@@ -1,0 +1,32 @@
+name: Feature request
+description: Suggest a new capability, input, or scenario the tool should model.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Suggestions are welcome. Note that this is a hobby project maintained by one person with no financial credentials, so not every request can be built — but well-described ideas are always useful.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's the gap?
+      description: What can't you model today that you wish you could? What decision would it help you make?
+      placeholder: "There's no way to model rental income as a separate stream, so..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you want it to do?
+      description: Describe the feature as you imagine it. Rough is fine.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Workarounds you've tried (optional)
+      description: Have you found a way to approximate this with the existing tabs?
