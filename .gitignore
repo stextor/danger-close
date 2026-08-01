@@ -1,0 +1,41 @@
+# ─────────────────────────────────────────────────────────────
+# CREDENTIALS — never commit. Per the permanent security rule in
+# DangerClose_Public.jsx: no API key may ever appear in source,
+# built HTML, or an exported backup.
+# ─────────────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+secrets.json
+
+# ─────────────────────────────────────────────────────────────
+# PERSONAL DATA — real household figures must not be published.
+# ─────────────────────────────────────────────────────────────
+DangerClose_Local.html
+*_Local.html
+*_Private.*
+backup*.json
+dangerclose-backup*.json
+my-data*.json
+/private/
+
+# Build output and dependencies
+node_modules/
+dist/
+build/
+.vite/
+*.tsbuildinfo
+
+# Editor and OS cruft
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+
+# Logs
+npm-debug.log*
+yarn-error.log*
+*.log
