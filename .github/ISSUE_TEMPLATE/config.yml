@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: ⚠️ Never post personal financial data
+    url: https://github.com/stextor/danger-close/blob/main/METHODOLOGY.md
+    about: "This tracker is public. Never paste real balances, income, or an API key into an issue. Use rounded numbers or the built-in Example Data. This is an educational tool, not financial advice."
+  - name: Read the methodology first
+    url: https://github.com/stextor/danger-close/blob/main/METHODOLOGY.md
+    about: "Most 'why is this number like this' questions — including why success rates run lower than other calculators — are answered in the white paper."
