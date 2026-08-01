@@ -1,0 +1,100 @@
+name: Bug report
+description: Something in the app behaves wrong, crashes, or shows an incorrect number.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. **Please do not paste your real financial figures, exported backup files, or an API key into this issue** — it is public. Describe the problem with rounded or made-up numbers, or use the built-in Example Data, which is enough to reproduce almost anything.
+
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy check
+      options:
+        - label: This report contains no real personal financial data and no API key.
+          required: true
+
+  - type: checkboxes
+    id: reproduced-with-example
+    attributes:
+      label: Reproducible with Example Data?
+      description: If you haven't tried, load the app, click "USE EXAMPLE DATA," and see if the bug still happens. This helps enormously.
+      options:
+        - label: I can reproduce this using the built-in Example Data (not my own numbers).
+        - label: This only happens with my own data (do NOT paste it — just describe it).
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which tab or area?
+      options:
+        - trajectory
+        - taxes
+        - roth
+        - irmaa
+        - monte carlo
+        - backtest
+        - stress
+        - grade
+        - compare
+        - my data
+        - ask AI
+        - skins
+        - docs
+        - Landing / loading screen
+        - Import / export backup
+        - Other / not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you see? What did you expect instead?
+      placeholder: "The Taxes tab showed a lifetime tax of $X, but I expected roughly $Y because..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: The exact clicks, in order, that lead to the problem.
+      placeholder: |
+        1. Load the app and click USE EXAMPLE DATA
+        2. Go to the ... tab
+        3. Change ... to ...
+        4. See the wrong value / crash
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Which version are you running?
+      description: The live GitHub Pages site, or a local copy of index.html? If local, roughly when did you download it?
+      placeholder: "Live site / local copy downloaded on ..."
+
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Browser
+      options:
+        - Chrome
+        - Safari
+        - Firefox
+        - Edge
+        - Mobile browser
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: console
+    attributes:
+      label: Console errors (optional)
+      description: "If you're comfortable: open your browser's developer console (F12 → Console) and paste any red error text here. Scrub anything personal first."
+      render: text
