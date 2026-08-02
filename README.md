@@ -24,6 +24,7 @@ Danger Close projects a household retirement plan against a deliberately pessimi
 - **Federal and state tax engines** — bracket-aware, with a state module covering effective-rate differences.
 - **Roth conversion modeling** and **IRMAA** tier effects.
 - **Withdrawal sequencing and guardrails** — spending rules that adapt to portfolio performance.
+- **Other income streams** — rental, post-retirement work, annuities and more, each with its own start/end years, owner, COLA flag, and tax treatment, flowing through every engine.
 
 ### A note on the numbers
 
@@ -46,7 +47,7 @@ The one exception is the optional **Ask AI** feature, which transmits a structur
 
 [**METHODOLOGY.md**](METHODOLOGY.md) is a full white paper explaining how every engine works, what it assumes, where those assumptions come from, and where the model simplifies reality. It is written to be auditable by a skeptical CPA, actuary, or engineer without reading the source.
 
-It also documents the known limitations honestly — including that **no independent professional (CPA/EA/actuary) review has been done**, which is the single most valuable outstanding validation, and that income streams other than Social Security and a pension are not natively modeled.
+It also documents the known limitations honestly — including that no independent professional (CPA/EA/actuary) review has been done, which is the single most valuable outstanding validation.
 
 ---
 
