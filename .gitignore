@@ -19,9 +19,6 @@ DangerClose_Local.html
 *[Bb]ackup*.json
 my-data*.json
 my_data*.json
-backup*.json
-dangerclose-backup*.json
-my-data*.json
 /private/
 
 # Build output and dependencies
