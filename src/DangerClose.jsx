@@ -5118,6 +5118,13 @@ function DangerCloseMain({ onReloadData: _onReloadData, onApplyData, onImport, o
           const spouseAFRA = _ssSrc.ssA?.tableByAge?.[67] || getSSA();
           const spouseBSS = getSSB();
           const spouseBFRAest = _ssSrc.ssB?.tableByAge?.[67] || 1944;
+          // Spousal benefit: SSA tops the lower earner up to 50% of the higher earner's FRA amount.
+          // The engines do NOT model this top-up, so when it would apply we say so plainly rather
+          // than asserting a comparison. (Was hardcoded prose claiming "below her own FRA" regardless
+          // of the actual figures — reported by a user whose numbers were the other way round.)
+          const _spousalBFromA = Math.round(spouseAFRA * 0.5);
+          const _spousalBApplies = _spousalBFromA > spouseBFRAest;
+          const _spousalBGap = Math.max(0, _spousalBFromA - spouseBFRAest);
           const pension = getPension();
 
           // SS benefit calculator
@@ -5512,7 +5519,12 @@ function DangerCloseMain({ onReloadData: _onReloadData, onApplyData, onImport, o
                     );
                   })}
                 </div>
-                <div style={{ fontSize: 8, color: "var(--ink-faint)" }}>* = FRA │ Estimated FRA benefit derived from ${spouseBSS.toLocaleString()} at age {_ssSrc.ssB?.plannedAge || 63} ({(_ssSrc.ssB?.plannedAge || 63) >= 67 ? 0 : Math.round((1 - spouseBSS / spouseBFRAest) * 100)}% early reduction). {nB}'s spousal benefit (50% of {nA} FRA = ${Math.round(spouseAFRA * 0.5).toLocaleString()}) is below her own FRA (${spouseBFRAest.toLocaleString()}) — own benefit applies.</div>
+                <div style={{ fontSize: 8, color: "var(--ink-faint)" }}>* = FRA │ Estimated FRA benefit derived from ${spouseBSS.toLocaleString()} at age {_ssSrc.ssB?.plannedAge || 63} ({(_ssSrc.ssB?.plannedAge || 63) >= 67 ? 0 : Math.round((1 - spouseBSS / spouseBFRAest) * 100)}% early reduction). {nB}'s spousal benefit (50% of {nA}'s FRA = ${_spousalBFromA.toLocaleString()}) is {_spousalBApplies ? "above" : "at or below"} {nB}'s own FRA amount (${spouseBFRAest.toLocaleString()}) — {_spousalBApplies ? "so SSA would pay the spousal amount instead" : "own benefit applies"}.</div>
+                {_spousalBApplies && (
+                  <div style={{ marginTop: 6, padding: "6px 8px", background: "rgba(255,170,0,0.06)", border: "1px solid rgba(255,170,0,0.2)", fontSize: 9, color: "var(--warn)" }}>
+                    ⚠ SPOUSAL BENEFIT NOT MODELED — this app understates {nB}'s income. Once {nA} has claimed, SSA tops {nB} up from a ${spouseBFRAest.toLocaleString()}/mo own benefit toward ${_spousalBFromA.toLocaleString()}/mo at {nB}'s FRA — roughly <strong>${_spousalBGap.toLocaleString()}/mo (${(_spousalBGap * 12).toLocaleString()}/yr) more</strong> than every projection here assumes. Claiming before FRA reduces the top-up, and it can't start until {nA} files. Every success rate, income floor, and claiming-grid cell is conservative by about this much — check ssa.gov or an advisor for your actual figure.
+                  </div>
+                )}
                 {spouseBModelDelta > 0 && (
                   <div style={{ marginTop: 6, padding: "6px 8px", background: "rgba(255,170,0,0.06)", border: "1px solid rgba(255,170,0,0.2)", fontSize: 9, color: "var(--warn)" }}>
                     ⚠ NOTE: MC simulation models {nB} at ${spouseBSS.toLocaleString()}/mo (age {_ssSrc.ssB?.plannedAge || 63} claim). At retire year {retireYear}, {nB} would be {spouseBActual.age} → actual benefit ~${spouseBActual.benefit.toLocaleString()}/mo. Model understates {nB}'s income by ${spouseBModelDelta.toLocaleString()}/mo (${(spouseBModelDelta * 12).toLocaleString()}/yr). This makes success rates slightly conservative.
