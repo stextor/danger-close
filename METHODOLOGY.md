@@ -192,7 +192,12 @@ schedule through the same apply/persist pipeline as every other load path; **Sim
 guaranteed income, and sequence-stress results; and removal of the FICO peer dimension
 (fed no engine; defaulted to a fabricated 800). The validation suite (§12) grew to 48
 checks asserting every statutory constant against IRS Rev. Proc. 2025-32, CMS, SSA, and
-IRS Pub. 590-B.
+IRS Pub. 590-B. (The in-app Verify tab currently runs 45 such checks in the merged build.)
+Beyond the in-app suite, the merged build was verified by four external Node/jsdom suites —
+318 checks total — covering constants and accessors, the seeded Monte Carlo engines under
+common-random-number A/B comparisons, the Roth engine against hand-computed tax cases exact
+to the dollar, and a full 26-tab DOM render sweep; see VERIFICATION_REPORT.md in the
+distribution.
 
 Two further v5.6 engines deserve their own description:
 
@@ -257,10 +262,24 @@ golden-file cross-validation against Pralana/ProjectionLab on identical inputs; 
 brackets (the state layer uses effective rates); ACA premium-subsidy modeling; and stochastic
 health-state modeling.
 
-One structural modeling gap deserves explicit statement: **income streams other than Social
-Security and a pension are not natively modeled.** Rental income, part-time work, annuities, and
-royalties have no first-class representation. Two documented workarounds exist — folding a
-lifetime taxable stream into the pension amount (correct tax treatment, no COLA), or representing
-a windowed stream as a negative expense row (cash-flow-exact, but income tax on the stream is not
-modeled, so amounts should be entered after-tax). A first-class income-streams module is the
-next planned engine work. These are the known edges of the map.
+A gap called out in earlier revisions is now closed: **other income streams are a first-class
+module.** Each stream (rental / job / annuity / other) carries a monthly amount in today's
+dollars, an inclusive start/end-year window, an owner (either spouse or joint — an owner's
+stream ends at that person's projected or sampled death), a COLA flag, and taxable vs tax-free
+treatment. Streams flow through every engine — planned trajectory, both Monte Carlo engines,
+what-breaks, the withdrawal schedule, the tax engine (job rows also pay FICA up to the wage
+base), IRMAA MAGI, and the Roth optimizer. Entering any stream replaces the built-in example
+part-time taper, and the old negative-expense-row workaround is superseded (moving such rows
+into the module lets the tax engines see the income). Remaining honest limits of the module:
+one amount per stream (no per-year schedules), annual granularity on the window, and no
+state-specific treatment beyond the state layer's ordinary handling. These are the known
+edges of the map.
+
+**Fixed during merge verification (previously present in all v5.6 builds):** after the second
+death in `runExtendedMC`, the engine pushed a portfolio snapshot every *quarter* while living
+years snapshot annually — inflating path lengths, stretching the post-death time axis, and,
+under stochastic longevity (where death times differ per path), producing ragged arrays whose
+percentile bands read `undefined` in the tail. The dead-path branch now snapshots only at
+year boundaries, so every path is uniformly `1 + totalYears` entries regardless of death
+timing; headline success/ruin rates were never affected (they read the final element).
+
