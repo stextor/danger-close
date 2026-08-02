@@ -16,6 +16,9 @@ secrets.json
 DangerClose_Local.html
 *_Local.html
 *_Private.*
+*[Bb]ackup*.json
+my-data*.json
+my_data*.json
 backup*.json
 dangerclose-backup*.json
 my-data*.json
