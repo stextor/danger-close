@@ -1,4 +1,4 @@
-# Danger Close — Methodology White Paper (v5.6)
+# Danger Close — Methodology White Paper (v5.7)
 
 This document explains how every engine in Danger Close works, what it assumes, where those
 assumptions come from, and — just as important — where the model simplifies reality. It exists
@@ -153,6 +153,60 @@ capital-gains excise. Verify your state.
   (fixed growth, current law). Framed deliberately as "the model's best cell under these
   assumptions," not a directive: sequence risk, future law, and personal factors live outside
   the grid.
+
+### 7b. ACA premium subsidy (v5.7)
+
+For households retiring before Medicare, the strategy comparator charges every conversion
+policy for the marketplace subsidy it destroys during bridge years — the years between
+retirement and each spouse's 65th birthday.
+
+- **Law modeled (current law, 2026+):** the ARPA/IRA enhanced credits expired 2025-12-31,
+  restoring the original §36B structure: eligibility between 100% and 400% of the **prior
+  calendar year's** federal poverty guideline, with a hard cliff — one dollar of MAGI past
+  400% and the credit is zero. Subsidy = max(0, benchmark silver premium − applicable% ×
+  MAGI), with the applicable percentage interpolated linearly inside statutory bands.
+- **Primary sources, fetched and verified at build time:** the 2026 Applicable Percentage
+  Table from IRS Rev. Proc. 2025-25 (2.10% flat below 133% FPL; 3.14→4.19 to 150%;
+  4.19→6.60 to 200%; 6.60→8.44 to 250%; 8.44→9.96 to 300%; 9.96 flat to and *including*
+  400%); FPL from the HHS/ASPE poverty guidelines (2025: $15,650 + $5,500/person; 2026:
+  $15,960 + $5,680/person — so coverage years 2026 and 2027 use real vintages; later years
+  index at the same 2%/yr proxy as the tax brackets). The ENHANCED regime uses the actual
+  ARPA table from Rev. Proc. 2021-36 (0% below 150% FPL sliding to an 8.5% cap, no cliff),
+  not a flat 8.5% approximation.
+- **ACA MAGI ≠ IRMAA MAGI:** the engine recombines components per §36B — AGI-side income
+  *plus the untaxed portion of Social Security*. A household living mostly on SS can sit
+  on the wrong side of the cliff while its taxable income looks harmless; the test suite
+  includes a case where the cliff is crossed at an $8,601 conversion where taxable-income
+  math would have said $32,601.
+- **Accounting:** a hidden zero-conversion baseline runs first; each strategy's per-year
+  subsidy is subtracted from the baseline's, the difference accumulates as **ACA SUB LOST**
+  and is charged against the taxable balance in the year incurred (so ending balances and
+  the after-tax estate reflect it). The no-conversion row loses $0 by construction. Timing
+  is same-year (no lookback — unlike IRMAA).
+- **STAY UNDER ACA CLIFF solver:** bridge years convert up to 400% × FPL − other ACA MAGI −
+  a $500 safety margin (full SS counts, so no taxability fixed point is needed); post-
+  Medicare years fill the 24% bracket. Hidden under the ENHANCED regime, where no cliff
+  exists. A $0 bridge-year conversion is reported as the finding it is.
+- **Assumptions:** benchmark premium is user-supplied (it varies ~3× by county and age and
+  cannot be checked by the model); premiums grow at household inflation + 2 points (medical
+  trend has historically outrun CPI — plain inflation would understate losses, the
+  anti-conservative direction); when one spouse has reached Medicare, half the household
+  premium is assumed (prorated by heads); a widowed survivor is assumed to be the younger
+  spouse (maximizing bridge exposure — conservative). Household size for FPL defaults to
+  the plan's household; users with marketplace dependents can override it.
+- **Not modeled, stated in-app:** below 100% FPL the model shows $0 and defers to Medicaid;
+  Alaska/Hawaii guidelines; cost-sharing reductions, silver loading, and plan choice. The
+  law-scenario toggle (CURRENT LAW vs ENHANCED EXTENDED) is a user-owned stress choice,
+  mirroring the Social Security depletion scenario — never a forecast.
+- **Scope (v1):** subsidy math is confined to the Roth strategy comparison. Expense rows
+  remain exactly what the user entered — the in-app note by the premium field ("enter your
+  GROSS premium here; keep your expense rows as what you actually pay") is what prevents
+  double-counting, and extending subsidy awareness into the trajectory/MC engines is a
+  deliberately separate future decision.
+- **Verification:** 8 new checks on the in-app Verify tab (53 total), each citing its
+  source; engine behavior hand-verified to the dollar in the Node suite (mid-scale subsidy,
+  cliff ±$1, the SS add-back case, proration, premium-path compounding, solver landing,
+  ENHANCED-regime interpolation, $0-premium inertness, and old-backup import defaults).
 
 ## 8. IRMAA
 
