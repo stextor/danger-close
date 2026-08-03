@@ -25,6 +25,7 @@ Danger Close projects a household retirement plan against a deliberately pessimi
 - **Roth conversion modeling** and **IRMAA** tier effects.
 - **Withdrawal sequencing and guardrails** — spending rules that adapt to portfolio performance.
 - **Other income streams** — rental, post-retirement work, annuities and more, each with its own start/end years, owner, COLA flag, and tax treatment, flowing through every engine.
+- **ACA premium subsidy modeling** - Roth strategies are charged for the marketplace subsidies they destroy in pre-Medicare bridge years, with a STAY UNDER ACA CLIFF solver and a current-law-vs-enhanced scenario toggle — constants verified against IRS Rev. Proc. 2025-25 and HHS poverty guidelines.
 
 ### A note on the numbers
 
