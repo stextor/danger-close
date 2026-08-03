@@ -7209,7 +7209,7 @@ function DangerCloseMain({ onReloadData: _onReloadData, onApplyData, onImport, o
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                   <span style={{ fontSize: 8, color: "var(--accent)", border: "1px solid var(--accent)", padding: "2px 6px", borderRadius: 3, letterSpacing: 1, fontWeight: 700 }}>STEP 1 · SET YOUR WHAT-IF</span>
                   <span style={{ fontSize: 9, color: "var(--ink-faint)" }}>ANNUAL CONVERSION:</span>
-                  <input type="range" min={0} max={120000} step={5000} value={rothAmount}
+                  <input type="range" min={0} max={400000} step={5000} value={rothAmount}
                     onChange={e => setRothAmount(Number(e.target.value))}
                     style={{ width: 140, accentColor: "var(--accent)" }} />
                   <span style={{ fontSize: 16, fontWeight: 700, color: "var(--accent)", minWidth: 70 }}>${(rothAmount / 1000).toFixed(0)}K/yr</span>
