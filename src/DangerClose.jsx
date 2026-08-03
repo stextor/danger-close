@@ -2785,7 +2785,7 @@ function GuidedWizard({ onDone, onCancel }) {
   const [stCode, setStCode] = useState("");
   const n = (v) => Math.max(0, Number(String(v).replace(/[$,\s]/g, "")) || 0);
   const steps = ["WHO", "WHEN", "MONEY", "INCOME", "SPENDING", "STATE & BUILD"];
-  const inp = { background: "var(--panel2)", border: "1px solid var(--line)", color: "var(--ink)", fontFamily: "'JetBrains Mono',monospace", fontSize: 11, padding: "8px 10px", borderRadius: 3, width: "100%" };
+  const inp = { background: "var(--panel2)", border: "1px solid var(--line)", color: "var(--ink)", fontFamily: "'JetBrains Mono',monospace", fontSize: 11, padding: "8px 10px", borderRadius: 3, width: "100%", boxSizing: "border-box" };
   const lbl = { fontSize: 8, color: "var(--ink-faint)", letterSpacing: 1, display: "block", marginBottom: 3, marginTop: 10 };
   const canNext = step !== 2 || n(retTotal) > 0;
   const build = () => {
@@ -8566,11 +8566,11 @@ function DangerCloseMain({ onReloadData: _onReloadData, onApplyData, onImport, o
                       const n = parseFloat(v);
                       if (!Number.isNaN(n)) setVmRate(n); // keep the numeric rate in sync for the sim
                     }}
-                    style={{ width: "100%", background: "rgba(0,0,0,0.3)", border: "1px solid var(--line)", color: "var(--ink)", fontFamily: "'JetBrains Mono',monospace", fontSize: 12, padding: "5px 6px", borderRadius: 2 }} />
+                    style={{ width: "100%", boxSizing: "border-box", background: "rgba(0,0,0,0.3)", border: "1px solid var(--line)", color: "var(--ink)", fontFamily: "'JetBrains Mono',monospace", fontSize: 12, padding: "5px 6px", borderRadius: 2 }} />
                 </div>
                 <div>
                   <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 1, marginBottom: 4 }}>TERM YR</div>
-                  <input value={vmTerm} onChange={e => setVmTerm(Number(e.target.value) || 30)} style={{ width: "100%", background: "rgba(0,0,0,0.3)", border: "1px solid var(--line)", color: "var(--ink)", fontFamily: "'JetBrains Mono',monospace", fontSize: 12, padding: "5px 6px", borderRadius: 2 }} />
+                  <input value={vmTerm} onChange={e => setVmTerm(Number(e.target.value) || 30)} style={{ width: "100%", boxSizing: "border-box", background: "rgba(0,0,0,0.3)", border: "1px solid var(--line)", color: "var(--ink)", fontFamily: "'JetBrains Mono',monospace", fontSize: 12, padding: "5px 6px", borderRadius: 2 }} />
                 </div>
               </div>
               {(() => {
@@ -10352,7 +10352,7 @@ function MyDataEditor({ onApply, onImport, onLoadSample, checklist, skin }) {
   };
 
   // ── styles ──
-  const inp = { background: "rgba(0,0,0,0.4)", border: "1px solid var(--line)", color: "var(--ink)", fontFamily: "'JetBrains Mono',monospace", fontSize: 11, padding: "5px 7px", borderRadius: 3, width: "100%" };
+  const inp = { background: "rgba(0,0,0,0.4)", border: "1px solid var(--line)", color: "var(--ink)", fontFamily: "'JetBrains Mono',monospace", fontSize: 11, padding: "5px 7px", borderRadius: 3, width: "100%", boxSizing: "border-box" };
   const lbl = { fontSize: 8, color: "var(--ink-faint)", letterSpacing: 1, textTransform: "uppercase", marginBottom: 3, display: "block" };
   const th = { fontSize: 8, color: "var(--ink-dim)", letterSpacing: 1, textTransform: "uppercase", padding: "6px 6px", textAlign: "left", borderBottom: "1px solid var(--line)" };
 
