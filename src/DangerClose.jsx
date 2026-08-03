@@ -1889,6 +1889,7 @@ const STORAGE_KEYS = {
   checklist: "danger_close:checklist_v1",
   apikey:    "danger_close:api_key_v1",   // BYOK — self-hosted builds only; never exported in backups
   skin:      "danger_close:skin_v1",      // display theme — persists across sessions
+  uiScale:   "danger_close:ui_scale_v1",  // UI size (100/115/130/150%) — persists with the theme
   offline:   "danger_close:offline_v1",   // offline mode — Ask AI disabled entirely
   localLLM:  "danger_close:local_llm_v1", // optional local OpenAI-compatible endpoint {url, model}
   simple:    "danger_close:simple_v1",    // simple mode — six core tabs instead of 26
@@ -2681,6 +2682,7 @@ async function clearStorage() {
     window.storage.delete(STORAGE_KEYS.meta).catch(() => null),
     window.storage.delete(STORAGE_KEYS.apikey).catch(() => null), // credentials never survive a wipe
     window.storage.delete(STORAGE_KEYS.skin).catch(() => null),   // theme resets with the plan
+    window.storage.delete(STORAGE_KEYS.uiScale).catch(() => null), // UI size resets with the plan
     window.storage.delete(STORAGE_KEYS.offline).catch(() => null),
     window.storage.delete(STORAGE_KEYS.localLLM).catch(() => null),
   ]);
@@ -2962,7 +2964,7 @@ function DataLoader({ onLoaded, hasData }) {
 
         <div style={{ border: "1px solid var(--line)", padding: 18, marginBottom: 20, background: "rgba(0,255,136,0.02)" }}>
           <div style={{ fontSize: 10, color: "var(--ink)", lineHeight: 1.8 }}>
-            Two ways in: <strong style={{ color: "var(--accent)" }}>start fresh</strong> and type your data into the My Data tab, or <strong style={{ color: "var(--info)" }}>restore a backup</strong> you exported earlier. Everything you enter is cached locally, so you won't be asked again next session. (You can also load the built-in example household to explore the app.)
+            Two ways in: <strong style={{ color: "var(--accent)" }}>start fresh</strong> and type your data into the My Data tab, or <strong style={{ color: "var(--info)" }}>restore a backup</strong> you exported earlier. Everything you enter is cached locally, so you won't be asked again next session. (You can also load the built-in example household to explore the app.) Hard on the eyes? Once you're in, the <strong style={{ color: "var(--info)" }}>Skins</strong> tab has seven themes — including light paper — and a UI size control.
           </div>
         </div>
 
@@ -3060,6 +3062,22 @@ const SKINS = {
     bg: "#EEF0F2", panel: "#F7F8F9", panel2: "#E3E6E9", ink: "#2B3440", inkDim: "#5A6572", inkFaint: "#6F7986",
     line: "#D3D7DC", line2: "#BCC2C9", accent: "#3D5A80", onAccent: "#F5F8FB", info: "#2F6F8F", warn: "#8F6A1A",
     crit: "#A04545", violet: "#6B5B95", orange: "#9C5C2A", plan: "#7C6E28", positive: "#4A7C62", ring: "rgba(61,90,128,0.16)" } },
+  highLight: { label: "High Contrast Light (max readability)", swatch: "#007A3D", tokens: {
+    bg: "#FFFFFF", panel: "#FFFFFF", panel2: "#F2F2F2", ink: "#111111", inkDim: "#333333", inkFaint: "#4D4D4D",
+    line: "#B8B8B8", line2: "#8F8F8F", accent: "#007A3D", onAccent: "#FFFFFF", info: "#0055CC", warn: "#8A5A00",
+    crit: "#C00000", violet: "#6A29A8", orange: "#B34700", plan: "#6E6400", positive: "#1E7A3C", ring: "rgba(0,122,61,0.35)" } },
+  highDark: { label: "High Contrast Dark (OLED black)", swatch: "#00E676", tokens: {
+    bg: "#000000", panel: "#0A0A0A", panel2: "#181818", ink: "#F5F5F5", inkDim: "#CFCFCF", inkFaint: "#ADADAD",
+    line: "#3A3A3A", line2: "#575757", accent: "#00E676", onAccent: "#002812", info: "#40C4FF", warn: "#FFC400",
+    crit: "#FF5A5A", violet: "#B388FF", orange: "#FF9E40", plan: "#FFE57F", positive: "#69F0AE", ring: "rgba(0,230,118,0.35)" } },
+  midnight: { label: "Midnight Blue (navy + cyan)", swatch: "#4FC3F7", tokens: {
+    bg: "#0A1428", panel: "#101D33", panel2: "#16263F", ink: "#DCE7F5", inkDim: "#AABDD8", inkFaint: "#8AA0BF",
+    line: "#1E3252", line2: "#2A4166", accent: "#4FC3F7", onAccent: "#04202E", info: "#82B1FF", warn: "#FFD54F",
+    crit: "#FF7A7A", violet: "#B9A3E3", orange: "#FFAB6B", plan: "#FFF176", positive: "#6FDCAC", ring: "rgba(79,195,247,0.3)" } },
+  cbSafe: { label: "Colorblind-Safe Light (Okabe–Ito)", swatch: "#0072B2", tokens: {
+    bg: "#FBFBF8", panel: "#FFFFFF", panel2: "#EFEFE9", ink: "#1A1A1A", inkDim: "#3D3D3D", inkFaint: "#565656",
+    line: "#C4C4BC", line2: "#9C9C93", accent: "#0072B2", onAccent: "#FFFFFF", info: "#00638E", warn: "#8F6400",
+    crit: "#A83A00", violet: "#8E4B76", orange: "#B25000", plan: "#6E6400", positive: "#00795A", ring: "rgba(0,114,178,0.3)" } },
 };
 // Build the CSS-variable style object for a skin's root container.
 function skinVars(skinKey) {
@@ -3265,7 +3283,7 @@ function runRothStrategies(P, customStrategies) {
 }
 
 // ═══ MAIN ═══
-function DangerCloseMain({ onReloadData: _onReloadData, onApplyData, onImport, onLoadSample, initialTab, onTabChange, skin, onSkinChange, aiQuery, setAiQuery, checklist, setChecklist }) {
+function DangerCloseMain({ onReloadData: _onReloadData, onApplyData, onImport, onLoadSample, initialTab, onTabChange, skin, onSkinChange, uiScale, onUiScaleChange, aiQuery, setAiQuery, checklist, setChecklist }) {
   const [retireYear, setRetireYear] = useState(PLAN_TIMELINE.targetRetireYear);
   const [simData, setSimData] = useState({});
   const [activeTab, setActiveTab] = useState(initialTab || ((PORTFOLIO.positions && PORTFOLIO.positions.length) ? "dashboard" : "mydata"));
@@ -3945,7 +3963,7 @@ function DangerCloseMain({ onReloadData: _onReloadData, onApplyData, onImport, o
   }, [current, retireYear]);
 
   return (
-    <div style={{ ...skinVars(skin), background: "var(--bg)", color: "var(--ink)", fontFamily: "'JetBrains Mono', 'Fira Code', monospace", minHeight: "100vh", transition: "background 0.3s, color 0.3s" }}>
+    <div style={{ ...skinVars(skin), zoom: (uiScale || 100) / 100, background: "var(--bg)", color: "var(--ink)", fontFamily: "'JetBrains Mono', 'Fira Code', monospace", minHeight: "100vh", transition: "background 0.3s, color 0.3s" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
         @keyframes pulse-ring { 0% { transform: translate(-50%,-50%) scale(0.5); opacity: 0.6; } 100% { transform: translate(-50%,-50%) scale(1.5); opacity: 0; } }
@@ -4424,9 +4442,23 @@ function DangerCloseMain({ onReloadData: _onReloadData, onApplyData, onImport, o
         {/* ═══ SKINS ═══ */}
         {activeTab === "skins" && (
           <div className="card">
+            <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", marginBottom: 16, padding: "10px 14px", background: "var(--panel2)", border: "1px solid var(--line)" }}>
+              <span style={{ fontSize: 10, color: "var(--accent)", fontWeight: 700, letterSpacing: 2 }}>UI SCALE</span>
+              {[100, 115, 130, 150].map(v => (
+                <button key={v} onClick={() => onUiScaleChange && onUiScaleChange(v)}
+                  style={{
+                    background: uiScale === v ? "var(--ring)" : "transparent",
+                    border: `1px solid ${uiScale === v ? "var(--accent)" : "var(--line)"}`,
+                    color: uiScale === v ? "var(--accent)" : "var(--ink)",
+                    padding: "6px 14px", fontSize: 11, fontWeight: uiScale === v ? 700 : 400,
+                    cursor: "pointer", fontFamily: "inherit", borderRadius: 3,
+                  }}>{v}%{uiScale === v ? " ✓" : ""}</button>
+              ))}
+              <span style={{ fontSize: 9, color: "var(--ink-faint)" }}>Makes everything bigger — useful on 4K and high-DPI screens. Sticks between sessions. Browser zoom (Ctrl/Cmd +) works on top of it.</span>
+            </div>
             <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }}>SKINS — DISPLAY THEME</div>
             <div style={{ fontSize: 9, color: "var(--ink-faint)", marginBottom: 14, lineHeight: 1.6 }}>
-              Recolors the whole app with a real color palette (not a screen filter). <span style={{ color: "var(--ink)" }}>Tactical Green</span> is the original dark console; Soft Dark Mode, Warm Executive, and Low-Glare Dark are softer dark themes for low light; Field Manual (red, white &amp; green), Reading Paper, and E-Ink Gray are light paper themes — the easiest on the eyes in bright rooms and for long text-heavy sessions. Each tile previews its actual colors. Your choice sticks while the app is open.
+              Recolors the whole app with a real color palette (not a screen filter). <span style={{ color: "var(--ink)" }}>Tactical Green</span> is the original dark console; Soft Dark Mode, Warm Executive, and Low-Glare Dark are softer dark themes for low light; Field Manual (red, white &amp; green), Reading Paper, and E-Ink Gray are light paper themes — the easiest on the eyes in bright rooms and for long text-heavy sessions. High Contrast Light and High Contrast Dark maximize legibility for small text and aging eyes; Midnight Blue is a navy alternative to the greens; Colorblind-Safe uses the Okabe\u2013Ito palette so gains, losses, and warnings stay distinguishable with red\u2013green color blindness. Each tile previews its actual colors. Your choice sticks while the app is open.
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(190px, 1fr))", gap: 10 }}>
               {Object.entries(SKINS).map(([key, s]) => {
@@ -10740,6 +10772,15 @@ export default function DangerClose() {
     setSkin(k);
     try { window.storage && window.storage.set(STORAGE_KEYS.skin, k).catch(() => {}); } catch (e) {}
   };
+  const [uiScale, setUiScale] = useState(100); // UI size %, persists like the theme; applied as zoom on the root
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.storage) return;
+    window.storage.get(STORAGE_KEYS.uiScale).then(r => { const v = Number(r && r.value); if ([100, 115, 130, 150].includes(v)) setUiScale(v); }).catch(() => {});
+  }, []);
+  const handleUiScaleChange = (v) => {
+    setUiScale(v);
+    try { window.storage && window.storage.set(STORAGE_KEYS.uiScale, String(v)).catch(() => {}); } catch (e) {}
+  };
   const [aiQuery, setAiQuery] = useState(""); // Ask AI query text, kept across tab switches AND the Save & Apply remount so users can gather info and return to it
   const [checklist, setChecklist] = useState({}); // estate/readiness checklist state per item id: { done, notes, contact }; survives remount + persisted
   // Save/Apply confirmation toast. It must live HERE, above the remount boundary:
@@ -10851,7 +10892,7 @@ export default function DangerClose() {
     // The landing screen must sit inside the token wrapper too — without it, every
     // CSS variable fails and the screen renders black-on-black (the "faint green
     // box" first-run bug: only literal rgba tints survived).
-    return <div style={skinVars(skin)}><DataLoader onLoaded={handleLoaded} hasData={loaderHasData} /></div>;
+    return <div style={{ ...skinVars(skin), zoom: (uiScale || 100) / 100 }}><DataLoader onLoaded={handleLoaded} hasData={loaderHasData} /></div>;
   }
   // Remount-key ensures the main app's internal state (simData, extendedSim, etc.)
   // is rebuilt from fresh module-level bindings whenever data changes.
@@ -10862,7 +10903,7 @@ export default function DangerClose() {
           {applyNotice}
         </div>
       )}
-      <DangerCloseMain key={remountKey} onReloadData={handleReload} onApplyData={handleApplyData} onImport={handleImportData} onLoadSample={handleLoadSample} initialTab={lastTab} onTabChange={setLastTab} skin={skin} onSkinChange={handleSkinChange} aiQuery={aiQuery} setAiQuery={setAiQuery} checklist={checklist} setChecklist={setChecklist} />
+      <DangerCloseMain key={remountKey} onReloadData={handleReload} onApplyData={handleApplyData} onImport={handleImportData} onLoadSample={handleLoadSample} initialTab={lastTab} onTabChange={setLastTab} skin={skin} onSkinChange={handleSkinChange} uiScale={uiScale} onUiScaleChange={handleUiScaleChange} aiQuery={aiQuery} setAiQuery={setAiQuery} checklist={checklist} setChecklist={setChecklist} />
     </>
   );
 }
