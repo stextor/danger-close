@@ -2,9 +2,9 @@
 
 *Cumulative. Each release appends a section; this header always describes the latest build.*
 
-**Current build: v5.8.2** · source hash `e3a6c0891139006130cabae3afbe8181` · **562 automated checks, all green** against the exact source shipped in `repo-update/`.
+**Current build: v5.9** · source hash `4a88782241765379419a016415c02d7f` · **580 automated checks, all green** against the exact source shipped in `repo-update/`.
 
-Suites: t1 units 251 · t2 engines 44 · t3 Roth 66 · t4 DOM (all 26 tabs, JSDOM) 168 · t5 disclaimer gate 24 · t6 spousal-branch 9. (`t5_gate_repo` runs the same 24 gate checks against the repo-layout build and is counted once.) The build input (`src/DangerClose.jsx`) is byte-identical to the tested canonical source; `index.html` is built from it via the repo's own Vite config and marker-verified.
+Suites: t1 units 273 · t2 engines 44 · t3 Roth 66 · t4 DOM (all 26 tabs, JSDOM) 168 · t5 disclaimer gate 24 · t6 spousal-branch 9. (`t5_gate_repo` runs the same 24 gate checks against the repo-layout build and is counted once.) The build input (`src/DangerClose.jsx`) is byte-identical to the tested canonical source; `index.html` is built from it via the repo's own Vite config and marker-verified.
 
 **Correction (2026-08):** totals reported for v5.8, v5.8.1, and v5.8.2 (542 / 552 / 556) were understated by a transcription slip in my addition — the per-suite figures in each section were correct throughout, and every suite was green at every release; only the sums were wrong. True totals: **548 / 558 / 562**. Corrected here and in CHANGELOG.md. No test result changes.
 
@@ -94,3 +94,8 @@ STEP-1 RMD cards: per-person projection (own balance → own first RMD year → 
 ## v5.8.2 — Stale distribution guidance corrected
 
 Found while answering a user question about repo sharing: the app carried pre-publication update instructions in three places, telling users to obtain fresh builds from whoever gave them their file because no download site existed. The live GitHub Pages URL had superseded this. Worst placement was the STALE DATA banner itself — shown only to users whose constants are out of date, i.e. exactly the population that needs a working update path, and it sent them up a chain of acquaintances instead of to the site. All three replaced with the live URL; t1 gains a 4-check U-DIST invariant so the retired language cannot return.
+
+
+## v5.9 — Interface personalities
+
+Skin token vocabulary widened from 18 colors to 23 (adds font, caps, scale, tracking, density). Two personalities added (REPORT light, QUIET DARK dark — one typography spine, two modes); the eleven legacy skins declare console values explicitly and render identically to v5.8.2. 222 hand-typed uppercase labels converted to canonical sentence case with a protected-acronym list and a `.lbl` marker class; `text-transform` is now driven by the skin, making casing reversible rather than baked in. Five t4 assertions matched the retired uppercase strings and were updated in the same edit as their source strings (the predicted regression surface, fully accounted). The t1 contrast block failed REPORT's initial palette (panel/bg at 1.04) — a genuine defect caught pre-ship and corrected. Zero engine or schema edits: t2/t3's 110 exact-dollar checks passed untouched.
