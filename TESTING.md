@@ -10,7 +10,7 @@ Honest scope: the Verify tab proves the *constants* are right — not every form
 
 ## The development test suite
 
-The app is developed against a Node-based suite of six test files — currently **493 checks** — run in full before any release:
+The app is developed against a Node-based suite of six test files — currently **552 checks** — run in full before any release:
 
 | Suite | Checks | What it covers |
 |---|---|---|
@@ -21,13 +21,13 @@ The app is developed against a Node-based suite of six test files — currently 
 | Disclaimer gate | 24 | The first-open gate: renders, blocks, acknowledges, persists, fails open if storage is blocked |
 | Branch verify | 9 | Both spousal-benefit branches of the SS tab render the computed comparison, not boilerplate |
 
-**Plain disclosure: these suites are not yet published in this repo.** Until they are, "493 green" is a claim you're trusting, not verifying — which is exactly the distinction this project cares about. Publishing the suite is planned; in the meantime, the Verify tab plus the table below are the parts that don't ask for trust.
+**Plain disclosure: these suites are not yet published in this repo.** Until they are, "552 green" is a claim you're trusting, not verifying — which is exactly the distinction this project cares about. Publishing the suite is planned; in the meantime, the Verify tab plus the table below are the parts that don't ask for trust.
 
 ## Hand-verified ACA figures (v5.7) — check these with a calculator
 
-The ACA engine's test cases were derived by hand from the primary sources and asserted to the dollar. Sources: IRS Rev. Proc. 2025-25 (2026 applicable percentages), HHS/ASPE poverty guidelines (2025: $15,650 + $5,500/person), Rev. Proc. 2021-36 (ARPA table for the "enhanced" scenario).
+The ACA engine's test cases were derived by hand from the primary sources and asserted to the dollar. Sources: IRS Rev. Proc. 2025-25 (2026 applicable percentages), HHS/ASPE poverty guidelines (2025: $15,650 + $5,552/person), Rev. Proc. 2021-36 (ARPA table for the "enhanced" scenario).
 
-| Case (single filer, 2026 coverage, $1,500/mo benchmark = $18,000/yr) | Value |
+| Case (single filer, 2026 coverage, $1,552/mo benchmark = $18,000/yr) | Value |
 |---|---|
 | FPL, 1 person (2025 guidelines govern 2026 coverage) | $15,650 |
 | 400% cliff | $62,600 |
@@ -37,7 +37,7 @@ The ACA engine's test cases were derived by hand from the primary sources and as
 | → Subsidy at MAGI $62,600 | $11,765.04 |
 | → Subsidy at MAGI $62,601 | $0 |
 | With $24,000/yr Social Security (mostly untaxed): conversion that crosses the cliff | $8,601 — because ACA MAGI counts *full* SS; taxable-income math would say $32,601 |
-| STAY UNDER ACA CLIFF solver, $30,000 other income | converts $62,600 − $30,000 − $500 = $32,100 |
+| STAY UNDER ACA CLIFF solver, $30,000 other income | converts $62,600 − $30,000 − $552 = $32,100 |
 | Enhanced scenario, MAGI $50,000 (ratio 3.195, ARPA band 6→8.5%) | 6.487% → subsidy $14,756.39 |
 
 Every row is reproducible from the cited documents with arithmetic. If you find a discrepancy, that's a bug report — please open an issue.

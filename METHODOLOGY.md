@@ -337,3 +337,75 @@ percentile bands read `undefined` in the tail. The dead-path branch now snapshot
 year boundaries, so every path is uniformly `1 + totalYears` entries regardless of death
 timing; headline success/ruin rates were never affected (they read the final element).
 
+
+
+## Roth break-even: the wealth-crossover method (v5.7.1)
+
+Earlier builds estimated break-even as (conversion tax paid) ÷ (annual RMD tax saved at an
+assumed flat 24%), undiscounted. That construction erred optimistic in three independent ways
+(no time value, no opportunity cost on the tax paid, an assumed rather than computed marginal
+rate) and is retired. The replacement runs BOTH the chosen strategy and a no-conversion
+baseline through the full deterministic engine — actual brackets per year, SS taxation, NIIT,
+AMT, state tax, the IRMAA two-year lookback, and ACA subsidies when configured — and reports
+the first year the strategy's after-tax wealth catches the baseline.
+
+Two properties fall out of the construction rather than being assumed. Discounting is implicit:
+comparing same-year wealth is mathematically equivalent to discounting cash flows at the
+portfolio's own growth rate under the active scenario prior. Opportunity cost is mechanical:
+conversion-tax dollars actually leave the modeled taxable balance and stop compounding.
+
+The crossover deliberately uses FACE VALUE, not the heir-discounted estate metric. Under the
+estate metric, moving a dollar from Traditional (credited at 1 − heir rate) to Roth (credited
+at par) manufactures an instant paper gain that masks the conversion tax — reporting every
+conversion as paying off immediately. Face value answers the cash question ("when does the tax
+I paid come back?"); the heirs'-tax advantage of Roth remains fully captured by the strategy
+table's ESTATE ranking, and the card says which question it is answering. Four outcomes are
+distinguished: recovered after a deficit (deepest shortfall shown), never behind (conversions
+under the standard deduction cost ≈$0 — common before Social Security starts), never recovers
+within the plan (real for large conversions with little outside money, where the tax is paid
+from the Roth itself), and no measurable difference.
+
+## Per-spouse ownership (v5.8)
+
+Every retirement holding carries an owner. This is not cosmetic: three pieces of law are
+per-person and were previously modeled at the household level.
+
+**RMDs run as two streams.** Each spouse's required distributions begin at that person's own
+SECURE 2.0 age (73 for 1951–59 births, 75 for 1960+) on that person's own balance, using the
+Uniform Lifetime divisor at that person's age each year. The prior model applied Spouse A's
+age to the pooled balance — overstating early RMDs and understating the conversion window for
+mixed-age couples.
+
+**Conversions are per-person.** A conversion moves money from one person's Traditional into
+THAT SAME PERSON'S Roth — there is no such thing as a spousal conversion, and the model no
+longer implies one. Each spouse's dollars are convertible only inside that spouse's own window
+(retirement through the year before their own RMDs); the household ladder therefore runs to
+the LATER of the two windows.
+
+**Solver allocation is a stated representation choice.** When a household-level solver (fill a
+bracket, stay under IRMAA, stay under the ACA cliff) picks a total conversion, the amount is
+split between spouses in proportion to each person's convertible headroom, capped by it.
+Proportional allocation is neutral plumbing, not advice: per-spouse sequencing (for example,
+draining the older spouse's account first to shrink the nearer RMD) can be superior in specific
+situations and is deliberately NOT optimized. If it is ever added, it will appear as a visible,
+comparable strategy in the comparator — never as a silent default.
+
+**Survivor treatment.** On the first death the decedent's retirement accounts roll to the
+survivor (the standard spousal election; alternatives such as inherited-IRA treatment are not
+modeled), and the survivor's own RMD age governs the merged balance thereafter. Jointly held
+taxable accounts simply continue. Taxes and IRMAA remain household-level throughout, which is
+correct for married-filing-jointly.
+
+**Migration.** Backups predating v5.8 carry no owner. On import, retirement rows default to
+Person A — the pre-v5.8 model — and a one-time notice in My Data asks for review; other
+accounts use their names as hints and default to Joint. Saving writes explicit owners.
+
+## One stated approximation: the Withdrawal tab's schedule view (v5.8.1)
+
+The Withdrawal tab's year-by-year schedule uses a fraction-of-pool accounting model. Its RMD
+timing is per-person — each spouse's slice starts at that person's own age — but the owner
+shares are held at their INITIAL proportions for the life of the schedule, whereas the Roth
+strategy engine reallocates dynamically as conversions deplete one spouse's balance faster
+than the other's. The approximation affects the split, not the timing, and is stated here and
+in the source rather than implied away. The strategy comparator and solve-for grid, which
+drive conversion decisions, use the fully dynamic per-person engine.
