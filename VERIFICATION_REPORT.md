@@ -1,6 +1,6 @@
 # Danger Close v5.7 — Verification Report
 
-**State: 523 automated checks, all green, against the exact source shipped in `repo-update/` (v5.7.1, source hash 85f8c7f9ba0ad9cdc760dd95e3c3c241).** (493 at the ACA freeze; +7 box-sizing; +23 for the v5.7.1 break-even rebuild and Phase 0 fixes.)
+**State: 523 automated checks, all green, against the exact source shipped in `repo-update/` (v5.7.1, source hash 9bc38092c10c26fcd716707e6984a33d).** (493 at the ACA freeze; +7 box-sizing; +23 for the v5.7.1 break-even rebuild and Phase 0 fixes. Post-release byline edit — "Steve Textor" → "Steve T." in the app footer and Field Manual — re-verified under the full suite; hash updated.)
 Suites: t1 units 218 · t2 engines 44 · t3 Roth 45 · t4 DOM (all 26 tabs, JSDOM) 153 · t5 disclaimer gate 24 · t6 spousal-branch 9. The build input (`src/DangerClose.jsx`) is byte-identical to the tested canonical source; `index.html` was built from it via the repo's own Vite config and marker-verified (12 markers including the v5.7 feature strings, the disclaimer gate, and the seam-note highlight).
 
 ## In-app Verify tab
