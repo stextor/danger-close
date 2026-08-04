@@ -1,7 +1,12 @@
-# Danger Close v5.7 — Verification Report
+# Danger Close — Verification Report
 
-**State: 552 automated checks, all green, against the exact source shipped in `repo-update/` (v5.8.1, source hash 43b90ecf977e8e8f69cb6dcc8b1f67b6).** (493 at the ACA freeze; +7 box-sizing; +23 for the v5.7.1 break-even rebuild and Phase 0 fixes. Post-release byline edit — "Steve Textor" → "Steve T." in the app footer and Field Manual — re-verified under the full suite; hash updated.)
-Suites: t1 units 218 · t2 engines 44 · t3 Roth 45 · t4 DOM (all 26 tabs, JSDOM) 153 · t5 disclaimer gate 24 · t6 spousal-branch 9. The build input (`src/DangerClose.jsx`) is byte-identical to the tested canonical source; `index.html` was built from it via the repo's own Vite config and marker-verified (12 markers including the v5.7 feature strings, the disclaimer gate, and the seam-note highlight).
+*Cumulative. Each release appends a section; this header always describes the latest build.*
+
+**Current build: v5.8.2** · source hash `e3a6c0891139006130cabae3afbe8181` · **562 automated checks, all green** against the exact source shipped in `repo-update/`.
+
+Suites: t1 units 251 · t2 engines 44 · t3 Roth 66 · t4 DOM (all 26 tabs, JSDOM) 168 · t5 disclaimer gate 24 · t6 spousal-branch 9. (`t5_gate_repo` runs the same 24 gate checks against the repo-layout build and is counted once.) The build input (`src/DangerClose.jsx`) is byte-identical to the tested canonical source; `index.html` is built from it via the repo's own Vite config and marker-verified.
+
+**Correction (2026-08):** totals reported for v5.8, v5.8.1, and v5.8.2 (542 / 552 / 556) were understated by a transcription slip in my addition — the per-suite figures in each section were correct throughout, and every suite was green at every release; only the sums were wrong. True totals: **548 / 558 / 562**. Corrected here and in CHANGELOG.md. No test result changes.
 
 ## In-app Verify tab
 53 checks, all green, each citing its primary source. New in v5.7: an 8-check ACA block (FPL vintages, band endpoints, the 133% statutory jump, inclusive-at-400% rule, cliff-edge dollars, ENHANCED-regime cap) sourced to IRS Rev. Proc. 2025-25, HHS/ASPE, and Rev. Proc. 2021-36.
@@ -84,3 +89,8 @@ The manual "money test" was executed headlessly: the shipped bundle mounted twic
 ## v5.8.1 — Per-person displays + header cleanup
 
 STEP-1 RMD cards: per-person projection (own balance → own first RMD year → own divisor), two stacked figures per D1; the with-conversion figure replays the ladder per person with the engine's proportional rule and per-person window gates. Withdrawal schedule: RMD timing split by initial owner shares at each person's own age (approximation stated in-app comment: shares held static in this view; the Roth engine reallocates dynamically); phase chip and legend per-person. Removals: radar (canvas + 60fps RAF loop + magnify state + mislabeled caption) and scanline (element, keyframe, class) — zero test references existed, and t1/t4 now carry extinction checks so neither can silently return. t4 asserts the demo's two distinct RMD years (2039/2041) render — the DOM-level ownership-visibility check the v5.8 flip test called for. Suite 552 green; both v5.8 staging notes resolved (CHANGELOG note deleted per definition-of-done).
+
+
+## v5.8.2 — Stale distribution guidance corrected
+
+Found while answering a user question about repo sharing: the app carried pre-publication update instructions in three places, telling users to obtain fresh builds from whoever gave them their file because no download site existed. The live GitHub Pages URL had superseded this. Worst placement was the STALE DATA banner itself — shown only to users whose constants are out of date, i.e. exactly the population that needs a working update path, and it sent them up a chain of acquaintances instead of to the site. All three replaced with the live URL; t1 gains a 4-check U-DIST invariant so the retired language cannot return.

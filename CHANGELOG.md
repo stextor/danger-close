@@ -1,5 +1,17 @@
 # Changelog
 
+## v5.8.2
+
+**Update instructions corrected — the app now points at its own home.** Three places told users that getting a current copy meant asking whoever gave them the file, who might have to ask *their* source in turn, because "there is no download site yet." That stopped being true once the app went live on GitHub Pages. All three now name the site directly:
+
+- the **⌛ STALE DATA banner** — the highest-impact one, since it is shown precisely to the users whose copy is out of date and who need the update path to work;
+- the Field Manual §13 maintenance table;
+- the §13 plain-English paragraph.
+
+A permanent test invariant now fails the build if "person to person" or "no download site yet" reappears anywhere in the source.
+
+Suite: 562 checks green (t1 251 · t2 44 · t3 66 · t4 168 · t5 24 · t6 9).
+
 ## v5.8.1
 
 **Per-person displays completed + header decluttered.**
@@ -8,7 +20,7 @@
 - **Withdrawal-tab schedule: two RMD streams.** Each spouse's slice starts RMDs at that person's own SECURE 2.0 age. Owner shares are held at their initial proportions in this schedule view (the Roth engine reallocates dynamically) — stated here rather than implied. The "RMDs active" phase and legend now name both ages. This closes the v5.8 staging note, which is deleted rather than amended.
 - **Header decluttered:** the animated allocation radar is gone — it duplicated the allocation strip below it, its caption still described a retired grading version ("Ring = target … Number = deviation" on a radar that had neither), and its sweep redrew at 60fps on every tab for the whole session, so removal is also a battery/CPU fix. The scanline (the slow-moving horizontal line) is gone too. The header is ~100px shorter; the success rate keeps its size and becomes the top-right's sole focus.
 
-Suite: 552 checks green (t1 247 · t2 44 · t3 66 · t4 168 · t5 24 · t6 9).
+Suite: 558 checks green (t1 247 · t2 44 · t3 66 · t4 168 · t5 24 · t6 9).
 
 ## v5.8
 
