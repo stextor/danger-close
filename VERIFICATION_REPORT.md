@@ -1,6 +1,6 @@
 # Danger Close v5.7 — Verification Report
 
-**State: 527 automated checks, all green, against the exact source shipped in `repo-update/` (v5.7.2).** (493 at the ACA freeze; +7 box-sizing; +23 for the v5.7.1 break-even rebuild and Phase 0 fixes. Post-release byline edit — "Steve Textor" → "Steve T." in the app footer and Field Manual — re-verified under the full suite; hash updated.)
+**State: 542 automated checks, all green, against the exact source shipped in `repo-update/` (v5.8, source hash cef71bab1624fc9eb468065669e0a089).** (493 at the ACA freeze; +7 box-sizing; +23 for the v5.7.1 break-even rebuild and Phase 0 fixes. Post-release byline edit — "Steve Textor" → "Steve T." in the app footer and Field Manual — re-verified under the full suite; hash updated.)
 Suites: t1 units 218 · t2 engines 44 · t3 Roth 45 · t4 DOM (all 26 tabs, JSDOM) 153 · t5 disclaimer gate 24 · t6 spousal-branch 9. The build input (`src/DangerClose.jsx`) is byte-identical to the tested canonical source; `index.html` was built from it via the repo's own Vite config and marker-verified (12 markers including the v5.7 feature strings, the disclaimer gate, and the seam-note highlight).
 
 ## In-app Verify tab
@@ -67,3 +67,15 @@ Between sessions, the working copy again acquired unreviewed "phantom" edits imp
 ## v5.7.2 — Readability pass
 
 Scripted, reviewable transforms; zero math edits by design. 119 lines raised from 7px, 58 prose lines 8→9px, 118 tracking reductions, holdings table restructured with the OWNER teaser (tfoot colSpan updated 8→9). Two scope findings recorded: (1) the planned de-capitalization pass collapsed to zero edits — a census found only 20 long all-caps strings outside the manual, all section headers the design keeps; the caps complaint traced to tiny tracked labels, fixed by size+tracking instead; (2) the new floor invariant immediately caught four 6px strings the original survey missed (claiming grid, IRMAA rows) — below anything reported, and exactly why the invariant is permanent. Fonts verified loading at 300–700 (no synthetic bold). Suite 527 green; source hash matches shipped deliverables.
+
+
+## v5.8 — Per-spouse ownership
+
+Backward-compatible P contract: engines accept pooled `tradInit`/`rothInit` (treated as person A — the pre-v5.8 model and the single-filer case) or per-person `tradInitA/B`, `rothInitA/B`, `ladderEndA/B`, `survivor`. All 56 pre-existing t3 exact-dollar checks passed through the fallback path with a single $1 re-pin (float association: four balances summed instead of three before rounding). R9 adds 10 per-spouse cases, all green first run: 1958/1962 couple takes A's RMD at 73 on A's balance only (exact to the dollar, divisor 26.5); a 2033 conversion is B-only after A's window closes; $60K allocates 10K/50K proportional to headroom; the survivor rollover zeroes the decedent's columns and the merged pot correctly takes no RMD at survivor-age 74; pooled-P ≡ all-to-A equivalence; the household ladder keeps converting from B for 5 years past A's window. Migration: `_ownerMigrated` flag + defaults (retirement→A with banner, otherAccounts→name-hint else JT). Staged: the Withdrawal-tab schedule still pools at A's age — documented in CHANGELOG and the Field Manual rather than silently shipped as done. MC/Trajectory confirmed RMD-free (no threading needed).
+
+
+## v5.8 post-build verification — headless ownership flip test
+
+The manual "money test" was executed headlessly: the shipped bundle mounted twice in JSDOM with the demo portfolio, VTI ($400K Traditional) owned by Spouse A vs Spouse B, Roth tab rendered and compared. **Result: the strategy comparator moved ($135K → $143K on the NONE row) from the owner flip alone — the ownership engine is live end-to-end** (storage → owner fields → per-person P construction → engine → DOM).
+
+**Gap found by the same test:** the STEP-1 "RMD AT [age]" cards did NOT respond. They are a local card projection that pools all Traditional at Spouse A's first RMD year — a third pooled site alongside the documented Withdrawal-tab staging, and for mixed-ownership households it overstates the first-year RMD (the younger spouse's dollars are compounded to, and divided at, the older spouse's date). Pre-v5.8 this was the model everywhere; post-v5.8 it is a stale display inconsistent with the engine below it on the same tab. Queued as the FIRST item of the per-person threading follow-up (v5.8.1), together with the Withdrawal-tab schedule. Practical note for manual verification meanwhile: judge ownership changes by the STEP-3 comparator and solve-for grid (engine-fed, per-person), not the STEP-1 RMD cards.
