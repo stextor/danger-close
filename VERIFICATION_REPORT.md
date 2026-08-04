@@ -1,6 +1,6 @@
 # Danger Close v5.7 — Verification Report
 
-**State: 523 automated checks, all green, against the exact source shipped in `repo-update/` (v5.7.1, source hash 9bc38092c10c26fcd716707e6984a33d).** (493 at the ACA freeze; +7 box-sizing; +23 for the v5.7.1 break-even rebuild and Phase 0 fixes. Post-release byline edit — "Steve Textor" → "Steve T." in the app footer and Field Manual — re-verified under the full suite; hash updated.)
+**State: 527 automated checks, all green, against the exact source shipped in `repo-update/` (v5.7.2).** (493 at the ACA freeze; +7 box-sizing; +23 for the v5.7.1 break-even rebuild and Phase 0 fixes. Post-release byline edit — "Steve Textor" → "Steve T." in the app footer and Field Manual — re-verified under the full suite; hash updated.)
 Suites: t1 units 218 · t2 engines 44 · t3 Roth 45 · t4 DOM (all 26 tabs, JSDOM) 153 · t5 disclaimer gate 24 · t6 spousal-branch 9. The build input (`src/DangerClose.jsx`) is byte-identical to the tested canonical source; `index.html` was built from it via the repo's own Vite config and marker-verified (12 markers including the v5.7 feature strings, the disclaimer gate, and the seam-note highlight).
 
 ## In-app Verify tab
@@ -62,3 +62,8 @@ Between sessions, the working copy again acquired unreviewed "phantom" edits imp
 **Test-harness traps found while pinning (recorded for future engine tests):** omitting `asOfYr` from an engine P NaNs every inflation exponent and the engine *silently charges no tax* (every `due > 0` guard goes false) — strategies then compare identical; and any engine test must neutralize the global income streams (`S.PORTFOLIO` with a far-future stream) or the demo household's part-time work income contaminates the arithmetic. Both now have precedent handling in t3.
 
 **Phase 0 fixes** (pension lump-sum guard ×2 inputs, funding-fallback notice, Mixed relabel, Taxes disclaimer correction) asserted at source level in t1 (8 checks) and in the mounted DOM in t4 (4 checks). One build-process lesson: t4's DOM bundle imports `app/src/DangerClose.jsx`, which must be synced from canonical before rebuilding — a stale sync produced 4 false failures before the root cause was found.
+
+
+## v5.7.2 — Readability pass
+
+Scripted, reviewable transforms; zero math edits by design. 119 lines raised from 7px, 58 prose lines 8→9px, 118 tracking reductions, holdings table restructured with the OWNER teaser (tfoot colSpan updated 8→9). Two scope findings recorded: (1) the planned de-capitalization pass collapsed to zero edits — a census found only 20 long all-caps strings outside the manual, all section headers the design keeps; the caps complaint traced to tiny tracked labels, fixed by size+tracking instead; (2) the new floor invariant immediately caught four 6px strings the original survey missed (claiming grid, IRMAA rows) — below anything reported, and exactly why the invariant is permanent. Fonts verified loading at 300–700 (no synthetic bold). Suite 527 green; source hash matches shipped deliverables.
