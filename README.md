@@ -18,18 +18,27 @@ Or download `index.html` from this repository and double-click it. It is a singl
 
 Danger Close projects a household retirement plan against a deliberately pessimistic model of the future, then shows you where it breaks.
 
-- **Regime-switching Monte Carlo** — each simulated year is drawn from one of six probability-weighted economic regimes (expansion, recession, crisis, stagflation, recovery, boom) rather than a single normal distribution, producing fatter left tails and more realistic return/inflation coupling.
+- **Regime-switching Monte Carlo** — each simulated year is drawn from one of six probability-weighted economic regimes (base, optimistic, pessimistic, recession, stagflation, crisis) rather than a single normal distribution, producing fatter left tails and more realistic return/inflation coupling.
 - **Historical backtest** — the same plan run against actual market history, side by side with the simulation.
-- **Mortality and long-term care** — Gompertz survival modeling and an LTC shock layer.
-- **Federal and state tax engines** — bracket-aware, with a state module covering effective-rate differences.
-- **Roth conversion modeling** and **IRMAA** tier effects.
+- **Mortality and long-term care** — Gompertz survival modeling, plus a choice between a single LTC shock and a drawn multi-year care duration (the tail that actually breaks plans).
+- **Federal and state tax engines** — bracket-aware, with a 51-jurisdiction state module, NIIT, and a simplified AMT check.
+- **Roth conversion modeling** — a six-strategy comparator and a 25-cell solve-for grid run through the full deterministic engine, with **IRMAA** two-year-lookback tier effects and a wealth-crossover break-even (discounting and the opportunity cost of conversion tax included, and "does not break even" is a possible honest answer).
+- **Per-spouse ownership** — every retirement holding has an owner, so each spouse's RMDs begin at their own SECURE 2.0 age (73 or 75 by birth year) on their own balance, conversions land in the converter's own Roth, and the first death triggers a spousal rollover.
 - **Withdrawal sequencing and guardrails** — spending rules that adapt to portfolio performance.
 - **Other income streams** — rental, post-retirement work, annuities and more, each with its own start/end years, owner, COLA flag, and tax treatment, flowing through every engine.
-- **ACA premium subsidy modeling** - Roth strategies are charged for the marketplace subsidies they destroy in pre-Medicare bridge years, with a STAY UNDER ACA CLIFF solver and a current-law-vs-enhanced scenario toggle — constants verified against IRS Rev. Proc. 2025-25 and HHS poverty guidelines.
+- **ACA premium subsidy modeling** — Roth strategies are charged for the marketplace subsidies they destroy in pre-Medicare bridge years, with a STAY UNDER ACA CLIFF solver and a current-law-vs-enhanced scenario toggle — constants verified against IRS Rev. Proc. 2025-25 and HHS poverty guidelines.
 
 ### A note on the numbers
 
-Danger Close will usually show a **lower success rate than mainstream retirement calculators** at their default settings — often by 10 to 20 points. Where another tool shows 95%, this may show ~78% for the same plan. That is by design, not an error. The BASE scenario prior is intentionally more pessimistic than the 1926–present historical record, because the tool's job is stress-testing. Switch the scenario to `HISTORICAL` to see how much of your result is the plan versus the model's caution.
+Danger Close will usually show a **lower success rate than mainstream retirement calculators** at their default settings — often by 10 to 20 points. Where another tool shows 95%, this may show ~78% for the same plan. That is by design, not an error. The BASE scenario prior is intentionally more pessimistic than the 1926–present historical record, because the tool's job is stress-testing. Switch the scenario prior to `BULL-LEANING` to see how much of your result is the plan versus the model's caution.
+
+---
+
+## Verification
+
+The app checks itself. The **Verify tab** re-runs every statutory constant the math depends on — federal brackets, standard deduction, IRMAA tiers, RMD divisors and ages, the Social Security wage base, the QCD cap, ACA poverty guidelines and applicable-percentage bands — against its primary source, in your browser, every time you open it, with a pass/fail and a citation per line. A tampered or stale copy fails loudly instead of quietly computing wrong numbers.
+
+Behind that, the source ships with a headless suite: **562 checks** across engine math (hand-verified to the dollar), backup import/export round-trips, the disclaimer gate, and browser-level tests that mount the real app and click through all 26 tabs. See [TESTING.md](TESTING.md) and [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
@@ -57,12 +66,14 @@ It also documents the known limitations honestly — including that no independe
 | File / folder | What it is |
 |---|---|
 | `index.html` | The complete application. Self-contained build — open it in any browser. This is the published, distributed artifact. |
-| `src/DangerClose.jsx` | The readable React source for the entire app (~10,600 lines, single component tree). The single source of truth for the application logic. |
+| `src/DangerClose.jsx` | The readable React source for the entire app (~11,200 lines, single component tree). The single source of truth for the application logic. |
 | `src/main.jsx` | Browser bootstrap — installs the `localStorage` persistence shim and mounts the app. |
 | `src/index.html` | Vite HTML entry template (not the published file). |
 | `package.json`, `vite.config.js` | Build configuration. |
 | `validation/` | Runnable verification suite — statutory-constant checks and headless behavioral tests. |
 | `METHODOLOGY.md` | The methodology white paper. |
+| `CHANGELOG.md` | Release history, most recent first. |
+| `TESTING.md` | What the suite covers and how to run it. |
 | `REVIEWING.md` | Short orientation for anyone auditing the math. |
 | `LICENSE` | MIT license. |
 
