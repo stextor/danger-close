@@ -2,9 +2,9 @@
 
 *Cumulative. Each release appends a section; this header always describes the latest build.*
 
-**Current build: v5.9.1** · source hash `a7f10cf5850b96a31a3e85c6b1998479` · **593 automated checks, all green** against the exact source shipped in `repo-update/`.
+**Current build: v5.9.2** · source hash `a1f0d4a76565c63494628e957c66ff91` · **597 automated checks, all green** against the exact source shipped in `repo-update/`.
 
-Suites: t1 units 283 · t2 engines 44 · t3 Roth 66 · t4 DOM (all 26 tabs, JSDOM) 168 · t5 disclaimer gate 24 · t6 spousal-branch 9. (`t5_gate_repo` runs the same 24 gate checks against the repo-layout build and is counted once.) The build input (`src/DangerClose.jsx`) is byte-identical to the tested canonical source; `index.html` is built from it via the repo's own Vite config and marker-verified.
+Suites: t1 units 287 · t2 engines 44 · t3 Roth 66 · t4 DOM (all 26 tabs, JSDOM) 168 · t5 disclaimer gate 24 · t6 spousal-branch 9. (`t5_gate_repo` runs the same 24 gate checks against the repo-layout build and is counted once.) The build input (`src/DangerClose.jsx`) is byte-identical to the tested canonical source; `index.html` is built from it via the repo's own Vite config and marker-verified.
 
 **Correction (2026-08):** totals reported for v5.8, v5.8.1, and v5.8.2 (542 / 552 / 556) were understated by a transcription slip in my addition — the per-suite figures in each section were correct throughout, and every suite was green at every release; only the sums were wrong. True totals: **548 / 558 / 562**. Corrected here and in CHANGELOG.md. No test result changes.
 
@@ -109,3 +109,8 @@ Dirty tracking via capture handlers on the editor root (single choke point — e
 ## v5.9.1 pre-release leak review (user question: "will this release leak data?")
 
 Verified before publication: the export payload contains exactly `{app, version, exportedAt, portfolio, expenses, masterPrompt, checklist, skin}` — no draft key; zero uses of `location.hash`/`location.search`/`pushState`, so no data can ever appear in a URL (GitHub Pages access logs therefore see only paths); the published HTML never contains user data (the file-properties test in §11 proves it per copy), so a committed `index.html` cannot carry a plan; backups are covered by the `*[Bb]ackup*.json` ignore rule; drafts live in browser storage only and are not files, so they cannot be committed at all. **One real gap found and fixed before ship:** `performClearAll` did not delete the autosaved draft — "permanently delete everything" would have left the full plan recoverable via the restore banner on a shared machine. Fixed (draft deletion + state reset in the clear path), guarded by a new t1 assertion that the clear handler removes the draft key. Suite 593 green; hash updated.
+
+
+## v5.9.2 — Save-anywhere ergonomics
+
+Chip-embedded save + three-way leave dialog (save/discard/stay), replacing the v5.9.1 window.confirm. Design note: no per-section duplicate buttons — the sticky chip is the universal convenience button, present in every section automatically, and all saves route through the one registered `handleSave` (module-level registration, same pattern as the dirty flag), so the dialog's save is provably the same commit path with no new serialization. Dialog save navigates first, then commits on a short timeout so the remount lands on the chosen tab. t1 asserts the three labels, the registration, the chip save, and that the old window.confirm guard is retired. Suite 597 green.
