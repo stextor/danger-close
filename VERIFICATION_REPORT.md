@@ -2,9 +2,9 @@
 
 *Cumulative. Each release appends a section; this header always describes the latest build.*
 
-**Current build: v5.9** · source hash `4a88782241765379419a016415c02d7f` · **580 automated checks, all green** against the exact source shipped in `repo-update/`.
+**Current build: v5.9.1** · source hash `a7f10cf5850b96a31a3e85c6b1998479` · **593 automated checks, all green** against the exact source shipped in `repo-update/`.
 
-Suites: t1 units 273 · t2 engines 44 · t3 Roth 66 · t4 DOM (all 26 tabs, JSDOM) 168 · t5 disclaimer gate 24 · t6 spousal-branch 9. (`t5_gate_repo` runs the same 24 gate checks against the repo-layout build and is counted once.) The build input (`src/DangerClose.jsx`) is byte-identical to the tested canonical source; `index.html` is built from it via the repo's own Vite config and marker-verified.
+Suites: t1 units 283 · t2 engines 44 · t3 Roth 66 · t4 DOM (all 26 tabs, JSDOM) 168 · t5 disclaimer gate 24 · t6 spousal-branch 9. (`t5_gate_repo` runs the same 24 gate checks against the repo-layout build and is counted once.) The build input (`src/DangerClose.jsx`) is byte-identical to the tested canonical source; `index.html` is built from it via the repo's own Vite config and marker-verified.
 
 **Correction (2026-08):** totals reported for v5.8, v5.8.1, and v5.8.2 (542 / 552 / 556) were understated by a transcription slip in my addition — the per-suite figures in each section were correct throughout, and every suite was green at every release; only the sums were wrong. True totals: **548 / 558 / 562**. Corrected here and in CHANGELOG.md. No test result changes.
 
@@ -99,3 +99,13 @@ Found while answering a user question about repo sharing: the app carried pre-pu
 ## v5.9 — Interface personalities
 
 Skin token vocabulary widened from 18 colors to 23 (adds font, caps, scale, tracking, density). Two personalities added (REPORT light, QUIET DARK dark — one typography spine, two modes); the eleven legacy skins declare console values explicitly and render identically to v5.8.2. 222 hand-typed uppercase labels converted to canonical sentence case with a protected-acronym list and a `.lbl` marker class; `text-transform` is now driven by the skin, making casing reversible rather than baked in. Five t4 assertions matched the retired uppercase strings and were updated in the same edit as their source strings (the predicted regression surface, fully accounted). The t1 contrast block failed REPORT's initial palette (panel/bg at 1.04) — a genuine defect caught pre-ship and corrected. Zero engine or schema edits: t2/t3's 110 exact-dollar checks passed untouched.
+
+
+## v5.9.1 — Data-loss guard, contribution-split clarity, import clamps
+
+Dirty tracking via capture handlers on the editor root (single choke point — every input/select inside marks dirty; clean mount asserted NOT dirty in t4, guarding against initialization false-positives). Draft = the exact `buildPortfolio()`/`buildExpenses()` payload Save & Apply commits, debounced 2s to `danger_close:mydata_draft_v1`; restore rides the existing import path. Build-time verification for the relabel: the engine normalizes split totals (`_bw[b]/_bwSum`), so the "scaled to these proportions" promise matches actual behavior, and the no-percentages fallback (balance-mix weighting) is now documented in the tooltip. One mid-build catch worth recording: the import clamps were first written against `PORTFOLIO.household.*`, a shape that does not exist — the timeline reads top-level `PORTFOLIO.retireYear`/`lifeExpA/B`/`dobA.year` — making them dead code that the presence-grep test would have passed; caught by field-shape verification before ship and re-pointed, with the test tightened to assert the real field name. Suite 592 green.
+
+
+## v5.9.1 pre-release leak review (user question: "will this release leak data?")
+
+Verified before publication: the export payload contains exactly `{app, version, exportedAt, portfolio, expenses, masterPrompt, checklist, skin}` — no draft key; zero uses of `location.hash`/`location.search`/`pushState`, so no data can ever appear in a URL (GitHub Pages access logs therefore see only paths); the published HTML never contains user data (the file-properties test in §11 proves it per copy), so a committed `index.html` cannot carry a plan; backups are covered by the `*[Bb]ackup*.json` ignore rule; drafts live in browser storage only and are not files, so they cannot be committed at all. **One real gap found and fixed before ship:** `performClearAll` did not delete the autosaved draft — "permanently delete everything" would have left the full plan recoverable via the restore banner on a shared machine. Fixed (draft deletion + state reset in the clear path), guarded by a new t1 assertion that the clear handler removes the draft key. Suite 593 green; hash updated.
