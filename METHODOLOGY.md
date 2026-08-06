@@ -409,3 +409,60 @@ strategy engine reallocates dynamically as conversions deplete one spouse's bala
 than the other's. The approximation affects the split, not the timing, and is stated here and
 in the source rather than implied away. The strategy comparator and solve-for grid, which
 drive conversion decisions, use the fully dynamic per-person engine.
+
+## Contribution accrual (v5.10)
+
+**What it does.** For a household still working, the retirement-start balances that seed the
+Roth ladder, the strategy comparator, the solve-for grid, the Withdrawal schedule, the Taxes
+schedule, the IRMAA planner, and What-Breaks previously equaled TODAY'S positions — every
+future contribution between now and the retirement date was silently ignored, understating
+the Traditional and Roth pools those engines start from. v5.10 adds the missing dollars: four
+monthly fields (pre-tax and Roth, per spouse) accrue from the as-of year to each person's stop
+year and are added, per bucket and per owner, to the retirement-start snapshot.
+
+**Nominal dollars, no growth — a stated house rule, not an oversight.** Accrued contributions
+are summed at face value: `12 x monthly x years` (plus the bonus-deferral lump for Person A),
+with no return applied. Two reasons. First, double-counting: the Monte Carlo already grows
+contributions along every simulated path; a deterministic growth assumption inside the
+snapshot would bake market return into inputs the MC then grows again. Second, the
+conservative house rule that governs every judgment call in this app — where an assumption
+must be picked, pick the direction that makes the plan look slightly worse. Undercounting
+future growth on contributions understates the starting pools, which understates conversion
+headroom and overstates depletion risk. The error is bounded and one-sided.
+
+**Stop years.** Person A accrues to the selected retirement year — the same year the engines
+being seeded start from, so the snapshot and the engine agree by construction. Person B
+accrues to the household timeline's own `targetRetireYearB`, the identical field the Monte
+Carlo's accumulation phase already uses for B's contribution stop — one source of truth, not
+a parallel definition.
+
+**One choke point.** All nine consumer sites call a single constructor
+(`retireStartBalances`) that reduces positions per owner and adds the accrual per bucket. No
+tab computes its own accrual, and the source invariant is greppable: raw Traditional/Roth
+position reduces exist only inside the constructor. The one whitelisted exception is the My
+Data readout, which previews the accrual from UNSAVED form state by design (its formula
+mirrors the helper exactly and is pinned by test).
+
+**Monte Carlo and Trajectory are deliberately unchanged.** They consume the SUM of the split
+fields through mirror fields (`monthly401k`, `spouseBMonthly`) that are recomputed on every
+load and save — so the MC's inputs are byte-identical to v5.9.2 for a migrated plan, and a
+v5.10 backup opened in v5.9.x still reads finite totals. Parity is asserted by test, not
+assumed.
+
+**Exclusions and limits, stated plainly.** HSA contributions are excluded from the accrual on
+purpose — the HSA is not part of the Traditional/Roth conversion arithmetic these engines
+run, and its Medicare-linked contribution cutoff has its own machinery. Working-year taxation
+of the contributions themselves is not modeled (the model still taxes nothing before
+retirement). Roth 401(k) and Roth IRA money share one Roth bucket, as everywhere else in the
+app. There is no employer-match field beyond the existing bonus-deferral machinery; matches
+can be folded into the pre-tax monthly amount by hand. The 402(g) elective-deferral limit is
+a soft warning with a Verify-tab citation — the model does not enforce it, because catch-up
+eligibility and plan specifics are outside its knowledge.
+
+**Migration.** Plans predating v5.10 carry only the old combined monthly amounts. On load
+they map to 100% pre-tax (the historically correct reading — the old fields fed a pre-tax
+engine), and a one-time notice in My Data says so; saving writes the explicit split. One
+pre-existing behavior carried forward unchanged: the form's Person-A pre-tax amount derives
+from the per-paycheck entry machinery (v5.9.1), so a plan holding only a monthly total and no
+per-paycheck detail shows $0 in that rollup until the paycheck fields are entered — true in
+v5.9.2, true now, and now visible in the accrual readout rather than silent.
