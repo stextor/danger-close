@@ -1,0 +1,28 @@
+
+// ═══ TEST-ONLY EXPORT SHIM (baseline harness — never ships) ═══
+const _g = (n) => { try { return eval(n); } catch { return undefined; } };
+export const __g = {
+  PORTFOLIO: () => PORTFOLIO,
+  setPortfolio: (p) => { Object.keys(PORTFOLIO).forEach(k => delete PORTFOLIO[k]); Object.assign(PORTFOLIO, p); },
+  PLAN_TIMELINE: () => PLAN_TIMELINE,
+  EXPENSES: () => EXPENSES,
+  TAX_CONSTS: () => TAX_CONSTS,
+  IRMAA_CONSTS: () => IRMAA_CONSTS,
+  ACA_CONSTS: () => ACA_CONSTS,
+  SKINS: () => SKINS,
+  SCENARIOS: () => SCENARIOS,
+  STATE_RULES: () => STATE_RULES,
+  HISTORICAL_RETURNS: () => HISTORICAL_RETURNS,
+  DOCS_HTML: () => DOCS_HTML,
+  applyLoadedData, buildPlanTimeline, buildVerificationChecks,
+  runMonteCarlo, runExtendedMC, runRothStrategies, runStressTests,
+  rmdDivisor, rmdStartAge, ssDepletionFactor, stateTaxAnnual,
+  genSSTable, getSSA, getSSB, getPension, getIncomeStreams,
+  streamsMonthlyAt, streamsAnnualAt, expectedInflation,
+  acaSubsidyAnnual, acaFplFor, acaApplicablePct,
+  sampleGompertzDeathAge, drawCareYears, computePercentiles,
+  contribBucketWeights, computePlanEvents, buildRetireOptions,
+  contribAccrual: _g("contribAccrual"),
+  retireStartBalances: _g("retireStartBalances"),
+  DangerClose,
+};
