@@ -187,6 +187,17 @@ retirement and each spouse's 65th birthday.
   a $500 safety margin (full SS counts, so no taxability fixed point is needed); post-
   Medicare years fill the 24% bracket. Hidden under the ENHANCED regime, where no cliff
   exists. A $0 bridge-year conversion is reported as the finding it is.
+  **Since v5.10.1 the solver also nets out its own funding-sale gains:** when the
+  conversion tax is paid by selling appreciated brokerage, the sale's realized gains land
+  in ACA MAGI, so the solver estimates the year's full tax bill at the candidate
+  conversion (mirroring the engine's own tax math), grosses the sale up exactly as the
+  funding model does, and subtracts the implied gain from the cliff headroom — a small
+  fixed-point iteration, so the *post-sale* MAGI lands at cliff − margin rather than the
+  pre-sale MAGI. Before this, the strategy converted to the cliff and its own funding sale
+  pushed the household over it (full subsidy forfeit). Withholding and gain-free funding
+  were already correct and are unchanged. The gain share remains one blended figure: no
+  per-lot selection, loss harvesting, or wash-sale logic (still out of scope, as
+  documented).
 - **Assumptions:** benchmark premium is user-supplied (it varies ~3× by county and age and
   cannot be checked by the model); premiums grow at household inflation + 2 points (medical
   trend has historically outrun CPI — plain inflation would understate losses, the
@@ -300,7 +311,10 @@ self-hosted. Two v5.5 additions: a persisted **Offline Mode** toggle hard-disabl
 (fully air-gapped operation), and self-hosted copies can route Ask AI to a **local OpenAI-compatible
 endpoint** (Ollama / LM Studio) so the summary never leaves the user's machine — text-only, with a
 documented quality trade-off versus the hosted model. The manual's §10 carries the complete
-transmitted/not-transmitted table.
+transmitted/not-transmitted table. Since v5.10.1, **Clear All Data honors the manual's promise
+in full**: confirming the wipe deletes every storage key — plan, preferences, and the API key
+(credentials never survive a wipe) — and returns the app to the landing screen; previously the
+button overwrote the plan with a blank one and left the key and preferences in browser storage.
 
 ## 12. Validation & known limitations
 
