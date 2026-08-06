@@ -10,7 +10,8 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
 const VER = process.argv[2] || "v510";
-const IS510 = VER === "v510";
+const IS510 = VER !== "v592"; // v5.10-family features (v510 and v5101)
+const IS5101 = VER === "v5101";
 
 // ── window.storage shim: localStorage-backed, artifact API contract ──
 const PREFIX = "dc:";
@@ -151,11 +152,21 @@ const yes = btn(/Yes, delete everything/);
 T("D: explicit confirm button present", !!yes);
 await click(yes, act); await flush(act); await flush(act);
 {
+  const ks0 = storedKeys();
+  if (IS5101) {
+    // ── FIXED in v5.10.1: performClearAll hands the wipe to a top-level handler that
+    // awaits clearStorage() — every plan key AND the API key are DELETED (not blanked),
+    // and the app returns to the landing screen, matching Docs §10/§11. Prior legs
+    // keep the dated pins below as frozen history (found 2026-08-06; fixed v5.10.1). ──
+    T("D: Clear All Data deletes the plan (portfolio key gone)", !ks0.includes(K("portfolio_v1")), ks0.join(","));
+    T("D: Clear All Data deletes the expenses key", !ks0.includes(K("expenses_v1")));
+  } else {
   // ── ACTUAL contract: Clear All Data OVERWRITES with a blank plan (onApply(blank)),
   // it does not delete storage keys or return to the landing screen. ──
   const p = JSON.parse(window.localStorage.getItem(PREFIX + K("portfolio_v1")) || "{}");
   T("D: plan content blanked (positions emptied)", Array.isArray(p.positions) && p.positions.length === 0, JSON.stringify(p.positions || null).slice(0, 60));
   T("D: household zeroed (name normalizes to placeholder)", (p.household || 0) === 0 && ["", "Spouse A"].includes(p.nameA || ""), `household=${p.household} nameA=${JSON.stringify(p.nameA)}`);
+  }
   // ── KNOWN DEFECT PIN #2 (pre-existing; v5.9.2 and v5.10 identically) ──
   // Docs §10 promises: "the app's own Clear All Data all wipe the key (Clear All Data does
   // so deliberately)" and clearStorage() implements exactly that ("credentials never
@@ -167,8 +178,15 @@ await click(yes, act); await flush(act); await flush(act);
   // Found 2026-08-06 by this suite. These pins document today's behavior; flip them when
   // performClearAll is fixed to await clearStorage().
   const ks = storedKeys();
-  T("D [KNOWN DEFECT]: API key SURVIVES Clear All Data (docs promise a wipe — fix pending)", ks.includes(K("api_key_v1")), ks.join(","));
-  T("D [KNOWN DEFECT]: no return to landing screen (blank plan stays cached — fix pending)", !/start fresh/i.test((body().textContent || "")) || [...body().querySelectorAll("button.tab")].length > 0);
+  if (IS5101) {
+    T("D: Clear All Data wipes the API key", !ks.includes(K("api_key_v1")), ks.join(","));
+    T("D: Clear All Data returns to the landing screen",
+      /start fresh/i.test((body().textContent || "")) && [...body().querySelectorAll("button.tab")].length === 0,
+      `tabs=${[...body().querySelectorAll("button.tab")].length}`);
+  } else {
+  T("D [KNOWN DEFECT]: API key SURVIVES Clear All Data (docs promise a wipe — fixed in v5.10.1; pre-fix state pinned here)", ks.includes(K("api_key_v1")), ks.join(","));
+  T("D [KNOWN DEFECT]: no return to landing screen (blank plan stays cached — fixed in v5.10.1; pre-fix state pinned here)", !/start fresh/i.test((body().textContent || "")) || [...body().querySelectorAll("button.tab")].length > 0);
+  }
 }
 
 console.log(`\nt5 SUITE (${VER}): ${pass} passed, ${fail} failed`);

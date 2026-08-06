@@ -8,7 +8,7 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
 const VER = process.argv[2] || "v510";
-const IS510 = VER === "v510";
+const IS510 = VER !== "v592"; // v5.10-family features (v510 and v5101)
 require(`./dom_${VER}.cjs`);
 const { root, act, DangerClose } = window.__mount(window.document.getElementById("root"));
 const g = window.__g;

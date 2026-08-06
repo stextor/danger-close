@@ -21,12 +21,15 @@ const T = (name, cond, detail = "") => {
 
 // ═══ compare mode: diff the two fingerprints ═══
 if (MODE === "compare") {
-  console.log("t2 — ENGINES (cross-version parity)");
-  const a = JSON.parse(fs.readFileSync("/tmp/t2_v592_fingerprint.json", "utf8"));
-  const b = JSON.parse(fs.readFileSync("/tmp/t2_v510_fingerprint.json", "utf8"));
+  // Re-baselined per build (§J): the pair is always prior-release → current-release.
+  // v5.10.1 build: v510 → v5101. Override with argv[3]/argv[4] to diff any two legs.
+  const PRIOR = process.argv[3] || "v510", CUR = process.argv[4] || "v5101";
+  console.log(`t2 — ENGINES (cross-version parity ${PRIOR} → ${CUR})`);
+  const a = JSON.parse(fs.readFileSync(`/tmp/t2_${PRIOR}_fingerprint.json`, "utf8"));
+  const b = JSON.parse(fs.readFileSync(`/tmp/t2_${CUR}_fingerprint.json`, "utf8"));
   for (const key of Object.keys(a)) {
     const same = JSON.stringify(a[key]) === JSON.stringify(b[key]);
-    T(`PARITY: ${key} identical across v5.9.2 → v5.10`, same,
+    T(`PARITY: ${key} identical across ${PRIOR} → ${CUR}`, same,
       same ? "" : `v592=${JSON.stringify(a[key]).slice(0, 120)} v510=${JSON.stringify(b[key]).slice(0, 120)}`);
   }
   console.log(`\nt2 SUITE (compare): ${pass} passed, ${fail} failed`);

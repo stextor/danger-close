@@ -7,7 +7,7 @@
 import { execSync } from "child_process";
 
 const VER = process.argv[2] || "v510";
-const IS510 = VER === "v510";
+const IS510 = VER !== "v592"; // v5.10-family features (v510 and v5101)
 
 // Dump the demo portfolio in a separate process (the app bundle must not run in this
 // JSDOM environment twice), then mutate it to a single filer.
@@ -98,10 +98,24 @@ await click(tabBtn("ss")); await flush();
   // prints a note saying so); the display layer conjures a spouse anyway. Found
   // 2026-08-06 by this suite. Pin documents today's behavior; when the SS tab's B
   // sections are gated on tl.single, flip these expectations.
-  T("SS [KNOWN DEFECT]: phantom Spouse-B claiming card renders for a single household (fix pending)",
+  if (VER === "v5101") {
+    // ── FIXED in v5.10.1: the SS tab's Spouse-B sections are gated on the household's
+    // single flag — no phantom claiming card, and the self-contradicting "$0/mo" note
+    // goes with it (the engines were already correct: B modeled at $0). Also fixed:
+    // the Post-car shortfall no longer subtracts the phantom B benefit for singles —
+    // pinned below as a source invariant. Prior legs keep the dated pins (found
+    // 2026-08-06; fixed v5.10.1). ──
+    T("SS: no phantom Spouse-B claiming card for a single household", !/SPOUSE B — BENEFIT BY CLAIMING AGE/i.test(t));
+    T("SS: no self-contradicting 'models Spouse B at $0' note", !/models Spouse B at \$0\/mo/i.test(t));
+    const SRC = fs.readFileSync(new URL(`../${VER}.jsx`, import.meta.url), "utf8");
+    T("SS: Post-car shortfall zeroes the B benefit for singles (source invariant)",
+      SRC.split("(_single ? 0 : spouseBActual.benefit)").length === 3, "expected exactly 2 gated uses");
+  } else {
+  T("SS [KNOWN DEFECT]: phantom Spouse-B claiming card renders for a single household (fixed in v5.10.1; pre-fix state pinned here)",
     /SPOUSE B — BENEFIT BY CLAIMING AGE/i.test(t));
-  T("SS [KNOWN DEFECT]: engine honestly models the phantom at $0 while the card shows a derived benefit",
+  T("SS [KNOWN DEFECT]: engine honestly models the phantom at $0 while the card shows a derived benefit (fixed in v5.10.1)",
     /models Spouse B at \$0\/mo/i.test(t));
+  }
 }
 
 // ═══ Engines walk: the sites that consume per-owner balances must not crash ═══

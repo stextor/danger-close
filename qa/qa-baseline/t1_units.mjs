@@ -6,7 +6,8 @@
 import fs from "fs";
 
 const VER = process.argv[2] || "v510";
-const IS510 = VER === "v510";
+const IS510 = VER !== "v592"; // v5.10-family features (v510 and v5101)
+const IS5101 = VER === "v5101";
 const SRC = fs.readFileSync(new URL(`../${VER}.jsx`, import.meta.url), "utf8");
 const m = await import(`./app_${VER}.mjs`);
 const g = m.__g;
@@ -140,7 +141,7 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
 
 // ═══ Statics — the source file itself ═══
 {
-  const verStr = IS510 ? "v5.10" : "v5.9.2";
+  const verStr = IS5101 ? "v5.10.1" : IS510 ? "v5.10" : "v5.9.2";
   T(`STATIC: field-manual callsign carries ${verStr}`, SRC.includes(`FIELD MANUAL · ${verStr}`));
   T(`STATIC: end-of-manual footer carries ${verStr}`, SRC.includes(`DANGER CLOSE ${verStr}`) || SRC.includes(`DANGER CLOSE ${verStr} ·`));
   T("STATIC: no API keys in source", !/sk-ant-[A-Za-z0-9_-]{20,}/.test(SRC));

@@ -101,10 +101,24 @@ console.log(`t3 — ROTH STRATEGY ENGINE (${VER})`);
   // is pushed over the very cliff the strategy exists to stay under and forfeits the
   // FULL subsidy. Found 2026-08-06 by this suite. This check pins today's behavior so
   // the defect is visible; when the solver is fixed, flip the expectation.
-  const gainy = g.runRothStrategies({ ...baseP(), acaPremium: 1800, acaSize: 2, currentConv: 250000 }).find(r => r.key === "acaCliff");
-  T("ACA [KNOWN DEFECT]: appreciated-sale funding pushes the cliff solver over its own cliff (full forfeit — fix pending)",
-    Object.values(gainy.acaSubByYr).every(v => v === 0) && gainy.totAcaLoss > cliff.totAcaLoss,
-    JSON.stringify(gainy.acaSubByYr));
+  const gainyRun = g.runRothStrategies({ ...baseP(), acaPremium: 1800, acaSize: 2, currentConv: 250000 });
+  const gainy = gainyRun.find(r => r.key === "acaCliff");
+  if (VER === "v5101") {
+    // ── FIXED in v5.10.1: the cliff solver now nets out the MAGI its own funding sale
+    // realizes (fixed-point mirroring the funding gross-up), so under appreciated-sale
+    // funding the strategy preserves a partial subsidy and beats a cliff-crossing
+    // slider instead of matching its full forfeit. Prior legs keep the dated pin below
+    // as frozen history (found 2026-08-06; fixed 2026-08-06, v5.10.1). ──
+    const naiveGainy = gainyRun.find(r => r.key === "current");
+    T("ACA: cliff solver nets out its own funding-sale gains (partial subsidy preserved)",
+      Object.values(gainy.acaSubByYr).some(v => v > 0), JSON.stringify(gainy.acaSubByYr));
+    T("ACA: cliff strategy beats a cliff-crossing slider under appreciated-sale funding",
+      gainy.totAcaLoss <= naiveGainy.totAcaLoss, `${Math.round(gainy.totAcaLoss)} vs ${Math.round(naiveGainy.totAcaLoss)}`);
+  } else {
+    T("ACA [KNOWN DEFECT]: appreciated-sale funding pushes the cliff solver over its own cliff (full forfeit — fixed in v5.10.1; pre-fix state pinned here)",
+      Object.values(gainy.acaSubByYr).every(v => v === 0) && gainy.totAcaLoss > cliff.totAcaLoss,
+      JSON.stringify(gainy.acaSubByYr));
+  }
 }
 
 // ═══ IRMAA ═══
