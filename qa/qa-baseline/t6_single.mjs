@@ -12,7 +12,7 @@ const IS510 = VER !== "v592"; // v5.10-family features (v510 and v5101)
 // Dump the demo portfolio in a separate process (the app bundle must not run in this
 // JSDOM environment twice), then mutate it to a single filer.
 execSync(`node --input-type=module -e "
-const m = await import('/home/claude/baseline/qa/app_${VER}.mjs');
+const m = await import('${new URL(`./app_${VER}.mjs`, import.meta.url).href}');
 const fs = await import('fs');
 fs.default.writeFileSync('/tmp/t6_demo_${VER}.json', JSON.stringify(m.__g.PORTFOLIO()));
 "`, { stdio: "inherit" });

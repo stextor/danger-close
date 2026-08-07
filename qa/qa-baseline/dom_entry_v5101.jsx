@@ -1,8 +1,6 @@
-import React from "react";
 import { createRoot } from "react-dom/client";
-import * as TestUtils from "react-dom/test-utils";
-import DangerClose, { __g, __test } from "../testable_v5101.jsx";
-const act = React.act || TestUtils.act;
+import { act } from "react";
+import { __g, __test } from "./app_v5101.jsx";
+window.__mount = (el) => { const root = createRoot(el); return { root, act, DangerClose: __g.DangerClose }; };
 window.__g = __g;
-window.__test = __test;
-window.__mount = (el) => ({ root: createRoot(el), act, DangerClose });
+window.__test = __test; // feature suites (t9) read this; baseline suites ignore it

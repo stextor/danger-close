@@ -26,3 +26,14 @@ export const __g = {
   retireStartBalances: _g("retireStartBalances"),
   DangerClose,
 };
+
+// ═══ Feature-suite surface (t7–t9). Live getters: applyLoadedData REASSIGNS the
+// module bindings, so a captured reference would go stale. Guarded so the same
+// shim splices cleanly into pre-accrual sources (v5.9.2). ═══
+export const __test = {
+  get PORTFOLIO() { return PORTFOLIO; },
+  get PLAN_TIMELINE() { return PLAN_TIMELINE; },
+  applyLoadedData, buildVerificationChecks, runRothStrategies,
+  contribAccrual: _g("contribAccrual"),
+  retireStartBalances: _g("retireStartBalances"),
+};
