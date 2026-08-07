@@ -22,8 +22,8 @@ const T = (name, cond, detail = "") => {
 // ═══ compare mode: diff the two fingerprints ═══
 if (MODE === "compare") {
   // Re-baselined per build (§J): the pair is always prior-release → current-release.
-  // v5.10.1 build: v510 → v5101. Override with argv[3]/argv[4] to diff any two legs.
-  const PRIOR = process.argv[3] || "v510", CUR = process.argv[4] || "v5101";
+  // v5.10.2 build: v5101 → v5102. Override with argv[3]/argv[4] to diff any two legs.
+  const PRIOR = process.argv[3] || "v5101", CUR = process.argv[4] || "v5102";
   console.log(`t2 — ENGINES (cross-version parity ${PRIOR} → ${CUR})`);
   const a = JSON.parse(fs.readFileSync(`/tmp/t2_${PRIOR}_fingerprint.json`, "utf8"));
   const b = JSON.parse(fs.readFileSync(`/tmp/t2_${CUR}_fingerprint.json`, "utf8"));

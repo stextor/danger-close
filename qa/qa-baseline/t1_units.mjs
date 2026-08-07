@@ -8,6 +8,7 @@ import fs from "fs";
 const VER = process.argv[2] || "v510";
 const IS510 = VER !== "v592"; // v5.10-family features (v510 and v5101)
 const IS5101 = VER === "v5101";
+const IS5102 = VER === "v5102";
 const SRC = fs.readFileSync(new URL(`../${VER}.jsx`, import.meta.url), "utf8");
 const m = await import(`./app_${VER}.mjs`);
 const g = m.__g;
@@ -141,9 +142,13 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
 
 // ═══ Statics — the source file itself ═══
 {
-  const verStr = IS5101 ? "v5.10.1" : IS510 ? "v5.10" : "v5.9.2";
-  T(`STATIC: field-manual callsign carries ${verStr}`, SRC.includes(`FIELD MANUAL · ${verStr}`));
-  T(`STATIC: end-of-manual footer carries ${verStr}`, SRC.includes(`DANGER CLOSE ${verStr}`) || SRC.includes(`DANGER CLOSE ${verStr} ·`));
+  const verStr = IS5102 ? "v5.10.2" : IS5101 ? "v5.10.1" : IS510 ? "v5.10" : "v5.9.2";
+  T(`STATIC: field-manual callsign carries ${verStr}`, SRC.includes(`FIELD MANUAL · ${verStr} · PUBLIC BUILD`));
+  T(`STATIC: end-of-manual footer carries ${verStr}`, SRC.includes(`DANGER CLOSE ${verStr} · documentation regenerated`));
+  // v5.10.2: the remaining two of the four in-app version sites, asserted exactly
+  // (delimiters included so v5.10 cannot match v5.10.1/2 by prefix).
+  T(`STATIC: DATA LOAD header carries ${verStr}`, SRC.includes(`DATA LOAD │ ${verStr}</div>`));
+  T(`STATIC: app footer carries ${verStr}`, SRC.includes(`DANGER CLOSE ${verStr} │ Not financial advice`));
   T("STATIC: no API keys in source", !/sk-ant-[A-Za-z0-9_-]{20,}/.test(SRC));
   T("STATIC: no personal Windows paths", !/C:\\+Users|\/Users\/steve/i.test(SRC));
   T("STATIC: persistence goes through window.storage (>40 call sites)", (SRC.match(/window\.storage\./g) || []).length > 40);

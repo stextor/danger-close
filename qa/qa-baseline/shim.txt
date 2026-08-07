@@ -24,6 +24,7 @@ export const __g = {
   contribBucketWeights, computePlanEvents, buildRetireOptions,
   contribAccrual: _g("contribAccrual"),
   retireStartBalances: _g("retireStartBalances"),
+  STORAGE_KEYS: () => _g("STORAGE_KEYS"), // t5 loops this map for the Clear-All wipe invariant (v5.10.2)
   DangerClose,
 };
 

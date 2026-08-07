@@ -10,8 +10,9 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
 const VER = process.argv[2] || "v510";
-const IS510 = VER !== "v592"; // v5.10-family features (v510 and v5101)
-const IS5101 = VER === "v5101";
+const IS510 = VER !== "v592"; // v5.10-family features (v510 and later)
+const IS5101 = VER === "v5101" || VER === "v5102"; // v5.10.1 fixes present (v5101 and later)
+const IS5102 = VER === "v5102"; // v5.10.2 B-2 fix present (full 13-key wipe)
 
 // ── window.storage shim: localStorage-backed, artifact API contract ──
 const PREFIX = "dc:";
@@ -141,6 +142,28 @@ await flush(act); await flush(act); await flush(act);
 
 // ═══ Phase D — Clear All Data wipes plan AND credentials, returns to landing ═══
 await click(tabBtn("my data"), act); await flush(act);
+// ── v5.10.2 (audit Finding B-2): seed EVERY key in STORAGE_KEYS before the wipe, so
+// Clear All Data is tested against a fully-populated store — previously only the plan
+// keys and the API key were present, which is exactly how three keys (checklist, simple,
+// ssCut) escaped the wipe list unnoticed. The checklist seed carries a recognizable
+// third-party contact (the PII this defect leaked) so its erasure is provable. ──
+const KEYMAP = (window.__g && window.__g.STORAGE_KEYS && window.__g.STORAGE_KEYS()) || null;
+if (IS5102) T("D: shim exposes the STORAGE_KEYS map (required for the wipe invariant)", !!KEYMAP);
+const SEED_FIXTURES = {
+  checklist: JSON.stringify({ estateAttorney: { done: true, notes: "executor is our daughter", contact: "Jane Q. Attorney / 555-0100" } }),
+  simple: "1",
+  ssCut: JSON.stringify({ on: true, year: 2033, pct: 78 }),
+  skin: "tactical", uiScale: "115", offline: "0",
+  localLLM: JSON.stringify({ url: "http://localhost:11434/v1", model: "llama3.1" }),
+  acaRegime: "current", prompt: "seeded master prompt",
+};
+if (KEYMAP) {
+  const present = storedKeys();
+  for (const [name, key] of Object.entries(KEYMAP)) {
+    if (!present.includes(key)) await window.storage.set(key, SEED_FIXTURES[name] ?? "seed");
+  }
+  T("D: every STORAGE_KEYS key present before the wipe", Object.values(KEYMAP).every(k => storedKeys().includes(k)));
+}
 const clear = btn(/CLEAR ALL DATA/);
 T("D: Clear All Data present", !!clear);
 await click(clear, act); await flush(act);
@@ -186,6 +209,36 @@ await click(yes, act); await flush(act); await flush(act);
   } else {
   T("D [KNOWN DEFECT]: API key SURVIVES Clear All Data (docs promise a wipe — fixed in v5.10.1; pre-fix state pinned here)", ks.includes(K("api_key_v1")), ks.join(","));
   T("D [KNOWN DEFECT]: no return to landing screen (blank plan stays cached — fixed in v5.10.1; pre-fix state pinned here)", !/start fresh/i.test((body().textContent || "")) || [...body().querySelectorAll("button.tab")].length > 0);
+  }
+  // ── EXTINCTION INVARIANT (v5.10.2, audit Finding B-2) vs KNOWN DEFECT PIN (prior legs) ──
+  // The defect class: clearStorage()'s hand-enumerated delete list drifts out of sync with
+  // STORAGE_KEYS (it produced D1 at v5.10.1 and B-2 here). The invariant below loops the
+  // key map itself, so ANY key added in a future release is covered automatically — if the
+  // wipe list isn't extended to match, this fails loudly.
+  if (IS5102) {
+    if (KEYMAP) {
+      T("D: STORAGE_KEYS defines at least the 13 known keys", Object.keys(KEYMAP).length >= 13, String(Object.keys(KEYMAP).length));
+      for (const [name, key] of Object.entries(KEYMAP)) {
+        T(`D: Clear All Data deletes STORAGE_KEYS.${name}`, !ks.includes(key), ks.join(","));
+      }
+      // checklist named explicitly: it holds THIRD-PARTY PII — the estate attorney's / CPA's /
+      // insurance contact's names and phone numbers, plus free-text notes that may name
+      // executors and family. Its survival after "delete everything" was the substance of
+      // Finding B-2; prove the CONTENT is gone from storage, not merely the key.
+      const survivors = ks.map(k => window.localStorage.getItem(PREFIX + k) || "").join("\n");
+      T("D: seeded third-party contact PII is gone from ALL surviving storage", !survivors.includes("555-0100"), "attorney contact survived the wipe");
+    }
+  } else {
+    // ── KNOWN DEFECT PIN (pre-existing in every release through v5.10.1; found 2026-08-07
+    // by the Phase 1 standing audit, Finding B-2; FIXED in v5.10.2 — this pin documents the
+    // pre-fix state on frozen legs). clearStorage() deleted only 10 of the 13 STORAGE_KEYS:
+    // checklist (third-party contact PII + notes), simple, and ssCut survived "delete
+    // everything" — on v5.10.1 because they were missing from the wipe list, and on earlier
+    // legs because clearStorage() was never called at all. Flip nothing here: frozen legs
+    // keep their history; the fixed behavior is asserted by the IS5102 loop above. ──
+    T("D [KNOWN DEFECT]: checklist (third-party contacts) SURVIVES Clear All Data (fixed in v5.10.2; pre-fix state pinned here)", ks.includes(K("checklist_v1")), ks.join(","));
+    T("D [KNOWN DEFECT]: simple-mode flag SURVIVES Clear All Data (fixed in v5.10.2; pre-fix state pinned here)", ks.includes(K("simple_v1")));
+    T("D [KNOWN DEFECT]: ssCut scenario SURVIVES Clear All Data (fixed in v5.10.2; pre-fix state pinned here)", ks.includes(K("ss_cut_v1")));
   }
 }
 
