@@ -2,7 +2,7 @@
 
 This project's premise is *verify, don't trust* — so this page explains what verification actually exists, what it covers, and what it doesn't. It's written for the same skeptical reader the app is.
 
-**Current build: v5.10.1** · source `src/DangerClose.jsx` md5 `2ee4d1e5d0f06fa89ee6980fd97984bc` · **334 automated checks green** against that exact source.
+**Current build: v5.10.2** · source `src/DangerClose.jsx` md5 `7ddda3585abb9dc2c40fa4fbfc46967a` · **353 automated checks green** against that exact source.
 
 ## The part you can check yourself, right now
 
@@ -14,39 +14,39 @@ Honest scope: the Verify tab proves the *constants* are right — not every form
 
 **The suite is published in this repo** — `qa/qa-baseline/` (the t1–t6 regression baseline and its harness) and `qa/` (the t7–t9 feature suites). It runs in full before any release, and can be re-run from a clean clone; `qa/qa-baseline/README.md` has the setup steps. This was not always true: the original suite lived only in build-session sandboxes and was lost, which is why v5.10 rebuilt it as repo files.
 
-The suite compares **two builds by role** — the current release and the immediately-prior one — and re-baselines every release. For v5.10.1 that pair is v5.10 → v5.10.1.
+The suite compares **two builds by role** — the current release and the immediately-prior one — and re-baselines every release. For v5.10.2 that pair is v5.10.1 → v5.10.2.
 
-### Current build (v5.10.1) — 248 checks
+### Current build (v5.10.2) — 267 checks
 
 | Suite | Checks | What it covers |
 |---|---|---|
-| t1 units & statics | 62 | Pure functions and source invariants against hand-derived values: tax math, SS taxability, RMD divisors, state rules, parsing, the ACA machinery, plus a headless run of the in-app Verify checks and assertions that the version string is bumped at all four in-app sites |
+| t1 units & statics | 64 | Pure functions and source invariants against hand-derived values: tax math, SS taxability, RMD divisors, state rules, parsing, the ACA machinery, plus a headless run of the in-app Verify checks and assertions that the version string is bumped at all four in-app sites — as of v5.10.2 all four are asserted exactly (footer, DATA LOAD header, Field Manual callsign, Field Manual footer) |
 | t2 engines | 15 | Monte Carlo statistical properties, extended-MC longevity/LTC machinery, stress scenarios, Roth engine invariants, each reduced to a seeded fingerprint |
 | t3 Roth | 36 | The conversion engine against hand-computed dollar figures, using explicit hand-built inputs rather than the demo household: bracket fills, IRMAA caps, funding-model gross-ups, widow transitions, and the ACA bridge cases |
 | t4 DOM | 90 | The real component mounted in jsdom: all 26 tabs clicked and asserted for signature content, no NaN/undefined anywhere, Simple Mode round-trip, unsaved-edits guard. Signature strings were grounded against a captured DOM, not guessed |
-| t5 persistence | 27 | The full storage lifecycle against the same `window.storage` contract the standalone build installs: fresh boot → landing, save → persisted, remount → reopens, backup export/import round-trip, and that a backup never contains the API key |
+| t5 persistence | 44 | The full storage lifecycle against the same `window.storage` contract the standalone build installs: fresh boot → landing, save → persisted, remount → reopens, backup export/import round-trip, and that a backup never contains the API key. As of v5.10.2, Clear All Data is tested against a fully-seeded store and asserted by **looping the `STORAGE_KEYS` map itself** — every key, including any added in a future release, must be absent after the wipe, and the seeded third-party contact PII must be gone from all surviving storage |
 | t6 single-filer | 18 | Storage seeded with a single-filer plan *before* mount, so the app boots into the branch the couple-centric demo never exercises |
 
 ### Cross-version and feature suites — 86 checks
 
 | Suite | Checks | What it covers |
 |---|---|---|
-| t2 parity (v5.10 → v5.10.1) | 8 | Under common seeded random numbers with identical inputs, the Monte Carlo, extended MC, stress, and Roth engines produce **byte-identical** output across the two builds. This is the mechanical form of any "engines unchanged" claim |
+| t2 parity (v5.10.1 → v5.10.2) | 8 | Under common seeded random numbers with identical inputs, the Monte Carlo, extended MC, stress, and Roth engines produce **byte-identical** output across the two builds. This is the mechanical form of any "engines unchanged" claim |
 | t7 accrual | 37 | The v5.10 contribution-accrual feature against hand-computed figures ($96,000 / $24,000 / $72,000 for the couple case), migration parity, and round-trip persistence. Authored *before* the engine edits |
 | t8 invariants | 27 | Extinction invariants (fixed defect classes asserted not to return), Verify-tab constants, and engine behavior |
 | t9 DOM smoke | 14 | End-to-end render smoke over the feature surface |
 
-**334 checks verify this build** = 248 (current leg) + 8 (parity) + 78 (t7–t9). The prior legs are re-proven at every run as history: v5.10 246 checks, v5.9.2 234. Those legs are expected to show since-fixed defects in their pre-fix state — that's correct, not a regression.
+**353 checks verify this build** = 267 (current leg) + 8 (parity) + 78 (t7–t9). The prior legs are re-proven at every run as history: v5.10.1 254 checks, v5.10 252 (both up from their published 248/246 because the suite itself grew at v5.10.2 — two new version-site assertions in t1 and, in t5, the all-keys seed check plus three dated pre-fix pins for the B-2 wipe defect). Frozen legs are expected to show since-fixed defects in their pre-fix state — that's correct, not a regression. The v5.9.2 leg (234) is retired history at its git tag.
 
 ### How known defects are tracked
 
 When a bug is found but not yet fixed, it gets a dated `[KNOWN DEFECT]` test asserting *today's wrong behavior*, so the defect stays visible and "green" describes reality rather than hiding it. Fixing it means changing the code and flipping the pin to a positive assertion — the fix is then self-verifying.
 
-Three such pins were opened at the v5.10 baseline rebuild and **flipped at v5.10.1** (the ACA cliff solver's own funding sale, Clear All Data not wiping the API key, and a phantom Spouse B on the SS tab for single filers). The current leg now asserts the fixed behavior; the frozen prior legs keep the dated pins as pre-fix history.
+Three pins were opened at the v5.10 baseline rebuild and **flipped at v5.10.1** (the ACA cliff solver's own funding sale, Clear All Data not wiping the API key, and a phantom Spouse B on the SS tab for single filers). The current leg now asserts the fixed behavior; the frozen prior legs keep the dated pins as pre-fix history. A fourth defect class was pinned and fixed in the same release at **v5.10.2** (audit Finding B-2): `clearStorage()` deleted only 10 of the 13 storage keys, leaving the checklist's third-party contacts, the Simple-Mode flag, and the SS-cut scenario in browser storage after "delete everything." The current leg asserts the full wipe via the loop invariant; frozen legs carry the dated pre-fix pins.
 
 ## Hand-verified ACA figures — check these with a calculator
 
-These test cases were derived by hand from the primary sources and asserted to the dollar. Every row below was **re-verified against the v5.10.1 engine** for this release. Sources: IRS Rev. Proc. 2025-25 (applicable percentages), HHS/ASPE poverty guidelines (2025: $15,650 + $5,500/person; 2026: $15,960 + $5,680/person), Rev. Proc. 2021-36 (ARPA table for the "enhanced" scenario).
+These test cases were derived by hand from the primary sources and asserted to the dollar. Every row below was **re-verified against the v5.10.2 engine** for this release (byte-identical engine parity with v5.10.1 at 8/8; the v5.10.2 diff touches no engine). Sources: IRS Rev. Proc. 2025-25 (applicable percentages), HHS/ASPE poverty guidelines (2025: $15,650 + $5,500/person; 2026: $15,960 + $5,680/person), Rev. Proc. 2021-36 (ARPA table for the "enhanced" scenario).
 
 | Case (single filer, 2026 coverage, $1,500/mo benchmark = $18,000/yr) | Value |
 |---|---|
