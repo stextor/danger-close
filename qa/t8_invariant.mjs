@@ -29,8 +29,17 @@ ck("constructor itself applies contribAccrual", /function retireStartBalances[\s
 
 // 3) The three census-found sites (missing from the scope's enumerated list) are wired.
 ck("Roth ladder seeds use the constructor (census find #3)", SRC.includes("const _rsbL = retireStartBalances(_tlRoth.rothLadderStart)"));
-ck("Taxes-tab schedule uses the constructor (census find #7)", /Portfolio for RMD calc[\s\S]{0,300}retireStartBalances\(_retireYr\)\.tradInit/.test(SRC));
-ck("IRMAA planner uses the constructor (census find #8)", /MAGI per year[\s\S]{0,400}retireStartBalances\(_retireYr\)\.tradInit/.test(SRC));
+// v5.11: Engines B and C still seed from the constructor, but now take the PER-PERSON
+// fields (tradInitA/tradInitB) instead of the pooled .tradInit, so RMDs can run on each
+// spouse's own age with a spousal rollover at first death (finding C-2C-3). The invariant
+// is unchanged in intent — seed from the constructor, never a local positions reduce —
+// and is strengthened: the per-person split is now asserted explicitly.
+ck("Taxes-tab schedule uses the constructor (census find #7)", /Portfolio for RMD calc[\s\S]{0,600}retireStartBalances\(_retireYr\)/.test(SRC));
+ck("IRMAA planner uses the constructor (census find #8)", /MAGI per year[\s\S]{0,600}retireStartBalances\(_retireYr\)/.test(SRC));
+ck("Taxes-tab schedule seeds PER-PERSON trad balances (v5.11, C-2C-3)",
+  /const _rsbB = retireStartBalances\(_retireYr\);[\s\S]{0,200}_rsbB\.tradInitA[\s\S]{0,80}_rsbB\.tradInitB/.test(SRC));
+ck("IRMAA planner seeds PER-PERSON trad balances (v5.11, C-2C-3)",
+  /const _rsbC = retireStartBalances\(_retireYr\);[\s\S]{0,200}_rsbC\.tradInitA[\s\S]{0,80}_rsbC\.tradInitB/.test(SRC));
 
 // 4) Cross-tab agreement (Roth tab): STEP-1 cards and the ladder table share the SAME
 //    anchor (rothLadderStart) and the SAME helper, so they cannot quietly disagree.
