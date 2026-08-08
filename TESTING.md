@@ -2,7 +2,7 @@
 
 This project's premise is *verify, don't trust* — so this page explains what verification actually exists, what it covers, and what it doesn't. It's written for the same skeptical reader the app is.
 
-**Current build: v5.10.2** · source `src/DangerClose.jsx` md5 `7ddda3585abb9dc2c40fa4fbfc46967a` · **353 automated checks green** against that exact source.
+**Current build: v5.11** · source `src/DangerClose.jsx` md5 `f645a3967c687960bb03227b5ce5bfec` · **381 automated checks green** against that exact source.
 
 ## The part you can check yourself, right now
 
@@ -14,9 +14,9 @@ Honest scope: the Verify tab proves the *constants* are right — not every form
 
 **The suite is published in this repo** — `qa/qa-baseline/` (the t1–t6 regression baseline and its harness) and `qa/` (the t7–t9 feature suites). It runs in full before any release, and can be re-run from a clean clone; `qa/qa-baseline/README.md` has the setup steps. This was not always true: the original suite lived only in build-session sandboxes and was lost, which is why v5.10 rebuilt it as repo files.
 
-The suite compares **two builds by role** — the current release and the immediately-prior one — and re-baselines every release. For v5.10.2 that pair is v5.10.1 → v5.10.2.
+The suite compares **two builds by role** — the current release and the immediately-prior one — and re-baselines every release. For v5.11 that pair is v5.10.2 → v5.11.
 
-### Current build (v5.10.2) — 267 checks
+### Current build (v5.11) — 267 checks in the t1–t6 baseline
 
 | Suite | Checks | What it covers |
 |---|---|---|
@@ -33,8 +33,11 @@ The suite compares **two builds by role** — the current release and the immedi
 |---|---|---|
 | t2 parity (v5.10.1 → v5.10.2) | 8 | Under common seeded random numbers with identical inputs, the Monte Carlo, extended MC, stress, and Roth engines produce **byte-identical** output across the two builds. This is the mechanical form of any "engines unchanged" claim |
 | t7 accrual | 37 | The v5.10 contribution-accrual feature against hand-computed figures ($96,000 / $24,000 / $72,000 for the couple case), migration parity, and round-trip persistence. Authored *before* the engine edits |
-| t8 invariants | 27 | Extinction invariants (fixed defect classes asserted not to return), Verify-tab constants, and engine behavior |
+| t8 invariants | 29 | Extinction invariants (fixed defect classes asserted not to return), Verify-tab constants, and engine behavior. At v5.11 the two source invariants that asserted the old pooled Traditional seed in the Taxes and IRMAA engines were updated to assert the per-person split explicitly — a strictly stronger check |
 | t9 DOM smoke | 14 | End-to-end render smoke over the feature surface |
+
+**Two honesty notes on t11.** First, *precision*: the Taxes and IRMAA engines are computed inside the app's component body, so the harness — which exports module-level bindings — cannot reach their row arrays. Their only output path is the rendered DOM, which prints every figure rounded to the nearest $1,000. t11's assertions are therefore accurate to **±$500, not to the dollar**. That is adequate here only because the effect being measured (~$4,050/yr per $1M of Traditional balance) is roughly eight times the measurement band. Making these engines dollar-exact testable requires a new harness capability and is scoped separately. Second, *teeth*: a test that cannot fail proves nothing, so t11 was run as a **negative control against the pre-fix v5.10.2 build and correctly failed its five discriminating assertions** in both directions. Its two cross-checks pass on the defective build as well and are recorded in the suite as supporting context rather than proof.
+| t11 survivor RMD | 26 | The v5.11 extinction invariant for audit finding C-2C-3: survivor-year RMDs must follow the **survivor's** age, not the deceased spouse's. Asserted in **both** direction configurations (Person A older, and Person A younger), because the defect's sign flips with the age order and a one-directional test would have passed against it in the other sign. Includes IRS Uniform Lifetime divisor and SECURE 2.0 start-age grounding read from the engine's own helpers. **Precision: ±$500** (see the note below) |
 
 **353 checks verify this build** = 267 (current leg) + 8 (parity) + 78 (t7–t9). The prior legs are re-proven at every run as history: v5.10.1 254 checks, v5.10 252 (both up from their published 248/246 because the suite itself grew at v5.10.2 — two new version-site assertions in t1 and, in t5, the all-keys seed check plus three dated pre-fix pins for the B-2 wipe defect). Frozen legs are expected to show since-fixed defects in their pre-fix state — that's correct, not a regression. The v5.9.2 leg (234) is retired history at its git tag.
 

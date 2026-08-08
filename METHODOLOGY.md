@@ -410,6 +410,41 @@ modeled), and the survivor's own RMD age governs the merged balance thereafter. 
 taxable accounts simply continue. Taxes and IRMAA remain household-level throughout, which is
 correct for married-filing-jointly.
 
+**Which engines implement the above — corrected at v5.11.** This section described the
+per-spouse model as though every engine followed it. That was true of the Roth strategy engine
+from v5.8, but **not** of the Taxes-tab schedule or the IRMAA planner: through v5.10.2 both held
+a single pooled Traditional balance and keyed its RMD to Person A's age unconditionally, so
+post-death years computed distributions on the *deceased* spouse's age, and pre-death years
+started the younger spouse's RMDs at the *older* spouse's start age. The direction of the
+resulting error depended on which spouse was younger — conservative when Person A was the older,
+**non-conservative when Person A was the younger** (understating RMD, tax, and therefore
+overstating plan survival). **As of v5.11 all three engines implement the per-spouse model
+described above**: per-person balances, spousal rollover into the survivor at first death, and
+RMDs on each person's own age and own SECURE 2.0 start age. The Withdrawal tab remains the
+stated approximation described in the next section.
+
+**Two stated simplifications in the survivor year (disclosed v5.11).** First, the **entire year
+of death is filed Single**. Under IRS Pub. 501 the surviving spouse is considered married for
+the whole year of death and may file jointly for it, with Single beginning the following year
+(Qualifying Surviving Spouse extends joint rates further but requires a dependent child, which
+this app's population generally lacks). Filing Single a year early over-taxes the death year —
+conservative — and is a simplification, not a reading of the law. Second, the **Social Security
+survivor benefit is modeled as the larger of the two actual checks**. The RIB-LIM / Widow's
+Limit (20 CFR 404.410(c); SSA POMS GN 00615.320) provides that where the deceased claimed before
+their full retirement age, the survivor receives the larger of the deceased's actual benefit or
+82.5% of the deceased's PIA. Only the first branch is modeled, so where the higher earner claimed
+early the survivor's benefit can be understated — again conservative.
+
+**A remaining inconsistency, stated rather than implied away (v5.11).** The IRMAA planner does
+not model the first death beyond the RMD basis corrected above: it pays **both** Social Security
+benefits for the full horizon, and it never switches filing status, so a surviving spouse is
+still scored against the married surcharge thresholds. These two errors work against each other —
+paying both checks overstates MAGI (which would overstate the surcharge), while retaining the
+married thresholds is too generous (which would understate it) — so **the net direction is not
+stated here, because it has not been measured.** It is inconsistent with the Taxes and Roth
+engines, which both model the first death, and is recorded as a known limitation pending its own
+scope and execution.
+
 **Migration.** Backups predating v5.8 carry no owner. On import, retirement rows default to
 Person A — the pre-v5.8 model — and a one-time notice in My Data asks for review; other
 accounts use their names as hints and default to Joint. Saving writes explicit owners.
