@@ -9,6 +9,10 @@
 //            => old code OVERSTATED the RMD (conservative).
 //   Case 2 — A younger, A dies first, B survives: decedent's larger divisor
 //            => old code UNDERSTATED the RMD (NON-conservative — the reason C-2C-3 is HIGH).
+//   Case 3 — B dies first, A survives: exercises the OTHER half of the v5.11 rollover
+//            (balance moving INTO person A), which cases 1-2 never reach.
+//   Case 4 — SECURE 2.0 start-age straddle, both alive: the PRE-death half of the defect,
+//            where the younger spouse's money used to start at the older spouse's start age.
 //
 // A one-directional test would have passed against the defect in the other sign, so the
 // pair is the point: the defect class cannot return in EITHER direction.
@@ -25,6 +29,16 @@
 // executed against the PRE-FIX build (v5.10.2, dom_v5102.cjs) and correctly failed 5 of 26:
 //   case 1 [EXTINCTION] 2044 ($47K) · case 1 [EXTINCTION] 2045 ($49K) · case 1 boundary
 //   case 2 [EXTINCTION] 2044 ($48K) · case 2 [EXTINCTION] 2045 ($50K)
+// Cases 3 and 4 (added 2026-08-09) were negative-controlled the same way, with an important
+// asymmetry that must not be glossed:
+//   Case 4 FAILS on v5.10.2 (2034 $45K -> 2035 $44K: no step, because the pooled model had
+//     already been distributing B's money since A's start age). Discriminating — it takes the
+//     pre-fix failure count to SIX.
+//   Case 3 PASSES on v5.10.2, and that is expected, not a weakness in the case. When A is the
+//     survivor the old pooled model was COINCIDENTALLY right, because `ageA` was already the
+//     survivor's own age. Case 3 therefore has NO teeth against the original defect; its job is
+//     forward-looking regression cover for the `_survivorIsA === true` rollover branch, which
+//     no other case executes. Do not cite case 3 as evidence the defect is caught.
 // Those five are the DISCRIMINATING assertions. Note honestly that the two cross-checks PASS
 // on the defective build too: the pooled ageA model still returns different figures for the
 // two configurations (ageA is 80 in case 1 but 78 in case 2), so the cross-checks are
@@ -235,6 +249,74 @@ try {
     // Direction check: the older survivor's smaller divisor must push the RMD UP.
     ck("case 2: RMD rises across the death boundary (older survivor, smaller divisor)",
       !!y43 && !!y44 && y44.rmdK > y43.rmdK, `2043 $${y43 && y43.rmdK}K → 2044 $${y44 && y44.rmdK}K`);
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CASE 3 — SURVIVOR = A. B dies first (2042) and A survives.
+  // Added 2026-08-09. Cases 1 and 2 both have A dying first, so until this case
+  // existed the `_survivorIsA === true` half of the v5.11 rollover — the decedent's
+  // balance moving INTO person A — was never executed by any test. Under the OLD
+  // pooled/ageA model this configuration was coincidentally correct (ageA was already
+  // the survivor's age), which is exactly why it is easy to leave untested and exactly
+  // why the new branch needs its own coverage: a mis-signed rollover here would send
+  // the money to the DEAD spouse's leg and key RMDs to their age.
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    const cfg = await configure({ dobA: 1964, lifeExpA: 87, dobB: 1966, lifeExpB: 76 });
+    ck("case 3 setup: B dies first in 2042 and A (older) survives",
+      cfg.dobAYr === 1964 && cfg.dobBYr === 1966 && cfg.deathYr1 === 2042, JSON.stringify(cfg));
+    ck("harness: Taxes tab reachable", await gotoTab("taxes"));
+
+    const y41 = await rmdForYear(2041); // last MFJ year
+    const y42 = await rmdForYear(2042); // first survivor year — rollover INTO A
+    const y43 = await rmdForYear(2043);
+    ck("case 3: 2042 panel is a survivor year (Single)", !!y42 && /Single \(survivor\)/.test(y42.header), y42 && y42.header);
+
+    // Survivor is A (born 1964, older, SMALLER divisor). A mis-signed rollover would put the
+    // pooled balance in B's leg and divide by the deceased spouse's larger divisor, producing a
+    // materially LOWER figure. Observed correct value ~$44K; the wrong-direction value is lower.
+    ck("case 3 [EXTINCTION]: survivor-year RMD follows the SURVIVING spouse A, not the deceased B",
+      !!y42 && y42.rmdK >= 43, `2042 RMD $${y42 && y42.rmdK}K`);
+    // The rollover must PRESERVE the decedent's balance, not drop it. If tradB were zeroed
+    // without being added to tradA, the RMD would fall across the boundary instead of rising.
+    ck("case 3: the decedent's balance is preserved by the rollover (RMD does not fall at death)",
+      !!y41 && !!y42 && y42.rmdK >= y41.rmdK, `2041 $${y41 && y41.rmdK}K → 2042 $${y42 && y42.rmdK}K`);
+    ck("case 3: the merged balance keeps distributing a year later",
+      !!y43 && y43.rmdK > 0 && y43.rmdK >= y42.rmdK, `2043 $${y43 && y43.rmdK}K`);
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CASE 4 — SECURE 2.0 START-AGE STRADDLE, both spouses alive.
+  // Added 2026-08-09. §107 splits the RMD start age at the 1960 birth year: a 1959 birth
+  // starts at 73, a 1960 birth at 75. With A born 1959 and B born 1960, the correct model
+  // distributes ONLY A's balance from 2032, and B's balance does not begin until 2035.
+  // The old pooled model keyed the whole balance to A's start age, so it distributed
+  // everything from 2032 and showed NO step when B's own start age arrived. The step is
+  // therefore the discriminating signature, and this case tests the PRE-death half of
+  // C-2C-3 — the half cases 1-3 never reach.
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    const cfg = await configure({ dobA: 1959, lifeExpA: 90, dobB: 1960, lifeExpB: 92 });
+    ck("case 4 setup: A born 1959 (start 73), B born 1960 (start 75), both alive through 2036",
+      cfg.dobAYr === 1959 && cfg.dobBYr === 1960 && cfg.deathYr1 > 2036, JSON.stringify(cfg));
+    ck("harness: Taxes tab reachable", await gotoTab("taxes"));
+
+    const y31 = await rmdForYear(2031); // A is 72 — nobody has started
+    const y32 = await rmdForYear(2032); // A turns 73 — A only
+    const y34 = await rmdForYear(2034); // A only, still
+    const y35 = await rmdForYear(2035); // B turns 75 — B's own RMDs begin
+    ck("case 4: no RMD before either spouse's start age (2031, ages 72/71)",
+      !!y31 && (y31.rmdK === null || y31.rmdK === 0), `2031 $${y31 && y31.rmdK}K`);
+    ck("case 4: A's RMDs begin at A's own start age of 73 (2032)",
+      !!y32 && y32.rmdK > 0, `2032 $${y32 && y32.rmdK}K`);
+    // While only A distributes, the figure tracks A's leg alone and drifts DOWN as that leg is
+    // drawn down; the pooled model would be distributing the whole household balance here.
+    ck("case 4: the pre-2035 figure tracks A's leg alone (does not rise while only A distributes)",
+      !!y32 && !!y34 && y34.rmdK <= y32.rmdK, `2032 $${y32 && y32.rmdK}K → 2034 $${y34 && y34.rmdK}K`);
+    // THE INVARIANT. A step up in 2035 exists ONLY if B's balance waited for B's OWN start age.
+    ck("case 4 [EXTINCTION]: B's RMDs start at B's OWN start age of 75, not A's — step up in 2035",
+      !!y34 && !!y35 && y35.rmdK > y34.rmdK + 3,
+      `2034 $${y34 && y34.rmdK}K → 2035 $${y35 && y35.rmdK}K (a pooled model shows no step here)`);
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
