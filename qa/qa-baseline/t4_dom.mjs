@@ -46,7 +46,7 @@ await click(example); await flush(); await flush();
   const t = body().textContent || "";
   // Exact per-tag string: "v5.10" is a PREFIX of v5.10.1/v5.10.2, so a substring test
   // passed for the whole v5.10 family by luck and broke at v5.11. Map the tag explicitly.
-  const _badge = VER === "v511" ? "v5.11" : VER === "v5102" ? "v5.10.2"
+  const _badge = VER === "v512" ? "v5.12" : VER === "v511" ? "v5.11" : VER === "v5102" ? "v5.10.2"
     : VER === "v5101" ? "v5.10.1" : IS510 ? "v5.10" : "v5.9.2";
   T(`SHELL: version badge reads ${_badge}`, t.includes(_badge));
   T("SHELL: amber example-data banner fires", has(t, "EXAMPLE DATA MODE") || has(t, "built-in example household"));

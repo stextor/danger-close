@@ -9,7 +9,7 @@ const VER = process.argv[2] || "v510";
 const IS510 = VER !== "v592"; // v5.10-family features (v510 and v5101)
 const IS5101 = VER === "v5101";
 const IS5102 = VER === "v5102";
-const IS511 = VER === "v511";
+const IS511 = VER === "v511" || VER === "v512";
 const SRC = fs.readFileSync(new URL(`../${VER}.jsx`, import.meta.url), "utf8");
 const m = await import(`./app_${VER}.mjs`);
 const g = m.__g;
@@ -143,7 +143,7 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
 
 // ═══ Statics — the source file itself ═══
 {
-  const verStr = IS511 ? "v5.11" : IS5102 ? "v5.10.2" : IS5101 ? "v5.10.1" : IS510 ? "v5.10" : "v5.9.2";
+  const verStr = VER === "v512" ? "v5.12" : VER === "v511" ? "v5.11" : IS5102 ? "v5.10.2" : IS5101 ? "v5.10.1" : IS510 ? "v5.10" : "v5.9.2";
   T(`STATIC: field-manual callsign carries ${verStr}`, SRC.includes(`FIELD MANUAL · ${verStr} · PUBLIC BUILD`));
   T(`STATIC: end-of-manual footer carries ${verStr}`, SRC.includes(`DANGER CLOSE ${verStr} · documentation regenerated`));
   // v5.10.2: the remaining two of the four in-app version sites, asserted exactly
