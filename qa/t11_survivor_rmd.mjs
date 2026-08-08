@@ -204,8 +204,13 @@ try {
     const y44 = await rmdForYear(2044); // first survivor year
     const y45 = await rmdForYear(2045);
     ck("case 1: 2043 detail panel reachable and reports an RMD", !!y43 && y43.rmdK !== null, JSON.stringify(y43));
-    ck("case 1: 2044 panel is a survivor year (Single)", !!y44 && /Single \(survivor\)/.test(y44.header), y44 && y44.header);
-    ck("case 1: 2045 panel is a survivor year (Single)", !!y45 && /Single \(survivor\)/.test(y45.header), y45 && y45.header);
+    // IRS Pub. 501 (corrected at v5.12): the survivor is treated as married for the ENTIRE year of
+    // death, so the death year files JOINTLY and Single begins the following year. The row is still
+    // flagged a survivor year in both — one SS check and the IRA rollover both take effect at death.
+    ck("case 1: 2044 (year of death) is a survivor year but still files MFJ (Pub. 501)",
+      !!y44 && /MFJ \(survivor\)/.test(y44.header), y44 && y44.header);
+    ck("case 1: 2045 (year after death) switches to Single",
+      !!y45 && /Single \(survivor\)/.test(y45.header), y45 && y45.header);
 
     // THE INVARIANT. Survivor is B (younger, larger divisor) → the survivor-year RMD must be
     // materially BELOW what the decedent's age would have produced. Under the old pooled/ageA
@@ -236,8 +241,10 @@ try {
     const y44 = await rmdForYear(2044);
     const y45 = await rmdForYear(2045);
     ck("case 2: 2043 detail panel reachable and reports an RMD", !!y43 && y43.rmdK !== null, JSON.stringify(y43));
-    ck("case 2: 2044 panel is a survivor year (Single)", !!y44 && /Single \(survivor\)/.test(y44.header), y44 && y44.header);
-    ck("case 2: 2045 panel is a survivor year (Single)", !!y45 && /Single \(survivor\)/.test(y45.header), y45 && y45.header);
+    ck("case 2: 2044 (year of death) is a survivor year but still files MFJ (Pub. 501)",
+      !!y44 && /MFJ \(survivor\)/.test(y44.header), y44 && y44.header);
+    ck("case 2: 2045 (year after death) switches to Single",
+      !!y45 && /Single \(survivor\)/.test(y45.header), y45 && y45.header);
 
     // THE INVARIANT, OPPOSITE SIGN. Survivor is B (OLDER, smaller divisor) → the survivor-year
     // RMD must be materially ABOVE the deceased-keyed figure. Pre-fix 2044 read ~$48K
@@ -270,7 +277,15 @@ try {
     const y41 = await rmdForYear(2041); // last MFJ year
     const y42 = await rmdForYear(2042); // first survivor year — rollover INTO A
     const y43 = await rmdForYear(2043);
-    ck("case 3: 2042 panel is a survivor year (Single)", !!y42 && /Single \(survivor\)/.test(y42.header), y42 && y42.header);
+    ck("case 3: 2042 (year of death) is a survivor year but still files MFJ (Pub. 501)",
+      !!y42 && /MFJ \(survivor\)/.test(y42.header), y42 && y42.header);
+    ck("case 3: 2043 (year after death) switches to Single",
+      !!y43 && /Single \(survivor\)/.test(y43.header), y43 && y43.header);
+    // The v5.12 decoupling: filing status moves a year later than the death, but the SPOUSAL
+    // ROLLOVER does not — the decedent's IRA transfers at death. If these were re-coupled, the
+    // death-year RMD would revert to the pre-rollover basis and the assertions below would move.
+    ck("case 3: the rollover still takes effect IN the death year, not with the filing switch",
+      !!y41 && !!y42 && y42.rmdK >= y41.rmdK, `2041 $${y41 && y41.rmdK}K → 2042 $${y42 && y42.rmdK}K`);
 
     // Survivor is A (born 1964, older, SMALLER divisor). A mis-signed rollover would put the
     // pooled balance in B's leg and divide by the deceased spouse's larger divisor, producing a
