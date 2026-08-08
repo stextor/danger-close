@@ -44,7 +44,11 @@ T("LOAD: example-data control found", !!example);
 await click(example); await flush(); await flush();
 {
   const t = body().textContent || "";
-  T(`SHELL: version badge reads ${IS510 ? "v5.10" : "v5.9.2"}`, t.includes(IS510 ? "v5.10" : "v5.9.2"));
+  // Exact per-tag string: "v5.10" is a PREFIX of v5.10.1/v5.10.2, so a substring test
+  // passed for the whole v5.10 family by luck and broke at v5.11. Map the tag explicitly.
+  const _badge = VER === "v511" ? "v5.11" : VER === "v5102" ? "v5.10.2"
+    : VER === "v5101" ? "v5.10.1" : IS510 ? "v5.10" : "v5.9.2";
+  T(`SHELL: version badge reads ${_badge}`, t.includes(_badge));
   T("SHELL: amber example-data banner fires", has(t, "EXAMPLE DATA MODE") || has(t, "built-in example household"));
   T("SHELL: no red substitution warning on the demo", !has(t, "USING EXAMPLE NUMBERS, NOT YOUR DATA"));
   T("SHELL: no staleness strip on a current-year build", !has(t, "STALE DATA"));
