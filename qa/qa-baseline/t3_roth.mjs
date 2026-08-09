@@ -103,7 +103,7 @@ console.log(`t3 — ROTH STRATEGY ENGINE (${VER})`);
   // the defect is visible; when the solver is fixed, flip the expectation.
   const gainyRun = g.runRothStrategies({ ...baseP(), acaPremium: 1800, acaSize: 2, currentConv: 250000 });
   const gainy = gainyRun.find(r => r.key === "acaCliff");
-  if (VER === "v5101" || VER === "v5102" || VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514") { // fixed at v5.10.1; holds for all later builds
+  if (VER === "v5101" || VER === "v5102" || VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514" || VER === "v515") { // fixed at v5.10.1; holds for all later builds
     // ── FIXED in v5.10.1: the cliff solver now nets out the MAGI its own funding sale
     // realizes (fixed-point mirroring the funding gross-up), so under appreciated-sale
     // funding the strategy preserves a partial subsidy and beats a cliff-crossing
