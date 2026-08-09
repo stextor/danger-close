@@ -98,7 +98,7 @@ await click(tabBtn("ss")); await flush();
   // prints a note saying so); the display layer conjures a spouse anyway. Found
   // 2026-08-06 by this suite. Pin documents today's behavior; when the SS tab's B
   // sections are gated on tl.single, flip these expectations.
-  if (VER === "v5101" || VER === "v5102" || VER === "v511" || VER === "v512") { // fixed at v5.10.1; holds for all later builds
+  if (VER === "v5101" || VER === "v5102" || VER === "v511" || VER === "v512" || VER === "v513") { // fixed at v5.10.1; holds for all later builds
     // ── FIXED in v5.10.1: the SS tab's Spouse-B sections are gated on the household's
     // single flag — no phantom claiming card, and the self-contradicting "$0/mo" note
     // goes with it (the engines were already correct: B modeled at $0). Also fixed:
