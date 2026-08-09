@@ -1,5 +1,94 @@
 # Changelog
 
+## v5.13
+
+**The IRMAA planner now models the first death. Three corrections that had to ship together.**
+
+The Withdrawal and Taxes tabs learned to model a surviving spouse at v5.12. The IRMAA planner did
+not, and it turned out to have not one omission but three — found by reading the surcharge line
+closely while designing the fix for the other two.
+
+### The three omissions, and why none could ship alone
+
+| Omission | Effect on the surcharge | Direction |
+|---|---|---|
+| Both Social Security checks paid for the full horizon | MAGI overstated by the smaller check | conservative |
+| Married thresholds retained for a survivor | tier boundary too high by $109,000 at tier 1 | **non-conservative** |
+| The deceased spouse still counted per person | surcharge multiplied by two instead of one | conservative |
+
+They do not share a direction, and the threshold one is roughly **eight times** the size of the
+Social Security one, so the net effect was to **understate** what a survivor pays — the wrong
+direction for a tool whose whole identity is pessimism.
+
+**Fixing the thresholds on their own would have been worse than the defect.** It would have moved
+survivors into higher tiers while still charging both of them, roughly doubling the surcharge. The
+new tests pin all three together so a future change cannot restore one without the others.
+
+### What changed, and which year each part takes effect
+
+These are not all keyed to the same year, which is the subtle part:
+
+- **The survivor keeps only the larger Social Security check** — from the year of death, matching
+  the Taxes tab.
+- **The survivor is scored against the Single thresholds** — from the year *after* the death. IRMAA
+  is assessed against the return it is scoring, and IRS Pub. 501 permits a joint return for the year
+  of death itself. The Taxes tab was corrected to the same rule at v5.12, so the two tabs now agree.
+- **The surcharge is charged for one person, not two** — and this one follows the **premium** year
+  rather than the income year, because IRMAA is billed two years in arrears and the bill is paid by
+  whoever is alive to pay it. A row whose "Affects" year falls after the death charges one person
+  even though both spouses were alive in the income year.
+
+That last point looks like an inconsistency in the table if it is not explained, so it is explained:
+survivor rows carry a `· single` marker in the tier column, and a line beneath the table sets out
+both rules. The tier reference table above still shows the household's current status and says so.
+
+### What this changes on screen
+
+Nothing at all for the example household, and that is worth being blunt about. Its survivor income
+(~$96K) never approaches even the Single threshold (~$156K by 2044), so its surcharge is $0 before
+and after. **The defect only bites for households whose survivor income lands between the Single
+and married thresholds — a band $109,000 wide at the first tier.** Inside that band the change is
+large: on the test household built for it, a survivor who previously showed no surcharge at all now
+shows $1,150/yr from the year after the death.
+
+### Engines unchanged, proven
+
+Cross-version engine parity (v5.12 → v5.13, common seeded random numbers, identical inputs) is
+byte-identical at **8/8**. The IRMAA planner is computed inside the component body; the Monte Carlo,
+extended MC, stress, and Roth engines were not touched.
+
+### Testing
+
+**482 checks green** against this source, run from a clean tree: v5.13 baseline **267** (t1 64 ·
+t2 15 · t3 36 · t4 90 · t5 44 · t6 18) + engine parity **8** + t7 37 · t8 29 · t9 14 · t11 40 ·
+t12 23 · **t13 40** · **t14 24**. The built `index.html` is separately exercised by `qa/smoke_built.mjs` — **16 checks**, including the `window.storage` round-trip that a wrong bootstrap would fail.
+
+**t13** is new — the extinction invariant for the IRMAA planner. The example household cannot
+demonstrate this defect at all, so every case runs a purpose-built household whose survivor income
+lands inside the band where it lives. It asserts all three omissions, in both directions (either
+spouse dying first), and includes a case that isolates the person count on its own by holding the
+tier constant across the fix. Negative-controlled against v5.12, where it fails **14** assertions.
+The six substantive assertions that *pass* pre-fix are listed in the file as not discriminating,
+rather than counted as wins.
+
+**t14** is new — the cross-engine invariant (audit decision D-5). Three separate findings over two
+releases were all the same failure: one engine not modelling a death the others did. t14 asserts
+that all four engines carry the survivor rule and that those exposing a figure move it in the same
+year. Building it surfaced a real divergence, recorded rather than smoothed over: the Taxes and
+IRMAA engines hold Social Security flat in today's dollars while the Withdrawal engine COLA-indexes
+it, so they agree on the rule and the timing but not on a single dollar figure. Negative-controlled
+against v5.12, where it fails **4** assertions — all of them Engine C. The other 20 pass because
+Engines A, B and D were already correct, which is exactly what a class-level guard should look like.
+
+### Honest limitations added
+
+Social Security's **life-changing-event redetermination** — a survivor asking SSA to reassess IRMAA
+on current income instead of the two-year-old joint return — is not modeled. A household that files
+one may pay less than projected, so the omission runs conservative. It is now stated in METHODOLOGY
+rather than left silent.
+
+**Provenance:** source `src/DangerClose.jsx` md5 `0ed9e140cd9163e4523d8ff71959d56c` · built `index.html` md5 `364fa4dcab05243b3c65b44a8b452d7e`.
+
 ## v5.12
 
 **Survivor modeling in the Withdrawal and Taxes tabs. A visible-numbers release for any couple.**
