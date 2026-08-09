@@ -1,5 +1,52 @@
 # Changelog
 
+## v5.12
+
+**Survivor modeling in the Withdrawal and Taxes tabs. A visible-numbers release for any couple.**
+
+Two corrections, both from the standing audit's Phase 2C, both changing figures users will see.
+
+### The Withdrawal tab never modeled the first death (finding C-2C-4)
+
+Its projection horizon runs to the **second** death, so it spent years modeling a surviving spouse — and for all of those years it paid **both** Social Security checks and applied the **full joint spending level**. Neither is right, and the two errors ran in opposite directions:
+
+- Paying both checks **understated** the draw need — non-conservative.
+- Skipping the survivor spending reduction **overstated** it — conservative.
+
+They partially cancelled, which is exactly why the tab looked plausible for so long. On the example household the spending error was the larger of the two, so the tab was reading **pessimistic** — the opposite of what the original finding concluded from the Social Security half alone. That correction is recorded in the finding document rather than quietly dropped.
+
+**Both are fixed together, and that pairing is deliberate.** Correcting the Social Security half on its own would have removed the conservative counterweight and left the tab optimistic — strictly worse than the defect it replaced. The new test suite pins them together so a future change cannot restore one without the other.
+
+The survivor now keeps only the larger of the two benefits, and survivor-year spending uses the same `SURVIVOR_SPEND_FACTOR` (75%) the Survivor tab, Monte Carlo, and What-Breaks have always used. On the example household, at the first death: guaranteed income $85K → $64K, expenses $141K → $108K, draw need $55K → $44K. Under v5.11 all three *rose* straight through the death.
+
+### The Taxes tab filed Single a year too early (finding C-2C-1)
+
+v5.11 disclosed this as a simplification: the model filed Single for the **whole** year of death, where IRS Pub. 501 treats the survivor as married for that entire year and generally permits a joint return, with Single beginning the year after. That disclosure is now **retired, because the behavior is corrected** rather than merely explained.
+
+The fix required separating two things that had been one flag. The **death event** — the survivor dropping to one Social Security check, and the decedent's IRA rolling over — still takes effect in the year of death. **Filing status** now moves a year later. Getting this wrong in the other direction would have delayed the IRA rollover by a year and changed every RMD from the death year onward, so the suite now pins the rollover to the death year explicitly.
+
+The death year is still flagged as a survivor year in the schedule; it simply reads "MFJ (survivor)" rather than "Single (survivor)". Expect the death year's tax to fall and the following year's to rise.
+
+**A simplification remains, and is now stated in its place:** Social Security drops to a single check for the whole year of death, where the deceased's benefit actually runs through the month of death. That overstates the loss slightly — the conservative direction.
+
+### Engines unchanged, proven
+
+Cross-version engine parity (v5.11 → v5.12, common seeded random numbers, identical inputs) is byte-identical at **8/8**. Both engines changed here are computed inside the component body; the Monte Carlo, extended MC, stress, and Roth engines were not touched.
+
+### Testing
+
+**418 checks green** against this source, run from a clean clone: v5.12 baseline **267** (t1 64 · t2 15 · t3 36 · t4 90 · t5 44 · t6 18) + engine parity **8** + t7 37 · t8 29 · t9 14 · **t11 40** · **t12 23**.
+
+**t12** is new — the extinction invariant for the Withdrawal tab. It asserts both movements (income drop *and* spending drop) in **both** direction configurations, verifies the drop is specifically the 0.75 factor rather than an arbitrary reduction, and checks that nothing changes while both spouses are alive. Negative-controlled against v5.11, where it correctly fails **eight** assertions — four per direction, so neither sign passes by luck.
+
+**t11** grew 38 → 40: its death-year assertions were rewritten for the corrected filing rule, and one was added pinning the spousal rollover to the death year rather than to the filing switch.
+
+**Stated limitation — verification precision.** Both engines are computed inside the component body, so the harness cannot reach their intermediate values; their only output path is a DOM that rounds to the nearest $1,000. These assertions are accurate to **±$500, not to the dollar** — adequate only because the movements measured (~$21K of Social Security, ~$33K of spending) are far larger than the band.
+
+### Known limitation carried forward
+
+**The IRMAA planner still does not model the first death.** It pays both Social Security benefits for the full horizon, never switches to Single thresholds, and continues charging a Medicare surcharge for the deceased spouse. Those three errors do not share a direction, and the threshold one dominates: retaining the married thresholds understates a survivor's surcharge by up to a full tier. It is **not** fixed here — it needs a restructure of the tier table plus a visible marker on affected rows, which is scoped separately and ships next. Households whose survivor income stays well below the Single threshold see no effect either way.
+
 ## v5.11
 
 **Modeling-correction release — survivor RMDs on the Taxes and IRMAA tabs, and nothing else.** The Phase 2C standing audit found that the Taxes engine and the IRMAA engine each held a **single pooled Traditional balance and keyed its RMD to person A's age unconditionally**. Because that age keeps incrementing after person A has died, every post-death year computed required distributions on the **deceased** spouse's age rather than the survivor's — and, before either death, ran RMDs on the younger spouse's money starting at the *older* spouse's start age.
