@@ -223,7 +223,11 @@ retirement and each spouse's 65th birthday.
 
 2026 tiers per CMS with the statutory **2-year MAGI lookback** modeled explicitly. Roth
 conversions and QCDs both flow through (conversions raise MAGI two years out; QCDs lower it).
-Cliff behavior is preserved — one dollar over a threshold applies the full tier surcharge.
+Cliff behavior is preserved — one dollar over a threshold applies the full tier surcharge. From
+v5.13 the planner also models the first death: the survivor keeps only the larger Social Security
+benefit, is scored against the Single thresholds from the year after the death, and is charged for
+one person rather than two. See the survivor section below for why all three ship together and for
+the year each takes effect.
 
 ## 9. Withdrawal sequencing & guardrails
 
@@ -235,7 +239,8 @@ fixed-real strategies descriptively.
 ## 10. Other engines, briefly
 
 Survivor modeling (filing-status switch to single, one SS check, survivor spending factor, widow
-tax squeeze); ACA bridge with subsidy-cliff awareness pre-Medicare; HSA contribution cutoff at
+tax squeeze) — implemented per engine, with the coverage table in the survivor section below rather
+than claimed uniformly here; ACA bridge with subsidy-cliff awareness pre-Medicare; HSA contribution cutoff at
 Medicare enrollment (with the 6-month lookback); reverse stress solver ("What Breaks"); event/
 deadline calendar; estate-readiness checklist.
 
@@ -423,8 +428,10 @@ described above**: per-person balances, spousal rollover into the survivor at fi
 RMDs on each person's own age and own SECURE 2.0 start age. The Withdrawal tab remains the
 stated approximation described in the next section.
 
-**Which engines model the first death (corrected through v5.11-v5.12).** Survivor modeling is not
-uniform across the app, and this section previously described it as though it were. As of v5.12:
+**Which engines model the first death (corrected through v5.11-v5.13).** Survivor modeling is not
+uniform across the app, and this section previously described it as though it were. As of v5.13
+every engine in the table models the first death; the table is kept rather than deleted because it
+is the record of which release closed which gap.
 
 | Engine | One SS check | Filing switches | Survivor spending | RMD on survivor's age |
 |---|---|---|---|---|
@@ -432,7 +439,7 @@ uniform across the app, and this section previously described it as though it we
 | Roth strategy comparator | yes | yes | n/a | yes (since v5.8) |
 | Taxes tab | yes | yes (corrected v5.12) | n/a | yes (since v5.11) |
 | Withdrawal tab | yes (v5.12) | n/a | yes (v5.12) | yes |
-| **IRMAA planner** | **no** | **no** | n/a | yes (since v5.11) |
+| IRMAA planner | yes (v5.13) | yes (v5.13) | n/a | yes (since v5.11) |
 
 **The year of death (v5.12).** Two things happen at different times, and the model now separates
 them. The **death event** takes effect in the year of death: the survivor drops to the larger of
@@ -460,15 +467,46 @@ Social Security correction above, survivor-year draw need on the example househo
 than rises across the death boundary; the two errors it replaces ran in opposite directions and
 partially cancelled, which is why the tab appeared plausible while both were present.
 
-**A remaining inconsistency, stated rather than implied away.** The **IRMAA planner does not model
-the first death** beyond the RMD basis corrected at v5.11. It pays both Social Security benefits
-for the full horizon, never switches to the Single surcharge thresholds, and continues counting the
-deceased spouse toward the per-person Medicare surcharge. These three errors do not share a
-direction, and the threshold one is by far the largest: the Single thresholds are half the married
-ones ($109,000 against $218,000 at the first tier), so retaining married thresholds for a survivor
-can understate the surcharge by a full tier — the non-conservative direction. Households whose
-survivor income stays below the Single threshold see no effect at all. This is scheduled for the
-next release; it is recorded here rather than left silent.
+**IRMAA and the first death (v5.13).** Through v5.12 the IRMAA planner did not model the first
+death beyond the RMD basis corrected at v5.11. It had three separate omissions, and they did not
+share a direction:
+
+| Omission | Effect on the surcharge | Direction |
+|---|---|---|
+| Both Social Security checks paid for the full horizon | MAGI overstated by the smaller check | conservative |
+| Married thresholds retained for a survivor | tier boundary too high by $109,000 at tier 1 | **non-conservative** |
+| The deceased spouse still counted per person | surcharge multiplied by two instead of one | conservative |
+
+The threshold omission dominates the Social Security one by roughly eight to one, so the net effect
+understated survivor surcharges. **All three are corrected together at v5.13, and that pairing is
+not tidiness.** Correcting the thresholds alone would have moved survivors into higher tiers while
+still charging both of them — roughly doubling the surcharge, and worse than the defect it
+replaced.
+
+Three details of the correction are worth stating, because they are not all keyed to the same year:
+
+- **The Social Security drop is a death-event change** and applies from the year of death, matching
+  the Taxes engine.
+- **The threshold switch is a filing-status change** and applies from the year *after* the death,
+  because IRMAA is assessed against the tax return it is scoring and Pub. 501 permits a joint
+  return for the year of death itself.
+- **The per-person count follows the premium year, not the income year.** IRMAA is billed two years
+  after the income it is based on, so the number of people charged is the number alive when the
+  premium is actually paid. A row whose "Affects" year falls after the death therefore charges one
+  person even if both spouses were alive in the income year. The tab discloses this beneath the
+  year-by-year table rather than leaving the apparent inconsistency unexplained.
+
+**A limitation that remains.** Social Security's life-changing-event redetermination — which lets a
+survivor ask SSA to reassess IRMAA on more current income after a spouse's death, rather than on
+the two-year-old joint return — is not modeled. A household that files one may pay less than the
+model projects, so the omission is conservative.
+
+**Where the engines still legitimately differ.** Engines B (Taxes) and C (IRMAA) hold Social
+Security flat in today's dollars while inflating brackets and thresholds — the deliberate
+bracket-creep conservatism described in §5. Engine D (Withdrawal) COLA-indexes it. All three model
+the same survivor transition in the same year and keep the same check; they simply do not share a
+dollar basis, and the cross-engine test suite asserts the timing and the rule rather than a single
+figure.
 
 **Migration.** Backups predating v5.8 carry no owner. On import, retirement rows default to
 Person A — the pre-v5.8 model — and a one-time notice in My Data asks for review; other
