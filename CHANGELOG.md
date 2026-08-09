@@ -1,5 +1,102 @@
 # Changelog
 
+## v5.15
+
+**The Roth tab was showing single filers married tax figures. This release corrects that, and their
+projected tax goes UP.**
+
+Read that direction first, because v5.14 moved the other way. Every defect fixed here was
+understating what a single filer owes.
+
+### The Roth ladder ran its own tax engine, and it assumed you were married
+
+The conversion-ladder table on the Roth tab carries tax arithmetic separate from every engine in the
+rest of the app. It hardcoded the **married** standard deduction, the **married** brackets, the
+**married** Social Security provisional thresholds, and the **married** IRMAA cliff — with no
+single-filer branch anywhere in the block. It rendered for single filers regardless.
+
+The result compounded: roughly half the correct deduction was subtracted, and the remainder was then
+taxed at brackets twice as wide.
+
+**Measured on the example household forced to single, 2029 row:**
+
+| | v5.14 | v5.15 |
+|---|---|---|
+| Taxable income | $61K | **$78K** |
+| Marginal rate | 12% | **22%** |
+| Federal tax | $6.7K | **$11.5K** |
+
+That is a **72% increase**, and it is the correct figure. The finding that opened this work estimated
+"~40% understated" from hand arithmetic on rounded display values and labelled it indicative; the
+executed number is larger. **Couples see no change at all** — the married household's ladder is
+identical before and after, which is what proves the fix touched only the branch it was meant to.
+
+### And the cliff it warned you about was wrong for everyone
+
+The same block inflated its IRMAA threshold at **3%/yr**, where the entire rest of the app uses 2%.
+The tab's own assumptions box told the reader "thresholds indexed ~2%/yr" while two lines of its
+arithmetic did something else. An overstated cliff means the tab **under-warns** about crossings that
+will actually happen — by 21.5% at 2046 and 34% at 2056, compounding.
+
+Both errors ran the same direction: *convert more than you should*.
+
+### Three loose literals, and why they mattered
+
+The Social Security provisional thresholds were hardcoded as bare `32000` and `44000` — the married
+figures — bypassing the shared `TAX_CONSTS` block entirely. The Verify tab asserts those constants
+and stays green, because it checks the constants, not which constant an engine reaches for. That is
+the third time this pattern has produced a defect, and every threshold in this block now comes from
+the shared blocks.
+
+### Survivor years
+
+The ladder now switches to Single brackets, deduction and IRMAA thresholds the year **after** the
+first projected death (IRS Pub. 501), matching the Taxes tab, the IRMAA planner and the Roth strategy
+engine. The tab's whole argument is *convert while you still file jointly* — it can now show the year
+that stops being true, and names it in the assumptions box.
+
+### What this release deliberately did NOT do
+
+The strategy comparator directly below the ladder, on the same screen, builds proper inputs and calls
+the shared Roth engine — it was correct throughout. So the tab has been showing two different tax
+pictures for the same household, and this release makes them agree by fixing the wrong one rather
+than by deleting it. **Routing the ladder through the shared engine entirely** is the right end state
+and is recorded as the intended direction; doing it here would have turned a correctness fix into a
+642-line rewrite. It is scoped as its own task.
+
+### Engines unchanged, proven
+
+Cross-version parity (v5.14 → v5.15) is **8/8 in its strict form** — no intended-difference entry was
+needed, which is the mechanical proof this fix stayed inside the Roth tab's own block and never
+reached the shared engines.
+
+### Testing
+
+**634 checks green** against this source, run from a clean tree: v5.15 baseline **382** (t1 64 · t2 15
+· t3 36 · t4 90 · t5 44 · t6 18 · t10 115) + engine parity **8** + t7 37 · t8 29 · t9 14 · t11 40 ·
+t12 23 · t13 40 · t14 33 · t15 11 · **t16 21**. The built `index.html` is separately exercised by
+`qa/smoke_built.mjs` — **16 checks**.
+
+**`t16` is new.** It asserts the single filer's deduction, bracket and tax against an **independent**
+hand computation from IRS Rev. Proc. 2025-32 rather than against the app's own tables, checks that
+the couple's ladder does not move, and pins the survivor switch. Negative-controlled against v5.14,
+where it fails **9** of 21.
+
+One test was rewritten during the build and the reason is recorded in the file: its first version
+computed an expected IRMAA threshold from constants and compared it to itself — a tautology that
+passed on both builds. A test that never touches the app cannot fail for the right reason. It is now
+a source assertion that fails four ways against v5.14.
+
+### A census correction worth recording
+
+The scope listed ten sites to change. There were **thirteen**. The Social Security threshold was
+three lines rather than one, and the two loose literals were not visible in the original census at
+all. That is the third consecutive release where verifying a site census before writing code found
+more than the document listed — which is why the step exists.
+
+**Provenance:** source `src/DangerClose.jsx` md5 `f915dd8c71142bcf16aeb00a6d56c403` · built
+`index.html` md5 `2e9a51e3bd6c955c5a18240c143a4c98`.
+
 ## v5.14
 
 **Two corrections to the Roth strategy engine, and one to the IRMAA planner. This release makes plans
