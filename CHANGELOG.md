@@ -1,5 +1,114 @@
 # Changelog
 
+## v5.14
+
+**Two corrections to the Roth strategy engine, and one to the IRMAA planner. This release makes plans
+look slightly BETTER — read that first.**
+
+Every correction since v5.11 has moved figures in the pessimistic direction. This one moves them the
+other way, because all three defects it fixes were over-charging. That is the correct outcome, not a
+softening of the model, but it deserves to be said at the top rather than discovered in a table.
+
+### 1. IRMAA thresholds were indexed to the wrong year (finding F-2B-1)
+
+Medicare sets your surcharge by applying **this year's** income brackets to the tax return from **two
+years ago**. The lookback shifts the *income*, not the *table*. Both engines shifted both — so every
+tier boundary sat two years of inflation too low (~3.9%), and households were pushed into a surcharge
+tier sooner than the law does.
+
+Worked example: at premium year 2046 the first Single boundary was modeled at **$155,679**; the law
+puts it at **$161,968**. A household with $158,000 of MAGI owed **$0** and was charged **$1,150**.
+
+### 2. The top tier is frozen by statute, and wasn't (finding F-2B-2)
+
+BBA-2018 §53114 created the $500,000 / $750,000 tier, **froze it through 2027**, and indexes it by
+CPI-U only **from 2028**. The engines inflated it every year like the others. The Verify tab has
+labelled this constant "top tier fixed by law" since v5.7 — a claim the arithmetic quietly
+contradicted. It is now **asserted** on that tab rather than merely printed.
+
+**These two shipped together and that was mandatory, not tidy.** Fixing the indexation alone would
+have pushed the top threshold a year *above* correct and flipped it from over-charging to
+under-charging — introducing the very optimism the other fix removes.
+
+### 3. The Roth comparator filed a survivor Single a year too early (finding C-2C-6)
+
+v5.12 corrected the Taxes tab and v5.13 the IRMAA planner: under IRS Pub. 501 a surviving spouse is
+treated as married for the **whole** year of death and may file jointly for it, with Single beginning
+the year after. The Roth strategy comparator was the last engine still switching in the death year —
+so for two releases the same household was filed two different ways in the same year depending on
+which tab you opened. **This release created that divergence and this release closes it.**
+
+Measured, dollar-exact: the death year was over-taxed by **$3,537** at a $100K pension, **$8,537** at
+$150K, and **$15,467** at $300K.
+
+Its IRMAA half did not share that direction, which is worth stating plainly. Filing Single both
+narrows the thresholds (raising the tier) *and* halves the person count (lowering the charge). Below
+about $500K of MAGI the first effect dominates and the death year was over-charged; above it the
+second takes over and the death year was **under**-charged — by $5,780 at $700K and $6,940 at $1.2M.
+The suite now pins that corner specifically.
+
+### One place, not five
+
+All three fixes route through a **single shared threshold helper**. The arithmetic had been copied
+into four separate loops across two engines, which is how these defects survived three releases —
+two of the four sites were not even in the fix's original site census and were found by verifying it
+before writing code. A fifth copy has drifted to a **3%/yr** inflator instead of 2% and hardcodes the
+married threshold; that is a different defect in a different engine, recorded as **finding C-2B-3**
+and deliberately **not** fixed here, because folding an optimistic correction in with three
+pessimistic ones would make the net effect on any household unreadable.
+
+### Engines: one changed on purpose, three proven unchanged
+
+Cross-version parity (v5.13 → v5.14, common seeded random numbers, identical inputs) is **8/8** — but
+its meaning changed this release. The Roth strategy engine is one of the four engines the guardrail
+watches, and this release **corrects it deliberately**, so its two legs are now asserted to *differ*
+rather than to match. The Monte Carlo, extended MC and stress legs remain byte-identical. Asserting
+the intended change is a stronger statement than skipping it: if a later edit silently reverted these
+fixes, the guardrail would fail.
+
+### Testing
+
+**617 checks green** against this source, run from a clean tree: v5.14 baseline **382** (t1 64 · t2 15
+· t3 36 · t4 90 · t5 44 · t6 18 · **t10 115**) + engine parity **8** + t7 37 · t8 29 · t9 14 · t11 40 ·
+t12 23 · t13 40 · **t14 33** · **t15 11**. The built `index.html` is separately exercised by
+`qa/smoke_built.mjs` — **16 checks**, including the `window.storage` round-trip.
+
+**`t10` is adopted into the routine run.** Written during the v5.10.2 audit and held since for "the
+next release with an independent reason to exist," it carried two dated `[KNOWN DEFECT]` pins
+asserting the wrong-but-real indexation behaviour. Those pins are now **flipped** to the CMS-correct
+answers — written from primary source before the fix existed, so they cannot have been
+reverse-engineered from it. Its 30 tier-border cases were **re-derived**: they had compared income
+against the 2026 base thresholds, which was only valid because the old engine indexed to the MAGI
+year. Ten correctly failed on the first run after the fix. Negative-controlled against v5.13, where
+t10 fails **23** assertions.
+
+**`t15` is new** — the extinction invariant for C-2C-6, and the first survivor suite that is
+**dollar-exact**. The Roth engine is module-level, so it can be driven directly instead of read
+through rendered figures rounded to the nearest $1,000. Negative-controlled against v5.13, where it
+fails **8** of 11; the three that pass there are named in the file as not discriminating rather than
+counted as wins.
+
+**`t14` was strengthened, because it had a hole this release exposed.** It shipped at v5.13 asserting
+the Social Security survivor rule across four engines — and it did not catch C-2C-6, because Engine A
+carried the SS rule correctly while filing a year early. It now also asserts that every engine with a
+filing concept keeps the death event (`>=`) and the filing switch (`>`) as two distinct flags.
+Against v5.13 that new assertion fails on exactly one engine: the one that was wrong.
+
+**`t13`'s test household was re-tuned**, and the reason is recorded in the file. Re-indexing lifted
+every boundary, and its survivor household's final year slipped just under the risen Single cliff —
+$193K of income against a $193.6K threshold. The engine was right; the fixture had lost its margin.
+The indexation scope had predicted this re-verification would *probably* pass, and said so as
+"expect, not know." It did not, which is why it was written that way.
+
+### Still open, and disclosed rather than implied fixed
+
+**Finding C-2B-3** — the Roth ladder table's 3%/yr IRMAA inflator and hardcoded married threshold.
+Non-conservative: it overstates the cliff by 21.5% by 2046 and 34% by 2056, so the tab under-warns
+about crossings that will actually happen. Scoped for its own release.
+
+**Provenance:** source `src/DangerClose.jsx` md5 `452626b89c509e44d0a1ccf4ec33cda2` · built
+`index.html` md5 `c94449e0ac8e18e6d05a22591b88a2c7`.
+
 ## v5.13
 
 **The IRMAA planner now models the first death. Three corrections that had to ship together.**
