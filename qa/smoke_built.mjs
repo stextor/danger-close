@@ -57,8 +57,25 @@ await wait(2000);
 ck("React app mounted from the inlined bundle", (window.document.getElementById("root")?.children.length || 0) > 0);
 
 // 3) The version the four in-app sites carry.
-ck("built app renders v5.11", /v5\.11/.test(txt()), txt().slice(0, 120));
-ck("no stale v5.10.x version rendered", !/v5\.10\.\d/.test(txt()));
+// Version is read FROM the artifact rather than hardcoded, so this check does not need a manual
+// bump every release (a hardcoded "v5.11" here failed at v5.12 — the same class of stale-literal
+// breakage PROJECT_INSTRUCTIONS §I warns about for the suites).
+const _verMatch = html.match(/DANGER CLOSE (v5\.[0-9.]+) \u2502 Not financial advice/);
+const _ver = _verMatch ? _verMatch[1] : null;
+ck("artifact declares a version in its footer string", !!_ver, "footer version not found");
+ck(`built app renders its own declared version (${_ver})`, !!_ver && txt().includes(_ver), txt().slice(0, 120));
+// Only the four VERSION SITES must agree. Historical references like "since v5.7" appear
+// throughout the Field Manual and are legitimate — an earlier version of this check flagged them
+// and was wrong about the build, not the other way round.
+const _siteVers = [
+  ...html.matchAll(/FIELD MANUAL \u00b7 (v5\.[0-9.]+) \u00b7 PUBLIC BUILD/g),
+  ...html.matchAll(/DANGER CLOSE (v5\.[0-9.]+) \u00b7 documentation regenerated/g),
+  ...html.matchAll(/DATA LOAD \u2502 (v5\.[0-9.]+)/g),
+  ...html.matchAll(/DANGER CLOSE (v5\.[0-9.]+) \u2502 Not financial advice/g),
+].map(m => m[1]);
+ck("all four in-app version sites agree, each present exactly once",
+  _siteVers.length === 4 && _siteVers.every(v => v === _ver),
+  `found [${_siteVers.join(", ")}], expected four x ${_ver}`);
 
 // 4) Load the example household and reach the Taxes tab.
 const findByText = (re, tags = "button, div, span") =>
@@ -76,7 +93,7 @@ if (ex) {
     await wait(4000);
     const t = txt();
     ck("Taxes schedule renders an RMD column", /RMD/.test(t));
-    ck("v5.11 survivor disclosure text is present in the shipped build",
+    ck("survivor disclosure text is present in the shipped build",
       /RIB-LIM widow's limit/.test(t) || /larger of the two/.test(t) || /Survivor year/.test(t));
   }
 }
