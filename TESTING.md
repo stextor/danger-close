@@ -2,7 +2,7 @@
 
 This project's premise is *verify, don't trust* — so this page explains what verification actually exists, what it covers, and what it doesn't. It's written for the same skeptical reader the app is.
 
-**Current build: v5.14** · source `src/DangerClose.jsx` md5 `452626b89c509e44d0a1ccf4ec33cda2` · **617 automated checks green** against that exact source, plus 16 more against the built `index.html` (md5 `c94449e0ac8e18e6d05a22591b88a2c7`).
+**Current build: v5.15** · source `src/DangerClose.jsx` md5 `f915dd8c71142bcf16aeb00a6d56c403` · **634 automated checks green** against that exact source, plus 16 more against the built `index.html` (md5 `2e9a51e3bd6c955c5a18240c143a4c98`).
 
 ## The part you can check yourself, right now
 
@@ -16,7 +16,7 @@ Honest scope: the Verify tab proves the *constants* are right — not every form
 
 The suite compares **two builds by role** — the current release and the immediately-prior one — and re-baselines every release. For v5.12 that pair is v5.11 → v5.12.
 
-### Current build (v5.14) — 382 checks in the t1–t6 baseline plus t10
+### Current build (v5.15) — 382 checks in the t1–t6 baseline plus t10
 
 | Suite | Checks | What it covers |
 |---|---|---|
@@ -27,11 +27,11 @@ The suite compares **two builds by role** — the current release and the immedi
 | t5 persistence | 44 | The full storage lifecycle against the same `window.storage` contract the standalone build installs: fresh boot → landing, save → persisted, remount → reopens, backup export/import round-trip, and that a backup never contains the API key. As of v5.10.2, Clear All Data is tested against a fully-seeded store and asserted by **looping the `STORAGE_KEYS` map itself** — every key, including any added in a future release, must be absent after the wipe, and the seeded third-party contact PII must be gone from all surviving storage |
 | t6 single-filer | 18 | Storage seeded with a single-filer plan *before* mount, so the app boots into the branch the couple-centric demo never exercises |
 
-### Cross-version and feature suites — 235 checks
+### Cross-version and feature suites — 252 checks
 
 | Suite | Checks | What it covers |
 |---|---|---|
-| t2 parity (v5.13 → v5.14) | 8 | Under common seeded random numbers with identical inputs, the Monte Carlo, extended MC, stress, and Roth engines produce **byte-identical** output across the two builds. This is the mechanical form of any "engines unchanged" claim |
+| t2 parity (v5.14 → v5.15) | 8 | Under common seeded random numbers with identical inputs, the Monte Carlo, extended MC, stress, and Roth engines produce **byte-identical** output across the two builds. This is the mechanical form of any "engines unchanged" claim |
 | t7 accrual | 37 | The v5.10 contribution-accrual feature against hand-computed figures ($96,000 / $24,000 / $72,000 for the couple case), migration parity, and round-trip persistence. Authored *before* the engine edits |
 | t8 invariants | 29 | Extinction invariants (fixed defect classes asserted not to return), Verify-tab constants, and engine behavior. At v5.11 the two source invariants that asserted the old pooled Traditional seed in the Taxes and IRMAA engines were updated to assert the per-person split explicitly — a strictly stronger check |
 | t9 DOM smoke | 14 | End-to-end render smoke over the feature surface |
@@ -41,14 +41,19 @@ The suite compares **two builds by role** — the current release and the immedi
 | t14 cross-engine survivor | 33 | The class-level invariant (audit decision D-5). Three findings across two releases were the same failure — one engine not modelling a death the others did — so this asserts that **all four** engines carry the survivor larger-check rule bound to their own first-death year, and that those exposing a figure move it in the **same year**. The structural half is the only cover for the Roth strategy engine, whose per-year Social Security the harness cannot reach; that limit is stated in the file rather than dressed up as arithmetic. **Precision: ±$500** |
 | t15 Engine A death-year filing | 11 | The v5.14 extinction invariant for finding C-2C-6, and the **first survivor suite that is dollar-exact**: the Roth strategy engine is module-level, so the harness drives it directly instead of reading figures rounded to the nearest $1,000. Asserts the death year is filed MFJ and the year after Single, in both direction configurations, against hand-computed bracket arithmetic. Includes the corner where the defect ran **non-conservative** — very high MAGI, where filing Single halved the IRMAA person count faster than it narrowed the thresholds. **Precision: dollar-exact** |
 | t10 tax cases | 115 | **Adopted into the routine run at v5.14** (held since v5.10.2 for "the next release with an independent reason to exist"). 76 federal-core assertions plus 39 IRMAA. Its two dated `[KNOWN DEFECT]` indexation pins are **flipped** to the CMS-correct answers here — written from primary source before the fix existed. Its 30 tier-border cases were re-derived against premium-year indexing; ten correctly failed on the first run after the fix. **Precision: dollar-exact** |
+| t16 Roth ladder filing status | 21 | The v5.15 extinction invariant for finding C-2B-3. The Roth tab's ladder ran its own tax arithmetic with the **married** deduction, brackets, SS thresholds and IRMAA cliff hardcoded, and no single-filer branch. Asserts the single filer's deduction, bracket and tax against an **independent** hand computation from IRS Rev. Proc. 2025-32 — not the app's own tables — plus that the couple's ladder does **not** move, that no private threshold arithmetic survives in the block, and that survivor years switch a year after the first death. **Precision: ±$500** |
 
 **The built artifact is verified too, not just the source.** A green source suite says nothing about the single-file `index.html` that actually gets published — it is produced by a separate build step, and a build made from a wrong bootstrap entry can render perfectly while its persistence layer is dead. `qa/smoke_built.mjs` therefore exercises the *built* file before every release: it boots the artifact, renders and dismisses the first-open disclaimer gate, mounts React, loads the example household, reaches a data tab, and round-trips the `window.storage` persistence shim (set/get/list/delete, the prefixed localStorage write-through, and the throw-on-missing-key contract). **16 checks.** This was added at v5.11 after a build was produced from a reconstructed entry file and passed every check that existed at the time while being unable to save a plan.
 
 **Two honesty notes on t11.** First, *precision*: the Taxes and IRMAA engines are computed inside the app's component body, so the harness — which exports module-level bindings — cannot reach their row arrays. Their only output path is the rendered DOM, which prints every figure rounded to the nearest $1,000. t11's assertions are therefore accurate to **±$500, not to the dollar**. That is adequate here only because the effect being measured (~$4,050/yr per $1M of Traditional balance) is roughly eight times the measurement band. Making these engines dollar-exact testable requires a new harness capability and is scoped separately. Second, *teeth*: a test that cannot fail proves nothing, so t11 is run as a **negative control against the pre-fix v5.10.2 build**, where it correctly fails **six** discriminating assertions — both post-death directions and the pre-death start-age straddle. Three of its checks pass on the defective build too, and the suite says so rather than implying otherwise: the two cross-checks are supporting context, and the *survivor = A* case cannot catch the original defect at all, because the old pooled model was coincidentally correct when person A was the survivor. That case earns its place as forward-looking cover for a code branch no other case executes, not as evidence the defect is caught.
 
-**617 checks verify this build** = 382 (current leg, now including t10) + 8 (parity) + 227 (t7–t9, t11–t15), every figure computed from parsed suite output rather than restated by hand. Frozen prior legs are re-proven at every run as history, and are expected to show since-fixed defects in their pre-fix state — that's correct, not a regression.
+**634 checks verify this build** = 382 (current leg, incl. t10) + 8 (parity) + 244 (t7–t9, t11–t16), every figure computed from parsed suite output rather than restated by hand. Frozen prior legs are re-proven at every run as history, and are expected to show since-fixed defects in their pre-fix state — that's correct, not a regression.
 
 **Negative controls for v5.14.** Every new or changed assertion was run against the pre-fix v5.13 build and the result recorded per case. `t10` fails **23** — the two flipped indexation pins plus the border cases whose thresholds moved. `t15` fails **8** of 11; the three that pass are named in the file as not discriminating rather than counted as wins. `t14`'s new filing-timing assertion fails on **exactly one** engine, the one that was wrong. `t13` needed its fixture re-tuned — see its header for why the engine was right and the fixture was not.
+
+**Negative controls for v5.15.** `t16` was run against pre-fix v5.14, where it fails **9** of 21 — the single-filer deduction, bracket and tax assertions, all four source assertions, and the survivor deduction switch. Two of its assertions pass pre-fix and are named inline as not discriminating rather than counted as wins. One case was rewritten mid-build: its first version computed an expected IRMAA threshold from constants and compared it to itself, a tautology that passed on both builds. The file records that, because a test which never touches the app cannot fail for the right reason.
+
+**Parity returned to its strict form at v5.15.** The `INTENDED_DIFFS` entry added at v5.14 is keyed to the v5.13→v5.14 pair only, so v5.15 needed none — which is the mechanical proof that the Roth *tab* fix never reached the shared Roth *engine*.
 
 **A note on what parity means from v5.14.** The MC-parity guardrail exists to catch *unintended* engine drift, so a release that changes an engine on purpose has to say which one and still prove the others are untouched. v5.14 corrects the Roth strategy engine, so its two parity legs are asserted to **differ**; the Monte Carlo, extended MC and stress legs must stay byte-identical. Asserting the intended change is stronger than skipping it: a later edit that silently reverted the fix would fail here.
 

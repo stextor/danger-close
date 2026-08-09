@@ -457,6 +457,7 @@ is the record of which release closed which gap.
 |---|---|---|---|---|
 | Survivor tab, Monte Carlo, What-Breaks | yes | yes | yes | yes |
 | Roth strategy comparator | yes | yes (corrected v5.14) | n/a | yes (since v5.8) |
+| Roth **ladder table** (separate from the comparator) | n/a | yes (v5.15) | n/a | n/a |
 | Taxes tab | yes | yes (corrected v5.12) | n/a | yes (since v5.11) |
 | Withdrawal tab | yes (v5.12) | n/a | yes (v5.12) | yes |
 | IRMAA planner | yes (v5.13) | yes (v5.13) | n/a | yes (since v5.11) |
@@ -531,6 +532,23 @@ bracket-creep conservatism described in §5. Engine D (Withdrawal) COLA-indexes 
 the same survivor transition in the same year and keep the same check; they simply do not share a
 dollar basis, and the cross-engine test suite asserts the timing and the rule rather than a single
 figure.
+
+**The Roth tab holds two tax engines, and until v5.15 only one of them worked (finding C-2B-3).**
+The conversion-ladder table carries its own arithmetic, separate from the shared Roth engine that
+powers the strategy comparator below it on the same screen. Through v5.14 that private arithmetic
+hardcoded the **married** standard deduction, brackets, Social Security provisional thresholds and
+IRMAA cliff, with no single-filer branch — so a single filer was shown married figures on every row:
+about half the correct deduction subtracted, the remainder taxed at brackets twice as wide. On the
+example household forced to single, 2029 federal tax rose 72% when this was corrected. It also
+inflated its IRMAA threshold at 3%/yr where every other threshold in the app uses 2% — overstating
+the cliff by 21.5% by 2046 — while the tab's own assumptions box claimed 2%. Both errors ran the same
+direction: they made conversions look cheaper and cliff crossings rarer than they are.
+
+v5.15 derives every one of those constants from the household's filing status, routes the IRMAA
+threshold through the shared helper, and switches survivor years to Single the year after the first
+death. **The underlying duplication remains**: the ladder still computes its own tax rather than
+calling the shared engine. Consolidating them is the recorded intended direction, deliberately not
+bundled into a correctness fix.
 
 **What "widow-year tax" counts (v5.14).** The Roth solve-for grid offers *minimise widow-year tax* as
 a ranking objective. It accumulates tax across **every year the survivor is alone, including the year
