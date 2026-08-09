@@ -1,5 +1,64 @@
 # Changelog
 
+## v5.16
+
+**Nothing changed. That is the entire point of this release.**
+
+A refactor with no behaviour change: federal tax facts now live in one place instead of being written
+out again at every site that needs them. Every one of the 634 checks returns the same figure it did at
+v5.15, and cross-version engine parity is byte-identical in its strict form. **If any number had
+moved, this release would be a bug.**
+
+### Why bother
+
+Four of the last six defects were the same shape. The IRMAA threshold arithmetic was copied into five
+places and two of the copies drifted — one to a different inflation rate entirely (C-2B-3), one
+missing a statutory freeze (F-2B-2). The taxable-balance residual is copied five times. The rule that
+a survivor keeps the larger Social Security check had to be written into six engines independently,
+and one of them was missed for two releases (C-2C-6).
+
+The pattern is not carelessness. It is that **the same fact is written down in many places**, so
+correcting one copy leaves the others behind, and an audit has to check every copy to be sure.
+
+### What moved into one place
+
+- **`taxFactsFor(filingSingle)`** — the eight filing-status-dependent federal facts: brackets, standard
+  deduction, LTCG brackets, NIIT threshold, both AMT figures, both Social Security provisional-income
+  thresholds. Frozen, so a caller cannot mutate shared facts. **16 call sites** across four tax
+  engines now read from it.
+- **`seniorExtraFor(...)`** — the age-65 additional standard deduction. Engines A and B each carried a
+  verbatim copy, differing only in what their local inflator was *named* (`infl` vs `inflate`; both
+  `base × 1.02^(yr − asOfYr)`).
+- **`inflateTaxConst(...)`** — that inflator, once.
+
+### What deliberately did NOT move into it
+
+**Which facts get inflated.** NIIT and the Social Security provisional thresholds are statutory and
+**not** indexed (IRC §1411, §86); brackets, deductions and AMT figures **are**. Folding inflation into
+the accessor would have buried that distinction — and it is precisely the distinction finding F-2B-2
+turned on, where the top IRMAA tier was inflated despite being frozen by statute. Callers still
+inflate what they should.
+
+**The Roth ladder's standard deduction.** It computes a deduction with no age-65 extra at all. That may
+well be a defect, but "fixing" it here would have destroyed this release's only safety property — that
+nothing changed. It is left exactly as it was and is noted for a future look.
+
+### Testing
+
+**634 checks green**, every figure identical to v5.15: baseline **382** (t1 64 · t2 15 · t3 36 · t4 90
+· t5 44 · t6 18 · t10 115) + engine parity **8** + t7 37 · t8 29 · t9 14 · t11 40 · t12 23 · t13 40 ·
+t14 33 · t15 11 · t16 21. Plus **16** against the built `index.html`.
+
+**Parity is 8/8 in its strict form** — no intended-difference entry was needed, which is the mechanical
+proof that no engine's output moved.
+
+No new tests ship with this release, and that is correct: a refactor that adds assertions is a refactor
+whose safety you cannot check, because you can no longer tell whether the suite passing means the code
+is unchanged or means the new tests were written to match whatever it now does.
+
+**Provenance:** source `src/DangerClose.jsx` md5 `f78c128b5620f12313057c98e76f253b` · built
+`index.html` md5 `45e18d1632775955259a01d8c06d0ba0`.
+
 ## v5.15
 
 **The Roth tab was showing single filers married tax figures. This release corrects that, and their
