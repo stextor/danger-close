@@ -533,6 +533,15 @@ the same survivor transition in the same year and keep the same check; they simp
 dollar basis, and the cross-engine test suite asserts the timing and the rule rather than a single
 figure.
 
+**Where federal tax facts live (v5.16).** Every filing-status-dependent federal figure — brackets,
+standard deduction, the age-65 extra, LTCG brackets, the NIIT threshold, both AMT figures and both
+Social Security provisional-income thresholds — is defined once and read by all four tax engines
+through a single accessor. Before v5.16 each was written out separately at two to four sites per fact,
+which is the mechanism behind findings F-2B-1, F-2B-2, C-2B-3 and D-2D-2: one fact in many places,
+free to drift. **Which facts are inflated is deliberately NOT part of that accessor** — NIIT and the
+Social Security thresholds are statutory and unindexed while brackets, deductions and AMT figures are
+indexed, and that distinction is exactly what F-2B-2 turned on.
+
 **The Roth tab holds two tax engines, and until v5.15 only one of them worked (finding C-2B-3).**
 The conversion-ladder table carries its own arithmetic, separate from the shared Roth engine that
 powers the strategy comparator below it on the same screen. Through v5.14 that private arithmetic

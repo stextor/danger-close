@@ -2,7 +2,9 @@
 
 This project's premise is *verify, don't trust* — so this page explains what verification actually exists, what it covers, and what it doesn't. It's written for the same skeptical reader the app is.
 
-**Current build: v5.15** · source `src/DangerClose.jsx` md5 `f915dd8c71142bcf16aeb00a6d56c403` · **634 automated checks green** against that exact source, plus 16 more against the built `index.html` (md5 `2e9a51e3bd6c955c5a18240c143a4c98`).
+**Current build: v5.16** · source `src/DangerClose.jsx` md5 `f78c128b5620f12313057c98e76f253b` · **634 automated checks green** against that exact source, plus 16 more against the built `index.html` (md5 `45e18d1632775955259a01d8c06d0ba0`).
+
+**v5.16 is a refactor with no behaviour change.** Its correctness proof is that the check count and every figure are *identical* to v5.15, and that engine parity stayed 8/8 strict. No tests were added — deliberately: a refactor that ships new assertions is one whose safety you can no longer verify.
 
 ## The part you can check yourself, right now
 
@@ -16,7 +18,7 @@ Honest scope: the Verify tab proves the *constants* are right — not every form
 
 The suite compares **two builds by role** — the current release and the immediately-prior one — and re-baselines every release. For v5.12 that pair is v5.11 → v5.12.
 
-### Current build (v5.15) — 382 checks in the t1–t6 baseline plus t10
+### Current build (v5.16) — 382 checks in the t1–t6 baseline plus t10
 
 | Suite | Checks | What it covers |
 |---|---|---|
@@ -31,7 +33,7 @@ The suite compares **two builds by role** — the current release and the immedi
 
 | Suite | Checks | What it covers |
 |---|---|---|
-| t2 parity (v5.14 → v5.15) | 8 | Under common seeded random numbers with identical inputs, the Monte Carlo, extended MC, stress, and Roth engines produce **byte-identical** output across the two builds. This is the mechanical form of any "engines unchanged" claim |
+| t2 parity (v5.15 → v5.16) | 8 | Under common seeded random numbers with identical inputs, the Monte Carlo, extended MC, stress, and Roth engines produce **byte-identical** output across the two builds. This is the mechanical form of any "engines unchanged" claim |
 | t7 accrual | 37 | The v5.10 contribution-accrual feature against hand-computed figures ($96,000 / $24,000 / $72,000 for the couple case), migration parity, and round-trip persistence. Authored *before* the engine edits |
 | t8 invariants | 29 | Extinction invariants (fixed defect classes asserted not to return), Verify-tab constants, and engine behavior. At v5.11 the two source invariants that asserted the old pooled Traditional seed in the Taxes and IRMAA engines were updated to assert the per-person split explicitly — a strictly stronger check |
 | t9 DOM smoke | 14 | End-to-end render smoke over the feature surface |
