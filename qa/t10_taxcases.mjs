@@ -49,6 +49,7 @@ const baseSingle = (o={}) => ({ single:true, asOfYr:2026, retireYr:2026, horizon
 const baseMFJ = (o={}) => baseSingle({ single:false, dobBYr:1966, ...o });
 const none = (P) => g.runRothStrategies(P).find(r=>r.key==="none").totTax;
 const noneNiit = (P) => g.runRothStrategies(P).find(r=>r.key==="none").totNiit;
+const noneIrmaa = (P) => g.runRothStrategies(P).find(r=>r.key==="none").totIrmaa;
 const penFor = (T_, D) => (T_ + D) / 12;
 const out = {};
 
@@ -102,7 +103,101 @@ for (const [st, base, bounds] of [["S", baseSingle, [12400,50400,105700,201775,2
     T(`SS ${st} ${tag} (ss${ss},oth${other})`, got, exp);
     out[`SS_${st}_${other}`]={got,exp,taxSS:+taxSS.toFixed(2),taxableOrd:+taxableOrd.toFixed(2)}; } }
 
-console.log(`\nt10 2A: ${pass} passed, ${fail} failed`);
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// PHASE 2B — IRMAA + indexation discipline (dollar-exact against Engine A / runRothStrategies).
+// Constants verified vs CMS 2026 (published 2025-11-14, eff 2026-01-01): thresholds EXACT;
+// per-person combined Part B+D surcharges are the app's disclosed "approximate annual" values
+// (CMS-exact differ ≤$5; see FlawsToFix-v5_10_2-Phase2B.md appendix). SUR_R below = the app's
+// constants, so these cases assert the ENGINE selects the right tier and multiplies by persons.
+//
+// HARNESS: IRMAA needs MAGI two years prior in-window, so a 3-year window (retireYr..retireYr+2)
+// puts exactly ONE surcharge year at the end (only it has magiHist[yr-2]); totIrmaa == that year.
+// At premium year 2028 (window 2026→2028) the inflator exponent (yr-2-asOfYr) is 0, so thresholds
+// are the base CMS values — the clean place to test tier selection. Both spouses 65+ via dob 1958.
+const pass2A = pass, fail2A = fail;
+const SGL_R = [109000,137000,171000,205000,500000,Infinity];
+const MFJ_R = [218000,274000,342000,410000,750000,Infinity];
+const SUR_R = [0,1150,2880,4620,6360,6940];
+const tierR = (magi, ups) => { for (let i=0;i<ups.length;i++) if (magi<=ups[i]) return i; return ups.length-1; };
+const irmaaRef = (magi, single, persons) => SUR_R[tierR(magi, single?SGL_R:MFJ_R)] * persons;
+// IRMAA isolation builder: 3-year window ending at `premiumYr`, both 65+ that year, MAGI = pen.
+const irmaaP = (single, magi, premiumYr=2028, o={}) =>
+  (single?baseSingle:baseMFJ)({ retireYr:premiumYr-2, horizonYr:premiumYr, asOfYr:2026,
+    dobAYr:premiumYr-70, dobBYr:premiumYr-70, ladderEnd:premiumYr-3, pen:magi/12, ...o });
+
+// ═══ 8. IRMAA tier borders ±$1, both statuses, PREMIUM-YEAR thresholds (premium year 2028) ═══
+// REWRITTEN AT v5.14. These 30 cases previously compared MAGI against the BASE 2026 thresholds,
+// which was valid only because the pre-fix engine indexed to the MAGI year — at premium year 2028
+// that meant 2026, exponent 0. v5.14 indexes to the PREMIUM year (F-2B-1), so exponent 2 applies and
+// every boundary moves up ~4%. Ten of these cases correctly failed on the first run after the fix.
+//
+// The reference below is an INDEPENDENT re-derivation of the CMS rule (premium-year indexing, plus
+// the BBA-2018 top-tier freeze), written from the statute — not a copy of the engine's helper. The
+// borders are taken at floor(threshold) so the ±$1 cliff test stays exact against a float boundary.
+const IDX_R = 1.02, TOP_FROZEN_R = 2027, BASE_YR_R = 2026;
+const thrRef = (upper, isTop, premiumYr) => !isFinite(upper) ? upper
+  : upper * Math.pow(IDX_R, isTop ? Math.max(0, premiumYr - TOP_FROZEN_R) : premiumYr - BASE_YR_R);
+const tierRefY = (magi, ups, premiumYr) => {
+  for (let i = 0; i < ups.length; i++) if (magi <= thrRef(ups[i], i === ups.length - 2, premiumYr)) return i;
+  return ups.length - 1; };
+const irmaaRefY = (magi, single, persons, premiumYr) =>
+  SUR_R[tierRefY(magi, single ? SGL_R : MFJ_R, premiumYr)] * persons;
+const PY = 2028;
+for (const [st, single, ups, persons] of [["SGL",true,SGL_R,1],["MFJ",false,MFJ_R,2]])
+  for (let i = 0; i < 5; i++) {
+    const edge = Math.floor(thrRef(ups[i], i === ups.length - 2, PY));
+    for (const d of [-1,0,1]) { const magi = edge + d;
+      const got = noneIrmaa(irmaaP(single, magi, PY));
+      const exp = irmaaRefY(magi, single, persons, PY);
+      T(`IRMAA ${st} magi=${magi} (border, premiumYr ${PY})`, got, exp);
+      out[`IRMAA_${st}_${magi}`]={got,exp}; } }
+
+// ═══ 9. Per-person surcharge: MFJ one spouse <65 (×1), neither 65 (×0) ═══
+{ const g1 = noneIrmaa(irmaaP(false, 300000, 2028, { dobBYr:1970 })); // B age 58 in 2028
+  T(`IRMAA MFJ one-65 magi=300000 (×1)`, g1, SUR_R[tierR(300000,MFJ_R)]*1); out.IRMAA_MFJ_one65={got:g1,exp:SUR_R[tierR(300000,MFJ_R)]};
+  const g0 = noneIrmaa(irmaaP(false, 300000, 2028, { dobAYr:1970, dobBYr:1970 })); // both <65
+  T(`IRMAA MFJ neither-65 magi=300000 (×0)`, g0, 0); out.IRMAA_MFJ_none65={got:g0,exp:0}; }
+
+// ═══ 10. [FIXED v5.14] indexation — pins flipped from the defect to the CMS-correct answer ═══
+// Both were opened 2026-08-07 as dated [KNOWN DEFECT] pins asserting the wrong-but-real behaviour,
+// and both are corrected in v5.14 by a single shared threshold helper. The flip is the fix's own
+// verification: these expectations were written from primary source BEFORE the fix existed, so they
+// cannot have been reverse-engineered from it.
+//
+// F-2B-1 — thresholds now index to the PREMIUM year, not the MAGI year. The 2-year lookback shifts
+//   the INCOME, not the table. SGL tier-1 at premium year 2046 = 109000·1.02^20 = 161,968 (was
+//   109000·1.02^18 = 155,679). A household with 2044 MAGI of 158,000 sits between the two: it owed
+//   $1,150 under the defect and owes $0 under the law.
+{ const got = noneIrmaa(irmaaP(true, 158000, 2046));
+  T(`IRMAA [FIXED F-2B-1] SGL premiumYr2046 magi=158000 => $0 (premium-year index; was 1150)`, got, 0);
+  out.IRMAA_FIX_premise2 = { got, exp:0, preFix:1150 };
+  // Still a cliff, just in the right place: one dollar over the CORRECT threshold charges in full.
+  const gHi = noneIrmaa(irmaaP(true, 161969, 2046));
+  T(`IRMAA [FIXED F-2B-1] SGL premiumYr2046 magi=161969 (one $ over the correct thr) => 1150`, gHi, 1150);
+  const gAt = noneIrmaa(irmaaP(true, 161968, 2046));
+  T(`IRMAA [FIXED F-2B-1] SGL premiumYr2046 magi=161968 (AT the correct thr) => 0`, gAt, 0); }
+//
+// F-2B-2 — the top tier is frozen through 2027 and indexes only from 2028, off the frozen base
+//   (BBA-2018 §53114). SGL top at premium year 2046 = 500000·1.02^19 = 728,406 (was 500000·1.02^18
+//   = 714,123). A household with 2044 MAGI of 720,000 is tier 4 under the law, not the top tier.
+{ const got = noneIrmaa(irmaaP(true, 720000, 2046));
+  T(`IRMAA [FIXED F-2B-2] SGL premiumYr2046 magi=720000 => 6360 (tier 4, not top; was 6940)`, got, 6360);
+  out.IRMAA_FIX_premise1 = { got, exp:6360, preFix:6940 };
+  const gTop = noneIrmaa(irmaaP(true, 728407, 2046));
+  T(`IRMAA [FIXED F-2B-2] SGL premiumYr2046 magi=728407 (one $ over the correct top) => 6940`, gTop, 6940); }
+//
+// The FREEZE ITSELF — the boundary no earlier case covered. The top tier must not move at all before
+// 2028, then index off the frozen base. Premium years 2027/2028/2029, one dollar over $500,000:
+// frozen years charge the top tier; from 2028 the threshold rises, so the same income falls to tier 4.
+{ const at2027 = noneIrmaa(irmaaP(true, 500001, 2027));
+  T(`IRMAA [FIXED F-2B-2] top tier FROZEN at premiumYr2027: magi=500001 => 6940`, at2027, 6940);
+  const at2029 = noneIrmaa(irmaaP(true, 500001, 2029));
+  T(`IRMAA [FIXED F-2B-2] top tier INDEXED by premiumYr2029: magi=500001 => 6360 (thr risen)`, at2029, 6360);
+  out.IRMAA_FIX_freeze = { at2027, at2029 }; }
+
+console.log(`\nt10 2A: ${pass2A} passed, ${fail2A} failed`);
+console.log(`t10 2B: ${pass-pass2A} passed, ${fail-fail2A} failed  (IRMAA tier selection + 7 indexation assertions, pins FLIPPED at v5.14)`);
+console.log(`t10 total: ${pass} passed, ${fail} failed`);
 if (fails.length) console.log(fails.join("\n"));
 console.log("\n--- captured (engine vs independent hand reference) ---");
 for (const k of ["S_50400","S_105700","M_100800","DED_S","OBBBA","LTCG_S_30000","LTCG_M_70000",

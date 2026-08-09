@@ -32,7 +32,7 @@
 // NEGATIVE CONTROL — run against pre-fix v5.12, 2026-08-09, recorded per case:
 //
 //   CASE 1 (A dies 2044, pension $8,300/mo)
-//     MAGI across the death   v5.12: 192 -> 190 -> 192 (drifts, no SS drop)   v5.13: 192 -> 177 -> 179
+//     MAGI across the death   v5.12: 207 -> 205 -> 207 (drifts, no SS drop)   fixed: 208 -> 193 -> 195
 //     survivor tier/marker    v5.12: Standard, unmarked, forever              v5.13: T1 · single from 2045
 //     survivor surcharge      v5.12: $0 for the whole plan                    v5.13: $1.1K/yr
 //     -> DISCRIMINATING on MAGI drop, tier, marker and surcharge.
@@ -54,7 +54,7 @@
 //        assertions above have fired.
 //
 //   CASE 2 (B dies 2042, same pension) — the other direction of the larger-check rule
-//     MAGI across the death   v5.12: no drop                                  v5.13: 189 -> 177
+//     MAGI across the death   v5.12: no drop                                  fixed: 204 -> 193
 //     survivor tier           v5.12: Standard                                 v5.13: T1 · single from 2043
 //     -> DISCRIMINATING. MAGI only ever sees the TOTAL, and total - max = min whichever spouse
 //        dies, so both cases must show the same drop. What differs is which spouse's check is
@@ -67,6 +67,15 @@
 //                             v5.12: $2.3K (two people)   v5.13: $1.1K (one person)
 //     -> DISCRIMINATING, and the ONLY assertion here that isolates the person count: identical
 //        MAGI, identical tier, surcharge exactly halved. Nothing but omission 3 can explain it.
+//
+// FIXTURE NOTE (v5.14): cases 1 and 2 use a $9,600/mo pension, raised from $8,300 at v5.14. That
+// release re-indexed IRMAA thresholds to the PREMIUM year (F-2B-1), lifting every boundary by two
+// years of inflation, and at $8,300 the household's final survivor year (2053, premium 2055) fell
+// just under the risen Single cliff — $193K of MAGI against a $193.6K threshold — so its surcharge
+// correctly lapsed and the persistence assertion failed. The ENGINE was right; the fixture had lost
+// its margin. Raising the pension restores clearance at both ends of the horizon. This is exactly
+// the re-verification the indexation scope flagged as owed and predicted would probably pass — it
+// did not, which is why "expect, not know" was the right way to write it down.
 //
 // A NOTE ON WHICH YEAR THE PERSON COUNT FOLLOWS. The surcharge is billed in the "Affects" year
 // (MAGI + 2), so the count follows who is alive THEN — the same year basis the Medicare-start gates
@@ -258,9 +267,9 @@ try {
   };
 
   // CASE 1 — person A (the LARGER check) dies first. The survivor inherits the decedent's benefit.
-  const c1 = await runCase("case 1 (A dies)", { lifeExpA: 80, lifeExpB: 87, pension: 8300 }, 2044);
+  const c1 = await runCase("case 1 (A dies)", { lifeExpA: 80, lifeExpB: 87, pension: 9600 }, 2044);
   // CASE 2 — person B (the SMALLER check) dies first. The survivor keeps their own.
-  const c2 = await runCase("case 2 (B dies)", { lifeExpA: 87, lifeExpB: 76, pension: 8300 }, 2042);
+  const c2 = await runCase("case 2 (B dies)", { lifeExpA: 87, lifeExpB: 76, pension: 9600 }, 2042);
 
   if (c1 && c2) {
     // total - max = min whichever spouse dies, so the MAGI drop must MATCH across directions.

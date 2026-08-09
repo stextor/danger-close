@@ -109,6 +109,28 @@ console.log("t14 \u2014 CROSS-ENGINE SURVIVOR SS (D-5: the class-level invariant
     { name: "Engine D (Withdrawal tab)", anchor: "const _deathYr1D =", span: 8000,
       rule: /Math\.max\(_ssA_full, _ssB_full\)/, death: /yr >= _deathYr1D/ },
   ];
+  // v5.14 — THE GAP THIS SUITE HAD. t14 shipped at v5.13 asserting the Social Security survivor rule
+  // across four engines, and it did NOT catch finding C-2C-6: Engine A carried the SS rule correctly
+  // while filing Single a year too early, because filing-status TIMING was never asserted. Every
+  // engine with a filing concept must separate the death event (`>=`) from the filing switch (`>`).
+  // This is the invariant that would have caught C-2C-6 on the day the v5.12 fix created it.
+  const filingEngines = [
+    { name: "Engine A (Roth strategy engine)", anchor: 'const survivorIsA = P.survivor !== "B"', span: 4000,
+      death: /const widowed\s*=\s*!P\.single && yr >= P\.deathYr1/, filing: /!P\.single && yr > P\.deathYr1/ },
+    { name: "Engine B (Taxes tab)", anchor: "const _survivorIsA = _single || ((_dobAYr + _tlT.lifeExpA)", span: 22000,
+      death: /const widowed\s*=\s*!_single && yr >= _deathYr1/, filing: /!_single && yr > _deathYr1/ },
+    { name: "Engine C (IRMAA planner)", anchor: "const _survivorIsA = _singleI || ((_dobAYr + _tlI.lifeExpA)", span: 8000,
+      death: /const widowed\s*=\s*!_singleI && yr >= _deathYr1/, filing: /!_singleI && yr > _deathYr1/ },
+  ];
+  for (const e of filingEngines) {
+    const r = region(e.anchor, e.span);
+    ck(`structural: ${e.name} region located (filing check)`, !!r);
+    if (!r) continue;
+    ck(`structural: ${e.name} keys the DEATH EVENT to >= (SS drop, rollover)`, e.death.test(r));
+    ck(`structural [EXTINCTION]: ${e.name} keys FILING STATUS to > (Pub. 501 — the year AFTER)`,
+      e.filing.test(r), "no strictly-greater filing flag found — filing may be switching in the death year");
+  }
+
   for (const e of engines) {
     const r = region(e.anchor, e.span);
     ck(`structural: ${e.name} region located`, !!r, `anchor missing: ${e.anchor}`);
