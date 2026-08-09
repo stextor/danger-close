@@ -47,6 +47,12 @@ Cross-version engine parity (v5.11 → v5.12, common seeded random numbers, iden
 
 **The IRMAA planner still does not model the first death.** It pays both Social Security benefits for the full horizon, never switches to Single thresholds, and continues charging a Medicare surcharge for the deceased spouse. Those three errors do not share a direction, and the threshold one dominates: retaining the married thresholds understates a survivor's surcharge by up to a full tier. It is **not** fixed here — it needs a restructure of the tier table plus a visible marker on affected rows, which is scoped separately and ships next. Households whose survivor income stays well below the Single threshold see no effect either way.
 
+---
+
+**Provenance.** Source `src/DangerClose.jsx` md5 `2ebfccb0ea9744c1015693badace4984` · built `index.html` md5 `b10d9efb7f12341810b901c29928c4e0`.
+
+*This line is new as of v5.12. This project does not use git tags, and TESTING.md only ever carries the current build's hash — so from here on each entry records its own, making the CHANGELOG the durable record of what every version actually was. Earlier entries have no recorded md5; identify those sources by reading them out of the commit that shipped them.*
+
 ## v5.11
 
 **Modeling-correction release — survivor RMDs on the Taxes and IRMAA tabs, and nothing else.** The Phase 2C standing audit found that the Taxes engine and the IRMAA engine each held a **single pooled Traditional balance and keyed its RMD to person A's age unconditionally**. Because that age keeps incrementing after person A has died, every post-death year computed required distributions on the **deceased** spouse's age rather than the survivor's — and, before either death, ran RMDs on the younger spouse's money starting at the *older* spouse's start age.
