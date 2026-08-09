@@ -423,27 +423,52 @@ described above**: per-person balances, spousal rollover into the survivor at fi
 RMDs on each person's own age and own SECURE 2.0 start age. The Withdrawal tab remains the
 stated approximation described in the next section.
 
-**Two stated simplifications in the survivor year (disclosed v5.11).** First, the **entire year
-of death is filed Single**. Under IRS Pub. 501 the surviving spouse is considered married for
-the whole year of death and may file jointly for it, with Single beginning the following year
-(Qualifying Surviving Spouse extends joint rates further but requires a dependent child, which
-this app's population generally lacks). Filing Single a year early over-taxes the death year —
-conservative — and is a simplification, not a reading of the law. Second, the **Social Security
-survivor benefit is modeled as the larger of the two actual checks**. The RIB-LIM / Widow's
+**Which engines model the first death (corrected through v5.11-v5.12).** Survivor modeling is not
+uniform across the app, and this section previously described it as though it were. As of v5.12:
+
+| Engine | One SS check | Filing switches | Survivor spending | RMD on survivor's age |
+|---|---|---|---|---|
+| Survivor tab, Monte Carlo, What-Breaks | yes | yes | yes | yes |
+| Roth strategy comparator | yes | yes | n/a | yes (since v5.8) |
+| Taxes tab | yes | yes (corrected v5.12) | n/a | yes (since v5.11) |
+| Withdrawal tab | yes (v5.12) | n/a | yes (v5.12) | yes |
+| **IRMAA planner** | **no** | **no** | n/a | yes (since v5.11) |
+
+**The year of death (v5.12).** Two things happen at different times, and the model now separates
+them. The **death event** takes effect in the year of death: the survivor drops to the larger of
+the two Social Security benefits, and the decedent's retirement accounts roll to the survivor.
+**Filing status** changes the year *after*: under IRS Pub. 501 the surviving spouse is treated as
+married for the entire year of death and may generally file jointly for it, with Single beginning
+the following year. (Qualifying Surviving Spouse extends joint rates further but requires a
+dependent child, which this app's population generally lacks, so it is not modeled.) Through
+v5.11 the model filed Single for the whole death year — a simplification that over-taxed that one
+year, disclosed at the time and **corrected at v5.12**.
+
+**Two stated simplifications that remain.** First, **Social Security drops to a single check for
+the whole year of death**, where the deceased's benefit actually runs through the month of death;
+a full year at the single check slightly overstates the loss — conservative. Second, the
+**survivor benefit is modeled as the larger of the two actual checks**. The RIB-LIM / Widow's
 Limit (20 CFR 404.410(c); SSA POMS GN 00615.320) provides that where the deceased claimed before
 their full retirement age, the survivor receives the larger of the deceased's actual benefit or
 82.5% of the deceased's PIA. Only the first branch is modeled, so where the higher earner claimed
 early the survivor's benefit can be understated — again conservative.
 
-**A remaining inconsistency, stated rather than implied away (v5.11).** The IRMAA planner does
-not model the first death beyond the RMD basis corrected above: it pays **both** Social Security
-benefits for the full horizon, and it never switches filing status, so a surviving spouse is
-still scored against the married surcharge thresholds. These two errors work against each other —
-paying both checks overstates MAGI (which would overstate the surcharge), while retaining the
-married thresholds is too generous (which would understate it) — so **the net direction is not
-stated here, because it has not been measured.** It is inconsistent with the Taxes and Roth
-engines, which both model the first death, and is recorded as a known limitation pending its own
-scope and execution.
+**Survivor spending (v5.12).** The Withdrawal tab previously applied the full joint spending level
+for the entire post-death stretch. It now uses the shared `SURVIVOR_SPEND_FACTOR` (75%), the same
+constant the Survivor tab, Monte Carlo, and What-Breaks use, so the tabs agree. Combined with the
+Social Security correction above, survivor-year draw need on the example household falls rather
+than rises across the death boundary; the two errors it replaces ran in opposite directions and
+partially cancelled, which is why the tab appeared plausible while both were present.
+
+**A remaining inconsistency, stated rather than implied away.** The **IRMAA planner does not model
+the first death** beyond the RMD basis corrected at v5.11. It pays both Social Security benefits
+for the full horizon, never switches to the Single surcharge thresholds, and continues counting the
+deceased spouse toward the per-person Medicare surcharge. These three errors do not share a
+direction, and the threshold one is by far the largest: the Single thresholds are half the married
+ones ($109,000 against $218,000 at the first tier), so retaining married thresholds for a survivor
+can understate the surcharge by a full tier — the non-conservative direction. Households whose
+survivor income stays below the Single threshold see no effect at all. This is scheduled for the
+next release; it is recorded here rather than left silent.
 
 **Migration.** Backups predating v5.8 carry no owner. On import, retirement rows default to
 Person A — the pre-v5.8 model — and a one-time notice in My Data asks for review; other
