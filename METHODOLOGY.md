@@ -223,7 +223,27 @@ retirement and each spouse's 65th birthday.
 
 2026 tiers per CMS with the statutory **2-year MAGI lookback** modeled explicitly. Roth
 conversions and QCDs both flow through (conversions raise MAGI two years out; QCDs lower it).
-Cliff behavior is preserved — one dollar over a threshold applies the full tier surcharge. From
+Cliff behavior is preserved — one dollar over a threshold applies the full tier surcharge.
+
+**Threshold indexation (corrected v5.14).** Two rules govern how the tier boundaries move, and both
+were wrong before v5.14:
+
+- **Thresholds belong to the PREMIUM year, not the income year.** CMS applies the *premium* year's
+  table to MAGI from two years earlier — the lookback shifts the income, not the table. Through
+  v5.13 both engines shifted both, under-indexing every boundary by two years (~3.9%) and
+  **over-charging**. At premium year 2046 the first Single boundary was modeled at $155,679 where
+  the law puts it at $161,968.
+- **The top tier is frozen.** BBA-2018 §53114 created the $500,000 / $750,000 tier and froze it
+  through **2027**, indexing it by CPI-U only from **2028**, off that frozen base. Through v5.13 the
+  engines inflated it every year like the others. The Verify tab had labelled it "top tier fixed by
+  law" since v5.7 — a claim the arithmetic contradicted; it is now asserted rather than printed.
+
+Both rules now live in **one shared module-level helper**, called by every site that needs an IRMAA
+threshold. They were previously copied into four separate loops across two engines, which is how
+both defects survived three releases — and how a fifth copy drifted to a different inflation rate
+entirely (recorded separately as finding C-2B-3, not yet fixed).
+
+From
 v5.13 the planner also models the first death: the survivor keeps only the larger Social Security
 benefit, is scored against the Single thresholds from the year after the death, and is charged for
 one person rather than two. See the survivor section below for why all three ship together and for
@@ -436,13 +456,17 @@ is the record of which release closed which gap.
 | Engine | One SS check | Filing switches | Survivor spending | RMD on survivor's age |
 |---|---|---|---|---|
 | Survivor tab, Monte Carlo, What-Breaks | yes | yes | yes | yes |
-| Roth strategy comparator | yes | yes | n/a | yes (since v5.8) |
+| Roth strategy comparator | yes | yes (corrected v5.14) | n/a | yes (since v5.8) |
 | Taxes tab | yes | yes (corrected v5.12) | n/a | yes (since v5.11) |
 | Withdrawal tab | yes (v5.12) | n/a | yes (v5.12) | yes |
 | IRMAA planner | yes (v5.13) | yes (v5.13) | n/a | yes (since v5.11) |
 
-**The year of death (v5.12).** Two things happen at different times, and the model now separates
-them. The **death event** takes effect in the year of death: the survivor drops to the larger of
+**The year of death (v5.12 for the Taxes tab, v5.13 for IRMAA, v5.14 for the Roth comparator).**
+Two things happen at different times, and every engine with a filing concept now separates them —
+that qualification matters, because v5.12 and v5.13 stated this generally while the Roth strategy
+comparator was still switching a year early (finding C-2C-6, fixed at v5.14). Correcting two engines
+and not the third had, for two releases, left the same household filed two different ways in the same
+year depending on which tab was open. The **death event** takes effect in the year of death: the survivor drops to the larger of
 the two Social Security benefits, and the decedent's retirement accounts roll to the survivor.
 **Filing status** changes the year *after*: under IRS Pub. 501 the surviving spouse is treated as
 married for the entire year of death and may generally file jointly for it, with Single beginning
@@ -507,6 +531,12 @@ bracket-creep conservatism described in §5. Engine D (Withdrawal) COLA-indexes 
 the same survivor transition in the same year and keep the same check; they simply do not share a
 dollar basis, and the cross-engine test suite asserts the timing and the rule rather than a single
 figure.
+
+**What "widow-year tax" counts (v5.14).** The Roth solve-for grid offers *minimise widow-year tax* as
+a ranking objective. It accumulates tax across **every year the survivor is alone, including the year
+of death itself** — even though that year is now filed jointly and therefore carries no widow's
+penalty. The objective is the survivor's burden, not the penalty's duration. Stated here because the
+two readings give different rankings and the label alone does not distinguish them.
 
 **Migration.** Backups predating v5.8 carry no owner. On import, retirement rows default to
 Person A — the pre-v5.8 model — and a one-time notice in My Data asks for review; other
