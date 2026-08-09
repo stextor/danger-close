@@ -27,10 +27,28 @@ if (MODE === "compare") {
   console.log(`t2 — ENGINES (cross-version parity ${PRIOR} → ${CUR})`);
   const a = JSON.parse(fs.readFileSync(`/tmp/t2_${PRIOR}_fingerprint.json`, "utf8"));
   const b = JSON.parse(fs.readFileSync(`/tmp/t2_${CUR}_fingerprint.json`, "utf8"));
+  // ── INTENDED ENGINE CHANGES (v5.14) ────────────────────────────────────────────────────────
+  // The parity guardrail exists to catch UNINTENDED engine drift, so a release that changes an
+  // engine on purpose must say which one and still prove the others are untouched. Leaving those
+  // legs simply red would teach a reader to ignore the guardrail, which is worse than no guardrail.
+  //
+  // v5.14 corrects the Roth strategy engine (Engine A) in two ways — the IRMAA threshold indexation
+  // (F-2B-1 / F-2B-2) and the death-year filing status (C-2C-6) — so its output MUST move. The Monte
+  // Carlo, extended MC and stress engines were not touched and must stay byte-identical.
+  //
+  // These keys are asserted to DIFFER, which is a stronger statement than skipping them: if a future
+  // change silently reverted the fix, this would fail.
+  const INTENDED_DIFFS = { "v513→v514": ["roth", "rothCurrentEstate"] };
+  const expectDiff = new Set(INTENDED_DIFFS[`${PRIOR}→${CUR}`] || []);
   for (const key of Object.keys(a)) {
     const same = JSON.stringify(a[key]) === JSON.stringify(b[key]);
-    T(`PARITY: ${key} identical across ${PRIOR} → ${CUR}`, same,
-      same ? "" : `v592=${JSON.stringify(a[key]).slice(0, 120)} v510=${JSON.stringify(b[key]).slice(0, 120)}`);
+    if (expectDiff.has(key)) {
+      T(`PARITY: ${key} CHANGED as intended across ${PRIOR} → ${CUR} (Engine A corrected)`, !same,
+        same ? "expected a change here and found none — was the fix reverted?" : "");
+    } else {
+      T(`PARITY: ${key} identical across ${PRIOR} → ${CUR}`, same,
+        same ? "" : `${PRIOR}=${JSON.stringify(a[key]).slice(0, 120)} ${CUR}=${JSON.stringify(b[key]).slice(0, 120)}`);
+    }
   }
   console.log(`\nt2 SUITE (compare): ${pass} passed, ${fail} failed`);
   process.exit(fail ? 1 : 0);

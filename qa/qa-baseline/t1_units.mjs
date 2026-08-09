@@ -9,7 +9,8 @@ const VER = process.argv[2] || "v510";
 const IS510 = VER !== "v592"; // v5.10-family features (v510 and v5101)
 const IS5101 = VER === "v5101";
 const IS5102 = VER === "v5102";
-const IS511 = VER === "v511" || VER === "v512" || VER === "v513";
+const IS511 = VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514";
+const IS514 = VER === "v514"; // v5.14 IRMAA indexation Verify checks present
 const SRC = fs.readFileSync(new URL(`../${VER}.jsx`, import.meta.url), "utf8");
 const m = await import(`./app_${VER}.mjs`);
 const g = m.__g;
@@ -25,7 +26,12 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
 // ═══ Verification suite (statutory constants against cited sources) ═══
 {
   const checks = g.buildVerificationChecks();
-  T(`VERIFY: check count is ${IS510 ? 54 : 53}`, checks.length === (IS510 ? 54 : 53), `got ${checks.length}`);
+  // v5.14 adds THREE Verify checks that assert the IRMAA indexation rules themselves, not just the
+  // constants: the top tier frozen through 2027, its resumption off the frozen base from 2028, and
+  // premium-year (not MAGI-year) threshold indexing. The Verify tab had labelled the top tier "fixed
+  // by law" since v5.7 while the engines inflated it anyway (F-2B-2) — these make the claim testable.
+  const _verifyCount = IS514 ? 57 : IS510 ? 54 : 53;
+  T(`VERIFY: check count is ${_verifyCount}`, checks.length === _verifyCount, `got ${checks.length}`);
   const bad = checks.filter(c => !c.pass);
   T("VERIFY: every check passes", bad.length === 0, bad.map(b => b.name).join("; "));
   T("VERIFY: every check carries a source citation", checks.every(c => typeof c.source === "string" && c.source.length >= 3));
@@ -143,7 +149,7 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
 
 // ═══ Statics — the source file itself ═══
 {
-  const verStr = VER === "v513" ? "v5.13" : VER === "v512" ? "v5.12" : VER === "v511" ? "v5.11" : IS5102 ? "v5.10.2" : IS5101 ? "v5.10.1" : IS510 ? "v5.10" : "v5.9.2";
+  const verStr = VER === "v514" ? "v5.14" : VER === "v513" ? "v5.13" : VER === "v512" ? "v5.12" : VER === "v511" ? "v5.11" : IS5102 ? "v5.10.2" : IS5101 ? "v5.10.1" : IS510 ? "v5.10" : "v5.9.2";
   T(`STATIC: field-manual callsign carries ${verStr}`, SRC.includes(`FIELD MANUAL · ${verStr} · PUBLIC BUILD`));
   T(`STATIC: end-of-manual footer carries ${verStr}`, SRC.includes(`DANGER CLOSE ${verStr} · documentation regenerated`));
   // v5.10.2: the remaining two of the four in-app version sites, asserted exactly
