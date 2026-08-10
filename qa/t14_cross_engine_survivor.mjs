@@ -1,5 +1,9 @@
 // t14 — CROSS-ENGINE SURVIVOR SOCIAL SECURITY (decision D-5).
 //
+// PRECISION, UPDATED v5.18: the Engine C leg here is still DOM-read (±$500), but Engine C is no
+// longer limited to that — `t17` asserts it to the cent via the module-level `computeIrmaaPlan`.
+// Engine B (Taxes) IS still inline and still ±$500; hoisting it is scoped, not done.
+//
 // This is the durable extinction invariant for a whole defect CLASS, not for one bug. Three
 // separate findings — C-2C-3 (Engines B/C keyed post-death RMDs to the wrong spouse), C-2C-4
 // (Engine D never modelled the first death at all) and C-2C-5 (Engine C paid both SS checks

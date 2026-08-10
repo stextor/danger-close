@@ -1,5 +1,14 @@
 // t13 — ENGINE C (IRMAA PLANNER) SURVIVOR MODELING (audit finding C-2C-5, fixed at v5.13).
 //
+// PRECISION, UPDATED v5.18. This file reads Engine C through the rendered DOM, where every figure
+// is Math.round(x / 1000) — so its own ceiling is ±$500 of MAGI and ±$50 of surcharge, and that
+// has not changed. What HAS changed is that the ceiling is no longer the project's ceiling for
+// this engine: v5.17 hoisted Engine C to module level and v5.18 exports it, so `t17` now asserts
+// its arithmetic to the cent. The two files are kept deliberately and do different jobs — t17
+// checks the numbers against statute; t13 remains the survivor EXTINCTION invariant and is also
+// the only thing proving the tab actually renders those numbers to a user. Add arithmetic cases
+// to t17, not here.
+//
 // Through v5.12 the IRMAA planner had THREE survivor omissions, and — unlike Engine D — they did
 // not share a direction:
 //

@@ -45,9 +45,16 @@
 // -$5,780 at $700K MAGI and -$6,940 at $1.2M. Case 4 pins that boundary so a future change cannot
 // quietly reintroduce the optimistic half.
 //
-// Run: node t15_engineA_death_filing.mjs [v514]
-const VER = process.argv[2] || "v514";
-const g = (await import(`./app_${VER}.mjs`)).__g;
+// Run: node t15_engineA_death_filing.mjs [version-tag]
+//   With no argument it tests app_testable.mjs — the copy of the CURRENT leg made during
+//   setup — which is how t7 and t8 resolve their build. That is deliberate: a hardcoded
+//   default tag rots. This file used to default to "v514", and once that leg stopped being
+//   built the suite died with ERR_MODULE_NOT_FOUND. Worse would have been surviving: had the
+//   default been bumped each release instead, it would keep resolving LAST release's bundle,
+//   pass green, and quietly stop testing the build it was supposed to be guarding.
+//   An explicit tag still works, and is how a frozen prior leg is driven for negative controls.
+const VER = process.argv[2] || null;
+const g = (await import(VER ? `./app_${VER}.mjs` : "./app_testable.mjs")).__g;
 g.setPortfolio({ positions: [], stateCode: null,
   incomeStreams: [{ monthly: 0, tax: "ordinary", owner: "A", startYear: 2000, endYear: 9999 }] });
 
