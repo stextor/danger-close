@@ -95,7 +95,22 @@ const gotoTab = async (name) => {
   return !!tab;
 };
 
-console.log("t16 \u2014 ROTH LADDER FILING STATUS (C-2B-3 extinction invariant)");
+console.log("t16 \u2014 ROTH LADDER FILING STATUS + AGE-65 DEDUCTION (C-2B-3 / v5.20)");
+
+// Independent reference — IRS Rev. Proc. 2025-32, typed here, NOT read from the app's tables.
+// SR is the §63(f) age-65 ADDITIONAL standard deduction: per spouse for MFJ, single figure for
+// Single. Indexed at the app's disclosed 2%/yr proxy (METHODOLOGY §6).
+// NOT the OBBBA $6,000 bonus (2025-2028), which the ladder deliberately does not model — see the
+// note in projectBrackets(). Engine B does model it, so the Roth and Taxes tabs differ for any
+// ladder year <= 2028. That divergence is disclosed, not asserted here.
+const STD_REF = { S: 16100, M: 32200 }, SR_REF = { S: 2050, M: 1650 };
+const IDX_REF = (n) => Math.pow(1.02, n);
+// Expected deduction in $K for a given year, filing status and count of spouses aged 65+.
+const dedRefK = (year, single, n65) => {
+  const i = IDX_REF(year - 2026);
+  return single ? (STD_REF.S * i + (n65 > 0 ? SR_REF.S * i : 0)) / 1000
+                : (STD_REF.M * i + n65 * SR_REF.M * i) / 1000;
+};
 
 // Ladder row shape: YEAR $CONVK $TAXABLEK RATE% $FEDK $MAGIK <irmaa flag> <trad> <roth>
 const readLadder = () => {
@@ -147,9 +162,40 @@ try {
   ck("case 1: ladder rows parsed (couple)", !!mfj && Object.keys(mfj).length > 3,
     mfj ? `${Object.keys(mfj).length} rows` : "none");
   if (mfj && mfj[2029]) {
-    ck("case 1: the couple's ladder is unchanged by the fix (no collateral movement)",
-      mfj[2029].taxable === 74 && mfj[2029].rate === 12 && Math.abs(mfj[2029].fed - 8.3) < 0.2,
+    // The label used to read "unchanged by the fix", meaning the v5.15 FILING fix. v5.20's
+    // deduction fix DID move these figures — 2029 taxable 74 -> 72, fed 8.3 -> 8.1 — so the
+    // year is named explicitly to stop the next reader thinking something regressed.
+    ck("case 1: the couple's ladder is unchanged by the v5.15 FILING fix (no collateral movement)",
+      mfj[2029].taxable === 72 && mfj[2029].rate === 12 && Math.abs(mfj[2029].fed - 8.1) < 0.2,
       `2029 taxable $${mfj[2029].taxable}K rate ${mfj[2029].rate}% fed $${mfj[2029].fed}K`);
+
+    // ── v5.20: the age-65 additional standard deduction ──────────────────────────────────────
+    // Spouse A is 65 in 2029; spouse B (born two years later) not until 2031. So 2029 must carry
+    // ONE extra and 2031 must carry TWO. A naive fix that adds the extra whenever the household
+    // is 65+ would pass the 2031 case and fail 2029 — which is why both are asserted.
+    // Gap = MAGI - taxable, both rounded to $K by the DOM, so tolerance is +/-1.5K.
+    if (mfj[2031]) {
+      const gap29 = mfj[2029].magi - mfj[2029].taxable;
+      const exp29 = dedRefK(2029, false, 1);
+      ck("case 1 [EXTINCTION]: 2029 deduction carries exactly ONE age-65 extra (spouse B is 63)",
+        Math.abs(gap29 - exp29) <= 1.5,
+        `gap $${gap29}K vs expected $${exp29.toFixed(1)}K; bare deduction would be $${dedRefK(2029, false, 0).toFixed(1)}K`);
+
+      const gap31 = mfj[2031].magi - mfj[2031].taxable;
+      const exp31 = dedRefK(2031, false, 2);
+      ck("case 1 [EXTINCTION]: 2031 deduction carries TWO age-65 extras (both spouses 65+)",
+        Math.abs(gap31 - exp31) <= 1.5,
+        `gap $${gap31}K vs expected $${exp31.toFixed(1)}K`);
+
+      // The discriminating check: between 2029 and 2031 the deduction must grow by MORE than
+      // two years of indexation, because a second person crossed 65. Indexation alone would
+      // give gap29 * 1.02^2. This is what separates "the extra is applied per spouse" from
+      // "the extra is applied once and then inflated".
+      const idxOnly = gap29 * IDX_REF(2);
+      ck("case 1: the 2029->2031 rise is a SECOND extra, not just two years of indexation",
+        gap31 - idxOnly >= 1,
+        `gap $${gap29}K -> $${gap31}K; indexation alone would give $${idxOnly.toFixed(1)}K`);
+    }
   }
 
   // ── CASE 2 — the SINGLE filer, which is the whole finding ───────────────────────────────────
@@ -159,13 +205,20 @@ try {
   ck("case 2: ladder rows parsed (single)", !!sgl && Object.keys(sgl).length > 3);
   if (sgl && sgl[2029]) {
     const r = sgl[2029];
-    // The deduction is the MAGI-to-taxable gap. Pre-fix it was ~$34K (MFJ_STD + senior); post-fix it
-    // must be roughly half that. 2029 inflator is 1.02^3.
+    // The deduction is the MAGI-to-taxable gap. Before v5.15 it was ~$34K, which is MFJ_STD
+    // indexed and nothing else — the earlier note here called that "MFJ_STD + senior", which was
+    // wrong twice over: no senior extra was applied anywhere in this ladder until v5.20, and
+    // MFJ_STD plus two extras would have been ~$38K. Post-fix it must be roughly half.
     const gap = r.magi - r.taxable;
-    const expSgl = (TC.SGL_STD * Math.pow(1.02, 3)) / 1000;
-    ck("case 2 [EXTINCTION]: the deduction is the SINGLE standard deduction, not the married one",
-      Math.abs(gap - expSgl) <= 3,
-      `MAGI $${r.magi}K - taxable $${r.taxable}K = $${gap}K, expected ~$${expSgl.toFixed(0)}K (pre-fix ~$34K)`);
+    // v5.20: this expectation now includes the single age-65 extra ($2,050 indexed), and the
+    // tolerance drops from +/-3K to +/-1.5K. At +/-3K it could not discriminate: the extra is
+    // ~$2.2K at 2029, INSIDE the old tolerance, so this check passed identically before and
+    // after the fix and proved nothing about the deduction it names.
+    const expSgl = dedRefK(2029, true, 1);
+    ck("case 2 [EXTINCTION]: the deduction is the SINGLE standard deduction PLUS the age-65 extra",
+      Math.abs(gap - expSgl) <= 1.5,
+      `MAGI $${r.magi}K - taxable $${r.taxable}K = $${gap}K, expected ~$${expSgl.toFixed(1)}K ` +
+      `(bare Single $${dedRefK(2029, true, 0).toFixed(1)}K; pre-v5.15 married ~$34K)`);
     // The bracket. $78K of taxable income is in Single's 22% band and MFJ's 12% band.
     ck("case 2 [EXTINCTION]: the marginal rate is scored against SINGLE brackets",
       r.rate === 22, `rate ${r.rate}% on $${r.taxable}K taxable (pre-fix 12%, the MFJ band)`);
