@@ -1,5 +1,95 @@
 # Changelog
 
+## v5.20
+
+**A real correction to a number on screen.** The Roth conversion ladder was subtracting the base
+standard deduction and nothing else — omitting the §63(f) age-65 additional standard deduction that
+both tax engines apply. It overstated the tax on every conversion made at 65 or older.
+
+On the shipped example household this is **$5,300 of overstated federal tax across the 2029–2040
+ladder**; for a single filer, $5,300 across 2029–2038.
+
+### The defect
+
+`projectBrackets(year)` computed `stdDed: Math.round(std * inflator)` from the base figure alone.
+There are exactly two calls to `seniorExtraFor` in the application — one in Engine A
+(`runRothStrategies`), one in Engine B (`computeTaxPlan`) — and neither was in the ladder.
+
+**It was a same-screen contradiction.** The strategy comparator sits directly below the ladder on the
+Roth tab and calls Engine A, which applies the extra. Same household, same screen, two different
+standard deductions. That is the shape of finding C-2B-3, fixed at v5.15 — one tab, two tax pictures.
+
+**Why it survived five releases.** The comment above the code discussed the *OBBBA $6,000 bonus*
+senior deduction (2025–2028, phasing out over $150K MFJ MAGI), analysed it correctly, concluded "for
+2029+: no senior deduction" — and never mentioned the permanent §63(f) extra at all. It read like a
+considered decision about the omission while addressing a different provision. It also hardcoded one
+household's birthday ("Spouse A turns 65 in 2028"), which was wrong on its own terms by v5.19.
+
+### Direction — conservative, but biased
+
+Omitting a deduction raises taxable income, so the ladder overstated conversion tax. Against the
+house rule that an unavoidable assumption should make the plan look slightly worse, that is
+conservative. **But this tab exists to answer "should I convert, and how much,"** and an overstated
+conversion tax biases the answer toward not converting. Filing it under "conservative, therefore
+harmless" would have been the wrong reading.
+
+### The fix
+
+`projectBrackets` now calls the same shared `seniorExtraFor` helper the engines use, with the same
+age arithmetic and the same base year, and combines it the way Engine A does (`stdD + senior`) so the
+ladder and the comparator cannot drift apart again. Per-spouse for MFJ: the example household gets
+one extra from 2029 (spouse A turns 65) and two from 2031 (spouse B).
+
+The displayed assumption line now reads the full deduction — "$32,200 (2026) + $1,650 per spouse age
+65+" — rather than showing a figure that no longer matches the arithmetic beneath it.
+
+### What is deliberately still NOT modelled
+
+The **OBBBA $6,000 bonus** senior deduction stays out of the ladder, matching Engine A and its stated
+reasoning: it expires before typical conversion windows, and modelling it would make the bracket-fill
+solver circular, because the deduction depends on MAGI which depends on the conversion being solved
+for. **Engine B does model it**, so the Roth and Taxes tabs differ for any ladder year at or before
+2028. That divergence was silent; METHODOLOGY §7 now states it.
+
+### Testing
+
+**704 checks green** (701 + 3 net new). `t16` grows from 21 to 24 and now asserts, against IRS
+Rev. Proc. 2025-32 figures typed into the test rather than read from the app:
+
+- 2029 carries **exactly one** age-65 extra (spouse B is still 63) — the case a naive fix that adds
+  the extra whenever a household is 65+ would fail
+- 2031 carries **two**
+- the 2029→2031 rise exceeds two years of indexation, separating "per spouse" from "once, then
+  inflated"
+- the single filer's deduction includes the single extra
+
+**Negative-controlled: 5 of t16's 24 checks fail against v5.19.**
+
+**One pre-existing check could not see this defect.** Case 2's tolerance was ±$3K while the single
+age-65 extra is ~$2.2K — inside it. That check passed identically before and after the fix, proving
+nothing about the deduction it named. Tolerance tightened to ±$1.5K. A comment beside it also
+described the pre-v5.15 gap of ~$34K as "MFJ_STD + senior"; $34K is MFJ_STD indexed and nothing else,
+and MFJ_STD plus two extras would be ~$38K. Corrected.
+
+**Parity is 8/8 strict** and every other suite returns figures identical to v5.19 — t16 is the only
+one that moved, which is the evidence that this touched the Roth tab's private arithmetic and nothing
+else.
+
+### A process failure worth recording
+
+Partway through this build, `t16` in the session workspace was found to differ from the shipped and
+knowledge copies: 29 `ck()` calls against 24, carrying assertions lifted from this release's own
+scope document that had never been written. **This is the third recorded instance of unreviewed
+"phantom" edits appearing in a session workspace.** The file was quarantined, reverted to the shipped
+hash, and the changes re-applied deliberately with hand-verified expected values.
+
+It is worth being precise about the danger. Those phantom assertions produced 19/7 against v5.19 and
+25/1 against v5.20 — the exact profile of a working fix with one loose end. Nothing about the output
+looked wrong. Only a hash comparison caught it.
+
+**Provenance:** source `src/DangerClose.jsx` md5 `9b6780ddfe4e769457969b7c0324393e` · built
+`index.html` md5 `90fda60518fc7df50108e203816c9b1e`.
+
 ## v5.19
 
 **Nothing changed. That is the entire point, for the third time — and the last time it will be
