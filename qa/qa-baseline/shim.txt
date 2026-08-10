@@ -42,4 +42,6 @@ export const __test = {
 // v5.18: Engine C was hoisted to module level at v5.17; this exposes it to the harness.
 // That is what the hoist was for — t17 drives it directly and compares to the dollar,
 // instead of parsing Math.round(x/1000) out of the rendered DOM (OPERATIONS §M).
-export const __engines = { computeIrmaaPlan };
+// v5.21: computeTaxPlan joins it. Engine B was hoisted at v5.19; this exposes it, which
+// empties the ±$500 category in OPERATIONS §M — no engine is now both inline AND unreachable.
+export const __engines = { computeIrmaaPlan, computeTaxPlan };
