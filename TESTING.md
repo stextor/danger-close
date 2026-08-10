@@ -2,9 +2,9 @@
 
 This project's premise is *verify, don't trust* — so this page explains what verification actually exists, what it covers, and what it doesn't. It's written for the same skeptical reader the app is.
 
-**Current build: v5.16** · source `src/DangerClose.jsx` md5 `f78c128b5620f12313057c98e76f253b` · **634 automated checks green** against that exact source, plus 16 more against the built `index.html` (md5 `45e18d1632775955259a01d8c06d0ba0`).
+**Current build: v5.17** · source `src/DangerClose.jsx` md5 `b466b02f3a10d1993a6e345f8070d8b3` · **638 automated checks green** against that exact source, plus 16 more against the built `index.html` (md5 `1f580be324d4c2dc0557d56c0c8b743b`).
 
-**v5.16 is a refactor with no behaviour change.** Its correctness proof is that the check count and every figure are *identical* to v5.15, and that engine parity stayed 8/8 strict. No tests were added — deliberately: a refactor that ships new assertions is one whose safety you can no longer verify.
+**v5.17 is a refactor with no behaviour change.** It hoists the IRMAA engine out of the component body to module level. Its correctness proof is that the check count and every figure are *identical* to v5.16, and that engine parity stayed 8/8 strict. No tests were added — deliberately: a refactor that ships new assertions is one whose safety you can no longer verify.
 
 ## The part you can check yourself, right now
 
@@ -18,7 +18,7 @@ Honest scope: the Verify tab proves the *constants* are right — not every form
 
 The suite compares **two builds by role** — the current release and the immediately-prior one — and re-baselines every release. For v5.12 that pair is v5.11 → v5.12.
 
-### Current build (v5.16) — 382 checks in the t1–t6 baseline plus t10
+### Current build (v5.17) — 382 checks in the t1–t6 baseline plus t10
 
 | Suite | Checks | What it covers |
 |---|---|---|
@@ -33,7 +33,7 @@ The suite compares **two builds by role** — the current release and the immedi
 
 | Suite | Checks | What it covers |
 |---|---|---|
-| t2 parity (v5.15 → v5.16) | 8 | Under common seeded random numbers with identical inputs, the Monte Carlo, extended MC, stress, and Roth engines produce **byte-identical** output across the two builds. This is the mechanical form of any "engines unchanged" claim |
+| t2 parity (v5.16 → v5.17) | 8 | Under common seeded random numbers with identical inputs, the Monte Carlo, extended MC, stress, and Roth engines produce **byte-identical** output across the two builds. This is the mechanical form of any "engines unchanged" claim |
 | t7 accrual | 37 | The v5.10 contribution-accrual feature against hand-computed figures ($96,000 / $24,000 / $72,000 for the couple case), migration parity, and round-trip persistence. Authored *before* the engine edits |
 | t8 invariants | 29 | Extinction invariants (fixed defect classes asserted not to return), Verify-tab constants, and engine behavior. At v5.11 the two source invariants that asserted the old pooled Traditional seed in the Taxes and IRMAA engines were updated to assert the per-person split explicitly — a strictly stronger check |
 | t9 DOM smoke | 14 | End-to-end render smoke over the feature surface |
@@ -49,7 +49,7 @@ The suite compares **two builds by role** — the current release and the immedi
 
 **Two honesty notes on t11.** First, *precision*: the Taxes and IRMAA engines are computed inside the app's component body, so the harness — which exports module-level bindings — cannot reach their row arrays. Their only output path is the rendered DOM, which prints every figure rounded to the nearest $1,000. t11's assertions are therefore accurate to **±$500, not to the dollar**. That is adequate here only because the effect being measured (~$4,050/yr per $1M of Traditional balance) is roughly eight times the measurement band. Making these engines dollar-exact testable requires a new harness capability and is scoped separately. Second, *teeth*: a test that cannot fail proves nothing, so t11 is run as a **negative control against the pre-fix v5.10.2 build**, where it correctly fails **six** discriminating assertions — both post-death directions and the pre-death start-age straddle. Three of its checks pass on the defective build too, and the suite says so rather than implying otherwise: the two cross-checks are supporting context, and the *survivor = A* case cannot catch the original defect at all, because the old pooled model was coincidentally correct when person A was the survivor. That case earns its place as forward-looking cover for a code branch no other case executes, not as evidence the defect is caught.
 
-**634 checks verify this build** = 382 (current leg, incl. t10) + 8 (parity) + 244 (t7–t9, t11–t16), every figure computed from parsed suite output rather than restated by hand. Frozen prior legs are re-proven at every run as history, and are expected to show since-fixed defects in their pre-fix state — that's correct, not a regression.
+**638 checks verify this build** = 382 (current leg, incl. t10) + 8 (parity) + 248 (t7–t9, t11–t16), every figure computed from parsed suite output rather than restated by hand. *(Corrected at v5.17: this line read 634 = 382 + 8 + **244**, understating the nine feature suites by four. The per-suite figures were right the whole time — 37 + 29 + 14 + 40 + 23 + 40 + 33 + 11 + 21 = 248 — but the wrong sub-total was copied into the v5.15 and v5.16 release headlines. Nothing was missing from the suite; only the arithmetic reporting it. See the disclosure at the foot of this page: this is the same failure, a third time.)* Frozen prior legs are re-proven at every run as history, and are expected to show since-fixed defects in their pre-fix state — that's correct, not a regression.
 
 **Negative controls for v5.14.** Every new or changed assertion was run against the pre-fix v5.13 build and the result recorded per case. `t10` fails **23** — the two flipped indexation pins plus the border cases whose thresholds moved. `t15` fails **8** of 11; the three that pass are named in the file as not discriminating rather than counted as wins. `t14`'s new filing-timing assertion fails on **exactly one** engine, the one that was wrong. `t13` needed its fixture re-tuned — see its header for why the engine was right and the fixture was not.
 
