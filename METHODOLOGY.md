@@ -143,6 +143,16 @@ capital-gains excise. Verify your state.
 
 ## 7. Roth conversion modeling
 
+**Standard deduction on the Roth tab (v5.20).** The conversion-ladder projection now applies the
+§63(f) age-65 additional standard deduction — $1,650 per spouse MFJ, $2,050 single for 2026, indexed
+— through the same shared helper Engines A and B use. Before v5.20 it applied the base deduction
+only, so it overstated the tax on conversions made at 65+ and disagreed with the strategy comparator
+directly below it on the same tab. Separately, and deliberately, neither the ladder nor the
+comparator models the OBBBA $6,000 bonus senior deduction (tax years 2025–2028): it expires before
+typical conversion windows, and modelling it would make the bracket-fill solver circular, since the
+deduction depends on MAGI which depends on the conversion being solved for. The Taxes tab does model
+it, so the two tabs differ for any ladder year at or before 2028.
+
 - **Strategy comparator:** six named policies (none / fill-12% / fill-22% / fill-24% / stay-under-
   IRMAA / current plan) run through the full deterministic projection; reports lifetime tax,
   IRMAA, NIIT, widow-year tax, ending balances, and after-tax estate (heirs' Traditional taxed at
