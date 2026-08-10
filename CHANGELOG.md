@@ -1,5 +1,106 @@
 # Changelog
 
+## v5.21
+
+**Engine B is now checked to the cent — and Engines A and B have been compared for the first time.**
+
+The Taxes planner, hoisted to module level at v5.19, is exported to the test harness and asserted
+against IRS figures by a new suite. **No engine in the app is behind the ±$500 measurement ceiling
+any more.** Every pre-existing check returns the figure it did at v5.20, and parity is 8/8 strict.
+The only source edit is the version string.
+
+### What this closes
+
+Engine B produces the lifetime tax estimate and is what the Roth conversion decision leans on. Until
+now the only way to observe it was the rendered DOM, where every figure is `Math.round(x / 1000)`.
+
+**`t18_engineB_exact.mjs` — 47 checks.** Federal ordinary tax against a hand bracket walk at three
+income levels in both filing statuses; the §63(f) age-65 additional deduction counted per spouse,
+including the pre-65 boundary; Social Security taxability at the IRC §86 provisional-income tiers,
+which are statutorily unindexed; and the agreement invariant below. Brackets, deductions and the
+age-65 extra are typed from IRS Rev. Proc. 2025-32, not read from the app.
+
+**Negative-controlled at 24 of 47.** The injected defect was the v5.20 Roth-ladder bug transplanted
+into Engine B — dropping the age-65 extra from `totalDeductions`.
+
+### The finding this release went looking for
+
+Engines A and B are **parallel implementations of the same statute**. Verified by counting call
+sites inside each function:
+
+| shared helper | Engine A | Engine B |
+|---|---|---|
+| `fedOrdinaryTax` | **0** | 1 |
+| `ltcgTax` | **0** | 2 |
+| `marginalBracket` | **0** | 1 |
+| `taxFactsFor` | 1 | **9** |
+
+Engine A calls **none** of the shared bracket, LTCG or marginal-rate helpers — it carries its own
+inline copies. AMT differs too: A reads `TAX_CONSTS.SGL_AMT_EXEMPT` directly; B goes through
+`inflate(taxFactsFor(effSingle).amtEx, yr)`. v5.16's consolidation reached B thoroughly and A barely.
+`t10` asserted A to the dollar, nothing asserted B, and **nothing checked they agree.**
+
+**They agree, on the path tested.** Case 10 drives both on the same household across six
+configurations — three income levels, both filing statuses — with Engine A's inputs derived from
+Engine B's own reported row so a misconfiguration cannot manufacture a divergence. Federal tax
+matches within a dollar in every case. (Within a dollar rather than a cent because Engine A rounds
+its reported total once; Engine B returns cents.)
+
+**Be precise about what that covers.** All six cases run pure ordinary income: `ssTaxable`,
+`capGains_y`, `niit_y`, `amt_y`, `fica` and `stateTax` are **zero in every one**, and all are the
+2029 row. So what is established is that the bracket walk, the standard deduction and the age-65
+extra agree — the highest-traffic path, and good evidence the shared constants hold even where the
+code is duplicated. It is **not** a clean bill of health for the engine pair. In particular the AMT
+difference documented above — A reading `TAX_CONSTS.SGL_AMT_EXEMPT` directly, B going through
+`inflate(taxFactsFor(effSingle).amtEx, yr)` — is the one concrete structural divergence found, and
+the agreement test never reaches it, because these households are nowhere near the exemption.
+Extending the comparison to AMT should come first when t18's remaining cases are written.
+
+That was not the expected result. The scope put the odds the other way, and the release was
+authorised on the basis that a divergence would be reported and deferred rather than fixed. There
+was nothing to report. **The invariant now stands as insurance:** these two implementations cannot
+drift apart in future without a test saying so, which is the outcome that matters given this
+project's history with duplicated arithmetic.
+
+### A check that reported coverage without running
+
+An early draft asserted the pre-65 boundary by reading a 2028 row from a plan whose rows begin at
+2029. It got `undefined`, sat behind an `if`, and reported nothing — while appearing in the file as
+coverage. Engine B's rows start at `retireYear`, so the year is only reachable by passing
+`retireYear` explicitly. Corrected, and the case now confirms both spouses' ages before asserting
+the deduction, so it cannot pass for the wrong reason.
+
+### Testing
+
+**751 checks green** — 704 of them returning figures identical to v5.20: baseline **382** (t1 64 ·
+t2 15 · t3 36 · t4 90 · t5 44 · t6 18 · t10 115) + engine parity **8** + t7 37 · t8 29 · t9 14 ·
+t11 40 · t12 23 · t13 40 · t14 33 · t15 11 · t16 24 · t17 63 · **t18 47**. Plus **16** against the
+built `index.html`.
+
+**Parity is 8/8 in its strict form** — the mechanical proof that exporting the engine did not change
+it.
+
+### What t18 does NOT yet cover
+
+Named rather than implied. The scope listed ten case groups and this release ships four of them, the
+core: federal ordinary tax, the age-65 deduction, SS taxability, and the A/B agreement invariant.
+**Not yet covered: LTCG stacking, NIIT, AMT, FICA, state tax, and the survivor filing transition.**
+Engine B computes all six and each is now reachable — they were left out because verifying their
+independent references properly did not fit this release, and thin coverage asserted from unverified
+figures would be worse than none.
+
+### What did NOT change
+
+**`otherAccounts` remains the open HIGH finding** (D-2D-3): the same account treated as fully taxable
+by the Withdrawal engine and invisible to Engines A, B, C and the Roth ladder — $147,000 on the
+example household, 8.9% of net worth. It was held until Engine B was dollar-exact, which it now is.
+
+**Engine A still bypasses the shared helpers.** Consolidating it is a real cleanup and is not scoped;
+the agreement invariant makes it safe to defer.
+
+**Provenance:** source `src/DangerClose.jsx` md5 `0c3cf58994326a5eda39f7ec46957f51` · built
+`index.html` md5 `e3e2e380f68e6deabae6ed03371f2c09`.
+
 ## v5.20
 
 **A real correction to a number on screen.** The Roth conversion ladder was subtracting the base
