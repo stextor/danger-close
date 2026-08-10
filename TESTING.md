@@ -2,9 +2,9 @@
 
 This project's premise is *verify, don't trust* — so this page explains what verification actually exists, what it covers, and what it doesn't. It's written for the same skeptical reader the app is.
 
-**Current build: v5.18** · source `src/DangerClose.jsx` md5 `45376b843608916cea9a8021153e1bca` · **701 automated checks green** against that exact source, plus 16 more against the built `index.html` (md5 `eb0b7f4ce170525d89b881dd83e5ff9b`).
+**Current build: v5.19** · source `src/DangerClose.jsx` md5 `3f152d70aa713fc4cd5891bb777ad742` · **701 automated checks green** against that exact source, plus 16 more against the built `index.html` (md5 `9f6af63040f92dfcf7ea78efaab4d316`).
 
-**v5.18 adds tests, and only tests.** The single source edit is the version string; every one of the 638 pre-existing checks returns the figure it did at v5.17, and parity stayed 8/8 strict. The new suite is `t17`, which asserts Engine C to the cent — the payoff for the v5.17 hoist. No tests were added — deliberately: a refactor that ships new assertions is one whose safety you can no longer verify.
+**v5.19 is a refactor with no behaviour change.** It hoists Engine B (Taxes) out of the component body to module level — the last engine that was computed inside the render. Its correctness proof is that the check count and every figure are *identical* to v5.18, and that parity stayed 8/8 strict. No tests were added, deliberately. Engine B is now *hoisted* but not yet *exported*, so it is still measured at ±$500 until the export-and-test release. No tests were added — deliberately: a refactor that ships new assertions is one whose safety you can no longer verify.
 
 ## The part you can check yourself, right now
 
@@ -18,7 +18,7 @@ Honest scope: the Verify tab proves the *constants* are right — not every form
 
 The suite compares **two builds by role** — the current release and the immediately-prior one — and re-baselines every release. For v5.12 that pair is v5.11 → v5.12.
 
-### Current build (v5.18) — 382 checks in the t1–t6 baseline plus t10
+### Current build (v5.19) — 382 checks in the t1–t6 baseline plus t10
 
 | Suite | Checks | What it covers |
 |---|---|---|
@@ -33,7 +33,7 @@ The suite compares **two builds by role** — the current release and the immedi
 
 | Suite | Checks | What it covers |
 |---|---|---|
-| t2 parity (v5.17 → v5.18) | 8 | Under common seeded random numbers with identical inputs, the Monte Carlo, extended MC, stress, and Roth engines produce **byte-identical** output across the two builds. This is the mechanical form of any "engines unchanged" claim |
+| t2 parity (v5.18 → v5.19) | 8 | Under common seeded random numbers with identical inputs, the Monte Carlo, extended MC, stress, and Roth engines produce **byte-identical** output across the two builds. This is the mechanical form of any "engines unchanged" claim |
 | t7 accrual | 37 | The v5.10 contribution-accrual feature against hand-computed figures ($96,000 / $24,000 / $72,000 for the couple case), migration parity, and round-trip persistence. Authored *before* the engine edits |
 | t8 invariants | 29 | Extinction invariants (fixed defect classes asserted not to return), Verify-tab constants, and engine behavior. At v5.11 the two source invariants that asserted the old pooled Traditional seed in the Taxes and IRMAA engines were updated to assert the per-person split explicitly — a strictly stronger check |
 | t9 DOM smoke | 14 | End-to-end render smoke over the feature surface |
