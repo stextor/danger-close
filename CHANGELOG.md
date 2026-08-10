@@ -1,5 +1,95 @@
 # Changelog
 
+## v5.19
+
+**Nothing changed. That is the entire point, for the third time — and the last time it will be
+needed for this class of problem.**
+
+Engine B, the Taxes planner, moved out of the React component body to module level. All **701**
+checks return the figure they did at v5.18, and cross-version engine parity is byte-identical in its
+strict form. **If any number had moved, this release would be a bug.**
+
+**With this, no engine in the app is computed inside the render.**
+
+### Why bother
+
+Engine B was the last one the test harness could not reach. Computed inline, its per-year rows had
+no module-level binding, so the only way to observe them was the rendered DOM — where every figure
+prints as `Math.round(x / 1000)`, capping verification at **±$500**.
+
+That matters more here than anywhere else it has mattered: the Taxes tab produces the lifetime tax
+estimate, and it is the engine the Roth conversion decision leans on. Sub-phase 2A recorded the
+ceiling explicitly in an amendment on 2026-08-08. It has been the open item ever since.
+
+### What moved
+
+- **`computeTaxPlan({ retireYear, rothAmount, qcdAnnual, taxYield })`** — the 286-line compute block,
+  lifted verbatim to module level beside `computeIrmaaPlan`. Those four arguments were its only
+  dependencies on component state — **the same four Engine C takes**, which is the clearest evidence
+  that these two tabs were always the same shape of problem. The 15 other things it reads were
+  already module-level and are still read at call time. It writes nothing outside itself, calls no
+  React hook, sets no state.
+
+The JSX destructures 28 values from one call and is otherwise untouched. Two things deliberately
+stayed behind in the render: `_selYr` and `sel`, which pick *which* row the detail panel shows from
+the `taxDetailYear` UI state. That is presentation, not modelling.
+
+The arithmetic was not edited. The move was scripted: every anchor asserted before anything was
+written, the block dedented by exactly eight spaces, and the result proven by comparing the
+relocated lines to the originals with whitespace stripped — 286 lines each side, identical.
+
+### The 28 returned values are flat, deliberately
+
+A 28-name destructure is unwieldy and honestly signals that this block does more than one job.
+Grouping it into `{ rows, totals, meta }` reads better and is recorded as the intended direction —
+but it would require editing the render, and "the render is untouched" is the property that makes a
+no-behaviour-change refactor checkable by inspection at all. Flat now, grouped in a later pass where
+the diff is small and readable.
+
+### Hoisted is not yet dollar-exact
+
+`computeTaxPlan` is **not** in `shim.txt` yet, so Engine B is still *measured* at ±$500. Exporting it
+and writing the exact-figure assertions is the next release — the same one-release gap Engine C had
+between v5.17 and v5.18, and separate for the same reason: a refactor that ships new assertions is
+one whose safety you can no longer check, because you can no longer tell whether green means the
+code is unchanged or means the new tests were written to match whatever it now does.
+
+### A stale claim caught in this release's own headers
+
+`t14`'s header, added at v5.18, said "Engine B (Taxes) IS still inline and still ±$500." True when
+written, false three weeks later. Corrected here. Worth noting because it is the fourth time this
+project has recorded a comment that described a fixed state: comments have no guard rail, and a line
+that names *another* component's status ages fastest of all.
+
+### Testing
+
+**701 checks green**, every figure identical to v5.18: baseline **382** (t1 64 · t2 15 · t3 36 ·
+t4 90 · t5 44 · t6 18 · t10 115) + engine parity **8** + t7 37 · t8 29 · t9 14 · t11 40 · t12 23 ·
+t13 40 · t14 33 · t15 11 · t16 21 · t17 63. Plus **16** against the built `index.html`.
+
+**Parity is 8/8 in its strict form** — no intended-difference entry was needed.
+
+Verified *before* the version bump, against a build still carrying the v5.18 version strings, so
+"did a figure move?" was answered separately from "was the version bumped?" In that state t7, t8,
+t11, t12, t13, t14, t16 and t17 all produced **byte-identical output**, and parity between pristine
+v5.18 and the hoisted build was 8/8.
+
+No new tests ship with this release, and that is correct.
+
+### What deliberately did NOT change
+
+**The Roth ladder's standard deduction still omits the age-65 extra.** Probably a defect, still
+unverified, now carried for five releases.
+
+**`otherAccounts` remains the open HIGH finding** (D-2D-3): the same account is treated as fully
+taxable by the Withdrawal engine and is invisible to Engines A, B, C and the Roth ladder. On the
+example household that is $147,000 — 8.9% of net worth — including $90,000 named as traditional IRA
+money that produces no RMD anywhere. Non-conservative in both directions, and undisclosed. Scoped,
+with decisions outstanding.
+
+**Provenance:** source `src/DangerClose.jsx` md5 `3f152d70aa713fc4cd5891bb777ad742` · built
+`index.html` md5 `9f6af63040f92dfcf7ea78efaab4d316`.
+
 ## v5.18
 
 **Engine C is now checked to the cent.** The IRMAA planner, hoisted to module level at v5.17, is
