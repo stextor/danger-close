@@ -7,7 +7,8 @@
 // its arithmetic to the cent. The two files are kept deliberately and do different jobs — t17
 // checks the numbers against statute; t13 remains the survivor EXTINCTION invariant and is also
 // the only thing proving the tab actually renders those numbers to a user. Add arithmetic cases
-// to t17, not here.
+// to t17, not here. (v5.21: Engine B got the same treatment via `t18`, so every engine is now
+// dollar-exact tested somewhere and the DOM legs are corroboration rather than the only source.)
 //
 // Through v5.12 the IRMAA planner had THREE survivor omissions, and — unlike Engine D — they did
 // not share a direction:

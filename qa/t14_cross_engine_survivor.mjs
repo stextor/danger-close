@@ -2,9 +2,9 @@
 //
 // PRECISION, UPDATED v5.18: the Engine C leg here is still DOM-read (±$500), but Engine C is no
 // longer limited to that — `t17` asserts it to the cent via the module-level `computeIrmaaPlan`.
-// Engine B (Taxes) was hoisted at v5.19, so NO engine is inline any more. Its rows are not yet
-// exported through the shim, so this leg still measures it at ±$500 — the same one-release gap
-// Engine C had between v5.17 and v5.18.
+// Engine B was hoisted at v5.19 and EXPORTED at v5.21, so `t18` now asserts it to the cent and
+// no engine is behind the ±$500 ceiling any more. This leg still reads through the DOM by
+// design: it is the cross-engine survivor invariant and the proof the tabs actually render.
 //
 // This is the durable extinction invariant for a whole defect CLASS, not for one bug. Three
 // separate findings — C-2C-3 (Engines B/C keyed post-death RMDs to the wrong spouse), C-2C-4
