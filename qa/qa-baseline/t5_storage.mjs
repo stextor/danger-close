@@ -11,8 +11,8 @@ const require = createRequire(import.meta.url);
 
 const VER = process.argv[2] || "v510";
 const IS510 = VER !== "v592"; // v5.10-family features (v510 and later)
-const IS5101 = VER === "v5101" || VER === "v5102" || VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517"; // v5.10.1 fixes present (v5101 and later)
-const IS5102 = VER === "v5102" || VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517"; // v5.10.2 B-2 fix present (full 13-key wipe)
+const IS5101 = VER === "v5101" || VER === "v5102" || VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518"; // v5.10.1 fixes present (v5101 and later)
+const IS5102 = VER === "v5102" || VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518"; // v5.10.2 B-2 fix present (full 13-key wipe)
 
 // ── window.storage shim: localStorage-backed, artifact API contract ──
 const PREFIX = "dc:";
