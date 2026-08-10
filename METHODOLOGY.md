@@ -221,7 +221,17 @@ retirement and each spouse's 65th birthday.
 
 ## 8. IRMAA
 
-2026 tiers per CMS with the statutory **2-year MAGI lookback** modeled explicitly. Roth
+2026 tiers per CMS with the statutory **2-year MAGI lookback** modeled explicitly.
+
+**On the surcharge figures.** The tier *thresholds* are the CMS 2026 figures exactly. The per-person
+combined Part B + Part D *surcharge* amounts are carried as **approximate annual values, rounded to
+the nearest $10** — within **$5/person/year** of the CMS-exact figure at every tier (the source
+labels them approximate at the constant, and `t17` asserts that $5 bound against the published
+monthly Part B and Part D amounts, so the rounding cannot quietly widen). Worst case on a 25-year
+projection for a couple at the top tier is roughly $240 of lifetime surcharge, in a mixed direction.
+This paragraph is new at v5.18: the rounding was already disclosed in the source and recorded by the
+Phase 2B audit, but this page said "2026 tiers per CMS" without qualification, which claimed more
+precision than the constants carry. Roth
 conversions and QCDs both flow through (conversions raise MAGI two years out; QCDs lower it).
 Cliff behavior is preserved — one dollar over a threshold applies the full tier surcharge.
 
