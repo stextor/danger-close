@@ -1,5 +1,92 @@
 # Changelog
 
+## v5.18
+
+**Engine C is now checked to the cent.** The IRMAA planner, hoisted to module level at v5.17, is
+exported to the test harness and asserted against CMS figures by a new suite. Every pre-existing
+check returns the figure it did at v5.16 and v5.17, and cross-version engine parity is 8/8 strict.
+**The app's arithmetic did not change** — the only source edit in this release is the version string.
+
+### What this closes
+
+v5.17 moved the engine somewhere testable. This collects the debt.
+
+Until now the only way to observe Engine C was the rendered DOM, where every figure is printed as
+`Math.round(x / 1000)` — a **±$500** ceiling on MAGI and **±$50** on the surcharge. That is wider
+than the thing being measured: an IRMAA threshold is a **cliff**, where one dollar of MAGI costs a
+four-figure sum for the whole year. On the example household the engine computes a 2039 MAGI of
+$159,598.05 where the DOM showed "$160K" — $402 of error nothing could see.
+
+**`t17_engineC_exact.mjs` — 63 checks.** Tier borders at ±$1 on all five boundaries in both filing
+statuses (20 checks — the cliff, testable for the first time), the premium-year indexation rule, the
+statutory top-tier freeze, the 2-year lookback, the per-person surcharge count, the survivor filing
+switch, and QCD exclusion. Thresholds are typed from the CMS figures published 2025-11-14, not read
+from the app.
+
+**It was negative-controlled.** Reintroducing finding F-2B-1 — indexing thresholds to the income
+year instead of the premium year, the defect fixed at v5.14 — fails **23 of its 63 checks**. A suite
+that has never been shown to fail is a suite that has never been shown to work.
+
+### The surcharge constants: a bounded approximation, not a defect
+
+`IRMAA_CONSTS.SUR` is rounded to the nearest $10, and the source has said so on the line above it
+since long before this release: *"SUR = approximate annual Part B + Part D surcharge per person."*
+The Phase 2B audit derived the per-tier deltas (≤$5) and closed them as a **disclosed rounding**.
+
+So `t17` does **not** assert CMS-exact surcharges, and does **not** pin the rounding as a defect —
+either would assert that correct, documented behaviour is wrong. Instead it adds the guard that was
+missing: every tier's constant must sit **within $5 of the CMS-exact figure**, computed from the
+published monthly Part B and Part D amounts. That is derived from the primary source rather than
+from the app, it documents the approximation as a *bounded* one, and it fails loudly if a constant
+drifts or a future CMS update is transcribed wrongly.
+
+**This is a correction to an earlier claim in this project's own working notes**, which described
+the rounding as an undisclosed finding. It was disclosed, in the source and in the audit record. The
+scope document carries the correction and the reason: "undisclosed" is a claim about *everywhere*,
+and it had been checked in two places.
+
+### METHODOLOGY
+
+§8 said "2026 tiers per CMS" without qualification, which claimed more precision than the constants
+carry. It now states that the thresholds are exact, the surcharges are rounded to the nearest $10
+and within $5/person/year of CMS, and that `t17` asserts that bound. No in-app text changed — the
+tab footnote already says the figures are approximate, and a $4.80/yr caveat on screen would cost
+more attention than it is worth.
+
+### A test that had stopped testing anything
+
+`t15` resolved its build from a hardcoded version tag, defaulting to `v514`. That leg stopped being
+built two releases ago, so running it without an explicit tag died with `ERR_MODULE_NOT_FOUND`.
+
+The obvious fix is a trap: bump the default to the current tag and it will keep resolving *last*
+release's bundle next time, pass green, and quietly stop testing the build it guards. It now
+defaults to `app_testable.mjs` — the current leg's bundle, copied during setup — which is how `t7`
+and `t8` have always resolved theirs and cannot go stale. An explicit tag still drives a frozen leg.
+`t17` follows the same convention. Every other tag-driven suite also carries a retired default, but
+those are unreachable dead code because `run_all.sh` always passes the tag.
+
+### Testing
+
+**701 checks green** — 638 of them returning figures identical to v5.17: baseline **382** (t1 64 ·
+t2 15 · t3 36 · t4 90 · t5 44 · t6 18 · t10 115) + engine parity **8** + t7 37 · t8 29 · t9 14 ·
+t11 40 · t12 23 · t13 40 · t14 33 · t15 11 · t16 21 · **t17 63**. Plus **16** against the built
+`index.html`.
+
+**Parity is 8/8 in its strict form** — no intended-difference entry, which is the mechanical proof
+that exporting the engine did not change it.
+
+### What did NOT change
+
+**Engine B (Taxes) is still computed inline and still verifiable only to ±$500.** Hoisting it the
+same way is scoped and not started. `t13` and `t14` still read Engine C through the DOM and still
+say so in their headers — they are kept deliberately: `t17` checks the arithmetic, `t13` remains the
+survivor extinction invariant and the only thing proving the tab renders those numbers to a user.
+
+**The Roth ladder's standard deduction still omits the age-65 extra.** Still open, still unverified.
+
+**Provenance:** source `src/DangerClose.jsx` md5 `45376b843608916cea9a8021153e1bca` · built
+`index.html` md5 `eb0b7f4ce170525d89b881dd83e5ff9b`.
+
 ## v5.17
 
 **Nothing changed. That is again the entire point.**
