@@ -1,5 +1,99 @@
 # Changelog
 
+## v5.17
+
+**Nothing changed. That is again the entire point.**
+
+The IRMAA engine moved out of the React component body and became a module-level function. Every
+one of the **638** checks returns the same figure it did at v5.16, and cross-version engine parity
+is byte-identical in its strict form. **If any number had moved, this release would be a bug.**
+
+### Why bother
+
+v5.16 started consolidating duplicated tax facts. This continues the same work from the other
+direction: not "the same fact written in many places," but "an engine written where nothing can
+test it."
+
+Engines B (Taxes) and C (IRMAA) were computed *inline*, inside the component's render. Their
+per-year rows therefore had no module-level binding, and the test harness — which reaches the app
+by exporting module-level names — could not touch them. Their only observable output was the
+rendered DOM, where every figure is printed as `Math.round(x / 1000)`. That capped verification of
+both engines at **±$500 of MAGI and ±$50 of surcharge**, which is wider than several of the effects
+the suite is trying to hold in place. Engine A, which has always been module-level, is checked to
+the dollar.
+
+An earlier plan proposed lifting that ceiling by splicing a test-only rows hook into the copy of
+the source the harness builds. That approach is dropped. Hoisting the engine needs no fragile
+anchor into a moving source file, and it makes Engine C reachable the same way Engine A already is.
+
+### What moved
+
+- **`computeIrmaaPlan({ retireYear, rothAmount, qcdAnnual, taxYield })`** — the 135-line compute
+  block, lifted verbatim to module level and given the four arguments that were its only
+  dependencies on component state. Everything else it reads was already module-level and is read at
+  call time, exactly as before. It writes nothing outside itself, calls no React hook, and sets no
+  state. The JSX below it now destructures eight values from one call and is otherwise untouched.
+
+The engine's arithmetic was not edited. The move was performed by a script that verified every
+anchor before writing, dedented the block by exactly eight spaces, and then proved the result by
+comparing the moved lines to the originals with whitespace stripped.
+
+**This does not yet make Engine C dollar-exact — it makes it dollar-exact *able*.** Exporting
+`computeIrmaaPlan` through the test shim and writing the exact-figure assertions is deliberately a
+separate release, for the same reason no tests are added here.
+
+### One comment corrected
+
+A comment inside the engine still said it "pays BOTH SS benefits and does not switch filing at
+death." That was true at v5.11. All three claims in it were fixed at v5.13, so for four releases the
+comment described a defect that was no longer there — the same stale-header failure recorded against
+finding C-2C-4. It is comment-only; no code near it changed.
+
+### A count correction
+
+**The suite has 638 checks, not 634.** The headline figure in the v5.15 and v5.16 entries was wrong.
+The per-suite numbers in both entries were right, and their own breakdowns sum to 638; the error was
+a sub-total in `TESTING.md`, which added the nine feature suites to **244** where they sum to **248**.
+That understatement then propagated into two release headlines. No test was missing and no check
+changed — only the arithmetic reporting them. `TESTING.md` is corrected in this release.
+
+This is the third recorded instance of a hand-computed total in project documentation being wrong,
+which is why the counts below are parsed from suite output.
+
+### What deliberately did NOT change
+
+**The Roth ladder's standard deduction still omits the age-65 extra entirely.** It is very likely a
+defect and it is noted for a future release. Fixing it here would have destroyed this release's only
+safety property — that nothing moved.
+
+**Engine B (Taxes) is still inline, and still ±$500.** Only Engine C was hoisted. Doing both in one
+pass would have doubled the surface of a change whose entire correctness argument is that the output
+is unchanged.
+
+### Testing
+
+**638 checks green**, every figure identical to v5.16: baseline **382** (t1 64 · t2 15 · t3 36 ·
+t4 90 · t5 44 · t6 18 · t10 115) + engine parity **8** + t7 37 · t8 29 · t9 14 · t11 40 · t12 23 ·
+t13 40 · t14 33 · t15 11 · t16 21. Plus **16** against the built `index.html`.
+
+**Parity is 8/8 in its strict form** — no intended-difference entry was needed.
+
+The refactor was additionally verified *before* the version bump, against a build carrying the
+v5.16 version strings, so that "did a figure move?" was answered separately from "was the version
+bumped?" In that state t7, t8, t11, t12, t13, t14 and t16 produced **byte-identical output** to
+v5.16, and parity between pristine v5.16 and the hoisted build was 8/8.
+
+No new tests ship with this release, and that is correct: a refactor that adds assertions is a
+refactor whose safety you cannot check.
+
+**Known harness wart, not fixed here:** `t15` defaults to the version tag `v514` and fails outright
+if run without an explicit tag. It is the version-tag trap the release checklist already warns
+about, and it will need the same one-line treatment every release until it is changed. It was left
+alone because editing the suite during a refactor weakens the proof the refactor depends on.
+
+**Provenance:** source `src/DangerClose.jsx` md5 `b466b02f3a10d1993a6e345f8070d8b3` · built
+`index.html` md5 `1f580be324d4c2dc0557d56c0c8b743b`.
+
 ## v5.16
 
 **Nothing changed. That is the entire point of this release.**
