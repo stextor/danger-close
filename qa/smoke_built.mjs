@@ -1,4 +1,4 @@
-// Verify the BUILT artifact (dist/index_classicscript_TESTONLY.html), not the source: does the published file
+// Verify the BUILT artifact (dist/index.html), not the source: does the published file
 // actually boot, dismiss its gate, load the example household, and carry v5.11?
 import { JSDOM, VirtualConsole } from "jsdom";
 import fs from "fs";
@@ -6,7 +6,30 @@ import fs from "fs";
 let _s = 123456789;
 Math.random = () => { _s = (1103515245 * _s + 12345) % 2147483648; return _s / 2147483648; };
 
-const html = fs.readFileSync("dist/index_classicscript_TESTONLY.html", "utf8");
+// ── Input: the REAL built artifact. jsdom cannot execute <script type="module">, so we derive a
+//    test-only classic-script copy here rather than expecting one to exist (it is NOT a file that
+//    is kept, committed, or carried between sessions — earlier versions of this script read a
+//    variant produced by hand, which meant it could not run standalone).
+//    The relocation to just before </body> is REQUIRED, not cosmetic: module scripts are deferred,
+//    classic ones are not, so running the bundle in place executes before <div id="root"> exists
+//    and throws React error #299. Verified safe because the bundle contains no module-only syntax
+//    (no import.meta, no export, no dynamic import).
+const SRC_HTML = process.argv[2] || "dist/index.html";
+const TMP_HTML = SRC_HTML.replace(/\.html$/, "") + ".__smoketest__.html";
+const _real = fs.readFileSync(SRC_HTML, "utf8");
+{
+  const m = _real.match(/<script type="module"[^>]*>/);
+  if (!m) { console.log(`  \u2717 no inlined module script found in ${SRC_HTML}`); process.exit(1); }
+  const a = _real.indexOf(m[0]);
+  const b = _real.indexOf("</script>", a + m[0].length) + "</script>".length;
+  const block = _real.slice(a, b).replace(m[0], "<script>");
+  // NOTE: the replacement MUST be a function. A string replacement would let $& / $` / $\' inside
+  // the minified bundle be interpreted as JS replacement patterns and silently corrupt the script
+  // (symptom: "Unexpected end of input" and a gate that will not dismiss).
+  fs.writeFileSync(TMP_HTML, (_real.slice(0, a) + _real.slice(b)).replace("</body>", () => block + "\n</body>"));
+}
+process.on("exit", () => { try { fs.unlinkSync(TMP_HTML); } catch {} });  // never leave it behind
+const html = fs.readFileSync(TMP_HTML, "utf8");
 const vc = new VirtualConsole();
 vc.on("jsdomError", e => { if (!/Could not load|css/i.test(String(e.message))) console.log("  [jsdomError]", String(e.message).slice(0, 200)); });
 
@@ -35,7 +58,7 @@ let pass = 0, fail = 0;
 const ck = (n, ok, d = "") => { if (ok) { pass++; console.log(`  ✓ ${n}`); } else { fail++; console.log(`  ✗ ${n}${d ? " — " + d : ""}`); } };
 const wait = (ms) => new Promise(r => setTimeout(r, ms));
 
-console.log("BUILT ARTIFACT SMOKE — dist/index_classicscript_TESTONLY.html");
+console.log(`BUILT ARTIFACT SMOKE \u2014 ${SRC_HTML}`);
 await wait(3000);
 
 const txt = () => window.document.body.textContent || "";
