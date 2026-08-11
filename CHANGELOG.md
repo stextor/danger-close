@@ -1,5 +1,94 @@
 # Changelog
 
+## v5.24
+
+**The Withdrawal tab was telling users something false about $147,000 of the example household.
+This release stops it. No engine is touched, and all 770 pre-existing checks return identical figures.**
+
+The Withdrawal tab's Priority 1 panel called its first-draw pot "Emergency Fund and any after-tax /
+taxable brokerage" and explained it as "Already-taxed principal. Only the gains are taxed (long-term
+cap gains: 0% / 15% / 20%)." Both halves were false. Engine D derives that pot as
+`household − total401k`, which sweeps in **every** account entered under Other accounts — the
+example household's Rollover IRA, Traditional IRA, annuity and state plan among them. And no gains
+are taxed anywhere in Engine D, at any rate. The Field Manual made the matching error, describing
+those accounts as "non-retirement."
+
+On the shipped example household the pot is $147,000, of which **$111,000 — 76% — is not
+already-taxed money**. It is drawn first, spent entirely tax-free, its growth is never taxed, and it
+never reaches the balance RMDs are computed on.
+
+### What this release does and does not do
+
+**It does not fix the modelling.** The pot is still misclassified; that fix is a later release. What
+changes is that the app now says so, in the app's own disclosed-limitations voice, in both places
+that previously denied it — including the direction of the error: **this makes the plan look better
+than it is.** For a tool whose stated identity is deliberate pessimism, that is the wrong way to be
+wrong, and shipping the disclosure before the fix means users are told the tool is optimistic here
+before it stops being optimistic.
+
+**A correction to how this defect was previously described.** Earlier documents — this changelog
+included — recorded the defect as "Engine D's `magi` omits `drawFromTaxable`" and implied the fix
+was to add it. That is wrong and would have introduced a defect. A withdrawal from a taxable
+brokerage account is mostly return of basis; only realized gain is income, at preferential rates.
+Adding the whole draw to MAGI would tax returned principal as ordinary income. The source says so at
+the line, and Engine B agrees — it sets realized capital gains to $0 unless a sale is modeled. The
+omission is deliberate, documented, correct, and consistent across engines. The defect is the
+**classification feeding** MAGI, not MAGI itself. `t19`'s pin carried the wrong framing and has been
+re-tagged and reworded; its assertion was correct and is unchanged. This finding has now been stated
+wrongly four times across three documents, which is recorded here because it will be read again.
+
+### Testing
+
+**787 checks green**, every figure parsed from suite output rather than hand-totalled:
+
+```
+baseline 399 (t1 64 · t2 15 · t3 36 · t4 107 · t5 44 · t6 18 · t10 115)
+parity     8 (v5.23 -> v5.24, strict, no intended diffs)
+feature  380 (t7 37 · t8 35 · t9 14 · t11 40 · t12 23 · t13 40 · t14 33
+              t15 11 · t16 24 · t17 63 · t18 47 · t19 13)
+TOTAL    787 = 770 pre-existing returning IDENTICAL figures + 17 new t4
+```
+
+Plus **16 checks against the built `index.html`** (`qa/smoke_built.mjs`) and **8 cross-version
+DOM-diff checks** (`qa/domdiff_withdrawal.mjs`, up from 4), which are cross-version by nature and so
+are not counted in the release headline.
+
+**The 17 new checks are extinction assertions on the corrected copy**, in `t4`, so the false wording
+cannot return. **Negative-controlled:** restoring the old copy fails **15 of the 17**. The two that
+still pass are deliberate — they assert the Field Manual iframe exists and that its `srcdoc` is
+substantial, which is what proves the four assertions reading it are capable of failing at all.
+
+**`qa/domdiff_withdrawal.mjs` is the proof that no figure moved.** It renders the Withdrawal tab on
+both builds and requires everything outside the Priority 1 copy block to be byte-identical, with the
+copy block excised by anchor rather than by loosening the comparison — so a change elsewhere cannot
+hide inside a relaxed test. It also asserts the copy block **did** change, and that v5.23 carries the
+old false claim while v5.24 does not.
+
+**Build control.** Before building v5.24, v5.23 was rebuilt from the same scaffold and reproduced its
+published `index.html` md5 byte-identically. That is what makes the new build hash below trustworthy
+rather than merely plausible.
+
+### Limitations disclosed
+
+- **The modelling is unchanged and still wrong.** Tax-deferred money entered under Other accounts is
+  still spent tax-free, still untaxed on growth, and still generates no RMD. This release only
+  removes the false claim that it is already-taxed principal.
+- **The corrected copy describes the class, not the amount.** It does not print how much of a given
+  user's pot is misclassified, because the app does not classify those accounts — that is the defect.
+  The 76% figure is specific to the shipped example household.
+- **`t4`'s new checks are copy assertions, not modelling assertions.** They prove the app says the
+  right thing. Nothing in this release proves Engine D computes the right thing, and `t19` continues
+  to pin three known Engine D defects as unfixed.
+- **The phrase "non-retirement" still appears three times outside the Field Manual** — twice in code
+  comments and once on the Taxes tab. All three describe a different quantity (the part of a bucketed
+  position that is neither Roth nor Traditional) and are accurate. They were checked, not missed.
+
+### Provenance
+
+Source `src/DangerClose.jsx` md5 `a0d33a885c29e86493a614b44060ed41` ·
+built `index.html` md5 `d959019388994da4e25f153f220d7593`.
+
+
 ## v5.23
 
 **The last engine computed inside the component body is now a module-level function — and the
