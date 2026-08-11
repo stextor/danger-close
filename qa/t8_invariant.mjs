@@ -109,5 +109,43 @@ T.applyLoadedData({ portfolio: port, expenses: [], incomeFromForm: true });
   ck("engine 'current' strategy computed on accrued balances", !!cur && Number.isFinite(cur.estate));
 }
 
+// ═══ v5.22 — TAXABLE-RESIDUAL CONSOLIDATION (finding D-2D-2) ═══
+// Same extinction shape as the retireStartBalances invariant above. Before v5.22 the positions
+// taxable residual was copied verbatim at SEVEN sites (Engines B and C internally, four Engine-A
+// P-constructions, and the Roth tab's tax-funding gate), all verified structurally identical by
+// AST fingerprint. These assert it now exists once and is reached everywhere.
+{
+  const hdr = "function taxableInitFromPositions";
+  const defStart = SRC.indexOf(hdr);
+  ck("helper taxableInitFromPositions exists", defStart >= 0);
+  const defEnd = SRC.indexOf("\n}", defStart) + 2;
+  const outsideHelper = SRC.slice(0, defStart) + SRC.slice(defEnd);
+
+  // 1) EXTINCTION — the raw residual reduce must exist ONLY inside the helper.
+  const residual = /reduce\(\((?:s, p|t, q)\) => (?:s|t) \+ Math\.max\(0, \((?:p|q)\.balance/g;
+  const strays = (outsideHelper.match(residual) || []).length;
+  ck("no taxable-residual reduce outside taxableInitFromPositions", strays === 0, `found ${strays}`);
+
+  // 2) COUNT — 1 definition + 7 consumer call sites (Engine C, Engine B, and five in DangerCloseMain).
+  //    Code-only: prose in the source refers to the helper by NAME, without parentheses, so this
+  //    counts real call sites rather than comment mentions. Confirmed against the AST census (8).
+  const uses = (SRC.match(/taxableInitFromPositions\(/g) || []).length;
+  ck("taxableInitFromPositions: 1 definition + 7 call sites", uses === 8, `found ${uses}`);
+
+  // 3) K2 — the Roth tax-funding gate is a VARIANT: positions residual PLUS otherAccounts. Only its
+  //    positions half was consolidated. Flattening it into the bare helper would silently change what
+  //    the "almost no outside money" warning measures, for households whose Other accounts carry it.
+  ck("Roth funding gate keeps its otherAccounts term",
+     SRC.includes('taxableInitFromPositions() + (PORTFOLIO.otherAccounts || []).reduce((t, a) => t + (a.balance || 0), 0)'));
+
+  // 4) K1 — the helper must NOT be inside retireStartBalances: that constructor applies contribAccrual
+  //    and no accrual flows to taxable. Asserted positionally, and the stale comment is gone.
+  const rsbStart = SRC.indexOf("function retireStartBalances");
+  const rsbEnd = SRC.indexOf("\n}", rsbStart) + 2;
+  ck("helper is OUTSIDE retireStartBalances (no accrual leaks into taxable)",
+     defStart > rsbEnd || defStart < rsbStart, `helper@${defStart} rsb@${rsbStart}-${rsbEnd}`);
+  ck("stale 'reduces stay inline' comment retired", !SRC.includes("those reduces stay inline at their sites"));
+}
+
 console.log(`\nt8 SUITE: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
