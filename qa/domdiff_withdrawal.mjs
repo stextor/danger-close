@@ -11,7 +11,7 @@
 import { JSDOM } from "jsdom";
 import { createRequire } from "module";
 
-const [VA, VB] = [process.argv[2] || "v522", process.argv[3] || "v523"];
+const [VA, VB] = [process.argv[2] || "v523", process.argv[3] || "v524"];
 
 const renderWithdrawal = async (ver) => {
   // Seed Math.random BEFORE the bundle import — d3-random captures it at module
@@ -76,26 +76,60 @@ console.log(`WITHDRAWAL TAB \u2014 cross-version DOM diff ${VA} \u2192 ${VB}\n`)
 ck(`${VA}: schedule table rendered`, !!A.schedule, "not found");
 ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
 const stripV = s => s.replace(/v5\.\d+(\.\d+)?/g, "vX");
-ck("schedule text is identical across the two builds (version strings normalized)",
-   !!A.schedule && stripV(A.schedule) === stripV(B.schedule),
-   A.schedule && B.schedule ? `lengths ${A.schedule.length} vs ${B.schedule.length}` : "one side missing");
 
-if (A.schedule && B.schedule && stripV(A.schedule) !== stripV(B.schedule)) {
-  for (let k = 0; k < Math.min(A.schedule.length, B.schedule.length); k++) {
-    if (A.schedule[k] !== B.schedule[k]) {
-      console.log(`\n  first divergence at char ${k}:`);
-      console.log(`    ${VA}: ...${A.schedule.slice(Math.max(0,k-60), k+60)}...`);
-      console.log(`    ${VB}: ...${B.schedule.slice(Math.max(0,k-60), k+60)}...`);
+// ── v5.24: the Priority 1 panel copy is the ONE intended divergence ─────────────
+// v5.23 -> v5.24 is a disclosure-only release: no engine is touched, but the Withdrawal
+// tab's Priority 1 panel is deliberately reworded (it called the taxable pot "already-taxed
+// principal", which is false for ~76% of it on the example household). So a strict
+// whole-tab identity check would fail BY DESIGN and prove nothing.
+//
+// Rather than loosen the comparison, excise exactly that panel body from both sides and
+// require everything else to be byte-identical. The excision is anchored, bounded, and
+// asserted on both sides, so it cannot quietly swallow a change somewhere else: if either
+// anchor goes missing the excision check fails loudly instead of passing vacuously.
+const P1_START = "Emergency Fund";
+const P1_END = "Years active:";
+const excise = (s) => {
+  if (!s) return { ok: false, rest: s, block: "" };
+  const a = s.indexOf(P1_START);
+  if (a < 0) return { ok: false, rest: s, block: "" };
+  const b = s.indexOf(P1_END, a);
+  if (b < 0) return { ok: false, rest: s, block: "" };
+  return { ok: true, rest: s.slice(0, a) + "[[P1-COPY]]" + s.slice(b), block: s.slice(a, b) };
+};
+
+const schedA = excise(A.schedule), schedB = excise(B.schedule);
+ck("Priority 1 panel located on both builds (the excision is anchored, not blind)",
+   schedA.ok && schedB.ok, `${VA} ${schedA.ok} / ${VB} ${schedB.ok}`);
+
+ck("schedule text identical apart from the Priority 1 copy block",
+   schedA.ok && schedB.ok && stripV(schedA.rest) === stripV(schedB.rest),
+   `lengths ${schedA.rest.length} vs ${schedB.rest.length}`);
+
+if (schedA.ok && schedB.ok && stripV(schedA.rest) !== stripV(schedB.rest)) {
+  const a = stripV(schedA.rest), b = stripV(schedB.rest);
+  for (let k = 0; k < Math.min(a.length, b.length); k++) {
+    if (a[k] !== b[k]) {
+      console.log(`\n  UNEXPECTED divergence outside the copy block, at char ${k}:`);
+      console.log(`    ${VA}: ...${a.slice(Math.max(0,k-60), k+60)}...`);
+      console.log(`    ${VB}: ...${b.slice(Math.max(0,k-60), k+60)}...`);
       break;
     }
   }
 }
 
-// Whole-tab check, version strings excluded (they legitimately differ).
-const strip = s => s.replace(/v5\.\d+(\.\d+)?/g, "vX");
-ck("entire tab text identical once version strings are normalized",
-   strip(A.full) === strip(B.full),
-   `lengths ${A.full.length} vs ${B.full.length}`);
+// The copy block MUST have changed — if it hasn't, the release didn't land.
+ck("the Priority 1 copy block DID change (this release's whole visible effect)",
+   schedA.block !== schedB.block,
+   "copy identical across builds — the disclosure fix did not reach the DOM");
+ck(`${VA} carries the OLD false claim`, /Already-taxed principal/i.test(schedA.block));
+ck(`${VB} no longer carries it`, !/Already-taxed principal/i.test(schedB.block));
+
+// Whole-tab check, same treatment: version strings and the one intended block excluded.
+const fullA = excise(A.full), fullB = excise(B.full);
+ck("entire tab text identical apart from version strings and the Priority 1 copy",
+   fullA.ok && fullB.ok && stripV(fullA.rest) === stripV(fullB.rest),
+   `lengths ${fullA.rest.length} vs ${fullB.rest.length}`);
 
 console.log(`\nDOM DIFF: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

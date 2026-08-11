@@ -74,14 +74,30 @@ ck("[KNOWN DEFECT 2026-08-11 | rel c] Engine D taxable pot == otherAccounts tota
    Math.round(r._taxInit) === Math.round(oaTotal),
    `_taxInit ${$(r._taxInit)} vs otherAccounts ${$(oaTotal)}`);
 
-// ── B-2 · draws from that pot contribute NOTHING to MAGI.
-// Source assertion (extinction-style, like t8): the magi expression names its components
-// explicitly and drawFromTaxable is not among them.
-// RELEASE (b) FIXES THIS \u2014 this assertion must then FAIL and be replaced.
+// ── B-2 · misclassified money never enters MAGI as tradDraw.
+//
+// ⚠ REWORDED 2026-08-11 (v5.24). This pin previously read "Engine D magi omits
+// drawFromTaxable" and was tagged `rel b`, instructing the next session to ADD
+// drawFromTaxable to magi. That would introduce a defect, not fix one:
+//   * drawFromTaxable is a withdrawal from a TAXABLE BROKERAGE account. It is mostly
+//     return of basis; only realized gain is income, and at preferential rates. Adding
+//     the whole draw to MAGI would tax returned principal as ordinary income.
+//   * The source already says so at the line (v5.24 L4161-4162), and Engine B agrees:
+//     computeTaxPlan sets capGains_y = 0, "conservatively 0 unless a sale is modeled."
+//     Neither engine models realized gains. That is a disclosed, consistent simplification.
+// So the magi expression is CORRECT and must stay as it is. What is wrong is the
+// CLASSIFICATION feeding it: _taxInit swallows every otherAccounts dollar (pin B-1), so
+// money that ought to be traditional is spent as brokerage and therefore never enters MAGI
+// as tradDraw. Fixing the classification is release (c); the magi expression needs no edit.
+//
+// The assertion below is unchanged and still passes — only its label and reasoning were wrong.
+// This finding has now been stated wrongly four times across three documents; if you are
+// about to "fix" magi, read SCOPE_ENGINE_D_MAGI_v5_24.md §1 before touching anything.
+// RELEASE (c) CHANGES THIS \u2014 when the pot is classified, re-point this pin at tradDraw.
 const SRC = readFileSync("../DangerClose.jsx", "utf8");
 const magiLine = SRC.split("\n").find(l => /const magi\s*=/.test(l) && /streamsOrd_y/.test(l));
 ck("source: the Engine D magi expression was located", !!magiLine);
-ck("[KNOWN DEFECT 2026-08-11 | rel b] Engine D magi omits drawFromTaxable",
+ck("[KNOWN DEFECT 2026-08-11 | rel c] misclassified pot never reaches MAGI (magi correctly excludes brokerage draws)",
    !!magiLine && !/drawFromTaxable/.test(magiLine),
    magiLine && magiLine.trim().slice(0, 110));
 ck("...and it does name the components it DOES count (guards against a renamed variable)",
