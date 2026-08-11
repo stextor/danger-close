@@ -16,7 +16,7 @@ const VER = process.argv[2] || "v510";
 // change the CHECK COUNT: with an unregistered tag t3 ran 35 checks instead of 36, and the count is
 // the number that goes in the release headline. Registering a new version in the ladders below is
 // now mandatory, and an unregistered tag stops the run instead of quietly testing the wrong thing.
-const KNOWN_VERSIONS = ["v510", "v5101", "v5102", "v511", "v512", "v513", "v514", "v515", "v516", "v517", "v518", "v519", "v520", "v521", "v522", "v592"];
+const KNOWN_VERSIONS = ["v510", "v5101", "v5102", "v511", "v512", "v513", "v514", "v515", "v516", "v517", "v518", "v519", "v520", "v521", "v522", "v523", "v592"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is not registered in this suite.");
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -62,7 +62,7 @@ await click(example); await flush(); await flush();
   const t = body().textContent || "";
   // Exact per-tag string: "v5.10" is a PREFIX of v5.10.1/v5.10.2, so a substring test
   // passed for the whole v5.10 family by luck and broke at v5.11. Map the tag explicitly.
-  const _badge = VER === "v522" ? "v5.22" : VER === "v521" ? "v5.21" : VER === "v520" ? "v5.20" : VER === "v519" ? "v5.19" : VER === "v518" ? "v5.18" : VER === "v517" ? "v5.17" : VER === "v516" ? "v5.16" : VER === "v515" ? "v5.15" : VER === "v514" ? "v5.14" : VER === "v513" ? "v5.13" : VER === "v512" ? "v5.12" : VER === "v511" ? "v5.11" : VER === "v5102" ? "v5.10.2"
+  const _badge = VER === "v523" ? "v5.23" : VER === "v522" ? "v5.22" : VER === "v521" ? "v5.21" : VER === "v520" ? "v5.20" : VER === "v519" ? "v5.19" : VER === "v518" ? "v5.18" : VER === "v517" ? "v5.17" : VER === "v516" ? "v5.16" : VER === "v515" ? "v5.15" : VER === "v514" ? "v5.14" : VER === "v513" ? "v5.13" : VER === "v512" ? "v5.12" : VER === "v511" ? "v5.11" : VER === "v5102" ? "v5.10.2"
     : VER === "v5101" ? "v5.10.1" : IS510 ? "v5.10" : "v5.9.2";
   T(`SHELL: version badge reads ${_badge}`, t.includes(_badge));
   T("SHELL: amber example-data banner fires", has(t, "EXAMPLE DATA MODE") || has(t, "built-in example household"));
@@ -121,7 +121,7 @@ sig("events", ["MEDICARE", "RMD", "HSA", "BACKUP"]);
 {
   const v = per["verify"] || "";
   // v5.14 adds three IRMAA-indexation checks to the Verify tab (see t1's note).
-  const _vCount = (VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522") ? "57" : IS510 ? "54" : "53";
+  const _vCount = (VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523") ? "57" : IS510 ? "54" : "53";
   T(`VERIFY TAB: reports ${_vCount} checks`, v.includes(_vCount));
   T("VERIFY TAB: no failing marks rendered", !/✗/.test(v));
 }
