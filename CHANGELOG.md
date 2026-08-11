@@ -1,5 +1,85 @@
 # Changelog
 
+## v5.23
+
+**The last engine computed inside the component body is now a module-level function — and the
+Withdrawal tab renders byte-identically.**
+
+Engine D, the Withdrawal tab's projection, was an arrow IIFE embedded in JSX inside the component
+body. It is now `computeWithdrawalPlan({ retireYear, rothAmount, scenarioPreset })`, sited beside
+`computeTaxPlan`. 226 lines moved verbatim; the JSX return half is untouched; the three values it
+used to read from the surrounding component scope are now parameters, and **no component-scope read
+remains**. This release fixes nothing and changes no output — that is the whole claim.
+
+### Why this release exists
+
+An engine computed inside the component body has no module-level binding, so the test harness cannot
+reach its row array. Its only output path is the rendered DOM, which prints every figure rounded to
+the nearest $1,000 — a ±$500 measurement ceiling. Engine D was the last engine behind that ceiling;
+Engine C left at v5.17–v5.18 and Engine B at v5.19–v5.21 by the same route.
+
+The hoist and the dollar-exact assertions stay in **separate releases**, as they did both previous
+times. A refactor that ships new assertions is one whose safety can no longer be checked, because
+green stops distinguishing "the code is unchanged" from "the tests were written to match whatever it
+now does."
+
+### What the proof is — and what it is not
+
+**The green suite is not the proof, and this release is the reason to say so plainly.** While this
+work was being prepared, a +10% inflation perturbation inside Engine D moved `totalDrawn` by
+**$50,320** — and the entire 757-check suite stayed green. `t4` (90 checks, which walks the
+Withdrawal tab) passed. `t12` (23 checks, *named* `t12_engineD_survivor`) passed. Engine D had never
+had discriminating coverage, and nothing in the suite's output said so.
+
+The proof is instead `qa/domdiff_withdrawal.mjs`, which renders the Withdrawal tab on both builds and
+diffs the text. Before normalising version strings, the **only** divergence in the entire tab was the
+footer's `v5.22` → `v5.23`. Every schedule row byte-identical.
+
+### Testing
+
+**770 checks green**, every figure parsed from suite output rather than hand-totalled:
+
+```
+baseline 382 (t1 64 · t2 15 · t3 36 · t4 90 · t5 44 · t6 18 · t10 115)
+parity     8 (v5.22 -> v5.23, strict, no intended diffs)
+feature  380 (t7 37 · t8 35 · t9 14 · t11 40 · t12 23 · t13 40 · t14 33
+              t15 11 · t16 24 · t17 63 · t18 47 · t19 13)
+TOTAL    770 = 757 pre-existing returning IDENTICAL figures + 13 new t19
+```
+
+Plus **16 checks against the built `index.html`** (`qa/smoke_built.mjs`) — the artifact boots,
+dismisses its gate, mounts React from the inlined bundle, loads the example household, reaches the
+Taxes tab, and round-trips the `window.storage` shim. Plus **4 cross-version DOM-diff checks**
+(`qa/domdiff_withdrawal.mjs`), which are cross-version by nature and so are not counted in the
+release headline.
+
+**New: `t19` — Engine D's first real coverage**, 13 checks. Five are structural (reachability, the
+17-key return contract, determinism, parameter purity) and eight are fixture or pinned. It carries
+three dated `[KNOWN DEFECT]` pins asserting today's wrong behaviour, so each fails the moment the
+defect is fixed and that flip becomes the fix's own verification.
+
+### Limitations disclosed
+
+- **`t19` is not dollar-exact against hand-computed law.** It asserts structure, determinism and
+  three pinned defects. Removing the ±$500 ceiling is what makes dollar-exact assertions *possible*;
+  writing them is the next release's work, not this one's.
+- **Engine D's known defects are pinned, not fixed.** `otherAccounts` is treated wholly as taxable;
+  withdrawals from the taxable pot are absent from MAGI; money in a named traditional IRA never
+  reaches the balance RMDs are computed on. All three remain in this build.
+- **One carry-forward pin claim was wrong as specified and was corrected before pinning.** It read
+  "the named IRA produces no RMD anywhere." That is false: RMDs *do* move, indirectly — a larger
+  taxable pot means less traditional drawdown, so more traditional balance survives to RMD age
+  (lifetime RMD $151,662 → $218,941 on a $100K addition). The defect is that the traditional balance
+  never sees the money, not that RMDs are unaffected. Pinned as corrected.
+- **Coverage before `t19` was assumed, not measured.** The scope for this release asserted that `t4`
+  and `t12` would witness the hoist. Both claims were false, and were caught only because the
+  negative control was actually run rather than taken on trust.
+
+### Provenance
+
+Source `src/DangerClose.jsx` md5 `bce4bd537a498df5b489ea5702e3eb44` ·
+built `index.html` md5 `0a14dc285936c0f84440554893cf3086`.
+
 ## v5.22
 
 **One expression, written seven times, is now written once — and every figure in the app is unchanged.**
