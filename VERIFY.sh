@@ -1,6 +1,6 @@
 #!/bin/bash
 # ─────────────────────────────────────────────────────────────────────────────
-# Danger Close — release verification · v5.24
+# Danger Close — release verification · v5.25
 #
 # PROVENANCE: originally authored 2026-08-11 for v5.22 by transcribing the steps
 # actually executed in that session. Rolled forward to v5.23 from that file
@@ -8,32 +8,39 @@
 # it is NOT in project knowledge, so a session working from knowledge alone
 # cannot produce it. ADD IT TO KNOWLEDGE with this release.
 #
-# v5.24 changes: version pair and both expected md5s rolled forward. Step 4b is
-# still the proof, and is now stronger: domdiff excises the ONE deliberately
-# reworded panel by anchor and requires everything else byte-identical (8 checks,
-# up from 4). v5.24 is disclosure-only — no engine is touched — so the claim is
-# that all 770 pre-existing checks return identical figures, and the 17 new t4
-# checks are extinction assertions on the corrected copy.
+# v5.25 changes: version pair and both expected md5s rolled forward; t20 joins
+# step 4; step 4b's domdiff is now STRICT IDENTITY (9 checks, up from 8) because
+# v5.25 rewords nothing on the Withdrawal tab — the v5.24 excision was removed
+# rather than carried forward by habit. v5.25 touches no engine, so the claim is
+# that all 787 pre-existing checks return identical figures, and the 85 new ones
+# are t20 (61) plus t4 (+16), t5 (+5) and t6 (+3).
 #
-# NOTE, added v5.24: step 5 rebuilds the CURRENT version only. Before trusting a
-# new built md5, rebuild the PRIOR version first and confirm it reproduces its
-# published hash — that is what distinguishes 'the scaffold is complete' from
-# 'the hash looks plausible'. Done manually at v5.24; worth automating.
+# NOTE, added v5.24 and EXECUTED at v5.25: step 5 rebuilds the CURRENT version
+# only. Before trusting a new built md5, rebuild the PRIOR version first and
+# confirm it reproduces its published hash. Done at v5.25 — v5.24 rebuilt to
+# d959019388994da4e25f153f220d7593 byte-for-byte, which is what distinguishes
+# 'the scaffold is complete' from 'the hash looks plausible'. Still worth
+# automating; still done by hand.
+#
+# TRAP, recorded at v5.25: `npm i <pkg>` PRUNES anything absent from
+# package.json, so installing harness deps one at a time silently uninstalls the
+# previous ones. Step 1 installs them together; if you add one later, use
+# --no-save (which also keeps the scaffold package.json byte-identical, §N3a).
 #
 # Every command below was run and its result recorded in the release notes.
 #
 # Usage:  ./VERIFY.sh /path/to/workdir
-#   workdir must contain:  v523.jsx  v524.jsx  DangerClose.jsx(=v524)  qa/
+#    workdir must contain:  v524.jsx  v525.jsx  DangerClose.jsx(=v525)  qa/
 # ─────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
 ROOT="${1:-$(pwd)}"
 cd "$ROOT"
 
-PRIOR=v523
-CURR=v524
-EXPECT_SRC_MD5=a0d33a885c29e86493a614b44060ed41
-EXPECT_BUILT_MD5=d959019388994da4e25f153f220d7593
+PRIOR=v524
+CURR=v525
+EXPECT_SRC_MD5=590f6e31641561d343e7a544e889d0f7
+EXPECT_BUILT_MD5=722fa8e03f830ed772e522802af3b8cf
 
 say() { printf "\n\033[1m== %s ==\033[0m\n" "$*"; }
 die() { printf "\n\033[31mFAIL: %s\033[0m\n" "$*" >&2; exit 1; }
@@ -73,7 +80,8 @@ say "4. Feature suites"
 cd qa
 for t in t7_accrual t8_invariant t9_dom_smoke t11_survivor_rmd t12_engineD_survivor \
          t13_engineC_irmaa t14_cross_engine_survivor t15_engineA_death_filing \
-         t16_roth_ladder_filing t17_engineC_exact t18_engineB_exact t19_engineD_exact; do
+         t16_roth_ladder_filing t17_engineC_exact t18_engineB_exact t19_engineD_exact \
+         t20_other_taxtype; do
   timeout 900 node "${t}.mjs" | tail -1
 done
 cd ..
@@ -117,18 +125,21 @@ fi
 
 say "DONE"
 cat <<'EOF'
-Expected totals for v5.24 — compare against the output above:
+Expected totals for v5.25 — compare against the output above:
 
-  baseline current leg  399  (t1 64 · t2 15 · t3 36 · t4 107 · t5 44 · t6 18 · t10 115)
+  baseline current leg  423  (t1 64 · t2 15 · t3 36 · t4 123 · t5 49 · t6 21 · t10 115)
   parity                  8  strict, no INTENDED_DIFFS
-  feature               380  (t7 37 · t8 35 · t9 14 · t11 40 · t12 23 · t13 40
-                              t14 33 · t15 11 · t16 24 · t17 63 · t18 47 · t19 13)
+  feature               441  (t7 37 · t8 35 · t9 14 · t11 40 · t12 23 · t13 40
+                              t14 33 · t15 11 · t16 24 · t17 63 · t18 47 · t19 13
+                              t20 61)
   ----------------------------------------------------------------------------
-  TOTAL                 787  = 770 pre-existing (IDENTICAL figures) + 17 new t4
+  TOTAL                 872  = 787 pre-existing (IDENTICAL figures) + 85 new
   built artifact         16  qa/smoke_built.mjs
-  withdrawal DOM diff     8  qa/domdiff_withdrawal.mjs (cross-version; step 4b)
+  withdrawal DOM diff     9  qa/domdiff_withdrawal.mjs (cross-version; step 4b)
 
 Any figure that differs is a finding, not a rounding difference. The prior leg
-re-runs at 382 as frozen history — NOT 399: the 17 new t4 checks are gated on
-VER === "v524" because they assert copy that does not exist in v5.23.
+re-runs at 399 as frozen history — NOT 423: t20 does not exist there, and the
+new t4/t5/t6 checks are gated on VER === "v525" because they assert UI that does
+not exist in v5.24. The 17 t4 checks added at v5.24 DO run on both legs; their
+gate was widened this release, which is why the prior leg reads 399 and not 382.
 EOF
