@@ -1,6 +1,6 @@
 #!/bin/bash
 # ─────────────────────────────────────────────────────────────────────────────
-# Danger Close — release verification · v5.23
+# Danger Close — release verification · v5.24
 #
 # PROVENANCE: originally authored 2026-08-11 for v5.22 by transcribing the steps
 # actually executed in that session. Rolled forward to v5.23 from that file
@@ -8,25 +8,32 @@
 # it is NOT in project knowledge, so a session working from knowledge alone
 # cannot produce it. ADD IT TO KNOWLEDGE with this release.
 #
-# v5.23 changes: version pair and both expected md5s rolled forward; t19 added
-# to the feature loop; the cross-version Withdrawal DOM diff added as step 4b,
-# because for this release THAT is the proof the hoist changed nothing — the
-# pre-existing suite does not discriminate on Engine D (OPERATIONS §B2).
+# v5.24 changes: version pair and both expected md5s rolled forward. Step 4b is
+# still the proof, and is now stronger: domdiff excises the ONE deliberately
+# reworded panel by anchor and requires everything else byte-identical (8 checks,
+# up from 4). v5.24 is disclosure-only — no engine is touched — so the claim is
+# that all 770 pre-existing checks return identical figures, and the 17 new t4
+# checks are extinction assertions on the corrected copy.
+#
+# NOTE, added v5.24: step 5 rebuilds the CURRENT version only. Before trusting a
+# new built md5, rebuild the PRIOR version first and confirm it reproduces its
+# published hash — that is what distinguishes 'the scaffold is complete' from
+# 'the hash looks plausible'. Done manually at v5.24; worth automating.
 #
 # Every command below was run and its result recorded in the release notes.
 #
 # Usage:  ./VERIFY.sh /path/to/workdir
-#   workdir must contain:  v522.jsx  v523.jsx  DangerClose.jsx(=v523)  qa/
+#   workdir must contain:  v523.jsx  v524.jsx  DangerClose.jsx(=v524)  qa/
 # ─────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
 ROOT="${1:-$(pwd)}"
 cd "$ROOT"
 
-PRIOR=v522
-CURR=v523
-EXPECT_SRC_MD5=bce4bd537a498df5b489ea5702e3eb44
-EXPECT_BUILT_MD5=0a14dc285936c0f84440554893cf3086
+PRIOR=v523
+CURR=v524
+EXPECT_SRC_MD5=a0d33a885c29e86493a614b44060ed41
+EXPECT_BUILT_MD5=d959019388994da4e25f153f220d7593
 
 say() { printf "\n\033[1m== %s ==\033[0m\n" "$*"; }
 die() { printf "\n\033[31mFAIL: %s\033[0m\n" "$*" >&2; exit 1; }
@@ -110,17 +117,18 @@ fi
 
 say "DONE"
 cat <<'EOF'
-Expected totals for v5.23 — compare against the output above:
+Expected totals for v5.24 — compare against the output above:
 
-  baseline current leg  382  (t1 64 · t2 15 · t3 36 · t4 90 · t5 44 · t6 18 · t10 115)
+  baseline current leg  399  (t1 64 · t2 15 · t3 36 · t4 107 · t5 44 · t6 18 · t10 115)
   parity                  8  strict, no INTENDED_DIFFS
   feature               380  (t7 37 · t8 35 · t9 14 · t11 40 · t12 23 · t13 40
                               t14 33 · t15 11 · t16 24 · t17 63 · t18 47 · t19 13)
   ----------------------------------------------------------------------------
-  TOTAL                 770  = 757 pre-existing (IDENTICAL figures) + 13 new t19
+  TOTAL                 787  = 770 pre-existing (IDENTICAL figures) + 17 new t4
   built artifact         16  qa/smoke_built.mjs
-  withdrawal DOM diff     4  qa/domdiff_withdrawal.mjs (cross-version; step 4b)
+  withdrawal DOM diff     8  qa/domdiff_withdrawal.mjs (cross-version; step 4b)
 
 Any figure that differs is a finding, not a rounding difference. The prior leg
-re-runs at 382 as frozen history.
+re-runs at 382 as frozen history — NOT 399: the 17 new t4 checks are gated on
+VER === "v524" because they assert copy that does not exist in v5.23.
 EOF

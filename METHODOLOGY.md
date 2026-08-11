@@ -388,6 +388,32 @@ one amount per stream (no per-year schedules), annual granularity on the window,
 state-specific treatment beyond the state layer's ordinary handling. These are the known
 edges of the map.
 
+**Disclosed at v5.24 — the Withdrawal tab's first-priority pot is modelled optimistically.**
+Engine D (the Withdrawal tab) derives its taxable starting balance as `household − total401k`, so
+**every account entered under Other accounts lands in it** — including any the user named as a
+Rollover IRA, Traditional IRA, annuity or state plan. Engine D then draws that pot first and treats
+the whole of it as already-taxed brokerage principal: the draws never enter its MAGI, the pot's
+growth is never taxed, and none of it contributes to the balance RMDs are computed on (Engine D's
+RMD basis is the bucketed 401(k) only). On the shipped example household that is $147,000, of which
+$111,000 — 76% — is not already-taxed money.
+
+The direction matters: this makes a plan look **better** than it is, which is the wrong way for a
+deliberately pessimistic tool to be wrong. v5.24 does not change the modelling; it stops the app
+from denying it. The Withdrawal tab's Priority 1 panel and the Field Manual both previously
+described this pot as after-tax or non-retirement money, and both now state what it actually
+contains and which way the simplification errs. Reclassifying these accounts — so that
+tax-deferred dollars entered there become traditional balances that generate RMDs and enter MAGI
+as ordinary income — is a modelling change held for a later release.
+
+Two related notes, so the limitation is not read wider than it is. First, Engine D's MAGI expression
+correctly **excludes** taxable-brokerage withdrawals: such a draw is mostly return of basis, and only
+realized gain is income. Adding the whole draw to MAGI would tax returned principal at ordinary
+rates. Engine B applies the same simplification (realized capital gains default to $0 unless a sale
+is modeled), so the two engines are consistent here. The defect is the classification feeding MAGI,
+not MAGI itself. Second, the phrase "taxable (non-retirement) sleeve" still appears on the Taxes tab
+and in code comments; there it describes a different quantity — the part of a bucketed position that
+is neither Roth nor Traditional — and is accurate.
+
 **Fixed during merge verification (previously present in all v5.6 builds):** after the second
 death in `runExtendedMC`, the engine pushed a portfolio snapshot every *quarter* while living
 years snapshot annually — inflating path lengths, stretching the post-death time axis, and,
