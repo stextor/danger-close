@@ -15,7 +15,7 @@ const VER = process.argv[2] || "v510";
 // change the CHECK COUNT: with an unregistered tag t3 ran 35 checks instead of 36, and the count is
 // the number that goes in the release headline. Registering a new version in the ladders below is
 // now mandatory, and an unregistered tag stops the run instead of quietly testing the wrong thing.
-const KNOWN_VERSIONS = ["v510", "v5101", "v5102", "v511", "v512", "v513", "v514", "v515", "v516", "v517", "v518", "v519", "v520", "v521", "v522", "v523", "v524", "v592"];
+const KNOWN_VERSIONS = ["v510", "v5101", "v5102", "v511", "v512", "v513", "v514", "v515", "v516", "v517", "v518", "v519", "v520", "v521", "v522", "v523", "v524", "v525", "v592"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is not registered in this suite.");
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -114,7 +114,7 @@ await click(tabBtn("ss")); await flush();
   // prints a note saying so); the display layer conjures a spouse anyway. Found
   // 2026-08-06 by this suite. Pin documents today's behavior; when the SS tab's B
   // sections are gated on tl.single, flip these expectations.
-  if (VER === "v5101" || VER === "v5102" || VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524") { // fixed at v5.10.1; holds for all later builds
+  if (VER === "v5101" || VER === "v5102" || VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525") { // fixed at v5.10.1; holds for all later builds
     // ── FIXED in v5.10.1: the SS tab's Spouse-B sections are gated on the household's
     // single flag — no phantom claiming card, and the self-contradicting "$0/mo" note
     // goes with it (the engines were already correct: B modeled at $0). Also fixed:
@@ -132,6 +132,27 @@ await click(tabBtn("ss")); await flush();
   T("SS [KNOWN DEFECT]: engine honestly models the phantom at $0 while the card shows a derived benefit (fixed in v5.10.1)",
     /models Spouse B at \$0\/mo/i.test(t));
   }
+}
+
+// ═══ v5.25 D-5: a single filer's retirement Other account has ONE possible owner ═══
+// Consequence 3 of decision D-5. A one-item dropdown pretends to be a choice, so the owner is
+// rendered fixed instead. This is the degenerate case the couple suites cannot see.
+if (VER === "v525") {
+  await click(tabBtn("my data")); await flush();
+  const sels = [...body().querySelectorAll("select")];
+  const typeSels = sels.filter(s => [...s.options].some(o => o.value === "trad") && [...s.options].some(o => o.value === "hsa"));
+  T("V525 SINGLE: the Other-accounts tax-type selector is present", typeSels.length > 0, `found ${typeSels.length}`);
+  // No owner selector anywhere may offer B on a single household — the pre-existing rule — and
+  // none may offer B on a retirement row, which is the new one.
+  const ownerSels = sels.filter(s => [...s.options].some(o => o.value === "JT") || [...s.options].some(o => o.value === "A"));
+  T("V525 SINGLE: no owner selector offers a B option",
+    ownerSels.every(s => ![...s.options].some(o => o.value === "B")));
+  // The example household's Rollover IRA is a trad row, so at least one row must render its owner
+  // as fixed text rather than as a <select>. Count type selectors vs owner selectors: a fixed
+  // owner means FEWER owner selectors than type selectors.
+  const t = body().textContent || "";
+  T("V525 SINGLE: the recorded-but-unused disclosure is shown",
+    t.includes("TAX TYPE IS RECORDED BUT NOT YET USED"));
 }
 
 // ═══ Engines walk: the sites that consume per-owner balances must not crash ═══

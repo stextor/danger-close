@@ -16,7 +16,7 @@ const VER = process.argv[2] || "v510";
 // change the CHECK COUNT: with an unregistered tag t3 ran 35 checks instead of 36, and the count is
 // the number that goes in the release headline. Registering a new version in the ladders below is
 // now mandatory, and an unregistered tag stops the run instead of quietly testing the wrong thing.
-const KNOWN_VERSIONS = ["v510", "v5101", "v5102", "v511", "v512", "v513", "v514", "v515", "v516", "v517", "v518", "v519", "v520", "v521", "v522", "v523", "v524", "v592"];
+const KNOWN_VERSIONS = ["v510", "v5101", "v5102", "v511", "v512", "v513", "v514", "v515", "v516", "v517", "v518", "v519", "v520", "v521", "v522", "v523", "v524", "v525", "v592"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is not registered in this suite.");
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -62,7 +62,7 @@ await click(example); await flush(); await flush();
   const t = body().textContent || "";
   // Exact per-tag string: "v5.10" is a PREFIX of v5.10.1/v5.10.2, so a substring test
   // passed for the whole v5.10 family by luck and broke at v5.11. Map the tag explicitly.
-  const _badge = VER === "v524" ? "v5.24" : VER === "v523" ? "v5.23" : VER === "v522" ? "v5.22" : VER === "v521" ? "v5.21" : VER === "v520" ? "v5.20" : VER === "v519" ? "v5.19" : VER === "v518" ? "v5.18" : VER === "v517" ? "v5.17" : VER === "v516" ? "v5.16" : VER === "v515" ? "v5.15" : VER === "v514" ? "v5.14" : VER === "v513" ? "v5.13" : VER === "v512" ? "v5.12" : VER === "v511" ? "v5.11" : VER === "v5102" ? "v5.10.2"
+  const _badge = VER === "v525" ? "v5.25" : VER === "v524" ? "v5.24" : VER === "v523" ? "v5.23" : VER === "v522" ? "v5.22" : VER === "v521" ? "v5.21" : VER === "v520" ? "v5.20" : VER === "v519" ? "v5.19" : VER === "v518" ? "v5.18" : VER === "v517" ? "v5.17" : VER === "v516" ? "v5.16" : VER === "v515" ? "v5.15" : VER === "v514" ? "v5.14" : VER === "v513" ? "v5.13" : VER === "v512" ? "v5.12" : VER === "v511" ? "v5.11" : VER === "v5102" ? "v5.10.2"
     : VER === "v5101" ? "v5.10.1" : IS510 ? "v5.10" : "v5.9.2";
   T(`SHELL: version badge reads ${_badge}`, t.includes(_badge));
   T("SHELL: amber example-data banner fires", has(t, "EXAMPLE DATA MODE") || has(t, "built-in example household"));
@@ -111,7 +111,7 @@ sig("withdrawal", ["ORDER OF OPERATIONS", "Traditional"]);
 // NOT pinned defects: the modelling is unchanged and remains wrong. Release (c) fixes the model;
 // this release only stops the app from denying it. Flip nothing here when (c) lands — instead
 // re-point these at whatever (c) makes true.
-if (VER === "v524") {
+if (VER === "v524" || VER === "v525") {
   const w = per["withdrawal"] || "";
   const norm = w.toLowerCase();
   T("V524 withdrawal: 'already-taxed principal' claim is GONE", !norm.includes("already-taxed principal"));
@@ -150,7 +150,7 @@ sig("events", ["MEDICARE", "RMD", "HSA", "BACKUP"]);
 // DOCS_HTML reaches the DOM ONLY through <iframe srcDoc={...}> (v5.24 L5625), and jsdom does not
 // fold iframe srcdoc into body.textContent. Reading per["docs"] here would make every assertion
 // below pass vacuously on BOTH builds — the OPERATIONS section B2 failure. Read the attribute.
-if (VER === "v524") {
+if (VER === "v524" || VER === "v525") {
   const docsTab = tabs().find(b => b.textContent.trim() === "docs");
   await click(docsTab); await flush();
   const frame = body().querySelector('iframe[title="Danger Close Documentation"]');
@@ -165,11 +165,79 @@ if (VER === "v524") {
   T("V524 docs: names the direction of the error", man.includes("makes the Withdrawal tab optimistic"));
 }
 
+// ═══ v5.25 — the Other-accounts tax type, in the DOM ═══════════════════════════════════════════
+// The field is RECORDED and read by no engine, so no figure anywhere can witness it. The only
+// evidence that the UI exists at all is the DOM, which makes this block the sole coverage of
+// decisions D-1, D-2, D-4 and D-5 as the user actually meets them.
+if (VER === "v525") {
+  await click(tabs().find(b => b.textContent.trim() === "my data")); await flush();
+  const md = (body().textContent || "").replace(/\s+/g, " ");
+  // Scope to the Other accounts CARD. A page-wide select query also catches the Holdings table's
+  // five owner selectors, which offer A/B and are indistinguishable by shape — a filter written
+  // page-wide reported 14 owner rows for a 9-row list and would have asserted against the wrong set.
+  const _hdr = [...body().querySelectorAll("div")]
+    .find(d => (d.textContent || "").trim().startsWith("OTHER ACCOUNTS (HSA"));
+  const card = _hdr ? _hdr.closest(".card") : null;
+  T("V525 my data: the Other accounts card is locatable", !!card);
+  const sels = card ? [...card.querySelectorAll("select")] : [];
+  const typeSels = sels.filter(x => [...x.options].some(o => o.value === "trad")
+                                 && [...x.options].some(o => o.value === "hsa")
+                                 && [...x.options].some(o => o.value === "taxable"));
+
+  T("V525 my data: a tax-type selector exists on Other accounts", typeSels.length > 0, `found ${typeSels.length}`);
+  T("V525 my data: one selector per Other account row", typeSels.length === 9, `found ${typeSels.length}, expected 9`);
+  T("V525 my data: the selector offers exactly the four types",
+    typeSels.every(x => x.options.length === 4), typeSels.map(x => x.options.length).join(","));
+  T("V525 my data: the selector's labels are human, not enum keys",
+    typeSels.length > 0 && [...typeSels[0].options].map(o => o.textContent).join("|") === "Taxable|Traditional (pre-tax)|Roth|HSA",
+    typeSels.length ? [...typeSels[0].options].map(o => o.textContent).join("|") : "");
+
+  // D-4: the field must SAY it does nothing yet. A field that silently does nothing implies the
+  // money is already handled correctly, which is the misconception v5.24 was shipped to remove.
+  T("V525 my data: discloses the type is recorded but not used",
+    md.includes("TAX TYPE IS RECORDED BUT NOT YET USED"));
+  T("V525 my data: discloses the money is still spent as already-taxed cash",
+    md.includes("still drawn first and spent as already-taxed cash"));
+  T("V525 my data: discloses no figure moves yet",
+    md.includes("will not move a single figure yet"));
+  T("V525 my data: discloses the non-qualified annuity approximation",
+    md.includes("non-qualified annuity"));
+
+  // D-1: the old tooltip told users retirement accounts do NOT belong here, while the app itself
+  // puts two IRAs, an annuity and a state plan here. That contradiction is resolved, not repeated.
+  const owners = sels.filter(x => x.options.length > 0
+                               && [...x.options].every(o => ["JT", "A", "B"].includes(o.value)));
+  const allTitles = sels.map(x => x.getAttribute("title") || "").join(" ");
+  T("V525 my data: the false 'retirement accounts live in Holdings' claim is GONE",
+    !allTitles.includes("live in the Holdings table above"));
+  T("V525 my data: the surviving true half — individually owned by law — is kept",
+    allTitles.includes("individually owned by law"));
+
+  // D-5: no owner selector on a trad/roth row may offer Joint. The example household has four
+  // retirement rows, so this is not vacuous — asserted by counting them first.
+  const jointCapable = owners.filter(x => [...x.options].some(o => o.value === "JT"));
+  T("V525 my data: PRECONDITION — the household really has both row kinds",
+    owners.length === 9 && jointCapable.length === 5,
+    `owners=${owners.length} jointCapable=${jointCapable.length}`);
+  T("V525 my data: exactly the 5 non-retirement rows offer Joint", jointCapable.length === 5,
+    String(jointCapable.length));
+  T("V525 my data: the 4 retirement rows offer no Joint option",
+    owners.length - jointCapable.length === 4, String(owners.length - jointCapable.length));
+
+  // The stale line above the card, which used to say Other accounts "aren't classified".
+  T("V525 my data: the 'aren't classified' line is GONE", !md.includes("below aren't classified"));
+
+  // The migration notice must NOT fire on the shipped example household — it ships fully typed.
+  // If this ever goes true, every user sees a warning about data that was never migrated.
+  T("V525 my data: no migration notice on the fully-typed example household",
+    !md.includes("THIS PLAN PREDATES TAX TYPES"));
+}
+
 // ═══ Verify tab reflects the version's check count ═══
 {
   const v = per["verify"] || "";
   // v5.14 adds three IRMAA-indexation checks to the Verify tab (see t1's note).
-  const _vCount = (VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524") ? "57" : IS510 ? "54" : "53";
+  const _vCount = (VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525") ? "57" : IS510 ? "54" : "53";
   T(`VERIFY TAB: reports ${_vCount} checks`, v.includes(_vCount));
   T("VERIFY TAB: no failing marks rendered", !/✗/.test(v));
 }

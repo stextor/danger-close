@@ -18,7 +18,7 @@ const VER = process.argv[2] || "v510";
 // change the CHECK COUNT: with an unregistered tag t3 ran 35 checks instead of 36, and the count is
 // the number that goes in the release headline. Registering a new version in the ladders below is
 // now mandatory, and an unregistered tag stops the run instead of quietly testing the wrong thing.
-const KNOWN_VERSIONS = ["v510", "v5101", "v5102", "v511", "v512", "v513", "v514", "v515", "v516", "v517", "v518", "v519", "v520", "v521", "v522", "v523", "v524", "v592"];
+const KNOWN_VERSIONS = ["v510", "v5101", "v5102", "v511", "v512", "v513", "v514", "v515", "v516", "v517", "v518", "v519", "v520", "v521", "v522", "v523", "v524", "v525", "v592"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is not registered in this suite.");
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -27,8 +27,8 @@ if (!KNOWN_VERSIONS.includes(VER)) {
 }
 
 const IS510 = VER !== "v592"; // v5.10-family features (v510 and later)
-const IS5101 = VER === "v5101" || VER === "v5102" || VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524"; // v5.10.1 fixes present (v5101 and later)
-const IS5102 = VER === "v5102" || VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524"; // v5.10.2 B-2 fix present (full 13-key wipe)
+const IS5101 = VER === "v5101" || VER === "v5102" || VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525"; // v5.10.1 fixes present (v5101 and later)
+const IS5102 = VER === "v5102" || VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525"; // v5.10.2 B-2 fix present (full 13-key wipe)
 
 // ── window.storage shim: localStorage-backed, artifact API contract ──
 const PREFIX = "dc:";
@@ -133,6 +133,24 @@ await click(exp); await flush();
     T("B: backup carries the portfolio", !!(parsed && (parsed.portfolio || parsed.positions)));
     T("B: backup NEVER contains the API key", !txt.includes("sk-ant-TESTSECRET"), "credential leaked into backup!");
     T("B: backup carries no storage key names for credentials", !txt.includes("api_key_v1"));
+    // v5.25: a schema change reaches the STORAGE CONTRACT, and parity cannot see it — a migration
+    // that works forward but corrupts an old backup shows up here or nowhere.
+    if (VER === "v525" && parsed) {
+      const oa = (parsed.portfolio && parsed.portfolio.otherAccounts) || parsed.otherAccounts || [];
+      T("B (V525): backup carries Other accounts", Array.isArray(oa) && oa.length > 0, `len=${oa.length}`);
+      T("B (V525): every exported Other account carries a taxType",
+        oa.every(a => ["taxable", "trad", "roth", "hsa"].includes(a.taxType)),
+        JSON.stringify(oa.map(a => `${a.name}=${a.taxType}`)));
+      T("B (V525): the exported split still matches what v5.24 disclosed ($111k trad)",
+        oa.filter(a => a.taxType === "trad").reduce((t, a) => t + (a.balance || 0), 0) === 111000,
+        String(oa.filter(a => a.taxType === "trad").reduce((t, a) => t + (a.balance || 0), 0)));
+      T("B (V525): no exported trad/roth account is jointly owned",
+        oa.every(a => !((a.taxType === "trad" || a.taxType === "roth") && a.owner === "JT")),
+        JSON.stringify(oa.map(a => `${a.name}:${a.taxType}/${a.owner}`)));
+      T("B (V525): the transient migration flag is NOT persisted as a stale true",
+        !(parsed.portfolio && parsed.portfolio._otherTypeMigrated),
+        JSON.stringify(parsed.portfolio && parsed.portfolio._otherTypeMigrated));
+    }
   }
 }
 // Simple Mode toggle → persists.
