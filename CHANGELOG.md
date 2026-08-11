@@ -1,5 +1,143 @@
 # Changelog
 
+## v5.25
+
+**Other accounts now record what kind of money they hold. Nothing uses it yet — and the app says so.
+No engine is touched, and all 787 pre-existing checks return identical figures.**
+
+v5.24 disclosed that Engine D treats every account entered under Other accounts as already-taxed
+brokerage cash — drawn first, spent tax-free, growth never taxed, no RMD — including money the user
+named as an IRA. On the example household that is $111,000 of a $147,000 pot. The fix for the
+*modelling* is a later release, and it cannot happen at all until the data records the
+classification: through v5.24 `buildPortfolio` emitted these accounts as exactly
+`{ name, balance, owner }`. There was nothing to classify from.
+
+This release adds that field, migrates existing plans onto it, and does nothing else with it.
+
+### What ships
+
+- **A `taxType` on each Other account** — `taxable` | `trad` | `roth` | `hsa` — persisted, exported
+  and imported.
+- **A selector in My Data**, with a disclosure line stating plainly that the type is recorded, drives
+  nothing today, and will not move a figure until a later release.
+- **Migration for existing plans.** A backup with no `taxType` has one inferred from each account
+  name, using the same idiom the file already used to back-fill a missing `owner`. A one-time My
+  Data notice lists what was guessed, **what could not be guessed**, and any account whose owner was
+  reassigned.
+- **Traditional and Roth accounts can no longer be jointly owned.** An IRA cannot be held jointly,
+  and a jointly-owned pre-tax account has no RMD age for a later release to compute on. Migration
+  promotes such a row to person A and names it in the notice; the editor stops offering Joint on
+  those rows. A single filer sees a fixed owner rather than a one-item dropdown.
+- **Every entry path sets the type explicitly** — the example household, both spreadsheet-parser
+  paths, and the guided wizard — so inference is reserved for old backups, where nothing else is
+  available.
+
+### The correction to the tooltip, which was the opposite of what the app does
+
+The owner selector told users: *"Retirement accounts (IRA/401k) live in the Holdings table above."*
+The app does not honour that. The shipped example household carries a Rollover IRA and a Traditional
+IRA as Other accounts, and the spreadsheet parser **actively creates** annuity and state-plan rows
+there. The instruction and the behaviour had contradicted each other for some time. The decision was
+to make the tooltip true rather than migrate the data: an annuity is not a holding, and forcing it
+into the Holdings table would require `bucket`, `type` and `er` values, none of which are meaningful
+for it. The true half of the old tooltip — that retirement accounts are individually owned by law —
+is kept, and is now enforced rather than merely advised.
+
+A second line, above the Other accounts card, said these accounts "aren't classified". That is now
+false and has been corrected.
+
+### A defect introduced by v5.24, found and fixed here
+
+The v5.24 edit that added the Field Manual disclosure left a stray editing anchor in the document:
+the "What you enter" table ended with a dangling quoted phrase, `"other accounts"`, visible to
+anyone reading the manual. It is absent from v5.23 and present in v5.24, so it shipped with that
+release. Removed. The same table now also describes the tax-type field, which it otherwise would
+have understated.
+
+### The known approximation, disclosed at the field
+
+`taxType` is a single label, so a genuinely mixed account cannot be expressed. The real case is a
+**non-qualified annuity** — after-tax basis, tax-deferred growth, gains taxed as ordinary income on
+the way out — which is neither `taxable` nor `trad`. It is recorded as `trad`, which will treat all
+of it as ordinary income once a later release uses the field. That is the conservative direction and
+therefore the right way to be wrong, but it is an approximation and the field's help text says so.
+It will be recorded in METHODOLOGY when it starts to bite; today it changes nothing.
+
+### What this release deliberately does NOT do
+
+No engine reads `taxType`. Nothing about MAGI, RMDs, `_taxInit`, `_tradInit` or the draw order
+changes. Every Other account is still drawn first and spent as already-taxed cash, exactly as at
+v5.24, and the Withdrawal tab is still optimistic by the amount v5.24 disclosed. **METHODOLOGY is
+unchanged, because the modelling is unchanged** — this release records a fact, it does not use one.
+
+### Testing
+
+**872 checks green** = 423 (current leg, incl. t10) + 8 (parity, strict) + 441 (feature suites),
+every figure read from parsed suite output rather than restated by hand.
+
+| | |
+|---|---|
+| current leg | 423 — t1 64 · t2 15 · t3 36 · t4 123 · t5 49 · t6 21 · t10 115 |
+| parity v5.24 → v5.25 | 8, strict, no INTENDED_DIFFS |
+| feature | 441 — t7 37 · t8 35 · t9 14 · t11 40 · t12 23 · t13 40 · t14 33 · t15 11 · t16 24 · t17 63 · t18 47 · t19 13 · **t20 61** |
+| built artifact | 16 — `qa/smoke_built.mjs` |
+| withdrawal DOM diff | 9 — `qa/domdiff_withdrawal.mjs`, now **strict identity** |
+
+**All 787 pre-existing checks return identical figures.** Every per-suite count is unchanged from
+v5.24 except the four suites this release extends. The 85 new checks are `t20` (61), `t4` (+16),
+`t5` (+5) and `t6` (+3).
+
+**`qa/domdiff_withdrawal.mjs` is stronger than it was.** At v5.24 it excised the deliberately
+reworded Priority 1 panel by anchor and required everything else to match. v5.25 changes no
+withdrawal copy, so the excision was removed and the whole tab is now required to be byte-identical
+apart from the version string. That is the direct proof that no figure moved.
+
+**Negative controls (OPERATIONS §B2).** A green suite is not evidence of coverage, so every new
+assertion was broken on purpose:
+
+| Control | Result |
+|---|---|
+| `t20` against the frozen v5.24 build | 42 of 59 fail |
+| Engine D patched to actually read `taxType` | the extinction assertion fires |
+| one inference rule (annuity) broken | trad total drops to $104,000 — short by exactly the $7,000 annuity |
+| the owner promotion removed | the schema invariant, both promotions, the ordering check and the notice all fail |
+| back-fill order swapped | the ordering assertion fires |
+| the disclosure text altered | the `t4` disclosure assertion fires |
+| Joint restored on retirement rows | three `t4` D-5 assertions fire |
+
+**Two of the new assertions were found to be vacuous during that process and were fixed.** The
+schema invariant and the extinction check both passed on v5.24 for the wrong reason — where the
+field does not exist, a condition about the field is never true. Both now assert their precondition
+first. This is recorded because it is the same failure the negative-control rule exists to catch,
+reproducing itself inside the tests written to obey that rule.
+
+**A required equality.** v5.24 told users, in the app, that $111,000 of the example household's
+$147,000 first-draw pot is not already-taxed money. The inference rules are asserted to reproduce
+that split to the dollar — $111,000 `trad`, $21,000 `taxable`, $15,000 `hsa` — because if the
+classification and the shipped disclosure ever disagree, one of them is lying to somebody.
+
+**The built artifact was verified against a control.** Before trusting the new build hash, v5.24 was
+rebuilt from the same scaffold and reproduced its published `index.html` byte-for-byte
+(`d959019388994da4e25f153f220d7593`), which is what distinguishes "the scaffold is complete" from
+"the hash looks plausible".
+
+### Limitations, stated plainly
+
+- **The inference is a guess.** An account named `Fidelity ...4471` carries no signal and is left as
+  Taxable — optimistic, and the reason the notice reports what it *could not* classify rather than
+  only what it could.
+- **Promoting a jointly-owned retirement account to person A is also a guess**, and will sometimes
+  be wrong. It is tolerable only because the notice names the row. If that notice is ever dropped,
+  this behaviour has to be reconsidered.
+- **A mixed-basis account cannot be represented at all** (see the annuity note above).
+- **Nothing here makes the Withdrawal tab less optimistic.** It records the information needed to
+  fix that later. Users who read the v5.24 disclosure and expected v5.25 to correct the figures
+  should know that it does not, by design.
+
+**Provenance.** Source `src/DangerClose.jsx` md5 `590f6e31641561d343e7a544e889d0f7` · built
+`index.html` md5 `722fa8e03f830ed772e522802af3b8cf`.
+
+
 ## v5.24
 
 **The Withdrawal tab was telling users something false about $147,000 of the example household.
