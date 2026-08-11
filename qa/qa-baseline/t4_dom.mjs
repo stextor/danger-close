@@ -16,7 +16,7 @@ const VER = process.argv[2] || "v510";
 // change the CHECK COUNT: with an unregistered tag t3 ran 35 checks instead of 36, and the count is
 // the number that goes in the release headline. Registering a new version in the ladders below is
 // now mandatory, and an unregistered tag stops the run instead of quietly testing the wrong thing.
-const KNOWN_VERSIONS = ["v510", "v5101", "v5102", "v511", "v512", "v513", "v514", "v515", "v516", "v517", "v518", "v519", "v520", "v521", "v522", "v523", "v592"];
+const KNOWN_VERSIONS = ["v510", "v5101", "v5102", "v511", "v512", "v513", "v514", "v515", "v516", "v517", "v518", "v519", "v520", "v521", "v522", "v523", "v524", "v592"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is not registered in this suite.");
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -62,7 +62,7 @@ await click(example); await flush(); await flush();
   const t = body().textContent || "";
   // Exact per-tag string: "v5.10" is a PREFIX of v5.10.1/v5.10.2, so a substring test
   // passed for the whole v5.10 family by luck and broke at v5.11. Map the tag explicitly.
-  const _badge = VER === "v523" ? "v5.23" : VER === "v522" ? "v5.22" : VER === "v521" ? "v5.21" : VER === "v520" ? "v5.20" : VER === "v519" ? "v5.19" : VER === "v518" ? "v5.18" : VER === "v517" ? "v5.17" : VER === "v516" ? "v5.16" : VER === "v515" ? "v5.15" : VER === "v514" ? "v5.14" : VER === "v513" ? "v5.13" : VER === "v512" ? "v5.12" : VER === "v511" ? "v5.11" : VER === "v5102" ? "v5.10.2"
+  const _badge = VER === "v524" ? "v5.24" : VER === "v523" ? "v5.23" : VER === "v522" ? "v5.22" : VER === "v521" ? "v5.21" : VER === "v520" ? "v5.20" : VER === "v519" ? "v5.19" : VER === "v518" ? "v5.18" : VER === "v517" ? "v5.17" : VER === "v516" ? "v5.16" : VER === "v515" ? "v5.15" : VER === "v514" ? "v5.14" : VER === "v513" ? "v5.13" : VER === "v512" ? "v5.12" : VER === "v511" ? "v5.11" : VER === "v5102" ? "v5.10.2"
     : VER === "v5101" ? "v5.10.1" : IS510 ? "v5.10" : "v5.9.2";
   T(`SHELL: version badge reads ${_badge}`, t.includes(_badge));
   T("SHELL: amber example-data banner fires", has(t, "EXAMPLE DATA MODE") || has(t, "built-in example household"));
@@ -100,6 +100,35 @@ sig("grade", ["ESTATE READINESS"]);
 sig("ranking", ["SCF", "Empower"]);
 sig("guardrails", ["GUYTON-KLINGER", "80%", "120%"]);
 sig("withdrawal", ["ORDER OF OPERATIONS", "Traditional"]);
+
+// ═══ v5.24 EXTINCTION — the Priority 1 panel must not claim the taxable pot is already-taxed ═══
+// Same shape t8 uses for source invariants, applied to rendered text. Engine D's `_taxInit`
+// (L4003 at v5.23/v5.24) is `household - total401k`, so it swallows every "Other account" —
+// named IRAs, annuities and state plans included. Engine D then spends that pot with no entry in
+// `magi` (L4162), no tax on its growth (L4151) and no RMD (RMD basis is buckets only, L4095-4103).
+// The old copy called it "Already-taxed principal. Only the gains are taxed", which was false in
+// both halves. These assertions FAIL if either false claim returns, in any casing or spacing.
+// NOT pinned defects: the modelling is unchanged and remains wrong. Release (c) fixes the model;
+// this release only stops the app from denying it. Flip nothing here when (c) lands — instead
+// re-point these at whatever (c) makes true.
+if (VER === "v524") {
+  const w = per["withdrawal"] || "";
+  const norm = w.toLowerCase();
+  T("V524 withdrawal: 'already-taxed principal' claim is GONE", !norm.includes("already-taxed principal"));
+  T("V524 withdrawal: 'only the gains are taxed' claim is GONE", !norm.includes("only the gains are taxed"));
+  T("V524 withdrawal: no LTCG rate table on the taxable panel", !norm.includes("long-term cap gains: 0%"));
+  T("V524 withdrawal: pot is described as including Other accounts",
+    norm.includes("everything you entered under other accounts"));
+  T("V524 withdrawal: names the account types it swallows",
+    norm.includes("ira, annuity, hsa or state plan"));
+  T("V524 withdrawal: limitation is labelled as such", norm.includes("known limitation"));
+  T("V524 withdrawal: discloses the pot is spent tax-free", norm.includes("spent tax-free"));
+  T("V524 withdrawal: discloses growth is untaxed", norm.includes("growth is never taxed"));
+  T("V524 withdrawal: discloses no RMD", norm.includes("produces no rmd"));
+  T("V524 withdrawal: states the DIRECTION of the error",
+    norm.includes("makes the plan look better than it is"));
+  T("V524 withdrawal: promises the fix", norm.includes("a future release will classify"));
+}
 sig("roth", ["WEALTH CROSSOVER", "CONVERSION", "RMD"]);
 sig("taxes", ["QCD", "bracket"]);
 sig("irmaa", ["lookback", "Affects"]);
@@ -117,11 +146,30 @@ sig("docs", ["FIELD MANUAL"]);
 sig("verify", ["IRS Rev. Proc", "IRMAA"]);
 sig("events", ["MEDICARE", "RMD", "HSA", "BACKUP"]);
 
+// ═══ v5.24 EXTINCTION — the Field Manual carries the same correction ═══
+// DOCS_HTML reaches the DOM ONLY through <iframe srcDoc={...}> (v5.24 L5625), and jsdom does not
+// fold iframe srcdoc into body.textContent. Reading per["docs"] here would make every assertion
+// below pass vacuously on BOTH builds — the OPERATIONS section B2 failure. Read the attribute.
+if (VER === "v524") {
+  const docsTab = tabs().find(b => b.textContent.trim() === "docs");
+  await click(docsTab); await flush();
+  const frame = body().querySelector('iframe[title="Danger Close Documentation"]');
+  T("V524 docs: the Field Manual iframe is present", !!frame);
+  const man = (frame && frame.getAttribute("srcdoc")) || "";
+  T("V524 docs: srcdoc is substantial (the assertions below can actually fail)", man.length > 50000,
+    String(man.length));
+  T("V524 docs: 'non-retirement' mischaracterisation is GONE", !man.toLowerCase().includes("non-retirement"));
+  T("V524 docs: states Other accounts are modelled as already-taxed cash",
+    man.includes("modelled as already-taxed cash"));
+  T("V524 docs: states no RMD is generated", man.includes("generating no RMD"));
+  T("V524 docs: names the direction of the error", man.includes("makes the Withdrawal tab optimistic"));
+}
+
 // ═══ Verify tab reflects the version's check count ═══
 {
   const v = per["verify"] || "";
   // v5.14 adds three IRMAA-indexation checks to the Verify tab (see t1's note).
-  const _vCount = (VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523") ? "57" : IS510 ? "54" : "53";
+  const _vCount = (VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524") ? "57" : IS510 ? "54" : "53";
   T(`VERIFY TAB: reports ${_vCount} checks`, v.includes(_vCount));
   T("VERIFY TAB: no failing marks rendered", !/✗/.test(v));
 }
