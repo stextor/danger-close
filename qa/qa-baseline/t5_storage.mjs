@@ -10,9 +10,25 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
 const VER = process.argv[2] || "v510";
+
+// ─── v5.22: VERSION-TAG REGISTRY GUARD ───
+// An UNREGISTERED tag used to evaluate every ladder below as false and fall off the end of every
+// ternary chain, silently running the OLDEST branch: pre-v5.11 expectations and v5.10 version
+// strings. That is fail-OPEN — a new build got a WEAKER test, not a stronger one — and it could
+// change the CHECK COUNT: with an unregistered tag t3 ran 35 checks instead of 36, and the count is
+// the number that goes in the release headline. Registering a new version in the ladders below is
+// now mandatory, and an unregistered tag stops the run instead of quietly testing the wrong thing.
+const KNOWN_VERSIONS = ["v510", "v5101", "v5102", "v511", "v512", "v513", "v514", "v515", "v516", "v517", "v518", "v519", "v520", "v521", "v522", "v592"];
+if (!KNOWN_VERSIONS.includes(VER)) {
+  console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is not registered in this suite.");
+  console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
+  console.log("    Add it to the version ladders in this file BEFORE running.");
+  process.exit(1);
+}
+
 const IS510 = VER !== "v592"; // v5.10-family features (v510 and later)
-const IS5101 = VER === "v5101" || VER === "v5102" || VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521"; // v5.10.1 fixes present (v5101 and later)
-const IS5102 = VER === "v5102" || VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521"; // v5.10.2 B-2 fix present (full 13-key wipe)
+const IS5101 = VER === "v5101" || VER === "v5102" || VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522"; // v5.10.1 fixes present (v5101 and later)
+const IS5102 = VER === "v5102" || VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522"; // v5.10.2 B-2 fix present (full 13-key wipe)
 
 // ── window.storage shim: localStorage-backed, artifact API contract ──
 const PREFIX = "dc:";
