@@ -1,5 +1,80 @@
 # Changelog
 
+## v5.22
+
+**One expression, written seven times, is now written once — and every figure in the app is unchanged.**
+
+The taxable-residual expression `Math.max(0, balance − roth − trad)` was duplicated across seven sites
+(finding D-2D-2). It is now a single module-level helper, `taxableInitFromPositions(P = PORTFOLIO)`. This
+release is the first of three; it deliberately changes **no output at all**, and that is the whole proof.
+
+### What changed
+
+`taxableInitFromPositions` is sited **beside** `retireStartBalances`, not inside it. That constructor
+applies `contribAccrual`, and no accrual flows to taxable money — folding the residual in would either
+apply accrual it must not have, or add a field bypassing the constructor's own invariant. The header
+comment that read *"those reduces stay inline at their sites"* was amended in the same edit, because it
+became false the moment this shipped. Leaving a now-false comment beside a new helper is precisely the
+defect class the next release exists to fix.
+
+**One call site was deliberately not consolidated.** The Roth funding gate combines the positions
+residual with every dollar of `otherAccounts`. Only the positions half was replaced; the `otherAccounts`
+term stays exactly as written. Folding it in would change what that warning gate measures — a behaviour
+change in a release whose entire claim is that nothing changed. It is the site most likely to be tidied
+by accident, and `t8` now fails if it is.
+
+### Testing
+
+**757 checks green**, every figure parsed from suite output rather than hand-totalled:
+
+```
+baseline 382 (t1 64 · t2 15 · t3 36 · t4 90 · t5 44 · t6 18 · t10 115)
+parity     8   (v5.21 -> v5.22, strict)
+feature  367 (t7 37 · t8 35 · t9 14 · t11 40 · t12 23 · t13 40 · t14 33 · t15 11 · t16 24 · t17 63 · t18 47)
+TOTAL    757 = 751 pre-existing returning IDENTICAL figures + 6 new t8 assertions
+```
+
+Plus **16 checks against the built `index.html`** (`qa/smoke_built.mjs`) — the artifact boots, dismisses
+its gate, mounts React from the inlined bundle, loads the example household, reaches the Taxes tab, and
+round-trips the `window.storage` shim.
+
+**Parity is 8/8 strict** with no `INTENDED_DIFFS` entry. Needing one would have meant the change
+overreached.
+
+**Negative controls.** Re-inlining one copy of the residual at the Taxes engine fails `t8` 2 of 35
+(the extinction assertion and the count); flattening the funding gate's `otherAccounts` term fails 1 of
+35; restored, 35/0. The new version-guard registry exits 1 on an unregistered tag.
+
+### A test-harness fix that shipped with this release
+
+Five version-keyed suites (`t1`, `t3`, `t4`, `t5`, `t6`) gated behaviour on enumerated version tags, and
+an **unregistered tag silently fell through every ternary to the oldest branch** — running pre-v5.11
+expectations and v5.10 version strings against a new build. Fail-open: a newer build got a *weaker* test,
+and the check count moved with it (`t3` ran 35 instead of 36). All five now share a `KNOWN_VERSIONS`
+registry that hard-exits on an unknown tag. This adds zero assertions and changes zero figures for
+registered tags. No ladder had already missed a roll-forward — the exposure was prospective, not
+historical.
+
+`qa/tools/` is added: four AST-based parser tools (`funcmap`, `census`, `diverge`, `residual`) used to
+resolve the site census for this release. They live outside the suite directory because they assert
+nothing and must never be countable as checks. **They are not themselves tested** — their output was
+corroborated against hand-read facts, which is not the same thing, and a fixture for them is outstanding.
+
+### Limitations, unchanged by this release
+
+The four modeling engines remain parallel implementations of overlapping statute. Engine D (the
+Withdrawal tab) is still computed inside the component body, so it is observable only through the
+rendered DOM at **±$500**, and its known defects — `otherAccounts` treated wholly as taxable, draws from
+it contributing nothing to MAGI, and a named traditional IRA producing no RMD — are **not fixed here.**
+They are the subject of releases (b) and (c). No `[KNOWN DEFECT]` pin was added for them in this release;
+see TESTING for why that requires an instrumentation change first.
+
+METHODOLOGY is unchanged — this is the one release of the three that alters no modeling.
+
+**Provenance.** Source `src/DangerClose.jsx` md5 `aac6851f91860edc8341dd44a2c35424` · built `index.html`
+md5 `34450fb1513117c9b47c1584028e8d72`. Built with vite 5.4.21 / @vitejs/plugin-react 4.7.0 /
+vite-plugin-singlefile 2.3.3 / react 18.3.1 on node 22; the build is byte-reproducible on that toolchain.
+
 ## v5.21
 
 **Engine B is now checked to the cent — and Engines A and B have been compared for the first time.**
