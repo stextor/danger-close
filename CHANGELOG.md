@@ -1,5 +1,100 @@
 # Changelog
 
+## v5.30
+
+**A false disclosure corrected. No engine change, no figure moves — parity 8/8 strict.**
+
+Through v5.29 the Field Manual told users the OBBBA "senior bonus" deduction **was not modelled**,
+and that leaving it out made near-term tax projections *"slightly conservative (overstated)."* Both
+clauses were false. The Taxes engine has modelled the deduction all along — $6,000 per person 65+,
+gated to tax years 2025–2028, phasing out at 6% of MAGI above $75,000 single / $150,000 filing
+jointly. So a user reading §13 was told their near-term tax was overstated when the deduction had
+already been taken.
+
+The direction is what made this worth its own release. A deliberately pessimistic tool claiming to
+be conservative in the one place it is not is the failure mode this project exists to avoid.
+
+### 1. §13 of the Field Manual now says what the app does
+
+The bullet states that the deduction is modelled on the Taxes tab, names the phase-out thresholds,
+and — in one sentence — discloses that the Roth conversion ladder does **not** model it, so the two
+tabs can differ for any ladder year at or before 2028. That divergence was real and undisclosed
+before this release; it is now a disclosed limitation. METHODOLOGY §7 already carried the reasoning
+(the deduction depends on MAGI, which depends on the conversion being solved for) and is unchanged.
+
+The closing sentence about every other 2026 constant being verified against IRS Rev. Proc. 2025-32,
+CMS and SSA survived the edit intact and is asserted by a new check — replacing half a sentence and
+leaving the rest is a defect this project has shipped before.
+
+### 2. METHODOLOGY §5 aligned to §7
+
+§5 listed the deduction among "known simplifications" as deliberately omitted. It now states that it
+is modelled, discloses the MAGI proxy the phase-out is computed against (gross ordinary income plus
+qualified dividends and capital gains), records that the four OBBBA figures are statutory and
+unindexed, and points at §7 for the ladder divergence.
+
+### 3. A false source comment corrected — this closes **E-3**
+
+The comment above `seniorExtraFor` claimed *"Engine A models it on the conversion side and Engine B
+in the schedule."* Engine A does not model it, and says so correctly at its own deduction site — the
+two comments contradicted each other about the same engine. Named here rather than folded silently
+into "docs corrected", because a Section E finding being retired should be visible in the record.
+
+### 4. Engine B's OBBBA arithmetic is now tested — it never was
+
+Correcting copy that describes untested behaviour only moves the risk. `t18` gains **three** checks,
+each hand-computed from the OBBBA rules **before** being compared to the engine: a 65+ MFJ household
+below the $150,000 phase-out start (full $6,000 × 2), one above it (tapered to $3,000 × 2 by 6% of
+the $50,000 excess), and one at `yr = 2029` proving the sunset fires. The sunset case is the load-
+bearing one: both spouses are 70 and 71, so the zero can only come from the year gate. All three
+matched to the cent.
+
+`t4` gains **six** checks on the corrected §13 copy, read from the iframe `srcdoc` attribute rather
+than `textContent` — a `textContent` read passes vacuously on every build. They are **gated per leg**:
+the v5.30 leg asserts the corrected copy, earlier legs assert the old copy they legitimately contain,
+so frozen legs keep replaying green.
+
+**Negative-controlled.** Restoring the old §13 wording fails **5 of the 6** new `t4` checks. The
+sixth passes on both, by design: it guards against *deleting* the true closing sentence, not against
+the wrong lead-in.
+
+### Counts — computed from suite output
+
+| Leg | Checks |
+|---|---|
+| Baseline, current leg (v530) | **490** — t1 64 · t2 15 · t3 36 · t4 147 · t5 44 · t6 21 · t10 163 |
+| Feature suites | **487** — t7 41 · t8 38 · t9 14 · t11 40 · t12 23 · t13 42 · t14 33 · t15 11 · t16 24 · t17 63 · t18 50 · t19 14 · t20 94 |
+| MC parity (v529 → v530) | **8**, strict |
+| **App total** | **985** |
+| Tooling (`t21`) | 50, counted separately |
+| Built artifact (`smoke_built.mjs`) | 16 |
+| Withdrawal DOM diff | 10, re-pointed to v529 → v530 |
+
+The prior leg replays at **980** — five fewer, which is the per-leg gating above (six new checks on
+v5.30, one on earlier legs), not a regression.
+
+### Limitations and things this release does NOT do
+
+- **Engine A still does not model the deduction.** That is now disclosed rather than fixed. Whether
+  it should model it is a live modelling question with a circularity objection on the record, and it
+  needs its own scope.
+- **The four OBBBA constants remain hardcoded** in the tax engine rather than living in
+  `TAX_CONSTS`, and are therefore **not covered by the Verify tab or the public-constants suite** —
+  which is what the surviving "every *other* 2026 constant" sentence now implies. Tracked as **E-2**.
+- **The `yr <= 2028` fuse is asserted by exactly one test** (`t18` case 11c) and by nothing in the
+  UI. Until E-2 lands, that check is what stands between the app and a wrong answer after 2028.
+- **The phase-out is computed against a MAGI proxy**, not a statutory MAGI, and is disclosed as such
+  in METHODOLOGY §5.
+- **This build did not reproduce bit-identically.** Rebuilding v5.29 from the same scaffold this
+  cycle produced `bccfd60d4afa19992d9c1f0c0713e4cb` rather than the published
+  `fe6bf7d4230abdacbf7ce1171798feb3`, although all five toolchain versions recorded in OPERATIONS
+  §N3a matched exactly. The differences are bundler identifier mangling; the floating dependency is
+  **rollup** (a caret dependency of vite that §N3a does not pin). The binding evidence for this
+  release is therefore `smoke_built.mjs` at 16/16 on the actual artifact, not a hash match.
+
+**Provenance** — source `src/DangerClose.jsx` md5 `8fcc546263f59fb4a88c131e97f4c882` · built
+`index.html` md5 `183b58b463fcd56dfb71311a4cd68caf`.
+
 ## v5.29
 
 **Three open items closed. No figure moves — parity 8/8 strict.**
