@@ -1,5 +1,84 @@
 # Changelog
 
+## v5.27
+
+**Corrects a false statement about your money that v5.26 left in the Field Manual. Presentation
+only — no engine, no schema, no figure moves.**
+
+v5.26 made Other accounts taxable by type and rewrote the copy that described them. Its Field Manual
+edit replaced the first half of a sentence and **left the second half standing.** The "What you
+enter" table therefore shipped saying, one clause after its own correction, that Other accounts are
+*"spent tax-free, never taxed on growth, and generating no RMD — even when what you entered there is
+an IRA, annuity or state plan. That makes the Withdrawal tab optimistic."*
+
+That was the v5.24 disclosure. It was true when written and false the moment v5.26 landed.
+
+**This is the worst shape a documentation defect can take.** Not an omission but a contradiction, in
+which the stale half is more specific and more alarming than the true half and names exactly the
+accounts the release had just fixed. A user reading it would conclude their IRA was still being spent
+tax-free. It was not — the engines were correct throughout.
+
+### What changed
+
+The false clause is replaced with what the model actually does. The two statements around it that
+are **still true** — that Taxable and HSA balances are modelled as already-taxed cash, and that Other
+accounts are still drawn first — are preserved. Deleting the passage wholesale would have replaced a
+wrong statement with a missing one, and there is a negative control for exactly that.
+
+### Why it survived, which matters more than the sentence
+
+**Two guards failed, and the second is the real finding.**
+
+`DOCS_HTML` is a single 141,091-character line. Project convention requires quote-free anchors when
+editing inside it, and that was followed — but an anchored replacement is correct about the span it
+replaces and **silent about the text that follows**, which on a line that long is invisible. The
+convention gains a second half: after editing inside `DOCS_HTML`, read back the full surrounding
+sentence.
+
+**Three `t4` assertions were holding the false claim in place.** Dating from v5.24, they asserted the
+*presence* of the three statements v5.26 falsified. The suite was green partly **because** the stale
+copy survived, and would have failed had the Field Manual been corrected properly. v5.26 correctly
+inverted the equivalent assertions for the Withdrawal tab and the My Data panel and missed this set —
+and missing it is what let the source defect through.
+
+A disclosure assertion that is not re-examined when its disclosure becomes false stops being a test
+and becomes a lock. All three are now extinction checks.
+
+### Testing
+
+**915 checks green** = 423 (current leg, incl. t10) + 8 (parity, strict) + 484 (feature suites), plus
+16 on the built artifact, 10 cross-version DOM-diff, and 49 tooling checks counted separately.
+
+**Parity 8/8 strict, and every one of v5.26's 911 checks returns an identical figure** except t1's
+four STATIC version strings (expected on any bump) and the three inverted t4 assertions. This release
+changes text and nothing else.
+
+`t4` gains 5 net: the three inverted, two guards that the surviving true statements are still there,
+and a new **consistency** assertion — the manual must not simultaneously claim this money is taxed
+and that it is spent tax-free. That assertion's absence is what allowed the contradiction to ship.
+
+**`qa/domdiff_withdrawal.mjs` returns to strict identity.** At v5.25 it asserted identity, at v5.26
+intended divergence, and now identity again, because v5.27 changes no withdrawal copy. The assertion
+is meant to flip with each release; a diff harness that passes for every release measures nothing.
+
+**Negative controls: two, both firing.** Restoring the exact v5.26 defect fails the extinction and
+consistency assertions. Deleting the clause wholesale instead of replacing it fails the guards on the
+two true statements — which is why that control exists.
+
+One control initially appeared not to fire, and the cause was in the harness rather than the code:
+`t4` loads its DOM bundle by version tag, so swapping the shared bundle file had no effect and the
+control was never actually running. Recorded because it is a trap the next person will hit.
+
+### Limitations
+
+The rest of `DOCS_HTML` has **not** been audited against current behaviour. Only the falsified passage
+was in scope. Given that this defect existed at all, a full pass of the Field Manual against the
+v5.26 model is worth doing and is not this release.
+
+**Provenance.** Source `src/DangerClose.jsx` md5 `5e1e81566fe4101eaf6bf584e38b1830` · built
+`index.html` md5 `e476e180ee8b1034a92b5c36933bdba8`.
+
+
 ## v5.26
 
 **Other accounts are now taxed according to their type. This is the release that moves figures —
