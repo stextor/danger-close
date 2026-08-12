@@ -2,7 +2,15 @@
 
 This project's premise is *verify, don't trust* — so this page explains what verification actually exists, what it covers, and what it doesn't. It's written for the same skeptical reader the app is.
 
-**Current build: v5.28** · source `src/DangerClose.jsx` md5 `9e06482087f415661196b1c47f7e8be0` · **967 automated checks green** against that exact source, plus 16 more against the built `index.html` (md5 `d61c253f6e8fb82fe53cfdf8b59cab91`), plus 10 cross-version DOM-diff checks and 49 tooling checks counted separately.
+**Current build: v5.29** · source `src/DangerClose.jsx` md5 `4ef69e9a820fac18b99aa2aa46a8b2a1` · **976 automated checks green** against that exact source, plus 16 more against the built `index.html` (md5 `fe6bf7d4230abdacbf7ce1171798feb3`), plus 10 cross-version DOM-diff checks and 49 tooling checks counted separately.
+
+**v5.29 closes three open items and moves no figure.** Montana's note now discloses that the model taxes its Social Security; the Roth crossover selection is extracted to a callable `rothCrossover()`, which closes audit 2D's residual gap; and `census.cjs` reports both hit and site counts. Parity **8/8 strict**. `t10` 163 · app total **976** · tooling **50**.
+
+**2D's gap is closed, not re-described.** The control that removed the never-behind branch from the shipped source used to change nothing, because the suite reimplemented the logic. It now fails two checks. `t10` gains 8 assertions calling the shipped function, four of them unit cases on synthetic series that isolate the branch from the engine.
+
+**The prior leg replays at 968** — 8 fewer, because assertions calling `rothCrossover` cannot run where it does not exist. The shim entry uses the guarded `_g()` form so pre-v5.29 legs load rather than throw.
+
+**A prior-leg break was caught during the build**: the Montana assertion initially ran on every leg and failed against v5.28, which legitimately carries the old note. Same mistake as v5.27, named by the §B2 rule added afterwards. Gated per build — history asserts the pin, v5.29 asserts the fix.
 
 **Audit sub-phase 2E discharged 2026-08-12, and PHASE 2 IS COMPLETE (harness only, no version bump).** `t10` gains a **2E** block of 20 checks; total 134 → **154**, app total 947 → **967**. `stateTaxAnnual` is one function with five behavioural branches, and 2E verifies one jurisdiction of each — no-tax (FL, also the maintainer's own state), flat (AZ), `retExempt` (MS), `excl65` (AL, both filing statuses), and partial-SS (MT, which carries both an SS factor and an exclusion) — plus the fallback path and five clamps where a sign error would produce a negative tax. Every figure was computed from the rule table by hand first, then compared; all match to the cent. **Five negative controls, all firing.**
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 # ─────────────────────────────────────────────────────────────────────────────
-# Danger Close — release verification · v5.28
+# Danger Close — release verification · v5.29
 #
 # PROVENANCE: originally authored 2026-08-11 for v5.22 by transcribing the steps
 # actually executed in that session. Rolled forward to v5.23 from that file
@@ -37,10 +37,10 @@ set -euo pipefail
 ROOT="${1:-$(pwd)}"
 cd "$ROOT"
 
-PRIOR=v527
-CURR=v528
-EXPECT_SRC_MD5=9e06482087f415661196b1c47f7e8be0
-EXPECT_BUILT_MD5=d61c253f6e8fb82fe53cfdf8b59cab91
+PRIOR=v528
+CURR=v529
+EXPECT_SRC_MD5=4ef69e9a820fac18b99aa2aa46a8b2a1
+EXPECT_BUILT_MD5=fe6bf7d4230abdacbf7ce1171798feb3
 
 say() { printf "\n\033[1m== %s ==\033[0m\n" "$*"; }
 die() { printf "\n\033[31mFAIL: %s\033[0m\n" "$*" >&2; exit 1; }
@@ -125,25 +125,25 @@ fi
 
 say "DONE"
 cat <<'EOF'
-Expected totals for v5.28 — compare against the output above:
+Expected totals for v5.29 — compare against the output above:
 
-  baseline current leg  475  (t1 64 · t2 15 · t3 36 · t4 141 · t5 44 · t6 21 · t10 154)
+  baseline current leg  484  (t1 64 · t2 15 · t3 36 · t4 141 · t5 44 · t6 21 · t10 163)
   parity                  8  strict, no INTENDED_DIFFS
   feature               484  (t7 41 · t8 38 · t9 14 · t11 40 · t12 23 · t13 42
                               t14 33 · t15 11 · t16 24 · t17 63 · t18 47 · t19 14
                               t20 94)
   ----------------------------------------------------------------------------
-  APP TOTAL             967  = 928 + 19 (sub-phase 2D) + 20 (sub-phase 2E), both 2026-08-12
-  tooling (t21)          49  counted SEPARATELY
+  APP TOTAL             976
+  tooling (t21)          50  counted SEPARATELY
   built artifact         16  qa/smoke_built.mjs
   withdrawal DOM diff    10  qa/domdiff_withdrawal.mjs — strict identity
 
-v5.28 is PRESENTATION ONLY (Field Manual text). Parity must be 8/8 strict and
-every v5.27 figure identical; only t1's four STATIC version strings differ. If
-any FIGURE moves, something is wrong.
+v5.29 closes three pinned items and MOVES NO FIGURE. Parity must be 8/8 strict:
+the crossover extraction is a pure refactor and Montana's note is a string.
 
-The prior leg re-runs at 954 as frozen history (915 plus the same 39 t10 2D+2E
-checks, which are version-independent), INCLUDING t4 at 128. The v5.28
-docs assertions are gated to v528+ because v5.24-v5.27 legitimately lack that
-copy — see OPERATIONS B2.
+The prior leg re-runs at 968 — EIGHT FEWER than the current leg, because t10's
+2D SHIPPED assertions call rothCrossover(), which does not exist before v5.29.
+That is correct, not a regression. The shim entry is the guarded _g() form so
+pre-v5.29 legs still load. t10's Montana assertion is gated at v529+: earlier
+legs assert the PIN, v5.29 asserts the FIX (OPERATIONS B2).
 EOF
