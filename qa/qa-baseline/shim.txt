@@ -18,6 +18,7 @@ export const __g = {
   runMonteCarlo, runExtendedMC, runRothStrategies, runStressTests,
   computeWithdrawalPlan: _g("computeWithdrawalPlan"),  // Engine D — hoisted at v5.23; GUARDED so pre-v5.23 splices still load
   rmdDivisor, rmdStartAge, ssDepletionFactor, stateTaxAnnual,
+  rothCrossover: _g("rothCrossover"),   // v5.29 — GUARDED so pre-v5.29 legs still load
   genSSTable, getSSA, getSSB, getPension, getIncomeStreams,
   streamsMonthlyAt, streamsAnnualAt, expectedInflation,
   acaSubsidyAnnual, acaFplFor, acaApplicablePct,
