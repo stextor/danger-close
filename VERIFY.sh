@@ -30,17 +30,17 @@
 # Every command below was run and its result recorded in the release notes.
 #
 # Usage:  ./VERIFY.sh /path/to/workdir
-#    workdir must contain:  v524.jsx  v525.jsx  DangerClose.jsx(=v525)  qa/
+#    workdir must contain:  v529.jsx  v530.jsx  DangerClose.jsx(=v530)  qa/
 # ─────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
 ROOT="${1:-$(pwd)}"
 cd "$ROOT"
 
-PRIOR=v528
-CURR=v529
-EXPECT_SRC_MD5=4ef69e9a820fac18b99aa2aa46a8b2a1
-EXPECT_BUILT_MD5=fe6bf7d4230abdacbf7ce1171798feb3
+PRIOR=v529
+CURR=v530
+EXPECT_SRC_MD5=8fcc546263f59fb4a88c131e97f4c882
+EXPECT_BUILT_MD5=183b58b463fcd56dfb71311a4cd68caf
 
 say() { printf "\n\033[1m== %s ==\033[0m\n" "$*"; }
 die() { printf "\n\033[31mFAIL: %s\033[0m\n" "$*" >&2; exit 1; }
@@ -125,25 +125,31 @@ fi
 
 say "DONE"
 cat <<'EOF'
-Expected totals for v5.29 — compare against the output above:
+Expected totals for v5.30 — compare against the output above:
 
-  baseline current leg  484  (t1 64 · t2 15 · t3 36 · t4 141 · t5 44 · t6 21 · t10 163)
+  baseline current leg  490  (t1 64 · t2 15 · t3 36 · t4 147 · t5 44 · t6 21 · t10 163)
   parity                  8  strict, no INTENDED_DIFFS
-  feature               484  (t7 41 · t8 38 · t9 14 · t11 40 · t12 23 · t13 42
-                              t14 33 · t15 11 · t16 24 · t17 63 · t18 47 · t19 14
+  feature               487  (t7 41 · t8 38 · t9 14 · t11 40 · t12 23 · t13 42
+                              t14 33 · t15 11 · t16 24 · t17 63 · t18 50 · t19 14
                               t20 94)
   ----------------------------------------------------------------------------
-  APP TOTAL             976
+  APP TOTAL             985
   tooling (t21)          50  counted SEPARATELY
   built artifact         16  qa/smoke_built.mjs
   withdrawal DOM diff    10  qa/domdiff_withdrawal.mjs — strict identity
 
-v5.29 closes three pinned items and MOVES NO FIGURE. Parity must be 8/8 strict:
-the crossover extraction is a pure refactor and Montana's note is a string.
+v5.30 corrects a false disclosure and MOVES NO FIGURE. Parity must be 8/8
+strict: no engine is touched. If parity breaks, the edit overreached (OPS E).
 
-The prior leg re-runs at 968 — EIGHT FEWER than the current leg, because t10's
-2D SHIPPED assertions call rothCrossover(), which does not exist before v5.29.
-That is correct, not a regression. The shim entry is the guarded _g() form so
-pre-v5.29 legs still load. t10's Montana assertion is gated at v529+: earlier
-legs assert the PIN, v5.29 asserts the FIX (OPERATIONS B2).
+The prior leg re-runs at 980 — FIVE FEWER than the current leg, because t4's
+v5.30 block asserts SIX corrected-copy checks on the v530 leg and ONE old-copy
+check on every earlier leg (6 - 1 = 5). That is the per-leg gating OPERATIONS
+B2 requires, not a regression: each leg asserts the copy true for its own build.
+
+NOTE ON THE BUILT MD5. v5.29 did NOT rebuild bit-identically this cycle
+(bccfd60d... vs published fe6bf7d4...) even though all five toolchain versions
+in OPERATIONS N3a matched. The cause is rollup, a floating caret dependency of
+vite that N3a does not pin — the diff is bundler identifier mangling only. Treat
+EXPECT_BUILT_MD5 as reproducible only on an identical dependency tree; the
+binding check is smoke_built.mjs at 16/16, not the hash.
 EOF

@@ -117,7 +117,7 @@ excluded from income and MAGI, counting toward the RMD, with the gifted dollars 
 the Traditional balance).
 
 Known simplifications: the provisional-income thresholds are handled in simplified tiers; AMT is
-a screen, not a full Form 6251; itemized deductions are not modeled (standard deduction assumed); the temporary OBBBA senior bonus deduction (up to $6K/person 65+, 2025–2028, income-phased) is deliberately omitted — a conservative simplification for a provision that expires mid-plan;
+a screen, not a full Form 6251; itemized deductions are not modeled (standard deduction assumed); the temporary OBBBA senior bonus deduction (up to $6,000/person 65+, 2025–2028) IS modeled here, phased out at 6% of MAGI above $75,000 single / $150,000 married filing jointly against a MAGI proxy of gross ordinary income plus qualified dividends and capital gains — those four figures are statutory and unindexed, and the Roth conversion ladder deliberately does not model it (§7), so the two tabs differ for any ladder year at or before 2028;
 future law is "current law, inflated."
 
 ## 6. State tax module (v5.5)
