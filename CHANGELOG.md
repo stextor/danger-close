@@ -1,5 +1,75 @@
 # Changelog
 
+## v5.28
+
+**The Field Manual brought up to date with the model. Presentation only — no engine, no schema, no
+figure moves.**
+
+An audit of `DOCS_HTML` against shipped v5.27 behaviour found no false statement — v5.27 removed the
+last of those — but three places where the manual was silent or stale about work the last six
+releases did. All three are corrected here.
+
+### What changed
+
+**1. The Withdrawal Strategy entry described the pre-v5.26 model.** It gave the account-priority
+order as *"Taxable → Traditional → Roth"* and never mentioned the pot that is actually drawn
+**first**. Since v5.26 that pot contains Traditional, Annuity, Roth and HSA money taxed by type, and
+a reader of this entry would not have learned that the IRA they entered there is now taxed. The entry
+now names Priority 1, says how it is taxed, and keeps the bucketed order after it.
+
+**2. §13 Limitations named none of the v5.26 simplifications.** `METHODOLOGY.md` carried all five;
+the Field Manual — the document users actually read — carried none. All five are now stated there:
+proportional taxation of the first-priority pot, HSA modelled as tax-free throughout, the annuity's
+part-basis approximation, the qualified-annuity mis-classification, and the Traditional default for
+unclassifiable names.
+
+**3. "What's new in v5.7 / v5.7.1 (this build)" was twenty releases stale.** Everything in it was
+historically true and none of it was recent. Across the whole manual, `v5.7` appeared three times to
+`v5.27`'s two. It is replaced by a section covering v5.22–v5.28 that leads with the release which
+moved figures, keeps the v5.7 history rather than deleting it, and no longer claims to be describing
+"this build". A stale claim rode along inside it — a **"53-check validation suite"** where the Verify
+tab reports 57 — and is gone with it.
+
+**None of this changes what the app computes.** The engines were correct throughout; the manual was
+incomplete.
+
+### Testing
+
+**928 checks green** = 436 (current leg, incl. t10) + 8 (parity, strict) + 484 (feature suites), plus
+16 on the built artifact, 10 cross-version DOM-diff, and 49 tooling checks counted separately.
+
+**Parity 8/8 strict, and every one of v5.27's 915 checks returns an identical figure** except t1's
+four STATIC version strings. `t4` gains 13, one per corrected claim plus two extinction checks.
+
+**The prior leg replays at 915, with `t4` at 128.** The new assertions are gated to v5.28+, because
+v5.24–v5.27 legitimately lack this copy. That gate is the rule `OPERATIONS.md` §B2 gained after the
+v5.27 harness patch, applied here for the first time — and it worked: the prior leg stayed green
+without a second corrective commit.
+
+**Negative controls: three, all firing.** Restoring the old priority-order sentence fails three
+assertions; deleting the HSA limitation fails one; restoring the v5.7 heading fails the extinction
+and coverage checks.
+
+### A process note, recorded because it nearly shipped
+
+The first attempt at the third edit used an end marker that was neither asserted unique nor
+sanity-checked, and **silently deleted 25,000 characters** — a quarter of the Field Manual. It was
+caught immediately by the parse check, because removing that much text left the string literal
+unterminated. Had the deleted span happened to be balanced, it would have parsed and shipped.
+
+The rewrite asserts the marker is unique, that the end follows the start, and prints both the span
+length and the net file delta for a human to sanity-check. That is now how bounded edits inside
+`DOCS_HTML` are made, alongside the §C0 read-back rule added at v5.27.
+
+### Limitations
+
+The audit did **not** cover the glossary term by term, §10's API-key material, or §14's FAQ beyond
+spot checks. Those remain unverified against current behaviour.
+
+**Provenance.** Source `src/DangerClose.jsx` md5 `9e06482087f415661196b1c47f7e8be0` · built
+`index.html` md5 `d61c253f6e8fb82fe53cfdf8b59cab91`.
+
+
 ## v5.27
 
 **Corrects a false statement about your money that v5.26 left in the Field Manual. Presentation
