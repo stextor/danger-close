@@ -127,13 +127,13 @@ say "DONE"
 cat <<'EOF'
 Expected totals for v5.28 — compare against the output above:
 
-  baseline current leg  455  (t1 64 · t2 15 · t3 36 · t4 141 · t5 44 · t6 21 · t10 134)
+  baseline current leg  475  (t1 64 · t2 15 · t3 36 · t4 141 · t5 44 · t6 21 · t10 154)
   parity                  8  strict, no INTENDED_DIFFS
   feature               484  (t7 41 · t8 38 · t9 14 · t11 40 · t12 23 · t13 42
                               t14 33 · t15 11 · t16 24 · t17 63 · t18 47 · t19 14
                               t20 94)
   ----------------------------------------------------------------------------
-  APP TOTAL             947  = 928 + 19 in t10 (audit sub-phase 2D, 2026-08-12)
+  APP TOTAL             967  = 928 + 19 (sub-phase 2D) + 20 (sub-phase 2E), both 2026-08-12
   tooling (t21)          49  counted SEPARATELY
   built artifact         16  qa/smoke_built.mjs
   withdrawal DOM diff    10  qa/domdiff_withdrawal.mjs — strict identity
@@ -142,8 +142,8 @@ v5.28 is PRESENTATION ONLY (Field Manual text). Parity must be 8/8 strict and
 every v5.27 figure identical; only t1's four STATIC version strings differ. If
 any FIGURE moves, something is wrong.
 
-The prior leg re-runs at 934 as frozen history (915 plus the same 19 t10 2D checks,
-which are version-independent), INCLUDING t4 at 128. The v5.28
+The prior leg re-runs at 954 as frozen history (915 plus the same 39 t10 2D+2E
+checks, which are version-independent), INCLUDING t4 at 128. The v5.28
 docs assertions are gated to v528+ because v5.24-v5.27 legitimately lack that
 copy — see OPERATIONS B2.
 EOF
