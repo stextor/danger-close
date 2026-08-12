@@ -216,5 +216,62 @@ console.log("\n  case 10 [EXTINCTION] \u2014 Engine A and Engine B agree on the 
   }
 }
 
+// ══ CASE 11 — the OBBBA bonus senior deduction (v5.30) ══
+// WHY THIS EXISTS. v5.30 corrected the Field Manual and METHODOLOGY, which had said this deduction
+// was NOT modeled. It is — in Engine B only. Correcting copy that describes untested behaviour just
+// moves the risk, so these assert the behaviour the new copy now claims.
+//
+// STATUTE (OBBBA, tax years 2025-2028): $6,000 per individual aged 65+, reduced by 6% of MAGI above
+// $75,000 single / $150,000 MFJ. Those four figures are statutory and UNINDEXED. The §63(f) ordinary
+// age-65 extra beside it IS indexed, at the app's disclosed 2%/yr proxy.
+//
+// HAND-COMPUTED FIRST, THEN COMPARED (decision D-2). Household: MFJ, dobA 1958 / dobB 1959, so BOTH
+// spouses are 65+ in 2028 AND in 2029 — which is what makes case 11c a sunset proof rather than an
+// age accident. Pension is the only income, so MAGI is the pension exactly.
+//
+//   indexation      IDX(2028) = 1.02^2 = 1.0404      IDX(2029) = 1.02^3 = 1.061208
+//   §63(f) x2       round(1650*1.0404)=1717 x2 = 3434    round(1650*1.061208)=1751 x2 = 3502
+//
+//   11a  2028, $100,000 MAGI <= $150,000  -> perPerson $6,000, x2 = $12,000  -> seniorExtra 15,434
+//   11b  2028, $200,000: 0.06*(200,000-150,000) = 3,000 reduction
+//                        -> perPerson $3,000, x2 = $6,000                    -> seniorExtra  9,434
+//   11c  2029, $100,000: yr > 2028, bonus $0 despite BOTH spouses being 70/71 -> seniorExtra  3,502
+//
+// NOTE ON THE HARNESS. dobA/dobB must be STRINGS: the timeline parses them with a regex and silently
+// ignores a {year,month,day} object, leaving the demo 1964/1966 birthdays in place. An object-shaped
+// override was tried first here and produced ages 64/62 in 2028 — persons65 = 0, bonus 0, and every
+// assertion below failing loudly. That is the correct failure mode, but the trap is recorded so the
+// next reader does not lose the time. (Same family as harness note 2 above.)
+console.log("\n  case 11 — OBBBA bonus senior deduction (Engine B models it; the Roth ladder does not)");
+{
+  const obbba = (pension) => {
+    const P = JSON.parse(JSON.stringify(BASE_P));
+    P.positions = []; P.otherAccounts = []; P.stateCode = null;
+    P.single = false; P.lifeExpA = 95; P.lifeExpB = 95;
+    P.dobA = "1958-01-01"; P.dobB = "1959-01-01";
+    P.incomeStreams = [{ monthly: 0, tax: "ordinary", owner: "A", startYear: 2000, endYear: 9999 }];
+    const ss = (m) => ({ tableByAge: { 62: m, 63: m, 64: m, 65: m, 67: m, 70: m }, planned: m, plannedAge: 67 });
+    P.incomeSources = { ssA: ss(0), ssB: ss(0), pension: { amount: pension / 12 } };
+    G.applyLoadedData({ portfolio: P });
+    const plan = E.computeTaxPlan({ retireYear: 2027, rothAmount: 0, qcdAnnual: 0, taxYield: 0 });
+    return (yr) => plan.rows.find((r) => r.yr === yr);
+  };
+  const SR28 = 2 * Math.round(1650 * Math.pow(1.02, 2));   // 3434
+  const SR29 = 2 * Math.round(1650 * Math.pow(1.02, 3));   // 3502
+
+  const a = obbba(100000)(2028);
+  T("11a 2028 MFJ, MAGI $100K below the $150K phase-out: full $6,000 x 2 on top of §63(f)",
+    a.seniorExtra, SR28 + 12000);
+
+  const b = obbba(200000)(2028);
+  T("11b 2028 MFJ, MAGI $200K: phased down by 6% of the $50K excess, to $3,000 x 2",
+    b.seniorExtra, SR28 + 6000);
+
+  const c = obbba(100000)(2029);
+  T("11c 2029 [SUNSET]: bonus is zero though BOTH spouses are 65+ — only `yr <= 2028` can cause this",
+    c.seniorExtra, SR29);
+}
+
+
 console.log(`\nt18 SUITE: ${pass} passed, ${fail} failed`);
 if (fail) { console.log("\nFAILURES:"); fails.forEach(f => console.log(f)); process.exit(1); }
