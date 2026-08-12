@@ -25,10 +25,10 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 
 | Field | Value |
 |---|---|
-| Version | **v5.26** |
-| Source file in knowledge | `DangerClose-v5_26.jsx` |
-| Source md5 | `0d219f87f8bc9d7e44f8703c35efee92` |
-| Built `index.html` md5 | `b7a3ec26eab40e176d4b731fd069c52c` |
+| Version | **v5.27** |
+| Source file in knowledge | `DangerClose-v5_27.jsx` |
+| Source md5 | `5e1e81566fe4101eaf6bf584e38b1830` |
+| Built `index.html` md5 | `e476e180ee8b1034a92b5c36933bdba8` |
 | Shipped | 2026-08 |
 
 **Any work — edits, verification, scope premises — is done against this file.** Confirm its
@@ -39,9 +39,9 @@ OPERATIONS.md §A). A mismatch means knowledge is stale — refresh before worki
 
 | Field | Value |
 |---|---|
-| Version | **v5.25** |
-| Source file in knowledge | `DangerClose-v5_25.jsx` |
-| Source md5 | `590f6e31641561d343e7a544e889d0f7` |
+| Version | **v5.26** |
+| Source file in knowledge | `DangerClose-v5_26.jsx` |
+| Source md5 | `0d219f87f8bc9d7e44f8703c35efee92` |
 
 This is the immediately-prior shipped release. The regression suite diffs current against it.
 It exists in knowledge ONLY as that comparison baseline. When the next release ships, it rolls
@@ -84,8 +84,8 @@ These are refreshed in place when they change; git holds their history.
 | `t21_tools.mjs` | **NEW 2026-08-11** — tests the `qa/tools/` parser toolkit itself against a fixture with hand-counted known answers. 49 checks, negative-controlled six ways. Counted SEPARATELY from the app total: it verifies tooling, not the build. Carries one dated `[KNOWN DEFECT]` pin — `census.cjs` double-reports object shorthand and export specifiers, so its "hits" exceed its site count. Repo `qa/` |
 | `tools_fixture.jsx` | **NEW 2026-08-11** — the fixture `t21` reads. **NOT AN APP SOURCE**: never built, never imported, never version-bumped, and it does NOT count toward the "exactly two `.jsx` app sources" rule. Repo `qa/tools/fixture/fixture.jsx`; knowledge is flat so it lives here under this name, and `t21` resolves either. Line numbers are load-bearing — add cases at the END only |
 | `t20_other_taxtype.mjs` | **NEW at v5.25** — the Other-accounts `taxType` schema, its migration, and the extinction assertion that no engine reads the field. 61 checks. The extinction check is a **permutation test**: the same household runs twice with every type flipped and all five engines must return byte-identical output — so it fires the moment release (c) starts reading the field. Also carries the required equality that inference over the example household reproduces the $111,000 / $21,000 / $15,000 split v5.24 published. Negative-controlled five ways; two of its own assertions were caught passing vacuously on v5.24 and now assert a precondition first. Repo `qa/` |
-| `dom_entry_v526.jsx` | Harness entry for the v5.26 CJS DOM bundle. Repo `qa/qa-baseline/` |
-| `dom_entry_v525.jsx` | Harness entry for the v5.25 CJS DOM bundle (prior leg). Repo `qa/qa-baseline/` |
+| `dom_entry_v527.jsx` | Harness entry for the v5.27 CJS DOM bundle. Repo `qa/qa-baseline/` |
+| `dom_entry_v526.jsx` | Harness entry for the v5.26 CJS DOM bundle (prior leg). Repo `qa/qa-baseline/` |
 | `VERIFY.sh` | Release verification driver. **Added to knowledge at v5.23** — it was previously repo/local only, so a session working from knowledge alone could not reproduce the release run. Repo root |
 | `t15_engineA_death_filing.mjs` | Engine A death-year filing extinction invariant (C-2C-6, v5.14) — 11 checks, **dollar-exact** (module-level engine), incl. the non-conservative high-MAGI corner | when tests change |
 | `t10_taxcases.mjs` | Tax-case assertions built by the Phase 2 audit: 76 federal-core (2A) + 35 IRMAA (2B) = **111**, incl. 3 dated `[KNOWN DEFECT]` pins. **ADOPTED into `run_all.sh` at v5.14** (scope D-4); pins flipped, borders re-derived, now 115 checks | when audit phases add cases |
