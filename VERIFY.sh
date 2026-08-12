@@ -1,6 +1,6 @@
 #!/bin/bash
 # ─────────────────────────────────────────────────────────────────────────────
-# Danger Close — release verification · v5.27
+# Danger Close — release verification · v5.28
 #
 # PROVENANCE: originally authored 2026-08-11 for v5.22 by transcribing the steps
 # actually executed in that session. Rolled forward to v5.23 from that file
@@ -37,10 +37,10 @@ set -euo pipefail
 ROOT="${1:-$(pwd)}"
 cd "$ROOT"
 
-PRIOR=v526
-CURR=v527
-EXPECT_SRC_MD5=5e1e81566fe4101eaf6bf584e38b1830
-EXPECT_BUILT_MD5=e476e180ee8b1034a92b5c36933bdba8
+PRIOR=v527
+CURR=v528
+EXPECT_SRC_MD5=9e06482087f415661196b1c47f7e8be0
+EXPECT_BUILT_MD5=d61c253f6e8fb82fe53cfdf8b59cab91
 
 say() { printf "\n\033[1m== %s ==\033[0m\n" "$*"; }
 die() { printf "\n\033[31mFAIL: %s\033[0m\n" "$*" >&2; exit 1; }
@@ -125,28 +125,24 @@ fi
 
 say "DONE"
 cat <<'EOF'
-Expected totals for v5.27 — compare against the output above:
+Expected totals for v5.28 — compare against the output above:
 
-  baseline current leg  423  (t1 64 · t2 15 · t3 36 · t4 128 · t5 44 · t6 21 · t10 115)
+  baseline current leg  436  (t1 64 · t2 15 · t3 36 · t4 141 · t5 44 · t6 21 · t10 115)
   parity                  8  strict, no INTENDED_DIFFS
   feature               484  (t7 41 · t8 38 · t9 14 · t11 40 · t12 23 · t13 42
                               t14 33 · t15 11 · t16 24 · t17 63 · t18 47 · t19 14
                               t20 94)
   ----------------------------------------------------------------------------
-  APP TOTAL             915  = 911 pre-existing + 4 net in t4
+  APP TOTAL             928  = 915 pre-existing + 13 in t4
   tooling (t21)          49  counted SEPARATELY
   built artifact         16  qa/smoke_built.mjs
-  withdrawal DOM diff    10  qa/domdiff_withdrawal.mjs — STRICT IDENTITY again
+  withdrawal DOM diff    10  qa/domdiff_withdrawal.mjs — strict identity
 
-v5.27 is PRESENTATION ONLY. Parity must be 8/8 strict and every v5.26 figure must
-be identical; only t1's four STATIC version strings differ. If any FIGURE moves,
-something is wrong.
+v5.28 is PRESENTATION ONLY (Field Manual text). Parity must be 8/8 strict and
+every v5.27 figure identical; only t1's four STATIC version strings differ. If
+any FIGURE moves, something is wrong.
 
-The prior leg re-runs at 911 as frozen history, INCLUDING t4 at 124. Corrected
-2026-08-12: v5.27 shipped with t4's inverted docs assertions applied to every leg,
-so the prior leg returned 906 with 5 failures and this line was wrong. t4 now
-gates those assertions per build — v5.24-v5.26 assert the copy that was true for
-THEM, v5.27+ assert the correction. A defect PIN asserts old behaviour on an old
-build deliberately; imposing a NEW expectation on history is a different thing and
-breaks the replay.
+The prior leg re-runs at 915 as frozen history, INCLUDING t4 at 128. The v5.28
+docs assertions are gated to v528+ because v5.24-v5.27 legitimately lack that
+copy — see OPERATIONS B2.
 EOF
