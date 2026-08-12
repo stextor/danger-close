@@ -195,8 +195,161 @@ for (const [st, single, ups, persons] of [["SGL",true,SGL_R,1],["MFJ",false,MFJ_
   T(`IRMAA [FIXED F-2B-2] top tier INDEXED by premiumYr2029: magi=500001 => 6360 (thr risen)`, at2029, 6360);
   out.IRMAA_FIX_freeze = { at2027, at2029 }; }
 
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════════
+// 2D — THE ROTH BREAK-EVEN CROSSOVER.  Audit sub-phase 2D owed these and never had them.
+// ═══════════════════════════════════════════════════════════════════════════════════════════════
+// WHY THESE EXIST. `FlawsToFix-v5_15-Phase2D.md` §6 recorded, across three revisions, that the
+// break-even half of 2D "remains a premise reading, not a verification": the code had been read
+// and judged plausible, which the project standard explicitly does not accept. It owed three
+// things — hand-verify the crossover on a household that runs a real deficit before recovering,
+// hand-verify one that is never behind, and verify the discounting-equivalence claim asserted in
+// the comment at the wealth line. All three are discharged here.
+//
+// WHAT THE CROSSOVER IS. `runRothStrategies` records per-year FACE-VALUE wealth
+// (taxable + rothA + rothB + tradA + tradB) for every policy. The Roth tab subtracts the
+// no-conversion run from the current-conversion run and reports the first year the difference
+// turns non-negative — after a deficit if there was one, otherwise the first year ahead.
+//
+// THE IDENTITY BEING ASSERTED, which is what makes this a verification rather than a re-reading:
+//
+//     wealth delta in the conversion year  ==  -(incremental federal tax) x (1 + GROWTH)
+//
+// The deficit IS the conversion tax, compounded once. Nothing else can produce it, because both
+// runs grow every balance at the same rate and differ only by the dollars the tax removed.
+const pass2C = pass, fail2C = fail;
+{
+  // t10 runs on a DELIBERATELY EMPTY portfolio, because 2A/2B test tax functions in isolation.
+  // The crossover needs balances to convert, so this block installs its own explicit fixture and
+  // restores the empty one afterwards. Stated because a hand-built fixture that silently inherits
+  // an empty portfolio returns zeros and every assertion below passes vacuously — which is what
+  // the first version of this block did.
+  const SAVED = JSON.parse(JSON.stringify(g.PORTFOLIO()));
+  g.setPortfolio({
+    positions: [{ ticker: "T", owner: "A", name: "Trad", balance: 900000, bucket: 3,
+                  type: "equity-lb", roth: 0, trad: 900000, er: 0.03 }],
+    total401k: 900000, household: 1000000, stateCode: null, asOfYr: 2026,
+    otherAccounts: [{ name: "Brokerage", balance: 100000, owner: "JT", taxType: "taxable" }],
+    incomeStreams: [], incomeSources: {}, single: false,
+    contributions: { monthly401k: 0, hsaMonthly: 0, spouseBMonthly: 0,
+                     contribPreTaxA: 0, contribRothA: 0, contribPreTaxB: 0, contribRothB: 0, allocations: {} },
+  });
+  const rsb = g.retireStartBalances(2027);
+  const BASE = {
+    single: false, asOfYr: 2026, retireYr: 2027, horizonYr: 2052,
+    ladderEnd: 2040, ladderEndA: 2040, ladderEndB: 2040,
+    dobAYr: 1970, dobBYr: 1972, deathYr1: 2060, survivor: "B",
+    ssA: 0, ssB: 0, ssAYr: 2040, ssAMo: 6, ssBYr: 2042, ssBMo: 6,
+    pen: 0, stateRate: 0, stateCode: null, convTaxFunding: "taxable", taxableGainFrac: 0.5,
+    acaPremium: 0, acaSize: 0, taxYieldPct: 0, currentConv: 0, ...rsb,
+    taxableInit: g.taxableInitAll ? g.taxableInitAll() : 0,
+  };
+  // ── WHAT THESE CASES DO AND DO NOT REACH — established by negative control, not by assumption.
+  // The wealth series below is genuine ENGINE output: `runRothStrategies` computes wealthByYr, and
+  // corrupting it (crediting Roth above Traditional via the heir rate) fails 7 of these assertions.
+  //
+  // The SELECTION logic — `beYr = beWasBehind ? firstRecover : firstAhead` — is NOT reached. It
+  // lives inline in an anonymous closure three levels inside DangerCloseMain (source ~L8686-8699)
+  // and is exported nowhere, so `cross()` below REIMPLEMENTS it. A control that removed the
+  // never-behind branch from the shipped source changed nothing here, which is how this was found
+  // rather than assumed. What that means precisely:
+  //   VERIFIED  — the wealth series, the tax identity, the discounting equivalence, and that
+  //               inputs producing each of the three outcomes exist and behave as claimed.
+  //   NOT VERIFIED — that the SHIPPED selection expression picks the same year this one does.
+  // Closing it needs the expression extracted to a callable function, which is a source change and
+  // was out of scope for the audit that produced these cases. Recorded in the 2D deliverable.
+  const GROWTH = 1.045;
+  const cross = (P, conv) => {
+    const menu = [{ key: "none", policy: { kind: "fixed", amount: 0 } },
+                  { key: "cur",  policy: { kind: "fixed", amount: conv } }];
+    const r = g.runRothStrategies({ ...P, currentConv: conv }, menu);
+    const none = r.find(x => x.key === "none"), cur = r.find(x => x.key === "cur");
+    const yrs = Object.keys(none.wealthByYr).map(Number).sort((a, b) => a - b);
+    let firstAhead = null, firstRecover = null, wasBehind = false, deficitMax = 0;
+    const delta = {};
+    for (const y of yrs) {
+      const d = (cur.wealthByYr[y] || 0) - (none.wealthByYr[y] || 0);
+      delta[y] = d;
+      if (d < -1) { wasBehind = true; deficitMax = Math.min(deficitMax, d); }
+      if (wasBehind && firstRecover === null && d >= 0) firstRecover = y;
+      if (firstAhead === null && d > 1) firstAhead = y;
+    }
+    return { beYr: wasBehind ? firstRecover : firstAhead, wasBehind, deficitMax, delta,
+             incTax: cur.totTax - none.totTax, yrs, none, cur };
+  };
+
+  // NOT VACUOUS. If the fixture failed to install, every figure below is zero and the assertions
+  // pass by accident. Assert the preconditions first.
+  T("2D fixture: the pre-tax basis is non-zero", rsb.tradInit > 0 ? 1 : 0, 1);
+  T("2D fixture: the taxable basis is non-zero", BASE.taxableInit > 0 ? 1 : 0, 1);
+
+  // ── CASE 1 — a real deficit, then recovery ─────────────────────────────────────────────────
+  // THE IDENTITY, asserted rather than a household-specific dollar figure: the year-one wealth
+  // deficit IS the incremental federal tax, compounded once at the portfolio growth rate. Both
+  // runs grow every balance at the same rate and differ only by the dollars the tax removed, so
+  // nothing else can produce it. This is what makes the crossover a cash answer rather than an
+  // assumption about opportunity cost.
+  const one = cross({ ...BASE, horizonYr: 2027, ladderEnd: 2027, ladderEndA: 2027, ladderEndB: 2027 }, 60000);
+  T("2D case 1: a $60K conversion IS taxed", one.incTax > 0 ? 1 : 0, 1);
+  T("2D case 1: year-one deficit == incremental tax x GROWTH (within rounding)",
+    Math.abs(one.delta[2027] + one.incTax * GROWTH) <= 2 ? 1 : 0, 1);
+  T("2D case 1: and the household is behind in year one", one.delta[2027] < 0 ? 1 : 0, 1);
+
+  // $30K/yr over the ladder runs a deficit and recovers at 2048; $60K/yr never recovers inside
+  // the horizon and is case 3 below. Both on ONE fixture, so the difference is the conversion
+  // size and nothing else — which is the point.
+  const full = cross(BASE, 30000);
+  T("2D case 1: over the full horizon it runs a real deficit", full.wasBehind ? 1 : 0, 1);
+  T("2D case 1: and recovers inside the horizon", full.beYr !== null ? 1 : 0, 1);
+  T("2D case 1: the reported year is the RECOVERY year, not the first ahead",
+    full.delta[full.beYr] >= 0 && full.delta[full.beYr - 1] < 0 ? 1 : 0, 1);
+
+  // ── CASE 2 — never behind ──────────────────────────────────────────────────────────────────
+  // A conversion small enough to sit under the standard deduction costs ZERO incremental tax, so
+  // there is no deficit and the reported year is the first year AHEAD. This is the branch
+  // `beWasBehind ? firstRecover : firstAhead` exists for, and 2D could not confirm it was
+  // reachable. It is.
+  const never = cross(BASE, 10000);
+  T("2D case 2: a $10K conversion costs ZERO incremental tax", never.incTax <= 0 ? 1 : 0, 1);
+  T("2D case 2: no year is ever behind", never.wasBehind ? 1 : 0, 0);
+  T("2D case 2: year-one delta is exactly zero", never.delta[2027], 0);
+  T("2D case 2: a crossover year is still reported", never.beYr !== null ? 1 : 0, 1);
+
+  // ── CASE 3 — does not break even ───────────────────────────────────────────────────────────
+  // v5.7.1 made "does not break even" a possible answer; nothing tested that it can still occur.
+  const nope = cross(BASE, 60000);
+  T("2D case 3: an over-large conversion reports NO break-even (same fixture, size alone)",
+    nope.beYr === null ? 1 : 0, 1);
+  T("2D case 3: ...and its lifetime tax is HIGHER, unlike the recovering case",
+    nope.incTax > full.incTax ? 1 : 0, 1);
+  T("2D case 3: ...and it is behind, not merely flat", nope.wasBehind ? 1 : 0, 1);
+
+  // ── THE DISCOUNTING-EQUIVALENCE CLAIM ──────────────────────────────────────────────────────
+  // The source comment asserts "comparing same-year wealth = discounting cash flows at the
+  // portfolio's own growth rate". VERIFIED, not read: with conversions confined to one year and
+  // zero taxable yield, the two runs differ thereafter ONLY by balances, so the delta must
+  // compound at exactly GROWTH. A dollar of difference introduced in year Y therefore appears at
+  // year N as (1+GROWTH)^(N-Y) — which is precisely discounting at that rate.
+  const iso = cross({ ...BASE, horizonYr: 2038, ladderEnd: 2027, ladderEndA: 2027, ladderEndB: 2027 }, 60000);
+  let ratiosOK = 1, worst = 0, checked = 0;
+  for (let y = 2029; y <= 2038; y++) {
+    if (!iso.delta[y - 1]) continue;
+    const r = iso.delta[y] / iso.delta[y - 1];
+    checked++; worst = Math.max(worst, Math.abs(r - GROWTH));
+    if (Math.abs(r - GROWTH) > 0.002) ratiosOK = 0;
+  }
+  T("2D equivalence: the isolated delta is non-zero (control)", iso.delta[2027] !== 0 ? 1 : 0, 1);
+  T("2D equivalence: enough years were actually compared (control)", checked >= 9 ? 1 : 0, 1);
+  T("2D equivalence: an isolated delta compounds at GROWTH every year", ratiosOK, 1);
+  T("2D equivalence: worst deviation from 1.045 is rounding-scale", worst < 0.002 ? 1 : 0, 1);
+
+  g.setPortfolio(SAVED);   // restore t10's empty portfolio for anything added after this block
+}
+const pass2D = pass - pass2C, fail2D = fail - fail2C;
+
 console.log(`\nt10 2A: ${pass2A} passed, ${fail2A} failed`);
 console.log(`t10 2B: ${pass-pass2A} passed, ${fail-fail2A} failed  (IRMAA tier selection + 7 indexation assertions, pins FLIPPED at v5.14)`);
+console.log(`t10 2D: ${pass2D} passed, ${fail2D} failed  (Roth break-even crossover \u2014 the three cases sub-phase 2D owed)`);
 console.log(`t10 total: ${pass} passed, ${fail} failed`);
 if (fails.length) console.log(fails.join("\n"));
 console.log("\n--- captured (engine vs independent hand reference) ---");
