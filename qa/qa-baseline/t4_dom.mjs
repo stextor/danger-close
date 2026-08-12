@@ -176,24 +176,43 @@ if (VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527") {
   // the suite stayed green partly BECAUSE the stale copy survived, and would have failed had the
   // Field Manual been corrected properly. A disclosure assertion that is not re-examined when its
   // disclosure becomes false stops being a test and becomes a lock.
-  T("EXTINCTION: the manual no longer claims these accounts generate no RMD",
-    !man.includes("generating no RMD"));
-  T("EXTINCTION: the manual no longer calls the Withdrawal tab optimistic",
-    !man.includes("makes the Withdrawal tab optimistic"));
-  T("V527 docs: states the new treatment instead",
-    man.includes("taxed as ordinary income as it is spent"));
-  T("V527 docs: states Traditional counts toward the RMD",
-    man.includes("counts toward your RMD"));
+  // GATED PER BUILD, AND THIS SPLIT IS THE POINT. v5.27 inverted these three assertions but left
+  // them running on v5.24-v5.26 as well, so the NEW extinction checks were applied retroactively to
+  // builds that legitimately still contained the old copy — and the frozen prior leg stopped
+  // replaying green. A defect PIN asserts old behaviour on an old build deliberately; this was the
+  // opposite, a new expectation imposed on history. Each leg must assert the copy that was TRUE
+  // for its own build, which is how the v5.24 block above already works.
+  if (VER === "v524" || VER === "v525" || VER === "v526") {
+    // TRUE FOR THESE BUILDS. Through v5.26 the Field Manual carried the v5.24 disclosure: this
+    // money is spent as already-taxed cash, generates no RMD, and the tab is optimistic as a
+    // result. v5.26 falsified it in the model and failed to correct it here; v5.27 corrected it.
+    T("V524-V526 docs: states Other accounts are modelled as already-taxed cash",
+      man.includes("modelled as already-taxed cash"));
+    T("V524-V526 docs: states no RMD is generated", man.includes("generating no RMD"));
+    T("V524-V526 docs: names the direction of the error",
+      man.includes("makes the Withdrawal tab optimistic"));
+  } else {
+    T("EXTINCTION: the manual no longer claims these accounts generate no RMD",
+      !man.includes("generating no RMD"));
+    T("EXTINCTION: the manual no longer calls the Withdrawal tab optimistic",
+      !man.includes("makes the Withdrawal tab optimistic"));
+    T("V527 docs: states the new treatment instead",
+      man.includes("taxed as ordinary income as it is spent"));
+    T("V527 docs: states Traditional counts toward the RMD",
+      man.includes("counts toward your RMD"));
+  }
   // The two statements that are STILL TRUE must survive. Deleting the false clause wholesale would
   // have replaced a wrong statement with a missing one.
-  T("V527 docs: KEEPS the true statement about Taxable and HSA balances",
-    man.includes("Taxable and HSA balances are still modelled as already-taxed cash"));
-  T("V527 docs: KEEPS the true statement that Other accounts are drawn first",
-    man.includes("Other accounts are still drawn first"));
+  if (VER !== "v524" && VER !== "v525" && VER !== "v526") {
+    T("V527 docs: KEEPS the true statement about Taxable and HSA balances",
+      man.includes("Taxable and HSA balances are still modelled as already-taxed cash"));
+    T("V527 docs: KEEPS the true statement that Other accounts are drawn first",
+      man.includes("Other accounts are still drawn first"));
+  }
   // THE ASSERTION WHOSE ABSENCE LET THE CONTRADICTION SHIP. The manual must not simultaneously say
   // this money is taxed and that it is spent tax-free in the present tense. The surviving v5.24
   // clause did exactly that, sitting one sentence after its own correction.
-  {
+  if (VER !== "v524" && VER !== "v525" && VER !== "v526") {
     const claimsTaxed = /taxed as ordinary income as it is spent/i.test(man);
     const claimsFreeNow = /still drawn first — spent tax-free/i.test(man)
       || /generating no RMD — even when/i.test(man);
