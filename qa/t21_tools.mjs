@@ -114,9 +114,9 @@ ck("L42 shadowed use is attributed to shadower", on(42).length === 1 && on(42)[0
 ck("L21 module-level declaration is attributed to <module>",
    on(21).length === 1 && on(21)[0].scope === "<module>", JSON.stringify(on(21)));
 
-console.log("\nA4. census \u2014 [KNOWN DEFECT] the site count is inflated by range collisions");
+console.log("\nA4. census \u2014 range collisions, FIXED at v5.29 (was a pin)");
 // ─────────────────────────────────────────────────────────────────────────────
-// [KNOWN DEFECT 2026-08-11 | census.cjs range collisions] — OPERATIONS §D pin.
+// [FIXED v5.29 | census.cjs range collisions] — the OPERATIONS §D pin, now flipped.
 //
 // WHAT IS WRONG. Where two AST nodes occupy the SAME source range, census reports the position
 // twice. Two constructs do this: object shorthand `{ widget }` (Property.key and Property.value
@@ -137,17 +137,29 @@ console.log("\nA4. census \u2014 [KNOWN DEFECT] the site count is inflated by ra
 // exist rather than fewer — which is why this is a pin and not a stop-the-line defect.
 //
 // PRE-EXISTING, not a regression: present since the tool was written.
-// FLIP THIS PIN when the fix lands — the assertions become "1 hit at L26, 1 at L67".
+// FIXED by REPORTING BOTH numbers rather than deduplicating (option (a) of three). That was
+// the recommendation and it is the one taken: every figure quoted in a shipped scope document
+// stays valid, and the discrepancy becomes visible where it is used. Deduplicating would have
+// silently changed numbers already in print; leaving the pin would have required every future
+// reader to know. The two shorthand assertions BELOW still assert 2 hits each, because that is
+// still what the walk finds — what changed is that the header now says so.
 // ─────────────────────────────────────────────────────────────────────────────
 ck("[KNOWN DEFECT 2026-08-11] object shorthand at L26 reports TWO hits for one occurrence",
    on(26).length === 2 && on(26).some(h => h.kind === "objkey") && on(26).some(h => h.kind === "ident"),
    JSON.stringify(on(26)));
 ck("[KNOWN DEFECT 2026-08-11] export specifier at L67 reports TWO hits for one occurrence",
    on(67).length === 2, JSON.stringify(on(67)));
-ck("[KNOWN DEFECT 2026-08-11] total is 18 AST hits where 16 source occurrences exist",
-   hits.length === 18, `got ${hits.length}`);
+ck("[FIXED v5.29, was KNOWN DEFECT] the header now reports BOTH counts",
+   /18 AST hits, 16 source sites/.test(cen), (cen.split("\n")[0] || "").slice(0, 90));
 ck("the header count agrees with the rows it printed",
    cen.includes(`\u2014 ${hits.length} AST hits`), "header and body disagree");
+// And it must stay QUIET when the two agree, or every census output grows noise for nothing.
+// innerFn is declared and returned inside outerFn and is NOT in the fixture's export list, so it
+// has no range collision. Every EXPORTED name has one, because an ExportSpecifier duplicates the
+// position — which is itself worth knowing when reading any census of this file.
+const _clean = run("census.cjs", [FIX, "innerFn"]);
+ck("no site count is printed when hits and sites agree",
+   !/source sites/.test(_clean), (_clean.split("\n")[0] || "").slice(0, 90));
 
 console.log("\nA5. census \u2014 the --kind filter");
 const kOnly = run("census.cjs", [FIX, "widget", "--kind=prop"]).split("\n").filter(l => /^L\s*\d+/.test(l));

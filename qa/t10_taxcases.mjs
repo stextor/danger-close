@@ -343,6 +343,35 @@ const pass2C = pass, fail2C = fail;
   T("2D equivalence: an isolated delta compounds at GROWTH every year", ratiosOK, 1);
   T("2D equivalence: worst deviation from 1.045 is rounding-scale", worst < 0.002 ? 1 : 0, 1);
 
+  // ── 2D'S RESIDUAL GAP, CLOSED AT v5.29 ──────────────────────────────────────────────────────
+  // The selection expression used to live in an anonymous closure inside DangerCloseMain, so this
+  // suite reimplemented it and a control that removed the never-behind branch changed nothing.
+  // v5.29 extracted it to `rothCrossover`. These assertions call the SHIPPED function, on the same
+  // three outcomes verified above — so the reimplementation and the real thing must now agree.
+  if (g.rothCrossover) {
+    const RC = g.rothCrossover;
+    const shipped = (P, conv) => {
+      const menu = [{ key: "none", policy: { kind: "fixed", amount: 0 } },
+                    { key: "cur",  policy: { kind: "fixed", amount: conv } }];
+      const r = g.runRothStrategies({ ...P, currentConv: conv }, menu);
+      return RC(r.find(x => x.key === "none").wealthByYr, r.find(x => x.key === "cur").wealthByYr);
+    };
+    T("2D SHIPPED: case 1 agrees with the suite's reimplementation", shipped(BASE, 30000).beYr, full.beYr);
+    T("2D SHIPPED: case 2 (never behind) agrees", shipped(BASE, 10000).beYr, never.beYr);
+    T("2D SHIPPED: case 2 reports NOT behind", shipped(BASE, 10000).beWasBehind ? 1 : 0, 0);
+    T("2D SHIPPED: case 3 (never breaks even) returns null",
+      shipped(BASE, 60000).beYr === null ? 1 : 0, 1);
+    // Direct unit cases on synthetic series — no engine, so the branch logic is isolated.
+    T("2D SHIPPED unit: deficit then recovery picks the RECOVERY year",
+      RC({ 2027: 100, 2028: 200, 2029: 300 }, { 2027: 90, 2028: 195, 2029: 320 }).beYr, 2029);
+    T("2D SHIPPED unit: never behind picks the FIRST AHEAD year",
+      RC({ 2027: 100, 2028: 200 }, { 2027: 150, 2028: 260 }).beYr, 2027);
+    T("2D SHIPPED unit: never recovering returns null",
+      RC({ 2027: 100, 2028: 200 }, { 2027: 50, 2028: 150 }).beYr === null ? 1 : 0, 1);
+    T("2D SHIPPED unit: the deepest deficit is reported",
+      RC({ 2027: 100, 2028: 200 }, { 2027: 50, 2028: 150 }).beDeficitMax, -50);
+  }
+
   g.setPortfolio(SAVED);   // restore t10's empty portfolio for anything added after this block
 }
 const pass2D = pass - pass2C, fail2D = fail - fail2C;
@@ -446,10 +475,26 @@ const pass2E = pass, fail2E = fail;
     // partial-SS state (CO, CT, MN, NM, RI, UT, VT) says so in its note. The modelling is right and
     // the disclosure is incomplete — the mild form of the defect D-5 names, which is why it is
     // pinned rather than treated as a stop. FLIP THIS PIN when the note is corrected.
-    const mtSaysSS = /social security|\bss\b/i.test(R.MT.note || "");
-    T("[KNOWN DEFECT 2026-08-12] MT taxes SS but its note does not say so", mtSaysSS ? 1 : 0, 0);
-    T("2E control: the other seven partial-SS states DO mention it",
-      ["CO","CT","MN","NM","RI","UT","VT"].filter(c => !/social security|\bss\b/i.test(R[c].note || "")).length, 0);
+    // [FIXED v5.29, was KNOWN DEFECT 2026-08-12] Montana's note now says so. The generalised form
+    // is asserted instead of the single state, because the defect was MT being the odd one out:
+    // ALL EIGHT partial-SS states must disclose the treatment, and a ninth added later must too.
+    //
+    // GATED TO v529+ per OPERATIONS §B2. v5.28 and earlier legitimately carry the old MT note, and
+    // asserting the correction against them would break the frozen prior-leg replay — the exact
+    // mistake made at v5.27 and the reason that rule exists. History asserts the pin; v5.29 asserts
+    // the fix. Caught here by the prior leg failing 1, not by remembering.
+    const _v = Number(String(VER).replace(/[^0-9]/g, "")) || 0;   // "v529" -> 529
+    if (_v >= 529) {
+      T("[FIXED v5.29] every partial-SS state discloses SS treatment in its note",
+        Object.keys(R).filter(c => R[c].ss > 0 && !/social security|\bss\b/i.test(R[c].note || "")).length, 0);
+    } else {
+      T("[KNOWN DEFECT 2026-08-12, pre-v5.29] MT taxes SS and its note does not say so",
+        /social security|\bss\b/i.test(R.MT.note || "") ? 1 : 0, 0);
+    }
+    T("2E control: there really are eight partial-SS states (not vacuous)",
+      Object.keys(R).filter(c => R[c].ss > 0).length, 8);
+    T("2E: and no state claims SS treatment it does not model",
+      Object.keys(R).filter(c => !R[c].ss && /\bss (is )?taxed|taxes social security/i.test(R[c].note || "")).length, 0);
   }
 }
 const pass2Ecount = pass - pass2E, fail2Ecount = fail - fail2E;
