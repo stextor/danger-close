@@ -25,6 +25,8 @@ export const __g = {
   contribBucketWeights, computePlanEvents, buildRetireOptions,
   contribAccrual: _g("contribAccrual"),
   retireStartBalances: _g("retireStartBalances"),
+  otherTaxableInit: _g("otherTaxableInit"),
+  taxableInitAll: _g("taxableInitAll"),
   STORAGE_KEYS: () => _g("STORAGE_KEYS"), // t5 loops this map for the Clear-All wipe invariant (v5.10.2)
   DangerClose,
 };
@@ -38,6 +40,8 @@ export const __test = {
   applyLoadedData, buildVerificationChecks, runRothStrategies,
   contribAccrual: _g("contribAccrual"),
   retireStartBalances: _g("retireStartBalances"),
+  otherTaxableInit: _g("otherTaxableInit"),
+  taxableInitAll: _g("taxableInitAll"),
 };
 
 // v5.18: Engine C was hoisted to module level at v5.17; this exposes it to the harness.
