@@ -79,7 +79,7 @@ const hits = [];
   if (match && (kindArg === 'any' || kindArg === match)) {
     const line = node.loc.start.line;
     const lineText = src.split('\n')[line - 1] || '';
-    hits.push({ line, col: node.loc.start.column, kind: match, scope: enclosing(node.start),
+    hits.push({ line, col: node.loc.start.column, pos: node.start, kind: match, scope: enclosing(node.start),
                 snippet: lineText.length > 4000 ? '[LONG LINE: ' + lineText.slice(Math.max(0, node.loc.start.column - 90), node.loc.start.column + 90) + ']' : lineText.trim().slice(0, 200) });
   }
   for (const k of Object.keys(node)) {
@@ -91,5 +91,14 @@ const hits = [];
 })(ast, null);
 
 hits.sort((a, b) => a.line - b.line || a.col - b.col);
-console.log(`# census of "${target}" in ${file} — ${hits.length} AST hits (kind=${kindArg})`);
+// v5.29 — report BOTH numbers. Where two AST nodes share one source range the walk visits both,
+// so an object shorthand `{ x }` or an export specifier `export { x }` counts twice. The hit count
+// was always literally accurate; the problem is that §B1 sells this tool as answering "how many
+// SITES?" and scope documents quoted it as one. On v5.28: otherAccounts 17 hits / 15 sites,
+// positions 49/46, taxType 56/55, total401k 44/43. Reporting both keeps every previously quoted
+// figure valid while making the discrepancy visible at the point of use — which deduplicating
+// silently would not. Pinned at v5.28 in t21 §A4; that pin flips with this change.
+const _sites = new Set(hits.map(h => h.pos)).size;
+const _dupNote = _sites === hits.length ? "" : `, ${_sites} source sites`;
+console.log(`# census of "${target}" in ${file} — ${hits.length} AST hits${_dupNote} (kind=${kindArg})`);
 for (const h of hits) console.log(`L${String(h.line).padStart(5)}  ${h.kind.padEnd(6)}  ${h.scope.padEnd(46)}  ${h.snippet}`);
