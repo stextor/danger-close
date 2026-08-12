@@ -8,6 +8,10 @@ This project's premise is *verify, don't trust* — so this page explains what v
 
 **THREE `t4` ASSERTIONS WERE HOLDING THE FALSE CLAIM IN PLACE.** Dating from v5.24, they asserted the PRESENCE of the three statements v5.26 falsified — so the suite was green partly BECAUSE the stale copy survived, and would have failed had the manual been corrected properly. v5.26 inverted the equivalent assertions for the Withdrawal tab and My Data and missed this set; missing it is what let the source defect through. A disclosure assertion that is not re-examined when its disclosure becomes false stops being a test and becomes a lock. All three are now extinction checks, and `t4` gains a CONSISTENCY assertion whose absence is what allowed a self-contradicting manual to ship.
 
+**Corrected 2026-08-12, harness only (no version bump).** v5.27 inverted `t4`'s three Field Manual assertions but ran them on EVERY leg, so the new expectations were applied to v5.24–v5.26 — builds that legitimately still contain the old copy. The prior leg returned 906 with 5 failures instead of 911, and `VERIFY.sh` stated a total the suite would not produce. `t4` now gates those assertions per build: v5.24–v5.26 assert the copy that was true for them, v5.27+ assert the correction. Prior leg replays at **911** again, including `t4` at 124.
+
+A **defect pin** asserts old behaviour on an old build deliberately, and is meant to fail when the defect is fixed. Imposing a **new** expectation on history is a different thing that looks similar, and it breaks the replay rather than recording anything. `OPERATIONS.md` §B2's fourth rule now carries both halves: invert every assertion the release falsifies, AND gate the inversion to the builds it is true for.
+
 **`qa/domdiff_withdrawal.mjs` is back to strict identity** — identity at v5.25, intended divergence at v5.26, identity again now. It is meant to flip with each release; a diff harness that passes for every release is measuring nothing.
 
 ## The part you can check yourself, right now

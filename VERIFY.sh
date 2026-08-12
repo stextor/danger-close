@@ -139,8 +139,14 @@ Expected totals for v5.27 — compare against the output above:
   withdrawal DOM diff    10  qa/domdiff_withdrawal.mjs — STRICT IDENTITY again
 
 v5.27 is PRESENTATION ONLY. Parity must be 8/8 strict and every v5.26 figure must
-be identical; only t1's four STATIC version strings and t4's three inverted docs
-assertions may differ. If any FIGURE moves, something is wrong.
+be identical; only t1's four STATIC version strings differ. If any FIGURE moves,
+something is wrong.
 
-The prior leg re-runs at 911 as frozen history.
+The prior leg re-runs at 911 as frozen history, INCLUDING t4 at 124. Corrected
+2026-08-12: v5.27 shipped with t4's inverted docs assertions applied to every leg,
+so the prior leg returned 906 with 5 failures and this line was wrong. t4 now
+gates those assertions per build — v5.24-v5.26 assert the copy that was true for
+THEM, v5.27+ assert the correction. A defect PIN asserts old behaviour on an old
+build deliberately; imposing a NEW expectation on history is a different thing and
+breaks the replay.
 EOF
