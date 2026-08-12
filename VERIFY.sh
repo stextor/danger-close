@@ -1,6 +1,6 @@
 #!/bin/bash
 # ─────────────────────────────────────────────────────────────────────────────
-# Danger Close — release verification · v5.25
+# Danger Close — release verification · v5.26
 #
 # PROVENANCE: originally authored 2026-08-11 for v5.22 by transcribing the steps
 # actually executed in that session. Rolled forward to v5.23 from that file
@@ -37,10 +37,10 @@ set -euo pipefail
 ROOT="${1:-$(pwd)}"
 cd "$ROOT"
 
-PRIOR=v524
-CURR=v525
-EXPECT_SRC_MD5=590f6e31641561d343e7a544e889d0f7
-EXPECT_BUILT_MD5=722fa8e03f830ed772e522802af3b8cf
+PRIOR=v525
+CURR=v526
+EXPECT_SRC_MD5=0d219f87f8bc9d7e44f8703c35efee92
+EXPECT_BUILT_MD5=b7a3ec26eab40e176d4b731fd069c52c
 
 say() { printf "\n\033[1m== %s ==\033[0m\n" "$*"; }
 die() { printf "\n\033[31mFAIL: %s\033[0m\n" "$*" >&2; exit 1; }
@@ -81,7 +81,7 @@ cd qa
 for t in t7_accrual t8_invariant t9_dom_smoke t11_survivor_rmd t12_engineD_survivor \
          t13_engineC_irmaa t14_cross_engine_survivor t15_engineA_death_filing \
          t16_roth_ladder_filing t17_engineC_exact t18_engineB_exact t19_engineD_exact \
-         t20_other_taxtype; do
+         t20_other_taxtype t21_tools; do
   timeout 900 node "${t}.mjs" | tail -1
 done
 cd ..
@@ -125,21 +125,24 @@ fi
 
 say "DONE"
 cat <<'EOF'
-Expected totals for v5.25 — compare against the output above:
+Expected totals for v5.26 — compare against the output above:
 
-  baseline current leg  423  (t1 64 · t2 15 · t3 36 · t4 123 · t5 49 · t6 21 · t10 115)
+  baseline current leg  419  (t1 64 · t2 15 · t3 36 · t4 124 · t5 44 · t6 21 · t10 115)
   parity                  8  strict, no INTENDED_DIFFS
-  feature               441  (t7 37 · t8 35 · t9 14 · t11 40 · t12 23 · t13 40
-                              t14 33 · t15 11 · t16 24 · t17 63 · t18 47 · t19 13
-                              t20 61)
+  feature               484  (t7 41 · t8 38 · t9 14 · t11 40 · t12 23 · t13 42
+                              t14 33 · t15 11 · t16 24 · t17 63 · t18 47 · t19 14
+                              t20 94)
   ----------------------------------------------------------------------------
-  TOTAL                 872  = 787 pre-existing (IDENTICAL figures) + 85 new
+  APP TOTAL             911
+  tooling (t21)          49  counted SEPARATELY — verifies qa/tools, not the build
   built artifact         16  qa/smoke_built.mjs
-  withdrawal DOM diff     9  qa/domdiff_withdrawal.mjs (cross-version; step 4b)
+  withdrawal DOM diff    13  qa/domdiff_withdrawal.mjs — INTENDED DIVERGENCE, not identity
 
-Any figure that differs is a finding, not a rounding difference. The prior leg
-re-runs at 399 as frozen history — NOT 423: t20 does not exist there, and the
-new t4/t5/t6 checks are gated on VER === "v525" because they assert UI that does
-not exist in v5.24. The 17 t4 checks added at v5.24 DO run on both legs; their
-gate was widened this release, which is why the prior leg reads 399 and not 382.
+v5.26 MOVES FIGURES. Parity must still be 8/8 strict: the Monte Carlo reads
+household and the bucket weights, which classification does not touch. If parity
+breaks, the fix has overreached — that is NOT an INTENDED_DIFFS candidate.
+
+The prior leg re-runs at 872 as frozen history. t20's extinction assertion is
+INVERTED at v5.26 and t19's rel-c pin is FLIPPED; both are expected to read the
+opposite of their v5.25 form.
 EOF

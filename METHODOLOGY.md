@@ -388,22 +388,46 @@ one amount per stream (no per-year schedules), annual granularity on the window,
 state-specific treatment beyond the state layer's ordinary handling. These are the known
 edges of the map.
 
-**Disclosed at v5.24 — the Withdrawal tab's first-priority pot is modelled optimistically.**
-Engine D (the Withdrawal tab) derives its taxable starting balance as `household − total401k`, so
-**every account entered under Other accounts lands in it** — including any the user named as a
-Rollover IRA, Traditional IRA, annuity or state plan. Engine D then draws that pot first and treats
-the whole of it as already-taxed brokerage principal: the draws never enter its MAGI, the pot's
-growth is never taxed, and none of it contributes to the balance RMDs are computed on (Engine D's
-RMD basis is the bucketed 401(k) only). On the shipped example household that is $147,000, of which
-$111,000 — 76% — is not already-taxed money.
+**Resolved at v5.26 — Other accounts are classified and taxed (was disclosed at v5.24).**
+Through v5.25, Engine D derived its first-priority pot as `household − total401k`, so **every account
+entered under Other accounts landed in it** — including any the user named as a Rollover IRA,
+Traditional IRA, annuity or state plan — and the whole pot was treated as already-taxed brokerage
+principal. Draws never entered MAGI, growth was never taxed, and none of it reached the balance RMDs
+are computed on. On the shipped example household that was $147,000, of which $111,000 (76%) is not
+already-taxed money. The direction mattered: it made a plan look **better** than it is, the wrong way
+for a deliberately pessimistic tool to be wrong. v5.24 stopped the app denying it; v5.25 recorded the
+classification without using it; **v5.26 uses it.**
 
-The direction matters: this makes a plan look **better** than it is, which is the wrong way for a
-deliberately pessimistic tool to be wrong. v5.24 does not change the modelling; it stops the app
-from denying it. The Withdrawal tab's Priority 1 panel and the Field Manual both previously
-described this pot as after-tax or non-retirement money, and both now state what it actually
-contains and which way the simplification errs. Reclassifying these accounts — so that
-tax-deferred dollars entered there become traditional balances that generate RMDs and enter MAGI
-as ordinary income — is a modelling change held for a later release.
+Each Other account carries a tax type — Taxable, Traditional, Roth, HSA, or Annuity. Two facts are
+tracked separately, because they have different answers:
+
+- **Taxed as ordinary income when spent:** Traditional and Annuity.
+- **Subject to a required minimum distribution:** Traditional only.
+
+A **non-qualified annuity** is the reason those are two questions rather than one. It is taxed like
+pre-tax money but carries no RMD; recording it as Traditional (which v5.25 did, and disclosed as an
+approximation) would manufacture a legal obligation the owner does not have and force money out
+early. It therefore has its own type. The residual approximation is that an annuity is part
+after-tax basis, which a single label cannot express — Annuity treats all of it as ordinary income,
+the pessimistic direction. A **qualified** annuity held inside an IRA does have an RMD, and the
+name-inference will mis-classify one; the field is user-correctable for exactly that reason, and any
+row it re-classifies is named in the review notice.
+
+**What did not change.** The draw order: Other accounts are still spent first, and this release
+deliberately did not revisit that. **HSA balances remain outside the tax split** — spent as
+already-taxed cash — consistent with the contribution-accrual treatment adopted at v5.10; that is a
+simplification, and HSA money is tax-free only for qualified medical costs. The Monte Carlo is
+untouched: it reads `household` and the bucket weights, neither of which classification affects,
+which is why cross-version engine parity remains strict through this release.
+
+**One stated simplification in Engine D.** Because the money physically sits in the first-priority
+pot rather than in the bucketed portfolio, a draw from that pot is taxed **in proportion** to what
+the pool holds, rather than by draining one tax type before another. A consequence worth stating:
+since Other accounts are spent early and RMDs begin at 73+, most of this money is gone before any RMD
+applies, so the RMD effect inside Engine D is small — the larger effect lands in the Roth, Taxes and
+IRMAA engines, which read the retirement-start basis. Ownership drives whose RMD age applies, so
+Traditional, Roth and Annuity rows cannot be held jointly; migration promotes such a row to person A
+and says so.
 
 Two related notes, so the limitation is not read wider than it is. First, Engine D's MAGI expression
 correctly **excludes** taxable-brokerage withdrawals: such a draw is mostly return of basis, and only
