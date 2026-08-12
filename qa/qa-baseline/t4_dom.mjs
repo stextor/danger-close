@@ -16,7 +16,7 @@ const VER = process.argv[2] || "v510";
 // change the CHECK COUNT: with an unregistered tag t3 ran 35 checks instead of 36, and the count is
 // the number that goes in the release headline. Registering a new version in the ladders below is
 // now mandatory, and an unregistered tag stops the run instead of quietly testing the wrong thing.
-const KNOWN_VERSIONS = ["v510", "v5101", "v5102", "v511", "v512", "v513", "v514", "v515", "v516", "v517", "v518", "v519", "v520", "v521", "v522", "v523", "v524", "v525", "v526", "v527", "v528", "v529", "v592"];
+const KNOWN_VERSIONS = ["v510", "v5101", "v5102", "v511", "v512", "v513", "v514", "v515", "v516", "v517", "v518", "v519", "v520", "v521", "v522", "v523", "v524", "v525", "v526", "v527", "v528", "v529", "v530", "v592"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is not registered in this suite.");
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -62,7 +62,7 @@ await click(example); await flush(); await flush();
   const t = body().textContent || "";
   // Exact per-tag string: "v5.10" is a PREFIX of v5.10.1/v5.10.2, so a substring test
   // passed for the whole v5.10 family by luck and broke at v5.11. Map the tag explicitly.
-  const _badge = VER === "v529" ? "v5.29" : VER === "v528" ? "v5.28" : VER === "v527" ? "v5.27" : VER === "v526" ? "v5.26" : VER === "v525" ? "v5.25" : VER === "v524" ? "v5.24" : VER === "v523" ? "v5.23" : VER === "v522" ? "v5.22" : VER === "v521" ? "v5.21" : VER === "v520" ? "v5.20" : VER === "v519" ? "v5.19" : VER === "v518" ? "v5.18" : VER === "v517" ? "v5.17" : VER === "v516" ? "v5.16" : VER === "v515" ? "v5.15" : VER === "v514" ? "v5.14" : VER === "v513" ? "v5.13" : VER === "v512" ? "v5.12" : VER === "v511" ? "v5.11" : VER === "v5102" ? "v5.10.2"
+  const _badge = VER === "v530" ? "v5.30" : VER === "v529" ? "v5.29" : VER === "v528" ? "v5.28" : VER === "v527" ? "v5.27" : VER === "v526" ? "v5.26" : VER === "v525" ? "v5.25" : VER === "v524" ? "v5.24" : VER === "v523" ? "v5.23" : VER === "v522" ? "v5.22" : VER === "v521" ? "v5.21" : VER === "v520" ? "v5.20" : VER === "v519" ? "v5.19" : VER === "v518" ? "v5.18" : VER === "v517" ? "v5.17" : VER === "v516" ? "v5.16" : VER === "v515" ? "v5.15" : VER === "v514" ? "v5.14" : VER === "v513" ? "v5.13" : VER === "v512" ? "v5.12" : VER === "v511" ? "v5.11" : VER === "v5102" ? "v5.10.2"
     : VER === "v5101" ? "v5.10.1" : IS510 ? "v5.10" : "v5.9.2";
   T(`SHELL: version badge reads ${_badge}`, t.includes(_badge));
   T("SHELL: amber example-data banner fires", has(t, "EXAMPLE DATA MODE") || has(t, "built-in example household"));
@@ -111,7 +111,7 @@ sig("withdrawal", ["ORDER OF OPERATIONS", "Traditional"]);
 // NOT pinned defects: the modelling is unchanged and remains wrong. Release (c) fixes the model;
 // this release only stops the app from denying it. Flip nothing here when (c) lands — instead
 // re-point these at whatever (c) makes true.
-if (VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529") {
+if (VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530") {
   const w = per["withdrawal"] || "";
   const norm = w.toLowerCase();
   T("V524 withdrawal: 'already-taxed principal' claim is GONE", !norm.includes("already-taxed principal"));
@@ -159,7 +159,7 @@ sig("events", ["MEDICARE", "RMD", "HSA", "BACKUP"]);
 // DOCS_HTML reaches the DOM ONLY through <iframe srcDoc={...}> (v5.24 L5625), and jsdom does not
 // fold iframe srcdoc into body.textContent. Reading per["docs"] here would make every assertion
 // below pass vacuously on BOTH builds — the OPERATIONS section B2 failure. Read the attribute.
-if (VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529") {
+if (VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530") {
   const docsTab = tabs().find(b => b.textContent.trim() === "docs");
   await click(docsTab); await flush();
   const frame = body().querySelector('iframe[title="Danger Close Documentation"]');
@@ -215,6 +215,40 @@ if (VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER 
   // ── v5.28: the three sections the DOCS_HTML audit found stale or silent ──────────────────────
   // GATED TO v527+ / v528+ PER OPERATIONS §B2, which now requires the gate as well as the
   // inversion. v5.24-v5.27 legitimately lack this copy and must keep replaying green.
+  // ── v5.30: the OBBBA senior-bonus disclosure ────────────────────────────────────────────────
+  // WHAT WAS WRONG. Through v5.29 §13 said the OBBBA bonus senior deduction "is NOT modeled" and
+  // that omitting it made near-term projections "slightly conservative (overstated)". Engine B has
+  // modelled it all along (computeTaxPlan, gated yr <= 2028), so BOTH clauses were false — and the
+  // direction it claimed is the inverse of the truth, in the document users actually read.
+  //
+  // WHY THIS ASSERTION DID NOT EXIST BEFORE. It never did. The §B2 lock sweep for this release
+  // found nothing guarding the sentence, which is precisely why it could drift for five releases.
+  // The absence of a lock was the cause, not a convenience.
+  //
+  // GATED PER LEG (§B2, the rule added at v5.28). The v530 leg asserts the CORRECTED copy; every
+  // earlier leg asserts the OLD copy, because those builds legitimately contain it. Inverting
+  // without gating would break the frozen legs and make the release notes state a total the suite
+  // will not produce.
+  if (VER === "v530") {
+    T("V530 docs: §13 states the bonus IS modeled on the Taxes tab",
+      man.includes("is modeled on the Taxes tab, but not in the Roth conversion ladder"));
+    T("V530 docs: §13 names the phase-out thresholds",
+      man.includes("6% of MAGI above $75,000 single / $150,000 filing jointly"));
+    T("V530 docs: §13 discloses the cross-tab divergence, with the year named (D-4)",
+      man.includes("differ for any ladder year at or before 2028"));
+    T("V530 EXTINCTION: the false 'is NOT modeled' claim is gone",
+      !man.includes("deduction (up to $6,000/person 65+, tax years 2025\u20132028, income-phased) is NOT modeled"));
+    T("V530 EXTINCTION: the inverted error-direction claim is gone",
+      !man.includes("Its omission makes near-term tax projections slightly conservative"));
+    T("V530 docs: the true closing sentence on the other 2026 constants SURVIVED the edit",
+      man.includes("has been verified against IRS Rev. Proc. 2025-32, CMS, and SSA"));
+  } else {
+    // The old copy, asserted on the builds that legitimately carry it. This is NOT a defect pin:
+    // it is the same statement being true of its own build and false of the next one.
+    T("PRIOR LEG: this build still carries the pre-v5.30 'is NOT modeled' copy",
+      man.includes("is NOT modeled"));
+  }
+
   if (VER !== "v524" && VER !== "v525" && VER !== "v526" && VER !== "v527") {
     // FINDING 1 — §07's Withdrawal Strategy entry described the pre-v5.26 model. It gave the
     // priority order as "Taxable -> Traditional -> Roth" and never mentioned the pot that is
@@ -267,7 +301,7 @@ if (VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER 
 // The field is RECORDED and read by no engine, so no figure anywhere can witness it. The only
 // evidence that the UI exists at all is the DOM, which makes this block the sole coverage of
 // decisions D-1, D-2, D-4 and D-5 as the user actually meets them.
-if (VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529") {
+if (VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530") {
   await click(tabs().find(b => b.textContent.trim() === "my data")); await flush();
   const md = (body().textContent || "").replace(/\s+/g, " ");
   // Scope to the Other accounts CARD. A page-wide select query also catches the Holdings table's
@@ -335,7 +369,7 @@ if (VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER 
 {
   const v = per["verify"] || "";
   // v5.14 adds three IRMAA-indexation checks to the Verify tab (see t1's note).
-  const _vCount = (VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529") ? "57" : IS510 ? "54" : "53";
+  const _vCount = (VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530") ? "57" : IS510 ? "54" : "53";
   T(`VERIFY TAB: reports ${_vCount} checks`, v.includes(_vCount));
   T("VERIFY TAB: no failing marks rendered", !/✗/.test(v));
 }
