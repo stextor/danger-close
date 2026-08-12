@@ -11,7 +11,7 @@
 import { JSDOM } from "jsdom";
 import { createRequire } from "module";
 
-const [VA, VB] = [process.argv[2] || "v526", process.argv[3] || "v527"];
+const [VA, VB] = [process.argv[2] || "v527", process.argv[3] || "v528"];
 
 const renderWithdrawal = async (ver) => {
   // Seed Math.random BEFORE the bundle import — d3-random captures it at module
