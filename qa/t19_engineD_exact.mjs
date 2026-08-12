@@ -122,12 +122,19 @@ if (namedIRA) {
   P1.household = (P1.household || 0) + BUMP;
   g.setPortfolio(P1);
   const after = g.computeWithdrawalPlan(ARGS);
-  ck("[KNOWN DEFECT 2026-08-11 | rel c] +$100K of NAMED IRA leaves _tradInit unchanged",
-     Math.round(after._tradInit) === Math.round(r._tradInit),
+  // PIN FLIPPED AT v5.26 — this is the fix's own verification. The two assertions below are the
+  // EXACT INVERSE of what stood here through v5.25, when adding $100K to a named IRA left the
+  // pre-tax basis untouched and the money was spent as already-taxed cash.
+  ck("[FIXED v5.26, was KNOWN DEFECT] +$100K of NAMED IRA now RAISES _tradInit by exactly $100K",
+     Math.round(after._tradInit - r._tradInit) === BUMP,
      `${$(r._tradInit)} -> ${$(after._tradInit)}`);
-  ck("[KNOWN DEFECT 2026-08-11 | rel c] ...and lands entirely in the taxable pot instead",
+  ck("[FIXED v5.26] ...and the Priority-1 pool still grows by it, because the DRAW ORDER is unchanged",
      Math.round(after._taxInit - r._taxInit) === BUMP,
      `delta ${$(after._taxInit - r._taxInit)}, expected ${$(BUMP)}`);
+  // The distinction that makes the two compatible: the money is still SPENT first, but it is no
+  // longer spent TAX-FREE. Releases (a)-(c) never moved this money; they changed what it costs.
+  ck("[FIXED v5.26] the extra IRA also raises the RMD basis by $100K (it is Traditional)",
+     Math.round(after._tradInit - r._tradInit) === BUMP);
   g.setPortfolio(P0);
   const restored = g.computeWithdrawalPlan(ARGS);
   ck("fixture restored \u2014 figures return to baseline",

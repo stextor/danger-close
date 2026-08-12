@@ -11,7 +11,7 @@
 import { JSDOM } from "jsdom";
 import { createRequire } from "module";
 
-const [VA, VB] = [process.argv[2] || "v524", process.argv[3] || "v525"];
+const [VA, VB] = [process.argv[2] || "v525", process.argv[3] || "v526"];
 
 const renderWithdrawal = async (ver) => {
   // Seed Math.random BEFORE the bundle import — d3-random captures it at module
@@ -77,16 +77,15 @@ ck(`${VA}: schedule table rendered`, !!A.schedule, "not found");
 ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
 const stripV = s => s.replace(/v5\.\d+(\.\d+)?/g, "vX");
 
-// ── v5.25: STRICT IDENTITY. There is no intended divergence this time ──────────
-// At v5.24 this file EXCISED the Priority 1 copy block, because that release deliberately
-// reworded it. v5.25 touches neither Engine D nor the Withdrawal tab, so the block should now be
-// byte-identical along with everything else, and asserting that DIRECTLY is stronger than
-// excising it. The anchors are kept and still asserted, so if the panel ever vanishes this fails
-// loudly rather than passing on an empty comparison.
+// ── v5.26: INTENDED DIVERGENCE. Identity is no longer the right assertion ──────
+// v5.25 required this whole tab to be byte-identical, because that release recorded a
+// classification and used it for nothing. v5.26 USES it, so the tab moves BY DESIGN and an
+// identity assertion would fail for the right reason while proving nothing about what moved.
 //
-// Do NOT carry the excision forward by habit. Once release (c) reclassifies these accounts the
-// figures in this table MOVE BY DESIGN, and the right response then is a new expectation, not a
-// wider hole in this one.
+// What replaces it is harder to satisfy than identity: the tab must diverge, the divergence must
+// be confined to FIGURES rather than structure (no year lost, no row dropped), and the three
+// statements v5.24/v5.25 made about this money must be gone on the new side and present on the
+// old — so the disclosure is proven to have moved WITH the model rather than lagging it.
 const P1_START = "Emergency Fund";
 const P1_END = "Years active:";
 const locate = (s) => {
@@ -99,34 +98,30 @@ const p1A = locate(A.schedule), p1B = locate(B.schedule);
 ck("Priority 1 panel located on both builds (the comparison is anchored, not blind)",
    p1A.ok && p1B.ok, `${VA} ${p1A.ok} / ${VB} ${p1B.ok}`);
 
-ck("Priority 1 copy block is IDENTICAL across the pair (v5.25 changes no withdrawal copy)",
-   p1A.ok && p1B.ok && stripV(p1A.block) === stripV(p1B.block),
-   `lengths ${p1A.block.length} vs ${p1B.block.length}`);
+ck("the tab DIVERGES — this release moves figures by design",
+   stripV(A.full) !== stripV(B.full), "identical; the v5.26 wiring is unreached");
 
-// The v5.24 disclosure must still be present on BOTH sides — it is what v5.25 must not undo.
-ck(`${VA} carries the v5.24 disclosure`, /everything you entered under Other accounts/i.test(p1A.block));
-ck(`${VB} still carries it`, /everything you entered under Other accounts/i.test(p1B.block));
-ck("the old false 'already-taxed principal' claim is absent from BOTH builds",
-   !/Already-taxed principal/i.test(p1A.block) && !/Already-taxed principal/i.test(p1B.block));
+// STRUCTURE PRESERVED. Divergence must be in the numbers, not in the shape: same years, same
+// number of rows. A fix that silently dropped a row would also "diverge", and would pass a
+// looser check.
+const yearsOf = (s) => (s.match(/\b20\d\d\b/g) || []).join(",");
+ck("every schedule YEAR is preserved across the pair (figures moved, structure did not)",
+   yearsOf(A.schedule) === yearsOf(B.schedule),
+   `${VA} ${(A.schedule.match(/\b20\d\d\b/g) || []).length} yrs vs ${VB} ${(B.schedule.match(/\b20\d\d\b/g) || []).length}`);
 
-ck("schedule text identical, with NOTHING excised",
-   stripV(A.schedule || "") === stripV(B.schedule || ""),
-   `lengths ${(A.schedule||"").length} vs ${(B.schedule||"").length}`);
-
-if (stripV(A.schedule || "") !== stripV(B.schedule || "")) {
-  const a = stripV(A.schedule || ""), b = stripV(B.schedule || "");
-  for (let k = 0; k < Math.min(a.length, b.length); k++) {
-    if (a[k] !== b[k]) {
-      console.log(`\n  DIVERGENCE at char ${k}:`);
-      console.log(`    ${VA}: ...${a.slice(Math.max(0,k-60), k+60)}...`);
-      console.log(`    ${VB}: ...${b.slice(Math.max(0,k-60), k+60)}...`);
-      break;
-    }
-  }
+// THE DISCLOSURE MOVED WITH THE MODEL. Each of these was true when written and false the moment
+// this release landed; a stale disclosure is worse than none, because it states the opposite.
+for (const [claim, label] of [
+  ["growth is never taxed", "growth is never taxed"],
+  ["produces no RMD", "produces no RMD"],
+  ["A future release will classify", "the promise of a later fix"],
+]) {
+  ck(`${VA} carried "${label}"`, p1A.block.includes(claim), "not present on the OLD build — anchor is stale");
+  ck(`${VB} no longer carries it`, !p1B.block.includes(claim), "a falsified disclosure survived the release");
 }
-
-ck("entire tab text identical apart from the version string",
-   stripV(A.full) === stripV(B.full), `lengths ${A.full.length} vs ${B.full.length}`);
+ck(`${VB} states the new treatment instead`,
+   /taxed as ordinary income as it is spent/i.test(p1B.block));
+ck(`${VB} tells the user their figures moved`, /if your numbers moved, that is why/i.test(p1B.block));
 
 console.log(`\nDOM DIFF: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

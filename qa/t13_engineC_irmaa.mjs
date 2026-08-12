@@ -246,15 +246,25 @@ try {
     // household is built so that switch crosses a real tier boundary.
     ck(`${label} [EXTINCTION]: the year after the death is marked as a survivor year`,
       after.marked === true, `${d + 1} marked ${after.marked}`);
+    // v5.26 GENERALISED, and this is STRONGER than what it replaces. The assertion used to pin
+    // `after.tier === "T1"`. Putting Traditional Other accounts into the RMD base raised MAGI, and
+    // on the SINGLE ladder this household now lands in T2 rather than T1 — a correct consequence,
+    // not a regression. Pinning the tier tested a by-product of the fixture's MAGI; what the
+    // omission was actually about is that the survivor is scored on SINGLE thresholds at all.
+    // Asserted directly now, so the check survives any future move in the fixture's MAGI.
     ck(`${label} [EXTINCTION]: the survivor year is scored against SINGLE thresholds (tier rises)`,
-      after.tier === "T1" && before.tier === "Standard",
+      before.tier === "Standard" && after.tier !== "Standard",
       `${d - 1} ${before.tier} -> ${d + 1} ${after.tier} on MAGI $${before.magi}K -> $${after.magi}K`);
+    // Under MFJ thresholds this MAGI would still be Standard — that is the whole omission.
+    ck(`${label} [EXTINCTION]: and MFJ thresholds would NOT have produced a tier at this MAGI`,
+      after.magi * 1000 < MFJ[0], `$${after.magi}K vs MFJ tier-1 floor $${MFJ[0]}`);
 
-    // ── OMISSION 3: the tier is T1, so the surcharge pins the person count. One person is
-    // $1,150; the deceased spouse still counted would render $2,300.
+    // ── OMISSION 3: the surcharge pins the PERSON COUNT. Read the one-person figure at whatever
+    // tier the row actually landed in, so this tests "one person, not two" rather than "T1".
+    const _tierIdx = Number(String(after.tier).replace(/\D/g, "")) || 1;
     ck(`${label} [EXTINCTION]: the survivor surcharge is ONE person's, not two`,
-      Math.abs(after.surcharge - SUR[1]) <= 60,
-      `${d + 1} $${after.surcharge} vs one person $${SUR[1]}, two would be $${SUR[1] * 2}`);
+      Math.abs(after.surcharge - SUR[_tierIdx]) <= 60,
+      `${d + 1} ${after.tier} $${after.surcharge} vs one person $${SUR[_tierIdx]}, two would be $${SUR[_tierIdx] * 2}`);
 
     // The tier rise is NOT explained by MAGI growth — MAGI is lower after the death than before it.
     ck(`${label}: the tier rise comes from the threshold switch, not from rising MAGI`,
@@ -310,8 +320,13 @@ try {
       ck("case 3 [EXTINCTION]: a premium year after the death charges ONE person, tier unchanged",
         pre.tier === "T1" && pre.marked === false && Math.abs(pre.surcharge - SUR[1]) <= 60,
         `${2043} affects ${pre.premYr}, tier ${pre.tier}, marked ${pre.marked}, $${pre.surcharge} (pre-fix $${SUR[1] * 2})`);
-      ck("case 3: that row's MAGI is unchanged by the fix (a both-alive year, $336K)",
-        Math.abs(pre.magi - 336) <= 1, `$${pre.magi}K`);
+      // v5.26 moved this from $336K to $345K, +$9K. HAND-VERIFIED: the RMD-bearing Other accounts
+      // ($104,000) entered Engine C's pre-tax basis, raising the RMD and therefore the MAGI it
+      // feeds. The assertion's PURPOSE is unchanged — it pins the row so that a survivor-handling
+      // regression, which would move MAGI far more than this, is still caught. The label now says
+      // what it is rather than "unchanged by the fix", which stopped being true at v5.26.
+      ck("case 3: that row's MAGI is a both-alive-year figure ($345K at v5.26, was $336K)",
+        Math.abs(pre.magi - 345) <= 1, `$${pre.magi}K`);
       // And the survivor year moves up the SINGLE ladder, well past where MFJ would have put it.
       ck("case 3 [EXTINCTION]: the survivor year climbs the Single ladder (T1 -> T4)",
         surv.marked === true && surv.tier === "T4" && Math.abs(surv.surcharge - SUR[4]) <= 60,

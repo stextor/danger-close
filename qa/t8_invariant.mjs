@@ -102,7 +102,14 @@ T.applyLoadedData({ portfolio: port, expenses: [], incomeFromForm: true });
 {
   const rsb = T.retireStartBalances(NOW + 4);
   const basePos = (T.PORTFOLIO.positions || []).reduce((x, p) => x + (p.trad || 0), 0);
-  ck("constructor pooled tradInit = positions + $168,000 total accrual", Math.abs(rsb.tradInit - (basePos + 96000 + 72000)) < 1e-6, `got ${rsb.tradInit}`);
+  // v5.26: plus the ordinary-income Other accounts. Asserted as a decomposition so the invariant
+  // still means "nothing appeared from nowhere" rather than being re-pinned to a new constant.
+  const othOrd = rsb.othOrdA + rsb.othOrdB;
+  ck("constructor pooled tradInit = positions + $168,000 total accrual + ordinary Other accounts",
+     Math.abs(rsb.tradInit - (basePos + 96000 + 72000 + othOrd)) < 1e-6, `got ${rsb.tradInit}, othOrd ${othOrd}`);
+  ck("CONSERVATION: the two bases differ by exactly the annuity money",
+     Math.abs((rsb.tradInit - rsb.rmdInit) - (othOrd - (rsb.othRmdA + rsb.othRmdB))) < 1e-6,
+     `tax ${rsb.tradInit} rmd ${rsb.rmdInit}`);
   const res = T.runRothStrategies(mkP(true));
   ck("engine runs on accrued P and returns strategies", Array.isArray(res) && res.length > 0);
   const cur = res.find(r => r.key === "current");
@@ -126,17 +133,24 @@ T.applyLoadedData({ portfolio: port, expenses: [], incomeFromForm: true });
   const strays = (outsideHelper.match(residual) || []).length;
   ck("no taxable-residual reduce outside taxableInitFromPositions", strays === 0, `found ${strays}`);
 
-  // 2) COUNT — 1 definition + 7 consumer call sites (Engine C, Engine B, and five in DangerCloseMain).
-  //    Code-only: prose in the source refers to the helper by NAME, without parentheses, so this
-  //    counts real call sites rather than comment mentions. Confirmed against the AST census (8).
+  // 2) COUNT — v5.26 moved the consumers UP one level. `taxableInitFromPositions` is now reached
+  //    through exactly ONE door, `taxableInitAll`, which adds the after-tax Other accounts; the
+  //    seven consumers call that instead. This is a STRONGER invariant than the v5.22 one it
+  //    replaces: it says the positions residual can no longer be consumed on its own by accident,
+  //    which is what would silently drop the $36,000 of taxable/HSA Other-account money.
   const uses = (SRC.match(/taxableInitFromPositions\(/g) || []).length;
-  ck("taxableInitFromPositions: 1 definition + 7 call sites", uses === 8, `found ${uses}`);
+  ck("taxableInitFromPositions: 1 definition + exactly 1 caller (taxableInitAll)", uses === 2, `found ${uses}`);
+  const usesAll = (SRC.match(/taxableInitAll\(/g) || []).length;
+  ck("taxableInitAll: 1 definition + 7 call sites", usesAll === 8, `found ${usesAll}`);
 
-  // 3) K2 — the Roth tax-funding gate is a VARIANT: positions residual PLUS otherAccounts. Only its
-  //    positions half was consolidated. Flattening it into the bare helper would silently change what
-  //    the "almost no outside money" warning measures, for households whose Other accounts carry it.
-  ck("Roth funding gate keeps its otherAccounts term",
-     SRC.includes('taxableInitFromPositions() + (PORTFOLIO.otherAccounts || []).reduce((t, a) => t + (a.balance || 0), 0)'));
+  // 3) K2 — the Roth tax-funding gate. Through v5.25 it summed EVERY Other account's balance,
+  //    counting a named IRA as money available to pay conversion tax. It never was: spending that
+  //    money is itself a taxable event, so the gate was telling users they had outside funds when
+  //    they had none. v5.26 routes it through taxableInitAll, which counts only genuinely
+  //    after-tax money. EXTINCTION: the raw balance sum must never come back.
+  ck("Roth funding gate no longer counts EVERY Other account as spendable",
+     !SRC.includes('(PORTFOLIO.otherAccounts || []).reduce((t, a) => t + (a.balance || 0), 0)'));
+  ck("Roth funding gate measures after-tax money only", SRC.includes('rothTaxFunding === "taxable" && taxableInitAll() < 1000'));
 
   // 4) K1 — the helper must NOT be inside retireStartBalances: that constructor applies contribAccrual
   //    and no accrual flows to taxable. Asserted positionally, and the stale comment is gone.

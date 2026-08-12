@@ -215,10 +215,37 @@ try {
     // THE INVARIANT. Survivor is B (younger, larger divisor) → the survivor-year RMD must be
     // materially BELOW what the decedent's age would have produced. Under the old pooled/ageA
     // model the 2044 figure was ~$47K; the survivor-based figure is ~$43-44K.
+    // THRESHOLDS RECALIBRATED AT v5.26. THE MOVEMENT WAS INVESTIGATED BEFORE THEY WERE MOVED,
+    // because the first explanation offered did not fit and calibrating past that would have
+    // destroyed what these two checks are for.
+    //
+    // Measured: 2044 went 44 -> 52 and 2045 went 46 -> 54. That is a RATIO of ~1.18, while the
+    // RMD-bearing Other accounts ($104,000 against a $1,227,600 pre-tax basis) can only account
+    // for ~1.085. The gap was real and needed explaining.
+    //
+    // IT IS AN ABSOLUTE ADDITION, NOT A RATIO. Sweeping Engine B over conversion levels on this
+    // exact fixture:
+    //
+    //     conversions      v5.25 RMD    v5.26 RMD     delta      ratio
+    //     $0/yr               95,742      103,908     +8,166     1.085
+    //     $40,000/yr          62,222       70,546     +8,324     1.134
+    //     $70,000/yr          37,081       45,524     +8,443     1.228
+    //     $100,000/yr         11,941       20,503     +8,562     1.717
+    //
+    // The delta is ~$8.2-8.6K at EVERY level: the Other-account money grows and is drawn like the
+    // rest of the basis and contributes a roughly fixed amount to the RMD. The ratio climbs only
+    // because conversions shrink the denominator. This fixture converts, so it sits at ~1.18 —
+    // and 44 + 8 = 52, 46 + 8 = 54, which is what was measured. The same indirect amplification
+    // is already documented in t19's note for a different perturbation.
+    //
+    // The invariant is UNCHANGED and still discriminates. Survivor is B (younger, larger divisor);
+    // keying to the DECEASED would multiply by divisor(78)/divisor(80) = 22.0/20.2 = 1.089 in 2044
+    // and 21.1/19.4 = 1.088 in 2045, giving ~56.6K and ~58.7K. The thresholds below sit BETWEEN
+    // the survivor-keyed and decedent-keyed figures, so a regression to ageA-keying still fails.
     ck("case 1 [EXTINCTION]: survivor-year RMD is NOT keyed to the deceased (older) spouse's age",
-      !!y44 && y44.rmdK < 46, `2044 RMD $${y44 && y44.rmdK}K — pre-fix ageA-keyed value was ~$47K`);
+      !!y44 && y44.rmdK < 54, `2044 RMD $${y44 && y44.rmdK}K — ageA-keyed would be ~$56.6K`);
     ck("case 1 [EXTINCTION]: the correction persists a year later (2045)",
-      !!y45 && y45.rmdK < 48, `2045 RMD $${y45 && y45.rmdK}K — pre-fix ageA-keyed value was ~$49K`);
+      !!y45 && y45.rmdK < 56, `2045 RMD $${y45 && y45.rmdK}K — ageA-keyed would be ~$58.7K`);
     // Direction check: with the older spouse gone, the surviving younger spouse's larger
     // divisor means the RMD must not jump upward across the death boundary.
     ck("case 1: RMD does not rise across the death boundary (younger survivor, larger divisor)",

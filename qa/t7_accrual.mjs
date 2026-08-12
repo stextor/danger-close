@@ -138,8 +138,20 @@ T.applyLoadedData({ portfolio: mkPortfolio({}, { contribPreTaxA: 2000, contribRo
     tradB: (P.positions || []).reduce((s, p) => s + (p.owner === "B" ? (p.trad || 0) : 0), 0),
   };
   const rsb = T.retireStartBalances(NOW + 4);
-  ck("engine tradInitA = positions + $96,000 accrual", rsb.tradInitA, base.tradA + 96000);
-  ck("engine tradInitB = positions + $72,000 accrual", rsb.tradInitB, base.tradB + 72000);
+  // v5.26: the pre-tax basis also carries ordinary-income Other accounts (trad + annuity), split
+  // by owner. HAND-VERIFIED against this fixture: tradInitA rose by exactly 90,000 and tradInitB
+  // by exactly 21,000, which are the example household's Rollover+Traditional IRA (A) and its
+  // Annuity+State Plan (B). Asserted as a DECOMPOSITION, not as a new constant, so the check still
+  // fails if positions, accrual or the Other-account split each drift while the total holds.
+  ck("engine tradInitA = positions + $96,000 accrual + ordinary Other accounts (A)",
+     rsb.tradInitA, base.tradA + 96000 + rsb.othOrdA);
+  ck("engine tradInitB = positions + $72,000 accrual + ordinary Other accounts (B)",
+     rsb.tradInitB, base.tradB + 72000 + rsb.othOrdB);
+  ck("the A-side Other-account contribution is the two named IRAs", rsb.othOrdA, 90000);
+  ck("the B-side is the annuity plus the state plan", rsb.othOrdB, 21000);
+  // The RMD basis excludes the annuity — that is the whole reason `annuity` is a separate type.
+  ck("RMD basis excludes the $7,000 annuity", rsb.tradInitB - rsb.rmdInitB, 7000);
+  ck("RMD basis on the A side is unchanged (no annuity there)", rsb.rmdInitA, rsb.tradInitA);
   ck("engine rothInitA = positions-Roth + $24,000 accrual", rsb.rothInitA, (T.PORTFOLIO.positions || []).reduce((x, p) => x + (p.owner === "B" ? 0 : (p.roth || 0)), 0) + 24000);
   ck("pooled tradInit = tradInitA + tradInitB", rsb.tradInit, rsb.tradInitA + rsb.tradInitB);
   ck("accrual figures internally consistent", acc.tradA + acc.tradB, 96000 + 72000);

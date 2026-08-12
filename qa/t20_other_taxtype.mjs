@@ -41,7 +41,11 @@ const ck = (n, ok, d = "") => {
   if (ok) { pass++; console.log(`  \u2713 ${n}`); }
   else { fail++; const m = `  \u2717 ${n}${d ? " \u2014 " + d : ""}`; console.log(m); fails.push(m); }
 };
-const TYPES = ["taxable", "trad", "roth", "hsa"];
+const TYPES = ["taxable", "trad", "roth", "hsa", "annuity"];
+// v5.26 semantics, derived once so no assertion has to remember which type means what.
+const ORDINARY = ["trad", "annuity"];   // taxed as ordinary income when spent
+const RMD_BEARING = ["trad"];           // subject to an RMD — annuity and roth are NOT
+const INDIVIDUAL = ["trad", "roth", "annuity"];  // cannot be held jointly
 
 console.log("t20 \u2014 OTHER ACCOUNTS TAX TYPE (schema / migration / extinction)\n");
 
@@ -62,7 +66,8 @@ const infer = (name) => {
   const s = String(name || "");
   if (/\broth\b/i.test(s)) return "roth";
   if (/\bhsa\b|health\s+savings/i.test(s)) return "hsa";
-  if (/\bira\b|\brollover\b|401\s*\(?k\)?|403\s*\(?b\)?|\b457\b|\bpension\b|state\s+plan|\bannuit(y|ies)\b|\bsep\b|\bsimple\b/i.test(s)) return "trad";
+  if (/\bannuit(y|ies)\b/i.test(s)) return "annuity";   // ORDER: before the pre-tax rule
+  if (/\bira\b|\brollover\b|401\s*\(?k\)?|403\s*\(?b\)?|\b457\b|\bpension\b|state\s+plan|\bsep\b|\bsimple\b/i.test(s)) return "trad";
   return "taxable";
 };
 ck("shipped types agree with what inference would have chosen",
@@ -107,12 +112,21 @@ ck("no name was altered by the migration",
 console.log("\nC. The D-3 equality \u2014 $111,000 / $21,000 / $15,000");
 
 const sum = (t) => mig.filter(a => a.taxType === t).reduce((s, a) => s + a.balance, 0);
-ck("trad totals exactly $111,000", sum("trad") === 111000, `got ${sum("trad")}`);
+// v5.26 SPLIT THE $111,000. It is still $111,000 of ordinary-income money — the figure v5.24
+// published — but only $104,000 of it carries an RMD. The $7,000 annuity is taxed the same way
+// and forced out at no age. Both halves are asserted, because the whole point of the split is
+// that these two questions have different answers.
+ck("ordinary-income money still totals exactly $111,000 (what v5.24 published)",
+   ORDINARY.reduce((t, k) => t + sum(k), 0) === 111000,
+   `trad ${sum("trad")} + annuity ${sum("annuity")}`);
+ck("RMD-bearing money is $104,000 — the annuity is NOT forced out", sum("trad") === 104000, `got ${sum("trad")}`);
+ck("the annuity is exactly the $7,000 difference", sum("annuity") === 7000, `got ${sum("annuity")}`);
 ck("taxable totals exactly $21,000", sum("taxable") === 21000, `got ${sum("taxable")}`);
 ck("hsa totals exactly $15,000", sum("hsa") === 15000, `got ${sum("hsa")}`);
 ck("roth totals exactly $0", sum("roth") === 0, `got ${sum("roth")}`);
-ck("the four buckets still sum to the $147,000 pot v5.24 named",
-   sum("trad") + sum("taxable") + sum("hsa") + sum("roth") === 147000);
+ck("the five buckets still sum to the $147,000 pot v5.24 named",
+   TYPES.reduce((t, k) => t + sum(k), 0) === 147000,
+   TYPES.map(k => `${k} ${sum(k)}`).join(" "));
 
 // Each rule at its boundary, including the ordering that makes "Roth IRA" resolve roth, not trad.
 console.log("\nC2. Inference rules at their boundaries");
@@ -129,7 +143,8 @@ P("My 401k", "trad");
 P("403(b) plan", "trad");
 P("457 deferred comp", "trad");
 P("State Plan", "trad");
-P("Spouse B - Annuity", "trad");
+P("Spouse B - Annuity", "annuity");   // v5.26: its own type, because it carries no RMD
+P("Variable Annuities", "annuity");
 P("SEP IRA", "trad");
 P("SIMPLE IRA", "trad");
 P("Teachers pension", "trad");
@@ -154,7 +169,8 @@ g.applyLoadedData({ portfolio: { positions: [], otherAccounts: [
   { name: "Roth account at Schwab", balance: 30000 },         // roth, no owner hint      -> JT -> promote
   { name: "Joint brokerage", balance: 10000 },                // taxable                  -> JT stays
   { name: "HSA", balance: 5000 },                             // hsa                      -> JT stays
-  { name: "Spouse B - Annuity", balance: 7000 },              // trad, owner B by name    -> untouched
+  { name: "Spouse B - Annuity", balance: 7000 },              // annuity, owner B by name -> untouched
+  { name: "Big Contract", balance: 30000, owner: "JT", taxType: "annuity" },  // JT ANNUITY -> promote
 ] } });
 const d5 = g.PORTFOLIO().otherAccounts;
 const byName = Object.fromEntries(d5.map(a => [a.name, a]));
@@ -162,11 +178,18 @@ const byName = Object.fromEntries(d5.map(a => [a.name, a]));
 // The invariant below is worthless unless the fixture actually CONTAINS trad/roth rows: on a build
 // with no taxType at all the condition is never true and the assertion passes while testing nothing.
 // That is the OPERATIONS §B2 failure exactly, so the precondition is asserted first.
-const _retRows = d5.filter(a => a.taxType === "trad" || a.taxType === "roth");
-ck("PRECONDITION: the fixture really does contain trad/roth rows (invariant is not vacuous)",
-   _retRows.length === 3, `found ${_retRows.length}, expected 3`);
-ck("SCHEMA INVARIANT: no trad/roth row is owned JT after migration",
-   _retRows.length > 0 && d5.every(a => !((a.taxType === "trad" || a.taxType === "roth") && a.owner === "JT")),
+// v5.26: `annuity` joined the individually-owned set. An annuity has no RMD, so the original
+// rationale (an RMD needs a person's age) does not apply — but survivor treatment at the first
+// death still has to know whose contract it is, and a mixed rule would be arbitrary in the UI.
+const _retRows = d5.filter(a => INDIVIDUAL.includes(a.taxType));
+ck("PRECONDITION: the fixture really does contain individually-owned rows (invariant is not vacuous)",
+   _retRows.length === 4, `found ${_retRows.length}, expected 4`);
+ck("PRECONDITION: and one of them is an ANNUITY entered as Joint (the NC-8 gap)",
+   d5.some(a => a.taxType === "annuity" && a.name === "Big Contract"), "no JT annuity in the fixture");
+ck("a jointly-entered ANNUITY is promoted to A, like trad and roth",
+   (byName["Big Contract"] || {}).owner === "A", (byName["Big Contract"] || {}).owner);
+ck("SCHEMA INVARIANT: no trad/roth/annuity row is owned JT after migration",
+   _retRows.length > 0 && d5.every(a => !(INDIVIDUAL.includes(a.taxType) && a.owner === "JT")),
    JSON.stringify(d5.map(a => `${a.name}:${a.taxType}/${a.owner}`)));
 ck("an inferred-trad JT row is promoted to A", byName["Vanguard Rollover"].owner === "A",
    byName["Vanguard Rollover"].owner);
@@ -194,7 +217,38 @@ const d5b = g.PORTFOLIO().otherAccounts;
 ck("an explicit B owner on a trad row is preserved", d5b[0].owner === "B", d5b[0].owner);
 ck("an explicit JT owner on a trad row IS corrected", d5b[1].owner === "A", d5b[1].owner);
 
+// GAP CLOSED AFTER A NEGATIVE CONTROL DID NOT FIRE (§B2). Breaking the owner split back to the
+// naive `owner === "A"` form broke nothing, because every fixture here already carried an owner.
+// The fail-safe exists precisely for rows that do NOT — a plan restored from a draft, or any path
+// that skips the back-fill. Money falling out of the pre-tax basis is the OPTIMISTIC direction:
+// less trad means less tax and a smaller RMD, so the plan looks better than it is.
+// Set DIRECTLY, bypassing applyLoadedData — which is the only way to reach this. The migration
+// back-fills a missing owner, so a loaded plan never has one absent; the fail-safe protects the
+// paths that skip migration (a draft restore, a direct state write, a future entry path). That is
+// exactly why the first attempt at this test passed under the broken build: it went through
+// applyLoadedData and never produced the shape it was meant to test.
+g.setPortfolio({ positions: [], total401k: 0, household: 50000, asOfYr: 2026, otherAccounts: [
+  { name: "Mystery Account", balance: 50000, taxType: "trad" },   // NO owner at all
+] });
+{
+  const rsb = g.retireStartBalances(2027);
+  ck("CONSERVATION: a row with NO owner still reaches the pre-tax basis (it is not lost)",
+     rsb.othOrdA + rsb.othOrdB === 50000, `A ${rsb.othOrdA} B ${rsb.othOrdB}`);
+  ck("...and it lands on A, not nowhere", rsb.othOrdA === 50000, `${rsb.othOrdA}`);
+  ck("CONSERVATION: the same holds for the RMD basis",
+     rsb.othRmdA + rsb.othRmdB === 50000, `A ${rsb.othRmdA} B ${rsb.othRmdB}`);
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
+// E. THE INVERSION — every engine now READS taxType, and the annuity still has no RMD
+// ─────────────────────────────────────────────────────────────────────────────
+// THIS SECTION ASSERTED THE EXACT OPPOSITE THROUGH v5.25, DELIBERATELY. Until this release no
+// engine read the field, and that was provable by permuting every type and requiring byte-
+// identical output. It was what made "all 787 checks return identical figures" mean something.
+//
+// v5.26 is the release that reads the field, so the old assertion must FAIL — and leaving it in
+// place would have kept the suite green while testing the reverse of the truth. It is replaced,
+// not deleted, by three assertions that are harder to satisfy than the one they retire.
 // E. EXTINCTION — no engine reads taxType (this is what makes the parity claim true)
 // ─────────────────────────────────────────────────────────────────────────────
 console.log("\nE. EXTINCTION \u2014 no engine reads taxType");
@@ -250,12 +304,12 @@ const runAll = (portfolio) => {
     pen: g.getPension(), stateRate: tl.stateTaxRate || 0, stateCode: g.PORTFOLIO().stateCode || null,
     convTaxFunding: "taxable", taxableGainFrac: 0.5,
     acaPremium: 0, acaSize: 0, taxYieldPct: 1.5, currentConv: 70000,
-    tradInit: sum(p => p.trad || 0), rothInit: sum(p => p.roth || 0),
-    tradInitA: sum(p => p.owner === "B" ? 0 : (p.trad || 0)),
-    tradInitB: sum(p => p.owner === "B" ? (p.trad || 0) : 0),
-    rothInitA: sum(p => p.owner === "B" ? 0 : (p.roth || 0)),
-    rothInitB: sum(p => p.owner === "B" ? (p.roth || 0) : 0),
-    taxableInit: sum(p => Math.max(0, (p.balance || 0) - (p.roth || 0) - (p.trad || 0))),
+    // FROM THE SHARED CONSTRUCTOR, exactly as the app builds it. Hand-rolling these from
+    // `positions` — which this suite did through v5.25, when it made no difference — silently
+    // excludes every Other account, so Engine A would be handed a basis that cannot see the field
+    // and would "prove" it does not read it. The trap is that such a P looks entirely reasonable.
+    ...g.retireStartBalances(2027),
+    taxableInit: g.taxableInitAll ? g.taxableInitAll() : sum(p => Math.max(0, (p.balance || 0) - (p.roth || 0) - (p.trad || 0))),
   };
   const seeded = (fn) => { _s = 123456789; return fn(); };
   const out = {};
@@ -276,14 +330,143 @@ ck("PRECONDITION: the permuted fixture really carries taxTypes (extinction is no
    && g.PORTFOLIO().otherAccounts.some(a => a.taxType !== HH.otherAccounts.find(h => h.name === a.name).taxType),
    JSON.stringify(g.PORTFOLIO().otherAccounts.map(a => `${a.name}=${a.taxType}`)));
 
+
 const asIs = runAll(HH);
 const flipped = runAll({ ...HH, otherAccounts: _flipFixture });
 
-ck("EXTINCTION: permuting every taxType changes NO engine output",
-   asIs === flipped,
-   asIs === flipped ? "" : "an engine has begun reading taxType \u2014 that is release (c), and it must not land here");
-ck("the extinction control is not vacuous (engines actually produced output)",
+ck("INVERSION: permuting every taxType now CHANGES engine output",
+   asIs !== flipped,
+   asIs === flipped ? "no engine reads taxType \u2014 the v5.26 wiring is missing or unreached" : "");
+ck("the comparison is not vacuous (engines actually produced output)",
    asIs.length > 2000, `serialized length ${asIs.length}`);
+
+// PER ENGINE, AT ITS OWN BASIS. The parent scope required this explicitly: a single combined
+// fingerprint can go green because ONE engine moved while the other four never read the field.
+// Each is therefore asserted separately, on its own output, never through a shared helper.
+{
+  const eng = ["withdrawal", "roth", "mc", "stress", "checks"];
+  const A = JSON.parse(asIs), B = JSON.parse(flipped);
+  for (const k of eng) {
+    const moved = JSON.stringify(A[k]) !== JSON.stringify(B[k]);
+    // THREE of these must NOT move, and each for its own stated reason. Asserting "everything
+    // moves" would have been wrong, and asserting it loosely ("something moved") would pass while
+    // four of the five ignored the field. Verified against the source, not assumed:
+    //   mc      — runMonteCarlo reads PORTFOLIO.household and bucketActuals. Classification
+    //             touches neither. This is the mechanical statement of "the fix has not
+    //             overreached", and the reason parity stays 8/8 strict.
+    //   stress  — runStressTests is runExtendedMC with forced scenario years. Same basis as mc.
+    //   checks  — buildVerificationChecks compares published tax constants against IRS Rev. Proc.
+    //             sources. It contains no household money at all.
+    const MUST_NOT_MOVE = { mc: "reads household and bucketActuals, not taxType",
+                            stress: "is the Monte Carlo under forced scenarios — same basis",
+                            checks: "asserts IRS constants, not this household's money" };
+    if (MUST_NOT_MOVE[k]) {
+      ck(`GUARD: "${k}" does NOT move \u2014 ${MUST_NOT_MOVE[k]}`, !moved, "it moved; the fix has reached further than intended");
+    } else {
+      ck(`engine "${k}" reads taxType at its own basis`, moved, "did not move under permutation");
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// E2. THE NEW EXTINCTION — annuity money never generates an RMD, in ANY engine.
+// ─────────────────────────────────────────────────────────────────────────────
+// This is the assertion that replaces the old one as the thing that must never come back.
+// v5.25 recorded annuities as `trad`, which was conservative for tax and WRONG for RMD: it
+// manufactured a legal obligation the owner does not have and forced money out early. During
+// this build the defect was found still live in three of the five engines AFTER the schema was
+// correct, because Engines A, B and C compute RMDs from a running trad balance. It was found a
+// second time in the spousal-rollover path, where the exempt SHARE was applied to the merged
+// balance and exempted far more than the annuity was worth. Twice in one release is why this
+// is pinned rather than trusted.
+console.log("\nE2. The annuity carries NO RMD \u2014 in any engine");
+{
+  const mkHH = (t) => ({ ...HH, otherAccounts: [
+    { name: "Rollover IRA (A)", balance: 200000, owner: "A", taxType: "trad" },
+    { name: "Big Contract", balance: 400000, owner: "B", taxType: t },
+  ] });
+  const asTrad = mkHH("trad"), asAnn = mkHH("annuity");
+
+  g.applyLoadedData({ portfolio: JSON.parse(JSON.stringify(asTrad)) });
+  const rT = g.retireStartBalances(2027);
+  g.applyLoadedData({ portfolio: JSON.parse(JSON.stringify(asAnn)) });
+  const rA = g.retireStartBalances(2027);
+
+  ck("PRECONDITION: the two fixtures differ ONLY in that one row's type (not vacuous)",
+     rT.tradInit === rA.tradInit && rT.tradInit > 0, `${rT.tradInit} vs ${rA.tradInit}`);
+  ck("TAX basis is IDENTICAL \u2014 an annuity is ordinary income just like Traditional",
+     rT.tradInit === rA.tradInit && rT.tradInitB === rA.tradInitB, `${rT.tradInitB} vs ${rA.tradInitB}`);
+  ck("RMD basis is LOWER by exactly the annuity balance",
+     rT.rmdInit - rA.rmdInit === 400000, `delta ${rT.rmdInit - rA.rmdInit}`);
+  ck("the RMD-exempt share carries the annuity exactly",
+     Math.round(rA.annShareB * rA.tradInitB) === 400000, `${Math.round(rA.annShareB * rA.tradInitB)}`);
+  ck("a household with NO annuity has a zero exempt share (not vacuous)",
+     rT.annShareA === 0 && rT.annShareB === 0, `${rT.annShareA}/${rT.annShareB}`);
+
+  // AND IN ENGINE D, END TO END. Two things had to be got right here, and both were got wrong first:
+  //
+  //   OWNERSHIP. The row must be owned by A. On the example household B's RMD age falls outside
+  //   the plan horizon, so a B-owned account produces no RMD for ANY type and the comparison is
+  //   vacuous — it passed while testing nothing. That is the §B2 failure, caught here by the
+  //   numbers being identical to the dollar across all three types.
+  //
+  //   MAGNITUDE. The effect in Engine D is SMALL (~$900 of lifetime RMD on $600,000), because the
+  //   draw order spends Other accounts FIRST and this release deliberately did not change it. By
+  //   the time RMDs begin, most of the money is gone. The bulk of the annuity's effect lands in
+  //   Engines A/B/C, which read the basis at retirement. A threshold assertion here would be
+  //   arbitrary, so the strong EXACT statement is used instead: an annuity produces precisely the
+  //   same lifetime RMD as a brokerage account — that is, none of its own.
+  const rmdOf = (p) => { g.applyLoadedData({ portfolio: JSON.parse(JSON.stringify(p)) });
+    const r = g.computeWithdrawalPlan({ retireYear: 2027, rothAmount: 0, scenarioPreset: "base" });
+    return r.schedule.reduce((s, x) => s + (x.rmd_y || 0), 0); };
+  // `household` must include the row, or Engine D's Priority-1 pool (household - total401k) is
+  // smaller than the account it is supposed to contain and the RMD tracker is capped away.
+  const ownedA = (t) => ({ ...HH, household: HH.total401k + 600000,
+    otherAccounts: [{ name: "Big Contract", balance: 600000, owner: "A", taxType: t }] });
+  const lifeTax = rmdOf(ownedA("taxable")), lifeTrad = rmdOf(ownedA("trad")), lifeAnn = rmdOf(ownedA("annuity"));
+  ck("Engine D: a TRADITIONAL Other account RAISES lifetime RMD above a brokerage one",
+     lifeTrad > lifeTax, `trad ${Math.round(lifeTrad)} vs taxable ${Math.round(lifeTax)}`);
+  ck("Engine D: an ANNUITY produces EXACTLY the same lifetime RMD as a brokerage account \u2014 none",
+     lifeAnn === lifeTax, `annuity ${Math.round(lifeAnn)} vs taxable ${Math.round(lifeTax)}`);
+  ck("PRECONDITION: the trad case really does differ (the comparison is not vacuous)",
+     lifeTrad !== lifeTax, "all three identical \u2014 the RMD path is unreached for this fixture");
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // AND THE HEADLINE BEHAVIOUR ITSELF: spending this money produces TAXABLE INCOME.
+  // ───────────────────────────────────────────────────────────────────────────
+  // ADDED BECAUSE A NEGATIVE CONTROL DID NOT FIRE (§B2). Deleting `othOrdDraw` from Engine D's
+  // magi — the single line that makes a spent IRA taxable, and the entire point of this release —
+  // broke NOTHING in the suite. The permutation assertion above still passed, because the
+  // withdrawal output also moves via the RMD base, so "the engine moved" was true for the wrong
+  // reason. That is the §B2 failure exactly: a coarse assertion standing in for a specific one.
+  //
+  // The exact statement: every dollar of ordinary-income money is taxed ONCE on its way out, so
+  // the lifetime MAGI difference between an all-Traditional and an all-Taxable Other account is
+  // the account balance itself. Hand-verified at $600,000: 3,682,330 -> 4,282,330.
+  const magiOf = (p) => { g.applyLoadedData({ portfolio: JSON.parse(JSON.stringify(p)) });
+    const r = g.computeWithdrawalPlan({ retireYear: 2027, rothAmount: 0, scenarioPreset: "base" });
+    return r.schedule.reduce((s, x) => s + (x.magi || 0), 0); };
+  const magiTax = magiOf(ownedA("taxable")), magiTrad = magiOf(ownedA("trad")), magiAnn = magiOf(ownedA("annuity"));
+  ck("Engine D: a TRADITIONAL Other account is taxed as ordinary income when spent",
+     magiTrad > magiTax, `trad ${Math.round(magiTrad)} vs taxable ${Math.round(magiTax)}`);
+  ck("PRECONDITION: the taxable baseline really is lower (not vacuous)",
+     magiTax > 0 && magiTax < magiTrad, `${Math.round(magiTax)}`);
+  // THE EXACT ONE — and the decomposition matters. An ANNUITY is taxed on the way out and forces
+  // no distribution, so its lifetime MAGI excess over a brokerage account is the balance itself,
+  // to the dollar. TRADITIONAL is taxed the same way but ALSO raises the RMD, which forces extra
+  // withdrawals that carry their own income — so its excess is the balance PLUS a small
+  // second-order amount (~$526 here, alongside the ~$924 of extra lifetime RMD). Asserting
+  // "exactly $600,000" for trad would have been wrong, and was: it failed first time and the
+  // failure was read rather than papered over.
+  ck("Engine D: an ANNUITY's lifetime MAGI excess is EXACTLY the balance ($600,000) \u2014 taxed, never forced",
+     Math.round(magiAnn - magiTax) === 600000, `delta ${Math.round(magiAnn - magiTax)}`);
+  ck("Engine D: TRADITIONAL exceeds that, because its RMD forces extra taxable withdrawals",
+     magiTrad > magiAnn, `trad ${Math.round(magiTrad)} vs annuity ${Math.round(magiAnn)}`);
+  ck("Engine D: and that excess is second-order, not a second taxation of the balance",
+     magiTrad - magiAnn < 5000, `excess ${Math.round(magiTrad - magiAnn)}`);
+  ck("Engine D: an HSA row is NOT taxed on the way out (decision C-4)",
+     Math.round(magiOf(ownedA("hsa"))) === Math.round(magiTax), "hsa differs from taxable");
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // F. Round trip — editor shape survives buildPortfolio -> export -> applyLoadedData
@@ -347,6 +530,44 @@ g.applyLoadedData({ portfolio: { positions: [], otherAccounts: [] } });
 ck("a plan with no Other accounts raises NO notice", !g.PORTFOLIO()._otherTypeMigrated);
 
 // ─────────────────────────────────────────────────────────────────────────────
+// G2. THE v5.26 RE-MIGRATION — recovering what v5.25's schema flattened
+// ─────────────────────────────────────────────────────────────────────────────
+// v5.25 had no `annuity` type, so it stored annuities as `trad`. After that migration the data
+// cannot distinguish "trad because annuity" from "trad because 401k" — the information is gone
+// and only the NAME can recover it. Reading the name HERE is not a breach of "engines trust the
+// stored field only": migration is not an engine, and back-filling from names is this file's
+// established idiom. It is bounded, one-time, and reported, which is what makes it acceptable.
+console.log("\nG2. Re-migration of v5.25-shaped annuities");
+
+g.applyLoadedData({ portfolio: { positions: [], otherAccounts: [
+  { name: "Spouse B - Annuity", balance: 7000, owner: "B", taxType: "trad" },   // re-classify
+  { name: "Rollover IRA (A)", balance: 70000, owner: "A", taxType: "trad" },    // leave alone
+  { name: "The Annuity Fund 401k", balance: 5000, owner: "A", taxType: "trad" },// FALSE POSITIVE
+  { name: "Joint brokerage", balance: 9000, owner: "JT", taxType: "taxable" },  // untouched
+] } });
+const rm = g.PORTFOLIO(), rmBy = Object.fromEntries(rm.otherAccounts.map(a => [a.name, a]));
+ck("a v5.25 annuity stored as trad is re-classified", rmBy["Spouse B - Annuity"].taxType === "annuity",
+   rmBy["Spouse B - Annuity"].taxType);
+ck("a genuine Traditional account is NOT touched", rmBy["Rollover IRA (A)"].taxType === "trad",
+   rmBy["Rollover IRA (A)"].taxType);
+ck("a taxable account is NOT touched", rmBy["Joint brokerage"].taxType === "taxable",
+   rmBy["Joint brokerage"].taxType);
+ck("the re-classification is REPORTED, both rows", (rm._otherTypeMigrated.reclassified || []).length === 2,
+   JSON.stringify(rm._otherTypeMigrated && rm._otherTypeMigrated.reclassified));
+// The false positive is the reason the notice has to name what it changed. A 401k that happens to
+// be called "The Annuity Fund" is re-classified and would lose its RMD — so the user is told.
+ck("a FALSE POSITIVE is named in the notice so the user can put it back",
+   (rm._otherTypeMigrated.reclassified || []).includes("The Annuity Fund 401k"),
+   JSON.stringify(rm._otherTypeMigrated && rm._otherTypeMigrated.reclassified));
+// ONE TIME ONLY: a plan already carrying `annuity` must not raise the notice again, or the
+// warning becomes furniture and stops being read.
+g.applyLoadedData({ portfolio: { positions: [], otherAccounts: [
+  { name: "Spouse B - Annuity", balance: 7000, owner: "B", taxType: "annuity" },
+] } });
+ck("an already-re-classified plan raises NO notice (one time only)",
+   !g.PORTFOLIO()._otherTypeMigrated, JSON.stringify(g.PORTFOLIO()._otherTypeMigrated));
+
+// ─────────────────────────────────────────────────────────────────────────────
 // H. Entry paths other than a backup
 // ─────────────────────────────────────────────────────────────────────────────
 console.log("\nH. Entry-path defaults");
@@ -368,7 +589,7 @@ ck("GuidedWizard's row resolves to taxable",
 // _parseSpreadsheet's generated rows. The annuity/state-plan pair is the case that matters: this is
 // the ONE entry path that knowingly manufactures retirement-shaped accounts.
 for (const [name, want] of [
-  ["Spouse B - Annuity", "trad"], ["Spouse B - State Plan", "trad"],
+  ["Spouse B - Annuity", "annuity"], ["Spouse B - State Plan", "trad"],
   ["Outside Account (total)", "taxable"], ["Brokerage - Growth", "taxable"],
   ["Brokerage - Speculative", "taxable"], ["Brokerage - Reserve", "taxable"],
   ["Taxable Brokerage (all accts)", "taxable"], ["HSA", "hsa"],
