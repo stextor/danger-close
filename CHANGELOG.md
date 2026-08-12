@@ -1,5 +1,70 @@
 # Changelog
 
+## v5.29
+
+**Three open items closed. No figure moves — parity 8/8 strict.**
+
+Two source changes and one tooling change, each closing something that had been left pinned or
+stated rather than fixed.
+
+### 1. Montana's note now discloses that Social Security is taxed
+
+The state module taxes half of federally-taxable Social Security in Montana (`ss: 0.5`), and its
+note said only *"$5,500 65+ subtraction"*. All seven other partial-SS states disclose the treatment;
+Montana was the odd one out. Found by the 51-jurisdiction note scan in audit sub-phase 2E and pinned
+there. **The modelling was always right — the disclosure was incomplete**, so a Montana user reading
+the note would not have learned their Social Security was being taxed.
+
+The replacement assertion is generalised rather than Montana-specific: **every** partial-SS state
+must disclose the treatment, so a ninth added later cannot repeat the omission.
+
+### 2. The Roth crossover is now testable, which closes audit 2D's residual gap
+
+`beYr = beWasBehind ? firstRecover : firstAhead` lived in an anonymous closure inside
+`DangerCloseMain`. Sub-phase 2D could verify the wealth series, the tax identity and the discounting
+equivalence — but not this, because the suite had to reimplement it, and **a control that removed the
+never-behind branch from the shipped source changed nothing.**
+
+It is extracted to a module-level `rothCrossover()`. Behaviour is unchanged. The same control now
+**fails two checks**, which is the difference between a gap described and a gap closed.
+
+`t10` gains 8 assertions that call the shipped function: the three outcomes cross-checked against the
+suite's own reimplementation, plus four unit cases on synthetic series that isolate the branch logic
+from the engine entirely.
+
+### 3. `census.cjs` reports both hit and site counts
+
+Where two AST nodes share one source range — object shorthand `{ x }`, export specifiers
+`export { x }` — the walk visits both, so the hit count exceeded the site count. Pinned at v5.28.
+**Fixed by reporting both numbers rather than deduplicating**, which was one of three options and the
+recommended one: every figure quoted in a shipped scope document stays valid, and the discrepancy
+becomes visible where it is used. Deduplicating would have silently changed numbers already in print.
+
+The second count is printed only when the two differ, so ordinary output gains no noise.
+
+### Testing
+
+**976 checks green** = 484 (current leg, incl. t10 163) + 8 (parity, strict) + 484 (feature suites),
+plus 16 on the built artifact, 10 cross-version DOM-diff, and 50 tooling checks counted separately.
+
+**Parity 8/8 strict.** The crossover extraction is a pure refactor and the note is a string; no
+figure moves.
+
+**The prior leg replays at 968** — 8 fewer, because the 8 assertions that call `rothCrossover` cannot
+run against builds where the function does not exist. That is correct, and the shim entry is written
+in the guarded `_g()` form so pre-v5.29 legs still load rather than throwing.
+
+**Both pins flipped**, and each flip is verified by its own control: reverting Montana's note fails
+the 2E scan; removing the never-behind branch fails the 2D shipped assertions.
+
+**A prior-leg break was caught and fixed during the build.** The Montana assertion initially ran on
+every leg, so v5.28 — which legitimately carries the old note — failed it. That is the same mistake
+made at v5.27, and the rule added to `OPERATIONS.md` §B2 afterwards is what named it: gate the
+inversion to the builds it is true for. History now asserts the pin; v5.29 asserts the fix.
+
+**Provenance.** Source `src/DangerClose.jsx` md5 `4ef69e9a820fac18b99aa2aa46a8b2a1` · built
+`index.html` md5 `fe6bf7d4230abdacbf7ce1171798feb3`.
+
 ## v5.28
 
 **The Field Manual brought up to date with the model. Presentation only — no engine, no schema, no
