@@ -1,5 +1,124 @@
 # Changelog
 
+## v5.26
+
+**Other accounts are now taxed according to their type. This is the release that moves figures —
+and the first since v5.21 where that is the point rather than the risk.**
+
+v5.24 disclosed that Engine D spends every Other account as already-taxed cash — including money the
+user named as an IRA — and that this makes a plan look better than it is. v5.25 recorded what kind
+of money each account holds and deliberately used it for nothing. **v5.26 uses it.**
+
+### What changed for users
+
+- **Traditional and Annuity balances are taxed as ordinary income as they are spent.** Through
+  v5.25 they were spent tax-free.
+- **Traditional balances now count toward RMDs.** A named IRA entered under Other accounts
+  previously generated none.
+- **Taxable and HSA balances are unchanged** — still spent as already-taxed cash.
+- **A fifth tax type: Annuity.** A non-qualified annuity is taxed like pre-tax money but carries no
+  required distribution. v5.25 recorded these as Traditional, which was conservative for tax and
+  **wrong for RMD** — it manufactured an obligation the owner does not have. Plans are re-classified
+  once, and every row changed is named in the review notice.
+- **The Roth tab's funding gate stopped counting IRA money as spendable.** It summed every Other
+  account when deciding whether you had outside money to pay conversion tax. You never did —
+  spending that money is itself a taxable event.
+- **The review notice re-fires once**, and now leads with the fact that figures moved rather than
+  with the guess that was made.
+
+**If your numbers got worse, that is the correction.** The Withdrawal tab was optimistic by the
+amount v5.24 described, and it no longer is.
+
+### What deliberately did not change
+
+The **draw order** — Other accounts are still spent first. **HSA** stays outside the tax split
+(decision C-4), consistent with the v5.10 contribution-accrual treatment. And the **Monte Carlo is
+untouched**: cross-version engine parity is **8/8 strict**, which is the mechanical statement that
+this fix did not overreach.
+
+### Two defects found during the build, both in this release's own new code
+
+- **The annuity was still fabricating RMDs in three of the five engines** after the schema was
+  already correct. Engines A, B and C compute RMDs from a running pre-tax balance, so excluding the
+  annuity at the schema level was not enough.
+- **The annuity exemption was mis-applied after a spousal rollover** — carried as a share, it was
+  then applied to the merged balance and exempted far more than the annuity was worth. Caught by an
+  existing cross-check comparing the MAGI drop in both death directions, which diverged by $6K.
+
+A third was caught before it could ship: the first implementation of the owner split dropped any row
+with no owner, silently removing $111,000 from the pre-tax basis — the optimistic direction. It now
+uses the fail-safe convention the position code already used.
+
+### Testing
+
+**911 checks green** = 419 (current leg, incl. t10) + 8 (parity, strict) + 484 (feature suites),
+plus 16 on the built artifact, 13 cross-version DOM-diff, and 49 tooling checks counted separately.
+Every figure read from parsed suite output rather than restated by hand.
+
+| | |
+|---|---|
+| current leg | 419 — t1 64 · t2 15 · t3 36 · t4 124 · t5 44 · t6 21 · t10 115 |
+| parity v5.25 → v5.26 | **8, strict, no INTENDED_DIFFS** |
+| feature | 484 — t7 41 · t8 38 · t9 14 · t11 40 · t12 23 · t13 42 · t14 33 · t15 11 · t16 24 · t17 63 · t18 47 · t19 14 · **t20 94** |
+| built artifact | 16 |
+| withdrawal DOM diff | 13 — now asserts **intended divergence**, not identity |
+
+**`t19`'s defect pin flipped, and that is this release's own verification.** It asserted, dated and
+in place since v5.21, that adding $100K to a named IRA left the pre-tax basis untouched. It now
+asserts the opposite and passes.
+
+**`t20`'s extinction assertion inverted.** Through v5.25 it proved that permuting every tax type
+changed no engine output — the claim that made "every figure identical" meaningful. That assertion
+is now false by design, so it was replaced rather than deleted: engine output must now **change**,
+asserted per engine at its own basis, with three engines named as ones that must **not** move and
+why. Its new extinction is that annuity money never generates an RMD anywhere.
+
+**Every figure that moved was hand-verified before any expectation was edited.** One movement did
+not fit its first explanation — a survivor-year RMD that rose by 18% where the arithmetic predicted
+8.5% — and the build stopped rather than recalibrating. Investigation showed the effect is an
+**absolute** addition of ~$8.3K, stable across conversion levels; the ratio climbs only because Roth
+conversions shrink the denominator. The full sweep is recorded in the suite.
+
+**Negative controls: eight, all firing.** Making the annuity RMD-bearing, removing the rollover
+rescale, removing the ordinary-income term from MAGI, reverting the bucket ratio, dropping the
+re-classification, removing the owner fail-safe, restoring the Roth gate's raw sum, and letting an
+annuity be held jointly each fail specific checks.
+
+**Three did not fire on the first attempt, and each exposed a real gap** — closed by strengthening
+the tests, never by weakening the control:
+
+- Deleting the term that makes a spent IRA taxable — *the entire point of the release* — broke
+  nothing. The permutation check passed for the wrong reason. Now asserted exactly: an annuity's
+  lifetime MAGI excess over a brokerage account equals its balance to the dollar.
+- The owner fail-safe was unreachable through the tested path, because migration back-fills the
+  owner. Now tested where it actually applies.
+- No fixture held a jointly-entered annuity, so that promotion was never exercised.
+
+**Three of the suite's own fixtures were found to be vacuous** while writing this release: an
+account owned by a spouse whose RMD age falls outside the plan horizon (identical results for every
+tax type, passing while testing nothing), a hand-built engine input that bypassed the shared basis
+constructor and so could not see the field it was asserting about, and a fixture whose `household`
+did not contain its own account.
+
+### Limitations, stated plainly
+
+- **The RMD effect inside the Withdrawal tab is small** (~$900 of lifetime RMD on $600,000) because
+  Other accounts are spent first and are mostly gone before RMDs begin. The larger effect is in the
+  Roth, Taxes and IRMAA tabs.
+- **A draw from the first-priority pot is taxed in proportion** to what the pool holds, not by
+  draining one type before another.
+- **An annuity is part after-tax basis and cannot be expressed** by a single label; all of it is
+  treated as ordinary income, the pessimistic direction.
+- **A qualified annuity inside an IRA does have an RMD** and will be mis-classified by name
+  inference. The field is user-correctable and the notice names every row it changed.
+- **HSA money is only tax-free for qualified medical costs**; it is modelled as tax-free throughout.
+- **Unclassifiable account names default to Traditional** (decision C-2), which over-taxes a
+  brokerage account nobody renamed. The conservative direction, and a guess either way.
+
+**Provenance.** Source `src/DangerClose.jsx` md5 `0d219f87f8bc9d7e44f8703c35efee92` · built
+`index.html` md5 `b7a3ec26eab40e176d4b731fd069c52c`.
+
+
 ## v5.25
 
 **Other accounts now record what kind of money they hold. Nothing uses it yet — and the app says so.
