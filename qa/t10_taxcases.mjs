@@ -347,9 +347,118 @@ const pass2C = pass, fail2C = fail;
 }
 const pass2D = pass - pass2C, fail2D = fail - fail2C;
 
+// ═══════════════════════════════════════════════════════════════════════════════════════════════
+// 2E — THE STATE-TAX MODULE.  The last sub-phase of Phase 2 (Section C).
+// ═══════════════════════════════════════════════════════════════════════════════════════════════
+// SCOPE, per decision D-5 of SCOPE_AUDIT_PHASE2_v5_10_2.md: verify `stateTaxAnnual` against one
+// jurisdiction of each of the five archetypes — no-tax, flat, retExempt, excl65, partial-SS — plus
+// the maintainer's own state, which is Florida and is already the no-tax case.
+//
+// THE SCOPE BOUNDARY MATTERS AND IS NOT A DODGE. 2E asks whether the code implements the
+// DOCUMENTED APPROXIMATION correctly. Whether an effective flat rate is a good stand-in for a
+// progressive state schedule is a disclosed limitation (Field Manual §13 and the module's own
+// header), and is therefore not a defect. A state whose modelled treatment contradicts its own
+// `note` string IS one.
+//
+// Every expected figure below was computed by hand from the rule table first, then compared to
+// engine output — not read back from the engine. The arithmetic is written out so it can be
+// re-checked without running anything.
+const pass2E = pass, fail2E = fail;
+{
+  const S = g.stateTaxAnnual, R = g.STATE_RULES ? g.STATE_RULES() : null;
+  if (S && R) {
+    // One income shape for every archetype, so the only variable is the jurisdiction.
+    const IN = { fallbackRate: 0.05, retIncome: 40000, pen: 20000, work: 10000,
+                 capGains: 5000, ssTaxableFed: 30000 };
+    const run = (code, persons65) => S({ code, ...IN, persons65 });
+
+    T("2E: the rule table carries all 51 jurisdictions", Object.keys(R).length, 51);
+
+    // ── ARCHETYPE 1 — no tax. FL is also the maintainer's state, so D-5's two requirements meet.
+    // Branch: `if (r.rate === 0) return 0`, taken before any other term is evaluated.
+    T("2E no-tax (FL): returns zero", run("FL", 2), 0);
+
+    // ── ARCHETYPE 2 — plain flat rate, no exclusions, no SS. AZ at 2.5%.
+    // hand: 0.025 x ((40,000 + 20,000) + 10,000 + 0 + 5,000) = 0.025 x 75,000 = 1,875
+    T("2E flat (AZ 2.5%): taxes retirement, work and gains alike", run("AZ", 2), 1875);
+
+    // ── ARCHETYPE 3 — retExempt. MS at 4%: ALL retirement income exempt, everything else taxed.
+    // hand: 0.04 x (0 + 10,000 + 0 + 5,000) = 600
+    T("2E retExempt (MS 4%): retirement excluded, work and gains still taxed", run("MS", 2), 600);
+
+    // ── ARCHETYPE 4 — per-person 65+ exclusion. AL at 4.5%, $6,000 each.
+    // hand MFJ:    0.045 x ((60,000 - 12,000) + 10,000 + 0 + 5,000) = 0.045 x 63,000 = 2,835
+    // hand single: 0.045 x ((60,000 -  6,000) + 10,000 + 0 + 5,000) = 0.045 x 69,000 = 3,105
+    T("2E excl65 (AL 4.5%, MFJ): exclusion applied per person", run("AL", 2), 2835);
+    T("2E excl65 (AL 4.5%, single): exclusion is half the MFJ amount", run("AL", 1), 3105);
+
+    // ── ARCHETYPE 5 — partial-SS. MT at 5.65%: ss factor 0.5 AND a $5,500 65+ subtraction, so it
+    // exercises two branches at once.
+    // hand MFJ:    0.0565 x ((60,000 - 11,000) + 10,000 + 15,000 + 5,000) = 0.0565 x 79,000 = 4,463.50
+    // hand single: 0.0565 x ((60,000 -  5,500) + 10,000 + 15,000 + 5,000) = 0.0565 x 84,500 = 4,774.25
+    T("2E partial-SS (MT 5.65%, MFJ): half of federally-taxable SS enters the base", run("MT", 2), 4463.5);
+    T("2E partial-SS (MT 5.65%, single)", run("MT", 1), 4774.25);
+    // NOT VACUOUS: a state with ss=0 on the same inputs must exclude SS entirely, or the assertion
+    // above would pass on any implementation that simply ignored the flag.
+    T("2E control: an ss=0 state excludes SS from the base",
+      run("AZ", 2), 0.025 * 75000);
+
+    // ── ARCHETYPE 6 — the fallback path for an unknown/absent code.
+    // hand: 0.05 x ((40,000 + 20,000 + 10,000) + 5,000) = 0.05 x 75,000 = 3,750
+    T("2E fallback (no code): flat rate on ordinary + gains", S({ code: null, ...IN, persons65: 2 }), 3750);
+    T("2E fallback: an unrecognised code takes the same path",
+      S({ code: "ZZ", ...IN, persons65: 2 }), 3750);
+
+    // ── CLAMPS. Each of these is a place a sign error would silently produce a negative tax, and
+    // none of them is exercised by the archetype cases above.
+    T("2E clamp: an exclusion larger than retirement income cannot go negative",
+      S({ code: "AL", fallbackRate: 0, retIncome: 3000, pen: 0, work: 20000, capGains: 0,
+          ssTaxableFed: 0, persons65: 2 }), 900);
+    T("2E clamp: a capital LOSS is ignored, not deducted",
+      S({ code: "AZ", fallbackRate: 0, retIncome: 50000, pen: 0, work: 0, capGains: -30000,
+          ssTaxableFed: 0, persons65: 0 }), 1250);
+    T("2E clamp: a negative persons65 cannot create a negative exclusion",
+      S({ code: "AL", fallbackRate: 0, retIncome: 60000, pen: 0, work: 0, capGains: 0,
+          ssTaxableFed: 0, persons65: -5 }), 2700);
+    T("2E clamp: a no-tax state ignores the fallback rate entirely",
+      S({ code: "FL", fallbackRate: 0.9, retIncome: 1e6, pen: 1e6, work: 1e6, capGains: 1e6,
+          ssTaxableFed: 1e6, persons65: 0 }), 0);
+    T("2E: a retExempt state exempts retirement income at ANY size",
+      S({ code: "MS", fallbackRate: 0, retIncome: 5e5, pen: 2e5, work: 0, capGains: 0,
+          ssTaxableFed: 0, persons65: 0 }), 0);
+
+    // ── THE DEFECT TEST D-5 ACTUALLY NAMES: a state whose behaviour contradicts its own note.
+    // Scanned across all 51. Seven candidates surfaced; six were dollar figures in the note that
+    // are AGI THRESHOLDS or explicitly unmodelled provisions, not exclusions — correct as written.
+    // One is a genuine documentation gap and is pinned below.
+    let noTaxOK = 0, exclOK = 0;
+    for (const c of Object.keys(R)) {
+      const r = R[c], n = (r.note || "").toLowerCase();
+      if (/no (state )?income tax/.test(n) && r.rate !== 0) noTaxOK++;
+      if (r.excl65 > 0 && !/\$\d/.test(n)) exclOK++;
+    }
+    T("2E notes: every state claiming no income tax really has rate 0", noTaxOK, 0);
+    T("2E notes: every state with a 65+ exclusion names a figure in its note", exclOK, 0);
+
+    // [KNOWN DEFECT 2026-08-12 | MT note omits SS] — OPERATIONS §D pin.
+    // Montana carries ss: 0.5, so the model taxes half of federally-taxable Social Security there.
+    // Its note reads only "$5,500 65+ subtraction" and never mentions Social Security. Every OTHER
+    // partial-SS state (CO, CT, MN, NM, RI, UT, VT) says so in its note. The modelling is right and
+    // the disclosure is incomplete — the mild form of the defect D-5 names, which is why it is
+    // pinned rather than treated as a stop. FLIP THIS PIN when the note is corrected.
+    const mtSaysSS = /social security|\bss\b/i.test(R.MT.note || "");
+    T("[KNOWN DEFECT 2026-08-12] MT taxes SS but its note does not say so", mtSaysSS ? 1 : 0, 0);
+    T("2E control: the other seven partial-SS states DO mention it",
+      ["CO","CT","MN","NM","RI","UT","VT"].filter(c => !/social security|\bss\b/i.test(R[c].note || "")).length, 0);
+  }
+}
+const pass2Ecount = pass - pass2E, fail2Ecount = fail - fail2E;
+
+
 console.log(`\nt10 2A: ${pass2A} passed, ${fail2A} failed`);
 console.log(`t10 2B: ${pass-pass2A} passed, ${fail-fail2A} failed  (IRMAA tier selection + 7 indexation assertions, pins FLIPPED at v5.14)`);
 console.log(`t10 2D: ${pass2D} passed, ${fail2D} failed  (Roth break-even crossover \u2014 the three cases sub-phase 2D owed)`);
+console.log(`t10 2E: ${pass2Ecount} passed, ${fail2Ecount} failed  (state-tax module \u2014 five archetypes, both statuses, clamps, note scan)`);
 console.log(`t10 total: ${pass} passed, ${fail} failed`);
 if (fails.length) console.log(fails.join("\n"));
 console.log("\n--- captured (engine vs independent hand reference) ---");
