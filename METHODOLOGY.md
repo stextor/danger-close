@@ -117,7 +117,7 @@ excluded from income and MAGI, counting toward the RMD, with the gifted dollars 
 the Traditional balance).
 
 Known simplifications: the provisional-income thresholds are handled in simplified tiers; AMT is
-a screen, not a full Form 6251; itemized deductions are not modeled (standard deduction assumed); the temporary OBBBA senior bonus deduction (up to $6,000/person 65+, 2025–2028) IS modeled here, phased out at 6% of MAGI above $75,000 single / $150,000 married filing jointly against a MAGI proxy of gross ordinary income plus qualified dividends and capital gains — those four figures are statutory and unindexed, and the Roth conversion ladder deliberately does not model it (§7), so the two tabs differ for any ladder year at or before 2028;
+a screen, not a full Form 6251; itemized deductions are not modeled (standard deduction assumed); the temporary OBBBA senior bonus deduction (up to $6,000/person 65+, 2025–2028) IS modeled here, phased out at 6% of MAGI above $75,000 single / $150,000 married filing jointly against a MAGI proxy of gross ordinary income plus qualified dividends and capital gains — those four figures are statutory and unindexed, and the Roth conversion ladder deliberately does not model it (§7), so the two tabs differ for any ladder year at or before 2028. **From v5.31 those figures live in a named `OBBBA_CONSTS` block and are checked by the Verify tab against OBBBA (P.L. 119-21 §70103) on every load** — through v5.30 they were inline literals inside the tax engine, which no staleness mechanism could see, so the Verify tab rendered green on constants it had never checked. The deduction is fused to its statutory sunset: the engine applies it only for tax years through 2028. **That fuse fails safe in the conservative direction.** If the provision expires as written the model is correct; if Congress extends it, the model omits the deduction and therefore *overstates* tax, making the plan look slightly worse — the direction this project picks whenever an assumption must be chosen. The genuinely harmful direction, continuing to apply an expired deduction, is the one the fuse makes impossible. One consequence is worth naming because it touches recommendation-shaped output: an extension would overstate tax in conversion years, which feeds the Roth bracket-fill solver and would make conversions look slightly *less* attractive than they are;
 future law is "current law, inflated."
 
 ## 6. State tax module (v5.5)
@@ -334,10 +334,11 @@ position on whether it will again.
 
 **Live verification suite (Verify tab).** The Node suite in `validation/` proves a *build*
 correct at authoring time; the Verify tab proves a *copy* correct at run time. On each visit it
-re-executes 45 assertions against the running instance's actual constants — federal bracket edges
+re-executes 62 assertions against the running instance's actual constants — federal bracket edges
 for both filing statuses, standard and senior deductions, LTCG breakpoints, NIIT thresholds,
 Social Security provisional-income thresholds and wage base, IRMAA tiers and the derived combined
-Part B+D surcharges, the QCD cap, Uniform Lifetime Table divisors, SECURE 2.0 start ages, and
+Part B+D surcharges, the QCD cap, Uniform Lifetime Table divisors, SECURE 2.0 start ages,
+the four OBBBA senior-bonus figures and their dated 2028 sunset (added v5.31), and
 state-module invariants — each displayed with its actual value and primary-source citation. Two
 further checks are statistical rather than declarative: they draw 4,000 fresh Gompertz samples and
 confirm the sampled median matches the anchored life expectancy and that the age cap holds. Any

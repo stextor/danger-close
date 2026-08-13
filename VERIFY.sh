@@ -1,6 +1,6 @@
 #!/bin/bash
 # ─────────────────────────────────────────────────────────────────────────────
-# Danger Close — release verification · v5.29
+# Danger Close — release verification · v5.31
 #
 # PROVENANCE: originally authored 2026-08-11 for v5.22 by transcribing the steps
 # actually executed in that session. Rolled forward to v5.23 from that file
@@ -30,17 +30,17 @@
 # Every command below was run and its result recorded in the release notes.
 #
 # Usage:  ./VERIFY.sh /path/to/workdir
-#    workdir must contain:  v529.jsx  v530.jsx  DangerClose.jsx(=v530)  qa/
+#    workdir must contain:  v530.jsx  v531.jsx  DangerClose.jsx(=v531)  qa/
 # ─────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
 ROOT="${1:-$(pwd)}"
 cd "$ROOT"
 
-PRIOR=v529
-CURR=v530
-EXPECT_SRC_MD5=8fcc546263f59fb4a88c131e97f4c882
-EXPECT_BUILT_MD5=183b58b463fcd56dfb71311a4cd68caf
+PRIOR=v530
+CURR=v531
+EXPECT_SRC_MD5=17636ea1b24ea37c806008e7a6b1a32f
+EXPECT_BUILT_MD5=ec935c4af4309ee3dbcf2d2c269383ad
 
 say() { printf "\n\033[1m== %s ==\033[0m\n" "$*"; }
 die() { printf "\n\033[31mFAIL: %s\033[0m\n" "$*" >&2; exit 1; }
@@ -54,7 +54,9 @@ echo "  OK  ${CURR}.jsx = $GOT, and DangerClose.jsx is identical to it"
 
 # ── 1. Suite dependencies ───────────────────────────────────────────────────
 say "1. Dependencies"
-npm i esbuild react react-dom d3 xlsx mammoth jsdom >/dev/null 2>&1
+# acorn/acorn-jsx/acorn-walk added v5.31: qa/tools/*.cjs require them, so t21 dies at module
+# load without them. They were missing from this line through v5.30.
+npm i esbuild react react-dom d3 xlsx mammoth jsdom acorn acorn-jsx acorn-walk >/dev/null 2>&1
 echo "  OK  installed"
 
 # ── 2. Testable modules + DOM bundles (both legs) ────────────────────────────
@@ -125,31 +127,35 @@ fi
 
 say "DONE"
 cat <<'EOF'
-Expected totals for v5.30 — compare against the output above:
+Expected totals for v5.31 — compare against the output above:
 
-  baseline current leg  490  (t1 64 · t2 15 · t3 36 · t4 147 · t5 44 · t6 21 · t10 163)
+  baseline current leg  515  (t1 77 · t2 15 · t3 36 · t4 159 · t5 44 · t6 21 · t10 163)
   parity                  8  strict, no INTENDED_DIFFS
   feature               487  (t7 41 · t8 38 · t9 14 · t11 40 · t12 23 · t13 42
                               t14 33 · t15 11 · t16 24 · t17 63 · t18 50 · t19 14
                               t20 94)
   ----------------------------------------------------------------------------
-  APP TOTAL             985
+  APP TOTAL            1010
   tooling (t21)          50  counted SEPARATELY
   built artifact         16  qa/smoke_built.mjs
   withdrawal DOM diff    10  qa/domdiff_withdrawal.mjs — strict identity
 
-v5.30 corrects a false disclosure and MOVES NO FIGURE. Parity must be 8/8
-strict: no engine is touched. If parity breaks, the edit overreached (OPS E).
+v5.31 moves the OBBBA senior-bonus constants into a named block and MOVES NO
+FIGURE. Parity must be 8/8 strict: no engine is touched. If parity breaks, the
+substitution changed a value — find which (OPS §E). t18's three OBBBA cases
+(11a/11b/11c) must also pass UNCHANGED; they are the proof it was a refactor.
 
-The prior leg re-runs at 980 — FIVE FEWER than the current leg, because t4's
-v5.30 block asserts SIX corrected-copy checks on the v530 leg and ONE old-copy
-check on every earlier leg (6 - 1 = 5). That is the per-leg gating OPERATIONS
-B2 requires, not a regression: each leg asserts the copy true for its own build.
+The prior leg re-runs at 990 — TWENTY fewer than the current leg. The v531 leg
+asserts the new constants block, the extinction of the four inline literals and
+the corrected Taxes-tab footnote; every earlier leg asserts the state true for
+its own build. That is the per-leg gating OPERATIONS §B2 requires.
 
-NOTE ON THE BUILT MD5. v5.29 did NOT rebuild bit-identically this cycle
-(bccfd60d... vs published fe6bf7d4...) even though all five toolchain versions
-in OPERATIONS N3a matched. The cause is rollup, a floating caret dependency of
-vite that N3a does not pin — the diff is bundler identifier mangling only. Treat
-EXPECT_BUILT_MD5 as reproducible only on an identical dependency tree; the
-binding check is smoke_built.mjs at 16/16, not the hash.
+NOTE ON THE BUILT MD5 — the v5.30 note here was WRONG and is corrected. It said
+bit-reproducibility had been lost and blamed rollup, an unpinned caret dependency
+of vite. At v5.31, rebuilding v5.30 from its own unmodified source reproduced its
+published artifact EXACTLY (183b58b4...), on rollup 4.62.4 — the very version
+blamed. The v5.30 session was comparing across a toolchain generation: it rebuilt
+v5.29, which had been built with an older tree. Reproducibility holds release over
+release when the dependency tree matches. The binding check is still
+smoke_built.mjs at 16/16, not the hash.
 EOF
