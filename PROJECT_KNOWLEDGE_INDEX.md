@@ -25,23 +25,81 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 
 | Field | Value |
 |---|---|
-| Version | **v5.29** |
-| Source file in knowledge | `DangerClose-v5_29.jsx` |
-| Source md5 | `4ef69e9a820fac18b99aa2aa46a8b2a1` |
-| Built `index.html` md5 | `fe6bf7d4230abdacbf7ce1171798feb3` |
+| Version | **v5.31** |
+| Source file in knowledge | `DangerClose-v5_31.jsx` |
+| Source md5 | `17636ea1b24ea37c806008e7a6b1a32f` |
+| Built `index.html` md5 | `ec935c4af4309ee3dbcf2d2c269383ad` |
 | Shipped | 2026-08 |
 
 **Any work — edits, verification, scope premises — is done against this file.** Confirm its
 md5 matches the value above before starting (see the pre-build freshness check in
 OPERATIONS.md §A). A mismatch means knowledge is stale — refresh before working.
 
+## Test and harness file hashes (freshness fallback — OPERATIONS §A2)
+
+**Why this table exists.** Until v5.30 the freshness check hashed the `.jsx` sources and nothing else,
+so a stale test in this flat pool was invisible by construction. One was: the pool's `t8_invariant.mjs`
+was an older 35-check copy with 3 failing assertions while the committed file had 38 and was green,
+which halted the v5.30 build and cost most of a session to diagnose. Recorded as **E-14**.
+
+⚠ **Prefer the clone-and-diff in OPERATIONS §A2 over this table.** A recorded table is only as fresh as
+the release that wrote it, and this project has had three separate recorded blocks go stale. This is the
+offline fallback, accurate **as of v5.31, 2026-08-13** — verified equal to the committed tree on that
+date, with the sole exception noted below.
+
+**Two mapping caveats.** The pool flattens repo paths: `tools_fixture.jsx` here is
+`qa/tools/fixture/fixture.jsx` in the repo (byte-identical), and the baseline suites live under
+`qa/qa-baseline/`. Match by content, not by filename position.
+
+| Pool file | md5 | Repo path |
+|---|---|---|
+| `cap_tabs.mjs` | `9057b96d48b84f99dc322f7fc983674a` | `qa/qa-baseline/cap_tabs.mjs` |
+| `dom_entry_v530.jsx` | `493f1359886d06e36c82512601af43d1` | `qa/qa-baseline/dom_entry_v530.jsx` |
+| `dom_entry_v531.jsx` | `f6081c8813b5af7d85dc9931d13b3cc8` | `qa/qa-baseline/dom_entry_v531.jsx` |
+| `domdiff_withdrawal.mjs` | `26d0672f1b56116faabfc19566cc2402` | `qa/domdiff_withdrawal.mjs` |
+| `env_dom.mjs` | `0ee15a1be6099a50319cfb271b530c4a` | `qa/qa-baseline/env_dom.mjs` |
+| `main.jsx` | `d9eca7b469a3fb7ec1c5325fd4bf8145` | `src/main.jsx` |
+| `shim.txt` | `fe510ad97011e4a31aa0d68e0c3ea3f5` | `qa/qa-baseline/shim.txt` |
+| `smoke_built.mjs` | `bc839044971ecd992bb9f4f019736d1e` | `qa/smoke_built.mjs` |
+| `t10_taxcases.mjs` | `bcd00a8fad74d81c88e05f928aa8b5ec` | `qa/t10_taxcases.mjs` |
+| `t11_survivor_rmd.mjs` | `dfa8ce062d9ae3bcca551a561ce717a8` | `qa/t11_survivor_rmd.mjs` |
+| `t12_engineD_survivor.mjs` | `70fb865322692e042d364ca85437cc51` | `qa/t12_engineD_survivor.mjs` |
+| `t13_engineC_irmaa.mjs` | `0be204b0d180fb40cf9bc7790f1c73ee` | `qa/t13_engineC_irmaa.mjs` |
+| `t14_cross_engine_survivor.mjs` | `5898d59cdbb1e9441415323b9493335d` | `qa/t14_cross_engine_survivor.mjs` |
+| `t15_engineA_death_filing.mjs` | `3fb4c83fd888ac6cad0ab0d57b8dba6b` | `qa/t15_engineA_death_filing.mjs` |
+| `t16_roth_ladder_filing.mjs` | `829c97c01efeb707da011c1468fefbb5` | `qa/t16_roth_ladder_filing.mjs` |
+| `t17_engineC_exact.mjs` | `75d21513fe2e98b4430507bd64e6a6f4` | `qa/t17_engineC_exact.mjs` |
+| `t18_engineB_exact.mjs` | `b06e714aa050c11e5ede6e8771d7a243` | `qa/t18_engineB_exact.mjs` |
+| `t19_engineD_exact.mjs` | `e86e069a29a13070c216fa9d7d6de34d` | `qa/t19_engineD_exact.mjs` |
+| `t1_units.mjs` | `1f03ff173f3e1a9063083e3581cda090` | `qa/qa-baseline/t1_units.mjs` |
+| `t20_other_taxtype.mjs` | `c9b127780227868ff05d2cd08b37e0bd` | `qa/t20_other_taxtype.mjs` |
+| `t21_tools.mjs` | `c5fb4c712135028f1effa039c84e0b90` | `qa/t21_tools.mjs` |
+| `t2_engines.mjs` | `7f99a64337efa725bec8dc7dc0fffe54` | `qa/qa-baseline/t2_engines.mjs` |
+| `t3_roth.mjs` | `6dfe311ba9a578540e3498c094d585ce` | `qa/qa-baseline/t3_roth.mjs` |
+| `t4_dom.mjs` | `5ab056b8cad621191690e3e1278e63a6` | `qa/qa-baseline/t4_dom.mjs` |
+| `t5_storage.mjs` | `32e1a09c91af08eb5713c539e0104ae7` | `qa/qa-baseline/t5_storage.mjs` |
+| `t6_single.mjs` | `d7f9c855f7ca32d6527ee2106eb87fd3` | `qa/qa-baseline/t6_single.mjs` |
+| `t7_accrual.mjs` | `490b82d3024b179a274b5498936e1a92` | `qa/t7_accrual.mjs` |
+| `t8_invariant.mjs` | `a9bd015c8b50b54a98d0ed9a4e2afaaf` | `qa/t8_invariant.mjs` |
+| `t9_dom_smoke.mjs` | `080c3edbe5f5479ac488d2f54034de69` | `qa/t9_dom_smoke.mjs` |
+| `tools_fixture.jsx` | `3602b615b65f09995a9eb1fa17fe4175` | `qa/tools/fixture/fixture.jsx` |
+
+`probe_classify.mjs` was removed from the pool at v5.30 and now lives only in the repo at
+`qa/tools/probe_classify.mjs`.
+
+⚠ **The repo's copy of THIS FILE was one release stale through v5.30** — the committed
+`PROJECT_KNOWLEDGE_INDEX.md` still named v5.29 as current and carried no §A2 table at all, because
+the v5.30 refresh updated knowledge but never committed the manifest. Found by the v5.31 clone-and-diff
+(46 of 47 pool files matched the committed tree; this was the one). The manifest ships to **both**
+destinations from v5.31 forward.
+
 ## Prior build (the regression comparison baseline)
 
 | Field | Value |
 |---|---|
-| Version | **v5.28** |
-| Source file in knowledge | `DangerClose-v5_28.jsx` |
-| Source md5 | `9e06482087f415661196b1c47f7e8be0` |
+| Version | **v5.30** |
+| Source file in knowledge | `DangerClose-v5_30.jsx` |
+| Source md5 | `8fcc546263f59fb4a88c131e97f4c882` |
 
 This is the immediately-prior shipped release. The regression suite diffs current against it.
 It exists in knowledge ONLY as that comparison baseline. When the next release ships, it rolls
@@ -74,25 +132,25 @@ These are refreshed in place when they change; git holds their history.
 | `t9_dom_smoke.mjs` | DOM smoke (fast environment validation — run this first to prove the toolchain) | when tests change |
 | `t11_survivor_rmd.mjs` | Survivor RMD / filing-transition suite — **40 checks**. DOM-read at ±$500 (OPERATIONS §M); its header carries the two honesty notes on precision and on the effect size that makes that band adequate | when tests change |
 | `t12_engineD_survivor.mjs` | Engine D survivor suite — **23 checks**, module-level and dollar-exact. ⚠ **Release (c) of the `otherAccounts` plan moves Engine D's balances, so this is the suite that must be re-verified case by case there** | when tests change |
-| `t13_engineC_irmaa.mjs` | Engine C IRMAA survivor extinction invariant (C-2C-5, v5.13) — 40 checks, three omissions, both directions, plus a person-count isolation case | when tests change |
-| `t14_cross_engine_survivor.mjs` | Cross-engine survivor SS invariant (decision D-5) — 24 checks; the only cover for Engine A is structural, and the file says so | when tests change |
-| `t16_roth_ladder_filing.mjs` | Roth ladder filing-status extinction invariant (C-2B-3, v5.15) — 21 checks against an independent IRS reference, incl. that the couple's ladder does NOT move | when tests change |
+| `t13_engineC_irmaa.mjs` | Engine C IRMAA survivor extinction invariant (C-2C-5, v5.13) — 42 checks, three omissions, both directions, plus a person-count isolation case | when tests change |
+| `t14_cross_engine_survivor.mjs` | Cross-engine survivor SS invariant (decision D-5) — 33 checks; the only cover for Engine A is structural, and the file says so | when tests change |
+| `t16_roth_ladder_filing.mjs` | Roth ladder filing-status extinction invariant (C-2B-3, v5.15) — 24 checks against an independent IRS reference, incl. that the couple's ladder does NOT move | when tests change |
 | `t17_engineC_exact.mjs` | Engine C dollar-exact (v5.18) — 63 checks against CMS figures via the module-level `computeIrmaaPlan`; tier borders ±$1, indexation, freeze, lookback, per-person counts, survivor switch, QCD. Negative-controlled at 23/63. Asserts the surcharge constants' ≤$5 **bound**, not CMS-exact amounts | when tests change |
-| `t18_engineB_exact.mjs` | Engine B dollar-exact (v5.21) — 47 checks via module-level `computeTaxPlan`; federal brackets, age-65 extra per spouse, SS taxability, **plus the first Engine A vs Engine B agreement invariant** (they agree). Negative-controlled at 24/47. NOT yet covered: LTCG, NIIT, AMT, FICA, state, survivor | when tests change |
-| `t19_engineD_exact.mjs` | **NEW at v5.23** — Engine D's first discriminating coverage. 13 checks: five structural (reachability, the 17-key return contract, determinism, parameter purity) and eight fixture/pinned. Three dated `[KNOWN DEFECT]` pins (taxable pot == all of `otherAccounts`; `magi` omits taxable draws; named-IRA money never reaches the RMD balance). Negative-controlled twice — 12/13 and 11/13. Not yet dollar-exact; that is release (b)/(c) work. **AMENDED at v5.24:** the B-2 pin was re-tagged `| rel c` and reworded. It previously read "Engine D magi omits drawFromTaxable" tagged `rel b`, which named something that is CORRECT and instructed the next session to introduce a defect. The assertion itself was right and is unchanged. Repo `qa/` |
-| `domdiff_withdrawal.mjs` | Cross-version DOM diff of the Withdrawal tab, **re-pointed at v5.24 to v5.23 → v5.24 and grown 4 → 8 checks**. It now excises the one deliberately reworded panel BY ANCHOR and requires everything else byte-identical, rather than relaxing the comparison — and separately asserts the panel did change and that only the prior build carries the false claim. **It hardcodes its default version pair; re-point it every release.** Originally new at v5.23, v5.22 → v5.23. **This is the proof the hoist changed nothing**, because the pre-existing suite does not discriminate on Engine D (OPERATIONS §B2). 4 checks; cross-version by nature, so NOT counted in the release headline. Repo `qa/` |
-| `t21_tools.mjs` | **NEW 2026-08-11** — tests the `qa/tools/` parser toolkit itself against a fixture with hand-counted known answers. 49 checks, negative-controlled six ways. Counted SEPARATELY from the app total: it verifies tooling, not the build. Carries one dated `[KNOWN DEFECT]` pin — `census.cjs` double-reports object shorthand and export specifiers, so its "hits" exceed its site count. Repo `qa/` |
+| `t18_engineB_exact.mjs` | Engine B dollar-exact (v5.21) — 50 checks via module-level `computeTaxPlan`; federal brackets, age-65 extra per spouse, SS taxability, **plus the first Engine A vs Engine B agreement invariant** (they agree). Negative-controlled at 24/47. NOT yet covered: LTCG, NIIT, AMT, FICA, state, survivor | when tests change |
+| `t19_engineD_exact.mjs` | **NEW at v5.23** — Engine D's first discriminating coverage. 14 checks: five structural (reachability, the 17-key return contract, determinism, parameter purity) and eight fixture/pinned. Three dated `[KNOWN DEFECT]` pins (taxable pot == all of `otherAccounts`; `magi` omits taxable draws; named-IRA money never reaches the RMD balance). Negative-controlled twice — 12/13 and 11/13. Not yet dollar-exact; that is release (b)/(c) work. **AMENDED at v5.24:** the B-2 pin was re-tagged `| rel c` and reworded. It previously read "Engine D magi omits drawFromTaxable" tagged `rel b`, which named something that is CORRECT and instructed the next session to introduce a defect. The assertion itself was right and is unchanged. Repo `qa/` |
+| `domdiff_withdrawal.mjs` | Cross-version DOM diff of the Withdrawal tab, **re-pointed at v5.24 to v5.23 → v5.24 and grown 4 → 10 checks**. It now excises the one deliberately reworded panel BY ANCHOR and requires everything else byte-identical, rather than relaxing the comparison — and separately asserts the panel did change and that only the prior build carries the false claim. **It hardcodes its default version pair; re-point it every release.** Originally new at v5.23, v5.22 → v5.23. **This is the proof the hoist changed nothing**, because the pre-existing suite does not discriminate on Engine D (OPERATIONS §B2). 4 checks; cross-version by nature, so NOT counted in the release headline. Repo `qa/` |
+| `t21_tools.mjs` | **NEW 2026-08-11** — tests the `qa/tools/` parser toolkit itself against a fixture with hand-counted known answers. 50 checks, negative-controlled six ways. Counted SEPARATELY from the app total: it verifies tooling, not the build. Carries one dated `[KNOWN DEFECT]` pin — `census.cjs` double-reports object shorthand and export specifiers, so its "hits" exceed its site count. Repo `qa/` |
 | `tools_fixture.jsx` | **NEW 2026-08-11** — the fixture `t21` reads. **NOT AN APP SOURCE**: never built, never imported, never version-bumped, and it does NOT count toward the "exactly two `.jsx` app sources" rule. Repo `qa/tools/fixture/fixture.jsx`; knowledge is flat so it lives here under this name, and `t21` resolves either. Line numbers are load-bearing — add cases at the END only |
-| `t20_other_taxtype.mjs` | **NEW at v5.25** — the Other-accounts `taxType` schema, its migration, and the extinction assertion that no engine reads the field. 61 checks. The extinction check is a **permutation test**: the same household runs twice with every type flipped and all five engines must return byte-identical output — so it fires the moment release (c) starts reading the field. Also carries the required equality that inference over the example household reproduces the $111,000 / $21,000 / $15,000 split v5.24 published. Negative-controlled five ways; two of its own assertions were caught passing vacuously on v5.24 and now assert a precondition first. Repo `qa/` |
-| `dom_entry_v529.jsx` | Harness entry for the v5.29 CJS DOM bundle. Repo `qa/qa-baseline/` |
-| `dom_entry_v528.jsx` | Harness entry for the v5.28 CJS DOM bundle (prior leg). Repo `qa/qa-baseline/` |
+| `t20_other_taxtype.mjs` | **NEW at v5.25** — the Other-accounts `taxType` schema, its migration, and the extinction assertion that no engine reads the field. 94 checks. The extinction check is a **permutation test**: the same household runs twice with every type flipped and all five engines must return byte-identical output — so it fires the moment release (c) starts reading the field. Also carries the required equality that inference over the example household reproduces the $111,000 / $21,000 / $15,000 split v5.24 published. Negative-controlled five ways; two of its own assertions were caught passing vacuously on v5.24 and now assert a precondition first. Repo `qa/` |
+| `dom_entry_v531.jsx` | Harness entry for the v5.31 CJS DOM bundle (current leg). Repo `qa/qa-baseline/` |
+| `dom_entry_v530.jsx` | Harness entry for the v5.30 CJS DOM bundle (prior leg). Repo `qa/qa-baseline/` |
 | `VERIFY.sh` | Release verification driver. **Added to knowledge at v5.23** — it was previously repo/local only, so a session working from knowledge alone could not reproduce the release run. Repo root |
 | `t15_engineA_death_filing.mjs` | Engine A death-year filing extinction invariant (C-2C-6, v5.14) — 11 checks, **dollar-exact** (module-level engine), incl. the non-conservative high-MAGI corner | when tests change |
-| `t10_taxcases.mjs` | Tax-case assertions built by the Phase 2 audit: 76 federal-core (2A) + 35 IRMAA (2B) = **111**, incl. 3 dated `[KNOWN DEFECT]` pins. **ADOPTED into `run_all.sh` at v5.14** (scope D-4); pins flipped, borders re-derived, now 115 checks | when audit phases add cases |
+| `t10_taxcases.mjs` | Tax-case assertions built by the Phase 2 audit: 76 federal-core (2A) + 35 IRMAA (2B) = **163** at v5.30 (2A 76 · 2B 87 · 2D 27 · 2E 21), incl. 3 dated `[KNOWN DEFECT]` pins. **ADOPTED into `run_all.sh` at v5.14** (scope D-4); pins flipped, borders re-derived, now 115 checks | when audit phases add cases |
 | `smoke_built.mjs` | The **built-artifact** suite — **16 checks** against the published single-file `index.html`, not the source: boots it, dismisses the disclaimer gate, mounts React, loads the example household, and round-trips the `window.storage` shim. Added v5.11 after a build passed every source check while being unable to save a plan | when tests change |
 | `qa-baseline-README.md` | How to run the baseline suite (renamed from qa-baseline/README.md for the flat pool) | when it changes |
 | **qa-baseline harness files** | `shim.txt`, `mk_testable.sh`, `env_dom.mjs`, `run_all.sh`, `cap_tabs.mjs` — the `dom_entry_*` files are listed individually above, current + prior only | when they change. NOTE (v5.10.2): stale knowledge copies were re-synced from the committed repo at that refresh. The repo is their source of truth. |
-| **`qa/tools/` parser toolkit** | `funcmap.cjs` (function boundaries — line numbers move every release), `census.cjs` (identifier/property/string hits with enclosing scope chain), `diverge.cjs` (normalized-fingerprint duplicate detection), `residual.cjs` (narrow: `balance − roth − trad`; ages out after release (c)). All four named explicitly per §G — a folder reference makes them invisible. They live in `qa/tools/`, **not** `qa/`, because they assert nothing and must never be countable as checks. ⚠ **Not themselves tested** — outputs corroborated against hand-read facts, which is not a test; a fixture is outstanding. Census and site-count questions go through these, never greps (OPERATIONS §B1) | when the tools change |
+| **`qa/tools/` parser toolkit** | `funcmap.cjs` (function boundaries — line numbers move every release), `census.cjs` (identifier/property/string hits with enclosing scope chain), `diverge.cjs` (normalized-fingerprint duplicate detection), `residual.cjs` (narrow: `balance − roth − trad`; ages out after release (c)). All four named explicitly per §G — a folder reference makes them invisible. They live in `qa/tools/`, **not** `qa/`, because they assert nothing and must never be countable as checks. **Tested since v5.25 by `t21_tools.mjs` (50 checks) against `tools_fixture.jsx`**, negative-controlled six ways; one pinned defect (AST hits vs source sites) is disclosed by reporting both counts since v5.29. Census and site-count questions go through these, never greps (OPERATIONS §B1) | when the tools change |
 | **build scaffold files** | `index.html` (the Vite HTML entry template), `main.jsx` (the browser bootstrap), `vite.config.js`, `package.json` — all four, per OPERATIONS §G. Without all four a session working from knowledge **cannot produce the published `index.html`** (the v5.11 failure). ⚠ **`vite.config.js` is written with a DOT** — the session mount displays it as `vite_config.js`; that is a mount artifact, not the pool name (verified 2026-08-10: same file, md5 `30da5708038a1d7c97a4b06777ea8e8a`). It is the only file in the pool where the mounted name differs from the real one | when the build setup changes |
 | `SITE_CENSUS_v5_10.md` | Code census (self-versioned by filename) | new one per feature |
 | `SCOPE_STANDING_AUDIT.md` | Reusable audit spec (not version-specific) | rarely |
@@ -113,7 +171,7 @@ the current source unless it says so.
 | `FlawsToFix-v5_15-Phase2D.md` | Sub-phase 2D findings, **REVISION 3**. Completeness half done to the Section C standard, verified **per engine**; break-even half still a premise reading. Revisions 1 and 2 both stated mechanisms wrongly — §1 records both errors and the single cause | **2D IN PROGRESS** — §6 owes the break-even arithmetic and `t10` cases |
 | `SCOPE_FIX_otherAccounts_tax_treatment_v5_21.md` | **REVISION 2 — supersedes the v5.15 scope, which is retired.** Re-verified against v5.21 with AST resolution. Corrects three premise claims: Engine D applies **zero** tax to these draws (not capital-gains — `magi` L7686 omits `drawFromTaxable`); the treatment is **mischaracterized, not undisclosed** (MyData L11211 discloses it, Withdrawal L7822 and the Field Manual contradict it); and the census grew by **nine sites**. Structural trap **EXECUTED**: $147K → $0, silent, plus $21K of genuine brokerage leaving the tab's accounting. `total401k` has **three** derivations, so Option B is path-dependent | **active — §7 DECISIONS RESOLVED 2026-08-10.** Governs releases (b) and (c) |
 | `SCOPE_CONSOLIDATE_taxable_residual_v5_22.md` | Release **(a)** of the three-release plan (D-6/D-7). Consolidates the taxable residual, verified at **seven** identical sites by normalized AST fingerprint (one distinct form). Two binding constraints: the helper must **not** live in `retireStartBalances` (documented decision, L1509–1511, whose comment must be amended in the same edit), and **L8384 is a variant** — positions residual **plus** `otherAccounts` — so only its positions half is replaced | **active — no open decisions. Next build.** Pure refactor: 8/8 strict parity, all 751 checks **identical** |
-| `SCOPE_AUDIT_PHASE2_v5_10_2.md` | Governing scope for Phase 2 / Section C. Decisions D-1…D-5 are **binding** on all 2A–2E work | active — 2D and 2E not yet run |
+| `SCOPE_AUDIT_PHASE2_v5_10_2.md` | Governing scope for Phase 2 / Section C. Decisions D-1…D-5 are **binding** on all 2A–2E work | **COMPLETE — all five sub-phases closed.** Roll-up: `AUDIT_2E_STATE_AND_PHASE2_ROLLUP.md` |
 | `FlawsToFix-v5_10_2-Phase2A.md` | Sub-phase 2A — federal core. Engine A dollar-exact (76 assertions) | complete. **Amended 2026-08-08**: Engine B is verifiable only to **±$500**, not dollar-exact |
 | `FlawsToFix-v5_10_2-Phase2B.md` | Sub-phase 2B — IRMAA + indexation (35 assertions). Findings F-2B-1 (threshold indexed to MAGI year) and F-2B-2 (top tier not frozen) — both LOW, conservative, **coupled: fix both or neither** | complete. **Amended 2026-08-08**: Engine C verifiable only to ±$500 MAGI / ±$50 surcharge |
 | `FlawsToFix-v5_10_2-Phase2C.md` | Sub-phase 2C — first-spouse death. **C-2C-3 (HIGH)**: Engines B and C key post-death RMDs to the deceased spouse's age; direction depends on which spouse is younger, **non-conservative** when A is the younger. C-2C-1 and C-2C-2 LOW, conservative | complete — **this is the current 2C document** |
@@ -126,128 +184,101 @@ the current source unless it says so.
 | `SCOPE_FIX_irmaa_indexation_v5_13.md` | Scope for the coupled F-2B-1 / F-2B-2 indexation fix. Premise **re-verified against v5.13**, not inherited from the v5.10.2 findings; census updated for the two-array tier structure v5.13 introduced. Four open decisions | **active — awaiting Steve's decisions in §7** |
 | `SCOPE_FIX_roth_tab_filing_status_v5_14.md` | Scope for C-2B-3. All five decisions resolved by Steve 2026-08-09; all three ordered changes shipped (the droppable third was not needed) | **fulfilled at v5.15 — retire** |
 | `SCOPE_DEFECTS_v5_10_1.md` | The v5.11 defect-fix release scope: three pre-existing defects found by the rebuilt t1–t6 baseline — **D1 (P0)** Clear All Data left the API key and skipped the landing return, **D2** ACA cliff solver ignored MAGI from its own funding sale, **D3** phantom Spouse-B card for single filers. All three were present identically in v5.9.2 and v5.10, so none was a regression. **Kept as the worked example** of the defect-pin → fix → flip cycle, and of a scope with an enforceable out-of-scope boundary | fulfilled (all three shipped at v5.10.1); retained for reference, not retirement |
+| `AUDIT_2D_BREAKEVEN_v5_28.md` | Sub-phase 2D — Roth break-even + account completeness (27 checks) against v5.28 | complete |
+| `AUDIT_2E_STATE_AND_PHASE2_ROLLUP.md` | Sub-phase 2E — state-tax module (21 checks) **and the Phase 2 roll-up**. The document a Phase 3+ session must read first: it names what is already verified and therefore not a finding | complete — **authoritative for Phase 2** |
+| `AUDIT_DOCS_HTML_v5_27.md` | Audit of the Field Manual against shipped v5.27 behaviour. Records that the **glossary, §10 API-key material and §14 FAQ were NOT audited** — that ground is Section F | complete, with the stated gap |
+| `STATUS_release_a.md` | Release-(a) status note (taxable-residual consolidation, v5.22) | historical |
+| `STATUS_v5_23_engineD_hoist.md` | Engine D hoist status note (v5.23) | historical |
+| ~~`probe_classify.mjs`~~ | **RESOLVED at v5.30 — removed from knowledge, now versioned.** Committed to the repo at `qa/tools/probe_classify.mjs` with a header recording what it was for. It is a v5.25-era probe from the `otherAccounts` scoping work; **its conclusions have since shipped and are asserted by `t20`**, so its "what would move" output now describes a change that already happened. It asserts nothing and **must never be counted in a release total**. Read `t20` instead. | retired from knowledge |
+| `MissingFeatures.md` | **Section D** of the standing audit (Phase 3) — missing taxation features, priority-ordered, pinned to v5.29. **Partial:** D-1 verified to source; D-2…D-6 assessed; no systematic undisclosed-gap sweep | Section D **incomplete — re-run before the top-five summary** |
+| `ARCHITECTUREIssues.md` | **Section E** of the standing audit (Phase 3) — 13 findings, pinned to v5.29. Highest: jsdom duplicated **9×** (not 8), OBBBA constants outside `TAX_CONSTS` with a 2028 fuse, backup export does not identify the build | Section E **covered** |
+| `AUDIT_PHASE3_ROLLUP.md` | Phase 3 roll-up (Sections D + E) | current |
+| `SCOPE_FIX_otherAccounts_tax_treatment_v5_21.md` | **REVISION 2.** Governing scope for the three-release `otherAccounts` plan — (a) v5.22, (b) v5.24, (c) v5.26. §1 records three corrections to its own premise; §7 carries Steve's resolved decisions D-1…D-7 | **FULFILLED (all three shipped) — RESTORED to knowledge 2026-08-12 and RETAINED DELIBERATELY.** ⚠ Do **not** retire: `qa/t19_engineD_exact.mjs` L61 cites it as its governing scope |
+| `SCOPE_ENGINE_D_MAGI_v5_24.md` | Release (b). §1 corrects the carried-forward premise (adding `drawFromTaxable` to `magi` would have been a **defect**, not a fix); §8 is the correction owed to `t19`'s B-2 pin. §8 also warns the finding **"is unusually good at being restated wrongly"** and counts three prior wrong statements | **FULFILLED at v5.24 — RESTORED 2026-08-12 and RETAINED DELIBERATELY.** ⚠ Do **not** retire: `t19` L96 is a **stop-instruction** telling a session to read its §1 before touching `magi` |
+| ~~`SESSION_BRIEF_v5_30_BUILD.md`~~ *(retire — spent)* | Build brief for v5.30 — pasted as the first message of the build session. Carries the freshness expectations, the three edits, the per-leg gating rule, and the version-bump tax | current |
+| ~~`SCOPE_FIX_obbba_disclosure_v5_30.md`~~ *(retired)* | Scope for **D-1(a)/(b) + E-3** — the false OBBBA disclosure in Field Manual §13 and METHODOLOGY §5, and the false source comment at L829–831. Three edits, no engine change, parity must stay 8/8. §3 records the §B2 lock check (clean) and a second gap it surfaced: nothing asserts Engine B *applies* the bonus | **RETIRED — FULFILLED BY v5.30 (verified 2026-08-13).** All three edits shipped, `t18` gained the three hand-computed OBBBA cases including the 2029 sunset, and E-3 was closed and named in the CHANGELOG. Delete from the pool with its build brief |
 
 ---
 
 ## Retirement list (delete-first; nothing replaces these)
 
-**Retired at the v5.24 release — DELETE THESE FOUR:**
-- `DangerClose-v5_22.jsx` — rolls OUT of the two-file rotation (md5 `aac6851f91860edc8341dd44a2c35424`,
-  on record in the v5.22 CHANGELOG provenance line).
-- `dom_entry_v522.jsx` — its source no longer lives in knowledge, so knowledge cannot run that leg.
-- `dom_entry_v521.jsx` — **a leftover the v5.23 rotation should have dropped and did not.** Found
-  during the v5.24 freshness check. It is not a duplicate name, so it never tripped the two-file
-  `.jsx` invariant or the "a name appearing twice" check; nothing in the pool looked wrong. The
-  `dom_entry_*` files now get individual manifest rows for exactly this reason — a folded
-  "harness files" row hid it for a full release.
-- `SCOPE_ENGINE_D_MAGI_v5_24.md` — **FULFILLED** by this release. Its §7 D-2 (blunt copy) and D-3
-  (METHODOLOGY note) both shipped; its §8 correction to `t19`'s B-2 pin shipped. Per the standing
-  rule that retiring a scope means writing its outcome back, the outcome is recorded in the v5.24
-  CHANGELOG and in METHODOLOGY §12, not only here.
+⚠ **This section, the rotation block below, and several table rows above had gone stale by five
+releases** — they described the v5.24 refresh while the two tables at the top of this file were
+correctly rolled to v5.29. Corrected at the v5.30 refresh. The cause is structural and is recorded
+as a finding: OPERATIONS §I's "refresh project knowledge once with the final state, delete-first"
+was executed on the top tables and not on the body. **Roll the whole file or none of it.**
 
-**Active scopes after this refresh: `SCOPE_FIX_otherAccounts_tax_treatment_v5_21.md` (only).**
-Release (a) shipped at v5.22, (b) shipped at v5.24 re-scoped as disclosure-only, and **(c) —
-fold and classify — remains.** Note that (b)'s original shape did not survive contact with the
-source; see the v5.24 CHANGELOG for why adding `drawFromTaxable` to `magi` would have been a defect.
+**Retired at the v5.31 refresh:**
 
-- `FlawsToFix-v5_10_2-Phase2C-INTERIM.md` — superseded by `FlawsToFix-v5_10_2-Phase2C.md`.
-  **DONE — confirmed removed from the pool 2026-08-08.**
-- `SCOPE_FIX_survivor_rmd.md` — **duplicate.** Byte-identical (`06f77e7f061c992b1e2aee6af081b39b`) to
-  `SCOPE_FIX_survivor_rmd_v5_11.md`, which supersedes it under the versioned name required by §G. The
-  rename was an upload without a matching delete, so the pool now holds the same document twice.
-  **Remove the unversioned copy.**
+- ~~`SCOPE_FIX_docs_disclosure_v5_27.md`~~ — **RETIRED (confirmed absent from the pool 2026-08-13).**
+  Fulfilled at v5.27; it outlived its release by three because §I's retirement step was skipped. Its
+  outcome is recorded in the v5.27 CHANGELOG entry.
+- ~~`SCOPE_FIX_obbba_disclosure_v5_30.md`~~ — **RETIRED at v5.30**, fulfilled by that release: all
+  three edits shipped, `t18` gained the three OBBBA cases, and E-3 was closed and named in the
+  CHANGELOG.
+- ~~`SESSION_BRIEF_v5_30_BUILD.md`~~ — **RETIRED at v5.30.** A build brief is spent once its release
+  ships; keeping it invites a future session to build v5.30 again.
+- ~~`SCOPE_FIX_obbba_constants_v5_31.md`~~ — **RETIRE at v5.31**, fulfilled: `OBBBA_CONSTS` shipped
+  with five Verify rows, the four literals are extinct and extinction-checked, both negative controls
+  fired, and E-2 is closed and named in the CHANGELOG. Its Rev B corrections (the suite is `t1` not
+  `t10`; the finding's stated cause and urgency framing do not hold) are carried into the E-2 closure
+  note so they survive the retirement.
+- ~~`SESSION_BRIEF_v5_31_BUILD.md`~~ — **RETIRE with the scope it paired with.**
 
-Retired at the v5.21 release: `DangerClose-v5_19.jsx` rolls OUT of the two-file rotation (md5
-`3f152d70aa713fc4cd5891bb777ad742`, on record in the v5.19 CHANGELOG provenance line), and
-`dom_entry_v519.jsx` with it. **`SCOPE_FIX_engineB_export_exact_tests_v5_20.md` is FULFILLED — retire it.**
-**Active scopes after this refresh: `SCOPE_FIX_otherAccounts_tax_treatment_v5_21.md` and
-`SCOPE_CONSOLIDATE_taxable_residual_v5_22.md`.** *(The v5.15 scope was superseded and deleted on
-2026-08-10, in the re-verification pass that preceded release (a) — see the standing rule below.)*
+**Active scopes after this refresh: NONE.** v5.31 shipped on 2026-08-13, and its scope and build brief
+are retired with it. The next release needs a scope
+written before it is built (project instructions, *Scope before build*).
 
-Retired at the v5.20 release: `DangerClose-v5_18.jsx` rolls OUT of the two-file rotation (md5
-`45376b843608916cea9a8021153e1bca`, on record in the v5.18 CHANGELOG provenance line), and
-`dom_entry_v518.jsx` with it. **`SCOPE_FIX_rothLadder_senior_deduction_v5_19.md` is FULFILLED — retire it.**
+**The open work is tracked as findings, not scopes:** `ARCHITECTUREIssues.md` (Section E — **eleven**
+open after E-2 closed at v5.31; **E-6** and **E-14** are the two rated High, and **E-9** — two copies of
+the 1.02 indexation proxy — is the adjacent one this release deliberately left alone) and
+`MissingFeatures.md` (Section D — **D-2**, unrealized capital gains on ordinary drawdown, is the ranked
+top item and the one that points the optimistic way). Section D still owes a systematic
+undisclosed-gap sweep, which the Phase 3 rollup says Phase 4 should wait for.
 
-**STANDING RULE, added v5.20 — knowledge holds EXACTLY the scopes named as active below. Any other
-`SCOPE_FIX_*` in the pool is a leftover and should be deleted.** Fulfilled scopes survived four
-consecutive refreshes because deletion is the only step in the refresh that removes rather than adds,
-and nothing in the pool looked wrong afterwards. This makes a leftover checkable at a glance, the way
-the two-file `.jsx` rotation already is — that invariant has never once been missed.
-**Active scopes: `SCOPE_FIX_otherAccounts_tax_treatment_v5_21.md` and
-`SCOPE_CONSOLIDATE_taxable_residual_v5_22.md` (both, and only these two).**
-*(Updated 2026-08-10: the v5.15 scope was SUPERSEDED by revision 2 and deleted — it is not a leftover
-to restore. Two active scopes is correct here because D-7 split the work into three releases.)*
+Releases (a), (b) and (c) of the `otherAccounts` plan
+have ALL shipped — (a) v5.22, (b) v5.24 re-scoped as disclosure-only, and **(c) fold-and-classify
+shipped at v5.26.** The previous text of this section claimed (c) "remains", which was true when
+written and false from v5.26 onward.
 
-Retired at the v5.19 release: `DangerClose-v5_17.jsx` rolls OUT of the two-file rotation (md5
-`b466b02f3a10d1993a6e345f8070d8b3`, on record in the v5.17 CHANGELOG provenance line), and
-`dom_entry_v517.jsx` with it. **`SCOPE_FIX_engineB_hoist_v5_17.md` is FULFILLED — retire it.**
+✅ **E-10 CLOSED 2026-08-12.** `SCOPE_FIX_otherAccounts_tax_treatment_v5_21.md` and
+`SCOPE_ENGINE_D_MAGI_v5_24.md` had been retired as fulfilled while `qa/t19_engineD_exact.mjs` still
+cited both — L61 as its governing scope, L96 as a **stop-instruction**. Steve restored both to
+knowledge; `t19`'s references now resolve.
 
-Retired at the v5.18 release: `DangerClose-v5_16.jsx` rolls OUT of the two-file rotation (md5
-`f78c128b5620f12313057c98e76f253b`, on record in the v5.16 CHANGELOG provenance line), and
-`dom_entry_v516.jsx` with it. Also **`SCOPE_FIX_t15_version_tag_v5_17.md`** (fulfilled at v5.18) and
-**`SCOPE_FIX_engineC_export_exact_tests_v5_17.md`** (fulfilled at v5.18).
-**Still outstanding from an earlier cycle:** `SCOPE_FIX_roth_tab_filing_status_v5_14.md` was listed
-for retirement at v5.15 and is still in the pool — delete it.
+⚠ **THEY ARE FULFILLED SCOPES AND MUST NOT BE RETIRED AGAIN.** OPERATIONS §I says to retire fulfilled
+`SCOPE_*.md` at each release, so the default behaviour of the release checklist is to delete these
+and re-open E-10. They are **retained deliberately**, on the same footing as
+`SCOPE_DEFECTS_v5_10_1.md` ("retained for reference, not retirement"). The durable alternative — and
+the better long-term fix — is to re-point `t19`'s two comments at the v5.24 and v5.26 CHANGELOG
+entries, which record the same outcomes and are never retired. Until that is done, retiring these two
+files breaks `t19`'s guidance.
 
-Retired at the v5.17 release: `DangerClose-v5_15.jsx` rolls OUT of the two-file rotation (md5
-`f915dd8c71142bcf16aeb00a6d56c403`, on record in the v5.15 CHANGELOG provenance line), and
-`dom_entry_v515.jsx` with it — its source no longer lives in knowledge, so knowledge cannot run
-that leg. The file stays in the repo.
-
-Retired at the v5.16 release: `DangerClose-v5_14.jsx` rolls OUT of the two-file rotation (md5
-`452626b89c509e44d0a1ccf4ec33cda2`, on record in the v5.14 CHANGELOG provenance line).
-
-Retired at the v5.15 release: `SCOPE_FIX_roth_tab_filing_status_v5_14.md` (fulfilled).
-`DangerClose-v5_13.jsx` rolls OUT of the two-file rotation; its md5
-`0ed9e140cd9163e4523d8ff71959d56c` is on record in the v5.13 CHANGELOG provenance line.
-
-Retired at the v5.14 release: `SCOPE_FIX_irmaa_indexation_v5_13.md` (fulfilled — F-2B-1 and F-2B-2
-both fixed at v5.14). `DangerClose-v5_12.jsx` rolls OUT of the two-file rotation; its md5
-`2ebfccb0ea9744c1015693badace4984` is on record in the v5.12 CHANGELOG provenance line.
-*(`SCOPE_FIX_engineA_death_year_filing_v5_13.md` was written and fulfilled inside the same release
-cycle and was never uploaded, so there is nothing to delete for it.)*
-
-Retired at the v5.13 release: `SCOPE_FIX_survivor_engines_CD.md` and
-`SCOPE_ADDENDUM_D6_EngineC_design.md` (both fulfilled — Engine D at v5.12, Engine C at v5.13);
-`DangerClose-v5_11.jsx` (rolled out of the two-file rotation); `dom_entry_v511.jsx` (its source no
-longer lives in knowledge).
-
-Retired at the v5.12 release: `SCOPE_FIX_survivor_rmd_v5_11.md` (fulfilled at v5.11);
-`DangerClose-v5_10_1.jsx` (rolled out of the two-file rotation — recoverable from commit history; pre-v5.12, so no recorded md5);
-`dom_entry_v5102.jsx` (its source no longer lives in knowledge; the file remains repo-only,
-since knowledge cannot run a leg whose source it does not hold).
-
----
+Every other absent
+`SCOPE_*`, `FlawsToFix-*-INTERIM` and retired `DangerClose-v5_*.jsx` / `dom_entry_v5*.jsx` named
+above is retired-by-design and recoverable from commit history.
 
 ## Rotation state (update at each release)
 
-- **Last rotation:** v5.23 → v5.24 baseline pair established at the v5.24 ship;
-  `DangerClose-v5_22.jsx` rolled OUT of knowledge, along with `dom_entry_v522.jsx` and the
-  stale `dom_entry_v521.jsx` the v5.23 rotation missed.
-  *(This block had gone stale: through v5.23 it still named v5.19 → v5.20 as the last rotation,
-  three releases behind, while the two tables at the top of this file were correct. It is the
-  same class of failure as the `dom_entry_v521.jsx` leftover — a section nobody reads because
-  the authoritative answer is elsewhere. Roll it or delete it; do not leave it half-true.)*
-- **Previous rotation:** v5.19 → v5.20 at the v5.20 ship;
-  `DangerClose-v5_18.jsx` rolled OUT of knowledge.
-- **Previous rotation:** v5.18 → v5.19 at the v5.19 ship;
-  `DangerClose-v5_17.jsx` rolled OUT of knowledge.
-- **Previous rotation:** v5.17 → v5.18 at the v5.18 ship;
-  `DangerClose-v5_16.jsx` rolled OUT of knowledge.
-- **Previous rotation:** v5.16 → v5.17 at the v5.17 ship;
-  `DangerClose-v5_15.jsx` rolled OUT of knowledge.
-- **Previous rotation:** v5.15 → v5.16 at the v5.16 ship;
-  `DangerClose-v5_14.jsx` rolled OUT of knowledge.
-- **Previous rotation:** v5.14 → v5.15 at the v5.15 ship;
-  `DangerClose-v5_13.jsx` rolled OUT of knowledge.
-- **Previous rotation:** v5.13 → v5.14 at the v5.14 ship;
-  `DangerClose-v5_12.jsx` rolled OUT of knowledge.
-- **Previous rotation:** v5.12 → v5.13 at the v5.13 ship;
-  `DangerClose-v5_11.jsx` rolled OUT of knowledge (recoverable from commit history; its md5 is on
-  record in this manifest's history and in the v5.12 CHANGELOG provenance line).
-- **Next rotation (at the NEXT release):** roll `DangerClose-v5_23.jsx` OUT, add the new current
-  source, promote `DangerClose-v5_24.jsx` to prior baseline, update the two tables above, and roll
-  the `dom_entry_*` rows and this block with them.
+**Current pair: v5.29 (prior) → v5.30 (current).** The two tables at the top of this file are
+authoritative; this block exists only to record the sequence.
+
+- **Last rotation:** v5.30 → v5.31 at the v5.31 ship; `DangerClose-v5_29.jsx` rolled OUT, along with
+  its `dom_entry_v529.jsx`.
+- **Earlier rotations,** newest first: v5.29→v5.30, v5.28→v5.29, v5.27→v5.28, v5.26→v5.27, v5.25→v5.26, v5.24→v5.25,
+  v5.23→v5.24, v5.19→v5.20, v5.18→v5.19, v5.17→v5.18, v5.16→v5.17, v5.15→v5.16, v5.14→v5.15,
+  v5.13→v5.14, v5.12→v5.13. Each rolled the then-oldest source OUT; all are recoverable from commit
+  history, and from v5.12 forward each is identified by the provenance line at the end of its
+  CHANGELOG entry (OPERATIONS §G).
+- **Next rotation (at the NEXT release):** roll `DangerClose-v5_30.jsx` OUT, add the new current
+  source, promote `DangerClose-v5_31.jsx` to prior baseline, update the two tables at the top, **the
+  §A2 hash table** (every changed test file needs its row updated or the offline fallback lies), and
+  roll the `dom_entry_*` rows and this block with them.
+
+⚠ **This block went stale by five releases once already** (it named v5.23 → v5.24 through v5.29) and
+carried a note predicting exactly that failure — *"a section nobody reads because the authoritative
+answer is elsewhere. Roll it or delete it; do not leave it half-true."* It was left half-true. If it
+goes stale again, delete it rather than repairing it: the top tables already carry the answer.
 
 ---
 
