@@ -1,5 +1,134 @@
 # Changelog
 
+## v5.32
+
+**The ACA subsidy floor now applies under both law scenarios, and bridge years that fall below it are named instead of silently reading as $0. The discontinuity itself is NOT fixed — this release makes it visible and excludable. Parity 8/8 strict, and see below for why that proves less here than usual.**
+
+The app has modelled the §36B(c)(1)(A) rule that the premium tax credit begins at 100% of the
+federal poverty level since the ACA feature shipped at v5.7. Two things were wrong with how.
+
+### 1. The enhanced law scenario had no floor at all
+
+`acaApplicablePct` tested the floor inside its current-law branch. The `enhanced` branch returned
+before ever reaching that test, and its table begins `[0, 1.5, 0, 0]` — an applicable percentage of
+0 anywhere below 150% FPL. So under the ENHANCED EXTENDED toggle a household below the poverty
+line was modelled as receiving the **entire benchmark premium** as subsidy. Measured across the
+range, that held at every ratio down to and including 0.000: a household with literally zero
+income was modelled as receiving free coverage.
+
+This was a modelling error, not a design choice. ARPA and the IRA suspended the **400% cliff**;
+neither touched the 100% floor. The practical consequence was that a control offered as a *law
+scenario* also silently flipped a household between "no coverage modelled" and "coverage free" —
+a $19,200 swing on the measured case, which is not what the toggle claims to do.
+
+The floor test is now hoisted above the regime branch and binds in both. Current-law behaviour is
+unchanged — the ordering was arranged so that path is bit-identical.
+
+### 2. The $0 below the floor looked like a computed result, and it is a blank
+
+Two different things render as $0 on the strategy table. Above the 400% cliff, $0 is what the
+statute gives you. Below the 100% floor, $0 is what this app says when **Medicaid eligibility is
+what actually governs and this app does not model Medicaid**. They are indistinguishable on
+screen, and the second one breaks comparisons: any change that lifts a household's MAGI back over
+the floor appears to improve the plan by a full benchmark premium, when nothing real has happened.
+
+The engine now records which bridge years fall below the floor **and at what depth**, as a new
+additive field. The strategy table marks its subsidy column and names the affected years with
+their FPL percentage, states that the column excludes them, and warns about exactly the inverted
+comparison above. The ACA panel and the My Data benchmark-premium field carry the same statement,
+and the Field Manual and `METHODOLOGY.md` copies were updated in the same release rather than left
+to become locks on stale text.
+
+**The depth matters and is why the copy carries it.** A pre-build measurement across six
+reconstructed bridge households found **6 of 24 modelled bridge years below the floor — a quarter
+of them** — with MAGI shortfalls from $1,527 to $17,616. Two of the six sit at 23% and 50% of FPL.
+Copy reading "this year is near the edge" would have been false for half the crossings the app
+actually produces. *(Those households are reconstructions from a scope description; the original
+fixtures are not recorded anywhere, and one of the six did not reconcile against its source panel
+and is treated as unverified. The other five are sound, and the finding does not rest on the
+unverified one.)*
+
+### What this release does NOT fix — read this before reading the numbers
+
+- **Sub-floor years still show $0.** This release labels the artifact; it does not remove it.
+  Removing it would mean paying out a subsidy the model cannot justify, which is a move against
+  this app's conservative default and is not one to make quietly.
+- **The discontinuity is unchanged.** One dollar of MAGI across the line still moves the modelled
+  subsidy by nearly a whole benchmark premium. `t22` pins that jump deliberately, so that if a
+  future release ever does smooth it, the change has to be made on purpose.
+- **A household drifting across the floor is still a real scenario.** The poverty level grows
+  about 2%/yr past the last published vintage and a flat drawdown MAGI does not, so a plan can
+  fall through the floor mid-horizon with nothing about it changed. It is now flagged when it
+  happens; it is still not smoothed.
+- **This does NOT unblock the realized-capital-gains default.** That question needed the ability
+  to hold the floor artifact constant both ways, which is a different change and was declined for
+  this release. The capital-gains default stays at 0, and `MissingFeatures.md` **D-2 remains
+  PARTIALLY ADDRESSED**. What the flagged years do give the next release is a principled way to
+  say which households' apparent improvement is this artifact — enough for an honest write-up,
+  not enough to move a default.
+- **Medicaid, Alaska/Hawaii poverty levels, cost-sharing reductions and plan choice** are still
+  not modelled, and the 400% cliff is unchanged because it is correct as built.
+
+### ⚠ Parity is 8/8 strict and it does not mean what it usually means
+
+`t2 compare` asserts byte-identical engine output across the version pair, and it passed strict.
+On this release, read that narrowly. The Roth fingerprint household is built with
+`acaPremium: 0`, and `acaHeads` returns 0 whenever the premium is not positive — so
+`bridgeInWindow` is false, `baselineSubByYr` is null, `acaSubByYr` is never populated, and **no
+ACA code runs inside the parity guardrail at all, in either law scenario.**
+
+Strict parity therefore proves the non-ACA engines are untouched. It proves nothing whatever about
+the feature this release changes — neither that the enhanced-regime fix landed, nor that the
+flagging moved no figure.
+
+Both of those claims are carried by their own checks. The fix is asserted directly against the
+statute in `t22` group A and hand-computed in group C. The no-movement claim is `t22` group F,
+which runs Engine A on an ACA-bridge household against v5.31 and requires the whole per-year
+subsidy map, `totAcaLoss` and `estate` to be byte-identical across all seven strategies — which is
+also why the sub-floor exclusion is a **display** exclusion rather than an engine one: netting
+those years out of `totAcaLoss` would move `estate`, which *is* in the fingerprint.
+
+This is the third time a green guardrail has been found blind to the thing under test in this
+project. It is recorded in `ARCHITECTUREIssues.md` as **premium-zero**, which is wider than the
+earlier note describing it as current-regime-only.
+
+### Verification
+
+**1074 app checks, 0 failed**, computed from parsed suite output:
+
+- baseline current leg **515** — t1 77 · t2 15 · t3 36 · t4 159 · t5 44 · t6 21 · t10 163
+- parity **8 strict**, no intended diffs
+- feature **551** — t7 41 · t8 38 · t9 14 · t11 40 · t12 23 · t13 42 · t14 33 · t15 11 · t16 24 ·
+  t17 63 · t18 50 · t19 14 · t20 94 · **t22 64 (new)**
+- tooling **50** (t21), counted separately — it verifies the parser toolkit, not the build
+- built artifact **16** (`qa/smoke_built.mjs`, exercised not merely inspected)
+- withdrawal DOM diff **10**, strict identity
+
+The prior leg replays at **515**, the same as the current leg's baseline portion: every v5.32 gate
+was extended to cover both builds rather than repointed, because v5.31 legitimately carries the
+same copy for everything except the ACA floor. The entire +64 is `t22`, which is current-leg only.
+
+**`t22` ships with five negative controls and all five fire.** Each removes the floor constant and
+requires the corresponding assertion to fail — including the control specific to the enhanced-regime
+fix, which reproduces exactly the pre-v5.32 behaviour. The in-app Verify tab gains four rows
+pinning the floor at exactly 100% FPL, one dollar below, one dollar below under the enhanced
+scenario, and the sub-floor $0 as unmodelled; **its count moves 62 → 66.**
+
+The built `index.html` was rebuilt and exercised, not inspected. As the check that the scaffold is
+complete, v5.31 was first rebuilt from its own unmodified source and reproduced its published
+artifact exactly (`ec935c4af4309ee3dbcf2d2c269383ad`).
+
+### Files
+
+`src/DangerClose.jsx` (the floor, the predicate, the engine field, four Verify rows, four
+disclosure surfaces, the version bump) · `qa/t22_aca_floor.mjs` (new) · `qa/qa-baseline/shim.txt`
+(exports the new predicate, guarded so prior legs still load) · `qa/qa-baseline/dom_entry_v532.jsx`
+(new) · version-tag chains in `t1`, `t3`, `t4`, `t5`, `t6` · `METHODOLOGY.md` · `TESTING.md` ·
+`MissingFeatures.md` · `ARCHITECTUREIssues.md` · `PROJECT_KNOWLEDGE_INDEX.md` · `VERIFY.sh`.
+
+Source md5 `7e7be3f869f298667fe994074cfffb06` · built `index.html` md5
+`ef42fb0ba566c1008bb8ffadd7b0b288`.
+
 ## v5.31
 
 **The OBBBA senior-bonus constants join the verified set. No engine change, no figure moves — parity 8/8 strict.**
