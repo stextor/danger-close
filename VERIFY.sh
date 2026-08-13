@@ -1,12 +1,27 @@
 #!/bin/bash
 # ─────────────────────────────────────────────────────────────────────────────
-# Danger Close — release verification · v5.31
+# Danger Close — release verification · v5.32
 #
 # PROVENANCE: originally authored 2026-08-11 for v5.22 by transcribing the steps
 # actually executed in that session. Rolled forward to v5.23 from that file
 # (md5 3e608e13a4365f814e35788317bdbbfa), which was supplied by the maintainer —
 # it is NOT in project knowledge, so a session working from knowledge alone
 # cannot produce it. ADD IT TO KNOWLEDGE with this release.
+#
+# v5.32 changes: version pair and both expected md5s rolled forward; t22 joins
+# step 4. NOTE t22's group F needs the PRIOR leg's bundle (qa/app_v531.mjs), which
+# step 2 already builds — but it defaults to v531 by name, so roll its default
+# forward next release the same way this pair rolls.
+#
+# ⚠ ORDERING TRAP, hit 2026-08-13: `run_all.sh parity` reads
+# /tmp/t2_<prior>_fingerprint.json, which only exists after the PRIOR leg's t2 has
+# run. Step 3 runs the legs before parity, so the script is fine — but a session
+# running parity first sees ENOENT and reads it as a defect. It is not.
+#
+# ⚠ HARNESS SETUP, recorded 2026-08-13: after mk_testable.sh, NINE suites die at
+# module load unless three copies are in place. Step 2 does the first two; the
+# third is the run-folder-root `DangerClose.jsx` the usage line above requires
+# (t8 and t19 read it directly).
 #
 # v5.25 changes: version pair and both expected md5s rolled forward; t20 joins
 # step 4; step 4b's domdiff is now STRICT IDENTITY (9 checks, up from 8) because
@@ -30,17 +45,17 @@
 # Every command below was run and its result recorded in the release notes.
 #
 # Usage:  ./VERIFY.sh /path/to/workdir
-#    workdir must contain:  v530.jsx  v531.jsx  DangerClose.jsx(=v531)  qa/
+#    workdir must contain:  v531.jsx  v532.jsx  DangerClose.jsx(=v532)  qa/
 # ─────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
 ROOT="${1:-$(pwd)}"
 cd "$ROOT"
 
-PRIOR=v530
-CURR=v531
-EXPECT_SRC_MD5=17636ea1b24ea37c806008e7a6b1a32f
-EXPECT_BUILT_MD5=ec935c4af4309ee3dbcf2d2c269383ad
+PRIOR=v531
+CURR=v532
+EXPECT_SRC_MD5=7e7be3f869f298667fe994074cfffb06
+EXPECT_BUILT_MD5=ef42fb0ba566c1008bb8ffadd7b0b288
 
 say() { printf "\n\033[1m== %s ==\033[0m\n" "$*"; }
 die() { printf "\n\033[31mFAIL: %s\033[0m\n" "$*" >&2; exit 1; }
@@ -83,7 +98,7 @@ cd qa
 for t in t7_accrual t8_invariant t9_dom_smoke t11_survivor_rmd t12_engineD_survivor \
          t13_engineC_irmaa t14_cross_engine_survivor t15_engineA_death_filing \
          t16_roth_ladder_filing t17_engineC_exact t18_engineB_exact t19_engineD_exact \
-         t20_other_taxtype t21_tools; do
+         t20_other_taxtype t22_aca_floor t21_tools; do
   timeout 900 node "${t}.mjs" | tail -1
 done
 cd ..
@@ -127,28 +142,32 @@ fi
 
 say "DONE"
 cat <<'EOF'
-Expected totals for v5.31 — compare against the output above:
+Expected totals for v5.32 — compare against the output above:
 
   baseline current leg  515  (t1 77 · t2 15 · t3 36 · t4 159 · t5 44 · t6 21 · t10 163)
   parity                  8  strict, no INTENDED_DIFFS
-  feature               487  (t7 41 · t8 38 · t9 14 · t11 40 · t12 23 · t13 42
+  feature               551  (t7 41 · t8 38 · t9 14 · t11 40 · t12 23 · t13 42
                               t14 33 · t15 11 · t16 24 · t17 63 · t18 50 · t19 14
-                              t20 94)
+                              t20 94 · t22 64)
   ----------------------------------------------------------------------------
-  APP TOTAL            1010
+  APP TOTAL            1074
   tooling (t21)          50  counted SEPARATELY
   built artifact         16  qa/smoke_built.mjs
   withdrawal DOM diff    10  qa/domdiff_withdrawal.mjs — strict identity
 
-v5.31 moves the OBBBA senior-bonus constants into a named block and MOVES NO
-FIGURE. Parity must be 8/8 strict: no engine is touched. If parity breaks, the
-substitution changed a value — find which (OPS §E). t18's three OBBBA cases
-(11a/11b/11c) must also pass UNCHANGED; they are the proof it was a refactor.
+v5.32 fixes the enhanced-regime floor omission and adds an A2 sub-floor flag.
+Parity must be 8/8 strict — but READ WHAT THAT PROVES. t2's Roth fingerprint
+household is built with acaPremium: 0, so acaHeads returns 0, bridgeInWindow is
+false, and NO ACA CODE RUNS INSIDE THE GUARDRAIL AT ALL, in either regime.
+Strict parity here proves the non-ACA engines are untouched and proves nothing
+about this release's subject. t22 group F is the check that does that job: it
+compares Engine A's whole per-year subsidy map across the pair and requires byte
+identity. Do not report parity in its place (ARCHITECTUREIssues, premium-zero).
 
-The prior leg re-runs at 990 — TWENTY fewer than the current leg. The v531 leg
-asserts the new constants block, the extinction of the four inline literals and
-the corrected Taxes-tab footnote; every earlier leg asserts the state true for
-its own build. That is the per-leg gating OPERATIONS §B2 requires.
+The prior leg re-runs at 515 — the SAME as the current leg's baseline portion,
+because every v5.32 gate was extended to cover both builds rather than repointed.
+The +64 is all t22, which is current-leg-only. Every earlier leg asserts the
+state true for its own build; that is the per-leg gating OPERATIONS §B2 requires.
 
 NOTE ON THE BUILT MD5 — the v5.30 note here was WRONG and is corrected. It said
 bit-reproducibility had been lost and blamed rollup, an unpinned caret dependency

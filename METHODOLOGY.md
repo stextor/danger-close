@@ -215,10 +215,20 @@ retirement and each spouse's 65th birthday.
   premium is assumed (prorated by heads); a widowed survivor is assumed to be the younger
   spouse (maximizing bridge exposure — conservative). Household size for FPL defaults to
   the plan's household; users with marketplace dependents can override it.
-- **Not modeled, stated in-app:** below 100% FPL the model shows $0 and defers to Medicaid;
-  Alaska/Hawaii guidelines; cost-sharing reductions, silver loading, and plan choice. The
-  law-scenario toggle (CURRENT LAW vs ENHANCED EXTENDED) is a user-owned stress choice,
-  mirroring the Social Security depletion scenario — never a forecast.
+- **Not modeled, stated in-app:** below 100% FPL the model shows $0 and defers to Medicaid —
+  **in both law scenarios (v5.32; through v5.31 the enhanced branch applied no floor at all and
+  paid the full benchmark premium down to zero income)**. That $0 is a PLACEHOLDER for coverage
+  this model does not price, not a computed result, and the two are visually identical: above the
+  400% cliff $0 is what the statute gives you, below the 100% floor $0 is what this app says when
+  Medicaid is what actually governs. From v5.32 the engine records which bridge years fall below
+  the floor, and at what depth, and the Roth strategy table names them and excludes them from its
+  improvement claim. **The discontinuity itself is unchanged**: one dollar of MAGI across the line
+  still moves the modelled subsidy by nearly a whole benchmark premium, and a change that lifts a
+  household back over the floor will still read as an improvement of that size. v5.32 makes that
+  artifact visible and excludable; it does not remove it. Also not modeled: Alaska/Hawaii
+  guidelines; cost-sharing reductions, silver loading, and plan choice. The law-scenario toggle
+  (CURRENT LAW vs ENHANCED EXTENDED) is a user-owned stress choice, mirroring the Social Security
+  depletion scenario — never a forecast.
 - **Scope (v1):** subsidy math is confined to the Roth strategy comparison. Expense rows
   remain exactly what the user entered — the in-app note by the premium field ("enter your
   GROSS premium here; keep your expense rows as what you actually pay") is what prevents
