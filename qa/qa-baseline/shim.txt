@@ -8,6 +8,10 @@ export const __g = {
   EXPENSES: () => EXPENSES,
   TAX_CONSTS: () => TAX_CONSTS,
   IRMAA_CONSTS: () => IRMAA_CONSTS,
+  // v5.31 — GUARDED (_g) so the v5.30 and earlier legs still LOAD. A direct closure here
+  // (OBBBA_CONSTS: () => OBBBA_CONSTS) throws ReferenceError at module load on any build that
+  // predates the block, killing the whole leg at import rather than at an assertion.
+  OBBBA_CONSTS: () => _g("OBBBA_CONSTS"),
   ACA_CONSTS: () => ACA_CONSTS,
   SKINS: () => SKINS,
   SCENARIOS: () => SCENARIOS,

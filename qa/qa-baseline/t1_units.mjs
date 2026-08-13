@@ -14,7 +14,7 @@ const VER = process.argv[2] || "v510";
 // change the CHECK COUNT: with an unregistered tag t3 ran 35 checks instead of 36, and the count is
 // the number that goes in the release headline. Registering a new version in the ladders below is
 // now mandatory, and an unregistered tag stops the run instead of quietly testing the wrong thing.
-const KNOWN_VERSIONS = ["v510", "v5101", "v5102", "v511", "v512", "v513", "v514", "v515", "v516", "v517", "v518", "v519", "v520", "v521", "v522", "v523", "v524", "v525", "v526", "v527", "v528", "v529", "v530", "v592"];
+const KNOWN_VERSIONS = ["v510", "v5101", "v5102", "v511", "v512", "v513", "v514", "v515", "v516", "v517", "v518", "v519", "v520", "v521", "v522", "v523", "v524", "v525", "v526", "v527", "v528", "v529", "v530", "v531", "v592"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is not registered in this suite.");
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -25,8 +25,8 @@ if (!KNOWN_VERSIONS.includes(VER)) {
 const IS510 = VER !== "v592"; // v5.10-family features (v510 and v5101)
 const IS5101 = VER === "v5101";
 const IS5102 = VER === "v5102";
-const IS511 = VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530";
-const IS514 = VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530"; // v5.14 IRMAA indexation Verify checks present
+const IS511 = VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531";
+const IS514 = VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531"; // v5.14 IRMAA indexation Verify checks present
 const SRC = fs.readFileSync(new URL(`../${VER}.jsx`, import.meta.url), "utf8");
 const m = await import(`./app_${VER}.mjs`);
 const g = m.__g;
@@ -46,7 +46,10 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
   // constants: the top tier frozen through 2027, its resumption off the frozen base from 2028, and
   // premium-year (not MAGI-year) threshold indexing. The Verify tab had labelled the top tier "fixed
   // by law" since v5.7 while the engines inflated it anyway (F-2B-2) — these make the claim testable.
-  const _verifyCount = IS514 ? 57 : IS510 ? 54 : 53;
+  // v5.31 adds FIVE rows: the four OBBBA senior-bonus constants plus the D-2 dated sunset row.
+  // Until v5.31 those four figures were inline literals in computeTaxPlan and this tab could not
+  // see them — it rendered green on constants it had never checked.
+  const _verifyCount = VER === "v531" ? 62 : IS514 ? 57 : IS510 ? 54 : 53;
   T(`VERIFY: check count is ${_verifyCount}`, checks.length === _verifyCount, `got ${checks.length}`);
   const bad = checks.filter(c => !c.pass);
   T("VERIFY: every check passes", bad.length === 0, bad.map(b => b.name).join("; "));
@@ -65,6 +68,51 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
   T("TAX: SS taxation thresholds ordered", t.SS_THR1_MFJ < t.SS_THR2_MFJ && t.SS_THR1_SGL < t.SS_THR2_SGL);
   if (IS510) T("TAX (V510): 402(g) limit is $24,500", t.LIMIT_402G === 24500, String(t.LIMIT_402G));
   else T("TAX (V592): no 402(g) limit key", t.LIMIT_402G === undefined);
+}
+
+// ═══ OBBBA_CONSTS — the senior-bonus statutory block (v5.31) ═══
+// GATED PER LEG (OPERATIONS §B2). The v531 leg asserts the block; every earlier leg asserts it is
+// ABSENT, because those builds legitimately carry the four figures as inline literals inside
+// computeTaxPlan. Both legs stay green. The shim exports this via the guarded _g() form, so on a
+// pre-v5.31 leg g.OBBBA_CONSTS() returns undefined rather than throwing at module load.
+//
+// Every expectation below is the STATUTORY figure, taken from OBBBA (P.L. 119-21 §70103) — not
+// read back off the source. Asserting a constant against itself proves nothing.
+{
+  const o = g.OBBBA_CONSTS ? g.OBBBA_CONSTS() : undefined;
+  if (VER === "v531") {
+    T("OBBBA: constants block exists and is exported", o && typeof o === "object", String(o));
+    T("OBBBA: deduction is $6,000 per person 65+", o.SENIOR_BONUS_PER_PERSON === 6000, String(o?.SENIOR_BONUS_PER_PERSON));
+    T("OBBBA: single MAGI phase-out starts at $75,000", o.SENIOR_BONUS_THR_SGL === 75000, String(o?.SENIOR_BONUS_THR_SGL));
+    T("OBBBA: MFJ MAGI phase-out starts at $150,000", o.SENIOR_BONUS_THR_MFJ === 150000, String(o?.SENIOR_BONUS_THR_MFJ));
+    T("OBBBA: phase-out rate is 6%", o.SENIOR_BONUS_PHASE_RATE === 0.06, String(o?.SENIOR_BONUS_PHASE_RATE));
+    T("OBBBA: last tax year the deduction exists is 2028", o.SENIOR_BONUS_SUNSET_YEAR === 2028, String(o?.SENIOR_BONUS_SUNSET_YEAR));
+    T("OBBBA: MFJ threshold is exactly 2x single (statute, not coincidence)", o.SENIOR_BONUS_THR_MFJ === 2 * o.SENIOR_BONUS_THR_SGL);
+    // The sunset must NOT be wired to the annual IRS/CMS staleness clock (decision D-3). If someone
+    // couples them, bumping TAX_CONSTANTS_YEAR would silently move a statutory expiry date.
+    T("OBBBA: sunset year is independent of TAX_CONSTANTS_YEAR (D-3)",
+      /SENIOR_BONUS_SUNSET_YEAR:\s*2028\b/.test(SRC) && !/SENIOR_BONUS_SUNSET_YEAR:\s*TAX_CONSTANTS_YEAR/.test(SRC));
+    // EXTINCTION — the four literals must not survive inline in computeTaxPlan. This is the check
+    // that stops a future edit quietly reintroducing an unverifiable figure, which is the defect
+    // class this release exists to close (E-2).
+    // Slice the REAL function body. An earlier draft of this block searched for "const
+    // computeTaxPlan" — the declaration is `function computeTaxPlan(`, so indexOf returned -1, the
+    // window was empty, and all three extinction checks below passed against an empty string. They
+    // were green and blind. The guard assertion is what makes the window itself testable (§B2).
+    const _tpStart = SRC.indexOf("function computeTaxPlan(");
+    const _tpEnd = SRC.indexOf("\nfunction ", _tpStart + 1);
+    const _tp = SRC.slice(_tpStart, _tpEnd > 0 ? _tpEnd : _tpStart + 60000);
+    T("OBBBA EXTINCTION GUARD: the search window really is computeTaxPlan's body",
+      _tpStart > 0 && /persons65/.test(_tp) && /seniorExtra = seniorBase/.test(_tp),
+      `start=${_tpStart} len=${_tp.length}`);
+    T("OBBBA EXTINCTION: no inline `yr <= 2028` fuse in computeTaxPlan", !/yr <= 2028/.test(_tp));
+    T("OBBBA EXTINCTION: no inline 75000/150000 threshold pair in computeTaxPlan", !/effSingle \? 75000 : 150000/.test(_tp));
+    T("OBBBA EXTINCTION: no inline 6000 / 0.06 arithmetic in computeTaxPlan", !/6000 - 0\.06/.test(_tp));
+    T("OBBBA: computeTaxPlan reads the named constants instead", /OBBBA_CONSTS\.SENIOR_BONUS_PER_PERSON/.test(_tp));
+  } else {
+    T("PRIOR LEG: no OBBBA_CONSTS block on this build", o === undefined);
+    T("PRIOR LEG: this build still carries the inline `yr <= 2028` fuse", /yr <= 2028/.test(SRC));
+  }
 }
 
 // ═══ RMD machinery (SECURE 2.0) ═══
@@ -165,7 +213,7 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
 
 // ═══ Statics — the source file itself ═══
 {
-  const verStr = VER === "v530" ? "v5.30" : VER === "v529" ? "v5.29" : VER === "v528" ? "v5.28" : VER === "v527" ? "v5.27" : VER === "v526" ? "v5.26" : VER === "v525" ? "v5.25" : VER === "v524" ? "v5.24" : VER === "v523" ? "v5.23" : VER === "v522" ? "v5.22" : VER === "v521" ? "v5.21" : VER === "v520" ? "v5.20" : VER === "v519" ? "v5.19" : VER === "v518" ? "v5.18" : VER === "v517" ? "v5.17" : VER === "v516" ? "v5.16" : VER === "v515" ? "v5.15" : VER === "v514" ? "v5.14" : VER === "v513" ? "v5.13" : VER === "v512" ? "v5.12" : VER === "v511" ? "v5.11" : IS5102 ? "v5.10.2" : IS5101 ? "v5.10.1" : IS510 ? "v5.10" : "v5.9.2";
+  const verStr = VER === "v531" ? "v5.31" : VER === "v530" ? "v5.30" : VER === "v529" ? "v5.29" : VER === "v528" ? "v5.28" : VER === "v527" ? "v5.27" : VER === "v526" ? "v5.26" : VER === "v525" ? "v5.25" : VER === "v524" ? "v5.24" : VER === "v523" ? "v5.23" : VER === "v522" ? "v5.22" : VER === "v521" ? "v5.21" : VER === "v520" ? "v5.20" : VER === "v519" ? "v5.19" : VER === "v518" ? "v5.18" : VER === "v517" ? "v5.17" : VER === "v516" ? "v5.16" : VER === "v515" ? "v5.15" : VER === "v514" ? "v5.14" : VER === "v513" ? "v5.13" : VER === "v512" ? "v5.12" : VER === "v511" ? "v5.11" : IS5102 ? "v5.10.2" : IS5101 ? "v5.10.1" : IS510 ? "v5.10" : "v5.9.2";
   T(`STATIC: field-manual callsign carries ${verStr}`, SRC.includes(`FIELD MANUAL · ${verStr} · PUBLIC BUILD`));
   T(`STATIC: end-of-manual footer carries ${verStr}`, SRC.includes(`DANGER CLOSE ${verStr} · documentation regenerated`));
   // v5.10.2: the remaining two of the four in-app version sites, asserted exactly
