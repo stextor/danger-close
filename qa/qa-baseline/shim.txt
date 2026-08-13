@@ -26,6 +26,7 @@ export const __g = {
   genSSTable, getSSA, getSSB, getPension, getIncomeStreams,
   streamsMonthlyAt, streamsAnnualAt, expectedInflation,
   acaSubsidyAnnual, acaFplFor, acaApplicablePct,
+  acaBelowFloor: _g("acaBelowFloor"),   // v5.32 — GUARDED so pre-v5.32 legs still load
   sampleGompertzDeathAge, drawCareYears, computePercentiles,
   contribBucketWeights, computePlanEvents, buildRetireOptions,
   contribAccrual: _g("contribAccrual"),
