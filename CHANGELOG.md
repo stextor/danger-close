@@ -1,5 +1,141 @@
 # Changelog
 
+## v5.31
+
+**The OBBBA senior-bonus constants join the verified set. No engine change, no figure moves — parity 8/8 strict.**
+
+The Taxes engine has applied the OBBBA "senior bonus" deduction since v5.24 — $6,000 per person
+65+, tax years 2025–2028, phasing out at 6% of MAGI above $75,000 single / $150,000 filing jointly.
+Four statutory figures drive it, and through v5.30 all four were inline literals inside
+`computeTaxPlan`. That put them outside the reach of both mechanisms this app has for catching
+stale law: the Verify tab could not see them, and the ⌛ STALE DATA strip keys off a different
+constant.
+
+The Verify tab therefore rendered green while never having checked them. **That is why this
+release exists.** A green mark is a claim, and it was being made about figures nobody had
+verified — on a feature v5.30 had just made user-visible. The 2028 sunset is *not* the reason:
+that fuse already fails safe (see "What this does not fix" below).
+
+### 1. A named `OBBBA_CONSTS` block, and the Verify tab can now see it
+
+The four figures plus the sunset year now live in `OBBBA_CONSTS`, a sibling block beside
+`IRMAA_CONSTS` inside the shared-constants region. Each member carries its OBBBA (P.L. 119-21
+§70103) citation and a `// statutory, unindexed` marker — the same convention `TAX_CONSTS` already
+uses for the NIIT and Social Security provisional-income thresholds, which are also statutory and
+also not indexed.
+
+`computeTaxPlan` now reads the named constants. **The arithmetic is unchanged.** The proof is that
+the three OBBBA cases in `t18` pass with identical figures and MC parity stays 8/8 strict — a
+release that moved a dollar here would fail both.
+
+The constants-region banner said figures in it come from "IRS/CMS". It now names OBBBA as a third
+governing source, so whoever does the annual refresh knows a statute governs part of this region
+on its own schedule.
+
+The Verify tab gains **five rows**: the four constants checked against statute, plus a dated row
+naming 2028 as the last tax year the deduction exists. The sunset is deliberately *not* wired to
+`TAX_CONSTANTS_YEAR`, which tracks the annual IRS/CMS publication cycle and drives the January
+staleness strip. Coupling them would let someone bumping that year to 2027 believe they had dealt
+with 2028. The reason is recorded in a comment beside the constant, not only here — the person at
+risk is reading the source.
+
+### 2. A false disclosure on the Taxes tab, corrected
+
+Found while verifying this release's blast radius, and fixed in it. **The Taxes tab contradicted
+itself about the same feature.** Its header listed the OBBBA senior bonus deduction among what it
+models — true. Its "Senior deduction (65+)" line item rendered a figure that *includes* the bonus
+— also true. And its closing footnote said the temporary OBBBA senior deduction "is not" modeled
+— false, and false since v5.24.
+
+The footnote now states that the deduction IS modeled on that tab, and discloses in the same
+sentence that the Roth conversion ladder does not apply it, so the two tabs can differ for any
+ladder year at or before 2028. The rest of the footnote is unchanged and asserted to be unchanged.
+
+**Why v5.30 did not catch this.** v5.30 corrected this same false claim in Field Manual §13 and
+ran a sweep for assertions locking the old copy in place. It swept the Field Manual, where the
+sentence never was. The false copy was in the render tree. Sweeping the documentation is not
+sweeping the app, and the release notes said the sweep "found nothing" when it had searched the
+wrong surface.
+
+### 3. Test count — 1010 checks
+
+| Leg | Checks |
+|---|---|
+| Baseline current (v5.31) | **515** — t1 77 · t2 15 · t3 36 · t4 159 · t5 44 · t6 21 · t10 163 |
+| MC parity (v5.30 → v5.31) | **8** strict |
+| Feature suites | **487** — t7 41 · t8 38 · t9 14 · t11 40 · t12 23 · t13 42 · t14 33 · t15 11 · t16 24 · t17 63 · t18 50 · t19 14 · t20 94 |
+| **App total** | **1010** |
+| Tooling (t21) | 50, counted separately |
+| Built artifact | 16 — `qa/smoke_built.mjs` |
+| Withdrawal DOM diff | 10 — strict identity |
+
+The prior leg re-runs at **990**, twenty fewer than the current leg. That is per-leg gating, not a
+regression: the v5.31 leg asserts the new constants block, the extinction of the four inline
+literals and the corrected Taxes-tab copy, while every earlier leg asserts the state true for its
+own build — no block, the literals still inline, the old footnote still present.
+
+New coverage: `t1` gains the constants block asserted **against statute rather than against the
+source** (asserting a constant against itself proves nothing), an extinction check that the four
+literals cannot silently return, and a check that the sunset stays independent of
+`TAX_CONSTANTS_YEAR`. `t4` gains the Verify rows and the corrected footnote, both gated per leg.
+
+**Negative controls, both run.** Corrupting one constant ($75,000 → $74,000) failed the `t1`
+assertion and put a visible ✗ on the rendered Verify tab. Reverting a named constant to an inline
+literal failed the extinction check.
+
+### 4. Corrections owned in this release
+
+- **A test in this release was green and blind, and the control is what found it.** The first
+  extinction check searched for `const computeTaxPlan`; the declaration is `function
+  computeTaxPlan(`, so the search window was empty and all three extinction assertions passed
+  against nothing. They now slice the real function bounds and carry a guard assertion that the
+  window *is* the function body, so a bad window fails loudly instead of passing vacuously.
+- **The scope named the wrong test suite** in its first revision (`t10`, which never references a
+  constants block) and corrected it to `t1` before the build.
+- **The governing finding's stated cause was wrong.** It held that these figures sat outside the
+  constants block because anything needing an indexation decision is excluded. Unindexed statutory
+  values already live there, and a statutory year fuse already lives in a constants block. There
+  was no design obstacle — only a pattern to follow, which made this release much smaller than the
+  finding implied. Its line numbers were also off by one.
+- **METHODOLOGY said the Verify tab runs 45 assertions.** It had been 57 since v5.14. Corrected to
+  62 with this release.
+
+### 5. What this does not fix
+
+- **The Roth conversion ladder still does not model the deduction**, so the Taxes tab and the
+  ladder can differ for any ladder year at or before 2028. Disclosed at v5.30, now disclosed on
+  the Taxes tab itself, and unchanged here — changing it is a modelling decision, not a constants
+  refactor.
+- **Engine A does not model the bonus at all.** Open, and out of scope for this release.
+- **The sunset is not alarmed.** No Events-tab warning was added, deliberately. The fuse fails
+  safe: if the provision expires as written the model is correct, and if Congress extends it the
+  model omits the deduction and *overstates* tax — the plan looks slightly worse, which is the
+  conservative direction this project picks. The genuinely harmful direction, applying an expired
+  deduction, is the one the fuse makes impossible. Alarming a user about a fail-safe would be
+  noise. One consequence is named in METHODOLOGY because it touches recommendation-shaped output:
+  an extension would overstate tax in conversion years, feeding the Roth bracket-fill solver and
+  making conversions look slightly less attractive than they are.
+- **The 2%/yr indexation proxy is still duplicated** in two places. Adjacent to this work and
+  deliberately left alone.
+
+### 6. Bit-reproducibility restored — and the previous diagnosis was wrong
+
+v5.30 recorded that byte-identical rebuilds had been lost, and named rollup — an unpinned caret
+dependency of vite — as the floater responsible. **That diagnosis does not hold.** Rebuilding
+v5.30 from its own unmodified source this cycle reproduced its published artifact exactly
+(`183b58b463fcd56dfb71311a4cd68caf`), on **rollup 4.62.4 — the very version blamed**. The v5.30
+session was comparing across a toolchain generation: it rebuilt v5.29, which had been built with
+an older tree. Reproducibility holds release over release when the dependency tree matches.
+
+This does not change what the binding check is. `smoke_built.mjs` at 16/16 remains the verification
+of a built artifact; a matching hash is confirmation the scaffold is complete, not a release gate.
+
+Toolchain used: vite 5.4.21 · rollup 4.62.4 · @vitejs/plugin-react 4.7.0 · vite-plugin-singlefile
+2.3.3 · react and react-dom 18.3.1 · node 22.22.2 · jsdom 30.
+
+**Provenance —** source `src/DangerClose.jsx` md5 `17636ea1b24ea37c806008e7a6b1a32f` · built
+`index.html` md5 `ec935c4af4309ee3dbcf2d2c269383ad`.
+
 ## v5.30
 
 **A false disclosure corrected. No engine change, no figure moves — parity 8/8 strict.**
