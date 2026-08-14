@@ -1,6 +1,6 @@
 #!/bin/bash
 # ─────────────────────────────────────────────────────────────────────────────
-# Danger Close — release verification · v5.32
+# Danger Close — release verification · v5.32 (+ E-15 test addendum, 2026-08-14)
 #
 # PROVENANCE: originally authored 2026-08-11 for v5.22 by transcribing the steps
 # actually executed in that session. Rolled forward to v5.23 from that file
@@ -142,32 +142,36 @@ fi
 
 say "DONE"
 cat <<'EOF'
-Expected totals for v5.32 — compare against the output above:
+Expected totals for v5.32 + the E-15 test addendum — compare against the output above:
 
-  baseline current leg  515  (t1 77 · t2 15 · t3 36 · t4 159 · t5 44 · t6 21 · t10 163)
-  parity                  8  strict, no INTENDED_DIFFS
+  baseline current leg  518  (t1 77 · t2 18 · t3 36 · t4 159 · t5 44 · t6 21 · t10 163)
+  parity                  9  strict, no INTENDED_DIFFS
   feature               551  (t7 41 · t8 38 · t9 14 · t11 40 · t12 23 · t13 42
                               t14 33 · t15 11 · t16 24 · t17 63 · t18 50 · t19 14
                               t20 94 · t22 64)
   ----------------------------------------------------------------------------
-  APP TOTAL            1074
+  APP TOTAL            1078
   tooling (t21)          50  counted SEPARATELY
   built artifact         16  qa/smoke_built.mjs
   withdrawal DOM diff    10  qa/domdiff_withdrawal.mjs — strict identity
 
-v5.32 fixes the enhanced-regime floor omission and adds an A2 sub-floor flag.
-Parity must be 8/8 strict — but READ WHAT THAT PROVES. t2's Roth fingerprint
-household is built with acaPremium: 0, so acaHeads returns 0, bridgeInWindow is
-false, and NO ACA CODE RUNS INSIDE THE GUARDRAIL AT ALL, in either regime.
-Strict parity here proves the non-ACA engines are untouched and proves nothing
-about this release's subject. t22 group F is the check that does that job: it
-compares Engine A's whole per-year subsidy map across the pair and requires byte
-identity. Do not report parity in its place (ARCHITECTUREIssues, premium-zero).
+Parity must be 9/9 strict. It was 8 through v5.32, and the ninth key exists
+because the first eight could not see the ACA path AT ALL: t2's original Roth
+fingerprint household is built with acaPremium: 0, so acaHeads returns 0 and
+bridgeInWindow is false. The E-15 addendum (2026-08-14) added a second, premium-
+positive household whose fingerprint records the per-year subsidy map, totAcaLoss
+AND estate — all three, because a measurement showed estate alone catches 5 of 7
+strategies and the subsidy map alone catches 4 of 7. Current regime only; the
+enhanced branch is still outside this guardrail and is covered by t22.
 
-The prior leg re-runs at 515 — the SAME as the current leg's baseline portion,
-because every v5.32 gate was extended to cover both builds rather than repointed.
-The +64 is all t22, which is current-leg-only. Every earlier leg asserts the
-state true for its own build; that is the per-leg gating OPERATIONS §B2 requires.
+If parity fails ONLY on rothAca, an ACA figure moved. If it fails on any of the
+other eight, a non-ACA engine moved — the older and more serious signal.
+
+The prior leg re-runs at 518, the SAME as the current leg's baseline portion:
+every v5.32 gate covers both builds, and the addendum's three coverage assertions
+run on both legs. The feature leg's +64 is t22, which is current-leg only. Every
+earlier leg asserts the state true for its own build; that is the per-leg gating
+OPERATIONS §B2 requires.
 
 NOTE ON THE BUILT MD5 — the v5.30 note here was WRONG and is corrected. It said
 bit-reproducibility had been lost and blamed rollup, an unpinned caret dependency

@@ -2,7 +2,13 @@
 
 This project's premise is *verify, don't trust* — so this page explains what verification actually exists, what it covers, and what it doesn't. It's written for the same skeptical reader the app is.
 
-**Current build: v5.32** · source `src/DangerClose.jsx` md5 `7e7be3f869f298667fe994074cfffb06` · **1074 automated checks green** against that exact source, plus 16 more against the built `index.html` (md5 `ef42fb0ba566c1008bb8ffadd7b0b288`), plus 10 cross-version DOM-diff checks and 50 tooling checks counted separately.
+**Current build: v5.32** · source `src/DangerClose.jsx` md5 `7e7be3f869f298667fe994074cfffb06` · **1078 automated checks green** against that exact source, plus 16 more against the built `index.html` (md5 `ef42fb0ba566c1008bb8ffadd7b0b288`), plus 10 cross-version DOM-diff checks and 50 tooling checks counted separately.
+
+**Test addendum, 2026-08-14 — the ACA path is now inside the parity guardrail. No source change, no new build.** `src/DangerClose.jsx` is untouched at `7e7be3f8…` and `index.html` at `ef42fb0b…`; this changed only `t2` and the documents. `t2`'s original Roth fingerprint household is built with `acaPremium: 0`, and `acaHeads` returns 0 whenever the premium is not positive — so `bridgeInWindow` was false and **no ACA code executed inside the cross-version parity guardrail at all, from v5.7 through v5.32.** A second, fully explicit, premium-positive household now fingerprints under the key `rothAca`; **parity moves 8/8 → 9/9** and `t2` gains three coverage assertions on each leg. App total **1078**.
+
+**The gap was demonstrated, not argued.** Deleting the 100%-of-FPL floor constant outright — one line, reproducing the pre-v5.32 defect exactly — was run against both versions of the guardrail on the same pair of builds: **`t2` as shipped passed it 8/8 with zero failures**; `t2` with the addendum fails on `rothAca` and on nothing else. Because the pair is still v5.31 → v5.32, this also brings v5.32's own ACA behaviour retroactively inside the guardrail rather than starting coverage at the next release.
+
+**What it does not cover.** The enhanced regime. `ACA_REGIME` is a module-level `let` whose only assignment is inside a React handler, so a module-level harness cannot switch it without a source change — and this addendum deliberately makes none. `t22` groups A/B/D still assert the enhanced branch directly against the statute. `ARCHITECTUREIssues.md` **E-15 is downgraded High → Low, not closed**, and the remaining half is scheduled to fold into the A3 release.
 
 **v5.32 fixes the ACA floor in the enhanced regime, and flags — but does not remove — the sub-floor discontinuity.** The 100%-of-FPL eligibility floor (§36B(c)(1)(A)) was tested inside `acaApplicablePct`'s current-law branch only; the enhanced branch returned before ever reaching it, so under that toggle any ratio below 150% FPL yielded an applicable percentage of 0 — the entire benchmark premium paid as subsidy, measured all the way down to a ratio of 0.000. The floor is now tested before the regime branch and binds in both. Nothing in the suite had exercised any ratio below 1.0, in either regime, through all 1010 checks at v5.31; the new **`t22` (64 checks)** closes that. Four Verify rows are added, so the in-app check count moves **62 → 66**. Parity **8/8 strict** — with a large caveat, below. App total **1074** · tooling **50**.
 
@@ -35,6 +41,24 @@ This project's premise is *verify, don't trust* — so this page explains what v
 **Parity 8/8 strict**, every v5.27 figure identical except t1's four STATIC version strings. **The prior leg replays at 915 with `t4` at 128** — the new assertions are gated to v5.28+, which is the §B2 rule added after the v5.27 harness patch working as intended on its first use.
 
 **A bounded-edit near-miss worth knowing about.** The first attempt at the third edit used an end marker that was neither asserted unique nor sanity-checked and silently deleted 25,000 characters — a quarter of the Field Manual. The parse check caught it, because removing that much left the string literal unterminated; had the deleted span happened to be balanced, it would have parsed. Bounded edits inside `DOCS_HTML` now assert marker uniqueness, assert the end follows the start, and print the span length and net file delta.
+
+## Re-running the parity negative control
+
+The claim that `t2`'s ninth key actually guards the ACA path is checkable in about a minute, and
+should be re-checked whenever that household or the ACA code changes:
+
+```
+sed 's/cliffMult: 4.0, floorMult: 1.0,/cliffMult: 4.0, floorMult: 0,/' v532.jsx > v532x.jsx
+./qa/mk_testable.sh v532x
+cd qa && node t2_engines.mjs v532 && node t2_engines.mjs v532x
+node t2_engines.mjs compare v532 v532x
+```
+
+**Expected: 8 passed, 1 failed — failing on `rothAca` and nothing else.** Failing on nothing means
+the household no longer reaches the ACA code and the key is decorative. Failing on other keys means
+the corruption leaked somewhere it should not have. Delete `v532x.jsx`, `qa/app_v532x.*` and
+`/tmp/t2_v532x_fingerprint.json` afterwards, and regenerate the real fingerprints — the corrupted
+run overwrites nothing, but the stray files will confuse the next session's hash check.
 
 ## Running the suite — three copies and an ordering trap, neither previously written down
 
@@ -102,7 +126,7 @@ The suite compares **two builds by role** — the current release and the immedi
 
 **Two honesty notes on t11.** First, *precision*: the Taxes and IRMAA engines are computed inside the app's component body, so the harness — which exports module-level bindings — cannot reach their row arrays. Their only output path is the rendered DOM, which prints every figure rounded to the nearest $1,000. t11's assertions are therefore accurate to **±$500, not to the dollar**. That is adequate here only because the effect being measured (~$4,050/yr per $1M of Traditional balance) is roughly eight times the measurement band. Making these engines dollar-exact testable requires a new harness capability and is scoped separately. Second, *teeth*: a test that cannot fail proves nothing, so t11 is run as a **negative control against the pre-fix v5.10.2 build**, where it correctly fails **six** discriminating assertions — both post-death directions and the pre-death start-age straddle. Three of its checks pass on the defective build too, and the suite says so rather than implying otherwise: the two cross-checks are supporting context, and the *survivor = A* case cannot catch the original defect at all, because the old pooled model was coincidentally correct when person A was the survivor. That case earns its place as forward-looking cover for a code branch no other case executes, not as evidence the defect is caught.
 
-**1074 checks verify this build** = 515 (current leg, incl. t10) + 8 (parity) + 551 (t7–t9, t11–t20, t22), every figure computed from parsed suite output rather than restated by hand. Reported as **1074 app + 50 tooling** — `t21` verifies the parser toolkit, not the build. *(Corrected at v5.30: this line had read 928 = 436 + 8 + 484 since several releases earlier, disagreeing with the header above it. Six per-suite counts in the table below were stale in the same way and are corrected with it.)* Frozen prior legs are re-proven at every run as history, and are expected to show since-fixed defects in their pre-fix state — that's correct, not a regression.
+**1078 checks verify this build** = 518 (current leg, incl. t10) + 9 (parity) + 551 (t7–t9, t11–t20, t22), every figure computed from parsed suite output rather than restated by hand. Reported as **1078 app + 50 tooling** — `t21` verifies the parser toolkit, not the build. *(Corrected at v5.30: this line had read 928 = 436 + 8 + 484 since several releases earlier, disagreeing with the header above it. Six per-suite counts in the table below were stale in the same way and are corrected with it.)* Frozen prior legs are re-proven at every run as history, and are expected to show since-fixed defects in their pre-fix state — that's correct, not a regression.
 
 **Tooling checks are counted separately, and deliberately not added to the number above.** `qa/tools/`
 is the sanctioned answer to "how many sites?" and "where is this used?" — its output is quoted in scope

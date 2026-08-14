@@ -75,7 +75,7 @@ date, with the sole exception noted below.
 | `t20_other_taxtype.mjs` | `c9b127780227868ff05d2cd08b37e0bd` | `qa/t20_other_taxtype.mjs` |
 | `t21_tools.mjs` | `c5fb4c712135028f1effa039c84e0b90` | `qa/t21_tools.mjs` |
 | `t22_aca_floor.mjs` | `acec53b5d754aefb734ccba440259f01` | `qa/t22_aca_floor.mjs` |
-| `t2_engines.mjs` | `7f99a64337efa725bec8dc7dc0fffe54` | `qa/qa-baseline/t2_engines.mjs` |
+| `t2_engines.mjs` | `bc7628a4b3e309aadfd14c4d37f06417` | `qa/qa-baseline/t2_engines.mjs` |
 | `t3_roth.mjs` | `f6f2ed02b109c46c107e2ae7e11cb7ed` | `qa/qa-baseline/t3_roth.mjs` |
 | `t4_dom.mjs` | `692ab28c294f18c35a10d4b6f832f4a1` | `qa/qa-baseline/t4_dom.mjs` |
 | `t5_storage.mjs` | `2486418a2580a336564244821871d2cd` | `qa/qa-baseline/t5_storage.mjs` |
@@ -123,7 +123,7 @@ These are refreshed in place when they change; git holds their history.
 | `README.md` | Repo/setup README | when it changes |
 | **Test files — enumerated, never elided.** A range written as "t1 … t9" hides whatever sits inside it; `t10` was invisible for exactly that reason. Every file gets its own line. | | |
 | `t1_units.mjs` | Units & statics (asserts the four in-app version strings — a stale bump fails here) | when tests change |
-| `t2_engines.mjs` | Engines + **cross-version MC parity** (`compare` must stay 8/8) | when tests change |
+| `t2_engines.mjs` | Engines + **cross-version MC parity** (`compare` must stay **9/9** — it was 8 until the E-15 addendum of 2026-08-14, which added the premium-positive ACA household). Carries TWO fingerprint households: the original derives from `PORTFOLIO()`/`PLAN_TIMELINE()`, the ACA one is **fully explicit and must stay that way** so example-data changes cannot silently rewrite the fingerprint | when tests change |
 | `t3_roth.mjs` | Roth engine | when tests change |
 | `t4_dom.mjs` | 26-tab DOM walk. **+17 at v5.24:** extinction assertions on the corrected Withdrawal Priority 1 copy and the Field Manual. The six manual checks read the iframe `srcdoc` attribute, NOT `textContent` — `DOCS_HTML` reaches the DOM only through `<iframe srcDoc>`, so a textContent read passes vacuously on both builds. Negative-controlled at 15/17 | when tests change |
 | `t5_storage.mjs` | Persistence / storage contract (incl. the 13-key Clear-All wipe loop) | when tests change |
