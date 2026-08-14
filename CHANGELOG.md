@@ -1,5 +1,130 @@
 # Changelog
 
+## v5.33 — the embedded-gain field, shipped alone, 2026-08-14
+
+**No figure moves anywhere in the app.** This release adds one household field, one clamped
+accessor that reads it, one schema default, and the My Data control that sets it. **No engine
+reads any of it.** Setting the control changes nothing on any tab — which is exactly what the
+control's own label says it does.
+
+This is the storage half of the realized-capital-gains work, shipped on its own. The engines
+that consume the field arrive at **v5.34**.
+
+### Why a control that does nothing ships a release early
+
+The precedent is **v5.25 → v5.26**, and it is the reason rather than a decoration. At v5.25 the
+Other-accounts tax-type field shipped "recorded but not yet used", settable and visible, and the
+engines picked it up at v5.26. Three things make the same sequence right here:
+
+1. **The field is worthless until populated.** A gain share has to come from the user's own cost
+   basis records — a custodian statement or a 1099-B. Shipping the control a release early gives
+   people a window to enter a real number *before* it affects anything, instead of discovering
+   the field only after v5.34 has already moved their figures using a default they never chose.
+2. **It de-risks v5.34.** By the time an engine reads the field, real user-entered values are
+   already flowing through save, backup, restore and Clear All Data. Persistence problems surface
+   in the release where nothing depends on them.
+3. **It matches the app's conservative direction.** A user who enters their true share now gets a
+   correct answer the moment v5.34 lands, rather than a default-0 answer the app itself describes
+   as optimistic.
+
+The condition on shipping it early is an **explicit in-app label**, and it is not softened: the
+panel is headed *"(recorded, not yet used)"* and states that the model does not use the value yet
+and that no figure on any tab changes until v5.34.
+
+### What was added
+
+- **`taxableGainPct`** on the household — one field, default **0**, range 0–95%.
+- **`taxableGainShare()`** — the single reader, clamping to 0–0.95 and falling to 0 for anything
+  non-finite. Every engine will call this at v5.34 rather than clamping the raw field itself, so
+  a share can never mean one thing on the Roth tab and another on the Withdrawal tab. It is
+  **called by nobody at v5.33**, deliberately, and the source says so.
+- **A schema default** so pre-v5.33 backups restore as 0 rather than `undefined`. A restored plan
+  reproduces exactly the figures it was saved with, so no migration notice is warranted *for this
+  release*.
+- **The My Data control**, at the end of the Other accounts card — the card where the taxable pool
+  is actually defined, and the same surface the v5.25 tax-type field landed on. Values are clamped
+  to 0–95 **on save**, so the stored value is already in range and `taxableGainShare()` is a second
+  line of defence rather than the only one.
+
+Do not confuse `taxableGainPct` with the existing **`taxableGainFrac`**, which is the
+conversion-tax funding gain fraction (`rothGainPct / 100`) on a different surface. They are
+different quantities; the source carries a comment saying so.
+
+### Verification
+
+**Parity 9/9 strict**, v5.32 → v5.33. On this release parity means what it appears to mean: the
+field is inert, so if any figure had moved, the guardrail would have seen it. The claim is
+carried by three independent witnesses, not one:
+
+| Witness | Result |
+|---|---|
+| `t2 compare` — cross-version MC parity | **9/9 strict** |
+| `qa/domdiff_withdrawal.mjs` — rendered Withdrawal tab, byte-for-byte | **10/10**, identical apart from the version string |
+| `t22` group F — Engine A on an ACA household vs the prior build | **byte-identical** across all seven strategies |
+
+**Counts, computed from suite output:**
+
+```
+baseline current leg  565   t1 93 · t2 18 · t3 36 · t4 176 · t5 58 · t6 21 · t10 163
+parity                  9   strict, v5.32 → v5.33
+feature               551   t7 41 · t8 38 · t9 14 · t11 40 · t12 23 · t13 42 · t14 33
+                            t15 11 · t16 24 · t17 63 · t18 50 · t19 14 · t20 94 · t22 64
+────────────────────────────────────────────────────────────────────────────────────
+APP TOTAL            1125   (v5.32: 1078)
+prior leg             520   ·  tooling (t21) 50  ·  built artifact 16  ·  DOM diff 10
+```
+
+The prior leg replays at **520**, two above v5.32's 518, because `t1` now asserts on every earlier
+leg that the field and the accessor are *absent* — each leg asserting what is true for its own
+build (OPERATIONS §B2).
+
+**Three negative controls, all fired**, each discriminatingly rather than breaking everything:
+removing the clamp's upper bound (`t1` 1 failure, `t5` 1), removing the schema default (`t5` 2),
+and moving the shipped default off 0 (`t1` 2, `t5` 2, `t4` 1). Each control corrupted the file the
+harness actually builds from, not the canonical copy beside it — corrupting the wrong one leaves
+the bundle clean and lets a control silently not fire.
+
+**The built artifact was exercised, not merely inspected:** `qa/smoke_built.mjs` **16/16**,
+including the `window.storage` round-trip that is the only check able to catch a wrong bootstrap.
+Before trusting the new hash, **v5.32 was rebuilt from its own unmodified source and reproduced
+`ef42fb0ba566c1008bb8ffadd7b0b288` byte-for-byte**, which is what distinguishes "the scaffold is
+complete" from "the hash looks plausible".
+
+### Suite changes beyond the new checks
+
+`t22`'s prior-build default rolls **v5.31 → v5.32**, as its own header instructs — but rolling the
+tag alone would have broken it. Group F mixes two kinds of claim: byte-identity checks, true for
+every pair, and *"acaFloorYrs is NEW"*, a claim about the single v5.31 → v5.32 transition that is
+false once the prior build is v5.32. That check is now **gated on the prior tag**, so the suite
+holds at 64 on either pairing. The rotation forced this: v5.31 leaves project knowledge with this
+release, so a session working from knowledge alone can no longer build the v5.31 bundle at all.
+
+### Limitations and what this release does not do
+
+- **Engine D does not realize gains at v5.33.** The capital-gains feature is v5.34. Anyone reading
+  this entry as "capital gains are now modelled" has read it wrong.
+- **The Verify tab count stays at 66.** The new field gets no row, because a Verify row checks a
+  constant against a published source and there is nothing here to check against one.
+- **`METHODOLOGY.md` is not updated.** This release changes no modelling — there is no new
+  assumption, approximation or figure to describe. By the standing rule it does not update, and
+  that is a judgement call recorded here rather than made silently.
+- **Leaving the field at 0 is the optimistic assumption**, and the app says so in the panel. It
+  asserts the taxable pool is entirely cost basis and that selling it triggers no tax. This is one
+  of the few places the app does not lean conservative, and it is disclosed rather than defended.
+- **At v5.34 figures WILL move, for two different populations.** A user who leaves the field at 0
+  will see figures move by the growth-accrual component alone. A user who enters a real share now
+  will see figures move by growth **plus** pool × share — a much larger jump, on a value they set
+  a release earlier and may have forgotten setting. The v5.34 notice must address both; it cannot
+  assume the default case.
+
+⚠ **A note for whoever builds v5.34.** The panel's "recorded, not yet used" copy is asserted by
+`t4`, and that assertion becomes a **lock** the moment v5.34 makes the copy false: it passes
+*because* the stale sentence survived. v5.34 must invert it, gated per leg, in the same release
+that falsifies it. Both the source comment and the `t4` block say so at the point where it matters.
+
+Provenance — source `df10c6226d7c4519919bb55238609a92`, built `c998f5ff760c6c5e04ab6173a68f6421`.
+
+
 ## v5.32 — test addendum, 2026-08-14 · no source change, no new build
 
 **The ACA path is now inside the cross-version parity guardrail. It had never been inside it — not
