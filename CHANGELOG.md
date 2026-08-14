@@ -1,5 +1,103 @@
 # Changelog
 
+## v5.33 — test addendum (D-4), 2026-08-14 · no source change, no new build
+
+**`t14`'s source windows were fixed character spans, and one of them was 588 characters from
+breaking. They are now bounded by the engine they belong to.** This entry exists because the
+repository changed, not because the app did.
+
+`src/DangerClose.jsx` is **unchanged** at `df10c6226d7c4519919bb55238609a92` and `index.html` at
+`c998f5ff760c6c5e04ab6173a68f6421`. Nothing was rebuilt, nothing re-uploaded, no version string
+moved, no user-visible behaviour changed. Filed under the version it amends, following the E-15
+precedent.
+
+### What was wrong
+
+`t14` locates each engine by a unique anchor and then searches a **fixed number of characters**
+after it for that engine's Social Security survivor rule. The span is a guess that ages: as an
+engine grows around the rule, the rule drifts toward the edge of the window and eventually out of
+it — at which point the assertion fails and reads exactly like a regression in the app, which it is
+not. Measured against shipped v5.33:
+
+| Engine | Rule offset | Span | Headroom |
+|---|---|---|---|
+| Engine A | +3,101 | 4,000 | **899** |
+| Engine B | +6,642 | 22,000 | 15,358 |
+| Engine C | +4,389 | 8,000 | 3,611 |
+| Engine D | +7,412 | 8,000 | **588** |
+
+This is not hypothetical. Against `DangerClose-CAPGAINS-PARTIAL.jsx` — the recovered capital-gains
+work that v5.34 ports — Engine D's rule sits at **+8,499**, outside its 8,000 span, and `t14` fails
+**32/1**. Engine A is worse than it looks: its window contains the ACA cliff solver, which v5.34
+edits, so the smaller of the two headroom figures is the one about to be spent.
+
+A previously recorded figure of "1,494 characters of headroom" for Engine A was measured against the
+partial (a v5.31 base). Against shipped v5.33 it is **899**, because v5.32 added ACA floor code
+inside that same window. Corrected here.
+
+### What changed
+
+**Windows are now bounded, not sized.** Each engine's region runs from its anchor to the **start of
+the next top-level function** — so the slice is "the rest of this engine" by construction and cannot
+drift with code size. Both bounds are asserted unique file-wide before use (8 new checks), and a
+missing end marker **fails loudly** rather than falling back to a span, because a silent fallback is
+how this went unnoticed.
+
+Sized against the real function boundary rather than doubled until green: Engine A's region is
+24,174 characters and Engine D's 16,754, both comfortably inside their own functions. Engine A also
+has a **fail-open ceiling at +29,908** — the offset of the *next* engine's copy of the same rule
+text. A span widened past that matches another engine's code and passes vacuously. The bounded
+window cannot reach it.
+
+### A negative control did not fire, and that is the finding
+
+Weakening **one** of Engine D's two death guards (`survAdj = yr >= _deathYr1D` → `>`) left `t14`
+green at 41/0. The per-engine `death` check is a **presence** test, and Engine D has two guards in
+its window — `survAdj` (survivor spending factor) and `_widowedD` (the SS survivor flag) — so any
+surviving copy keeps the pattern matched. The assertion read as *"Engine D's death guard is
+correct"* and actually meant *"at least one death guard exists somewhere."*
+
+Fixed by asserting the **absence of the weakened form** rather than the presence of the correct one.
+That is sound here for a specific, verified reason: **Engine D has no filing concept** — it carries
+`_widowedD` and `_tlW.single` but no `yr > _deathYr1D` transition, because filing status is Engine
+B's job — so inside Engine D a `>` against the death year can only be a weakened guard, never a
+legitimate filing switch. It is also drift-proof in a way that counting guards is not: adding a
+fifth correct guard later does not break it. This is why Engine D is legitimately absent from the
+`filingEngines` block, which was never written down before.
+
+⚠ **If Engine D ever gains a filing concept, that assertion must MOVE to `filingEngines`, not be
+deleted**, or the C-2C-6 class reopens silently on this engine.
+
+**Recorded, not fixed:** Engines A/B/C carry the same presence-check weakness in their `death`
+regexes. It is materially narrower there because `filingEngines` asserts a much more specific
+pattern for each, but it is not zero. Widening it is a scope of its own.
+
+### Verification
+
+**Four negative controls, all firing, each on exactly one check:** Engine D's rule deleted; Engine
+A's rule deleted; Engine D's death guard weakened (the control that exposed the gap above); an end
+marker duplicated.
+
+**The decisive check:** `t14` with bounded windows runs **44/0 against the partial** — the exact
+source on which the old `span: 8000` failed 32/1. The fix is verified against the code that will
+break the old one, which is the entire reason this ships ahead of v5.34 rather than alongside it.
+
+`t14` **33 → 44**. App total **1125 → 1136**. Parity **9/9 strict**, prior leg **520**, tooling
+**50**, built artifact **16**, Withdrawal DOM diff **10** — all unchanged, as they must be for a
+test-only change.
+
+### What this addendum does NOT include
+
+**The `t19` rebuild to 35 checks was planned for this addendum and cannot ship in it.** On reading
+the spec, essentially all 21 of those checks assert capital-gains behaviour that does not exist at
+v5.33 — declared-share fidelity, the Option A pin, the 85.3% recycling case, the flat-fraction
+extinction, the per-year gain replay, and the second half of the rewritten B-2 pin (*MAGI includes
+`capGain_y`*). They would assert against an engine that does not yet realize gains. `t19` stays at
+**14** and its rebuild ships with the engine at v5.34.
+
+Provenance — source `df10c6226d7c4519919bb55238609a92` (unchanged), built
+`c998f5ff760c6c5e04ab6173a68f6421` (unchanged).
+
 ## v5.33 — the embedded-gain field, shipped alone, 2026-08-14
 
 **No figure moves anywhere in the app.** This release adds one household field, one clamped
