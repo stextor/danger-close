@@ -65,7 +65,7 @@ date, with the sole exception noted below.
 | `t11_survivor_rmd.mjs` | `dfa8ce062d9ae3bcca551a561ce717a8` | `qa/t11_survivor_rmd.mjs` |
 | `t12_engineD_survivor.mjs` | `70fb865322692e042d364ca85437cc51` | `qa/t12_engineD_survivor.mjs` |
 | `t13_engineC_irmaa.mjs` | `0be204b0d180fb40cf9bc7790f1c73ee` | `qa/t13_engineC_irmaa.mjs` |
-| `t14_cross_engine_survivor.mjs` | `5898d59cdbb1e9441415323b9493335d` | `qa/t14_cross_engine_survivor.mjs` |
+| `t14_cross_engine_survivor.mjs` | `83ad5441e9574074567f21185ad17074` | `qa/t14_cross_engine_survivor.mjs` |
 | `t15_engineA_death_filing.mjs` | `3fb4c83fd888ac6cad0ab0d57b8dba6b` | `qa/t15_engineA_death_filing.mjs` |
 | `t16_roth_ladder_filing.mjs` | `829c97c01efeb707da011c1468fefbb5` | `qa/t16_roth_ladder_filing.mjs` |
 | `t17_engineC_exact.mjs` | `75d21513fe2e98b4430507bd64e6a6f4` | `qa/t17_engineC_exact.mjs` |
@@ -134,7 +134,7 @@ These are refreshed in place when they change; git holds their history.
 | `t11_survivor_rmd.mjs` | Survivor RMD / filing-transition suite — **40 checks**. DOM-read at ±$500 (OPERATIONS §M); its header carries the two honesty notes on precision and on the effect size that makes that band adequate | when tests change |
 | `t12_engineD_survivor.mjs` | Engine D survivor suite — **23 checks**, module-level and dollar-exact. ⚠ **Release (c) of the `otherAccounts` plan moves Engine D's balances, so this is the suite that must be re-verified case by case there** | when tests change |
 | `t13_engineC_irmaa.mjs` | Engine C IRMAA survivor extinction invariant (C-2C-5, v5.13) — 42 checks, three omissions, both directions, plus a person-count isolation case | when tests change |
-| `t14_cross_engine_survivor.mjs` | Cross-engine survivor SS invariant (decision D-5) — 33 checks; the only cover for Engine A is structural, and the file says so | when tests change |
+| `t14_cross_engine_survivor.mjs` | Cross-engine survivor SS invariant (decision D-5) — **44 checks**; the only cover for Engine A is structural, and the file says so. **D-4 addendum 2026-08-14:** source windows are **bounded** (anchor → start of the next top-level function), not fixed character spans — a span ages as the engine grows around the rule and then fails looking like an app regression. Both bounds asserted unique; a missing end marker fails loudly, never falls back. ⚠ Engine D's death check asserts the **absence of the weakened `>` form**, which is sound only because Engine D has **no filing concept** — if it ever gains one, that assertion must MOVE to `filingEngines`, not be deleted | when tests change |
 | `t16_roth_ladder_filing.mjs` | Roth ladder filing-status extinction invariant (C-2B-3, v5.15) — 24 checks against an independent IRS reference, incl. that the couple's ladder does NOT move | when tests change |
 | `t17_engineC_exact.mjs` | Engine C dollar-exact (v5.18) — 63 checks against CMS figures via the module-level `computeIrmaaPlan`; tier borders ±$1, indexation, freeze, lookback, per-person counts, survivor switch, QCD. Negative-controlled at 23/63. Asserts the surcharge constants' ≤$5 **bound**, not CMS-exact amounts | when tests change |
 | `t18_engineB_exact.mjs` | Engine B dollar-exact (v5.21) — 50 checks via module-level `computeTaxPlan`; federal brackets, age-65 extra per spouse, SS taxability, **plus the first Engine A vs Engine B agreement invariant** (they agree). Negative-controlled at 24/47. NOT yet covered: LTCG, NIIT, AMT, FICA, state, survivor | when tests change |

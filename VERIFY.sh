@@ -1,6 +1,6 @@
 #!/bin/bash
 # ─────────────────────────────────────────────────────────────────────────────
-# Danger Close — release verification · v5.33
+# Danger Close — release verification · v5.33 (+ D-4 test addendum, 2026-08-14)
 #
 # PROVENANCE: originally authored 2026-08-11 for v5.22 by transcribing the steps
 # actually executed in that session. Rolled forward to v5.23 from that file
@@ -153,11 +153,11 @@ Expected totals for v5.33 — compare against the output above:
 
   baseline current leg  565  (t1 93 · t2 18 · t3 36 · t4 176 · t5 58 · t6 21 · t10 163)
   parity                  9  strict, no INTENDED_DIFFS
-  feature               551  (t7 41 · t8 38 · t9 14 · t11 40 · t12 23 · t13 42
-                              t14 33 · t15 11 · t16 24 · t17 63 · t18 50 · t19 14
+  feature               562  (t7 41 · t8 38 · t9 14 · t11 40 · t12 23 · t13 42
+                              t14 44 · t15 11 · t16 24 · t17 63 · t18 50 · t19 14
                               t20 94 · t22 64)
   ----------------------------------------------------------------------------
-  APP TOTAL            1125
+  APP TOTAL            1136
   prior leg (v5.32)     520  counted SEPARATELY
   tooling (t21)          50  counted SEPARATELY
   built artifact         16  qa/smoke_built.mjs
@@ -184,6 +184,18 @@ The prior leg replays at 520, two ABOVE v5.32's own 518, because t1 now asserts 
 every earlier leg that taxableGainPct and taxableGainShare are ABSENT. Each leg
 asserts the state true for its own build — the per-leg gating OPERATIONS §B2
 requires, not a regression.
+
+D-4 TEST ADDENDUM, 2026-08-14 — no source change. t14's source windows were fixed
+character spans; they are now BOUNDED by the engine (anchor -> start of the next
+top-level function), because a span ages as the engine grows around the rule and
+then fails looking like an app regression. Engine D had 588 characters of headroom
+and Engine A 899; against DangerClose-CAPGAINS-PARTIAL.jsx, Engine D's rule sits at
++8,499 and the old span:8000 failed 32/1. t14 33 -> 44. Four negative controls all
+fire; one of them (weakening ONE of Engine D's two death guards) did NOT fire at
+first, exposing that the per-engine death check was a PRESENCE test — fixed by
+asserting the ABSENCE of the weakened > form, which is sound only because Engine D
+has no filing concept. THE DECISIVE CHECK: t14 runs 44/0 against the partial, the
+very source that broke the old span.
 
 THREE NEGATIVE CONTROLS, all of which fired at the v5.33 build and all of which
 must fire again if re-run: remove the clamp's upper bound (t1 1, t5 1); remove the
