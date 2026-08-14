@@ -1,6 +1,6 @@
 #!/bin/bash
 # ─────────────────────────────────────────────────────────────────────────────
-# Danger Close — release verification · v5.32 (+ E-15 test addendum, 2026-08-14)
+# Danger Close — release verification · v5.33
 #
 # PROVENANCE: originally authored 2026-08-11 for v5.22 by transcribing the steps
 # actually executed in that session. Rolled forward to v5.23 from that file
@@ -8,10 +8,17 @@
 # it is NOT in project knowledge, so a session working from knowledge alone
 # cannot produce it. ADD IT TO KNOWLEDGE with this release.
 #
-# v5.32 changes: version pair and both expected md5s rolled forward; t22 joins
-# step 4. NOTE t22's group F needs the PRIOR leg's bundle (qa/app_v531.mjs), which
-# step 2 already builds — but it defaults to v531 by name, so roll its default
-# forward next release the same way this pair rolls.
+# v5.33 changes: version pair and both expected md5s rolled forward. t22's prior
+# default is rolled v531 -> v532 as its header instructed — but NOT by itself:
+# group F's "acaFloorYrs is NEW" is a claim about the v5.31 -> v5.32 transition and
+# is FALSE against a v5.32 prior, so it is now gated on the prior tag. t22 holds at
+# 64 either way. The rotation forced this: v5.31 leaves project knowledge at v5.33,
+# so app_v531.mjs can no longer be built from knowledge alone.
+#
+# v5.33 is a STORAGE-ONLY release: one field, one clamped accessor, one schema
+# default, and the My Data control that sets it. NO engine reads any of it. Parity
+# must therefore be 9/9 strict AND every figure identical — if parity moves, something
+# reads the field, which contradicts the whole premise. STOP rather than adapting.
 #
 # ⚠ ORDERING TRAP, hit 2026-08-13: `run_all.sh parity` reads
 # /tmp/t2_<prior>_fingerprint.json, which only exists after the PRIOR leg's t2 has
@@ -45,17 +52,17 @@
 # Every command below was run and its result recorded in the release notes.
 #
 # Usage:  ./VERIFY.sh /path/to/workdir
-#    workdir must contain:  v531.jsx  v532.jsx  DangerClose.jsx(=v532)  qa/
+#    workdir must contain:  v532.jsx  v533.jsx  DangerClose.jsx(=v533)  qa/
 # ─────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
 ROOT="${1:-$(pwd)}"
 cd "$ROOT"
 
-PRIOR=v531
-CURR=v532
-EXPECT_SRC_MD5=7e7be3f869f298667fe994074cfffb06
-EXPECT_BUILT_MD5=ef42fb0ba566c1008bb8ffadd7b0b288
+PRIOR=v532
+CURR=v533
+EXPECT_SRC_MD5=df10c6226d7c4519919bb55238609a92
+EXPECT_BUILT_MD5=c998f5ff760c6c5e04ab6173a68f6421
 
 say() { printf "\n\033[1m== %s ==\033[0m\n" "$*"; }
 die() { printf "\n\033[31mFAIL: %s\033[0m\n" "$*" >&2; exit 1; }
@@ -142,36 +149,48 @@ fi
 
 say "DONE"
 cat <<'EOF'
-Expected totals for v5.32 + the E-15 test addendum — compare against the output above:
+Expected totals for v5.33 — compare against the output above:
 
-  baseline current leg  518  (t1 77 · t2 18 · t3 36 · t4 159 · t5 44 · t6 21 · t10 163)
+  baseline current leg  565  (t1 93 · t2 18 · t3 36 · t4 176 · t5 58 · t6 21 · t10 163)
   parity                  9  strict, no INTENDED_DIFFS
   feature               551  (t7 41 · t8 38 · t9 14 · t11 40 · t12 23 · t13 42
                               t14 33 · t15 11 · t16 24 · t17 63 · t18 50 · t19 14
                               t20 94 · t22 64)
   ----------------------------------------------------------------------------
-  APP TOTAL            1078
+  APP TOTAL            1125
+  prior leg (v5.32)     520  counted SEPARATELY
   tooling (t21)          50  counted SEPARATELY
   built artifact         16  qa/smoke_built.mjs
   withdrawal DOM diff    10  qa/domdiff_withdrawal.mjs — strict identity
 
-Parity must be 9/9 strict. It was 8 through v5.32, and the ninth key exists
-because the first eight could not see the ACA path AT ALL: t2's original Roth
-fingerprint household is built with acaPremium: 0, so acaHeads returns 0 and
-bridgeInWindow is false. The E-15 addendum (2026-08-14) added a second, premium-
-positive household whose fingerprint records the per-year subsidy map, totAcaLoss
-AND estate — all three, because a measurement showed estate alone catches 5 of 7
-strategies and the subsidy map alone catches 4 of 7. Current regime only; the
-enhanced branch is still outside this guardrail and is covered by t22.
+v5.33 ships a field, a clamped accessor, a schema default and the My Data control
+that sets it. NOTHING READS THE FIELD. So the release's entire claim is "this
+exists, persists, clamps, and changes nothing", and three independent witnesses
+carry it: parity 9/9 strict, the Withdrawal DOM diff at 10/10 (identical apart from
+the version string), and t22 group F's byte-identity check against the prior build.
+
+Parity is meaningful here in a way it was NOT at v5.32. There the guardrail could
+not see the ACA path at all (t2's Roth fingerprint household is built with
+acaPremium: 0), which the E-15 addendum fixed by adding a premium-positive
+household under the key rothAca. Here the field is simply inert, so anything that
+moved would show.
 
 If parity fails ONLY on rothAca, an ACA figure moved. If it fails on any of the
-other eight, a non-ACA engine moved — the older and more serious signal.
+other eight, a non-ACA engine moved — the older and more serious signal. On THIS
+release either result means an engine has started reading taxableGainPct a version
+early: stop and report rather than adapting the expectation.
 
-The prior leg re-runs at 518, the SAME as the current leg's baseline portion:
-every v5.32 gate covers both builds, and the addendum's three coverage assertions
-run on both legs. The feature leg's +64 is t22, which is current-leg only. Every
-earlier leg asserts the state true for its own build; that is the per-leg gating
-OPERATIONS §B2 requires.
+The prior leg replays at 520, two ABOVE v5.32's own 518, because t1 now asserts on
+every earlier leg that taxableGainPct and taxableGainShare are ABSENT. Each leg
+asserts the state true for its own build — the per-leg gating OPERATIONS §B2
+requires, not a regression.
+
+THREE NEGATIVE CONTROLS, all of which fired at the v5.33 build and all of which
+must fire again if re-run: remove the clamp's upper bound (t1 1, t5 1); remove the
+schema default (t5 2); change the shipped default off 0 (t1 2, t5 2, t4 1). Corrupt
+${CURR}.jsx — the file mk_testable.sh BUILDS FROM — not the canonical DangerClose.jsx
+beside it. Corrupting only the latter leaves the bundle clean and the control
+silently does not fire.
 
 NOTE ON THE BUILT MD5 — the v5.30 note here was WRONG and is corrected. It said
 bit-reproducibility had been lost and blamed rollup, an unpinned caret dependency
@@ -181,4 +200,9 @@ blamed. The v5.30 session was comparing across a toolchain generation: it rebuil
 v5.29, which had been built with an older tree. Reproducibility holds release over
 release when the dependency tree matches. The binding check is still
 smoke_built.mjs at 16/16, not the hash.
+
+CONFIRMED AGAIN AT v5.33: v5.32 was rebuilt from its own unmodified source before
+the new hash was trusted, and reproduced ef42fb0ba566c1008bb8ffadd7b0b288
+byte-for-byte. That is what distinguishes "the scaffold is complete" from "the hash
+looks plausible".
 EOF
