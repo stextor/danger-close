@@ -1,5 +1,102 @@
 # Changelog
 
+## v5.32 — test addendum, 2026-08-14 · no source change, no new build
+
+**The ACA path is now inside the cross-version parity guardrail. It had never been inside it — not
+in v5.32, not in any release since the ACA feature shipped at v5.7.**
+
+`src/DangerClose.jsx` is **unchanged** at `7e7be3f869f298667fe994074cfffb06` and `index.html` at
+`ef42fb0ba566c1008bb8ffadd7b0b288`. Nothing was rebuilt, nothing was re-uploaded, no version string
+moved, and no user-visible behaviour changed in any way. This entry exists because the repository
+changed, not because the app did — the first such entry in this project, filed under the version it
+amends rather than as a new one.
+
+### What was wrong
+
+`t2`'s Roth fingerprint household is built with `acaPremium: 0`. `acaHeads` returns 0 whenever the
+premium is not positive, so `bridgeInWindow` was false, `baselineSubByYr` was null, `acaSubByYr`
+was never populated, and **no ACA code executed inside the parity guardrail at all, in either law
+regime.** Every release note in this file that says "parity 8/8 strict" said something true and
+said nothing about the ACA path.
+
+The v5.32 notes disclosed this and carried the release's claims on `t22` instead. This addendum
+fixes the underlying gap rather than working around it again.
+
+### It was demonstrated, not argued
+
+Deleting the 100%-of-FPL floor constant outright — one line, reproducing the pre-v5.32 defect
+exactly — run against both versions of the guardrail on the same pair of builds:
+
+| Guardrail | Result with the ACA floor deleted |
+|---|---|
+| `t2` as shipped through v5.32 | **8 passed, 0 failed** — completely silent |
+| `t2` with this addendum | **8 passed, 1 failed** — fails on `rothAca`, and nothing else |
+
+The first row is the finding. The second is the discrimination test: a guardrail that fired on
+everything would be worth no more than one that fired on nothing. The procedure is written into
+`TESTING.md` so it can be repeated rather than taken on trust.
+
+### What changed
+
+A second fingerprint household — **fully explicit**, premium-positive, with a real bridge window
+that crosses the 100% FPL floor twice and at two depths — now fingerprints under the key
+`rothAca`. **Parity moves 8/8 → 9/9.** `t2` also gains three coverage assertions per leg.
+
+Three design points, each of which was a live way to get this wrong:
+
+- **The key records the per-year subsidy map, `totAcaLoss` AND `estate` — all three.** Measured on
+  the floor-deletion corruption: **estate alone catches 5 of 7 strategies, the subsidy map alone
+  catches 4 of 7, the union catches 7 of 7.** They are complementary, not nested. With no
+  incremental conversions `lost` is zero either way, so the `none` and `current` rows move their
+  subsidy without moving their estate; `fill12`, `fill22` and `irmaa1` do the reverse, because
+  their own subsidy holds while the baseline run's moves. Copying the existing household's
+  estates-only shape — the obvious design — would have left the no-conversion baseline row
+  uncovered, and that is the row every improvement claim in the app is measured against.
+- **The household is fully explicit and must stay that way**, so a future change to the example
+  data cannot silently rewrite the fingerprint.
+- **A coverage assertion guards the guard:** `t2` requires the subsidy map to be non-empty before
+  fingerprinting it. Without that, a later change to `acaHeads` or the bridge window could empty
+  it and the key would fingerprint `{}` forever while staying green — which is exactly how the
+  original gap survived.
+
+`acaFloorYrs` is deliberately excluded from the fingerprint: it does not exist before v5.32, and
+including it would force an `INTENDED_DIFFS` entry on a change that touches no engine.
+
+Because the version pair is still v5.31 → v5.32, this also brings **v5.32's own ACA behaviour
+retroactively inside the guardrail**, rather than starting coverage at the next release.
+
+### What it does NOT cover
+
+**The enhanced regime.** `ACA_REGIME` is a module-level `let` whose only assignment sits inside a
+React toggle handler, and nothing exports it — a module-level harness cannot switch regimes without
+a source change, and this addendum deliberately makes none. Two ACA sites are gated on the current
+regime, so their enhanced paths remain unfingerprinted. `t22` groups A, B and D still assert the
+enhanced branch directly against the statute.
+
+`ARCHITECTUREIssues.md` **E-15 is downgraded High → Low, not closed.** The remaining half is
+scheduled to fold into the A3 release, which is about sub-floor behaviour, touches this code
+anyway, and justifies a regime setter on the feature's own merits rather than for a test.
+
+### Verification
+
+**1078 app checks, 0 failed**, computed from parsed suite output and replayed from the packaged
+copies before release:
+
+- baseline current leg **518** — t1 77 · **t2 18** · t3 36 · t4 159 · t5 44 · t6 21 · t10 163
+- parity **9 strict**, no intended diffs
+- feature **551** — unchanged; `t22` still 64
+- tooling **50** · built artifact **16** · withdrawal DOM diff **10**
+
+The prior leg replays at **518** as well: the addendum's assertions run on both legs, since neither
+is version-gated. The built artifact was re-exercised unchanged, as the committed `index.html`,
+and still passes 16/16 — it was not rebuilt, because nothing it is built from moved.
+
+### Files
+
+`qa/qa-baseline/t2_engines.mjs` · `VERIFY.sh` · `TESTING.md` · `ARCHITECTUREIssues.md` ·
+`PROJECT_KNOWLEDGE_INDEX.md` · `qa/qa-baseline/README.md` · this file. **No `src/` file and no
+`index.html`.**
+
 ## v5.32
 
 **The ACA subsidy floor now applies under both law scenarios, and bridge years that fall below it are named instead of silently reading as $0. The discontinuity itself is NOT fixed — this release makes it visible and excludable. Parity 8/8 strict, and see below for why that proves less here than usual.**
