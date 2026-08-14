@@ -101,18 +101,84 @@ console.log("t14 \u2014 CROSS-ENGINE SURVIVOR SS (D-5: the class-level invariant
 // cannot reach (runRothStrategies returns lifetime totals, not rows).
 {
   const src = readFileSync(new URL("../DangerClose.jsx", import.meta.url), "utf8");
-  const region = (anchor, span) => {
+  const region = (anchor, endMarker) => {
     const i = src.indexOf(anchor);
-    return i < 0 ? null : src.slice(i, i + span);
+    if (i < 0) return null;
+    // v5.33 addendum (D-4): the window is BOUNDED, not sized. A fixed character span
+    // is the whole failure class — it silently goes stale as the engine grows around
+    // the rule, and the failure reads like a regression in the app. Every engine's
+    // window now runs from its anchor to the START OF THE NEXT TOP-LEVEL FUNCTION,
+    // so the slice is "the rest of this engine" by construction and cannot drift.
+    // Both markers are asserted unique before use; a missing end marker FAILS LOUDLY
+    // rather than falling back to a span, because a silent fallback is how this got
+    // missed the first time.
+    if (!endMarker) return null;
+    const j = src.indexOf(endMarker, i);
+    if (j < 0) return null;
+    return src.slice(i, j);
   };
+  // v5.33 addendum (D-4): assert the BOUNDS before trusting any window. A window is only
+  // as good as its markers: a duplicated anchor silently reads the wrong engine, and a
+  // missing end marker used to fall back to a fixed span that could exclude the very rule
+  // being asserted. Both are now checked explicitly, once, for every engine.
+  const _markers = [
+    ["Engine A anchor", 'const survivorIsA = P.survivor !== "B"'],
+    ["Engine B anchor", "const _survivorIsA = _single || ((_dobAYr + _tlT.lifeExpA)"],
+    ["Engine C anchor", "const _survivorIsA = _singleI || ((_dobAYr + _tlI.lifeExpA)"],
+    ["Engine D anchor", "const _deathYr1D ="],
+    ["end: computeIrmaaPlan", "function computeIrmaaPlan"],
+    ["end: computeWithdrawalPlan", "function computeWithdrawalPlan"],
+    ["end: computeTaxPlan", "function computeTaxPlan"],
+    ["end: DangerCloseMain", "function DangerCloseMain"],
+  ];
+  for (const [nm, m] of _markers) {
+    const n = src.split(m).length - 1;
+    ck(`window bound is unique file-wide — ${nm}`, n === 1, `${n} occurrences`);
+  }
+
+  // ── v5.33 addendum · a NEGATIVE CONTROL THAT DID NOT FIRE, and what it exposed ──────────
+  // Building the D-4 window fix, a control weakened ONE of Engine D's death guards
+  // (`survAdj = yr >= _deathYr1D` -> `>`) and t14 stayed green at 41/0. The reason is that
+  // the per-engine `death` regex is a PRESENCE check: Engine D has TWO death guards in its
+  // window — `survAdj` (survivor spending factor) and `_widowedD` (the SS survivor flag) —
+  // and any surviving copy keeps the pattern matched. The assertion reads as "Engine D's
+  // death guard is correct" and actually means "at least one death guard exists somewhere".
+  //
+  // Engine D has NO filing concept — verified: it carries `_widowedD` and `_tlW.single`, but
+  // no `yr > _deathYr1D` transition, because filing status is Engine B's job. That is why
+  // Engine D is legitimately absent from filingEngines below, and it is what makes the fix
+  // below sound: inside Engine D, a `>` against the death year can ONLY be a weakened guard,
+  // never a filing switch. Asserting the ABSENCE of the weakened form is drift-proof in a way
+  // that counting guards is not — a fifth correct guard added later does not break it.
+  //
+  // ⚠ If Engine D ever gains a filing concept, this assertion must MOVE to filingEngines
+  // rather than being deleted, or the C-2C-6 class reopens silently on this engine.
+  {
+    const dWin = region("const _deathYr1D =", "function computeTaxPlan");
+    ck("Engine D window resolves for the death-guard check", !!dWin);
+    if (dWin) {
+      const ge = (dWin.match(/yr >= _deathYr1D/g) || []).length;
+      const gt = (dWin.match(/yr > _deathYr1D/g) || []).length;
+      ck("Engine D: every death guard uses >= (the death YEAR counts)", ge >= 1, `${ge} found`);
+      ck("Engine D [EXTINCTION]: NO weakened > guard — Engine D has no filing switch, so a > here is a defect",
+        gt === 0, `${gt} weakened guard(s); Engine D carries ${ge} correct one(s)`);
+    }
+  }
+
+  // NOTE for Engines A/B/C: their `death` regexes are presence checks too, but the
+  // filingEngines block below asserts a MUCH more specific pattern for each
+  // (`const widowed = !P.single && yr >= P.deathYr1` plus the paired `>` filing switch),
+  // so the same blind spot is materially narrower there. It is not zero. Recorded rather
+  // than fixed, because widening it is a scope of its own and this addendum is D-4.
+
   const engines = [
-    { name: "Engine A (Roth strategy engine)", anchor: 'const survivorIsA = P.survivor !== "B"', span: 4000,
+    { name: "Engine A (Roth strategy engine)", anchor: 'const survivorIsA = P.survivor !== "B"', endMarker: "function computeIrmaaPlan",
       rule: /const lg = Math\.max\(ssA_y, ssB_y\)/, death: /yr >= P\.deathYr1/ },
-    { name: "Engine B (Taxes tab)", anchor: "const _survivorIsA = _single || ((_dobAYr + _tlT.lifeExpA)", span: 22000,
+    { name: "Engine B (Taxes tab)", anchor: "const _survivorIsA = _single || ((_dobAYr + _tlT.lifeExpA)", endMarker: "function DangerCloseMain",
       rule: /const lg = Math\.max\(ssA_y, ssB_y\)/, death: /yr >= _deathYr1/ },
-    { name: "Engine C (IRMAA planner)", anchor: "const _survivorIsA = _singleI || ((_dobAYr + _tlI.lifeExpA)", span: 8000,
+    { name: "Engine C (IRMAA planner)", anchor: "const _survivorIsA = _singleI || ((_dobAYr + _tlI.lifeExpA)", endMarker: "function computeWithdrawalPlan",
       rule: /const lg = Math\.max\(ssA_y, ssB_y\)/, death: /yr >= _deathYr1/ },
-    { name: "Engine D (Withdrawal tab)", anchor: "const _deathYr1D =", span: 8000,
+    { name: "Engine D (Withdrawal tab)", anchor: "const _deathYr1D =", endMarker: "function computeTaxPlan",
       rule: /Math\.max\(_ssA_full, _ssB_full\)/, death: /yr >= _deathYr1D/ },
   ];
   // v5.14 — THE GAP THIS SUITE HAD. t14 shipped at v5.13 asserting the Social Security survivor rule
@@ -121,15 +187,15 @@ console.log("t14 \u2014 CROSS-ENGINE SURVIVOR SS (D-5: the class-level invariant
   // engine with a filing concept must separate the death event (`>=`) from the filing switch (`>`).
   // This is the invariant that would have caught C-2C-6 on the day the v5.12 fix created it.
   const filingEngines = [
-    { name: "Engine A (Roth strategy engine)", anchor: 'const survivorIsA = P.survivor !== "B"', span: 4000,
+    { name: "Engine A (Roth strategy engine)", anchor: 'const survivorIsA = P.survivor !== "B"', endMarker: "function computeIrmaaPlan",
       death: /const widowed\s*=\s*!P\.single && yr >= P\.deathYr1/, filing: /!P\.single && yr > P\.deathYr1/ },
-    { name: "Engine B (Taxes tab)", anchor: "const _survivorIsA = _single || ((_dobAYr + _tlT.lifeExpA)", span: 22000,
+    { name: "Engine B (Taxes tab)", anchor: "const _survivorIsA = _single || ((_dobAYr + _tlT.lifeExpA)", endMarker: "function DangerCloseMain",
       death: /const widowed\s*=\s*!_single && yr >= _deathYr1/, filing: /!_single && yr > _deathYr1/ },
-    { name: "Engine C (IRMAA planner)", anchor: "const _survivorIsA = _singleI || ((_dobAYr + _tlI.lifeExpA)", span: 8000,
+    { name: "Engine C (IRMAA planner)", anchor: "const _survivorIsA = _singleI || ((_dobAYr + _tlI.lifeExpA)", endMarker: "function computeWithdrawalPlan",
       death: /const widowed\s*=\s*!_singleI && yr >= _deathYr1/, filing: /!_singleI && yr > _deathYr1/ },
   ];
   for (const e of filingEngines) {
-    const r = region(e.anchor, e.span);
+    const r = region(e.anchor, e.endMarker);
     ck(`structural: ${e.name} region located (filing check)`, !!r);
     if (!r) continue;
     ck(`structural: ${e.name} keys the DEATH EVENT to >= (SS drop, rollover)`, e.death.test(r));
@@ -138,7 +204,7 @@ console.log("t14 \u2014 CROSS-ENGINE SURVIVOR SS (D-5: the class-level invariant
   }
 
   for (const e of engines) {
-    const r = region(e.anchor, e.span);
+    const r = region(e.anchor, e.endMarker);
     ck(`structural: ${e.name} region located`, !!r, `anchor missing: ${e.anchor}`);
     if (!r) continue;
     // [EXTINCTION] The rule that every one of these engines must carry. Engine C's was ABSENT
