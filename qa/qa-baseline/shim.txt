@@ -27,6 +27,10 @@ export const __g = {
   streamsMonthlyAt, streamsAnnualAt, expectedInflation,
   acaSubsidyAnnual, acaFplFor, acaApplicablePct,
   acaBelowFloor: _g("acaBelowFloor"),   // v5.32 — GUARDED so pre-v5.32 legs still load
+  // v5.33 — the embedded-gain accessor. GUARDED: it does not exist on any pre-v5.33 build,
+  // and a bare shorthand here throws ReferenceError at module load on every prior leg
+  // (OPERATIONS §C). Nothing in the APP calls this at v5.33 — only t1's clamp checks do.
+  taxableGainShare: _g("taxableGainShare"),
   sampleGompertzDeathAge, drawCareYears, computePercentiles,
   contribBucketWeights, computePlanEvents, buildRetireOptions,
   contribAccrual: _g("contribAccrual"),

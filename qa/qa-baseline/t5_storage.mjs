@@ -18,7 +18,7 @@ const VER = process.argv[2] || "v510";
 // change the CHECK COUNT: with an unregistered tag t3 ran 35 checks instead of 36, and the count is
 // the number that goes in the release headline. Registering a new version in the ladders below is
 // now mandatory, and an unregistered tag stops the run instead of quietly testing the wrong thing.
-const KNOWN_VERSIONS = ["v510", "v5101", "v5102", "v511", "v512", "v513", "v514", "v515", "v516", "v517", "v518", "v519", "v520", "v521", "v522", "v523", "v524", "v525", "v526", "v527", "v528", "v529", "v530", "v531", "v532", "v592"];
+const KNOWN_VERSIONS = ["v510", "v5101", "v5102", "v511", "v512", "v513", "v514", "v515", "v516", "v517", "v518", "v519", "v520", "v521", "v522", "v523", "v524", "v525", "v526", "v527", "v528", "v529", "v530", "v531", "v532", "v533", "v592"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is not registered in this suite.");
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -27,8 +27,8 @@ if (!KNOWN_VERSIONS.includes(VER)) {
 }
 
 const IS510 = VER !== "v592"; // v5.10-family features (v510 and later)
-const IS5101 = VER === "v5101" || VER === "v5102" || VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532"; // v5.10.1 fixes present (v5101 and later)
-const IS5102 = VER === "v5102" || VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532"; // v5.10.2 B-2 fix present (full 13-key wipe)
+const IS5101 = VER === "v5101" || VER === "v5102" || VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533"; // v5.10.1 fixes present (v5101 and later)
+const IS5102 = VER === "v5102" || VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533"; // v5.10.2 B-2 fix present (full 13-key wipe)
 
 // ── window.storage shim: localStorage-backed, artifact API contract ──
 const PREFIX = "dc:";
@@ -153,6 +153,65 @@ await click(exp); await flush();
     }
   }
 }
+// ── v5.33 · GROUP E — the embedded-gain field is a STORAGE contract before it is anything else.
+// Nothing reads the field at v5.33, so "it persists, clamps, and survives a restore" IS the
+// release. Every expectation below is hand-computed: v/100 clamped into [0, 0.95], non-finite
+// to 0. The non-zero round trip is the path the My Data control creates and the one v5.34
+// depends on — a user who sets 40% at v5.33 must still read 40% after v5.34 lands.
+if (VER === "v533") {
+  const G = window.__g;
+  const basePlan = JSON.parse(JSON.stringify(G.PORTFOLIO()));
+
+  // 1 — the shipped default persists through Save & Apply
+  const persisted = JSON.parse(window.localStorage.getItem(PREFIX + K("portfolio_v1")) || "{}");
+  T("E: Save & Apply persists taxableGainPct", Object.prototype.hasOwnProperty.call(persisted, "taxableGainPct"), JSON.stringify(persisted.taxableGainPct));
+  T("E: and it persists as the shipped default 0", persisted.taxableGainPct === 0, String(persisted.taxableGainPct));
+
+  // 2 — a PRE-v5.33 backup has no such field at all. Restoring it must yield 0, not undefined,
+  //     and must not NaN anything downstream.
+  const oldBackup = JSON.parse(JSON.stringify(basePlan));
+  delete oldBackup.taxableGainPct;
+  T("E: the simulated pre-v5.33 backup genuinely lacks the field", !("taxableGainPct" in oldBackup));
+  G.applyLoadedData({ portfolio: oldBackup });
+  T("E: restoring a pre-v5.33 backup defaults the field to 0", G.PORTFOLIO().taxableGainPct === 0, String(G.PORTFOLIO().taxableGainPct));
+  T("E: and the accessor reads 0 from it", G.taxableGainShare() === 0, String(G.taxableGainShare()));
+
+  // 3 — an unparseable value in a hand-edited backup falls to 0 the same way
+  const junk = JSON.parse(JSON.stringify(basePlan)); junk.taxableGainPct = "abc";
+  G.applyLoadedData({ portfolio: junk });
+  T("E: an unparseable taxableGainPct is normalised to 0 on restore", G.PORTFOLIO().taxableGainPct === 0, String(G.PORTFOLIO().taxableGainPct));
+
+  // 4 — a USER-SET non-zero value survives restore untouched (the v5.34 dependency)
+  const set40 = JSON.parse(JSON.stringify(basePlan)); set40.taxableGainPct = 40;
+  G.applyLoadedData({ portfolio: set40 });
+  T("E: a user-set 40 survives restore", G.PORTFOLIO().taxableGainPct === 40, String(G.PORTFOLIO().taxableGainPct));
+  T("E: and the accessor converts it to 0.40", G.taxableGainShare() === 0.40, String(G.taxableGainShare()));
+
+  // 5 — the non-zero value round-trips through the BACKUP BYTES. Note what this does and does
+  //     not prove: Export Backup serialises buildPortfolio(), the FORM state, so exercising the
+  //     real export button here would capture the form's 0 rather than the value applyLoadedData
+  //     just wrote to the module global (the documented no-re-render trap, OPERATIONS C). The
+  //     control -> Save & Apply -> export path is covered in t4, where the control can be typed
+  //     into. What is proved here is the half t5 owns: the field survives JSON serialisation and
+  //     restore exactly, which is what a backup file physically is.
+  const bytes = JSON.stringify({ app: "DangerClose", version: 5, portfolio: G.PORTFOLIO() });
+  const reparsed = JSON.parse(bytes).portfolio;
+  T("E: the backup bytes carry the user-set 40", reparsed.taxableGainPct === 40, String(reparsed.taxableGainPct));
+  G.applyLoadedData({ portfolio: reparsed });
+  T("E: restoring from those bytes still reads 40", G.PORTFOLIO().taxableGainPct === 40, String(G.PORTFOLIO().taxableGainPct));
+  T("E: and the accessor still converts it to 0.40", G.taxableGainShare() === 0.40, String(G.taxableGainShare()));
+  // 6 — a hand-edited OUT-OF-RANGE backup gets past the save-time clamp (nothing clamped it
+  //     on the way in), so the accessor is the second line of defence and must hold the band.
+  const wild = JSON.parse(JSON.stringify(basePlan)); wild.taxableGainPct = 200;
+  G.applyLoadedData({ portfolio: wild });
+  T("E: an out-of-range 200 is stored as-is by the schema default", G.PORTFOLIO().taxableGainPct === 200, String(G.PORTFOLIO().taxableGainPct));
+  T("E: but the accessor clamps it to 0.95", G.taxableGainShare() === 0.95, String(G.taxableGainShare()));
+
+  // restore the household so the later groups run against the plan they expect
+  G.applyLoadedData({ portfolio: basePlan });
+  T("E: household restored for the remaining groups", G.PORTFOLIO().taxableGainPct === 0, String(G.PORTFOLIO().taxableGainPct));
+}
+
 // Simple Mode toggle → persists.
 const fewer = btn(/SHOW FEWER TABS/);
 await click(fewer); await flush();

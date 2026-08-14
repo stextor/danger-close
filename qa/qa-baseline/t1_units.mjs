@@ -14,7 +14,7 @@ const VER = process.argv[2] || "v510";
 // change the CHECK COUNT: with an unregistered tag t3 ran 35 checks instead of 36, and the count is
 // the number that goes in the release headline. Registering a new version in the ladders below is
 // now mandatory, and an unregistered tag stops the run instead of quietly testing the wrong thing.
-const KNOWN_VERSIONS = ["v510", "v5101", "v5102", "v511", "v512", "v513", "v514", "v515", "v516", "v517", "v518", "v519", "v520", "v521", "v522", "v523", "v524", "v525", "v526", "v527", "v528", "v529", "v530", "v531", "v532", "v592"];
+const KNOWN_VERSIONS = ["v510", "v5101", "v5102", "v511", "v512", "v513", "v514", "v515", "v516", "v517", "v518", "v519", "v520", "v521", "v522", "v523", "v524", "v525", "v526", "v527", "v528", "v529", "v530", "v531", "v532", "v533", "v592"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is not registered in this suite.");
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -25,9 +25,13 @@ if (!KNOWN_VERSIONS.includes(VER)) {
 const IS510 = VER !== "v592"; // v5.10-family features (v510 and v5101)
 const IS5101 = VER === "v5101";
 const IS5102 = VER === "v5102";
-const IS511 = VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532";
-const IS514 = VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532"; // v5.14 IRMAA indexation Verify checks present
+const IS511 = VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533";
+const IS514 = VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533"; // v5.14 IRMAA indexation Verify checks present
 const SRC = fs.readFileSync(new URL(`../${VER}.jsx`, import.meta.url), "utf8");
+// v5.33: parsed once so STATIC claims about call sites are AST facts, not line matches.
+const { Parser: _AcornParser } = await import("acorn");
+const _acornJsx = (await import("acorn-jsx")).default;
+const AST = _AcornParser.extend(_acornJsx()).parse(SRC, { ecmaVersion: 2022, sourceType: "module" });
 const m = await import(`./app_${VER}.mjs`);
 const g = m.__g;
 
@@ -49,7 +53,9 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
   // v5.31 adds FIVE rows: the four OBBBA senior-bonus constants plus the D-2 dated sunset row.
   // Until v5.31 those four figures were inline literals in computeTaxPlan and this tab could not
   // see them — it rendered green on constants it had never checked.
-  const _verifyCount = VER === "v532" ? 66 : VER === "v531" ? 62 : IS514 ? 57 : IS510 ? 54 : 53;
+  // v5.33 adds NO row (decision 4, 2026-08-13): the embedded-gain field is recorded but not
+  // read by any engine, so there is nothing for a Verify row to check against a source.
+  const _verifyCount = (VER === "v532" || VER === "v533") ? 66 : VER === "v531" ? 62 : IS514 ? 57 : IS510 ? 54 : 53;
   T(`VERIFY: check count is ${_verifyCount}`, checks.length === _verifyCount, `got ${checks.length}`);
   const bad = checks.filter(c => !c.pass);
   T("VERIFY: every check passes", bad.length === 0, bad.map(b => b.name).join("; "));
@@ -80,7 +86,7 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
 // read back off the source. Asserting a constant against itself proves nothing.
 {
   const o = g.OBBBA_CONSTS ? g.OBBBA_CONSTS() : undefined;
-  if (VER === "v531" || VER === "v532") {
+  if (VER === "v531" || VER === "v532" || VER === "v533") {
     T("OBBBA: constants block exists and is exported", o && typeof o === "object", String(o));
     T("OBBBA: deduction is $6,000 per person 65+", o.SENIOR_BONUS_PER_PERSON === 6000, String(o?.SENIOR_BONUS_PER_PERSON));
     T("OBBBA: single MAGI phase-out starts at $75,000", o.SENIOR_BONUS_THR_SGL === 75000, String(o?.SENIOR_BONUS_THR_SGL));
@@ -213,7 +219,7 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
 
 // ═══ Statics — the source file itself ═══
 {
-  const verStr = VER === "v532" ? "v5.32" : VER === "v531" ? "v5.31" : VER === "v530" ? "v5.30" : VER === "v529" ? "v5.29" : VER === "v528" ? "v5.28" : VER === "v527" ? "v5.27" : VER === "v526" ? "v5.26" : VER === "v525" ? "v5.25" : VER === "v524" ? "v5.24" : VER === "v523" ? "v5.23" : VER === "v522" ? "v5.22" : VER === "v521" ? "v5.21" : VER === "v520" ? "v5.20" : VER === "v519" ? "v5.19" : VER === "v518" ? "v5.18" : VER === "v517" ? "v5.17" : VER === "v516" ? "v5.16" : VER === "v515" ? "v5.15" : VER === "v514" ? "v5.14" : VER === "v513" ? "v5.13" : VER === "v512" ? "v5.12" : VER === "v511" ? "v5.11" : IS5102 ? "v5.10.2" : IS5101 ? "v5.10.1" : IS510 ? "v5.10" : "v5.9.2";
+  const verStr = VER === "v533" ? "v5.33" : VER === "v532" ? "v5.32" : VER === "v531" ? "v5.31" : VER === "v530" ? "v5.30" : VER === "v529" ? "v5.29" : VER === "v528" ? "v5.28" : VER === "v527" ? "v5.27" : VER === "v526" ? "v5.26" : VER === "v525" ? "v5.25" : VER === "v524" ? "v5.24" : VER === "v523" ? "v5.23" : VER === "v522" ? "v5.22" : VER === "v521" ? "v5.21" : VER === "v520" ? "v5.20" : VER === "v519" ? "v5.19" : VER === "v518" ? "v5.18" : VER === "v517" ? "v5.17" : VER === "v516" ? "v5.16" : VER === "v515" ? "v5.15" : VER === "v514" ? "v5.14" : VER === "v513" ? "v5.13" : VER === "v512" ? "v5.12" : VER === "v511" ? "v5.11" : IS5102 ? "v5.10.2" : IS5101 ? "v5.10.1" : IS510 ? "v5.10" : "v5.9.2";
   T(`STATIC: field-manual callsign carries ${verStr}`, SRC.includes(`FIELD MANUAL · ${verStr} · PUBLIC BUILD`));
   T(`STATIC: end-of-manual footer carries ${verStr}`, SRC.includes(`DANGER CLOSE ${verStr} · documentation regenerated`));
   // v5.10.2: the remaining two of the four in-app version sites, asserted exactly
@@ -230,6 +236,60 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
     T("STATIC (V510): migration flag present", SRC.includes("_contribMigrated"));
   } else {
     T("STATIC (V592): no accrual machinery yet", !SRC.includes("retireStartBalances") && !SRC.includes("contribAccrual"));
+  }
+}
+
+// ── v5.33 · embedded-gain field + the ONE accessor that reads it ────────────────────────────
+// This release is storage only: the field exists, persists and clamps, and NOTHING reads it.
+// The clamp table is hand-verified: v/100 is clamped into [0, 0.95], and any non-finite input
+// (including undefined on a pre-v5.33 backup) falls to 0 rather than propagating NaN.
+{
+  const IS533 = VER === "v533";
+  const P0 = g.PORTFOLIO();
+  if (IS533) {
+    T("v5.33: DEFAULT_PORTFOLIO carries taxableGainPct", Object.prototype.hasOwnProperty.call(P0, "taxableGainPct"));
+    T("v5.33: it defaults to 0 (D-2 — the optimistic assumption, disclosed in app)", P0.taxableGainPct === 0, String(P0.taxableGainPct));
+    T("v5.33: taxableGainShare is exported to the harness", typeof g.taxableGainShare === "function", typeof g.taxableGainShare);
+
+    const saved = P0.taxableGainPct;
+    const CLAMP = [[-10, 0], [0, 0], [40, 0.40], [95, 0.95], [200, 0.95],
+                   ["abc", 0], [null, 0], [undefined, 0], [NaN, 0]];
+    for (const [input, want] of CLAMP) {
+      P0.taxableGainPct = input;
+      const got = g.taxableGainShare();
+      T(`v5.33 clamp: ${JSON.stringify(input) ?? String(input)} -> ${want}`, got === want, `got ${got}`);
+    }
+    P0.taxableGainPct = saved;
+    T("v5.33: clamp probe restored the field", g.PORTFOLIO().taxableGainPct === 0);
+
+    // STATIC — the accessor is present in source and, at v5.33, is called by NOBODY.
+    // If this fails, an engine has started reading the field a release early. That is the
+    // STOP condition in the v5.33 brief, not a test to relax.
+    const body = SRC.split("\n").filter(l => l.length < 5000).join("\n");
+    // AST, not text: two of the three textual occurrences at v5.33 are COMMENTS, and a line
+    // match counts them as call sites (OPERATIONS B1). Count nodes instead.
+    let _decls = 0, _calls = 0;
+    {
+      const walk = (n, f) => {
+        if (!n || typeof n.type !== "string") return;
+        f(n);
+        for (const k in n) {
+          const v = n[k];
+          if (Array.isArray(v)) v.forEach(c => { if (c && typeof c.type === "string") walk(c, f); });
+          else if (v && typeof v.type === "string") walk(v, f);
+        }
+      };
+      walk(AST, n => {
+        if (n.type === "FunctionDeclaration" && n.id && n.id.name === "taxableGainShare") _decls++;
+        if (n.type === "CallExpression" && n.callee && n.callee.name === "taxableGainShare") _calls++;
+      });
+    }
+    T("v5.33 STATIC: taxableGainShare() is defined exactly once", _decls === 1, String(_decls));
+    T("v5.33 STATIC: no engine calls it yet (AST call sites === 0)", _calls === 0, `${_calls} call site(s)`);
+    T("v5.33 STATIC: the schema default is present for pre-v5.33 backups", body.includes("PORTFOLIO.taxableGainPct = 0"));
+  } else {
+    T("pre-v5.33: no taxableGainPct field", !Object.prototype.hasOwnProperty.call(P0, "taxableGainPct"));
+    T("pre-v5.33: no taxableGainShare accessor", typeof g.taxableGainShare !== "function");
   }
 }
 
