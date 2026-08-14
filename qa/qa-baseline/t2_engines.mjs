@@ -3,6 +3,12 @@
 //      node t2_engines.mjs v510 → invariants + fingerprint
 //      node t2_engines.mjs compare → cross-version parity (the v5.10 "engines unchanged" claim)
 //
+// ⚠ WHAT THIS GUARDRAIL COVERS, as of the E-15 addendum (2026-08-14). Read before citing "parity
+// 8/8" — it is 9/9 now, and for the ACA path it was 0/9 until this addendum. The Roth fingerprint
+// household is premium-zero, so no ACA code executed here at all from v5.7 through v5.32; the
+// premium-positive household added below closes that for the CURRENT regime. The enhanced regime
+// is still outside this guardrail and is covered by t22 instead. See ARCHITECTUREIssues E-15.
+//
 // Parity methodology: Math.random is replaced with the SAME seeded LCG in both version
 // runs, and every engine is called with identical inputs. The Roth engine gets an
 // EXPLICIT P (positions summed in the test itself) so both versions receive literally
@@ -142,6 +148,61 @@ console.log(`t2 — ENGINES (${VER})`);
   T("ROTH: conversions shrink the Traditional pool vs none", cur.finalTrad < none.finalTrad || cur.endTrad < none.endTrad || true);
   fp.roth = { n: res.length, keys: res.map(r => r.key).sort(), estates: res.map(r => rnd(r.estate)).sort((a, b) => a - b) };
   fp.rothCurrentEstate = rnd(cur.estate);
+}
+
+// ═══ Roth strategy engine, ACA BRIDGE household — E-15 ═══════════════════════════════════════
+// WHY THIS EXISTS. The household above is built with acaPremium: 0. acaHeads returns 0 whenever
+// the premium is not positive, so bridgeInWindow is false, baselineSubByYr is null, acaSubByYr is
+// never populated, and NO ACA CODE RUNS INSIDE THIS GUARDRAIL AT ALL. That held for the entire
+// life of the ACA feature — v5.7 to v5.32 — and it is why the v5.32 enhanced-regime floor defect
+// could not have been caught here. Recorded as ARCHITECTUREIssues E-15. Do not "simplify" this
+// household back out; the premium is the whole point of it.
+//
+// FULLY EXPLICIT ON PURPOSE (scope D-3). It does NOT derive from PORTFOLIO()/PLAN_TIMELINE() the
+// way the household above does, so a future change to the example data cannot silently rewrite
+// this fingerprint. A guardrail household should be inert.
+//
+// It crosses the 100% FPL floor twice and at two depths (~87% and ~18% of FPL) — the same shape
+// t22 uses, deliberately, so the two files describe the same household. They are independent
+// definitions; changing one does not change the other.
+//
+// SCOPE NOTE: current regime only (scope D-2a). ACA_REGIME is a module-level `let` (L1197) whose
+// only assignment is inside a React handler (L4932), so a module-level harness cannot switch it
+// without a source change. The enhanced branch stays covered by t22 groups A/B/D and joins this
+// guardrail with the A3 release. E-15 is DOWNGRADED by this addition, not closed.
+{
+  const PACA = {
+    single: false, asOfYr: 2026, retireYr: 2027, horizonYr: 2060, ladderEnd: 2035,
+    dobAYr: 1965, dobBYr: 1966, deathYr1: Infinity, survivor: "A",
+    ssA: 3000, ssB: 1800, ssAYr: 2032, ssAMo: 6, ssBYr: 2033, ssBMo: 6,
+    pen: 0, stateRate: 0, stateCode: null, convTaxFunding: "taxable", taxableGainFrac: 0.5,
+    acaPremium: 1600, acaSize: 2, taxYieldPct: 1.5, currentConv: 0,
+    tradInit: 900000, rothInit: 100000, tradInitA: 600000, tradInitB: 300000,
+    rothInitA: 60000, rothInitB: 40000, taxableInit: 250000,
+  };
+  const resA = g.runRothStrategies(PACA);
+  // COVERAGE ASSERTION — this is the check that stops E-15 from recurring. If a future change to
+  // acaHeads, the bridge window or the retirement year silently empties the subsidy map, this
+  // fails loudly instead of fingerprinting {} forever and staying green.
+  const liveYears = resA.reduce((n, r) => n + Object.keys(r.acaSubByYr || {}).length, 0);
+  T("ROTH-ACA: the bridge is LIVE — the ACA path actually executed", liveYears > 0,
+    "acaSubByYr empty on every strategy: this household no longer reaches the ACA code, so the fingerprint below would be worthless");
+  T("ROTH-ACA: a subsidy is actually paid in some year", resA.some(r => Object.values(r.acaSubByYr || {}).some(v => v > 0)));
+  T("ROTH-ACA: the household crosses the 100% FPL floor (the $0 years exist)",
+    resA.some(r => Object.values(r.acaSubByYr || {}).some(v => v === 0)));
+  // Per the scope's measured finding (§1 P-6): estate alone catches 5 of 7 strategies, the subsidy
+  // map alone catches 4 of 7, the union catches 7 of 7. They are complementary, not nested — with
+  // no incremental conversions `lost` is 0 either way, so `none` and `current` move their subsidy
+  // without moving their estate. Record BOTH. Dropping either half reopens a hole.
+  //
+  // acaFloorYrs is deliberately EXCLUDED: it does not exist before v5.32, and including it would
+  // force an INTENDED_DIFFS entry on a release that changes no engine.
+  fp.rothAca = resA.map(r => ({
+    key: r.key,
+    sub: r.acaSubByYr,
+    loss: r.totAcaLoss,
+    estate: rnd(r.estate),
+  })).sort((a, b) => (a.key < b.key ? -1 : 1));
 }
 
 // ═══ Deterministic helpers into the fingerprint ═══

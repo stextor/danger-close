@@ -13,7 +13,7 @@ DOM signature strings were grounded against a captured DOM (cap_tabs.mjs), not g
 The suite compares the **immediately-prior release** to the **current release**, and rolls
 forward each ship. As of v5.10.2 the pair is **v5.10.1 → v5.10.2**.
 
-There is no permanent floor: the MC-parity guardrail (`t2 compare`, 8/8) proves release over
+There is no permanent floor: the MC-parity guardrail (`t2 compare`, 9/9 since the E-15 addendum) proves release over
 release that the engines haven't drifted across each boundary, which is what a fixed old
 baseline would otherwise be guarding.
 
