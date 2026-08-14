@@ -40,9 +40,18 @@
 //
 // Run: node t22_aca_floor.mjs [prior-tag]
 //   Groups A-E and G run against app_testable.mjs, the current leg.
-//   Group F needs the PRIOR build's bundle and defaults to app_v531.mjs. Roll the default
+//   Group F needs the PRIOR build's bundle and defaults to app_v532.mjs. Roll the default
 //   forward every release, the same way t2's parity pair rolls.
-const PRIOR = process.argv[2] || "v531";
+//
+//   ⚠ ROLLING THE DEFAULT IS NOT ENOUGH ON ITS OWN (learned at v5.33). Group F mixes two kinds
+//   of claim: byte-identity checks, which are TRUE FOR EVERY PAIR and should roll; and the
+//   "acaFloorYrs is NEW" check, which is a claim about ONE transition (v5.31 → v5.32) and is
+//   FALSE once the prior build is v5.32 or later. Rolling the tag without gating that check
+//   turns a green suite red for a reason that has nothing to do with the app. The check is
+//   therefore gated on the prior tag below (OPERATIONS §B2: each leg asserts what is true for
+//   its own build). The rotation forces this: v5.31 leaves the knowledge pool at v5.33, so a
+//   session working from knowledge alone cannot build app_v531.mjs at all.
+const PRIOR = process.argv[2] || "v532";
 const MOD = await import("./app_testable.mjs");
 const g = MOD.__g;
 
@@ -198,8 +207,20 @@ console.log(`\n\u2500\u2500 F \u00b7 A2 moved no figure \u2014 byte identity vs 
       now.map((r, i) => `${r.key}:${r.totAcaLoss}/${was[i].totAcaLoss}`).join(" "));
     CK("F: estate is unchanged on every row (it feeds the parity fingerprint)",
       now.every((r, i) => r.estate === was[i].estate));
-    CK("F: acaFloorYrs is NEW \u2014 the prior build does not have it",
-      was.every(r => r.acaFloorYrs === undefined) && now.every(r => r.acaFloorYrs !== undefined));
+    // Gated per prior tag. Against a PRE-v5.32 prior this is the original transition claim:
+    // the flag did not exist and now does. Against v5.32 or later the flag exists on BOTH
+    // sides, and the honest assertion is that it is still present and still populated —
+    // which is what "v5.33 moved no figure" needs Group F to witness.
+    const _priorPredatesFloor = ["v531", "v530", "v529"].includes(PRIOR);
+    if (_priorPredatesFloor) {
+      CK("F: acaFloorYrs is NEW \u2014 the prior build does not have it",
+        was.every(r => r.acaFloorYrs === undefined) && now.every(r => r.acaFloorYrs !== undefined));
+    } else {
+      CK(`F: acaFloorYrs is present on BOTH builds and byte-identical (prior=${PRIOR})`,
+        was.every(r => r.acaFloorYrs !== undefined) && now.every(r => r.acaFloorYrs !== undefined)
+        && now.every((r, i) => JSON.stringify(r.acaFloorYrs) === JSON.stringify(was[i].acaFloorYrs)),
+        now.map((r, i) => `${r.key}:${JSON.stringify(r.acaFloorYrs)}/${JSON.stringify(was[i].acaFloorYrs)}`).join(" "));
+    }
   }
 }
 
