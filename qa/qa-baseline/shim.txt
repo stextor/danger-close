@@ -31,6 +31,11 @@ export const __g = {
   // and a bare shorthand here throws ReferenceError at module load on every prior leg
   // (OPERATIONS §C). Nothing in the APP calls this at v5.33 — only t1's clamp checks do.
   taxableGainShare: _g("taxableGainShare"),
+  // v5.34 — THE shared realized-gain rule. GUARDED for the same reason: it does not exist on
+  // any pre-v5.34 build, and mk_testable.sh splices this shim into EVERY leg including frozen
+  // ones. E-5 unit-tests this directly instead of comparing two engines' figures and hoping
+  // agreement implies a shared rule.
+  realizeGain: _g("realizeGain"),
   sampleGompertzDeathAge, drawCareYears, computePercentiles,
   contribBucketWeights, computePlanEvents, buildRetireOptions,
   contribAccrual: _g("contribAccrual"),

@@ -16,7 +16,7 @@ const VER = process.argv[2] || "v510";
 // change the CHECK COUNT: with an unregistered tag t3 ran 35 checks instead of 36, and the count is
 // the number that goes in the release headline. Registering a new version in the ladders below is
 // now mandatory, and an unregistered tag stops the run instead of quietly testing the wrong thing.
-const KNOWN_VERSIONS = ["v510", "v5101", "v5102", "v511", "v512", "v513", "v514", "v515", "v516", "v517", "v518", "v519", "v520", "v521", "v522", "v523", "v524", "v525", "v526", "v527", "v528", "v529", "v530", "v531", "v532", "v533", "v592"];
+const KNOWN_VERSIONS = ["v510", "v5101", "v5102", "v511", "v512", "v513", "v514", "v515", "v516", "v517", "v518", "v519", "v520", "v521", "v522", "v523", "v524", "v525", "v526", "v527", "v528", "v529", "v530", "v531", "v532", "v533", "v534", "v592"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is not registered in this suite.");
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -62,7 +62,7 @@ await click(example); await flush(); await flush();
   const t = body().textContent || "";
   // Exact per-tag string: "v5.10" is a PREFIX of v5.10.1/v5.10.2, so a substring test
   // passed for the whole v5.10 family by luck and broke at v5.11. Map the tag explicitly.
-  const _badge = VER === "v533" ? "v5.33" : VER === "v532" ? "v5.32" : VER === "v531" ? "v5.31" : VER === "v530" ? "v5.30" : VER === "v529" ? "v5.29" : VER === "v528" ? "v5.28" : VER === "v527" ? "v5.27" : VER === "v526" ? "v5.26" : VER === "v525" ? "v5.25" : VER === "v524" ? "v5.24" : VER === "v523" ? "v5.23" : VER === "v522" ? "v5.22" : VER === "v521" ? "v5.21" : VER === "v520" ? "v5.20" : VER === "v519" ? "v5.19" : VER === "v518" ? "v5.18" : VER === "v517" ? "v5.17" : VER === "v516" ? "v5.16" : VER === "v515" ? "v5.15" : VER === "v514" ? "v5.14" : VER === "v513" ? "v5.13" : VER === "v512" ? "v5.12" : VER === "v511" ? "v5.11" : VER === "v5102" ? "v5.10.2"
+  const _badge = VER === "v534" ? "v5.34" : VER === "v533" ? "v5.33" : VER === "v532" ? "v5.32" : VER === "v531" ? "v5.31" : VER === "v530" ? "v5.30" : VER === "v529" ? "v5.29" : VER === "v528" ? "v5.28" : VER === "v527" ? "v5.27" : VER === "v526" ? "v5.26" : VER === "v525" ? "v5.25" : VER === "v524" ? "v5.24" : VER === "v523" ? "v5.23" : VER === "v522" ? "v5.22" : VER === "v521" ? "v5.21" : VER === "v520" ? "v5.20" : VER === "v519" ? "v5.19" : VER === "v518" ? "v5.18" : VER === "v517" ? "v5.17" : VER === "v516" ? "v5.16" : VER === "v515" ? "v5.15" : VER === "v514" ? "v5.14" : VER === "v513" ? "v5.13" : VER === "v512" ? "v5.12" : VER === "v511" ? "v5.11" : VER === "v5102" ? "v5.10.2"
     : VER === "v5101" ? "v5.10.1" : IS510 ? "v5.10" : "v5.9.2";
   T(`SHELL: version badge reads ${_badge}`, t.includes(_badge));
   T("SHELL: amber example-data banner fires", has(t, "EXAMPLE DATA MODE") || has(t, "built-in example household"));
@@ -111,7 +111,7 @@ sig("withdrawal", ["ORDER OF OPERATIONS", "Traditional"]);
 // NOT pinned defects: the modelling is unchanged and remains wrong. Release (c) fixes the model;
 // this release only stops the app from denying it. Flip nothing here when (c) lands — instead
 // re-point these at whatever (c) makes true.
-if (VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533") {
+if (VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534") {
   const w = per["withdrawal"] || "";
   const norm = w.toLowerCase();
   T("V524 withdrawal: 'already-taxed principal' claim is GONE", !norm.includes("already-taxed principal"));
@@ -159,7 +159,7 @@ sig("events", ["MEDICARE", "RMD", "HSA", "BACKUP"]);
 // DOCS_HTML reaches the DOM ONLY through <iframe srcDoc={...}> (v5.24 L5625), and jsdom does not
 // fold iframe srcdoc into body.textContent. Reading per["docs"] here would make every assertion
 // below pass vacuously on BOTH builds — the OPERATIONS section B2 failure. Read the attribute.
-if (VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533") {
+if (VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534") {
   const docsTab = tabs().find(b => b.textContent.trim() === "docs");
   await click(docsTab); await flush();
   const frame = body().querySelector('iframe[title="Danger Close Documentation"]');
@@ -230,7 +230,7 @@ if (VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER 
   // without gating would break the frozen legs and make the release notes state a total the suite
   // will not produce.
   // v5.31 keeps this copy verbatim: D-4 declined touching DOCS_HTML, and §13 stays true.
-  if (VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533") {
+  if (VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534") {
     T("V530 docs: §13 states the bonus IS modeled on the Taxes tab",
       man.includes("is modeled on the Taxes tab, but not in the Roth conversion ladder"));
     T("V530 docs: §13 names the phase-out thresholds",
@@ -302,7 +302,7 @@ if (VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER 
 // The field is RECORDED and read by no engine, so no figure anywhere can witness it. The only
 // evidence that the UI exists at all is the DOM, which makes this block the sole coverage of
 // decisions D-1, D-2, D-4 and D-5 as the user actually meets them.
-if (VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533") {
+if (VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534") {
   await click(tabs().find(b => b.textContent.trim() === "my data")); await flush();
   const md = (body().textContent || "").replace(/\s+/g, " ");
   // Scope to the Other accounts CARD. A page-wide select query also catches the Holdings table's
@@ -382,7 +382,7 @@ if (VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER 
 {
   const tx = per["taxes"] || "";
   T("TAXES TAB: the OBBBA deduction is named in the tab header", tx.includes("OBBBA $6K/person senior bonus deduction"));
-  if (VER === "v531" || VER === "v532" || VER === "v533") {
+  if (VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534") {
     T("V531 taxes: the footnote states the OBBBA deduction IS modeled here",
       tx.includes("the temporary OBBBA senior deduction (through 2028) ARE modeled on this tab"));
     T("V531 taxes: the footnote discloses the Roth-ladder divergence",
@@ -405,12 +405,12 @@ if (VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER 
   const v = per["verify"] || "";
   // v5.14 adds three IRMAA-indexation checks to the Verify tab (see t1's note).
   const _vCount = (VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530") ? "57" : IS510 ? "54" : "53";
-  const _vCountV = (VER === "v532" || VER === "v533") ? "66" : VER === "v531" ? "62" : _vCount;
+  const _vCountV = (VER === "v532" || VER === "v533" || VER === "v534") ? "66" : VER === "v531" ? "62" : _vCount;
   T(`VERIFY TAB: reports ${_vCountV} checks`, v.includes(_vCountV));
   T("VERIFY TAB: no failing marks rendered", !/✗/.test(v));
   // v5.31 — the four OBBBA constants become checkable here for the first time (E-2), plus the
   // D-2 dated sunset row. Gated: on earlier builds the tab correctly has no such category.
-  if (VER === "v531" || VER === "v532" || VER === "v533") {
+  if (VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534") {
     T("V531 verify: the OBBBA senior-bonus category renders", v.includes("OBBBA SENIOR BONUS"));
     T("V531 verify: the per-person deduction row is present", v.includes("Deduction per person 65+"));
     T("V531 verify: both MAGI phase-out rows are present",
@@ -491,30 +491,40 @@ if (IS510) {
 // model does NOT use the field is PRESENT. v5.34 makes that copy FALSE, and this assertion will
 // go green anyway, because the stale sentence survives. v5.34 must invert it in the same release
 // that falsifies it, GATED PER LEG so v5.33 keeps asserting the copy that is true for v5.33.
-if (VER === "v533") {
+// v5.34: the gate WIDENS rather than inverting. The v5.33 disclosure — "recorded, not yet used"
+// — is still TRUE at v5.34, because the Engine D basis tracker that would have falsified it was
+// backed out before shipping (it realized gain on an RMD that Engine D sources from the taxable
+// sleeve). So this is a disclosure lock that must NOT be inverted yet; leaving it gated to v533
+// alone would instead leave the CURRENT build with no coverage of this panel at all, which is
+// how it stood before this release. INVERT AT v5.35, when an engine actually reads the field.
+// Only the release NAMED in the copy differs between the legs, and that assertion is gated.
+if (VER === "v533" || VER === "v534") {
+  const _pfx = VER === "v533" ? "V533" : "V534";
+  const _namesRel = VER === "v533" ? "no figure on any tab changes until v5.34"
+                                   : "no figure on any tab changes until v5.35";
   await click(tabs().find(b => b.textContent.trim() === "my data")); await flush();
   const _cands = [...body().querySelectorAll("div")]
     .filter(d => (d.textContent || "").trim().startsWith("EMBEDDED GAIN IN TAXABLE ACCOUNTS"));
-  T("V533 my data: the embedded-gain panel renders", _cands.length > 0, `${_cands.length} candidates`);
+  T(`${_pfx} my data: the embedded-gain panel renders`, _cands.length > 0, `${_cands.length} candidates`);
   const panel = _cands.find(d => d.querySelector("input")) || null;
-  T("V533 my data: the panel is scoped to its own input, not the card", !!panel);
+  T(`${_pfx} my data: the panel is scoped to its own input, not the card`, !!panel);
   const txt = panel ? (panel.textContent || "").replace(/\s+/g, " ") : "";
 
   // the label, asserted verbatim — this is the lock
-  T("V533 my data: the panel is labelled RECORDED, NOT YET USED", txt.includes("(recorded, not yet used)"), txt.slice(0, 120));
-  T("V533 my data: it states plainly that the model does not use it yet",
+  T(`${_pfx} my data: the panel is labelled RECORDED, NOT YET USED`, txt.includes("(recorded, not yet used)"), txt.slice(0, 120));
+  T(`${_pfx} my data: it states plainly that the model does not use it yet`,
     txt.includes("The model does not use this yet"), txt.slice(0, 200));
-  T("V533 my data: it names the release that changes that",
-    txt.includes("no figure on any tab changes until v5.34"), txt.slice(0, 200));
-  T("V533 my data: it says where to find the number (1099-B / custodian basis)",
+  T(`${_pfx} my data: it names the release that changes that`,
+    txt.includes(_namesRel), txt.slice(0, 200));
+  T(`${_pfx} my data: it says where to find the number (1099-B / custodian basis)`,
     txt.includes("1099-B") && txt.includes("cost basis"), txt.slice(0, 200));
-  T("V533 my data: it discloses that leaving it at 0 is the OPTIMISTIC assumption",
+  T(`${_pfx} my data: it discloses that leaving it at 0 is the OPTIMISTIC assumption`,
     txt.includes("optimistic assumption"), txt.slice(0, 240));
 
   // the input itself
   const gi = panel ? [...panel.querySelectorAll("input")][0] : null;
-  T("V533 my data: the panel carries an input", !!gi);
-  T("V533 my data: it starts at the shipped default 0", gi && String(gi.value) === "0", gi && String(gi.value));
+  T(`${_pfx} my data: the panel carries an input`, !!gi);
+  T(`${_pfx} my data: it starts at the shipped default 0`, gi && String(gi.value) === "0", gi && String(gi.value));
 
   const type = async (el, v) => {
     await act(async () => {
@@ -538,14 +548,14 @@ if (VER === "v533") {
   if (gi) {
     // accepts a value, and Save & Apply writes it THROUGH to the module-level portfolio
     await type(gi, 40);
-    T("V533 my data: the control accepts a typed value", String(gi.value) === "40", String(gi.value));
+    T(`${_pfx} my data: the control accepts a typed value`, String(gi.value) === "40", String(gi.value));
     const sv = saveBtn();
-    T("V533 my data: Save & Apply is reachable", !!sv);
+    T(`${_pfx} my data: Save & Apply is reachable`, !!sv);
     if (sv) {
       await click(sv); await flush(); await flush();
-      T("V533 my data: Save & Apply writes 40 through to PORTFOLIO.taxableGainPct",
+      T(`${_pfx} my data: Save & Apply writes 40 through to PORTFOLIO.taxableGainPct`,
         window.__g.PORTFOLIO().taxableGainPct === 40, String(window.__g.PORTFOLIO().taxableGainPct));
-      T("V533 my data: and the accessor now reads 0.40",
+      T(`${_pfx} my data: and the accessor now reads 0.40`,
         window.__g.taxableGainShare() === 0.40, String(window.__g.taxableGainShare()));
 
       // NOT asserted here: the exported backup bytes. t4 has no createObjectURL capture
@@ -557,20 +567,110 @@ if (VER === "v533") {
     // out-of-range input is CLAMPED ON SAVE, so the stored value is already in band and
     // taxableGainShare() is a second line of defence rather than the only one.
     const gi900 = gainInput();
-    T("V533 my data: the control is still present after save", !!gi900);
+    T(`${_pfx} my data: the control is still present after save`, !!gi900);
     await type(gi900, 900);
     const sv2 = saveBtn();
     if (sv2) {
       await click(sv2); await flush(); await flush();
-      T("V533 my data: 900 is clamped to 95 on save", window.__g.PORTFOLIO().taxableGainPct === 95, String(window.__g.PORTFOLIO().taxableGainPct));
-      T("V533 my data: the accessor reads the clamped 0.95", window.__g.taxableGainShare() === 0.95, String(window.__g.taxableGainShare()));
+      T(`${_pfx} my data: 900 is clamped to 95 on save`, window.__g.PORTFOLIO().taxableGainPct === 95, String(window.__g.PORTFOLIO().taxableGainPct));
+      T(`${_pfx} my data: the accessor reads the clamped 0.95`, window.__g.taxableGainShare() === 0.95, String(window.__g.taxableGainShare()));
     }
     const giNeg = gainInput();
     await type(giNeg, -5);
     const sv3 = saveBtn();
     if (sv3) {
       await click(sv3); await flush(); await flush();
-      T("V533 my data: a negative entry is clamped to 0 on save", window.__g.PORTFOLIO().taxableGainPct === 0, String(window.__g.PORTFOLIO().taxableGainPct));
+      T(`${_pfx} my data: a negative entry is clamped to 0 on save`, window.__g.PORTFOLIO().taxableGainPct === 0, String(window.__g.PORTFOLIO().taxableGainPct));
+    }
+  }
+}
+
+// ═══ v5.34 — THE CONVERSION-TAX FUNDING COPY, ON BOTH SURFACES ════════════════════════════════
+// Why this block exists: a §B2 sweep found that NOTHING in the suite asserted any of this copy,
+// which is how "no sale, no gains tax" survived from v5.9 to v5.33 while being false the whole
+// time. Under `withhold` the conversion absorbs only min(conv, due) (source L4073) and any
+// RESIDUAL falls through to the brokerage sale (L4087), which realizes gain and is taxed (L4103).
+// Measured on the t3 fixture household at the shipped default share of 0: a $10K/yr conversion
+// makes 19 funding sales realizing $111,359 of gain and $9,428 of LTCG tax.
+//
+// The second correction is one v5.34 caused rather than inherited: through v5.33 a declared 0%
+// meant no gain ever (`_gf = P.taxableGainFrac`), so "modeled as tax-free" was TRUE. v5.34's
+// tracker makes the declared share the OPENING basis only, and growth accrues gain from there —
+// so the same sentence became false the moment the tracker landed. OPERATIONS §B2: gate per leg.
+// Each leg asserts the copy ITS OWN build carries; the prior leg is not a defect pin.
+if (VER === "v533" || VER === "v534") {
+  const NEW = VER === "v534";
+
+  // ── The Field Manual (iframe srcdoc — a textContent read passes vacuously, see L159) ──
+  await click(tabs().find(b => b.textContent.trim() === "docs")); await flush();
+  const _fr = body().querySelector('iframe[title="Danger Close Documentation"]');
+  const _man = (_fr && _fr.getAttribute("srcdoc")) || "";
+  T("V534 funding: PRECONDITION — the manual is readable and carries the funding control entry",
+    _man.length > 50000 && _man.includes("conversion-tax funding"), String(_man.length));
+
+  if (NEW) {
+    T("V534 EXTINCTION: the manual no longer claims withholding means no sale and no gains tax",
+      !_man.includes("no sale, no gains tax"));
+    T("V534 EXTINCTION: the manual no longer calls the 0% case a sale that creates no profit",
+      !_man.includes("a sale that creates no taxable profit"));
+    T("V534 docs: the manual says the residual is still sold and still realizes gain",
+      _man.includes("any remainder is still sold from the brokerage and still realizes gain"));
+    T("V534 docs: the manual calls the share a running cost basis, not a fixed rate",
+      _man.includes("carried as a running cost basis, not a fixed rate"));
+    T("V534 docs: the manual says the entered share is the OPENING one",
+      _man.includes("The share you enter is the OPENING one")
+      && _man.includes("even a pool declared at 0 realizes gain on later sales"));
+  } else {
+    T("PRIOR LEG: this build still carries the pre-v5.34 no-sale-no-gains-tax copy",
+      _man.includes("no sale, no gains tax"));
+    T("PRIOR LEG: ...and still calls the 0% case a sale that creates no taxable profit",
+      _man.includes("a sale that creates no taxable profit"));
+  }
+
+  // ── The live Roth tab, which the manual only describes ──
+  await click(tabs().find(b => b.textContent.trim() === "roth")); await flush();
+  const _fundSel = [...body().querySelectorAll("select")].find(s =>
+    [...s.options].some(o => o.value === "taxable") && [...s.options].some(o => o.value === "withhold"));
+  T("V534 funding: PRECONDITION — the funding selector is on the Roth tab",
+    !!_fundSel, _fundSel ? [..._fundSel.options].map(o => o.value).join("|") : "not found");
+
+  const rothTxt = () => (body().textContent || "").replace(/\s+/g, " ");
+  T("V534 funding: PRECONDITION — the 0%-gains branch is the one rendered by default",
+    rothTxt().includes("0% gains:"), rothTxt().slice(0, 0) || "");
+
+  if (NEW) {
+    T("V534 EXTINCTION: the Roth tab no longer says a 0% pool sells tax-free",
+      !rothTxt().includes("selling from taxable is modeled as tax-free"));
+    T("V534 roth: it says the pool STARTS as all cost basis",
+      rothTxt().includes("the account starts as all cost basis, so selling it today realizes nothing"));
+    T("V534 roth: ...and that growth accrues gain from there",
+      rothTxt().includes("growth accrues as gain from there, so sales in later years can still be taxed"));
+  } else {
+    T("PRIOR LEG: this build still says a 0% pool sells tax-free",
+      rothTxt().includes("selling from taxable is modeled as tax-free"));
+  }
+
+  if (_fundSel) {
+    // React owns this select: set through the native setter, then dispatch change.
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, "value")
+        .set.call(_fundSel, "withhold");
+      _fundSel.dispatchEvent(new window.Event("change", { bubbles: true }));
+    });
+    await flush();
+    const wTxt = rothTxt();
+    T("V534 funding: PRECONDITION — switching the selector actually renders withhold mode",
+      wTxt.includes("Withhold mode:"), wTxt.includes("0% gains:") ? "still on the sale-mode copy" : "");
+    if (NEW) {
+      T("V534 EXTINCTION: withhold mode no longer claims no sale and no capital-gains tax",
+        !wTxt.includes("No sale, no capital-gains tax"));
+      T("V534 roth: withhold mode says the remainder is still sold and still realizes gains",
+        wTxt.includes("the remainder is still sold from your taxable account and still realizes gains"));
+      T("V534 roth: ...and still discloses the unmodelled under-59½ penalty",
+        wTxt.includes("would also owe a 10% penalty"));
+    } else {
+      T("PRIOR LEG: this build's withhold mode still claims no sale and no capital-gains tax",
+        wTxt.includes("No sale, no capital-gains tax"));
     }
   }
 }

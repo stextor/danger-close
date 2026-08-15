@@ -44,12 +44,32 @@ if (MODE === "compare") {
   //
   // These keys are asserted to DIFFER, which is a stronger statement than skipping them: if a future
   // change silently reverted the fix, this would fail.
-  const INTENDED_DIFFS = { "v513→v514": ["roth", "rothCurrentEstate"] };
+  //
+  // v5.34 declares ["roth", "rothAca"] and NOT "rothCurrentEstate". The brief's §4 predicted all
+  // three Engine A fingerprints would move; two did. The third is byte-identical for a mechanism
+  // that was verified rather than assumed, and the measured set was ACCEPTED on that basis
+  // (maintainer decision, 2026-08-14) rather than by adjusting the prediction to fit:
+  //
+  //   `rothCurrentEstate` isolates ONE strategy — "current", the user's own slider setting — on a
+  //   household built with currentConv 70000 and acaPremium 0. That strategy converts hard enough
+  //   that later ordinary income stays inside the 0% LTCG bracket, so its realized gain is taxed
+  //   at nothing, the gross-up adds nothing, the sale is unchanged and so is the estate. The
+  //   invariance is a property of THE FIXTURE, not of the code: on the same household with the
+  //   pension raised to $8,000/mo the same strategy moves by $38,463.
+  //
+  // Leaving it in the identical set is therefore not a shrug — it PINS the finding. If this figure
+  // ever starts moving, parity fails and someone has to work out why, which is exactly what we
+  // would want. `roth` carries the whole strategy set and did change, so Engine A is still proven
+  // to have moved; nothing is being hidden by this key staying put.
+  const INTENDED_DIFFS = {
+    "v513→v514": ["roth", "rothCurrentEstate"],
+    "v533→v534": ["roth", "rothAca"],
+  };
   const expectDiff = new Set(INTENDED_DIFFS[`${PRIOR}→${CUR}`] || []);
   for (const key of Object.keys(a)) {
     const same = JSON.stringify(a[key]) === JSON.stringify(b[key]);
     if (expectDiff.has(key)) {
-      T(`PARITY: ${key} CHANGED as intended across ${PRIOR} → ${CUR} (Engine A corrected)`, !same,
+      T(`PARITY: ${key} CHANGED as intended across ${PRIOR} → ${CUR}`, !same,
         same ? "expected a change here and found none — was the fix reverted?" : "");
     } else {
       T(`PARITY: ${key} identical across ${PRIOR} → ${CUR}`, same,
@@ -76,6 +96,24 @@ const tl = g.PLAN_TIMELINE();
 const retireYear = tl.targetRetireYear;
 const fp = {};
 const rnd = (x, d = 2) => Number(Number(x).toFixed(d));
+
+// ── v5.34 (E-6): PIN THE GLOBAL EMBEDDED-GAIN SHARE AROUND EVERY FINGERPRINT RUN ────────────
+// The households below are explicit `P` literals, and the file says so — "fully explicit on
+// purpose (scope D-3)". From v5.34 that is no longer the whole truth: `taxableGainShare()`
+// reads the MODULE-LEVEL `PORTFOLIO`, not the P literal, so Engine D's basis tracker (and
+// through it Engines B and C) depends on a global this file never set. A future release that
+// changed the shipped default would silently move a "fully explicit" fingerprint and be read
+// as an engine regression.
+//
+// Pinning to 0 is not a claim that 0 is correct — it is the SHIPPED default (D-2, still
+// PARTIALLY ADDRESSED), and the fingerprint's job is release-over-release identity, not
+// realism. Note that pinning the share to 0 does NOT make the fingerprints gain-free: under
+// Option A growth accrues gain whatever the opening basis was. That is deliberate.
+// Pre-v5.33 builds have no such field; guard so frozen legs still load.
+if (g.PORTFOLIO && typeof g.PORTFOLIO === "function") {
+  const _P = g.PORTFOLIO();
+  if (_P && Object.prototype.hasOwnProperty.call(_P, "taxableGainPct")) _P.taxableGainPct = 0;
+}
 
 console.log(`t2 — ENGINES (${VER})`);
 
