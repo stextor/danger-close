@@ -25,10 +25,10 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 
 | Field | Value |
 |---|---|
-| Version | **v5.34** |
-| Source file in knowledge | `DangerClose-v5_34.jsx` |
-| Source md5 | `db5efe3ccbdbacc05e7c76a8c31e74a0` |
-| Built `index.html` md5 | `94c41e9c58dfb1371bc0ec3f075576a6` |
+| Version | **v5.35** |
+| Source file in knowledge | `DangerClose-v5_35.jsx` |
+| Source md5 | `a28843d3e1f441e90c765419264954ff` |
+| Built `index.html` md5 | `2361b2ac3fe739d50526fd954b80fb63` |
 | Shipped | 2026-08 |
 
 **Any work — edits, verification, scope premises — is done against this file.** Confirm its
@@ -44,7 +44,7 @@ which halted the v5.30 build and cost most of a session to diagnose. Recorded as
 
 ⚠ **Prefer the clone-and-diff in OPERATIONS §A2 over this table.** A recorded table is only as fresh as
 the release that wrote it, and this project has had three separate recorded blocks go stale. This is the
-offline fallback, accurate **as of v5.34, 2026-08-15** — every row below was computed from the file
+offline fallback, accurate **as of v5.35, 2026-08-15** — every row below was computed from the file
 that ships in this release's package, not carried forward.
 
 **Two mapping caveats.** The pool flattens repo paths: `tools_fixture.jsx` here is
@@ -57,7 +57,7 @@ that ships in this release's package, not carried forward.
 | `capture_gain_fp.mjs` | `99f096c7c332b5ec7a87949681386a71` | `qa/capture_gain_fp.mjs` |
 | `dom_entry_v533.jsx` | `aa695416ba7bb84eb2468cf2b3c9c84f` | `qa/qa-baseline/dom_entry_v533.jsx` |
 | `dom_entry_v534.jsx` | `a5db4a5643f2433fa994ea6758b308db` | `qa/qa-baseline/dom_entry_v534.jsx` |
-| `domdiff_withdrawal.mjs` | `a8b3922a1875aee174013530d9ccce8a` | `qa/domdiff_withdrawal.mjs` |
+| `domdiff_withdrawal.mjs` | `dc48d0c204bf736772e92a542d62d9c1` | `qa/domdiff_withdrawal.mjs` |
 | `env_dom.mjs` | `0ee15a1be6099a50319cfb271b530c4a` | `qa/qa-baseline/env_dom.mjs` |
 | `main.jsx` | `d9eca7b469a3fb7ec1c5325fd4bf8145` | `src/main.jsx` |
 | `probe_withhold_gain.mjs` | `b7fbc3fc34a0684c88b79123ddcda57c` | `qa/probe_withhold_gain.mjs` |
@@ -72,16 +72,16 @@ that ships in this release's package, not carried forward.
 | `t16_roth_ladder_filing.mjs` | `829c97c01efeb707da011c1468fefbb5` | `qa/t16_roth_ladder_filing.mjs` |
 | `t17_engineC_exact.mjs` | `75d21513fe2e98b4430507bd64e6a6f4` | `qa/t17_engineC_exact.mjs` |
 | `t18_engineB_exact.mjs` | `b06e714aa050c11e5ede6e8771d7a243` | `qa/t18_engineB_exact.mjs` |
-| `t19_engineD_exact.mjs` | `0f300d46480013cf8b515735cd8816d8` | `qa/t19_engineD_exact.mjs` |
-| `t1_units.mjs` | `3d2583693475187681a050c47443baa6` | `qa/qa-baseline/t1_units.mjs` |
-| `t20_other_taxtype.mjs` | `c9b127780227868ff05d2cd08b37e0bd` | `qa/t20_other_taxtype.mjs` |
+| `t19_engineD_exact.mjs` | `934d8182ccfa4abc620ae10a00b54dec` | `qa/t19_engineD_exact.mjs` |
+| `t1_units.mjs` | `a9c7bbd47facb37eeae7219d1ae36350` | `qa/qa-baseline/t1_units.mjs` |
+| `t20_other_taxtype.mjs` | `8bb230220ee1ac5e6a8489a0e0f558ed` | `qa/t20_other_taxtype.mjs` |
 | `t21_tools.mjs` | `c5fb4c712135028f1effa039c84e0b90` | `qa/t21_tools.mjs` |
 | `t22_aca_floor.mjs` | `2f626831143668ac86818ceac77c2465` | `qa/t22_aca_floor.mjs` |
 | `t2_engines.mjs` | `769bc6a60b1b58ae385e5b2d9a7cc24a` | `qa/qa-baseline/t2_engines.mjs` |
-| `t3_roth.mjs` | `1ee958134c1236e22847d7a9647cdcf2` | `qa/qa-baseline/t3_roth.mjs` |
-| `t4_dom.mjs` | `0f16ce11ea892be6b8b70467143bd7e7` | `qa/qa-baseline/t4_dom.mjs` |
-| `t5_storage.mjs` | `f1b0072bf7cb72a2e387bad52a0132e9` | `qa/qa-baseline/t5_storage.mjs` |
-| `t6_single.mjs` | `5a28799680adb9dc4660b27fc954d29e` | `qa/qa-baseline/t6_single.mjs` |
+| `t3_roth.mjs` | `045cc3f9f15d4be11db38ea7b42ac8fd` | `qa/qa-baseline/t3_roth.mjs` |
+| `t4_dom.mjs` | `da8e938591955631b56f64a827cadfd7` | `qa/qa-baseline/t4_dom.mjs` |
+| `t5_storage.mjs` | `557c921cd7547c2622913505e5d9f5e7` | `qa/qa-baseline/t5_storage.mjs` |
+| `t6_single.mjs` | `186720f09481fbfe702bed3376223112` | `qa/qa-baseline/t6_single.mjs` |
 | `t7_accrual.mjs` | `490b82d3024b179a274b5498936e1a92` | `qa/t7_accrual.mjs` |
 | `t8_invariant.mjs` | `a9bd015c8b50b54a98d0ed9a4e2afaaf` | `qa/t8_invariant.mjs` |
 | `t9_dom_smoke.mjs` | `080c3edbe5f5479ac488d2f54034de69` | `qa/t9_dom_smoke.mjs` |
@@ -100,9 +100,9 @@ destinations from v5.31 forward.
 
 | Field | Value |
 |---|---|
-| Version | **v5.33** |
-| Source file in knowledge | `DangerClose-v5_33.jsx` |
-| Source md5 | `df10c6226d7c4519919bb55238609a92` |
+| Version | **v5.34** |
+| Source file in knowledge | `DangerClose-v5_34.jsx` |
+| Source md5 | `db5efe3ccbdbacc05e7c76a8c31e74a0` |
 
 This is the immediately-prior shipped release. The regression suite diffs current against it.
 It exists in knowledge ONLY as that comparison baseline. When the next release ships, it rolls
