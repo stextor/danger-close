@@ -1,6 +1,6 @@
 #!/bin/bash
 # ─────────────────────────────────────────────────────────────────────────────
-# Danger Close — release verification · v5.34 (2026-08-15)
+# Danger Close — release verification · v5.35 (2026-08-15)
 #
 # PROVENANCE: originally authored 2026-08-11 for v5.22 by transcribing the steps
 # actually executed in that session. Rolled forward to v5.23 from that file
@@ -52,17 +52,17 @@
 # Every command below was run and its result recorded in the release notes.
 #
 # Usage:  ./VERIFY.sh /path/to/workdir
-#    workdir must contain:  v533.jsx  v534.jsx  DangerClose.jsx(=v534)  qa/
+#    workdir must contain:  v534.jsx  v535.jsx  DangerClose.jsx(=v535)  qa/
 # ─────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
 ROOT="${1:-$(pwd)}"
 cd "$ROOT"
 
-PRIOR=v533
-CURR=v534
-EXPECT_SRC_MD5=db5efe3ccbdbacc05e7c76a8c31e74a0
-EXPECT_BUILT_MD5=94c41e9c58dfb1371bc0ec3f075576a6
+PRIOR=v534
+CURR=v535
+EXPECT_SRC_MD5=a28843d3e1f441e90c765419264954ff
+EXPECT_BUILT_MD5=2361b2ac3fe739d50526fd954b80fb63
 
 say() { printf "\n\033[1m== %s ==\033[0m\n" "$*"; }
 die() { printf "\n\033[31mFAIL: %s\033[0m\n" "$*" >&2; exit 1; }
@@ -200,7 +200,7 @@ any of this copy. t4 now does, on both surfaces, gated per leg.
 TWO NEGATIVE CONTROLS ON THAT COPY, both of which fired at the v5.34 build and
 both of which must fire again if re-run: restore the manual's old clauses (t4
 fails 3, all in the docs block); restore the Roth tab's old clauses (t4 fails 5,
-all on the tab). Each fires ONLY on the surface it corrupted. Corrupt v534.jsx —
+all on the tab). Each fires ONLY on the surface it corrupted. Corrupt v535.jsx —
 the file mk_testable.sh BUILDS FROM — not the canonical DangerClose.jsx beside
 it; corrupting only the latter leaves the bundle clean and the control silently
 does not fire.
@@ -211,10 +211,14 @@ asserts the copy ITS OWN build carries; the prior leg is gating, not a defect pi
 
 domdiff_withdrawal.mjs had a HARDCODED default pair four releases stale (v529 ->
 v530) and died at module load looking for a bundle the run folder does not hold.
-Re-pointed to v533 -> v534. Re-point it EVERY release.
+Re-pointed to v534 -> v535, and RE-SCOPED from strict identity to excise-by-anchor:
+# this release moves the tab's figures AND its copy, so strict identity is the wrong
+# assertion and keeping it would be a stale lock. Expect 20 checks. Re-point AND
+# re-scope it EVERY release - the right assertion is the one matching what the
+# release claims to have done.
 
 BUILT MD5 — the scaffold was proven before the new hash was trusted: v5.33 was
-rebuilt from its own unmodified source and reproduced c998f5ff760c6c5e04ab6173a68f6421
+rebuilt from its own unmodified source and reproduced 94c41e9c58dfb1371bc0ec3f075576a6
 byte-for-byte. That is what distinguishes "the scaffold is complete" from "the
 hash looks plausible" (OPERATIONS §N3a). The binding check on a built artifact is
 still smoke_built.mjs at 16/16, not the hash.

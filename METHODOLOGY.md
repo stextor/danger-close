@@ -330,6 +330,44 @@ withdrawals, and Guyton-Klinger–style guardrails at 80%/120% of the planned ba
 spending adjustments on breach. The comparison table presents cash-first, tax-optimized, and
 fixed-real strategies descriptively.
 
+**Where the RMD comes from (v5.35).** Through v5.34 the sentence above was true of the tax
+*treatment* and false of the *sourcing*: the engine folded the RMD into a single withdrawal need and
+satisfied the whole of it from the taxable sleeve first, then returned the unspent part to the same
+pool. Balance-neutral, and therefore invisible for many releases — but an RMD is a distribution from
+the retirement account and cannot be met by selling brokerage.
+
+From v5.35 the required amount is decomposed by **where the money actually sits**, using the same
+arithmetic that produces it, so the parts sum back to the cent:
+
+- the share resting on the Traditional buckets is drawn from B1 → B4 in sleeve order;
+- the share resting on a **named IRA entered under Other accounts** is drawn from that account,
+  which has lived in the first-priority pool since v5.26;
+- the spending need is then whatever the distribution did not already cover, and only that part
+  reaches the taxable sleeve.
+
+Unspent required cash still lands in the taxable account, as before. It arrives **already taxed**,
+so it dilutes that pool's ordinary-income share rather than adding to it.
+
+**Two consequences for figures, in opposite directions, both disclosed in the app.** Ending balances
+*fall* on affected households, because money that used to keep compounding in the tax-deferred
+sleeve now sits in a slower-growing taxable one — the plan looks slightly worse, which is the
+conservative direction. And `Total withdrawn` *falls*, because it had been counting the same cash
+twice as it round-tripped out and back.
+
+**Each required dollar now reaches MAGI exactly once.** It had been counted twice — once as the
+distribution, and again through the draw that funded it — because the same Other-accounts money was
+tracked both as ordinary income and as the subset carrying a required distribution. The
+overstatement was conservative at first and turned optimistic later, as the pool's ordinary
+character was spent on paper while its balance stood untouched.
+
+**Stated approximations that remain.** `Total withdrawn` counts every dollar that leaves an account,
+including required cash the plan never needed to spend — it is a distribution total, not a measure
+of spending, and the Withdrawal tab says so. A draw from the first-priority pool is still taxed in
+proportion to what that pool holds rather than by draining one type before another, and that
+proportion is measured before the required distribution takes its own fully-ordinary slice; whether
+it should be recomputed on the remainder is an open question, not a settled simplification. Engine D
+still applies no tax to balances.
+
 ## 10. Other engines, briefly
 
 Survivor modeling (filing-status switch to single, one SS check, survivor spending factor, widow
