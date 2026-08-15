@@ -142,5 +142,80 @@ if (namedIRA) {
      Math.round(restored.totalDrawn) === Math.round(r.totalDrawn));
 }
 
+// ══ v5.34 — EXTINCTION: the S-7 basis tracker is OUT, and must stay out until the
+//    sequencer below is fixed ══════════════════════════════════════════════════════════
+// v5.34 briefly gave Engine D a cost-basis tracker and published a realized-gain series that
+// Engines B and C added to MAGI. It was backed out before shipping: the gain was computed on
+// `drawFromTaxable`, which includes an RMD the sequencer routes THROUGH the taxable sleeve, so
+// it invented gain in households with no taxable account at all ($24,657 in year one of t17
+// case G, which holds a Traditional IRA and nothing else). These assertions exist so the layer
+// cannot return before the defect pinned below is fixed. FLIP THEM AT v5.35, together.
+console.log("\n  v5.34 \u2014 extinction: no basis tracker on the schedule, no engine reading one");
+{
+  const row = r.schedule[0];
+  ck("EXTINCTION: the schedule row publishes no capGain_y", !("capGain_y" in row));
+  ck("EXTINCTION: the schedule row publishes no taxBasis", !("taxBasis" in row));
+  // AST would be better; a text scan is sufficient here because these identifiers do not occur
+  // in DOCS_HTML and the one-line blob is excluded by length, as elsewhere in this suite.
+  const body = SRC.split("\n").filter(l => l.length < 5000).join("\n");
+  ck("EXTINCTION: no engine reads a per-year gain series (_gainByYr / _gainByYrI)",
+     !body.includes("_gainByYr"), "a gain series is wired into an engine again");
+  ck("EXTINCTION: Engine B's capGains_y is back to the disclosed hardcoded 0",
+     body.includes("const capGains_y = 0;"), "Engine B is reading a gain series again");
+}
+
+// ══ [KNOWN DEFECT] 2026-08-15 — Engine D SOURCES THE RMD FROM THE TAXABLE SLEEVE ═══════
+// PRE-EXISTING (v5.33 and earlier behave identically); found while backing out the v5.34
+// tracker above. L4595 folds the RMD into a generic `totalToWithdraw = drawNeeded + rmd_y`
+// and the sequencer satisfies the whole of it from the taxable pool FIRST, then returns the
+// same cash as RMD surplus. An RMD is a distribution from the retirement account and cannot
+// be met by selling brokerage assets. The round trip is balance-neutral, which is why it went
+// unnoticed for many releases — but it is visible on the Withdrawal tab, which prints
+// "Tax $XXK" drawn in a year where nothing was spent, and it is what made the v5.34 tracker
+// produce phantom gains. Measured: 83.7% of the demo household's plan-life realized gain.
+// This pin asserts TODAY'S WRONG BEHAVIOUR so the defect stays visible and the suite stays
+// honest (OPERATIONS §D). FIX AT v5.35 and flip it to the inverse assertion.
+console.log("\n  [KNOWN DEFECT] the RMD is drawn from the taxable sleeve (fix at v5.35)");
+{
+  // ⚠ t19's OWN fixture does not exercise this and cannot be made to. Measured: across its whole
+  // schedule `drawNeeded` exceeds `rmd_y` every year, so every taxable draw it makes is a genuine
+  // sale funding a genuine shortfall. Two earlier drafts of this pin were written against that
+  // fixture and asserted nothing — 0 qualifying years both times. A purpose-built household is
+  // therefore required, and the fact that it IS required is itself worth recording: the defect
+  // needs guaranteed income large enough to cover expenses, which the demo household lacks.
+  // applyLoadedData (not setPortfolio) because Engine D reads PLAN_TIMELINE, which only
+  // applyLoadedData rebuilds, and it takes a WRAPPER object (OPERATIONS §C).
+  const PSAVE = JSON.parse(JSON.stringify(g.PORTFOLIO()));
+  const PD = JSON.parse(JSON.stringify(PSAVE));
+  PD.positions = [{ name: "IRA", balance: 2000000, trad: 2000000, roth: 0, type: "equity" }];
+  PD.otherAccounts = [];
+  PD.single = false; PD.lifeExpA = 95; PD.lifeExpB = 95;
+  PD.incomeStreams = [{ monthly: 0, tax: "ordinary", owner: "A", startYear: 2000, endYear: 9999 }];
+  const zSS = { tableByAge: { 62: 0, 63: 0, 64: 0, 65: 0, 67: 0, 70: 0 }, planned: 0, plannedAge: 67 };
+  PD.incomeSources = { ssA: { ...zSS }, ssB: { ...zSS }, pension: { amount: 150000 / 12 } };
+  g.applyLoadedData({ portfolio: PD });
+  const d = g.computeWithdrawalPlan({
+    retireYear: g.PLAN_TIMELINE().targetRetireYear, rothAmount: 0, scenarioPreset: "base" });
+  const y = d.schedule.find(x => x.drawNeeded === 0 && x.rmd_y > 0 && x.taxable > x.rmd_y);
+  ck("a no-spend RMD year exists on the purpose-built household", !!y,
+     y ? `${y.yr}` : "none \u2014 the household no longer produces one");
+  if (y) {
+    ck("[KNOWN DEFECT 2026-08-15] the RMD is drawn from the TAXABLE sleeve though nothing is spent",
+       Math.round(y.drawFromTaxable) === Math.round(y.rmd_y),
+       `${y.yr}: drawNeeded ${$(y.drawNeeded)}, rmd ${$(y.rmd_y)}, drawFromTaxable ${$(y.drawFromTaxable)}`);
+    // The round trip is what makes it balance-neutral and therefore invisible: the pool moves
+    // only by growth across the year the RMD supposedly drained it.
+    const prev = d.schedule.find(x => x.yr === y.yr - 1);
+    ck("[KNOWN DEFECT 2026-08-15] ...and the pool GROWS across that year, so no money really left",
+       !!prev && y.taxable > prev.taxable,
+       prev ? `${prev.yr} ${$(prev.taxable)} -> ${y.yr} ${$(y.taxable)}` : "no prior year");
+  }
+  g.applyLoadedData({ portfolio: PSAVE });
+  const back = g.computeWithdrawalPlan(ARGS);
+  ck("fixture restored after the defect pin \u2014 baseline figures return",
+     Math.round(back.totalDrawn) === Math.round(r.totalDrawn),
+     `${$(back.totalDrawn)} vs ${$(r.totalDrawn)}`);
+}
+
 console.log(`\nt19 SUITE: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

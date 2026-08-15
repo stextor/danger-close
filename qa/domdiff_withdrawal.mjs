@@ -1,4 +1,7 @@
-// Cross-version DOM comparison of the WITHDRAWAL tab (Engine D). Default pair v524 -> v525.
+// Cross-version DOM comparison of the WITHDRAWAL tab (Engine D). Default pair v533 -> v534.
+// RE-POINT THE DEFAULT EVERY RELEASE — it is hardcoded, and a stale default dies at module
+// load looking for a bundle the run folder does not contain (observed at the v5.34 build:
+// the committed default was still v529 -> v530, four releases behind).
 //
 // WHY THIS EXISTS: the release scope assumed t4 and t12 would witness the hoist.
 // They do not — a +10% inflation perturbation inside the hoisted function moves
@@ -11,7 +14,7 @@
 import { JSDOM } from "jsdom";
 import { createRequire } from "module";
 
-const [VA, VB] = [process.argv[2] || "v529", process.argv[3] || "v530"];
+const [VA, VB] = [process.argv[2] || "v533", process.argv[3] || "v534"];
 
 const renderWithdrawal = async (ver) => {
   // Seed Math.random BEFORE the bundle import — d3-random captures it at module
