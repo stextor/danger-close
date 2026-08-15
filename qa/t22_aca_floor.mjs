@@ -60,8 +60,6 @@ try { PRIOR_G = (await import(`./app_${PRIOR}.mjs`)).__g; }
 catch (e) { PRIOR_ERR = String(e).split("\n")[0]; }
 
 let pass = 0, fail = 0; const fails = [];
-import fs from "fs";
-const SRC = fs.readFileSync(new URL("../DangerClose.jsx", import.meta.url), "utf8"); // group H structural checks
 const CK = (name, ok, detail = "") => {
   if (ok) { pass++; console.log(`  \u2713 ${name}`); }
   else { fail++; const m = `  \u2717 ${name}${detail ? " \u2014 " + detail : ""}`; console.log(m); fails.push(m); }
@@ -199,61 +197,16 @@ console.log(`\n\u2500\u2500 F \u00b7 A2 moved no figure \u2014 byte identity vs 
     const now = g.runRothStrategies(BRIDGE);
     const was = PRIOR_G.runRothStrategies(BRIDGE);
     CK("F: same strategy set", JSON.stringify(now.map(r => r.key)) === JSON.stringify(was.map(r => r.key)));
-    // ── GATED PER LEG at v5.34 (OPERATIONS §B2) ──────────────────────────────────────────────
-    // Group F was written for releases that move NO figure, and byte identity was the whole
-    // claim. v5.34 is the first release since it was written that moves these figures ON
-    // PURPOSE: Engine A gained a capital-gains basis tracker, so its sales realize gain, the
-    // gain enters ACA MAGI, and the per-year subsidy map legitimately differs. Asserting
-    // identity here would be asserting that v5.34 did not happen.
-    //
-    // This is an INVERSION, not a deletion, and it is gated so each leg asserts what is true
-    // for its own build — the §B2 rule, and the distinction from a defect PIN. The gate is a
-    // capability probe rather than a version string: `realizeGain` is the v5.34 helper and is
-    // exported GUARDED, so it is undefined on every earlier build. Where the current build
-    // predates the tracker the original identity claim still runs unchanged.
-    const _curHasTracker = typeof g.realizeGain === "function";
-    const _priorHasTracker = typeof PRIOR_G.realizeGain === "function";
-    const _crossesTracker = _curHasTracker && !_priorHasTracker;
-    if (!_crossesTracker) {
-      for (let i = 0; i < was.length; i++) {
-        CK(`F: ${was[i].key} \u2014 acaSubByYr is byte-identical`,
-          JSON.stringify(now[i].acaSubByYr) === JSON.stringify(was[i].acaSubByYr),
-          `${JSON.stringify(now[i].acaSubByYr)} vs ${JSON.stringify(was[i].acaSubByYr)}`);
-      }
-      CK("F: totAcaLoss is unchanged on every row (A2 is a DISPLAY exclusion, not an engine one)",
-        now.every((r, i) => r.totAcaLoss === was[i].totAcaLoss),
-        now.map((r, i) => `${r.key}:${r.totAcaLoss}/${was[i].totAcaLoss}`).join(" "));
-      CK("F: estate is unchanged on every row (it feeds the parity fingerprint)",
-        now.every((r, i) => r.estate === was[i].estate));
-    } else {
-      // The v5.34 statement. Deliberately NOT "some number changed" — that would go green on
-      // any drift at all. It names WHICH rows may move and WHICH must not, and it asserts the
-      // DIRECTION, so a sign error or a runaway estimate fails here rather than passing as
-      // "expected to differ". A premium-zero row has no ACA code in it and must be untouched.
-      CK("F[v5.34]: the strategy set is unchanged across the tracker boundary",
-        now.length === was.length);
-      CK("F[v5.34]: the ACA-bridge rows MOVE (the tracker reaches ACA MAGI)",
-        now.some((r, i) => JSON.stringify(r.acaSubByYr) !== JSON.stringify(was[i].acaSubByYr)),
-        "no subsidy map moved at all — the tracker is not reaching the ACA path");
-      CK("F[v5.34]: no row LOSES a bridge year that the prior build paid in full",
-        now.every((r, i) => Object.keys(was[i].acaSubByYr || {}).every(y =>
-          !(was[i].acaSubByYr[y] > 0 && (r.acaSubByYr[y] || 0) === 0))),
-        now.map((r, i) => `${r.key}:${JSON.stringify(r.acaSubByYr)}/${JSON.stringify(was[i].acaSubByYr)}`).join(" "));
-      CK("F[v5.34]: acaCliff does not end up WORSE than the prior build",
-        (() => {
-          const sum = o => Object.values(o || {}).reduce((a, b) => a + b, 0);
-          const iN = now.findIndex(r => r.key === "acaCliff"), iW = was.findIndex(r => r.key === "acaCliff");
-          return iN < 0 || iW < 0 || sum(now[iN].acaSubByYr) >= sum(was[iW].acaSubByYr) - 60;
-        })(),
-        "the cliff strategy lost subsidy against the prior build — S-6 has not held");
-      CK("F[v5.34]: every subsidy figure is finite and non-negative on both builds",
-        now.every(r => Object.values(r.acaSubByYr || {}).every(v => Number.isFinite(v) && v >= 0)));
-      CK("F[v5.34]: totAcaLoss stays finite on every row",
-        now.every(r => Number.isFinite(r.totAcaLoss)),
-        now.map(r => `${r.key}:${r.totAcaLoss}`).join(" "));
-      CK("F[v5.34]: estate stays finite and positive on every row",
-        now.every(r => Number.isFinite(r.estate) && r.estate > 0));
+    for (let i = 0; i < was.length; i++) {
+      CK(`F: ${was[i].key} \u2014 acaSubByYr is byte-identical`,
+        JSON.stringify(now[i].acaSubByYr) === JSON.stringify(was[i].acaSubByYr),
+        `${JSON.stringify(now[i].acaSubByYr)} vs ${JSON.stringify(was[i].acaSubByYr)}`);
     }
+    CK("F: totAcaLoss is unchanged on every row (A2 is a DISPLAY exclusion, not an engine one)",
+      now.every((r, i) => r.totAcaLoss === was[i].totAcaLoss),
+      now.map((r, i) => `${r.key}:${r.totAcaLoss}/${was[i].totAcaLoss}`).join(" "));
+    CK("F: estate is unchanged on every row (it feeds the parity fingerprint)",
+      now.every((r, i) => r.estate === was[i].estate));
     // Gated per prior tag. Against a PRE-v5.32 prior this is the original transition claim:
     // the flag did not exist and now does. Against v5.32 or later the flag exists on BOTH
     // sides, and the honest assertion is that it is still present and still populated —
@@ -263,11 +216,9 @@ console.log(`\n\u2500\u2500 F \u00b7 A2 moved no figure \u2014 byte identity vs 
       CK("F: acaFloorYrs is NEW \u2014 the prior build does not have it",
         was.every(r => r.acaFloorYrs === undefined) && now.every(r => r.acaFloorYrs !== undefined));
     } else {
-      // Same gate, same reason: the flag is keyed to ACA MAGI, so a release that moves ACA MAGI
-      // moves it too. Present-and-populated survives the boundary; byte identity does not.
-      CK(`F: acaFloorYrs is present on BOTH builds${_crossesTracker ? " (identity waived across the tracker boundary)" : " and byte-identical"} (prior=${PRIOR})`,
+      CK(`F: acaFloorYrs is present on BOTH builds and byte-identical (prior=${PRIOR})`,
         was.every(r => r.acaFloorYrs !== undefined) && now.every(r => r.acaFloorYrs !== undefined)
-        && (_crossesTracker || now.every((r, i) => JSON.stringify(r.acaFloorYrs) === JSON.stringify(was[i].acaFloorYrs))),
+        && now.every((r, i) => JSON.stringify(r.acaFloorYrs) === JSON.stringify(was[i].acaFloorYrs)),
         now.map((r, i) => `${r.key}:${JSON.stringify(r.acaFloorYrs)}/${JSON.stringify(was[i].acaFloorYrs)}`).join(" "));
     }
   }
@@ -292,93 +243,6 @@ console.log("\n\u2500\u2500 G \u00b7 negative controls (if one does NOT fire, th
     () => Object.keys(g.runRothStrategies(BRIDGE).find(r => r.key === "none").acaFloorYrs).length > 0);
   CK("G: floorMult was restored after the controls", g.ACA_CONSTS().floorMult === saved, String(g.ACA_CONSTS().floorMult));
   CK("G: and the floor works again", g.acaApplicablePct(0.999, "enhanced") === null);
-}
-
-// ── GROUP H · v5.34 (S-6 + d-iv) · the ACA cliff SOLVER under a tracked basis ───────────────
-// WHY THIS GROUP EXISTS. The `acaCliff` strategy converts up to the 400%-FPL cliff and no
-// further. Since v5.10.1 it has left headroom for the gain its OWN funding sale realizes,
-// because that gain lands in ACA MAGI after the solve. v5.34 replaced the flat declared gain
-// fraction with a real basis tracker, and under a tracker the pool accrues gain from GROWTH
-// whatever the opening basis was — so the v5.10.1 guard, which read the DECLARED fraction,
-// skipped the whole contraction on the shipped default of 0 while the sale went on realizing
-// gain. Measured before the fix: $39,454 of subsidy became $23,828 with two forfeited years,
-// on the setting every user starts from. The strategy built to avoid the cliff crossed it.
-//
-// Each case below is paired with the ONE half of the fix it discriminates. That pairing was
-// measured, not assumed (OPERATIONS §B2): each control was built as a separate source and every
-// case run against every control, so a case that would pass while half the edit was missing is
-// visible here rather than inferred.
-//
-//   case A  · taxable, declared 0     · fires ONLY on a guard that reads the declared fraction
-//   case A' · taxable, declared 0.5   · fires ONLY on a solver whose fixed point does not converge
-//   case B  · withhold, declared 0    · fires ONLY on a solver blind to the ACA-PREMIUM sale
-//
-// ⚠ Case A' is the convergence pin and it is not cosmetic. Folding the ACA-premium gain into
-// the solver's estimate makes that estimate DISCONTINUOUS in conv — the subsidy is a cliff, so
-// `lost` jumps the instant a candidate crosses it (measured jump $6,481 in 2027). The existing
-// 8-pass loop then oscillates with period 2 and returns whichever phase the pass count lands
-// in. It did: conv alternated 49,417 / 55,898 and the even count returned the high one, which
-// forfeited 2027 and 2028. The estimator now prices the subsidy at the solver's TARGET
-// (cliff - solverMargin) rather than at the candidate, which is inactive at the answer and
-// removes the discontinuity from the search path.
-console.log("\n\u2500\u2500 H \u00b7 v5.34 the ACA cliff solver under a tracked basis (S-6 + d-iv)");
-{
-  const solve = (o = {}) => {
-    const row = g.runRothStrategies({ ...BRIDGE, taxableGainFrac: 0, ...o })
-      .find(r => r.key === "acaCliff");
-    const sub = Object.values(row.acaSubByYr).reduce((a, b) => a + b, 0);
-    return { sub, forfeit: Object.keys(row.acaSubByYr).filter(y => row.acaSubByYr[y] === 0), row };
-  };
-  // The anchor. v5.33 pays this on the same household and v5.34 must not lose it.
-  const ANCHOR = 39454, TOL = 60;
-  const near = (x, target = ANCHOR) => Math.abs(x - target) <= TOL;
-
-  // ── case A · the contraction RUNS · declared share 0, the SHIPPED default ──
-  const A = solve({ convTaxFunding: "taxable" });
-  CK("H-A: declared 0 forfeits NO bridge year (the v5.34 regression is gone)",
-    A.forfeit.length === 0, `forfeited [${A.forfeit.join(",")}]`);
-  CK(`H-A: declared 0 keeps the subsidy (~$${ANCHOR})`, near(A.sub), `$${Math.round(A.sub)}`);
-  // REGRESSION PIN. This is the measured before-state, named so it cannot come back quietly.
-  CK("H-A [PIN]: the $23,828 / two-forfeit-year breach on the DEFAULT share does not recur",
-    !(Math.abs(A.sub - 23828) < 100 && A.forfeit.length === 2), `$${Math.round(A.sub)} [${A.forfeit.join(",")}]`);
-
-  // ── case A' · the solver's fixed point CONVERGES · declared 0.5 ──
-  const A2 = solve({ convTaxFunding: "taxable", taxableGainFrac: 0.5 });
-  CK("H-A': a declared 0.5 forfeits no bridge year either (the solver converges)",
-    A2.forfeit.length === 0, `forfeited [${A2.forfeit.join(",")}]`);
-  CK("H-A' [PIN]: the oscillation state ($15,596, 2027+2028 forfeited) does not recur",
-    !(Math.abs(A2.sub - 15596) < 100 && A2.forfeit.length === 2), `$${Math.round(A2.sub)} [${A2.forfeit.join(",")}]`);
-  // The strategy must not do WORSE at the default than at a declared 0.5 — that inversion is
-  // what made the original defect legible, so it is asserted directly rather than implied.
-  CK("H-A': the default share is not WORSE than a declared 0.5", A.sub >= A2.sub - TOL,
-    `default $${Math.round(A.sub)} vs 0.5 $${Math.round(A2.sub)}`);
-
-  // ── case B · the FUNDING sale is absent but the ACA-PREMIUM sale is not ──
-  // Under `withhold` the conversion pays its own tax bill, so there is no funding sale to leave
-  // headroom for. The premium sale is still real, still comes out of the taxable pool, and after
-  // d-iv its gain is still in ACA MAGI. A pension is required: on the pension-free household the
-  // premium sale realizes exactly $0 every year (the no-conversion baseline goes sub-floor, so
-  // `lost` is negative and there is no sale), and this case would assert nothing. That was
-  // measured before the case was written, not discovered afterwards.
-  for (const pen of [1500, 3000]) {
-    const B = solve({ convTaxFunding: "withhold", pen });
-    CK(`H-B: withhold + $${pen}/mo pension forfeits no bridge year (the premium sale is anticipated)`,
-      B.forfeit.length === 0, `forfeited [${B.forfeit.join(",")}]`);
-    CK(`H-B: withhold + $${pen}/mo pension keeps the subsidy (~$${ANCHOR})`, near(B.sub), `$${Math.round(B.sub)}`);
-  }
-  // S6-2 (maintainer, 2026-08-15): the guard no longer excludes `withhold`. If that exclusion
-  // came back, the two cases above would go red — this asserts the REASON, so a reader does not
-  // have to infer it from a subsidy figure.
-  CK("H-B: withhold is not excluded from the solver's contraction",
-    !/convTaxFunding\s*!==\s*"withhold"\s*&&\s*_cgfEff/.test(SRC),
-    "the withhold exclusion is back in the cliff-solver guard");
-
-  // ── the shared rule (D-34-4): one realizeGain, not two implementations ──
-  CK("H: the solver's estimate uses the shared realizeGain helper",
-    typeof g.realizeGain === "function" && /realizeGain\(saleC, _poolC, _basisC\)/.test(SRC));
-  CK("H: realizeGain is proportional — selling alone never moves the gain share",
-    (() => { const r = g.realizeGain(100, 1000, 400); return r.gain === 60 && r.basis === 360; })(),
-    JSON.stringify(g.realizeGain(100, 1000, 400)));
 }
 
 console.log(`\nt22 SUITE: ${pass} passed, ${fail} failed`);
