@@ -1,5 +1,141 @@
 # Changelog
 
+## v5.34 — the conversion-funding basis tracker, and three false statements about it, 2026-08-15
+
+**What ships is Engine A only.** The Roth tab's conversion-tax funding model now carries a real
+cost basis that is tracked year to year, instead of a single declared percentage applied forever.
+The ACA cliff solver was corrected in three places to match. **Every other engine is byte-identical
+to v5.33** — the Taxes, IRMAA and Withdrawal tabs compute exactly what they computed before, and
+`t2`'s cross-version parity guardrail is 9/9 strict.
+
+That is narrower than this release set out to be. The reason is a defect found mid-build, described
+below in full.
+
+### Why the release narrowed
+
+v5.34 was scoped to route realized capital gains through the drawdown as well: Engine D would
+realize gain on its taxable-sleeve withdrawals, and Engines B and C would carry that gain into
+taxable income and into MAGI. That work is **backed out and held for v5.35.**
+
+Engine D folds each year's RMD into a single `totalToWithdraw` and satisfies the whole of it **from
+the taxable sleeve first**, then hands the same cash back as RMD surplus. The balances net out, so
+the round trip has been invisible for many releases — **it behaves identically on v5.33 and is not
+new.** Attaching gain realization to the outbound leg made it visible and consequential: the model
+began realizing capital gain on money that was never sold. Measured, **$24,657 in year one of a test
+household whose only account is a $2M Traditional IRA and whose taxable balance is zero**, and
+**83.7% of the example household's plan-life realized gain**.
+
+The error direction is **conservative** — it overstates tax and MAGI, so the plan looks worse than
+it is — which is why it was safe to hold rather than rush. But a figure that is 84% phantom is not
+a figure to ship, and the honest fix is a sequencer change with every dependent figure
+re-computed by hand, which is its own release.
+
+**The defect is pinned, not hidden** (`t19`, dated `[KNOWN DEFECT] 2026-08-15`, with a restore
+check). Four extinction assertions guard against the gain layer returning piecemeal before the
+sequencer is fixed. `t13` and `t17` returned to their v5.33 figures **with no test edited** — the
+proof condition for the backout, and the reason it can be trusted.
+
+⚠ **Honest coverage accounting:** two negative controls were built, each re-adding one engine's
+wiring alone, and each fired `t19` — but **neither moved `t13` or `t17`**, because re-adding a
+consumer while the producer is gone leaves the term at zero. `t13`/`t17` prove the backout worked;
+only `t19` guards against the layer returning.
+
+### What changed in the model
+
+- **A tracked basis, not a flat fraction.** The declared gain share now seeds the **opening** basis
+  of the taxable pool. From there the pool accrues gain as it grows, and every sale realizes the
+  pool's *effective* share at that moment. Growth is applied to the pool and not to the basis,
+  which is what unrealized appreciation is.
+- **The ACA cliff solver reads the effective share, not the declared one.** The v5.10.1 guard that
+  nets out the solver's own funding-sale gains was reading the declared fraction, which under a
+  tracker treats a declared 0 as "no gain ever" and skips the contraction while the sale goes on
+  realizing gain. Measured against the pre-fix build on the bridge household, **$39,454 of subsidy
+  fell to $23,828 with two bridge years forfeited** — from the strategy that exists to prevent
+  exactly that.
+- **The subsidy a conversion destroys is itself paid by selling, and that sale's gain is now in ACA
+  MAGI.** Without it the solver left headroom for the funding sale and was then pushed over the
+  cliff by the premium sale — the same failure one step later. Bounded three-pass contraction.
+- **Withholding is no longer excluded from the solver's estimate.** It never should have been; see
+  below.
+
+### Three statements about conversion-tax funding were false, and one was falsified by this release
+
+The app has told users, in the Field Manual and on the Roth tab, that paying conversion tax by
+**withholding** means *"no sale, no gains tax."* **That is false, and it was false on every build
+back to v5.9.**
+
+Under withholding the conversion absorbs `min(conversion, bill)` — and the bill is the year's
+*whole* tax and IRMAA charge, not the incremental tax on the conversion. Any residual falls straight
+through to a brokerage sale, which realizes gain and is taxed. Measured on a test household at the
+**shipped default gain share of 0**: a $10K/yr conversion makes **19 funding sales realizing
+$111,359 of gain and $9,428 of capital-gains tax**. On v5.33 the same household with a declared 50%
+share paid **$10,686 more lifetime tax** under withholding than at 0 — under copy that said no sale
+occurs. The claim only holds while the conversion is large enough to swallow the entire bill.
+
+The fourth statement is one **this release falsified rather than inherited**: *"0% gains: selling
+from taxable is modeled as tax-free."* Through v5.33 a declared 0 did mean no gain ever, so that was
+true. Under the tracker it is the opening position only, and growth accrues gain from there.
+
+All four sites are corrected together — the Field Manual entry, the Roth tab's withhold-mode and
+0%-gains copy, and the source comment in Engine A that carried the same claim.
+
+⚠ **Why this survived nine releases: nothing in the suite asserted any of it.** A sweep confirmed no
+test referenced this copy at all, which is the coverage failure OPERATIONS §B2 describes — a green
+suite is not evidence of coverage. `t4` now asserts both surfaces, gated per leg, negative-controlled
+twice (restoring the manual's old copy fails 3 checks; restoring the Roth tab's fails 5, and each
+control fires only on the surface it corrupted).
+
+The METHODOLOGY entry carries a matching **retraction**: it previously stated that withholding and
+gain-free funding "were already correct and are unchanged." Measured false on v5.33 as well — a
+pre-existing documentation error that this release's work exposed rather than created.
+
+### Limitations, stated plainly
+
+- **The RMD sourcing defect above is present and pinned.** It affects the Withdrawal tab's internal
+  routing only at v5.34, because the gain layer that made it consequential is not shipped.
+- **The ACA-premium sale's gain reaches MAGI but is not itself taxed.** The funding sale's gain is
+  charged; this one is not. The asymmetry is optimistic in that one respect, deliberate, and
+  recorded for the next step rather than fixed here.
+- **One blended gain share for the whole account**, carried as a running basis: all long-term, no
+  per-lot selection, no loss harvesting, no wash-sale logic, 59½+ assumed. Under 59½ the withheld
+  slice would also owe a 10% penalty, which is disclosed in-app and not modelled.
+- **The solver prices the subsidy at its target rather than at the candidate conversion.** Folding
+  the premium sale into the estimate makes it discontinuous at the cliff (measured jump $6,481), and
+  the fixed-point loop then oscillates with period 2. Pricing at the target removes the
+  discontinuity from the search path without moving the answer — verified inactive at the converged
+  answer in every year of four measured households.
+- **`taxableGainPct`, the My Data field shipped at v5.33, is still read by no engine.** Engine A
+  reads the Roth tab's own gain control, which predates it. The in-app label now names **v5.35**.
+
+### Verification
+
+**1,170 checks pass, 0 fail** — parsed from suite output, not restated.
+
+| Leg | Count |
+|---|---|
+| Baseline, current leg | **580** — t1 93 · t2 18 · t3 36 · t4 191 · t5 58 · t6 21 · t10 163 |
+| Cross-version MC parity | **9**, strict, no intended diffs |
+| Feature suites | **581** — t7 41 · t8 38 · t9 14 · t11 40 · t12 23 · t13 42 · t14 44 · t15 11 · t16 24 · t17 63 · t18 50 · t19 22 · t20 94 · t22 75 |
+| **App total** | **1,170** |
+| Prior leg (v5.33), counted separately | **573** |
+| Tooling (`t21`), counted separately | **50** |
+| Built artifact (`smoke_built.mjs`) | **16** |
+| Withdrawal DOM diff, cross-version | **10**, strict identity apart from the version string |
+
+New and changed this release: `t22` 64 → 75 (the realized-gain rule unit-tested directly, including
+that selling alone never moves the gain share) · `t19` 14 → 22 (four extinction assertions plus the
+dated defect pin) · `t4` 176 → 191 current / 184 prior (the embedded-gain panel widened to cover the
+current build, plus the funding-copy assertions) · `t1` 94 → 93 (two assertions became one).
+
+`domdiff_withdrawal.mjs` had a hardcoded default pair four releases stale (v5.29 → v5.30) and died at
+module load looking for a bundle that no longer exists. Re-pointed to v5.33 → v5.34, where it passes
+10/10: the Withdrawal tab is identical across the pair apart from the version string.
+
+The build scaffold was proven before the new artifact was trusted — **v5.33 rebuilt from its own
+unmodified source to `c998f5ff760c6c5e04ab6173a68f6421`, byte-identical to the published file.**
+
+Provenance — source `db5efe3ccbdbacc05e7c76a8c31e74a0`, built `94c41e9c58dfb1371bc0ec3f075576a6`.
+
 ## v5.33 — test addendum (D-4), 2026-08-14 · no source change, no new build
 
 **`t14`'s source windows were fixed character spans, and one of them was 588 characters from
