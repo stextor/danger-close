@@ -1,6 +1,6 @@
 #!/bin/bash
 # ─────────────────────────────────────────────────────────────────────────────
-# Danger Close — release verification · v5.33 (+ D-4 test addendum, 2026-08-14)
+# Danger Close — release verification · v5.34 (2026-08-15)
 #
 # PROVENANCE: originally authored 2026-08-11 for v5.22 by transcribing the steps
 # actually executed in that session. Rolled forward to v5.23 from that file
@@ -52,17 +52,17 @@
 # Every command below was run and its result recorded in the release notes.
 #
 # Usage:  ./VERIFY.sh /path/to/workdir
-#    workdir must contain:  v532.jsx  v533.jsx  DangerClose.jsx(=v533)  qa/
+#    workdir must contain:  v533.jsx  v534.jsx  DangerClose.jsx(=v534)  qa/
 # ─────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
 ROOT="${1:-$(pwd)}"
 cd "$ROOT"
 
-PRIOR=v532
-CURR=v533
-EXPECT_SRC_MD5=df10c6226d7c4519919bb55238609a92
-EXPECT_BUILT_MD5=c998f5ff760c6c5e04ab6173a68f6421
+PRIOR=v533
+CURR=v534
+EXPECT_SRC_MD5=db5efe3ccbdbacc05e7c76a8c31e74a0
+EXPECT_BUILT_MD5=94c41e9c58dfb1371bc0ec3f075576a6
 
 say() { printf "\n\033[1m== %s ==\033[0m\n" "$*"; }
 die() { printf "\n\033[31mFAIL: %s\033[0m\n" "$*" >&2; exit 1; }
@@ -105,9 +105,12 @@ cd qa
 for t in t7_accrual t8_invariant t9_dom_smoke t11_survivor_rmd t12_engineD_survivor \
          t13_engineC_irmaa t14_cross_engine_survivor t15_engineA_death_filing \
          t16_roth_ladder_filing t17_engineC_exact t18_engineB_exact t19_engineD_exact \
-         t20_other_taxtype t22_aca_floor t21_tools; do
+         t20_other_taxtype t21_tools; do
   timeout 900 node "${t}.mjs" | tail -1
 done
+# t22 takes the PRIOR tag explicitly — its committed default is still v532, one release
+# unrolled. Group F reads the prior leg's bundle, so a wrong tag fails at module load.
+timeout 900 node t22_aca_floor.mjs "$PRIOR" | tail -1
 cd ..
 
 # ── 4b. Cross-version Withdrawal DOM diff — THE PROOF FOR v5.23 ─────────────
@@ -117,7 +120,7 @@ cd ..
 # both pass. So "the suite is green" does NOT prove the hoist changed nothing.
 # This does: it renders the Withdrawal tab on BOTH builds and diffs the text.
 say "4b. Withdrawal tab, cross-version DOM diff"
-( cd qa && timeout 900 node domdiff_withdrawal.mjs | tail -6 )
+( cd qa && timeout 900 node domdiff_withdrawal.mjs "$PRIOR" "$CURR" | tail -6 )
 
 # ── 5. The built artifact — built, then EXERCISED ───────────────────────────
 # OPERATIONS §N: a green source suite says NOTHING about the built file, and
@@ -149,72 +152,70 @@ fi
 
 say "DONE"
 cat <<'EOF'
-Expected totals for v5.33 — compare against the output above:
+Expected totals for v5.34 — compare against the output above:
 
-  baseline current leg  565  (t1 93 · t2 18 · t3 36 · t4 176 · t5 58 · t6 21 · t10 163)
+  baseline current leg  580  (t1 93 · t2 18 · t3 36 · t4 191 · t5 58 · t6 21 · t10 163)
   parity                  9  strict, no INTENDED_DIFFS
-  feature               562  (t7 41 · t8 38 · t9 14 · t11 40 · t12 23 · t13 42
-                              t14 44 · t15 11 · t16 24 · t17 63 · t18 50 · t19 14
-                              t20 94 · t22 64)
+  feature               581  (t7 41 · t8 38 · t9 14 · t11 40 · t12 23 · t13 42
+                              t14 44 · t15 11 · t16 24 · t17 63 · t18 50 · t19 22
+                              t20 94 · t22 75)
   ----------------------------------------------------------------------------
-  APP TOTAL            1136
-  prior leg (v5.32)     520  counted SEPARATELY
+  APP TOTAL            1170
+  prior leg (v5.33)     573  counted SEPARATELY
   tooling (t21)          50  counted SEPARATELY
   built artifact         16  qa/smoke_built.mjs
   withdrawal DOM diff    10  qa/domdiff_withdrawal.mjs — strict identity
 
-v5.33 ships a field, a clamped accessor, a schema default and the My Data control
-that sets it. NOTHING READS THE FIELD. So the release's entire claim is "this
-exists, persists, clamps, and changes nothing", and three independent witnesses
-carry it: parity 9/9 strict, the Withdrawal DOM diff at 10/10 (identical apart from
-the version string), and t22 group F's byte-identity check against the prior build.
+v5.34 ships ENGINE A ONLY. The conversion-funding model carries a tracked cost
+basis instead of a flat declared fraction, and the ACA cliff solver reads the
+EFFECTIVE share, anticipates the subsidy-replacement sale, and no longer excludes
+withholding. Every other engine is byte-identical to v5.33, so parity must be 9/9
+STRICT and the Withdrawal DOM diff 10/10. If either moves, something outside
+Engine A changed — stop and report rather than adapting the expectation.
 
-Parity is meaningful here in a way it was NOT at v5.32. There the guardrail could
-not see the ACA path at all (t2's Roth fingerprint household is built with
-acaPremium: 0), which the E-15 addendum fixed by adding a premium-positive
-household under the key rothAca. Here the field is simply inert, so anything that
-moved would show.
+WHY THIS RELEASE IS NARROWER THAN ITS SCOPE. The drawdown gain routing (S-7) was
+backed out mid-build and holds for v5.35. Engine D folds the RMD into
+totalToWithdraw and satisfies the whole of it from the TAXABLE SLEEVE FIRST, then
+returns the same cash as RMD surplus — balance-neutral, identical on v5.33, and
+therefore invisible for many releases. Attaching realizeGain to the outbound leg
+made it realize phantom gain: $24,657 in year one of t17 case G, whose only
+account is a $2M Traditional IRA, and 83.7% of the demo household's plan-life
+realized gain. Conservative in direction; wrong in fact.
 
-If parity fails ONLY on rothAca, an ACA figure moved. If it fails on any of the
-other eight, a non-ACA engine moved — the older and more serious signal. On THIS
-release either result means an engine has started reading taxableGainPct a version
-early: stop and report rather than adapting the expectation.
+THE PROOF CONDITION FOR THE BACKOUT, and it held: t13 42/0 and t17 63/0 with NO
+TEST EDITED — the v5.33 figures, recovered because the term that moved them is
+gone. Two negative controls (re-adding Engine C's wiring alone; re-adding Engine
+B's) each fire t19's extinction set. NEITHER moves t13 or t17, because re-adding
+a consumer while the producer is gone leaves the term at zero — that is honest
+coverage accounting, not a pass. t19 guards the layer RETURNING; t13/t17 prove
+the backout WORKED.
 
-The prior leg replays at 520, two ABOVE v5.32's own 518, because t1 now asserts on
-every earlier leg that taxableGainPct and taxableGainShare are ABSENT. Each leg
-asserts the state true for its own build — the per-leg gating OPERATIONS §B2
-requires, not a regression.
+THE COPY CORRECTIONS, and the coverage that was missing. "no sale, no gains tax"
+was false on every build back to v5.9 — under withhold the conversion absorbs
+min(conv, due) of the year's WHOLE bill and any residual is sold from the
+brokerage and taxed. Measured at the shipped default share of 0: 19 funding
+sales, $111,359 of gain, $9,428 of LTCG tax. A §B2 sweep found NO test asserted
+any of this copy. t4 now does, on both surfaces, gated per leg.
 
-D-4 TEST ADDENDUM, 2026-08-14 — no source change. t14's source windows were fixed
-character spans; they are now BOUNDED by the engine (anchor -> start of the next
-top-level function), because a span ages as the engine grows around the rule and
-then fails looking like an app regression. Engine D had 588 characters of headroom
-and Engine A 899; against DangerClose-CAPGAINS-PARTIAL.jsx, Engine D's rule sits at
-+8,499 and the old span:8000 failed 32/1. t14 33 -> 44. Four negative controls all
-fire; one of them (weakening ONE of Engine D's two death guards) did NOT fire at
-first, exposing that the per-engine death check was a PRESENCE test — fixed by
-asserting the ABSENCE of the weakened > form, which is sound only because Engine D
-has no filing concept. THE DECISIVE CHECK: t14 runs 44/0 against the partial, the
-very source that broke the old span.
+TWO NEGATIVE CONTROLS ON THAT COPY, both of which fired at the v5.34 build and
+both of which must fire again if re-run: restore the manual's old clauses (t4
+fails 3, all in the docs block); restore the Roth tab's old clauses (t4 fails 5,
+all on the tab). Each fires ONLY on the surface it corrupted. Corrupt v534.jsx —
+the file mk_testable.sh BUILDS FROM — not the canonical DangerClose.jsx beside
+it; corrupting only the latter leaves the bundle clean and the control silently
+does not fire.
 
-THREE NEGATIVE CONTROLS, all of which fired at the v5.33 build and all of which
-must fire again if re-run: remove the clamp's upper bound (t1 1, t5 1); remove the
-schema default (t5 2); change the shipped default off 0 (t1 2, t5 2, t4 1). Corrupt
-${CURR}.jsx — the file mk_testable.sh BUILDS FROM — not the canonical DangerClose.jsx
-beside it. Corrupting only the latter leaves the bundle clean and the control
-silently does not fire.
+t4's PRIOR-LEG count moves 176 -> 184 and the current leg 176 -> 191. Each leg
+asserts the copy ITS OWN build carries; the prior leg is gating, not a defect pin
+(OPERATIONS §B2).
 
-NOTE ON THE BUILT MD5 — the v5.30 note here was WRONG and is corrected. It said
-bit-reproducibility had been lost and blamed rollup, an unpinned caret dependency
-of vite. At v5.31, rebuilding v5.30 from its own unmodified source reproduced its
-published artifact EXACTLY (183b58b4...), on rollup 4.62.4 — the very version
-blamed. The v5.30 session was comparing across a toolchain generation: it rebuilt
-v5.29, which had been built with an older tree. Reproducibility holds release over
-release when the dependency tree matches. The binding check is still
-smoke_built.mjs at 16/16, not the hash.
+domdiff_withdrawal.mjs had a HARDCODED default pair four releases stale (v529 ->
+v530) and died at module load looking for a bundle the run folder does not hold.
+Re-pointed to v533 -> v534. Re-point it EVERY release.
 
-CONFIRMED AGAIN AT v5.33: v5.32 was rebuilt from its own unmodified source before
-the new hash was trusted, and reproduced ef42fb0ba566c1008bb8ffadd7b0b288
-byte-for-byte. That is what distinguishes "the scaffold is complete" from "the hash
-looks plausible".
+BUILT MD5 — the scaffold was proven before the new hash was trusted: v5.33 was
+rebuilt from its own unmodified source and reproduced c998f5ff760c6c5e04ab6173a68f6421
+byte-for-byte. That is what distinguishes "the scaffold is complete" from "the
+hash looks plausible" (OPERATIONS §N3a). The binding check on a built artifact is
+still smoke_built.mjs at 16/16, not the hash.
 EOF

@@ -204,10 +204,54 @@ retirement and each spouse's 65th birthday.
   funding model does, and subtracts the implied gain from the cliff headroom — a small
   fixed-point iteration, so the *post-sale* MAGI lands at cliff − margin rather than the
   pre-sale MAGI. Before this, the strategy converted to the cliff and its own funding sale
-  pushed the household over it (full subsidy forfeit). Withholding and gain-free funding
-  were already correct and are unchanged. The gain share remains one blended figure: no
-  per-lot selection, loss harvesting, or wash-sale logic (still out of scope, as
-  documented).
+  pushed the household over it (full subsidy forfeit).
+
+  **v5.34 corrects three things about that solver, and retracts a statement made here.**
+
+  - *The gain fraction is now the EFFECTIVE one, not the declared one.* The declared share
+    describes only the OPENING basis; under the v5.34 basis tracker the pool accrues gain
+    from growth whatever that opening was, so a household that declared 0 still realizes
+    gain on sale. The v5.10.1 guard read the *declared* fraction. That was consistent while
+    the funding sale read the same declared fraction, and became wrong the moment the
+    tracker landed: the guard then treated the shipped default of 0 as "no gain ever" and
+    skipped the contraction while the sale went on realizing gain. Measured against the
+    pre-fix v5.34 build on the ACA-bridge household, **$39,454 of subsidy fell to $23,828
+    with two bridge years forfeited** — from the strategy built to avoid exactly that. The
+    guard now asks what actually holds: is there gain in the pool, and is there a pool.
+  - *Withholding is no longer excluded, and the previous claim here was wrong.* This
+    passage used to state that "withholding and gain-free funding were already correct and
+    are unchanged." **That is retracted.** Under withholding the conversion absorbs only
+    min(conversion, tax due), so a residual bill still reaches the brokerage; and after the
+    change below, the subsidy-replacement sale is a real taxable-pool sale in every funding
+    mode. Measured, the declared gain share moves the outcome under withholding on **v5.33
+    as well** — so this was a pre-existing error in the documentation, which v5.34's work
+    exposed rather than created.
+  - *The subsidy the conversion destroys is itself paid by selling, and that sale's gain is
+    now in ACA MAGI too.* Without this the solver left headroom for the funding sale and
+    was then pushed over the cliff by the premium sale — the identical failure one step
+    later. It is a bounded three-pass contraction mirroring the one the ACA block runs.
+
+  **One implementation note, because it is a departure worth stating.** Folding the
+  premium sale into the estimate makes that estimate *discontinuous* in the conversion
+  amount: the subsidy is a cliff, so the loss jumps the instant a candidate crosses it
+  (measured jump $6,481 on the bridge household in 2027). The fixed-point loop then
+  oscillates with period 2 and returns whichever phase its pass count lands on. The
+  estimator therefore prices the subsidy at the solver's **target** (cliff − margin) rather
+  than at the candidate. This removes the discontinuity from the *search path* without
+  moving the *answer*: at the converged conversion, MAGI is at or below the target by
+  construction, so the clamp is inactive there — verified inactive at the answer in every
+  year of four measured households — and where no conversion can get under the cliff the
+  conversion is already pinned to 0 or to the available headroom, which the clamp cannot
+  change because the estimated gain is never negative.
+
+  **Disclosed, not fixed:** the subsidy-replacement sale's gain enters ACA MAGI but is
+  **not taxed**, where the funding sale's gain is. That asymmetry is optimistic — it
+  understates tax in bridge years with a large subsidy loss — and is stated here rather
+  than left silent.
+
+  The gain share remains one blended figure, now *tracked* rather than fixed at the
+  declared value: still no per-lot selection, loss harvesting, or wash-sale logic (out of
+  scope, as documented).
 - **Assumptions:** benchmark premium is user-supplied (it varies ~3× by county and age and
   cannot be checked by the model); premiums grow at household inflation + 2 points (medical
   trend has historically outrun CPI — plain inflation would understate losses, the
@@ -302,7 +346,8 @@ low-growth account — vs an appreciated-brokerage sale — with a
 fixed-point gross-up so each sale covers the capital-gains tax it creates, LTCG stacking on
 the year's income, and realized gains feeding MAGI for the two-year IRMAA lookback — vs
 withholding from the conversion itself, where only the net reaches the Roth; 59½+ assumed,
-one blended gain fraction, no per-lot logic by design); **spousal Social Security analytics**
+one blended gain fraction — tracked, not fixed at the declared opening share — with no
+per-lot logic by design); **spousal Social Security analytics**
 (per-spouse breakeven cards including the couple's-horizon correction — the lower earner's
 record pays only until the first death — plus an 81-combination joint claiming grid with
 survivor step-up, undiscounted today's dollars, spousal top-ups not modeled); a **guided

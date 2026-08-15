@@ -25,10 +25,10 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 
 | Field | Value |
 |---|---|
-| Version | **v5.33** |
-| Source file in knowledge | `DangerClose-v5_33.jsx` |
-| Source md5 | `df10c6226d7c4519919bb55238609a92` |
-| Built `index.html` md5 | `c998f5ff760c6c5e04ab6173a68f6421` |
+| Version | **v5.34** |
+| Source file in knowledge | `DangerClose-v5_34.jsx` |
+| Source md5 | `db5efe3ccbdbacc05e7c76a8c31e74a0` |
+| Built `index.html` md5 | `94c41e9c58dfb1371bc0ec3f075576a6` |
 | Shipped | 2026-08 |
 
 **Any work — edits, verification, scope premises — is done against this file.** Confirm its
@@ -44,8 +44,8 @@ which halted the v5.30 build and cost most of a session to diagnose. Recorded as
 
 ⚠ **Prefer the clone-and-diff in OPERATIONS §A2 over this table.** A recorded table is only as fresh as
 the release that wrote it, and this project has had three separate recorded blocks go stale. This is the
-offline fallback, accurate **as of v5.33, 2026-08-14** — verified equal to the committed tree on that
-date, with the sole exception noted below.
+offline fallback, accurate **as of v5.34, 2026-08-15** — every row below was computed from the file
+that ships in this release's package, not carried forward.
 
 **Two mapping caveats.** The pool flattens repo paths: `tools_fixture.jsx` here is
 `qa/tools/fixture/fixture.jsx` in the repo (byte-identical), and the baseline suites live under
@@ -54,12 +54,14 @@ date, with the sole exception noted below.
 | Pool file | md5 | Repo path |
 |---|---|---|
 | `cap_tabs.mjs` | `9057b96d48b84f99dc322f7fc983674a` | `qa/qa-baseline/cap_tabs.mjs` |
-| `dom_entry_v532.jsx` | `0bbc7aaeabe759cf7e14bb7209f91d6d` | `qa/qa-baseline/dom_entry_v532.jsx` |
+| `capture_gain_fp.mjs` | `99f096c7c332b5ec7a87949681386a71` | `qa/capture_gain_fp.mjs` |
 | `dom_entry_v533.jsx` | `aa695416ba7bb84eb2468cf2b3c9c84f` | `qa/qa-baseline/dom_entry_v533.jsx` |
-| `domdiff_withdrawal.mjs` | `26d0672f1b56116faabfc19566cc2402` | `qa/domdiff_withdrawal.mjs` |
+| `dom_entry_v534.jsx` | `a5db4a5643f2433fa994ea6758b308db` | `qa/qa-baseline/dom_entry_v534.jsx` |
+| `domdiff_withdrawal.mjs` | `a8b3922a1875aee174013530d9ccce8a` | `qa/domdiff_withdrawal.mjs` |
 | `env_dom.mjs` | `0ee15a1be6099a50319cfb271b530c4a` | `qa/qa-baseline/env_dom.mjs` |
 | `main.jsx` | `d9eca7b469a3fb7ec1c5325fd4bf8145` | `src/main.jsx` |
-| `shim.txt` | `aac48afff108aec51b8967dcda06bfb2` | `qa/qa-baseline/shim.txt` |
+| `probe_withhold_gain.mjs` | `b7fbc3fc34a0684c88b79123ddcda57c` | `qa/probe_withhold_gain.mjs` |
+| `shim.txt` | `fec4551cd77cb2d4be0b19f6c54bb621` | `qa/qa-baseline/shim.txt` |
 | `smoke_built.mjs` | `bc839044971ecd992bb9f4f019736d1e` | `qa/smoke_built.mjs` |
 | `t10_taxcases.mjs` | `bcd00a8fad74d81c88e05f928aa8b5ec` | `qa/t10_taxcases.mjs` |
 | `t11_survivor_rmd.mjs` | `dfa8ce062d9ae3bcca551a561ce717a8` | `qa/t11_survivor_rmd.mjs` |
@@ -70,16 +72,16 @@ date, with the sole exception noted below.
 | `t16_roth_ladder_filing.mjs` | `829c97c01efeb707da011c1468fefbb5` | `qa/t16_roth_ladder_filing.mjs` |
 | `t17_engineC_exact.mjs` | `75d21513fe2e98b4430507bd64e6a6f4` | `qa/t17_engineC_exact.mjs` |
 | `t18_engineB_exact.mjs` | `b06e714aa050c11e5ede6e8771d7a243` | `qa/t18_engineB_exact.mjs` |
-| `t19_engineD_exact.mjs` | `e86e069a29a13070c216fa9d7d6de34d` | `qa/t19_engineD_exact.mjs` |
-| `t1_units.mjs` | `0946651c198b8f1e02db63529f3fad1b` | `qa/qa-baseline/t1_units.mjs` |
+| `t19_engineD_exact.mjs` | `0f300d46480013cf8b515735cd8816d8` | `qa/t19_engineD_exact.mjs` |
+| `t1_units.mjs` | `3d2583693475187681a050c47443baa6` | `qa/qa-baseline/t1_units.mjs` |
 | `t20_other_taxtype.mjs` | `c9b127780227868ff05d2cd08b37e0bd` | `qa/t20_other_taxtype.mjs` |
 | `t21_tools.mjs` | `c5fb4c712135028f1effa039c84e0b90` | `qa/t21_tools.mjs` |
-| `t22_aca_floor.mjs` | `35a9aa86e6699b4ff0b9f7a7817bd08d` | `qa/t22_aca_floor.mjs` |
-| `t2_engines.mjs` | `bc7628a4b3e309aadfd14c4d37f06417` | `qa/qa-baseline/t2_engines.mjs` |
-| `t3_roth.mjs` | `dc23e0b50b9de0de168bf81f74a7634e` | `qa/qa-baseline/t3_roth.mjs` |
-| `t4_dom.mjs` | `80a12cecb54799ddaadcc6c685ab9a16` | `qa/qa-baseline/t4_dom.mjs` |
-| `t5_storage.mjs` | `7aa470a13adb33c8a54570a62bf85bc8` | `qa/qa-baseline/t5_storage.mjs` |
-| `t6_single.mjs` | `bb9b238177ff290d0ac4a2f3d4a0bec3` | `qa/qa-baseline/t6_single.mjs` |
+| `t22_aca_floor.mjs` | `2f626831143668ac86818ceac77c2465` | `qa/t22_aca_floor.mjs` |
+| `t2_engines.mjs` | `769bc6a60b1b58ae385e5b2d9a7cc24a` | `qa/qa-baseline/t2_engines.mjs` |
+| `t3_roth.mjs` | `1ee958134c1236e22847d7a9647cdcf2` | `qa/qa-baseline/t3_roth.mjs` |
+| `t4_dom.mjs` | `0f16ce11ea892be6b8b70467143bd7e7` | `qa/qa-baseline/t4_dom.mjs` |
+| `t5_storage.mjs` | `f1b0072bf7cb72a2e387bad52a0132e9` | `qa/qa-baseline/t5_storage.mjs` |
+| `t6_single.mjs` | `5a28799680adb9dc4660b27fc954d29e` | `qa/qa-baseline/t6_single.mjs` |
 | `t7_accrual.mjs` | `490b82d3024b179a274b5498936e1a92` | `qa/t7_accrual.mjs` |
 | `t8_invariant.mjs` | `a9bd015c8b50b54a98d0ed9a4e2afaaf` | `qa/t8_invariant.mjs` |
 | `t9_dom_smoke.mjs` | `080c3edbe5f5479ac488d2f54034de69` | `qa/t9_dom_smoke.mjs` |
@@ -98,9 +100,9 @@ destinations from v5.31 forward.
 
 | Field | Value |
 |---|---|
-| Version | **v5.32** |
-| Source file in knowledge | `DangerClose-v5_32.jsx` |
-| Source md5 | `7e7be3f869f298667fe994074cfffb06` |
+| Version | **v5.33** |
+| Source file in knowledge | `DangerClose-v5_33.jsx` |
+| Source md5 | `df10c6226d7c4519919bb55238609a92` |
 
 This is the immediately-prior shipped release. The regression suite diffs current against it.
 It exists in knowledge ONLY as that comparison baseline. When the next release ships, it rolls
@@ -138,14 +140,16 @@ These are refreshed in place when they change; git holds their history.
 | `t16_roth_ladder_filing.mjs` | Roth ladder filing-status extinction invariant (C-2B-3, v5.15) — 24 checks against an independent IRS reference, incl. that the couple's ladder does NOT move | when tests change |
 | `t17_engineC_exact.mjs` | Engine C dollar-exact (v5.18) — 63 checks against CMS figures via the module-level `computeIrmaaPlan`; tier borders ±$1, indexation, freeze, lookback, per-person counts, survivor switch, QCD. Negative-controlled at 23/63. Asserts the surcharge constants' ≤$5 **bound**, not CMS-exact amounts | when tests change |
 | `t18_engineB_exact.mjs` | Engine B dollar-exact (v5.21) — 50 checks via module-level `computeTaxPlan`; federal brackets, age-65 extra per spouse, SS taxability, **plus the first Engine A vs Engine B agreement invariant** (they agree). Negative-controlled at 24/47. NOT yet covered: LTCG, NIIT, AMT, FICA, state, survivor | when tests change |
-| `t19_engineD_exact.mjs` | **NEW at v5.23** — Engine D's first discriminating coverage. 14 checks: five structural (reachability, the 17-key return contract, determinism, parameter purity) and eight fixture/pinned. Three dated `[KNOWN DEFECT]` pins (taxable pot == all of `otherAccounts`; `magi` omits taxable draws; named-IRA money never reaches the RMD balance). Negative-controlled twice — 12/13 and 11/13. Not yet dollar-exact; that is release (b)/(c) work. **AMENDED at v5.24:** the B-2 pin was re-tagged `| rel c` and reworded. It previously read "Engine D magi omits drawFromTaxable" tagged `rel b`, which named something that is CORRECT and instructed the next session to introduce a defect. The assertion itself was right and is unchanged. Repo `qa/` |
-| `domdiff_withdrawal.mjs` | Cross-version DOM diff of the Withdrawal tab, **re-pointed at v5.24 to v5.23 → v5.24 and grown 4 → 10 checks**. It now excises the one deliberately reworded panel BY ANCHOR and requires everything else byte-identical, rather than relaxing the comparison — and separately asserts the panel did change and that only the prior build carries the false claim. **It hardcodes its default version pair; re-point it every release.** Originally new at v5.23, v5.22 → v5.23. **This is the proof the hoist changed nothing**, because the pre-existing suite does not discriminate on Engine D (OPERATIONS §B2). 4 checks; cross-version by nature, so NOT counted in the release headline. Repo `qa/` |
+| `t19_engineD_exact.mjs` | **22 checks at v5.34** (was 14): four EXTINCTION assertions that no engine reads a gain series and that Engine B is back to its hardcoded `0`, plus a dated `[KNOWN DEFECT] 2026-08-15` pin on the RMD-sourced-from-taxable defect with a restore check. ⚠ The pin needed a **purpose-built household** — two earlier drafts written against `t19`'s own fixture asserted nothing, because `drawNeeded` exceeds `rmd_y` in every year of that schedule, so every taxable draw it makes is genuine. The defect requires guaranteed income large enough to cover expenses. Flip all of it at v5.35, together. **Originally NEW at v5.23** — Engine D's first discriminating coverage. 14 checks: five structural (reachability, the 17-key return contract, determinism, parameter purity) and eight fixture/pinned. Three dated `[KNOWN DEFECT]` pins (taxable pot == all of `otherAccounts`; `magi` omits taxable draws; named-IRA money never reaches the RMD balance). Negative-controlled twice — 12/13 and 11/13. Not yet dollar-exact; that is release (b)/(c) work. **AMENDED at v5.24:** the B-2 pin was re-tagged `| rel c` and reworded. It previously read "Engine D magi omits drawFromTaxable" tagged `rel b`, which named something that is CORRECT and instructed the next session to introduce a defect. The assertion itself was right and is unchanged. Repo `qa/` |
+| `domdiff_withdrawal.mjs` | Cross-version DOM diff of the Withdrawal tab, **re-pointed at v5.34 to v5.33 → v5.34**. ⚠ At the v5.34 build its committed default was found four releases stale (v5.29 → v5.30) and it **died at module load** looking for a bundle the run folder does not hold — a stale default here fails loudly rather than silently, but it fails as a missing module, which reads like a broken harness. Re-point it every release. Previously **re-pointed at v5.24 to v5.23 → v5.24 and grown 4 → 10 checks**. It now excises the one deliberately reworded panel BY ANCHOR and requires everything else byte-identical, rather than relaxing the comparison — and separately asserts the panel did change and that only the prior build carries the false claim. **It hardcodes its default version pair; re-point it every release.** Originally new at v5.23, v5.22 → v5.23. **This is the proof the hoist changed nothing**, because the pre-existing suite does not discriminate on Engine D (OPERATIONS §B2). 4 checks; cross-version by nature, so NOT counted in the release headline. Repo `qa/` |
 | `t21_tools.mjs` | **NEW 2026-08-11** — tests the `qa/tools/` parser toolkit itself against a fixture with hand-counted known answers. 50 checks, negative-controlled six ways. Counted SEPARATELY from the app total: it verifies tooling, not the build. Carries one dated `[KNOWN DEFECT]` pin — `census.cjs` double-reports object shorthand and export specifiers, so its "hits" exceed its site count. Repo `qa/` |
 | `tools_fixture.jsx` | **NEW 2026-08-11** — the fixture `t21` reads. **NOT AN APP SOURCE**: never built, never imported, never version-bumped, and it does NOT count toward the "exactly two `.jsx` app sources" rule. Repo `qa/tools/fixture/fixture.jsx`; knowledge is flat so it lives here under this name, and `t21` resolves either. Line numbers are load-bearing — add cases at the END only |
-| `t22_aca_floor.mjs` | **NEW at v5.32** — the ACA 100%-of-FPL eligibility floor. **64 checks** in seven groups: the floor as an `[EXTINCTION]` set in BOTH regimes; regime symmetry; the boundary hand-computed to the cent from HHS/ASPE and Rev. Proc. 2025-25 typed independently; the drift case; Engine A end-to-end on a household crossing the floor twice at two depths; **group F, the cross-version byte-identity check on `acaSubByYr`/`totAcaLoss`/`estate`**; and five negative controls, all firing. ⚠ **Group F exists because parity is blind here** — `t2`'s fingerprint household is `acaPremium: 0`, so no ACA code runs inside the guardrail at all (E-15). Do not delete it as redundant; the file's header says so too. Group F reads the PRIOR leg's bundle and defaults to **`v532` at v5.33** (rolled forward, like `t2`'s parity pair). ⚠ **Rolling that default is not sufficient on its own.** Group F mixes claims true for ANY pair (byte identity) with one true for a SINGLE transition — *"acaFloorYrs is NEW"*, which is false once the prior build is v5.32. That check is now **gated on the prior tag**, so the suite holds at 64 on either pairing. The rotation forces the roll: v5.31 left knowledge at v5.33, so `app_v531.mjs` can no longer be built from knowledge alone. Repo `qa/` |
+| `t22_aca_floor.mjs` | **75 checks at v5.34** (was 64): group H unit-tests the shared `realizeGain` rule directly, including that selling alone never moves the gain share — chosen over comparing two engines' figures and hoping agreement implies a shared rule. Run it as `node t22_aca_floor.mjs v533`; its committed default is still `v532`, unrolled. **NEW at v5.32** — the ACA 100%-of-FPL eligibility floor. **Was 64 checks** in seven groups: the floor as an `[EXTINCTION]` set in BOTH regimes; regime symmetry; the boundary hand-computed to the cent from HHS/ASPE and Rev. Proc. 2025-25 typed independently; the drift case; Engine A end-to-end on a household crossing the floor twice at two depths; **group F, the cross-version byte-identity check on `acaSubByYr`/`totAcaLoss`/`estate`**; and five negative controls, all firing. ⚠ **Group F exists because parity is blind here** — `t2`'s fingerprint household is `acaPremium: 0`, so no ACA code runs inside the guardrail at all (E-15). Do not delete it as redundant; the file's header says so too. Group F reads the PRIOR leg's bundle and defaults to **`v532` at v5.33** (rolled forward, like `t2`'s parity pair). ⚠ **Rolling that default is not sufficient on its own.** Group F mixes claims true for ANY pair (byte identity) with one true for a SINGLE transition — *"acaFloorYrs is NEW"*, which is false once the prior build is v5.32. That check is now **gated on the prior tag**, so the suite holds at 64 on either pairing. The rotation forces the roll: v5.31 left knowledge at v5.33, so `app_v531.mjs` can no longer be built from knowledge alone. Repo `qa/` |
 | `t20_other_taxtype.mjs` | **NEW at v5.25** — the Other-accounts `taxType` schema, its migration, and the extinction assertion that no engine reads the field. 94 checks. The extinction check is a **permutation test**: the same household runs twice with every type flipped and all five engines must return byte-identical output — so it fires the moment release (c) starts reading the field. Also carries the required equality that inference over the example household reproduces the $111,000 / $21,000 / $15,000 split v5.24 published. Negative-controlled five ways; two of its own assertions were caught passing vacuously on v5.24 and now assert a precondition first. Repo `qa/` |
-| `dom_entry_v532.jsx` | Harness entry for the v5.32 CJS DOM bundle (current leg). Repo `qa/qa-baseline/` |
-| `dom_entry_v531.jsx` | Harness entry for the v5.31 CJS DOM bundle (prior leg). Repo `qa/qa-baseline/` |
+| `dom_entry_v534.jsx` | Harness entry for the v5.34 CJS DOM bundle (current leg). Repo `qa/qa-baseline/` |
+| `dom_entry_v533.jsx` | Harness entry for the v5.33 CJS DOM bundle (prior leg). Repo `qa/qa-baseline/` |
+| `capture_gain_fp.mjs` | **Probe, not a suite — asserts nothing and is counted in no total.** Captures a full-precision fingerprint of every engine that touches the realized-gain rule, which is how `realizeGain`'s extraction was proven a behaviour no-op before any behaviour changed (OPERATIONS §M pattern). Repo `qa/` |
+| `probe_withhold_gain.mjs` | **NEW at v5.34. Probe, not a suite — asserts nothing and is counted in no total.** Reproduces the measurement behind the v5.34 copy correction: under `convTaxFunding: "withhold"` it runs Engine A at three conversion sizes and two declared gain shares on both legs, showing that a residual bill reaches the brokerage and is taxed. Run it as `node probe_withhold_gain.mjs ./app_v534.mjs`. Repo `qa/` |
 | `VERIFY.sh` | Release verification driver. **Added to knowledge at v5.23** — it was previously repo/local only, so a session working from knowledge alone could not reproduce the release run. Repo root |
 | `t15_engineA_death_filing.mjs` | Engine A death-year filing extinction invariant (C-2C-6, v5.14) — 11 checks, **dollar-exact** (module-level engine), incl. the non-conservative high-MAGI corner | when tests change |
 | `t10_taxcases.mjs` | Tax-case assertions built by the Phase 2 audit: 76 federal-core (2A) + 35 IRMAA (2B) = **163** at v5.30 (2A 76 · 2B 87 · 2D 27 · 2E 21), incl. 3 dated `[KNOWN DEFECT]` pins. **ADOPTED into `run_all.sh` at v5.14** (scope D-4); pins flipped, borders re-derived, now 115 checks | when audit phases add cases |
