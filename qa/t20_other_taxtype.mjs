@@ -272,6 +272,17 @@ const HH = {
     { name: "Spouse B - Annuity", balance: 21000, taxType: "trad" },
   ],
   asOfYr: 2026,   // OPERATIONS §C: omitting asOfYr silently NaNs every tax figure
+  // ⚠ THESE TWO DATES ARE NOT READ, and the block below therefore runs at the DEFAULT ages.
+  // Found at v5.35 while hand-computing the trad-vs-annuity excess. `buildPlanTimeline` parses
+  // dobA/dobB with a helper that returns null unless the value is a "YYYY-MM-DD" STRING — the
+  // shape the My Data form writes — so an OBJECT falls through to the master-prompt parse.
+  // Measured: this fixture resolves to dobA 1964 / dobB 1966, not 1962 / 1964.
+  // The app is correct; the fixture is not. No assertion here is invalidated — A's RMD still
+  // begins in 2039 and the RMD path is genuinely exercised — but every age-dependent figure in
+  // section E2 is a property of the defaults rather than of these lines. Left as-is deliberately
+  // at v5.35: correcting it would move the exact-$600,000 assertion and the hand-computed excess,
+  // entangling a fixture fix with an engine one. `t7_accrual.mjs` has the same shape and is
+  // unaffected in substance (its arithmetic is retireYear-driven, and it asserts no age).
   single: false, nameA: "A", nameB: "B",
   dobA: { year: 1962, month: 6, day: 1 }, dobB: { year: 1964, month: 6, day: 1 },
   retireYear: 2027, lifeExpA: 90, lifeExpB: 92,
