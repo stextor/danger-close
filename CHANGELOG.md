@@ -1,5 +1,130 @@
 # Changelog
 
+## v5.35 — the RMD comes out of the retirement account, 2026-08-15
+
+Engine D no longer satisfies a required minimum distribution by selling from the brokerage sleeve.
+The RMD is now sourced from where the money actually lives: the share resting on the Traditional
+buckets is drawn B1→B4, the share resting on a named IRA entered under Other accounts is drawn from
+that account, and the taxable sleeve funds only what the RMD did not already cover.
+
+**Figures move on affected households, in both directions, and both are disclosed on the Withdrawal
+tab.** Ending balances fall — money that used to stay compounding in the tax-deferred sleeve at
+4.53% now moves to taxable at 3.45% — which is the conservative correction. `Total withdrawn` falls
+too, because it was counting the same cash twice as it round-tripped out and back.
+
+**Engines A, B and C are byte-identical to v5.34.** `t2`'s cross-version parity guardrail is 9/9
+strict.
+
+### What was wrong
+
+`computeWithdrawalPlan` folded the RMD into a single `totalToWithdraw = drawNeeded + rmd_y` and
+satisfied the whole of it from the taxable sleeve first, then handed the surplus straight back to
+the pool it came from. An RMD is a distribution from the retirement account and cannot be met by
+selling brokerage. The round trip is balance-neutral, which is why it survived many releases
+undetected — and it behaves **identically on v5.33 and earlier**, so it was never a regression.
+
+Measured on a household whose guaranteed income covers its expenses: **thirteen consecutive years,
+2039–2051, with the buckets drawn ZERO while the RMD ran $85,740 → $224,021**, the tax-deferred
+sleeve growing right through the years its whole statutory purpose is to draw it down.
+
+**The example household cannot exercise this**, and that is worth saying because two earlier
+attempts at a test were written against a fixture that could not fail. Its spending need exceeds its
+RMD in every year, so every taxable draw it makes funds a genuine shortfall.
+
+### A second defect from the same root
+
+`othRmd ⊆ othOrd` — the same dollars were tracked twice, as Other-accounts ordinary income and as
+the subset carrying a required distribution. MAGI therefore counted each RMD dollar twice: once as
+the RMD, and again through the draw that funded it. On a household holding its retirement money in
+a named IRA under Other accounts, **MAGI read $420,401 against a correct $307,906 in the first RMD
+year — overstated 36.6%** — then decayed as the pool's ordinary character was spent on paper while
+its balance stood untouched. **Conservative at first, optimistic afterwards.** Also identical on
+v5.33.
+
+Fixing the sourcing alone would have **moved** that double count rather than removed it, handing the
+same dollars from one draw term to another. Four sites were required, not the one the scope named.
+
+### A third, created by this release and caught before it shipped
+
+The new sleeve-RMD path booked ordinary income into MAGI without spending the matching ordinary
+*character*, so those dollars were recognised again when a later draw consumed them. On a $600,000
+Traditional account it produced **$610,791 of lifetime ordinary income — $10,791 that does not
+exist**, against an annuity of the same size and tax treatment producing exactly $600,000.
+
+It was found by an existing invariant failing, not by inspection, and the number was hand-computed
+to the cent before anything was changed: the excess is the lifetime sleeve RMD ($10,807.67) less the
+ordinary character left unspent at the end of the plan ($16.28) — $10,791.39, against the engine's
+$10,791.40. The correction charges the sleeve RMD against the character tracker at full value,
+because MAGI charges it at full value; the residual is now $102.34, **smaller than the $526 the same
+invariant carried at v5.33 and v5.34.**
+
+### Disclosure and labelling
+
+The Withdrawal tab now states what changed and why, following the v5.26 precedent. The Section A
+note it attaches to — *"RMDs treated as forced trad withdrawals"* — had been shipping for many
+releases while the sequencer sold brokerage instead; **this release makes an existing disclosure
+true** rather than falsifying one.
+
+`Total portfolio draw` is relabelled **`Total withdrawn`**. The arithmetic is unchanged. It counts
+every dollar that left an account, including forced RMD cash the plan never needed to spend, and
+the tab now says plainly that it is not a measure of what you spent.
+
+### Verification
+
+| | |
+|---|---|
+| Baseline, current leg | **587** — t1 93 · t2 18 · t3 36 · t4 198 · t5 58 · t6 21 · t10 163 |
+| Cross-version parity | **9/9 strict** |
+| Feature suites | **593** — t7 41 · t8 38 · t9 14 · t11 40 · t12 23 · t13 42 · t14 44 · t15 11 · t16 24 · t17 63 · t18 50 · t19 32 · t20 94 · t22 77 |
+| **APP TOTAL** | **1189** |
+| Prior leg (v5.34), counted separately | **580** |
+| Tooling (`t21`), counted separately | **50** |
+| Built artifact (`smoke_built.mjs`) | **16** |
+| Withdrawal DOM diff, cross-version | **20**, excise-by-anchor |
+
+New and changed this release: `t19` 22 → 32 (the dated pin flipped, its companion rewritten, an
+extinction assertion, and a second purpose-built household) · `t4` 191 → 198 current, 191 prior
+(the disclosure and label assertions, gated to the leg they are true for).
+
+**Five negative controls, all firing, and three of them did not at first.** Reverting the sequencer
+moved `totalDrawn` +34% and ending wealth −18%; reverting the ordinary-income term moved lifetime
+MAGI +$452,599; reverting the bucket draw term moved it +25% — **each with the whole suite green.**
+That is a coverage gap, not a passing grade, and it was closed by adding assertions until each
+control fired on exactly one, rather than by recording the controls as run.
+
+**Three assertions were found to be measuring nothing and were removed or rewritten**, so the total
+is smaller than it would otherwise have been: a companion pin that passed on both builds, a
+disclosure check satisfied by copy from an earlier release, and a source scan that reported the
+defect it was describing because the source's own comment quotes it.
+
+`domdiff_withdrawal.mjs` was re-scoped from strict identity to excise-by-anchor, as at v5.24. Three
+regions are excised by name — the schedule, the summary-card row, the method note — each asserted
+unique, bounded, and **verified to have actually changed**, so the excision cannot hide a no-op.
+With those removed the tab is byte-identical: this release touched Engine D's sourcing and two
+pieces of copy, and nothing else on the tab.
+
+The build scaffold was proven before the new artifact was trusted — **v5.34 rebuilt from its own
+unmodified source to `94c41e9c58dfb1371bc0ec3f075576a6`, byte-identical to the published file.**
+
+### Limitations, stated plainly
+
+- **`Total withdrawn` still counts unspent RMD surplus.** The arithmetic was deliberately left
+  alone and the label and disclosure changed instead. It is defensible as a distribution total and
+  it is still not "what you spent".
+- **`_ordFrac` is computed on the pool before the sleeve RMD removes its own fully-ordinary slice.**
+  Whether the spending draw's ordinary fraction should be recomputed on the remainder is unmeasured,
+  and no assertion currently covers it. Recorded rather than closed.
+- **A $102.34 residual remains** on the trad-versus-annuity invariant, where the character tracker
+  floors at zero while a named IRA still carries an RMD. Second-order and conservative.
+- **Engine D applies no tax to balances at all.** Unchanged, and disclosed as before.
+- **Engine C's QCD-blindness** resolves for the `t17` case that exposed it, but stays latent.
+- **Two suite fixtures declare a date of birth the model never reads.** `dobA`/`dobB` must be
+  `"YYYY-MM-DD"` strings; an object is silently ignored and the plan falls back to the master
+  prompt. The app is correct — the fixtures are not — and no assertion was invalidated, but
+  age-dependent figures in those two blocks are properties of the default household.
+
+Provenance — source `a28843d3e1f441e90c765419264954ff`, built `2361b2ac3fe739d50526fd954b80fb63`.
+
 ## v5.34 — the conversion-funding basis tracker, and three false statements about it, 2026-08-15
 
 **What ships is Engine A only.** The Roth tab's conversion-tax funding model now carries a real
