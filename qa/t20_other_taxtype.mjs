@@ -454,10 +454,18 @@ console.log("\nE2. The annuity carries NO RMD \u2014 in any engine");
   // The exact statement: every dollar of ordinary-income money is taxed ONCE on its way out, so
   // the lifetime MAGI difference between an all-Traditional and an all-Taxable Other account is
   // the account balance itself. Hand-verified at $600,000: 3,682,330 -> 4,282,330.
-  const magiOf = (p) => { g.applyLoadedData({ portfolio: JSON.parse(JSON.stringify(p)) });
+  // v5.36: MAGI is now TWO things — ordinary income and realized capital gain — so the
+  // decomposition is taken here rather than comparing the blended total. That is not a
+  // convenience: the ordinary invariant this block exists to state is only visible once the
+  // gain series is separated out, and comparing totals would have silently absorbed a gain
+  // difference into a statement about income tax.
+  const planOf = (p) => { g.applyLoadedData({ portfolio: JSON.parse(JSON.stringify(p)) });
     const r = g.computeWithdrawalPlan({ retireYear: 2027, rothAmount: 0, scenarioPreset: "base" });
-    return r.schedule.reduce((s, x) => s + (x.magi || 0), 0); };
-  const magiTax = magiOf(ownedA("taxable")), magiTrad = magiOf(ownedA("trad")), magiAnn = magiOf(ownedA("annuity"));
+    const magi = r.schedule.reduce((s, x) => s + (x.magi || 0), 0);
+    const gain = r.schedule.reduce((s, x) => s + (x.capGain_y || 0), 0);
+    return { magi, gain, ord: magi - gain }; };
+  const pTax = planOf(ownedA("taxable")), pTrad = planOf(ownedA("trad")), pAnn = planOf(ownedA("annuity"));
+  const magiTax = pTax.magi, magiTrad = pTrad.magi, magiAnn = pAnn.magi;
   ck("Engine D: a TRADITIONAL Other account is taxed as ordinary income when spent",
      magiTrad > magiTax, `trad ${Math.round(magiTrad)} vs taxable ${Math.round(magiTax)}`);
   ck("PRECONDITION: the taxable baseline really is lower (not vacuous)",
@@ -469,14 +477,51 @@ console.log("\nE2. The annuity carries NO RMD \u2014 in any engine");
   // second-order amount (~$526 here, alongside the ~$924 of extra lifetime RMD). Asserting
   // "exactly $600,000" for trad would have been wrong, and was: it failed first time and the
   // failure was read rather than papered over.
-  ck("Engine D: an ANNUITY's lifetime MAGI excess is EXACTLY the balance ($600,000) \u2014 taxed, never forced",
-     Math.round(magiAnn - magiTax) === 600000, `delta ${Math.round(magiAnn - magiTax)}`);
-  ck("Engine D: TRADITIONAL exceeds that, because its RMD forces extra taxable withdrawals",
-     magiTrad > magiAnn, `trad ${Math.round(magiTrad)} vs annuity ${Math.round(magiAnn)}`);
-  ck("Engine D: and that excess is second-order, not a second taxation of the balance",
-     magiTrad - magiAnn < 5000, `excess ${Math.round(magiTrad - magiAnn)}`);
-  ck("Engine D: an HSA row is NOT taxed on the way out (decision C-4)",
-     Math.round(magiOf(ownedA("hsa"))) === Math.round(magiTax), "hsa differs from taxable");
+  // v5.36: measured on the ORDINARY component. The blended total no longer equals the balance,
+  // because a brokerage row's growth accrues capital gain and an annuity's does not — that
+  // difference is the release working, not the invariant breaking.
+  ck("Engine D: an ANNUITY's lifetime ORDINARY excess is EXACTLY the balance ($600,000) \u2014 taxed, never forced",
+     Math.round(pAnn.ord - pTax.ord) === 600000, `delta ${Math.round(pAnn.ord - pTax.ord)}`);
+  // ⚠ REWRITTEN AT v5.36, NOT RELAXED — and the reason is the point of the assertion.
+  // Through v5.35 this asserted `magiTrad > magiAnn` and explained the gap as the RMD forcing
+  // extra taxable withdrawals. That explanation was ALREADY FALSE when it was written: lifetime
+  // `drawFromTaxable` is identical to the dollar across all four tax types (730,062), so no extra
+  // withdrawal was ever forced. The real gap was $102.34 of clamp artifact — the `Math.max(0,…)`
+  // floor on `taxOrd` biting once `taxRmdA` outlived it, which v5.35's own release notes
+  // identified correctly while this assertion kept the wrong reason.
+  // v5.36 measures the ordinary fraction on the post-sleeve-RMD pool, which reserves the sleeve's
+  // RMD out of `taxOrd` BEFORE the spending draw takes its share, so the floor can no longer bite
+  // and the residual goes to zero. The invariant this block exists to state — every dollar of
+  // ordinary money is taxed exactly ONCE on its way out — therefore becomes EXACT, and is
+  // asserted as such. A stronger statement replacing a weaker one that was true for a wrong
+  // reason; if a future release reintroduces a gap, this fails rather than absorbing it.
+  ck("Engine D: TRADITIONAL and ANNUITY recognise IDENTICAL lifetime ORDINARY income \u2014 the $102 clamp residual is GONE",
+     Math.round(pTrad.ord - pAnn.ord) === 0, `excess ${Math.round(pTrad.ord - pAnn.ord)} (was $102 through v5.35)`);
+  ck("PRECONDITION: the two really are being compared (both above the brokerage case)",
+     pTrad.ord > pTax.ord && pAnn.ord > pTax.ord, `trad ${Math.round(pTrad.ord)} ann ${Math.round(pAnn.ord)} tax ${Math.round(pTax.ord)}`);
+  // What IS left between them is capital gain, and it has a mechanism: the forced distribution
+  // pulls ordinary dollars out of the Priority-1 pool faster, so a proportionally larger share of
+  // what remains is gains-bearing and accrues gain on growth. Small, and in the conservative
+  // direction (the RMD-bearing household is taxed slightly more, not less).
+  ck("Engine D: the whole trad-vs-annuity MAGI difference is CAPITAL GAIN, not a second taxation",
+     Math.round(pTrad.magi - pAnn.magi) === Math.round(pTrad.gain - pAnn.gain),
+     `magi delta ${Math.round(pTrad.magi - pAnn.magi)} vs gain delta ${Math.round(pTrad.gain - pAnn.gain)}`);
+  ck("Engine D: and it is second-order against the $600,000 balance",
+     Math.abs(pTrad.magi - pAnn.magi) < 5000, `delta ${Math.round(pTrad.magi - pAnn.magi)}`);
+  ck("Engine D: TRADITIONAL still raises the lifetime RMD (the forced distribution is real)",
+     lifeTrad > lifeTax, `trad ${Math.round(lifeTrad)} vs taxable ${Math.round(lifeTax)}`);
+  // v5.36 SPLIT IN TWO — and this is the assertion that discriminates decision 7 (scope §5a).
+  // Through v5.35 an HSA row and a brokerage row produced identical MAGI, because neither
+  // produced anything. They must NOT be identical now: both are free of ordinary income, but a
+  // brokerage row's growth is a capital gain and an HSA's is not. If these two ever converge
+  // again, the HSA share has stopped being excluded from the gains-bearing pool.
+  const pHsa = planOf(ownedA("hsa"));
+  ck("Engine D: an HSA row is NOT taxed as ordinary income on the way out (decision C-4)",
+     Math.round(pHsa.ord) === Math.round(pTax.ord), `hsa ${Math.round(pHsa.ord)} vs taxable ${Math.round(pTax.ord)}`);
+  ck("Engine D: and an HSA row generates STRICTLY LESS capital gain than a brokerage row (scope decision 7)",
+     pHsa.gain < pTax.gain - 1000, `hsa gain ${Math.round(pHsa.gain)} vs taxable gain ${Math.round(pTax.gain)}`);
+  ck("PRECONDITION: the brokerage comparator really does generate gain (not a vacuous inequality)",
+     pTax.gain > 1000, `taxable gain ${Math.round(pTax.gain)}`);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
