@@ -1,5 +1,71 @@
 # Changelog
 
+## v5.36 — the drawdown realizes capital gains, and the tax engines consume them, 2026-08-16
+
+The embedded-gain share recorded in My Data since v5.33 is now used. Engine D tracks the
+gains-bearing brokerage portion of the taxable sleeve as its own balance and cost basis, realizes
+gain on the spending sale (never on the sleeve RMD — a distribution is not a sale), and publishes
+the per-year gain on the schedule. Engines B and C consume that series: on the Taxes tab the gains
+are taxed at preferential rates and count toward NIIT; on the IRMAA tab they enter MAGI
+dollar-for-dollar. The series is built at the call sites from the *selected scenario's* schedule —
+never recomputed inside the tax engines, which do not take a scenario, so a stress view shows the
+stress scenario's gains.
+
+**Figures move, and the app says why.** The declared share is the OPENING basis, not a fixed rate:
+growth adds balance and no basis, so even a plan saved at the default share of 0 realizes gains in
+later years — disclosed in My Data ("if your numbers moved at v5.36, that is why"). Two recorded
+modelling decisions, both conservative: unspent RMD cash joins the gains-bearing pool at full cost
+basis (its future growth is a capital gain; the gain-free alternative was rejected), and gain
+attaches to the spending sale only. Scope §9's label fix landed with the consumption: the field is
+"% of brokerage money," not "% of taxable pool," because ordinary-taxed and HSA balances entered
+under Other accounts are structurally excluded from the gains-bearing pool.
+
+**Engine A and the Monte Carlo, stress and Roth engines are byte-identical to v5.35** — parity 9/9
+strict — and the Withdrawal tab renders byte-identical too (measured by the cross-version DOM diff:
+the tracker is bookkeeping on top of an unchanged schedule).
+
+### Disclosed limitations and approximations
+
+- **Engine B's Social-Security provisional income now INCLUDES realized gains** (fixed in-release
+  on the maintainer's decision — E-16). The omission was dormant while gains were hardcoded $0
+  (v5.10–v5.35) and would have gone live with this release's wiring; instead `qdcg_y` feeds
+  `taxableSSPortion`, as IRC §86 requires. `t18` asserts the fix exactly: a $100K gain drives
+  `ssTaxable` to precisely the 85% statutory cap (§86(a)(2)) on a phase-in household, and MAGI
+  rises by exactly gain + ΔssTaxable. Its own negative control (C12) reverts the term and fires.
+- **Growth on Other-account ordinary money is never recognised as ordinary income** (`taxOrd` does
+  not grow): a $600,000 IRA yields exactly $600,000 of lifetime ordinary income however much it
+  compounds — measured exactly by `t20`, logged as E-15, its own release. Also an optimism.
+- One blended gain share and one blended basis for the whole brokerage pool; all long-term; no
+  per-lot selection, loss harvesting, or wash-sale logic.
+
+### Verification
+
+Current leg **600** (t1 94 · t2 18 · t3 36 · t4 210 · t5 58 · t6 21 · t10 163) · parity **9/9
+strict** · feature **648** (t7 41 · t8 38 · t9 14 · t11 40 · t12 23 · t13 42 · t14 44 · t15 11 ·
+t16 24 · t17 74 · t18 67 · t19 57 · t20 99 · t22 77) — **APP TOTAL 1260**. Prior v5.35 leg replays
+at **588** (t4 grew a PRIOR-LEG assertion pinning the copy that build is true to). Tooling: t21 50 ·
+cross-version DOM diff **26/26** (Withdrawal at strict identity; Taxes and IRMAA at figure-region
+divergence — the only witness of the call-site wiring, since every suite calls the engines
+directly) · `smoke_built` 16/16. Twelve negative controls all fire (C1–C9 and C12 in the adopted
+`qa/controls.sh`, patches embedded; C10/C11 on the DOM witnesses), with three verdict-instrument
+failures found and codified on the way — a dead probe that read as NO-OP, a control that skipped
+the splice rebuild, and a divergence witness satisfied by copy instead of figures (E-19, E-20).
+`t18`'s new consumption block is hand-exact: $10,000 of gain → MAGI +$10,000, ordinary tax +$0,
+LTCG +$1,500, NIIT +$380, total +$1,880, every delta computed before the engine confirmed it.
+Engine D's tracker is hand-verified against an independent 25-year simulation to zero error in
+every year (lifetime gain $215,216 exact, from the v5.36 session-1 record).
+
+New in the repo this release: `qa/controls.sh` and `qa/runsuite.sh` (adopted session tooling —
+the negative-control program and the parse-only totals runner), and `docs/` — the operations
+manual and the full scope/audit/finding/status record, previously held only in project knowledge
+(the fourth recorded pool-drift block, which cost this release a session restart, is why).
+
+Source `src/DangerClose.jsx` md5 `b7396c1c14861dc149b71e8edb1a00d5` · built `index.html` md5
+`c6d7474725d150a616a8ee8d389e8c72`. (The final source edit was a comment correction — a stale
+Engine D comment claimed gains were "ignored here" one line above the code that carries them —
+and the production build strips comments, so the built artifact is byte-identical to the one
+built from `279db93a…`; `smoke_built` was run against it regardless, 16/16.)
+
 ## v5.35 — the RMD comes out of the retirement account, 2026-08-15
 
 Engine D no longer satisfies a required minimum distribution by selling from the brokerage sleeve.
