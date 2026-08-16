@@ -799,3 +799,50 @@ pre-existing behavior carried forward unchanged: the form's Person-A pre-tax amo
 from the per-paycheck entry machinery (v5.9.1), so a plan holding only a monthly total and no
 per-paycheck detail shows $0 in that rollup until the paycheck fields are entered — true in
 v5.9.2, true now, and now visible in the accrual readout rather than silent.
+
+## Capital gains in the drawdown, and where they are taxed (v5.36)
+
+**What changed.** Through v5.35 the model recorded an embedded-gain share (My Data, added v5.33) and
+did nothing with it: the Taxes tab carried a hardcoded `$0` of realized gains, disclosed as such, and
+IRMAA MAGI never saw a gain. From v5.36 the drawdown realizes gains and the two tax engines consume
+them. Three pieces, in the direction the money flows:
+
+**1 · The gains-bearing sub-pool (Engine D).** The taxable sleeve is heterogeneous: brokerage money
+can carry embedded gain; balances entered under Other accounts as Traditional or annuity are taxed
+as ordinary income on the way out, and HSA money is spent tax-free — neither can also produce
+capital gains. So the engine tracks the brokerage portion as its own balance (`taxGainPool`) with
+its own cost basis (`gainBasis`), opened as `max(0, taxable − ordinary − HSA)` with the user's
+declared share setting the opening basis split. It grows with the pool, is depleted by sales in
+proportion to its share of the post-RMD pool, and is never touched by the sleeve RMD — an RMD is a
+distribution, not a sale. A pool with nothing gains-bearing in it holds `taxGainPool === 0` forever
+and cannot realize a cent; this is structural, not numerical, and it is what replaced an earlier
+inference that misbooked 39.7% of an all-ordinary pool as gain over 33 years. Hand-verified: a fully
+independent 25-year forward simulation, never re-synced to engine state, reproduces `taxable` and
+the per-year gain with zero error, lifetime gain $215,216 against the engine's $215,216.
+
+**2 · The declared share is the OPENING basis, not a fixed rate.** Growth adds balance to the
+sub-pool and no basis, so a plan saved at the default share of 0 still accrues — and later realizes —
+gain. This is disclosed in-app ("if your numbers moved at v5.36, that is why"). Two recorded
+modelling decisions, both taken in the conservative direction: **unspent RMD cash joins the
+gains-bearing pool at full cost basis** (it lands in the brokerage account, so its future growth is
+a capital gain; entering without basis would tax the same dollar twice, and treating it as
+permanently gain-free would be the optimism this app does not take); and gains attach to the
+spending sale only, never to the sleeve RMD leg.
+
+**3 · Consumption (Engines B and C).** Realized gains are computed once, by the drawdown, and passed
+into the Taxes and IRMAA engines as a year-keyed series built at the call site from the *selected
+scenario's* schedule — never recomputed inside those engines, because the drawdown's gain depends
+on the scenario preset, which the tax engines do not take: an internal call would show base-case
+gains under a stress scenario. In Engine B the gains join qualified dividends at preferential rates
+and count as net investment income for NIIT; in Engine C they enter IRMAA MAGI dollar-for-dollar.
+Both parameters default to empty, so direct callers and every pre-v5.36 behavior are unchanged.
+
+**Disclosed limitations, with their directions.** (a) *Found during this release and fixed in it*:
+Engine B's provisional-income proxy omitted realized gains, which IRC §86 includes — dormant while
+gains were hardcoded $0, it would have gone live with the wiring. It now feeds `qdcg_y` into the
+§86 test; `t18` pins the fix exactly (a $100K gain drives the taxable share of SS to precisely the
+85% statutory cap on a phase-in household) and control C12 reverts it and fires. (b) Growth on Other-account **ordinary** money is never recognised as ordinary income
+at all (`taxOrd` does not grow): a $600,000 IRA yields exactly $600,000 of lifetime ordinary income
+however much it compounds — an optimism, measured exactly by `t20`, its own release. It
+is recorded in `docs/ARCHITECTUREIssues.md` (E-15; E-16 is the fixed item above). (c) One blended share and one blended
+basis for the whole brokerage pool — no per-lot selection, no loss harvesting, all long-term.

@@ -1,6 +1,6 @@
 #!/bin/bash
 # ─────────────────────────────────────────────────────────────────────────────
-# Danger Close — release verification · v5.35 (2026-08-15)
+# Danger Close — release verification · v5.36 (2026-08-16)
 #
 # PROVENANCE: originally authored 2026-08-11 for v5.22 by transcribing the steps
 # actually executed in that session. Rolled forward to v5.23 from that file
@@ -52,17 +52,17 @@
 # Every command below was run and its result recorded in the release notes.
 #
 # Usage:  ./VERIFY.sh /path/to/workdir
-#    workdir must contain:  v534.jsx  v535.jsx  DangerClose.jsx(=v535)  qa/
+#    workdir must contain:  v535.jsx  v536.jsx  DangerClose.jsx(=v536)  qa/
 # ─────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
 ROOT="${1:-$(pwd)}"
 cd "$ROOT"
 
-PRIOR=v534
-CURR=v535
-EXPECT_SRC_MD5=a28843d3e1f441e90c765419264954ff
-EXPECT_BUILT_MD5=2361b2ac3fe739d50526fd954b80fb63
+PRIOR=v535
+CURR=v536
+EXPECT_SRC_MD5=b7396c1c14861dc149b71e8edb1a00d5
+EXPECT_BUILT_MD5=c6d7474725d150a616a8ee8d389e8c72
 
 say() { printf "\n\033[1m== %s ==\033[0m\n" "$*"; }
 die() { printf "\n\033[31mFAIL: %s\033[0m\n" "$*" >&2; exit 1; }
@@ -119,7 +119,7 @@ cd ..
 # pre-existing suite stays green — t4 (90) and t12 (23, named engineD_survivor)
 # both pass. So "the suite is green" does NOT prove the hoist changed nothing.
 # This does: it renders the Withdrawal tab on BOTH builds and diffs the text.
-say "4b. Withdrawal tab, cross-version DOM diff"
+say "4b. Tax-bearing tabs, cross-version DOM diff"
 ( cd qa && timeout 900 node domdiff_withdrawal.mjs "$PRIOR" "$CURR" | tail -6 )
 
 # ── 5. The built artifact — built, then EXERCISED ───────────────────────────
@@ -152,74 +152,55 @@ fi
 
 say "DONE"
 cat <<'EOF'
-Expected totals for v5.34 — compare against the output above:
+Expected totals for v5.36 — compare against the output above:
 
-  baseline current leg  580  (t1 93 · t2 18 · t3 36 · t4 191 · t5 58 · t6 21 · t10 163)
+  baseline current leg  600  (t1 94 · t2 18 · t3 36 · t4 210 · t5 58 · t6 21 · t10 163)
   parity                  9  strict, no INTENDED_DIFFS
-  feature               581  (t7 41 · t8 38 · t9 14 · t11 40 · t12 23 · t13 42
-                              t14 44 · t15 11 · t16 24 · t17 63 · t18 50 · t19 22
-                              t20 94 · t22 75)
+  feature               651  (t7 41 · t8 38 · t9 14 · t11 40 · t12 23 · t13 42
+                              t14 44 · t15 11 · t16 24 · t17 74 · t18 67 · t19 57
+                              t20 99 · t22 77)
   ----------------------------------------------------------------------------
-  APP TOTAL            1170
-  prior leg (v5.33)     573  counted SEPARATELY
+  APP TOTAL            1260
+  prior leg (v5.35)     588  counted SEPARATELY (t4 grew ONE prior-leg assertion
+                             at v5.36 — it pins the copy that build is true to;
+                             the published v5.35 figure was 587)
   tooling (t21)          50  counted SEPARATELY
   built artifact         16  qa/smoke_built.mjs
-  withdrawal DOM diff    10  qa/domdiff_withdrawal.mjs — strict identity
+  tax-tab DOM diff       26  qa/domdiff_withdrawal.mjs — see below
 
-v5.34 ships ENGINE A ONLY. The conversion-funding model carries a tracked cost
-basis instead of a flat declared fraction, and the ACA cliff solver reads the
-EFFECTIVE share, anticipates the subsidy-replacement sale, and no longer excludes
-withholding. Every other engine is byte-identical to v5.33, so parity must be 9/9
-STRICT and the Withdrawal DOM diff 10/10. If either moves, something outside
-Engine A changed — stop and report rather than adapting the expectation.
+v5.36 wires the drawdown's realized capital gains into Engines B and C. Engine A
+and the MC/stress/Roth engines are byte-identical to v5.35, so parity must be 9/9
+STRICT — and the WITHDRAWAL tab must render BYTE-IDENTICAL across the pair: the
+v5.36 basis tracker is bookkeeping on top of an unchanged schedule (capGain_y,
+taxBasis, taxGainPool ride the rows; no displayed dollar moves). The DOM diff was
+re-scoped accordingly, and the re-scope INVERTED the session brief's premise
+("this release moves the schedule again" — measured: it does not).
 
-WHY THIS RELEASE IS NARROWER THAN ITS SCOPE. The drawdown gain routing (S-7) was
-backed out mid-build and holds for v5.35. Engine D folds the RMD into
-totalToWithdraw and satisfies the whole of it from the TAXABLE SLEEVE FIRST, then
-returns the same cash as RMD surplus — balance-neutral, identical on v5.33, and
-therefore invisible for many releases. Attaching realizeGain to the outbound leg
-made it realize phantom gain: $24,657 in year one of t17 case G, whose only
-account is a $2M Traditional IRA, and 83.7% of the demo household's plan-life
-realized gain. Conservative in direction; wrong in fact.
+THE TWO CHECKS THAT HAVE NO BACKUP. The diff's Taxes and IRMAA sections assert
+that the year-table FIGURE regions differ across the pair. Every suite calls the
+engines directly, so these are the ONLY witness that the app's call sites pass
+the gainByYr map — drop a call site and 1256 checks stay green while both tax
+tabs silently show no gains. Control-verified: with both call sites reverted
+(and the splice REGENERATED — patching the source without re-running
+mk_testable.sh bundles the stale splice and the control is a no-op, hit once at
+this build), exactly those two checks fail. The regions are anchored PAST every
+piece of v5.36 copy, because the naive whole-tab form was satisfied by the copy
+alone and its control did not fire (docs/ARCHITECTUREIssues.md E-20).
 
-THE PROOF CONDITION FOR THE BACKOUT, and it held: t13 42/0 and t17 63/0 with NO
-TEST EDITED — the v5.33 figures, recovered because the term that moved them is
-gone. Two negative controls (re-adding Engine C's wiring alone; re-adding Engine
-B's) each fire t19's extinction set. NEITHER moves t13 or t17, because re-adding
-a consumer while the producer is gone leaves the term at zero — that is honest
-coverage accounting, not a pass. t19 guards the layer RETURNING; t13/t17 prove
-the backout WORKED.
+TWELVE NEGATIVE CONTROLS, all firing: C1–C9 and C12 in qa/controls.sh (patches embedded
+in the script — the session-1 payloads lived in /tmp and were lost), C10/C11 on
+the DOM witnesses above. C8 (Engine B wiring reverted) moves only B's
+fingerprint and is caught by t18(6)+t19(1); C9 (Engine C MAGI term dropped)
+moves only C's, caught by t17(5) — the orthogonality is the evidence each patch
+reverts exactly what it claims.
 
-THE COPY CORRECTIONS, and the coverage that was missing. "no sale, no gains tax"
-was false on every build back to v5.9 — under withhold the conversion absorbs
-min(conv, due) of the year's WHOLE bill and any residual is sold from the
-brokerage and taxed. Measured at the shipped default share of 0: 19 funding
-sales, $111,359 of gain, $9,428 of LTCG tax. A §B2 sweep found NO test asserted
-any of this copy. t4 now does, on both surfaces, gated per leg.
+E-16, FOUND AND FIXED IN-RELEASE: Engine B's SS provisional income omitted
+realized gains (IRC §86 includes them). Fixed on the maintainer's decision —
+qdcg_y feeds taxableSSPortion. t18 pins the fix exactly (the 85% statutory cap,
+from the row's own ssTotal); control C12 reverts the term and fires t18(3).
 
-TWO NEGATIVE CONTROLS ON THAT COPY, both of which fired at the v5.34 build and
-both of which must fire again if re-run: restore the manual's old clauses (t4
-fails 3, all in the docs block); restore the Roth tab's old clauses (t4 fails 5,
-all on the tab). Each fires ONLY on the surface it corrupted. Corrupt v535.jsx —
-the file mk_testable.sh BUILDS FROM — not the canonical DangerClose.jsx beside
-it; corrupting only the latter leaves the bundle clean and the control silently
-does not fire.
-
-t4's PRIOR-LEG count moves 176 -> 184 and the current leg 176 -> 191. Each leg
-asserts the copy ITS OWN build carries; the prior leg is gating, not a defect pin
-(OPERATIONS §B2).
-
-domdiff_withdrawal.mjs had a HARDCODED default pair four releases stale (v529 ->
-v530) and died at module load looking for a bundle the run folder does not hold.
-Re-pointed to v534 -> v535, and RE-SCOPED from strict identity to excise-by-anchor:
-# this release moves the tab's figures AND its copy, so strict identity is the wrong
-# assertion and keeping it would be a stale lock. Expect 20 checks. Re-point AND
-# re-scope it EVERY release - the right assertion is the one matching what the
-# release claims to have done.
-
-BUILT MD5 — the scaffold was proven before the new hash was trusted: v5.33 was
-rebuilt from its own unmodified source and reproduced 94c41e9c58dfb1371bc0ec3f075576a6
-byte-for-byte. That is what distinguishes "the scaffold is complete" from "the
-hash looks plausible" (OPERATIONS §N3a). The binding check on a built artifact is
-still smoke_built.mjs at 16/16, not the hash.
+BUILT MD5 — the scaffold was proven before the new hash was trusted: v5.35 was
+rebuilt from its own unmodified source and reproduced 2361b2ac3fe739d50526fd954b80fb63
+byte-for-byte. The binding check on a built artifact is still smoke_built.mjs at
+16/16, not the hash.
 EOF
