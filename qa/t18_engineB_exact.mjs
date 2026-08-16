@@ -273,5 +273,97 @@ console.log("\n  case 11 — OBBBA bonus senior deduction (Engine B models it; t
 }
 
 
+// ══ v5.36 — ENGINE B CONSUMES ENGINE D'S GAIN SERIES (shape (b), scope decision 3) ══════════
+// The new surface is CONSUMPTION: a year-keyed `gainByYr` map, defaulted to {}, feeding the
+// formerly-hardcoded `capGains_y`. The preferential-rate and NIIT machinery it feeds has been
+// exercised by this suite since v5.21 (via dividends), so what must be exact here is the path
+// from map to row to tax — each delta below is hand-computed, not read from the engine.
+// Fixture: pension-only MFJ household ($300K/yr), no SS, no positions, yield 0 — so base MAGI
+// is flat $300,000, above the (unindexed) $250K MFJ NIIT threshold with $50K to spare, the
+// OBBBA senior bonus is fully phased out (6% × $150K excess > $6,000) so it cannot interact,
+// and ordinary taxable income sits mid-15%-LTCG-band, far from both band edges.
+console.log("\n  v5.36 \u2014 Engine B consumes the gain series (gainByYr)");
+{
+  const mkRun = (gainByYr) => {
+    const P = JSON.parse(JSON.stringify(BASE_P));
+    P.positions = []; P.otherAccounts = []; P.stateCode = null;
+    P.single = false; P.lifeExpA = 95; P.lifeExpB = 95;
+    P.incomeStreams = [{ monthly: 0, tax: "ordinary", owner: "A", startYear: 2000, endYear: 9999 }];
+    const ss = (m) => ({ tableByAge: { 62: m, 63: m, 64: m, 65: m, 67: m, 70: m }, planned: m, plannedAge: 67 });
+    P.incomeSources = { ssA: ss(0), ssB: ss(0), pension: { amount: 300000 / 12 } };
+    G.applyLoadedData({ portfolio: P });
+    const args = { retireYear: 2027, rothAmount: 0, qcdAnnual: 0, taxYield: 0 };
+    if (gainByYr !== undefined) args.gainByYr = gainByYr;
+    return E.computeTaxPlan(args);
+  };
+  const base = mkRun({});
+  const YG = 2032, GAIN = 10000;                       // an arbitrary mid-plan year
+  const g1 = mkRun({ [YG]: GAIN });
+
+  const bRow = base.rows.find(r => r.yr === YG), gRow = g1.rows.find(r => r.yr === YG);
+  CK("PRECONDITION: base MAGI exceeds the NIIT threshold by more than the gain",
+     bRow.magi_y - 250000 >= GAIN, `MAGI ${bRow.magi_y}`);
+  T("with no map entry, capGains_y is 0 \u2014 the default preserves pre-v5.36 behavior",
+    bRow.capGains_y, 0);
+  T("the map's gain lands on the row EXACTLY \u2014 $10,000 in, $10,000 published", gRow.capGains_y, GAIN);
+  T("every OTHER year's capGains_y stays 0", g1.rows.filter(r => r.yr !== YG).reduce((s, r) => s + r.capGains_y, 0), 0);
+  T("MAGI rises by EXACTLY the gain \u2014 magi_y = grossOrdinary + qdcg_y, dollar for dollar",
+    gRow.magi_y - bRow.magi_y, GAIN);
+  T("ordinary federal tax is UNCHANGED to the dollar \u2014 a capital gain is never ordinary income",
+    gRow.fedTax - bRow.fedTax, 0);
+  // Hand: gain stacks on ~$270K taxable ordinary \u2014 inside the 15% LTCG band (which opens
+  // near $99K MFJ in 2026 and indexes up ~2%/yr; the 20% band opens near $600K) \u2014 so the
+  // whole $10,000 is taxed at 15%: $1,500. No band edge is within $150K of the stack point.
+  T("LTCG tax rises by EXACTLY 15% of the gain: $1,500", gRow.capGainsTax - bRow.capGainsTax, 1500);
+  // Hand: NIIT = 3.8% \u00d7 min(invInc, MAGI \u2212 $250K). Base invInc is 0 \u2192 base NIIT $0. With the
+  // gain, invInc = $10,000 and the excess is \u2265 $60K, so the min is the gain: 0.038 \u00d7 10000 = $380.
+  T("NIIT rises by EXACTLY 3.8% of the gain: $380", gRow.niit_y - bRow.niit_y, 380);
+  T("the year's total tax rises by EXACTLY $1,880 \u2014 $1,500 LTCG + $380 NIIT and nothing else (no AMT, FICA, or state interaction)",
+    gRow.totalTax - bRow.totalTax, 1880);
+  T("no other year's total tax moves a dollar",
+    g1.rows.filter(r => r.yr !== YG).reduce((s, r) => s + r.totalTax, 0),
+    base.rows.filter(r => r.yr !== YG).reduce((s, r) => s + r.totalTax, 0));
+  {
+    const every = {}; for (const r of base.rows) every[r.yr] = GAIN;
+    const g2 = mkRun(every);
+    T("a gain in EVERY year passes through in full \u2014 \u03a3 capGains_y === $10,000 \u00d7 years",
+      g2.rows.reduce((s, r) => s + r.capGains_y, 0), GAIN * base.rows.length);
+  }
+  CK("omitting the key and passing {} are byte-identical \u2014 the default is real",
+     JSON.stringify(mkRun(undefined).rows) === JSON.stringify(base.rows));
+
+  // [FLIPPED 2026-08-16, same release — E-16 fixed on the maintainer's decision] Engine B's
+  // provisional income now INCLUDES realized capital gains (qdcg_y feeds taxableSSPortion),
+  // as IRC §86 requires. This block asserted the omission as a dated DISCLOSED LIMITATION for
+  // part of the v5.36 build; the maintainer chose fix-now over own-release, so the pin flips
+  // in the same release the wiring landed. The exact anchors are COLA-robust: the $100K gain
+  // drives provisional income far past the 85% cap, so post-gain ssTaxable must equal
+  // round(0.85 × ssTotal) — the statutory cap, IRC §86(a)(2), computed from the row's own
+  // published ssTotal — and MAGI must rise by exactly gain + ΔssTaxable.
+  {
+    const P = JSON.parse(JSON.stringify(BASE_P));
+    P.positions = []; P.otherAccounts = []; P.stateCode = null;
+    P.single = false; P.lifeExpA = 95; P.lifeExpB = 95;
+    P.incomeStreams = [{ monthly: 0, tax: "ordinary", owner: "A", startYear: 2000, endYear: 9999 }];
+    const ss = (m) => ({ tableByAge: { 62: m, 63: m, 64: m, 65: m, 67: m, 70: m }, planned: m, plannedAge: 67 });
+    P.incomeSources = { ssA: ss(3000), ssB: ss(0), pension: { amount: 30000 / 12 } };
+    G.applyLoadedData({ portfolio: P });
+    const a = E.computeTaxPlan({ retireYear: 2027, rothAmount: 0, qcdAnnual: 0, taxYield: 0, gainByYr: {} });
+    G.applyLoadedData({ portfolio: P });
+    const b = E.computeTaxPlan({ retireYear: 2027, rothAmount: 0, qcdAnnual: 0, taxYield: 0, gainByYr: { 2032: 100000 } });
+    const ra = a.rows.find(r => r.yr === 2032), rb = b.rows.find(r => r.yr === 2032);
+    CK("PRECONDITION: SS is only PARTIALLY taxable at base, so the gain has room to move it",
+       ra.ssTaxable > 0 && ra.ssTaxable < Math.round(0.85 * ra.ssTotal), `taxable ${ra.ssTaxable} of ${ra.ssTotal}`);
+    T("[FLIPPED v5.36] a $100K gain drives ssTaxable to EXACTLY the 85% statutory cap (IRC \u00a786(a)(2): round(0.85 \u00d7 ssTotal), from the row's own ssTotal)",
+      rb.ssTaxable, Math.round(0.85 * rb.ssTotal));
+    CK("[FLIPPED v5.36] ...which is a strict INCREASE \u2014 provisional income sees the gain now",
+       rb.ssTaxable > ra.ssTaxable, `${ra.ssTaxable} -> ${rb.ssTaxable}`);
+    T("[FLIPPED v5.36] MAGI rises by EXACTLY gain + \u0394ssTaxable \u2014 the two enter once each, nothing double-counts",
+      rb.magi_y - ra.magi_y, 100000 + (rb.ssTaxable - ra.ssTaxable));
+    CK("[FLIPPED v5.36] ordinary federal tax strictly rises \u2014 the newly taxable SS is ordinary income",
+       rb.fedTax > ra.fedTax, `${ra.fedTax} -> ${rb.fedTax}`);
+  }
+}
+
 console.log(`\nt18 SUITE: ${pass} passed, ${fail} failed`);
 if (fail) { console.log("\nFAILURES:"); fails.forEach(f => console.log(f)); process.exit(1); }

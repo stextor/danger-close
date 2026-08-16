@@ -150,18 +150,30 @@ if (namedIRA) {
 // it invented gain in households with no taxable account at all ($24,657 in year one of t17
 // case G, which holds a Traditional IRA and nothing else). These assertions exist so the layer
 // cannot return before the defect pinned below is fixed. FLIP THEM AT v5.35, together.
-console.log("\n  v5.34 \u2014 extinction: no basis tracker on the schedule, no engine reading one");
+// ══ FLIPPED AT v5.36 — the basis tracker is BACK, on a corrected target ═══════════════
+// The four assertions below stood as extinction checks from v5.34, guarding against the layer
+// returning before the sequencer defect was fixed. v5.35 fixed the sequencer; v5.36 re-lands the
+// layer against `_spendFromTaxable` — the brokerage sale — rather than `drawFromTaxable`, which
+// since v5.35 is that sale PLUS a sleeve RMD that sells nothing. Two of the four were inverted
+// when the tracker landed; the two naming Engine B/C consumption stood as extinction checks
+// until the consumption half landed LATER IN THE SAME RELEASE (session 2, scope decision 3,
+// shape (b)) — all four are now positive statements. Engine B takes `gainByYr` as `_gainByYr`,
+// Engine C as `_gainByYrI`; both DEFAULT to {} so this suite's own direct calls (and t17/t18's)
+// run gain-free, which is why inverting these is safe for every fixture above.
+console.log("\n  v5.36 \u2014 the basis tracker is back, on the spending sale only");
 {
   const row = r.schedule[0];
-  ck("EXTINCTION: the schedule row publishes no capGain_y", !("capGain_y" in row));
-  ck("EXTINCTION: the schedule row publishes no taxBasis", !("taxBasis" in row));
+  ck("[FLIPPED v5.36, was EXTINCTION] the schedule row publishes capGain_y", "capGain_y" in row);
+  ck("[FLIPPED v5.36, was EXTINCTION] the schedule row publishes taxBasis", "taxBasis" in row);
   // AST would be better; a text scan is sufficient here because these identifiers do not occur
   // in DOCS_HTML and the one-line blob is excluded by length, as elsewhere in this suite.
   const body = SRC.split("\n").filter(l => l.length < 5000).join("\n");
-  ck("EXTINCTION: no engine reads a per-year gain series (_gainByYr / _gainByYrI)",
-     !body.includes("_gainByYr"), "a gain series is wired into an engine again");
-  ck("EXTINCTION: Engine B's capGains_y is back to the disclosed hardcoded 0",
-     body.includes("const capGains_y = 0;"), "Engine B is reading a gain series again");
+  ck("[FLIPPED v5.36, was EXTINCTION] Engine B consumes the gain series (_gainByYr is wired)",
+     body.includes("_gainByYr"), "no engine reads a per-year gain series");
+  ck("[FLIPPED v5.36, was EXTINCTION] Engine B's hardcoded `const capGains_y = 0;` is GONE",
+     !body.includes("const capGains_y = 0;"), "the disclosed hardcoded 0 is back");
+  ck("[NEW v5.36] Engine C consumes its own gain series (_gainByYrI is wired \u2014 the substring above matches B alone or both, this one binds C)",
+     body.includes("_gainByYrI"), "Engine C's MAGI does not read a gain series");
 }
 
 // ══ FIXED AT v5.35 — Engine D SOURCES THE RMD FROM WHERE THE MONEY LIVES ═════════════
@@ -351,6 +363,223 @@ console.log("\n  v5.35 — split RMD: bucket share and named-IRA share, with a r
   ck("fixture restored after the split-RMD household \u2014 baseline figures return",
      Math.round(back2.totalDrawn) === Math.round(r.totalDrawn),
      `${$(back2.totalDrawn)} vs ${$(r.totalDrawn)}`);
+}
+
+// ══ v5.36 — THE DRAWDOWN REALIZES CAPITAL GAINS (S-7) ════════════════════════
+// The release exists to make ONE distinction: a brokerage sale realizes gain, a required
+// distribution routed through the taxable sleeve does not. Both live inside `drawFromTaxable`
+// since v5.35, so a literal port of the v5.34 plan taxes both — the defect that made v5.34 back
+// S-7 out. Every assertion below is written to FAIL on that literal port.
+//
+// ⚠ EVERY HOUSEHOLD HERE IS BUILT EXPLICITLY, not inherited. The first draft of this block
+// reused whatever the preceding block left in PORTFOLIO and produced ZERO RMD-covered years —
+// the discriminating case was not being exercised at all, and only the PRECONDITION checks said
+// so. That is the OPERATIONS §B2 failure caught by its own guard rather than shipped.
+console.log("\n  v5.36 — gain on the SPENDING SALE only");
+{
+  const PSAVE3 = JSON.parse(JSON.stringify(g.PORTFOLIO()));
+  const RETIRE = () => g.PLAN_TIMELINE().targetRetireYear;
+  const planFor = (P) => { g.applyLoadedData({ portfolio: JSON.parse(JSON.stringify(P)) });
+    return g.computeWithdrawalPlan({ retireYear: RETIRE(), rothAmount: 0, scenarioPreset: "base" }); };
+  const lifeGain = (plan) => plan.schedule.reduce((t, x) => t + x.capGain_y, 0);
+
+  // ── (1) THE DISCRIMINATING CASE ────────────────────────────────────────────────────────
+  // A named IRA under Other accounts, plus a pension large enough to cover the spending need.
+  // In every such year the taxable draw is PURELY the sleeve's RMD — nothing is sold — so the
+  // gain must be exactly zero. A literal port reports gain in all of them.
+  const sleeveHH = (taxType) => {
+    const P = JSON.parse(JSON.stringify(PSAVE3));
+    P.otherAccounts = [{ name: "Rollover IRA", balance: 600000, owner: "A", taxType }];
+    P.household = (P.total401k || 0) + 600000;
+    P.single = false; P.lifeExpA = 95; P.lifeExpB = 95;
+    const zSS = { tableByAge: { 62: 0, 63: 0, 64: 0, 65: 0, 67: 0, 70: 0 }, planned: 0, plannedAge: 67 };
+    P.incomeSources = { ssA: { ...zSS }, ssB: { ...zSS }, pension: { amount: 150000 / 12 } };
+    P.taxableGainPct = 40;
+    return P;
+  };
+  const sl = planFor(sleeveHH("trad"));
+  const covered = sl.schedule.filter(x => x.rmd_y >= x.drawNeeded);
+  const leaked = covered.filter(x => x.capGain_y > 0.005);
+  const maxCoveredDraw = Math.max(...covered.map(x => x.drawFromTaxable), 0);
+  ck("PRECONDITION: the sleeve household really does have RMD-covered years",
+     covered.length > 5, `${covered.length} covered years`);
+  ck("PRECONDITION: and those years DO draw from the taxable sleeve (not a vacuous check)",
+     maxCoveredDraw > 1000, `max draw in a covered year ${$(maxCoveredDraw)}`);
+  ck("NO capital gain in ANY year the RMD covered the spending need — nothing was sold",
+     leaked.length === 0,
+     leaked.length ? `${leaked.length} leaking, first ${leaked[0].yr} gain ${$(leaked[0].capGain_y)}`
+                   : `0 leaking across ${covered.length} years, largest sleeve draw ${$(maxCoveredDraw)}`);
+
+  // ── (2) GAIN ON A GENUINE SALE, HAND-COMPUTED TO THE CENT ──────────────────────────────
+  // No Other accounts at all, so the heterogeneous-pool correction cannot confound the figure:
+  // the whole pool is gains-bearing. Opening basis = 400,000 − 0.40 × 400,000 = 240,000, basis
+  // fraction 0.60. Sale 16,240.00 → gain 6,496.00, basis 240,000 − 9,744 = 230,256.00.
+  const PC = JSON.parse(JSON.stringify(PSAVE3));
+  PC.otherAccounts = [];
+  PC.household = (PC.total401k || 0) + 400000;
+  PC.taxableGainPct = 40;
+  const cl = planFor(PC);
+  const y0 = cl.schedule[0];
+  const _sale = y0.drawFromTaxable;               // no named IRA ⇒ the sleeve RMD is 0
+  const _basis0 = 400000 - 400000 * 0.40;
+  const _handGain = _sale * (1 - _basis0 / 400000);
+  const _handBasis = _basis0 - _sale * (_basis0 / 400000);
+  ck("PRECONDITION: the clean household sells in its first year", _sale > 1000, `sale ${$(_sale)}`);
+  ck("gain on a genuine sale matches the hand computation to the cent",
+     Math.abs(y0.capGain_y - _handGain) < 0.01,
+     `engine ${y0.capGain_y.toFixed(2)} vs hand ${_handGain.toFixed(2)}`);
+  ck("...and so does the cost basis it leaves behind",
+     Math.abs(y0.taxBasis - _handBasis) < 0.01,
+     `engine ${y0.taxBasis.toFixed(2)} vs hand ${_handBasis.toFixed(2)}`);
+
+  // ── (3) rmdToTaxable ENTERS AT FULL BASIS ──────────────────────────────────────────────
+  // Unspent RMD cash has already been taxed as income. If it landed without its basis the model
+  // would charge capital-gains tax on it later — the same dollar taxed twice by a second route.
+  const surplusYrs = sl.schedule.filter(x => x.rmd_y > x.drawNeeded + 1);
+  ck("PRECONDITION: the sleeve household banks RMD surplus into the taxable pool",
+     surplusYrs.length > 3, `${surplusYrs.length} surplus years`);
+  // ⚠ THE IDENTITY, STATED CORRECTLY — two earlier drafts of this check were wrong, and BOTH
+  // failed against correct code. The first compared the change in EMBEDDED GAIN against the
+  // surplus, which conflates the surplus with the growth that also accrues that year. The second
+  // asserted "basis rises by at least the surplus", which ignores that the SAME year's sleeve RMD
+  // removes basis on its way out. In a covered year nothing is sold, so `drawFromTaxable` IS the
+  // sleeve RMD, and the exact statement is:
+  //     Δbasis = surplus − sleeveRmdDraw + (growth on the non-gains-bearing remainder),  all ≥ 0
+  // so Δbasis must be AT LEAST (surplus − drawFromTaxable). If the surplus arrived without its
+  // basis, Δbasis falls short of that bound by the whole surplus. Recorded because a check that
+  // fails against correct code is as expensive as one that passes against broken code.
+  const noSale = surplusYrs.filter(x => x.rmd_y >= x.drawNeeded);
+  const shortfall = noSale.filter((x) => {
+    const i = sl.schedule.indexOf(x); if (i < 1) return false;
+    const dBasis = x.taxBasis - sl.schedule[i - 1].taxBasis;
+    return dBasis < (Math.max(0, x.rmd_y - x.drawNeeded) - x.drawFromTaxable) - 0.01;
+  });
+  ck("PRECONDITION: there are surplus years in which nothing is sold",
+     noSale.length > 3, `${noSale.length} no-sale surplus years`);
+  ck("banked RMD surplus enters at FULL BASIS — basis rises by the surplus net of the sleeve RMD",
+     shortfall.length === 0,
+     `${shortfall.length} of ${noSale.length} years fell short of (surplus − sleeveRmdDraw)`);
+
+  // ── (4) BASIS CONSERVATION on every household this suite builds ────────────────────────
+  for (const [label, plan] of [["sleeve", sl], ["clean", cl], ["baseline", r]]) {
+    const bad = plan.schedule.filter(x =>
+      !(x.taxBasis >= -0.005 && x.taxBasis <= x.taxable + 0.005 && x.capGain_y >= -0.005));
+    ck(`basis conservation holds every year on the ${label} household`, bad.length === 0,
+       bad.length ? `${bad.length} violations, first ${bad[0].yr}: basis ${$(bad[0].taxBasis)} pool ${$(bad[0].taxable)}`
+                  : `${plan.schedule.length} years clean`);
+  }
+
+  // ── (5) THE EXCLUSION SURVIVES GROWTH — stated as a COMPARISON, not a threshold ────────
+  // ONE household, ONE $600,000 Other-accounts row, and only its `taxType` changes. Ordinary and
+  // HSA money cannot carry a capital gain, so those two must realize far less than the same row
+  // typed `taxable` — even though the `trad` case SELLS MORE THAN TWICE AS MUCH, because its RMD
+  // keeps pulling money through the sleeve.
+  //
+  // This is deliberately a ratio between measured runs rather than a tuned constant. It is also
+  // the assertion that catches the defect found during this build: excluding ordinary and HSA
+  // only at INITIALISATION is undone by growth, because growth is applied to the whole
+  // heterogeneous pool while cost basis is not. Before the growth-basis credit the `trad` case
+  // realized $25,799 with $107,265 of embedded gain by 2038, on a pool holding no asset that can
+  // carry one. Revert that credit and this fails.
+  const sellHH = (taxType) => {
+    const P = JSON.parse(JSON.stringify(PSAVE3));
+    P.otherAccounts = [{ name: "Big Account", balance: 600000, owner: "A", taxType }];
+    P.household = (P.total401k || 0) + 600000;
+    P.taxableGainPct = 40;
+    return P;
+  };
+  const gTrad = lifeGain(planFor(sellHH("trad")));
+  const gHsa  = lifeGain(planFor(sellHH("hsa")));
+  const gTax  = lifeGain(planFor(sellHH("taxable")));
+  const drawTrad = planFor(sellHH("trad")).schedule.reduce((t, x) => t + x.drawFromTaxable, 0);
+  const drawTax  = planFor(sellHH("taxable")).schedule.reduce((t, x) => t + x.drawFromTaxable, 0);
+  ck("PRECONDITION: the brokerage-typed row really does realize gain (bar is not trivially met)",
+     gTax > 50000, `taxable-typed lifetime gain ${$(gTax)}`);
+  // The bound is ">" and not a tuned multiple: the CLAIM is that the trad row realizes less gain
+  // despite selling MORE, so "more" is the whole precondition. (An earlier draft asserted 1.5x, a
+  // figure taken from a run using a different retire year — measured here it is ~1.3x. The
+  // constant was wrong, not the code, and a constant carried between fixtures is worth nothing.)
+  ck("PRECONDITION: and the trad-typed row SELLS MORE, so the comparison is not just about volume",
+     drawTrad > drawTax, `trad draw ${$(drawTrad)} vs taxable draw ${$(drawTax)} (${(drawTrad / drawTax).toFixed(2)}x)`);
+  // EXACT, not an order of magnitude. The sub-pool model makes this a structural property rather
+  // than a numerical outcome: a pool with nothing gains-bearing in it holds `taxGainPool === 0`
+  // for every year of the plan, so no sale can realize a cent no matter how long the horizon or
+  // how fast the growth. The earlier whole-pool tracker could only manage "small" here — $1,518,
+  // rising with horizon — and an "order of magnitude" assertion cannot tell $1,518 from $0.
+  ck("an ORDINARY-typed row realizes EXACTLY zero capital gain",
+     Math.round(gTrad * 100) === 0, `trad ${gTrad.toFixed(2)} vs taxable ${$(gTax)}`);
+  ck("an HSA-typed row realizes EXACTLY zero too (scope decision 7)",
+     Math.round(gHsa * 100) === 0, `hsa ${gHsa.toFixed(2)} vs taxable ${$(gTax)}`);
+  // ...and the DIRECT statement, on the balance itself rather than on its consequence. A gain
+  // series reads zero both when the exclusion works and when the tracker is never consulted at
+  // all; the sub-pool balance distinguishes those two.
+  // ⚠ STATED CAREFULLY. An earlier draft asserted `taxGainPool === 0` in EVERY year and failed
+  // against correct code at $790,749 — because banked RMD surplus legitimately JOINS this pool
+  // (it is after-tax brokerage cash from then on, and that is a recorded modelling decision).
+  // The claim that actually holds is that none of the ORIGINAL ordinary balance is ever in it:
+  // the pool is exactly zero at retirement and stays zero until the first dollar of surplus is
+  // banked. That is the statement the exclusion makes, and it is the one asserted.
+  const tradSched = planFor(sellHH("trad")).schedule;
+  const taxSched = planFor(sellHH("taxable")).schedule;
+  const firstSurplus = tradSched.findIndex(x => x.rmd_y > x.drawNeeded + 1);
+  const preSurplus = firstSurplus < 0 ? tradSched : tradSched.slice(0, firstSurplus);
+  ck("PRECONDITION: the ordinary-typed household runs for years before it banks any surplus",
+     preSurplus.length > 3, `${preSurplus.length} pre-surplus years`);
+  ck("the gains-bearing sub-pool is EXACTLY zero for an ordinary-typed row until surplus is banked",
+     preSurplus.every(x => x.taxGainPool < 0.005),
+     `max taxGainPool over ${preSurplus.length} pre-surplus years: ${$(Math.max(...preSurplus.map(x => x.taxGainPool)))}`);
+  ck("PRECONDITION: and NON-zero from year one for the brokerage-typed row (the tracker is live)",
+     taxSched.every(x => x.taxGainPool > 0.005),
+     `min taxGainPool ${$(Math.min(...taxSched.map(x => x.taxGainPool)))}`);
+
+  // ── (6) THE MIXED POOL — added because a negative control did NOT fire (§B2) ────────────
+  // Reverting the line that depletes the sub-pool on a sale broke NOTHING in this suite. Every
+  // fixture above is homogeneous: all-ordinary (sub-pool 0, so the depletion is a no-op), all-HSA
+  // (same), or all-brokerage (where `Math.min(taxable, …)` at growth re-clamps the sub-pool back
+  // to the pool every year and hides the drift). The most common real household — brokerage AND
+  // an IRA AND an HSA together, which is the shipped example's own shape — was not tested at all.
+  // Measured on this fixture: the revert takes lifetime gain from $89,673 to $194,928 and drives
+  // the gains-bearing share from a flat 41.7% to 100% by year ten, with the whole suite green.
+  const mixHH = () => {
+    const P = JSON.parse(JSON.stringify(PSAVE3));
+    P.otherAccounts = [
+      { name: "Rollover IRA", balance: 300000, owner: "A", taxType: "trad" },
+      { name: "Brokerage",    balance: 250000, owner: "A", taxType: "taxable" },
+      { name: "HSA",          balance:  50000, owner: "A", taxType: "hsa" },
+    ];
+    P.household = (P.total401k || 0) + 600000;
+    P.taxableGainPct = 40;
+    return P;
+  };
+  const mx = planFor(mixHH()).schedule;
+  const share = (x) => x.taxable > 0 ? x.taxGainPool / x.taxable : 0;
+  // The sub-pool opens at the brokerage share of the pool: 250,000 / 600,000 = 41.667%.
+  ck("mixed pool: the gains-bearing share opens at the brokerage share of the pool",
+     Math.abs(share(mx[0]) - 250000 / 600000) < 0.005,
+     `${(100 * share(mx[0])).toFixed(2)}% vs 41.67% expected`);
+  // A proportional sale takes from the sub-pool and the rest of the pool alike, so in a year that
+  // sells but has no RMD activity — nothing forced out, nothing banked in — the share must not
+  // move. This is the assertion the control demanded: it is false the moment the sale stops
+  // depleting the sub-pool, and it cannot be satisfied by the growth clamp.
+  const pureSaleYrs = mx.filter((x, i) => i > 0 && x.drawFromTaxable > 1 && x.rmd_y < 0.005);
+  ck("PRECONDITION: the mixed household has sale-only years (no RMD in or out)",
+     pureSaleYrs.length > 3, `${pureSaleYrs.length} sale-only years`);
+  const drift = pureSaleYrs.filter((x) => {
+    const i = mx.indexOf(x);
+    return Math.abs(share(x) - share(mx[i - 1])) > 0.0005;
+  });
+  ck("mixed pool: a sale does NOT change the gains-bearing share — it depletes both sides alike",
+     drift.length === 0,
+     drift.length ? `${drift.length} of ${pureSaleYrs.length} drifted, first ${drift[0].yr}: ${(100 * share(drift[0])).toFixed(2)}%`
+                  : `share held at ${(100 * share(pureSaleYrs[0])).toFixed(2)}% across ${pureSaleYrs.length} years`);
+  ck("mixed pool: the gains-bearing share never exceeds 100% of the pool",
+     mx.every(x => share(x) <= 1.000005), `max ${(100 * Math.max(...mx.map(share))).toFixed(2)}%`);
+
+  g.applyLoadedData({ portfolio: PSAVE3 });
+  const back3 = g.computeWithdrawalPlan(ARGS);
+  ck("fixture restored after the S-7 households — baseline figures return",
+     Math.round(back3.totalDrawn) === Math.round(r.totalDrawn),
+     `${$(back3.totalDrawn)} vs ${$(r.totalDrawn)}`);
 }
 
 console.log(`\nt19 SUITE: ${pass} passed, ${fail} failed`);

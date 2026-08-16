@@ -1,0 +1,52 @@
+#!/bin/bash
+# Suite runner (adopted into the repo at v5.36 — was session scratch). Parses "N passed, M failed" out of each suite's own output and
+# totals from THAT — never from a remembered figure (project instructions: totals are
+# computed from suite output). Not a shipped file; scratch tooling for this session.
+# usage: ./runsuite.sh <prior> <current>   e.g. ./runsuite.sh v535 v536
+cd "$(dirname "$0")"
+PRIOR=${1:-v535}; CUR=${2:-v536}
+TMP=$(mktemp -d)
+tally () {  # $1 label, $2... command
+  local label="$1"; shift
+  local out rc; out=$(timeout 900 "$@" 2>&1); rc=$?
+  echo "$out" > "$TMP/$label.log"
+  local p f
+  p=$(echo "$out" | grep -oE '[0-9]+ passed' | awk '{s+=$1} END {print s+0}')
+  f=$(echo "$out" | grep -oE '[0-9]+ failed' | awk '{s+=$1} END {print s+0}')
+  # t10 prints per-PHASE lines AND a total line; take the total line only.
+  case "$label" in t10-*)
+    p=$(echo "$out" | grep -E '^t10 total:' | grep -oE '[0-9]+ passed' | grep -oE '[0-9]+')
+    f=$(echo "$out" | grep -E '^t10 total:' | grep -oE '[0-9]+ failed' | grep -oE '[0-9]+') ;;
+  esac
+  # A dead suite prints no "N passed" line at all and would tally as 0/0 — which reads
+  # as green if you only count failures (OPERATIONS §B2, learned three times). Say DIED.
+  if [ "$p" = "0" ] && [ "$f" = "0" ] && [ $rc -ne 0 ]; then
+    printf "%-22s DIED (rc=%s) — see %s\n" "$label" "$rc" "$TMP/$label.log"
+  else
+    printf "%-22s %5s passed %5s failed\n" "$label" "$p" "$f"
+  fi
+  echo "$p $f" >> "$TMP/tally.txt"
+}
+: > "$TMP/tally.txt"
+echo "== BOTH LEGS =="
+for V in "$PRIOR" "$CUR"; do
+  for t in t1_units t2_engines t3_roth t4_dom t5_storage t6_single t10_taxcases; do
+    tally "${t%%_*}-$V" node "$t.mjs" "$V"
+  done
+done
+echo "== PARITY =="
+tally "parity" node t2_engines.mjs compare "$PRIOR" "$CUR"
+echo "== FEATURE =="
+for t in t7_accrual t8_invariant t9_dom_smoke t11_survivor_rmd t12_engineD_survivor \
+         t13_engineC_irmaa t14_cross_engine_survivor t15_engineA_death_filing \
+         t16_roth_ladder_filing t17_engineC_exact t18_engineB_exact t19_engineD_exact \
+         t20_other_taxtype; do
+  tally "${t%%_*}" node "$t.mjs"
+done
+tally "t22" node t22_aca_floor.mjs "$PRIOR"
+echo "== TOOLING (not counted in APP TOTAL) =="
+tally "t21" node t21_tools.mjs
+tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
+echo
+awk '{p+=$1; f+=$2} END {printf "GRAND (incl tooling): %d passed, %d failed\n", p, f}' "$TMP/tally.txt"
+echo "logs: $TMP"

@@ -261,5 +261,56 @@ console.log("\n  case G \u2014 QCD exclusion: a QCD covering the RMD leaves MAGI
   }
 }
 
+// ══ v5.36 — ENGINE C CONSUMES ENGINE D'S GAIN SERIES (shape (b), scope decision 3) ══════════
+// Realized gains ARE IRMAA MAGI. The new surface is the consumption path — map \u2192 magi \u2192 tier —
+// so the assertions are exact on the path and directional on the surcharge, whose per-tier
+// dollar math is CASE A's territory above. Fixture: pension-only MFJ at a flat $150,000 MAGI,
+// tier 0 with six figures of headroom, so an injected gain is the ONLY thing moving.
+console.log("\n  v5.36 \u2014 Engine C consumes the gain series (gainByYr)");
+{
+  const mkRun = (gainByYr) => {
+    const P = JSON.parse(JSON.stringify(BASE_P));
+    P.positions = []; P.otherAccounts = []; P.single = false; P.lifeExpA = 95; P.lifeExpB = 95;
+    P.incomeStreams = [{ monthly: 0, tax: "ordinary", owner: "A", startYear: 2000, endYear: 9999 }];
+    const zeroSS = { tableByAge: { 62: 0, 63: 0, 64: 0, 65: 0, 67: 0, 70: 0 }, planned: 0, plannedAge: 67 };
+    P.incomeSources = { ssA: { ...zeroSS }, ssB: { ...zeroSS }, pension: { amount: 150000 / 12 } };
+    G.applyLoadedData({ portfolio: P });
+    const tl = G.PLAN_TIMELINE();
+    const args = { retireYear: tl.targetRetireYear, rothAmount: 0, qcdAnnual: 0, taxYield: 0 };
+    if (gainByYr !== undefined) args.gainByYr = gainByYr;
+    return E.computeIrmaaPlan(args);
+  };
+  const base = mkRun({});
+  const YG = 2032, GAIN = 10000;
+  const bRow = base.rows.find(r => r.yr === YG);
+  CK("PRECONDITION: the fixture sits in tier 0 with headroom far beyond the small gain",
+     bRow.tier === 0 && bRow.headroom > 5 * GAIN, `tier ${bRow.tier}, headroom ${bRow.headroom}`);
+  T("with no map entry, MAGI is the flat pension \u2014 the default preserves pre-v5.36 behavior",
+    bRow.magi, 150000, 0.01);
+
+  const g1 = mkRun({ [YG]: GAIN });
+  const gRow = g1.rows.find(r => r.yr === YG);
+  T("IRMAA MAGI rises by EXACTLY the gain \u2014 dollar for dollar into the tier test", gRow.magi - bRow.magi, GAIN, 0.01);
+  T("headroom to the next cliff shrinks by EXACTLY the gain (tier unchanged, same-year threshold)",
+    bRow.headroom - gRow.headroom, GAIN, 0.01);
+  T("...and the tier itself does not move for a gain inside the headroom", gRow.tier, bRow.tier);
+  T("no other year's MAGI moves a dollar",
+    g1.rows.filter(r => r.yr !== YG).reduce((s, r) => s + r.magi, 0),
+    base.rows.filter(r => r.yr !== YG).reduce((s, r) => s + r.magi, 0), 0.01);
+
+  const BIG = 200000;
+  const g2 = mkRun({ [YG]: BIG });
+  const g2Row = g2.rows.find(r => r.yr === YG);
+  CK("PRECONDITION: both spouses are on Medicare in the premium year, so a tier change bills",
+     g2Row.personsOnMedicare === 2, `personsOnMedicare ${g2Row.personsOnMedicare}`);
+  T("a $200K gain still enters MAGI EXACTLY", g2Row.magi - bRow.magi, BIG, 0.01);
+  CK("...and it climbs the tier ladder \u2014 the cliff mechanism sees the gain",
+     g2Row.tier > bRow.tier, `tier ${bRow.tier} \u2192 ${g2Row.tier}`);
+  CK("...and lifetime IRMAA is strictly higher \u2014 the surcharge actually bills",
+     g2.totalIrmaa > base.totalIrmaa, `${base.totalIrmaa} \u2192 ${g2.totalIrmaa}`);
+  CK("omitting the key and passing {} are byte-identical \u2014 the default is real",
+     JSON.stringify(mkRun(undefined).rows) === JSON.stringify(base.rows));
+}
+
 console.log(`\nt17 SUITE: ${pass} passed, ${fail} failed`);
 if (fail) { console.log("\nFAILURES:"); fails.forEach(f => console.log(f)); process.exit(1); }

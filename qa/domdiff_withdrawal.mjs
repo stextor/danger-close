@@ -1,4 +1,5 @@
-// Cross-version DOM comparison of the WITHDRAWAL tab (Engine D). Default pair v533 -> v534.
+// Cross-version DOM comparison of the TAX-BEARING TABS (Engine D's Withdrawal tab, Engine B's
+// Taxes tab, Engine C's IRMAA tab). Default pair v535 -> v536.
 // RE-POINT THE DEFAULT EVERY RELEASE — it is hardcoded, and a stale default dies at module
 // load looking for a bundle the run folder does not contain (observed at the v5.34 build:
 // the committed default was still v529 -> v530, four releases behind).
@@ -10,13 +11,36 @@
 // identical" cannot be proven engine-to-engine across the boundary. What CAN be
 // proven is that the RENDERED tab is byte-identical between the two builds.
 //
+// THIS FILE'S ASSERTIONS FLIP WITH THE RELEASE, AND THAT IS DELIBERATE. At v5.25 it was
+// strict identity (nothing moved). At v5.26, intended divergence. v5.27, identity again.
+// v5.35, excise-by-anchor (three named regions moved by design). Do not carry either form
+// forward by habit: the right assertion is the one that matches what the release actually
+// claims to have done; a diff harness that passes for every release is measuring nothing.
+//
+// ── v5.36 RE-SCOPE, from measurement, and it INVERTED the session brief's premise ─────────
+// The brief said "this release moves the schedule again." Measured against the pair before
+// re-scoping: the Withdrawal tab is BYTE-IDENTICAL v535 -> v536 (all three v5.35 excise
+// regions identical; remainder identical; both legs carry "Total withdrawn"). That is
+// CORRECT: the v5.36 basis tracker is bookkeeping ON TOP of the schedule — capGain_y,
+// taxBasis and taxGainPool ride the rows without changing any displayed dollar, and the
+// sale / growth / RMD paths are untouched (t19 asserts the balances to the cent). So the
+// Withdrawal section returns to STRICT IDENTITY — the strongest claim that is true — and
+// the v5.35 excise machinery is retired (see git history for its form).
+// What v5.36 DOES change is the Taxes tab (Engine B consumes Engine D's realized gains)
+// and the IRMAA tab (Engine C's MAGI carries them) — through the CALL SITES, which no
+// suite witnesses: t17/t18 call the engines directly, so a forgotten or broken call site
+// leaves every suite green. The two new sections below are that witness: version tokens
+// are stripped FIRST, so the version bump alone cannot satisfy a divergence check.
+//
 // usage: node domdiff_withdrawal.mjs <verA> <verB>
 import { JSDOM } from "jsdom";
 import { createRequire } from "module";
 
-const [VA, VB] = [process.argv[2] || "v533", process.argv[3] || "v534"];
+const [VA, VB] = [process.argv[2] || "v535", process.argv[3] || "v536"];
 
-const renderWithdrawal = async (ver) => {
+// One mount per leg; the three tabs are read by clicking through the mounted app (the t4
+// idiom), because six separate jsdom mounts cost more time than this file is worth.
+const renderTabs = async (ver) => {
   // Seed Math.random BEFORE the bundle import — d3-random captures it at module
   // load (OPERATIONS section C).
   let _s = 123456789;
@@ -59,132 +83,93 @@ const renderWithdrawal = async (ver) => {
   ex.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
   await flush(); await flush();
 
-  const tab = [...body().querySelectorAll("button, div, span")]
-    .find(e => (e.textContent || "").trim().toLowerCase() === "withdrawal");
-  tab.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
-  await flush(); await flush(); await flush();
-
-  const t = body().textContent || "";
-  const i = t.indexOf("YearAge A/B");
-  return { full: t, schedule: i < 0 ? null : t.slice(i, i + 12000) };
+  const readTab = async (name) => {
+    const tab = [...body().querySelectorAll("button, div, span")]
+      .find(e => (e.textContent || "").trim().toLowerCase() === name);
+    tab.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await flush(); await flush(); await flush();
+    return body().textContent || "";
+  };
+  const out = {};
+  for (const name of ["withdrawal", "taxes", "irmaa"]) out[name] = await readTab(name);
+  const w = out.withdrawal, i = w.indexOf("YearAge A/B");
+  out.schedule = i < 0 ? null : w.slice(i, i + 12000);
+  return out;
 };
 
-const A = await renderWithdrawal(VA);
-const B = await renderWithdrawal(VB);
+const A = await renderTabs(VA);
+const B = await renderTabs(VB);
 
 let pass = 0, fail = 0;
 const ck = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; console.log(`  \u2717 ${n}${d ? " \u2014 " + d : ""}`); } };
+const stripV = s => s.replace(/v5\.\d+(\.\d+)?/g, "vX");
+const firstDiff = (a, b) => { let k = 0; while (k < Math.min(a.length, b.length) && a[k] === b[k]) k++;
+  return `at ${k}: ${VA} ...${a.slice(Math.max(0,k-50), k+60)}... / ${VB} ...${b.slice(Math.max(0,k-50), k+60)}...`; };
 
-console.log(`WITHDRAWAL TAB \u2014 cross-version DOM diff ${VA} \u2192 ${VB}\n`);
+console.log(`TAX-BEARING TABS \u2014 cross-version DOM diff ${VA} \u2192 ${VB}\n`);
+
+// ══ WITHDRAWAL — Engine D. v5.36 claim: bookkeeping only, NOTHING rendered moves. ══════════
 ck(`${VA}: schedule table rendered`, !!A.schedule, "not found");
 ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
-const stripV = s => s.replace(/v5\.\d+(\.\d+)?/g, "vX");
-
-// ── v5.35: EXCISE-BY-ANCHOR, because this release changes the tab's figures AND its copy ──
-// THIS ASSERTION FLIPS WITH THE RELEASE, AND THAT IS DELIBERATE. At v5.25 it was strict identity
-// (nothing moved). At v5.26 it was intended divergence (figures moved by design). v5.27 is a
-// Field Manual correction only, so the Withdrawal tab must be byte-identical again — and asserting
-// that DIRECTLY is stronger than any looser check that would survive both cases.
-//
-// Do not carry either form forward by habit. The right assertion is the one that matches what the
-// release actually claims to have done; a diff harness that passes for every release is measuring
-// nothing.
-// v5.35 re-scope, following the v5.24 precedent. Strict identity is the WRONG assertion here and
-// keeping it would have been a stale lock: v5.35 re-sources the RMD, so every schedule figure
-// moves by design, and decisions 3 and 4 change the method note and the draw card's label. Run
-// against the pair before re-scoping, it failed exactly where it should — 8 passed / 2 failed,
-// with the divergence dump reading "Total portfolio draw$1.55M" vs "Total withdrawn$1.21M".
-//
-// What is excised is named, bounded and asserted, not waved away:
-//   1. the year-by-year schedule table   — every figure moves
-//   2. the summary-card row              — the label AND the value move
-//   3. the Section A method note         — decision 3's disclosure is appended to it
-// Everything else on the tab must still be byte-identical, which is the real claim: this release
-// touched Engine D's sourcing and two pieces of copy, and NOTHING ELSE on the tab.
-//
-// ⚠ An excision can hide a no-op, so each region is also asserted to have ACTUALLY changed. An
-// excise-by-anchor that quietly removed an unchanged region would go green while measuring less
-// than the strict form it replaced — the failure this file's own header warns about.
-const P1_START = "Emergency Fund";
-const P1_END = "Years active:";
-const locate = (s) => {
-  if (!s) return { ok: false, block: "" };
-  const a = s.indexOf(P1_START); if (a < 0) return { ok: false, block: "" };
-  const b = s.indexOf(P1_END, a); if (b < 0) return { ok: false, block: "" };
-  return { ok: true, block: s.slice(a, b) };
-};
-const p1A = locate(A.schedule), p1B = locate(B.schedule);
-ck("Priority 1 panel located on both builds (the comparison is anchored, not blind)",
-   p1A.ok && p1B.ok, `${VA} ${p1A.ok} / ${VB} ${p1B.ok}`);
-
-ck("Priority 1 copy block is IDENTICAL across the pair (v5.27 changes no withdrawal copy)",
-   p1A.ok && p1B.ok && stripV(p1A.block) === stripV(p1B.block),
-   `lengths ${p1A.block.length} vs ${p1B.block.length}`);
-
-// Bounded excision. Both markers asserted unique and ordered before anything is cut — the
-// OPERATIONS §C0 rule for bounded edits, which applies to a harness that CUTS a span just as it
-// does to one that replaces it. An end marker resolving to the wrong occurrence would silently
-// excise half the tab and turn this file green.
-// Listed in DOCUMENT ORDER, which was MEASURED rather than assumed — the first draft closed the
-// schedule region with "Legend" and failed, because Legend renders BEFORE the schedule, not after.
-// Offsets on the v5.34 leg: Years modeled 7033 · Legend 7117 · Sleeve sequencing 7261 · the
-// deterministic-path warning 8026 · YearAge A/B 8372 · Emergency Fund 9992.
-const REGIONS = [
-  ["the summary-card row (label and value both move)", "Years modeled", "Legend"],
-  ["the Section A method note (decision 3's disclosure)", "Sleeve sequencing", "⚠ This is a single deterministic path"],
-  ["the year-by-year schedule (every figure moves)", "YearAge A/B", "Emergency Fund"],
-];
-const cutOne = (s, start, end) => {
-  const a = s.indexOf(start); if (a < 0) return { ok: false, s };
-  const b = s.indexOf(end, a); if (b < 0) return { ok: false, s };
-  return { ok: true, s: s.slice(0, a) + s.slice(b), cut: s.slice(a, b) };
-};
-let remA = stripV(A.full), remB = stripV(B.full);
-for (const [label, start, end] of REGIONS) {
-  const uA = remA.split(start).length - 1, uB = remB.split(start).length - 1;
-  ck(`excision anchor is UNIQUE on both builds \u2014 ${label}`, uA === 1 && uB === 1, `${VA} x${uA} / ${VB} x${uB}`);
-  const cA = cutOne(remA, start, end), cB = cutOne(remB, start, end);
-  ck(`excision resolves start-before-end on both builds \u2014 ${label}`, cA.ok && cB.ok,
-     `${VA} ${cA.ok} / ${VB} ${cB.ok}`);
-  if (cA.ok && cB.ok) {
-    // The region must ACTUALLY differ, or the excision is hiding a no-op.
-    ck(`the excised region really did change \u2014 ${label}`, cA.cut !== cB.cut,
-       `identical across the pair: ${cA.cut.length} chars \u2014 excising it measures nothing`);
-    remA = cA.s; remB = cB.s;
+{
+  const wA = stripV(A.withdrawal), wB = stripV(B.withdrawal);
+  ck("WITHDRAWAL: the tab is byte-identical across the pair (v5.36 touches no rendered figure or copy here)",
+     wA === wB, firstDiff(wA, wB));
+  // The v5.35 claims must still hold on BOTH sides — this is the assertion that would catch
+  // the v5.36 work over-reaching into the prior release's disclosures.
+  for (const [V, w] of [[VA, A.withdrawal], [VB, B.withdrawal]]) {
+    ck(`${V} carries the v5.35 sourcing disclosure`, /that is how they are actually sourced/i.test(w));
+    ck(`${V} carries the v5.35 draw-card label, and not the retired one`,
+       /Total withdrawn/i.test(w) && !/Total portfolio draw/i.test(w));
+    ck(`${V} still states the v5.26 tax treatment`, /taxed as ordinary income as it is spent/i.test(w));
+    ck(`${V} still tells the user their figures moved`, /if your numbers moved, that is why/i.test(w));
   }
 }
 
-// THE CLAIM: with the three named regions removed, the tab is byte-identical. This release
-// touched Engine D's sourcing and two pieces of copy, and nothing else.
-ck("the REST of the tab is byte-identical across the pair (excise-by-anchor)",
-   remA === remB, `lengths ${remA.length} vs ${remB.length}`);
-
-if (remA !== remB) {
-  for (let k = 0; k < Math.min(remA.length, remB.length); k++) {
-    if (remA[k] !== remB[k]) {
-      console.log(`\n  UNEXPECTED DIVERGENCE outside the excised regions, at char ${k}:`);
-      console.log(`    ${VA}: ...${remA.slice(Math.max(0, k - 60), k + 60)}...`);
-      console.log(`    ${VB}: ...${remB.slice(Math.max(0, k - 60), k + 60)}...`);
-      break;
-    }
-  }
+// ══ TAXES — Engine B. v5.36 claim: the call site feeds Engine D's gains in, so the rendered
+//    figures MOVE (version tokens stripped first — the bump alone cannot satisfy this). ═════
+{
+  // ⚠ The naive whole-tab DIFFERS check was run as its own negative control (both call
+  // sites reverted, engines and copy untouched) and DID NOT FIRE: the v5.36 COPY differs
+  // across the pair, so the whole tab diverges with the wiring dead. The witness must be a
+  // FIGURES-ONLY region — the year table, anchored past every piece of changed copy.
+  const region = (s, start, end, label) => {
+    const nS = s.split(start).length - 1, nE = s.split(end).length - 1;
+    ck(`${label}: region anchors are unique`, nS === 1 && nE === 1, `start x${nS} / end x${nE}`);
+    const a = s.indexOf(start), b = s.indexOf(end, a);
+    ck(`${label}: start resolves before end`, a >= 0 && b > a, `${a}..${b}`);
+    return a >= 0 && b > a ? s.slice(a, b) : "";
+  };
+  const tA = stripV(A.taxes), tB = stripV(B.taxes);
+  const figA = region(tA, "Eff RateBracket", "Estimates only", `${VA} taxes year-table`);
+  const figB = region(tB, "Eff RateBracket", "Estimates only", `${VB} taxes year-table`);
+  ck("TAXES: the year-table FIGURES differ across the pair \u2014 the call-site wiring is live (control-verified: this region is identical when the call site is dead)",
+     figA.length > 0 && figA !== figB, "figures identical: the gainByYr map is not reaching Engine B from the app");
+  ck(`${VB} taxes: footnote names the gains' source (the Withdrawal plan's sales)`,
+     B.taxes.includes("Realized capital gains are the Withdrawal plan's own sales"));
+  ck(`${VB} taxes: the footnote says provisional income counts realized gains (E-16 fixed in-release)`,
+     B.taxes.includes("realized capital gains count toward it, as the statute requires"));
+  ck(`${VB} EXTINCTION: the '$0 unless a sale is modeled' claim is gone`,
+     !B.taxes.includes("default to $0 unless a sale is modeled"));
+  ck(`${VA} taxes: the prior leg still carries the $0-gains default it is true to`,
+     A.taxes.includes("Realized capital gains default to $0 unless a sale is modeled"));
 }
 
-// The two copy changes are asserted POSITIVELY here as well, so the excision above cannot be the
-// only thing standing between a dropped disclosure and a green run.
-ck(`${VB} carries the v5.35 sourcing disclosure`,
-   /that is how they are actually sourced/i.test(B.full), "the decision 3 disclosure is missing");
-ck(`${VB} carries the relabelled draw card, and ${VA} still carries the old one`,
-   /Total withdrawn/i.test(B.full) && /Total portfolio draw/i.test(A.full),
-   `${VB} relabelled: ${/Total withdrawn/i.test(B.full)} / ${VA} old label: ${/Total portfolio draw/i.test(A.full)}`);
-
-// The v5.26 treatment must still be described on BOTH sides — v5.27 must not have undone it while
-// correcting the Field Manual. This is the assertion that would catch a copy fix over-reaching.
-for (const V of [[VA, p1A.block], [VB, p1B.block]]) {
-  ck(`${V[0]} still states the v5.26 tax treatment`,
-     /taxed as ordinary income as it is spent/i.test(V[1]));
-  ck(`${V[0]} still tells the user their figures moved`,
-     /if your numbers moved, that is why/i.test(V[1]));
+// ══ IRMAA — Engine C. Same claim: realized gains reach IRMAA MAGI through the call site. ════
+{
+  const iA = stripV(A.irmaa), iB = stripV(B.irmaa);
+  const region2 = (s, start, end, label) => {
+    const nS = s.split(start).length - 1, nE = s.split(end).length - 1;
+    ck(`${label}: region anchors are unique`, nS === 1 && nE === 1, `start x${nS} / end x${nE}`);
+    const a = s.indexOf(start), b = s.indexOf(end, a);
+    ck(`${label}: start resolves before end`, a >= 0 && b > a, `${a}..${b}`);
+    return a >= 0 && b > a ? s.slice(a, b) : "";
+  };
+  const magA = region2(iA, "Tax YrAffectsMAGI", "Not tax advice", `${VA} irmaa MAGI-table`);
+  const magB = region2(iB, "Tax YrAffectsMAGI", "Not tax advice", `${VB} irmaa MAGI-table`);
+  ck("IRMAA: the MAGI-table FIGURES differ across the pair \u2014 gains reach IRMAA MAGI through the call site",
+     magA.length > 0 && magA !== magB, "figures identical: the gainByYr map is not reaching Engine C from the app");
+  ck(`${VB} irmaa: the tab still renders its cliff framing`, /cliff/i.test(B.irmaa));
 }
 
 console.log(`\nDOM DIFF: ${pass} passed, ${fail} failed`);
