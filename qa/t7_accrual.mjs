@@ -22,7 +22,10 @@ const mkPortfolio = (over = {}, contrib = {}) => ({
   single: false,
   retireYear: NOW + 4,
   retireYearB: NOW + 6,
-  dobA: { year: 1966, month: 6 }, dobB: { year: 1968, month: 3 },
+  // v5.37 (E-17 sweep): formerly OBJECTS ({1966-06}/{1968-03}) that `buildPlanTimeline` ignores —
+  // the run always resolved to the defaults below. Converted to the strings that actually run;
+  // measured no-op (this suite's arithmetic is retireYear-driven and asserts no age).
+  dobA: "1964-01-01", dobB: "1966-01-01",
   lifeExpA: 88, lifeExpB: 90,
   _incomeFromForm: true,
   ...over,

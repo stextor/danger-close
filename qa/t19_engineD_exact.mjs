@@ -551,7 +551,8 @@ console.log("\n  v5.36 — gain on the SPENDING SALE only");
     P.taxableGainPct = 40;
     return P;
   };
-  const mx = planFor(mixHH()).schedule;
+  const mxPlan = planFor(mixHH());
+  const mx = mxPlan.schedule;
   const share = (x) => x.taxable > 0 ? x.taxGainPool / x.taxable : 0;
   // The sub-pool opens at the brokerage share of the pool: 250,000 / 600,000 = 41.667%.
   ck("mixed pool: the gains-bearing share opens at the brokerage share of the pool",
@@ -574,6 +575,103 @@ console.log("\n  v5.36 — gain on the SPENDING SALE only");
                   : `share held at ${(100 * share(pureSaleYrs[0])).toFixed(2)}% across ${pureSaleYrs.length} years`);
   ck("mixed pool: the gains-bearing share never exceeds 100% of the pool",
      mx.every(x => share(x) <= 1.000005), `max ${(100 * Math.max(...mx.map(share))).toFixed(2)}%`);
+
+  // ── (7) v5.37 — THE ORDINARY SUB-POOL GROWS, AND CONSERVATION IS REPORTED (scope §6-4/§8-3) ──
+  // v5.37 adds one line to Engine D: `taxOrd = min(taxable − taxGainPool, taxOrd × (1+growth.tax))`
+  // at the same point `taxGainPool` grows. The blast radius was measured by AST census before the
+  // edit: `taxOrd` is write-only into MAGI (its only consumers are `_ordFrac → othOrdDraw → magi`),
+  // so the GAINS side of this household cannot move — and did not, to the microdollar:
+  ck("mixed pool: lifetime realized gain is EXACTLY $89,673 — UNCHANGED by v5.37 (census: gains side never reads taxOrd)",
+     Math.round(mx.reduce((s, x) => s + (x.capGain_y || 0), 0)) === 89673,
+     `$${Math.round(mx.reduce((s, x) => s + (x.capGain_y || 0), 0)).toLocaleString()}`);
+  // What DOES move is MAGI, through othOrdDraw: measured v5.36 → v5.37 on this exact household
+  // and these exact ARGS, 3,132,745.819315 → 3,162,820.292311 (+$30,074.47 of ordinary growth
+  // recognised over the plan). Pinned to the dollar; the v5.36 figure is recorded here so the
+  // next re-derivation has both ends.
+  ck("mixed pool: lifetime MAGI is EXACTLY $3,162,820 — the ordinary growth is recognised (was $3,132,746 at v5.36)",
+     Math.round(mx.reduce((s, x) => s + (x.magi || 0), 0)) === 3162820,
+     `$${Math.round(mx.reduce((s, x) => s + (x.magi || 0), 0)).toLocaleString()}`);
+
+  // THE INDEPENDENT LEDGER — the same instrument that derived v5.37's exacts before the engine
+  // was edited, carried here so the suite re-runs the derivation instead of trusting it. It
+  // re-implements the whole taxable-sleeve arithmetic with its OWN copy of the IRS Uniform
+  // Lifetime divisors (Pub 590-B) and SECURE 2.0 start ages, walks the engine's published
+  // mechanical series, and must reproduce the published balances to the cent — only then is its
+  // internal `taxOrd` (which the engine does not publish) trusted for the conservation report.
+  {
+    const DIV = { 72:27.4,73:26.5,74:25.5,75:24.6,76:23.7,77:22.9,78:22.0,79:21.1,80:20.2,81:19.4,
+      82:18.5,83:17.7,84:16.8,85:16.0,86:15.2,87:14.4,88:13.7,89:12.9,90:12.2,91:11.5,92:10.8,
+      93:10.1,94:9.5,95:8.9,96:8.4,97:7.8,98:7.3,99:6.8,100:6.4 };           // IRS Pub 590-B
+    const dv = (age) => DIV[age] || 6.4;
+    const startAge = (by) => !by ? 75 : by <= 1950 ? 72 : by <= 1959 ? 73 : 75;  // SECURE 2.0
+    const gr = mxPlan.growth.tax;
+    const dobA = mxPlan._dobAYr, dobB = mxPlan._tlW.dobB.year, single = !!mxPlan._tlW.single;
+    const rA = startAge(dobA), rB = startAge(dobB);
+    const port = g.PORTFOLIO();
+    const bal = (f) => (port.otherAccounts || []).filter(f).reduce((s, a) => s + (a.balance || 0), 0);
+    const taxInit = Math.max(0, (port.household || 0) - (port.total401k || 0));
+    const ordInit = bal(a => a.taxType === "trad" || a.taxType === "annuity");
+    const hsaInit = bal(a => a.taxType === "hsa");
+    const shareOpen = (port.taxableGainPct != null ? port.taxableGainPct : 40) / 100;
+    let T = taxInit, taxOrd = Math.min(ordInit, taxInit);
+    let taxRmdA = bal(a => a.taxType === "trad" && a.owner === "A");
+    let taxRmdB = bal(a => a.taxType === "trad" && a.owner === "B");
+    let gp = Math.max(0, Math.min(taxInit, Math.max(0, taxInit - ordInit - hsaInit)));
+    let basis = Math.max(0, gp * (1 - shareOpen));
+    let worstT = 0, worstGp = 0, worstGain = 0, worstBasis = 0;
+    const binds = [], viol = [];
+    for (const R of mx) {
+      const ageA = R.yr - dobA, ageB = R.yr - dobB;
+      const rmdFromSleeve = (ageA >= rA && taxRmdA > 0 ? taxRmdA / dv(ageA) : 0)
+                          + (!single && ageB >= rB && taxRmdB > 0 ? taxRmdB / dv(ageB) : 0);
+      const T_boy = T;
+      const sleeve = Math.min(Math.max(0, rmdFromSleeve), T_boy);
+      const spend = R.drawFromTaxable - sleeve;
+      const poolPostRmd = Math.max(0, T_boy - sleeve);
+      const ordFrac = poolPostRmd > 0 ? Math.min(1, Math.max(0, taxOrd - sleeve) / poolPostRmd) : 0;
+      const othOrd = Math.max(0, spend) * ordFrac;
+      const gainShare = poolPostRmd > 0 ? Math.min(1, gp / poolPostRmd) : 0;
+      const sale = Math.max(0, spend) * gainShare;
+      const basisFrac = gp > 0 ? Math.min(1, basis / gp) : 1;
+      const gain = Math.max(0, sale * (1 - basisFrac));
+      basis = Math.max(0, basis - sale * basisFrac);
+      gp = Math.max(0, gp - sale);
+      taxOrd = Math.max(0, taxOrd - othOrd - sleeve);
+      const shrink = T_boy > 0 ? R.drawFromTaxable / T_boy : 0;
+      taxRmdA = Math.max(0, taxRmdA - taxRmdA * shrink);
+      taxRmdB = Math.max(0, taxRmdB - taxRmdB * shrink);
+      T = T_boy - R.drawFromTaxable;
+      const u = Math.max(0, R.taxable / (1 + gr) - T);   // RMD-surplus deposit, from published EOY
+      T += u; gp += u; basis += u;
+      T *= (1 + gr);
+      gp = Math.min(T, gp * (1 + gr));
+      // v5.37's line, re-derived independently — with the binding-year report §8-3 requires:
+      const grown = taxOrd * (1 + gr), cap = T - gp;
+      if (grown > cap + 0.005) binds.push({ yr: R.yr, by: grown - cap });
+      taxOrd = Math.min(cap, grown);
+      if (taxOrd + gp > T + 0.01) viol.push({ yr: R.yr, by: taxOrd + gp - T });
+      worstT = Math.max(worstT, Math.abs(T - R.taxable));
+      worstGp = Math.max(worstGp, Math.abs(gp - R.taxGainPool));
+      worstGain = Math.max(worstGain, Math.abs(gain - (R.capGain_y || 0)));
+      const basisPub = Math.max(0, Math.min(T, T - gp + basis));
+      worstBasis = Math.max(worstBasis, Math.abs(basisPub - (R.taxBasis || 0)));
+    }
+    ck("LEDGER: the independent re-computation reproduces the published pool to the cent every year",
+       worstT < 0.01, `worst |Δ taxable| ${worstT.toFixed(6)}`);
+    ck("LEDGER: ...and the gains sub-pool", worstGp < 0.01, `worst |Δ taxGainPool| ${worstGp.toFixed(6)}`);
+    ck("LEDGER: ...and the realized gain", worstGain < 0.01, `worst |Δ capGain_y| ${worstGain.toFixed(6)}`);
+    ck("LEDGER: ...and the published basis", worstBasis < 0.01, `worst |Δ taxBasis| ${worstBasis.toFixed(6)}`);
+    // §8-3, both halves. Conservation is ONE-SIDED by design: the HSA share is the untaxed
+    // remainder, so `taxOrd + taxGainPool` may sit BELOW `taxable` by the grown HSA slack —
+    // asserting equality here would be wrong. What must never happen is the sum EXCEEDING the
+    // pool (a dollar carrying two characters at once).
+    ck("CONSERVATION (§8-3): taxOrd + taxGainPool ≤ taxable every simulated year",
+       viol.length === 0, viol.length ? `${viol.length} violations, first ${viol[0].yr} by ${viol[0].by.toFixed(2)}`
+                                      : "one-sided invariant holds all years");
+    ck("CONSERVATION (§8-3): the growth cap binds ZERO years on this household (the required report)",
+       binds.length === 0, binds.length ? `${binds.length} binding years, first ${binds[0].yr} by ${binds[0].by.toFixed(2)}`
+                                        : "0 binding years — both sub-pools grow at the same rate");
+  }
 
   g.applyLoadedData({ portfolio: PSAVE3 });
   const back3 = g.computeWithdrawalPlan(ARGS);

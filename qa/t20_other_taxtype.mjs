@@ -272,19 +272,23 @@ const HH = {
     { name: "Spouse B - Annuity", balance: 21000, taxType: "trad" },
   ],
   asOfYr: 2026,   // OPERATIONS §C: omitting asOfYr silently NaNs every tax figure
-  // ⚠ THESE TWO DATES ARE NOT READ, and the block below therefore runs at the DEFAULT ages.
-  // Found at v5.35 while hand-computing the trad-vs-annuity excess. `buildPlanTimeline` parses
-  // dobA/dobB with a helper that returns null unless the value is a "YYYY-MM-DD" STRING — the
-  // shape the My Data form writes — so an OBJECT falls through to the master-prompt parse.
-  // Measured: this fixture resolves to dobA 1964 / dobB 1966, not 1962 / 1964.
-  // The app is correct; the fixture is not. No assertion here is invalidated — A's RMD still
-  // begins in 2039 and the RMD path is genuinely exercised — but every age-dependent figure in
-  // section E2 is a property of the defaults rather than of these lines. Left as-is deliberately
-  // at v5.35: correcting it would move the exact-$600,000 assertion and the hand-computed excess,
-  // entangling a fixture fix with an engine one. `t7_accrual.mjs` has the same shape and is
-  // unaffected in substance (its arithmetic is retireYear-driven, and it asserts no age).
+  // dobA/dobB are the "YYYY-MM-DD" STRINGS the My Data form writes — the only shape
+  // `buildPlanTimeline` reads (`_ymd` returns null for anything else). Through v5.36 these lines
+  // were OBJECTS labelled 1962/1964, silently ignored; the suite ran the resolved defaults,
+  // 1964-01-01 / 1966-01-01, while declaring a different household (E-17, found at v5.35).
+  // CORRECTED AT v5.37 TO DECLARE THE HOUSEHOLD THAT RUNS. Measured, not assumed: with these
+  // strings all five engines are value-identical to the object-dob run across all eight t20
+  // households (canonical-JSON hashes equal; the sole raw-byte delta is dob key order inside the
+  // `_tlW` debug echo, {month,day,year} from the master-prompt parse vs {year,month,day} from
+  // `_ymd`). The labelled 1962/1964 household was also measured, and REJECTED for a reason: it
+  // does not exhaust the Priority-1 pool in-horizon, and outside the full-exhaustion regime the
+  // E2 exact invariants are undefined — both pins fail on the unchanged v5.36 engine (excess
+  // $457,490 not $600,000; trad−ann $135,282 not $0). Keeping the resolved dates keeps the
+  // invariants meaningful. If a future edit changes these dobs, section E2's exacts MUST be
+  // re-derived in the regime the new household actually occupies.
+  // `t7_accrual.mjs` carried the same object shape and was swept the same way at v5.37.
   single: false, nameA: "A", nameB: "B",
-  dobA: { year: 1962, month: 6, day: 1 }, dobB: { year: 1964, month: 6, day: 1 },
+  dobA: "1964-01-01", dobB: "1966-01-01",
   retireYear: 2027, lifeExpA: 90, lifeExpB: 92,
   bucketActuals: { 1: 0, 2: 0.4, 3: 0.6, 4: 0 },
   contributions: { monthly401k: 0, hsaMonthly: 0, spouseBMonthly: 0, contribPreTaxA: 0, contribRothA: 0, contribPreTaxB: 0, contribRothB: 0, allocations: {} },
@@ -451,14 +455,18 @@ console.log("\nE2. The annuity carries NO RMD \u2014 in any engine");
   // withdrawal output also moves via the RMD base, so "the engine moved" was true for the wrong
   // reason. That is the §B2 failure exactly: a coarse assertion standing in for a specific one.
   //
-  // The exact statement: every dollar of ordinary-income money is taxed ONCE on its way out, so
-  // the lifetime MAGI difference between an all-Traditional and an all-Taxable Other account is
-  // the account balance itself. Hand-verified at $600,000: 3,682,330 -> 4,282,330.
+  // The exact statement, as first written: every dollar of ordinary-income money is taxed ONCE
+  // on its way out, so the lifetime MAGI difference between an all-Traditional and an all-Taxable
+  // Other account is the account balance itself. Hand-verified at $600,000 when written.
   // v5.36: MAGI is now TWO things — ordinary income and realized capital gain — so the
   // decomposition is taken here rather than comparing the blended total. That is not a
   // convenience: the ordinary invariant this block exists to state is only visible once the
   // gain series is separated out, and comparing totals would have silently absorbed a gain
   // difference into a statement about income tax.
+  // v5.37: the statement itself is AMENDED — "the balance itself" was E-15's optimistic
+  // fingerprint (growth escaped tax). It is now: every ordinary dollar INCLUDING ITS GROWTH is
+  // taxed once on its way out, so the excess is the balance plus the growth recognised. The
+  // exact figures are pinned below.
   const planOf = (p) => { g.applyLoadedData({ portfolio: JSON.parse(JSON.stringify(p)) });
     const r = g.computeWithdrawalPlan({ retireYear: 2027, rothAmount: 0, scenarioPreset: "base" });
     const magi = r.schedule.reduce((s, x) => s + (x.magi || 0), 0);
@@ -470,18 +478,24 @@ console.log("\nE2. The annuity carries NO RMD \u2014 in any engine");
      magiTrad > magiTax, `trad ${Math.round(magiTrad)} vs taxable ${Math.round(magiTax)}`);
   ck("PRECONDITION: the taxable baseline really is lower (not vacuous)",
      magiTax > 0 && magiTax < magiTrad, `${Math.round(magiTax)}`);
-  // THE EXACT ONE — and the decomposition matters. An ANNUITY is taxed on the way out and forces
-  // no distribution, so its lifetime MAGI excess over a brokerage account is the balance itself,
-  // to the dollar. TRADITIONAL is taxed the same way but ALSO raises the RMD, which forces extra
-  // withdrawals that carry their own income — so its excess is the balance PLUS a small
-  // second-order amount (~$526 here, alongside the ~$924 of extra lifetime RMD). Asserting
-  // "exactly $600,000" for trad would have been wrong, and was: it failed first time and the
-  // failure was read rather than papered over.
-  // v5.36: measured on the ORDINARY component. The blended total no longer equals the balance,
-  // because a brokerage row's growth accrues capital gain and an annuity's does not — that
-  // difference is the release working, not the invariant breaking.
-  ck("Engine D: an ANNUITY's lifetime ORDINARY excess is EXACTLY the balance ($600,000) \u2014 taxed, never forced",
-     Math.round(pAnn.ord - pTax.ord) === 600000, `delta ${Math.round(pAnn.ord - pTax.ord)}`);
+  // THE EXACT ONE — and at v5.37 the figure it pins CHANGED, deliberately. Through v5.36 this
+  // asserted the excess is EXACTLY the $600,000 opening balance, and that exactness was E-15's
+  // fingerprint: `taxOrd` was depleted but never grown, so only the dollars the account STARTED
+  // with were ever recognised as ordinary income — every dollar the money grew escaped tax
+  // entirely (optimistic, the direction this app exists to avoid). v5.37 grows the ordinary
+  // sub-pool at the sleeve's own rate, so the lifetime excess is now the balance PLUS the growth
+  // recognised on the way out: $600,000 + $124,266 = $724,266 on this household. Derived by an
+  // independent simulator (its own IRS Pub 590-B divisor table, its own ledger) BEFORE the
+  // engine was edited, and matched by the edited engine to six decimals (724,266.004427 both).
+  // If this reads 600000 again, E-15 is back — see the extinction below.
+  ck("Engine D: an ANNUITY's lifetime ORDINARY excess is the balance PLUS its growth \u2014 EXACTLY $724,266 (v5.37)",
+     Math.round(pAnn.ord - pTax.ord) === 724266, `delta ${Math.round(pAnn.ord - pTax.ord)}`);
+  // THE E-15 EXTINCTION, as the inequality that survives future re-derivations: ordinary money
+  // must recognise MORE than it started with, because it grew before it left. A release that
+  // stops growing `taxOrd` collapses the excess back to exactly the opening balance and fails
+  // here even if the exact pin above were re-derived for some other legitimate reason.
+  ck("EXTINCTION (E-15): the ordinary excess EXCEEDS the opening balance \u2014 growth is taxed on the way out",
+     (pAnn.ord - pTax.ord) > 600000.005, `excess ${(pAnn.ord - pTax.ord).toFixed(2)} vs opening balance 600000`);
   // ⚠ REWRITTEN AT v5.36, NOT RELAXED — and the reason is the point of the assertion.
   // Through v5.35 this asserted `magiTrad > magiAnn` and explained the gap as the RMD forcing
   // extra taxable withdrawals. That explanation was ALREADY FALSE when it was written: lifetime
@@ -495,6 +509,14 @@ console.log("\nE2. The annuity carries NO RMD \u2014 in any engine");
   // ordinary money is taxed exactly ONCE on its way out — therefore becomes EXACT, and is
   // asserted as such. A stronger statement replacing a weaker one that was true for a wrong
   // reason; if a future release reintroduces a gap, this fails rather than absorbing it.
+  // v5.37: measured SURVIVING the ordinary-growth edit to six decimals (0.000000) — both rows'
+  // sub-pools grow at the same rate and exhaust within the horizon, so growing them changes
+  // WHAT is recognised, not whether the two recognise the same total. NOTE THE REGIME BOUND:
+  // this exactness (and the $724,266 pin above) is a property of FULL POOL EXHAUSTION in-horizon.
+  // On a household whose pool outlives the plan, trad's forced RMD recognises ordinary income
+  // the annuity legitimately defers past the horizon, and the honest figure is nonzero — measured
+  // at v5.37 on a 1962/1964 household: $135,282 on the unchanged v5.36 engine. If these dobs or
+  // balances ever change, re-derive in the new regime; do not carry these exacts.
   ck("Engine D: TRADITIONAL and ANNUITY recognise IDENTICAL lifetime ORDINARY income \u2014 the $102 clamp residual is GONE",
      Math.round(pTrad.ord - pAnn.ord) === 0, `excess ${Math.round(pTrad.ord - pAnn.ord)} (was $102 through v5.35)`);
   ck("PRECONDITION: the two really are being compared (both above the brokerage case)",

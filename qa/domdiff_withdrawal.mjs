@@ -1,5 +1,5 @@
 // Cross-version DOM comparison of the TAX-BEARING TABS (Engine D's Withdrawal tab, Engine B's
-// Taxes tab, Engine C's IRMAA tab). Default pair v535 -> v536.
+// Taxes tab, Engine C's IRMAA tab). Default pair v536 -> v537.
 // RE-POINT THE DEFAULT EVERY RELEASE — it is hardcoded, and a stale default dies at module
 // load looking for a bundle the run folder does not contain (observed at the v5.34 build:
 // the committed default was still v529 -> v530, four releases behind).
@@ -32,11 +32,26 @@
 // leaves every suite green. The two new sections below are that witness: version tokens
 // are stripped FIRST, so the version bump alone cannot satisfy a divergence check.
 //
+// ── v5.37 RE-SCOPE, from measurement — and it inverted the SESSION's OWN stop-report ───────
+// The v5.37 stop report predicted the Withdrawal tab "can move" (it renders r.bracket, and
+// Engine D's MAGI rises on every ordinary-bearing household). Measured on this pair before
+// re-scoping: lifetime MAGI DOES move on the shipped example household (+$3,333.04 — the
+// growth line is live at the app's own call path), but the per-year deltas never cross a
+// bracket edge, so the bracket column — the only MAGI-derived thing this tab renders — is
+// IDENTICAL, and the whole tab is byte-identical. Taxes and IRMAA are identical BY CENSUS:
+// their inputs are the capGain_y series, which the v5.37 edit cannot reach (taxOrd is
+// write-only into MAGI). So ALL THREE tabs return to STRICT IDENTITY — the strongest claim
+// that is true — and the release's divergence witness lives at the engine level, in t19's
+// MAGI pin ($3,162,820 exactly) and t20's $724,266 pin, per E-20's rule that a witness must
+// be anchored to a region only the claimed mechanism can move; no such DOM region exists.
+// The identity form remains CONTROL-COMPATIBLE: a dead Engine B/C call site on either leg
+// desynchronizes that leg's figures from the other's and fails the identity check loudly.
+//
 // usage: node domdiff_withdrawal.mjs <verA> <verB>
 import { JSDOM } from "jsdom";
 import { createRequire } from "module";
 
-const [VA, VB] = [process.argv[2] || "v535", process.argv[3] || "v536"];
+const [VA, VB] = [process.argv[2] || "v536", process.argv[3] || "v537"];
 
 // One mount per leg; the three tabs are read by clicking through the mounted app (the t4
 // idiom), because six separate jsdom mounts cost more time than this file is worth.
@@ -113,7 +128,7 @@ ck(`${VA}: schedule table rendered`, !!A.schedule, "not found");
 ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
 {
   const wA = stripV(A.withdrawal), wB = stripV(B.withdrawal);
-  ck("WITHDRAWAL: the tab is byte-identical across the pair (v5.36 touches no rendered figure or copy here)",
+  ck("WITHDRAWAL: the tab is byte-identical across the pair (v5.37 moves MAGI but never a rendered cell \u2014 measured)",
      wA === wB, firstDiff(wA, wB));
   // The v5.35 claims must still hold on BOTH sides — this is the assertion that would catch
   // the v5.36 work over-reaching into the prior release's disclosures.
@@ -143,16 +158,21 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   const tA = stripV(A.taxes), tB = stripV(B.taxes);
   const figA = region(tA, "Eff RateBracket", "Estimates only", `${VA} taxes year-table`);
   const figB = region(tB, "Eff RateBracket", "Estimates only", `${VB} taxes year-table`);
-  ck("TAXES: the year-table FIGURES differ across the pair \u2014 the call-site wiring is live (control-verified: this region is identical when the call site is dead)",
-     figA.length > 0 && figA !== figB, "figures identical: the gainByYr map is not reaching Engine B from the app");
-  ck(`${VB} taxes: footnote names the gains' source (the Withdrawal plan's sales)`,
-     B.taxes.includes("Realized capital gains are the Withdrawal plan's own sales"));
-  ck(`${VB} taxes: the footnote says provisional income counts realized gains (E-16 fixed in-release)`,
-     B.taxes.includes("realized capital gains count toward it, as the statute requires"));
-  ck(`${VB} EXTINCTION: the '$0 unless a sale is modeled' claim is gone`,
-     !B.taxes.includes("default to $0 unless a sale is modeled"));
-  ck(`${VA} taxes: the prior leg still carries the $0-gains default it is true to`,
-     A.taxes.includes("Realized capital gains default to $0 unless a sale is modeled"));
+  // v5.37 FLIP: at the v535\u2192v536 pair this asserted the figures DIFFER (the wiring landing).
+  // At v536\u2192v537 Engine B's inputs are byte-identical by census, so the honest claim is
+  // IDENTITY \u2014 and it still witnesses the wiring: kill the call site on either leg and that
+  // leg's figures lose the gains, desynchronize from the other's, and fail here.
+  ck("TAXES: the year-table FIGURES are IDENTICAL across the pair (v5.37 cannot reach Engine B \u2014 census; a dead call site on either leg fails this)",
+     figA.length > 0 && figA === figB, figA.length ? firstDiff(figA, figB) : "region not found");
+  // The v5.36 copy now rides on BOTH legs \u2014 the prior-leg $0-default branch is retired with v5.35.
+  for (const [V, t] of [[VA, A.taxes], [VB, B.taxes]]) {
+    ck(`${V} taxes: footnote names the gains' source (the Withdrawal plan's sales)`,
+       t.includes("Realized capital gains are the Withdrawal plan's own sales"));
+    ck(`${V} taxes: the footnote says provisional income counts realized gains (E-16)`,
+       t.includes("realized capital gains count toward it, as the statute requires"));
+    ck(`${V} EXTINCTION: the '$0 unless a sale is modeled' claim is gone`,
+       !t.includes("default to $0 unless a sale is modeled"));
+  }
 }
 
 // ══ IRMAA — Engine C. Same claim: realized gains reach IRMAA MAGI through the call site. ════
@@ -167,8 +187,11 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   };
   const magA = region2(iA, "Tax YrAffectsMAGI", "Not tax advice", `${VA} irmaa MAGI-table`);
   const magB = region2(iB, "Tax YrAffectsMAGI", "Not tax advice", `${VB} irmaa MAGI-table`);
-  ck("IRMAA: the MAGI-table FIGURES differ across the pair \u2014 gains reach IRMAA MAGI through the call site",
-     magA.length > 0 && magA !== magB, "figures identical: the gainByYr map is not reaching Engine C from the app");
+  // v5.37 FLIP \u2014 same reasoning as the Taxes section: identity is the strongest true claim
+  // for this pair, and a dead Engine C call site on either leg fails it.
+  ck("IRMAA: the MAGI-table FIGURES are IDENTICAL across the pair (v5.37 cannot reach Engine C \u2014 census; a dead call site on either leg fails this)",
+     magA.length > 0 && magA === magB, magA.length ? firstDiff(magA, magB) : "region not found");
+  ck(`${VA} irmaa: the tab still renders its cliff framing`, /cliff/i.test(A.irmaa));
   ck(`${VB} irmaa: the tab still renders its cliff framing`, /cliff/i.test(B.irmaa));
 }
 

@@ -4,7 +4,7 @@
 # computed from suite output). Not a shipped file; scratch tooling for this session.
 # usage: ./runsuite.sh <prior> <current>   e.g. ./runsuite.sh v535 v536
 cd "$(dirname "$0")"
-PRIOR=${1:-v535}; CUR=${2:-v536}
+PRIOR=${1:-v536}; CUR=${2:-v537}
 TMP=$(mktemp -d)
 tally () {  # $1 label, $2... command
   local label="$1"; shift

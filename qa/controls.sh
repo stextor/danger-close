@@ -1,5 +1,7 @@
 #!/bin/bash
-# NEGATIVE CONTROLS (OPERATIONS §B2) — v5.36 session-2 edition, SELF-CONTAINED.
+# NEGATIVE CONTROLS (OPERATIONS §B2) — v5.37 edition, SELF-CONTAINED.
+# v5.37: re-pointed to the v537 source; C13 added (the ordinary-growth line reverted —
+# t20's $724,266 pin and E-15 extinction, and t19's $3,162,820 MAGI pin, must all fire).
 # Adopted-for-repo form: the patch payloads are embedded below rather than read from /tmp,
 # so the file cannot lose its patches between sessions (which is exactly what happened to
 # the session-1 copy). Each control reverts one part of the v5.36 capital-gains work,
@@ -8,7 +10,7 @@
 # checked because a dead suite prints no "N failed" line at all (§B2, learned twice).
 set -u
 cd "$(dirname "$0")/.."
-SRC=v536.jsx
+SRC=v537.jsx
 cp $SRC /tmp/ctl.orig.jsx
 PDIR=$(mktemp -d)
 
@@ -17,7 +19,7 @@ PDIR=$(mktemp -d)
 #    do — so reverting B's wiring or C's MAGI term visibly MOVES the fingerprint.
 measure () {
   node --input-type=module -e '
-    const m = await import("./qa/app_v536.mjs"); const g = m.__g;
+    const m = await import("./qa/app_v537.mjs"); const g = m.__g;
     const F = (n) => (m.__engines && m.__engines[n]) || g[n];   // engines live on __engines
     const P0 = JSON.parse(JSON.stringify(g.PORTFOLIO()));
     const mk = (tt, bal, pension) => { const P = JSON.parse(JSON.stringify(P0));
@@ -51,18 +53,18 @@ measure () {
   ' 2>/tmp/ctl.probe.err
 }
 
-rebuild () { cp $SRC DangerClose.jsx; ./qa/mk_testable.sh v536 >/dev/null 2>&1; cp qa/app_v536.mjs qa/app_testable.mjs; }
+rebuild () { cp $SRC DangerClose.jsx; ./qa/mk_testable.sh v537 >/dev/null 2>&1; cp qa/app_v537.mjs qa/app_testable.mjs; }
 
 # ── embedded patches: each asserts its anchor appears EXACTLY ONCE before replacing ──
 mkpatch () { cat > "$PDIR/$1.py" << PYEOF
 import sys
-src = open("v536.jsx").read()
+src = open("v537.jsx").read()
 OLD = $2
 NEW = $3
 n = src.count(OLD)
 if n != 1:
     print(f"anchor count {n} != 1", file=sys.stderr); sys.exit(1)
-open("v536.jsx","w").write(src.replace(OLD, NEW))
+open("v537.jsx","w").write(src.replace(OLD, NEW))
 PYEOF
 }
 mkpatch c1 '"const _saleFromGain = _spendFromTaxable * _gainShareOfPool;"' \
@@ -83,6 +85,8 @@ mkpatch c9 '"const magi = ssTaxable + pen_y + work_y + rmdTax_y + conv_y + div_y
            '"const magi = ssTaxable + pen_y + work_y + rmdTax_y + conv_y + div_y;"'
 mkpatch c12 '"const ssTaxable = taxableSSPortion(ssTotal, ordinaryIncome + qdcg_y);"' \
             '"const ssTaxable = taxableSSPortion(ssTotal, ordinaryIncome + div_y);"'
+mkpatch c13 '"taxOrd = Math.min(taxable - taxGainPool, taxOrd * (1 + growth.tax));"' \
+            '""'
 
 rebuild; BASE=$(measure)
 if [ -z "$BASE" ]; then echo "BASELINE PROBE DIED:"; head -3 /tmp/ctl.probe.err; exit 1; fi
@@ -134,6 +138,7 @@ run_control "C7 sale never depletes the sub-pool"                  c7 t19_engine
 run_control "C8 Engine B wiring reverted (capGains_y = 0 again)"   c8 t17_engineC_exact t18_engineB_exact t19_engineD_exact
 run_control "C9 Engine C MAGI term dropped"                        c9 t17_engineC_exact t18_engineB_exact t19_engineD_exact
 run_control "C12 provisional income stops seeing gains (E-16 reverted)" c12 t18_engineB_exact
+run_control "C13 ordinary sub-pool stops growing (v5.37 reverted, E-15 back)" c13 t19_engineD_exact t20_other_taxtype
 
 cp /tmp/ctl.orig.jsx $SRC; rebuild
 echo "source restored: $(md5sum $SRC | cut -d' ' -f1)"
