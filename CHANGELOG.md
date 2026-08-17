@@ -1,5 +1,71 @@
 # Changelog
 
+## v5.37 — ordinary money grows, and its growth is finally taxed (E-15 fixed), 2026-08-16
+
+Through v5.36, Engine D's Priority-1 pool tracked its ordinary-character balance (Traditional and
+Annuity money under Other accounts) as an opening value, depleted but **never grown** — so a
+$600,000 IRA recognised exactly $600,000 of lifetime ordinary income however much it compounded
+before being spent. Every dollar of growth escaped income tax entirely: an optimism, disclosed at
+v5.36 as limitation (b) and pinned by `t20`'s exact-$600,000 assertion, whose exactness was the
+defect's own fingerprint. v5.37 grows the ordinary sub-pool at the sleeve's growth rate, one line
+in the v5.36 idiom: `taxOrd = min(taxable − taxGainPool, taxOrd × (1 + g))`. Ordered caps make
+`taxOrd + taxGainPool ≤ taxable` hold every year by construction (the HSA share is the untaxed
+remainder, unchanged); `t19` re-derives the whole ledger independently and reports any year the
+cap binds — zero at ship, because both sub-pools grow at the same rate.
+
+**What moved, with one cause.** Derived by an independent simulator (its own IRS Pub 590-B divisor
+table) before the engine was edited, and matched by the edited engine to six decimals: the `t20`
+household's lifetime ordinary excess is now **$724,266** — the balance plus $124,266 of growth
+recognised on the way out — and the `t19` mixed household's lifetime MAGI rose **$30,074** while
+its realized capital gain was unchanged to the microdollar. The edit cannot reach the gains side:
+AST census shows `taxOrd` feeds MAGI and nothing else, so **Engines A, B and C are byte-identical**
+(parity 9/9 strict) and the Taxes and IRMAA tabs cannot move. What can move for a user is the
+Withdrawal tab's bracket column, when the newly recognised ordinary income crosses a bracket edge —
+in the conservative direction (taxes higher, never lower). On the shipped example household no
+rendered cell moves: lifetime MAGI rises $3,333 but never crosses an edge, measured by the DOM
+diff. Traditional and Annuity rows still recognise identical lifetime ordinary income — both grow,
+both are taxed once on the way out; the RMD changes *when*, not *whether* (asserted exactly).
+
+**Fixture correction rides along (E-17, closed).** Two suites carried object-shaped `dobA`/`dobB`
+values that `buildPlanTimeline` silently ignores, so they declared one household (1962/1964) while
+running the resolved defaults (1964-01-01/1966-01-01). Both now declare the household they run:
+converted to the strings the runs resolve to, measured value-identical across all five engines and
+all eight `t20` households (canonical-JSON hashes equal; the sole raw-byte delta is dob key order
+inside a debug echo). The labelled 1962/1964 household was measured and rejected deliberately: it
+does not exhaust the Priority-1 pool in-horizon, and outside the full-exhaustion regime `t20` E2's
+exact invariants are undefined — both pins fail on the *unchanged* v5.36 engine there. The exacts
+are regime-bound and the fixture says so; if its dobs ever change, they must be re-derived.
+
+### Disclosed limitations and approximations
+
+- One blended ordinary balance for the whole pool, matching the gains side — no per-account
+  character tracking. The HSA share remains modelled as tax-free throughout (v5.26 disclosure).
+- The conservation cap's binding year would be locally optimistic; it is watched (`t19` reports
+  binding years every run) rather than assumed away. Zero at ship.
+- Carried forward unchanged: one blended gain share and basis, all long-term, no per-lot selection,
+  loss harvesting, or wash-sale logic.
+
+### Verification
+
+Current leg **600** (t1 94 · t2 18 · t3 36 · t4 210 · t5 58 · t6 21 · t10 163) · prior v5.36 leg
+replays at its shipped **600** · parity **9/9 strict** · feature **660** (t7 41 · t8 38 · t9 14 ·
+t11 40 · t12 23 · t13 42 · t14 44 · t15 11 · t16 24 · t17 74 · t18 67 · t19 65 · t20 100 · t22 77)
+— **APP TOTAL 1269**. Tooling: t21 50 · cross-version DOM diff **29/29** — all three tax-bearing
+tabs at strict identity, the strongest claim that is true for this pair, with the release's
+divergence witness at the engine level (`t19`'s $3,162,820 MAGI pin, `t20`'s $724,266 pin) per the
+E-20 rule; the identity form still catches a dead call site on either leg, verified by running
+C10/C11 against it · `smoke_built` 16/16. **Thirteen negative controls, all firing**: C1–C9, C12
+and the new **C13** (the growth line reverted → the fingerprint moves and t19(1)/t20(2) fire) in
+`qa/controls.sh`; C10/C11 at the DOM layer. `t19` gained an in-suite independent ledger (own
+divisor table) that must reproduce the published pool, gains sub-pool, realized gain and basis to
+the cent every year before its conservation report is trusted; `t20` gained the E-15 extinction
+(the ordinary excess must EXCEED the opening balance).
+
+Repo hygiene: the stray duplicate `qa/t4_dom.mjs` (identical to `qa/qa-baseline/t4_dom.mjs`) is
+removed. One correction to the v5.36 entry below: its feature total printed **648**; the per-suite
+numbers it lists sum to **651**, which is the correct figure (consistent with its APP TOTAL 1260).
+An arithmetic slip in the document, not in the suite.
+
 ## v5.36 — the drawdown realizes capital gains, and the tax engines consume them, 2026-08-16
 
 The embedded-gain share recorded in My Data since v5.33 is now used. Engine D tracks the
