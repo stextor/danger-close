@@ -236,10 +236,13 @@ supplying `{ year: 1962, month: 6, day: 1 }` therefore plans a DIFFERENT househo
 with no error and no warning — measured at v5.35: `t20`'s `ownedA` block resolves to dobA 1964 /
 dobB 1966 against the 1962 / 1964 it writes. **The app is correct** — it reads the shape its own My
 Data form produces — so this is a fixture trap, not a defect, and it belongs with the `asOfYr` and
-wrapper-object traps above rather than in the findings list. Two suites carry it (`t20`, `t7`);
-neither has a vacuous assertion because of it, but any age-dependent figure in those blocks is a
-property of the default household. **Sweep the suite for object-shaped dates before trusting an
-age-keyed expectation**, and prefer the string form in anything new.
+wrapper-object traps above rather than in the findings list. Two suites carried it (`t20`, `t7`);
+both were converted at v5.37 to the strings their runs resolve to (`"1964-01-01"`/`"1966-01-01"`,
+measured value-identical — E-17 closure records the method and figures). The trap itself is
+unchanged in the app, so the rule stands: **sweep any fixture for object-shaped dates before
+trusting an age-keyed expectation**, and use the string form in anything new. If `t20`'s dobs are
+ever changed again, its E2 exact invariants are regime-bound (full pool exhaustion) and MUST be
+re-derived, not carried.
 
 ### C1. The jsdom environment is duplicated EIGHT times — audit outstanding
 

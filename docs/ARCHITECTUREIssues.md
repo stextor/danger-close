@@ -764,6 +764,22 @@ app.** Pre-existing (v5.26 onward), measured at v5.36. Fixing it moves `t20`'s h
 figures and raises MAGI across most Other-account households, dragging IRMAA and ACA with it — **its
 own release**, per STATUS v5.36 §6's agreed disposition. Severity: High. Direction: optimistic.
 
+**CLOSED at v5.37 (2026-08-16), by the agreed own-release.** One line at the `taxGainPool` growth
+point: `taxOrd = min(taxable − taxGainPool, taxOrd × (1 + growth.tax))` — ordered caps so
+`taxOrd + taxGainPool ≤ taxable` holds every year by construction, the growth rate the sleeve's own
+so the cap binds zero years (watched by `t19`'s in-suite independent ledger, which re-validates
+against the published balances to the cent before its conservation report is trusted). Derived by
+an independent simulator before the engine was edited and matched to six decimals: the pin above
+moved $600,000 → **$724,266** (the balance plus $124,266 of growth recognised on the way out);
+`trad − annuity` stayed exactly $0 (both characters grow identically — a property of the
+full-exhaustion regime, now documented as such in the fixture). MAGI rose on ordinary-bearing
+households as predicted ($30,074 lifetime on `t19`'s mixed household; $3,333 on the shipped
+example, never crossing a bracket edge, so no rendered cell moved); IRMAA and ACA were NOT dragged
+— the census showed `taxOrd` is write-only into MAGI and Engines B/C are byte-identical, a smaller
+blast radius than this entry predicted. `t20` carries the extinction: the ordinary excess must
+EXCEED the opening balance, so the exact-balance form of this defect cannot silently return.
+Control **C13** reverts the growth line and fires t19(1)+t20(2).
+
 ## E-16 · Engine B's provisional-income test omits realized capital gains (IRC §86 includes them)
 
 `ssTaxable = taxableSSPortion(ssTotal, ordinaryIncome + div_y)` — realized gains are absent from the
@@ -798,6 +814,17 @@ ages. The app is correct — its own form produces strings — so this is a **fi
 OPERATIONS §C2 (added v5.35); recorded here because two suites (`t20`, `t7`) carry object-shaped
 dates and any age-keyed expectation in them is a property of the default household. Standing rule:
 sweep new fixtures for object dates; prefer strings. Severity: Medium (test-integrity, not app).
+
+**CLOSED at v5.37.** Both carriers converted to the strings their runs actually resolve to
+(`"1964-01-01"` / `"1966-01-01"`), so each fixture now declares the household it runs. Measured,
+not assumed: all five engines value-identical to the object-dob run across all eight `t20`
+households (canonical-JSON hashes equal; the sole raw-byte delta is dob key order inside the
+`_tlW` debug echo), and `t7`'s stdout byte-identical. The dates the old objects were *labelled*
+with (1962/1964) were also measured and rejected: that household does not exhaust the Priority-1
+pool in-horizon, and outside the full-exhaustion regime `t20` E2's exact invariants are undefined
+— both pins fail on the unchanged v5.36 engine. The standing §C2 sweep rule remains in force for
+future fixtures; the trap itself (silent fall-through in `buildPlanTimeline`) is unchanged and
+still only a fixture hazard, not an app defect.
 
 ## E-18 · Dual-homed files drift, and the fourth recorded block was nearly fatal to a release
 
