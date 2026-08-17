@@ -1,6 +1,13 @@
 #!/bin/bash
 # ─────────────────────────────────────────────────────────────────────────────
-# Danger Close — release verification · v5.36 (2026-08-16)
+# Danger Close — release verification · v5.37 (2026-08-16)
+#
+# v5.37 changes: pair and both md5s rolled forward (v536 -> v537). The DOM diff's
+# Taxes/IRMAA sections FLIPPED from figure-region divergence to STRICT IDENTITY —
+# v5.37 cannot reach Engines B/C (census: taxOrd is write-only into MAGI), so
+# identity is the strongest true claim, and it still catches a dead call site
+# (verified: C10/C11 run against the identity form each fail exactly one check).
+# Control C13 added: the ordinary-growth line reverted must fire t19(1)/t20(2).
 #
 # PROVENANCE: originally authored 2026-08-11 for v5.22 by transcribing the steps
 # actually executed in that session. Rolled forward to v5.23 from that file
@@ -52,17 +59,17 @@
 # Every command below was run and its result recorded in the release notes.
 #
 # Usage:  ./VERIFY.sh /path/to/workdir
-#    workdir must contain:  v535.jsx  v536.jsx  DangerClose.jsx(=v536)  qa/
+#    workdir must contain:  v536.jsx  v537.jsx  DangerClose.jsx(=v537)  qa/
 # ─────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
 ROOT="${1:-$(pwd)}"
 cd "$ROOT"
 
-PRIOR=v535
-CURR=v536
-EXPECT_SRC_MD5=b7396c1c14861dc149b71e8edb1a00d5
-EXPECT_BUILT_MD5=c6d7474725d150a616a8ee8d389e8c72
+PRIOR=v536
+CURR=v537
+EXPECT_SRC_MD5=ff4dddcb585e2237e6c6a2643ded2ebb
+EXPECT_BUILT_MD5=50faed9fe934ddeb628b59d00ddb4a3e
 
 say() { printf "\n\033[1m== %s ==\033[0m\n" "$*"; }
 die() { printf "\n\033[31mFAIL: %s\033[0m\n" "$*" >&2; exit 1; }
@@ -152,55 +159,52 @@ fi
 
 say "DONE"
 cat <<'EOF'
-Expected totals for v5.36 — compare against the output above:
+Expected totals for v5.37 — compare against the output above:
 
   baseline current leg  600  (t1 94 · t2 18 · t3 36 · t4 210 · t5 58 · t6 21 · t10 163)
   parity                  9  strict, no INTENDED_DIFFS
-  feature               651  (t7 41 · t8 38 · t9 14 · t11 40 · t12 23 · t13 42
-                              t14 44 · t15 11 · t16 24 · t17 74 · t18 67 · t19 57
-                              t20 99 · t22 77)
+  feature               660  (t7 41 · t8 38 · t9 14 · t11 40 · t12 23 · t13 42
+                              t14 44 · t15 11 · t16 24 · t17 74 · t18 67 · t19 65
+                              t20 100 · t22 77)
   ----------------------------------------------------------------------------
-  APP TOTAL            1260
-  prior leg (v5.35)     588  counted SEPARATELY (t4 grew ONE prior-leg assertion
-                             at v5.36 — it pins the copy that build is true to;
-                             the published v5.35 figure was 587)
+  APP TOTAL            1269
+  prior leg (v5.36)     600  counted SEPARATELY (replays at its shipped figure)
   tooling (t21)          50  counted SEPARATELY
   built artifact         16  qa/smoke_built.mjs
-  tax-tab DOM diff       26  qa/domdiff_withdrawal.mjs — see below
+  tax-tab DOM diff       29  qa/domdiff_withdrawal.mjs — see below
 
-v5.36 wires the drawdown's realized capital gains into Engines B and C. Engine A
-and the MC/stress/Roth engines are byte-identical to v5.35, so parity must be 9/9
-STRICT — and the WITHDRAWAL tab must render BYTE-IDENTICAL across the pair: the
-v5.36 basis tracker is bookkeeping on top of an unchanged schedule (capGain_y,
-taxBasis, taxGainPool ride the rows; no displayed dollar moves). The DOM diff was
-re-scoped accordingly, and the re-scope INVERTED the session brief's premise
-("this release moves the schedule again" — measured: it does not).
+v5.37 grows Engine D's ordinary sub-pool (E-15 fixed): one line, taxOrd =
+min(taxable − taxGainPool, taxOrd × (1 + growth.tax)). The edit is write-only
+into MAGI (AST census), so Engines A, B and C are byte-identical to v5.36 and
+parity must be 9/9 STRICT. ALL THREE tax-bearing tabs must render BYTE-IDENTICAL
+across the pair: Taxes and IRMAA because their capGain_y inputs cannot move, and
+the Withdrawal tab because — measured, not assumed — lifetime MAGI rises $3,333
+on the example household but never crosses a bracket edge, so the bracket column
+(the only MAGI-derived render) holds. The release's divergence witness therefore
+lives at the ENGINE level: t19's exact MAGI pin ($3,162,820, was $3,132,746) and
+t20's exact excess pin ($724,266, was $600,000), both derived by an independent
+simulator BEFORE the engine was edited and matched to six decimals.
 
-THE TWO CHECKS THAT HAVE NO BACKUP. The diff's Taxes and IRMAA sections assert
-that the year-table FIGURE regions differ across the pair. Every suite calls the
-engines directly, so these are the ONLY witness that the app's call sites pass
-the gainByYr map — drop a call site and 1256 checks stay green while both tax
-tabs silently show no gains. Control-verified: with both call sites reverted
-(and the splice REGENERATED — patching the source without re-running
-mk_testable.sh bundles the stale splice and the control is a no-op, hit once at
-this build), exactly those two checks fail. The regions are anchored PAST every
-piece of v5.36 copy, because the naive whole-tab form was satisfied by the copy
-alone and its control did not fire (docs/ARCHITECTUREIssues.md E-20).
+THE IDENTITY CHECKS STILL WITNESS THE CALL SITES. A dead Engine B/C call site on
+either leg desynchronizes that leg's figures from the other's and fails the
+identity check loudly — verified by running C10/C11 against this form (each
+fails exactly its one intended check, with the gains visibly missing from the
+dead leg in the diff output). The figure regions stay anchored PAST every piece
+of v5.36 copy (E-20).
 
-TWELVE NEGATIVE CONTROLS, all firing: C1–C9 and C12 in qa/controls.sh (patches embedded
-in the script — the session-1 payloads lived in /tmp and were lost), C10/C11 on
-the DOM witnesses above. C8 (Engine B wiring reverted) moves only B's
-fingerprint and is caught by t18(6)+t19(1); C9 (Engine C MAGI term dropped)
-moves only C's, caught by t17(5) — the orthogonality is the evidence each patch
-reverts exactly what it claims.
+THIRTEEN NEGATIVE CONTROLS, all firing: C1–C9, C12 and the new C13 in
+qa/controls.sh (patches embedded), C10/C11 on the DOM identity witnesses. C13
+reverts the v5.37 growth line: the fingerprint moves (the pension-trad
+household's MAGI drops) and t19(1) + t20(2) fire — the $724,266 pin, the E-15
+extinction (excess must EXCEED the opening balance), and the MAGI pin.
 
-E-16, FOUND AND FIXED IN-RELEASE: Engine B's SS provisional income omitted
-realized gains (IRC §86 includes them). Fixed on the maintainer's decision —
-qdcg_y feeds taxableSSPortion. t18 pins the fix exactly (the 85% statutory cap,
-from the row's own ssTotal); control C12 reverts the term and fires t18(3).
+FIXTURE NOTE (E-17, closed this release): t20 and t7 now declare the household
+they run (dob strings 1964-01-01/1966-01-01, measured value-identical to the
+object-dob runs they replace). t20 E2's exacts are REGIME-BOUND to full pool
+exhaustion — if those dobs or balances ever change, re-derive; do not carry.
 
-BUILT MD5 — the scaffold was proven before the new hash was trusted: v5.35 was
-rebuilt from its own unmodified source and reproduced 2361b2ac3fe739d50526fd954b80fb63
-byte-for-byte. The binding check on a built artifact is still smoke_built.mjs at
-16/16, not the hash.
+BUILT MD5 — the scaffold was proven before the new hash was trusted: v5.36 was
+rebuilt from its own unmodified source and reproduced c6d7474725d150a616a8ee8d389e8c72
+byte-for-byte, then the identical toolchain built v5.37. The binding check on a
+built artifact is still smoke_built.mjs at 16/16, not the hash.
 EOF

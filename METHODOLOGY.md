@@ -841,8 +841,46 @@ Both parameters default to empty, so direct callers and every pre-v5.36 behavior
 Engine B's provisional-income proxy omitted realized gains, which IRC §86 includes — dormant while
 gains were hardcoded $0, it would have gone live with the wiring. It now feeds `qdcg_y` into the
 §86 test; `t18` pins the fix exactly (a $100K gain drives the taxable share of SS to precisely the
-85% statutory cap on a phase-in household) and control C12 reverts it and fires. (b) Growth on Other-account **ordinary** money is never recognised as ordinary income
-at all (`taxOrd` does not grow): a $600,000 IRA yields exactly $600,000 of lifetime ordinary income
-however much it compounds — an optimism, measured exactly by `t20`, its own release. It
-is recorded in `docs/ARCHITECTUREIssues.md` (E-15; E-16 is the fixed item above). (c) One blended share and one blended
+85% statutory cap on a phase-in household) and control C12 reverts it and fires. (b) **Fixed at
+v5.37** — through v5.36, growth on Other-account **ordinary** money was never recognised as ordinary
+income at all (`taxOrd` did not grow): a $600,000 IRA yielded exactly $600,000 of lifetime ordinary
+income however much it compounded — an optimism, measured exactly by `t20`, recorded as E-15, and
+extinguished by v5.37 (see the ordinary-growth section below; the same $600,000 IRA now recognises
+$724,266 on the test household, the balance plus its growth, and `t20` asserts the excess EXCEEDS
+the opening balance so the omission cannot silently return). (c) One blended share and one blended
 basis for the whole brokerage pool — no per-lot selection, no loss harvesting, all long-term.
+
+## Ordinary-income growth in the Priority-1 pool (v5.37)
+
+Through v5.36, Engine D's taxable sleeve tracked its ordinary-character balance (`taxOrd` — the
+Traditional and Annuity money a household holds under Other accounts) as an opening value that was
+depleted by spending and the sleeve's RMD but **never grown**. The consequence, disclosed as
+limitation (b) above and recorded as E-15: a $600,000 IRA in that pool recognised exactly $600,000
+of lifetime ordinary income no matter how much it compounded before it was spent — every dollar of
+growth escaped income tax entirely, an optimism in the one place this app promises pessimism.
+
+v5.37 grows the ordinary sub-pool at the sleeve's own growth rate, in the same step and the same
+idiom as the gains-bearing sub-pool: `taxOrd = min(taxable − taxGainPool, taxOrd × (1 + g))`. Three
+design choices, each deliberate. **One growth line, not a new ledger** — the verified attribution
+machinery (the ordinary fraction, the sale split) is untouched, so every figure that moved at v5.37
+moved for exactly one reason. **Ordered caps** — the gains pool keeps its existing cap against the
+whole pool and ordinary caps against the residual, so `taxOrd + taxGainPool ≤ taxable` holds every
+simulated year by construction; the HSA share is the untaxed remainder (its exclusion is a
+disclosed simplification, unchanged). The cap's binding year would be locally optimistic and is
+therefore watched, not assumed away: `t19` re-derives the whole ledger independently every run and
+reports any year the cap binds — measured at ship, it binds zero years, because **the growth rate
+is the sleeve's own** (`growth.tax`): these dollars live in the taxable pool and already compound
+at that rate, so both sub-pools grow in lockstep and conservation holds with no squeeze.
+
+Measured effects at ship, all derived by an independent simulator (its own IRS Pub 590-B divisor
+table) before the engine was edited and matched by the engine to six decimals: the `t20` test
+household's lifetime ordinary excess moved from exactly the $600,000 balance to $724,266 (the
+balance plus $124,266 of growth recognised on the way out); the `t19` mixed household's lifetime
+MAGI rose $30,074 while its realized capital gain was unchanged to the microdollar (the edit cannot
+reach the gains side — `taxOrd` feeds MAGI and nothing else, verified by AST census). Engines A, B
+and C are byte-identical at this release; the Taxes and IRMAA tabs cannot move. What can move for a
+user is Engine D's per-year MAGI and therefore the Withdrawal tab's bracket column, when the added
+ordinary income crosses a bracket edge — in the conservative direction, taxes higher, never lower.
+Traditional and Annuity rows still recognise identical lifetime ordinary income (both grow, both
+are taxed once on the way out; the RMD changes when, not whether — asserted exactly by `t20`, a
+property of households whose pool exhausts within the plan horizon).
