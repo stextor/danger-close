@@ -1,5 +1,10 @@
 #!/bin/bash
-# NEGATIVE CONTROLS (OPERATIONS §B2) — v5.37 edition, SELF-CONTAINED.
+# NEGATIVE CONTROLS (OPERATIONS §B2) — v5.38 edition, SELF-CONTAINED.
+# v5.38: re-pointed to the v538 source; C14 and C15 added (the ACA-premium-sale gain tax
+# and its IRMAA-lookback term, each reverted — t22 group I's pins must fire: C14 -> the
+# totTax/estate pins; C15 -> the IRMAA pin at $0 as its unique signature, with ~$52 coupled
+# knock-ons on the tax pins via the surcharge's own funding). Suites may carry a :arg
+# suffix (e.g. t22_aca_floor:v537) passed through to the suite.
 # v5.37: re-pointed to the v537 source; C13 added (the ordinary-growth line reverted —
 # t20's $724,266 pin and E-15 extinction, and t19's $3,162,820 MAGI pin, must all fire).
 # Adopted-for-repo form: the patch payloads are embedded below rather than read from /tmp,
@@ -10,7 +15,7 @@
 # checked because a dead suite prints no "N failed" line at all (§B2, learned twice).
 set -u
 cd "$(dirname "$0")/.."
-SRC=v537.jsx
+SRC=v538.jsx
 cp $SRC /tmp/ctl.orig.jsx
 PDIR=$(mktemp -d)
 
@@ -19,7 +24,7 @@ PDIR=$(mktemp -d)
 #    do — so reverting B's wiring or C's MAGI term visibly MOVES the fingerprint.
 measure () {
   node --input-type=module -e '
-    const m = await import("./qa/app_v537.mjs"); const g = m.__g;
+    const m = await import("./qa/app_v538.mjs"); const g = m.__g;
     const F = (n) => (m.__engines && m.__engines[n]) || g[n];   // engines live on __engines
     const P0 = JSON.parse(JSON.stringify(g.PORTFOLIO()));
     const mk = (tt, bal, pension) => { const P = JSON.parse(JSON.stringify(P0));
@@ -53,18 +58,18 @@ measure () {
   ' 2>/tmp/ctl.probe.err
 }
 
-rebuild () { cp $SRC DangerClose.jsx; ./qa/mk_testable.sh v537 >/dev/null 2>&1; cp qa/app_v537.mjs qa/app_testable.mjs; }
+rebuild () { cp $SRC DangerClose.jsx; bash ./qa/mk_testable.sh v538 >/dev/null 2>&1 || { echo "REBUILD FAILED — controls are blind without it; aborting (found the hard way at v5.38: a stripped execute bit made every control read NOT CAUGHT)" >&2; exit 1; }; cp qa/app_v538.mjs qa/app_testable.mjs 2>/dev/null || true; }
 
 # ── embedded patches: each asserts its anchor appears EXACTLY ONCE before replacing ──
 mkpatch () { cat > "$PDIR/$1.py" << PYEOF
 import sys
-src = open("v537.jsx").read()
+src = open("v538.jsx").read()
 OLD = $2
 NEW = $3
 n = src.count(OLD)
 if n != 1:
     print(f"anchor count {n} != 1", file=sys.stderr); sys.exit(1)
-open("v537.jsx","w").write(src.replace(OLD, NEW))
+open("v538.jsx","w").write(src.replace(OLD, NEW))
 PYEOF
 }
 mkpatch c1 '"const _saleFromGain = _spendFromTaxable * _gainShareOfPool;"' \
@@ -87,6 +92,10 @@ mkpatch c12 '"const ssTaxable = taxableSSPortion(ssTotal, ordinaryIncome + qdcg_
             '"const ssTaxable = taxableSSPortion(ssTotal, ordinaryIncome + div_y);"'
 mkpatch c13 '"taxOrd = Math.min(taxable - taxGainPool, taxOrd * (1 + growth.tax));"' \
             '""'
+mkpatch c14 '"totTax += _acaGainTax; if (widowed) widowTax += _acaGainTax;"' \
+            '""'
+mkpatch c15 '"magiHist[yr] = magi + saleGain + acaSaleGain;               // decision 1: the lookback sees this gain"' \
+            '""'
 
 rebuild; BASE=$(measure)
 if [ -z "$BASE" ]; then echo "BASELINE PROBE DIED:"; head -3 /tmp/ctl.probe.err; exit 1; fi
@@ -106,7 +115,8 @@ run_control () {  # $1 name, $2 patch id, $3.. suites expected to fire
     # MUST run from inside qa/ — these suites resolve paths relative to the cwd and die
     # otherwise, printing no "N failed" line at all. Exit status is checked (§B2).
     local res rc
-    res=$( cd qa && timeout 900 node "$t.mjs" 2>&1 ); rc=$?
+    local tf="${t%%:*}" targ="${t#*:}"; [ "$targ" = "$t" ] && targ=""
+    res=$( cd qa && timeout 900 node "$tf.mjs" $targ 2>&1 ); rc=$?
     local n; n=$(echo "$res" | grep -oE '[0-9]+ failed' | tail -1 | grep -oE '^[0-9]+')
     if [ -z "$n" ]; then fired="$fired $t(DIED rc=$rc)"
     elif [ "$n" -gt 0 ]; then fired="$fired $t($n)"; fi
@@ -139,6 +149,8 @@ run_control "C8 Engine B wiring reverted (capGains_y = 0 again)"   c8 t17_engine
 run_control "C9 Engine C MAGI term dropped"                        c9 t17_engineC_exact t18_engineB_exact t19_engineD_exact
 run_control "C12 provisional income stops seeing gains (E-16 reverted)" c12 t18_engineB_exact
 run_control "C13 ordinary sub-pool stops growing (v5.37 reverted, E-15 back)" c13 t19_engineD_exact t20_other_taxtype
+run_control "C14 ACA-sale gain tax reverted (the v5.38 asymmetry back)" c14 t22_aca_floor:v537
+run_control "C15 IRMAA-lookback term dropped (decision 1 reverted)"     c15 t22_aca_floor:v537
 
 cp /tmp/ctl.orig.jsx $SRC; rebuild
 echo "source restored: $(md5sum $SRC | cut -d' ' -f1)"

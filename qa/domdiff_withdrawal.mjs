@@ -51,7 +51,7 @@
 import { JSDOM } from "jsdom";
 import { createRequire } from "module";
 
-const [VA, VB] = [process.argv[2] || "v536", process.argv[3] || "v537"];
+const [VA, VB] = [process.argv[2] || "v537", process.argv[3] || "v538"];
 
 // One mount per leg; the three tabs are read by clicking through the mounted app (the t4
 // idiom), because six separate jsdom mounts cost more time than this file is worth.

@@ -214,7 +214,50 @@ console.log(`\n\u2500\u2500 F \u00b7 A2 moved no figure \u2014 byte identity vs 
     const _curHasTracker = typeof g.realizeGain === "function";
     const _priorHasTracker = typeof PRIOR_G.realizeGain === "function";
     const _crossesTracker = _curHasTracker && !_priorHasTracker;
-    if (!_crossesTracker) {
+    // ── v5.38 boundary probe (same idiom as the tracker probe: capability, not version
+    // string — but BEHAVIORAL, since v5.38 exports nothing new). A withhold-funded 2-year
+    // bridge household with a pension: no funding sale, no dividends, so the ONLY totTax
+    // difference between a gainy pool and an all-basis pool is the ACA-premium sale's LTCG —
+    // $0 through v5.37 (the disclosed asymmetry), > $0 from v5.38 (scope v5.38, decisions
+    // resolved 2026-08-17). Deterministic; two tiny runs per build.
+    const _acaGainTaxed = (G) => {
+      if (typeof G.realizeGain !== "function") return false; // pre-tracker: certainly untaxed
+      const PP = { single: false, asOfYr: 2026, retireYr: 2027, horizonYr: 2028, ladderEnd: 2028,
+        dobAYr: 1965, dobBYr: 1966, deathYr1: Infinity, survivor: "A",
+        ssA: 0, ssB: 0, ssAYr: 2099, ssAMo: 6, ssBYr: 2099, ssBMo: 6,
+        pen: 3000, stateRate: 0, stateCode: null, convTaxFunding: "withhold", taxableGainFrac: 0.9,
+        acaPremium: 1600, acaSize: 2, taxYieldPct: 0, currentConv: 0,
+        tradInitA: 900000, tradInitB: 100000, rothInitA: 10000, rothInitB: 10000, taxableInit: 300000 };
+      const _m = [{ key: "n", policy: { kind: "fixed", amount: 0 } }, { key: "c", policy: { kind: "fixed", amount: 150000 } }];
+      return G.runRothStrategies(PP, _m)[1].totTax > G.runRothStrategies({ ...PP, taxableGainFrac: 0 }, _m)[1].totTax + 1;
+    };
+    const _crossesGainTax = _acaGainTaxed(g) && !_acaGainTaxed(PRIOR_G);
+    if (_crossesGainTax) {
+      // ── The v5.38 statement (mirrors the v5.34 inversion below). Byte identity expires BY
+      // DESIGN at this boundary: the premium sale's gain is now taxed and grossed up, so rows
+      // whose sales realize 15%-band gains legitimately move (on this household: fill24's
+      // contraction shifts one subsidy by ~$5 — the intended mechanism's second-order). What
+      // stays assertable, and is: conv-0 rows are untouched end to end; movement on the other
+      // rows is CONSERVATIVE for fixed/bracket policies; nobody loses a paid bridge year; the
+      // solver does not end up worse (S-6, carried over); floor-year KEYS are stable.
+      CK("F[v5.38]: strategy set unchanged across the gain-tax boundary",
+        JSON.stringify(now.map(r => r.key)) === JSON.stringify(was.map(r => r.key)));
+      for (const k of ["none", "current"])
+        CK(`F[v5.38]: ${k} row is byte-identical (conv 0 — no ACA code runs)`,
+          JSON.stringify(now.find(r => r.key === k)) === JSON.stringify(was.find(r => r.key === k)));
+      CK("F[v5.38]: fixed/bracket rows move conservatively (totTax never DOWN)",
+        now.every((r, i) => ["acaCliff", "irmaa1"].includes(r.key) || r.totTax >= was[i].totTax),
+        now.map((r, i) => `${r.key}:${r.totTax}/${was[i].totTax}`).join(" "));
+      CK("F[v5.38]: no row LOSES a bridge year the prior build paid in full",
+        now.every((r, i) => Object.keys(was[i].acaSubByYr || {}).every(y =>
+          !(was[i].acaSubByYr[y] > 0 && (r.acaSubByYr[y] || 0) === 0))));
+      CK("F[v5.38]: acaCliff does not end up WORSE than the prior build (S-6 holds one layer up)",
+        (() => { const sum = o => Object.values(o || {}).reduce((a, b) => a + b, 0);
+          const iN = now.findIndex(r => r.key === "acaCliff"), iW = was.findIndex(r => r.key === "acaCliff");
+          return iN < 0 || iW < 0 || sum(now[iN].acaSubByYr) >= sum(was[iW].acaSubByYr) - 60; })());
+      CK("F[v5.38]: acaFloorYrs KEYS are stable on every row (values may move with MAGI)",
+        now.every((r, i) => JSON.stringify(Object.keys(r.acaFloorYrs || {})) === JSON.stringify(Object.keys(was[i].acaFloorYrs || {}))));
+    } else if (!_crossesTracker) {
       for (let i = 0; i < was.length; i++) {
         CK(`F: ${was[i].key} \u2014 acaSubByYr is byte-identical`,
           JSON.stringify(now[i].acaSubByYr) === JSON.stringify(was[i].acaSubByYr),
@@ -265,9 +308,9 @@ console.log(`\n\u2500\u2500 F \u00b7 A2 moved no figure \u2014 byte identity vs 
     } else {
       // Same gate, same reason: the flag is keyed to ACA MAGI, so a release that moves ACA MAGI
       // moves it too. Present-and-populated survives the boundary; byte identity does not.
-      CK(`F: acaFloorYrs is present on BOTH builds${_crossesTracker ? " (identity waived across the tracker boundary)" : " and byte-identical"} (prior=${PRIOR})`,
+      CK(`F: acaFloorYrs is present on BOTH builds${_crossesTracker || _crossesGainTax ? " (value identity waived across a declared boundary; keys asserted above)" : " and byte-identical"} (prior=${PRIOR})`,
         was.every(r => r.acaFloorYrs !== undefined) && now.every(r => r.acaFloorYrs !== undefined)
-        && (_crossesTracker || now.every((r, i) => JSON.stringify(r.acaFloorYrs) === JSON.stringify(was[i].acaFloorYrs))),
+        && (_crossesTracker || _crossesGainTax || now.every((r, i) => JSON.stringify(r.acaFloorYrs) === JSON.stringify(was[i].acaFloorYrs))),
         now.map((r, i) => `${r.key}:${JSON.stringify(r.acaFloorYrs)}/${JSON.stringify(was[i].acaFloorYrs)}`).join(" "));
     }
   }
@@ -379,6 +422,65 @@ console.log("\n\u2500\u2500 H \u00b7 v5.34 the ACA cliff solver under a tracked 
   CK("H: realizeGain is proportional — selling alone never moves the gain share",
     (() => { const r = g.realizeGain(100, 1000, 400); return r.gain === 60 && r.basis === 360; })(),
     JSON.stringify(g.realizeGain(100, 1000, 400)));
+}
+
+// ── GROUP I · v5.38 · the ACA-premium sale's gain is TAXED (the standing candidate, shipped) ──
+// Pins from DERIVATION_v5_38_step1.md: independently derived by the validated reference ledger
+// (sim_ledger.mjs, 72/72 vs shipped v5.37 before projection) and the memo's hand-shown 2028
+// chain (LTCG flat 15% on stack₂ = taxableOrd + qdcg + saleGain; gross-up fixed point).
+// Gated on the same behavioral capability probe as group F: on a pre-v5.38 bundle these
+// claims are FALSE and the group prints a SKIP line instead of silently greening (§B2).
+// Extinction wiring: control C14 (revert the tax charge) fires I-totTax and I-estate;
+// control C15 (drop the magiHist term) has the IRMAA pin at $0 as its unique signature —
+// measured 2026-08-17: the removed surcharge also shrinks `due`, hence the funding sale,
+// hence totTax by ~$52, so the tax pins fire as coupled knock-ons rather than staying green.
+console.log(`\n\u2500\u2500 I \u00b7 v5.38 \u00b7 taxed premium-sale gain \u2014 derivation pins`);
+{
+  // GATE (revised during the v5.38 build, after control C14 exposed a circularity): gating on
+  // the tested BEHAVIOR means a build with the tax charge reverted reads as "old bundle" and
+  // the pins skip themselves — the control goes dark. Gate instead on an ADJACENT source
+  // marker (the tracker-probe precedent): the `_acaGainTax` identifier exists from v5.38 and
+  // survives both C14 (which removes only the charge) and C15 (which removes only the
+  // lookback term), so the pins still RUN under each control and the right one fires. A
+  // wholesale removal of the block would flip group F's behavioral probe into its identity
+  // branch instead — defense in depth, not blindness.
+  const _acaGainTaxedI = typeof g.realizeGain === "function" && /_acaGainTax/.test(SRC);
+  if (!_acaGainTaxedI) {
+    console.log("  \u25cb SKIPPED \u2014 this bundle predates the v5.38 gain tax; group I's claims are false here by design");
+  } else {
+    const CASE1 = { single: false, asOfYr: 2026, retireYr: 2027, horizonYr: 2060, ladderEnd: 2035,
+      dobAYr: 1965, dobBYr: 1966, deathYr1: Infinity, survivor: "A",
+      ssA: 3000, ssB: 1800, ssAYr: 2032, ssAMo: 6, ssBYr: 2033, ssBMo: 6,
+      pen: 0, stateRate: 0, stateCode: null, convTaxFunding: "taxable", taxableGainFrac: 0.6,
+      acaPremium: 1600, acaSize: 2, taxYieldPct: 1.5, currentConv: 0,
+      tradInitA: 1200000, tradInitB: 600000, rothInitA: 60000, rothInitB: 40000, taxableInit: 400000 };
+    const BR60 = { ...CASE1, taxableGainFrac: 0.5, taxableInit: 250000, tradInitA: 600000, tradInitB: 300000 };
+    const _menu = (a) => [{ key: "n", policy: { kind: "fixed", amount: 0 } }, { key: "c", policy: { kind: "fixed", amount: a } }];
+    const c1 = g.runRothStrategies(CASE1, _menu(186000))[1];
+    // Cases 1 + 1a — hand-derived: 2027 gain $12,887 \u2192 LTCG $1,933; 2028 gain $13,969 \u2192 $2,095
+    // (flat 15%: stack\u2082 $195,439 already past the indexed 0% top $102,896). The aggregate \u0394 is
+    // +$3,802, NOT \u03a3 gain taxes ($4,028): pool depletion trims later dividends \u2212$226 \u2014 measured,
+    // so the pins are the aggregates, not the sum.
+    CK("I: CASE1 totTax $314,708 (the taxed-gain pin \u2014 C14's discriminator)", c1.totTax === 314708, `$${c1.totTax}`);
+    CK("I: CASE1 totIrmaa $1,150 \u2014 the 2028 gain crosses tier 1 in the 2030 lookback (decision 1; C15's discriminator)",
+      c1.totIrmaa === 1150, `$${c1.totIrmaa}`);
+    CK("I: CASE1 estate $8,908,031", c1.estate === 8908031, `$${c1.estate}`);
+    // Case 3 \u2014 the 0%-bracket household: gains realized ($9,798 / $10,738), LTCG $0, and the
+    // v5.37 figures hold exactly \u2014 an unmoved number is not a missed fix.
+    const b60 = g.runRothStrategies(BR60, _menu(60000))[1];
+    CK("I: 0%-band household \u2014 totTax $108,353 unchanged though gain is realized", b60.totTax === 108353, `$${b60.totTax}`);
+    CK("I: 0%-band household \u2014 estate $5,110,052 unchanged", b60.estate === 5110052, `$${b60.estate}`);
+    // Invariance pins (verified byte-identical to v5.37 at the boundary; held as literals here)
+    const noAca = g.runRothStrategies({ ...CASE1, acaPremium: 0, acaSize: 0 }, _menu(186000))[1];
+    CK("I: acaPremium-0 household untouched \u2014 totTax $313,665, totIrmaa $0",
+      noAca.totTax === 313665 && noAca.totIrmaa === 0, `$${noAca.totTax} / $${noAca.totIrmaa}`);
+    // The solver, one layer up: the mirror anticipates the grossed-up sale (D-34-4)
+    const _all = g.runRothStrategies(CASE1);
+    const _none = _all.find(r => r.key === "none"), _cliff = _all.find(r => r.key === "acaCliff");
+    CK("I: acaCliff forfeits no bridge year under the taxed gross-up (mirror matches engine)",
+      Object.keys(_none.acaSubByYr).filter(y => _none.acaSubByYr[y] > 0).every(y => _cliff.acaSubByYr[y] > 0));
+    CK("I: full menu still runs (7 strategies)", _all.length === 7, String(_all.length));
+  }
 }
 
 console.log(`\nt22 SUITE: ${pass} passed, ${fail} failed`);
