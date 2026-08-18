@@ -1,5 +1,90 @@
 # Changelog
 
+## v5.38 — the ACA-premium sale's gain is taxed, and the IRMAA lookback sees it, 2026-08-17
+
+Since v5.34, when a Roth-conversion strategy forfeits ACA subsidy, the engine pays the extra
+premium by selling from the taxable pool — and that sale's capital gain entered ACA MAGI but was
+**never taxed**, where the funding sale's gain is. That asymmetry was disclosed at v5.34 as "the
+optimistic direction… recorded for step 3, not fixed here." v5.38 is step 3. The premium sale is
+now treated like the funding sale end to end: the sale grosses up fixed-point for the long-term
+capital-gains tax its own gain owes (gains stack on the year's ordinary income, dividends, and the
+funding sale's gain, in that order); the gain's tax is charged; the subsidy contraction estimates
+the grossed-up sale so ACA MAGI is not understated by the tax-driven slice; the cliff solver's
+estimator anticipates the same larger sale, so it still forfeits no bridge year; and — closing the
+last asymmetry between the two sales — the gain now enters the **IRMAA two-year lookback**
+alongside the funding sale's.
+
+**What moves, with one cause — figures move in the conservative direction (taxes higher, never
+lower); the NONE row and a zero slider do not move at all.** Converting strategies on bridge
+households with an appreciated taxable pool get visibly more expensive — about $3–4K of lifetime
+tax on the measured guardrail household, roughly 2.5% of a strategy's lifetime tax — so the Roth
+comparator's rankings **can reorder** versus v5.37, and the solve-for grid's best cell can shift.
+Two subtleties worth knowing before concluding anything from your own numbers. First, **an
+unmoved number is not a missed fix**: a household whose gains fall inside the 0% long-term bracket
+sees no change even though the gain is realized and now formally taxed — measured to be the common
+case at modest conversion sizes (the tax only bites when large conversions stack the gain into the
+15% band). Second, **a bridge household can now pick up a Medicare surcharge it did not show
+before**: a premium-sale gain realized at 62–63 reaches the lookback that prices IRMAA at 64–65+,
+same single cause (on the derivation fixture: exactly one year moves, $0 → $1,150). The STAY UNDER
+ACA CLIFF strategy is the one row that can get *cheaper* (−$2,547 on the derivation fixture): its
+solver now prices the sale's tax and redistributes conversions, and its protective property — no
+forfeited bridge year — is asserted, not assumed.
+
+**Derived before it was built.** Every headline figure was computed first by an independent
+reference ledger (own bracket walk, own §86 worksheet, own gross-up; law tables shared with the
+Verify tab's primary-source pins) that reproduced the shipped v5.37 engine exactly — 72/72,
+per-year wealth to the dollar, subsidies to the cent — before the engine was touched; the edited
+engine then matched the ledger's projection on every pin (31/31), including the aggregate's
+second-order: the lifetime-tax delta is *less* than the sum of the gain taxes, because the deeper
+pool depletion trims later dividend income.
+
+**Two findings the work surfaced, both corrected in this release.** (1) The subsidy delta `lost`
+**can be negative** — on a floor-crossing household the no-conversion baseline sits below 100% FPL
+($0 subsidy) while the converting strategy's higher MAGI clears the floor, so the strategy pays
+*less* premium than baseline and the pool is credited. The shipped comment claiming `lost ≥ 0` was
+false; the credit was shipped behavior and is preserved, and the comment now states the truth.
+(2) The negative-controls harness had gone **blind at the version re-point** — a stripped execute
+bit made every control silently test the clean build and read NOT CAUGHT; the controls runner now
+aborts loudly if its rebuild fails, and the new controls' gate was redesigned after it was caught
+classifying a reverted build as "too old to test."
+
+**What deliberately does not change, recorded as its own finding:** **neither** sale's gain —
+funding or premium — reaches NIIT or the state-tax module's capital-gains input; only dividend
+income does. Optimistic where it binds (large gains on high-MAGI households, or gains in a taxed
+state); disclosed in METHODOLOGY, out of scope here to keep this release's parity attribution
+clean, tracked for its own release.
+
+### Disclosed limitations and approximations
+
+- The premium sale still has no Roth/Traditional fallback if the pool cannot cover premium plus
+  tax; the grossed-up sale clamps to the pool (pre-existing behavior, unchanged).
+- Carried forward unchanged: one blended gain share and basis, all long-term, no per-lot
+  selection, loss harvesting, or wash-sale logic; NIIT/state gap above.
+
+### Verification
+
+Current leg **600** (t1 94 · t2 18 · t3 36 · t4 210 · t5 58 · t6 21 · t10 163) · prior v5.37 leg
+replays at its shipped **600** · parity **9/9** — `INTENDED_DIFFS["v537→v538"] = ["rothAca"]`: the
+ACA-guardrail fingerprint moved as declared and `roth`, `rothCurrentEstate`, and all three Monte
+Carlo fingerprints stayed **byte-identical** — the attribution witness this fix waited two releases
+to get (v5.36 scope, decision 5) · feature **666** (t7 41 · t8 38 · t9 14 · t11 40 · t12 23 ·
+t13 42 · t14 44 · t15 11 · t16 24 · t17 74 · t18 67 · t19 65 · t20 100 · t22 83 — group F
+re-scoped at the boundary with a behavioral capability probe; new group I carries the derivation
+pins) — **APP TOTAL 1275** (current leg + parity + feature, the house convention; the prior-leg
+replay, t21, and the DOM diff are counted separately). Tooling: t21 50 · cross-version DOM diff **29/29**, and the Roth tab
+itself measured **identical** on the shipped example household once unseeded Monte-Carlo noise is
+blinded — all four tax-bearing tabs at strict identity for this pair, the strongest claim that is
+true, with the release's divergence witnessed at the engine level (t22 group I's $314,708 /
+$1,150 / $8,908,031 pins) per the E-20 rule. **Fifteen negative controls: C1–C9 and C12–C15 all
+firing in the controls runner (including the new C14 — tax charge reverted → the taxed-gain pins
+fire — and C15 — lookback term dropped → the IRMAA pin at $0 as its unique signature, with ~$52
+coupled knock-ons via the surcharge's own funding); C10/C11's defect class was verified
+LIVE-FIRE: a control payload (C8, Engine B's gains wiring reverted) accidentally leaked into the
+build workspace via a killed controls run, and the DOM diff's Taxes-identity check caught the dead
+call site exactly as designed (28/1 with the missing gains visible in the diff) before the
+candidate was restored from its hash-pinned export and everything re-verified green.
+`smoke_built` **16/16** against the shipped `index.html`.**
+
 ## v5.37 — ordinary money grows, and its growth is finally taxed (E-15 fixed), 2026-08-16
 
 Through v5.36, Engine D's Priority-1 pool tracked its ordinary-character balance (Traditional and
