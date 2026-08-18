@@ -25,11 +25,11 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 
 | Field | Value |
 |---|---|
-| Version | **v5.37** |
-| Source file in knowledge | `DangerClose-v5_37.jsx` |
-| Source md5 | `ff4dddcb585e2237e6c6a2643ded2ebb` |
-| Built `index.html` md5 | `50faed9fe934ddeb628b59d00ddb4a3e` |
-| Shipped | 2026-08-16 |
+| Version | **v5.39** |
+| Source file in knowledge | `DangerClose-v5_39.jsx` |
+| Source md5 | `7070018f2699503dfac4ca8e0e1b2feb` |
+| Built `index.html` md5 | `0563e2f6db79c19b4729bec6e09a458a` |
+| Shipped | 2026-08-18 |
 
 **Any work — edits, verification, scope premises — is done against this file.** Confirm its
 md5 matches the value above before starting (see the pre-build freshness check in
@@ -44,8 +44,13 @@ which halted the v5.30 build and cost most of a session to diagnose. Recorded as
 
 ⚠ **Prefer the clone-and-diff in OPERATIONS §A2 over this table.** A recorded table is only as fresh as
 the release that wrote it, and this project has had FOUR separate recorded blocks go stale — the fourth opened the v5.36 session-2 build: six suite files in the pool were pre-session-1 copies while the brief said otherwise, recoverable only from the maintainer's archive (E-18). This is the
-offline fallback, accurate **as of v5.37, 2026-08-16** — every row below was computed from the file
-that ships in this release's package, not carried forward.
+offline fallback, accurate **as of v5.39, 2026-08-18**. At the v5.38 ship every row was re-hashed
+from the mounted pool at post-ship verification (the fifth stale-block incident: that ship left the
+table un-rolled for a day, caught by the closing sweep). At the v5.39 ship the six rows the release
+actually changed — `t1_units`, `t3_roth`, `t4_dom`, `t5_storage`, `t6_single` and the new
+`dom_entry_v539.jsx` — were rolled from a **fresh clone of the committed tree**, and a full
+pool-vs-clone sweep confirmed 42 files matching, 0 stale. Rows not listed as changed are carried
+forward from that v5.38 re-hash.
 
 **Two mapping caveats.** The pool flattens repo paths: `tools_fixture.jsx` here is
 `qa/tools/fixture/fixture.jsx` in the repo (byte-identical), and the baseline suites live under
@@ -55,10 +60,9 @@ that ships in this release's package, not carried forward.
 |---|---|---|
 | `cap_tabs.mjs` | `9057b96d48b84f99dc322f7fc983674a` | `qa/qa-baseline/cap_tabs.mjs` |
 | `capture_gain_fp.mjs` | `99f096c7c332b5ec7a87949681386a71` | `qa/capture_gain_fp.mjs` |
-| `controls.sh` | `1f672b64eac7b028d8331a94a80376f6` | `qa/controls.sh` — re-pointed to v537 at v5.37, **C13 added**; adopted at v5.36 with embedded patches |
-| `dom_entry_v536.jsx` | `c387ed8b1e89fe598c1e4d91323eacf9` | `qa/qa-baseline/dom_entry_v536.jsx` (prior leg) |
+| `controls.sh` | `5389104ea31f841695e95e6e8ec0064a` | `qa/controls.sh` — re-pointed to v537 at v5.37, **C13 added**; adopted at v5.36 with embedded patches |
 | `dom_entry_v537.jsx` | `87a1324d67ed44f4215601018cda92eb` | `qa/qa-baseline/dom_entry_v537.jsx` — **NEW at v5.37** (current leg) |
-| `domdiff_withdrawal.mjs` | `faaea61bea1ec51794dd7a5ebb825d13` | `qa/domdiff_withdrawal.mjs` |
+| `domdiff_withdrawal.mjs` | `f31c743ba26c9d30f22f953f434e95ec` | `qa/domdiff_withdrawal.mjs` |
 | `env_dom.mjs` | `0ee15a1be6099a50319cfb271b530c4a` | `qa/qa-baseline/env_dom.mjs` |
 | `main.jsx` | `d9eca7b469a3fb7ec1c5325fd4bf8145` | `src/main.jsx` |
 | `probe_withhold_gain.mjs` | `b7fbc3fc34a0684c88b79123ddcda57c` | `qa/probe_withhold_gain.mjs` |
@@ -74,23 +78,38 @@ that ships in this release's package, not carried forward.
 | `t17_engineC_exact.mjs` | `5eef71d2385058d847cc53018a3fae67` | `qa/t17_engineC_exact.mjs` |
 | `t18_engineB_exact.mjs` | `7272f97181e0764204eef087f3810380` | `qa/t18_engineB_exact.mjs` |
 | `t19_engineD_exact.mjs` | `256ff3681548966735569c5034164dac` | `qa/t19_engineD_exact.mjs` |
-| `t1_units.mjs` | `69e8718765bca64c9d3ce1d62fa3fad2` | `qa/qa-baseline/t1_units.mjs` |
+| `t1_units.mjs` | `f1f60537cc377ed15e4db4842970d2bd` | `qa/qa-baseline/t1_units.mjs` |
 | `t20_other_taxtype.mjs` | `9640ce1e4006c7ba6b30a29639ef428b` | `qa/t20_other_taxtype.mjs` |
 | `t21_tools.mjs` | `c5fb4c712135028f1effa039c84e0b90` | `qa/t21_tools.mjs` |
-| `t22_aca_floor.mjs` | `2f626831143668ac86818ceac77c2465` | `qa/t22_aca_floor.mjs` |
-| `t2_engines.mjs` | `769bc6a60b1b58ae385e5b2d9a7cc24a` | `qa/qa-baseline/t2_engines.mjs` |
-| `t3_roth.mjs` | `340d8fc45e5b0504cc880d9080e6eff0` | `qa/qa-baseline/t3_roth.mjs` |
-| `t4_dom.mjs` | `1af2854a17631f51ef71be43c1bc8c41` | `qa/qa-baseline/t4_dom.mjs` |
-| `t5_storage.mjs` | `7f22335253c5bdd8d63a97b5c5081d63` | `qa/qa-baseline/t5_storage.mjs` |
-| `t6_single.mjs` | `5351b78b65ad279e02464bf2611d9950` | `qa/qa-baseline/t6_single.mjs` |
+| `t22_aca_floor.mjs` | `e8b52e06c38a095ac6eea830ac2dd84d` | `qa/t22_aca_floor.mjs` |
+| `t2_engines.mjs` | `9a9ba167634ee29c645830ccdd7d6ca9` | `qa/qa-baseline/t2_engines.mjs` |
+| `t3_roth.mjs` | `2c21b54ee41c6eedbefe28afcb9b85fb` | `qa/qa-baseline/t3_roth.mjs` |
+| `t4_dom.mjs` | `d613beeb5bcd8052640564c1d1ca7646` | `qa/qa-baseline/t4_dom.mjs` |
+| `t5_storage.mjs` | `f02dba0df86514546ae55dd7a90259d6` | `qa/qa-baseline/t5_storage.mjs` |
+| `t6_single.mjs` | `d91ee96d8059f965dedc540510229a35` | `qa/qa-baseline/t6_single.mjs` |
 | `t7_accrual.mjs` | `fd0ab4282e31d8a7e170606c877c28d0` | `qa/t7_accrual.mjs` |
 | `t8_invariant.mjs` | `a9bd015c8b50b54a98d0ed9a4e2afaaf` | `qa/t8_invariant.mjs` |
 | `t9_dom_smoke.mjs` | `080c3edbe5f5479ac488d2f54034de69` | `qa/t9_dom_smoke.mjs` |
 | `runsuite.sh` | `b4996bf35625ceae916df913a3987856` | `qa/runsuite.sh` — **NEW at v5.36** (adopted; parse-only totals runner with the DIED verdict) |
 | `tools_fixture.jsx` | `3602b615b65f09995a9eb1fa17fe4175` | `qa/tools/fixture/fixture.jsx` |
+| `dom_entry_v538.jsx` | `be495ebabf5fc0528ae2c7302f6f3f3e` | `qa/qa-baseline/dom_entry_v538.jsx` — now the PRIOR leg's entry |
+| `dom_entry_v539.jsx` | `05ad80af418566777b8160fd2975f1ad` | `qa/qa-baseline/dom_entry_v539.jsx` — **NEW at v5.39**, the current leg |
+| `gate_v538.mjs` | `585a90322d5a56ec7bed955eb9b5c67a` | `qa/tools/gate_v538.mjs` — committed at v5.38; retire from pool at next refresh if desired |
+| `VERIFY.sh` | `d6c31723f3610a16cd0d2ae2f1931a68` | `VERIFY.sh` (repo root) — row added 2026-08-17; its absence here is how the v5.36→v5.37 pool drift stayed invisible (scope v5.38 §0) |
+| `SCOPE_v5_38_aca_sale_gain_tax.md` | `77bda5bbce1e9bb3008566b57350aff1` | *(v5.38-prep, not yet committed — repo `docs/` at ship)* |
+| `DERIVATION_v5_38_step1.md` | `6e6b2794fba1c1a7623720a442edfa02` | *(v5.38-prep, not yet committed — repo `docs/` at ship)* |
+| `sim_ledger.mjs` | `a8d275a4ea7325a5500491f4b6b25058` | *(v5.38-prep, not yet committed — repo `qa/tools/` at ship)* |
+| `validate.mjs` | `5e18e78e494c831a1a01d3623bbd43e9` | *(v5.38-prep, not yet committed — repo `qa/tools/` at ship)* |
+| `case1_detail.mjs` | `0d94612058e013a00dcbcb2896254536` | *(v5.38-prep, not yet committed — repo `qa/tools/` at ship)* |
+| `project.mjs` | `cf964df972be31b133d0630bcbf2d4c7` | *(v5.38-prep, not yet committed — repo `qa/tools/` at ship)* |
 
 `probe_classify.mjs` was removed from the pool at v5.30 and now lives only in the repo at
 `qa/tools/probe_classify.mjs`.
+
+The v5.38-prep files were committed to the repo at the v5.38 ship. The pool still carries
+copies of the scope, derivation memo, and the five derivation instruments — harmless duplicates
+of `docs/` and `qa/tools/`, listed above with their true hashes; retire them (rows deleted in
+the same edit) whenever the maintainer chooses.
 
 ⚠ **The repo's copy of THIS FILE was one release stale through v5.30** — the committed
 `PROJECT_KNOWLEDGE_INDEX.md` still named v5.29 as current and carried no §A2 table at all, because
@@ -102,9 +121,24 @@ destinations from v5.31 forward.
 
 | Field | Value |
 |---|---|
-| Version | **v5.36** |
-| Source file in knowledge | `DangerClose-v5_36.jsx` |
-| Source md5 | `b7396c1c14861dc149b71e8edb1a00d5` |
+| Version | **v5.38** |
+| Source file in knowledge | `DangerClose-v5_38.jsx` |
+| Source md5 | `b8d12481b55cd2ed05c6c6f14e2f41d9` |
+
+> **Rolled 2026-08-18 (v5.39 ship).** Both build tables and the §A2 hash rows were rolled together
+> in one pass, and this file was searched end-to-end for the outgoing version string before the edit
+> was considered done. Verified against a fresh clone of the committed tree, not against session state.
+>
+> **History of this table going stale — read before the next roll.** At the v5.38 ship it was left
+> reading v5.36 while the pool held v5.37 (sixth instance of "roll the whole file or none of it",
+> E-14/E-18). It was corrected earlier on 2026-08-18, and then at the v5.39 ship **it went stale again
+> in the same way**: the pool files were rotated correctly and this file was not touched, leaving the
+> Prior build row pointing at `DangerClose-v5_37.jsx` — a file the rotation had just removed, so the
+> row named something that did not exist. Seventh instance.
+>
+> **The pattern is now unambiguous: rotating pool files and rolling this manifest are two separate
+> acts, and the second is the one that gets skipped.** Treat the ship as incomplete until
+> `grep -c "v5\.<outgoing>" PROJECT_KNOWLEDGE_INDEX.md` returns only the intended historical hits.
 
 This is the immediately-prior shipped release. The regression suite diffs current against it.
 It exists in knowledge ONLY as that comparison baseline. When the next release ships, it rolls
@@ -171,7 +205,14 @@ These are refreshed in place when they change; git holds their history.
 
 ## Audit findings and scopes (self-versioned by filename)
 
-**v5.36 rows (this refresh):**
+**v5.39 rows (this refresh):**
+
+| File | What it is | Status |
+|---|---|---|
+| `STATUS_v5_39_shipped.md` | The v5.39 ship record — full verification chain (tested source == shipped source, rebuild reproducibility, parity 9/9), per-suite totals parsed from output, the negative control for the new extinction assertion, **and §5, four errors made during the build, recorded plainly** | **current — the authoritative v5.39 record** |
+| ~~`SCOPE_FIX_docs_v5_39.md`~~ *(retire when convenient)* | Governing scope for the docs-only release. §1 re-verified every premise against the decoded runtime bytes rather than trusting the audit; §5 carried decisions D-1…D-8, all resolved by Steve as recommended | **FULFILLED at v5.39.** Two of its own figures were wrong and are corrected in the ship record: parity is **9/9** (not 8/8), and the version-bump tax spans version ladders in **six** suites plus ~25 feature gates (not two sites) |
+
+**v5.36 rows:**
 
 | File | What it is | Status |
 |---|---|---|
@@ -205,12 +246,13 @@ the current source unless it says so.
 | `SCOPE_DEFECTS_v5_10_1.md` | The v5.11 defect-fix release scope: three pre-existing defects found by the rebuilt t1–t6 baseline — **D1 (P0)** Clear All Data left the API key and skipped the landing return, **D2** ACA cliff solver ignored MAGI from its own funding sale, **D3** phantom Spouse-B card for single filers. All three were present identically in v5.9.2 and v5.10, so none was a regression. **Kept as the worked example** of the defect-pin → fix → flip cycle, and of a scope with an enforceable out-of-scope boundary | fulfilled (all three shipped at v5.10.1); retained for reference, not retirement |
 | `AUDIT_2D_BREAKEVEN_v5_28.md` | Sub-phase 2D — Roth break-even + account completeness (27 checks) against v5.28 | complete |
 | `AUDIT_2E_STATE_AND_PHASE2_ROLLUP.md` | Sub-phase 2E — state-tax module (21 checks) **and the Phase 2 roll-up**. The document a Phase 3+ session must read first: it names what is already verified and therefore not a finding | complete — **authoritative for Phase 2** |
-| `AUDIT_DOCS_HTML_v5_27.md` | Audit of the Field Manual against shipped v5.27 behaviour. Records that the **glossary, §10 API-key material and §14 FAQ were NOT audited** — that ground is Section F | complete, with the stated gap |
+| `AUDIT_DOCS_HTML_v5_27.md` | Audit of the Field Manual against shipped v5.27 behaviour. Records that the **glossary, §10 API-key material and §14 FAQ were NOT audited** — that ground is Section F (**now covered — see `UsabilityFlaws.md` Part D**). ⚠ **REPO-ONLY: this file is listed here but is NOT in the mounted pool** (confirmed 2026-08-18). Read it from the committed tree at `docs/AUDIT_DOCS_HTML_v5_27.md`. Either add it to the pool at the next refresh or keep this annotation — a row with no file behind it costs a session a hunt | complete, with the stated gap — **gap since closed** |
 | `STATUS_release_a.md` | Release-(a) status note (taxable-residual consolidation, v5.22) | historical |
 | `STATUS_v5_23_engineD_hoist.md` | Engine D hoist status note (v5.23) | historical |
 | ~~`probe_classify.mjs`~~ | **RESOLVED at v5.30 — removed from knowledge, now versioned.** Committed to the repo at `qa/tools/probe_classify.mjs` with a header recording what it was for. It is a v5.25-era probe from the `otherAccounts` scoping work; **its conclusions have since shipped and are asserted by `t20`**, so its "what would move" output now describes a change that already happened. It asserts nothing and **must never be counted in a release total**. Read `t20` instead. | retired from knowledge |
 | `MissingFeatures.md` | **Section D** of the standing audit (Phase 3) — missing taxation features, priority-ordered, pinned to v5.29. **Partial:** D-1 verified to source; D-2…D-6 assessed; no systematic undisclosed-gap sweep | Section D **incomplete — re-run before the top-five summary** |
 | `ARCHITECTUREIssues.md` | **Section E** of the standing audit (Phase 3) — 13 findings, pinned to v5.29. Highest: jsdom duplicated **9×** (not 8), OBBBA constants outside `TAX_CONSTS` with a 2028 fuse, backup export does not identify the build | Section E **covered** |
+| `UsabilityFlaws.md` | **Section F** of the standing audit (Phase 4) — usability across a large browser window and small-real-estate devices, audited against **v5.38**. 19 findings F-1…F-19, all user-side, **plus the material `AUDIT_DOCS_HTML_v5_27.md` deferred to this section**. ⚠ §A carries an **errata owning two of the audit's own errors** (an F-8 static-arithmetic overreach, and a retracted F-2 "correction" that was a harness artifact) — read it before citing F-2 or F-8. §G records a **headless-Chromium harness recipe** (npm-bundled binary, no local install) and the disclaimer-gate scroll-lock trap that silently invalidates naive runs. **NOTE: the document text still reads as if nothing has shipped — it predates v5.39 and was not rewritten.** Use the status column here for what is actually open | **PARTIALLY CLOSED at v5.39.** Fixed: F-10, F-11, F-12, F-13, F-14, F-15, F-17, F-18, F-19 (F-19 was found while verifying F-10 and was the release's highest-value item). **Still open:** F-1…F-9 (small-screen layout, contrast, touch targets, tooltips, input modes, chart resize) — now **disclosed** in Field Manual §13 but **not fixed**; and F-16 (glossary ASCII sort, NIT). The mechanics release for F-2/F-6/F-8 is identified but unscoped. The two-paragraph top-five summary remains **DEFERRED** — it requires Sections C (2D break-even half) and D (gap sweep) closed first |
 | `AUDIT_PHASE3_ROLLUP.md` | Phase 3 roll-up (Sections D + E) | current |
 | `SCOPE_FIX_otherAccounts_tax_treatment_v5_21.md` | **REVISION 2.** Governing scope for the three-release `otherAccounts` plan — (a) v5.22, (b) v5.24, (c) v5.26. §1 records three corrections to its own premise; §7 carries Steve's resolved decisions D-1…D-7 | **FULFILLED (all three shipped) — RESTORED to knowledge 2026-08-12 and RETAINED DELIBERATELY.** ⚠ Do **not** retire: `qa/t19_engineD_exact.mjs` L61 cites it as its governing scope |
 | `SCOPE_ENGINE_D_MAGI_v5_24.md` | Release (b). §1 corrects the carried-forward premise (adding `drawFromTaxable` to `magi` would have been a **defect**, not a fix); §8 is the correction owed to `t19`'s B-2 pin. §8 also warns the finding **"is unusually good at being restated wrongly"** and counts three prior wrong statements | **FULFILLED at v5.24 — RESTORED 2026-08-12 and RETAINED DELIBERATELY.** ⚠ Do **not** retire: `t19` L96 is a **stop-instruction** telling a session to read its §1 before touching `magi` |
@@ -271,13 +313,31 @@ was executed on the top tables and not on the body. **Roll the whole file or non
   note so they survive the retirement.
 - ~~`SESSION_BRIEF_v5_31_BUILD.md`~~ — **RETIRE with the scope it paired with.**
 
-**Active scopes after this refresh: NONE.** v5.36 shipped on 2026-08-16; its scope is retired with it (outcomes in `STATUS_v5_36_shipped.md`). The next release needs a scope
-written before it is built (project instructions, *Scope before build*).
+**Active scopes after this refresh: NONE.** v5.39 shipped on 2026-08-18; `SCOPE_FIX_docs_v5_39.md` is
+fulfilled and retires with it (outcomes in `STATUS_v5_39_shipped.md`). The next release needs a scope
+written before it is built (project instructions, *Scope before build*). ⚠ This line was found reading
+"v5.36 shipped on 2026-08-16" at the v5.39 refresh — **two releases stale**, the same
+roll-the-whole-file failure as the build tables. It is a third place a version lives.
+
+**The nearest candidate — identified, not scoped.** The small-screen mechanics release: **F-2** and
+**F-8** (wrap the four fixed-pixel grids in the `overflowX:auto` idiom five other tables already use)
+and **F-6** (`inputMode="decimal"` on money fields). All are render-code string edits with no engine
+change, and v5.39's §13 disclosure means the app currently *documents* these flaws rather than fixing
+them. F-8 became cheap when measurement showed it needs the same wrapper as F-2, not a layout rewrite.
 
 **The open work is tracked as findings, not scopes:** `ARCHITECTUREIssues.md` (Section E — six post-audit entries E-15…E-20 were added at v5.36 and **E-16 was closed the same day, in-release**; among the open items **E-6**, **E-14/E-18** (the hash-table principle, now executed at session close and packaging) and **E-15** — the ordinary-growth omission, optimistic, its own release — lead) and
 `MissingFeatures.md` (Section D — **D-2**, unrealized capital gains on ordinary drawdown, is the ranked
 top item and the one that points the optimistic way). Section D still owes a systematic
 undisclosed-gap sweep, which the Phase 3 rollup says Phase 4 should wait for.
+**Section F ran anyway, deliberately and with that dependency disclosed** — `UsabilityFlaws.md`
+(audited against v5.38) covers the usability ground and closed the `AUDIT_DOCS_HTML_v5_27.md` gap.
+**Its documentation half shipped as v5.39**; F-11 (the callout broken by over-escaping, invisible to
+`t4` because every docs assertion read text and only the markup was wrong) is fixed and now has an
+extinction assertion. Its two-paragraph top-five summary is still **withheld**, because Section D's
+sweep and Section C's 2D break-even half remain open. That summary is the work of the session that
+closes those two. Still open from Section F: **F-2/F-8/F-6** (mechanical wrapper and input-mode
+fixes) and **F-1/F-4**
+(the small-screen and contrast questions, which are product-direction decisions for Steve, not fixes).
 
 Releases (a), (b) and (c) of the `otherAccounts` plan
 have ALL shipped — (a) v5.22, (b) v5.24 re-scoped as disclosure-only, and **(c) fold-and-classify
