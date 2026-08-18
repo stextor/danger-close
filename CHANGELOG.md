@@ -1,5 +1,88 @@
 # Changelog
 
+## v5.39 — Field Manual correctness: a callout that never rendered, a table that lost a column, and six undocumented skins, 2026-08-18
+
+A documentation-only release. **No engine, constant, or modeling change** — the Monte Carlo parity
+guardrail runs 9/9 with zero divergence across the v5.38 → v5.39 boundary, which is the proof.
+Every finding below came from a usability audit of v5.38 and is a defect in what the app *says*,
+not what it computes.
+
+**The callout that never rendered.** In §13 of the Field Manual, one "In plain English" callout was
+escaped one level too deep inside the `DOCS_HTML` string literal, so the HTML the iframe actually
+received carried literal backslashes in its attributes: `class=\"plain\"` instead of `class="plain"`.
+The class never applied and the callout rendered as unstyled body text. Nine of the ten callouts
+were correct; this one was not, and it has been wrong since at least v5.37. The test suite could not
+see it because every documentation assertion read *text*, and the text was fine — only the markup
+was broken. A new assertion now reads the markup: it fails if **any** attribute in the runtime
+manual carries a literal backslash. It was negative-controlled — re-introducing the defect fires
+three assertions.
+
+**The FAQ table that lost a column.** §14's table is Symptom / Likely cause / Fix, and its first
+row ("Will Social Security run out?") shipped with only two cells, so the browser rendered a short
+row. The answer is now split into a cause and a fix. The suite asserts all 14 rows are uniform
+rather than pinning that one row, since a per-row pin would not catch the next one.
+
+**Six undocumented skins — including all three built for accessibility.** The app ships 13 display
+themes. The Field Manual described "Seven color palettes" and the in-app Skins tab named 11. The six
+the manual omitted were High Contrast Light, High Contrast Dark, Midnight Blue, Colorblind-Safe
+Light, Report and Quiet Dark. Three of those are the palettes built for legibility rather than
+looks, which matters: the app's smallest text sits below the WCAG AA contrast threshold, and the
+manual was hiding the app's own answer to that. Both descriptions now match the registry, the three
+accessibility themes are named explicitly, and the **UI SIZE** control (100/115/130/150%) is
+documented for the first time — with the honest caveat that it scales the whole layout, so on a
+narrow screen it makes wide tables need horizontal scrolling sooner, not later.
+
+**A new limitation disclosed, not fixed.** §13 now states plainly that the app is designed for a
+desktop browser: on a narrow screen the tab strip wraps heavily, wide tables require horizontal
+scrolling, and the smallest text is below AA contrast. Simple Mode, UI SIZE and the high-contrast
+skins improve it; a phone remains a compromised experience. **This release does not fix any of
+that** — it stops the manual being silent about it.
+
+**Smaller corrections.** The manual contradicted itself on tab count (the hero strip said 26, a
+figure said "25 TABS", §05 said "feeling like 25") — now 26 throughout. The TCJA glossary entry
+still said individual provisions "expire after 2025 unless extended", which OBBBA superseded and
+which the same manual models in §13. The Success Rate entry hardcoded three thresholds where the
+engine uses five; it now describes the rule instead of listing values, so it cannot drift again.
+§07 claimed the manual was "printable to PDF from the toolbar" — no such control exists; the text
+now matches what the toolbar actually says. And "ACA Premium Subsidy" was presented as a tab, though
+no ACA tab exists; the entry now names the Roth tab as its home.
+
+### Tests
+
+Full suite green on both legs, totals parsed from suite output.
+
+| Suite | v5.39 | v5.38 (prior leg) |
+|---|---|---|
+| t1 units & statics | 94 | 94 |
+| t2 engines | 18 | 18 |
+| t3 Roth | 36 | 36 |
+| t4 DOM tab-walk | **228** | 213 |
+| t5 storage | 58 | 58 |
+| t6 single | 21 | 21 |
+| **baseline** | **455** | **440** |
+
+Feature suites (v5.39): t7 41 · t8 38 · t9 14 · t10 163 · t11 40 · t12 23 · t13 42 · t14 44 ·
+t15 11 · t16 24 · t17 74 · t18 67 · t19 65 · t20 100 · t21 50 · t22 85 = **881**.
+**Total: 1,336 checks.** MC parity v5.38 → v5.39: **9/9, no divergence**. Built-file smoke: 16/16.
+
+t4 gained **15 checks**: the over-escaping extinction assertion and its prior-leg inverse, the
+callout-class counts on both legs, and an extinction pair for each corrected string (tab count,
+skin count, TCJA, Success Rate, PDF claim, ACA entry, FAQ uniformity, plus presence checks for the
+accessibility skins, UI SIZE, and the desktop disclosure).
+
+### Limitations this release does not address
+
+Disclosed rather than implied complete. The small-screen problems named in the new §13 paragraph are
+**documented, not fixed**: wide fixed-pixel tables still overflow a phone viewport and require
+horizontal panning, the 26-tab strip still wraps to seven rows of sub-target-size buttons at 380px,
+and the smallest text still computes 3.88:1 against the background where AA requires 4.5:1. The
+Field Manual's remaining glossary terms were checked for internal consistency and agreement with the
+app, not re-derived against primary tax sources. The version-tag ladders in the test suites remain
+per-release manual edits.
+
+
+**Provenance:** v5.39 · source `src/DangerClose.jsx` md5 `7070018f2699503dfac4ca8e0e1b2feb` · built `index.html` md5 `0563e2f6db79c19b4729bec6e09a458a` · prior v5.38 `b8d12481b55cd2ed05c6c6f14e2f41d9`
+
 ## v5.38 — the ACA-premium sale's gain is taxed, and the IRMAA lookback sees it, 2026-08-17
 
 Since v5.34, when a Roth-conversion strategy forfeits ACA subsidy, the engine pays the extra
