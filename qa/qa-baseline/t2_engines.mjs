@@ -64,6 +64,13 @@ if (MODE === "compare") {
   const INTENDED_DIFFS = {
     "v513→v514": ["roth", "rothCurrentEstate"],
     "v533→v534": ["roth", "rothAca"],
+    // v5.38 (scope + derivation memo, 2026-08-17): the ACA-premium sale's gain is taxed and
+    // enters the IRMAA lookback. Only the ACA-guardrail fingerprint may move — its household
+    // runs bracket-fill strategies whose sale gains sit in the 15% band. `roth` and
+    // `rothCurrentEstate` (acaPremium 0 — no ACA code runs) and all three MC fingerprints
+    // must stay byte-identical: that identity IS the parity witness this release waited
+    // two releases for (v5.36 scope decision 5).
+    "v537→v538": ["rothAca"],
   };
   const expectDiff = new Set(INTENDED_DIFFS[`${PRIOR}→${CUR}`] || []);
   for (const key of Object.keys(a)) {
