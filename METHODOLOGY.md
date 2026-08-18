@@ -244,10 +244,18 @@ retirement and each spouse's 65th birthday.
   conversion is already pinned to 0 or to the available headroom, which the clamp cannot
   change because the estimated gain is never negative.
 
-  **Disclosed, not fixed:** the subsidy-replacement sale's gain enters ACA MAGI but is
-  **not taxed**, where the funding sale's gain is. That asymmetry is optimistic — it
-  understates tax in bridge years with a large subsidy loss — and is stated here rather
-  than left silent.
+  **Fixed at v5.38** (previously "disclosed, not fixed"): the subsidy-replacement sale is
+  now treated like the funding sale end to end. The sale grosses up fixed-point for the
+  long-term capital-gains tax its own gain owes (gains stack on the year's ordinary income,
+  dividends, and the funding sale's gain, in that order); the gain's tax is charged; and
+  the gain enters the IRMAA two-year lookback alongside the funding sale's — so a sale at
+  62–63 can surface as a Medicare surcharge at 64–65+. Households whose gains fall inside
+  the 0% long-term bracket see no change even though the gain is realized — measured to be
+  the common case at modest conversion sizes. One asymmetry this release deliberately does
+  **not** address, recorded as its own finding: **neither** sale's gain reaches NIIT or the
+  state-tax module's capital-gains input — only dividend income does. That is optimistic
+  where it binds (large gains on high-MAGI households, or gains in a taxed state), and it
+  is stated here rather than left silent.
 
   The gain share remains one blended figure, now *tracked* rather than fixed at the
   declared value: still no per-lot selection, loss harvesting, or wash-sale logic (out of

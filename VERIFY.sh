@@ -2,6 +2,10 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # Danger Close — release verification · v5.37 (2026-08-16)
 #
+# v5.38 changes: pair and both md5s rolled forward (v537 -> v538); domdiff default
+# re-pointed in the same release. Executable modes matter: run scripts via bash if a
+# pool round-trip stripped +x (found the hard way at v5.38 — a stripped bit made every
+# negative control silently test the clean build).
 # v5.37 changes: pair and both md5s rolled forward (v536 -> v537). The DOM diff's
 # Taxes/IRMAA sections FLIPPED from figure-region divergence to STRICT IDENTITY —
 # v5.37 cannot reach Engines B/C (census: taxOrd is write-only into MAGI), so
@@ -59,17 +63,17 @@
 # Every command below was run and its result recorded in the release notes.
 #
 # Usage:  ./VERIFY.sh /path/to/workdir
-#    workdir must contain:  v536.jsx  v537.jsx  DangerClose.jsx(=v537)  qa/
+#    workdir must contain:  v537.jsx  v538.jsx  DangerClose.jsx(=v538)  qa/
 # ─────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
 ROOT="${1:-$(pwd)}"
 cd "$ROOT"
 
-PRIOR=v536
-CURR=v537
-EXPECT_SRC_MD5=ff4dddcb585e2237e6c6a2643ded2ebb
-EXPECT_BUILT_MD5=50faed9fe934ddeb628b59d00ddb4a3e
+PRIOR=v537
+CURR=v538
+EXPECT_SRC_MD5=b8d12481b55cd2ed05c6c6f14e2f41d9
+EXPECT_BUILT_MD5=d547810a4e2c4beb97008481d7bbbfef
 
 say() { printf "\n\033[1m== %s ==\033[0m\n" "$*"; }
 die() { printf "\n\033[31mFAIL: %s\033[0m\n" "$*" >&2; exit 1; }
