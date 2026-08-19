@@ -12,6 +12,25 @@
 
 ---
 
+> ### ⚠ ERRATA — line citations corrected 2026-08-19
+>
+> **Every `L####` citation into `src/DangerClose.jsx` in this document was originally one line low.**
+> The working copy used for the analysis had the single-line `DOCS_HTML` literal (L3593) deleted so
+> that greps would not dump the Field Manual — a documented technique — but the resulting line
+> numbers were then quoted as though they came from the unmodified file. Everything at or below
+> L3593 was unaffected; everything above it was short by exactly one.
+>
+> **All citations here are now corrected and each was re-resolved against the shipped source**
+> (`7070018f2699503dfac4ca8e0e1b2feb`) by confirming the cited line contains the code it claims.
+> **No finding, figure, or conclusion changes** — the anchors were always the right code, described
+> correctly; only the addresses were wrong.
+>
+> The error is recorded here rather than only in chat, per the project's rule on owning errors in
+> the deliverables. It is the same shape as the failures this audit already documents: a derived
+> artifact mistaken for the primary source. It was caught by re-deriving the anchors from the
+> original file rather than by re-reading the analysis.
+
+
 ## 1. Why a delta sweep, and why now
 
 The v5.31 sweep concluded that the rendered surfaces and the documentation agree. That was **measured
@@ -74,12 +93,12 @@ positive results and do not depend on the method's ceiling.
 **Carried forward from the v5.31 sweep, and it has widened.** Recorded there as a single omission
 (`div_y`), Low, *"one clause, no engine change, candidate for whatever release next opens that file."*
 
-**What.** The IRMAA tab prints (**L9791**, verbatim):
+**What.** The IRMAA tab prints (**L9792**, verbatim):
 
 > *"MAGI here uses the simplified 85%-of-SS assumption plus pension, earned income, RMDs, and
 > conversions."*
 
-Five components. Engine C's MAGI (**L4398**) sums seven:
+Five components. Engine C's MAGI (**L4399**) sums seven:
 
 ```js
 const magi = ssTaxable + pen_y + work_y + rmdTax_y + conv_y + div_y + capGain_y;
@@ -88,11 +107,11 @@ const magi = ssTaxable + pen_y + work_y + rmdTax_y + conv_y + div_y + capGain_y;
 | Component | Named on the tab? |
 |---|---|
 | `ssTaxable`, `pen_y`, `work_y`, `rmdTax_y`, `conv_y` | yes |
-| `div_y` — taxable-sleeve dividends (**L4394**) | **no** — the original S-1 |
-| `capGain_y` — realized capital gains (**L4397**) | **no** — **new since v5.31** |
+| `div_y` — taxable-sleeve dividends (**L4395**) | **no** — the original S-1 |
+| `capGain_y` — realized capital gains (**L4398**) | **no** — **new since v5.31** |
 
 **Why the second omission matters more than the first.** The source comment directly above `capGain_y`
-(**L4395**) reads: *"v5.36: realized capital gains ARE MAGI — Engine D's per-year gain."* Making
+(**L4396**) reads: *"v5.36: realized capital gains ARE MAGI — Engine D's per-year gain."* Making
 realized gains visible to the IRMAA lookback was the **stated purpose** of v5.36 and v5.38. The tab
 whose entire job is explaining IRMAA still tells the user those gains are not in the calculation.
 
@@ -119,14 +138,14 @@ than re-enumerating — an enumeration is a hostage to the next release, which i
 > modeled), so the two engines are consistent here."*
 
 Present tense, uncaveated, inside the v5.24/v5.26-era section on the Engine D `otherAccounts`
-classification. **It is false as of v5.36.** Engine B (**L5095**):
+classification. **It is false as of v5.36.** Engine B (**L5096**):
 
 ```js
 const capGains_y = Math.round(_gainByYr[yr] || 0); // shown as its own column for transparency
 ```
 
-fed from the withdrawal schedule at the call site (**L9426–9433**), which Engine D populates from
-ordinary spending against the taxable sleeve (**L4741–4742**).
+fed from the withdrawal schedule at the call site (**L9427–9433**), which Engine D populates from
+ordinary spending against the taxable sleeve (**L4742–4742**).
 
 **The same document contradicts itself.** A later section — *"Capital gains in the drawdown, and where
 they are taxed (v5.36)"* — states correctly that *through v5.35* the Taxes tab carried a hardcoded $0

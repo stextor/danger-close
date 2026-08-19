@@ -9,6 +9,25 @@
 
 ---
 
+> ### ⚠ ERRATA — line citations corrected 2026-08-19
+>
+> **Every `L####` citation into `src/DangerClose.jsx` in this document was originally one line low.**
+> The working copy used for the analysis had the single-line `DOCS_HTML` literal (L3593) deleted so
+> that greps would not dump the Field Manual — a documented technique — but the resulting line
+> numbers were then quoted as though they came from the unmodified file. Everything at or below
+> L3593 was unaffected; everything above it was short by exactly one.
+>
+> **All citations here are now corrected and each was re-resolved against the shipped source**
+> (`7070018f2699503dfac4ca8e0e1b2feb`) by confirming the cited line contains the code it claims.
+> **No finding, figure, or conclusion changes** — the anchors were always the right code, described
+> correctly; only the addresses were wrong.
+>
+> The error is recorded here rather than only in chat, per the project's rule on owning errors in
+> the deliverables. It is the same shape as the failures this audit already documents: a derived
+> artifact mistaken for the primary source. It was caught by re-deriving the anchors from the
+> original file rather than by re-reading the analysis.
+
+
 ## The summary
 
 Across every phase of this audit the most consequential defect has not been a wrong number — it has
@@ -64,9 +83,9 @@ code probably did** — a lesson the audit learned by getting findings wrong in 
 
 | # | Issue | Where | Direction | Status |
 |---|---|---|---|---|
-| **1** | Disclosures drift off the engines beneath them | `DangerClose.jsx` L9791 vs L4398 (S-1); `METHODOLOGY.md` L537–538 vs L5095 (S-3); `METHODOLOGY.md` L696–699 (D-6) | Understates conservatism; the one instance that overstated it (D-1) is fixed | **OPEN** — S-1, S-3, D-6 |
-| **2** | State schedules → single effective flat rate | `DangerClose.jsx` L1016 ff. state table, L5159 legacy path | **Not uniform — can flatter a plan** | **OPEN** (D-3) |
-| **3** | ACA sub-floor $0 reads as computed | ACA panel L9264, strategy-table flag L9301, Verify assertion L1343 | Both — inverts comparisons across the line | **PARTIAL** (D-8b) — flagged v5.32, discontinuity remains |
+| **1** | Disclosures drift off the engines beneath them | `DangerClose.jsx` L9792 vs L4399 (S-1); `METHODOLOGY.md` L537–538 vs L5096 (S-3); `METHODOLOGY.md` L696–699 (D-6) | Understates conservatism; the one instance that overstated it (D-1) is fixed | **OPEN** — S-1, S-3, D-6 |
+| **2** | State schedules → single effective flat rate | `DangerClose.jsx` L1016 ff. state table, L5160 legacy path | **Not uniform — can flatter a plan** | **OPEN** (D-3) |
+| **3** | ACA sub-floor $0 reads as computed | ACA panel L9265, strategy-table flag L9302, Verify assertion L1343 | Both — inverts comparisons across the line | **PARTIAL** (D-8b) — flagged v5.32, discontinuity remains |
 | **4** | Nine small-screen usability defects | `UsabilityFlaws.md` F-1…F-9 | User-side | **OPEN** — disclosed at v5.39, unfixed |
 | **5** | Verdict instruments and records both fail silently | `ARCHITECTUREIssues.md` E-19 (High), E-20, E-14/E-18 | Creator-side, compounding | **PARTIAL** — `qa/controls.sh` adopted; records repaired 2026-08-18 |
 
@@ -75,8 +94,8 @@ code probably did** — a lesson the audit learned by getting findings wrong in 
 | Finding | Severity as recorded | Closed by | Verified |
 |---|---|---|---|
 | D-1 · OBBBA disclosure false in two places | **High** | disclosures rewritten; constants moved to `OBBBA_CONSTS` L931–937 with P.L. 119-21 §70103 citations | Field Manual and `METHODOLOGY.md` L120 both now accurate |
-| D-2 · No realized gains from ordinary drawdown | Med-High, **optimistic** | **v5.36** | Engine D L4741–4742 → Engine B L5095 → both tax engines L9426–9433, L9709–9712 |
-| C-2C-3 · Post-death RMDs keyed to the deceased spouse | **HIGH, non-conservative** | not attributed to a release in the documents | Engine B L5070 does the spousal rollover; L5077–5080 keys `rmdA`/`rmdB` to each person's own age; `tradBal` survives only as a pooled view |
+| D-2 · No realized gains from ordinary drawdown | Med-High, **optimistic** | **v5.36** | Engine D L4742–4742 → Engine B L5096 → both tax engines L9427–9433, L9710–9712 |
+| C-2C-3 · Post-death RMDs keyed to the deceased spouse | **HIGH, non-conservative** | not attributed to a release in the documents | Engine B L5071 does the spousal rollover; L5078–5080 keys `rmdA`/`rmdB` to each person's own age; `tradBal` survives only as a pooled view |
 
 ### Method and limits
 

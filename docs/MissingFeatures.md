@@ -21,6 +21,25 @@
 
 ## §0.1 · Re-pin record — v5.29 → v5.39, 2026-08-18
 
+> ### ⚠ ERRATA — line citations corrected 2026-08-19
+>
+> **Every `L####` citation into `src/DangerClose.jsx` in this document was originally one line low.**
+> The working copy used for the analysis had the single-line `DOCS_HTML` literal (L3593) deleted so
+> that greps would not dump the Field Manual — a documented technique — but the resulting line
+> numbers were then quoted as though they came from the unmodified file. Everything at or below
+> L3593 was unaffected; everything above it was short by exactly one.
+>
+> **All citations here are now corrected and each was re-resolved against the shipped source**
+> (`7070018f2699503dfac4ca8e0e1b2feb`) by confirming the cited line contains the code it claims.
+> **No finding, figure, or conclusion changes** — the anchors were always the right code, described
+> correctly; only the addresses were wrong.
+>
+> The error is recorded here rather than only in chat, per the project's rule on owning errors in
+> the deliverables. It is the same shape as the failures this audit already documents: a derived
+> artifact mistaken for the primary source. It was caught by re-deriving the anchors from the
+> original file rather than by re-reading the analysis.
+
+
 Every item below was re-checked against **v5.39** (source `7070018f2699503dfac4ca8e0e1b2feb`,
 committed tree `755a4c7`) by locating the engine expression that implements it. Six modelling releases
 shipped in the window: v5.32, v5.34, v5.35, v5.36, v5.37, v5.38.
@@ -85,7 +104,7 @@ argument, not a measured one, and a later session should expect to reorder it.
 >
 > | Part | v5.39 |
 > |---|---|
-> | Engine B still models it | **yes** — `seniorBonus` at L5117–5124, inside `computeTaxPlan` |
+> | Engine B still models it | **yes** — `seniorBonus` at L5118–5124, inside `computeTaxPlan` |
 > | Engine A still does not | **yes** — `seniorBonus` appears at three sites, all in `computeTaxPlan`; the note at L915 states it explicitly |
 > | **(a)** Field Manual disclosure | ✅ **FIXED** — now reads that the deduction *"is modeled on the Taxes tab, but not in the Roth conversion ladder."* Accurate, and it names the divergence |
 > | **(b)** `METHODOLOGY.md` §5 (L120) | ✅ **FIXED** — now states it **IS** modelled, with the phase-out, the MAGI proxy, and a cross-reference to §7 |
@@ -218,18 +237,18 @@ Three separable pieces, and they should not be one release:
 >
 > | Site in v5.39 | What it does |
 > |---|---|
-> | L4741–4742 | Engine D: `_gainShareOfPool` → `_saleFromGain = _spendFromTaxable × _gainShareOfPool` — **ordinary spending from the taxable sleeve realizes gain** |
-> | L5095 | Engine B: `const capGains_y = Math.round(_gainByYr[yr] \|\| 0)` — **no longer `0`** |
-> | L9426–9433 | withdrawal schedule wired into `computeTaxPlan` |
-> | L9709–9712 | withdrawal schedule wired into `computeIrmaaPlan` — so the gains **do** reach MAGI and IRMAA |
-> | L9552, L9609 | rendered as its own column and row |
+> | L4742–4742 | Engine D: `_gainShareOfPool` → `_saleFromGain = _spendFromTaxable × _gainShareOfPool` — **ordinary spending from the taxable sleeve realizes gain** |
+> | L5096 | Engine B: `const capGains_y = Math.round(_gainByYr[yr] \|\| 0)` — **no longer `0`** |
+> | L9427–9433 | withdrawal schedule wired into `computeTaxPlan` |
+> | L9710–9712 | withdrawal schedule wired into `computeIrmaaPlan` — so the gains **do** reach MAGI and IRMAA |
+> | L9553, L9610 | rendered as its own column and row |
 >
 > The surrounding work: **v5.34** built the conversion-funding basis tracker, **v5.37** made ordinary
 > money's growth accrue and be taxed, **v5.38** taxed the ACA-premium sale's gain and fed it to the
 > IRMAA lookback. The "no cost-basis input" blocker named under **Shape** below was solved with the
 > blended-basis approach that section proposed.
 >
-> **One live descendant:** the IRMAA tab's MAGI sentence (L9791) still does not name `capGain_y`,
+> **One live descendant:** the IRMAA tab's MAGI sentence (L9792) still does not name `capGain_y`,
 > so the tab explains IRMAA without mentioning the gains v5.36 added to it. Tracked as **S-1** in
 > `AUDIT_PHASE3_SECTION_D_SWEEP.md`, now widened. Low, user-side, safe-direction.
 
@@ -489,7 +508,7 @@ artifact held constant both ways needed the declined toggle. So the capital-gain
 
 > ⚠ **STALE as of v5.36 — flagged at the 2026-08-18 re-pin.** The sentence above is the v5.32-era
 > position. **v5.36 changed it**: ordinary drawdown now realizes gains by default (Engine D
-> L4741–4742), Engine B's `capGains_y` is no longer 0 (L5095), and both tax engines consume the
+> L4742–4742), Engine B's `capGains_y` is no longer 0 (L5096), and both tax engines consume the
 > schedule. The reasoning in this section — that the ACA work did not unblock the capital-gains
 > default, and that closing D-8b's discontinuity needs the declined toggle — **remains correct and
 > is still the live position on D-8b.** Only the D-2 consequence is out of date.
