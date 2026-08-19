@@ -12,6 +12,36 @@
 
 ---
 
+
+> ## STATUS AT v5.40 — rewritten 2026-08-19
+>
+> **This document's findings text is pinned to v5.38 and describes the app before two releases acted
+> on it.** Rather than re-flow every entry, the current status of each finding is stated here, once,
+> and the entries below are left as the original evidence.
+>
+> | Finding | Status |
+> |---|---|
+> | **F-2** · fixed-pixel grids overflow the phone viewport | ✅ **FIXED v5.40** — both grids wrapped |
+> | **F-6** · money fields raise the alphabetic keyboard | ✅ **FIXED v5.40** — 47 numeric inputs carry `inputMode="decimal"` |
+> | **F-8** · nine-column claiming grids overflow | ✅ **FIXED v5.40** — both grids wrapped |
+> | **F-1, F-3, F-4, F-5, F-7, F-9, F-16** | **DISCLOSED, NOT FIXED** — v5.39 disclosed them in Field Manual §13; the defects remain |
+>
+> **On F-6's count:** the v5.40 scope estimated **28** fields from a label heuristic. Exact
+> enumeration by what each input binds and parses found **47**. The 19 it missed carry no currency
+> symbol in the label — "ALL RETIREMENT ACCOUNTS COMBINED" among them. Free-text fields (names,
+> tickers, notes, the local-LLM URL and model) were deliberately excluded.
+>
+> **What v5.40 did NOT verify.** The fixes are pinned by **source-text** extinction invariants in
+> `t1`, proven to fail against a reverted build. **No device or headless-layout verification was
+> run**, so "fixed" here means the wrapper and the keyboard hint are present in the shipped source —
+> not that the result was measured at 380px. §G's headless recipe remains the way to close that gap,
+> and the disclaimer gate must be dismissed properly (tick `#dc-dg-check`, click `#dc-dg-accept`) or
+> a scroll-lock artifact masquerades as an app defect, as it did once already.
+>
+> **§A's errata still stand and are still worth reading** — an F-8 static-arithmetic overreach and an
+> F-2 "correction" that was a harness artifact. Both were inference stated with more confidence than
+> it had earned, which is this document's recurring failure mode rather than carelessness.
+
 ## A. Method — and its honest limits
 
 Everything below was established by **direct inspection of the v5.38 source and byte-level checks of the runtime HTML the source produces** (the `DOCS_HTML` string was decoded from its JS literal to the exact bytes the iframe receives; CSS/grid arithmetic and WCAG contrast ratios were computed, not eyeballed).
