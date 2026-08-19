@@ -1,5 +1,59 @@
 # Changelog
 
+## v5.40 — four disclosures that had drifted off their engines, and the phone-sized fixes, 2026-08-19
+
+Nothing in this release changes a computed figure. Every item corrects a sentence that no longer
+matched the code beneath it, or changes how a control behaves on a small screen.
+
+**S-1 · the IRMAA tab described MAGI as five components while Engine C summed seven.** The tab named
+the 85%-of-SS assumption, pension, earned income, RMDs and conversions. Engine C also sums taxable-sleeve
+dividends and, since v5.36, realized capital gains — the latter added specifically so the IRMAA lookback
+would see drawdown gains. The tab explaining IRMAA was telling users those gains were not in the
+calculation. The replacement is deliberately **non-exhaustive** rather than a longer list: the previous
+sentence was an enumeration, and an enumeration is falsified by the next release that adds a term, which
+is exactly how this defect arrived twice in the same sentence. Direction was safe throughout — the app
+counted the income, so no surcharge was ever understated; only the explanation was incomplete.
+
+**S-3 · METHODOLOGY stated in the present tense that the Taxes engine defaults realized gains to $0.**
+False since v5.36, and contradicted by a later section of the same document, so the reference described
+two incompatible models with no cue which governed. The passage is now date-stamped as historical rather
+than struck, because the classification argument around it is still correct.
+
+**D-6 · the SSA-44 disclosure covered only a surviving spouse.** Social Security's life-changing-event
+redetermination was disclosed for the death-of-spouse trigger. The enumerated events also include work
+stoppage — the one that applies to most newly retired households, which is this app's entire audience.
+Now named alongside the others. Conservative either way: the model charges IRMAA a household may
+successfully appeal away.
+
+**F-2 / F-8 · four wide grids had no scroll wrapper.** The SS draw-comparison grid, the IRMAA
+year-by-year table and the two nine-column claiming grids sat outside every `overflowX` wrapper and
+overflowed a phone viewport, so reaching the right-hand columns panned the whole page. Each is now in
+its own scroll frame. These grids overflowed rather than compressed, so no data was ever unreachable —
+the cost was navigational.
+
+**F-6 · money fields raised the alphabetic keyboard.** 47 numeric inputs were bare text fields and now
+carry `inputMode="decimal"`, which is a keyboard hint only and does not change parsing, so existing
+stored values are unaffected. The scope estimated 28 from a label heuristic; exact enumeration by what
+each input binds and parses found **47**. The 19 it missed were fields whose labels carry no currency
+symbol — "ALL RETIREMENT ACCOUNTS COMBINED" among them. Free-text fields (names, tickers, notes, the
+local-LLM URL and model) were deliberately left alone.
+
+**Tests: 1,344 passed, 0 failed across 22 suites**, plus 16 built-artifact smoke checks.
+t1 102 (+8) · t2 18 · t3 36 · t4 228 · t5 58 · t6 21 · t7 41 · t8 38 · t9 14 · t10 163 · t11 40 ·
+t12 23 · t13 42 · t14 44 · t15 11 · t16 24 · t17 74 · t18 67 · t19 65 · t20 100 · t21 50 · t22 85.
+
+The eight new checks in t1 are **extinction invariants** pinning the three fixed defect classes, and
+each was **proven to fail against a deliberately reverted build** before being accepted — reverting the
+S-1 sentence fails 4, removing one wrapper fails 1, stripping five `inputMode` attributes fails 1.
+This matters because the suite has previously recorded probes that died silently and read as green.
+
+**Limitations and what this release does not do.** The extinction checks are **source-text** assertions:
+they prove the fix is present in the source, not that it renders correctly on a device. The structural
+assertion tying the IRMAA sentence to Engine C's `magi` expression, and real small-screen layout
+verification, are both still outstanding. F-1, F-3, F-4, F-5, F-7, F-9 and F-16 remain **disclosed but
+unfixed**. D-3 — progressive state schedules approximated by a flat effective rate, and the one open
+simplification that is not reliably conservative — is untouched and is now the top-ranked open gap.
+
 ## v5.39 — Field Manual correctness: a callout that never rendered, a table that lost a column, and six undocumented skins, 2026-08-18
 
 A documentation-only release. **No engine, constant, or modeling change** — the Monte Carlo parity

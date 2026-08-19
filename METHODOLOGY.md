@@ -534,8 +534,12 @@ and says so.
 Two related notes, so the limitation is not read wider than it is. First, Engine D's MAGI expression
 correctly **excludes** taxable-brokerage withdrawals: such a draw is mostly return of basis, and only
 realized gain is income. Adding the whole draw to MAGI would tax returned principal at ordinary
-rates. Engine B applies the same simplification (realized capital gains default to $0 unless a sale
-is modeled), so the two engines are consistent here. The defect is the classification feeding MAGI,
+rates. Engine B applied the same simplification **through v5.35** (realized capital gains defaulted to $0
+unless a sale was modeled), so the two engines were consistent here. **From v5.36 that is no longer
+true and this parenthetical is historical:** the drawdown realizes gains on ordinary spending from
+the taxable sleeve, Engine B consumes them, and both the Taxes tab and the IRMAA lookback see them —
+see "Capital gains in the drawdown, and where they are taxed (v5.36)" below. The classification
+argument in this section is unaffected and still current. The defect is the classification feeding MAGI,
 not MAGI itself. Second, the phrase "taxable (non-retirement) sleeve" still appears on the Taxes tab
 and in code comments; there it describes a different quantity — the part of a bucketed position that
 is neither Roth nor Traditional — and is accurate.
@@ -693,9 +697,11 @@ Three details of the correction are worth stating, because they are not all keye
   person even if both spouses were alive in the income year. The tab discloses this beneath the
   year-by-year table rather than leaving the apparent inconsistency unexplained.
 
-**A limitation that remains.** Social Security's life-changing-event redetermination — which lets a
-survivor ask SSA to reassess IRMAA on more current income after a spouse's death, rather than on
-the two-year-old joint return — is not modeled. A household that files one may pay less than the
+**A limitation that remains.** Social Security's life-changing-event redetermination (form SSA-44) — which lets a household ask
+SSA to reassess IRMAA on more current income rather than on the two-year-old return — is not
+modeled. The enumerated events include **work stoppage or reduction, the trigger that applies to
+most newly retired households**, as well as death of a spouse, marriage, divorce and loss of a
+pension. A household that files one may pay less than the
 model projects, so the omission is conservative.
 
 **Where the engines still legitimately differ.** Engines B (Taxes) and C (IRMAA) hold Social
