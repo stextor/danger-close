@@ -9,20 +9,43 @@
 | Date | 2026-08-12 |
 | Status | **Partial — see §0.** D-1 is verified to source. D-2 onward are assessed, not all independently verified. |
 
-> ## ⚠ THIS DOCUMENT IS PINNED TO v5.29 AND HAS BEEN OVERTAKEN (banner added 2026-08-18)
->
-> **`D-2` — the top-ranked item — was CLOSED at v5.36.** Do not cite it as open. See the correction
-> box at D-2 itself.
+> ## RE-PINNED TO v5.39 — 2026-08-18
 >
 > **This document is the Section D *findings inventory*. It is NOT the Section D sweep.** The
-> systematic undisclosed-gap sweep was run separately against v5.31 and is complete — see
-> `AUDIT_PHASE3_SECTION_D_SWEEP.md`. This document's "Partial" status above has been read as
-> "Section D was never swept" by several sessions; that reading is wrong and cost most of a session
-> on 2026-08-18.
+> systematic undisclosed-gap sweep was run separately against v5.31 (`AUDIT_PHASE3_SECTION_D_SWEEP.md`)
+> and re-run over the v5.31 → v5.39 delta (`AUDIT_SECTION_D_DELTA_v5_31_to_v5_39.md`). This document's
+> "Partial" status above has been read as "Section D was never swept" by several sessions; that
+> reading is wrong and cost most of a session on 2026-08-18.
 >
-> Everything below is accurate **as of v5.29**. Six modelling releases have shipped since
-> (v5.32, v5.34–v5.38). Re-pin at the next Section D pass; until then, verify any item against
-> current source before acting on it.
+> **See §0.1 for the re-pin record** — what changed, what held, and what is newly wrong.
+
+## §0.1 · Re-pin record — v5.29 → v5.39, 2026-08-18
+
+Every item below was re-checked against **v5.39** (source `7070018f2699503dfac4ca8e0e1b2feb`,
+committed tree `755a4c7`) by locating the engine expression that implements it. Six modelling releases
+shipped in the window: v5.32, v5.34, v5.35, v5.36, v5.37, v5.38.
+
+| Item | Status at re-pin |
+|---|---|
+| **D-1** | ✅ **CLOSED.** Both false disclosures corrected. See the box at D-1 |
+| **D-2** | ✅ **CLOSED at v5.36.** See the box at D-2 |
+| **D-3** | unchanged — mechanism and disclosure both still as described |
+| **D-4** | unchanged — `METHODOLOGY.md` L120 still discloses it |
+| **D-5** | unchanged — disclosure still at `TAX_CONSTS.QCD_LIMIT` (now L850) |
+| **D-6** | ⚠ **CORRECTED — the v5.31 sweep's resolution was too broad.** See the box at D-6 |
+| **D-7** | unchanged — state estate/inheritance tax still **unassessed** |
+| **D-8** | accurate as built, but its closing *"Consequence for D-2"* paragraph is **stale** — flagged in place |
+
+**Two of eight items closed; one newly qualified; one paragraph stale.** The pattern is worth naming:
+**both closures happened silently.** D-1 was fixed by some release that corrected the disclosures, and
+D-2 by v5.36, and in neither case was this document touched — which is why it sat for four releases
+presenting a closed item as the top-ranked open gap.
+
+**What this re-pin did NOT do.** Claims were compared to **engine expressions at named lines**, not
+measured by driving the engines. That is stronger than reading code and judging it plausible, and
+weaker than the arithmetic standard Section C holds to. No figure below was recomputed. The **priority
+rankings were not re-derived** — with D-1 and D-2 both closed, the ranking below is a v5.29 ordering
+with its top two struck out, not a fresh one.
 
 Each item is priced against the product boundary test in the project instructions: **does the
 situation occur for a mainstream couple within sight of retirement, and does the feature make an
@@ -54,6 +77,31 @@ argument, not a measured one, and a later session should expect to reorder it.
 ---
 
 ## D-1 · The OBBBA senior bonus deduction is modelled by the Taxes engine, absent from the Roth engine, and declared absent by both disclosures
+
+> ### CLOSED — verified against v5.39 source on 2026-08-18
+>
+> **All three problems are resolved.** The mechanism split (a) is unchanged and correct; both false
+> disclosures (b) have been rewritten.
+>
+> | Part | v5.39 |
+> |---|---|
+> | Engine B still models it | **yes** — `seniorBonus` at L5117–5124, inside `computeTaxPlan` |
+> | Engine A still does not | **yes** — `seniorBonus` appears at three sites, all in `computeTaxPlan`; the note at L915 states it explicitly |
+> | **(a)** Field Manual disclosure | ✅ **FIXED** — now reads that the deduction *"is modeled on the Taxes tab, but not in the Roth conversion ladder."* Accurate, and it names the divergence |
+> | **(b)** `METHODOLOGY.md` §5 (L120) | ✅ **FIXED** — now states it **IS** modelled, with the phase-out, the MAGI proxy, and a cross-reference to §7 |
+>
+> **The statutory parameters are now guarded.** The four figures moved into a named `OBBBA_CONSTS`
+> block (L931–937) — `$6,000` per person, `$75,000` single / `$150,000` MFJ thresholds, `6%`
+> phase-out, `2028` sunset — each carrying its citation to **P.L. 119-21 §70103**, and
+> `METHODOLOGY.md` L442 records that the Verify tab checks them on every load. Through v5.30 they
+> were inline literals no staleness mechanism could see. *(Constants checked against the statute;
+> the Verify tab's assertion was not executed.)*
+>
+> **One change the original entry could not have anticipated.** The phase-out's MAGI proxy is
+> `grossOrdinary + qdcg_y`, and since v5.36 `qdcg_y = capGains_y + div_y` — so realized drawdown
+> gains now push the deduction toward phase-out. The deduction therefore shrinks slightly faster
+> than at v5.29. Direction is **conservative**, and `METHODOLOGY.md` L120 describes the proxy
+> correctly including gains.
 
 **Priority: 1 — highest.** This is the only item here verified end-to-end, and it is three problems
 wearing one coat.
@@ -280,6 +328,37 @@ RMD), which is the part that matters for mainstream charitable givers.
 
 ## D-6 · IRMAA life-changing-event relief (SSA-44) appears to be unmodelled and undisclosed
 
+> ### ⚠ CORRECTED 2026-08-18 — the v5.31 sweep resolved this too broadly
+>
+> `AUDIT_PHASE3_SECTION_D_SWEEP.md` §3.3 reclassified D-6 as **"disclosed, not a gap"**, on the
+> grounds that `METHODOLOGY.md` states the life-changing-event reassessment is not modelled. **That
+> disclosure exists, and it is narrower than this item.** `METHODOLOGY.md` L696–699:
+>
+> > *"Social Security's life-changing-event redetermination — which lets a **survivor** ask SSA to
+> > reassess IRMAA on more current income **after a spouse's death**, rather than on the two-year-old
+> > joint return — is not modeled."*
+>
+> The mechanism is named generically in the opening clause, but the sentence's subject and only
+> illustration is the **death-of-spouse** trigger. **This item is about work stoppage** — which the
+> entry below calls *"the single most common trigger for this form"* and the one that *"applies
+> precisely to the population this app is built for."*
+>
+> A newly-retired, non-widowed household reading that sentence learns that a survivor can appeal.
+> It does not learn that **retiring** is itself an enumerated life-changing event on SSA-44.
+>
+> **Verified at v5.39:** `SSA-44`, `life-changing` and `work stoppage` return **zero hits** in the
+> source render tree and **zero** in the decoded Field Manual. The disclosure exists in exactly one
+> place, `METHODOLOGY.md`, in the survivor form.
+>
+> **Reclassify as: disclosed for the death-of-spouse trigger, undisclosed for work stoppage.**
+> Severity stays **Low** — direction is conservative either way, since the model charges IRMAA the
+> household may successfully appeal away. The fix is a clause, not a feature: naming work stoppage
+> alongside the survivor case.
+>
+> *This is a correction to a sweep finding, not to the entry below, which was right to flag D-6 for
+> verification. The sweep's own rule — "'Undisclosed' requires looking everywhere" — has a converse
+> it did not state: **finding one disclosure does not establish that the gap is disclosed.***
+
 **Priority: unranked — flagged for verification before it is trusted.**
 
 **What.** IRMAA uses a two-year MAGI lookback, which the app models faithfully (Phase 2B verified
@@ -327,6 +406,9 @@ person per tier) and the remedy is a form. **Exposure:** user-side.
 
 | # | Item | Disclosed? | Direction of error | Boundary test | Severity |
 |---|---|---|---|---|---|
+> **⚠ This table is the v5.29 ordering. It is superseded by the v5.39 column below** and is kept
+> only so the original ranking is legible. Do not cite it on its own.
+
 | **D-1** | OBBBA bonus: modelled in Engine B, absent from Engine A, declared absent by Field Manual §13 and METHODOLOGY §5 (§7 is correct) | **Disclosure is FALSE** | Claims conservative; is not | **Build** | **High** |
 | **D-2** | No realized gains from ordinary drawdown | Disclosed | **Optimistic** | **Build** | Med-High |
 | **D-3** | Progressive state schedules → effective flat rate | Disclosed | **Not uniform** | Build, staged | Medium |
@@ -335,11 +417,24 @@ person per tier) and the remedy is a form. **Exposure:** user-side.
 | **D-6** | IRMAA SSA-44 life-changing-event relief | **Verify first** | Conservative | Build (disclosure) | Low-Med |
 | **D-8** | ACA subsidy below 100% FPL: \$0 that reads as computed, and no floor at all in the enhanced regime | Was disclosed in two places only | **Both** — see entry | **Built (v5.32)** | **ADDRESSED / PARTIALLY** |
 
-**D-1 and D-2 are the two that matter**, and they differ in kind: D-1 is a disclosure that is
-verifiably false today, D-2 is an honestly-disclosed simplification that happens to point the wrong
-way for a tool whose identity is pessimism.
+### Summary at v5.39 — re-pinned 2026-08-18
 
-**No fixes were made in the session that produced this document.**
+| # | Item | Status | Direction | Boundary test | Severity |
+|---|---|---|---|---|---|
+| ~~D-1~~ | OBBBA bonus disclosure | ✅ **CLOSED** — both disclosures fixed, constants Verify-checked | — | — | — |
+| ~~D-2~~ | Realized gains from ordinary drawdown | ✅ **CLOSED at v5.36** — engine + both tax engines + render | — | — | — |
+| **D-3** | Progressive state schedules → effective flat rate | open, unchanged | **Not uniform** | Build, staged | **Medium — now the top-ranked open item** |
+| **D-4** | Itemized deductions not modelled | open, unchanged | Conservative | Minority case | Low-Med |
+| **D-6** | IRMAA SSA-44 relief | **partially disclosed** — survivor trigger yes, work stoppage no | Conservative | Build (one clause) | Low |
+| **D-5** | QCD one-time CRT/CGA election | open, unchanged | Conservative | **Decline** | Very low |
+| **D-7** | State estate / inheritance tax | **unassessed** — still owed | unknown | unassessed | unranked |
+| **D-8** | ACA sub-floor \$0 | **PARTIALLY ADDRESSED (v5.32)** — declined toggle not built | **Both** | Built | see entry |
+
+**With D-1 and D-2 closed, D-3 is the top-ranked open item** — and it is the one simplification here
+that is **not reliably conservative**, so it can flatter a plan. That makes it the natural successor
+to D-2 for a tool whose identity is deliberate pessimism.
+
+**No fixes were made in the session that produced this document, nor in the 2026-08-18 re-pin.**
 
 ---
 
@@ -391,6 +486,13 @@ Sequencing the ACA work first was originally justified by the idea that it would
 realized-capital-gains default. **It does not.** Re-running that direction evidence with the floor
 artifact held constant both ways needed the declined toggle. So the capital-gains default stays at
 0 and **D-2 remains PARTIALLY ADDRESSED** — the capability ships, the default stays conservative.
+
+> ⚠ **STALE as of v5.36 — flagged at the 2026-08-18 re-pin.** The sentence above is the v5.32-era
+> position. **v5.36 changed it**: ordinary drawdown now realizes gains by default (Engine D
+> L4741–4742), Engine B's `capGains_y` is no longer 0 (L5095), and both tax engines consume the
+> schedule. The reasoning in this section — that the ACA work did not unblock the capital-gains
+> default, and that closing D-8b's discontinuity needs the declined toggle — **remains correct and
+> is still the live position on D-8b.** Only the D-2 consequence is out of date.
 That is a coherent outcome, and it is now a decision on the record rather than a discovery at the
 next release. What D-8b does give that release is a principled way to identify which households'
 apparent improvement is this artifact.
