@@ -250,7 +250,7 @@ the current source unless it says so.
 | `STATUS_release_a.md` | Release-(a) status note (taxable-residual consolidation, v5.22) | historical |
 | `STATUS_v5_23_engineD_hoist.md` | Engine D hoist status note (v5.23) | historical |
 | ~~`probe_classify.mjs`~~ | **RESOLVED at v5.30 — removed from knowledge, now versioned.** Committed to the repo at `qa/tools/probe_classify.mjs` with a header recording what it was for. It is a v5.25-era probe from the `otherAccounts` scoping work; **its conclusions have since shipped and are asserted by `t20`**, so its "what would move" output now describes a change that already happened. It asserts nothing and **must never be counted in a release total**. Read `t20` instead. | retired from knowledge |
-| `MissingFeatures.md` | **Section D** of the standing audit (Phase 3) — missing taxation features, priority-ordered, **pinned to v5.29 and overtaken by four releases**. ⚠ **Its top-ranked item D-2 (ordinary drawdown realizes no capital gains) was CLOSED at v5.36** — the release titled *"the drawdown realizes capital gains, and the tax engines consume them"*. The document still describes `capGains_y = 0`; v5.39 computes it at L5095 from Engine D's schedule (L4741–4742) and wires it into the Taxes (L9426–9433) and IRMAA (L9709–9712) engines. **Do not cite D-2 as open.** Re-pin to current at the next Section D pass | **Section D COMPLETE** — the systematic undisclosed-gap sweep this row previously said was never run **was run at v5.31**; see `AUDIT_PHASE3_SECTION_D_SWEEP.md`. This document is the *findings inventory*, not the sweep, and is **stale, not incomplete** |
+| `MissingFeatures.md` | **Section D** of the standing audit (Phase 3) — missing taxation features, priority-ordered, **pinned to v5.29 and overtaken by four releases**. ⚠ **Its top-ranked item D-2 (ordinary drawdown realizes no capital gains) was CLOSED at v5.36** — the release titled *"the drawdown realizes capital gains, and the tax engines consume them"*. The document still describes `capGains_y = 0`; v5.39 computes it at L5096 from Engine D's schedule (L4742–4742) and wires it into the Taxes (L9427–9433) and IRMAA (L9710–9712) engines. **Do not cite D-2 as open.** Re-pin to current at the next Section D pass | **Section D COMPLETE** — the systematic undisclosed-gap sweep this row previously said was never run **was run at v5.31**; see `AUDIT_PHASE3_SECTION_D_SWEEP.md`. This document is the *findings inventory*, not the sweep, and is **stale, not incomplete** |
 | `ARCHITECTUREIssues.md` | **Section E** of the standing audit (Phase 3) — 13 findings, pinned to v5.29. Highest: jsdom duplicated **9×** (not 8), OBBBA constants outside `TAX_CONSTS` with a 2028 fuse, backup export does not identify the build | Section E **covered** |
 | `UsabilityFlaws.md` | **Section F** of the standing audit (Phase 4) — usability across a large browser window and small-real-estate devices, audited against **v5.38**. 19 findings F-1…F-19, all user-side, **plus the material `AUDIT_DOCS_HTML_v5_27.md` deferred to this section**. ⚠ §A carries an **errata owning two of the audit's own errors** (an F-8 static-arithmetic overreach, and a retracted F-2 "correction" that was a harness artifact) — read it before citing F-2 or F-8. §G records a **headless-Chromium harness recipe** (npm-bundled binary, no local install) and the disclaimer-gate scroll-lock trap that silently invalidates naive runs. **NOTE: the document text still reads as if nothing has shipped — it predates v5.39 and was not rewritten.** Use the status column here for what is actually open | **PARTIALLY CLOSED at v5.39.** Fixed: F-10, F-11, F-12, F-13, F-14, F-15, F-17, F-18, F-19 (F-19 was found while verifying F-10 and was the release's highest-value item). **Still open:** F-1…F-9 (small-screen layout, contrast, touch targets, tooltips, input modes, chart resize) — now **disclosed** in Field Manual §13 but **not fixed**; and F-16 (glossary ASCII sort, NIT). The mechanics release for F-2/F-6/F-8 is identified but unscoped. The two-paragraph top-five summary is ✅ **WRITTEN 2026-08-18** — `AUDIT_TOP_FIVE_SUMMARY.md`; F-1…F-9 are its item 4. It was **NO LONGER BLOCKED** (corrected 2026-08-18): both stated blockers were already closed — Section C's 2D break-even half at **v5.28** and Section D's gap sweep at **v5.31**. It was deferred through several sessions against blockers that had already cleared. Write it after the v5.31 → v5.39 delta sweep, since that may change what the top five are |
 | `AUDIT_TOP_FIVE_SUMMARY.md` | **THE STANDING AUDIT'S CAPSTONE** — the two-paragraph standalone top-five summary `SCOPE_STANDING_AUDIT.md` calls for after the final phase, written 2026-08-18 against **v5.39**, drawing on Sections A–F plus the rollup, both Section D sweeps and the v5.28 2D audit. **The five:** (1) disclosures drifting off the engines beneath them — S-1, S-3, D-6, the top finding by a distance; (2) **D-3**, state schedules as a flat effective rate, the largest open taxation gap and **the only open simplification that is not reliably conservative**; (3) the **ACA sub-floor $0** that reads as computed (D-8b); (4) **F-1…F-9**, disclosed at v5.39 and unfixed; (5) verdict instruments and records failing silently (E-19/E-20, E-14/E-18). Also records **three silent closures verified at v5.39** — D-1, D-2, and **C-2C-3, a HIGH non-conservative defect** — all fixed by releases that never touched the documents recording them. ⚠ Flags a live records defect: **`ARCHITECTUREIssues.md` uses `E-15` twice** (L624 and L756); only the second is discharged, so citing "E-15" is ambiguous | **complete — the standing audit's final deliverable.** Claims verified against v5.39 source by locating the implementing expression; **not measured by driving the engines**, and severity labels carried forward rather than re-derived |
@@ -391,6 +391,21 @@ hash table** — every changed test file needs its row updated, or the offline f
 
 ---
 
+## ⚠ Line citations in the 2026-08-18 audit documents were corrected on 2026-08-19
+
+`AUDIT_SECTION_D_DELTA_v5_31_to_v5_39.md`, `AUDIT_TOP_FIVE_SUMMARY.md`, `MissingFeatures.md` and the
+delta-sweep row below all originally cited `src/DangerClose.jsx` line numbers that were **one low**
+above L3593. The analysis was run on a working copy with the single-line `DOCS_HTML` literal (L3593)
+deleted — the documented anti-grep-dump technique — and the resulting numbers were quoted as if from
+the unmodified file.
+
+**All are corrected, and every corrected citation was re-resolved against the shipped source by
+confirming the cited line contains the code claimed. No finding or conclusion changed.**
+
+**The durable lesson, because it will recur:** the docs-stripped copy is the right tool for grepping
+and the wrong tool for citing. Re-derive any line number from the original file before it goes in a
+document. Each affected document carries the errata in full.
+
 ## ⚠ The audit documents live in `docs/`, and this manifest indexes the POOL (added 2026-08-18)
 
 **Read this before concluding that any audit phase is incomplete.** On 2026-08-18 a session opened
@@ -421,7 +436,7 @@ gains), v5.37 (ordinary growth taxed), v5.38 (ACA sale gain into IRMAA) — each
 surface may still describe in its pre-release form.
 
 **One instance is already confirmed:** the sweep's own **S-1** is still open at v5.39 and has
-**widened**. The IRMAA tab (L9791) names five MAGI components; Engine C (L4398) sums seven —
+**widened**. The IRMAA tab (L9792) names five MAGI components; Engine C (L4399) sums seven —
 `div_y` (the original S-1) and now `capGain_y`, added at v5.36 precisely so the IRMAA lookback would
 see realized gains. The tab that exists to explain IRMAA still tells users those gains are not in the
 calculation. Low severity and safe-direction — the app *counts* the income, so no surcharge is
