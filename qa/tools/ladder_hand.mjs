@@ -45,7 +45,7 @@ function rothTabSS(totalSS, nonSS, joint) {
 }
 
 export function runLadder(hh) {
-  const { dobA, dobB, retireYear, ssAmo, ssAage, ssBmo, ssBage, pensionMo,
+  const { dobA, dobB, retireYear, ssAmo, ssAstartMonth = 1, ssAage, ssBmo, ssBage, pensionMo,
           tradInitA, tradInitB, rmdShareA, rmdShareB, taxableSleeve, divYieldPct,
           realizedGainByYear = {}, rothAmount, workTaper } = hh;
 
@@ -53,7 +53,9 @@ export function runLadder(hh) {
   const endB = dobB + (rmdAge(dobB) - 1);
   const ladderEnd = Math.max(endA, endB);
   const ssAyear = dobA + ssAage, ssByear = dobB + ssBage;
-  const ssApartial = Math.max(0, 12 - ssAmo + 1);
+  const ssApartial = Math.max(0, 12 - ssAstartMonth + 1);   // FIXED 2026-08-20: was `12 - ssAmo + 1`,
+  // which used the monthly AMOUNT as the start MONTH and silently zeroed spouse A's benefit in her
+  // claim year. Caught by disagreeing with Engine C by $33,660 in 2031. Engine C was right.
   const pension = pensionMo * 12;
 
   let balA = tradInitA, balB = tradInitB;
@@ -109,10 +111,3 @@ export function runLadder(hh) {
   }
   return { rows, ladderEnd, endA, endB, ssAyear, ssByear };
 }
-
-// ── Provenance ────────────────────────────────────────────────────────────────
-// Written 2026-08-20 against v5.40 (src md5 6b7cebb1476ee66e57079b713b94ba75) for
-// SCOPE_ROTH_TAB_MAGI_MEASUREMENT sec.3 steps 1-2. Results in
-// docs/MEASUREMENT_roth_tab_magi_v5_40.md. Depends on qa/tools/hand_86.mjs.
-//
-// TOOLING. Asserts nothing. Counted in NO release check total (OPERATIONS sec.B1).
