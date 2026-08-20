@@ -67,8 +67,15 @@ itself go stale — which matters in a project where three separate blocks have 
 - **The pool flattens repo paths.** `tools_fixture.jsx` in knowledge is `qa/tools/fixture/fixture.jsx`
   in the repo; the baseline suites live under `qa/qa-baseline/`. Match by content, not by path. The
   manifest's repo-path column is the map.
-- **Not every pool file is in the repo.** `probe_classify.mjs` exists only in knowledge. A file being
-  absent from the repo is not automatically drift — but it *is* worth asking why it is unversioned.
+- **A file on one side only is not automatically drift — but ask why.** Both directions occur, and this
+  bullet has been wrong in both. It read *"`probe_classify.mjs` exists only in knowledge"* until
+  2026-08-20; the truth is the reverse and has been since v5.30 — that file was retired from the pool and
+  now lives only in the repo at `qa/tools/probe_classify.mjs` (the manifest recorded this correctly while
+  this line did not). **Run the comparison in both directions.** Pool-only files are usually
+  packaging leftovers; repo-only files are usually history the pool deliberately doesn't keep
+  (superseded `dom_entry_*`, retired probes, `validation/`, the built `index.html`) — but a *build input*
+  showing up as repo-only is a defect, which is how `src/index.html` was found absent from the pool on
+  2026-08-20 after §G had required it for eleven releases.
 
 **Fallback when there is no network:** the manifest carries a per-file md5 table for the test and
 harness files the pool holds. It is authoritative only as of the release that wrote it; prefer the
