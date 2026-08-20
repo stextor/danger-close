@@ -257,6 +257,54 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
     T(`EXT F-6: numeric inputs carry inputMode="decimal" (${_im} >= 47)`, _im >= 47);
     T("EXT F-6: free-text fields did NOT get a numeric keyboard",
       !/<input inputMode="decimal"[^>]*value=\{nameA\}/.test(SRC) && !/<input inputMode="decimal"[^>]*value=\{r\.ticker\}/.test(SRC));
+
+    // ─── STRUCTURAL S-1 (scoped 2026-08-20) ───
+    // The four EXT S-1 checks above are source-text: they prove the SENTENCE is right and cannot see
+    // the ENGINE. S-1 arrived twice by the engine gaining a term while the prose stood still, so
+    // these bind the two together in both directions. Scoped to Engine C only — computeIrmaaPlan —
+    // because a second, four-term MAGI at L8847 also reaches the screen under the IRMAA label and is
+    // deliberately NOT covered here (see SCOPE_STRUCTURAL_MAGI_EXTINCTION.md §6).
+    //
+    // acorn-walk cannot walk this file (it throws on the first JSXElement), so the walk is manual.
+    // Resolution is by ENCLOSING FUNCTION, never by line number, so a reflow cannot move the target.
+    const _findNode = (root, pred) => {
+      let hit = null;
+      (function w(n) {
+        if (hit || !n || typeof n !== "object") return;
+        if (Array.isArray(n)) { for (const c of n) { w(c); if (hit) return; } return; }
+        if (typeof n.type === "string" && pred(n)) { hit = n; return; }
+        for (const k in n) { if (k === "start" || k === "end" || k === "loc") continue; w(n[k]); if (hit) return; }
+      })(root);
+      return hit;
+    };
+    const _addTerms = (e) => {
+      const out = [];
+      (function f(x) {
+        if (x.type === "BinaryExpression" && x.operator === "+") { f(x.left); f(x.right); }
+        else out.push(SRC.slice(x.start, x.end));
+      })(e);
+      return out;
+    };
+
+    const _engineC = _findNode(AST, n => n.type === "FunctionDeclaration" && n.id && n.id.name === "computeIrmaaPlan");
+    T("STRUCT S-1: Engine C computeIrmaaPlan resolves in the AST", !!_engineC);
+    const _magiC = _engineC && _findNode(_engineC.body, n => n.type === "VariableDeclarator" && n.id.type === "Identifier" && n.id.name === "magi");
+    T("STRUCT S-1: Engine C declares magi", !!_magiC);
+
+    const _terms = _magiC ? _addTerms(_magiC.init) : [];
+    const _EXPECT = ["ssTaxable", "pen_y", "work_y", "rmdTax_y", "conv_y", "div_y", "capGain_y"];
+    T(`STRUCT S-1: Engine C magi sums exactly ${_EXPECT.length} terms`, _terms.length === _EXPECT.length, _terms.join(" + "));
+    T("STRUCT S-1: Engine C magi term set is exactly the registered set (order-insensitive)",
+      _terms.length === _EXPECT.length &&
+      JSON.stringify([..._terms].sort()) === JSON.stringify([..._EXPECT].sort()), _terms.join(" + "));
+
+    // Bidirectional: the two terms that historically falsified the prose must be in the ENGINE and
+    // named in the SENTENCE. Removing either from either side fails.
+    const _magiSentenceStruct = (SRC.match(/MAGI here is[^<]*/) || [""])[0];
+    T("STRUCT S-1: div_y is in the engine AND dividends is in the sentence",
+      _terms.includes("div_y") && /dividends/.test(_magiSentenceStruct));
+    T("STRUCT S-1: capGain_y is in the engine AND realized capital gains is in the sentence",
+      _terms.includes("capGain_y") && /realized capital gains/.test(_magiSentenceStruct));
   }
 
   T("STATIC: no API keys in source", !/sk-ant-[A-Za-z0-9_-]{20,}/.test(SRC));
