@@ -2,12 +2,12 @@
 
 | Field | Value |
 |---|---|
-| Status | **RESOLVED AND BUILDABLE.** D1–D3 decided 2026-08-20. **D4 remains open** (§5) and does not block the build. |
+| Status | **BUILT 2026-08-20.** D1–D3 decided 2026-08-20; applied and verified the same day. **D4 remains open** (§5). |
 | Build | **v5.40** · `src/DangerClose.jsx` md5 `6b7cebb1476ee66e57079b713b94ba75` · tree **`ffb8bd3`** |
 | Asked for by | `AUDIT_SECTION_D_DELTA_v5_31_to_v5_39.md` §6; carried in the v5.40 CHANGELOG as outstanding |
 | Changes | **`qa/qa-baseline/t1_units.mjs` only.** No `src/`, no constant, no prose, no version bump. |
-| New checks | **6**, taking t1 from 102 → **108** and the suite total from 1,344 → **1,350** — *provisional until computed from captured suite output at build time, never restated from here.* |
-| Built in this session? | **No.** The checks below were written and executed against v5.40 and five reverted builds (§4), but nothing was applied to the suite and the full 22-suite baseline was **not** re-run. |
+| New checks | **6**, taking t1 from 102 → **108** and the suite total from 1,344 → **1,350** — **confirmed at build from captured suite output**, not restated. |
+| Built in this session? | **Yes, 2026-08-20.** Applied to `qa/qa-baseline/t1_units.mjs` (md5 `768e9fe22882babe6f262ca55282b2a8` → `5d205a18b18af683f4f7c71f824ee8ac`, a single 48-line insertion and no other change). NC1–NC5 re-run against reverted copies; full 22-suite baseline re-run both legs plus parity, **1,350 passed / 0 failed**, parity **9/9**. See the `Unreleased` CHANGELOG entry. |
 
 ---
 
@@ -25,8 +25,15 @@ directions, so a change on either side fails a test.
 
 ## 2. Premise, verified — including the part that failed
 
-**Verified and holding.** Engine C is `function computeIrmaaPlan({...})` at **L4271**; its `magi`
-declarator at **L4399** sums exactly seven terms:
+**Verified and holding — re-verified independently at build, 2026-08-20.** Engine C is
+`function computeIrmaaPlan({...})` at **L4272**; its `magi` declarator at **L4399** sums exactly seven
+terms:
+
+⚠ **A third citation correction, this scope's own.** §2 above originally read **L4271** for
+`computeIrmaaPlan`. The AST resolves the `FunctionDeclaration` to **L4272**; L4271 is the last line of
+the preceding comment block. Off by one, non-substantive — the checks resolve by enclosing function and
+never by line — but recorded rather than quietly corrected, since §2b records the same class of error
+against another file.
 
 ```
 ssTaxable + pen_y + work_y + rmdTax_y + conv_y + div_y + capGain_y
@@ -139,6 +146,14 @@ each new check fails before accepting it.
 
 NC3 is the one that changed the design: on an order-*sensitive* comparison it failed, which would have
 shipped a check that fires on edits needing no response.
+
+✅ **Re-run at build, 2026-08-20 — the table reproduces, with one reading made explicit.** NC1 2,
+NC2 3, NC3 0, NC5 1, all exactly as above. **NC4 fails 4 checks in the whole suite, not 2**: the two
+new STRUCT checks *plus* the two v5.40 source-text checks (`names dividends`, `names realized capital
+gains`), which the same revert also breaks. The table's counts are **failures among the six new
+checks**; every other row happens to have no overlap with the older checks, so the two readings
+coincide there and diverge only at NC4. That is stronger coverage than the row claimed, not weaker —
+but the row was ambiguous and is now disambiguated.
 
 ## 5. D4 — still open, and it is yours
 
