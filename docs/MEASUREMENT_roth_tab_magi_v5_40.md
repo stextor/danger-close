@@ -26,6 +26,14 @@ Caught by Engine C, whose RMD-driven MAGI jump appeared in 2039–2040 where rev
 2038–2040. This is another instance of a hand figure being wrong in a way only a second, independent
 computation exposed.
 
+**Error C — a third tool bug, found during the slider re-run.** `conv` was
+`Math.min(rothAmount, grown)` with no floor, so once an RMD drove a balance below zero the tool
+returned a **negative conversion** (observed: slider $175,000, ladder year 2040, conv = −$1K).
+Floored at 0, balances floored too, commented at the site; full-sweep check now reports zero negative
+conversions or RMDs. Only reachable in the exhausted-balance region, so no headline figure moved —
+but it is the third defect in my own tooling this session, and the reason the >$170,000 region is
+explicitly disclaimed above rather than reported.
+
 **Error B — a bug in my own tool. Not material to revision 1's totals, but it was live.**
 `ladder_hand.mjs` computed the SS partial-year as `12 - ssAmo + 1`, using the monthly **amount**
 ($3,300) where the start **month** belonged. `Math.max(0, …)` swallowed the negative, so spouse A's
@@ -98,9 +106,38 @@ The RMD term is concentrated entirely in **2039 and 2040**, at ~$45,000 each —
 understatement** of those years' MAGI. Direction is the non-conservative one, as §6 of the parent
 scope originally suspected.
 
-The slider sensitivity from revision 1 §3 stands qualitatively — the net flips positive at low
-conversion amounts where the SS cliff dominates — but its figures were computed on the wrong DOB and
-should be re-run before being quoted.
+### Slider sensitivity — RE-RUN 2026-08-20, supersedes revision 1 §3
+
+Revision 1's table was computed on the wrong `dobA` and carried a "do not quote" warning. Re-run with
+`dobA` 1964, the `ssAstartMonth` fix, and a third tool fix (see §1, Error C). Tier flips are tested
+against the tab's **own** rendered thresholds.
+
+| Slider | Net error | SS term | RMD term | Yrs over | Yrs under | **Tier flips** |
+|---|---|---|---|---|---|---|
+| $0 | −$214,636 | −$57,447 | −$152,149 | 1 | 11 | **0** |
+| $10,000 | −$204,382 | −$56,157 | −$143,185 | 1 | 11 | **0** |
+| **$15,000** | **+$154,277** | **+$298,020** | −$138,703 | 10 | 2 | **0** |
+| $25,000 | +$85,855 | +$220,634 | −$129,739 | 8 | 4 | **0** |
+| $35,000 | +$26,819 | — | — | — | — | **0** |
+| $40,000 | −$2,699 | +$118,634 | −$116,293 | 8 | 4 | **0** |
+| $60,000 | −$103,405 | $0 | −$98,365 | 0 | 12 | **0** |
+| **$70,000 (default)** | **−$94,441** | **$0** | **−$89,401** | 0 | **12** | **0** |
+| $150,000 | −$22,729 | $0 | −$17,689 | 0 | 12 | **0** |
+| $400,000 | −$6,720 | −$1,680 | $0 | 0 | 12 | **0** |
+
+**The overstating band is wider than revision 1 reported** — the net is positive from about $15,000
+to about $35,000, not $15,000–$20,000 — and the SS term in it is far larger (+$298,020 at $15,000
+against revision 1's implied figure). The default remains firmly in the understating region.
+
+**Zero tier flips at every slider position**, against the app's own thresholds. On this household no
+conversion amount makes the MAGI error change the IRMAA verdict. That is a property of *this*
+household sitting far below the tier-1 edge, not of the defect — HH3 (§5) flips 8 of 8.
+
+**Above ~$175,000 the sweep is not a finding.** Verified rather than assumed this time: at $175,000
+the conversion first falls short of the slider in 2039, at $200,000 in 2037, at $300,000 in 2034. The
+ladder exhausts the Traditional balance before the RMD years, the RMD term drops to $0, and the
+residual ±$25,000 oscillation is the SS term crossing the §86 ceiling as conversions fall away.
+**Read nothing into sign changes above $170,000.**
 
 ---
 
