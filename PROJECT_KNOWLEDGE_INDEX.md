@@ -132,9 +132,19 @@ destinations from v5.31 forward.
 
 | Field | Value |
 |---|---|
-| Version | **v5.38** |
-| Source file in knowledge | `DangerClose-v5_38.jsx` |
-| Source md5 | `b8d12481b55cd2ed05c6c6f14e2f41d9` |
+| Version | **v5.39** |
+| Source file in knowledge | `DangerClose-v5_39.jsx` |
+| Source md5 | `7070018f2699503dfac4ca8e0e1b2feb` |
+| Built `index.html` md5 | `0563e2f6db79c19b4729bec6e09a458a` |
+
+> ⚠ **Rolled 2026-08-20 — EIGHTH instance of this table going stale.** It read **v5.38 /
+> `DangerClose-v5_38.jsx` / `b8d12481…`** while the pool held `DangerClose-v5_39.jsx`, so the row
+> named a file that does not exist — the same failure as the seventh instance below, which named
+> `DangerClose-v5_37.jsx` after rotation removed it. Found on 2026-08-20 **after** a full §A2
+> clone-and-diff had reported the hash table clean: that session verified all 44 hash rows against
+> pool and clone and never compared these two build tables to the pool at all. **The §A2 sweep does
+> not cover the build tables unless you make it.** Verified now against both: the pool holds exactly
+> `DangerClose-v5_39.jsx` at `7070018f…`, matching the v5.39 CHANGELOG provenance line.
 
 > **Rolled 2026-08-18 (v5.39 ship).** Both build tables and the §A2 hash rows were rolled together
 > in one pass, and this file was searched end-to-end for the outgoing version string before the edit
@@ -215,6 +225,23 @@ These are refreshed in place when they change; git holds their history.
 ---
 
 ## Audit findings and scopes (self-versioned by filename)
+
+**v5.40 and later rows — added 2026-08-20.** ⚠ **Every one of these files was in the pool with no
+manifest row.** Seven documents were invisible to the manifest at once, including two status records
+written the same week and one written by the session that was auditing the manifest. The
+clone-and-diff cannot catch this: all seven match the committed tree exactly, so the pool was correct
+and only its *index* was wrong. **A file the manifest never names is a file the next session will not
+know to read.**
+
+| File | What it is | Status |
+|---|---|---|
+| `SCOPE_v5_40_disclosures_and_mechanics.md` | Governing scope for the v5.40 release — the disclosure and mechanics work that shipped 2026-08-19 | fulfilled at v5.40; retire when convenient (outcomes in the CHANGELOG entry) |
+| `SCOPE_STRUCTURAL_MAGI_EXTINCTION.md` | Scope for the structural S-1 assertion: bind the IRMAA MAGI *sentence* to Engine C's `magi` *expression* in both directions, resolved by AST and enclosing function so a reflow cannot move the target | **BUILT 2026-08-20.** `qa/`-only, no version bump; outcomes in `STATUS_2026_08_20_structural_magi_extinction.md` |
+| `SCOPE_ROTH_TAB_MAGI_MEASUREMENT.md` | Scope covering the Roth tab's MAGI measurement | **active — read before touching the Roth tab's MAGI** |
+| `STATUS_2026_08_20_structural_magi_extinction.md` | Build record for the structural S-1 assertion. **1,350 passed / 0 failed across 22 suites, parity 9/9, t1 102 → 108** — the current recorded suite state. Also records a line-citation correction the session owned against its own scope (`computeIrmaaPlan` at L4272, not L4271) | current — the suite baseline any next build starts from |
+| `STATUS_2026_08_20_d3_correction.md` | The D-3 disclosure correction: the state-tax approximation is disclosed in three places, Maryland was misfiled, and the finding is restated as **Low** severity, not an undisclosed simplification. Also records the late v5.40 knowledge refresh | current |
+| `STATUS_2026_08_20_knowledge_refresh.md` | This refresh's record — the missing `src/index.html` entry template (and the disclaimer gate that rides in it), the retired stale `README-FIRST.md`, the inverted OPERATIONS §A2 bullet, and the pruned/corrected manifest rows | current |
+| `STATUS_CAPGAINS_PARTIAL_for_v5_33.md` | The capital-gains partial-state handoff written for v5.33 — a scope premise falsified mid-build, reported rather than adapted around | historical; read with the v5.33–v5.36 gains work |
 
 **v5.39 rows (this refresh):**
 
