@@ -110,15 +110,31 @@ perturbed tree.
 
 ## 6. Disclosed limitations, and what was NOT done
 
-- **`qa/controls.sh` is still the v5.38 edition** and expects a `v538.jsx` in the run-folder root, so it
-  cannot execute against the current pair. Both controls above were therefore run **by hand**. This is
-  the **second** per-release instrument found stale by neglect in one session, and it is **not fixed
-  here** — it needs its own re-point, and its payloads re-verified against v5.40 rather than v5.38.
-- **Two instruments drifting unnoticed while the app suite stayed green is a pattern, not a
-  coincidence.** The app suite cannot see them: they are cross-version tooling, counted in no total, so
-  nothing fails when they rot. Worth deciding whether the release checklist should assert each
-  instrument's pair, rather than relying on a rule inside each file that has now been skipped by three
-  consecutive releases.
+- **`qa/controls.sh` is still the v5.38 edition** and hardcodes `SRC=v538.jsx` — a source that rotated
+  out of knowledge at v5.40 — so it cannot execute against the current pair. Both controls above were
+  therefore run **by hand**. **Left stale by maintainer decision (2026-08-20):** re-point it in whichever
+  session next needs controls, and re-verify each patch fires against v5.40 rather than v5.38.
+
+- **⚠ A CORRECTION TO THIS DOCUMENT'S OWN FIRST DRAFT.** It reported the two instruments together as
+  "the second per-release instrument found stale by neglect," which was accurate about the neglect and
+  **wrong about the risk**, because it grouped a silent failure with a loud one. Checked afterwards
+  rather than assumed:
+
+  | Instrument | Run by `runsuite.sh`? | Failure mode |
+  |---|---|---|
+  | `domdiff_withdrawal.mjs` | **Yes, every run** — with the pair passed explicitly (line 49) | **Silent.** The explicit args mean the hardcoded default is never exercised, so the v5.34 "stale default dies loudly at module load" protection is switched off by the runner. What rotted was the *assertions*: three releases of v5.37-era claims run against whatever pair was handed in, returning 28 green checks nobody had confirmed were true of that pair |
+  | `controls.sh` | **No — not invoked by it at all** | **Loud.** Hardcoded source, no override, run by hand at a build. Fails immediately at point of use; costs a session's time, never a false green |
+
+  So the dangerous instrument is the one that was fixed, and the risk was never symmetric. A "pattern"
+  claim that lumps them together reads as more alarming than the evidence supports, which is its own
+  kind of inaccuracy in a document meant to be trusted later.
+
+- **The structural option was considered and declined.** Converting each instrument's "re-point every
+  release" rule into a suite assertion would be a **tripwire, not a proof** — `runsuite.sh` overrides
+  the default anyway, so the check would force a human to open the file rather than verify the
+  assertions match the pair — and it would add a hand-service site every release, the same per-release
+  cost the v5.40 entry already flags for the MAGI term set. Declined on that trade, with the reasoning
+  recorded here so a future session inherits the argument rather than re-deriving it.
 - **No `src/` change, no version bump, no new app checks.** The app total is unchanged at 1,350.
 - **Nothing was re-verified that this session did not itself run.** The v5.40 built md5 and the suite
   counts above are measured here; figures quoted from earlier sessions are labelled as theirs.
