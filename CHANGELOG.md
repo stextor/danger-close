@@ -1,5 +1,100 @@
 # Changelog
 
+## v5.41 — the Roth tab's MAGI now includes required minimum distributions, 2026-08-20
+
+
+**Build.** `src/DangerClose.jsx` md5 `18152190e9b699529642ae2983b3ae2c` · built
+`index.html` md5 `74355c8b66d5024b99fcc6fb19f100cb` · prior build v5.40
+(`6b7cebb1476ee66e57079b713b94ba75`).
+
+
+### What changed
+
+**The Roth tab's conversion ladder omitted required minimum distributions from every figure it
+computed.** For any household whose ladder runs past its RMD age, the tab understated MAGI, taxable
+income, tax, marginal rate and bracket headroom in those years. On the shipped example household at
+the $70,000 slider default the understatement was **$44,991 in 2039 and $46,902 in 2040** — MAGI read
+$121,720 in both years when the correct figures are **$166,711 and $168,622**, a 37% understatement.
+
+An RMD is ordinary income, so the term belongs in three places, and it now appears in all three:
+
+- the **IRMAA MAGI** figure (42 U.S.C. §1395r(i)(4)(A): AGI plus tax-exempt interest — a required
+  distribution is a taxable IRA distribution, so it is in AGI);
+- the **§86 provisional-income base**, which sets the taxable share of Social Security. Omitting the
+  RMD here understated that share, which understated MAGI a *second* time — **the two omissions
+  compounded**;
+- **gross taxable income**, and therefore tax, marginal rate and 24%-bracket headroom.
+
+**Your conversion tax, marginal rate and headroom will rise** on this tab if your ladder runs past
+your RMD age. That is a correction, not a new charge — those figures were wrong before, in the
+direction that flattered the plan. Nothing about your actual tax changes; the model's estimate of it
+was too low and now is not.
+
+**The RMD cards on the same tab also move.** The tab previously carried **two disagreeing Traditional
+balance projections** — the ladder table grew the balance then converted, while the RMD cards
+converted then grew, and by 2040 they were **$48,712 apart (3.78%)** on the example household with
+both figures on screen at once. The ladder table's projection is now the only one; the cards read it
+instead of replaying their own. It is the conservative of the two (the higher balance yields the
+larger required distribution), so the card figures rise.
+
+Three smaller corrections ride along, all consequences of the above rather than separate features:
+the RMD now **leaves the account**, so the balance column falls faster in tail years; the conversion
+is **capped at the balance remaining after the RMD is taken**, matching the rule Engine C already
+used; and each spouse's conversion is drawn only from within their own ladder window, which is the
+split the RMD cards already applied.
+
+### Precision, stated rather than implied
+
+The ladder is computed inside the component body and has no module-level binding, so its only output
+path is the rendered DOM, which formats MAGI as thousands. **The MAGI assertions in this release are
+therefore accurate to ±$500, not to the dollar** (OPERATIONS §M). The effect being measured is
+~$45,000, which exceeds that ceiling by about ninety times, so the finding does not depend on the
+missing precision — but a dollar-exact MAGI test is not available until the block is hoisted to
+module level, which §M requires to be its own release. The **RMD figures themselves are pinned to the
+dollar**, because the cards render full dollars: spouse A's with-conversion RMD is asserted at exactly
+$44,991.
+
+### What did NOT change
+
+Dividends and realized capital gains are still absent from this tab's MAGI — they are the next
+release and a larger one. The §86 treatment on this tab remains a two-tier approximation rather than
+the full worksheet; it contributes **$0** on every household measured at the default slider position.
+No engine changed: all nine Monte Carlo, Roth-strategy and stress fingerprints are **byte-identical**
+across v5.40 → v5.41.
+
+### Tests
+
+**1,332 checks, 0 failed**, counts parsed from suite output:
+
+| Suite | Checks | | Suite | Checks |
+|---|---|---|---|---|
+| t1 units & statics | 115 | | t11 survivor RMD | 40 |
+| t2 engines | 18 | | t12 Engine D survivor | 23 |
+| t3 Roth strategy | 36 | | t13 Engine C IRMAA | 42 |
+| t4 DOM tab-walk | 228 | | t14 cross-engine survivor | 44 |
+| t5 storage | 58 | | t15 Engine A death filing | 11 |
+| t6 single filer | 21 | | t16 Roth ladder filing | 24 |
+| t7 accrual | 41 | | t17 Engine C exact | 74 |
+| t8 invariants | 38 | | t18 Engine B exact | 67 |
+| t9 DOM smoke | 14 | | t19 Engine D exact | 65 |
+| t10 tax cases | 163 | | t20 other tax type | 100 |
+| **t23 Roth ladder RMD (new)** | **25** | | t22 ACA floor | 85 |
+
+Plus `t21` tooling 50 (never counted as app checks), **parity 9/9 identical**, `smoke_built` **16/16**
+against the built artifact.
+
+**Nine negative controls, all fired.** Removing the term from MAGI, from the §86 base and from gross
+taxable income; dividing the grown balance instead of the prior 31 December balance; stopping the RMD
+leaving the account; using RMD age 73 instead of SECURE 2.0's 75; and reinstating the retired replay
+each turn a check red. The basis control is the instructive one: dividing the grown balance produces
+$169K/$171K — entirely plausible figures that nothing throws on — and only the card-versus-ladder
+cross-check catches the disagreement.
+
+`t23` is **gated per leg**: the v5.40 leg asserts the pre-fix figures deliberately, so the two legs
+together are the before/after witness rather than a single green number.
+
+---
+
 ## Unreleased — `qa/` only: the cross-version DOM instrument re-pointed, 2026-08-20
 
 **No version bump, and no release.** Nothing under `src/` changed. Source throughout is v5.40,

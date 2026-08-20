@@ -153,6 +153,54 @@ typical conversion windows, and modelling it would make the bracket-fill solver 
 deduction depends on MAGI which depends on the conversion being solved for. The Taxes tab does model
 it, so the two tabs differ for any ladder year at or before 2028.
 
+**Required minimum distributions in the ladder table (v5.41).** The conversion-ladder projection
+now includes each spouse's required minimum distribution in the years the ladder overlaps their RMD
+window. Through v5.40 it omitted the term entirely, so for any household whose ladder runs past its
+RMD age the tab understated MAGI, taxable income, tax, marginal rate and 24%-bracket headroom in
+exactly those years — on the shipped example household by $44,991 in 2039 and $46,902 in 2040, a 37%
+understatement of MAGI, in the direction that flattered the plan.
+
+The distribution is computed on the **prior 31 December balance** divided by the Uniform Lifetime
+Table divisor for the age attained in the distribution year (IRS Pub. 590-B App. B Table III),
+with the applicable age set by SECURE 2.0 §107 (73 for births 1951–1959, 75 for 1960 and later)
+through the same shared `rmdDivisor` / `rmdStartAge` helpers every other engine uses. Dividing the
+*grown* balance instead — the natural mistake, since the loop grows before it converts — inflates
+every distribution by one year's growth and is silent: nothing throws and the figures stay
+plausible. That basis is asserted directly rather than inferred from the divisor.
+
+An RMD is ordinary income, so the term enters three expressions and not one: the IRMAA MAGI figure
+(42 U.S.C. §1395r(i)(4)(A) — AGI plus tax-exempt interest, and a required distribution is a taxable
+IRA distribution), the §86 provisional-income base that sets the taxable share of Social Security,
+and gross taxable income. Omitting it from the §86 base understated taxable Social Security, which
+understated MAGI a second time; **the two omissions compounded**, which is why the correction is
+larger than the distribution alone in households whose provisional income sits near a threshold.
+
+**One Traditional balance, not two (v5.41).** The tab previously carried two independent projections
+of the same quantity: the ladder table grew the balance and then subtracted the conversion, while
+the RMD cards below it subtracted the conversion and then grew. Both were rendered. The difference
+compounds at conversion × growth per year and reached $48,712 — 3.78% — by 2040 on the example
+household. The ladder table's grow-then-convert projection is now the single source and the cards
+read it. Where the two disagreed, the retained one is the conservative choice: the higher balance
+yields the larger required distribution, so the correction raises the RMD figures the tab reports.
+
+Two consequences follow mechanically. The distribution now **leaves the account**, so the projected
+Traditional balance falls faster once RMDs begin — without this the money would enter income while
+the balance carried on as though it had never been withdrawn, replacing one inconsistency with
+another. And the modelled conversion is **capped at the balance remaining after the distribution is
+taken**, matching the rule the IRMAA engine already applied; measured across the full slider range
+this cap changes lifetime conversions by at most $252 in the worst configuration found and by $0 on
+every household measured, so it was adopted for consistency between engines rather than for its
+effect. Each spouse's conversion is drawn only from within their own ladder window — the window
+ending the year before that person's RMDs begin — which is the split the RMD cards already used.
+
+**Known limits, unchanged by this release.** The ladder's MAGI still omits dividend income and
+realized capital gains, which the IRMAA engine includes; those are a separate and larger correction.
+The §86 treatment on this tab remains a two-tier approximation rather than the full worksheet, and
+the RMD basis on this tab is each spouse's whole Traditional balance rather than the RMD-bearing
+portion of it, so a non-qualified annuity balance entered under Other accounts contributes to the
+modelled distribution although it carries none. Both simplifications run in the conservative
+direction — they overstate income — and both are recorded here rather than corrected silently.
+
 - **Strategy comparator:** six named policies (none / fill-12% / fill-22% / fill-24% / stay-under-
   IRMAA / current plan) run through the full deterministic projection; reports lifetime tax,
   IRMAA, NIIT, widow-year tax, ending balances, and after-tax estate (heirs' Traditional taxed at

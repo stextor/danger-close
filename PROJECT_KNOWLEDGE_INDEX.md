@@ -25,16 +25,21 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 
 | Field | Value |
 |---|---|
-| Version | **v5.40** |
-| Source file in knowledge | `DangerClose-v5_40.jsx` |
-| Source md5 | `6b7cebb1476ee66e57079b713b94ba75` |
-| Built `index.html` md5 | `17867edb9af4c5e7e3542aeade594f24` |
-| Shipped | 2026-08-19 · committed tree `c7c8156` |
+| Version | **v5.41** |
+| Source file in knowledge | `DangerClose-v5_41.jsx` |
+| Source md5 | `18152190e9b699529642ae2983b3ae2c` |
+| Built `index.html` md5 | `74355c8b66d5024b99fcc6fb19f100cb` |
+| Shipped | 2026-08-20 |
 
-> ⚠ **Rolled 2026-08-20, late.** This table still read **v5.39** a day after v5.40 shipped — the
-> post-ship knowledge refresh (OPERATIONS §I) did not run at the v5.40 release. Anything that trusted
-> this manifest between 2026-08-19 and 2026-08-20 was pointed at the wrong "current" build. The prior
-> build is now **v5.39** (`7070018f2699503dfac4ca8e0e1b2feb` / `0563e2f6db79c19b4729bec6e09a458a`).
+> **Rolled 2026-08-20 at the v5.41 ship, in the same session that built it** — the first time this
+> table has been rolled without a lag. The previous roll was late by a day (v5.40 shipped 2026-08-19
+> and this table still read v5.39 on 2026-08-20), and anything that trusted the manifest in that
+> window was pointed at the wrong "current" build.
+>
+> ⚠ **v5.41 changes modelling on the Roth tab** — the conversion ladder now includes required
+> minimum distributions in MAGI, the §86 provisional base and gross taxable income, and the tab's
+> two disagreeing Traditional-balance projections were unified onto one. Any scope premise written
+> against v5.40's Roth ladder must be re-verified before use.
 
 **Any work — edits, verification, scope premises — is done against this file.** Confirm its
 md5 matches the value above before starting (see the pre-build freshness check in
@@ -86,22 +91,23 @@ forward from that v5.38 re-hash.
 | `t17_engineC_exact.mjs` | `5eef71d2385058d847cc53018a3fae67` | `qa/t17_engineC_exact.mjs` |
 | `t18_engineB_exact.mjs` | `7272f97181e0764204eef087f3810380` | `qa/t18_engineB_exact.mjs` |
 | `t19_engineD_exact.mjs` | `256ff3681548966735569c5034164dac` | `qa/t19_engineD_exact.mjs` |
-| `t1_units.mjs` | `5d205a18b18af683f4f7c71f824ee8ac` | `qa/qa-baseline/t1_units.mjs` — **rolled 2026-08-20** (+6 structural S-1 checks inside the existing `if (V540)` block; `qa/`-only, no version bump — see the `Unreleased` CHANGELOG entry). Previously `768e9fe22882babe6f262ca55282b2a8` at the v5.40 ship (+8 extinction invariants, `v540` registered) |
+| `t1_units.mjs` | `21ba6a65d826b2651c177d64626a3a00` | `qa/qa-baseline/t1_units.mjs` — **rolled 2026-08-20 at v5.41** (+5 `STRUCT S-2` checks pinning the ROTH TAB's `magi` term set by AST, gated per leg, plus `v541` registration). S-1 pinned Engine C's term set and left the Roth tab's unpinned — that gap is why the omitted-RMD defect survived. **115 checks on v541, 110 on v540, 94 on v539** |
 | `t20_other_taxtype.mjs` | `9640ce1e4006c7ba6b30a29639ef428b` | `qa/t20_other_taxtype.mjs` |
 | `t21_tools.mjs` | `c5fb4c712135028f1effa039c84e0b90` | `qa/t21_tools.mjs` |
 | `t22_aca_floor.mjs` | `e8b52e06c38a095ac6eea830ac2dd84d` | `qa/t22_aca_floor.mjs` |
+| `t23_roth_ladder_rmd.mjs` | `bc933f532c250c19b31ddac0ba1585f5` | `qa/t23_roth_ladder_rmd.mjs` — **NEW at v5.41.** The Roth ladder's RMD-term invariants. ⚠ **Split precision, by necessity (OPERATIONS §M):** the ladder is a COMPONENT-INLINE engine, so MAGI reads from the DOM at `Math.round(x/1000)` — **±$500** — while the RMD cards render full dollars and ARE pinned exactly ($44,991). Gated per leg: **25 checks on v541, 21 on v540**, the v540 leg asserting the PRE-FIX figures deliberately so the two legs are the before/after witness |
 | `t2_engines.mjs` | `9a9ba167634ee29c645830ccdd7d6ca9` | `qa/qa-baseline/t2_engines.mjs` |
-| `t3_roth.mjs` | `7a82453f30b9c2a9f0d01a11fea38c8d` | `qa/qa-baseline/t3_roth.mjs` — **rolled to v5.40** (`v540` registered) |
-| `t4_dom.mjs` | `6592892e069e216b7b1398eff84376f9` | `qa/qa-baseline/t4_dom.mjs` — **rolled to v5.40** (`v540` registered) |
-| `t5_storage.mjs` | `96fb8a1fa80a974a50a5f2a04b35aeb8` | `qa/qa-baseline/t5_storage.mjs` — **rolled to v5.40** (`v540` registered) |
-| `t6_single.mjs` | `2f76a8f1f4dfea4afc7544322a82284c` | `qa/qa-baseline/t6_single.mjs` — **rolled to v5.40** (`v540` registered) |
+| `t3_roth.mjs` | `c76eaffd046e148a262163d75104fa7a` | `qa/qa-baseline/t3_roth.mjs` — **rolled to v5.41** (`v541` registered) |
+| `t4_dom.mjs` | `68d7f3bf3f153ef89986b5242f1faa3d` | `qa/qa-baseline/t4_dom.mjs` — **rolled to v5.41** (`v541` registered) |
+| `t5_storage.mjs` | `41732169cf8bbfb5939d7198a9e63b14` | `qa/qa-baseline/t5_storage.mjs` — **rolled to v5.41** (`v541` registered) |
+| `t6_single.mjs` | `fee628710eb912798fc9b0f631194aae` | `qa/qa-baseline/t6_single.mjs` — **rolled to v5.41** (`v541` registered) |
 | `t7_accrual.mjs` | `fd0ab4282e31d8a7e170606c877c28d0` | `qa/t7_accrual.mjs` |
 | `t8_invariant.mjs` | `a9bd015c8b50b54a98d0ed9a4e2afaaf` | `qa/t8_invariant.mjs` |
 | `t9_dom_smoke.mjs` | `080c3edbe5f5479ac488d2f54034de69` | `qa/t9_dom_smoke.mjs` |
 | `runsuite.sh` | `b4996bf35625ceae916df913a3987856` | `qa/runsuite.sh` — **NEW at v5.36** (adopted; parse-only totals runner with the DIED verdict) |
 | `tools_fixture.jsx` | `3602b615b65f09995a9eb1fa17fe4175` | `qa/tools/fixture/fixture.jsx` |
-| `dom_entry_v539.jsx` | `05ad80af418566777b8160fd2975f1ad` | `qa/qa-baseline/dom_entry_v539.jsx` — now the PRIOR leg's entry |
-| `dom_entry_v540.jsx` | `3e946820747aeacb52311df76a56e3fb` | `qa/qa-baseline/dom_entry_v540.jsx` — **NEW at v5.40**, the current leg; row added 2026-08-20 |
+| `dom_entry_v541.jsx` | `ae195e7e7d220fe3065684e8266cd2c2` | `qa/qa-baseline/dom_entry_v541.jsx` — **NEW at v5.41**, the current leg. `dom_entry_v539.jsx` rotated OUT of the pool with its source |
+| `dom_entry_v540.jsx` | `3e946820747aeacb52311df76a56e3fb` | `qa/qa-baseline/dom_entry_v540.jsx` — now the PRIOR leg's entry |
 | `gate_v538.mjs` | `585a90322d5a56ec7bed955eb9b5c67a` | `qa/tools/gate_v538.mjs` — committed at v5.38; retire from pool at next refresh if desired |
 | `VERIFY.sh` | `d6c31723f3610a16cd0d2ae2f1931a68` | `VERIFY.sh` (repo root) — row added 2026-08-17; its absence here is how the v5.36→v5.37 pool drift stayed invisible (scope v5.38 §0) |
 | `SCOPE_v5_38_aca_sale_gain_tax.md` | `77bda5bbce1e9bb3008566b57350aff1` | `docs/SCOPE_v5_38_aca_sale_gain_tax.md` — v5.38-prep; **committed at the v5.38 ship**, note corrected 2026-08-20 |
@@ -128,14 +134,49 @@ the v5.30 refresh updated knowledge but never committed the manifest. Found by t
 (46 of 47 pool files matched the committed tree; this was the one). The manifest ships to **both**
 destinations from v5.31 forward.
 
+### Repo-only `qa/tools/*.mjs` — rows added 2026-08-20 at v5.41
+
+**Why these were missing.** Eight measurement tools were written across the two sessions preceding
+v5.41 and committed to `qa/tools/`, but never given manifest rows — so the §A2 fallback table could
+not see them and a stale copy would have been invisible by construction, the exact hole §A2 exists
+to close. They are **repo-only by design** (measurement scaffolding, not suites; they assert nothing
+and are counted in no check total), so a session working from the pool alone will not have them and
+should clone.
+
+| Repo file | md5 | What it is |
+|---|---|---|
+| `qa/tools/d3_cap_sweep.mjs` | `c737fb6aff51bfe020498d73688bf18b` | Sweeps the D-3 conversion cap across the slider range × Traditional balances. Produced the "worst case $252, $0 on both measured households" figure that resolved D-3 |
+| `qa/tools/derive_rmd_expectations.mjs` | `0cfa92b929735f5207eab517c9b7adfb` | The v5.41 pre-build derivation. ⚠ **KNOWN-WRONG IN TWO WAYS, LEFT UNCORRECTED DELIBERATELY** — see the warning below |
+| `qa/tools/engineC_threeway.mjs` | `9caf5fb27267cecc2bfc8d4637283f45` | Drives Engine C against the Roth tab and a hand computation for three-way agreement |
+| `qa/tools/hand_86.mjs` | `ad9688928e9a897b62951e5e22ba280e` | Independent §86 two-tier worksheet, used as the cross-check on taxable Social Security |
+| `qa/tools/hh3.mjs` | `8bd8d8cd1c56eac1052ad87cff29671f` | The third (straddling) household fixture — the one whose error is 59% dividends/gains |
+| `qa/tools/ladder_hand.mjs` | `590234628df6a96e84dd3223a54fe2f3` | Hand replication of the ladder loop; one of the two independent scripts agreeing on $167,131 |
+| `qa/tools/render_check.mjs` | `88711e45ca98e8e63599488699ceeca3` | Reads the RENDERED ladder table out of jsdom. ⚠ Its imports are written for the RUN-FOLDER ROOT, not `qa/tools/` — copy it up a level to run it |
+| `qa/tools/slider_rerun.mjs` | `4fbbbdb5bc83505cdf994bb5a9b9027f` | Re-runs the ladder across slider positions; produced the direction-flip table in the measurement |
+
+> ⚠ **`derive_rmd_expectations.mjs` produces figures that v5.41 did NOT ship, and this is recorded
+> rather than fixed.** Two defects, both found before any code was written:
+>
+> 1. It adds a **dividend term** (`div = sleeve × divPct` = $420) to `nonSS`. `census.cjs` finds
+>    **zero `div_y` hits** in the Roth block, and dividends are explicitly out of scope for v5.41 —
+>    so its tail-year MAGI targets are $420 too high.
+> 2. It allocates each year's conversion **pro-rata without gating by each spouse's ladder window**,
+>    while the shipped code gates (as `_perRmd` always did). This moves the 2040 RMD by **$2,492**.
+>
+> Shipped v5.41 figures: **2039 MAGI $166,711 / RMD $44,991 · 2040 MAGI $168,622 / RMD $46,902.**
+> The script says $167,131 / $166,550. **The script is wrong, not the code.** It was left uncorrected
+> on purpose: it is the artifact the discrepancy was found in, and editing it in the session that
+> found it would erase the evidence. Correct it with the `div_y` release, and check the corrected
+> allocation against a second household.
+
 ## Prior build (the regression comparison baseline)
 
 | Field | Value |
 |---|---|
-| Version | **v5.39** |
-| Source file in knowledge | `DangerClose-v5_39.jsx` |
-| Source md5 | `7070018f2699503dfac4ca8e0e1b2feb` |
-| Built `index.html` md5 | `0563e2f6db79c19b4729bec6e09a458a` |
+| Version | **v5.40** |
+| Source file in knowledge | `DangerClose-v5_40.jsx` |
+| Source md5 | `6b7cebb1476ee66e57079b713b94ba75` |
+| Built `index.html` md5 | `17867edb9af4c5e7e3542aeade594f24` |
 
 > ⚠ **Rolled 2026-08-20 — EIGHTH instance of this table going stale.** It read **v5.38 /
 > `DangerClose-v5_38.jsx` / `b8d12481…`** while the pool held `DangerClose-v5_39.jsx`, so the row
@@ -202,9 +243,10 @@ These are refreshed in place when they change; git holds their history.
 | `t21_tools.mjs` | **NEW 2026-08-11** — tests the `qa/tools/` parser toolkit itself against a fixture with hand-counted known answers. 50 checks, negative-controlled six ways. Counted SEPARATELY from the app total: it verifies tooling, not the build. Carries one dated `[KNOWN DEFECT]` pin — `census.cjs` double-reports object shorthand and export specifiers, so its "hits" exceed its site count. Repo `qa/` |
 | `tools_fixture.jsx` | **NEW 2026-08-11** — the fixture `t21` reads. **NOT AN APP SOURCE**: never built, never imported, never version-bumped, and it does NOT count toward the "exactly two `.jsx` app sources" rule. Repo `qa/tools/fixture/fixture.jsx`; knowledge is flat so it lives here under this name, and `t21` resolves either. Line numbers are load-bearing — add cases at the END only |
 | `t22_aca_floor.mjs` | **75 checks at v5.34** (was 64): group H unit-tests the shared `realizeGain` rule directly, including that selling alone never moves the gain share — chosen over comparing two engines' figures and hoping agreement implies a shared rule. Run it as `node t22_aca_floor.mjs v533`; its committed default is still `v532`, unrolled. **NEW at v5.32** — the ACA 100%-of-FPL eligibility floor. **Was 64 checks** in seven groups: the floor as an `[EXTINCTION]` set in BOTH regimes; regime symmetry; the boundary hand-computed to the cent from HHS/ASPE and Rev. Proc. 2025-25 typed independently; the drift case; Engine A end-to-end on a household crossing the floor twice at two depths; **group F, the cross-version byte-identity check on `acaSubByYr`/`totAcaLoss`/`estate`**; and five negative controls, all firing. ⚠ **Group F exists because parity is blind here** — `t2`'s fingerprint household is `acaPremium: 0`, so no ACA code runs inside the guardrail at all (E-15). Do not delete it as redundant; the file's header says so too. Group F reads the PRIOR leg's bundle and defaults to **`v532` at v5.33** (rolled forward, like `t2`'s parity pair). ⚠ **Rolling that default is not sufficient on its own.** Group F mixes claims true for ANY pair (byte identity) with one true for a SINGLE transition — *"acaFloorYrs is NEW"*, which is false once the prior build is v5.32. That check is now **gated on the prior tag**, so the suite holds at 64 on either pairing. The rotation forces the roll: v5.31 left knowledge at v5.33, so `app_v531.mjs` can no longer be built from knowledge alone. Repo `qa/` |
+| `t23_roth_ladder_rmd.mjs` | Roth ladder RMD term (v5.41). MAGI at ±$500 (§M component-inline ceiling), RMD cards dollar-exact. Gated per leg | when tests change |
 | `t20_other_taxtype.mjs` | **100 checks at v5.37** (+1): the exact E2 pin moved $600,000 → **$724,266** (the balance plus its growth — derived by the independent simulator BEFORE the engine edit, matched to six decimals) and a new **E-15 EXTINCTION** (the ordinary excess must EXCEED the opening balance). The trad−annuity exact-0 pin survived the edit at 0.000000 and is documented as REGIME-BOUND (full pool exhaustion) in the fixture. E-17 closed: the dobs are now the strings the run resolves to (1964-01-01/1966-01-01), measured value-identical across all five engines and all eight households. Historical: **NEW at v5.25** — the Other-accounts `taxType` schema, its migration, and the extinction assertion that no engine reads the field. 94 checks. The extinction check is a **permutation test**: the same household runs twice with every type flipped and all five engines must return byte-identical output — so it fires the moment release (c) starts reading the field. Also carries the required equality that inference over the example household reproduces the $111,000 / $21,000 / $15,000 split v5.24 published. Negative-controlled five ways; two of its own assertions were caught passing vacuously on v5.24 and now assert a precondition first. Repo `qa/` |
-| `dom_entry_v539.jsx` | Harness entry for the v5.39 CJS DOM bundle (**prior** leg). Repo `qa/qa-baseline/` |
-| `dom_entry_v540.jsx` | Harness entry for the v5.40 CJS DOM bundle (**current** leg). Repo `qa/qa-baseline/`. ⚠ These two rows named `v536`/`v537` until 2026-08-20 — three releases of rotation moved the pool files and left the rows behind, so the manifest listed two files the pool did not hold. Roll them with the rotation, not after it |
+| `dom_entry_v541.jsx` | Harness entry for the v5.41 CJS DOM bundle (**current** leg). Repo `qa/qa-baseline/` |
+| `dom_entry_v540.jsx` | Harness entry for the v5.40 CJS DOM bundle (**prior** leg). Repo `qa/qa-baseline/`. ⚠ These two rows named `v536`/`v537` until 2026-08-20 — three releases of rotation moved the pool files and left the rows behind, so the manifest listed two files the pool did not hold. Roll them with the rotation, not after it |
 | `controls.sh` | **NEW at v5.36 — adopted from session tooling.** The negative-control program: twelve reverts (C1–C9, C12; C10/C11 are DOM-witness controls run at the domdiff layer), each patch EMBEDDED in the script with its anchor asserted unique (the session-1 payloads lived in /tmp and were lost — E-18's lesson applied to tooling). Verdict logic per E-19: exit status checked, a dead probe reports PROBE DIED (never NO-OP), rebuild regenerates the splice before bundling, and probe-blind-but-suite-caught is reported as such. Repo `qa/` |
 | `runsuite.sh` | **NEW at v5.36 — adopted from session tooling.** Runs both legs, parity, feature suites and tooling, and PARSES every total from suite output (the honesty standard: totals are computed, never restated). A suite printing no count with a non-zero exit reports DIED, not 0/0. Repo `qa/` |
 | `capture_gain_fp.mjs` | **Probe, not a suite — asserts nothing and is counted in no total.** Captures a full-precision fingerprint of every engine that touches the realized-gain rule, which is how `realizeGain`'s extraction was proven a behaviour no-op before any behaviour changed (OPERATIONS §M pattern). Repo `qa/` |
@@ -250,6 +292,7 @@ know to read.**
 | File | What it is | Status |
 |---|---|---|
 | `STATUS_v5_39_shipped.md` | The v5.39 ship record — full verification chain (tested source == shipped source, rebuild reproducibility, parity 9/9), per-suite totals parsed from output, the negative control for the new extinction assertion, **and §5, four errors made during the build, recorded plainly** | **current — the authoritative v5.39 record** |
+| `STATUS_v5_41_shipped.md` | **The v5.41 ship record.** Carries the two corrections made to the build brief's expected figures (an out-of-scope $420 dividend term; an undecided conversion-gating rule worth $2,492 in 2040), the §M precision ceiling and why dollar-exact MAGI was NOT achievable, the 9 negative controls, and four findings left for the next scope |
 | ~~`SCOPE_FIX_docs_v5_39.md`~~ *(retire when convenient)* | Governing scope for the docs-only release. §1 re-verified every premise against the decoded runtime bytes rather than trusting the audit; §5 carried decisions D-1…D-8, all resolved by Steve as recommended | **FULFILLED at v5.39.** Two of its own figures were wrong and are corrected in the ship record: parity is **9/9** (not 8/8), and the version-bump tax spans version ladders in **six** suites plus ~25 feature gates (not two sites) |
 
 **v5.36 rows:**
@@ -306,6 +349,21 @@ the current source unless it says so.
 ---
 
 ## Retirement list (delete-first; nothing replaces these)
+
+### At the v5.41 upload — DELETE THESE FIRST
+
+The pool is flat and add-only, so a stale file is byte-indistinguishable from a current one until
+hashed. Delete before uploading, not after:
+
+| Delete | Because |
+|---|---|
+| `DangerClose-v5_39.jsx` | rotated out — the pair is now v5.41 current / v5.40 prior, **exactly two** |
+| `dom_entry_v539.jsx` | its source rotated out with it |
+| `SCOPE_ROTH_TAB_MAGI_MEASUREMENT.md` | ⚠ **the pool copy is revision 1** (`87c9a7e7…`, *"SCOPED, NOT BUILDABLE YET, three decisions open"*) while the committed copy is revision 2, measured and resolved (`281d9ca0…`). Found by the §A2 clone-and-diff at the v5.41 build — the **sixth** recorded stale block. Replace with the copy in this upload |
+| `CHANGELOG.md`, `METHODOLOGY.md`, `PROJECT_KNOWLEDGE_INDEX.md` | replaced by this upload |
+| `t1_units.mjs`, `t3_roth.mjs`, `t4_dom.mjs`, `t5_storage.mjs`, `t6_single.mjs` | replaced by this upload |
+
+
 
 ⚠ **This section, the rotation block below, and several table rows above had gone stale by five
 releases** — they described the v5.24 refresh while the two tables at the top of this file were
