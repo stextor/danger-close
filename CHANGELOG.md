@@ -1,5 +1,71 @@
 # Changelog
 
+## Unreleased — `qa/` only: the cross-version DOM instrument re-pointed, 2026-08-20
+
+**No version bump, and no release.** Nothing under `src/` changed. Source throughout is v5.40,
+`src/DangerClose.jsx` md5 `6b7cebb1476ee66e57079b713b94ba75`, verified unchanged at the end of the
+session against the same hash it started from. This entry rides with the next release.
+
+**What was closed.** The entry below records `qa/domdiff_withdrawal.mjs` as red since v5.40 shipped and
+leaves the fix to whichever release next opened it. This is that fix.
+
+**The failure was never a regression, and the diagnosis in the entry below was right as far as it went.**
+v5.40 deliberately rewrote the IRMAA MAGI sentence, and that sentence sits inside a region the
+instrument asserts is byte-identical. What re-running it exposed is a **second and older defect**: an
+asymmetry between the two figures-only regions, latent since v5.36. Both are meant to be anchored past
+every piece of changed copy. Measured on the v5.39 → v5.40 pair:
+
+- **Taxes**, `Eff RateBracket` → `Estimates only`: **1,739 characters, ending on the last figure.** Its
+  footnote sits outside the region. Anchored correctly.
+- **IRMAA**, `Tax YrAffectsMAGI` → `Not tax advice`: **1,972 characters, of which the trailing ~1,070 are
+  prose** — the "Affects"/headroom explainer and the CMS/MAGI footnote. Never anchored correctly.
+
+So a check whose name says FIGURES was hostage to any disclosure edit, and the release that finally
+edited that disclosure is what surfaced it. The end anchor moves to the first prose token, giving a
+**913-character region that is the year table and nothing else**, byte-identical across the pair. The
+divergence had sat at offset **1,734 of 1,972** — every figure ahead of it already matched, which is the
+measurement behind "no figure moved."
+
+**The instrument was three releases stale**, left pointing at v5.36 → v5.37 through v5.38, v5.39 and
+v5.40, against its own "re-point every release" instruction. Its header and its code also disagreed
+about the default pair — the comment said v536 → v537 while the code said v537 → v538 — so neither
+statement could be trusted without running it. Both now read v539 → v540, and the header carries the
+rule that they roll together.
+
+**The v5.40 copy change is now witnessed explicitly rather than incidentally.** Excluding the sentence
+from the identity region would otherwise leave nothing at the DOM layer asserting it changed. Three
+checks were added, gated per leg so the frozen v5.39 leg keeps replaying green: the v5.39 leg asserts the
+pre-v5.40 component list, the v5.40 leg asserts the corrected sentence naming dividends and realized
+capital gains, and a third asserts the narrow list is extinct on v5.40. **These three are pair-specific
+and must be re-pointed with the default**, which the file now says in place.
+
+**Both negative controls were run, not assumed** (§B2 — a green instrument proves nothing about what it
+would catch):
+
+- **Dead call site.** Engine C has exactly one call site, resolved by AST at L9719 with the definition at
+  L4272. Neutering it and rebuilding the v5.40 leg **fails the tightened identity check**, headroom
+  figures moving $138K → $139K and $138K → $137K. The smaller region still witnesses the wiring, which
+  was the thing worth proving before shrinking it.
+- **Reverted disclosure.** Restoring the pre-v5.40 sentence on the v5.40 leg **fails exactly the two
+  v5.40-side copy checks and leaves the figures check green** — copy and figures are now cleanly
+  separated, which is what the anchor fix was for.
+
+**Tests: `domdiff` 28 passed / 1 failed → 32 passed / 0 failed.** It is cross-version tooling and is
+counted in no release headline. The app total is unchanged and was re-measured from captured output on
+the restored sources: **1,350 across 22 suites, 0 failed**, parity **9/9**, prior leg 618, current leg
+632, features 668. Every suite matched its recorded count exactly.
+
+**Also verified this session, and worth recording because it had never been tested:** the published
+v5.40 artifact **rebuilds byte-identical from project knowledge alone** — `dist/index.html` md5
+`17867edb9af4c5e7e3542aeade594f24` — with `qa/smoke_built.mjs` at **16/16**. Until 2026-08-20 the pool
+was missing `src/index.html`, so the §G claim that knowledge holds a complete build scaffold had been
+asserted for eleven releases and never demonstrated.
+
+**Disclosed limitation.** `qa/controls.sh` is still the v5.38 edition and expects a `v538.jsx` in the
+run-folder root, so it cannot execute against the current pair; the two controls above were run by hand
+instead. That is now the second per-release instrument found stale by neglect in one session, and it is
+**not fixed here**.
+
 ## Unreleased — `qa/` only: the structural S-1 assertion, 2026-08-20
 
 **No version bump, and no release.** Nothing under `src/` changed: no engine, no constant, no prose,

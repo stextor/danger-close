@@ -69,7 +69,7 @@ forward from that v5.38 re-hash.
 | `cap_tabs.mjs` | `9057b96d48b84f99dc322f7fc983674a` | `qa/qa-baseline/cap_tabs.mjs` |
 | `capture_gain_fp.mjs` | `99f096c7c332b5ec7a87949681386a71` | `qa/capture_gain_fp.mjs` |
 | `controls.sh` | `5389104ea31f841695e95e6e8ec0064a` | `qa/controls.sh` — re-pointed to v537 at v5.37, **C13 added**; adopted at v5.36 with embedded patches |
-| `domdiff_withdrawal.mjs` | `f31c743ba26c9d30f22f953f434e95ec` | `qa/domdiff_withdrawal.mjs` |
+| `domdiff_withdrawal.mjs` | `1a4541b3407781138d38c9a93d2d64ec` | `qa/domdiff_withdrawal.mjs` — **re-pointed to v539 → v540 and IRMAA-anchor-fixed 2026-08-20** (was `f31c743b…`, three releases stale and red since the v5.40 ship). 28/1 → **32/0**; both controls fired. Tooling — counted in no app total |
 | `env_dom.mjs` | `0ee15a1be6099a50319cfb271b530c4a` | `qa/qa-baseline/env_dom.mjs` |
 | `main.jsx` | `d9eca7b469a3fb7ec1c5325fd4bf8145` | `src/main.jsx` |
 | `index.html` | `52ef2be3080352df6198ee3b8c3507ad` | `src/index.html` — the **Vite entry template**, **restored to the pool 2026-08-20** after being found absent (see the build-scaffold row below). ⚠ **Not the built app.** The published single-file `index.html` is repo-only output and never enters the pool; its md5 is in the Current build table and is different by construction |
@@ -241,6 +241,7 @@ know to read.**
 | `STATUS_2026_08_20_structural_magi_extinction.md` | Build record for the structural S-1 assertion. **1,350 passed / 0 failed across 22 suites, parity 9/9, t1 102 → 108** — the current recorded suite state. Also records a line-citation correction the session owned against its own scope (`computeIrmaaPlan` at L4272, not L4271) | current — the suite baseline any next build starts from |
 | `STATUS_2026_08_20_d3_correction.md` | The D-3 disclosure correction: the state-tax approximation is disclosed in three places, Maryland was misfiled, and the finding is restated as **Low** severity, not an undisclosed simplification. Also records the late v5.40 knowledge refresh | current |
 | `STATUS_2026_08_20_knowledge_refresh.md` | This refresh's record — the missing `src/index.html` entry template (and the disclaimer gate that rides in it), the retired stale `README-FIRST.md`, the inverted OPERATIONS §A2 bullet, and the pruned/corrected manifest rows | current |
+| `STATUS_2026_08_20_build_and_domdiff.md` | The verification record: the published v5.40 artifact **rebuilds byte-identical from project knowledge alone** (`17867edb…`, smoke 16/16) — tested for the first time, the pool having lacked `src/index.html` until that day; the suite re-measured at **1,350 / 0 across 22 suites**, parity 9/9; and `domdiff_withdrawal.mjs` re-pointed after three releases stale, its IRMAA region re-anchored off 1,070 characters of prose, both controls fired | current |
 | `STATUS_CAPGAINS_PARTIAL_for_v5_33.md` | The capital-gains partial-state handoff written for v5.33 — a scope premise falsified mid-build, reported rather than adapted around | historical; read with the v5.33–v5.36 gains work |
 
 **v5.39 rows (this refresh):**

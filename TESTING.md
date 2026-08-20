@@ -12,7 +12,26 @@ This project's premise is *verify, don't trust* — so this page explains what v
 
 `t1` 102 · `t2` 18 · `t3` 36 · `t4` 228 · `t5` 58 · `t6` 21 · `t7` 41 · `t8` 38 · `t9` 14 · `t10` 163 · `t11` 40 · `t12` 23 · `t13` 42 · `t14` 44 · `t15` 11 · `t16` 24 · `t17` 74 · `t18` 67 · `t19` 65 · `t20` 100 · `t21` 50 · `t22` 85.
 
-**Since the v5.40 ship, `qa/`-only: `t1` 102 → 108, app total 1,344 → 1,350.** The figures above are
+**The cross-version DOM instrument was re-pointed on 2026-08-20 and is green again.**
+`qa/domdiff_withdrawal.mjs` had been red since the v5.40 ship and three releases stale, still pointing at
+v5.36 → v5.37. Its IRMAA region ran from `Tax YrAffectsMAGI` to `Not tax advice` — 1,972 characters, of
+which the trailing ~1,070 were prose — so v5.40's corrected MAGI sentence fell inside a check whose name
+says FIGURES. The Taxes region, by contrast, had always stopped on the last figure. The end anchor moves
+to the first prose token: **913 characters, the year table and nothing else, byte-identical across the
+pair**, with the divergence measured at offset 1,734 of 1,972 so every figure ahead of it already
+matched. Three per-leg checks now witness the v5.40 sentence explicitly, gated so the frozen v5.39 leg
+keeps replaying green. **Both controls fired**: killing Engine C's sole call site (AST-resolved, L9719)
+fails the tightened identity check with headroom figures moving $138K → $139K; reverting the disclosure
+fails exactly the two v5.40-side copy checks and leaves figures green. **`qa/controls.sh` remains the
+v5.38 edition and cannot run against the current pair** — the controls above were run by hand, and that
+instrument is not fixed.
+
+**The published artifact rebuilds byte-identical from project knowledge alone** — verified 2026-08-20
+for the first time, `dist/index.html` md5 `17867edb9af4c5e7e3542aeade594f24`, `qa/smoke_built.mjs`
+**16/16, exit 0** including the disclaimer gate rendering and dismissing. The pool was missing
+`src/index.html` until that date, so this had been asserted for eleven releases and never demonstrated.
+
+**Since the v5.40 ship, `qa/`-only: `t1` 102 → 108, app total 1,344 → 1,350; and separately `qa/domdiff_withdrawal.mjs` 28/1 → 32/0 — cross-version tooling, counted in no app total.** The figures above are
 what v5.40 shipped and are left as they are. Six **structural** checks were added to `t1` on 2026-08-20
 against the same v5.40 source (md5 `6b7cebb1476ee66e57079b713b94ba75`, unchanged — no engine, constant,
 prose or version-string edit, so this is not a release). They close the gap the v5.40 entry names as
