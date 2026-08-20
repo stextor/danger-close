@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | **MEASURED 2026-08-20.** Results in `MEASUREMENT_roth_tab_magi_v5_40.md`. D-A/D-B/D-D resolved; **D-C open**, and now answerable. §3 step 3 partial (§6 of the measurement) |
+| Status | **MEASURED AND VALIDATED 2026-08-20. §3 steps 1-5 all complete.** Results in `MEASUREMENT_roth_tab_magi_v5_40.md` **rev 2** (rev 1 carried a wrong `dobA` — see its §1). D-A/D-B/D-D resolved. **D-C answered by HH3: 8 of 8 ladder years render the wrong IRMAA verdict** — the defect is user-visible, not hygiene |
 | ⚠ Revision 2 | 2026-08-20. **§1(c) below was wrong and is corrected in place** — see `STOP-REPORT-v5_40-roth-tab-section86.md`. The direction hypothesis in §1 "Net" was also wrong, and so was the inversion my stop report proposed to replace it. Both are superseded by §1d |
 | Build | **v5.40** · `src/DangerClose.jsx` md5 `6b7cebb1476ee66e57079b713b94ba75` · committed tree `027fbd2` |
 | Asked for by | `SCOPE_STRUCTURAL_MAGI_EXTINCTION.md` §6, which opened this rather than closing it; D4 of that scope waits on the outcome |
@@ -176,12 +176,17 @@ rather than carried again.
 D-B was vindicated — the SS term turned out to be the one that inverted the working hypothesis, and
 excluding it would have produced a net figure wrong by construction, exactly as predicted below.
 
-**D-C is now answerable and remains open.** The measurement's §8 recommends splitting the fix by
-evidence — `rmdTax_y` first (96% of the error, no new plumbing), the SS cliff second (correct and
-cheap, but it moves `grossTaxable`), `div_y`/`capGain_y` last and only after a **threshold-straddling
-third household** is run. That third household is the one gap that matters: **zero of the 20 measured
-ladder years across both households changes IRMAA tier**, so the dollar error currently drives no
-user-visible verdict, and whether it ever does is exactly what a straddling household would decide.
+**D-C — ANSWERED 2026-08-20.** The straddling household this paragraph called for was built (HH3)
+and it settles the question: **8 of 8 ladder years show a green ✓ where the statute triggers a
+surcharge.** The fix is in the product boundary — it makes an existing output more correct for a
+mainstream couple, and the output it corrects is a warning the tab currently gets backwards.
+Recommended order, per the measurement §6: `rmdTax_y` first, then `div_y`/`capGain_y` (59% of
+HH3's error, and what inverts the verdict before any RMD exists), then the SS cliff (cheapest fix,
+lowest severity — it contributed $0 on all three households).
+
+Note the shape of the earlier evidence: HH1 and HH2 gave **0 of 20** verdict changes between them,
+which read as "not user-visible." That reading was an artifact of neither household sitting near a
+tier edge. **A zero result from households not built to test the thing is not a negative finding.**
 
 | # | Decision | Notes |
 |---|---|---|
