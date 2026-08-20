@@ -1,0 +1,10 @@
+D-3 DIRECTION CORRECTION 2026-08-19 — no source/suite/version change (v5.40 stands)
+
+233cc61d1688bb8da08fb87e053696da  github/PROJECT_KNOWLEDGE_INDEX.md
+2551a2ae0c0b31c055da9729a6cc5621  github/docs/AUDIT_D3_STATE_TAX_DIRECTION.md
+cef96e1ccb5109eca5ecfb0f41445a34  github/docs/AUDIT_TOP_FIVE_SUMMARY.md
+54cada6879e0eeae9389cc062d58df24  github/docs/MissingFeatures.md
+2551a2ae0c0b31c055da9729a6cc5621  knowledge/AUDIT_D3_STATE_TAX_DIRECTION.md
+cef96e1ccb5109eca5ecfb0f41445a34  knowledge/AUDIT_TOP_FIVE_SUMMARY.md
+54cada6879e0eeae9389cc062d58df24  knowledge/MissingFeatures.md
+233cc61d1688bb8da08fb87e053696da  knowledge/PROJECT_KNOWLEDGE_INDEX.md
