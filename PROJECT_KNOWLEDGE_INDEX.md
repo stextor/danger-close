@@ -49,7 +49,10 @@ which halted the v5.30 build and cost most of a session to diagnose. Recorded as
 
 ⚠ **Prefer the clone-and-diff in OPERATIONS §A2 over this table.** A recorded table is only as fresh as
 the release that wrote it, and this project has had FOUR separate recorded blocks go stale — the fourth opened the v5.36 session-2 build: six suite files in the pool were pre-session-1 copies while the brief said otherwise, recoverable only from the maintainer's archive (E-18). This is the
-offline fallback, accurate **as of v5.39, 2026-08-18**. At the v5.38 ship every row was re-hashed
+offline fallback, accurate **as of 2026-08-20** — every row in it was re-verified against a fresh
+clone on that date: **44 rows, 0 mismatches against the pool and 0 against the committed tree**, after
+two rows for rotated-out `dom_entry_*` files were pruned, six *"not yet committed"* notes corrected,
+and an `index.html` row added. At the v5.38 ship every row was re-hashed
 from the mounted pool at post-ship verification (the fifth stale-block incident: that ship left the
 table un-rolled for a day, caught by the closing sweep). At the v5.39 ship the six rows the release
 actually changed — `t1_units`, `t3_roth`, `t4_dom`, `t5_storage`, `t6_single` and the new
@@ -66,10 +69,10 @@ forward from that v5.38 re-hash.
 | `cap_tabs.mjs` | `9057b96d48b84f99dc322f7fc983674a` | `qa/qa-baseline/cap_tabs.mjs` |
 | `capture_gain_fp.mjs` | `99f096c7c332b5ec7a87949681386a71` | `qa/capture_gain_fp.mjs` |
 | `controls.sh` | `5389104ea31f841695e95e6e8ec0064a` | `qa/controls.sh` — re-pointed to v537 at v5.37, **C13 added**; adopted at v5.36 with embedded patches |
-| `dom_entry_v537.jsx` | `87a1324d67ed44f4215601018cda92eb` | `qa/qa-baseline/dom_entry_v537.jsx` — **NEW at v5.37** (current leg) |
 | `domdiff_withdrawal.mjs` | `f31c743ba26c9d30f22f953f434e95ec` | `qa/domdiff_withdrawal.mjs` |
 | `env_dom.mjs` | `0ee15a1be6099a50319cfb271b530c4a` | `qa/qa-baseline/env_dom.mjs` |
 | `main.jsx` | `d9eca7b469a3fb7ec1c5325fd4bf8145` | `src/main.jsx` |
+| `index.html` | `52ef2be3080352df6198ee3b8c3507ad` | `src/index.html` — the **Vite entry template**, **restored to the pool 2026-08-20** after being found absent (see the build-scaffold row below). ⚠ **Not the built app.** The published single-file `index.html` is repo-only output and never enters the pool; its md5 is in the Current build table and is different by construction |
 | `probe_withhold_gain.mjs` | `b7fbc3fc34a0684c88b79123ddcda57c` | `qa/probe_withhold_gain.mjs` |
 | `shim.txt` | `fec4551cd77cb2d4be0b19f6c54bb621` | `qa/qa-baseline/shim.txt` |
 | `smoke_built.mjs` | `bc839044971ecd992bb9f4f019736d1e` | `qa/smoke_built.mjs` |
@@ -97,20 +100,22 @@ forward from that v5.38 re-hash.
 | `t9_dom_smoke.mjs` | `080c3edbe5f5479ac488d2f54034de69` | `qa/t9_dom_smoke.mjs` |
 | `runsuite.sh` | `b4996bf35625ceae916df913a3987856` | `qa/runsuite.sh` — **NEW at v5.36** (adopted; parse-only totals runner with the DIED verdict) |
 | `tools_fixture.jsx` | `3602b615b65f09995a9eb1fa17fe4175` | `qa/tools/fixture/fixture.jsx` |
-| `dom_entry_v538.jsx` | `be495ebabf5fc0528ae2c7302f6f3f3e` | `qa/qa-baseline/dom_entry_v538.jsx` — now the PRIOR leg's entry |
 | `dom_entry_v539.jsx` | `05ad80af418566777b8160fd2975f1ad` | `qa/qa-baseline/dom_entry_v539.jsx` — now the PRIOR leg's entry |
 | `dom_entry_v540.jsx` | `3e946820747aeacb52311df76a56e3fb` | `qa/qa-baseline/dom_entry_v540.jsx` — **NEW at v5.40**, the current leg; row added 2026-08-20 |
 | `gate_v538.mjs` | `585a90322d5a56ec7bed955eb9b5c67a` | `qa/tools/gate_v538.mjs` — committed at v5.38; retire from pool at next refresh if desired |
 | `VERIFY.sh` | `d6c31723f3610a16cd0d2ae2f1931a68` | `VERIFY.sh` (repo root) — row added 2026-08-17; its absence here is how the v5.36→v5.37 pool drift stayed invisible (scope v5.38 §0) |
-| `SCOPE_v5_38_aca_sale_gain_tax.md` | `77bda5bbce1e9bb3008566b57350aff1` | *(v5.38-prep, not yet committed — repo `docs/` at ship)* |
-| `DERIVATION_v5_38_step1.md` | `6e6b2794fba1c1a7623720a442edfa02` | *(v5.38-prep, not yet committed — repo `docs/` at ship)* |
-| `sim_ledger.mjs` | `a8d275a4ea7325a5500491f4b6b25058` | *(v5.38-prep, not yet committed — repo `qa/tools/` at ship)* |
-| `validate.mjs` | `5e18e78e494c831a1a01d3623bbd43e9` | *(v5.38-prep, not yet committed — repo `qa/tools/` at ship)* |
-| `case1_detail.mjs` | `0d94612058e013a00dcbcb2896254536` | *(v5.38-prep, not yet committed — repo `qa/tools/` at ship)* |
-| `project.mjs` | `cf964df972be31b133d0630bcbf2d4c7` | *(v5.38-prep, not yet committed — repo `qa/tools/` at ship)* |
+| `SCOPE_v5_38_aca_sale_gain_tax.md` | `77bda5bbce1e9bb3008566b57350aff1` | `docs/SCOPE_v5_38_aca_sale_gain_tax.md` — v5.38-prep; **committed at the v5.38 ship**, note corrected 2026-08-20 |
+| `DERIVATION_v5_38_step1.md` | `6e6b2794fba1c1a7623720a442edfa02` | `docs/DERIVATION_v5_38_step1.md` — v5.38-prep; **committed at the v5.38 ship**, note corrected 2026-08-20 |
+| `sim_ledger.mjs` | `a8d275a4ea7325a5500491f4b6b25058` | `qa/tools/sim_ledger.mjs` — v5.38-prep; **committed at the v5.38 ship**, note corrected 2026-08-20 |
+| `validate.mjs` | `5e18e78e494c831a1a01d3623bbd43e9` | `qa/tools/validate.mjs` — v5.38-prep; **committed at the v5.38 ship**, note corrected 2026-08-20 |
+| `case1_detail.mjs` | `0d94612058e013a00dcbcb2896254536` | `qa/tools/case1_detail.mjs` — v5.38-prep; **committed at the v5.38 ship**, note corrected 2026-08-20 |
+| `project.mjs` | `cf964df972be31b133d0630bcbf2d4c7` | `qa/tools/project.mjs` — v5.38-prep; **committed at the v5.38 ship**, note corrected 2026-08-20 |
 
 `probe_classify.mjs` was removed from the pool at v5.30 and now lives only in the repo at
-`qa/tools/probe_classify.mjs`.
+`qa/tools/probe_classify.mjs`. (OPERATIONS §A2 asserted the exact opposite — *"exists only in
+knowledge"* — from v5.30 until 2026-08-20, when the clone-and-diff caught it. This row was right
+the whole time; the two documents simply disagreed and nothing compared them. Corrected in
+`OPERATIONS.md`.)
 
 The v5.38-prep files were committed to the repo at the v5.38 ship. The pool still carries
 copies of the scope, derivation memo, and the five derivation instruments — harmless duplicates
@@ -188,8 +193,8 @@ These are refreshed in place when they change; git holds their history.
 | `tools_fixture.jsx` | **NEW 2026-08-11** — the fixture `t21` reads. **NOT AN APP SOURCE**: never built, never imported, never version-bumped, and it does NOT count toward the "exactly two `.jsx` app sources" rule. Repo `qa/tools/fixture/fixture.jsx`; knowledge is flat so it lives here under this name, and `t21` resolves either. Line numbers are load-bearing — add cases at the END only |
 | `t22_aca_floor.mjs` | **75 checks at v5.34** (was 64): group H unit-tests the shared `realizeGain` rule directly, including that selling alone never moves the gain share — chosen over comparing two engines' figures and hoping agreement implies a shared rule. Run it as `node t22_aca_floor.mjs v533`; its committed default is still `v532`, unrolled. **NEW at v5.32** — the ACA 100%-of-FPL eligibility floor. **Was 64 checks** in seven groups: the floor as an `[EXTINCTION]` set in BOTH regimes; regime symmetry; the boundary hand-computed to the cent from HHS/ASPE and Rev. Proc. 2025-25 typed independently; the drift case; Engine A end-to-end on a household crossing the floor twice at two depths; **group F, the cross-version byte-identity check on `acaSubByYr`/`totAcaLoss`/`estate`**; and five negative controls, all firing. ⚠ **Group F exists because parity is blind here** — `t2`'s fingerprint household is `acaPremium: 0`, so no ACA code runs inside the guardrail at all (E-15). Do not delete it as redundant; the file's header says so too. Group F reads the PRIOR leg's bundle and defaults to **`v532` at v5.33** (rolled forward, like `t2`'s parity pair). ⚠ **Rolling that default is not sufficient on its own.** Group F mixes claims true for ANY pair (byte identity) with one true for a SINGLE transition — *"acaFloorYrs is NEW"*, which is false once the prior build is v5.32. That check is now **gated on the prior tag**, so the suite holds at 64 on either pairing. The rotation forces the roll: v5.31 left knowledge at v5.33, so `app_v531.mjs` can no longer be built from knowledge alone. Repo `qa/` |
 | `t20_other_taxtype.mjs` | **100 checks at v5.37** (+1): the exact E2 pin moved $600,000 → **$724,266** (the balance plus its growth — derived by the independent simulator BEFORE the engine edit, matched to six decimals) and a new **E-15 EXTINCTION** (the ordinary excess must EXCEED the opening balance). The trad−annuity exact-0 pin survived the edit at 0.000000 and is documented as REGIME-BOUND (full pool exhaustion) in the fixture. E-17 closed: the dobs are now the strings the run resolves to (1964-01-01/1966-01-01), measured value-identical across all five engines and all eight households. Historical: **NEW at v5.25** — the Other-accounts `taxType` schema, its migration, and the extinction assertion that no engine reads the field. 94 checks. The extinction check is a **permutation test**: the same household runs twice with every type flipped and all five engines must return byte-identical output — so it fires the moment release (c) starts reading the field. Also carries the required equality that inference over the example household reproduces the $111,000 / $21,000 / $15,000 split v5.24 published. Negative-controlled five ways; two of its own assertions were caught passing vacuously on v5.24 and now assert a precondition first. Repo `qa/` |
-| `dom_entry_v536.jsx` | Harness entry for the v5.36 CJS DOM bundle (current leg). Repo `qa/qa-baseline/` |
-| `dom_entry_v537.jsx` | Harness entry for the v5.37 CJS DOM bundle (current leg). Repo `qa/qa-baseline/` |
+| `dom_entry_v539.jsx` | Harness entry for the v5.39 CJS DOM bundle (**prior** leg). Repo `qa/qa-baseline/` |
+| `dom_entry_v540.jsx` | Harness entry for the v5.40 CJS DOM bundle (**current** leg). Repo `qa/qa-baseline/`. ⚠ These two rows named `v536`/`v537` until 2026-08-20 — three releases of rotation moved the pool files and left the rows behind, so the manifest listed two files the pool did not hold. Roll them with the rotation, not after it |
 | `controls.sh` | **NEW at v5.36 — adopted from session tooling.** The negative-control program: twelve reverts (C1–C9, C12; C10/C11 are DOM-witness controls run at the domdiff layer), each patch EMBEDDED in the script with its anchor asserted unique (the session-1 payloads lived in /tmp and were lost — E-18's lesson applied to tooling). Verdict logic per E-19: exit status checked, a dead probe reports PROBE DIED (never NO-OP), rebuild regenerates the splice before bundling, and probe-blind-but-suite-caught is reported as such. Repo `qa/` |
 | `runsuite.sh` | **NEW at v5.36 — adopted from session tooling.** Runs both legs, parity, feature suites and tooling, and PARSES every total from suite output (the honesty standard: totals are computed, never restated). A suite printing no count with a non-zero exit reports DIED, not 0/0. Repo `qa/` |
 | `capture_gain_fp.mjs` | **Probe, not a suite — asserts nothing and is counted in no total.** Captures a full-precision fingerprint of every engine that touches the realized-gain rule, which is how `realizeGain`'s extraction was proven a behaviour no-op before any behaviour changed (OPERATIONS §M pattern). Repo `qa/` |
@@ -201,8 +206,8 @@ These are refreshed in place when they change; git holds their history.
 | `qa-baseline-README.md` | How to run the baseline suite (renamed from qa-baseline/README.md for the flat pool) | when it changes |
 | **qa-baseline harness files** | `shim.txt`, `mk_testable.sh`, `env_dom.mjs`, `run_all.sh`, `cap_tabs.mjs` — the `dom_entry_*` files are listed individually above, current + prior only | when they change. NOTE (v5.10.2): stale knowledge copies were re-synced from the committed repo at that refresh. The repo is their source of truth. |
 | **`qa/tools/` parser toolkit** | `funcmap.cjs` (function boundaries — line numbers move every release), `census.cjs` (identifier/property/string hits with enclosing scope chain), `diverge.cjs` (normalized-fingerprint duplicate detection), `residual.cjs` (narrow: `balance − roth − trad`; ages out after release (c)). All four named explicitly per §G — a folder reference makes them invisible. They live in `qa/tools/`, **not** `qa/`, because they assert nothing and must never be countable as checks. **Tested since v5.25 by `t21_tools.mjs` (50 checks) against `tools_fixture.jsx`**, negative-controlled six ways; one pinned defect (AST hits vs source sites) is disclosed by reporting both counts since v5.29. Census and site-count questions go through these, never greps (OPERATIONS §B1) | when the tools change |
-| **build scaffold files** | `index.html` (the Vite HTML entry template), `main.jsx` (the browser bootstrap), `vite.config.js`, `package.json` — all four, per OPERATIONS §G. Without all four a session working from knowledge **cannot produce the published `index.html`** (the v5.11 failure). ⚠ **`vite.config.js` is written with a DOT** — the session mount displays it as `vite_config.js`; that is a mount artifact, not the pool name (verified 2026-08-10: same file, md5 `30da5708038a1d7c97a4b06777ea8e8a`). It is the only file in the pool where the mounted name differs from the real one | when the build setup changes |
-| `SITE_CENSUS_v5_10.md` | Code census (self-versioned by filename) | new one per feature |
+| **build scaffold files** | `index.html` (the Vite HTML entry template), `main.jsx` (the browser bootstrap), `vite.config.js`, `package.json` — all four, per OPERATIONS §G. Without all four a session working from knowledge **cannot produce the published `index.html`** (the v5.11 failure). ⚠ **The pool held only three of the four until 2026-08-20.** `index.html` was missing — this row asserted all four for eleven releases while the pool never carried the template, and no check compared the claim to the pool because the §A2 table had no row for it either. It matters more than a missing file usually would: that template carries the entire **first-open disclaimer gate** (credentials disclosure, pessimism notice, acknowledgement checkbox), which exists **nowhere** in `DangerClose.jsx`, so a knowledge-only rebuild would have published the app with no gate. Restored at md5 `52ef2be3080352df6198ee3b8c3507ad`; `qa/smoke_built.mjs` asserts the gate renders and dismisses, so the failure would have been loud at the built-artifact suite rather than silent in production. ⚠ **`vite.config.js` is written with a DOT** — the session mount displays it as `vite_config.js`; that is a mount artifact, not the pool name (verified 2026-08-10: same file, md5 `30da5708038a1d7c97a4b06777ea8e8a`). It is the only file in the pool where the mounted name differs from the real one | when the build setup changes |
+| `SITE_CENSUS_v5_10.md` | Code census (self-versioned by filename). ⚠ **Not in the pool** as of the 2026-08-20 clone-and-diff — it lives in the repo at `docs/SITE_CENSUS_v5_10.md`. Row kept and marked rather than deleted: whether the pool should carry it is the maintainer's call, and a silently-dropped row is how files become invisible | new one per feature |
 | `SCOPE_STANDING_AUDIT.md` | Reusable audit spec (not version-specific) | rarely |
 | `OPERATIONS.md` | **The operational appendix, §A–§N** — freshness check, suite layout, harness traps, defect pins, parity guardrail, ship verification, storage/rotation, release checklist, packaging, instrumentation ceiling, and the `index.html` build. **Read it before any build, fix, scope, or release, starting with §A.** | when mechanics change |
 | `PROJECT_KNOWLEDGE_INDEX.md` | This manifest | every refresh |
@@ -278,6 +283,22 @@ releases** — they described the v5.24 refresh while the two tables at the top 
 correctly rolled to v5.29. Corrected at the v5.30 refresh. The cause is structural and is recorded
 as a finding: OPERATIONS §I's "refresh project knowledge once with the final state, delete-first"
 was executed on the top tables and not on the body. **Roll the whole file or none of it.**
+
+**Retired 2026-08-20 (knowledge-hygiene refresh, no release):**
+
+- ~~`README-FIRST.md`~~ — **retired outright, not replaced.** It is a per-delivery upload instruction
+  sheet, and the pool copy was the **v5.36 edition** — four releases stale, describing a packaging
+  layout that has since changed. The v5.37 retirement list below claims it was *"replaced in place by
+  the v5.37 edition"*; it was not, so this is the **§G write-hazard again** (delete-then-upload where
+  the delete didn't take), and two prior freshness checks logged the file as *"knowledge-only by
+  design"* — true of the name, false of the contents. Retired rather than rolled because the durable
+  record it once carried now lives in `docs/` in the repo: the release story is the CHANGELOG entry,
+  the per-file story is that release's `STATUS_*.md`. It remains a **delivery-zip** artifact per
+  OPERATIONS §L — that convention is unchanged; only the stale pool copy goes.
+- **The pool's `README-FIRST.md` and the repo have never been comparable** — it is one of only two
+  pool files with no committed counterpart (the other is the retained prior source, which is
+  legitimate), so the clone-and-diff could never adjudicate it and reported it as expected noise
+  three times running. Retiring it removes that permanent blind spot from the check.
 
 **Retired at the v5.37 refresh:**
 
