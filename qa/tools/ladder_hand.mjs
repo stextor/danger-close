@@ -64,7 +64,10 @@ export function runLadder(hh) {
   for (let year = retireYear; year <= ladderEnd; year++) {
     const grownA = balA * (1 + GROWTH), grownB = balB * (1 + GROWTH);
     const grown = grownA + grownB;
-    const conv = Math.min(rothAmount, grown);
+    // FIXED 2026-08-20: floored at 0. Previously `Math.min(rothAmount, grown)`, which returned a
+    // NEGATIVE conversion once the RMD had driven a balance below zero (observed at slider $175,000,
+    // ladder year 2040: conv = -$1K). Only reachable in the exhausted-balance region.
+    const conv = Math.max(0, Math.min(rothAmount, grown));
     const convA = grown > 0 ? conv * (grownA / grown) : 0;
     const convB = conv - convA;
 
@@ -106,8 +109,8 @@ export function runLadder(hh) {
       dSS: taxableSS_apptab - taxableSS_hand, dRMD: -rmd, dDiv: -dividends, dGain: -gains,
     });
 
-    balA = grownA - convA - rmdA;
-    balB = grownB - convB - rmdB;
+    balA = Math.max(0, grownA - convA - rmdA);
+    balB = Math.max(0, grownB - convB - rmdB);
   }
   return { rows, ladderEnd, endA, endB, ssAyear, ssByear };
 }
