@@ -48,7 +48,7 @@ shipped in the window: v5.32, v5.34, v5.35, v5.36, v5.37, v5.38.
 |---|---|
 | **D-1** | ✅ **CLOSED.** Both false disclosures corrected. See the box at D-1 |
 | **D-2** | ✅ **CLOSED at v5.36.** See the box at D-2 |
-| **D-3** | unchanged — mechanism and disclosure both still as described |
+| **D-3** | ⚠ **DIRECTION CORRECTED and finding SPLIT** — see the box at D-3 |
 | **D-4** | unchanged — `METHODOLOGY.md` L120 still discloses it |
 | **D-5** | unchanged — disclosure still at `TAX_CONSTS.QCD_LIMIT` (now L850) |
 | **D-6** | ⚠ **CORRECTED — the v5.31 sweep's resolution was too broad.** See the box at D-6 |
@@ -281,12 +281,67 @@ consistent with existing precedent and would not require per-lot tracking.
 
 ## D-3 · Progressive state schedules are approximated by an effective flat rate
 
+> ### ⚠ DIRECTION CORRECTED 2026-08-19 — measured against v5.40, and the finding splits
+>
+> **This entry's direction is wrong.** The approximation was recorded as *"Not uniform"* and was
+> reasoned about downstream as under-taxing high earners and flattering a plan. **It over-taxes**
+> across the entire mainstream range.
+>
+> New York, MFJ, both 67, sourced 2026 schedule (Form IT-2105-I; $16,050 MFJ standard deduction;
+> $20,000/person pension exclusion 59½+):
+>
+> | NY retirement income | Model | Actual | Direction |
+> |---|---|---|---|
+> | $80,000 | $2,400 | $971 | over-taxes |
+> | $120,000 | $4,800 | $3,121 | **over-taxes by 54%** |
+> | $250,000 | $12,600 | $10,303 | over-taxes |
+> | $600,000 | $33,600 | $33,050 | over-taxes |
+> | $900,000 | $51,600 | $53,600 | under-taxes |
+>
+> The direction reverses only between **$600,000 and $900,000** of annual retirement income — outside
+> this project's own boundary test. Engine figures executed from shipped v5.40 source, matching hand
+> arithmetic to the dollar. **Direction is therefore CONSERVATIVE**, the safe side for this tool.
+>
+> **Two causes:** `stateTaxAnnual` (L1091) models **no state standard deduction**, and each flat rate
+> approximates a mid-to-upper *marginal* rate rather than an effective one.
+>
+> **The finding splits, and the halves have different urgency:**
+>
+> - **Disclosure half — REAL, and now the defensible core.** Six states collapse a graduated schedule
+>   with **no note admitting it**: HI, MN, NJ, NY, VT, WI. Four disclose the same approximation: CA,
+>   DC, MD, OR. Undisclosed stays undisclosed whichever way the error points, and the inconsistency
+>   means a user comparing two states cannot tell they are reading the same kind of estimate.
+>   **Ship the six notes with the next release** — a string per state, no engine change.
+> - **Precision half — HELD, and de-prioritised.** Its rank rested on the direction. Full graduated
+>   brackets are **declined**: ~300 numbers across 51 jurisdictions re-indexed annually, and a stale
+>   bracket table is worse than an honest flat approximation because it looks precise. If it proceeds,
+>   prefer **recalibration** — a per-state standard-deduction field plus rates re-derived as effective
+>   rates against a reference retiree household (~102 numbers, no structural change).
+>
+> **Limits:** only New York is verified against a sourced schedule. California is **indicative only**
+> (recalled brackets). HI, MN, VT, WI are **unmeasured** — their inclusion rests on the rate gap and
+> the missing note, which is a disclosure claim, not a magnitude claim. **All six need the New York
+> treatment before any recalibration ships.**
+>
+> **Separate item found in passing:** the engine returns **$0** New Jersey tax for this household
+> (`excl65: 75000 × 2` exceeds the income). NJ's real exclusion is generous and income-limited and the
+> note calls it *"approximated as unconditional"*, so this may be roughly right or may be a distinct
+> defect. **Unmeasured, asserted neither way.**
+>
+> Full evidence: `AUDIT_D3_STATE_TAX_DIRECTION.md`.
+
+
 **Priority: 3.** *Disclosed limitation* — Field Manual §13, the module header, and each state's own
 `note` string. Sub-phase 2E verified the module implements its documented approximation correctly and
 explicitly ruled the approximation itself out of scope; the Phase 3 brief asks the different question:
 *does the approximation deserve a feature?*
 
 **Assessment: yes, but it is the largest item here and its direction of error is not uniform.**
+
+> ⚠ **The paragraph immediately below is SUPERSEDED** — measured 2026-08-19 and false for this app's
+> population. It is kept because it is the reasoning that drove the priority, not because it is right.
+> The crossover it assumes sits at ~$600–900K of retirement income in New York, not in the mainstream
+> range. See the box at the top of this entry.
 
 An effective rate under-taxes a high-income household in a steeply progressive state and over-taxes a
 low-income one. So unlike almost every other simplification in this app, **it is not reliably
@@ -442,14 +497,14 @@ person per tier) and the remedy is a form. **Exposure:** user-side.
 |---|---|---|---|---|---|
 | ~~D-1~~ | OBBBA bonus disclosure | ✅ **CLOSED** — both disclosures fixed, constants Verify-checked | — | — | — |
 | ~~D-2~~ | Realized gains from ordinary drawdown | ✅ **CLOSED at v5.36** — engine + both tax engines + render | — | — | — |
-| **D-3** | Progressive state schedules → effective flat rate | open, unchanged | **Not uniform** | Build, staged | **Medium — now the top-ranked open item** |
+| **D-3** | State schedules → flat rate | **SPLIT 2026-08-19** — disclosure half real, precision half held | **CONSERVATIVE** (direction corrected) | Disclosure: build now. Precision: declined/held | Disclosure **Medium**; precision **Low** |
 | **D-4** | Itemized deductions not modelled | open, unchanged | Conservative | Minority case | Low-Med |
 | **D-6** | IRMAA SSA-44 relief | **partially disclosed** — survivor trigger yes, work stoppage no | Conservative | Build (one clause) | Low |
 | **D-5** | QCD one-time CRT/CGA election | open, unchanged | Conservative | **Decline** | Very low |
 | **D-7** | State estate / inheritance tax | **unassessed** — still owed | unknown | unassessed | unranked |
 | **D-8** | ACA sub-floor \$0 | **PARTIALLY ADDRESSED (v5.32)** — declined toggle not built | **Both** | Built | see entry |
 
-**With D-1 and D-2 closed, D-3 is the top-ranked open item** — and it is the one simplification here
+**D-3 was ranked top here on 2026-08-18 and that ranking is superseded** (direction corrected 2026-08-19 — see the box at D-3). Its *disclosure* half stays a live Medium; its *precision* half is held and de-prioritised. What follows is the 2026-08-18 reasoning, kept for the record: **with D-1 and D-2 closed, D-3 is the top-ranked open item** — and it is the one simplification here
 that is **not reliably conservative**, so it can flatter a plan. That makes it the natural successor
 to D-2 for a tool whose identity is deliberate pessimism.
 
