@@ -12,6 +12,22 @@ This project's premise is *verify, don't trust* — so this page explains what v
 
 `t1` 102 · `t2` 18 · `t3` 36 · `t4` 228 · `t5` 58 · `t6` 21 · `t7` 41 · `t8` 38 · `t9` 14 · `t10` 163 · `t11` 40 · `t12` 23 · `t13` 42 · `t14` 44 · `t15` 11 · `t16` 24 · `t17` 74 · `t18` 67 · `t19` 65 · `t20` 100 · `t21` 50 · `t22` 85.
 
+**Since the v5.40 ship, `qa/`-only: `t1` 102 → 108, app total 1,344 → 1,350.** The figures above are
+what v5.40 shipped and are left as they are. Six **structural** checks were added to `t1` on 2026-08-20
+against the same v5.40 source (md5 `6b7cebb1476ee66e57079b713b94ba75`, unchanged — no engine, constant,
+prose or version-string edit, so this is not a release). They close the gap the v5.40 entry names as
+outstanding: the four S-1 checks above are source-text and prove the IRMAA *sentence* is right without
+being able to see the *engine*, which is how the same sentence was falsified twice. The new checks
+resolve Engine C's `magi` expression by AST — by enclosing function, never by line number — and require
+its term set to match a registered set exactly, order-insensitively, while requiring the two terms that
+historically falsified the prose to be present in **both** the engine and the sentence. All six were
+proven to fail against deliberately reverted builds before being accepted, and the full 22-suite baseline
+was re-run on both legs plus parity: **1,350 passed, 0 failed**, parity 9/9, the v5.39 leg unchanged at
+94. Coverage is deliberately narrower than "IRMAA MAGI": the checks are named for Engine C, because a
+second, four-term MAGI in the Roth tab's render block also reaches the screen under the IRMAA label and
+is **not** covered. No arithmetic has been run against that one; it is recorded as a thing to measure,
+not as a finding.
+
 **Two measurement corrections worth recording.** The scope estimated **28** money fields needing `inputMode` from a label heuristic; exact enumeration by what each input binds and parses found **47**, the 19 missed being fields whose labels carry no currency symbol. And the **version-bump tax was measured rather than recalled**: 35 sites name the current top version across five baseline suites, against the "~25 feature gates" figure carried in several session briefs, with **433** `VER ===` comparisons accumulated in total — `ARCHITECTUREIssues.md` E-7 recorded 202 across five suites at v5.29, so the ladder has more than doubled.
 
 **`t22`'s prior leg is buildable after all.** It had been recorded as unrunnable because `app_v532.mjs` could not be reconstructed from knowledge. Built from the v5.38 source instead, `t22` runs its full prior-leg comparison: **74 passed / 1 failed → 85 passed / 0 failed.**
