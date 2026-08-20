@@ -1,5 +1,66 @@
 # Changelog
 
+## Unreleased — `qa/` only: the structural S-1 assertion, 2026-08-20
+
+**No version bump, and no release.** Nothing under `src/` changed: no engine, no constant, no prose,
+no version string. The four in-app version sites and `t1`'s STATIC checks are untouched. This entry
+rides with the next release rather than shipping on its own. Source at the time of the change is
+v5.40, `src/DangerClose.jsx` md5 `6b7cebb1476ee66e57079b713b94ba75`.
+
+**What was closed.** v5.40 fixed S-1 — the IRMAA tab described MAGI as five components while Engine C
+summed seven — and pinned it with four **source-text** checks. Those checks prove the *sentence* is
+right and cannot see the *engine*: an eighth term added to `computeIrmaaPlan`'s `magi` tomorrow would
+leave all four green, which is precisely how S-1 arrived twice in the same sentence. Six new checks in
+`qa/qa-baseline/t1_units.mjs` now bind sentence and engine together in both directions, so a change on
+either side fails a test.
+
+The engine expression is resolved by **AST, by enclosing function**, never by line number, so a reflow
+cannot move the target. The registered term set is `ssTaxable + pen_y + work_y + rmdTax_y + conv_y +
+div_y + capGain_y` — verified as exactly seven terms at the time of writing — and the comparison is
+**order-insensitive**: reordering `a + b` to `b + a` changes neither the arithmetic nor the sentence, so
+failing on it would be noise. Membership and count changes still fail.
+
+**Every check was proven to fail against a deliberately reverted build before being accepted**, and the
+five controls were re-run at build time rather than carried from the scope. Adding an eighth term fails
+2; removing `div_y` fails 3; renaming a term fails 1; stripping *"including dividends and realized
+capital gains"* from the sentence fails 2 of the new checks (and 2 of v5.40's existing source-text
+checks, 4 in total); reordering two terms fails 0, as intended.
+
+**Tests: 1,350 passed, 0 failed across 22 suites** — computed from captured suite output, not restated.
+t1 **108 (+6)** · t2 18 · t3 36 · t4 228 · t5 58 · t6 21 · t7 41 · t8 38 · t9 14 · t10 163 · t11 40 ·
+t12 23 · t13 42 · t14 44 · t15 11 · t16 24 · t17 74 · t18 67 · t19 65 · t20 100 · t21 50 · t22 85.
+Monte Carlo parity across the v5.39 → v5.40 boundary runs **9/9**. The v5.39 leg is unchanged at 94,
+which is the version gate holding. A suite-by-suite diff of the runs before and after the edit shows
+exactly one line moved: `t1-v540`, 102 → 108.
+
+**Limitations, stated plainly.**
+
+- **Coverage is narrower than "IRMAA MAGI," by design.** The checks are named for **Engine C**, not for
+  IRMAA generally, because a second `magi` — four terms, in the Roth tab's render block — also reaches
+  the screen under the IRMAA label and is **deliberately not covered here**. It omits RMDs, dividends,
+  realized capital gains, and one spouse's earned income relative to Engine C's seven. **No arithmetic
+  has been run against it**, so it is not claimed to be a defect, is not claimed to be new, and its
+  direction is a hypothesis rather than a measurement. It is recorded as a thing to measure.
+- **The exact term set is a change-detector and carries a per-release cost.** It fires on any membership
+  change to Engine C's `magi`, including legitimate ones, and it is version-gated inside `if (V540)` —
+  a future build that legitimately changes `magi` registers a new expected set under its own tag rather
+  than editing v5.40's. That is one more version-gated site to hand-service each release, named here
+  rather than absorbed quietly.
+- **The app currently shows two different MAGI figures under one IRMAA label with no cue that they are
+  computed differently.** Whether to disclose that while it is still unmeasured is an open decision for
+  the maintainer; disclosing it would be a `src/` change and therefore a different scope with a version
+  bump.
+
+**Separately, and not fixed here: `qa/domdiff_withdrawal.mjs` has been red since v5.40 shipped.** Its
+IRMAA check asserts strict identity of a region anchored from `Tax YrAffectsMAGI` to `Not tax advice`,
+and v5.40's corrected S-1 sentence lives inside that region — so the instrument fails on the release's
+own intended prose change. **Measured, not assumed: with the sentence excised from both legs the regions
+are byte-identical, so no figure moved.** The instrument was re-scoped for exactly this situation at
+v5.24 and again at v5.36 (excise-by-anchor, with the excision itself asserted to have changed); it was
+not re-scoped at v5.40, and the v5.40 entry does not disclose it. It is cross-version tooling and is not
+counted in any release headline, but a permanently-red instrument stops being read. Recorded here; the
+fix belongs to whichever release next opens it.
+
 ## v5.40 — four disclosures that had drifted off their engines, and the phone-sized fixes, 2026-08-19
 
 Nothing in this release changes a computed figure. Every item corrects a sentence that no longer

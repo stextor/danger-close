@@ -83,7 +83,7 @@ forward from that v5.38 re-hash.
 | `t17_engineC_exact.mjs` | `5eef71d2385058d847cc53018a3fae67` | `qa/t17_engineC_exact.mjs` |
 | `t18_engineB_exact.mjs` | `7272f97181e0764204eef087f3810380` | `qa/t18_engineB_exact.mjs` |
 | `t19_engineD_exact.mjs` | `256ff3681548966735569c5034164dac` | `qa/t19_engineD_exact.mjs` |
-| `t1_units.mjs` | `768e9fe22882babe6f262ca55282b2a8` | `qa/qa-baseline/t1_units.mjs` — **rolled to v5.40** (+8 extinction invariants, `v540` registered) |
+| `t1_units.mjs` | `5d205a18b18af683f4f7c71f824ee8ac` | `qa/qa-baseline/t1_units.mjs` — **rolled 2026-08-20** (+6 structural S-1 checks inside the existing `if (V540)` block; `qa/`-only, no version bump — see the `Unreleased` CHANGELOG entry). Previously `768e9fe22882babe6f262ca55282b2a8` at the v5.40 ship (+8 extinction invariants, `v540` registered) |
 | `t20_other_taxtype.mjs` | `9640ce1e4006c7ba6b30a29639ef428b` | `qa/t20_other_taxtype.mjs` |
 | `t21_tools.mjs` | `c5fb4c712135028f1effa039c84e0b90` | `qa/t21_tools.mjs` |
 | `t22_aca_floor.mjs` | `e8b52e06c38a095ac6eea830ac2dd84d` | `qa/t22_aca_floor.mjs` |
