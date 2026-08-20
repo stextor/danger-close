@@ -1,8 +1,11 @@
 // Cross-version DOM comparison of the TAX-BEARING TABS (Engine D's Withdrawal tab, Engine B's
-// Taxes tab, Engine C's IRMAA tab). Default pair v536 -> v537.
+// Taxes tab, Engine C's IRMAA tab). Default pair v539 -> v540.
 // RE-POINT THE DEFAULT EVERY RELEASE — it is hardcoded, and a stale default dies at module
 // load looking for a bundle the run folder does not contain (observed at the v5.34 build:
 // the committed default was still v529 -> v530, four releases behind).
+// ⚠ AND THE HEADER IS PART OF THE DEFAULT. Through v5.40 this line read "v536 -> v537" while
+// the code read v537 -> v538 — the file contradicted itself, so neither statement could be
+// trusted and a reader had to run it to find out. Roll BOTH in the same edit.
 //
 // WHY THIS EXISTS: the release scope assumed t4 and t12 would witness the hoist.
 // They do not — a +10% inflation perturbation inside the hoisted function moves
@@ -46,12 +49,37 @@
 // be anchored to a region only the claimed mechanism can move; no such DOM region exists.
 // The identity form remains CONTROL-COMPATIBLE: a dead Engine B/C call site on either leg
 // desynchronizes that leg's figures from the other's and fails the identity check loudly.
+// ── v5.40 RE-POINT + IRMAA ANCHOR FIX (2026-08-20) — three releases of neglect ─────────────
+// This file was left pointing at v536→v537 through v5.38, v5.39 AND v5.40, against its own
+// "re-point every release" rule three lines up. Run on the v539→v540 pair it failed ONE
+// check — IRMAA figures-identity — and the failure was NOT a regression: v5.40 deliberately
+// rewrote the IRMAA MAGI sentence (the S-1 disclosure fix, in that release's CHANGELOG).
+//
+// The real defect it exposed is an ASYMMETRY between the two figures-only regions, and it
+// had been latent since v5.36. Both are meant to be anchored PAST every piece of changed
+// copy (see the E-20 note in the Taxes section). Measured on this pair:
+//   TAXES  "Eff RateBracket" → "Estimates only"     = 1,739 chars, ends on the last figure.
+//                                                     Its footnote sits OUTSIDE the region.
+//   IRMAA  "Tax YrAffectsMAGI" → "Not tax advice"   = 1,972 chars, of which the last ~1,070
+//                                                     are PROSE: the "Affects"/headroom
+//                                                     explainer AND the CMS/MAGI footnote.
+// So the Taxes anchor was placed correctly and the IRMAA one never was — it stopped after
+// the footnote instead of before it, making a FIGURES check hostage to any disclosure edit.
+// The end anchor moves to the first prose token, giving a 913-char region that is figures
+// and nothing else, byte-identical across the pair, and still control-compatible: a dead
+// Engine C call site on either leg desynchronizes that leg's MAGI column and fails it.
+// Verified: the divergence sat at offset 1,734 of 1,972 — every figure ahead of it matched.
+//
+// The copy change itself is now witnessed EXPLICITLY rather than incidentally, one assertion
+// per leg. ⚠ Those two are PAIR-SPECIFIC and must be re-pointed with the default (they are
+// the §B2 "gate the inversion to the builds it is true for" rule: each leg asserts the copy
+// that was true for its own build, so the frozen v5.39 leg keeps replaying green).
 //
 // usage: node domdiff_withdrawal.mjs <verA> <verB>
 import { JSDOM } from "jsdom";
 import { createRequire } from "module";
 
-const [VA, VB] = [process.argv[2] || "v537", process.argv[3] || "v538"];
+const [VA, VB] = [process.argv[2] || "v539", process.argv[3] || "v540"];
 
 // One mount per leg; the three tabs are read by clicking through the mounted app (the t4
 // idiom), because six separate jsdom mounts cost more time than this file is worth.
@@ -128,7 +156,7 @@ ck(`${VA}: schedule table rendered`, !!A.schedule, "not found");
 ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
 {
   const wA = stripV(A.withdrawal), wB = stripV(B.withdrawal);
-  ck("WITHDRAWAL: the tab is byte-identical across the pair (v5.37 moves MAGI but never a rendered cell \u2014 measured)",
+  ck("WITHDRAWAL: the tab is byte-identical across the pair (v5.40 is disclosure + mechanics; no rendered cell moves \u2014 measured)",
      wA === wB, firstDiff(wA, wB));
   // The v5.35 claims must still hold on BOTH sides — this is the assertion that would catch
   // the v5.36 work over-reaching into the prior release's disclosures.
@@ -162,7 +190,7 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   // At v536\u2192v537 Engine B's inputs are byte-identical by census, so the honest claim is
   // IDENTITY \u2014 and it still witnesses the wiring: kill the call site on either leg and that
   // leg's figures lose the gains, desynchronize from the other's, and fail here.
-  ck("TAXES: the year-table FIGURES are IDENTICAL across the pair (v5.37 cannot reach Engine B \u2014 census; a dead call site on either leg fails this)",
+  ck("TAXES: the year-table FIGURES are IDENTICAL across the pair (v5.40 does not move Engine B\u2019s inputs; a dead call site on either leg fails this)",
      figA.length > 0 && figA === figB, figA.length ? firstDiff(figA, figB) : "region not found");
   // The v5.36 copy now rides on BOTH legs \u2014 the prior-leg $0-default branch is retired with v5.35.
   for (const [V, t] of [[VA, A.taxes], [VB, B.taxes]]) {
@@ -185,12 +213,25 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
     ck(`${label}: start resolves before end`, a >= 0 && b > a, `${a}..${b}`);
     return a >= 0 && b > a ? s.slice(a, b) : "";
   };
-  const magA = region2(iA, "Tax YrAffectsMAGI", "Not tax advice", `${VA} irmaa MAGI-table`);
-  const magB = region2(iB, "Tax YrAffectsMAGI", "Not tax advice", `${VB} irmaa MAGI-table`);
+  // ⚠ END ANCHOR IS THE FIRST PROSE TOKEN, NOT THE FOOTNOTE. It read "Not tax advice" until
+  // 2026-08-20, which sits AFTER the explainer and the CMS/MAGI footnote — so ~1,070 chars of
+  // disclosure copy rode inside a check whose name says FIGURES, and the v5.40 MAGI-sentence
+  // fix failed it. Anchored here the region is the year table and nothing else.
+  const magA = region2(iA, "Tax YrAffectsMAGI", '"Affects" = the calendar year', `${VA} irmaa MAGI-table`);
+  const magB = region2(iB, "Tax YrAffectsMAGI", '"Affects" = the calendar year', `${VB} irmaa MAGI-table`);
   // v5.37 FLIP \u2014 same reasoning as the Taxes section: identity is the strongest true claim
-  // for this pair, and a dead Engine C call site on either leg fails it.
-  ck("IRMAA: the MAGI-table FIGURES are IDENTICAL across the pair (v5.37 cannot reach Engine C \u2014 census; a dead call site on either leg fails this)",
+  // for this pair, and a dead Engine C call site on either leg fails it. Still true at v5.40:
+  // that release changed the SENTENCE describing MAGI, not the MAGI arithmetic.
+  ck("IRMAA: the MAGI-table FIGURES are IDENTICAL across the pair (v5.40 changed the MAGI sentence, not the number \u2014 a dead call site on either leg fails this)",
      magA.length > 0 && magA === magB, magA.length ? firstDiff(magA, magB) : "region not found");
+  // The v5.40 S-1 fix, witnessed per leg. PAIR-SPECIFIC \u2014 re-point with the default.
+  ck(`${VA} irmaa: carries the PRE-v5.40 MAGI sentence (the narrow component list)`,
+     /MAGI here uses the simplified 85%-of-SS assumption plus pension, earned income, RMDs, and conversions/.test(A.irmaa));
+  ck(`${VB} irmaa: carries the v5.40 MAGI sentence, naming dividends and realized gains (S-1)`,
+     /MAGI here is the model's own projected income for the year/.test(B.irmaa) &&
+     /including dividends and realized capital gains/.test(B.irmaa));
+  ck(`${VB} EXTINCTION: the narrow pre-v5.40 MAGI component list is gone`,
+     !/plus pension, earned income, RMDs, and conversions/.test(B.irmaa));
   ck(`${VA} irmaa: the tab still renders its cliff framing`, /cliff/i.test(A.irmaa));
   ck(`${VB} irmaa: the tab still renders its cliff framing`, /cliff/i.test(B.irmaa));
 }
