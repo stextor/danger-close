@@ -44,21 +44,32 @@
 > **Two causes:** `stateTaxAnnual` models **no state standard deduction** at all, and each flat rate
 > approximates a mid-to-upper *marginal* rate rather than an effective one.
 >
-> **What survives is the disclosure half**, and it is better founded: six states collapse a graduated
-> schedule silently while four disclose it — a real inconsistency whichever way the arithmetic points.
+> **What survives is the disclosure half** — ⚠ **and that half was itself corrected on 2026-08-20.**
+> It was written up as six states collapsing a graduated schedule *silently*. They do not: the
+> approximation is disclosed in the Field Manual twice and beneath the state selector on My Data for
+> every jurisdiction (`src/DangerClose.jsx` L11889). What actually varies is how much detail each
+> state's `note` adds — and only **three** states name progressivity (CA, DC, OR; Maryland was
+> misfiled), against 30 whose notes say nothing about the shape of the schedule. That is
+> **inconsistent per-state detail, severity Low.**
 >
-> **Consequence for this ranking.** Item 2 belonged this high *because* of the direction. With it
-> corrected, the **disclosure half stays** (undisclosed is undisclosed) but the **precision half drops
-> below** the structural extinction assertion and E-7's version-ladder registry, both cheaper and both
-> making every later release safer.
+> **Consequence for this ranking.** Item 2 belonged this high *because* of the direction. With the
+> direction corrected the precision half drops below the structural extinction assertion and E-7's
+> version-ladder registry; with the disclosure half corrected too, **item 2 has no live high-priority
+> half left at all** and should not be read as ranked second any longer.
 >
 > Full evidence and limits — only New York is verified against a sourced schedule, California is
-> indicative, four states are unmeasured — in `AUDIT_D3_STATE_TAX_DIRECTION.md`.
+> indicative, four states are unmeasured, and the exact count of silently-collapsed schedules is
+> **unmeasured between 6 and 26** — in `AUDIT_D3_STATE_TAX_DIRECTION.md` §3.
 >
 > **This is the audit's own failure mode recurring:** the direction label was carried forward from
 > v5.29 and ranked without ever being re-measured — not wrong when written so much as never checked.
 > It surfaced during premise verification for a D-3 scope, which is where scope discipline is meant
 > to catch exactly this.
+>
+> **And it recurred inside the correction.** The replacement claim — "undisclosed" — was inference,
+> written in a session that had already read the disclosure text, and it stood for a day in four
+> committed documents before being executed against source. A correction earns no credit in advance;
+> it needs its own check. See `AUDIT_D3_STATE_TAX_DIRECTION.md` §6.
 
 ## The summary
 
@@ -76,10 +87,11 @@ the disclosures are the only way anyone can know what was computed — so prose 
 engines attacks the product at its foundation, not at its edges. Ranked below that are three live
 modelling and interface gaps. **The largest open taxation gap, now that the two above it have
 closed, is that progressive state income-tax schedules are approximated by a single effective flat
-rate**, and six of those states — Hawaii, Minnesota, New Jersey, New York, Vermont and Wisconsin —
-collapse a graduated schedule with no note admitting it, while California, DC, Maryland and Oregon
-disclose exactly the same approximation, so a user comparing two states cannot tell they are reading
-the same kind of estimate. **The ACA
+rate** — a simplification the app **does** disclose, in the Field Manual twice and beneath the state
+selector on every jurisdiction. What is uneven is the per-state detail: three states (California, DC,
+Oregon) name the progressivity in their own note and the rest do not, so a user comparing two states
+reads different amounts about the same modelling choice. *(Corrected 2026-08-20; as first written this
+sentence claimed six states disclosed nothing at all, which was false.)* **The ACA
 sub-floor remains a live trap**: below 100% of the federal poverty level the app prints $0 because
 Medicaid governs there and is not modelled, indistinguishable on screen from the $0 the statute
 produces above the subsidy cliff, so a single dollar of MAGI across that line swings the modelled
@@ -117,7 +129,7 @@ code probably did** — a lesson the audit learned by getting findings wrong in 
 | # | Issue | Where | Direction | Status |
 |---|---|---|---|---|
 | **1** | Disclosures drift off the engines beneath them | `DangerClose.jsx` L9792 vs L4399 (S-1); `METHODOLOGY.md` L537–538 vs L5096 (S-3); `METHODOLOGY.md` L696–699 (D-6) | Understates conservatism; the one instance that overstated it (D-1) is fixed | **OPEN** — S-1, S-3, D-6 |
-| **2** | State schedules → single flat rate; **six states do not disclose it** | `DangerClose.jsx` L1005 ff. `STATE_RULES`, L1091 `stateTaxAnnual` | **Conservative** below ~$600–900K income — *corrected 2026-08-19, see below* | **OPEN** (D-3, disclosure half) |
+| **2** | State schedules → single flat rate; **disclosed app-wide, but per-state `note` detail is uneven** | `DangerClose.jsx` L1005–1057 `STATE_RULES`, L1091 `stateTaxAnnual`, L11889 the rendered note | **Conservative** below ~$600–900K income — *direction corrected 2026-08-19; disclosure claim corrected 2026-08-20, see below* | **OPEN but LOW** (D-3) — **no longer belongs at rank 2** |
 | **3** | ACA sub-floor $0 reads as computed | ACA panel L9265, strategy-table flag L9302, Verify assertion L1343 | Both — inverts comparisons across the line | **PARTIAL** (D-8b) — flagged v5.32, discontinuity remains |
 | **4** | Nine small-screen usability defects | `UsabilityFlaws.md` F-1…F-9 | User-side | **OPEN** — disclosed at v5.39, unfixed |
 | **5** | Verdict instruments and records both fail silently | `ARCHITECTUREIssues.md` E-19 (High), E-20, E-14/E-18 | Creator-side, compounding | **PARTIAL** — `qa/controls.sh` adopted; records repaired 2026-08-18 |

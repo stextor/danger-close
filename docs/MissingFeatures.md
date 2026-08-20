@@ -48,7 +48,7 @@ shipped in the window: v5.32, v5.34, v5.35, v5.36, v5.37, v5.38.
 |---|---|
 | **D-1** | ✅ **CLOSED.** Both false disclosures corrected. See the box at D-1 |
 | **D-2** | ✅ **CLOSED at v5.36.** See the box at D-2 |
-| **D-3** | ⚠ **DIRECTION CORRECTED and finding SPLIT** — see the box at D-3 |
+| **D-3** | ⚠ **DIRECTION CORRECTED and finding SPLIT (2026-08-19); disclosure half CORRECTED DOWN to Low (2026-08-20)** — see the box at D-3 |
 | **D-4** | unchanged — `METHODOLOGY.md` L120 still discloses it |
 | **D-5** | unchanged — disclosure still at `TAX_CONSTS.QCD_LIMIT` (now L850) |
 | **D-6** | ⚠ **CORRECTED — the v5.31 sweep's resolution was too broad.** See the box at D-6 |
@@ -307,11 +307,18 @@ consistent with existing precedent and would not require per-lot tracking.
 >
 > **The finding splits, and the halves have different urgency:**
 >
-> - **Disclosure half — REAL, and now the defensible core.** Six states collapse a graduated schedule
->   with **no note admitting it**: HI, MN, NJ, NY, VT, WI. Four disclose the same approximation: CA,
->   DC, MD, OR. Undisclosed stays undisclosed whichever way the error points, and the inconsistency
->   means a user comparing two states cannot tell they are reading the same kind of estimate.
->   **Ship the six notes with the next release** — a string per state, no engine change.
+> - **Disclosure half — ⚠ OVERSTATED, corrected 2026-08-20, now LOW.** As written on 2026-08-19 this
+>   said six states (HI, MN, NJ, NY, VT, WI) collapse a graduated schedule with **no note admitting
+>   it** while four (CA, DC, MD, OR) disclose it, and called that D-3's defensible core. **False on
+>   both counts.** The approximation is disclosed in three places — Field Manual §13, the Field
+>   Manual's Taxes tab entry, and `src/DangerClose.jsx` **L11889**, which renders *"2026 approx: X.XX%
+>   effective … — [note]. Verify against your state's rules."* beneath the My Data selector for **every**
+>   jurisdiction. All six named states carry notes. And Maryland was misfiled: its note says
+>   *"effective"* but never *"progressive"*, so the disclosing set is **three** — CA, DC, OR — against **30**
+>   whose notes say nothing about the shape of the schedule (26 excluding the four `retExempt` states). The exact count in between is **unmeasured**. What is left: **per-state `note`
+>   detail is inconsistent, severity Low**, plus the setup wizard's state picker (L3393) showing no
+>   note at all. **Do not ship a release for this** — let the note tidy ride along with the next
+>   release that opens `STATE_RULES`. Full working: `AUDIT_D3_STATE_TAX_DIRECTION.md` §3.
 > - **Precision half — HELD, and de-prioritised.** Its rank rested on the direction. Full graduated
 >   brackets are **declined**: ~300 numbers across 51 jurisdictions re-indexed annually, and a stale
 >   bracket table is worse than an honest flat approximation because it looks precise. If it proceeds,
@@ -319,9 +326,10 @@ consistent with existing precedent and would not require per-lot tracking.
 >   rates against a reference retiree household (~102 numbers, no structural change).
 >
 > **Limits:** only New York is verified against a sourced schedule. California is **indicative only**
-> (recalled brackets). HI, MN, VT, WI are **unmeasured** — their inclusion rests on the rate gap and
-> the missing note, which is a disclosure claim, not a magnitude claim. **All six need the New York
-> treatment before any recalibration ships.**
+> (recalled brackets). HI, MN, VT, WI are **unmeasured** — and the "missing note" half of the reason
+> they were listed is **withdrawn** (2026-08-20). **Every state a recalibration would touch needs the
+> New York treatment before it ships**, and the set is a census that has not been run, not the six
+> named above.
 >
 > **Separate item found in passing:** the engine returns **$0** New Jersey tax for this household
 > (`excl65: 75000 × 2` exceeds the income). NJ's real exclusion is generous and income-limited and the
@@ -497,7 +505,7 @@ person per tier) and the remedy is a form. **Exposure:** user-side.
 |---|---|---|---|---|---|
 | ~~D-1~~ | OBBBA bonus disclosure | ✅ **CLOSED** — both disclosures fixed, constants Verify-checked | — | — | — |
 | ~~D-2~~ | Realized gains from ordinary drawdown | ✅ **CLOSED at v5.36** — engine + both tax engines + render | — | — | — |
-| **D-3** | State schedules → flat rate | **SPLIT 2026-08-19** — disclosure half real, precision half held | **CONSERVATIVE** (direction corrected) | Disclosure: build now. Precision: declined/held | Disclosure **Medium**; precision **Low** |
+| **D-3** | State schedules → flat rate | **SPLIT 2026-08-19; disclosure half CORRECTED DOWN 2026-08-20** — approximation is disclosed, only per-state note detail is uneven | **CONSERVATIVE** (direction corrected) | Note tidy: ride along, no release of its own. Precision: declined/held | Both halves **Low** — **no live high-priority half** |
 | **D-4** | Itemized deductions not modelled | open, unchanged | Conservative | Minority case | Low-Med |
 | **D-6** | IRMAA SSA-44 relief | **partially disclosed** — survivor trigger yes, work stoppage no | Conservative | Build (one clause) | Low |
 | **D-5** | QCD one-time CRT/CGA election | open, unchanged | Conservative | **Decline** | Very low |

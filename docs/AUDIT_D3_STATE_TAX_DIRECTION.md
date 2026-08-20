@@ -5,8 +5,9 @@
 | Date | 2026-08-19 |
 | Build measured | **v5.40** · `src/DangerClose.jsx` md5 `6b7cebb1476ee66e57079b713b94ba75` · tree `db8f142` |
 | Trigger | Premise verification while scoping a D-3 fix. **Stopped and reported rather than adapting the scope.** |
-| Result | **D-3's stated direction is false for the app's target population.** The approximation is **conservative**, not optimistic. A second, better-founded finding is separated out: **six states collapse a graduated schedule with no disclosure.** |
+| Result | **D-3's stated direction is false for the app's target population.** The approximation is **conservative**, not optimistic. A second finding was separated out and, on 2026-08-20, **corrected downward**: the approximation is disclosed in three places, so what remains is **inconsistent per-state note detail, severity Low** — see §3. |
 | Fixes made | **None.** This is an audit. |
+| Amended | **2026-08-20** — §3 rewritten (see the box at §3), §4 and §5 followed. Verified against v5.40 source, committed tree `c7c8156`. |
 
 ---
 
@@ -65,28 +66,101 @@ Two causes, both pushing the same way:
    its fifth bracket. A retiree at $120,000 never reaches it — their top marginal rate is 5.4% and
    their effective rate on NY taxable income is about 4.9%.
 
-## 3. The finding that survives, and is better founded
+## 3. The finding that survives — and it is smaller than this section first claimed
 
-**Six states collapse a graduated schedule with no note admitting it.** Four do disclose it — CA
-(*"progressive 1–13.3%; 6% is a mid-range effective approximation"*), DC, MD, OR. These six do not:
+> ⚠ **CORRECTED 2026-08-20, against v5.40 `src/DangerClose.jsx` md5
+> `6b7cebb1476ee66e57079b713b94ba75` (committed tree `c7c8156`).** As first written, this section
+> called the flat-rate approximation an **"undisclosed simplification"** and named it *"D-3's
+> defensible core."* **Both claims are false.** The approximation is disclosed in three places (§3.0),
+> two of which this same session had already read. What actually varies is how much detail an
+> individual state's `note` string adds *on top of* that disclosure — **inconsistent per-state detail,
+> severity Low**, not an undisclosed gap. The original text is preserved in §3.3 so the correction can
+> be audited. **Consequence: D-3 has no live high-priority half.** The precision half (§2) is
+> conservative and held; this half is Low.
 
-| State | Modelled rate | Top marginal | Note text |
-|---|---|---|---|
-| **HI** Hawaii | 6.75% | 11.00% | mentions DB pensions only |
-| **MN** Minnesota | 6.80% | 9.85% | mentions the SS subtraction only |
-| **NJ** New Jersey | 5.50% | 10.75% | mentions the retirement exclusion only |
-| **NY** New York | 6.00% | 10.90% | mentions the exclusion and NYC only |
-| **VT** Vermont | 6.60% | 8.75% | mentions SS thresholds only |
-| **WI** Wisconsin | 5.30% | 7.65% | mentions the retirement exclusion only |
+### 3.0 The approximation IS disclosed — three sites, each quoted from source
 
-**This is an undisclosed simplification, and it stays undisclosed regardless of which way the error
-points** — the conservative direction buys it no reprieve. It is also *inconsistent*: the same
-approximation is disclosed for CA and silent for NY, so a user comparing the two has no way to know
-they are reading the same kind of estimate.
+1. **Field Manual §13, "Limitations & Known Issues."** Decoded from the one-line `DOCS_HTML` blob at
+   `src/DangerClose.jsx` **L3593** (143,529 runtime bytes; decodes with a JS evaluator, not
+   `JSON.parse`): *"State tax is an approximation layer. The 51-jurisdiction module (see the Taxes tab
+   entry) uses effective flat rates in place of progressive state brackets, treats several
+   income-limited exclusions as unconditional, and skips county/city taxes — pick your state in My
+   Data, then verify against your state's own rules."*
+2. **Field Manual, the Taxes tab entry**, same blob: *"It is an approximation layer: effective rates
+   stand in for progressive brackets and several income-limited exclusions are treated as
+   unconditional — verify your state."*
+3. **In the app itself** — `src/DangerClose.jsx` **L11889**, rendered under the state selector on My
+   Data whenever a state is chosen from the dropdown, for **every** jurisdiction in `STATE_RULES`:
+   *"2026 approx: {rate}% effective … — {note}. Verify against your state's rules."*
 
-**This, not the precision gap, is D-3's defensible core.**
+**One real gap found while checking this, and it is new:** the **setup wizard's** state picker
+(`src/DangerClose.jsx` **L3393**, step 5) offers the same 51-entry dropdown with **no note beneath
+it** — a user who picks a state during setup and never revisits My Data sees the approximation
+disclosed only in the Field Manual. Severity **Low**; recorded here rather than opened as a numbered
+defect.
 
-### 3.1 A separate item found in passing — NJ returns $0
+### 3.1 What actually varies — measured, not inferred
+
+`STATE_RULES` (`src/DangerClose.jsx` **L1005–L1057**) holds **51** entries and gives every one of them
+a **single scalar `rate`**. The collapse of a graduated schedule into one number is therefore
+**universal by construction** — it is not a property of six states. What differs between states is the
+`note` string:
+
+| Group | Count | States |
+|---|---|---|
+| `rate === 0` — no income tax modelled | 9 | AK FL NV NH SD TN TX WA WY |
+| Note itself says "flat" | 9 | AZ GA ID IN LA MA MS NC OH |
+| **Remainder — candidate set: the note does not declare the rate flat** | **33** | AL AR CA CO CT DE DC HI IL IA KS KY ME MD MI MN MO MT NE NJ NM NY ND OK OR PA RI SC UT VT VA WV WI |
+| — of the 33, the note **does** name progressivity | 3 | **CA, DC, OR** |
+| — of the 33, the note is **silent on the shape of the schedule** | **30** | the other 30 |
+| — of those 30, `retExempt: true`, so the rate never bites on retirement income | 4 | IL IA MI PA |
+
+Three corrections follow from that table, and each contradicts the original §3:
+
+- **Maryland is misfiled.** MD's note reads *"state+county effective; pension exclusion ~$36K 65+
+  (traditional IRA excluded from the exclusion — not modeled)"* — it says **"effective"** but never
+  says the schedule is progressive. By this section's own discriminator MD belongs with the silent
+  group. **The disclosing set is three, not four: CA, DC, OR.** Only CA names a numeric range
+  (*"progressive 1–13.3%"*); OR names a ceiling (*"progressive to 9.9%"*); DC names neither
+  (*"progressive; effective approximation"*). So even the "disclosing" set is not uniform with itself.
+- **"With no note" is false.** All six named states carry notes — the original table's own right-hand
+  column says what each one mentions, which contradicts the sentence directly above it.
+- **Six is a sample, not a census.** The measured set of states whose note is silent on schedule shape
+  is **30**, falling to **26** once the four `retExempt` states are set aside. That is an **upper
+  bound**, not the answer: several of the 26 levy a flat rate in law and belong out of the set
+  entirely, and identifying which requires a **sourced census of 26 state schedules that has NOT been
+  run**. No number between 6 and 26 should be quoted as measured until it is.
+
+### 3.2 Restated finding
+
+**Per-state `note` detail is inconsistent: of the 33 states whose note does not declare the rate flat,
+three name the progressivity the rate stands in for and 30 say nothing about the shape of the schedule
+— and the three do not agree with each other on how much to say.** A user comparing California to New York reads different amounts of detail about the
+same modelling choice — but not, as originally claimed, disclosure versus silence, because the
+approximation itself is stated in the Field Manual twice and beneath the selector on every state.
+
+**Severity: Low.** Exposure is **user-side** but bounded: the governing disclosure is present and the
+per-state note is additive. **Where:** `src/DangerClose.jsx` L1005–L1057, the `note` field.
+**Suspected cause:** notes were written per state as each was added, against no template.
+
+### 3.3 The original §3, preserved for audit
+
+> **Six states collapse a graduated schedule with no note admitting it.** Four do disclose it — CA
+> (*"progressive 1–13.3%; 6% is a mid-range effective approximation"*), DC, MD, OR. These six do not:
+> HI (6.75% modelled / 11.00% top marginal), MN (6.80% / 9.85%), NJ (5.50% / 10.75%), NY (6.00% /
+> 10.90%), VT (6.60% / 8.75%), WI (5.30% / 7.65%).
+>
+> **This is an undisclosed simplification, and it stays undisclosed regardless of which way the error
+> points** — the conservative direction buys it no reprieve. It is also *inconsistent*: the same
+> approximation is disclosed for CA and silent for NY, so a user comparing the two has no way to know
+> they are reading the same kind of estimate.
+>
+> **This, not the precision gap, is D-3's defensible core.**
+>
+> *(The top-marginal figures above were never sourced — see §4. They are carried into this quotation
+> unchanged and remain unverified.)*
+
+### 3.4 A separate item found in passing — NJ returns $0
 
 At $120,000 with two people 65+, the engine returns **$0** New Jersey state tax. `excl65: 75000 × 2 =
 $150,000` exceeds the income, so `retBase` clamps to zero. New Jersey's real exclusion is generous and
@@ -100,30 +174,43 @@ either way.**
   $16,050 deduction and the $20,000/person exclusion were checked against published 2026 material.
 - **California is indicative only.** Model $7,200 vs roughly $3,690 by hand — but the CA brackets used
   were **recalled, not sourced**, and CA is not to be cited as verified.
-- **HI, MN, VT, WI were not measured at all.** Their inclusion in §3 rests on the rate-vs-top-marginal
-  gap and the absence of a note — a disclosure claim, not a magnitude claim. The direction pattern
-  **could break** where a state's exclusions are unusually generous, as NJ's may.
+- **HI, MN, VT, WI were not measured at all.** Their inclusion in the original §3 rested on the
+  rate-vs-top-marginal gap and on a claimed absence of a note. **The absence half is now withdrawn**
+  (§3.0): all four carry notes, and the approximation is disclosed app-wide. What remains unmeasured
+  is the magnitude, and the direction pattern **could break** where a state's exclusions are unusually
+  generous, as NJ's may.
+- **The top-marginal rates quoted in the original §3 were never sourced.** They are preserved in §3.3
+  and remain unverified. None of the 2026-08-20 correction depends on them.
 - **One household shape, one filing status.** No survivor case, no capital gains, no earned income.
 - This is arithmetic against the engine's own function, not a full-plan run through Engine B.
 
-**Before any recalibration ships, all six states need the New York treatment**: sourced schedule,
-hand-computed, compared to engine output to the dollar.
+**Before any recalibration ships, every state it would touch needs the New York treatment**: sourced
+schedule, hand-computed, compared to engine output to the dollar. "The six" was a sample, not a
+census (§3.1).
 
 ## 5. Recommendations
 
 1. **Split D-3.** The *disclosure* half (§3) and the *precision* half (§2) have different urgency and
    should not travel together.
-2. **Ship the six disclosure notes in the next release.** A note string per state, no engine change,
-   no arithmetic risk.
-3. **Hold the precision half** until all six states are measured. **Decline full graduated brackets** —
+2. **~~Ship the six disclosure notes in the next release.~~ Superseded 2026-08-20.** The
+   approximation is already disclosed (§3.0), so there is no disclosure defect to ship against. What
+   is left is a **Low**-severity consistency tidy — bring the `note` strings onto one template so that
+   a state whose modelled rate stands in for a graduated schedule says so. **Let it ride along with
+   the next release that opens `STATE_RULES` for another reason; it does not justify a release of its
+   own.** If it does ship, it should cover the measured set (§3.1), not the six this document
+   originally named, and it should add the missing note beneath the **setup wizard's** picker (L3393).
+3. **Hold the precision half** until the states it would touch are measured. **Decline full graduated brackets** —
    roughly 300 numbers across 51 jurisdictions, re-indexed annually, maintained by one person; a stale
    bracket table is worse than an honest flat approximation because it looks precise. If the precision
    half proceeds, prefer **recalibration**: add a per-state standard-deduction field and re-derive each
    rate as an effective rate against a reference retiree household — about 102 numbers, no structural
    change.
-4. **Drop D-3's priority.** Its rank rested on a direction that does not hold. The structural
-   extinction assertion and E-7's version-ladder registry are both cheaper and now rank above it.
-5. **Correct the record** in `AUDIT_TOP_FIVE_SUMMARY.md` and `MissingFeatures.md`.
+4. **Drop D-3's priority — and after 2026-08-20, drop it further.** Its rank rested on a direction
+   that does not hold; the half that was supposed to survive that correction is Low. **D-3 now has no
+   live high-priority half.** The structural extinction assertion and E-7's version-ladder registry
+   both rank above it.
+5. **Correct the record** in `AUDIT_TOP_FIVE_SUMMARY.md`, `MissingFeatures.md` and
+   `PROJECT_KNOWLEDGE_INDEX.md`. *(Done 2026-08-20 for the disclosure correction.)*
 
 ## 6. What this says about the audit
 
@@ -133,3 +220,16 @@ re-measurement**. The label was never wrong at the time in any checkable sense �
 Every other correction in this audit has come the same way: from executing a check rather than
 re-reading the reasoning. This one cost nothing because it surfaced during premise verification, which
 is exactly where scope discipline is supposed to catch it.
+
+**And then this document did it again.** The 2026-08-20 correction (§3) is the same failure one level
+down: having corrected D-3's *direction* by measurement, the surviving half was written up from
+inference — "these notes don't mention brackets" was rounded to "this is undisclosed" — while the
+disclosure text sat in the same source file the session had already opened. `MissingFeatures.md`
+records the project's own rule for exactly this, from an earlier instance: ***"'Undisclosed' requires
+looking everywhere."*** Its D-3 row had also classified the item **"Disclosed | Not uniform"** since an
+earlier pass, which was correct; the 2026-08-19 revision overwrote a correct classification with a
+worse one.
+
+The general form: **a correction is not self-certifying.** The act of having just caught an error makes
+the replacement claim feel earned, and it is not — it needs its own execution. Three of this
+document's claims have now been fixed by running a check; none by re-reading.
