@@ -2,7 +2,8 @@
 
 | Field | Value |
 |---|---|
-| Status | **SCOPED, NOT BUILDABLE YET.** Three decisions open (§5). Premise verified 2026-08-20 against source |
+| Status | **MEASURED 2026-08-20.** Results in `MEASUREMENT_roth_tab_magi_v5_40.md`. D-A/D-B/D-D resolved; **D-C open**, and now answerable. §3 step 3 partial (§6 of the measurement) |
+| ⚠ Revision 2 | 2026-08-20. **§1(c) below was wrong and is corrected in place** — see `STOP-REPORT-v5_40-roth-tab-section86.md`. The direction hypothesis in §1 "Net" was also wrong, and so was the inversion my stop report proposed to replace it. Both are superseded by §1d |
 | Build | **v5.40** · `src/DangerClose.jsx` md5 `6b7cebb1476ee66e57079b713b94ba75` · committed tree `027fbd2` |
 | Asked for by | `SCOPE_STRUCTURAL_MAGI_EXTINCTION.md` §6, which opened this rather than closing it; D4 of that scope waits on the outcome |
 | Kind | **A measurement first.** Whether anything is fixed is decided by what the measurement says, not here |
@@ -65,15 +66,51 @@ ladder runs `_ladderStart … _ladderEnd` where `rothLadderEnd = single ? rothLa
   the measurement must produce.
 
 **(c) §6 misses a divergence entirely, and it is in the SS term.** Engine C sets
-`ssTaxable = ssTot * 0.85` — a flat 85%, unconditional (L4394). The Roth block runs the graduated §86
-provisional-income worksheet against filing-status-selected thresholds (L8831–8844) and can return
-anything from **0** to 85% of benefits. So the two expressions disagree on a term §6 treated as shared.
+`ssTaxable = ssTot * 0.85` — a flat 85%, unconditional (L4394). The Roth block runs its own
+provisional-income test against filing-status-selected thresholds (L8831–8844). So the two
+expressions disagree on a term §6 treated as shared.
+
+⚠ **CORRECTED 2026-08-20 (revision 2). This paragraph originally said the Roth block "runs the
+graduated §86 provisional-income worksheet" and "can return anything from 0 to 85% of benefits."
+Both claims are false, and they were load-bearing.** The block is a two-tier approximation:
+
+- Above the adjusted base amount it returns **exactly 85% of benefits, always** — a cliff. §86(a)(2)'s
+  limb (A), the graduated phase-in, is absent.
+- In the middle tier it caps at **0.85 × benefits** where §86(a)(1) caps at **½ × benefits**.
+
+**A correct implementation already exists in the file and the Roth tab does not call it:**
+`taxableSSPortion` at **L4990–4997**, inside `computeTaxPlan` (Engine B, L4902). v5.40 therefore
+carries **three** Social Security treatments — Engine B's worksheet, Engine C's flat 85%, and the
+Roth tab's cliff.
+
+Measured consequence: the cliff **overstates** taxable SS by up to $69,650 on a swept grid, and by
+$40,580 on the shipped example household at a $12,000 conversion. It is live only for conversions
+between roughly **$11,600 and $59,741** on that household — a band that does **not** contain the
+$70,000 slider default, which is why the measured SS error at the default is **exactly $0 in every
+ladder year**. Full arithmetic in the stop report and the measurement.
 
 **Net.** The Roth tab's `magi` differs from Engine C's by **three genuine terms** — `rmdTax_y`
 (conditional), `div_y`, `capGain_y` — plus a **fourth divergence in `ssTaxable`**, not four omissions
-including a spouse's wages. Every difference identified so far runs the same way: **Roth tab ≤ Engine C.**
-That makes §6's direction hypothesis *more* plausible, not less — which is precisely why it now needs
-arithmetic instead of another round of reasoning.
+including a spouse's wages.
+
+**(d) The direction, MEASURED 2026-08-20 — this supersedes the sentence that stood here.** The
+original text argued every difference runs the same way, making §6's "understates, flatters the plan"
+hypothesis *more* plausible. The stop report then argued the reverse, that the SS cliff inverts it.
+**Both were over-generalisations, and the arithmetic settles it: the direction depends on the
+conversion slider.**
+
+| Slider (shipped example household) | Net error over the ladder | Direction |
+|---|---|---|
+| $0 – $10,000 | −$313K to −$332K | understates |
+| **$15,000 – $20,000** | **+$52K / +$20K** | **overstates** — the SS cliff dominates |
+| $25,000 – $60,000 | −$5K to −$152K | understates |
+| **$70,000 (shipped default)** | **−$139,095, 12 of 12 years** | **understates** |
+
+At the default, §6's original hypothesis is **correct**: the app understates MAGI, in the
+non-conservative direction, in every ladder year. The SS term contributes **$0** there; **96.4% of
+the error is the omitted RMD.** But the sign flips twice at low slider positions, so no
+direction claim is true unconditionally — which is exactly why this scope refused to accept one
+without arithmetic.
 
 **One thing the measurement may find that this scope is not about.** Engine C's flat 85% overstates
 taxable SS for any household below the upper provisional threshold. Against Engine C the Roth tab looks
@@ -135,6 +172,17 @@ rather than carried again.
 
 ## 5. Open decisions
 
+**RESOLVED 2026-08-20: D-A both households · D-B include the SS term · D-D (new) revise and resume.**
+D-B was vindicated — the SS term turned out to be the one that inverted the working hypothesis, and
+excluding it would have produced a net figure wrong by construction, exactly as predicted below.
+
+**D-C is now answerable and remains open.** The measurement's §8 recommends splitting the fix by
+evidence — `rmdTax_y` first (96% of the error, no new plumbing), the SS cliff second (correct and
+cheap, but it moves `grossTaxable`), `div_y`/`capGain_y` last and only after a **threshold-straddling
+third household** is run. That third household is the one gap that matters: **zero of the 20 measured
+ladder years across both households changes IRMAA tier**, so the dollar error currently drives no
+user-visible verdict, and whether it ever does is exactly what a straddling household would decide.
+
 | # | Decision | Notes |
 |---|---|---|
 | **D-A** | **Which household?** The shipped example, or one built to make the omission bite (different RMD-start years, funded taxable sleeve, live ladder)? | **Recommend: both.** The example household answers "does this affect the user in front of us"; the constructed one answers "how bad can it get". One is not a substitute for the other, and running the example alone risks a $0 result that reads as *no problem* when it means *this household does not exercise it*. Two households, both hand-computed |
@@ -153,8 +201,9 @@ rather than carried again.
 
 ## 7. Cautions for whoever picks this up
 
-- **§A freshness check first.** It was clean at 2026-08-20: 76 of 78 pool files matching the committed
-  tree, the two exceptions being the retained prior source and `README-FIRST.md`.
+- **§A freshness check first.** Re-run 2026-08-20 at the measurement session: **82 of 83 pool files
+  content-identical** to the committed tree, both directions, the single exception being the retained
+  prior source. (`README-FIRST.md` is no longer in the pool, hence 83 rather than 78.)
 - **The rendered figure is the claim, not the variable.** L9118 prints `MAGI $XXXK` — rounded to
   thousands. A sub-$500 divergence is invisible on screen and a $499 error rounds away. Measure the
   variable *and* the rendering; they support different claims.
