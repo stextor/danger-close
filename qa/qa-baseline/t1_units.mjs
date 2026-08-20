@@ -14,7 +14,7 @@ const VER = process.argv[2] || "v510";
 // change the CHECK COUNT: with an unregistered tag t3 ran 35 checks instead of 36, and the count is
 // the number that goes in the release headline. Registering a new version in the ladders below is
 // now mandatory, and an unregistered tag stops the run instead of quietly testing the wrong thing.
-const KNOWN_VERSIONS = ["v510", "v5101", "v5102", "v511", "v512", "v513", "v514", "v515", "v516", "v517", "v518", "v519", "v520", "v521", "v522", "v523", "v524", "v525", "v526", "v527", "v528", "v529", "v530", "v531", "v532", "v533", "v534", "v535", "v536", "v537", "v538", "v539", "v540", "v592"];
+const KNOWN_VERSIONS = ["v510", "v5101", "v5102", "v511", "v512", "v513", "v514", "v515", "v516", "v517", "v518", "v519", "v520", "v521", "v522", "v523", "v524", "v525", "v526", "v527", "v528", "v529", "v530", "v531", "v532", "v533", "v534", "v535", "v536", "v537", "v538", "v539", "v540", "v541", "v592"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is not registered in this suite.");
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -25,10 +25,11 @@ if (!KNOWN_VERSIONS.includes(VER)) {
 const IS510 = VER !== "v592"; // v5.10-family features (v510 and v5101)
 const IS5101 = VER === "v5101";
 const IS5102 = VER === "v5102";
-const IS511 = VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540"));
-const IS514 = VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540")); // v5.14 IRMAA indexation Verify checks present
+const IS511 = VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541"));
+const IS514 = VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541")); // v5.14 IRMAA indexation Verify checks present
 const SRC = fs.readFileSync(new URL(`../${VER}.jsx`, import.meta.url), "utf8");
-const V540 = VER === "v540";
+const V540 = VER === "v540" || VER === "v541"; // v5.41 carries the v5.40 pins forward
+const V541 = VER === "v541";
 // v5.33: parsed once so STATIC claims about call sites are AST facts, not line matches.
 const { Parser: _AcornParser } = await import("acorn");
 const _acornJsx = (await import("acorn-jsx")).default;
@@ -56,7 +57,7 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
   // see them — it rendered green on constants it had never checked.
   // v5.33 adds NO row (decision 4, 2026-08-13): the embedded-gain field is recorded but not
   // read by any engine, so there is nothing for a Verify row to check against a source.
-  const _verifyCount = (VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540"))) ? 66 : VER === "v531" ? 62 : IS514 ? 57 : IS510 ? 54 : 53;
+  const _verifyCount = (VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541"))) ? 66 : VER === "v531" ? 62 : IS514 ? 57 : IS510 ? 54 : 53;
   T(`VERIFY: check count is ${_verifyCount}`, checks.length === _verifyCount, `got ${checks.length}`);
   const bad = checks.filter(c => !c.pass);
   T("VERIFY: every check passes", bad.length === 0, bad.map(b => b.name).join("; "));
@@ -87,7 +88,7 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
 // read back off the source. Asserting a constant against itself proves nothing.
 {
   const o = g.OBBBA_CONSTS ? g.OBBBA_CONSTS() : undefined;
-  if (VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540"))) {
+  if (VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541"))) {
     T("OBBBA: constants block exists and is exported", o && typeof o === "object", String(o));
     T("OBBBA: deduction is $6,000 per person 65+", o.SENIOR_BONUS_PER_PERSON === 6000, String(o?.SENIOR_BONUS_PER_PERSON));
     T("OBBBA: single MAGI phase-out starts at $75,000", o.SENIOR_BONUS_THR_SGL === 75000, String(o?.SENIOR_BONUS_THR_SGL));
@@ -220,7 +221,7 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
 
 // ═══ Statics — the source file itself ═══
 {
-  const verStr = VER === "v540" ? "v5.40" : VER === "v539" ? "v5.39" : VER === "v538" ? "v5.38" : VER === "v537" ? "v5.37" : VER === "v536" ? "v5.36" : VER === "v535" ? "v5.35" : VER === "v534" ? "v5.34" : VER === "v533" ? "v5.33" : VER === "v532" ? "v5.32" : VER === "v531" ? "v5.31" : VER === "v530" ? "v5.30" : VER === "v529" ? "v5.29" : VER === "v528" ? "v5.28" : VER === "v527" ? "v5.27" : VER === "v526" ? "v5.26" : VER === "v525" ? "v5.25" : VER === "v524" ? "v5.24" : VER === "v523" ? "v5.23" : VER === "v522" ? "v5.22" : VER === "v521" ? "v5.21" : VER === "v520" ? "v5.20" : VER === "v519" ? "v5.19" : VER === "v518" ? "v5.18" : VER === "v517" ? "v5.17" : VER === "v516" ? "v5.16" : VER === "v515" ? "v5.15" : VER === "v514" ? "v5.14" : VER === "v513" ? "v5.13" : VER === "v512" ? "v5.12" : VER === "v511" ? "v5.11" : IS5102 ? "v5.10.2" : IS5101 ? "v5.10.1" : IS510 ? "v5.10" : "v5.9.2";
+  const verStr = VER === "v541" ? "v5.41" : VER === "v541" ? "v5.41" : VER === "v540" ? "v5.40" : VER === "v539" ? "v5.39" : VER === "v538" ? "v5.38" : VER === "v537" ? "v5.37" : VER === "v536" ? "v5.36" : VER === "v535" ? "v5.35" : VER === "v534" ? "v5.34" : VER === "v533" ? "v5.33" : VER === "v532" ? "v5.32" : VER === "v531" ? "v5.31" : VER === "v530" ? "v5.30" : VER === "v529" ? "v5.29" : VER === "v528" ? "v5.28" : VER === "v527" ? "v5.27" : VER === "v526" ? "v5.26" : VER === "v525" ? "v5.25" : VER === "v524" ? "v5.24" : VER === "v523" ? "v5.23" : VER === "v522" ? "v5.22" : VER === "v521" ? "v5.21" : VER === "v520" ? "v5.20" : VER === "v519" ? "v5.19" : VER === "v518" ? "v5.18" : VER === "v517" ? "v5.17" : VER === "v516" ? "v5.16" : VER === "v515" ? "v5.15" : VER === "v514" ? "v5.14" : VER === "v513" ? "v5.13" : VER === "v512" ? "v5.12" : VER === "v511" ? "v5.11" : IS5102 ? "v5.10.2" : IS5101 ? "v5.10.1" : IS510 ? "v5.10" : "v5.9.2";
   T(`STATIC: field-manual callsign carries ${verStr}`, SRC.includes(`FIELD MANUAL · ${verStr} · PUBLIC BUILD`));
   T(`STATIC: end-of-manual footer carries ${verStr}`, SRC.includes(`DANGER CLOSE ${verStr} · documentation regenerated`));
   // v5.10.2: the remaining two of the four in-app version sites, asserted exactly
@@ -305,6 +306,65 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
       _terms.includes("div_y") && /dividends/.test(_magiSentenceStruct));
     T("STRUCT S-1: capGain_y is in the engine AND realized capital gains is in the sentence",
       _terms.includes("capGain_y") && /realized capital gains/.test(_magiSentenceStruct));
+
+    // ─── STRUCT S-2 (v5.41) — the ROTH TAB's magi term set ───────────────────────────────
+    // WHY THIS EXISTS. S-1 above pins Engine C's magi by AST and left the Roth tab's
+    // unpinned, and that gap is precisely why the omitted-RMD defect survived: the two
+    // expressions answer the same question and nothing compared them. This pins the render
+    // block's set the same way, so a term cannot silently go missing from it again.
+    // GATED PER LEG (OPERATIONS §B2): frozen builds legitimately carry the OLD set, so each
+    // leg asserts the set that was true for its own build. This is NOT a defect pin — it is
+    // the same invariant evaluated against two different correct answers.
+    const _rothMagi = (() => {
+      // The ladder-loop `magi` lives in an anonymous render closure, so find it by its
+      // neighbours rather than by a function name: the declarator whose init sums conv_y
+      // and taxableSS.
+      let found = null;
+      const walk = (n) => {
+        if (!n || typeof n !== "object" || found) return;
+        if (n.type === "VariableDeclarator" && n.id && n.id.name === "magi" && n.init) {
+          const t = _addTerms(n.init);
+          // Discriminate against Engine D's magi, which ALSO sums taxableSS and conv_y but
+          // uses the pen_y/work_y accessors. The render block is the one using the
+          // `pension` / `spouseBWork` locals.
+          if (t.includes("pension") && t.includes("spouseBWork") && t.includes("conv_y")) { found = t; return; }
+        }
+        for (const k of Object.keys(n)) {
+          const v = n[k];
+          if (Array.isArray(v)) v.forEach(walk); else if (v && typeof v.type === "string") walk(v);
+        }
+      };
+      walk(AST);
+      return found;
+    })();
+    T("STRUCT S-2: the Roth tab declares a magi summing taxableSS and conv_y", !!_rothMagi,
+      _rothMagi ? _rothMagi.join(" + ") : "not found");
+    const _S2_EXPECT = V541
+      ? ["pension", "spouseBWork", "taxableSS", "conv_y", "rmd_y"]
+      : ["pension", "spouseBWork", "taxableSS", "conv_y"];
+    T(`STRUCT S-2: Roth-tab magi term set is exactly the registered set for this build (${_S2_EXPECT.length} terms, order-insensitive)`,
+      !!_rothMagi && _rothMagi.length === _S2_EXPECT.length &&
+      JSON.stringify([..._rothMagi].sort()) === JSON.stringify([..._S2_EXPECT].sort()),
+      _rothMagi ? _rothMagi.join(" + ") : "not found");
+    if (V541) {
+      // The three sites move together or the omissions compound (scope §3): an RMD missing
+      // from the Sec.86 base understates taxableSS, which understates magi a SECOND time.
+      T("STRUCT S-2 (V541): rmd_y is also in the Sec.86 provisional base (nonSSincome)",
+        /const nonSSincome = pension \+ spouseBWork \+ conv_y \+ rmd_y;/.test(SRC));
+      T("STRUCT S-2 (V541): rmd_y is also in grossTaxable",
+        /const grossTaxable = pension \+ spouseBWork \+ taxableSS \+ conv_y \+ rmd_y;/.test(SRC));
+      // BASIS (Pub. 590-B): the divisor applies to the PRIOR 31 December balance. A test that
+      // only checks rmdDivisor(75)===24.6 passes happily against the grown balance, which
+      // inflates every RMD by (1+g) silently — so pin the operand, not just the divisor.
+      T("STRUCT S-2 (V541): the ladder RMD divides the PRIOR year-end balance, not the grown one",
+        /rmdA_y = _ageA_y >= _rmdAgeARoth \? Math\.max\(0, tradBalA\) \/ rmdDivisor\(_ageA_y\)/.test(SRC) &&
+        !/rmdA_y = [^;]*_grownA/.test(SRC));
+      // D-2 Option C: the replay is gone, so the tab carries ONE Traditional balance.
+      T("STRUCT S-2 (V541): the _perRmd convert-then-grow replay is retired",
+        !/a = Math\.max\(0, a - cA\) \* \(1 \+ tradGrowth\)/.test(SRC));
+      T("STRUCT S-2 (V541): the RMD cards read the ladder rows' per-person balances",
+        /_balOf = \(who, r\) => \(who === "A" \? r\.tradBalA : r\.tradBalB\)/.test(SRC));
+    }
   }
 
   T("STATIC: no API keys in source", !/sk-ant-[A-Za-z0-9_-]{20,}/.test(SRC));
@@ -331,7 +391,7 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
 // leg, which legitimately still has none — the v5.28 defect, not a fix.
 {
   const IS533 = VER === "v533";
-  const IS536 = VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540"));
+  const IS536 = VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541"));
   const IS534 = VER === "v534" || VER === "v535" || IS536;
   const HAS_GAIN_FIELD = IS533 || IS534;
   const P0 = g.PORTFOLIO();
