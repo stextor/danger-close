@@ -61,10 +61,33 @@ v5.40 artifact **rebuilds byte-identical from project knowledge alone** — `dis
 was missing `src/index.html`, so the §G claim that knowledge holds a complete build scaffold had been
 asserted for eleven releases and never demonstrated.
 
-**Disclosed limitation.** `qa/controls.sh` is still the v5.38 edition and expects a `v538.jsx` in the
-run-folder root, so it cannot execute against the current pair; the two controls above were run by hand
-instead. That is now the second per-release instrument found stale by neglect in one session, and it is
-**not fixed here**.
+**Disclosed limitation, and the decision taken on it.** `qa/controls.sh` is still the v5.38 edition and
+hardcodes `SRC=v538.jsx` — a source that rotated out of knowledge at v5.40 — so it cannot execute against
+the current pair, and the two controls above were run by hand instead. **Not fixed here, deliberately:**
+the maintainer's decision was to leave it stale and re-point it in whichever session next needs controls,
+re-verifying each patch fires at that time.
+
+**That decision rests on a correction worth recording, because this entry's first draft got it wrong.**
+The two instruments were initially reported together as "stale by neglect," which conflated two opposite
+failure modes:
+
+- **`domdiff_withdrawal.mjs` rotted silently, and that is why it mattered.** `runsuite.sh` passes the pair
+  explicitly on every run, so the hardcoded default is never exercised and the "a stale default dies loudly
+  at module load" protection recorded at v5.34 is switched off by the runner. What actually went stale was
+  the *assertions*: for three releases it ran v5.37-era claims against whatever pair it was handed and
+  returned 28 green checks nobody had confirmed were true of that pair. It went red only because v5.40
+  happened to edit copy inside an asserted region. That is §B2's failure mode — a green number meaning less
+  than it looks like.
+- **`qa/controls.sh` cannot rot silently.** Its source is hardcoded with no override and it is not in
+  `runsuite.sh` at all; it is invoked by hand at a build, so it fails immediately and visibly at point of
+  use. The cost is a future session's time, not a false green.
+
+So the risk was asymmetric, the dangerous instrument is the one that was fixed, and leaving the loud one
+for its next user is a defensible trade rather than an oversight. **The structural option was considered and
+declined**: converting each instrument's "re-point every release" rule into a suite assertion would only be
+a tripwire, not a proof — `runsuite.sh` overrides the default anyway, so such a check would force a human to
+open the file rather than verify the assertions are right for the pair — and it would add a hand-service
+site every release. Recorded here so the next session inherits the reasoning, not just the state.
 
 ## Unreleased — `qa/` only: the structural S-1 assertion, 2026-08-20
 
