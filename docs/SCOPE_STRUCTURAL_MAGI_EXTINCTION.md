@@ -181,6 +181,23 @@ realized capital gains, and spouse A's earned income relative to Engine C's seve
 to both the Roth tab's rendered figure and Engine C's to the dollar. Section C standard — arithmetic,
 not inspection.
 
+⚠ **SUPERSEDED 2026-08-20 — see `SCOPE_ROTH_TAB_MAGI_MEASUREMENT.md`, and note that this section is
+wrong in three places.** Premise verification for that scope resolved the two expressions term by term:
+
+- **"omits … spouse A's earned income" is FALSE.** Engine C's `work_y` and the Roth block's
+  `spouseBWork` are the same construction — `spouseBWorkTaper` plus ordinary streams — anchored to the
+  same year. Neither models spouse A earned income at all.
+- **"omits RMDs" is CONDITIONAL.** The ladder ends at each spouse's own pre-RMD year, household ladder to
+  the LATER of the two, so a single filer or a couple whose RMD-start years coincide has **zero** ladder
+  years containing an RMD. It bites only in the tail years of a couple with different RMD-start years.
+- **A fourth divergence was missed.** Engine C uses a flat `ssTot * 0.85`; the Roth block runs the
+  graduated §86 provisional-income worksheet. The SS term is not shared, and it is the one that might
+  run the other way — against the LAW rather than against Engine C, the Roth tab may be the closer of the
+  two on that term.
+
+The direction hypothesis is unchanged and, if anything, strengthened: every identified difference runs
+Roth tab ≤ Engine C. It remains a hypothesis. No arithmetic has been run.
+
 This is the duplicated-expression-drifting-apart class `qa/tools/diverge.cjs` exists for (OPERATIONS
 §B1), and it was found by an AST walk during premise verification.
 

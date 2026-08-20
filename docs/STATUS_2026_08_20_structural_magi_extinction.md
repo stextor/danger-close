@@ -118,21 +118,51 @@ stops being read, which is the failure mode worth avoiding.
 **Recommendation:** re-scope it (excise the S-1 sentence by anchor, assert the excised span differs) in
 whichever release next opens it. It does not warrant a release of its own.
 
-## 7. Open for the maintainer
+## 7. Decisions taken 2026-08-20, after the build
 
-**D4 — still yours, still unrecommended.** The app shows two MAGI figures under one IRMAA label with no
-cue that they are computed differently. Disclose now, or wait until L8847 is measured. No recommendation
-is offered, for the reason the scope gives: it is a product-voice call about the app's contract with its
-user, not a technical one. Disclosing would be a `src/` change and a different scope with a version bump.
+Both open items were put to the maintainer and resolved the same day.
 
-**§6 of the scope — L8847 remains a thing to measure, not a finding.** Untouched, deliberately. No
-arithmetic has been run against it.
+**D4 — resolved as "neither, measure first."** The scope framed it as disclose-now vs stay-silent. Both
+were rejected: a disclosure written today could only say the two figures may differ by an unknown amount,
+which is an admission of not having looked rather than a disclosure, and staying silent leaves an
+undisclosed simplification the maintainer cannot yet describe. **L8847 becomes the next scope**
+(`SCOPE_ROTH_TAB_MAGI_MEASUREMENT.md`), and the measurement decides both the fix question and the
+disclosure wording. D4 is not closed — it is now waiting on a number instead of on a judgement call.
 
-**`TESTING.md` now understates the suite, and I did not edit it.** Its headline reads *"App total 1,344
-across 22 suites"* and `t1` *"+94 → 102"*; the committed suite now runs 1,350 and 108. Editing it was not
-in scope, and a non-release edit would make it describe a build state that has not shipped — but leaving
-it is the drift class this project bleeds from. **Recommendation: roll those two figures when the next
-release rolls `TESTING.md` anyway**, rather than now. Say the word if you would rather have it now.
+**`TESTING.md` — resolved as "add, don't edit."** Rolling the v5.40 figures in place would falsify the
+release record (102 and 1,344 are historically true of what v5.40 shipped); leaving the file silent
+misrepresents what the repo runs today. A short additive paragraph now sits under the v5.40 breakdown
+recording the `qa/`-only change to 108 / 1,350 against the same unchanged source. Shipped.
 
-**`AUDIT_TOP_FIVE_SUMMARY.md` row 1 still cites L9792 for S-1**; the sentence is at L9800. Out of scope
-per §8, re-confirmed here so the next reader does not rediscover it.
+⚠ **Two staleness items found while making that edit, neither fixed, both reported.**
+
+- **`TESTING.md`'s header is two releases stale.** It reads *"Current build: v5.38 · md5 `b8d1…` · 1275
+  automated checks green"* while v5.40 has shipped and the suite runs 1,350. The v5.39 and v5.40 sections
+  were both added below it without the header being rolled. **Not fixed here** — correcting it asserts a
+  current-build identity and a leg breakdown, which is a release-mechanics roll (OPERATIONS §I) rather
+  than the additive note that was agreed. **Recommend rolling it at the next release**, in the same pass
+  as the manifest.
+- **The manifest contradicts itself on the prior build.** The current-build warning box says the prior
+  build is now **v5.39** (`7070018f2699503dfac4ca8e0e1b2feb`), but the *Prior build* table below still
+  reads **v5.38**. The v5.39 hash in the warning box is correct — independently confirmed, it is the leg
+  that ran at 94 in this session. Same fix pass as above; same reason for not doing it here.
+
+Both are the recorded-block-goes-stale class this project has now hit six times (E-14 / E-18). Neither is
+substantive on its own; the pattern is.
+
+## 8. Still open
+
+**The L8847 measurement itself.** Scoped as `SCOPE_ROTH_TAB_MAGI_MEASUREMENT.md`, **not yet buildable** —
+three decisions open (D-A which household, D-B whether to include the SS-treatment divergence, D-C the
+product-boundary question if the fix turns out to be large). Two carry recommendations; D-C deliberately
+does not, and is better answered once the numbers exist. **No arithmetic has been run against L8847.**
+
+**Premise verification for that scope corrected the parent scope's §6 in three places**, which is worth
+recording because §6 has been quoted twice already: "omits spouse A's earned income" is **false** (the two
+work terms are the same construction with the same anchor); "omits RMDs" is **conditional** (structurally
+vacuous for a single filer or a couple whose RMD-start years coincide); and a fourth divergence was
+**missed** — Engine C's flat 85% SS against the Roth block's graduated §86 worksheet, the one term that
+might run the other way. §6 is annotated in place rather than rewritten.
+
+**`AUDIT_TOP_FIVE_SUMMARY.md` row 1 still cites L9792 for S-1**; the sentence is at L9800. Out of scope,
+re-confirmed here so the next reader does not rediscover it.
