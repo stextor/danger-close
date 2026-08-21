@@ -193,13 +193,46 @@ every household measured, so it was adopted for consistency between engines rath
 effect. Each spouse's conversion is drawn only from within their own ladder window — the window
 ending the year before that person's RMDs begin — which is the split the RMD cards already used.
 
+**Social Security is phased in under §86, not stepped (v5.42).** Above the adjusted base amount
+($44,000 married filing jointly, $34,000 single) the includible share of benefits is
+`min( 0.85 × benefits, 0.85 × (provisional − adjusted base) + min( para1, ½(adjusted base − base) ) )`,
+where `para1 = min( ½ × benefits, ½ × (provisional − base) )` per §86(a)(1). Through v5.41 this tab
+took the upper tier as a **cliff** — it assigned the full 85% of benefits the moment provisional
+income crossed the adjusted base, skipping the phase-in entirely. The two expressions converge only
+once the 85%-of-benefits cap binds, at provisional income of about $92,141 on the example household;
+below that the cliff overstated the taxable share, by up to 5.3× and by as much as $38,030 of MAGI in
+a single year. Both thresholds are selected by filing status per year, so a survivor's years use the
+single-filer pair.
+
+**This correction runs in the OPTIMISTIC direction**, which is unusual here and is stated plainly for
+that reason: MAGI, taxable income, tax, marginal rate, bracket headroom and IRMAA risk all fall for
+affected households. The convention elsewhere in this document — pick the conservative assumption
+when one must be chosen — applies to *assumptions*. This was not an assumption but a misreading of a
+statute, and the statute governs.
+
+**The tab is now more correct than the engine it reconciles to.** The IRMAA engine does not implement
+§86 at all: it treats 85% of benefits as taxable regardless of provisional income. Below provisional
+income of roughly $92,000 that engine and this tab therefore disagree, by up to $46,920. The
+disagreement is real, documented, and deliberately left standing: correcting the engine is an engine
+change with its own regression surface, and it is sequenced with the taxable-income work rather than
+carried on the back of a render-block fix. Any future invariant comparing the two must be phrased as
+*the term sets are equal, the values may differ*.
+
 **Known limits, unchanged by this release.** The ladder's MAGI still omits dividend income and
 realized capital gains, which the IRMAA engine includes; those are a separate and larger correction.
-The §86 treatment on this tab remains a two-tier approximation rather than the full worksheet, and
-the RMD basis on this tab is each spouse's whole Traditional balance rather than the RMD-bearing
+The RMD basis on this tab is each spouse's whole Traditional balance rather than the RMD-bearing
 portion of it, so a non-qualified annuity balance entered under Other accounts contributes to the
-modelled distribution although it carries none. Both simplifications run in the conservative
-direction — they overstate income — and both are recorded here rather than corrected silently.
+modelled distribution although it carries none.
+
+The **middle** §86 tier on this tab also remains uncorrected, and was found during the v5.42 work
+rather than being previously known. Between the base and adjusted base amounts the statute caps the
+includible amount at ½ of benefits; this tab caps it at 85%. It can only bite where provisional
+income falls inside that band *and* total benefits are small — under $12,000 joint, under $9,000
+single — because above that the overall 85% cap binds first. Swept across the whole band the
+overstatement is bounded at **$2,468** joint and **$1,850** single, and it is $0 on the example
+household. It is the same defect class as the omitted ½-benefits cap in the taxable-income engine and
+is scheduled with it. All three of these simplifications run in the conservative direction — they
+overstate income — and all are recorded here rather than corrected silently.
 
 - **Strategy comparator:** six named policies (none / fill-12% / fill-22% / fill-24% / stay-under-
   IRMAA / current plan) run through the full deterministic projection; reports lifetime tax,

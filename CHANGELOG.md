@@ -1,5 +1,120 @@
 # Changelog
 
+## v5.42 — the Roth tab now phases Social Security in under §86 instead of jumping to 85%, 2026-08-21
+
+
+**Build.** `src/DangerClose.jsx` md5 `976a03fe16cd401b9735bbb21675bf5f` · built
+`index.html` md5 `2ede63fd5d64c7318da975437218e7b1` · prior build v5.41
+(`18152190e9b699529642ae2983b3ae2c`).
+
+
+### Read this first: your numbers on the Roth tab may go DOWN, and that is the correction
+
+Recent releases have all moved in the same direction — the plan looked *worse* afterwards, because
+the model had been flattering it. **This one goes the other way.** On the Roth conversion tab, MAGI,
+taxable income, tax, marginal rate and 24%-bracket headroom all *fall* for affected households, some
+of them by a lot, and an IRMAA verdict can flip from triggered to not triggered.
+
+If you had already read your figures off that tab, you are entitled to know that **the earlier number
+was wrong, not that the new one is optimistic.** The app was overstating the taxable share of your
+Social Security by as much as **5.3×**.
+
+### What changed
+
+**The conversion ladder treated the upper Social Security threshold as a cliff.** The code read, as a
+single expression:
+
+```
+if (provisional > _ssT2) taxableSS = Math.round(totalSS * 0.85);
+```
+
+26 U.S.C. §86(a)(2) does not do that. Above the adjusted base amount ($44,000 married filing jointly,
+$34,000 single) the includible share **phases in**:
+
+```
+includible = min( 0.85 × benefits,
+                  0.85 × (provisional − adjusted base) + min( para1, ½(adjusted base − base) ) )
+     para1 = min( ½ × benefits, ½ × (provisional − base) )                            [§86(a)(1)]
+```
+
+The app skipped the entire phase-in and jumped straight to the full 85% of benefits the instant
+provisional income crossed the adjusted base. The two formulas converge only once the 85% cap binds —
+at provisional income of about **$92,141** on the shipped example household.
+
+**Measured on the example household, ladder years 2032–2038:**
+
+| Conversion slider | Provisional | taxable SS before → after | MAGI before → after | Change |
+|---|---|---|---|---|
+| $15,000 | $47,400 | $46,920 → **$8,890** | $66,720 → **$28,690** | **−$38,030** |
+| $20,000 | $52,400 | $46,920 → $13,140 | $71,720 → $37,940 | −$33,780 |
+| $30,000 | $62,400 | $46,920 → $21,640 | $81,720 → $56,440 | −$25,280 |
+| $50,000 | $82,400 | $46,920 → $38,640 | $101,720 → $93,440 | −$8,280 |
+| **$70,000 (default)** | $102,400 | $46,920 → $46,920 | $121,720 → $121,720 | **$0** |
+
+**Why this survived so long.** At the $70,000 conversion default every ladder year is already past
+convergence, so the defect is worth exactly $0 there — and the default is the position anyone
+checking the tab sees first. It only appears once you move the slider down. The v5.41 build notes
+described this as *"real, cheap, $0 on every household measured"*; that was true only of the one
+position where it happens to be zero, and this release corrects that record.
+
+### Limitations and approximations, stated rather than implied
+
+- **The Roth ladder's figures are still read at ±$500.** The ladder is computed inside the render
+  block, so its only output path is the rendered table, which rounds MAGI to the nearest $1,000. The
+  effect corrected here is $4,200–$38,030, so the rounding does not threaten it — but the tab does
+  not offer dollar-exact MAGI, and this release does not change that.
+- **The Roth tab is now more correct than the engine it is normally reconciled against.** The IRMAA
+  engine does not implement §86 at all: it treats 85% of benefits as taxable regardless of provisional
+  income. Below provisional income of roughly $92,000 the tab and that engine now legitimately
+  disagree, by up to $46,920. That is a known and documented divergence, not a new defect, and it is
+  deliberately not resolved here. See METHODOLOGY.
+- **A second, smaller §86 defect was found during this work and is NOT fixed.** The *middle* tier of
+  the same function caps the includible amount at 85% of benefits where the statute caps it at ½. It
+  affects only households whose provisional income falls between the two thresholds *and* whose total
+  benefits are under $12,000 (under $9,000 for a single filer), and it is bounded at **$2,468**
+  (joint) / **$1,850** (single). It overstates, like the defect fixed above. It is $0 on the example
+  household. It is pinned by a dated test so it stays visible, and it is scheduled with the related
+  correction in the taxable-income engine rather than being fixed unannounced here.
+- Nothing outside the Roth conversion tab moves. The engines are untouched.
+
+### Tests
+
+**2,085 checks verify this release, 0 failing**, plus 82 tooling checks (not counted in the app
+total). Per suite:
+
+| Suite | v5.41 leg | v5.42 leg |
+|---|---|---|
+| t1 units & statics | 117 | **121** |
+| t2 engines | 18 | 18 |
+| t3 roth | 36 | 36 |
+| t4 dom | 228 | 228 |
+| t5 storage | 58 | 58 |
+| t6 single | 21 | 21 |
+| t10 tax cases | 163 | 163 |
+| t23 roth ladder RMD | 25 | 25 |
+| **t24 §86 phase-in (new)** | **34** | **38** |
+
+MC parity across the pair **9/9**. Feature suites, one leg each: t7 41 · t8 38 · t9 14 · t11 40 ·
+t12 23 · t13 42 · t14 44 · t15 11 · t16 24 · t17 74 · t18 67 · t19 65 · t20 100 · t22 85. Tooling:
+t21 50 · DOM diff 32.
+
+**`t24` is new** and is the extinction invariant for this defect class. Because the fix is invisible
+at the default slider position, the suite **drives the conversion slider** to five positions —
+$15,000, $20,000, $30,000, $50,000 and $70,000 — and checks every ladder year at each against an
+independent implementation of §86 transcribed from the statute rather than from the app. The $70,000
+position is included precisely because it is the $0 case that made the defect look harmless. The
+v5.41 leg asserts the old cliff figures deliberately, so the pair is the before/after witness.
+
+**t23 is unchanged and still green at 25/25 on both legs** — its pins sit at the $70,000 default,
+where this release correctly moves nothing. That is the evidence the fix did not overreach.
+
+**Six negative controls were run and five fired.** Perturbing the phase-in slope, the
+½(adjusted base − base) term, the overall 85% cap, and the adjusted base amount each turned t24 red;
+reverting the filing-status threshold selection turned t1 red. The sixth — changing para1's cap from
+½ to 85% of benefits — is a **behavioural no-op on the example household**, because that cap is
+swallowed by the $6,000 term whenever benefits exceed $12,000. It is caught structurally by t1, and
+the reasoning is now asserted in t24 rather than left as a note.
+
 ## v5.41 — the Roth tab's MAGI now includes required minimum distributions, 2026-08-20
 
 
