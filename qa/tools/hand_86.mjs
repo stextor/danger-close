@@ -56,4 +56,20 @@ export function engineC(ss) { return ss * 0.85; }
 // The three app copies below are transcribed verbatim from v5.40 source and exist
 // only so the comparison is reproducible.
 //
-// TOOLING. Asserts nothing. Counted in NO release check total (OPERATIONS §B1).
+// PROMOTED TO SUITE ORACLE at v5.42. `statute86` is now imported by
+// `qa/t24_ss86_phasein.mjs`, which asserts the Roth tab's rendered ladder against it
+// at five conversion-slider positions, AND by `qa/tools/derive_v542.mjs`, which
+// produced that release's expected figures. One oracle on both sides is deliberate:
+// at v5.41 the expectations came from a second, independently written script that had
+// silently drifted from the release's own scope, and the build brief's table shipped
+// wrong in two separate ways. A single oracle cannot drift from itself.
+//
+// ⚠ THE APP COPIES BELOW ARE v5.40 TRANSCRIPTIONS AND ARE NOW HISTORY, NOT CURRENT.
+// `rothTab` records the pre-v5.42 CLIFF, which v5.42 replaced with the §86(a)(2)
+// phase-in; t24 carries its own copy of that cliff for the frozen-leg assertions
+// rather than reading this one. Do not treat these three as a description of any
+// shipping build without re-transcribing them first.
+//
+// STILL TOOLING IN THE COUNTING SENSE: it asserts nothing and is counted in NO
+// release check total (OPERATIONS §B1). Being imported by a suite does not make its
+// contents checks.
