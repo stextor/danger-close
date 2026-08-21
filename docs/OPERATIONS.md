@@ -372,7 +372,23 @@ per §N (self-contained except the intentional Google Fonts link, **and smoke-te
 suite from a clean clone · refresh project knowledge once with the final state, delete-first · retire
 fulfilled `SCOPE_*.md` · publish on GitHub (a normal commit — no tag; see §G) · end the CHANGELOG
 entry with the source and built md5s (the provenance line, §G — this replaces what a tag would
-have given us).
+have given us) · **package per §L — one zip, two destinations, with the suite re-run from the
+packaged copies before the zip is cut.**
+
+**§L is the last step, and it is where the SESSION's work ends.** Everything after it — uploading to
+the repo, deleting and re-uploading the pool, making the commit — is the maintainer's, done FROM the
+zip. That boundary is why this step gets skipped: the list above ends in "publish on GitHub," which a
+session cannot do, so there is no natural marker for "my part is finished." The marker is the zip. A
+release is not done when the suite is green; it is done when the zip is cut and verified.
+
+**Added 2026-08-21, after the step was missed at the v5.42 ship.** §L was reachable from nowhere —
+no section cross-referenced it — while the project instructions, which are injected into every
+conversation, described a *different* deliverable layout (`repo-update/`, no zip). The session
+followed the always-present instruction and packaging was never read. Both halves are now fixed: the
+instructions route here instead of competing, and this checklist names the step. Third recorded
+instance of two documents disagreeing with nothing to compare them (cf. §A2 vs the manifest on
+`probe_classify`, and the manifest's deleted rotation-state section). **`qa/tools/package_check.mjs`
+is the executable half — run it on the zip before sending, per §L.**
 
 **Teach the suite the new version tag — expect this every release.** Several suites gate behavior on an
 enumerated list of version tags, and a new tag falls through to the wrong branch. At v5.11 six such
@@ -423,6 +439,16 @@ the suite from the packaged copies; not green → no zip) · the manifest is the
 `src/index.html` (the Vite template), and a **test-only** rewritten copy that exists during §N verification
 and never ships · **`qa/smoke_built.mjs` runs after the build and before the zip is cut** — a release is
 not verified until the built artifact has been *exercised*, not merely inspected.
+
+**The shape of the zip is CHECKED, not remembered** (added 2026-08-21). `qa/tools/package_check.mjs`
+takes the built zip and a fresh clone and verifies what this section requires: the three index files
+are present; every `MANIFEST.txt` md5 matches the file it names; `github/` holds **exactly** the
+files that differ from the committed tree — so both a *missing* file and a needlessly-shipped
+*unchanged* one fail; `knowledge/` is flat, carries no built `index.html`, and holds exactly one
+`DangerClose-v5_*.jsx`; and `MANIFEST.txt` records that the suite was run from the packaged copies.
+Run it before sending. This exists because §L was skipped at v5.42 while being perfectly legible —
+a rule nothing checks is a rule this project has now watched drift five separate times (§B2), and
+the answer here is the same as everywhere else: make it fail loudly.
 
 **Never ship a reconstructed file.** If a needed input is missing from knowledge, stop and ask for it
 rather than inferring it. At v5.11 a reconstructed `src/main.jsx` produced a build that rendered perfectly
