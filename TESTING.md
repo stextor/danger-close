@@ -22,9 +22,11 @@ pair**, with the divergence measured at offset 1,734 of 1,972 so every figure ah
 matched. Three per-leg checks now witness the v5.40 sentence explicitly, gated so the frozen v5.39 leg
 keeps replaying green. **Both controls fired**: killing Engine C's sole call site (AST-resolved, L9719)
 fails the tightened identity check with headroom figures moving $138K → $139K; reverting the disclosure
-fails exactly the two v5.40-side copy checks and leaves figures green. **`qa/controls.sh` remains the
-v5.38 edition and cannot run against the current pair** — the controls above were run by hand, and that
-instrument is not fixed.
+fails exactly the two v5.40-side copy checks and leaves figures green. **`qa/controls.sh` remained the
+v5.38 edition and could not run against the current pair** — the controls above were run by hand.
+**Fixed at v5.42 and the stale file deleted 2026-08-21:** `qa/controls_v542.sh` is the re-pointed
+successor, with all thirteen v5.38-era patch anchors verified to resolve exactly once against the
+current source before the re-point, plus six new controls for the §86 work.
 
 **The published artifact rebuilds byte-identical from project knowledge alone** — verified 2026-08-20
 for the first time, `dist/index.html` md5 `17867edb9af4c5e7e3542aeade594f24`, `qa/smoke_built.mjs`
