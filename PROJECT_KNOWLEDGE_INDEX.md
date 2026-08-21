@@ -159,14 +159,14 @@ v5.41 and committed to `qa/tools/`, but never given manifest rows — so the §A
 not see them and a stale copy would have been invisible by construction, the exact hole §A2 exists
 to close. They are **repo-only by design** (measurement scaffolding, not suites; they assert nothing
 and are counted in no check total), so a session working from the pool alone will not have them and
-should clone.
+should clone. ⚠ **Seven of the original eight still are; `hand_86.mjs` is not** — it became a suite oracle at v5.42 and now lives in the pool. Its row below is a pointer to the §A2 table, not a hash.
 
 | Repo file | md5 | What it is |
 |---|---|---|
 | `qa/tools/d3_cap_sweep.mjs` | `c737fb6aff51bfe020498d73688bf18b` | Sweeps the D-3 conversion cap across the slider range × Traditional balances. Produced the "worst case $252, $0 on both measured households" figure that resolved D-3 |
 | `qa/tools/derive_rmd_expectations.mjs` | `0cfa92b929735f5207eab517c9b7adfb` | The v5.41 pre-build derivation. ⚠ **KNOWN-WRONG IN TWO WAYS, LEFT UNCORRECTED DELIBERATELY** — see the warning below |
 | `qa/tools/engineC_threeway.mjs` | `9caf5fb27267cecc2bfc8d4637283f45` | Drives Engine C against the Roth tab and a hand computation for three-way agreement |
-| `qa/tools/hand_86.mjs` | `ad9688928e9a897b62951e5e22ba280e` | Independent §86 two-tier worksheet, used as the cross-check on taxable Social Security |
+| `qa/tools/hand_86.mjs` | — | ⚠ **NO LONGER REPO-ONLY. See its row in the §A2 table above** (pool name `hand_86.mjs`, md5 `981b425c4fc738abb49046a97cd0fea0`), where it was promoted to SUITE ORACLE at v5.42 and added to the pool. This row is kept as a pointer, not a second hash: it carried `ad9688928e9a897b62951e5e22ba280e` — the pre-v5.42 content — for a few hours after the v5.42 refresh, so the manifest briefly held **two rows for one file with two different hashes**, one of them stale and both claiming authority. Caught by the post-ship sweep on 2026-08-21. **A file promoted out of this section must have its row here converted to a pointer in the same edit**, or the §A2 fallback has two answers and no way to tell which is current |
 | `qa/tools/hh3.mjs` | `8bd8d8cd1c56eac1052ad87cff29671f` | The third (straddling) household fixture — the one whose error is 59% dividends/gains |
 | `qa/tools/ladder_hand.mjs` | `590234628df6a96e84dd3223a54fe2f3` | Hand replication of the ladder loop; one of the two independent scripts agreeing on $167,131 |
 | `qa/tools/render_check.mjs` | `88711e45ca98e8e63599488699ceeca3` | Reads the RENDERED ladder table out of jsdom. ⚠ Its imports are written for the RUN-FOLDER ROOT, not `qa/tools/` — copy it up a level to run it |
