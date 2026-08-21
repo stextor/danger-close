@@ -44,6 +44,10 @@ for t in t7_accrual t8_invariant t9_dom_smoke t11_survivor_rmd t12_engineD_survi
   tally "${t%%_*}" node "$t.mjs"
 done
 tally "t22" node t22_aca_floor.mjs "$PRIOR"
+tally "t23-$PRIOR" node t23_roth_ladder_rmd.mjs "$PRIOR"
+tally "t23-$CUR"   node t23_roth_ladder_rmd.mjs "$CUR"
+tally "t24-$PRIOR" node t24_ss86_phasein.mjs "$PRIOR"
+tally "t24-$CUR"   node t24_ss86_phasein.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

@@ -224,9 +224,22 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   // that release changed the SENTENCE describing MAGI, not the MAGI arithmetic.
   ck("IRMAA: the MAGI-table FIGURES are IDENTICAL across the pair (v5.40 changed the MAGI sentence, not the number \u2014 a dead call site on either leg fails this)",
      magA.length > 0 && magA === magB, magA.length ? firstDiff(magA, magB) : "region not found");
-  // The v5.40 S-1 fix, witnessed per leg. PAIR-SPECIFIC \u2014 re-point with the default.
-  ck(`${VA} irmaa: carries the PRE-v5.40 MAGI sentence (the narrow component list)`,
-     /MAGI here uses the simplified 85%-of-SS assumption plus pension, earned income, RMDs, and conversions/.test(A.irmaa));
+  // The v5.40 S-1 fix, witnessed per leg.
+  // GATED PER LEG (OPERATIONS §B2) at v5.42. This was written for the v5.39→v5.40 pair and
+  // was left PAIR-SPECIFIC with a note to re-point it. It was not re-pointed, so as the pair
+  // rolled forward it kept asserting that the OLD leg carries the PRE-v5.40 sentence — false
+  // for every prior leg from v5.40 onward, and it went red at the v5.42 pair with no code
+  // change. The fix is the §B2 one: assert the copy that was true for each leg's own build,
+  // rather than assuming the old leg predates the change.
+  const PRE_S1 = v => ["v510", "v5101", "v5102", "v592"].includes(v) ||
+    (/^v5(\d\d)$/.test(v) && Number(RegExp.$1) <= 39);
+  if (PRE_S1(VA)) {
+    ck(`${VA} irmaa: carries the PRE-v5.40 MAGI sentence (the narrow component list)`,
+       /MAGI here uses the simplified 85%-of-SS assumption plus pension, earned income, RMDs, and conversions/.test(A.irmaa));
+  } else {
+    ck(`${VA} irmaa: carries the v5.40 MAGI sentence (this leg post-dates the S-1 fix)`,
+       /MAGI here is the model's own projected income for the year/.test(A.irmaa));
+  }
   ck(`${VB} irmaa: carries the v5.40 MAGI sentence, naming dividends and realized gains (S-1)`,
      /MAGI here is the model's own projected income for the year/.test(B.irmaa) &&
      /including dividends and realized capital gains/.test(B.irmaa));
