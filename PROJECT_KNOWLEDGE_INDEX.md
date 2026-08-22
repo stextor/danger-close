@@ -80,6 +80,19 @@ repo-only set was the built `index.html`, the `qa/tools/` scripts the pool delib
 and superseded `dom_entry_*` files, all expected. Rows the v5.42 release changed are rolled below;
 rows not listed as changed carry forward.
 
+⚠ **`OPERATIONS.md` DRIFTED IN THE POOL and was restored 2026-08-22.** The pool copy was the
+pre-§E-correction version (parity still reading **8/8**) while the repo carried the corrected one
+(**9/9**). Since the pool is where a session without a clone reads OPERATIONS, the freshness rule
+itself was being read from a stale copy. **Found by the §A2 content diff, which is the only check
+that looks at documents at all** — no suite reads them. This is the fourth document-drift finding in
+two days and the first that was not self-inflicted by a stale edit base, which is the argument for
+running the §A2 diff *both directions* every time rather than only when something looks wrong.
+
+⚠ **A fourth orphan `dom_entry` row, removed 2026-08-22.** `dom_entry_v543.jsx` rotated out at v5.45
+and its §A2 hash row survived — the same slip as `v541` and `v542` before it, now three releases
+running. **Rotating a leg is two edits: delete the file AND delete its hash row.** If it happens a
+fourth time the rotation block should generate these rows rather than have them hand-maintained.
+
 ⚠ **Three rows were wrong after the v5.44 ship, corrected 2026-08-22.** v5.44's manifest was rolled
 from a clone taken BEFORE the preceding scope package landed, so it silently **reverted** that
 package's manifest edits and layered v5.44's on top: `SCOPE_ITEMS_3_6_perRmd.md`'s row vanished and
@@ -148,7 +161,6 @@ skipped** — the same shape as the rotation/manifest split recorded under Prior
 | `t9_dom_smoke.mjs` | `080c3edbe5f5479ac488d2f54034de69` | `qa/t9_dom_smoke.mjs` |
 | `runsuite.sh` | `9748880966a2e77a18fd2612f252b68c` | `qa/runsuite.sh` — **rolled at v5.42**: `t23` and `t24` adopted into the routine run, both legs each. NEW at v5.36 (parse-only totals runner with the DIED verdict) |
 | `tools_fixture.jsx` | `3602b615b65f09995a9eb1fa17fe4175` | `qa/tools/fixture/fixture.jsx` |
-| `dom_entry_v543.jsx` | `ba5477ce13d08ee66c92bc9f9fead80c` | `qa/qa-baseline/dom_entry_v543.jsx` — now the PRIOR leg's entry |
 | `VERIFY.sh` | `d6c31723f3610a16cd0d2ae2f1931a68` | `VERIFY.sh` (repo root) — row added 2026-08-17; its absence here is how the v5.36→v5.37 pool drift stayed invisible (scope v5.38 §0) |
 
 `probe_classify.mjs` was removed from the pool at v5.30 and now lives only in the repo at
@@ -289,8 +301,8 @@ These are refreshed in place when they change; git holds their history.
 | `hand_86.mjs` | **The §86 statutory oracle**, transcribed from 26 U.S.C. §86 at law.cornell.edu and NOT from any app expression. Imported by `t24` and by `qa/tools/derive_v542.mjs` — one oracle on both sides, deliberately. ⚠ Its three embedded app copies are **v5.40 transcriptions and now history**. Asserts nothing; counted in no total. Repo `qa/tools/` | when the statute or the app copies change |
 | `controls_v542.sh` | **NEW at v5.42** — the re-pointed negative-control program. **Replaces `controls.sh`, which was DELETED from both destinations on 2026-08-21** after being unrunnable since v5.40 (it hardcoded `SRC=v538.jsx`, a source that rotated out of knowledge); its rows here were removed in the same edit, because a manifest row for a file that does not exist is the failure this file has recorded eight times. Recoverable from commit history if ever wanted. All 13 v5.38-era anchors verified to resolve exactly once against v5.42 source before re-pointing; C16–C21 added for the §86 work. Supersedes `controls.sh`. Repo `qa/` | every release |
 | `t20_other_taxtype.mjs` | **100 checks at v5.37** (+1): the exact E2 pin moved $600,000 → **$724,266** (the balance plus its growth — derived by the independent simulator BEFORE the engine edit, matched to six decimals) and a new **E-15 EXTINCTION** (the ordinary excess must EXCEED the opening balance). The trad−annuity exact-0 pin survived the edit at 0.000000 and is documented as REGIME-BOUND (full pool exhaustion) in the fixture. E-17 closed: the dobs are now the strings the run resolves to (1964-01-01/1966-01-01), measured value-identical across all five engines and all eight households. Historical: **NEW at v5.25** — the Other-accounts `taxType` schema, its migration, and the extinction assertion that no engine reads the field. 94 checks. The extinction check is a **permutation test**: the same household runs twice with every type flipped and all five engines must return byte-identical output — so it fires the moment release (c) starts reading the field. Also carries the required equality that inference over the example household reproduces the $111,000 / $21,000 / $15,000 split v5.24 published. Negative-controlled five ways; two of its own assertions were caught passing vacuously on v5.24 and now assert a precondition first. Repo `qa/` |
-| `dom_entry_v544.jsx` | Harness entry for the v5.44 CJS DOM bundle (**current** leg). Repo `qa/qa-baseline/` |
-| `dom_entry_v543.jsx` | Harness entry for the v5.43 CJS DOM bundle (**prior** leg). Repo `qa/qa-baseline/`. ⚠ These two rows named `v536`/`v537` until 2026-08-20 — three releases of rotation moved the pool files and left the rows behind, so the manifest listed two files the pool did not hold. Roll them with the rotation, not after it |
+| `dom_entry_v545.jsx` | Harness entry for the v5.45 CJS DOM bundle (**current** leg). Repo `qa/qa-baseline/` |
+| `dom_entry_v544.jsx` | Harness entry for the v5.44 CJS DOM bundle (**prior** leg). Repo `qa/qa-baseline/`. ⚠ These two rows named `v536`/`v537` until 2026-08-20 — three releases of rotation moved the pool files and left the rows behind, so the manifest listed two files the pool did not hold. Roll them with the rotation, not after it |
 | `runsuite.sh` | **NEW at v5.36 — adopted from session tooling.** Runs both legs, parity, feature suites and tooling, and PARSES every total from suite output (the honesty standard: totals are computed, never restated). A suite printing no count with a non-zero exit reports DIED, not 0/0. Repo `qa/` |
 | `capture_gain_fp.mjs` | **Probe, not a suite — asserts nothing and is counted in no total.** Captures a full-precision fingerprint of every engine that touches the realized-gain rule, which is how `realizeGain`'s extraction was proven a behaviour no-op before any behaviour changed (OPERATIONS §M pattern). Repo `qa/` |
 | `probe_withhold_gain.mjs` | **NEW at v5.34. Probe, not a suite — asserts nothing and is counted in no total.** Reproduces the measurement behind the v5.34 copy correction: under `convTaxFunding: "withhold"` it runs Engine A at three conversion sizes and two declared gain shares on both legs, showing that a residual bill reaches the brokerage and is taxed. Run it as `node probe_withhold_gain.mjs ./app_v534.mjs`. Repo `qa/` |
