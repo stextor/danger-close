@@ -1,5 +1,97 @@
 # Changelog
 
+## v5.43 — the IRMAA engine now applies §86 instead of taxing 85% of Social Security flat, 2026-08-21
+
+**Build.** `src/DangerClose.jsx` md5 `7a9c6cfdaecaed0ebc77e98bfcd98b54` · built `index.html` md5
+`7bbc3db533ca40ad516d43e976f9f574` · prior build v5.42 (`976a03fe16cd401b9735bbb21675bf5f`).
+
+### What changed
+
+**The IRMAA engine did not implement §86 at all.** It read, as a single expression:
+
+```
+const ssTaxable = ssTot * 0.85;
+```
+
+Flat — regardless of provisional income, with no base amount, no adjusted base amount, no phase-in
+and no filing-status thresholds. 26 U.S.C. §86 does none of that. Below the point where the
+85%-of-benefits cap binds, this overstated the includible share of benefits by up to **$46,920** on a
+household with $55,200 of benefits.
+
+Since v5.42 the Roth conversion tab **has** implemented §86. Until this release the app therefore
+answered the same statutory question two different ways depending on which tab was open. It no longer
+does, and the thresholds now come from the same single source the Roth tab uses rather than a third
+hardcoded copy.
+
+### What it is worth — measured, not asserted
+
+On the shipped example household, across 25 projection years:
+
+| | |
+|---|---|
+| Years whose MAGI changes | **3** (2041, 2042, 2043) |
+| MAGI corrections | $101,748 → **$93,492** · $103,746 → **$97,188** · $105,779 → **$100,949** |
+| **IRMAA tier changes** | **none** |
+| **Surcharge changes** | **none — $0** |
+| Rendered *headroom* corrected | up to **$8,256** |
+
+**Direction: like v5.42, this correction makes the plan look better, not worse.** MAGI falls; the
+headroom figure — how much conversion room you have before the next IRMAA threshold — rises. If you
+had read those numbers, the earlier ones were wrong, not the new ones optimistic.
+
+**A claim that is deliberately NOT made.** The case originally argued for this release included the
+possibility that the flat rule could push a household over an IRMAA threshold and show a surcharge it
+did not owe. That came from a synthetic sweep of the income space and **does not reproduce on this
+household** — no tier changes, no surcharge changes. It may still be possible for households with
+very large benefits, and it is not claimed here because it was not measured. The nine survivor years,
+which the sweep argument specifically predicted were at risk, do not move at all: their provisional
+income is already past the point where the flat rule happens to be exact.
+
+### Limitations, stated rather than implied
+
+- The remaining §86 defects are unchanged: the taxable-income engine's omitted ½-benefits cap, and
+  the Roth tab's middle tier, which caps at 85% where the statute caps at ½. Both are the same defect
+  class, both are narrow (bounded at $2,375 and $2,468/$1,850, needing benefits under $12,000), both
+  overstate, and both are scheduled to ship together rather than piecemeal.
+- The Roth tab's MAGI still omits dividends and realized capital gains, which this engine includes.
+- Nothing outside the IRMAA engine moves. The Monte Carlo, stress and Roth engines are untouched.
+
+### Tests
+
+**2,156 checks verify this release, 0 failing** (1,420 of them against this build), plus 86 tooling
+checks. MC parity **9/9** across the pair — this release changes one engine that no fingerprinted
+path calls, and that was measured before the code was written, not assumed.
+
+| Suite | v5.42 leg | v5.43 leg |
+|---|---|---|
+| t1 units & statics | 123 | **127** |
+| **t25 Engine C §86 (new)** | **26** | **29** |
+| t23 roth ladder RMD | 25 | 25 |
+| t24 §86 phase-in | 38 | 38 |
+| t2 · t3 · t4 · t5 · t6 · t10 | 18 · 36 · 228 · 58 · 21 · 163 | identical |
+
+Feature suites, one leg each: t7 41 · t8 38 · t9 14 · t11 40 · t12 23 · t13 42 · t14 44 · t15 11 ·
+t16 24 · t17 74 · t18 67 · t19 65 · t20 100 · t22 85. Tooling: t21 50 · DOM diff 36.
+
+**`t25` is new, and unlike `t24` its assertions are dollar-exact.** The IRMAA engine is reachable at
+module level, so its output is read directly rather than scraped from a rendered table — the ±$500
+rounding ceiling that constrains the Roth tab does not apply. All three corrected years are pinned to
+the dollar on both legs, the twelve unchanged years are pinned as unchanged, and the zero-tier-change
+result is pinned deliberately so the absence of a surcharge effect stays a checked fact.
+
+**Five negative controls were run and all five fired.** Perturbing the phase-in slope, the
+½(adjusted base − base) term, and the overall 85% cap each turned `t25` red; freezing the
+filing-status thresholds to joint, and capping the §86(a)(1) amount at 85% instead of ½, each turned
+`t1` red. The last two are behavioural no-ops on this household for reasons now asserted rather than
+remembered.
+
+**Two test instruments were wrong and were corrected, both found by this release.** A structural pin
+initially passed on the fixed build because the new source comment quotes the retired expression
+verbatim, and the check matched the comment — it is now anchored to line starts. And the DOM diff
+asserted that the IRMAA figures are identical across every version pair, which was true until this
+release changed them by design; it is now gated by pair, and its replacement bounds the intended
+difference rather than suppressing the check.
+
 ## v5.42 — the Roth tab now phases Social Security in under §86 instead of jumping to 85%, 2026-08-21
 
 
