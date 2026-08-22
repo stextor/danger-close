@@ -80,6 +80,14 @@ repo-only set was the built `index.html`, the `qa/tools/` scripts the pool delib
 and superseded `dom_entry_*` files, all expected. Rows the v5.42 release changed are rolled below;
 rows not listed as changed carry forward.
 
+⚠ **Two rows were missing for a day and added 2026-08-21.** `STATUS_v5_42_shipped.md` and
+`package_check.mjs` were uploaded to the pool at the v5.42 refresh and the ops fix respectively, and
+neither was given a row here — so both were **invisible to the freshness check by construction**, the
+exact hole this table exists to close (E-14). Found by sweeping pool filenames against this file's
+text rather than by reading the table, which is the only way to find a row that was never written.
+**Adding a file to the pool and adding its row are two acts, and the second is the one that gets
+skipped** — the same shape as the rotation/manifest split recorded under Prior build below.
+
 **Two mapping caveats.** The pool flattens repo paths: `tools_fixture.jsx` here is
 `qa/tools/fixture/fixture.jsx` in the repo (byte-identical), and the baseline suites live under
 `qa/qa-baseline/`. Match by content, not by filename position.
@@ -111,7 +119,9 @@ rows not listed as changed carry forward.
 | `t22_aca_floor.mjs` | `e8b52e06c38a095ac6eea830ac2dd84d` | `qa/t22_aca_floor.mjs` |
 | `t23_roth_ladder_rmd.mjs` | `9fd21801580f108b28c4cc688992e8fd` | `qa/t23_roth_ladder_rmd.mjs` — **NEW at v5.41.** The Roth ladder's RMD-term invariants. ⚠ **Split precision, by necessity (OPERATIONS §M):** the ladder is a COMPONENT-INLINE engine, so MAGI reads from the DOM at `Math.round(x/1000)` — **±$500** — while the RMD cards render full dollars and ARE pinned exactly ($44,991). Gated per leg: **25 checks on v542 AND on v541 — identical, and that is the point**: its pins sit at the $70,000 conversion default, where v5.42's §86 fix correctly moves nothing, so an unchanged t23 is the evidence that release did not overreach. Only the version registry and `POST_FIX` were touched at v5.42; **no assertion changed**. 21 on v540, that leg asserting the PRE-FIX figures deliberately so the legs are the before/after witness |
 | `t24_ss86_phasein.mjs` | `de9c8ed81ed0e10cc51fc61512074a5b` | `qa/t24_ss86_phasein.mjs` — **NEW at v5.42.** The §86 upper-tier phase-in invariants. ⚠ **This suite DRIVES THE CONVERSION SLIDER** and must, because the defect it pins is worth $0 at the $70,000 default — assertions at the default prove nothing about it. The control is a **React controlled input**, so `.value` assignment is swallowed; it goes through the native `HTMLInputElement` prototype setter followed by an `input` event. Asserts all 12 ladder years at **$15,000 / $20,000 / $30,000 / $50,000 / $70,000** against `statute86`, computed rather than hardcoded. Gated per leg: **38 checks on v542, 34 on v541**, the v541 leg asserting the pre-fix cliff figures — which also proves the suite's ladder transcription is faithful. Precision **±$500** (§M); the effect is $4,200–$38,030. Carries the middle-tier `[KNOWN DEFECT]` pin at §D |
+| `STATUS_v5_42_shipped.md` | `1021fb74188a077a0c22788a1efd0904` | `docs/STATUS_v5_42_shipped.md` — **NEW at v5.42.** The ship record: the §86 cliff, the five-slider test design and why the default proves nothing, the six negative controls and the one that is a documented no-op, the middle-tier `[KNOWN DEFECT]` found mid-build, and the four items left open |
 | `hand_86.mjs` | `981b425c4fc738abb49046a97cd0fea0` | `qa/tools/hand_86.mjs` — **PROMOTED TO SUITE ORACLE at v5.42** and added to the pool (it was repo-only through v5.41, which is why the v5.42 brief had to record its hash separately). `statute86` is transcribed from 26 U.S.C. §86 at law.cornell.edu, **not from any app expression**, and is imported by BOTH `t24` and `qa/tools/derive_v542.mjs` — one oracle on both sides, deliberately, because at v5.41 a second independent derivation drifted and the brief's table shipped wrong twice. ⚠ **The three app copies inside it are v5.40 transcriptions and are now HISTORY** — `rothTab` records the cliff v5.42 replaced. Asserts nothing; counted in NO check total |
+| `package_check.mjs` | `88adee72107c0e96636f6a43be80ea81` | `qa/tools/package_check.mjs` — **NEW at v5.42 (added 2026-08-21).** Validates a release zip against OPERATIONS §L before it is sent: structure, MANIFEST truthfulness, changed-files-only against a clone, `knowledge/` flatness and the two-source rotation, cross-destination byte-identity, and the delete-first list. **23 checks (22 on an ops package), negative-controlled 16 ways, all firing.** Packages declare `KIND: app-release` or `KIND: ops` in MANIFEST.txt; release-only checks are gated on it and an **undeclared package fails closed**. Without a clone the tree-diff checks are SKIPPED and say so. Asserts about the DELIVERY, not the build — counted in NO release check total |
 | `controls_v542.sh` | `66a923e87b585b4f8dd843e7fe3e8ca9` | `qa/controls_v542.sh` — **NEW at v5.42**, the re-pointed successor to `controls.sh`. All 13 v5.38-era patch anchors were verified to still resolve **exactly once** against v5.42 source before re-pointing; C16–C21 added for the §86 work. Supersedes the stale `controls.sh` row above — retire that file at the maintainer's discretion |
 | `t2_engines.mjs` | `9a9ba167634ee29c645830ccdd7d6ca9` | `qa/qa-baseline/t2_engines.mjs` |
 | `t3_roth.mjs` | `85cc622b11decbac9f22427c2c5f5bc2` | `qa/qa-baseline/t3_roth.mjs` — **rolled to v5.42** (`v542` registered; the fail-closed version guard caught all four at the first suite run, which is it working). Previously rolled to v5.41 |
@@ -125,14 +135,7 @@ rows not listed as changed carry forward.
 | `tools_fixture.jsx` | `3602b615b65f09995a9eb1fa17fe4175` | `qa/tools/fixture/fixture.jsx` |
 | `dom_entry_v542.jsx` | `7ca93a22cf92c50f35f369d5c15f2cbf` | `qa/qa-baseline/dom_entry_v542.jsx` — **NEW at v5.42**, the current leg |
 | `dom_entry_v541.jsx` | `ae195e7e7d220fe3065684e8266cd2c2` | `qa/qa-baseline/dom_entry_v541.jsx` — now the PRIOR leg's entry. `dom_entry_v540.jsx` rotated OUT of the pool with its source |
-| `gate_v538.mjs` | `585a90322d5a56ec7bed955eb9b5c67a` | `qa/tools/gate_v538.mjs` — committed at v5.38; retire from pool at next refresh if desired |
 | `VERIFY.sh` | `d6c31723f3610a16cd0d2ae2f1931a68` | `VERIFY.sh` (repo root) — row added 2026-08-17; its absence here is how the v5.36→v5.37 pool drift stayed invisible (scope v5.38 §0) |
-| `SCOPE_v5_38_aca_sale_gain_tax.md` | `77bda5bbce1e9bb3008566b57350aff1` | `docs/SCOPE_v5_38_aca_sale_gain_tax.md` — v5.38-prep; **committed at the v5.38 ship**, note corrected 2026-08-20 |
-| `DERIVATION_v5_38_step1.md` | `6e6b2794fba1c1a7623720a442edfa02` | `docs/DERIVATION_v5_38_step1.md` — v5.38-prep; **committed at the v5.38 ship**, note corrected 2026-08-20 |
-| `sim_ledger.mjs` | `a8d275a4ea7325a5500491f4b6b25058` | `qa/tools/sim_ledger.mjs` — v5.38-prep; **committed at the v5.38 ship**, note corrected 2026-08-20 |
-| `validate.mjs` | `5e18e78e494c831a1a01d3623bbd43e9` | `qa/tools/validate.mjs` — v5.38-prep; **committed at the v5.38 ship**, note corrected 2026-08-20 |
-| `case1_detail.mjs` | `0d94612058e013a00dcbcb2896254536` | `qa/tools/case1_detail.mjs` — v5.38-prep; **committed at the v5.38 ship**, note corrected 2026-08-20 |
-| `project.mjs` | `cf964df972be31b133d0630bcbf2d4c7` | `qa/tools/project.mjs` — v5.38-prep; **committed at the v5.38 ship**, note corrected 2026-08-20 |
 
 `probe_classify.mjs` was removed from the pool at v5.30 and now lives only in the repo at
 `qa/tools/probe_classify.mjs`. (OPERATIONS §A2 asserted the exact opposite — *"exists only in
@@ -140,10 +143,12 @@ knowledge"* — from v5.30 until 2026-08-20, when the clone-and-diff caught it. 
 the whole time; the two documents simply disagreed and nothing compared them. Corrected in
 `OPERATIONS.md`.)
 
-The v5.38-prep files were committed to the repo at the v5.38 ship. The pool still carries
-copies of the scope, derivation memo, and the five derivation instruments — harmless duplicates
-of `docs/` and `qa/tools/`, listed above with their true hashes; retire them (rows deleted in
-the same edit) whenever the maintainer chooses.
+**The v5.38-prep duplicates were RETIRED FROM THE POOL on 2026-08-21**, together with
+`gate_v538.mjs` and the two fulfilled scopes (`SCOPE_FIX_docs_v5_39.md`,
+`SCOPE_v5_40_disclosures_and_mechanics.md`) — nine files, all of which this file had already marked
+retirable. **Their rows were deleted in the same edit**, which is the whole point: a row naming a file
+that no longer exists is worse than the file, because the §A2 offline fallback then misdirects. All
+nine remain in the repo at `docs/` and `qa/tools/`, so nothing is lost. Pool: 88 → 79 files.
 
 ⚠ **The repo's copy of THIS FILE was one release stale through v5.30** — the committed
 `PROJECT_KNOWLEDGE_INDEX.md` still named v5.29 as current and carried no §A2 table at all, because
@@ -301,7 +306,6 @@ know to read.**
 
 | File | What it is | Status |
 |---|---|---|
-| `SCOPE_v5_40_disclosures_and_mechanics.md` | Governing scope for the v5.40 release — the disclosure and mechanics work that shipped 2026-08-19 | fulfilled at v5.40; retire when convenient (outcomes in the CHANGELOG entry) |
 | `SCOPE_STRUCTURAL_MAGI_EXTINCTION.md` | Scope for the structural S-1 assertion: bind the IRMAA MAGI *sentence* to Engine C's `magi` *expression* in both directions, resolved by AST and enclosing function so a reflow cannot move the target | **BUILT 2026-08-20.** `qa/`-only, no version bump; outcomes in `STATUS_2026_08_20_structural_magi_extinction.md` |
 | `SCOPE_ROTH_TAB_MAGI_MEASUREMENT.md` | Scope covering the Roth tab's MAGI measurement | **active — read before touching the Roth tab's MAGI** |
 | `STATUS_2026_08_20_structural_magi_extinction.md` | Build record for the structural S-1 assertion. **1,350 passed / 0 failed across 22 suites, parity 9/9, t1 102 → 108** — the current recorded suite state. Also records a line-citation correction the session owned against its own scope (`computeIrmaaPlan` at L4272, not L4271) | current — the suite baseline any next build starts from |
@@ -317,7 +321,6 @@ know to read.**
 |---|---|---|
 | `STATUS_v5_39_shipped.md` | The v5.39 ship record — full verification chain (tested source == shipped source, rebuild reproducibility, parity 9/9), per-suite totals parsed from output, the negative control for the new extinction assertion, **and §5, four errors made during the build, recorded plainly** | **current — the authoritative v5.39 record** |
 | `STATUS_v5_41_shipped.md` | **The v5.41 ship record.** Carries the two corrections made to the build brief's expected figures (an out-of-scope $420 dividend term; an undecided conversion-gating rule worth $2,492 in 2040), the §M precision ceiling and why dollar-exact MAGI was NOT achievable, the 9 negative controls, and four findings left for the next scope |
-| ~~`SCOPE_FIX_docs_v5_39.md`~~ *(retire when convenient)* | Governing scope for the docs-only release. §1 re-verified every premise against the decoded runtime bytes rather than trusting the audit; §5 carried decisions D-1…D-8, all resolved by Steve as recommended | **FULFILLED at v5.39.** Two of its own figures were wrong and are corrected in the ship record: parity is **9/9** (not 8/8), and the version-bump tax spans version ladders in **six** suites plus ~25 feature gates (not two sites) |
 
 **v5.36 rows:**
 
