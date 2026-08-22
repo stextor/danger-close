@@ -32,13 +32,13 @@ import { fileURLToPath, pathToFileURL } from "url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v543";
-const KNOWN_VERSIONS = ["v541", "v542", "v543", "v544"];
+const KNOWN_VERSIONS = ["v541", "v542", "v543", "v544", "v545"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST_FIX = VER === "v543" || VER === "v544";
+const POST_FIX = VER === "v543" || VER === "v544" || VER === "v545";
 
 // The repo keeps the oracle at qa/tools/hand_86.mjs; PROJECT KNOWLEDGE IS FLAT and holds it beside
 // the suites. Resolve rather than assume, and say which copy was used (the t21/t24 pattern).
