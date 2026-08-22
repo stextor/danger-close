@@ -1,5 +1,76 @@
 # Changelog
 
+## v5.44 — the "no conversions" RMD counterfactual was over-grown by three years, 2026-08-22
+
+**Build.** `src/DangerClose.jsx` md5 `cd87419e7e8ae182c0efdb30cb7b1305` · built `index.html` md5
+`9b0a08aff7ef73f3e3ab4f6c52c0c8a0` · prior build v5.43 (`7a9c6cfdaecaed0ebc77e98bfcd98b54`).
+
+### Read this first: the Roth tab now claims LESS benefit from converting
+
+The last two releases moved numbers in your favour. **This one goes back the other way.** The
+"if you never convert" RMD figure on the Roth conversion tab was too high, which made the
+*"Combined RMDs reduced by $X/yr"* line overstate what conversions achieve. Conversions still reduce
+RMDs — by less than the tab was saying.
+
+### What changed
+
+The no-conversion projection took its starting balance from **retirement year** and then grew it from
+**today**, compounding the years between those two dates twice over. On the shipped example household
+that is three extra years at 4.5%:
+
+| | Before | After |
+|---|---|---|
+| Spouse A's no-conversion RMD (2039) | $85,008 | **$74,492** |
+| Spouse B's no-conversion RMD (2041) | $17,197 | **$15,070** |
+| **Combined** | **$102,205** | **$89,562** |
+
+That is a **14.1%** overstatement — and the figure is **not a constant**. It is exactly
+(retirement year − current year) years of growth, so it shrinks as retirement approaches and differs
+between households. An earlier internal note recorded it as 19.3%, which was four years' worth and
+correct when written. Neither number should be quoted as *the* size of this defect.
+
+The with-conversion side is unaffected: it reads the ladder's own balances and always did.
+
+### Limitations, stated rather than implied
+
+- **A second defect in the same block is deliberately NOT fixed.** The no-conversion balance still
+  includes non-qualified annuity money, which carries no required distribution — every engine
+  excludes it and the Roth tab does not. It is worth **$483/yr** on the example household. It is left
+  because the tab gets that basis wrong in *two* places, and correcting only one would put the two
+  RMD cards on disagreeing bases — the defect v5.41 was built to eliminate. It ships as its own
+  release, with the second site included.
+- The tab's MAGI still omits dividends and realized capital gains.
+- Nothing outside the Roth tab's RMD cards moves. All engines are untouched.
+
+### Tests
+
+**2,207 checks verify this release, 0 failing** (1,444 against this build), plus 82 tooling checks.
+MC parity **9/9**.
+
+| Suite | v5.43 leg | v5.44 leg |
+|---|---|---|
+| t1 units & statics | 129 | **131** |
+| **t26 no-conversion span (new)** | **18** | **20** |
+| t23 · t24 · t25 | 25 · 38 · 29 | 25 · 38 · 29 |
+
+Feature suites, one leg each: t7 41 · **t8 38** · t9 14 · t11 40 · t12 23 · t13 42 · t14 44 · t15 11 ·
+t16 24 · t17 74 · t18 67 · t19 65 · t20 100 · t22 85. Tooling: t21 50 · DOM diff 32.
+
+**`t26` is new and dollar-exact on both sides** — the inputs are reachable without the DOM, and the
+RMD cards render whole dollars. It **derives its expectation from the household's own dates rather
+than hardcoding the percentage**, precisely because that percentage moves; the shipped figures are
+pinned separately as today's values. A hardcoded-only suite would have gone red on a calendar change
+and looked like a defect.
+
+**Six negative controls were run and all six fired**, including one that reverts the fix outright and
+one that shifts the span by a single year.
+
+**A test instrument was repaired.** `t8`'s call-site census counted occurrences in *comments* as
+though they were code, so a comment mentioning the constructor turned it red with no code change —
+which happened at v5.41 and again here. The standing advice had become "if `t8` goes red, check for a
+comment first", which is a workaround, not a fix. It now strips comments before counting, and a
+control confirms a genuine extra call site is still caught.
+
 ## v5.43 — the IRMAA engine now applies §86 instead of taxing 85% of Social Security flat, 2026-08-21
 
 **Build.** `src/DangerClose.jsx` md5 `7a9c6cfdaecaed0ebc77e98bfcd98b54` · built `index.html` md5
