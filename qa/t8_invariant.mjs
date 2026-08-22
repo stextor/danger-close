@@ -23,8 +23,23 @@ ck("no Roth-from-positions reduce outside retireStartBalances", (outside.match(r
 ck("no direct trad-sum via forEach t0 pattern (old STEP-1 form) anywhere", !SRC.includes('t0[q.owner === "B" ? "B" : "A"] += (q.trad || 0)'));
 
 // 2) All nine census consumers call the helper (definition + 9 call sites).
-const calls = (SRC.match(/retireStartBalances\(/g) || []).length;
-ck("retireStartBalances: 1 definition + 9 consumer call sites", calls === 10, `found ${calls}`);
+// ⚠ COUNT CODE, NOT COMMENTS. This was a bare text match over the whole source, so any COMMENT
+// naming `retireStartBalances(` inflated the count and turned the check red with no code change.
+// It did exactly that at v5.41, and again at v5.44 when a comment explaining where `t0` comes
+// from added an eleventh "call site". A census check that a comment can break is a census check
+// nobody trusts, and the standing advice had become "if t8 goes red, look for a comment first" —
+// which is a workaround, not a fix. Strip line and block comments before counting.
+// Deliberately NOT a full parser: this is a census, and a regex that removes // and /* */ is
+// sufficient and auditable. String literals containing "//" would be over-stripped, so the
+// comparison is on the CALL COUNT only, never on offsets into the stripped text.
+const SRC_NOCOMMENT = SRC
+  .replace(/\/\*[\s\S]*?\*\//g, "")          // block comments
+  .replace(/^[ \t]*\/\/.*$/gm, "")            // whole-line comments
+  .replace(/([^:])\/\/[^\n"'`]*$/gm, "$1");   // trailing comments (not URLs, which carry ://)
+const calls = (SRC_NOCOMMENT.match(/retireStartBalances\(/g) || []).length;
+const callsRaw = (SRC.match(/retireStartBalances\(/g) || []).length;
+ck("retireStartBalances: 1 definition + 9 consumer call sites (comments excluded)", calls === 10,
+   `found ${calls} in code (${callsRaw} including comments)`);
 ck("constructor itself applies contribAccrual", /function retireStartBalances[\s\S]{0,400}contribAccrual\(retireYr\)/.test(SRC));
 
 // 3) The three census-found sites (missing from the scope's enumerated list) are wired.
