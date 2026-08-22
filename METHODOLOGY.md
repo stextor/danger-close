@@ -210,13 +210,18 @@ affected households. The convention elsewhere in this document — pick the cons
 when one must be chosen — applies to *assumptions*. This was not an assumption but a misreading of a
 statute, and the statute governs.
 
-**The tab is now more correct than the engine it reconciles to.** The IRMAA engine does not implement
-§86 at all: it treats 85% of benefits as taxable regardless of provisional income. Below provisional
-income of roughly $92,000 that engine and this tab therefore disagree, by up to $46,920. The
-disagreement is real, documented, and deliberately left standing: correcting the engine is an engine
-change with its own regression surface, and it is sequenced with the taxable-income work rather than
-carried on the back of a render-block fix. Any future invariant comparing the two must be phrased as
-*the term sets are equal, the values may differ*.
+**The IRMAA engine applies §86 too, as of v5.43.** Through v5.42 it did not: it treated 85% of
+benefits as taxable regardless of provisional income, so below roughly $92,000 of provisional income
+it and the Roth tab disagreed by up to $46,920 — the app answering one statutory question two ways
+depending on which tab was open. That divergence is now closed. Both use the same phase-in and draw
+their thresholds from the same source, so an invariant comparing them reads *term sets equal, values
+equal*, with no carve-out.
+
+On the shipped household the correction moves three of twenty-five projection years, lowering MAGI by
+$4,830–$8,256 and raising the reported headroom to the next IRMAA threshold by the same amounts. It
+changes no IRMAA tier and no surcharge. Like the v5.42 correction it runs in the **optimistic**
+direction, and for the same reason: this was not a conservative assumption but a statute the model
+had not implemented.
 
 **Known limits, unchanged by this release.** The ladder's MAGI still omits dividend income and
 realized capital gains, which the IRMAA engine includes; those are a separate and larger correction.
@@ -224,7 +229,9 @@ The RMD basis on this tab is each spouse's whole Traditional balance rather than
 portion of it, so a non-qualified annuity balance entered under Other accounts contributes to the
 modelled distribution although it carries none.
 
-The **middle** §86 tier on this tab also remains uncorrected, and was found during the v5.42 work
+Two §86 defects remain, both narrow, both overstating, and both scheduled to ship together rather
+than piecemeal, because they are one defect in two places: the taxable-income engine omits the
+½-benefits cap in its own phase-in, and the **middle** §86 tier on this tab also remains uncorrected, and was found during the v5.42 work
 rather than being previously known. Between the base and adjusted base amounts the statute caps the
 includible amount at ½ of benefits; this tab caps it at 85%. It can only bite where provisional
 income falls inside that band *and* total benefits are small — under $12,000 joint, under $9,000

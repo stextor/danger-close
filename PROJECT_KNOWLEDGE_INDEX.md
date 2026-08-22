@@ -25,10 +25,10 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 
 | Field | Value |
 |---|---|
-| Version | **v5.42** |
-| Source file in knowledge | `DangerClose-v5_42.jsx` |
-| Source md5 | `976a03fe16cd401b9735bbb21675bf5f` |
-| Built `index.html` md5 | `2ede63fd5d64c7318da975437218e7b1` |
+| Version | **v5.43** |
+| Source file in knowledge | `DangerClose-v5_43.jsx` |
+| Source md5 | `7a9c6cfdaecaed0ebc77e98bfcd98b54` |
+| Built `index.html` md5 | `7bbc3db533ca40ad516d43e976f9f574` |
 | Shipped | 2026-08-21 |
 
 > **Rolled 2026-08-21 at the v5.42 ship, in the same session that built it** — the second
@@ -96,7 +96,7 @@ skipped** — the same shape as the rotation/manifest split recorded under Prior
 |---|---|---|
 | `cap_tabs.mjs` | `9057b96d48b84f99dc322f7fc983674a` | `qa/qa-baseline/cap_tabs.mjs` |
 | `capture_gain_fp.mjs` | `99f096c7c332b5ec7a87949681386a71` | `qa/capture_gain_fp.mjs` |
-| `domdiff_withdrawal.mjs` | `4ebd61793fd50bd6c446c6773ef2b10a` | `qa/domdiff_withdrawal.mjs` — **gated per leg 2026-08-21 at v5.42**, 31/1 → **32/0**. Its pre-v5.40 MAGI-sentence check had been left PAIR-SPECIFIC with a note to re-point that was never acted on, so it had been false for every prior leg from v5.40 onward and went red at the v5.41 → v5.42 pair **with no code change** — the §B2 gating rule, applied to a cross-build assertion instead of a disclosure. Previously re-pointed to v539 → v540 and IRMAA-anchor-fixed 2026-08-20 (was `f31c743b…`, three releases stale). Tooling — counted in no app total |
+| `domdiff_withdrawal.mjs` | `94aa930686814e4eed4796743be36507` | `qa/domdiff_withdrawal.mjs` — **gated per leg 2026-08-21 at v5.42**, 31/1 → **32/0**. Its pre-v5.40 MAGI-sentence check had been left PAIR-SPECIFIC with a note to re-point that was never acted on, so it had been false for every prior leg from v5.40 onward and went red at the v5.41 → v5.42 pair **with no code change** — the §B2 gating rule, applied to a cross-build assertion instead of a disclosure. Previously re-pointed to v539 → v540 and IRMAA-anchor-fixed 2026-08-20 (was `f31c743b…`, three releases stale). Tooling — counted in no app total |
 | `env_dom.mjs` | `0ee15a1be6099a50319cfb271b530c4a` | `qa/qa-baseline/env_dom.mjs` |
 | `main.jsx` | `d9eca7b469a3fb7ec1c5325fd4bf8145` | `src/main.jsx` |
 | `index.html` | `52ef2be3080352df6198ee3b8c3507ad` | `src/index.html` — the **Vite entry template**, **restored to the pool 2026-08-20** after being found absent (see the build-scaffold row below). ⚠ **Not the built app.** The published single-file `index.html` is repo-only output and never enters the pool; its md5 is in the Current build table and is different by construction |
@@ -113,27 +113,30 @@ skipped** — the same shape as the rotation/manifest split recorded under Prior
 | `t17_engineC_exact.mjs` | `5eef71d2385058d847cc53018a3fae67` | `qa/t17_engineC_exact.mjs` |
 | `t18_engineB_exact.mjs` | `7272f97181e0764204eef087f3810380` | `qa/t18_engineB_exact.mjs` |
 | `t19_engineD_exact.mjs` | `256ff3681548966735569c5034164dac` | `qa/t19_engineD_exact.mjs` |
-| `t1_units.mjs` | `818f9b1a387398831bd3cf432a51c826` | `qa/qa-baseline/t1_units.mjs` — **rolled 2026-08-21 at v5.42** (+4 `STRUCT S-3` checks pinning the §86 upper tier as a phase-in, gated per leg so pre-v5.42 legs keep a dated `[KNOWN DEFECT]` pin asserting the cliff; plus `v542` registered across **five** nested ladders, `KNOWN_VERSIONS`, the `verStr` ladder and the `V540`/`V541` gates). **121 checks on v542, 117 on v541.** Previously **rolled 2026-08-20 at v5.41** (+5 `STRUCT S-2` checks pinning the ROTH TAB's `magi` term set by AST, gated per leg, plus `v541` registration). S-1 pinned Engine C's term set and left the Roth tab's unpinned — that gap is why the omitted-RMD defect survived. **115 checks on v541, 110 on v540, 94 on v539** |
+| `t1_units.mjs` | `adbffb7a0e57e346c753592d11effdbc` | `qa/qa-baseline/t1_units.mjs` — **rolled 2026-08-21 at v5.42** (+4 `STRUCT S-3` checks pinning the §86 upper tier as a phase-in, gated per leg so pre-v5.42 legs keep a dated `[KNOWN DEFECT]` pin asserting the cliff; plus `v542` registered across **five** nested ladders, `KNOWN_VERSIONS`, the `verStr` ladder and the `V540`/`V541` gates). **121 checks on v542, 117 on v541.** Previously **rolled 2026-08-20 at v5.41** (+5 `STRUCT S-2` checks pinning the ROTH TAB's `magi` term set by AST, gated per leg, plus `v541` registration). S-1 pinned Engine C's term set and left the Roth tab's unpinned — that gap is why the omitted-RMD defect survived. **115 checks on v541, 110 on v540, 94 on v539** |
 | `t20_other_taxtype.mjs` | `9640ce1e4006c7ba6b30a29639ef428b` | `qa/t20_other_taxtype.mjs` |
 | `t21_tools.mjs` | `c5fb4c712135028f1effa039c84e0b90` | `qa/t21_tools.mjs` |
 | `t22_aca_floor.mjs` | `e8b52e06c38a095ac6eea830ac2dd84d` | `qa/t22_aca_floor.mjs` |
-| `t23_roth_ladder_rmd.mjs` | `9fd21801580f108b28c4cc688992e8fd` | `qa/t23_roth_ladder_rmd.mjs` — **NEW at v5.41.** The Roth ladder's RMD-term invariants. ⚠ **Split precision, by necessity (OPERATIONS §M):** the ladder is a COMPONENT-INLINE engine, so MAGI reads from the DOM at `Math.round(x/1000)` — **±$500** — while the RMD cards render full dollars and ARE pinned exactly ($44,991). Gated per leg: **25 checks on v542 AND on v541 — identical, and that is the point**: its pins sit at the $70,000 conversion default, where v5.42's §86 fix correctly moves nothing, so an unchanged t23 is the evidence that release did not overreach. Only the version registry and `POST_FIX` were touched at v5.42; **no assertion changed**. 21 on v540, that leg asserting the PRE-FIX figures deliberately so the legs are the before/after witness |
-| `t24_ss86_phasein.mjs` | `de9c8ed81ed0e10cc51fc61512074a5b` | `qa/t24_ss86_phasein.mjs` — **NEW at v5.42.** The §86 upper-tier phase-in invariants. ⚠ **This suite DRIVES THE CONVERSION SLIDER** and must, because the defect it pins is worth $0 at the $70,000 default — assertions at the default prove nothing about it. The control is a **React controlled input**, so `.value` assignment is swallowed; it goes through the native `HTMLInputElement` prototype setter followed by an `input` event. Asserts all 12 ladder years at **$15,000 / $20,000 / $30,000 / $50,000 / $70,000** against `statute86`, computed rather than hardcoded. Gated per leg: **38 checks on v542, 34 on v541**, the v541 leg asserting the pre-fix cliff figures — which also proves the suite's ladder transcription is faithful. Precision **±$500** (§M); the effect is $4,200–$38,030. Carries the middle-tier `[KNOWN DEFECT]` pin at §D |
+| `t23_roth_ladder_rmd.mjs` | `c9f7c6f81d10f83b7ee31729cffde7d2` | `qa/t23_roth_ladder_rmd.mjs` — **NEW at v5.41.** The Roth ladder's RMD-term invariants. ⚠ **Split precision, by necessity (OPERATIONS §M):** the ladder is a COMPONENT-INLINE engine, so MAGI reads from the DOM at `Math.round(x/1000)` — **±$500** — while the RMD cards render full dollars and ARE pinned exactly ($44,991). Gated per leg: **25 checks on v542 AND on v541 — identical, and that is the point**: its pins sit at the $70,000 conversion default, where v5.42's §86 fix correctly moves nothing, so an unchanged t23 is the evidence that release did not overreach. Only the version registry and `POST_FIX` were touched at v5.42; **no assertion changed**. 21 on v540, that leg asserting the PRE-FIX figures deliberately so the legs are the before/after witness |
+| `t24_ss86_phasein.mjs` | `f9b5da8a03de59c17b44498f5fd99aae` | `qa/t24_ss86_phasein.mjs` — **NEW at v5.42.** The §86 upper-tier phase-in invariants. ⚠ **This suite DRIVES THE CONVERSION SLIDER** and must, because the defect it pins is worth $0 at the $70,000 default — assertions at the default prove nothing about it. The control is a **React controlled input**, so `.value` assignment is swallowed; it goes through the native `HTMLInputElement` prototype setter followed by an `input` event. Asserts all 12 ladder years at **$15,000 / $20,000 / $30,000 / $50,000 / $70,000** against `statute86`, computed rather than hardcoded. Gated per leg: **38 checks on v542, 34 on v541**, the v541 leg asserting the pre-fix cliff figures — which also proves the suite's ladder transcription is faithful. Precision **±$500** (§M); the effect is $4,200–$38,030. Carries the middle-tier `[KNOWN DEFECT]` pin at §D |
+| `t25_engineC_ss86.mjs` | `2a980d5e59c37f4928d249c7f0084fb6` | `qa/t25_engineC_ss86.mjs` — **NEW at v5.43.** Engine C's §86. ⚠ **DOLLAR-EXACT, unlike `t24`** — `computeIrmaaPlan` is module-level and exported through the shim, so rows are read directly and OPERATIONS §M's ±$500 render ceiling does NOT apply. Pins the three corrected years to the dollar on both legs, the twelve unchanged years as unchanged, and the **zero tier / zero surcharge** result deliberately, so the absence of a surcharge effect is a checked fact. Gated per leg: **29 on v543, 26 on v542** |
+| `SCOPE_ENGINE_C_SS86.md` | `30e9de97451c8e197fae5d26db2f40bf` | `docs/SCOPE_ENGINE_C_SS86.md` — the governing scope for v5.43, **fulfilled at the ship**. Its §1 records that the recommendation which produced decision D-2(b) was partly wrong: the false-IRMAA-surcharge case came from a synthetic sweep and does not reproduce. Retire when convenient |
 | `STATUS_v5_42_shipped.md` | `1021fb74188a077a0c22788a1efd0904` | `docs/STATUS_v5_42_shipped.md` — **NEW at v5.42.** The ship record: the §86 cliff, the five-slider test design and why the default proves nothing, the six negative controls and the one that is a documented no-op, the middle-tier `[KNOWN DEFECT]` found mid-build, and the four items left open |
 | `hand_86.mjs` | `981b425c4fc738abb49046a97cd0fea0` | `qa/tools/hand_86.mjs` — **PROMOTED TO SUITE ORACLE at v5.42** and added to the pool (it was repo-only through v5.41, which is why the v5.42 brief had to record its hash separately). `statute86` is transcribed from 26 U.S.C. §86 at law.cornell.edu, **not from any app expression**, and is imported by BOTH `t24` and `qa/tools/derive_v542.mjs` — one oracle on both sides, deliberately, because at v5.41 a second independent derivation drifted and the brief's table shipped wrong twice. ⚠ **The three app copies inside it are v5.40 transcriptions and are now HISTORY** — `rothTab` records the cliff v5.42 replaced. Asserts nothing; counted in NO check total |
 | `package_check.mjs` | `88adee72107c0e96636f6a43be80ea81` | `qa/tools/package_check.mjs` — **NEW at v5.42 (added 2026-08-21).** Validates a release zip against OPERATIONS §L before it is sent: structure, MANIFEST truthfulness, changed-files-only against a clone, `knowledge/` flatness and the two-source rotation, cross-destination byte-identity, and the delete-first list. **23 checks (22 on an ops package), negative-controlled 16 ways, all firing.** Packages declare `KIND: app-release` or `KIND: ops` in MANIFEST.txt; release-only checks are gated on it and an **undeclared package fails closed**. Without a clone the tree-diff checks are SKIPPED and say so. Asserts about the DELIVERY, not the build — counted in NO release check total |
 | `controls_v542.sh` | `66a923e87b585b4f8dd843e7fe3e8ca9` | `qa/controls_v542.sh` — **NEW at v5.42**, the re-pointed successor to `controls.sh`. All 13 v5.38-era patch anchors were verified to still resolve **exactly once** against v5.42 source before re-pointing; C16–C21 added for the §86 work. Supersedes the stale `controls.sh` row above — retire that file at the maintainer's discretion |
 | `t2_engines.mjs` | `9a9ba167634ee29c645830ccdd7d6ca9` | `qa/qa-baseline/t2_engines.mjs` |
-| `t3_roth.mjs` | `85cc622b11decbac9f22427c2c5f5bc2` | `qa/qa-baseline/t3_roth.mjs` — **rolled to v5.42** (`v542` registered; the fail-closed version guard caught all four at the first suite run, which is it working). Previously rolled to v5.41 |
-| `t4_dom.mjs` | `002afc222da1732172d41d8e219dbea1` | `qa/qa-baseline/t4_dom.mjs` — **rolled to v5.42** (`v542` registered; the fail-closed version guard caught all four at the first suite run, which is it working). Previously rolled to v5.41 |
-| `t5_storage.mjs` | `28066dd7c5219dada3013dc089c6f923` | `qa/qa-baseline/t5_storage.mjs` — **rolled to v5.42** (`v542` registered; the fail-closed version guard caught all four at the first suite run, which is it working). Previously rolled to v5.41 |
-| `t6_single.mjs` | `7dec1d00685497288ba4ac737225252a` | `qa/qa-baseline/t6_single.mjs` — **rolled to v5.42** (`v542` registered; the fail-closed version guard caught all four at the first suite run, which is it working). Previously rolled to v5.41 |
+| `t3_roth.mjs` | `dc595747d4e8a985bec63e738d396ed6` | `qa/qa-baseline/t3_roth.mjs` — **rolled to v5.42** (`v542` registered; the fail-closed version guard caught all four at the first suite run, which is it working). Previously rolled to v5.41 |
+| `t4_dom.mjs` | `164a497c060c03a4890a11a06fe87051` | `qa/qa-baseline/t4_dom.mjs` — **rolled to v5.42** (`v542` registered; the fail-closed version guard caught all four at the first suite run, which is it working). Previously rolled to v5.41 |
+| `t5_storage.mjs` | `f68dcd1bdc03603b744d3b835331c7c0` | `qa/qa-baseline/t5_storage.mjs` — **rolled to v5.42** (`v542` registered; the fail-closed version guard caught all four at the first suite run, which is it working). Previously rolled to v5.41 |
+| `t6_single.mjs` | `0df0db03d50eeb18a8ae213d3fe4b347` | `qa/qa-baseline/t6_single.mjs` — **rolled to v5.42** (`v542` registered; the fail-closed version guard caught all four at the first suite run, which is it working). Previously rolled to v5.41 |
 | `t7_accrual.mjs` | `fd0ab4282e31d8a7e170606c877c28d0` | `qa/t7_accrual.mjs` |
 | `t8_invariant.mjs` | `a9bd015c8b50b54a98d0ed9a4e2afaaf` | `qa/t8_invariant.mjs` |
 | `t9_dom_smoke.mjs` | `080c3edbe5f5479ac488d2f54034de69` | `qa/t9_dom_smoke.mjs` |
-| `runsuite.sh` | `9418687e9a0359cfe9e29fd1b9352ef0` | `qa/runsuite.sh` — **rolled at v5.42**: `t23` and `t24` adopted into the routine run, both legs each. NEW at v5.36 (parse-only totals runner with the DIED verdict) |
+| `runsuite.sh` | `e6474d1bf1ffc831f1d29e6a1ce7ab6a` | `qa/runsuite.sh` — **rolled at v5.42**: `t23` and `t24` adopted into the routine run, both legs each. NEW at v5.36 (parse-only totals runner with the DIED verdict) |
 | `tools_fixture.jsx` | `3602b615b65f09995a9eb1fa17fe4175` | `qa/tools/fixture/fixture.jsx` |
-| `dom_entry_v542.jsx` | `7ca93a22cf92c50f35f369d5c15f2cbf` | `qa/qa-baseline/dom_entry_v542.jsx` — **NEW at v5.42**, the current leg |
+| `dom_entry_v542.jsx` | `7ca93a22cf92c50f35f369d5c15f2cbf` | `qa/qa-baseline/dom_entry_v542.jsx` — now the PRIOR leg's entry. `dom_entry_v541.jsx` rotated OUT with its source |
+| `dom_entry_v543.jsx` | `ba5477ce13d08ee66c92bc9f9fead80c` | `qa/qa-baseline/dom_entry_v543.jsx` — **NEW at v5.43**, the current leg |
 | `dom_entry_v541.jsx` | `ae195e7e7d220fe3065684e8266cd2c2` | `qa/qa-baseline/dom_entry_v541.jsx` — now the PRIOR leg's entry. `dom_entry_v540.jsx` rotated OUT of the pool with its source |
 | `VERIFY.sh` | `d6c31723f3610a16cd0d2ae2f1931a68` | `VERIFY.sh` (repo root) — row added 2026-08-17; its absence here is how the v5.36→v5.37 pool drift stayed invisible (scope v5.38 §0) |
 
@@ -195,10 +198,10 @@ should clone. ⚠ **Seven of the original eight still are; `hand_86.mjs` is not*
 
 | Field | Value |
 |---|---|
-| Version | **v5.41** |
-| Source file in knowledge | `DangerClose-v5_41.jsx` |
-| Source md5 | `18152190e9b699529642ae2983b3ae2c` |
-| Built `index.html` md5 | `74355c8b66d5024b99fcc6fb19f100cb` |
+| Version | **v5.42** |
+| Source file in knowledge | `DangerClose-v5_42.jsx` |
+| Source md5 | `976a03fe16cd401b9735bbb21675bf5f` |
+| Built `index.html` md5 | `2ede63fd5d64c7318da975437218e7b1` |
 
 > **Rolled 2026-08-21 at the v5.42 ship, in the same pass as the Current build table above** — and
 > this time the two build tables were compared against the pool as part of the §A2 sweep rather than
@@ -384,14 +387,16 @@ hashed. Delete before uploading, not after:
 
 | Delete | Because |
 |---|---|
-| `DangerClose-v5_40.jsx` | rotated out — the pair is now **v5.42 current / v5.41 prior, exactly two** |
-| `dom_entry_v540.jsx` | its source rotated out with it |
+| `DangerClose-v5_41.jsx` | rotated out — the pair is now **v5.43 current / v5.42 prior, exactly two** |
+| `dom_entry_v541.jsx` | its source rotated out with it |
 | `controls.sh` | superseded by `controls_v542.sh`. Unrunnable since v5.40 (it hardcoded `SRC=v538.jsx`); keeping both invited someone running the dead one. **DONE 2026-08-21 — deleted from the pool and the repo, and its two rows above removed in the same edit.** The v5.40 decision to keep it stale deliberately is hereby superseded: that reasoning held while it was the ONLY control program, and stopped holding the moment a working successor existed |
 | `CHANGELOG.md`, `METHODOLOGY.md`, `TESTING.md`, `PROJECT_KNOWLEDGE_INDEX.md` | replaced by this upload |
 | `t1_units.mjs`, `t3_roth.mjs`, `t4_dom.mjs`, `t5_storage.mjs`, `t6_single.mjs` | replaced by this upload |
 | `t23_roth_ladder_rmd.mjs`, `domdiff_withdrawal.mjs`, `runsuite.sh` | replaced by this upload |
 
-**Add** (new to the pool at v5.42): `DangerClose-v5_42.jsx` · `dom_entry_v542.jsx` ·
+**Add** (new to the pool at v5.43): `DangerClose-v5_43.jsx` · `dom_entry_v543.jsx` · `t25_engineC_ss86.mjs` · `SCOPE_ENGINE_C_SS86.md` · `STATUS_v5_43_shipped.md`.
+
+**Added at v5.42:** `DangerClose-v5_42.jsx` · `dom_entry_v542.jsx` ·
 `t24_ss86_phasein.mjs` · `hand_86.mjs` (the §86 oracle — repo-only through v5.41, which is why the
 v5.42 build brief had to carry its hash separately) · `controls_v542.sh`.
 
