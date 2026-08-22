@@ -222,8 +222,38 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   // v5.37 FLIP \u2014 same reasoning as the Taxes section: identity is the strongest true claim
   // for this pair, and a dead Engine C call site on either leg fails it. Still true at v5.40:
   // that release changed the SENTENCE describing MAGI, not the MAGI arithmetic.
-  ck("IRMAA: the MAGI-table FIGURES are IDENTICAL across the pair (v5.40 changed the MAGI sentence, not the number \u2014 a dead call site on either leg fails this)",
-     magA.length > 0 && magA === magB, magA.length ? firstDiff(magA, magB) : "region not found");
+  // ⚠ GATED BY PAIR at v5.43 (OPERATIONS §B2). Identity was the strongest TRUE claim for every
+  // pair up to v5.42, because no release in that span touched Engine C's arithmetic. **v5.43 does**
+  // — it replaces the flat 85%-of-benefits rule with §86 — so identity became FALSE for this pair
+  // by design, and asserting it would have turned an intended difference into a red suite. The
+  // rule is the same one applied to the S-1 disclosure check below: assert what is true for the
+  // pair in hand, and name the intended difference rather than suppressing the check.
+  const ENGINE_C_CHANGED = (VA === "v542" && VB === "v543");
+  if (!ENGINE_C_CHANGED) {
+    ck("IRMAA: the MAGI-table FIGURES are IDENTICAL across the pair (no release in this span touches Engine C's arithmetic \u2014 a dead call site on either leg fails this)",
+       magA.length > 0 && magA === magB, magA.length ? firstDiff(magA, magB) : "region not found");
+  } else {
+    // INTENDED DIFFERENCE, bounded rather than waved through: the table must still render on both
+    // legs, must differ, and must differ ONLY downward \u2014 §86 can never raise includible benefits
+    // above the flat 85% rule, so an increase anywhere means the fix reached past its scope.
+    ck("IRMAA: both legs still render the MAGI table", magA.length > 0 && magB.length > 0);
+    ck("IRMAA (v542\u2192v543): the MAGI figures DIFFER \u2014 this release changes Engine C's \u00a786 arithmetic", magA !== magB);
+    const numsA = (magA.match(/\$[\d,]+K?/g) || []), numsB = (magB.match(/\$[\d,]+K?/g) || []);
+    const val = t => Number(String(t).replace(/[$,K]/g, "")) * (String(t).endsWith("K") ? 1000 : 1);
+    ck("IRMAA (v542\u2192v543): the table has the same SHAPE \u2014 same number of figures, only their values move",
+       numsA.length === numsB.length, `${numsA.length} vs ${numsB.length}`);
+    // ⚠ NOT "every figure moves down". The rendered table carries MAGI **and** headroom, and
+    // headroom = threshold \u2212 MAGI, so when MAGI falls headroom RISES by the same amount. An
+    // all-downward assertion is wrong about the model and went red on the correct build \u2014 the
+    // check was wrong, not the code. What is actually invariant is the blast radius: exactly the
+    // three affected years move, on both columns, and no move exceeds the largest engine-measured
+    // delta ($8,256, pinned to the dollar in t25 \u00a7B).
+    const moves = numsA.map((t, i) => Math.abs(val(numsB[i]) - val(t))).filter(d => d > 0);
+    ck("IRMAA (v542\u2192v543): exactly 6 figures move \u2014 3 years \u00d7 (MAGI + headroom)",
+       moves.length === 6, `${moves.length} moved`);
+    ck("IRMAA (v542\u2192v543): no figure moves by more than $9,000 (t25 pins the largest at $8,256)",
+       moves.every(d => d <= 9000), moves.filter(d => d > 9000).join(", "));
+  }
   // The v5.40 S-1 fix, witnessed per leg.
   // GATED PER LEG (OPERATIONS §B2) at v5.42. This was written for the v5.39→v5.40 pair and
   // was left PAIR-SPECIFIC with a note to re-point it. It was not re-pointed, so as the pair

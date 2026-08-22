@@ -48,6 +48,8 @@ tally "t23-$PRIOR" node t23_roth_ladder_rmd.mjs "$PRIOR"
 tally "t23-$CUR"   node t23_roth_ladder_rmd.mjs "$CUR"
 tally "t24-$PRIOR" node t24_ss86_phasein.mjs "$PRIOR"
 tally "t24-$CUR"   node t24_ss86_phasein.mjs "$CUR"
+tally "t25-$PRIOR" node t25_engineC_ss86.mjs "$PRIOR"
+tally "t25-$CUR"   node t25_engineC_ss86.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
