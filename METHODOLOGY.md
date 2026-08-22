@@ -229,6 +229,23 @@ The RMD basis on this tab is each spouse's whole Traditional balance rather than
 portion of it, so a non-qualified annuity balance entered under Other accounts contributes to the
 modelled distribution although it carries none.
 
+**The no-conversion counterfactual grows from the ladder's first year (v5.44).** The RMD cards
+compare "if you convert" against "if you never convert". The second projection seeds its balance at
+the ladder's start year — planned contributions and all — and through v5.43 grew it with an exponent
+counted from the *current* year instead, compounding the gap between those dates twice. On the
+example household that inflated the no-conversion RMD by 14.1% ($102,205 against $89,562), and since
+that figure feeds the "Combined RMDs reduced by" line, it **overstated what conversions achieve**.
+The correction runs in the conservative direction, unlike the two releases before it. Its size is not
+a constant: it is (ladder start − current year) years of growth, so it shrinks as retirement
+approaches and differs between households.
+
+**Annuity money is still inside this tab's RMD basis (not fixed at v5.44).** A non-qualified annuity
+carries no required distribution. Every engine excludes it from the RMD base; the Roth tab does not,
+in two places — the no-conversion card's seed and the ladder's own per-spouse distribution. Worth
+$483/yr on the example household. Left standing deliberately: correcting one site and not the other
+would put the tab's two RMD projections on disagreeing bases, the defect v5.41 was built to remove,
+so both sites are scheduled together.
+
 Two §86 defects remain, both narrow, both overstating, and both scheduled to ship together rather
 than piecemeal, because they are one defect in two places: the taxable-income engine omits the
 ½-benefits cap in its own phase-in, and the **middle** §86 tier on this tab also remains uncorrected, and was found during the v5.42 work
