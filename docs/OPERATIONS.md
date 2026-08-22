@@ -278,8 +278,18 @@ code, flip its pin to a positive assertion, and the fix is self-verifying.
 
 `t2_engines.mjs compare` asserts that under common seeded random numbers with identical inputs, the Monte
 Carlo, extended MC, stress, and Roth engines produce **byte-identical** output across the active version
-pair. Any release claiming "engines unchanged" must keep this **8/8**. If a fix that shouldn't touch the
+pair. Any release claiming "engines unchanged" must keep this **9/9**. If a fix that shouldn't touch the
 engines breaks parity, **the fix has overreached — stop and narrow it.**
+
+⚠ **The figure is 9/9, not 8/8 — corrected 2026-08-21.** The fingerprint carries **nine** keys; it has
+since the E-15 addendum, and `qa/qa-baseline/README.md` has said 9/9 for several releases while this
+section said 8/8. Build briefs inherited the wrong number from here and had to correct it inline,
+release after release, without anyone changing the source they were correcting. Verified at the v5.42
+ship: `node t2_engines.mjs compare v541 v542` returns **9 passed, 0 failed**.
+
+**Do not hardcode this count in a build brief.** Read it off the run. The number has moved once and
+will move again if the fingerprint gains a key — and a brief that carries a stale expectation invites
+someone to "fix" a passing guardrail to match it.
 
 ## F. Ship-verification ritual
 

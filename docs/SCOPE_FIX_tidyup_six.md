@@ -17,16 +17,19 @@ must be re-found with `qa/tools/funcmap.cjs`.
 
 ---
 
-## 1. The six, ranked by measured worst case
+## 1. The items, ranked by measured worst case
 
-| # | Item | Site | Worst measured error | Direction |
+⚠ **Sites re-verified against v5.42 on 2026-08-21 — see §5. Item 1's was wrong (L8881, not L8885).**
+
+| # | Item | Site (v5.42) | Worst measured error | Direction |
 |---|---|---|---|---|
-| **1** | **§86 upper-tier cliff, Roth tab** | L8885 | **$38,030** on the *shipped* household | overstates |
+| ~~**1**~~ | ~~**§86 upper-tier cliff, Roth tab**~~ | ~~L8881~~ | ~~**$38,030**~~ | **SHIPPED v5.42** |
 | **2** | Spouse B's SS ungated by start date | L8857 | up to **$15,600/yr** phantom SS | overstates |
-| **3** | `_perRmd`'s `noConv` basis | L8967 | **$13,724 (19.3%)** on the shipped household | overstates |
-| **4** | Engine B's omitted ½-benefits cap | L4990–4997 | **$2,375**, narrow band only | overstates |
+| **3** | `_perRmd`'s `noConv` basis | L8988 | **$13,724 (19.3%)** on the shipped household | overstates |
+| **4** | Engine B's omitted ½-benefits cap | L4990 `taxableSSPortion` | **$2,375**, narrow band only | overstates |
+| **7** | **Roth tab's MIDDLE §86 tier — same defect as item 4** (§7b, found at v5.42) | L8906 | **$2,468** joint / **$1,850** single, narrow band only | overstates |
 | **5** | HSA inside the dividend base | `otherTaxableInit` | **$300/yr** (71% of the term) | overstates |
-| **6** | Annuity money inside `_perRmd`'s RMD basis | L8961 | **~$105/yr** | overstates |
+| **6** | Annuity money inside `_perRmd`'s RMD basis | L8985 | **~$105/yr** | overstates |
 
 All six run in the conservative direction, which is why none of them ever blocked a release. That is
 also why they have survived: nothing looks wrong, the plan just looks slightly worse than it is.
@@ -135,14 +138,21 @@ precisely for this. Effect on B's card: **~$105/yr**. `annShareA` is 0, so spous
 
 ## 5. Sites
 
-| Item | Site (v5.41, re-find) |
+⚠ **RE-VERIFIED AGAINST v5.42 SOURCE, 2026-08-21** (`976a03fe16cd401b9735bbb21675bf5f`). The v5.41
+column below was wrong for item 1 and the shipped v5.42 build corrected it: the `provisional > _ssT2`
+branch was at **L8881, not L8885** — L8885 is the `// MAGI (for IRMAA lookback)` comment, four lines
+past the target. A session trusting that number lands in the wrong expression. Item 1 is now SHIPPED
+(v5.42); the rest are re-found below against v5.42 and must still be re-found again with
+`qa/tools/funcmap.cjs` at the next build, because line numbers move every release.
+
+| Item | Site (v5.42, re-find with `funcmap.cjs`) |
 |---|---|
-| 1 | `<anon>@8719` L8885, the `provisional > _ssT2` branch. Correct formula in `qa/tools/hand_86.mjs::statute86` |
-| 2 | L8857 `spouseBSS`; needs an `_ssBYearRoth` + partial-month mirror of L8860, and a `single` gate |
-| 3 | L8967 `mk()` — `yrs`, and `fin()`'s `noConv` / `noConvTrad` |
+| ~~1~~ | **SHIPPED at v5.42.** Was L8881 (recorded here as L8885, wrong). Now the §86(a)(2) phase-in at L8880–8906, pinned by `t24` and `t1` STRUCT S-3 |
+| 2 | **L8857** `const spouseBSS = _rsSsB * 12;` — unchanged from v5.41. Needs an `_ssBYearRoth` + partial-month mirror of the spouse-A gate at **L8860**, and a `single` gate |
+| 3 | **L8988** `mk()`'s `const yrs = Math.max(0, yr - tl.asOfYear)`, with `t0` seeded at **L8985** from `_rsbC.tradInitA/B`; plus `fin()`'s `noConv` / `noConvTrad` (**L9020**). `_perRmd` opens at **L8980**. (Recorded here as L8967 against v5.41) |
 | 4 | `taxableSSPortion` L4990–4997 (Engine B) |
 | 5 | `otherTaxableInit()` — shared helper, wide blast radius |
-| 6 | L8961 `t0` — `tradInitA/B` → RMD-bearing basis via `annShareA/B` |
+| 6 | **L8985** `const t0 = { A: _rsbC.tradInitA, B: _rsbC.tradInitB }` → RMD-bearing basis via `annShareA/B` (defined at **L1718**). (Recorded here as L8961 against v5.41) |
 
 ## 6. Tests
 
@@ -168,10 +178,14 @@ scaled to clear the ceiling. Decide during scoping, not mid-build.
 
 ## 7. Open decisions — Steve
 
+**D-1 — RESOLVED: yes. Item 1 shipped alone as v5.42 on 2026-08-21.** Original recommendation follows.
+
 **D-1 — split item 1 out?** I recommend **yes**: ship the §86 cliff alone and first. It is the
 largest defect of the seven now on the table (these six plus div/capgain), it is one expression, its
 oracle already exists, and it clears the rendering ceiling without a synthetic household. The other
 five then become a genuine tidy-up.
+
+**D-2 — PROVISIONALLY (a) AT v5.42, AWAITING SIGN-OFF.** v5.42 shipped item 1 with Engine C left flat and the disagreement documented in METHODOLOGY, i.e. option (a). That is recorded, not ratified — and per the note below it **cannot be deferred past the div/capgain release**, whose central invariant must then read *term sets equal, values may differ*. Original text follows.
 
 **D-2 — does Engine C get §86?** Engine C is currently flat 85% and has been designated the
 comparison reference that must not be edited. Fixing item 1 makes the tab more correct than its own
@@ -187,6 +201,28 @@ engine and needs a full parity run with intended-diff registration. The alternat
 documenting the HSA inclusion as a known simplification. I lean toward fixing it at the helper, since
 leaving it means the div/capgain release copies a base that is 71% wrong — but it is the only item
 here that can move a fingerprint, and that is Steve's call.
+
+## 7b. Item 7 — a SEVENTH item, found during the v5.42 build
+
+**The Roth tab's MIDDLE §86 tier has the same defect as item 4.** §86(a)(1) caps the includible
+amount at ½ of benefits; the tab caps it at 85%:
+
+```
+app      Math.min((provisional - _ssT1) * 0.5, totalSS * 0.85)     L8906 (v5.42)
+statute  Math.min( ½(prov − base),             totalSS * 0.5 )
+```
+
+Swept across the whole band: **$2,468 joint** (peak at benefits ≈ $7,050) and **$1,850 single**. It
+needs joint benefits under **$12,000** (single under $9,000), because above that the overall 85% cap
+binds first. Overstates, like the other six. **$0 on the example household** — benefits are $15,600
+then $55,200, both outside the band.
+
+This is **the same defect class as item 4 in a second location**, and this scope did not list it.
+Pinned, not fixed, at v5.42: a dated `[KNOWN DEFECT]` comment at the site and measured bounds in
+`t24` §D. **Recommendation: fix items 4 and 7 together in one release** — one statute, one oracle
+(`hand_86.mjs` already covers both), and fixing the class rather than the instances is what stops a
+third copy appearing. Both need a fixture at SS ≈ $7,000; neither is reachable from the example
+household.
 
 ## 8. Out of scope
 
