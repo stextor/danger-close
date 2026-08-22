@@ -14,7 +14,7 @@ const VER = process.argv[2] || "v510";
 // change the CHECK COUNT: with an unregistered tag t3 ran 35 checks instead of 36, and the count is
 // the number that goes in the release headline. Registering a new version in the ladders below is
 // now mandatory, and an unregistered tag stops the run instead of quietly testing the wrong thing.
-const KNOWN_VERSIONS = ["v510", "v5101", "v5102", "v511", "v512", "v513", "v514", "v515", "v516", "v517", "v518", "v519", "v520", "v521", "v522", "v523", "v524", "v525", "v526", "v527", "v528", "v529", "v530", "v531", "v532", "v533", "v534", "v535", "v536", "v537", "v538", "v539", "v540", "v541", "v542", "v592"];
+const KNOWN_VERSIONS = ["v510", "v5101", "v5102", "v511", "v512", "v513", "v514", "v515", "v516", "v517", "v518", "v519", "v520", "v521", "v522", "v523", "v524", "v525", "v526", "v527", "v528", "v529", "v530", "v531", "v532", "v533", "v534", "v535", "v536", "v537", "v538", "v539", "v540", "v541", "v542", "v543", "v592"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is not registered in this suite.");
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -25,12 +25,13 @@ if (!KNOWN_VERSIONS.includes(VER)) {
 const IS510 = VER !== "v592"; // v5.10-family features (v510 and v5101)
 const IS5101 = VER === "v5101";
 const IS5102 = VER === "v5102";
-const IS511 = VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v542"));
-const IS514 = VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v542")); // v5.14 IRMAA indexation Verify checks present
+const IS511 = VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v542" || VER === "v543"));
+const IS514 = VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v542" || VER === "v543")); // v5.14 IRMAA indexation Verify checks present
 const SRC = fs.readFileSync(new URL(`../${VER}.jsx`, import.meta.url), "utf8");
-const V540 = VER === "v540" || VER === "v541" || VER === "v542"; // v5.41/v5.42 carry the v5.40 pins forward
-const V541 = VER === "v541" || VER === "v542"; // v5.42 carries the v5.41 pins forward — its magi term set and RMD basis are unchanged
-const V542 = VER === "v542"; // v5.42: the §86 upper-tier phase-in (STRUCT S-3)
+const V540 = VER === "v540" || VER === "v541" || VER === "v542" || VER === "v543"; // v5.41/v5.42 carry the v5.40 pins forward
+const V541 = VER === "v541" || VER === "v542" || VER === "v543"; // v5.42 carries the v5.41 pins forward — its magi term set and RMD basis are unchanged
+const V542 = VER === "v542" || VER === "v543"; // v5.43 keeps the §86 upper-tier phase-in
+const V543 = VER === "v543"; // v5.43: Engine C gets §86 (STRUCT S-4) // v5.42: the §86 upper-tier phase-in (STRUCT S-3)
 // v5.33: parsed once so STATIC claims about call sites are AST facts, not line matches.
 const { Parser: _AcornParser } = await import("acorn");
 const _acornJsx = (await import("acorn-jsx")).default;
@@ -58,7 +59,7 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
   // see them — it rendered green on constants it had never checked.
   // v5.33 adds NO row (decision 4, 2026-08-13): the embedded-gain field is recorded but not
   // read by any engine, so there is nothing for a Verify row to check against a source.
-  const _verifyCount = (VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v542"))) ? 66 : VER === "v531" ? 62 : IS514 ? 57 : IS510 ? 54 : 53;
+  const _verifyCount = (VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v542" || VER === "v543"))) ? 66 : VER === "v531" ? 62 : IS514 ? 57 : IS510 ? 54 : 53;
   T(`VERIFY: check count is ${_verifyCount}`, checks.length === _verifyCount, `got ${checks.length}`);
   const bad = checks.filter(c => !c.pass);
   T("VERIFY: every check passes", bad.length === 0, bad.map(b => b.name).join("; "));
@@ -89,7 +90,7 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
 // read back off the source. Asserting a constant against itself proves nothing.
 {
   const o = g.OBBBA_CONSTS ? g.OBBBA_CONSTS() : undefined;
-  if (VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v542"))) {
+  if (VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v542" || VER === "v543"))) {
     T("OBBBA: constants block exists and is exported", o && typeof o === "object", String(o));
     T("OBBBA: deduction is $6,000 per person 65+", o.SENIOR_BONUS_PER_PERSON === 6000, String(o?.SENIOR_BONUS_PER_PERSON));
     T("OBBBA: single MAGI phase-out starts at $75,000", o.SENIOR_BONUS_THR_SGL === 75000, String(o?.SENIOR_BONUS_THR_SGL));
@@ -222,7 +223,7 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
 
 // ═══ Statics — the source file itself ═══
 {
-  const verStr = VER === "v542" ? "v5.42" : VER === "v541" ? "v5.41" : VER === "v540" ? "v5.40" : VER === "v539" ? "v5.39" : VER === "v538" ? "v5.38" : VER === "v537" ? "v5.37" : VER === "v536" ? "v5.36" : VER === "v535" ? "v5.35" : VER === "v534" ? "v5.34" : VER === "v533" ? "v5.33" : VER === "v532" ? "v5.32" : VER === "v531" ? "v5.31" : VER === "v530" ? "v5.30" : VER === "v529" ? "v5.29" : VER === "v528" ? "v5.28" : VER === "v527" ? "v5.27" : VER === "v526" ? "v5.26" : VER === "v525" ? "v5.25" : VER === "v524" ? "v5.24" : VER === "v523" ? "v5.23" : VER === "v522" ? "v5.22" : VER === "v521" ? "v5.21" : VER === "v520" ? "v5.20" : VER === "v519" ? "v5.19" : VER === "v518" ? "v5.18" : VER === "v517" ? "v5.17" : VER === "v516" ? "v5.16" : VER === "v515" ? "v5.15" : VER === "v514" ? "v5.14" : VER === "v513" ? "v5.13" : VER === "v512" ? "v5.12" : VER === "v511" ? "v5.11" : IS5102 ? "v5.10.2" : IS5101 ? "v5.10.1" : IS510 ? "v5.10" : "v5.9.2";
+  const verStr = VER === "v543" ? "v5.43" : VER === "v542" ? "v5.42" : VER === "v541" ? "v5.41" : VER === "v540" ? "v5.40" : VER === "v539" ? "v5.39" : VER === "v538" ? "v5.38" : VER === "v537" ? "v5.37" : VER === "v536" ? "v5.36" : VER === "v535" ? "v5.35" : VER === "v534" ? "v5.34" : VER === "v533" ? "v5.33" : VER === "v532" ? "v5.32" : VER === "v531" ? "v5.31" : VER === "v530" ? "v5.30" : VER === "v529" ? "v5.29" : VER === "v528" ? "v5.28" : VER === "v527" ? "v5.27" : VER === "v526" ? "v5.26" : VER === "v525" ? "v5.25" : VER === "v524" ? "v5.24" : VER === "v523" ? "v5.23" : VER === "v522" ? "v5.22" : VER === "v521" ? "v5.21" : VER === "v520" ? "v5.20" : VER === "v519" ? "v5.19" : VER === "v518" ? "v5.18" : VER === "v517" ? "v5.17" : VER === "v516" ? "v5.16" : VER === "v515" ? "v5.15" : VER === "v514" ? "v5.14" : VER === "v513" ? "v5.13" : VER === "v512" ? "v5.12" : VER === "v511" ? "v5.11" : IS5102 ? "v5.10.2" : IS5101 ? "v5.10.1" : IS510 ? "v5.10" : "v5.9.2";
   T(`STATIC: field-manual callsign carries ${verStr}`, SRC.includes(`FIELD MANUAL · ${verStr} · PUBLIC BUILD`));
   T(`STATIC: end-of-manual footer carries ${verStr}`, SRC.includes(`DANGER CLOSE ${verStr} · documentation regenerated`));
   // v5.10.2: the remaining two of the four in-app version sites, asserted exactly
@@ -401,6 +402,38 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
     }
   }
 
+  // ─── STRUCT S-4 (v5.43) — ENGINE C implements §86, and does so ONCE ──────────────────
+  // Through v5.42 the IRMAA engine read `const ssTaxable = ssTot * 0.85;` — flat, no statute.
+  // This is the extinction invariant for that expression. Gated per leg: pre-v5.43 legs carry a
+  // dated [KNOWN DEFECT] pin asserting the flat rule, which is correct for those builds.
+  {
+    // ⚠ ANCHORED TO LINE START (^\s*const), because v5.43's own source comment quotes the retired
+    // expression verbatim to explain what it replaced. An unanchored /const ssTaxable = .../ matches
+    // that COMMENT and the pin passes on the fixed leg while asserting the defect is still present —
+    // the t8 comment-counting trap, one suite over. Found by this check going red on v543.
+    const _flatC = /^\s*const ssTaxable = ssTot \* 0\.85;/m.test(SRC);
+    const _prov  = /const _prov86 = pen_y \+ work_y \+ rmdTax_y \+ conv_y \+ div_y \+ capGain_y \+ ssTot \* 0\.5;/.test(SRC);
+    const _par   = /const _para1 = Math\.min\(ssTot \* 0\.5, Math\.max\(0, _prov86 - _ssF\.ssThr1\) \* 0\.5\);/.test(SRC);
+    if (V543) {
+      T("STRUCT S-4 (V543): Engine C's flat 85%-of-benefits assignment is gone", !_flatC);
+      T("STRUCT S-4 (V543): provisional income carries every MAGI term plus half of benefits", _prov);
+      T("STRUCT S-4 (V543): para1 is capped at HALF of benefits per §86(a)(1)", _par);
+      T("STRUCT S-4 (V543): the phase-in is capped at 85% of benefits per §86(a)(2)(B)",
+        /Math\.min\(ssTot \* 0\.85,\s*\n?\s*\(_prov86 - _ssF\.ssThr2\) \* 0\.85/.test(SRC));
+      // Thresholds come from the SINGLE source the Roth tab already uses. A third hardcoded copy
+      // is how F-2B-1 and F-2B-2 survived three releases; this pin stops a fourth.
+      T("STRUCT S-4 (V543): thresholds come from taxFactsFor, NOT a third hardcoded copy",
+        /const _ssF = taxFactsFor\(filingSingleI\);/.test(SRC) &&
+        !/_prov86[^;]*(25000|32000|34000|44000)/.test(SRC));
+      // The ordering trap that broke the scoping experiment, pinned so it cannot come back.
+      T("STRUCT S-4 (V543): the phase-in sits BELOW capGain_y (TDZ trap — div_y/capGain_y are declared after the old site)",
+        SRC.indexOf("const capGain_y = Math.round(_gainByYrI[yr] || 0);") < SRC.indexOf("const _prov86 ="));
+    } else {
+      T("STRUCT S-4 (pre-V543) [KNOWN DEFECT]: Engine C still carries the flat 85% rule", _flatC);
+      T("STRUCT S-4 (pre-V543) [KNOWN DEFECT]: no §86 phase-in in Engine C on this build", !_prov);
+    }
+  }
+
   T("STATIC: no API keys in source", !/sk-ant-[A-Za-z0-9_-]{20,}/.test(SRC));
   T("STATIC: no personal Windows paths", !/C:\\+Users|\/Users\/steve/i.test(SRC));
   T("STATIC: persistence goes through window.storage (>40 call sites)", (SRC.match(/window\.storage\./g) || []).length > 40);
@@ -425,7 +458,7 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
 // leg, which legitimately still has none — the v5.28 defect, not a fix.
 {
   const IS533 = VER === "v533";
-  const IS536 = VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v542"));
+  const IS536 = VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v542" || VER === "v543"));
   const IS534 = VER === "v534" || VER === "v535" || IS536;
   const HAS_GAIN_FIELD = IS533 || IS534;
   const P0 = g.PORTFOLIO();
