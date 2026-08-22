@@ -246,7 +246,16 @@ $483/yr on the example household. Left standing deliberately: correcting one sit
 would put the tab's two RMD projections on disagreeing bases, the defect v5.41 was built to remove,
 so both sites are scheduled together.
 
-Two §86 defects remain, both narrow, both overstating, and both scheduled to ship together rather
+**§86(a)(1)'s half-benefits cap is applied in both places as of v5.45.** The statute caps the
+includible amount at half the benefits; the taxable-income engine dropped that cap in its upper tier
+and the Roth tab capped at 85% in its middle tier — mirror images, each correct where the other was
+wrong. Both overstated, bounded at $2,463 and $2,468 joint ($1,838 / $1,850 single), and both were
+confined to households with benefits under $12,000 joint or $9,000 single, above which the overall
+85% cap binds first. **The two bands were contiguous at the adjusted base amount**, so a household
+with small benefits and rising income crossed from one defect straight into the other; fixing either
+alone would have left a discontinuity at that threshold, which is why they shipped together.
+
+The remaining tidy-up items are narrow, both overstating, and both scheduled to ship together rather
 than piecemeal, because they are one defect in two places: the taxable-income engine omits the
 ½-benefits cap in its own phase-in, and the **middle** §86 tier on this tab also remains uncorrected, and was found during the v5.42 work
 rather than being previously known. Between the base and adjusted base amounts the statute caps the

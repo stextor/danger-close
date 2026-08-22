@@ -1,5 +1,77 @@
 # Changelog
 
+## v5.45 — Social Security's half-benefits cap, restored in the two places that dropped it, 2026-08-22
+
+**Build.** `src/DangerClose.jsx` md5 `c55f900df11fb475847ef4238b7e761f` · built `index.html` md5
+`4fdba2725b196ff94ca3b5270abb9a41` · prior build v5.44 (`cd87419e7e8ae182c0efdb30cb7b1305`).
+
+### What changed
+
+26 U.S.C. §86(a)(1) caps the includible amount of Social Security at **half** your benefits. Two
+places in the app dropped that cap, and they were **mirror images** — each got right the tier the
+other got wrong:
+
+| | Where | Middle tier | Upper tier |
+|---|---|---|---|
+| Taxable-income engine | `taxableSSPortion` | correct | **capped at the wrong thing** |
+| Roth conversion tab | the §86 block | **capped at 85%, not ½** | correct since v5.42 |
+
+Both are fixed. **The correction lowers taxable Social Security**, so like most of this run it makes
+the plan look better — by up to **$2,463** (taxable-income engine) and **$2,468** (Roth tab) for a
+joint filer, **$1,838 / $1,850** single.
+
+### Who this affects, stated plainly
+
+**Only households with small Social Security benefits** — under **$12,000/yr** filing jointly, under
+**$9,000** single. Above those, the overall 85% cap binds first and both formulas already agreed.
+**It is $0 on the example household**, whose benefits are far larger.
+
+### Why both had to ship together
+
+The two defects **never overlapped in a single case**, and their income bands were **contiguous**:
+the Roth tab's error ran up to $44,000 of provisional income — the adjusted base amount — and the
+engine's started one dollar above it. A household with small benefits and rising income left one
+defect and entered the other at that exact threshold. Fixing one alone would have produced a
+**discontinuity** at $44,000: correct on one side, wrong on the other. That is a worse artefact than
+the symmetric error it would have replaced, and a test now asserts its absence.
+
+### Limitations
+
+- Two tidy-up items remain on the Roth tab: annuity money still sits inside the RMD basis ($483/yr),
+  and the younger spouse's benefit is not gated by claim date (up to $15,600/yr, $0 on the example
+  household). Both are disclosed and scheduled.
+- The tab's MAGI still omits dividends and realized capital gains.
+
+### Tests
+
+**2,252 checks verify this release, 0 failing** (1,469 against this build), plus 82 tooling checks.
+
+| Suite | v5.44 leg | v5.45 leg |
+|---|---|---|
+| t1 units & statics | 133 | **138** |
+| **t27 §86 half-cap (new)** | **14** | **18** |
+| t23 · t24 · t25 · t26 | 25 · 38 · 29 · 20 | 25 · 38 · 29 · 20 |
+
+**⚠ MC parity is 9/9, and that is NOT evidence this release is contained.** Patching the engine moves
+no fingerprint keys — but neither does perturbing that function's output for *every* input, because
+it sits on no fingerprinted path at all. That was established with a control during scoping and is
+recorded here so the 9/9 is not read as reassurance it cannot give. The suite is the guardrail for
+the engine half; parity covers only the Roth tab half.
+
+**`t27` is new and required a purpose-built fixture.** Neither defect is reachable from the example
+household — a household with benefits around $7,000 had to be constructed and driven across both
+income bands. This is the third consecutive release with that property: v5.42's defect hid behind a
+slider default, v5.44's behind a date, these behind benefit size.
+
+**Six negative controls, all six fired.** Two fired `t27`, four fired the structural pins in `t1`;
+that split is by design and is now documented inside `t27` rather than left to be rediscovered.
+
+**A false green was found in the new suite and fixed before shipping.** `t27`'s engine assertion
+reconstructed "other income" by subtracting taxable Social Security from a figure that never
+contained it, so the statutory oracle was being evaluated at the wrong income — and the two controls
+that revert the actual defects *passed*. It was caught only because those controls fired the
+structural pins and not the behavioural ones, and that gap was investigated rather than accepted.
+
 ## v5.44 — the "no conversions" RMD counterfactual was over-grown by three years, 2026-08-22
 
 **Build.** `src/DangerClose.jsx` md5 `cd87419e7e8ae182c0efdb30cb7b1305` · built `index.html` md5
