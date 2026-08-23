@@ -1,5 +1,154 @@
 # Changelog
 
+## v5.47 — two balances a rule was reading, and the invariant that had been measuring the wrong thing, 2026-08-23
+
+**Build.** `src/DangerClose.jsx` md5 `1395f2e4fc2809ab3e5692b50e2d3409` · built `index.html` md5
+`d54d9e137ac6a52cec712b3587ba09f0` · prior build v5.46 (`bfb4ea3d3140d7135f67fcc324147b6e`).
+
+### What changed
+
+Two corrections, both about **which balance a rule is allowed to read** — the recurring failure
+mode here, and the one behind the v5.41 divergence and the v5.44 span defect.
+
+**The HSA is out of the dividend base.** `otherTaxableInit()` lumps taxable and HSA money together
+as spendable after-tax cash. That is correct for the question it answers, and it is the wrong input
+to a taxable dividend: a qualified HSA withdrawal is tax-free, so those dollars cannot throw off a
+dividend that lands in MAGI. Engine D reached this conclusion at v5.36 and held the HSA out of its
+gains-bearing pool; the three dividend expressions — one each in Engines A, B and C — are the
+consumer that never got the same treatment. Fixed at the three consumers, not in the shared helper,
+so the spendable view and the capital-gain view keep their own correct answer and no new API
+surface is added. Subtracted as an **amount, not a share**: gross RMDs land in this pool and are
+fully taxable, so its taxable fraction rises over time and a fixed share would understate dividends.
+
+**The Roth tab's RMD cards no longer count annuity money.** A non-qualified annuity is ordinary
+income when spent but carries no required distribution. Every engine has excluded it as
+`trad x (1 - annShare)` since v5.26; the conversion tab's two RMD cards did not. The share is now
+applied to **both halves** rather than reseeding the counterfactual, which would have been the
+smaller edit and the wrong one — it fixes the no-conversion half while the with-conversion half
+keeps reading the ladder's own Traditional balances, leaving two halves of one quantity on
+different bases. That is the failure v5.41 removed, when two projections drifted $48,712 apart.
+
+### Direction — it splits, and one line moves the unfavourable way
+
+Both corrections remove overstated income, so most figures improve — the third consecutive release
+moving that way. But **within the annuity fix the direction splits**: RMDs fall, which looks
+better, while the tab's "Combined RMDs reduced by" line falls $41,288 -> $40,910, so **conversions
+now look slightly less effective than the tab claimed**. And the HSA fix moves **MAGI, not federal
+tax**, on the example household — those dividends sit in the 0% long-term capital-gains bracket, so
+what moves is IRMAA and ACA exposure. A single sentence saying this release improves the plan would
+be wrong on all three counts.
+
+### What it is worth
+
+Measured on the shipped example household. Dividends $720 -> $420, so MAGI falls **$300/yr**;
+inside §86's upper-tier phase-in the effect compounds to **$555**, because $300 less provisional
+income also removes $255 of includible Social Security. `taxableOrdinary` and federal tax are
+byte-identical. Spouse B's RMD cards fall $15,070 -> $14,587 and $3,283 -> $3,178. Spouse A holds
+no annuity (`annShareA` is exactly 0) and both of A's cards are unchanged to the dollar, which is
+the built-in negative control.
+
+### The invariant that had been measuring the wrong quantity
+
+`t14`'s Engine C survivor check failed during this build, and the interesting part is why. It
+differenced raw year-over-year MAGI and attributed all of it to the first death — but this
+household's MAGI also rises **$3,959.47/yr** from RMD growth, identical on both builds. So the raw
+difference understated the death effect by about one year of drift, and always had: on shipped
+v5.46 it read $10K against an expectation of $13.26K and **passed with $740 of its $4,000 band
+left**. The band was absorbing a structural offset, not noise.
+
+Verified by counterfactual — Engine C run on the same household with both deaths pushed past the
+horizon, differencing the same year: the isolated death effect is **$14,090.26** on v5.46 and
+**$13,835.26** on v5.47. Items 5 and 6 moved it by exactly **$255**, the §86 multiplier applying
+before the death and not after. That $255 crossed a $1,000 rendering boundary and spent the last of
+the margin. **The invariant did not detect a defect; it ran out of headroom it should not have been
+relying on.**
+
+The sibling check was the more dangerous one. "Engines B and C reconcile on the same flat-SS basis"
+was still *passing*, with **$80** of its $4,000 band left — it would have failed on the next
+release to touch MAGI at all, and read as that release's regression. Both are now corrected for one
+year of drift, using rows `t14` already parses: no new engine call, and specifically no
+`applyLoadedData`, which would mutate module globals under the already-mounted DOM. Negative
+control: with Engine C's survivor rule disabled (the pre-v5.13 C-2C-5 defect), the corrected form
+fails by $3.26K. Margins now: v5.46 $3.26K · v5.47 $2.74K.
+
+### Tests
+
+**2,455 app checks, 0 failing** · **parity 9/9** · tooling 90 · **2,545 total, 0 failing**. Counts
+parsed from suite output.
+
+| | v5.46 leg | v5.47 leg |
+|---|---|---|
+| t1 units/statics | 150 | **155** |
+| t2 · t3 · t4 · t5 · t6 · t10 | 18 · 36 · 228 · 58 · 21 · 163 | 18 · 36 · 228 · 58 · 21 · 163 |
+| t23 · t24 · **t25** · **t26** · t27 · t28 · t29 | 25 · 38 · **29** · **20** · 18 · 34 · 43 | 25 · 38 · **35** · **25** · 18 · 34 · 43 |
+| leg total | 881 | **897** |
+
+Feature suites run once against the current leg: t7 41 · t8 38 · t9 14 · t11 40 · t12 23 · t13 42 ·
+t14 44 · t15 11 · t16 24 · t17 74 · t18 67 · t19 65 · t20 100 · t22 85 = 668. Parity 9.
+
+Reconciliation against v5.46's published 2,335, since the leg totals above are larger for two
+reasons that are not growth: `t29`'s 43 checks are counted per leg here and appeared in neither of
+that entry's two tables, and `t1` gains 6 on the frozen leg from this release's new pre-v5.47
+mirrors. Genuine new coverage this release is `t1` +5, `t25` +6, `t26` +5 on the current leg.
+
+**⚠ `t10`'s printed section labels overlapped, and this nearly reached this very entry as a false
+finding about v5.46.** `pass` is one running counter across all of `t10`'s blocks, and the "2B"
+line evaluated `pass - pass2A` **at print time**, so it reported 2B+2C+2D+2E (87) under a label
+saying 2B — while the 2D and 2E lines below reported those same blocks again. The four labels
+therefore did not sum to the total line beneath them: 76+87+27+21 = 211 against a true **163**.
+Totalling this suite by adding up its section labels overcounts by 48 per leg, which is exactly
+what happened here, and a draft of this entry accused the v5.46 release of under-reporting by 96
+when v5.46's figure had been right all along. Caught by the §L run from the packaged copies, which
+prints `t10 total` alongside the sections. The label is corrected so the blocks sum; the lesson is
+that "parsed from output" is not the same as "parsed correctly," and a total line that disagrees
+with its own parts is worth reading twice.
+
+New coverage. **`t1` STRUCT S-8 and S-9**, anchored to line start throughout — item 5's Engine A
+site now sits beneath a 14-line comment quoting the retired expression, exactly the trap that
+caught S-4 at v5.43 and `t8`'s census at v5.44. Both carry pre-v5.47 mirrors, so the frozen legs
+assert the defects present. **`t26` §E** is item 6's extinction invariant: both card halves must
+move (the v5.41 one-basis rule), spouse A unmoved as the negative control, plus an assertion that
+the control *can* fire. **`t25` §E** is item 5's, and it is engine-level and dollar-exact for a
+specific reason recorded below.
+
+`t26`'s oracle was re-pointed rather than patched. It derived its expectation from `tradInit*`, so
+it carried the very defect item 6 removes. Mirroring the app's new expression into the test would
+have been tautological; it now seeds from `rmdInit*`, which is **upstream** of the app's route —
+`retireStartBalances` builds `rmdInitB` from the positions directly and then *derives* `annShareB`
+from it, so the app makes a round trip through the ratio while the test reads the primitive it came
+from. Algebraically equal, structurally different: verified at 218,600 x (1 - 0.03202195791399817)
+= 211,600 = `rmdInitB`.
+
+### Limitations, and what the suite could NOT witness
+
+**The MC-parity guardrail held 9/9, and that is not evidence about item 5.** `t2`'s parity fixture
+builds its portfolio by hand from `positions` only — no `othHsa`, and `taxableInit` computed as the
+positions residual, excluding Other accounts entirely. `P.othHsa` is `undefined -> 0`, so **item 5
+is worth $0 on that fixture by construction.** The fingerprint does include Engine A, so the
+guardrail would ordinarily be the right place to look; it could not see this change. This is
+exactly the situation `t2`'s own v5.34 note describes — the invariance is a property of the
+fixture, not of the code. Reporting an unmoved guardrail as confirmation here would be false.
+
+**The same blind spot covers `t17` and `t18`**, the two dollar-exact engine suites, whose household
+builders both do `P.otherAccounts = []`. An item-5 invariant added to either would pass vacuously
+forever. That is why it lives in `t25`, which drives Engine C on the shipped example household —
+the one place already positioned to witness it. Widening any of these three fixtures to carry an
+Other-accounts household is a scope decision, noted and not taken here.
+
+**And it had to be engine-level.** Item 5 is worth $300/yr, **below** the ±$500 ceiling that every
+`Math.round(x/1000)` rendering imposes, so a DOM-based invariant for it would pass whether the fix
+were present or not. `OPERATIONS` §M and the export shim's own comment both used to claim that
+category was empty; both were corrected in this cycle. The claim was true of the four drawdown
+engines and was generalised to the app, while the Roth tab's conversion ladder has been
+component-inline and unexported throughout.
+
+**The cross-version DOM diff** now carries a bounded intended-difference branch for this pair, in
+the same idiom v5.43 established: the Taxes and IRMAA tables must still render, must differ, must
+keep their shape, and every moved figure must move **exactly one $K step** — a sub-$1K input seen
+through a $K rendering cannot do more, so a two-step move would mean the change reached past the
+dividend base. Its blast radius is deliberately pinned as the opposite shape from v5.43's: that
+release moved three years by up to $8,256, this one moves every year by one step.
+
 ## v5.46 — spouse B's Social Security no longer starts before spouse B claims it, 2026-08-23
 
 **Build.** `src/DangerClose.jsx` md5 `bfb4ea3d3140d7135f67fcc324147b6e` · built `index.html` md5
