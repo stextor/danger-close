@@ -1,5 +1,96 @@
 # Changelog
 
+## v5.46 — spouse B's Social Security no longer starts before spouse B claims it, 2026-08-23
+
+**Build.** `src/DangerClose.jsx` md5 `bfb4ea3d3140d7135f67fcc324147b6e` · built `index.html` md5
+`0c2663b5cb1430af2beb4867f629337d` · prior build v5.45 (`c55f900df11fb475847ef4238b7e761f`).
+
+### What changed
+
+The Roth conversion tab's ladder added spouse B's Social Security to its benefits total for **every**
+projected year, whatever B's claim date. Spouse A's benefit had always been gated by A's claim date;
+B's was not. For any household where B claims after the ladder starts — anyone delaying to 70, which
+is ordinary advice — the tab credited benefits that had not begun.
+
+Social Security feeds the §86 provisional-income base, so the error compounded: phantom benefits
+raised provisional income, which raised the taxable share of those benefits, which raised MAGI a
+second time, along with tax, marginal rate and apparent IRMAA exposure.
+
+B's term is now gated on B's own claim date and mirrors A's exactly, including the **pro-rata
+credit in the claim year** (benefits from the claim month through December). For a single filer it
+is zero by an explicit test, not by inference from absent data — the claim date is constructed for
+both spouses whether or not a second spouse exists, so a stored spouse-B benefit arriving in a
+restored backup would otherwise still have reached the ladder.
+
+### Direction — this one lowers the numbers
+
+**The correction makes the tab report smaller figures**, and the build brief predicted the opposite,
+so it is stated explicitly. Removing income the household does not yet have reduces provisional
+income, taxable Social Security, MAGI, tax and marginal rate, and widens apparent conversion
+headroom. That is not the conservative direction this project defaults to when *choosing* an
+assumption — but nothing is being chosen here. The household does not have the money, and the
+figures now say so.
+
+### What it is worth
+
+**$0 on the shipped example household**, in every year, at every slider position — spouse B claims
+in **January of the ladder's first year**, so B is already claiming in all twelve projected years
+and the claim-year pro-rata credit is a full twelve months. This is the fourth consecutive release
+whose defect is invisible in the example data, and it is the reason purpose-built fixtures rather
+than example-household assertions are the substance of this release.
+
+Measured on a fixture where B delays to 70 against a ladder starting in 2029: **MAGI falls by
+$22,950 in each of the seven pre-claim years** (2029–2035) and is unchanged from the claim year on.
+On a second fixture where B's claim lands mid-year, the claim year itself moves by $11,475 — half a
+year's benefit — which is what distinguishes the pro-rata treatment from a whole-year switch.
+
+### Tests
+
+**2,335 app checks, 0 failing** (up 83 from v5.45's 2,252) · **parity 9/9** · tooling 82 ·
+**2,417 total, 0 failing**. Counts parsed from suite output.
+
+| | v5.45 leg | v5.46 leg |
+|---|---|---|
+| t1 units/statics | 140 | **144** |
+| t2 engines · t3 roth · t4 dom · t5 storage · t6 single · t10 tax | 18 · 36 · 228 · 58 · 21 · 163 | 18 · 36 · 228 · 58 · 21 · 163 |
+| t23 · t24 · t25 · t26 · t27 | 25 · 38 · 29 · 20 · 18 | 25 · 38 · 29 · 20 · 18 |
+| **t28 spouse-B claim gate (new)** | **32** | **34** |
+| leg total | 826 | 832 |
+
+Feature suites run once against the current leg: t7 41 · t8 38 · t9 14 · t11 40 · t12 23 · t13 42 ·
+t14 44 · t15 11 · t16 24 · t17 74 · t18 67 · t19 65 · t20 100 · t22 85 = 668. Parity 9.
+
+**`t28` is new** and carries two fixtures, because one was not enough. The first (B delays to 70,
+January claim) exercises the gate across seven pre-claim years. The second exists because the first
+**cannot test the behaviour this release actually chose**: with a January claim a pro-rata gate and
+a whole-year gate produce identical figures, so the modelling decision would have shipped
+unverified. The second fixture moves B's claim to July and asserts all three candidate behaviours by
+name — pro-rata $119,935, whole-year $131,410, claim-year-dropped $108,460 — so a regression toward
+either wrong branch fails by name rather than by an uninterpretable number. A third section asserts
+the single-filer gate as a **difference**: a single filer's ladder must be identical whether or not
+a stale spouse-B benefit is stored, which needs no transcription of the single-filer recursion.
+
+Both prior-leg pins fired: on v5.45 `t28` asserts the defective figures and passes, which is the
+before/after witness. `t1` gains **STRUCT S-7**, anchored to line start, because the new source
+comment quotes the retired expression and would otherwise satisfy a bare text match — the trap that
+caught S-4 at v5.43 and t8's census at v5.44. `t24`'s ladder transcription now carries B's gate; its
+example-household pins are **unmoved at 38 on both legs**, which is the check that the fix did not
+reach a household it must not touch.
+
+### Limitations and approximations
+
+- The ladder is component-inline, so its figures are read from the rendered DOM at `Math.round(x/1000)`
+  — a **±$500 ceiling** (OPERATIONS §M). The effects measured here are $11,475–$22,950, clearing it by
+  23×–45×, but no dollar-exact assertion on this tab is available without the §M hoist, which remains
+  its own release.
+- `t24`'s transcription still models **spouse A's** term as a whole-year gate. A's claim month is
+  January on the example household, so the two agree there and no figure is affected; the pro-rata
+  case for A is untested by that suite. `t28` covers the pro-rata path on a purpose-built fixture.
+- The unreachable-state gate for single filers is asserted through the backup-restore path, which is
+  the only route by which a single plan can carry a non-zero spouse-B benefit. Neither of the app's
+  two plan-writing forms can produce that state.
+- Other tabs and engines already gated spouse B correctly; this release changes the Roth tab only.
+
 ## v5.45 — Social Security's half-benefits cap, restored in the two places that dropped it, 2026-08-22
 
 **Build.** `src/DangerClose.jsx` md5 `c55f900df11fb475847ef4238b7e761f` · built `index.html` md5
