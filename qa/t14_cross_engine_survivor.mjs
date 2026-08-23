@@ -44,6 +44,15 @@
 // PRECISION CEILING (OPERATIONS §M): every figure read here is rendered as Math.round(x/1000), so
 // these are +/-$500 assertions. The movements measured ($15.6K-$21K) are far larger than the band.
 //
+// v5.47 ADDENDUM — A WIDE BAND IS NOT THE SAME AS A HEALTHY ONE. Engine C's two MAGNITUDE
+// assertions differenced raw year-over-year MAGI and attributed all of it to the death, while
+// this household's MAGI also rises ~$4K/yr from RMD growth. Their +/-$4,000 bands were absorbing
+// that structural offset, so both sat far closer to failing than they read: at the v5.47 build
+// the magnitude check had $740 of margin and the B/C reconcile check had $80. Both are now
+// corrected for one year of drift; see the long note at the Engine C block. The lesson worth
+// keeping is that a passing assertion with an unexamined tolerance can be measuring the wrong
+// quantity for years — the tolerance hides the offset instead of reporting it.
+//
 // NEGATIVE CONTROL — run against pre-fix v5.12, 2026-08-09:
 //   Engine C's two assertions FAIL (MAGI does not drop; no survivor transition).
 //   Engine B's and Engine D's PASS — both were already correct at v5.12 (B since v5.11, D since
@@ -314,9 +323,44 @@ try {
   if (cRows && cRows[d] && cRows[d - 1]) {
     const cDrop = cRows[d - 1].magi - cRows[d].magi;
     const expected = (smaller * 0.85) / 1000;
-    ck("Engine C [EXTINCTION]: MAGI falls at the first death by 85% of the smaller check",
-      Math.abs(cDrop - expected) <= 4,
-      `drop $${cDrop}K vs expected ~$${expected.toFixed(1)}K`);
+    // ── v5.47 — DRIFT-CORRECTED. Read this before touching the tolerance. ────────────────────
+    // `cRows[d-1] - cRows[d]` is a RAW year-over-year difference, and this household's MAGI is
+    // ALSO rising ~$4K/yr for reasons that have nothing to do with the death (RMD growth on a
+    // compounding Traditional balance). The raw difference therefore understates the death
+    // effect by about one year of that drift — and it always has. On shipped v5.46 this check
+    // read $10K against an expectation of $13.26K and passed with $740 of its $4,000 band left.
+    // It was not measuring the quantity its own name claims; the band was absorbing a
+    // STRUCTURAL offset, not noise, and that is why it looked healthy for eleven releases.
+    //
+    // MEASURED, not reasoned. `computeIrmaaPlan` was run on the same household with both deaths
+    // pushed past the horizon and the SAME year differenced, which isolates the death and
+    // nothing else:
+    //     v5.46  isolated death effect $14,090.26   raw reading $10,130.79   drift $3,959.47
+    //     v5.47  isolated death effect $13,835.26   raw reading  $9,875.79   drift $3,959.47
+    // Both isolated figures sit just ABOVE 0.85 x the smaller check, and the excess is real:
+    // the survivor is scored against SINGLE §86 thresholds, which tax the retained check harder.
+    // The drift is identical on both builds, so it is not something v5.47 introduced.
+    //
+    // WHAT v5.47 ACTUALLY DID. Items 5 and 6 moved the isolated effect by exactly $255 — the
+    // §86 phase-in multiplier applying to item 5's $300 before the death (1.85 x $300 = $555)
+    // and not after it (single filer, out of the phase-in band). $255 of real movement crossed a
+    // $1,000 DOM rounding boundary at d-1 and consumed the last $740 of margin. The invariant
+    // did not detect a defect; it ran out of headroom it should never have been relying on.
+    //
+    // THE CORRECTION subtracts one year of drift, estimated from the immediately-prior year's
+    // change. It uses only rows this file ALREADY parses — no new engine call, and in
+    // particular no `applyLoadedData`, which would mutate module globals underneath the
+    // already-mounted DOM (OPERATIONS §C) and silently corrupt every later assertion here.
+    //
+    // NEGATIVE CONTROL, run at the v5.47 build: with Engine C's survivor rule disabled (the
+    // pre-v5.13 C-2C-5 defect — both checks paid for the whole horizon), the corrected form
+    // reads $6K against $13.26K and FAILS by $3.26K. It still catches what it exists to catch.
+    // Margins: v5.46 $3.26K · v5.47 $2.74K · C-2C-5 control −$3.26K (fires).
+    const cDrift = cRows[d - 2] ? (cRows[d - 1].magi - cRows[d - 2].magi) : 0;
+    const cDropAdj = cDrop + cDrift;
+    ck("Engine C [EXTINCTION]: MAGI falls at the first death by 85% of the smaller check (drift-corrected)",
+      Math.abs(cDropAdj - expected) <= 4,
+      `drift-corrected drop $${cDropAdj}K (raw $${cDrop}K + one year of drift $${cDrift}K) vs expected ~$${expected.toFixed(1)}K`);
     // TIMING — the transition happens in the same year everywhere, not one year apart.
     if (dDrop !== null) {
       const cPrev = cRows[d - 2] ? cRows[d - 2].magi - cRows[d - 1].magi : 0;
@@ -326,9 +370,14 @@ try {
     }
     // Engines B and C share a basis, so B's retained check and C's lost MAGI must reconcile:
     // (both checks) - (larger) = smaller, and C lost 85% of exactly that.
+    // v5.47: reconciles against the DRIFT-CORRECTED figure for the reason recorded above. This
+    // check inherited the same defect and was the more dangerous of the two, because it was
+    // still passing: at the v5.47 build it had $80 of its $4,000 band left. It would have failed
+    // on the next release to touch MAGI at all, and read as that release's regression.
+    // Negative control (C-2C-5 disabled): off by $6,920 — fires.
     ck("cross-engine [EXTINCTION]: Engines B and C reconcile on the same flat-SS basis",
-      Math.abs((ssA + ssB - bAtTotal) * 0.85 - cDrop * 1000) <= 4000,
-      `B implies smaller $${ssA + ssB - bAtTotal}; C lost $${cDrop}K of MAGI`);
+      Math.abs((ssA + ssB - bAtTotal) * 0.85 - cDropAdj * 1000) <= 4000,
+      `B implies smaller $${ssA + ssB - bAtTotal}; C lost $${cDropAdj}K of MAGI (drift-corrected)`);
   }
 } catch (e) {
   fail++; console.log(`  \u2717 t14 run threw: ${String(e).slice(0, 400)}`);

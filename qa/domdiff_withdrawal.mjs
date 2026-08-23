@@ -190,8 +190,34 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   // At v536\u2192v537 Engine B's inputs are byte-identical by census, so the honest claim is
   // IDENTITY \u2014 and it still witnesses the wiring: kill the call site on either leg and that
   // leg's figures lose the gains, desynchronize from the other's, and fail here.
-  ck("TAXES: the year-table FIGURES are IDENTICAL across the pair (v5.40 does not move Engine B\u2019s inputs; a dead call site on either leg fails this)",
-     figA.length > 0 && figA === figB, figA.length ? firstDiff(figA, figB) : "region not found");
+  // v5.47 follows the ENGINE_C_CHANGED precedent below: when a release legitimately moves an
+  // engine's figures, the honest treatment is a BOUNDED intended-difference branch, not a
+  // suppressed check and not a softened one. Item 5 held the HSA out of the dividend base in
+  // Engines A, B and C, so the Taxes table's MAGI column moves by design at this pair.
+  const ENGINE_B_CHANGED = (VA === "v546" && VB === "v547");
+  if (!ENGINE_B_CHANGED) {
+    ck("TAXES: the year-table FIGURES are IDENTICAL across the pair (v5.40 does not move Engine B\u2019s inputs; a dead call site on either leg fails this)",
+       figA.length > 0 && figA === figB, figA.length ? firstDiff(figA, figB) : "region not found");
+  } else {
+    ck("TAXES: both legs still render the year table", figA.length > 0 && figB.length > 0);
+    ck("TAXES (v546\u2192v547): the figures DIFFER \u2014 item 5 removes the HSA from the dividend base", figA !== figB);
+    const nA = (figA.match(/\$[\d,]+K?/g) || []), nB = (figB.match(/\$[\d,]+K?/g) || []);
+    const val = t => Number(String(t).replace(/[$,K]/g, "")) * (String(t).endsWith("K") ? 1000 : 1);
+    ck("TAXES (v546\u2192v547): same SHAPE \u2014 same number of figures, only their values move",
+       nA.length === nB.length, `${nA.length} vs ${nB.length}`);
+    // The blast radius. Every rendered figure here is Math.round(x/1000), and item 5 is worth
+    // $300/yr (or $555 inside the \u00a786 phase-in), so a move can only ever be ONE $K step. A
+    // larger step means the change reached past the dividend base.
+    const steps = nA.map((t, i) => Math.abs(val(nB[i]) - val(t))).filter(d => d > 0);
+    ck("TAXES (v546\u2192v547): every moved figure moves exactly one $K step \u2014 a sub-$1K input cannot do more",
+       steps.length > 0 && steps.every(d => d === 1000), `steps ${[...new Set(steps)].join(",")}`);
+    // Every $-figure in this table is an income or tax amount, so removing income can only hold
+    // or lower them. (Unlike the IRMAA table, there is no headroom column here to move the other
+    // way \u2014 which is why an all-downward claim is sound here and was NOT sound there.)
+    ck("TAXES (v546\u2192v547): no $ figure RISES \u2014 removing income cannot raise income or tax",
+       nA.every((t, i) => val(nB[i]) <= val(t)),
+       nA.filter((t, i) => val(nB[i]) > val(t)).join(", "));
+  }
   // The v5.36 copy now rides on BOTH legs \u2014 the prior-leg $0-default branch is retired with v5.35.
   for (const [V, t] of [[VA, A.taxes], [VB, B.taxes]]) {
     ck(`${V} taxes: footnote names the gains' source (the Withdrawal plan's sales)`,
@@ -228,7 +254,9 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   // by design, and asserting it would have turned an intended difference into a red suite. The
   // rule is the same one applied to the S-1 disclosure check below: assert what is true for the
   // pair in hand, and name the intended difference rather than suppressing the check.
-  const ENGINE_C_CHANGED = (VA === "v542" && VB === "v543");
+  // v5.47 joins v5.43 here: item 5 moves Engine C's dividend term, so the MAGI column differs by
+  // design at the v546\u2192v547 pair too. Bounded below rather than suppressed.
+  const ENGINE_C_CHANGED = (VA === "v542" && VB === "v543") || (VA === "v546" && VB === "v547");
   if (!ENGINE_C_CHANGED) {
     ck("IRMAA: the MAGI-table FIGURES are IDENTICAL across the pair (no release in this span touches Engine C's arithmetic \u2014 a dead call site on either leg fails this)",
        magA.length > 0 && magA === magB, magA.length ? firstDiff(magA, magB) : "region not found");
@@ -237,7 +265,7 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
     // legs, must differ, and must differ ONLY downward \u2014 §86 can never raise includible benefits
     // above the flat 85% rule, so an increase anywhere means the fix reached past its scope.
     ck("IRMAA: both legs still render the MAGI table", magA.length > 0 && magB.length > 0);
-    ck("IRMAA (v542\u2192v543): the MAGI figures DIFFER \u2014 this release changes Engine C's \u00a786 arithmetic", magA !== magB);
+    ck(`IRMAA (${VA}\u2192${VB}): the MAGI figures DIFFER \u2014 this release changes Engine C's inputs`, magA !== magB);
     const numsA = (magA.match(/\$[\d,]+K?/g) || []), numsB = (magB.match(/\$[\d,]+K?/g) || []);
     const val = t => Number(String(t).replace(/[$,K]/g, "")) * (String(t).endsWith("K") ? 1000 : 1);
     ck("IRMAA (v542\u2192v543): the table has the same SHAPE \u2014 same number of figures, only their values move",
@@ -249,10 +277,22 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
     // three affected years move, on both columns, and no move exceeds the largest engine-measured
     // delta ($8,256, pinned to the dollar in t25 \u00a7B).
     const moves = numsA.map((t, i) => Math.abs(val(numsB[i]) - val(t))).filter(d => d > 0);
-    ck("IRMAA (v542\u2192v543): exactly 6 figures move \u2014 3 years \u00d7 (MAGI + headroom)",
-       moves.length === 6, `${moves.length} moved`);
-    ck("IRMAA (v542\u2192v543): no figure moves by more than $9,000 (t25 pins the largest at $8,256)",
-       moves.every(d => d <= 9000), moves.filter(d => d > 9000).join(", "));
+    if (VB === "v543") {
+      ck("IRMAA (v542\u2192v543): exactly 6 figures move \u2014 3 years \u00d7 (MAGI + headroom)",
+         moves.length === 6, `${moves.length} moved`);
+      ck("IRMAA (v542\u2192v543): no figure moves by more than $9,000 (t25 pins the largest at $8,256)",
+         moves.every(d => d <= 9000), moves.filter(d => d > 9000).join(", "));
+    } else {
+      // v5.47's blast radius is the OPPOSITE shape from v5.43's and that is the point of pinning
+      // it. v5.43 moved three years by up to $8,256; item 5 moves EVERY year, by $300 (or $555
+      // inside the \u00a786 phase-in) \u2014 sub-$1K inputs seen through Math.round(x/1000), so any
+      // individual figure either holds or steps exactly one $K. A two-step move here means the
+      // change reached past the dividend base.
+      ck("IRMAA (v546\u2192v547): every moved figure moves exactly one $K step \u2014 a sub-$1K input cannot do more",
+         moves.length > 0 && moves.every(d => d === 1000), `distinct steps ${[...new Set(moves)].join(",")}`);
+      ck("IRMAA (v546\u2192v547): the move is BROAD, not local \u2014 item 5 touches every year, unlike v5.43's three",
+         moves.length > 6, `${moves.length} figures moved`);
+    }
   }
   // The v5.40 S-1 fix, witnessed per leg.
   // GATED PER LEG (OPERATIONS §B2) at v5.42. This was written for the v5.39→v5.40 pair and

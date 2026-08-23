@@ -501,7 +501,15 @@ const pass2Ecount = pass - pass2E, fail2Ecount = fail - fail2E;
 
 
 console.log(`\nt10 2A: ${pass2A} passed, ${fail2A} failed`);
-console.log(`t10 2B: ${pass-pass2A} passed, ${fail-fail2A} failed  (IRMAA tier selection + 7 indexation assertions, pins FLIPPED at v5.14)`);
+// v5.47 — was `${pass-pass2A}`, evaluated HERE, at the end of the run. `pass` is one running
+// counter across every block, so that expression reported 2B+2C+2D+2E (87) under a label saying
+// "2B", while the 2D and 2E lines below reported their own blocks again. The four printed labels
+// therefore overlapped and did NOT sum to the total line beneath them — 76+87+27+21 = 211 against
+// a true 163. A session totalling this suite by adding up its section labels overcounts by 48 per
+// leg. Found 2026-08-23 when exactly that happened during the v5.47 packaging run, and the wrong
+// figure very nearly reached a CHANGELOG as a claim that the PREVIOUS release had under-reported.
+// Fixed by snapshotting at the block boundary, like every other block here.
+console.log(`t10 2B+2C: ${pass2C-pass2A} passed, ${fail2C-fail2A} failed  (IRMAA tier selection + 7 indexation assertions, pins FLIPPED at v5.14)`);
 console.log(`t10 2D: ${pass2D} passed, ${fail2D} failed  (Roth break-even crossover \u2014 the three cases sub-phase 2D owed)`);
 console.log(`t10 2E: ${pass2Ecount} passed, ${fail2Ecount} failed  (state-tax module \u2014 five archetypes, both statuses, clamps, note scan)`);
 console.log(`t10 total: ${pass} passed, ${fail} failed`);

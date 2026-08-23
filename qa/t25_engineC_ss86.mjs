@@ -32,13 +32,16 @@ import { fileURLToPath, pathToFileURL } from "url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v543";
-const KNOWN_VERSIONS = ["v541", "v542", "v543", "v544", "v545", "v546"];
+const KNOWN_VERSIONS = ["v541", "v542", "v543", "v544", "v545", "v546", "v547"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST_FIX = VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546";
+const POST_FIX = VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547";
+// v5.47 — tidy-up item 5 held the HSA out of the dividend base, which lowers Engine C's MAGI on
+// this household by $300/yr. Legs v541-v546 keep asserting their own correct pre-item-5 figures.
+const POST_ITEM5 = VER === "v547";
 
 // The repo keeps the oracle at qa/tools/hand_86.mjs; PROJECT KNOWLEDGE IS FLAT and holds it beside
 // the suites. Resolve rather than assume, and say which copy was used (the t21/t24 pattern).
@@ -71,10 +74,21 @@ const by = Object.fromEntries(rows.map(r => [r.yr, r]));
 // ── §B · the three years the correction moves, pinned TO THE DOLLAR ──────────────────────
 // Both the pre-fix and post-fix figures are named, so the pair is the before/after witness and
 // neither leg can drift onto the other's numbers.
-const MOVERS = POST_FIX
+// v5.47 · PER-LEG. Item 5 removed the HSA from the dividend base, worth $300/yr of MAGI here.
+// In these three years the household sits in the §86 UPPER TIER PHASE-IN, so $300 less
+// provisional income also removes $255 of includible Social Security: the year moves by
+// $555 = $300 x 1.85, not $300. That second-order term is the same compounding v5.46 recorded,
+// and it is why these three pins move by a different amount from §C's twelve.
+// Headroom is (threshold - MAGI), so it moves the same $555 in the OPPOSITE direction — pinning
+// both is what proves the shift is a MAGI change and not a threshold change.
+const MOVERS = POST_ITEM5
+  ? { 2041: 92937, 2042: 96633, 2043: 100394 }
+  : POST_FIX
   ? { 2041: 93492, 2042: 97188, 2043: 100949 }
   : { 2041: 101748, 2042: 103746, 2043: 105779 };
-const HEADROOM = POST_FIX
+const HEADROOM = POST_ITEM5
+  ? { 2041: 212316, 2042: 214725, 2043: 217190 }
+  : POST_FIX
   ? { 2041: 211761, 2042: 214170, 2043: 216635 }
   : { 2041: 203505, 2042: 207612, 2043: 211806 };
 for (const [yr, want] of Object.entries(MOVERS)) {
@@ -86,14 +100,22 @@ for (const [yr, want] of Object.entries(MOVERS)) {
 
 // ── §C · the 22 years that must NOT move, and the zero-flip result ──────────────────────
 // The overreach test. A fix that reached past Engine C's §86 term lands here.
-const UNCHANGED = {
+// v5.47 · these twelve years are past §86 convergence, so item 5's $300 lands on MAGI WITHOUT
+// the 1.85 multiplier §B's three years carry. Pinning both sets at once is the real assertion:
+// twelve years moving $300 and three moving $555 is the signature of a change to the dividend
+// base seen through §86, and NOT of a change to the §86 term itself, which would move only the
+// phase-in years. A single-figure delta across all fifteen would be the defect.
+const UNCHANGED = POST_ITEM5 ? {
+  2029: 108480, 2030: 106480, 2031: 137140, 2032: 122140, 2033: 122140, 2034: 122140,
+  2035: 122140, 2036: 122140, 2037: 122140, 2038: 122140, 2039: 165803, 2040: 164989,
+} : {
   2029: 108780, 2030: 106780, 2031: 137440, 2032: 122440, 2033: 122440, 2034: 122440,
   2035: 122440, 2036: 122440, 2037: 122440, 2038: 122440, 2039: 166103, 2040: 165289,
 };
 let moved = [];
 for (const [yr, want] of Object.entries(UNCHANGED))
   if (!by[yr] || Math.round(by[yr].magi) !== want) moved.push(`${yr}: want ${usd(want)} got ${by[yr] ? usd(by[yr].magi) : "none"}`);
-T("C-1: the 12 pre-2041 years are IDENTICAL on both legs \u2014 past convergence, the fix must not touch them",
+T(`C-1: the 12 pre-2041 years are past §86 convergence${POST_ITEM5 ? " and each moved item 5's flat $300" : " \u2014 the v5.43 fix must not touch them"}`,
   moved.length === 0, moved.join(" | "));
 T("C-2: every year sits in tier 0 \u2014 this household never pays IRMAA on either leg",
   rows.every(r => r.tier === 0), rows.filter(r => r.tier !== 0).map(r => r.yr).join(","));
@@ -151,6 +173,55 @@ T("C-5: NO survivor year moves \u2014 their provisional income is already past c
     Math.min(11000 * 0.5, 6000) !== Math.min(11000 * 0.85, 6000));
   T("D-8: every year the correction moves is a JOINT year \u2014 the single pair is unexercised here",
     Object.keys(MOVERS).every(y => by[y] && !by[y].filingSingleI));
+}
+
+// ── §E · v5.47 [EXTINCTION] — tidy-up item 5, the HSA in the dividend base ──────────────
+// WHY IT LIVES HERE and not in t17 or t18, the two dollar-exact engine suites. Both of those
+// build purpose-made households with `P.otherAccounts = []`, so `othHsa` is 0 and item 5 is
+// worth $0 on their fixtures BY CONSTRUCTION — an invariant added there would pass vacuously
+// forever. This is the same blind spot t2's parity fixture has (its P is built from `positions`
+// only, no `othHsa`, which is why the MC-parity guardrail stayed 9/9 across item 5 and is NOT
+// evidence about it). t25 drives Engine C on the SHIPPED example household, which carries a
+// $15,000 HSA, so it is the one place already positioned to witness this.
+//
+// AND IT MUST BE ENGINE-LEVEL. The effect is $300/yr, BELOW the ±$500 DOM rounding ceiling
+// (OPERATIONS §M) — a DOM-read invariant for item 5 would pass whether the fix were present or
+// not. Every figure below comes from `computeIrmaaPlan` directly, to the dollar.
+if (POST_ITEM5) {
+  // The HSA is real, and it is inside the pool the dividend base used to read.
+  const _rsb = __g.retireStartBalances(__g.PLAN_TIMELINE().rothLadderStart);
+  T("E-1: the example household carries an HSA (othHsa > 0) \u2014 otherwise this section is vacuous",
+    _rsb.othHsa > 0, `othHsa ${usd(_rsb.othHsa)}`);
+  T("E-2: `taxableInitAll` still INCLUDES it \u2014 decision C-4's spendable view is untouched",
+    Math.round(__g.taxableInitAll()) - Math.round(__g.otherTaxableInit()) >= 0 &&
+    Math.round(__g.taxableInitAll()) > Math.round(_rsb.othHsa),
+    `taxableInitAll ${usd(__g.taxableInitAll())}, othHsa ${usd(_rsb.othHsa)}`);
+
+  // The measured effect, per §86 region. Twelve flat-$300 years and three $555 years — the
+  // signature described at §C. A regression that puts the HSA back in the base restores every
+  // one of these to its v5.46 figure, so both sets are named.
+  const PRE_UNCHANGED = { 2029: 108780, 2039: 166103, 2040: 165289 };
+  const PRE_MOVERS = { 2041: 93492, 2042: 97188, 2043: 100949 };
+  T("E-3 [EXTINCTION]: past convergence, item 5 moves MAGI by exactly $300 \u2014 the dividend, undamped",
+    Object.entries(PRE_UNCHANGED).every(([y, pre]) => by[y] && pre - Math.round(by[y].magi) === 300),
+    Object.entries(PRE_UNCHANGED).map(([y, pre]) => `${y}: ${pre - (by[y] ? Math.round(by[y].magi) : NaN)}`).join(" "));
+  T("E-4 [EXTINCTION]: inside the \u00a786 phase-in it moves $555 = $300 x 1.85 \u2014 the second-order term",
+    Object.entries(PRE_MOVERS).every(([y, pre]) => by[y] && pre - Math.round(by[y].magi) === 555),
+    Object.entries(PRE_MOVERS).map(([y, pre]) => `${y}: ${pre - (by[y] ? Math.round(by[y].magi) : NaN)}`).join(" "));
+
+  // NEGATIVE CONTROL. $300/yr of MAGI is 2% of a $15,000 HSA, so the control that discriminates
+  // is the SIZE: if the fix ever held out the wrong quantity — the whole Other-accounts pool,
+  // say, or a share instead of an amount — the delta stops equalling yield x othHsa exactly.
+  {
+    const yieldPct = 2.0;                       // the tab's own default, and this run's input
+    const expected = Math.round(_rsb.othHsa * (yieldPct / 100));
+    T(`E-5 [NEGATIVE CONTROL]: the flat delta is exactly yield x othHsa = ${usd(expected)}`,
+      expected === 300, `${usd(_rsb.othHsa)} x ${yieldPct}% = ${usd(expected)}`);
+    T("E-6 [NEGATIVE CONTROL IS LIVE]: holding out the WHOLE Other-taxable pool instead would " +
+      "give a different figure, so E-5 discriminates",
+      Math.round(__g.otherTaxableInit() * (yieldPct / 100)) !== expected,
+      `whole pool would give ${usd(Math.round(__g.otherTaxableInit() * (yieldPct / 100)))}`);
+  }
 }
 
 console.log(`\nt25 SUITE (${VER}): ${pass} passed, ${fail} failed`);
