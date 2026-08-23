@@ -1,5 +1,86 @@
 # Changelog
 
+## Unreleased — `qa/` only: the parity guardrail can now see Other accounts, 2026-08-23
+
+**No version bump, and no release.** Nothing under `src/` changed. Source throughout is v5.47,
+`src/DangerClose.jsx` md5 `1395f2e4fc2809ab3e5692b50e2d3409`, verified unchanged against the same
+hash the session started from. This entry rides with the next release.
+
+### The gap, measured rather than argued
+
+The MC-parity fingerprint is this project's hard line for "the engines have not drifted"
+(OPERATIONS §E), and it reports 9/9 across every release. It could not observe **any** behaviour
+keyed off the Other accounts category, and never could.
+
+Established by AST field diff rather than by reading: `runRothStrategies` reads **36** `P` fields;
+the main fingerprint household supplies **33**. The three it omits are `othHsa`, `annShareA` and
+`annShareB`, all arriving as `undefined → 0`. The ACA-bridge household, fully explicit by its own
+scope's D-3, never lists them either. Those three fields are the entry points for the HSA dividend
+exclusion (L3840, v5.47), the annuity RMD exemption (L3741, v5.26), and — the one that matters
+most — the **survivor re-pooling of the exempt share at the first death** (L3811–3815), which is
+the same class of survivor behaviour `t14` exists to protect.
+
+No other fingerprint covers it. The nine compared keys were `mc, extMC, stress, roth,
+rothCurrentEstate, rothAca, ssTable, stateTax, inflation`; the census of `othHsa` returns six sites,
+and the three non-Engine-A consumers all reach it through `retireStartBalances`, which the Monte
+Carlo path never calls. `roth` and `rothCurrentEstate` were the only keys that could have seen it.
+
+### What it cost
+
+v5.47 held the HSA out of Engine A's dividend base. On the two pre-existing households that change
+is worth **$0 by construction**, so parity reported 9/9 across a release it should have caught, and
+that release's CHANGELOG had to state that its own guardrail was not evidence. On the new household
+every strategy moves, between **+$1,024 and +$3,040**.
+
+### The fix
+
+A **third fully-explicit fingerprint household**, `fp.rothOther`, chosen over extending the
+existing one. Extending it would have made the v5.46 → v5.47 pair legitimately differ, requiring a
+per-pair gate, and would have spent forty releases of continuity on a household whose entire value
+is that it has been inert. A third key costs one fingerprint entry and disturbs nothing.
+
+Both spouses carry annuity money at **different** proportions (0.10 / 0.25), so a re-pooling bug
+that swaps them cannot pass, and the first death sits at 2048 inside a 2062 horizon so L3811–3815
+actually executes — `deathYr1: Infinity`, as the ACA household uses, would have left that half of
+the household dead weight. Nine coverage assertions in the `ROTH-ACA: the bridge is LIVE` idiom
+check those properties rather than trusting the constants, because an edit that zeroed the three
+fields would otherwise fingerprint an inert household and stay green forever — this scope's own
+failure, reproduced one level up.
+
+`INTENDED_DIFFS` gains `"v546→v547": ["rothOther"]`. That makes the negative control permanent
+instead of a one-off measurement: a revert of v5.47's item 5 fails this guardrail from now on, and
+if `rothOther` ever stops moving across that pair, the household has stopped exercising the
+mechanism it was built for.
+
+### Negative controls — both fired, and the second is the interesting one
+
+**Item 5 reverted in Engine A:** `PARITY: rothOther CHANGED as intended` fails with *"expected a
+change here and found none — was the fix reverted?"*
+
+**Survivor re-pooling broken** (L3814, the inherited exempt share dropped):
+
+| household | correct | broken | detects it |
+|---|---|---|---|
+| `rothOther` (new) | 6,257,642 | 6,256,741 | **yes** |
+| `roth` (main) | 3,993,096 | 3,993,096 | **no** |
+
+A real defect in the survivor path passes the existing guardrail silently and fails the new one.
+That is the whole case for this change, demonstrated rather than asserted.
+
+### Tests
+
+`t2` 18 → **27** per leg · parity 9 → **10**. **2,474 app checks, 0 failing** · tooling 90 ·
+**2,564 total, 0 failing**, counts parsed from suite output. Every other suite re-run unchanged on
+both legs.
+
+### What this does NOT do
+
+`t17` and `t18` share the same blind spot — both builders do `P.otherAccounts = []` — and are
+deliberately untouched: their purpose-built households isolate one MAGI source, which is a
+different question with a different answer. `TESTING.md` is **not** updated here; its header has
+read v5.38 for nine releases and correcting it properly is its own piece of work, not a drive-by on
+a release that would otherwise touch one file.
+
 ## v5.47 — two balances a rule was reading, and the invariant that had been measuring the wrong thing, 2026-08-23
 
 **Build.** `src/DangerClose.jsx` md5 `1395f2e4fc2809ab3e5692b50e2d3409` · built `index.html` md5

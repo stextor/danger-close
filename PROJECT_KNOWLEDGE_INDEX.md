@@ -56,6 +56,18 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 > bands ($740 and $80 of margin left at v5.47). They now subtract one year of drift. A tolerance
 > that has never been examined is not the same as headroom.
 >
+> ⚠ **The MC-parity guardrail gained a THIRD household, 2026-08-23 (`qa/` only, no version bump).**
+> Until then `t2`'s fingerprint could not observe any Other-accounts behaviour: `runRothStrategies`
+> reads 36 `P` fields and the main household supplied 33, omitting `othHsa`, `annShareA` and
+> `annShareB`. So the annuity RMD exemption (v5.26) and the **survivor re-pooling of the exempt
+> share** (L3811-3815) were invisible to it, as was v5.47's HSA fix — which is why parity reported
+> 9/9 across a release it should have caught. The new `fp.rothOther` key carries all three, with
+> both spouses annuitised at different rates and a death inside the horizon. Parity is now **10**,
+> `t2` is **27** per leg. `INTENDED_DIFFS` carries `"v546→v547": ["rothOther"]`, so a revert of
+> v5.47's item 5 fails permanently. ⚠ `t17` and `t18` still share the blind spot (`P.otherAccounts
+> = []` in both builders) and are deliberately untouched — do not read their green as coverage of
+> anything under Other accounts.
+>
 > ⚠ **`t10`'s printed section labels OVERLAP — do not total that suite by adding them up.** `pass`
 > is one running counter across its blocks, and until v5.47 the "2B" line evaluated `pass-pass2A`
 > at print time, so it reported 2B+2C+2D+2E while the 2D and 2E lines reported those blocks again.
@@ -202,7 +214,7 @@ skipped** — the same shape as the rotation/manifest split recorded under Prior
 | `hand_86.mjs` | `981b425c4fc738abb49046a97cd0fea0` | `qa/tools/hand_86.mjs` — **PROMOTED TO SUITE ORACLE at v5.42** and added to the pool (it was repo-only through v5.41, which is why the v5.42 brief had to record its hash separately). `statute86` is transcribed from 26 U.S.C. §86 at law.cornell.edu, **not from any app expression**, and is imported by BOTH `t24` and `qa/tools/derive_v542.mjs` — one oracle on both sides, deliberately, because at v5.41 a second independent derivation drifted and the brief's table shipped wrong twice. ⚠ **The three app copies inside it are v5.40 transcriptions and are now HISTORY** — `rothTab` records the cliff v5.42 replaced. Asserts nothing; counted in NO check total |
 | `package_check.mjs` | `88adee72107c0e96636f6a43be80ea81` | `qa/tools/package_check.mjs` — **NEW at v5.42 (added 2026-08-21).** Validates a release zip against OPERATIONS §L before it is sent: structure, MANIFEST truthfulness, changed-files-only against a clone, `knowledge/` flatness and the two-source rotation, cross-destination byte-identity, and the delete-first list. **23 checks (22 on an ops package), negative-controlled 16 ways, all firing.** Packages declare `KIND: app-release` or `KIND: ops` in MANIFEST.txt; release-only checks are gated on it and an **undeclared package fails closed**. Without a clone the tree-diff checks are SKIPPED and say so. Asserts about the DELIVERY, not the build — counted in NO release check total |
 | `controls_v542.sh` | `66a923e87b585b4f8dd843e7fe3e8ca9` | `qa/controls_v542.sh` — **NEW at v5.42**, the re-pointed successor to `controls.sh`. All 13 v5.38-era patch anchors were verified to still resolve **exactly once** against v5.42 source before re-pointing; C16–C21 added for the §86 work. Supersedes the stale `controls.sh` row above — retire that file at the maintainer's discretion |
-| `t2_engines.mjs` | `9a9ba167634ee29c645830ccdd7d6ca9` | `qa/qa-baseline/t2_engines.mjs` |
+| `t2_engines.mjs` | `399e1432c986f9517852f3ec7f92122a` | `qa/qa-baseline/t2_engines.mjs` |
 | `t3_roth.mjs` | `1b7c07734fea1e76fc8e08cd472d7122` | `qa/qa-baseline/t3_roth.mjs` — **rolled to v5.42** (`v542` registered; the fail-closed version guard caught all four at the first suite run, which is it working). Previously rolled to v5.41 |
 | `t4_dom.mjs` | `28a5cc4bf3d49889f62abbb022275390` | `qa/qa-baseline/t4_dom.mjs` — **rolled to v5.42** (`v542` registered; the fail-closed version guard caught all four at the first suite run, which is it working). Previously rolled to v5.41 |
 | `t5_storage.mjs` | `64f18f63ba5417bf8691e22910841ac8` | `qa/qa-baseline/t5_storage.mjs` — **rolled to v5.42** (`v542` registered; the fail-closed version guard caught all four at the first suite run, which is it working). Previously rolled to v5.41 |
