@@ -180,6 +180,22 @@ text rather than by reading the table, which is the only way to find a row that 
 **Adding a file to the pool and adding its row are two acts, and the second is the one that gets
 skipped** — the same shape as the rotation/manifest split recorded under Prior build below.
 
+**WHAT THIS TABLE COVERS, stated explicitly 2026-08-23 so it stops implying more than it does.**
+It carries the **test, harness and build-input** files the pool holds — the ones where staleness is
+SILENT, because a stale test either fails against correct code and reads as a regression or passes
+vacuously and hides one. It does **not** carry the pool's 27 `.md` documents, and that is a decision
+rather than an oversight: documents change most releases, so rows for them would be 27 more figures
+to roll every time — a new drift surface on a page that has already recorded this exact failure
+three times. Documents are covered by the **clone-and-diff**, which §A2 names as the primary check
+and which costs one command and cannot itself go stale. The two `.jsx` sources are covered by the
+Current/Prior build tables above.
+
+⚠ **Eight rows were added 2026-08-23** after a scripted audit found the table covered 52 of the
+pool's 89 files, ten of the gaps not being documents. Nothing had drifted at the time — the same
+day's both-directions sweep found every pool file except the prior-leg source byte-identical to its
+repo counterpart — so this closed a **latent** hole, not a live one. Counted by script, because a
+row that was never written cannot be found by reading the table.
+
 **Two mapping caveats.** The pool flattens repo paths: `tools_fixture.jsx` here is
 `qa/tools/fixture/fixture.jsx` in the repo (byte-identical), and the baseline suites live under
 `qa/qa-baseline/`. Match by content, not by filename position.
@@ -226,6 +242,7 @@ skipped** — the same shape as the rotation/manifest split recorded under Prior
 | `STATUS_v5_42_shipped.md` | `1021fb74188a077a0c22788a1efd0904` | `docs/STATUS_v5_42_shipped.md` — **NEW at v5.42.** The ship record: the §86 cliff, the five-slider test design and why the default proves nothing, the six negative controls and the one that is a documented no-op, the middle-tier `[KNOWN DEFECT]` found mid-build, and the four items left open |
 | `hand_86.mjs` | `981b425c4fc738abb49046a97cd0fea0` | `qa/tools/hand_86.mjs` — **PROMOTED TO SUITE ORACLE at v5.42** and added to the pool (it was repo-only through v5.41, which is why the v5.42 brief had to record its hash separately). `statute86` is transcribed from 26 U.S.C. §86 at law.cornell.edu, **not from any app expression**, and is imported by BOTH `t24` and `qa/tools/derive_v542.mjs` — one oracle on both sides, deliberately, because at v5.41 a second independent derivation drifted and the brief's table shipped wrong twice. ⚠ **The three app copies inside it are v5.40 transcriptions and are now HISTORY** — `rothTab` records the cliff v5.42 replaced. Asserts nothing; counted in NO check total |
 | `package_check.mjs` | `6218ec2d77fc7bc53e8621d4c91c64f0` | `qa/tools/package_check.mjs` — **NEW at v5.42 (added 2026-08-21).** Validates a release zip against OPERATIONS §L before it is sent: structure, MANIFEST truthfulness, changed-files-only against a clone, `knowledge/` flatness and the two-source rotation, cross-destination byte-identity, and the delete-first list. **25 checks (24 on an ops package), negative-controlled 16 ways, all firing.** Packages declare `KIND: app-release` or `KIND: ops` in MANIFEST.txt; release-only checks are gated on it and an **undeclared package fails closed**. Without a clone the tree-diff checks are SKIPPED and say so. Asserts about the DELIVERY, not the build — counted in NO release check total |
+| `package_check_controls.sh` | `57e4d1eb3bce683dddbd3c519f17dd6e` | `qa/tools/package_check_controls.sh` — the negative-control harness for `package_check.mjs` (§B2). **REWRITTEN 2026-08-23**: it hardcoded absolute paths from a dead session, so anywhere else it printed *** NOT CAUGHT *** for every control — reading as "the checks are broken" rather than "the inputs are missing" — and exited **0**. Now self-locating, argument-driven, deriving its targets from the package, and exiting non-zero when a control does not fire. **17 controls, all firing**, including P19, which asserts `G-1` stays QUIET on a clean workspace. Tooling — counted in no app total |
 | `controls_v542.sh` | `66a923e87b585b4f8dd843e7fe3e8ca9` | `qa/controls_v542.sh` — **NEW at v5.42**, the re-pointed successor to `controls.sh`. All 13 v5.38-era patch anchors were verified to still resolve **exactly once** against v5.42 source before re-pointing; C16–C21 added for the §86 work. Supersedes the stale `controls.sh` row above — retire that file at the maintainer's discretion |
 | `t2_engines.mjs` | `399e1432c986f9517852f3ec7f92122a` | `qa/qa-baseline/t2_engines.mjs` |
 | `t3_roth.mjs` | `1b7c07734fea1e76fc8e08cd472d7122` | `qa/qa-baseline/t3_roth.mjs` — **rolled to v5.42** (`v542` registered; the fail-closed version guard caught all four at the first suite run, which is it working). Previously rolled to v5.41 |
@@ -277,6 +294,14 @@ should clone. ⚠ **Seven of the original eight still are; `hand_86.mjs` is not*
 | `qa/tools/ladder_hand.mjs` | `590234628df6a96e84dd3223a54fe2f3` | Hand replication of the ladder loop; one of the two independent scripts agreeing on $167,131 |
 | `qa/tools/render_check.mjs` | `88711e45ca98e8e63599488699ceeca3` | Reads the RENDERED ladder table out of jsdom. ⚠ Its imports are written for the RUN-FOLDER ROOT, not `qa/tools/` — copy it up a level to run it |
 | `qa/tools/slider_rerun.mjs` | `4fbbbdb5bc83505cdf994bb5a9b9027f` | Re-runs the ladder across slider positions; produced the direction-flip table in the measurement |
+| `mk_testable.sh` | `216722604a4a08faaee512d483219ca5` | `qa/qa-baseline/mk_testable.sh` — Splices `shim.txt` onto a source and builds `qa/app_<tag>.mjs`. **Named as a harness file in OPERATIONS §B and row-less until 2026-08-23.** Portability was fixed at v5.10.1 — it resolves relative to its own location, so the suite runs from a clean clone |
+| `run_all.sh` | `71bf342fbc7221340d40a93a154b29ee` | `qa/qa-baseline/run_all.sh` — The baseline driver: t1–t6 plus t10 for one leg, or `parity` for the compare. **Row-less until 2026-08-23** |
+| `census.cjs` | `82148eb7761468e29c96ee319dcdd92a` | `qa/tools/census.cjs` — Parser-based site census — the sanctioned answer to "how many sites?" (§B1), never a grep. Tested by `t21` |
+| `funcmap.cjs` | `2630c96947b474889062d239a742f203` | `qa/tools/funcmap.cjs` — Function-range index over the source. Tested by `t21` |
+| `diverge.cjs` | `f05523da96cd03ef519c873c18167e39` | `qa/tools/diverge.cjs` — AST divergence comparison. Tested by `t21` |
+| `residual.cjs` | `9b250a3b825e5628d07eb9d88738107d` | `qa/tools/residual.cjs` — Taxable-residual expression finder. Tested by `t21` |
+| `package.json` | `9ee8d745bc9f32d6e8fa02e623603423` | `package.json` — The pinned toolchain, and a **build input** rather than a suite file — given a row 2026-08-23 for a measured reason: `npm i <pkg>` in a run folder rewrites it with resolved versions, so it drifts as a side effect of setting the folder up. That is why OPERATIONS §N3a installs jsdom with `--no-save`, and it is the drift `package_check`'s new G-1 caught on its first real use |
+| `vite_config.js` | `30da5708038a1d7c97a4b06777ea8e8a` | `vite.config.js` — The Vite config. ⚠ **The pool flattens the inner dot** — it is `vite.config.js` in the repo, and Vite silently ignores a differently-named config, producing a `dist/` of separate files instead of one self-contained artifact (§N1). Build input, same reasoning as `package.json` |
 
 > ⚠ **`derive_rmd_expectations.mjs` produces figures that v5.41 did NOT ship, and this is recorded
 > rather than fixed.** Two defects, both found before any code was written:

@@ -1,5 +1,78 @@
 # Changelog
 
+## Unreleased — `qa/` only: the control harness that could not run, and eight rows the freshness table never had, 2026-08-23
+
+**No version bump, and no release.** Nothing under `src/` changed. Source throughout is v5.47,
+`src/DangerClose.jsx` md5 `1395f2e4fc2809ab3e5692b50e2d3409`, verified unchanged. Two files. This
+entry rides with the next release.
+
+### The control harness was worse than broken — it blamed the wrong thing
+
+`qa/tools/package_check_controls.sh` is the negative-control harness for `package_check` (§B2). It
+hardcoded `/home/claude/pkg/danger-close-v5.42`, `/home/claude/pkg2/danger-close-ops-v2` and
+`/home/claude/package_check.mjs` — absolute paths from the session that wrote it. That is the same
+portability defect `mk_testable.sh` and `t6`'s subprocess carried until v5.10.1.
+
+**Its failure mode was the worst available.** Run anywhere else, it printed `*** NOT CAUGHT ***`
+for **every** control — which reads as *"package_check's checks are broken"* rather than *"this
+script cannot find its inputs"* — and it **exited 0**, so anything automated saw success. A control
+harness that lies about the thing it is controlling is worse than no control harness, because it
+converts a missing check into a false alarm about a working one.
+
+Rewritten on the v5.10.1 precedent. `package_check.mjs` now resolves relative to the script, so the
+pair travels together; the packages and the clone are **arguments**, and a missing one aborts
+loudly rather than degrading into a wall of false failures; and every target file is **derived from
+the package** instead of named, so it runs against whatever release is current. The old `P1`
+hardcoded `t24_ss86_phasein.mjs` — a real file, but nothing made it stay real. It now exits
+**non-zero** when a control fails to fire.
+
+**Three new controls.** `P17` exercises `E-1b` — the control that did not exist when it mattered,
+since `E-1b` is the check that would have caught the v5.47 omission. `P18` exercises `G-1`. And
+`P19` is the guard the others need: `G-1` must stay **quiet** on a clean workspace. A check that
+fires on everything is as useless as one that fires on nothing, and nothing in this harness had
+previously asserted the negative direction.
+
+Verified on all four paths: **17 fired / 0 missed / 0 skipped** against the real v5.47 package and
+a real ops package; **16 fired, P15 skipped and said so** when copied to an unrelated directory and
+run from there, which is the portability claim actually tested rather than asserted; `ABORT` with
+usage and **exit 2** on no arguments; and `P17 *** NOT CAUGHT ***` with **exit 1** when `E-1b` is
+deliberately broken.
+
+### The §A2 hash table covered 52 of the pool's 89 files
+
+Found by script at the previous entry, recorded there, and decided here. Eight rows added — the
+non-document gaps: `mk_testable.sh` and `run_all.sh` (both named as harness files in OPERATIONS
+§B), the four parser tools `census.cjs` / `funcmap.cjs` / `diverge.cjs` / `residual.cjs`, and the
+two build inputs `package.json` and `vite_config.js`. The table goes 59 → **67 rows**; all 67 were
+re-verified against the pool afterwards, 60 matching and 7 correctly naming repo-only tools. The
+only non-document pool files still without rows are the two `.jsx` sources, covered by the
+Current/Prior build tables by design.
+
+**The 27 `.md` documents deliberately do NOT get rows**, and the table now says so rather than
+implying coverage it does not have. Documents change most releases, so rows for them would be 27
+more figures to roll every time — a new drift surface on a page that has already recorded this
+exact failure three times. They are covered by the clone-and-diff, which §A2 names as the primary
+check and which cannot itself go stale.
+
+`package.json` earned its row by evidence rather than by category: `npm i <pkg>` in a run folder
+rewrites it with resolved dependency versions, so a working folder drifts from the committed
+scaffold as a side effect of setting itself up. That is why §N3a installs jsdom with `--no-save`,
+and it is the drift `G-1` caught on its first real use.
+
+### One process note, because it is the second of its kind this week
+
+The first attempt at the hash-table edit **printed success and wrote nothing** — the script died on
+a bad path before the save, and the `print` sat after the failed line. It was caught only by
+re-reading the file from disk. That is the same shape as the `t10` overcount two entries ago: **the
+output of a step is not evidence the step happened.** Both were caught by checking the artifact
+rather than the log, which is the only method that works.
+
+### Tests
+
+No suite figure moves: this changes packaging tooling and the manifest only. `t21` (50) tests the
+parser toolkit, not `package_check`; `package_check` and its controls are counted in no release
+total by design, because they verify delivery rather than the build.
+
 ## Unreleased — `qa/` and docs only: TESTING.md rolled, and package_check learns the question it could not ask, 2026-08-23
 
 **No version bump, and no release.** Nothing under `src/` changed. Source throughout is v5.47,
