@@ -55,13 +55,13 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true; window.IS_REACT_ACT_ENVIRONMENT = tr
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v542";
-const KNOWN_VERSIONS = ["v540", "v541", "v542", "v543", "v544", "v545"];
+const KNOWN_VERSIONS = ["v540", "v541", "v542", "v543", "v544", "v545", "v546"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST_FIX = VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545";
+const POST_FIX = VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546";
 
 // The repo keeps the oracle at qa/tools/hand_86.mjs; PROJECT KNOWLEDGE IS FLAT and holds it
 // beside the suites. Resolve rather than assume, and say which copy was used, so a stale
@@ -97,6 +97,15 @@ const G = 0.045, ULT = { 75: 24.6, 76: 23.7 };
 const A0 = 1180000, B0 = 218600;
 const PEN = 4800, SSA = 39600, SSB = 15600;
 const SSA_YR = 2031, T1 = 32000, T2 = 44000;              // joint thresholds; example is MFJ
+// v5.46: spouse B's benefit is gated by B's OWN claim date, mirroring A. On the example
+// household B claims JANUARY 2029 — the ladder's first year — so the partial-month credit is a
+// full twelve months and every figure below is unchanged by that release. The gate is carried
+// here anyway: without it this transcription is wrong for any household where B claims later,
+// and a future fixture would inherit the defect this suite is supposed to model faithfully.
+// (Spouse A's term keeps its whole-year form: A's claim month is January too, so the two agree
+// on this household. t28 carries the partial-month case on a purpose-built fixture.)
+const SSB_YR = 2029, SSB_MO = 1;
+const bTerm = y => y > SSB_YR ? SSB : y === SSB_YR ? SSB / 12 * Math.max(0, 12 - SSB_MO + 1) : 0;
 const dobA = 1964, dobB = 1966, START = 2029, END = 2040, endA = 2038, endB = 2040;
 const taper = y => (y === 2029 ? 20000 : y === 2030 ? 18000 : y === 2031 ? 15000 : 0);
 
@@ -114,7 +123,7 @@ function ladder(rothAmount, ssFn) {
     const cA = (capA + capB) > 0 ? conv * (capA / (capA + capB)) : 0;
     a = Math.max(0, gA - cA - rA); b = Math.max(0, gB - (conv - cA) - rB);
 
-    const ss = (y >= SSA_YR ? SSA : 0) + SSB;
+    const ss = (y >= SSA_YR ? SSA : 0) + bTerm(y);
     const nonSS = PEN + taper(y) + conv + rmd;
     const taxableSS = ssFn(ss, nonSS);
     out.push({

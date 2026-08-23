@@ -54,6 +54,8 @@ tally "t26-$PRIOR" node t26_noconv_span.mjs "$PRIOR"
 tally "t26-$CUR"   node t26_noconv_span.mjs "$CUR"
 tally "t27-$PRIOR" node t27_half_cap.mjs "$PRIOR"
 tally "t27-$CUR"   node t27_half_cap.mjs "$CUR"
+tally "t28-$PRIOR" node t28_ssB_claim_gate.mjs "$PRIOR"
+tally "t28-$CUR"   node t28_ssB_claim_gate.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
