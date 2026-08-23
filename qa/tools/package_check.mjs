@@ -9,11 +9,16 @@
 // It answers the question §L actually cares about — "is this zip shaped right, and does it contain
 // exactly the right files?" — rather than "did someone remember to read §L."
 //
-//   usage: node qa/tools/package_check.mjs <zip-or-unpacked-dir> [clone-dir]
+//   usage: node qa/tools/package_check.mjs <zip-or-unpacked-dir> [clone-dir] [workspace-dir]
 //
 // The clone is the committed tree to diff `github/` against. Omit it and the content checks that
 // need it are SKIPPED AND SAID SO — never silently passed. Clone it yourself with:
 //   git clone --depth 1 https://github.com/stextor/danger-close.git /tmp/ship
+//
+// The THIRD argument is optional and is the run folder the release was built and verified in. With
+// it, section G answers the question the rest of this file structurally cannot: not "is everything
+// in the package correct?" but "is everything that CHANGED actually in the package?" Without it,
+// section G is skipped and says so. E-1b covers the common case with no extra input.
 //
 // TOOLING. Asserts about the PACKAGE, not the app. Counted in NO release check total (OPERATIONS
 // §B1) — it verifies the delivery, not the build.
@@ -45,6 +50,7 @@ const walk = (dir, base = dir) => {
 // ── resolve the package ──────────────────────────────────────────────────────────────────
 const ARG = process.argv[2];
 const CLONE = process.argv[3] || null;
+const WORK = process.argv[4] || null;
 if (!ARG) {
   console.log("usage: node package_check.mjs <zip-or-unpacked-dir> [clone-dir]");
   process.exit(2);
@@ -72,7 +78,8 @@ const KIND = (/^KIND:\s*(app-release|ops)\s*$/mi.exec(_man0) || [, "app-release"
 console.log(`package_check \u2014 OPERATIONS \u00a7L`);
 console.log(`     kind:    ${KIND}${/^KIND:/mi.test(_man0) ? "" : "  (UNDECLARED \u2014 defaulting to app-release, fail-closed)"}`);
 console.log(`     package: ${ARG}`);
-console.log(`     clone:   ${CLONE || "(none given \u2014 tree-diff checks will be SKIPPED)"}\n`);
+console.log(`     clone:   ${CLONE || "(none given \u2014 tree-diff checks will be SKIPPED)"}`);
+console.log(`     work:    ${WORK || "(none given \u2014 section G will be SKIPPED)"}\n`);
 
 // ── A · the outer shape ──────────────────────────────────────────────────────────────────
 console.log("A. Structure");
@@ -208,6 +215,50 @@ for (const k of knFiles) {
 ck("E-1: files shipped to BOTH destinations are byte-identical in both",
   mismatched.length === 0, mismatched.join(", "));
 
+// ── E-1b · THE REVERSE DIRECTION. D-1 asks "does everything in github/ differ from the tree?";
+// nothing asked "does everything that differs from the tree appear in github/?" A file simply
+// OMITTED from github/ is invisible to every check above, because it is not in the package at all.
+//
+// That is not hypothetical. At the v5.47 ship `PROJECT_KNOWLEDGE_INDEX.md` was updated in the pool
+// half and left out of the repo half. package_check passed 23/23, and the repo's copy sat naming a
+// `.jsx` the rotation had just deleted until the post-ship freshness sweep found it a day later.
+//
+// NEGATIVE CONTROL, run 2026-08-23: the v5.47 package UNMODIFIED, as it actually shipped, against a
+// clone of the pre-v5.47 tree. It passed 23/23 at the time; with E-1b it reports DO NOT SEND THIS
+// ZIP and names `PROJECT_KNOWLEDGE_INDEX.md`. The control is the real artifact, not a simulation.
+//
+// The package cannot know what the maintainer's workspace holds — but it does not have to. Most
+// documents that live in both places ship to both, so a `knowledge/` file whose repo counterpart
+// EXISTS and DIFFERS is a file that should have gone to `github/` too. That is exactly the shape
+// of the v5.47 miss, and it needs no extra input.
+if (CLONE && existsSync(CLONE)) {
+  const repoAll = walk(CLONE).filter(f => !f.startsWith(".git/"));
+  const byBase = new Map();
+  for (const r of repoAll) {
+    const b = r.split("/").pop();
+    if (!byBase.has(b)) byBase.set(b, []);
+    byBase.get(b).push(r);
+  }
+  const ghSet = new Set(ghFiles);
+  const orphans = [];
+  for (const k of knFiles) {
+    // The versioned source is renamed across the two destinations by design; E-2 covers it.
+    if (/^DangerClose-v5_\d+\.jsx$/.test(k)) continue;
+    const cands = byBase.get(k) || [];
+    // Unambiguous counterpart only. A basename matching several repo paths cannot be resolved
+    // from here, and guessing which one was meant is how a check starts lying.
+    if (cands.length !== 1) continue;
+    const repoPath = cands[0];
+    if (md5(join(CLONE, repoPath)) === md5(join(KN, k))) continue;   // identical: nothing owed
+    if (!ghSet.has(repoPath)) orphans.push(`${k} (differs from ${repoPath}, absent from github/)`);
+  }
+  ck("E-1b: every knowledge/ file that DIFFERS from its repo counterpart also ships to github/",
+    orphans.length === 0, orphans.join(" | "));
+} else {
+  skipped("E-1b: knowledge/ files that differ from the repo but are missing from github/",
+    "no clone given — this is the check that caught nothing at v5.47");
+}
+
 // The versioned source in knowledge/ must be the same bytes as src/DangerClose.jsx in github/ —
 // the "shipped jsx == canonical == build input" hash rule, checked rather than asserted.
 const srcGh = join(GH, "src/DangerClose.jsx");
@@ -233,6 +284,54 @@ if (existsSync(rfPath)) {
     knFiles.filter(f => !/^DangerClose-v5_\d+\.jsx$/.test(f) && !rf.includes(f)).join(", "));
   ck("F-3: states the two destinations explicitly", /github/i.test(rf) && /knowledge/i.test(rf));
 } else ck("F-1: README-FIRST.md readable", false, "absent");
+
+// ── G · did anything that CHANGED get left out? ──────────────────────────────────────────
+// The one question the zip and the clone cannot answer between them. E-1b catches the common
+// shape (a doc that lives in both destinations); this catches the rest, including a repo-only
+// file — REVIEWING.md, VERIFICATION_REPORT.md, the built index.html — edited and then forgotten.
+// Needs the run folder the release was verified in, because that is the only place the full set
+// of changes exists.
+//
+// NEGATIVE CONTROL, run 2026-08-23: a workspace with REVIEWING.md edited and absent from the
+// package. E-1b passes (REVIEWING.md is repo-only, so no knowledge/ copy exists to compare) and
+// G-1 fires. The two checks are complementary, not nested — which is why both are here.
+//
+// ⚠ FIRST REAL USE, 2026-08-23: G-1 fired on the very package that introduced it, naming
+// `package.json`. It was RIGHT. `npm i <pkg>` in a run folder rewrites package.json with resolved
+// dependency versions, so a working run folder drifts from the committed scaffold as a side effect
+// of setting itself up — which is exactly why OPERATIONS §N3a installs jsdom with `--no-save`. The
+// fix is to quarantine the drift and revert to the shipped copy, not to exempt the file here: a
+// polluted package.json that ships would change the build scaffold for everyone. If G-1 names a
+// file you did not mean to change, that is the check working.
+console.log("\nG. Completeness \u2014 everything that differs from the tree is IN the package");
+if (!WORK || !existsSync(WORK)) {
+  skipped("G-1: workspace vs the committed tree",
+    "no workspace given. Pass the run folder as the third argument to close this.");
+} else if (!CLONE || !existsSync(CLONE)) {
+  skipped("G-1: workspace vs the committed tree", "needs a clone as well as a workspace");
+} else {
+  // Map workspace paths onto repo paths the way the run folder flattens them: sources at the root,
+  // every harness and suite file together in qa/.
+  const repoAll = new Set(walk(CLONE).filter(f => !f.startsWith(".git/")));
+  const candidates = (w) => {
+    if (w === "DangerClose.jsx") return ["src/DangerClose.jsx"];
+    if (w.startsWith("qa/")) return [w, `qa/qa-baseline/${w.slice(3)}`];
+    return [w];
+  };
+  const ghSet = new Set(ghFiles);
+  const missing = [];
+  for (const w of walk(WORK)) {
+    if (w.startsWith("node_modules/") || w.includes("/node_modules/")) continue;
+    for (const r of candidates(w)) {
+      if (!repoAll.has(r)) continue;
+      if (md5(join(WORK, w)) === md5(join(CLONE, r))) break;   // unchanged: nothing owed
+      if (!ghSet.has(r)) missing.push(`${w} -> ${r}`);
+      break;
+    }
+  }
+  ck("G-1: every workspace file that differs from the committed tree is in github/",
+    missing.length === 0, missing.join(" | "));
+}
 
 // ── verdict ──────────────────────────────────────────────────────────────────────────────
 console.log(`\npackage_check: ${pass} passed, ${fail} failed, ${skip} skipped`);
