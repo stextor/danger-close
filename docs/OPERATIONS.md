@@ -511,18 +511,46 @@ Not every engine is testable to the dollar, and a scope must not assume otherwis
   no module-level binding, so the shim cannot reach its row array. Its only output path is the rendered
   DOM — which formats every figure as `Math.round(x / 1000)` (`toFixed(1)` on the IRMAA surcharge).
   **Ceiling: ±$500, and ±$50 for the IRMAA surcharge.**
-- **This category is now EMPTY, and so is the measurement gap behind it.** Engine C left at
-  v5.17–v5.18 (hoisted, exported, asserted by `t17`); **Engine B left at v5.19–v5.21** (hoisted to
-  `computeTaxPlan`, exported, asserted by `t18`). Every engine is module-level AND dollar-exact
-  tested. The DOM suites (`t13`, `t14`, `t16`) still read at ±$500 by design — they are the
-  extinction invariants and the only proof the tabs render what the engines compute.
+- **This category is NOT empty, and the sentence that said it was stood for 25 releases.** ⚠ From
+  v5.21 until 2026-08-23 this bullet read *"This category is now EMPTY … Every engine is module-level
+  AND dollar-exact tested."* **That was false**, and it was contradicted the whole time by the
+  manifest (which says the conversion ladder is component-inline, twice) and by five suites that run
+  at ±$500 citing this very section. Corrected at the v5.47 freshness check.
+  - **What is true.** The four DRAWDOWN engines left the category and are dollar-exact: Engine C at
+    v5.17–v5.18 (hoisted, exported, asserted by `t17`), **Engine B at v5.19–v5.21** (hoisted to
+    `computeTaxPlan`, exported, asserted by `t18`), alongside Engine A (`runRothStrategies`) and
+    Engine D (`computeWithdrawalPlan`, hoisted v5.23).
+  - **What remains inline.** The **Roth tab's conversion ladder** — `_perRmd` and the ladder loop
+    around it, computed inside `DangerCloseMain`. It appears in NONE of the shim's three export
+    surfaces (`__g`, `__test`, `__engines`) and never has. `runRothStrategies` being exported is not
+    the same thing: it is the strategy COMPARISON, not the tab's per-year ladder.
+  - **How the error was made, because the shape recurs.** The claim traces to a comment in
+    `shim.txt` at the `__engines` export — *"which empties the ±$500 category in OPERATIONS §M — no
+    engine is now both inline AND unreachable."* True **of the four drawdown engines**; this section
+    generalised it to "every engine." ⚠ **That comment is still uncorrected** — it is a harness file
+    spliced into every leg by `mk_testable.sh`, so amending it requires a full suite run and belongs
+    to a release that is running the suite anyway.
+- **TWO different reasons a suite reads at ±$500 — do not conflate them.** `t13`, `t14`, `t16` read
+  the DOM **by design**: the engine behind them IS reachable, and these suites exist to prove the
+  tabs render what it computes. `t23`, `t24`, `t26`, `t27`, `t28` read the DOM **by necessity**:
+  there is no module-level binding to read. Only the second group is a measurement gap.
+  - ⚠ **The ladder's RMD cards are the exception, and they matter.** They render
+    `_perRmd.A.noConv.toLocaleString()` — **full dollars, no `/1000`** — so RMD figures on that tab
+    ARE dollar-exact pinnable (`t23` pins $44,991). MAGI and the balance columns are not. A scope
+    touching the ladder should say which of the two it is measuring rather than assuming ±$500
+    across the tab.
+
 - **Hoist and export stay in SEPARATE releases.** Run twice now (C at v5.17/v5.18, B at v5.19/v5.21)
   and it held both times: a refactor that ships new assertions is one whose safety you can no longer
   check, because green stops distinguishing "the code is unchanged" from "the tests were written to
   match whatever it now does". Do not read "the Taxes and IRMAA engines" anywhere as a permanent
   pairing; it was true through v5.16 only.
-- **Consequence for scopes:** never write "dollar-exact confirmation pending a jsdom render" for these
-  engines. State the achievable precision, and state whether the effect being measured exceeds it.
+- **Consequence for scopes:** never write "dollar-exact confirmation pending a jsdom render" for the
+  four drawdown engines — they are reachable, so drive them. State the achievable precision, and
+  state whether the effect being measured **exceeds** it. ⚠ **An effect smaller than the ceiling is
+  the trap**: a $300/yr change to a figure rendered at `Math.round(x/1000)` is invisible, so a
+  DOM-based invariant for it passes vacuously. Measure it at the engine or do not claim to have
+  measured it.
 - Lifting the ceiling does **not** require a new harness capability, which is what the v5.17/v5.18 pair
   demonstrated. The earlier plan here — splicing a test-only rows hook into the `app_<tag>.jsx` copy —
   was **superseded**: it needed a reliable anchor into a file that changes every release. Hoisting the
