@@ -380,7 +380,8 @@ Bump the version at all four in-app sites · CHANGELOG entry newest-first with p
 disclosed limitations · METHODOLOGY if modeling changed · rebuild `index.html` from canonical and verify it
 per §N (self-contained except the intentional Google Fonts link, **and smoke-tested**) · re-run the full
 suite from a clean clone · refresh project knowledge once with the final state, delete-first · retire
-fulfilled `SCOPE_*.md` · publish on GitHub (a normal commit — no tag; see §G) · end the CHANGELOG
+fulfilled `SCOPE_*.md` · if this release fixed a defect that was invisible in the example data, add the
+boundary that hid it to the census (**§K1** — the rule lives there, deliberately not repeated here) · publish on GitHub (a normal commit — no tag; see §G) · end the CHANGELOG
 entry with the source and built md5s (the provenance line, §G — this replaces what a tag would
 have given us) · **package per §L — one zip, two destinations, with the suite re-run from the
 packaged copies before the zip is cut.**
@@ -426,6 +427,41 @@ release ships on its own scope + green suite. When running it: "Section C means 
 inspection" (compute the expected figure by hand from primary-source law, then compare to engine output),
 and "border cases are the point" (one dollar below and one dollar above every threshold). Distinguish a
 disclosed limitation from an undisclosed defect; only the undisclosed one is a finding.
+
+### K1. The boundary census — run it at SCOPE time (added 2026-08-23)
+
+`qa/tools/boundaries.mjs`. Answers one question about a household: **does it exercise the behaviour
+a scope is about to describe, or is that behaviour $0 there?** Run it two ways:
+
+- **On the example household, before writing a brief.** If the row for the behaviour reads ON, the
+  brief cannot quote example-household figures as evidence and must say so up front instead of
+  discovering it mid-build.
+- **On a PROPOSED FIXTURE, before writing any test code.** This is the more valuable use. At v5.46
+  the fixture built for the spouse-B claim gate exercised seven ladder years and looked complete,
+  but B claimed in **January**, so a pro-rata gate and a whole-year gate produced identical figures
+  and the release's actual modelling decision would have shipped **unverified**. A second fixture was
+  needed. The census reports `dobB_month` as ON for that fixture in about five seconds.
+
+**It nudges; it never gates** — the same standing as the audit in §K. A release ships on its own scope
+and a green suite, not on a clean census. And per §B1 an unexpected result is a finding on its own
+**only while `t29` is green**.
+
+**It hardcodes no constant.** Every numeric threshold is read live through the shim, so the tool
+cannot disagree with the app about what a threshold is; `t29` §F pins that, including a check that the
+tool's source contains no §86 threshold literal at all — because a band hardcoded to the
+currently-correct value passes every comparison until the day the constant moves.
+
+**THE MAINTENANCE RULE — this is the only place it is written down.** *When a release fixes a defect
+that was invisible in the example data, the boundary that hid it is added to the census in the same
+release.* The structural rows (is the DOB month January; does B's claim year equal the ladder start)
+have no source of truth to read and cannot be derived, so growth is what keeps them honest. A census
+that never grows is a list of yesterday's blind spots.
+
+**What it does NOT catch, stated so nobody reads more into a clean run.** Two recent defects were not
+of this kind and this tool would not have found either: v5.42 was non-zero on the example household
+and hid behind the **default slider position** (a view, not a household), and v5.44 was visible on the
+example household and simply **unnoticed**. The v5.46 build brief called these part of a four-release
+streak of $0-on-example defects; that was wrong, and the honest streak is two — v5.45 and v5.46.
 
 ## L. Release packaging — one zip, two destinations
 
