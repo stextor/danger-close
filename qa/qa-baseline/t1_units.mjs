@@ -14,7 +14,7 @@ const VER = process.argv[2] || "v510";
 // change the CHECK COUNT: with an unregistered tag t3 ran 35 checks instead of 36, and the count is
 // the number that goes in the release headline. Registering a new version in the ladders below is
 // now mandatory, and an unregistered tag stops the run instead of quietly testing the wrong thing.
-const KNOWN_VERSIONS = ["v510", "v5101", "v5102", "v511", "v512", "v513", "v514", "v515", "v516", "v517", "v518", "v519", "v520", "v521", "v522", "v523", "v524", "v525", "v526", "v527", "v528", "v529", "v530", "v531", "v532", "v533", "v534", "v535", "v536", "v537", "v538", "v539", "v540", "v541", "v542", "v543", "v544", "v545", "v546", "v592"];
+const KNOWN_VERSIONS = ["v510", "v5101", "v5102", "v511", "v512", "v513", "v514", "v515", "v516", "v517", "v518", "v519", "v520", "v521", "v522", "v523", "v524", "v525", "v526", "v527", "v528", "v529", "v530", "v531", "v532", "v533", "v534", "v535", "v536", "v537", "v538", "v539", "v540", "v541", "v542", "v543", "v544", "v545", "v546", "v547", "v592"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is not registered in this suite.");
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -25,16 +25,17 @@ if (!KNOWN_VERSIONS.includes(VER)) {
 const IS510 = VER !== "v592"; // v5.10-family features (v510 and v5101)
 const IS5101 = VER === "v5101";
 const IS5102 = VER === "v5102";
-const IS511 = VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546"));
-const IS514 = VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546")); // v5.14 IRMAA indexation Verify checks present
+const IS511 = VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547"));
+const IS514 = VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547")); // v5.14 IRMAA indexation Verify checks present
 const SRC = fs.readFileSync(new URL(`../${VER}.jsx`, import.meta.url), "utf8");
-const V540 = VER === "v540" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546"; // v5.41/v5.42 carry the v5.40 pins forward
-const V541 = VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546"; // v5.42 carries the v5.41 pins forward — its magi term set and RMD basis are unchanged
-const V542 = VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546"; // v5.43 keeps the §86 upper-tier phase-in
-const V543 = VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546";
-const V544 = VER === "v544" || VER === "v545" || VER === "v546";
-const V545 = VER === "v545" || VER === "v546";
-const V546 = VER === "v546"; // v5.46: the Roth ladder gates spouse B's SS by B's claim date (STRUCT S-7) // v5.45: the §86(a)(1) ½ cap, both places (STRUCT S-6) // v5.42: the §86 upper-tier phase-in (STRUCT S-3)
+const V540 = VER === "v540" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547"; // v5.41/v5.42 carry the v5.40 pins forward
+const V541 = VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547"; // v5.42 carries the v5.41 pins forward — its magi term set and RMD basis are unchanged
+const V542 = VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547"; // v5.43 keeps the §86 upper-tier phase-in
+const V543 = VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547";
+const V544 = VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547";
+const V545 = VER === "v545" || VER === "v546" || VER === "v547";
+const V546 = VER === "v546" || VER === "v547";
+const V547 = VER === "v547"; // v5.47: HSA out of the dividend base (S-9); the Roth tab's RMD-exempt share (S-8) // v5.46: the Roth ladder gates spouse B's SS by B's claim date (STRUCT S-7) // v5.45: the §86(a)(1) ½ cap, both places (STRUCT S-6) // v5.42: the §86 upper-tier phase-in (STRUCT S-3)
 // v5.33: parsed once so STATIC claims about call sites are AST facts, not line matches.
 const { Parser: _AcornParser } = await import("acorn");
 const _acornJsx = (await import("acorn-jsx")).default;
@@ -62,7 +63,7 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
   // see them — it rendered green on constants it had never checked.
   // v5.33 adds NO row (decision 4, 2026-08-13): the embedded-gain field is recorded but not
   // read by any engine, so there is nothing for a Verify row to check against a source.
-  const _verifyCount = (VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546"))) ? 66 : VER === "v531" ? 62 : IS514 ? 57 : IS510 ? 54 : 53;
+  const _verifyCount = (VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547"))) ? 66 : VER === "v531" ? 62 : IS514 ? 57 : IS510 ? 54 : 53;
   T(`VERIFY: check count is ${_verifyCount}`, checks.length === _verifyCount, `got ${checks.length}`);
   const bad = checks.filter(c => !c.pass);
   T("VERIFY: every check passes", bad.length === 0, bad.map(b => b.name).join("; "));
@@ -93,7 +94,7 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
 // read back off the source. Asserting a constant against itself proves nothing.
 {
   const o = g.OBBBA_CONSTS ? g.OBBBA_CONSTS() : undefined;
-  if (VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546"))) {
+  if (VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547"))) {
     T("OBBBA: constants block exists and is exported", o && typeof o === "object", String(o));
     T("OBBBA: deduction is $6,000 per person 65+", o.SENIOR_BONUS_PER_PERSON === 6000, String(o?.SENIOR_BONUS_PER_PERSON));
     T("OBBBA: single MAGI phase-out starts at $75,000", o.SENIOR_BONUS_THR_SGL === 75000, String(o?.SENIOR_BONUS_THR_SGL));
@@ -226,7 +227,7 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
 
 // ═══ Statics — the source file itself ═══
 {
-  const verStr = VER === "v546" ? "v5.46" : VER === "v545" ? "v5.45" : VER === "v544" ? "v5.44" : VER === "v543" ? "v5.43" : VER === "v542" ? "v5.42" : VER === "v541" ? "v5.41" : VER === "v540" ? "v5.40" : VER === "v539" ? "v5.39" : VER === "v538" ? "v5.38" : VER === "v537" ? "v5.37" : VER === "v536" ? "v5.36" : VER === "v535" ? "v5.35" : VER === "v534" ? "v5.34" : VER === "v533" ? "v5.33" : VER === "v532" ? "v5.32" : VER === "v531" ? "v5.31" : VER === "v530" ? "v5.30" : VER === "v529" ? "v5.29" : VER === "v528" ? "v5.28" : VER === "v527" ? "v5.27" : VER === "v526" ? "v5.26" : VER === "v525" ? "v5.25" : VER === "v524" ? "v5.24" : VER === "v523" ? "v5.23" : VER === "v522" ? "v5.22" : VER === "v521" ? "v5.21" : VER === "v520" ? "v5.20" : VER === "v519" ? "v5.19" : VER === "v518" ? "v5.18" : VER === "v517" ? "v5.17" : VER === "v516" ? "v5.16" : VER === "v515" ? "v5.15" : VER === "v514" ? "v5.14" : VER === "v513" ? "v5.13" : VER === "v512" ? "v5.12" : VER === "v511" ? "v5.11" : IS5102 ? "v5.10.2" : IS5101 ? "v5.10.1" : IS510 ? "v5.10" : "v5.9.2";
+  const verStr = VER === "v547" ? "v5.47" : VER === "v546" ? "v5.46" : VER === "v545" ? "v5.45" : VER === "v544" ? "v5.44" : VER === "v543" ? "v5.43" : VER === "v542" ? "v5.42" : VER === "v541" ? "v5.41" : VER === "v540" ? "v5.40" : VER === "v539" ? "v5.39" : VER === "v538" ? "v5.38" : VER === "v537" ? "v5.37" : VER === "v536" ? "v5.36" : VER === "v535" ? "v5.35" : VER === "v534" ? "v5.34" : VER === "v533" ? "v5.33" : VER === "v532" ? "v5.32" : VER === "v531" ? "v5.31" : VER === "v530" ? "v5.30" : VER === "v529" ? "v5.29" : VER === "v528" ? "v5.28" : VER === "v527" ? "v5.27" : VER === "v526" ? "v5.26" : VER === "v525" ? "v5.25" : VER === "v524" ? "v5.24" : VER === "v523" ? "v5.23" : VER === "v522" ? "v5.22" : VER === "v521" ? "v5.21" : VER === "v520" ? "v5.20" : VER === "v519" ? "v5.19" : VER === "v518" ? "v5.18" : VER === "v517" ? "v5.17" : VER === "v516" ? "v5.16" : VER === "v515" ? "v5.15" : VER === "v514" ? "v5.14" : VER === "v513" ? "v5.13" : VER === "v512" ? "v5.12" : VER === "v511" ? "v5.11" : IS5102 ? "v5.10.2" : IS5101 ? "v5.10.1" : IS510 ? "v5.10" : "v5.9.2";
   T(`STATIC: field-manual callsign carries ${verStr}`, SRC.includes(`FIELD MANUAL · ${verStr} · PUBLIC BUILD`));
   T(`STATIC: end-of-manual footer carries ${verStr}`, SRC.includes(`DANGER CLOSE ${verStr} · documentation regenerated`));
   // v5.10.2: the remaining two of the four in-app version sites, asserted exactly
@@ -463,8 +464,13 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
       // span, not the seed). If it moves, the fix took option (b) by accident.
       T("STRUCT S-5 (V544): the seed still comes from retireStartBalances(rothLadderStart)",
         /const _rsbC = retireStartBalances\(tl\.rothLadderStart\);/.test(SRC));
-      // [KNOWN DEFECT — item 6, D-6a(ii)] t0 is still the whole Traditional balance.
-      T("STRUCT S-5 (V544) [KNOWN DEFECT item 6]: t0 still uses tradInitA/B, not rmdInitA/B",
+      // v5.47: `t0` is STILL the whole Traditional balance, and that is now correct rather than
+      // pending. Item 6 applied the RMD-exempt share at the two card expressions instead of
+      // moving the seed (decision D-2), precisely so both halves of the quantity stay on ONE
+      // basis — reseeding would have fixed the no-conversion half while the with-conversion half
+      // kept reading the ladder's own `tradBal*`. So this line must NOT change, and it is pinned
+      // on both sides of v5.47 for opposite reasons. STRUCT S-8 below carries item 6's own pins.
+      T(`STRUCT S-5 (V544)${V547 ? "" : " [KNOWN DEFECT item 6]"}: t0 uses tradInitA/B, not rmdInitA/B${V547 ? " (D-2: the share is applied at the card, not the seed)" : ""}`,
         /const t0 = \{ A: _rsbC\.tradInitA, B: _rsbC\.tradInitB \};/.test(SRC));
     } else {
       T("STRUCT S-5 (pre-V544) [KNOWN DEFECT]: the noConv span still counts from the as-of year", _oldSpan);
@@ -499,6 +505,77 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
       T("STRUCT S-7 (pre-V546) [KNOWN DEFECT 2026-08-22]: B's SS is credited in every ladder year", _old);
       T("STRUCT S-7 (pre-V546) [KNOWN DEFECT 2026-08-22]: no B claim-year constant exists",
         !/_ssBYearRoth/.test(SRC));
+    }
+  }
+
+  // ─── STRUCT S-8 (v5.47) — the Roth tab's RMD-EXEMPT SHARE, on BOTH card halves ───────
+  // A non-qualified annuity is ordinary income when spent but carries no required distribution.
+  // Every engine excludes it as `trad * (1 - annShare)`; through v5.46 the Roth tab's two RMD
+  // cards did not. The pins below are ANCHORED TO LINE START throughout — item 6's own comment
+  // block quotes the retired forms and names `rmdInit*` explicitly, so an unanchored regex would
+  // match the COMMENT and report the fix present (or the defect gone) while asserting nothing.
+  // That trap has now caught S-4 at v5.43, t8's census at v5.44, and S-6/S-7 since.
+  //
+  // BOTH HALVES, one basis. The single most important pin here is that noConv AND withConv are
+  // scaled. Scaling one is the v5.41 failure — two projections of one quantity on different
+  // bases, which drifted $48,712 apart before it was caught.
+  {
+    const _shareMap = /^\s*const annSh = \{ A: _rsbC\.annShareA \|\| 0, B: _rsbC\.annShareB \|\| 0 \};$/m.test(SRC);
+    const _noConvScaled = /^\s*noConv: Math\.round\(P0\.t0 \* Math\.pow\(1 \+ tradGrowth, P0\.yrs\) \* \(1 - P0\.annSh\) \/ rmdDivisor\(P0\.age\)\),$/m.test(SRC);
+    const _withConvScaled = /^\s*withConv: Math\.round\(balAt\(P0\.who, P0\.yr\) \* \(1 - P0\.annSh\) \/ rmdDivisor\(P0\.age\)\),$/m.test(SRC);
+    // The two *Trad fields are the BALANCE, not the distribution — annuity money is genuinely
+    // part of them, so they must stay on the full Traditional basis. Scaling them would be an
+    // overreach, and it is pinned as such rather than left to review.
+    const _noConvTradPlain = /^\s*noConvTrad: P0\.t0 \* Math\.pow\(1 \+ tradGrowth, P0\.yrs\),$/m.test(SRC);
+    const _withConvTradPlain = /^\s*withConvTrad: balAt\(P0\.who, P0\.yr\),$/m.test(SRC);
+    if (V547) {
+      T("STRUCT S-8 (V547): the per-person exempt share is built from _rsbC", _shareMap);
+      T("STRUCT S-8 (V547): the NO-conversion card is scaled by (1 - annSh)", _noConvScaled);
+      T("STRUCT S-8 (V547): the WITH-conversion card is scaled by the SAME share — one basis, both halves", _withConvScaled);
+      T("STRUCT S-8 (V547): noConvTrad is NOT scaled — it is the balance, not the distribution", _noConvTradPlain);
+      T("STRUCT S-8 (V547): withConvTrad is NOT scaled either", _withConvTradPlain);
+      T("STRUCT S-8 (V547): the share reaches the card through mk's return, not a second lookup",
+        /^\s*return \{ who, age, yr, yrs, t0: t0\[who\], annSh: annSh\[who\] \};$/m.test(SRC));
+    } else {
+      T("STRUCT S-8 (pre-V547) [KNOWN DEFECT item 6]: no exempt share is built in the Roth tab", !_shareMap);
+      T("STRUCT S-8 (pre-V547) [KNOWN DEFECT item 6]: the no-conversion card is unscaled", !_noConvScaled);
+      T("STRUCT S-8 (pre-V547) [KNOWN DEFECT item 6]: the with-conversion card is unscaled", !_withConvScaled);
+    }
+  }
+
+  // ─── STRUCT S-9 (v5.47) — the HSA is out of the DIVIDEND base, at all three sites ────
+  // `otherTaxableInit()` lumps taxable and HSA together as spendable after-tax cash (decision
+  // C-4) and must keep doing so — seven call sites depend on that view. It is simply the wrong
+  // input to a TAXABLE DIVIDEND: a qualified HSA withdrawal is tax-free, so those dollars cannot
+  // throw off a dividend that lands in MAGI. Engine D reached this in v5.36 (`_gainPoolInit`);
+  // the three dividend sites are the consumer that never got the same treatment.
+  // ANCHORED TO LINE START: item 5's Engine A site now sits beneath a 14-line comment that
+  // quotes the old expression, and `otherTaxableInit` appears in that prose too.
+  {
+    const _aFixed = /^\s*const div_y = Math\.round\(Math\.max\(0, taxBal - \(P\.othHsa \|\| 0\)\) \* \(P\.taxYieldPct \/ 100\)\);$/m.test(SRC);
+    const _cFixed = /^\s*const div_y = Math\.round\(Math\.max\(0, _taxableInitI - \(_rsbC\.othHsa \|\| 0\)\) \* \(taxYield \/ 100\)\);/m.test(SRC);
+    const _bFixed = /^\s*const div_y = Math\.round\(Math\.max\(0, _taxableInit - \(_rsbB\.othHsa \|\| 0\)\) \* \(taxYield \/ 100\)\);/m.test(SRC);
+    // The retired forms, pinned by absence so a partial revert at one site is caught.
+    const _aOld = /^\s*const div_y = Math\.round\(Math\.max\(0, taxBal\) \* \(P\.taxYieldPct \/ 100\)\);$/m.test(SRC);
+    const _cOld = /^\s*const div_y = Math\.round\(_taxableInitI \* \(taxYield \/ 100\)\);/m.test(SRC);
+    const _bOld = /^\s*const div_y = Math\.round\(_taxableInit \* \(taxYield \/ 100\)\);$/m.test(SRC);
+    if (V547) {
+      T("STRUCT S-9 (V547): Engine A's dividend base holds the HSA out", _aFixed);
+      T("STRUCT S-9 (V547): Engine C's does too", _cFixed);
+      T("STRUCT S-9 (V547): Engine B's does too — all THREE, or the engines disagree", _bFixed);
+      T("STRUCT S-9 (V547): none of the three retired forms survives", !_aOld && !_cOld && !_bOld);
+      // The shared helper is deliberately untouched: the fix is at the consumer, so the
+      // spendable view and the C-4 capital-gain view keep their own correct answer. Asserted
+      // POSITIVELY on the body — `hsa` must still be one of the two taxTypes it sums — because
+      // pinning "the helper does not mention othHsa" would pass on a helper that had been
+      // deleted, and this release's whole design rests on that helper being left alone.
+      T("STRUCT S-9 (V547): otherTaxableInit still sums taxable AND hsa (decision C-4 untouched)",
+        /^function otherTaxableInit\(\) \{$/m.test(SRC) &&
+        /^\s*return oth\.reduce\(\(s, a\) => s \+ \(\(a\.taxType === "taxable" \|\| a\.taxType === "hsa"\) \? \(a\.balance \|\| 0\) : 0\), 0\);$/m.test(SRC));
+    } else {
+      T("STRUCT S-9 (pre-V547) [KNOWN DEFECT item 5]: Engine A's dividend base still includes the HSA", _aOld);
+      T("STRUCT S-9 (pre-V547) [KNOWN DEFECT item 5]: so does Engine C's", _cOld);
+      T("STRUCT S-9 (pre-V547) [KNOWN DEFECT item 5]: so does Engine B's", _bOld);
     }
   }
 
@@ -553,7 +630,7 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
 // leg, which legitimately still has none — the v5.28 defect, not a fix.
 {
   const IS533 = VER === "v533";
-  const IS536 = VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546"));
+  const IS536 = VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547"));
   const IS534 = VER === "v534" || VER === "v535" || IS536;
   const HAS_GAIN_FIELD = IS533 || IS534;
   const P0 = g.PORTFOLIO();

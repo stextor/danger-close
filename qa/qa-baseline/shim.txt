@@ -62,6 +62,21 @@ export const __test = {
 // v5.18: Engine C was hoisted to module level at v5.17; this exposes it to the harness.
 // That is what the hoist was for — t17 drives it directly and compares to the dollar,
 // instead of parsing Math.round(x/1000) out of the rendered DOM (OPERATIONS §M).
-// v5.21: computeTaxPlan joins it. Engine B was hoisted at v5.19; this exposes it, which
-// empties the ±$500 category in OPERATIONS §M — no engine is now both inline AND unreachable.
+// v5.21: computeTaxPlan joins it. Engine B was hoisted at v5.19; this exposes it.
+//
+// CORRECTED v5.47. This comment used to end "which empties the ±$500 category in OPERATIONS §M
+// — no engine is now both inline AND unreachable." That was true of the FOUR DRAWDOWN ENGINES
+// and it is still true of them. It was never true of the app as a whole, and OPERATIONS §M
+// generalised the claim from this line into "every engine is module-level AND dollar-exact
+// tested," which stood wrong from v5.21 to v5.47.
+//
+// WHAT IS STILL INLINE: the Roth tab's conversion ladder, including `_perRmd`. It is an IIFE
+// inside `DangerCloseMain` and appears in NONE of the three export surfaces above (`__g`,
+// `__test`, `__engines`) — it never has. Its RMD cards render FULL DOLLARS, not $K, so the
+// suites that measure it (t23, t24, t26, t27, t28) read them exactly; but anything on that tab
+// rendered through Math.round(x/1000) is still bounded by the ±$500 ceiling, and an effect
+// SMALLER than that ceiling makes a DOM-based invariant pass vacuously. That is a live trap,
+// not a historical one: it is exactly why v5.47's item 5, worth $300/yr, has its extinction
+// invariant at the module-level engine in t25 rather than on any rendered figure.
+// See OPERATIONS §M, corrected in the same cycle.
 export const __engines = { computeIrmaaPlan, computeTaxPlan };
