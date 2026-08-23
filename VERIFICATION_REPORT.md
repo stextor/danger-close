@@ -1,10 +1,34 @@
 # Danger Close — Verification Report
 
-*Cumulative. Each release appends a section; this header always describes the latest build.*
+> ## ⚠ THIS IS A FROZEN HISTORICAL RECORD. IT IS NOT THE CURRENT VERIFICATION STATE.
+>
+> **This file stopped being maintained after v5.9.2 and covers v5.7 – v5.9.2 only.** Everything
+> below that line is history, kept because it is the only record of several incidents. The app is
+> many releases past it.
+>
+> **For the current build, its source hash, and its test counts, read [`CHANGELOG.md`](CHANGELOG.md)
+> — newest entry first.** For what each suite covers, read [`TESTING.md`](TESTING.md). For the
+> modelling itself, read [`METHODOLOGY.md`](METHODOLOGY.md).
+>
+> **Deliberately no current figures are repeated here.** From v5.7 to v5.9.2 this file carried its
+> own copy of the build hash and check count and claimed *"this header always describes the latest
+> build."* Per-release appending then stopped while the claim stayed, so the header asserted v5.9.2
+> was current for 37 releases. Restating the numbers would recreate exactly the second-copy-that-drifts
+> problem that produced the error; pointing at the one maintained source cannot go stale.
+>
+> Found 2026-08-23 by the v5.47 freshness check, in the reverse (repo → pool) leg of the OPERATIONS
+> §A2 diff. This file is repo-only and never enters project knowledge, so no freshness check had
+> ever looked at it — "repo-only" had been treated as "safe to ignore." Corrected here rather than
+> deleted: the workspace-drift incidents, the ACA primary-source gate record, and the honest-scope
+> section below are recorded nowhere else.
 
-**Current build: v5.9.2** · source hash `a1f0d4a76565c63494628e957c66ff91` · **597 automated checks, all green** against the exact source shipped in `repo-update/`.
+---
 
-Suites: t1 units 287 · t2 engines 44 · t3 Roth 66 · t4 DOM (all 26 tabs, JSDOM) 168 · t5 disclaimer gate 24 · t6 spousal-branch 9. (`t5_gate_repo` runs the same 24 gate checks against the repo-layout build and is counted once.) The build input (`src/DangerClose.jsx`) is byte-identical to the tested canonical source; `index.html` is built from it via the repo's own Vite config and marker-verified.
+## The record as it stood at v5.9.2 (historical)
+
+**Build at the time: v5.9.2** · source hash `a1f0d4a76565c63494628e957c66ff91` · **597 automated checks, all green** against the exact source shipped in `repo-update/`.
+
+Suites at the time: t1 units 287 · t2 engines 44 · t3 Roth 66 · t4 DOM (all 26 tabs, JSDOM) 168 · t5 disclaimer gate 24 · t6 spousal-branch 9. (`t5_gate_repo` runs the same 24 gate checks against the repo-layout build and is counted once.) The build input (`src/DangerClose.jsx`) is byte-identical to the tested canonical source; `index.html` is built from it via the repo's own Vite config and marker-verified. **These are v5.9.2 figures and are not current.**
 
 **Correction (2026-08):** totals reported for v5.8, v5.8.1, and v5.8.2 (542 / 552 / 556) were understated by a transcription slip in my addition — the per-suite figures in each section were correct throughout, and every suite was green at every release; only the sums were wrong. True totals: **548 / 558 / 562**. Corrected here and in CHANGELOG.md. No test result changes.
 

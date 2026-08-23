@@ -548,7 +548,8 @@ Beyond the in-app suite, the merged build was verified by four external Node/jsd
 318 checks total — covering constants and accessors, the seeded Monte Carlo engines under
 common-random-number A/B comparisons, the Roth engine against hand-computed tax cases exact
 to the dollar, and a full 26-tab DOM render sweep; see VERIFICATION_REPORT.md in the
-distribution.
+distribution. (⚠ Those are v5.6-era figures, and `VERIFICATION_REPORT.md` is a frozen
+record ending at v5.9.2 — for current suite counts read `CHANGELOG.md`.)
 
 Two further v5.6 engines deserve their own description:
 
