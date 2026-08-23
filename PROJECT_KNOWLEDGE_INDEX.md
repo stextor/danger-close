@@ -159,6 +159,19 @@ package's manifest edits and layered v5.44's on top: `SCOPE_ITEMS_3_6_perRmd.md`
 check covers the SOURCE; it did not cover the document base.** Re-clone before editing any document
 that a prior package already changed — a stale doc base reverts silently and the suite cannot see it.
 
+⚠ **AUDITED 2026-08-23: 37 of the pool's 89 files have no row in this table, and 10 of them are
+not documents.** Counted by script, not by eye. The non-document gaps are `mk_testable.sh` and
+`run_all.sh` — named as harness files in OPERATIONS §B — the four parser tools `census.cjs`,
+`funcmap.cjs`, `diverge.cjs` and `residual.cjs`, plus `package.json` and `vite_config.js`. The two
+`.jsx` sources are covered by the build tables above instead, by design. **Nothing has drifted right
+now**: the 2026-08-23 both-directions sweep found every pool file except the prior-leg source
+byte-identical to its repo counterpart, so this is a latent hole, not a live one. But it is exactly
+the defect class §A2 was written to close — *"a stale test in the pool was invisible by
+construction"* — and it is the third recording of the same shape on this page.
+**Not fixed here, deliberately.** Whether the 27 `.md` documents want rows is a separate question
+from whether the harness files do, and a partly-filled table is worse than an openly incomplete one
+— the same rule this file applies to its own count lines. It needs one decision, taken once.
+
 ⚠ **Two rows were missing for a day and added 2026-08-21.** `STATUS_v5_42_shipped.md` and
 `package_check.mjs` were uploaded to the pool at the v5.42 refresh and the ops fix respectively, and
 neither was given a row here — so both were **invisible to the freshness check by construction**, the
@@ -212,7 +225,7 @@ skipped** — the same shape as the rotation/manifest split recorded under Prior
 | `SCOPE_ENGINE_B_ROTH_HALF_CAP.md` | `7ed04e208cf518238f117c171a30d38e` | `docs/SCOPE_ENGINE_B_ROTH_HALF_CAP.md` — **NEW 2026-08-22.** Governing scope for tidy-up items 4 and 7 — the §86 ½-benefits cap, dropped in two mirror-image places. ⚠ **ACTIVE, NOT BUILDABLE — two blocking decisions (D-47a, D-47b).** Records that the bands are **contiguous and non-overlapping** (item 7 up to the adjusted base, item 4 above it), that **neither is reachable from the example household** so a ~$7,000-benefits fixture is mandatory, and that **parity is not the guardrail for item 4** — `computeTaxPlan` is on no fingerprinted path, proven by control |
 | `STATUS_v5_42_shipped.md` | `1021fb74188a077a0c22788a1efd0904` | `docs/STATUS_v5_42_shipped.md` — **NEW at v5.42.** The ship record: the §86 cliff, the five-slider test design and why the default proves nothing, the six negative controls and the one that is a documented no-op, the middle-tier `[KNOWN DEFECT]` found mid-build, and the four items left open |
 | `hand_86.mjs` | `981b425c4fc738abb49046a97cd0fea0` | `qa/tools/hand_86.mjs` — **PROMOTED TO SUITE ORACLE at v5.42** and added to the pool (it was repo-only through v5.41, which is why the v5.42 brief had to record its hash separately). `statute86` is transcribed from 26 U.S.C. §86 at law.cornell.edu, **not from any app expression**, and is imported by BOTH `t24` and `qa/tools/derive_v542.mjs` — one oracle on both sides, deliberately, because at v5.41 a second independent derivation drifted and the brief's table shipped wrong twice. ⚠ **The three app copies inside it are v5.40 transcriptions and are now HISTORY** — `rothTab` records the cliff v5.42 replaced. Asserts nothing; counted in NO check total |
-| `package_check.mjs` | `88adee72107c0e96636f6a43be80ea81` | `qa/tools/package_check.mjs` — **NEW at v5.42 (added 2026-08-21).** Validates a release zip against OPERATIONS §L before it is sent: structure, MANIFEST truthfulness, changed-files-only against a clone, `knowledge/` flatness and the two-source rotation, cross-destination byte-identity, and the delete-first list. **23 checks (22 on an ops package), negative-controlled 16 ways, all firing.** Packages declare `KIND: app-release` or `KIND: ops` in MANIFEST.txt; release-only checks are gated on it and an **undeclared package fails closed**. Without a clone the tree-diff checks are SKIPPED and say so. Asserts about the DELIVERY, not the build — counted in NO release check total |
+| `package_check.mjs` | `6218ec2d77fc7bc53e8621d4c91c64f0` | `qa/tools/package_check.mjs` — **NEW at v5.42 (added 2026-08-21).** Validates a release zip against OPERATIONS §L before it is sent: structure, MANIFEST truthfulness, changed-files-only against a clone, `knowledge/` flatness and the two-source rotation, cross-destination byte-identity, and the delete-first list. **25 checks (24 on an ops package), negative-controlled 16 ways, all firing.** Packages declare `KIND: app-release` or `KIND: ops` in MANIFEST.txt; release-only checks are gated on it and an **undeclared package fails closed**. Without a clone the tree-diff checks are SKIPPED and say so. Asserts about the DELIVERY, not the build — counted in NO release check total |
 | `controls_v542.sh` | `66a923e87b585b4f8dd843e7fe3e8ca9` | `qa/controls_v542.sh` — **NEW at v5.42**, the re-pointed successor to `controls.sh`. All 13 v5.38-era patch anchors were verified to still resolve **exactly once** against v5.42 source before re-pointing; C16–C21 added for the §86 work. Supersedes the stale `controls.sh` row above — retire that file at the maintainer's discretion |
 | `t2_engines.mjs` | `399e1432c986f9517852f3ec7f92122a` | `qa/qa-baseline/t2_engines.mjs` |
 | `t3_roth.mjs` | `1b7c07734fea1e76fc8e08cd472d7122` | `qa/qa-baseline/t3_roth.mjs` — **rolled to v5.42** (`v542` registered; the fail-closed version guard caught all four at the first suite run, which is it working). Previously rolled to v5.41 |

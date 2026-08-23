@@ -1,5 +1,95 @@
 # Changelog
 
+## Unreleased — `qa/` and docs only: TESTING.md rolled, and package_check learns the question it could not ask, 2026-08-23
+
+**No version bump, and no release.** Nothing under `src/` changed. Source throughout is v5.47,
+`src/DangerClose.jsx` md5 `1395f2e4fc2809ab3e5692b50e2d3409`, verified unchanged. Two files, both
+destinations. This entry rides with the next release.
+
+### `TESTING.md` — nineteen figures, and five suites the page had never listed
+
+The header had read **v5.38 / 1275 checks for nine releases**, and the figures beneath had drifted
+with it. Everything describing the present is now rolled from parsed suite output: the build and
+source hash, the active pair (v5.41→v5.42 → **v5.46→v5.47**), the baseline section (645 → **688**),
+the feature table (740 → **1059**), the release total (1385 app + 82 tooling → **1584 app + 90
+tooling**), the full run (2085 → **2474**), `t1` (121 → **155**), `t2` (18 → **27**) and parity
+(9 → **10**).
+
+**`t25`–`t29` had no rows at all** — 155 checks, five suites, undocumented on the page a reviewer is
+pointed at. All five added.
+
+Three internal contradictions closed. `t10`'s row described "76 federal-core plus 39 IRMAA" — 115 —
+against its own stated total of 163; it now names all four blocks and carries the warning about its
+overlapping printed labels. `t21` was "49 checks" in one sentence and 50 in the next, five lines
+apart, for eleven releases. `t17`'s table row had been missing its trailing pipe and rendered as a
+two-column row.
+
+**Two stale denominators were kept and relabelled rather than updated.** `t17`'s *"fails 23 of its
+63"* and `t18`'s *"24/47"* record controls run when those suites were smaller. The controls were not
+re-run, so the ratios are marked as historical measurements. Inventing a current ratio would have
+been worse than an honest old one.
+
+**The per-release paragraphs for v5.37, v5.38 and v5.40 are untouched** — they were true when
+written. The v5.40 per-suite line is now labelled as the v5.40 record instead of reading as current,
+with a v5.47 line beside it. Roll what describes the present; leave what describes a past release.
+
+### `package_check` — the question it structurally could not ask
+
+`package_check` sees the zip and the clone. **A file simply omitted from the package is in neither**,
+so no arrangement of those two inputs can detect it. That is why the v5.47 package passed 23/23 while
+leaving `PROJECT_KNOWLEDGE_INDEX.md` out of its repo half, and the committed copy sat naming a `.jsx`
+the rotation had just deleted until the post-ship sweep found it.
+
+Two checks, because they catch different things:
+
+- **`E-1b`**, always on and needing no new input: a `knowledge/` file whose repo counterpart exists
+  and **differs** must also ship to `github/`. Most documents that live in both places behave this
+  way, and it is the exact shape of the v5.47 miss. Only unambiguous basename matches are resolved —
+  guessing which of several repo paths was meant is how a check starts lying.
+- **`G-1`**, gated on an optional third argument, the run folder the release was verified in. That is
+  the only place the full set of changes exists, so it is the only way to catch a **repo-only** file —
+  `REVIEWING.md`, `VERIFICATION_REPORT.md`, the built `index.html` — edited and then forgotten.
+  Skipped and said so when absent, following the existing clone idiom.
+
+**Negative controls, both fired, and the first used the real artifact rather than a simulation:** the
+v5.47 package **unmodified**, against a clone of the pre-v5.47 tree, now returns `DO NOT SEND THIS
+ZIP` and names the file it omitted. For `G-1`, a workspace with `REVIEWING.md` edited and unpackaged:
+`E-1b` passes — the file is repo-only, so no `knowledge/` copy exists to compare — and `G-1` fires.
+Complementary, not nested. Positive test on a correct package with its real run folder: **24 passed,
+0 failed, 0 skipped**, no false alarms. `package_check` goes 23 → **25** checks.
+
+**And `G-1` fired on the very package that introduced it, naming `package.json` — correctly.**
+`npm i <pkg>` in a run folder rewrites `package.json` with resolved dependency versions, so a
+working run folder drifts from the committed scaffold as a side effect of setting itself up. That is
+why OPERATIONS §N3a installs jsdom with `--no-save`. The drift was quarantined and the file reverted
+to the shipped copy rather than exempted in the check: a polluted `package.json` that shipped would
+change the build scaffold for everyone. A check whose first real use catches a live hazard in the
+author's own workspace is the check working.
+
+### Two findings recorded, neither fixed here
+
+**The §A2 hash table covers 52 of the pool's 89 files.** Counted by script. Ten of the 37 gaps are
+not documents: `mk_testable.sh` and `run_all.sh` — named as harness files in OPERATIONS §B — the four
+parser tools `census.cjs` / `funcmap.cjs` / `diverge.cjs` / `residual.cjs`, and `package.json` /
+`vite_config.js`. The two `.jsx` sources are covered by the build tables instead, by design. Nothing
+has drifted right now, so this is latent rather than live — but it is the defect class §A2 exists to
+close, and the third recording of that shape on the manifest. **Deliberately not fixed here:**
+whether the 27 documents want rows is a different question from whether the harness files do, and a
+partly-filled table is worse than an openly incomplete one. It needs one decision, taken once.
+`TESTING.md` is therefore shipped **without** a row, rather than half-closing the gap.
+
+**`qa/tools/package_check_controls.sh` is committed and broken.** It hardcodes
+`/home/claude/pkg/danger-close-v5.42` and `/home/claude/package_check.mjs`, absolute paths from a
+session that ended long ago — the same portability defect `mk_testable.sh` carried until v5.10.1. A
+control script that cannot find its inputs reports nothing rather than complaining, so it fails
+silently. The two controls above are recorded in `package_check.mjs` itself instead.
+
+### Tests
+
+`t21` 50/50 unchanged — it tests the parser toolkit, not `package_check`. No suite figure moves:
+this changes documentation and packaging tooling only, and `package_check` is counted in no release
+total by design.
+
 ## Unreleased — `qa/` only: the parity guardrail can now see Other accounts, 2026-08-23
 
 **No version bump, and no release.** Nothing under `src/` changed. Source throughout is v5.47,
