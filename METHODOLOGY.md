@@ -193,6 +193,32 @@ every household measured, so it was adopted for consistency between engines rath
 effect. Each spouse's conversion is drawn only from within their own ladder window — the window
 ending the year before that person's RMDs begin — which is the split the RMD cards already used.
 
+**Each spouse's Social Security starts when that spouse claims it (v5.46).** The conversion-ladder
+projection gates spouse B's benefit on B's own claim date, as it has always gated spouse A's.
+Through v5.45 B's benefit was added to the ladder's Social Security total in **every** projected
+year regardless of when B claimed, so for any household where B claims after the ladder begins the
+tab credited benefits that had not started — phantom income in the pre-claim years. Because Social
+Security enters the §86 provisional-income base, the error compounded the same way the omitted RMD
+term did in v5.41, but in the opposite direction: it raised provisional income, which raised the
+taxable share of benefits, which raised MAGI a second time, along with tax, marginal rate and
+apparent IRMAA exposure.
+
+The claim year itself is credited **pro rata by calendar month** — benefits from the claim month
+through December — which is the treatment spouse A already received, and the reason the correction
+is not simply a whole-year switch. For a single filer the term is zero by an explicit test rather
+than by inference from missing data: the claim date is constructed for both spouses whether or not
+a second spouse exists, so a stored spouse-B benefit surviving in a restored backup would otherwise
+still reach the ladder.
+
+**This correction lowers the figures the tab reports**, which is unusual here and worth stating
+plainly: removing income the household does not yet have reduces provisional income, taxable Social
+Security, MAGI, tax and marginal rate, and widens apparent conversion headroom. It is not a
+conservative adjustment in the sense the rest of this document uses — it is a factual one, and the
+direction follows from the fact rather than from a choice. **It is worth $0 on the shipped example
+household**, whose spouse B claims in January of the ladder's first year, so no figure in the
+example data moves; the effect appears only where B claims later. On a household delaying B to 70
+with the ladder starting seven years earlier, MAGI falls by $22,950 in each pre-claim year.
+
 **Social Security is phased in under §86, not stepped (v5.42).** Above the adjusted base amount
 ($44,000 married filing jointly, $34,000 single) the includible share of benefits is
 `min( 0.85 × benefits, 0.85 × (provisional − adjusted base) + min( para1, ½(adjusted base − base) ) )`,
