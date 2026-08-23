@@ -1039,3 +1039,61 @@ ordinary income crosses a bracket edge — in the conservative direction, taxes 
 Traditional and Annuity rows still recognise identical lifetime ordinary income (both grow, both
 are taxed once on the way out; the RMD changes when, not whether — asserted exactly by `t20`, a
 property of households whose pool exhausts within the plan horizon).
+
+## Two bases the Roth tab and the dividend estimate had wrong (v5.47)
+
+Two corrections that are small in dollars and worth stating precisely, because both are about
+**which balance a rule is allowed to read** — the recurring failure mode in this codebase, and the
+one that produced the v5.41 divergence and the v5.44 span defect before it.
+
+### The HSA is out of the dividend base — but not out of the spendable pool
+
+`otherTaxableInit()` deliberately lumps `taxable` and `hsa` together as spendable after-tax cash.
+That is decision C-4 and it is right: seven call sites depend on it, and "what can be spent, and
+what can carry a capital gain" is the question it answers. It is the wrong input to a *taxable
+dividend*. A qualified HSA withdrawal is tax-free, so those dollars cannot throw off a dividend
+that lands in MAGI. Engine D reached this conclusion at v5.36 and held the HSA out of its
+gains-bearing pool (`_gainPoolInit`, citing $36,000 against a true $21,000 on the shipped example);
+the three dividend expressions — one each in Engines A, B and C — are the consumer that never got
+the same treatment.
+
+v5.47 fixes it **at the three consumers, not in the shared helper**, so the spendable view and the
+capital-gain view keep their own correct answer and no new API surface is added: `othHsa` was
+already in scope at all three sites. It is subtracted as an **amount, not a share**, unlike the
+annuity rule below. The reason is that gross RMDs land in this pool and are fully taxable, so its
+taxable fraction *rises* over time; a fixed share would hold out a growing amount and understate
+dividends. The amount is both closer to the model and the conservative of the two.
+
+Measured on the shipped example household: dividends fall $720 → $420, so MAGI falls **$300/yr**.
+`taxableOrdinary` and federal tax are byte-identical — these dividends sit in the 0% long-term
+capital-gains bracket, so **this moves MAGI, and therefore IRMAA and ACA exposure, not federal
+tax**. Where a year sits inside §86's upper-tier phase-in the effect compounds to $555, because
+$300 less provisional income also removes $255 of includible Social Security.
+
+### The Roth tab's RMD cards no longer count annuity money
+
+A non-qualified annuity is taxed as ordinary income when it is spent but carries **no required
+distribution**, so it must not sit in an RMD basis. Every engine has excluded it as
+`trad × (1 − annShare)` since v5.26. The Roth conversion tab's two RMD cards did not.
+
+The correction applies the share to **both halves** — the no-conversion counterfactual and the
+with-conversion figure — rather than reseeding the counterfactual from `rmdInit*`. Reseeding would
+have been the smaller edit and the wrong one: it fixes the no-conversion half while the
+with-conversion half keeps reading the ladder's own Traditional balances, leaving two halves of one
+quantity on different bases. That is precisely the failure v5.41 removed, when two projections of
+the Traditional balance drifted $48,712 apart. The two `*Trad` fields stay on the full Traditional
+basis deliberately: they are the balance, not the distribution, and annuity money is genuinely part
+of it.
+
+On the shipped example household, spouse B's cards fall $15,070 → $14,587 (no conversion) and
+$3,283 → $3,178 (with conversion). Spouse A holds no annuity — `annShareA` is exactly 0 — and both
+of A's cards are unchanged to the dollar, which is the built-in negative control for the fix.
+
+### Direction — it is not one-directional, and the tab's headline moves the *unfavourable* way
+
+Both corrections remove overstated income, so headline figures improve. But within the annuity fix
+the direction splits: RMDs fall, which looks better, while the tab's "Combined RMDs reduced by"
+line falls $41,288 → $40,910 — meaning **conversions now look slightly less effective than the tab
+previously claimed**. And the HSA fix moves MAGI without moving federal tax on this household. A
+single sentence claiming this release makes the plan look better would be wrong on all three
+counts.
