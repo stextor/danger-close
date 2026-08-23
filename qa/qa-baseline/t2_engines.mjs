@@ -71,6 +71,20 @@ if (MODE === "compare") {
     // must stay byte-identical: that identity IS the parity witness this release waited
     // two releases for (v5.36 scope decision 5).
     "v537→v538": ["rothAca"],
+    // v5.47 + the Other-accounts household (added 2026-08-23, harness-only, no version bump).
+    // This entry IS the negative control for the new `rothOther` fingerprint, in permanent form.
+    // v5.47 held the HSA out of Engine A's dividend base; on the two pre-existing households that
+    // change is worth $0 BY CONSTRUCTION (neither supplies `othHsa`), which is why parity reported
+    // 9/9 across a release it should have caught. On the new household every strategy moves.
+    // Asserting the change here rather than measuring it once means a revert of item 5 fails this
+    // guardrail forever — and if `rothOther` ever stops moving across this pair, the household has
+    // stopped exercising the mechanism it was built for.
+    //
+    // `roth`, `rothCurrentEstate` and `rothAca` are deliberately NOT listed: they are byte-identical
+    // across v546→v547 and that identity is the whole point of the finding. Their invariance is a
+    // property of THEIR FIXTURES, not of the code — the same sentence this file's v5.34 note
+    // records about `rothCurrentEstate`, now true of a second and third key for a second reason.
+    "v546→v547": ["rothOther"],
   };
   const expectDiff = new Set(INTENDED_DIFFS[`${PRIOR}→${CUR}`] || []);
   for (const key of Object.keys(a)) {
@@ -248,6 +262,94 @@ console.log(`t2 — ENGINES (${VER})`);
     loss: r.totAcaLoss,
     estate: rnd(r.estate),
   })).sort((a, b) => (a.key < b.key ? -1 : 1));
+}
+
+// ═══ Roth strategy engine, OTHER-ACCOUNTS household ═══════════════════════════════════════════
+// WHY THIS EXISTS. The two households above cannot observe ANY behaviour keyed off the Other
+// accounts category, and never could. Measured at v5.47 by AST field diff: `runRothStrategies`
+// reads 36 `P` fields; the main household supplies 33. The three it omits are `othHsa`,
+// `annShareA` and `annShareB` — and the ACA household, fully explicit by its own scope's D-3,
+// simply never lists them either. All three arrive as `undefined → 0`.
+//
+// Those three are not incidental. They are the entry points for three mechanisms:
+//   · `P.othHsa`      — the HSA is held out of the taxable-dividend base (L3840, v5.47)
+//   · `P.annShare*`   — annuity money carries no RMD, so it is out of the RMD basis (L3741, v5.26)
+//   · the same two    — SURVIVOR RE-POOLING of the exempt share at the first death (L3811–3815)
+// The third is the one that matters most: when the survivor inherits the deceased spouse's
+// Traditional balance the exempt amount has to move with it, or the survivor's RMD basis is
+// wrong. That is the class of survivor behaviour `t14` exists to protect, and this guardrail was
+// blind to it.
+//
+// THE COST, MEASURED RATHER THAN ARGUED. v5.47 held the HSA out of Engine A's dividend base. On
+// the main household the two legs are byte-identical and parity reported 9/9; on this household
+// every strategy moves, between +$102 and +$456. The guardrail would have caught that release and
+// did not, and its CHANGELOG had to state that 9/9 was not evidence — a thing a guardrail should
+// never require. The `v546→v547` INTENDED_DIFFS entry above is the permanent form of that finding:
+// it asserts this key CHANGES across that pair, so a revert of item 5 fails here forever.
+//
+// FULLY EXPLICIT, following the ACA household's decision D-3: it does NOT derive from PORTFOLIO()
+// or PLAN_TIMELINE(), so a future change to the shipped example data cannot silently rewrite this
+// fingerprint. A guardrail household should be inert.
+//
+// ⚠ BOTH SPOUSES CARRY ANNUITY MONEY, IN DIFFERENT PROPORTIONS, AND THAT IS DELIBERATE. The
+// shipped example household has `annShareA` exactly 0 — which is precisely why spouse A was
+// v5.47's built-in negative control — so a household copied from it would leave the survivor
+// re-pooling only half exercised. The shares differ (0.10 / 0.25) so that a re-pooling bug which
+// happens to swap them cannot pass.
+//
+// ⚠ THE DEATH MUST SIT INSIDE THE HORIZON. `deathYr1: Infinity` (as the ACA household uses) means
+// L3811–3815 never executes and the whole re-pooling half of this household is dead weight. The
+// coverage assertions below check this rather than trusting the constants.
+{
+  const POTH = {
+    single: false, asOfYr: 2026, retireYr: 2028, horizonYr: 2062, ladderEnd: 2036,
+    ladderEndA: 2036, ladderEndB: 2036,
+    dobAYr: 1962, dobBYr: 1964,
+    deathYr1: 2048, survivor: "A",
+    ssA: 3400, ssB: 2100, ssAYr: 2029, ssAMo: 3, ssBYr: 2031, ssBMo: 9,
+    pen: 1200, stateRate: 0, stateCode: null,
+    convTaxFunding: "taxable", taxableGainFrac: 0.5,
+    acaPremium: 0, acaSize: 0, taxYieldPct: 1.5, currentConv: 55000,
+    tradInit: 1100000, rothInit: 120000,
+    tradInitA: 700000, tradInitB: 400000,
+    rothInitA: 70000, rothInitB: 50000,
+    taxableInit: 320000,
+    // ── the three fields this household exists for ──
+    othHsa: 25000,
+    annShareA: 0.10, annShareB: 0.25,
+  };
+  const resO = g.runRothStrategies(POTH);
+
+  // ── COVERAGE, in the ROTH-ACA idiom. Without these a future edit that zeroes the three fields
+  // fingerprints an inert household and stays green forever — which is the exact failure this
+  // whole household exists to end, reproduced one level up.
+  T("ROTH-OTHER: strategy set returned", Array.isArray(resO) && resO.length >= 4, String(resO.length));
+  T("ROTH-OTHER: the HSA is present and non-zero — otherwise the dividend-base half is vacuous",
+    POTH.othHsa > 0, `othHsa ${POTH.othHsa}`);
+  T("ROTH-OTHER: BOTH spouses carry annuity money — otherwise survivor re-pooling is half-tested",
+    POTH.annShareA > 0 && POTH.annShareB > 0, `A ${POTH.annShareA}, B ${POTH.annShareB}`);
+  T("ROTH-OTHER: the two shares DIFFER — a re-pooling bug that swaps them must not pass",
+    POTH.annShareA !== POTH.annShareB);
+  T("ROTH-OTHER: the first death sits INSIDE the horizon — L3811-3815 actually executes",
+    Number.isFinite(POTH.deathYr1) && POTH.deathYr1 > POTH.retireYr && POTH.deathYr1 < POTH.horizonYr,
+    `death ${POTH.deathYr1}, horizon ${POTH.horizonYr}`);
+  T("ROTH-OTHER: both spouses reach RMD age inside the horizon — the RMD basis is exercised",
+    POTH.dobAYr + 75 < POTH.horizonYr && POTH.dobBYr + 75 < POTH.horizonYr);
+  T("ROTH-OTHER: the dividend base is live — a taxable sleeve and a non-zero yield",
+    POTH.taxableInit > POTH.othHsa && POTH.taxYieldPct > 0);
+  T("ROTH-OTHER: every strategy's estate finite", resO.every(r => Number.isFinite(r.estate)));
+
+  // ── This household must not be an accidental restatement of the main one. If the two ever
+  // fingerprint alike, one of them has stopped being the household it claims to be.
+  T("ROTH-OTHER: this is a genuinely different household from the main fingerprint",
+    rnd(resO.find(r => r.key === "current").estate) !== fp.rothCurrentEstate);
+
+  fp.rothOther = {
+    n: resO.length,
+    keys: resO.map(r => r.key).sort(),
+    estates: resO.map(r => rnd(r.estate)).sort((a, b) => a - b),
+    current: rnd(resO.find(r => r.key === "current").estate),
+  };
 }
 
 // ═══ Deterministic helpers into the fingerprint ═══
