@@ -50,6 +50,24 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 > MC-parity guardrail's 9/9 is NOT evidence about it. Any future scope premise that reaches for
 > those fixtures to measure an Other-accounts behaviour must build its own household first.
 >
+> ⚠ **`t13` LOOKS like `t14` and is NOT — do not apply `t14`'s drift correction to it.** Measured
+> 2026-08-23, after a recommendation to do exactly that was made and withdrawn. `t14`'s households
+> drift ~$4K/yr, so subtracting one year of drift is right there. `t13`'s are purpose-built and do
+> not drift: case 1 moves +$2K, and case 2's `d-2` year is a **one-off −$63K step**. Applying the
+> correction takes case 1 from margin 2.26 to 0.26 and case 2 from 1.74 to **−61.26**. It would have
+> broken the suite.
+>
+> `t13` does carry a *related* defect, from a different cause. Counterfactual, both deaths pushed
+> past the horizon: the isolated death effect is **$17,100.81** on case 1 against an expectation of
+> $13,260.00. Decomposed — holding both spouses alive and removing spouse B's check gives **exactly
+> $13,260.00**, so the **$3,840.81 residual** is not the SS term. The death also rolls the deceased's
+> Traditional balance to the survivor and recomputes RMDs on the survivor's age; case 1's survivor is
+> younger (larger divisor, smaller RMD, MAGI falls further), case 2's is older, which is why case 2
+> lands at −$0.61K instead. So the check is NAMED for the SS loss while MEASURING SS plus the
+> rollover, and its ±$4K band absorbs the difference. Margins are 2.26 and 1.74 — healthy next to the
+> 0.74 and 0.08 that made `t14` urgent — so this is recorded, not fixed. The fix is a counterfactual
+> anchor, and `t13` is DOM-driven, so that is a scope rather than a ride-along.
+>
 > ⚠ **`t14`'s Engine C magnitude checks were re-anchored at v5.47** after measurement showed they
 > had been differencing raw year-over-year MAGI while the household's MAGI also rises $3,959/yr
 > from RMD growth. Both passed for eleven releases with a structural offset inside their ±$4,000
@@ -159,7 +177,7 @@ package's manifest edits and layered v5.44's on top: `SCOPE_ITEMS_3_6_perRmd.md`
 check covers the SOURCE; it did not cover the document base.** Re-clone before editing any document
 that a prior package already changed — a stale doc base reverts silently and the suite cannot see it.
 
-⚠ **AUDITED 2026-08-23: 37 of the pool's 89 files have no row in this table, and 10 of them are
+⚠ **AUDITED 2026-08-23: 37 of the pool's 89 files (90 since 2026-08-23 — see below) have no row in this table, and 10 of them are
 not documents.** Counted by script, not by eye. The non-document gaps are `mk_testable.sh` and
 `run_all.sh` — named as harness files in OPERATIONS §B — the four parser tools `census.cjs`,
 `funcmap.cjs`, `diverge.cjs` and `residual.cjs`, plus `package.json` and `vite_config.js`. The two
@@ -190,8 +208,21 @@ three times. Documents are covered by the **clone-and-diff**, which §A2 names a
 and which costs one command and cannot itself go stale. The two `.jsx` sources are covered by the
 Current/Prior build tables above.
 
+⚠ **THE POOL IS 90 FILES, NOT 89, SINCE 2026-08-23** — and the way it grew is the finding.
+`package_check_controls.sh` was **repo-only**; the ops package that rewrote it listed the file in its
+DELETE-FIRST list, that delete was a no-op, and the upload ADDED it. The end state is correct — the
+file is pooled, at the right hash, with a row — but the count moved without anyone deciding it
+should. The two figures above were written the day before and are left as written, with this note,
+because rewriting them would erase the evidence of how a number goes stale.
+
+The cause is an asymmetry worth naming: `package_check`'s F-2 verifies that every `knowledge/` file
+**replacing a pool file** is named for deletion. Nothing verifies the reverse — that every file
+named for deletion **exists to be deleted**. So a delete-first list derived from what the PACKAGE
+contains, rather than from what the POOL holds, silently adds files. That is the same shape as the
+`E-1b` / `G-1` gap one level over, and it is not yet checked.
+
 ⚠ **Eight rows were added 2026-08-23** after a scripted audit found the table covered 52 of the
-pool's 89 files, ten of the gaps not being documents. Nothing had drifted at the time — the same
+pool's 89 files (90 since 2026-08-23 — see below), ten of the gaps not being documents. Nothing had drifted at the time — the same
 day's both-directions sweep found every pool file except the prior-leg source byte-identical to its
 repo counterpart — so this closed a **latent** hole, not a live one. Counted by script, because a
 row that was never written cannot be found by reading the table.
