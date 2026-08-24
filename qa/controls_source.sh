@@ -234,6 +234,44 @@ run_noop_control () {  # $1 name, $2 patch id, $3.. suites that must ALL stay gr
   cp /tmp/ctl.orig.jsx $SRC; rebuild
 }
 
+# ══ v5.43-v5.47 · fourteen controls added 2026-08-23 ══════════════════════════════════════
+# Until now this file covered the v5.36 capital-gains work and the v5.42 §86 phase-in ONLY.
+# t25, t26, t27 and t28 did not exist when it was written and had NO source-level control at all
+# — five releases whose suite coverage was assumed rather than demonstrated, which is the exact
+# position §B2 was written in response to.
+#
+# All fourteen anchors were verified to resolve EXACTLY ONCE against v5.47 before any was written.
+# Seven of them patch component-inline code reachable only through the DOM bundle, so every one
+# of those would have reported a false NOT CAUGHT before the rebuild fix landed on 2026-08-23.
+mkpatch d1  '"(_prov86 - _ssF.ssThr2) * 0.85 + Math.min(_para1, (_ssF.ssThr2 - _ssF.ssThr1) * 0.5));"' \
+            '"(_prov86 - _ssF.ssThr2) * 0.50 + Math.min(_para1, (_ssF.ssThr2 - _ssF.ssThr1) * 0.5));"'
+mkpatch d2  '": _prov86 <= _ssF.ssThr2 ? Math.min(_para1, ssTot * 0.85)"' \
+            '": _prov86 <= _ssF.ssThr2 ? Math.min(_para1 * 2, ssTot * 0.85)"'
+mkpatch d3  '"const _para1 = Math.min(ssTot * 0.5, Math.max(0, _prov86 - _ssF.ssThr1) * 0.5);"' \
+            '"const _para1 = Math.max(0, _prov86 - _ssF.ssThr1) * 0.5;"'
+mkpatch d4  '"const _ssPara1 = Math.min(totalSS * 0.5, (provisional - _ssT1) * 0.5);"' \
+            '"const _ssPara1 = (provisional - _ssT1) * 0.5;"'
+mkpatch d5  '"Math.min(ssTot * 0.85,\n          (_prov86 - _ssF.ssThr2) * 0.85"' \
+            '"Math.min(ssTot * 1.00,\n          (_prov86 - _ssF.ssThr2) * 0.85"'
+mkpatch d6  '"const spouseBSS = _singleRoth ? 0 : year > _ssBYearRoth ? _rsSsB * 12 : year === _ssBYearRoth ? _rsSsB * _ssBPartialMonths : 0;"' \
+            '"const spouseBSS = _singleRoth ? 0 : _rsSsB * 12;"'
+mkpatch d7  '"const _ssBYearRoth = _tlRoth.ssB_date.year;"' \
+            '"const _ssBYearRoth = _tlRoth.ssB_date.year - 5;"'
+mkpatch d8  '"const div_y = Math.round(Math.max(0, taxBal - (P.othHsa || 0)) * (P.taxYieldPct / 100));"' \
+            '"const div_y = Math.round(Math.max(0, taxBal) * (P.taxYieldPct / 100));"'
+mkpatch d9  '"Math.max(0, _taxableInitI - (_rsbC.othHsa || 0))"' \
+            '"Math.max(0, _taxableInitI)"'
+mkpatch d10 '"Math.max(0, _taxableInit - (_rsbB.othHsa || 0))"' \
+            '"Math.max(0, _taxableInit)"'
+mkpatch d11 '"const annSh = { A: _rsbC.annShareA || 0, B: _rsbC.annShareB || 0 };"' \
+            '"const annSh = { A: 0, B: 0 };"'
+mkpatch d12 '"noConv: Math.round(P0.t0 * Math.pow(1 + tradGrowth, P0.yrs) * (1 - P0.annSh) / rmdDivisor(P0.age)),"' \
+            '"noConv: Math.round(P0.t0 * Math.pow(1 + tradGrowth, P0.yrs) / rmdDivisor(P0.age)),"'
+mkpatch d13 '"withConv: Math.round(balAt(P0.who, P0.yr) * (1 - P0.annSh) / rmdDivisor(P0.age)),"' \
+            '"withConv: Math.round(balAt(P0.who, P0.yr) / rmdDivisor(P0.age)),"'
+mkpatch d14 '"const yrs = Math.max(0, yr - tl.rothLadderStart);"' \
+            '"const yrs = Math.max(0, yr - tl.asOfYear);"'
+
 rebuild; BASE=$(measure)
 if [ -z "$BASE" ]; then echo "BASELINE PROBE DIED:"; head -3 /tmp/ctl.probe.err; exit 1; fi
 echo "BASELINE fingerprint: $BASE"
@@ -301,4 +339,40 @@ run_control "C20 base amount hardcoded to the MARRIED literal (v5.15 reverted)" 
 run_control "C21 para1 capped at 85% of benefits, not 1/2 (the middle tier's defect, moved up)" c21 t24_ss86_phasein:v547 t1_units:v547
 
 cp /tmp/ctl.orig.jsx $SRC; rebuild
+# ── v5.43-v5.47 controls. Each names the suite that OWNS the behaviour plus a neighbour, so a
+# control that fires only on its owner still shows whether the blast radius is what it should be.
+# ⚠ Controls naming t2 must use the COMPARE mode — `t2_engines v547` only WRITES a fingerprint;
+# the guardrail lives in `t2_engines compare v546 v547`, and naming the wrong one silently
+# under-reports exactly the parity check v5.47 was added to strengthen.
+run_control "D1 v5.43 Engine C \u00a786 phase-in slope 0.85 -> 0.50" d1 t25_engineC_ss86:v547 t17_engineC_exact
+run_control "D2 v5.43 Engine C \u00a786 middle tier doubled" d2 t25_engineC_ss86:v547 t17_engineC_exact
+run_control "D3 v5.45 half-cap removed from ENGINE C" d3 t25_engineC_ss86:v547 t27_half_cap:v547
+# ── D4 is DELIBERATELY NOT RUN, and this is the finding, not an omission ──────────────────
+# The patch is written and its anchor resolves exactly once. It reverts the v5.45 half-benefits
+# cap in the ROTH TAB's own copy of §86 (`_ssPara1`, L8946) — the mirror of the Engine C copy D3
+# reverts. Measured 2026-08-23: it moves nothing and nothing fires, because the cap binds only
+# where provisional income exceeds the first threshold by MORE than total benefits, and the
+# shipped household carries $55,200 of benefits. Same shape as D3 before t25 gained §F.
+#
+# It is not run because a control that CANNOT fire would print *** NOT CAUGHT *** on every run
+# forever — and §B2 says a control that does not fire is a finding to investigate. A permanent
+# false finding trains the reader to ignore the one real one. So the patch stays, the invocation
+# does not, and the reason is here rather than in a verdict.
+#
+# TO ENABLE IT: t24 needs a low-benefits fixture, the way t25 gained §F for the Engine C copy.
+# That is heavier than t25's was — t24 is DOM-driven and reimplements the ladder recursion
+# against EXAMPLE-HOUSEHOLD CONSTANTS (`retireStartBalances(2029).tradInitA/B`, `getPension()*12`,
+# the spouse-B work taper), so a second household means re-deriving all of them. Scoped, not done.
+# run_control "D4 v5.45 half-cap removed from the ROTH TAB" d4 t24_ss86_phasein:v547 t27_half_cap:v547
+run_control "D5 v5.43 Engine C overall 85% cap loosened" d5 t25_engineC_ss86:v547 t17_engineC_exact
+run_control "D6 v5.46 spouse-B claim gate reverted" d6 t28_ssB_claim_gate:v547 t24_ss86_phasein:v547
+run_control "D7 v5.46 B claim year shifted 5 years early" d7 t28_ssB_claim_gate:v547 t23_roth_ladder_rmd:v547
+run_control "D8 v5.47 HSA back into ENGINE A dividend base" d8 t1_units:v547 t25_engineC_ss86:v547
+run_control "D9 v5.47 HSA back into ENGINE C dividend base" d9 t25_engineC_ss86:v547 t1_units:v547
+run_control "D10 v5.47 HSA back into ENGINE B dividend base" d10 t1_units:v547 t18_engineB_exact
+run_control "D11 v5.47 Roth tab annuity share zeroed" d11 t26_noconv_span:v547 t1_units:v547
+run_control "D12 v5.47 no-conversion card unscaled" d12 t26_noconv_span:v547 t1_units:v547
+run_control "D13 v5.47 with-conversion card unscaled" d13 t26_noconv_span:v547 t23_roth_ladder_rmd:v547
+run_control "D14 v5.44 span seeded from the as-of year again" d14 t26_noconv_span:v547 t23_roth_ladder_rmd:v547
+
 echo "source restored: $(md5sum $SRC | cut -d' ' -f1)"

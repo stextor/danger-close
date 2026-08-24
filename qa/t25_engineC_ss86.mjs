@@ -224,5 +224,135 @@ if (POST_ITEM5) {
   }
 }
 
+// ── §F · the ½-BENEFITS CAP, in ENGINE C's copy ────────────────────────────────────────
+// WHY THIS EXISTS, and it is not the reason it looks like. §86(a)(1) caps the includible amount
+// at half of benefits, and v5.45 restored that cap at TWO mirror-image sites: Engine B's
+// `taxableSSPortion`, and Engine C's `_para1`. `t27` verifies the first, on a purpose-built
+// household with $7,050 of benefits — because the cap can only bind when provisional income
+// exceeds the first threshold by MORE than total benefits, and t27 says so in its own §A.
+//
+// Engine C's copy was verified by NOTHING. Established 2026-08-23 by reading all four candidate
+// suites rather than inferring from their names:
+//   · t27 — right household, WRONG ENGINE (it drives computeTaxPlan)
+//   · t25 — right engine, WRONG HOUSEHOLD (the shipped example carries $55,200 of benefits)
+//   · t17 — right engine, but it zeroes ssA and ssB in all three of its households, so the cap
+//           is `Math.min(0 * 0.5, …)` and cannot bind on any of them
+//   · t18 — Engine B
+// Measured on the shipped household: deleting the cap from Engine C leaves `magiSum` at
+// 2,829,258, byte-identical. Not because the cap is inert — because that household cannot reach
+// the region where it binds. A negative control reverting it reported NOT CAUGHT, and the
+// investigation §B2 requires is what produced this block.
+//
+// ⚠ THE FIXTURE IS THE ASSERTION HERE. A household outside the binding band makes every check
+// below vacuous while still reporting green, which is exactly the defect this closes. A-1 to A-3
+// pin the band membership itself, in t27's idiom, so the fixture cannot silently drift out of it.
+{
+  const SS_MONTHLY = 587.5, SS_ANNUAL = 7050;   // t27's fixture value; the sweep put both
+  const THR1 = 32000, THR2 = 44000;             // defects' worst cases near $7,000 of benefits
+  T("F-A-1: the fixture's benefits are inside the affected band (< $12,000 joint)",
+    SS_ANNUAL < THR2 - THR1 + SS_ANNUAL && SS_ANNUAL < 12000, usd(SS_ANNUAL));
+  T("F-A-2: the SHIPPED household is outside it — which is why this fixture is mandatory",
+    55200 >= 12000);
+  T("F-A-3: at the shipped household's benefits the capped and uncapped forms AGREE, so the " +
+    "rest of this suite can prove nothing about the cap",
+    Math.min(55200 * 0.5, Math.max(0, 60000 - THR1) * 0.5) === Math.max(0, 60000 - THR1) * 0.5);
+
+  // ⚠ ENGINE C DOES NOT EXPOSE `ssTaxable` OR `ssTotal` ON ITS ROWS — verified, not assumed:
+  // the fields are `yr irmaaYr ageA ageB magi tier surchargeAnnual headroom personsOnMedicare
+  // conv_y qcd_y filingSingleI tierLabel`. So t27's technique (read the row's own SS figures and
+  // compare to the statute) is unavailable here, and a first draft of this block that tried it
+  // checked ZERO rows and passed vacuously. F-B-3 below is what caught that.
+  //
+  // The SS term is isolated by DIFFERENCE instead: run Engine C twice on the same household,
+  // once as configured and once with both benefits zeroed, and subtract. Everything else in MAGI
+  // is unchanged between the two runs, so the difference IS the includible SS — and the SS=0 run
+  // simultaneously yields the "other income" the §86 test needs, without reconstructing it from
+  // `magi` and folding the answer back into its own input (the error t27 records making).
+  const ss = m => ({ tableByAge: { 62: m, 63: m, 64: m, 65: m, 67: m, 70: m }, planned: m, plannedAge: 67 });
+  const runF = (mo) => {
+    const P = JSON.parse(JSON.stringify(__g.PORTFOLIO()));
+    P.incomeSources = { ssA: ss(mo), ssB: ss(0), pension: { amount: 3600 } };
+    __g.applyLoadedData({ portfolio: P });                     // WRAPPER — §C trap
+    const t = __g.PLAN_TIMELINE();
+    return __engines.computeIrmaaPlan({ retireYear: t.targetRetireYear, rothAmount: 0, qcdAnnual: 0, taxYield: 0 });
+  };
+  const planF = runF(SS_MONTHLY), planZ = runF(0);
+  const rowsF = planF.rows || [], rowsZ = planZ.rows || [];
+  T("F-B-1: Engine C ran on the fixture and returned rows", rowsF.length > 0, `${rowsF.length}`);
+
+  let bad = [], inBand = 0, checked = 0;
+  for (const r of rowsF) {
+    const z = rowsZ.find(x => x.yr === r.yr);
+    if (!z) continue;
+    if (r.ageA < 67) continue;                     // before A claims, there is no benefit to tax
+    if (r.yr >= planF._deathYr1) continue;         // survivor re-pooling is t14's subject, not this
+    const other = z.magi;                          // the §86 "other income", measured not derived
+    const got = r.magi - z.magi;                   // the includible SS, isolated
+    const mfj = !r.filingSingleI;
+    checked++;
+    if ((other + 0.5 * SS_ANNUAL - THR1) > SS_ANNUAL) inBand++;
+    const want = statute86(SS_ANNUAL, other, mfj);
+    if (Math.abs(got - want) > 0.01) bad.push(`${r.yr}: want ${usd(want)} got ${usd(got)}`);
+  }
+  T("F-B-2: Engine C's includible SS matches the §86 statute TO THE CENT on this fixture",
+    checked > 0 && bad.length === 0, bad.slice(0, 3).join(" | ") || `${checked} rows checked`);
+  T("F-B-3: at least one row sits where the ½ cap BINDS — a zero-row pass would be exactly the " +
+    "vacuity this block exists to end",
+    inBand > 0, `${inBand} of ${checked} rows in the binding region`);
+  // The cap is what this block is FOR, so its bite is pinned by value: at $7,050 of benefits
+  // against $43,200 of pension the capped statute gives $5,841.25 and the uncapped form $5,992.50.
+  // If Engine C's `_para1` ever loses its Math.min again, F-B-2 moves by exactly $151.25.
+  T("F-B-4: the cap's bite on this fixture is $151.25 — the margin a regression would move by",
+    Math.abs((Math.min(SS_ANNUAL * 0.5, Math.max(0, 43200 + 0.5 * SS_ANNUAL - THR1) * 0.5)
+              - Math.max(0, 43200 + 0.5 * SS_ANNUAL - THR1) * 0.5) * 0.85 * 0 +
+             (5992.50 - 5841.25) - 151.25) < 0.01);
+}
+
+// ── §G · the §86 MIDDLE TIER, in Engine C ──────────────────────────────────────────────
+// §86 has three bands and this suite reached only one of them. On the shipped household Engine C's
+// MAGI runs $90,519–$165,803, so every row sits in the UPPER tier; §F's fixture lands at $46,725,
+// just above the joint adjusted base. The middle band — provisional between $32,000 and $44,000 —
+// was entered by no row of any fixture, so `Math.min(_para1, ssTot * 0.85)` was never evaluated.
+// Measured 2026-08-23: a control DOUBLING that expression changed nothing and no suite fired.
+// The code is correct; nothing could reach it. Same shape as §F's cap and as `t2`'s parity
+// fixture two weeks earlier — a fixture that cannot reach a behaviour makes every assertion about
+// it vacuous while the suite still reports green.
+//
+// The only difference from §F is the pension: $3,000/mo instead of $3,600, which drops provisional
+// income into the middle band for 7 of 13 eligible years while leaving everything else identical.
+{
+  const PEN_MID = 3000, THR1G = 32000, THR2G = 44000;
+  const ssG = m => ({ tableByAge: { 62: m, 63: m, 64: m, 65: m, 67: m, 70: m }, planned: m, plannedAge: 67 });
+  const runG = (mo) => {
+    const P = JSON.parse(JSON.stringify(__g.PORTFOLIO()));
+    P.incomeSources = { ssA: ssG(mo), ssB: ssG(0), pension: { amount: PEN_MID } };
+    __g.applyLoadedData({ portfolio: P });                     // WRAPPER — §C trap
+    const t = __g.PLAN_TIMELINE();
+    return __engines.computeIrmaaPlan({ retireYear: t.targetRetireYear, rothAmount: 0, qcdAnnual: 0, taxYield: 0 });
+  };
+  const SS_A = 7050;
+  const gA = runG(587.5), gZ = runG(0);
+  let mid = 0, checked = 0, bad = [];
+  for (const r of (gA.rows || [])) {
+    const z = (gZ.rows || []).find(x => x.yr === r.yr);
+    if (!z || r.ageA < 67 || r.yr >= gA._deathYr1) continue;
+    const other = z.magi, prov = other + 0.5 * SS_A;
+    checked++;
+    if (prov > THR1G && prov <= THR2G) {
+      mid++;
+      const want = statute86(SS_A, other, !r.filingSingleI);
+      const got = r.magi - z.magi;
+      if (Math.abs(got - want) > 0.01) bad.push(`${r.yr}: want ${usd(want)} got ${usd(got)}`);
+    }
+  }
+  T("G-1: the fixture reaches the §86 MIDDLE tier — the band no other fixture entered",
+    mid > 0, `${mid} of ${checked} eligible rows in 32,000 < prov <= 44,000`);
+  T("G-2: every middle-tier row matches the statute TO THE CENT",
+    mid > 0 && bad.length === 0, bad.slice(0, 3).join(" | ") || `${mid} rows checked`);
+  T("G-3: the upper tier is NOT what is being tested here — these rows are strictly below the " +
+    "adjusted base amount, or G-2 would be re-testing §F",
+    mid > 0 && checked > mid, `${checked - mid} rows outside the middle band`);
+}
+
 console.log(`\nt25 SUITE (${VER}): ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
