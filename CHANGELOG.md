@@ -1,5 +1,80 @@
 # Changelog
 
+## Unreleased — `qa/` only: coverage for v5.43–v5.47, and three assertions that could never have fired, 2026-08-23
+
+**No version bump, no release.** Nothing under `src/` changed. Source throughout is v5.47,
+`src/DangerClose.jsx` md5 `1395f2e4fc2809ab3e5692b50e2d3409`, verified unchanged before and after
+the harness run.
+
+### What this set out to do
+
+`controls_source.sh` covered the v5.36 capital-gains work and the v5.42 §86 phase-in. **Nothing
+covered v5.43–v5.47** — five releases whose suite coverage was assumed rather than demonstrated,
+which is the position §B2 was written in response to. Fourteen anchors were extracted and each
+verified to resolve exactly once against v5.47 before a line was written.
+
+**Thirteen of the fourteen now fire. The harness runs 32 controls, 0 uncaught, C0 correctly
+silent** — up from 19.
+
+### What it actually found, which was not missing controls
+
+Three of the fourteen reverted **correct code that no household in the suite could reach**:
+
+- **D3** — the v5.45 half-benefits cap in **Engine C**. `t27` verifies the *Engine B* copy on a
+  purpose-built $7,050 household; `t25` had the right engine and the shipped $55,200 household;
+  `t17` had the right engine with SS zeroed. Engine C's copy was verified by nothing.
+- **D2** — §86's **middle tier** in Engine C. The band needs provisional income between $32,000 and
+  $44,000; Engine C's MAGI on the shipped household runs $90,519–$165,803. `Math.min(_para1, ssTot
+  * 0.85)` had never been evaluated by any test in the project.
+- **D4** — the same half-cap in the **Roth tab's** copy. Same gap, same reason.
+
+The code is correct in all three cases. The fixtures could not exercise it, and the suite reported
+green either way.
+
+### `t25` gained two households
+
+**§F** carries benefits small enough for the cap to bind. ⚠ **Engine C does not expose `ssTotal` or
+`ssTaxable` on its rows** — the fields are `yr irmaaYr ageA ageB magi tier surchargeAnnual headroom
+personsOnMedicare conv_y qcd_y filingSingleI tierLabel` — so `t27`'s technique is unavailable, and
+**the first draft of §F checked ZERO rows and passed.** Its own anti-vacuity assertion caught that,
+not review. The SS term is now isolated by difference: Engine C is run twice on the same household,
+once with benefits zeroed, and subtracted. Everything else in MAGI is identical between the runs, so
+the difference *is* the includible SS — and the zeroed run simultaneously yields the "other income"
+§86 needs, without reconstructing it from `magi` and folding the answer into its own input, the
+error `t27` records having made.
+
+**§G** drops the pension to $3,000/mo, which puts 7 of 13 eligible years into the middle tier.
+
+Negative-controlled, both: removing Engine C's cap gives *want $5,841 got $5,993*; doubling the
+middle tier gives *want $3,525 got $5,993*. The cap's bite on the §F fixture is **$151.25**, pinned
+by value so a regression moves by a known amount.
+
+### D4 is written but deliberately NOT invoked
+
+A control that can never fire would print `*** NOT CAUGHT ***` on every run forever — and §B2 says
+a control that does not fire is a finding to investigate. **A permanent false finding trains the
+reader to ignore the real one.** So the patch stays in the file, the invocation is commented out,
+and the reason sits beside it rather than in a verdict. Enabling it needs a low-benefits fixture in
+`t24`, which is heavier than `t25`'s was: `t24` is DOM-driven and reimplements the ladder recursion
+against example-household constants, so a second household means re-deriving all of them.
+
+### The pattern, now recorded in the manifest rather than a CHANGELOG entry
+
+Four instances in two weeks — `t2`'s parity fixture supplying no Other-accounts fields, and these
+three §86 cases. **A fixture that cannot reach a behaviour makes every assertion about it vacuous,
+and the suite reports green either way.** A green suite is not evidence of coverage; a green suite
+on a fixture that reaches the code is. When adding an assertion, prove the fixture enters the
+region — and `t25`'s first §F draft is the cautionary case, since it passed while checking nothing.
+
+### Tests
+
+**2,494 app checks, 0 failing · parity 10/10 · tooling 90 · 2,584 total**, counts parsed from suite
+output, both legs, 45 invocations. `t25` 39 → **45** on the current leg (36 → 39 on the frozen one);
+`t26` 25. The +20 is `t25`'s two new fixture blocks.
+
+The harness itself: **32 controls fire, 0 uncaught, C0 silent, source restored** to
+`1395f2e4fc2809ab3e5692b50e2d3409`.
+
 ## Unreleased — `qa/` only: the control harness reported four verdicts that were false, 2026-08-23
 
 **No version bump, no release.** Nothing under `src/` changed. Source throughout is v5.47,
