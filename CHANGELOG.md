@@ -1,5 +1,92 @@
 # Changelog
 
+## Unreleased — `qa/` only: the control harness reported four verdicts that were false, 2026-08-23
+
+**No version bump, no release.** Nothing under `src/` changed. Source throughout is v5.47,
+`src/DangerClose.jsx` md5 `1395f2e4fc2809ab3e5692b50e2d3409`, verified unchanged before and after
+the harness run — it restores the source it patches, and the hash proves it did.
+
+`qa/controls_v542.sh` → **`qa/controls_source.sh`**, repaired. **The old file is DELETED from both
+destinations**, the same rotation `controls.sh` got at v5.42 and for the same reason: keeping both
+invites someone running the dead one.
+
+### The scope was wrong, and the correction is the finding
+
+This began as "re-point a stale harness — sixteen controls whose patch anchors v5.43–v5.47 have
+moved." Tested by extracting every anchor and counting its occurrences in the v5.47 source:
+**all nineteen anchors intact, zero moved.** The count was wrong too — nineteen, not sixteen. The
+re-point is five version strings and three suite tags. Fifteen of nineteen controls fired correctly
+on v5.47 the first time it was run.
+
+**The four that did not were reporting falsely.** C16–C19 each printed `*** NOT CAUGHT ***`, which
+under §B2 reads as *"`t24` is blind to the §86 upper-tier phase-in it was built to guard."*
+`t24_ss86_phasein` does `require("./dom_<tag>.cjs")`; `rebuild()` built only `app_<tag>.mjs`. Every
+control patched the source, rebuilt the module, and left `t24` reading a **clean** bundle.
+
+Hand-verified individually, each perturbation applied with the bundle rebuilt alongside:
+
+| control | perturbation | `t24` failures |
+|---|---|---|
+| C16 | phase-in slope 0.85 → 0.50 | 6 |
+| C17 | the (adjbase − base)/2 term dropped | 8 |
+| C18 | the overall 85%-of-benefits cap removed | 8 |
+| C19 | adjusted base shifted +$10,000 | 7 |
+| — | clean source restored | **0** |
+
+**`t24` was never blind.** Of the seven suites the harness names, exactly one reads the DOM bundle —
+which is why the §86 control block half-worked and the defect stayed invisible: C20 and C21 also
+exercise §86 but name `t1_units`, which reads the module, and both fired.
+
+**A false `NOT CAUGHT` is the worst output this file can produce.** §B2 says a control that does not
+fire *is* the finding — so a reader following the rule correctly goes hunting for a hole that does
+not exist, and every honest conclusion available to them is wrong. This is not a v5.47 regression:
+C16–C21 were added at v5.42 and `t24` has read the bundle since it was written, so the harness has
+been capable of emitting four false verdicts since those controls were authored. It stopped being
+runnable at about the same time, which is why nobody saw them.
+
+### Three changes
+
+**`rebuild()` builds every artifact a named suite consumes** — the module and the DOM bundle.
+Decided deliberately as unconditional: the bundle costs ~4.5s against the module's ~0.7s, so always
+adds ~2.9 minutes across nineteen controls. That is the right trade, because the defect being fixed
+*was* a build step that was conditional in effect, and a lookup from suite name to "needs DOM" is a
+second place the truth lives, where drift is silent and reproduces exactly this failure.
+
+**`verify_artifacts()` is the class-level fix.** Rebuilding the bundle repairs this instance; this
+makes the class impossible. Every consumed artifact must be **newer than the source it was built
+from**, and if one is stale the harness **refuses to print a verdict at all** — because a harness
+that cannot prove the perturbation arrived has not earned `CAUGHT` *or* `NOT CAUGHT`.
+
+**C0 — a control that must NOT fire.** Every other control here is expected to fire, so a harness
+that rubber-stamped `CAUGHT` would have passed all nineteen of its own checks; nothing in the file
+could distinguish "the suites are discriminating" from "the verdict is a rubber stamp." C0 is a
+comment-only edit: byte-different source, identical behaviour. It runs first, and it reports
+**correctly SILENT**. The same gap, one level over, is why `package_check_controls.sh` gained P19 a
+day earlier.
+
+The version is out of the filename (D-2). It never described the controls — only the one `SRC=`
+line — so it guaranteed the file *looked* stale the moment a tag rolled, which is most of how it
+came to sit unrun for five releases.
+
+### Result
+
+**19 controls fire, C0 correctly silent, source restored to `1395f2e4…`.**
+
+### ⚠ The gap this does NOT close, and it is bigger than the repair
+
+These controls cover the v5.36 capital-gains work and the v5.42 §86 phase-in. **Nothing covers
+v5.43–v5.47** — not the §86 half-cap, the spouse-B claim gate, the HSA dividend base, or the Roth
+tab's RMD-exempt share. `t25`, `t26`, `t27` and `t28` did not exist when these were written and have
+no source-level controls at all. A green run of this file says the v5.36 and v5.42 work is still
+covered. It says nothing whatever about the last five releases, and that is now the largest known
+hole in this project's verification.
+
+### Tests
+
+Full suite re-run after the change, both legs: **2,474 app checks, 0 failing · parity 10/10 ·
+tooling 90 · 2,564 total**. No figure moves — no suite imports this file. The harness itself is
+counted in no release total, by design.
+
 ## Unreleased — docs only: three findings that existed nowhere but a chat log, 2026-08-23
 
 **No version bump, no release, no code.** Source throughout is v5.47,
