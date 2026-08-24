@@ -34,9 +34,29 @@ keeps replaying green. **Both controls fired**: killing Engine C's sole call sit
 fails the tightened identity check with headroom figures moving $138K → $139K; reverting the disclosure
 fails exactly the two v5.40-side copy checks and leaves figures green. **`qa/controls.sh` remained the
 v5.38 edition and could not run against the current pair** — the controls above were run by hand.
-**Fixed at v5.42 and the stale file deleted 2026-08-21:** `qa/controls_v542.sh` is the re-pointed
+**Fixed at v5.42 and the stale file deleted 2026-08-21:** `qa/controls_v542.sh` was the re-pointed
 successor, with all thirteen v5.38-era patch anchors verified to resolve exactly once against the
 current source before the re-point, plus six new controls for the §86 work.
+
+**Superseded again 2026-08-23 by `qa/controls_source.sh`, and the version is out of the filename**
+— it never described the controls, only the one `SRC=` line, so it guaranteed the file LOOKED stale
+the moment a tag rolled. It then sat unrun for five releases, which is most of how the next problem
+went unseen. ⚠ **When it was finally run, four controls reported `*** NOT CAUGHT ***` and all four
+verdicts were FALSE.** `t24_ss86_phasein` reads `dom_<tag>.cjs`; the harness rebuilt only
+`app_<tag>.mjs`, so C16–C19 patched the source and left `t24` reading a clean build. Hand-verified
+with the bundle rebuilt: C16 → 6 `t24` failures, C17 → 8, C18 → 8, C19 → 7, clean → 0. `t24` was
+never blind. The harness now rebuilds every artifact a named suite consumes, and
+`verify_artifacts()` refuses to print any verdict unless each is newer than the source it was built
+from — because a harness that cannot prove the perturbation arrived has not earned `CAUGHT` **or**
+`NOT CAUGHT`. **C0** was added at the same time: a comment-only edit that must NOT fire, since
+every other control is expected to fire and a harness that rubber-stamped `CAUGHT` would have
+passed all nineteen of its own checks.
+
+⚠ **COVERAGE GAP, and it is larger than the repair.** These controls cover the v5.36 capital-gains
+work and the v5.42 §86 phase-in. **Nothing covers v5.43–v5.47** — not the §86 half-cap, the
+spouse-B claim gate, the HSA dividend base, or the Roth tab's RMD-exempt share. `t25`, `t26`, `t27`
+and `t28` did not exist when these were written and have no source-level controls at all. A green
+run says the v5.36 and v5.42 work is still covered; it says nothing about the last five releases.
 
 **The published artifact rebuilds byte-identical from project knowledge alone** — verified 2026-08-20
 for the first time, `dist/index.html` md5 `17867edb9af4c5e7e3542aeade594f24`, `qa/smoke_built.mjs`
