@@ -1,5 +1,82 @@
 # Changelog
 
+## Unreleased — docs only: three findings that existed nowhere but a chat log, 2026-08-23
+
+**No version bump, no release, no code.** Source throughout is v5.47,
+`src/DangerClose.jsx` md5 `1395f2e4fc2809ab3e5692b50e2d3409`, verified unchanged. One file:
+`PROJECT_KNOWLEDGE_INDEX.md`. This entry rides with the next release.
+
+Three things were measured over the preceding packages and written down nowhere. A finding that
+lives only in a conversation is a finding the next session repeats, so they are recorded here and in
+the manifest rather than left to be rediscovered.
+
+### `t13` looks like `t14` and is not — a withdrawn recommendation
+
+`t13` and `t14` both assert that Engine C's MAGI falls at the first death by 85% of the smaller
+Social Security check, both against a ±$4,000 band. On that structural likeness, `t13` was
+recommended as a small ride-along fix using the drift correction v5.47 applied to `t14`. **Measured,
+that was wrong, and applying it would have broken the suite.**
+
+`t14` runs the shipped example household, whose MAGI drifts ~$4K/yr from RMD growth, so subtracting
+one year of drift is right there. `t13` runs purpose-built households that do not drift: case 1
+moves +$2K, and case 2's `d-2` year is a **one-off −$63K step**. The correction takes case 1's margin
+from 2.26 to 0.26 and case 2's from 1.74 to **−61.26**.
+
+`t13` does carry a related defect from a different cause. Counterfactual, both deaths pushed past the
+horizon: the isolated death effect on case 1 is **$17,100.81** against an expectation of $13,260.00.
+Decomposed rather than guessed — holding both spouses alive and removing spouse B's check gives
+**exactly $13,260.00**, so the **$3,840.81 residual** is not the SS term. The death also rolls the
+deceased's Traditional balance to the survivor and recomputes RMDs on the survivor's age: case 1's
+survivor is younger, so a larger divisor gives a smaller RMD and MAGI falls further; case 2's is
+older, which is why that case lands at −$0.61K. **The check is named for the SS loss while measuring
+SS plus the rollover, and the band absorbs the difference.** Margins 2.26 and 1.74 — healthy beside
+the 0.74 and 0.08 that made `t14` urgent — so this is recorded, not fixed. The fix is a
+counterfactual anchor and `t13` is DOM-driven, so it is a scope rather than a ride-along.
+
+The general lesson is the one worth keeping: **two checks that read alike can need opposite
+treatment, and only measurement distinguishes them.** The recommendation was made from structure and
+withdrawn from arithmetic.
+
+### The pool went 89 → 90 and nobody decided it should
+
+`package_check_controls.sh` was repo-only. The ops package that rewrote it listed the file in its
+DELETE-FIRST list; that delete was a no-op, and the upload **added** it. The end state is correct —
+pooled, right hash, has a row — but the count moved as a side effect.
+
+The cause is an asymmetry: `package_check`'s F-2 verifies that every `knowledge/` file **replacing a
+pool file** is named for deletion. Nothing verifies the reverse — that every file named for deletion
+**exists to be deleted**. A delete-first list derived from what the package contains, rather than
+from what the pool holds, silently adds files. Same shape as the `E-1b` / `G-1` gap one level over,
+and not yet checked.
+
+The two manifest lines reading "the pool's 89 files" are **left as written**, annotated rather than
+rewritten, because the evidence of how a number goes stale is worth more than the tidy number.
+
+### Executable bits, audited exhaustively
+
+Every file in the repo carrying a `#!` line, and every file git records as `100755`, were listed in
+both directions. The two sets now match exactly at six shell scripts. `qa/controls_v542.sh` was the
+last gap and is fixed.
+
+⚠ **That file is the SOURCE-level control harness — the other half of §B2, and the more important
+half.** `package_check_controls.sh` verifies delivery; `controls_v542.sh` verifies that the suite can
+see defects at all, by reverting fixes in the source and requiring the suite to fail. It is pinned to
+`SRC=v542.jsx` and the repo is at v5.47, so **it aborts and cannot run** — five releases stale, with
+no newer harness anywhere in the repo. It fails correctly, loudly and non-zero, which is why this is
+staleness rather than breakage. Re-pointing it is real work: its sixteen controls each revert a
+specific v5.42-era expression, and v5.43–v5.47 rewrote several of the sites they patch.
+
+One detail worth recording: `controls_v542.sh`'s own abort message reads *"found the hard way at
+v5.38: a stripped execute bit made every control read NOT CAUGHT."* **That is exactly the defect
+`package_check_controls.sh` carried until it was rewritten a day ago.** The project learned the
+lesson once, wrote it into one control script, and the other did not have it — for nine releases.
+Two files with the same job, one holding a lesson the other needed.
+
+### Tests
+
+No code changed, so no figure moves: **2,474 app checks, parity 10/10, tooling 90, 2,564 total**,
+unchanged and last verified from a committed tree at the parity ship.
+
 ## Unreleased — `qa/` only: the control harness that could not run, and eight rows the freshness table never had, 2026-08-23
 
 **No version bump, and no release.** Nothing under `src/` changed. Source throughout is v5.47,
