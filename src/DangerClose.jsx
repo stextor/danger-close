@@ -3279,8 +3279,8 @@ function GuidedWizard({ onDone, onCancel }) {
   const [stCode, setStCode] = useState("");
   const n = (v) => Math.max(0, Number(String(v).replace(/[$,\s]/g, "")) || 0);
   const steps = ["WHO", "WHEN", "MONEY", "INCOME", "SPENDING", "STATE & BUILD"];
-  const inp = { background: "var(--panel2)", border: "1px solid var(--line)", color: "var(--ink)", fontFamily: "'JetBrains Mono',monospace", fontSize: 11, padding: "8px 10px", borderRadius: 3, width: "100%", boxSizing: "border-box" };
-  const lbl = { fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5, display: "block", marginBottom: 3, marginTop: 10 };
+  const inp = { background: "var(--panel2)", border: "1px solid var(--line)", color: "var(--ink)", fontFamily: "'JetBrains Mono',monospace", fontSize: 12, padding: "8px 10px", borderRadius: 3, width: "100%", boxSizing: "border-box" };
+  const lbl = { fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5, display: "block", marginBottom: 3, marginTop: 10 };
   const canNext = step !== 2 || n(retTotal) > 0;
   const build = () => {
     const tot = n(retTotal);
@@ -3324,18 +3324,18 @@ function GuidedWizard({ onDone, onCancel }) {
     <div style={{ maxWidth: 560, margin: "0 auto" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
         <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 700, letterSpacing: 2 }}>🧭 GUIDED SETUP — STEP {step + 1} OF 6: {steps[step]}</div>
-        <button onClick={onCancel} style={{ background: "transparent", border: "none", color: "var(--ink-faint)", fontFamily: "inherit", fontSize: 9, cursor: "pointer" }}>✕ cancel</button>
+        <button onClick={onCancel} style={{ background: "transparent", border: "none", color: "var(--ink-faint)", fontFamily: "inherit", fontSize: 12, cursor: "pointer" }}>✕ cancel</button>
       </div>
       <div style={{ display: "flex", gap: 3, marginBottom: 14 }}>
         {steps.map((s, i) => <div key={s} style={{ flex: 1, height: 3, background: i <= step ? "var(--accent)" : "var(--line)" }} />)}
       </div>
       <div style={{ background: "var(--panel)", border: "1px solid var(--line)", borderRadius: 4, padding: 18 }}>
         {step === 0 && (<div>
-          <div style={{ fontSize: 9, color: "var(--ink-dim)", lineHeight: 1.6 }}>Rough answers are fine everywhere — everything is editable later on the My Data tab, and nothing leaves this browser.</div>
+          <div style={{ fontSize: 12, color: "var(--ink-dim)", lineHeight: 1.6 }}>Rough answers are fine everywhere — everything is editable later on the My Data tab, and nothing leaves this browser.</div>
           <label style={lbl} className="lbl">Planning for</label>
           <div style={{ display: "flex", gap: 8 }}>
             {[["couple", false], ["just me", true]].map(([t, v]) => (
-              <button key={t} onClick={() => setSingle(v)} style={{ flex: 1, padding: "9px 0", background: single === v ? "rgba(0,255,136,0.1)" : "transparent", border: `1px solid ${single === v ? "var(--accent)" : "var(--line)"}`, color: single === v ? "var(--accent)" : "var(--ink-dim)", fontFamily: "inherit", fontSize: 10, fontWeight: 600, cursor: "pointer", borderRadius: 3, letterSpacing: 1 }}>{t.toUpperCase()}</button>
+              <button key={t} onClick={() => setSingle(v)} style={{ flex: 1, padding: "9px 0", background: single === v ? "rgba(0,255,136,0.1)" : "transparent", border: `1px solid ${single === v ? "var(--accent)" : "var(--line)"}`, color: single === v ? "var(--accent)" : "var(--ink-dim)", fontFamily: "inherit", fontSize: 11, fontWeight: 600, cursor: "pointer", borderRadius: 3, letterSpacing: 1 }}>{t.toUpperCase()}</button>
             ))}
           </div>
           <div style={{ display: "grid", gridTemplateColumns: single ? "1fr" : "1fr 1fr", gap: 10 }}>
@@ -3351,7 +3351,7 @@ function GuidedWizard({ onDone, onCancel }) {
             <div><label style={lbl}>PLAN-TO AGE{single ? "" : " — YOU"} (a 50/50 guess is fine)</label><input style={inp} type="number" value={leA} onChange={e => setLeA(e.target.value)} /></div>
             {!single && <div><label style={lbl} className="lbl">Plan-to age — spouse</label><input style={inp} type="number" value={leB} onChange={e => setLeB(e.target.value)} /></div>}
           </div>
-          <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 8, lineHeight: 1.5 }}>The Monte Carlo tab can later treat these as the <em>median</em> of a real mortality curve — one toggle.</div>
+          <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 8, lineHeight: 1.5 }}>The Monte Carlo tab can later treat these as the <em>median</em> of a real mortality curve — one toggle.</div>
         </div>)}
         {step === 2 && (<div>
           <div><label style={lbl}>ALL RETIREMENT ACCOUNTS COMBINED (401k / IRA / Roth, both of you)</label><input inputMode="decimal" style={inp} value={retTotal} onChange={e => setRetTotal(e.target.value)} placeholder="e.g. 900,000" /></div>
@@ -3375,7 +3375,7 @@ function GuidedWizard({ onDone, onCancel }) {
           </div>
           <div><label style={lbl}>PENSION, IF ANY ($/mo household — 0 if none)</label><input inputMode="decimal" style={inp} value={pension} onChange={e => setPension(e.target.value)} placeholder="0" />
             {Number(String(pension).replace(/[^0-9.]/g, "")) > 25000 && (
-              <div style={{ marginTop: 4, fontSize: 9, color: "var(--warn)", lineHeight: 1.5 }}>⚠ Monthly amount — a lump-sum pension goes in Holdings (rolled over) or Other Accounts (cash), not here.</div>
+              <div style={{ marginTop: 4, fontSize: 12, color: "var(--warn)", lineHeight: 1.5 }}>⚠ Monthly amount — a lump-sum pension goes in Holdings (rolled over) or Other Accounts (cash), not here.</div>
             )}</div>
         </div>)}
         {step === 4 && (<div>
@@ -3383,7 +3383,7 @@ function GuidedWizard({ onDone, onCancel }) {
             <div><label style={lbl}>SPENDING TODAY ($/mo, all-in)</label><input inputMode="decimal" style={inp} value={spendPre} onChange={e => setSpendPre(e.target.value)} placeholder="e.g. 7,500" /></div>
             <div><label style={lbl}>EXPECTED SPENDING IN RETIREMENT ($/mo)</label><input inputMode="decimal" style={inp} value={spendPost} onChange={e => setSpendPost(e.target.value)} placeholder="e.g. 7,000" /></div>
           </div>
-          <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 8, lineHeight: 1.5 }}>One honest number beats ten precise guesses. The Expenses tab can split this into categories and time windows whenever you're ready.</div>
+          <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 8, lineHeight: 1.5 }}>One honest number beats ten precise guesses. The Expenses tab can split this into categories and time windows whenever you're ready.</div>
         </div>)}
         {step === 5 && (<div>
           <div><label style={lbl}>STATE OF RESIDENCE (drives the state-tax model)</label>
@@ -3392,17 +3392,17 @@ function GuidedWizard({ onDone, onCancel }) {
               {Object.entries(STATE_RULES).map(([c, r]) => <option key={c} value={c}>{r.name}{r.rate === 0 ? " (no income tax)" : ""}</option>)}
             </select>
           </div>
-          <div style={{ marginTop: 12, padding: 10, background: "rgba(0,255,136,0.04)", border: "1px solid var(--line)", fontSize: 9, color: "var(--ink)", lineHeight: 1.7 }}>
-            <div style={{ fontSize: 8, color: "var(--accent)", letterSpacing: 0.5, marginBottom: 4 }} className="lbl">Review</div>
+          <div style={{ marginTop: 12, padding: 10, background: "rgba(0,255,136,0.04)", border: "1px solid var(--line)", fontSize: 12, color: "var(--ink)", lineHeight: 1.7 }}>
+            <div style={{ fontSize: 11, color: "var(--accent)", letterSpacing: 0.5, marginBottom: 4 }} className="lbl">Review</div>
             {single ? (nA || "You") : `${nA || "You"} & ${nB || "spouse"}`} · retire {retY} · ${n(retTotal).toLocaleString()} retirement (${n(rothAmt).toLocaleString()} Roth) + ${n(outside).toLocaleString()} outside · SS ${n(ssAmtA).toLocaleString()}/mo @{ssAgeA}{single ? "" : ` + ${n(ssAmtB).toLocaleString()}/mo @${ssAgeB}`} · spend ${(n(spendPost) || n(spendPre)).toLocaleString()}/mo in retirement{stCode ? ` · ${STATE_RULES[stCode].name}` : ""}
           </div>
-          <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 8, lineHeight: 1.5 }}>Building starts you in <strong>SIMPLE MODE</strong> — six core tabs. The SHOW ALL TABS switch is always one click away, and every number here is editable on My Data.</div>
+          <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 8, lineHeight: 1.5 }}>Building starts you in <strong>SIMPLE MODE</strong> — six core tabs. The SHOW ALL TABS switch is always one click away, and every number here is editable on My Data.</div>
         </div>)}
         <div style={{ display: "flex", justifyContent: "space-between", marginTop: 16 }}>
-          <button onClick={() => (step === 0 ? onCancel() : setStep(step - 1))} style={{ background: "transparent", border: "1px solid var(--line)", color: "var(--ink-dim)", fontFamily: "inherit", fontSize: 10, padding: "8px 16px", cursor: "pointer", borderRadius: 3, letterSpacing: 1 }}>◀ {step === 0 ? "BACK TO START" : "BACK"}</button>
+          <button onClick={() => (step === 0 ? onCancel() : setStep(step - 1))} style={{ background: "transparent", border: "1px solid var(--line)", color: "var(--ink-dim)", fontFamily: "inherit", fontSize: 11, padding: "8px 16px", cursor: "pointer", borderRadius: 3, letterSpacing: 1 }}>◀ {step === 0 ? "BACK TO START" : "BACK"}</button>
           {step < 5
-            ? <button onClick={() => canNext && setStep(step + 1)} disabled={!canNext} style={{ background: canNext ? "rgba(0,255,136,0.1)" : "transparent", border: "1px solid var(--accent)", color: "var(--accent)", fontFamily: "inherit", fontSize: 10, fontWeight: 700, padding: "8px 20px", cursor: canNext ? "pointer" : "not-allowed", opacity: canNext ? 1 : 0.4, borderRadius: 3, letterSpacing: 1 }}>NEXT ▶</button>
-            : <button onClick={build} style={{ background: "rgba(0,255,136,0.12)", border: "1px solid var(--accent)", color: "var(--accent)", fontFamily: "inherit", fontSize: 10, fontWeight: 700, padding: "8px 20px", cursor: "pointer", borderRadius: 3, letterSpacing: 1 }}>▶ BUILD MY PLAN</button>}
+            ? <button onClick={() => canNext && setStep(step + 1)} disabled={!canNext} style={{ background: canNext ? "rgba(0,255,136,0.1)" : "transparent", border: "1px solid var(--accent)", color: "var(--accent)", fontFamily: "inherit", fontSize: 11, fontWeight: 700, padding: "8px 20px", cursor: canNext ? "pointer" : "not-allowed", opacity: canNext ? 1 : 0.4, borderRadius: 3, letterSpacing: 1 }}>NEXT ▶</button>
+            : <button onClick={build} style={{ background: "rgba(0,255,136,0.12)", border: "1px solid var(--accent)", color: "var(--accent)", fontFamily: "inherit", fontSize: 11, fontWeight: 700, padding: "8px 20px", cursor: "pointer", borderRadius: 3, letterSpacing: 1 }}>▶ BUILD MY PLAN</button>}
         </div>
       </div>
     </div>
@@ -3528,15 +3528,15 @@ function DataLoader({ onLoaded, hasData }) {
       <style>{`@keyframes pulse-ring { 0% { transform: translate(-50%,-50%) scale(1); opacity: 0.4; } 100% { transform: translate(-50%,-50%) scale(2); opacity: 0; } }`}</style>
       <div style={{ maxWidth: 720, margin: "0 auto" }}>
         <div style={{ fontSize: 18, fontWeight: 700, color: "var(--accent)", letterSpacing: 3, marginBottom: 4 }} className="lbl">DANGER CLOSE</div>
-        <div style={{ fontSize: 10, color: "var(--ink-faint)", letterSpacing: 2, marginBottom: 24 }}>DATA LOAD │ v5.47</div>
+        <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 2, marginBottom: 24 }}>DATA LOAD │ v5.48</div>
 
         <div style={{ border: "1px solid var(--line)", padding: 18, marginBottom: 20, background: "rgba(0,255,136,0.02)" }}>
-          <div style={{ fontSize: 10, color: "var(--ink)", lineHeight: 1.8 }}>
+          <div style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.8 }}>
             Two ways in: <strong style={{ color: "var(--accent)" }}>start fresh</strong> and type your data into the My Data tab, or <strong style={{ color: "var(--info)" }}>restore a backup</strong> you exported earlier. Everything you enter is cached locally, so you won't be asked again next session. (You can also load the built-in example household to explore the app.) Hard on the eyes? Once you're in, the <strong style={{ color: "var(--info)" }}>Skins</strong> tab has seven themes — including light paper — and a UI size control.
           </div>
         </div>
 
-        {error && <div style={{ color: "var(--crit)", fontSize: 10, marginBottom: 12 }}>ERROR: {error}</div>}
+        {error && <div style={{ color: "var(--crit)", fontSize: 12, marginBottom: 12 }}>ERROR: {error}</div>}
 
         <div style={{ display: "flex", gap: 10, justifyContent: "space-between", alignItems: "center", marginTop: 20, flexWrap: "wrap" }}>
           <div style={{ display: "flex", gap: 10 }}>
@@ -3545,14 +3545,14 @@ function DataLoader({ onLoaded, hasData }) {
               onClick={startFresh}
               style={{
                 background: "rgba(0,255,136,0.12)", border: "1px solid var(--accent)", color: "var(--accent)",
-                padding: "10px 16px", fontSize: 10, cursor: "pointer", fontFamily: "inherit", letterSpacing: 1, fontWeight: 600,
+                padding: "10px 16px", fontSize: 11, cursor: "pointer", fontFamily: "inherit", letterSpacing: 1, fontWeight: 600,
               }}
             >
               ✏ START FRESH — ENTER MY OWN DATA
             </button>
             <label style={{
               background: "transparent", border: "1px solid var(--info)", color: "var(--info)",
-              padding: "10px 16px", fontSize: 10, cursor: "pointer", fontFamily: "inherit", letterSpacing: 1, display: "inline-block",
+              padding: "10px 16px", fontSize: 11, cursor: "pointer", fontFamily: "inherit", letterSpacing: 1, display: "inline-block",
             }}>
               ↑ RESTORE FROM BACKUP
               <input type="file" accept="application/json,.json" style={{ display: "none" }}
@@ -3564,7 +3564,7 @@ function DataLoader({ onLoaded, hasData }) {
             onClick={() => setShowWizard(true)}
             style={{
               background: "rgba(0,255,136,0.1)", border: "1px solid var(--accent)", color: "var(--accent)",
-              padding: "10px 16px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", letterSpacing: 1,
+              padding: "10px 16px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", letterSpacing: 1,
             }}
           >
             🧭 GUIDED SETUP — BUILD MY OWN PLAN (3 MIN)
@@ -3574,14 +3574,14 @@ function DataLoader({ onLoaded, hasData }) {
             onClick={() => applyAndContinue(true)}
             style={{
               background: "var(--panel2)", border: "1px solid var(--ink-dim)", color: "var(--ink)",
-              padding: "10px 16px", fontSize: 10, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", letterSpacing: 1,
+              padding: "10px 16px", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", letterSpacing: 1,
             }}
           >
             {busy ? "LOADING..." : "USE EXAMPLE DATA"}
           </button>
         </div>
 
-        <div style={{ fontSize: 10, color: "var(--ink)", marginTop: 32, textAlign: "center", lineHeight: 1.8 }}>
+        <div style={{ fontSize: 12, color: "var(--ink)", marginTop: 32, textAlign: "center", lineHeight: 1.8 }}>
           No account, never shared. Everything you enter auto-saves privately in this browser on this device (clearing site data or switching browsers/devices erases it). The only time your data leaves this device is when you press ASK on the Ask AI tab — it sends the AI service a summary of your plan (totals, allocations, spending, income, settings, and projection results) plus your question and any files you attach, and only then.<br />
           Once you're in, use the Export / Import Backup buttons on the My Data tab to save or restore your plan.
         </div>
@@ -3590,7 +3590,7 @@ function DataLoader({ onLoaded, hasData }) {
   );
 }
 
-const DOCS_HTML = "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>Danger Close — Field Manual</title>\n<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n<link href=\"https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Spline+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap\" rel=\"stylesheet\">\n<style>\n  :root{\n    --bg:#070b09; --bg2:#0b130f; --panel:#0d1611; --panel2:#101c15;\n    --line:#1a3a2a; --line2:#27513a;\n    --green:#00ff88; --green-dim:#3a7a5a; --amber:#ffaa00; --red:#ff4444; --cyan:#00ccff; --violet:#aa66ff; --orange:#ff6600;\n    --ink:#c0d8cc; --ink-dim:#6a8a7a; --ink-faint:#3a7a5a;\n    --mono:'JetBrains Mono',monospace; --disp:'Chakra Petch',sans-serif; --body:'Spline Sans',sans-serif;\n  }\n  *{box-sizing:border-box}\n  html{scroll-behavior:smooth}\n  body{\n    margin:0; background:#070b09; color:var(--ink); font-family:var(--body); font-size:15px; line-height:1.7;\n    background-image:\n      radial-gradient(circle at 15% 10%, rgba(0,255,136,0.05), transparent 40%),\n      radial-gradient(circle at 85% 90%, rgba(0,204,255,0.04), transparent 45%),\n      repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,136,0.012) 3px, transparent 4px);\n  }\n  a{color:var(--cyan); text-decoration:none}\n  a:hover{text-decoration:underline}\n  .wrap{max-width:1000px; margin:0 auto; padding:0 22px}\n\n  /* ── HERO ── */\n  header.hero{\n    position:relative; padding:70px 0 46px; border-bottom:1px solid var(--line); overflow:hidden;\n    background:linear-gradient(180deg, rgba(0,255,136,0.04), transparent);\n  }\n  .reticle{position:absolute; top:50%; right:-60px; transform:translateY(-50%); width:340px; height:340px; opacity:.13; pointer-events:none}\n  .callsign{font-family:var(--mono); font-size:11px; letter-spacing:5px; color:var(--green-dim); margin-bottom:14px}\n  .byline{position:absolute; top:18px; right:22px; z-index:3; font-family:var(--mono); font-size:11px; letter-spacing:2px; color:var(--green-dim)}\n  h1{font-family:var(--disp); font-weight:700; font-size:62px; line-height:.95; margin:0 0 8px; letter-spacing:1px;\n     color:var(--green); text-shadow:0 0 30px rgba(0,255,136,0.25)}\n  h1 .lo{color:var(--ink); display:block; font-size:20px; letter-spacing:8px; font-weight:500; margin-top:12px}\n  .tagline{font-size:17px; color:var(--ink-dim); max-width:620px; margin-top:18px}\n  .meta-strip{display:flex; gap:26px; flex-wrap:wrap; margin-top:26px; font-family:var(--mono); font-size:11px; color:var(--green-dim)}\n  .meta-strip b{color:var(--ink); font-weight:500}\n\n  /* ── SECTION ── */\n  section{padding:46px 0; border-bottom:1px solid var(--line)}\n  h2{font-family:var(--disp); font-weight:600; font-size:30px; color:var(--green); margin:0 0 6px; letter-spacing:.5px;\n     display:flex; flex-wrap:wrap; align-items:center; gap:12px}\n  h2 .num{font-family:var(--mono); font-size:13px; color:var(--green-dim); border:1px solid var(--line2); padding:3px 8px; border-radius:3px}\n  h3{font-family:var(--disp); font-weight:600; font-size:20px; color:var(--ink); margin:30px 0 8px; letter-spacing:.3px}\n  h4{font-family:var(--disp); font-weight:600; font-size:15px; color:var(--amber); margin:18px 0 4px; letter-spacing:.5px; text-transform:uppercase}\n  p{margin:10px 0}\n  .lead{font-size:16px; color:var(--ink)}\n  strong{color:#e6f4ec; font-weight:600}\n  em{color:var(--ink-dim)}\n  code{font-family:var(--mono); font-size:.86em; background:rgba(0,255,136,0.07); border:1px solid var(--line); padding:1px 6px; border-radius:3px; color:var(--green)}\n\n  /* ── CARDS / HUD ── */\n  .card{position:relative; background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:20px 22px; margin:16px 0}\n  .card::before,.card::after{content:\"\"; position:absolute; width:10px; height:10px; border:1.5px solid var(--green-dim)}\n  .card::before{top:-1px; left:-1px; border-right:0; border-bottom:0}\n  .card::after{bottom:-1px; right:-1px; border-left:0; border-top:0}\n  .danger{border-color:var(--red); background:linear-gradient(180deg, rgba(255,68,68,0.07), rgba(255,68,68,0.02))}\n  .danger::before,.danger::after{border-color:var(--red)}\n  .danger h3{color:var(--red)}\n  .note{border-left:3px solid var(--green); background:rgba(0,255,136,0.04); padding:14px 18px; margin:16px 0; border-radius:0 4px 4px 0}\n  .warn{border-left:3px solid var(--amber); background:rgba(255,170,0,0.05)}\n  .crit{border-left:3px solid var(--red); background:rgba(255,68,68,0.05)}\n\n  ul,ol{margin:10px 0; padding-left:22px}\n  li{margin:6px 0}\n  ul.tight li{margin:3px 0}\n\n  /* ── TABLES ── */\n  table{width:100%; border-collapse:collapse; margin:16px 0; font-size:13.5px}\n  th{font-family:var(--mono); font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--ink-dim);\n     text-align:left; padding:9px 11px; background:rgba(0,255,136,0.05); border:1px solid var(--line)}\n  td{padding:9px 11px; border:1px solid var(--line); vertical-align:top; color:var(--ink)}\n  tr:nth-child(even) td{background:rgba(255,255,255,0.012)}\n\n  /* ── TOC ── */\n  .toc{columns:2; column-gap:40px; font-family:var(--mono); font-size:13px}\n  .toc a{display:block; padding:5px 0; color:var(--ink-dim); border-bottom:1px dotted var(--line)}\n  .toc a:hover{color:var(--green); text-decoration:none}\n  .toc .sub{padding-left:18px; font-size:12px}\n\n  /* ── BACK-TO-TOC LINK (sits at the right of every section heading) ── */\n  h2 .toclink{margin-left:auto; font-family:var(--mono); font-size:10px; font-weight:400; letter-spacing:1px;\n    color:var(--ink-faint); border:1px solid var(--line2); padding:5px 10px; border-radius:3px; text-transform:uppercase; white-space:nowrap}\n  h2 .toclink:hover{color:var(--green); border-color:var(--green-dim); background:rgba(0,255,136,0.05); text-decoration:none}\n  .totop-foot{display:inline-block; margin-top:20px; font-family:var(--mono); font-size:11px; letter-spacing:1px;\n    color:var(--ink-faint); border:1px solid var(--line2); padding:7px 13px; border-radius:3px; text-transform:uppercase}\n  .totop-foot:hover{color:var(--green); border-color:var(--green-dim); background:rgba(0,255,136,0.05); text-decoration:none}\n\n  /* ── PLAIN-ENGLISH CALLOUT (for readers who aren't finance pros) ── */\n  .plain{border-left:3px solid var(--cyan); background:rgba(0,204,255,0.05); padding:14px 18px; margin:18px 0; border-radius:0 4px 4px 0}\n  .plain .lbl{display:block; font-family:var(--mono); font-size:10px; letter-spacing:2px; color:var(--cyan); text-transform:uppercase; margin-bottom:7px}\n  .plain p{margin:6px 0}\n  .plain .analogy{color:var(--ink-dim); font-style:italic}\n\n  /* ── TAB MAP ── */\n  .tabmap{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin:20px 0}\n  .tabgroup{border:1px solid var(--line); border-radius:4px; padding:14px; background:var(--panel)}\n  .tabgroup .glabel{font-family:var(--mono); font-size:10px; letter-spacing:2px; text-transform:uppercase; margin-bottom:10px; padding-bottom:6px; border-bottom:1px solid var(--line)}\n  .tabchip{display:block; font-family:var(--disp); font-size:13px; padding:5px 9px; margin:5px 0; border-radius:3px;\n           background:rgba(255,255,255,0.02); border-left:2px solid; color:var(--ink)}\n\n  /* ── TAB ENTRIES ── */\n  .tabentry{border:1px solid var(--line); border-radius:4px; margin:14px 0; padding:16px 20px; background:var(--panel)}\n  .tabentry h3{margin:0 0 4px; display:flex; align-items:center; gap:10px}\n  .tabentry h3 .tag{font-family:var(--mono); font-size:9px; letter-spacing:1px; padding:2px 7px; border-radius:3px; text-transform:uppercase}\n  .tabentry .purpose{color:var(--green); font-size:14px; margin:0 0 10px}\n  .tabentry .micro{font-family:var(--mono); font-size:11px; color:var(--ink-faint); margin-top:8px}\n\n  .pillrow{display:flex; gap:8px; flex-wrap:wrap; margin:8px 0}\n  .pill{font-family:var(--mono); font-size:10px; letter-spacing:.5px; padding:3px 9px; border:1px solid var(--line2); border-radius:20px; color:var(--ink-dim)}\n\n  figure{margin:24px 0; text-align:center}\n  figure svg{max-width:100%; height:auto}\n  figcaption{font-family:var(--mono); font-size:11px; color:var(--ink-faint); margin-top:8px; letter-spacing:.5px}\n\n  .glossary{column-count:2; column-gap:34px; font-size:13px}\n  .glossary .term{break-inside:avoid; margin:0 0 11px}\n  .glossary .term b{font-family:var(--disp); color:var(--green); font-weight:600}\n  @media(max-width:760px){ h1{font-size:42px} .toc,.glossary{column-count:1} .reticle{display:none} }\n\n  footer{padding:40px 0 60px; color:var(--ink-faint); font-size:12px; font-family:var(--mono)}\n  .kicker{font-family:var(--mono); font-size:11px; letter-spacing:3px; color:var(--green-dim); text-transform:uppercase; margin-bottom:4px}\n</style>\n</head>\n<body>\n\n<header class=\"hero\">\n  <div class=\"byline\">Steve T. · built with AI assistance, constants verified against IRS/CMS/SSA · 2026 · not financial advice</div>\n  <svg class=\"reticle\" viewBox=\"0 0 200 200\" fill=\"none\" stroke=\"#00ff88\" stroke-width=\"1\">\n    <circle cx=\"100\" cy=\"100\" r=\"90\"/><circle cx=\"100\" cy=\"100\" r=\"60\"/><circle cx=\"100\" cy=\"100\" r=\"30\"/>\n    <line x1=\"100\" y1=\"0\" x2=\"100\" y2=\"200\"/><line x1=\"0\" y1=\"100\" x2=\"200\" y2=\"100\"/>\n    <circle cx=\"100\" cy=\"100\" r=\"4\" fill=\"#00ff88\"/>\n  </svg>\n  <div class=\"wrap\">\n    <div class=\"callsign\">// FIELD MANUAL · v5.47 · PUBLIC BUILD</div>\n    <h1>DANGER CLOSE<span class=\"lo\">RETIREMENT STRESS-TEST CONSOLE</span></h1>\n    <p class=\"tagline\">A single-page tool that runs Monte Carlo simulations, historical backtests, and stress tests against your own portfolio — built to pressure-test a real retirement plan when the stakes are highest.</p>\n    <div class=\"meta-strip\">\n      <span>STATUS · <b>OPERATIONAL</b></span>\n      <span>TABS · <b>26</b></span>\n      <span>ENGINE · <b>REGIME-SWITCHING MC</b></span>\n      <span>DATA · <b>LOCAL / IN-BROWSER</b></span>\n    </div>\n  </div>\n</header>\n\n<!-- DISCLAIMER -->\n<section>\n  <div class=\"wrap\">\n    <div class=\"card danger\">\n      <h3>⚠ READ BEFORE USING — THIS IS NOT FINANCIAL ADVICE</h3>\n      <p>This software is provided for <strong>educational and entertainment purposes only</strong>. It is not financial, investment, tax, or legal advice.</p>\n      <ul class=\"tight\">\n        <li><strong>The author has no professional financial credentials</strong> — not a CFP, CFA, CPA, Enrolled Agent, or attorney, and has no formal training in finance, tax, or investment management. This is an amateur hobby project.</li>\n        <li><strong>Do not rely on this app to make any financial decision.</strong> Every projection is an estimate from simplified models that may contain bugs, errors, or omissions. Real markets, tax law, and life will differ — possibly by a lot.</li>\n        <li><strong>No fiduciary relationship, no warranty, no liability.</strong> The software is provided \"AS IS.\" You are responsible for your own decisions.</li>\n        <li><strong>Past performance does not predict the future.</strong> Real outcomes can be materially worse than the worst case shown.</li>\n        <li>The embedded AI assistant can be confidently wrong. Tax and law assumptions go stale. Peer rankings are approximate.</li>\n      </ul>\n      <p style=\"margin-bottom:0\">Before acting on anything here, consult a fee-only fiduciary advisor, a CPA, and an estate attorney, and verify every number against authoritative sources (IRS, SSA, your custodian). See the <a href=\"#final\">Final Disclaimer</a>.</p>\n    </div>\n  </div>\n</section>\n\n<!-- TOC -->\n<section id=\"toc\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">00</span> Table of Contents</h2>\n    <div class=\"toc\">\n      <a href=\"#what\">01 · What Danger Close Does</a>\n      <a href=\"#flow\">02 · How Data Flows Through It</a>\n      <a href=\"#start\">03 · Getting Started</a>\n      <a href=\"#banner\">04 · The Data-Integrity Warning Banner</a>\n      <a href=\"#map\">05 · The 26 Tabs at a Glance</a>\n      <a href=\"#controls\">06 · Top-Level Controls &amp; Modeling Approach</a>\n      <a href=\"#tabs\">07 · The Tabs in Detail</a>\n      <a href=\"#g-foundation\" class=\"sub\">Foundation · Scoring</a>\n      <a href=\"#g-strategy\" class=\"sub\">Strategy · Testing · Tools</a>\n      <a href=\"#xlsx\">08 · Entering Your Data (My Data tab)</a>\n      <a href=\"#docx\">09 · The Master Prompt &amp; AI Context</a>\n      <a href=\"#apikey\">10 · Ask AI &amp; Your API Key (Self-Hosted Copies)</a>\n      <a href=\"#reload\">11 · Reloading &amp; Resetting</a>\n      <a href=\"#hsa\">12 · HSA Contributions &amp; the Medicare Cutoff</a>\n      <a href=\"#limits\">13 · Limitations &amp; Known Issues</a>\n      <a href=\"#faq\">14 · Troubleshooting &amp; FAQ</a>\n      <a href=\"#glossary\">15 · Glossary</a>\n      <a href=\"#final\">16 · Final Disclaimer</a>\n    </div>\n  </div>\n</section>\n\n<!-- WHAT IT DOES -->\n<section id=\"what\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">01</span> What Danger Close Does <a class=\"toclink\" href=\"#toc\">↑ Contents</a></h2>\n    <div class=\"plain\">\n      <span class=\"lbl\">In plain English — start here</span>\n      <p>Picture your retirement as one long road trip where nobody can tell you the weather ahead of time. <strong>This app drives that whole trip thousands of times.</strong> Some runs get sunshine (strong markets); some hit storms (a crash, years of high inflation, a long illness). Each run, it checks whether you still have money when the trip ends.</p>\n      <p class=\"analogy\">So when you see \"success rate 90%,\" it means: across 10,000 imagined futures, your savings lasted in about 9,000 of them. Think of it as a weather forecast for your money — useful odds, never a promise.</p>\n    </div>\n    <p class=\"lead\">At its core, the app does six things, all locally in your browser:</p>\n    <ol>\n      <li><strong>Holds your portfolio and household context</strong> — positions, balances, Roth/Traditional split, asset classes, names, DOBs, Social Security, pension, housing, goals — which you type into the <strong>My Data</strong> tab or restore from a saved backup file.</li>\n      <li><strong>Runs Monte Carlo simulations</strong> at the asset-class level using six probability-weighted economic regimes (base, optimistic, pessimistic, recession, stagflation, crisis) at 5,000–10,000 iterations.</li>\n      <li><strong>Models the retirement transition</strong> quarter-by-quarter through year 30 — Social Security claiming, pension start, Roth conversions, home sale and cash purchase, Medicare and the ACA bridge, and long-term care.</li>\n      <li><strong>Builds a withdrawal schedule</strong> — a year-by-year plan of which account funds each year's spending, with account-priority sequencing.</li>\n      <li><strong>Stress-tests the plan</strong> against named adverse scenarios and reverse-solves for the break-points.</li>\n      <li><strong>Provides an Ask AI tab</strong> that sends a structured summary to an AI assistant for natural-language follow-up.</li>\n    </ol>\n    <div class=\"note\">This tool assumes you already have a retirement plan and want to pressure-test it. It is <em>not</em> a \"what is a 401(k)\" tool. Nothing is uploaded to any server except the calls you explicitly send from the Ask AI tab.</div>\n    <figure>\n      <svg viewBox=\"0 0 760 285\" font-family=\"'JetBrains Mono',monospace\">\n        <line x1=\"70\" y1=\"30\" x2=\"70\" y2=\"230\" stroke=\"#1a3a2a\"/>\n        <line x1=\"70\" y1=\"230\" x2=\"660\" y2=\"230\" stroke=\"#1a3a2a\"/>\n        <text x=\"62\" y=\"36\" fill=\"#6a8a7a\" font-size=\"10\" text-anchor=\"end\">MONEY</text>\n        <text x=\"70\" y=\"250\" fill=\"#6a8a7a\" font-size=\"10\">RETIRE</text>\n        <text x=\"660\" y=\"250\" fill=\"#6a8a7a\" font-size=\"10\" text-anchor=\"end\">END OF PLAN</text>\n        <line x1=\"70\" y1=\"185\" x2=\"660\" y2=\"185\" stroke=\"#27513a\" stroke-dasharray=\"4 4\"/>\n        <text x=\"664\" y=\"189\" fill=\"#6a8a7a\" font-size=\"9\">\"not broke\" line</text>\n        <path d=\"M70,150 C240,135 400,108 660,82\" fill=\"none\" stroke=\"#3a7a5a\" stroke-width=\"1\" opacity=\"0.55\"/>\n        <path d=\"M70,150 C240,158 400,168 660,150\" fill=\"none\" stroke=\"#3a7a5a\" stroke-width=\"1\" opacity=\"0.55\"/>\n        <path d=\"M70,150 C240,166 400,192 645,228\" fill=\"none\" stroke=\"#7a3a3a\" stroke-width=\"1\" opacity=\"0.55\"/>\n        <path d=\"M70,150 C220,120 360,80 660,46\" fill=\"none\" stroke=\"#00ff88\" stroke-width=\"2\"/>\n        <text x=\"664\" y=\"49\" fill=\"#00ff88\" font-size=\"9\">good markets</text>\n        <path d=\"M70,150 C240,150 420,138 660,120\" fill=\"none\" stroke=\"#ffaa00\" stroke-width=\"2\"/>\n        <text x=\"664\" y=\"123\" fill=\"#ffaa00\" font-size=\"9\">typical</text>\n        <path d=\"M70,150 C210,176 360,206 545,229\" fill=\"none\" stroke=\"#ff4444\" stroke-width=\"2\"/>\n        <text x=\"540\" y=\"221\" fill=\"#ff4444\" font-size=\"9\" text-anchor=\"end\">runs out ✗</text>\n        <text x=\"365\" y=\"278\" fill=\"#6a8a7a\" font-size=\"10\" text-anchor=\"middle\">one starting portfolio · 10,000 different futures · success = the share that finish above the line</text>\n      </svg>\n      <figcaption>FIG.0 — WHAT A \"MONTE CARLO\" ACTUALLY DOES</figcaption>\n    </figure>\n    <div class=\"note\">\n      <strong>Why \"Danger Close\"?</strong> In artillery, <em>danger close</em> is the call that supporting fire is landing near your own position — the moment that demands maximum precision because the stakes are highest. That's the metaphor, and the whole reason this tool exists: the years surrounding retirement are when a financial mistake lands closest to home, and the math deserves artillery-grade care. To be clear about the styling: the author is a civilian, has never served in the military, and claims no service — the name and the console aesthetic are a design theme borrowed with respect for what the term means.\n    </div>\n  \n    <h3>What's new — v5.22 through v5.28</h3>\n    <p>The current build is named in the header at the top of this manual and in the app footer; this section lists what the last several releases changed, newest first.</p>\n    <p><em>v5.28:</em> this manual corrected in three places — the Withdrawal Strategy entry now names the Other-accounts pot as Priority 1 and describes how it is taxed, §13 gains the five Other-accounts simplifications, and this section replaces one that still announced v5.7 as the current build.</p>\n    <p><em>v5.27:</em> a statement in this manual that v5.26 had made false — that Other accounts are spent tax-free and generate no RMD — removed. The engines were correct throughout; only the manual was wrong.</p>\n    <p><em>v5.26 — the one that moved figures:</em> <strong>Other accounts are now taxed according to their type.</strong> Traditional and Annuity balances are ordinary income as they are spent and Traditional balances count toward RMDs, where previously the whole pot was spent as already-taxed cash even when what you entered there was an IRA. If your plan looked better before this release, that was the optimism v5.24 disclosed. A fifth tax type, <strong>Annuity</strong>, was added because a non-qualified annuity is taxed like pre-tax money but carries no required distribution. The Roth tab's funding check also stopped counting IRA money as cash available to pay conversion tax.</p>\n    <p><em>v5.25:</em> the tax-type field itself added to each Other-accounts row, recorded but not yet used, with a one-time review notice for plans that predated it. <em>v5.24:</em> disclosed, in the app, that the Withdrawal tab was optimistic about this money — the disclosure v5.26 acted on. <em>v5.22:</em> the taxable-residual calculation consolidated to a single definition.</p>\n    <p>Earlier: <em>v5.7 / v5.7.1</em> brought ACA premium-subsidy modelling on the Roth tab, a Guided Setup wizard, Simple Mode, the Dashboard tab, the 51-jurisdiction state-tax model, the Roth solve-for optimizer and conversion-tax funding model, Social Security breakeven cards and the joint claiming-age grid, Monte Carlo toggles for stochastic longevity and LTC duration, a first-class Other Income Streams module, an Offline Mode switch, and the data-vintage staleness system (§13). The Roth break-even was rebuilt as a wealth crossover computed by the full engine, with <em>does not break even</em> a possible answer.</p>\n</div>\n</section>\n\n<!-- DATA FLOW -->\n<section id=\"flow\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">02</span> How Data Flows Through It <a class=\"toclink\" href=\"#toc\">↑ Contents</a></h2>\n    <p>Everything starts from <strong>one in-memory model</strong> (<code>PORTFOLIO</code> + <code>PLAN_TIMELINE</code>), and every tab derives its numbers from that single source. You fill that model one of three ways: <strong>type your data</strong> into the My Data tab, <strong>restore a backup</strong> you exported earlier (a JSON file), or <strong>load the example household</strong> to explore. Whatever you enter is saved privately between visits so the app reopens to your plan, and you can export it to a JSON file to keep or move between devices. Nothing is ever shared, and the only transmission of plan data is the summary the <a href=\"#tabs\">Ask AI</a> tab sends when you explicitly ask a question.</p>\n    <div class=\"plain\">\n      <span class=\"lbl\">In plain English</span>\n      <p>There's no account and nothing to sign up for. The app keeps one private copy of your plan just for you. You either type it in or hand it a backup file you saved before — and everything else you see, every tab, chart, and score, is calculated from that one copy on the spot. Nobody else ever sees it; the only thing that transmits anything is the Ask AI tab, when you press ask.</p>\n    </div>\n    <figure>\n      <svg viewBox=\"0 0 920 360\" font-family=\"'JetBrains Mono',monospace\">\n        <defs>\n          <marker id=\"ar\" markerWidth=\"9\" markerHeight=\"9\" refX=\"7\" refY=\"4.5\" orient=\"auto\"><path d=\"M0,0 L9,4.5 L0,9 z\" fill=\"#3a7a5a\"/></marker>\n        </defs>\n        <rect x=\"20\" y=\"28\" width=\"214\" height=\"48\" rx=\"4\" fill=\"#0d1611\" stroke=\"#00ccff\"/>\n        <text x=\"127\" y=\"49\" fill=\"#00ccff\" font-size=\"12\" text-anchor=\"middle\">My Data tab</text>\n        <text x=\"127\" y=\"66\" fill=\"#6a8a7a\" font-size=\"9\" text-anchor=\"middle\">you type it in</text>\n        <rect x=\"20\" y=\"92\" width=\"214\" height=\"48\" rx=\"4\" fill=\"#0d1611\" stroke=\"#00ccff\"/>\n        <text x=\"127\" y=\"113\" fill=\"#00ccff\" font-size=\"12\" text-anchor=\"middle\">Restore backup</text>\n        <text x=\"127\" y=\"130\" fill=\"#6a8a7a\" font-size=\"9\" text-anchor=\"middle\">a .json file you saved</text>\n        <rect x=\"20\" y=\"156\" width=\"214\" height=\"48\" rx=\"4\" fill=\"#0d1611\" stroke=\"#27513a\"/>\n        <text x=\"127\" y=\"177\" fill=\"#c0d8cc\" font-size=\"12\" text-anchor=\"middle\">Example household</text>\n        <text x=\"127\" y=\"194\" fill=\"#6a8a7a\" font-size=\"9\" text-anchor=\"middle\">explore with demo data</text>\n        <rect x=\"340\" y=\"78\" width=\"200\" height=\"96\" rx=\"4\" fill=\"#101c15\" stroke=\"#00ff88\"/>\n        <text x=\"440\" y=\"110\" fill=\"#00ff88\" font-size=\"12\" text-anchor=\"middle\">PORTFOLIO +</text>\n        <text x=\"440\" y=\"127\" fill=\"#00ff88\" font-size=\"12\" text-anchor=\"middle\">PLAN_TIMELINE</text>\n        <text x=\"440\" y=\"148\" fill=\"#6a8a7a\" font-size=\"9\" text-anchor=\"middle\">one source of truth ·</text>\n        <text x=\"440\" y=\"161\" fill=\"#6a8a7a\" font-size=\"9\" text-anchor=\"middle\">derives all dates/ages</text>\n        <rect x=\"648\" y=\"78\" width=\"160\" height=\"96\" rx=\"4\" fill=\"#0d1611\" stroke=\"#27513a\"/>\n        <text x=\"728\" y=\"118\" fill=\"#c0d8cc\" font-size=\"13\" text-anchor=\"middle\">26 TABS</text>\n        <text x=\"728\" y=\"140\" fill=\"#6a8a7a\" font-size=\"9\" text-anchor=\"middle\">all read the</text>\n        <text x=\"728\" y=\"153\" fill=\"#6a8a7a\" font-size=\"9\" text-anchor=\"middle\">same model</text>\n        <line x1=\"234\" y1=\"52\" x2=\"338\" y2=\"108\" stroke=\"#3a7a5a\" marker-end=\"url(#ar)\"/>\n        <line x1=\"234\" y1=\"116\" x2=\"338\" y2=\"124\" stroke=\"#3a7a5a\" marker-end=\"url(#ar)\"/>\n        <line x1=\"234\" y1=\"180\" x2=\"338\" y2=\"142\" stroke=\"#3a7a5a\" marker-end=\"url(#ar)\"/>\n        <line x1=\"540\" y1=\"126\" x2=\"646\" y2=\"126\" stroke=\"#3a7a5a\" marker-end=\"url(#ar)\"/>\n        <rect x=\"300\" y=\"250\" width=\"448\" height=\"78\" rx=\"4\" fill=\"rgba(0,255,136,0.05)\" stroke=\"#27513a\" stroke-dasharray=\"4 3\"/>\n        <text x=\"524\" y=\"278\" fill=\"#00ff88\" font-size=\"11\" text-anchor=\"middle\">SAVED PRIVATELY · YOURS ALONE</text>\n        <text x=\"524\" y=\"298\" fill=\"#6a8a7a\" font-size=\"9\" text-anchor=\"middle\">reopens to your plan next visit · Export / Import a .json backup</text>\n        <text x=\"524\" y=\"313\" fill=\"#6a8a7a\" font-size=\"9\" text-anchor=\"middle\">to keep it or move between devices · never shared with anyone</text>\n        <line x1=\"440\" y1=\"174\" x2=\"440\" y2=\"248\" stroke=\"#27513a\" stroke-dasharray=\"4 3\" marker-end=\"url(#ar)\"/>\n      </svg>\n      <figcaption>FIG.1 — HOW YOUR DATA MOVES (TYPED OR RESTORED · STAYS PRIVATE)</figcaption>\n    </figure>\n    <p class=\"micro\" style=\"font-family:var(--mono);font-size:11px;color:var(--ink-faint)\">Because every tab derives from one model, the app is fully portable: load a different household and every visible number re-derives. Income figures route through single accessors, so there are no scattered hard-coded values.</p>\n  </div>\n</section>\n\n<!-- GETTING STARTED -->\n<section id=\"start\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">03</span> Getting Started <a class=\"toclink\" href=\"#toc\">↑ Contents</a></h2>\n    <p>All you need is a current browser. On first open you'll see the <strong>landing screen</strong>, which offers three ways to begin:</p>\n    <table>\n      <tr><th>Choice</th><th>What it does</th><th>Best for</th></tr>\n      <tr><td><strong>\ud83e\udded Guided Setup</strong></td><td>Six friendly questions (who, when, money, income, spending, state) build a complete working plan in about three minutes. Also launchable anytime from the My Data tab's 🧭 GUIDED SETUP button — building replaces the current plan; cancelling changes nothing — rough answers welcome, everything editable later in My Data. Finishing starts you in <strong>Simple Mode</strong> (below).</td><td>Your very first plan</td></tr>\n      <tr><td><strong>✏ Start Fresh</strong></td><td>Opens an empty plan; you type your household, holdings, income, and expenses into the My Data tab, then press <strong>Save &amp; Apply</strong>.</td><td>Your first real run</td></tr>\n      <tr><td><strong>↑ Restore from Backup</strong></td><td>Reads a <code>.json</code> backup you exported earlier and rebuilds every tab from it.</td><td>Returning, or new device</td></tr>\n      <tr><td><strong>Use Example Data</strong></td><td>Loads the built-in demo household so you can explore every tab with realistic numbers.</td><td>Kicking the tires</td></tr>\n    </table>\n    <p>After you Save &amp; Apply (or restore a backup), the app <strong>caches your plan in the browser</strong>, so the next visit skips the landing screen and reopens straight to your data. From the My Data tab you can <strong>Export Backup</strong> at any time to save a durable <code>.json</code> copy, and <strong>Clear All Data</strong> to wipe the cache and start over.</p>\n    <div class=\"note\"><strong>Export a backup regularly.</strong> The browser cache is convenient but not permanent — clearing browser data or switching devices loses it. The exported <code>.json</code> file is the durable copy; it carries your whole plan (holdings, income, expenses, the AI context, your estate checklist, and your chosen theme). Curious where your data actually lives — and how to prove the file itself stores nothing? <a href=\"#reload\">§11</a> includes tests you can run yourself.</div>\n  </div>\n</section>\n\n<!-- WARNING BANNER -->\n<section id=\"banner\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">04</span> The Data-Integrity Warning Banner <a class=\"toclink\" href=\"#toc\">↑ Contents</a></h2>\n    <p>To keep the app from quietly showing you someone else's numbers, it tracks where each income figure (Social Security, pension) came from. A banner appears at the top of every tab in two flavors — and understanding <em>when each one can fire</em> tells you how the protection actually works:</p>\n    <div class=\"card crit\" style=\"border-radius:4px\">\n      <h4 style=\"color:var(--red);margin-top:0\">⚠ WARNING — USING EXAMPLE NUMBERS, NOT YOUR DATA (red)</h4>\n      <p style=\"margin:6px 0\">Fires when your plan arrived <em>without income figures of its own</em> — typically an older backup, or a plan saved before the My Data income section existed — and the app had to substitute the demo household's numbers to keep the engines running. It names exactly which fields were substituted (e.g. \"Spouse B Social Security, Pension\") and includes a small diagnostics line showing what it looked for and what it found. Until you enter the real amounts in <strong>My Data → Income</strong> and press Save &amp; Apply, every projection that uses income — taxes, IRMAA, survivor, withdrawals — is unreliable.</p>\n    </div>\n    <div class=\"card warn\" style=\"border-radius:4px\">\n      <h4 style=\"color:var(--amber);margin-top:0\">ⓘ EXAMPLE DATA MODE (amber)</h4>\n      <p style=\"margin:6px 0\">The gentle version. Fires when you deliberately chose \"Use Example Data.\" All figures are illustrative placeholders; no alarm needed.</p>\n    </div>\n    <p><strong>What about income you simply haven't entered yet?</strong> That's the third case, and it works differently by design: an income field left blank in My Data is saved as an honest <strong>$0</strong> — the app never swaps a demo number in behind your form entries. A zero is your number, just probably not your <em>final</em> number, so instead of a banner you'll see it plainly as $0 on the Income tab and in the header's income floor. The red banner is reserved for the genuinely dangerous case: figures that <em>look</em> real but belong to the demo household.</p>\n    <p>When your own numbers are all in place, <strong>no banner appears</strong> — the check costs nothing day-to-day but flags instantly if a demo figure ever stands in for yours.</p>\n  </div>\n</section>\n\n<!-- TAB MAP -->\n<section id=\"map\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">05</span> The 26 Tabs at a Glance <a class=\"toclink\" href=\"#toc\">↑ Contents</a></h2>\n    <p>Tabs are grouped by function. Color marks the family; detail on each is in section <a href=\"#tabs\">07</a>. Feeling like 26 is a lot? The <strong>◑ SHOW FEWER TABS</strong> switch at the end of the tab strip turns on <strong>Simple Mode</strong> — just the six core tabs (My Data, Dashboard, Trajectory, Monte Carlo, SS, Docs) — and remembers your choice. Guided Setup starts new plans there automatically; the full set is always one click away.</p>\n    <div class=\"tabmap\">\n      <div class=\"tabgroup\">\n        <div class=\"glabel\" style=\"color:#00ccff\">FOUNDATION</div>\n        <span class=\"tabchip\" style=\"border-color:#00ccff\">Dashboard</span>\n        <span class=\"tabchip\" style=\"border-color:#00ccff\">My Data</span>\n        <span class=\"tabchip\" style=\"border-color:#00ccff\">Trajectory</span>\n        <span class=\"tabchip\" style=\"border-color:#00ccff\">Expenses</span>\n        <span class=\"tabchip\" style=\"border-color:#00ccff\">Income</span>\n        <span class=\"tabchip\" style=\"border-color:#00ccff\">SS</span>\n        <span class=\"tabchip\" style=\"border-color:#00ccff\">Positions</span>\n      </div>\n      <div class=\"tabgroup\">\n        <div class=\"glabel\" style=\"color:#aa66ff\">SCORING</div>\n        <span class=\"tabchip\" style=\"border-color:#aa66ff\">Grade</span>\n        <span class=\"tabchip\" style=\"border-color:#aa66ff\">Ranking</span>\n      </div>\n      <div class=\"tabgroup\">\n        <div class=\"glabel\" style=\"color:#ffaa00\">STRATEGY</div>\n        <span class=\"tabchip\" style=\"border-color:#ffaa00\">Guardrails</span>\n        <span class=\"tabchip\" style=\"border-color:#ffaa00\">Withdrawal</span>\n        <span class=\"tabchip\" style=\"border-color:#ffaa00\">Roth</span>\n        <span class=\"tabchip\" style=\"border-color:#ffaa00\">Taxes</span>\n        <span class=\"tabchip\" style=\"border-color:#ffaa00\">IRMAA</span>\n        <span class=\"tabchip\" style=\"border-color:#ffaa00\">Exit Plan</span>\n      </div>\n      <div class=\"tabgroup\">\n        <div class=\"glabel\" style=\"color:#ff6600\">TESTING</div>\n        <span class=\"tabchip\" style=\"border-color:#ff6600\">Monte Carlo</span>\n        <span class=\"tabchip\" style=\"border-color:#ff6600\">Backtest</span>\n        <span class=\"tabchip\" style=\"border-color:#ff6600\">What Breaks</span>\n        <span class=\"tabchip\" style=\"border-color:#ff6600\">Survivor</span>\n        <span class=\"tabchip\" style=\"border-color:#ff6600\">Stress</span>\n      </div>\n      <div class=\"tabgroup\">\n        <div class=\"glabel\" style=\"color:#ff4444\">TOOLS</div>\n        <span class=\"tabchip\" style=\"border-color:#ff4444\">Ask AI</span><span class='tabchip' style='border-color:#00ccff'>Checklist</span><span class='tabchip' style='border-color:#6a8a7a'>Skins</span><span class='tabchip' style='border-color:#6a8a7a'>Docs</span><span class='tabchip' style='border-color:#aa66ff'>Verify</span><span class='tabchip' style='border-color:#ffaa00'>Events</span>\n      </div>\n    </div>\n  </div>\n</section>\n\n<!-- CONTROLS + MODELING -->\n<section id=\"controls\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">06</span> Top-Level Controls &amp; Modeling Approach <a class=\"toclink\" href=\"#toc\">↑ Contents</a></h2>\n    <h3>Controls</h3>\n    <ul>\n      <li><strong>Retirement Date Selector</strong> — switches the modeled retirement quarter; recomputes the whole plan.</li>\n      <li><strong>Scenario Prior Selector</strong> — BASE / BEAR-LEANING / BULL-LEANING. Re-weights the six economic regimes feeding the Monte Carlo.</li>\n      <li><strong>Roth Conversion Amount (Roth tab)</strong> — $0–$400,000 (step $5,000), default $70,000/yr. The single biggest lever: it drives <em>four</em> tabs at once — Roth ladder, Withdrawal schedule, Taxes, and IRMAA — all from one shared value.</li>\n      <li><strong>SS Claim-Age slider (SS tab)</strong> — 62–70, drives the claiming optimizer. The spouse names shown are read from your data (My Data tab), not hard-coded.</li>\n      <li><strong>Guardrails Toggle (Trajectory tab)</strong> — show/hide the Guyton-Klinger spending bands.</li>\n    </ul>\n\n    <h3>Modeling Approach — read this</h3>\n    <p>Danger Close uses a <strong>regime-switching mixture model</strong> — with two optional engine toggles on the Monte Carlo tab: <em>stochastic longevity</em> (Gompertz-sampled death ages anchored to your entered life expectancy as the median) and an <em>LTC distribution</em> (a drawn care-duration tail replacing the single shock) — not the classical mean-plus-standard-deviation Monte Carlo most tools use. Each year the simulator picks one of six regimes (under BASE: base 45%, optimistic 20%, pessimistic 15%, recession 10%, stagflation 7%, crisis 3%) and holds it for all four quarters — the regime means are annual outcomes — then applies that regime's return plus a small quarterly noise term. Variance comes mostly from regime-switching, so the AAGR-vs-CAGR \"variance drag\" double-counting bug that affects some tools does <em>not</em> apply here.</p>\n    <div class=\"plain\">\n      <span class=\"lbl\">In plain English</span>\n      <p>Most calculators picture the market as one bumpy \"average\" year repeated over and over. Danger Close instead <strong>rolls a die each year to decide what kind of year it is</strong> — normal, boom, slump, recession, 1970s-style high-inflation, or 2008-style crisis — and uses that year's typical result. Real economies move in streaks (good years cluster together, so do bad ones), and picking a year-type each turn captures that far better than one fixed average.</p>\n    </div>\n    <p><strong>But the BASE prior is deliberately conservative</strong> versus historical US equity performance. Probability-weighted across regimes:</p>\n    <figure>\n      <svg viewBox=\"0 0 760 260\" font-family=\"'JetBrains Mono',monospace\">\n        <!-- axis -->\n        <line x1=\"150\" y1=\"20\" x2=\"150\" y2=\"210\" stroke=\"#1a3a2a\"/>\n        <line x1=\"150\" y1=\"210\" x2=\"720\" y2=\"210\" stroke=\"#1a3a2a\"/>\n        <!-- zero line -->\n        <line x1=\"300\" y1=\"20\" x2=\"300\" y2=\"210\" stroke=\"#27513a\" stroke-dasharray=\"3 3\"/>\n        <text x=\"300\" y=\"232\" fill=\"#6a8a7a\" font-size=\"9\" text-anchor=\"middle\">0%</text>\n        <!-- scale: x = 300 + realReturn*px, px=40 per 1% -->\n        <!-- historical 7.5 -->\n        <text x=\"140\" y=\"50\" fill=\"#6a8a7a\" font-size=\"11\" text-anchor=\"end\">HISTORICAL</text>\n        <rect x=\"300\" y=\"38\" width=\"300\" height=\"22\" fill=\"rgba(0,255,136,0.3)\" stroke=\"#00ff88\"/>\n        <text x=\"610\" y=\"53\" fill=\"#00ff88\" font-size=\"11\">+7.5% real (since 1926)</text>\n        <!-- BULL 2.6 -->\n        <text x=\"140\" y=\"92\" fill=\"#6a8a7a\" font-size=\"11\" text-anchor=\"end\">BULL-LEAN</text>\n        <rect x=\"300\" y=\"80\" width=\"104\" height=\"22\" fill=\"rgba(0,204,255,0.3)\" stroke=\"#00ccff\"/>\n        <text x=\"414\" y=\"95\" fill=\"#00ccff\" font-size=\"11\">+2.6% real</text>\n        <!-- BASE 0.4 -->\n        <text x=\"140\" y=\"134\" fill=\"#6a8a7a\" font-size=\"11\" text-anchor=\"end\">BASE</text>\n        <rect x=\"300\" y=\"122\" width=\"16\" height=\"22\" fill=\"rgba(255,170,0,0.35)\" stroke=\"#ffaa00\"/>\n        <text x=\"326\" y=\"137\" fill=\"#ffaa00\" font-size=\"11\">+0.4% real</text>\n        <!-- BEAR -7.7 -->\n        <text x=\"140\" y=\"176\" fill=\"#6a8a7a\" font-size=\"11\" text-anchor=\"end\">BEAR-LEAN</text>\n        <rect x=\"192\" y=\"164\" width=\"108\" height=\"22\" fill=\"rgba(255,68,68,0.3)\" stroke=\"#ff4444\"/>\n        <text x=\"186\" y=\"179\" fill=\"#ff4444\" font-size=\"11\" text-anchor=\"end\">−7.7% real</text>\n      </svg>\n      <figcaption>FIG.2 — EXPECTED REAL EQUITY RETURN BY PRIOR vs HISTORY</figcaption>\n    </figure>\n    <p>Even the BULL-LEANING prior sits well below realized history. <strong>This is a modeling choice, not a bug</strong> — it follows the conservative-academic tradition (Pfau and others advocate 2–4% forward real returns for planning). In practice, your success rates here will read <em>lower</em> than Boldin/ProjectionLab/Pralana at their defaults, sometimes by 10–20 points. Cross-check critical results against one commercial tool; the gap is the prior's conservatism, not an error. For history-like output, use BULL-LEANING.</p>\n    \n    <h3>Inflation assumptions — one map, three different numbers on purpose</h3>\n    <p>Three inflation figures appear in the app, and the differences are deliberate, each erring conservative in its own direction: <strong>(1) Household inflation ~2.7% expected</strong> — the simulators (Monte Carlo, Trajectory, Stress) don't use a single rate at all; each simulated quarter draws the regime's rate (2.0% in booms, 2.8% base, 3.5% pessimistic, 6.5% in stagflation — probability-weighted ≈2.7% under the BASE prior, between the last 30 years' ~2.5% and the full-century ~3.0%). Spending and Social Security's COLA ride these draws; the pension deliberately doesn't (no COLA). <strong>(2) Tax-threshold indexation 2.0%</strong> — brackets, deductions, and IRMAA tiers grow at 2%/yr in the deterministic tax engines. Law indexes these by <em>chained</em> CPI, which historically runs ~0.3 points below regular CPI — and for thresholds, assuming <em>slower</em> growth is the conservative choice: income outgrowing brackets produces bracket creep, so the model <em>overstates</em> your future taxes rather than flattering them. Raising this number would make Roth math look better, not safer. <strong>(3) LTC costs: inflation +1.5%</strong> — long-term-care costs escalate <em>above</em> whatever inflation each path draws, reflecting decades of care-cost growth outrunning CPI. Same philosophy every time: where an assumption must be picked, pick the direction that makes the plan look slightly worse than reality.</p>\n\n    <h3 id=\"longevity\">Why stochastic longevity matters — the STOCHASTIC LONGEVITY toggle</h3>\n    <p>By default, the simulator assumes both of you live to <em>exactly</em> the life expectancies you entered — clean, transparent, and quietly unrealistic, because nobody dies on schedule. The <strong>STOCHASTIC LONGEVITY</strong> toggle on the Monte Carlo tab replaces that with something closer to life: each of the 10,000 runs <strong>samples a different death age for each spouse</strong> from a Gompertz mortality curve anchored so the life expectancy you entered is the <strong>median</strong> — a 50/50 over-under, not a guarantee. (Anchored at 88, for example, the sampled tenth percentile lands near 74 and the ninetieth near 98.) Your number keeps its meaning; the tails around it become real.</p>\n    <p>That matters because the two tails stress <em>completely different parts of the plan</em>:</p>\n    <ul>\n      <li><strong>Long-life runs — the portfolio stress test.</strong> Live well past the median — late 90s, even past 100 — and the danger is simply outliving the money: more spending years than planned, sequence-of-returns risk compounding over decades, inflation quietly halving purchasing power roughly every 24 years at 3%, and long-term-care odds rising exactly when the balance is smallest.</li>\n      <li><strong>Short-life runs — the survivor stress test.</strong> One spouse dying early triggers the <strong>widowhood penalty</strong>: the household keeps only the larger Social Security check, most fixed expenses (housing, property taxes, insurance, utilities) barely shrink, the survivor is pushed into Single filing's narrower brackets and smaller standard deduction, and healthcare costs often rise. The Survivor tab dissects this case; the toggle folds thousands of variations of it into the headline success rate.</li>\n    </ul>\n    <div class=\"plain\">\n      <span class=\"lbl\">In plain English</span>\n      <p>Instead of asking <em>\"what happens if we live exactly to our life expectancies?\"</em>, the toggle asks the better question: <strong>\"what fraction of thousands of realistic lifetimes — some short, some very long — does this plan survive?\"</strong> Expect the success number to move when you flip it; that movement <em>is</em> the information. One honest limit: the two spouses' lifespans are sampled independently — the real-world correlation of couples' health is not modeled.</p>\n    </div>\n\n    <h3 id=\"ltcdist\">The real shape of long-term-care risk — the LTC DISTRIBUTION toggle</h3>\n    <p>Long-term-care duration is one of the most <strong>right-skewed</strong> risks in retirement — the average hides everything that matters. The research picture: roughly <strong>a third of today's 65-year-olds will never need long-term-care support at all</strong>; the median formal (nursing-home) stay is startlingly brief — often days or weeks of post-acute rehab after a surgery or illness; yet about <strong>20% will need care for more than five years</strong>, and roughly 5% will spend over four years in a nursing home. Duration also splits sharply by sex — women average about <strong>3.7 years</strong> of care need versus <strong>2.2 for men</strong>, largely because women live longer (and spend about 6.1 adult years <em>giving</em> care besides). It is why the long-term-care insurance industry standardized on a <strong>3-year benefit period</strong>: it covers the great majority of claims at a payable premium — while dementia care, the classic budget-breaker, routinely outruns it.</p>\n    <p>The default engine models care as one $150K–$300K event per spouse — the <em>median-ish</em> experience. The <strong>LTC DISTRIBUTION</strong> toggle swaps in the real shape: each run <strong>draws a paid-care duration per spouse</strong> (usually zero, occasionally many years, at ~$120K/yr in today's dollars escalating 1.5%/yr <em>above</em> inflation), anchored to the final years before that run's own death. The expected cost is similar to the single shock; the <strong>ruin tail is far fatter</strong> — because multi-year care lands at the worst possible moment: portfolio at its smallest, one Social Security check already gone.</p>\n    <div class=\"plain\">\n      <span class=\"lbl\">In plain English — and one number reconciled</span>\n      <p>Most people pay little for care; a few pay catastrophically. Averages mislead; the toggle models the lottery instead. One apparent conflict worth squaring: research says ~33% never need <em>any</em> care, while this model draws \"no <em>paid</em> care\" 45% of the time — different measures, not a contradiction, since a large share of real care is unpaid family care that never touches a portfolio. Both agree on the part that matters: <strong>the tail, not the average, is the risk</strong>. Pair the toggle with the Stress tab's LTC Marathon — and if you are evaluating LTC insurance, this is exactly the distribution a 3-year benefit period is priced against.</p>\n    </div>\n\n  </div>\n</section>\n\n<!-- TABS DETAIL -->\n<section id=\"tabs\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">07</span> The Tabs in Detail <a class=\"toclink\" href=\"#toc\">↑ Contents</a></h2>\n    <div class=\"pillrow\" style=\"margin:14px 0 4px\">\n      <a class=\"pill\" href=\"#g-foundation\" style=\"color:#00ccff;border-color:#00ccff\">▍Foundation</a>\n      <a class=\"pill\" href=\"#g-scoring\" style=\"color:#aa66ff;border-color:#aa66ff\">▍Scoring</a>\n      <a class=\"pill\" href=\"#g-strategy\" style=\"color:#ffaa00;border-color:#ffaa00\">▍Strategy</a>\n      <a class=\"pill\" href=\"#g-testing\" style=\"color:#ff6600;border-color:#ff6600\">▍Testing</a>\n      <a class=\"pill\" href=\"#g-tools\" style=\"color:#ff4444;border-color:#ff4444\">▍Tools &amp; Reference</a>\n    </div>\n\n    <h3 id=\"g-foundation\" style=\"color:#00ccff\">▍Foundation</h3>\n\n    <div class=\"tabentry\">\n      <h3>Dashboard <span class=\"tag\" style=\"background:rgba(0,204,255,.15);color:#00ccff\">foundation</span></h3>\n      <p class=\"purpose\">One screen, the three questions retirees actually ask.</p>\n      <p><strong>Will my money last?</strong> (Monte Carlo success and median outcome) · <strong>How much can I spend?</strong> (modeled spending, the guaranteed-income floor, and the resulting portfolio draw rate) · <strong>Can I survive a crash?</strong> (success with poor returns forced into the first three retirement years, vs the no-crash base). Each card links to the tab with the full workings. It's the default landing view once a plan is loaded — and a good place to send a spouse who wants the answer without the other tabs.</p>\n    </div>\n    <div class=\"tabentry\">\n      <h3>My Data <span class=\"tag\" style=\"background:rgba(0,204,255,.15);color:#00ccff\">foundation</span></h3>\n      <p class=\"purpose\">Where your plan lives — the forms every other tab reads from.</p>\n      <p>Household (names, birth dates, retirement year, life expectancies, state tax), holdings, Social Security &amp; pension, contributions, and expenses — plus <strong>Save &amp; Apply</strong>, <strong>Export / Import Backup</strong>, and <strong>Clear All Data</strong>. Section <a href=\"#xlsx\">08</a> walks through every field. If a projection ever looks wrong, this tab is where to look first.</p>\n    </div>\n    <div class=\"tabentry\">\n      <h3>Trajectory <span class=\"tag\" style=\"background:rgba(0,204,255,.15);color:#00ccff\">foundation</span></h3>\n      <p class=\"purpose\">The headline balance-over-time chart from now through year 30.</p>\n      <p>Shows the projected portfolio path with optional Guyton-Klinger guardrail bands. The first read for \"does the line trend up, drift, or deplete?\"</p>\n    </div>\n    <div class=\"tabentry\">\n      <h3>Expenses <span class=\"tag\" style=\"background:rgba(0,204,255,.15);color:#00ccff\">foundation</span></h3>\n      <p class=\"purpose\">Pre- vs post-retirement spending, item by item.</p>\n      <p>Each expense shows its category, amount, and active window (start → end · duration). A delta block shows what <strong>drops off</strong> at retirement (e.g. mortgage), what <strong>adds on</strong> (LTC, ACA, Medicare), and what continues unchanged (marked ↻), with no double-counting.</p>\n      <p class=\"micro\">Tip: recurring \"for-life\" costs (housing, food, utilities, Medicare) should run all the way to the end of the plan. If any stop early, the Events tab raises an alarm — otherwise the simulator treats those later years as free and every success rate looks rosier than it should.</p>\n    </div>\n    <div class=\"tabentry\">\n      <h3>Income <span class=\"tag\" style=\"background:rgba(0,204,255,.15);color:#00ccff\">foundation</span></h3>\n      <p class=\"purpose\">Income stack: Social Security, pension, and your entered income streams (rental, work, annuities).</p>\n      <p>Shows when each stream starts and the combined floor. The key insight it surfaces appears below.</p>\n      <figure>\n        <svg viewBox=\"0 0 720 150\" font-family=\"'JetBrains Mono',monospace\">\n          <text x=\"10\" y=\"30\" fill=\"#6a8a7a\" font-size=\"11\">SPENDING NEED</text>\n          <rect x=\"10\" y=\"40\" width=\"690\" height=\"30\" fill=\"rgba(255,255,255,0.04)\" stroke=\"#27513a\"/>\n          <text x=\"700\" y=\"60\" fill=\"#c0d8cc\" font-size=\"11\" text-anchor=\"end\">~$95K/yr</text>\n          <text x=\"10\" y=\"100\" fill=\"#6a8a7a\" font-size=\"11\">COVERED BY</text>\n          <rect x=\"10\" y=\"110\" width=\"436\" height=\"30\" fill=\"rgba(0,255,136,0.25)\" stroke=\"#00ff88\"/>\n          <text x=\"228\" y=\"130\" fill=\"#00ff88\" font-size=\"11\" text-anchor=\"middle\">GUARANTEED ~$60K (63%)</text>\n          <rect x=\"446\" y=\"110\" width=\"254\" height=\"30\" fill=\"rgba(255,170,0,0.25)\" stroke=\"#ffaa00\"/>\n          <text x=\"573\" y=\"130\" fill=\"#ffaa00\" font-size=\"11\" text-anchor=\"middle\">PORTFOLIO DRAW ~$35K</text>\n        </svg>\n        <figcaption>FIG.3 — INCOME COVERAGE (EXAMPLE HOUSEHOLD): ~2.1% STEADY-STATE WITHDRAWAL RATE</figcaption>\n      </figure>\n      <p class=\"micro\">When guaranteed income covers most of spending, the portfolio draw is tiny — the difference between \"income-replacement capital\" and \"legacy capital.\" This single fact drives most of the app's reassuring results.</p>\n    </div>\n    <div class=\"tabentry\">\n      <h3>SS (Social Security) <span class=\"tag\" style=\"background:rgba(0,204,255,.15);color:#00ccff\">foundation</span></h3>\n      <p class=\"purpose\">Claiming-age optimizer for both spouses.</p>\n      <p>A <strong>trust-fund depletion scenario</strong> panel sits at the top: per the 2026 Trustees Report, the retirement fund alone depletes in late 2032 (then ~78% of scheduled benefits payable — the legal default), or 2034/~83% if Congress merges it with the disability fund. Depletion is not bankruptcy — checks continue at the covered percentage — and Congress has always acted before a cut landed, which is why this is a <em>scenario toggle</em>, not a prediction: flip it and every simulation, the Roth tax engine, the Dashboard, and the claiming grid recompute with post-depletion checks at your chosen percentage (benefit tables and breakeven cards keep showing scheduled amounts for clarity). Three one-click choices — <strong>NO CUT</strong> (scheduled benefits, what your statement shows), <strong>2033 → 78%</strong> (the OASI retirement fund alone — the legal default absent new law), <strong>2034 → 83%</strong> (OASI+DI combined, which requires an act of Congress) — plus custom year/percent fields. When active, a readout shows exactly what happens to each spouse's check and the household total in dollars, with a guide to where the cut ripples. Persisted across sessions. Below it: benefit-by-claiming-age tables (62–70), crossover ages, and the lifetime trade-off of claiming early vs delaying. Names and amounts read from your data. For couples, a dedicated <strong>Spouse B breakeven card</strong> runs the same claim-early-vs-FRA arithmetic on the second record and adds the couple's twist: the <em>smaller</em> check only pays until the first death (the survivor keeps the larger one), so the lower earner's honest breakeven horizon is the joint first death — usually years shorter than their own life expectancy — while a higher-earning Spouse B's delay protects the survivor and runs to the second death. And a <strong>spousal claiming-age grid</strong> sweeps all 81 combinations of both spouses\' claiming ages and scores household lifetime benefits (today\'s dollars, survivor step-up included, deaths at your entered life expectancies), marking the model\'s best cell against your current plan — with its approximations listed right under the grid (no discounting; spousal top-up benefits not modeled).</p>\n    </div>\n    <div class=\"tabentry\">\n      <h3>Positions <span class=\"tag\" style=\"background:rgba(0,204,255,.15);color:#00ccff\">foundation</span></h3>\n      <p class=\"purpose\">The raw holdings table behind everything.</p>\n      <p>Every position with its balance, account type, Roth/Traditional split, and asset class — the audit trail for the rest of the app.</p>\n    </div>\n\n    <h3 id=\"g-scoring\" style=\"color:#aa66ff\">▍Scoring</h3>\n\n    <div class=\"tabentry\">\n      <h3>Grade <span class=\"tag\" style=\"background:rgba(170,102,255,.15);color:#aa66ff\">scoring</span></h3>\n      <p class=\"purpose\">A composite retirement-readiness letter grade.</p>\n      <p>A radar chart across weighted dimensions (portfolio size, income floor, sequence buffer, LTC/tail risk, tax efficiency, diversification, estate readiness), with the evidence and the drag behind each grade.</p>\n    </div>\n    <div class=\"tabentry\">\n      <h3>Ranking <span class=\"tag\" style=\"background:rgba(170,102,255,.15);color:#aa66ff\">scoring</span></h3>\n      <p class=\"purpose\">Where you sit versus US peers.</p>\n      <p>Approximate \"Top N%\" tiers built from public survey data. The Federal Reserve Survey of Consumer Finances (SCF, currently the 2022 survey) is the backbone, with EBRI, SSA, and AALTCI filling in the rest. Heuristic context, not precise statistics — the percentile cut-points and the \"Nx the average\" ratios all trace back to these benchmarks.</p>\n      <p class=\"micro\">Why two savings benchmarks? The SCF surveys the <em>whole population</em> of Americans 55–64, so it includes the ~25% with essentially nothing saved — which drags the average and median down and flatters anyone who has saved consistently. So the tab pairs it with an Empower Personal Dashboard benchmark: balances for people who <em>actively track their money</em> on that platform — a self-selected crowd whose balances run far higher. Read the SCF as the easy mirror (you'll be several multiples of the average) and Empower as the honest one (the savers you actually resemble). Two limits to keep in mind: the figures are hand-entered approximations, not live microdata, and the SCF refreshes only every three years — the 2025 survey publishes ~fall 2026, when the Events tab flags these benchmarks as due for a refresh.</p>\n    </div>\n\n    <h3 id=\"g-strategy\" style=\"color:#ffaa00\">▍Strategy</h3>\n\n    <div class=\"tabentry\">\n      <h3>Guardrails <span class=\"tag\" style=\"background:rgba(255,170,0,.15);color:#ffaa00\">strategy</span></h3>\n      <p class=\"purpose\">Guyton-Klinger dynamic spending rules.</p>\n      <p>Cut spending if the portfolio falls to the lower band (default 80% of plan); raise it if it reaches the upper band (120%). Shows when each band triggers across scenarios.</p>\n    </div>\n    <div class=\"tabentry\">\n      <h3>Withdrawal Strategy <span class=\"tag\" style=\"background:rgba(255,170,0,.15);color:#ffaa00\">strategy</span></h3>\n      <p class=\"purpose\">A year-by-year operational drawdown plan.</p>\n      <p>Three sections: the year-by-year schedule, the account-priority order, and a 3-strategy comparison. <strong>Priority 1 is everything you entered under Other accounts</strong> — spent before the bucketed portfolio, and since v5.26 taxed by the tax type on each row: Traditional and Annuity balances are ordinary income as they are spent, Traditional also counts toward your RMD, and Taxable and HSA balances are spent as already-taxed cash. The bucketed portfolio then follows in Taxable → Traditional → Roth order, with an 8-step order-of-operations. Growth rates link to the active scenario prior; the Roth-conversion column reads the shared slider.</p>\n    </div>\n    <div class=\"tabentry\">\n      <h3>Roth <span class=\"tag\" style=\"background:rgba(255,170,0,.15);color:#ffaa00\">strategy</span></h3>\n      <p class=\"purpose\">The Roth conversion ladder from retirement until the year before RMDs begin (RMD age 73 or 75 by birth year — SECURE 2.0).</p>\n      <p>Projects conversions year by year, the resulting RMD reduction at RMD age (73 for 1951–59 births, 75 for 1960+), and current Traditional/Roth balances (derived from your positions). The <strong>break-even</strong> (v5.7.1) appears under the strategy comparator as a WEALTH CROSSOVER card: your slider strategy and NO CONVERSIONS both run through the full 30-year engine and the card reports the first year your after-tax wealth catches up — so discounting and the opportunity cost of the conversion tax are included mechanically, and for some households the honest answer is that it never does. The conversion window and RMD start are below.</p>\n      <figure>\n        <svg viewBox=\"0 0 720 130\" font-family=\"'JetBrains Mono',monospace\">\n          <line x1=\"30\" y1=\"70\" x2=\"690\" y2=\"70\" stroke=\"#1a3a2a\"/>\n          <rect x=\"60\" y=\"56\" width=\"430\" height=\"28\" fill=\"rgba(0,204,255,0.18)\" stroke=\"#00ccff\"/>\n          <text x=\"275\" y=\"75\" fill=\"#00ccff\" font-size=\"11\" text-anchor=\"middle\">ROTH CONVERSION WINDOW</text>\n          <circle cx=\"60\" cy=\"70\" r=\"5\" fill=\"#00ff88\"/><text x=\"60\" y=\"40\" fill=\"#00ff88\" font-size=\"10\" text-anchor=\"middle\">RETIRE</text>\n          <circle cx=\"490\" cy=\"70\" r=\"5\" fill=\"#ffaa00\"/><text x=\"490\" y=\"40\" fill=\"#ffaa00\" font-size=\"10\" text-anchor=\"middle\">AGE 74</text>\n          <circle cx=\"560\" cy=\"70\" r=\"5\" fill=\"#ff4444\"/><text x=\"560\" y=\"40\" fill=\"#ff4444\" font-size=\"10\" text-anchor=\"middle\">AGE 75</text>\n          <text x=\"620\" y=\"74\" fill=\"#ff4444\" font-size=\"10\">RMDs begin</text>\n          <text x=\"275\" y=\"105\" fill=\"#6a8a7a\" font-size=\"9\" text-anchor=\"middle\">low-income gap years — convert at low brackets, before RMDs force income up</text>\n        </svg>\n        <figcaption>FIG.5 — THE ROTH CONVERSION WINDOW (EXAMPLE HOUSEHOLD, BORN 1964 → RMD AGE 75; 1951–59 BIRTHS START AT 73)</figcaption>\n      </figure>\n      <div class='card warn' style='border-radius:4px;margin-top:14px'><h4 style='margin-top:0;color:var(--amber)'>⚠ PAY CONVERSION TAX FROM OUTSIDE FUNDS — NOT FROM RETIREMENT ASSETS</h4><p style='margin:6px 0'>When you convert, the IRS wants its tax. <strong>Where that tax money comes from changes the math of the whole conversion.</strong> Pay it from a taxable (brokerage/savings) account and the full conversion lands in the Roth. Pay it by withholding from the conversion itself and you shrink the very tax shelter you are building — and if you are under 59½, you get fined for it.</p><h4>Example 1 — age 59½+, $100K conversion at a 24% marginal rate, 20 years at 4.5% growth</h4><ul class='tight'><li><strong>Tax paid from outside funds:</strong> $100,000 enters the Roth → grows to <strong>$241,171, all tax-free</strong>. The $24,000 tax came from your taxable account.</li><li><strong>Tax withheld from the conversion:</strong> only $76,000 enters the Roth → $183,290. The $24,000 you kept in taxable grows to about $52,800 <em>after</em> capital-gains tax. Total ≈ <strong>$236,089 — about $5,100 less</strong>, and that understates it because taxable dividends are taxed every year along the way.</li></ul><p style='margin:6px 0'>The clean way to see it: paying from outside funds is equivalent to <strong>moving an extra $24,000 of taxable money inside the Roth wrapper</strong> — something contribution limits would never otherwise let you do. Withholding throws that free shelter space away.</p><h4>Example 2 — the same conversion under age 59½: now it costs real money</h4><p style='margin:6px 0'>The $24,000 withheld never reaches the Roth, so the IRS treats it as an <strong>early distribution: a 10% penalty = $2,400 in cash, gone immediately</strong>. Add the lost growth on that penalty and the wrapper loss from Example 1, and the total cost is roughly <strong>$10,900 per $100K converted</strong>. On a multi-year ladder this compounds: withholding 24% on a $70K/yr conversion costs $1,680/yr in pure penalty alone. This is the case where <em>never</em> really means never.</p><h4>Example 3 — what if you have no taxable account?</h4><p style='margin:6px 0'>Some households (including the built-in example) hold nearly everything in retirement accounts. Honest answer: conversions can <em>still</em> be worth doing — the Conversion Strategy Comparator on the Roth tab models taxes paid from the taxable account first and Roth second, and conversions still beat doing nothing for the example household — the benefit is simply smaller than with outside funds. If you are under 59½, avoid <em>withholding</em> specifically: pay the tax from current cash flow via estimated payments so the full conversion reaches the Roth and no penalty applies. If you are 59½+ with no outside funds, size conversions so the reduced benefit still clears the bar (low brackets, widow-penalty avoidance, RMD reduction).</p><p class='micro' style='margin-bottom:0'>Rule of thumb: under 59½, never withhold from a conversion. At any age, prefer outside funds — every tax dollar paid from inside the shelter is shelter you permanently lose.</p></div>\n    </div>\n    <div class=\"tabentry\">\n      <h3>Taxes <span class=\"tag\" style=\"background:rgba(255,170,0,.15);color:#ffaa00\">strategy</span></h3>\n      <p class=\"purpose\">Lifetime tax estimate: federal income, capital gains, FICA, state.</p>\n      <p>Lifetime summary cards plus a clickable year-by-year table. Each year breaks gross taxable income into its sources (SS taxable portion, pension, earned income, RMD, Roth conversion, cap gains) via a stacked bar, then subtracts deductions to net taxable and shows the bracket-by-bracket fill. State tax uses a <strong>51-jurisdiction module</strong> (2026 approximations): each state's effective rate, Social Security treatment (only 8 states partially tax SS in 2026), full retirement-income exemptions (IL/MS/PA/IA/MI + the 9 no-tax states), and major 65+ exclusions (e.g. Georgia's $65K/person). Pick your state in My Data — or leave it on manual and the legacy flat rate applies unchanged. It is an approximation layer: effective rates stand in for progressive brackets and several income-limited exclusions are treated as unconditional — verify your state. The Roth slider drives the conversion column live, and a QCD what-if slider models charitable IRA distributions (income exclusion, RMD offset, lower MAGI). The tab reads as <strong>four numbered steps</strong> with a 30-second explainer up top: ① the conversion slider (your what-if dial — the comparator reads it live and names its row after it), ② the tax-funding selector, ③ the six-strategy comparator, ④ the solve-for grid. A <strong>conversion-tax funding</strong> control models where the tax money actually comes from — the question most calculators skip. Three honest cases: a pool you declare as all cost basis (cash, money markets, or an account holding little growth), an <em>appreciated brokerage</em> sale (the engine grosses the sale up to cover the capital-gains tax the sale itself creates — long-term rates stacked on that year's income — and feeds the realized gains into MAGI so the IRMAA lookback two years later sees them), or <em>withholding from the conversion itself</em> for households with no outside money (the conversion pays the bill first, so only the net reaches the Roth — but it covers that bill only up to its own size, and any remainder is still sold from the brokerage and still realizes gain; permanently smaller Roth — sometimes still the winning move; \"never pay conversion tax from the IRA\" assumes outside cash you may not have). Approximations, stated plainly: one blended gain share for the whole account (carried as a running cost basis, not a fixed rate), all long-term, no per-lot selection, no loss harvesting, no wash-sale logic, 59½+ assumed (no early-withdrawal penalty on the withheld slice). The share you enter is the OPENING one: growth accrues gain from there, so even a pool declared at 0 realizes gain on later sales. The Roth tab also carries a <strong>solve-for grid</strong>: 25 conversion policies swept through the deterministic engine and ranked against your chosen objective (after-tax estate, lifetime tax+IRMAA, or widow-year tax) — reported as the model's best cell, never a directive. <span class=\"plain\" style=\"display:block;margin-top:8px\"><span class=\"lbl\">Why the ranked amounts look shuffled</span> The cards are sorted by the <em>result</em> (your chosen goal), not by the conversion amount — so the dollar figures won't climb in order. That's because the relationship between conversion size and the goal is <strong>U-shaped</strong>: there's a sweet-spot amount in the middle, and moving away from it in <em>either</em> direction scores worse. Convert too little and you leave too much in the Traditional account, so bigger future RMDs force up your later taxes; convert too much and you voluntarily push income into higher brackets and IRMAA tiers now. So a small amount and a large amount can land next to each other with nearly the same score — one on each side of the valley. The green <strong>YOU</strong> card is your live slider amount scored the same way, with its rank among all 25 cells and a <strong>&plusmn;$ vs #1</strong> gap on every card so you can see how far each sits from the best. The whole spread is usually small (often $10–40K of lifetime tax+IRMAA on a multi-million-dollar estate), so treat it as fine-tuning — and check the IRMAA tab for which years a bigger conversion trips a Medicare cliff before acting.</span> <div class=\"plain\" style=\"margin-top:8px\"><span class=\"lbl\">The three sliders, in plain English</span><p><strong>Taxable-account yield</strong> — money in a regular brokerage account pays dividends and interest that are taxed every year even if you never sell; the slider is your estimate of that payout rate (last year's 1099-DIV ÷ account balance; ≈1.5% for stock index funds, 3–5% for bonds and cash). No brokerage account? It does nothing. <strong>QCD modeler</strong> — only for charitable givers age 70½+: gifts sent directly from a Traditional IRA to charity never appear on your tax return and still count toward the RMD. If you don't give, leave it at $0. <strong>Roth conversion slider</strong> — lives on the Roth tab; this tab's Roth Conv column follows it live. One input arrives from outside the tab: realized capital gains flow in from the Withdrawal plan's sales — the Monte Carlo scenario and the My Data embedded-gain share move them. Set the yield honestly, leave the other two at zero, and the tab is simply your projected tax life as-is.</p></div></p>\n      <p class=\"micro\">Honest limits: SS taxation uses a simplified provisional-income test; realized cap gains are the Withdrawal plan's own sales (the My Data embedded-gain share sets their opening basis) and they count toward the provisional-income test; NIIT (3.8% on estimated investment income, unindexed thresholds), a simplified AMT check, and QCDs (a what-if slider: excluded from income and MAGI, counts toward the RMD, per-person indexed cap) are modeled.</p>\n    </div>\n    <div class=\"tabentry\">\n      <h3>IRMAA Cliff <span class=\"tag\" style=\"background:rgba(255,170,0,.15);color:#ffaa00\">strategy</span></h3>\n      <p class=\"purpose\">Medicare premium-surcharge cliffs vs your projected income.</p>\n      <p>The tier table, then a year-by-year view of MAGI vs the next cliff with a <strong>2-year lookback</strong> (\"Affects\" column), headroom coloring (amber within $40K, red within $15K), and lifetime surcharge total. Driven by the Roth slider — it shows when a conversion is about to push you over a cliff and cost ~$1,000+/yr per person.</p>\n    </div>\n\n    <div class=\"tabentry\">\n      <h3>ACA Premium Subsidy (on the Roth tab) <span class=\"tag\" style=\"background:rgba(0,204,255,.15);color:#00ccff\">v5.7 · strategy</span></h3>\n      <p class=\"purpose\">Marketplace subsidy vs Roth conversions for anyone retiring before Medicare.</p>\n      <p>If you retire before 65, health coverage comes from the ACA marketplace, and the premium tax credit is set by your MAGI. The enhanced credits expired at the end of 2025, so under <strong>current law</strong> eligibility ends at a hard cliff: one dollar of MAGI over 400% of the prior year's federal poverty level and the entire subsidy — often $10,000–$25,000/yr for a couple in their early 60s — is gone. Roth conversions are MAGI, so a conversion strategy that wins on lifetime tax can quietly lose more in forfeited subsidies. This is frequently a <em>bigger</em> conversion penalty than IRMAA.</p>\n      <p><strong>How to use it:</strong> enter your household's benchmark silver premium (the second-lowest-cost silver plan from healthcare.gov) under My Data → ACA BRIDGE. <strong style=\"color:#ffaa00\">Enter the GROSS premium there and keep your expense rows as what you actually pay</strong> — the field feeds only the Roth tab's subsidy math, so nothing double-counts. The strategy table then gains an <strong>ACA SUB LOST</strong> column (each strategy charged, in real cash, for the subsidy it destroys versus converting nothing) and a <strong>STAY UNDER ACA CLIFF</strong> strategy that converts up to the cliff minus a $500 margin during bridge years, then fills the 24% bracket after Medicare. When that strategy converts $0 in a bridge year, that's the finding, not a bug: any conversion at all clears the cliff for your household.</p>\n      <p><strong>Law scenario toggle:</strong> Congress may restore the enhanced credits. Like the Social Security depletion scenario, this is your choice to stress, not a forecast — CURRENT LAW (400% cliff) or ENHANCED EXTENDED (the ARPA structure: no cliff, benchmark capped at 8.5% of income). Under ENHANCED the cliff strategy is hidden, since no cliff exists to stay under.</p>\n      <p><strong>What the model assumes (and its honest limits):</strong> ACA MAGI counts your <em>full</em> Social Security — the untaxed portion adds back, which is a different MAGI than IRMAA uses, and it can put you on the wrong side of the cliff while your tax return looks fine. Bridge premiums grow at household inflation plus 2 points (medical trend). In years where one spouse has reached Medicare, half the household premium is assumed. Below 100% of FPL the model shows $0 and defers to Medicaid rules it does not model — in BOTH law scenarios. Read that $0 as a blank rather than an answer: it is a placeholder for coverage this app does not price, so bridge years below the line are flagged under the strategy table and excluded from the improvement claim, and a change that lifts you back over the line will look like it buys a whole benchmark premium when the model cannot actually say that. (Through v5.31 the enhanced scenario applied no floor at all and paid the full premium down to zero income; v5.32 fixed that.) Alaska/Hawaii poverty levels, cost-sharing reductions, and plan choice are not modeled — this prices the subsidy, not your healthcare. Constants come from IRS Rev. Proc. 2025-25 and the HHS poverty guidelines, and are checked on the Verify tab.</p>\n    </div>\n\n    <div class=\"tabentry\">\n      <h3>Exit Plan <span class=\"tag\" style=\"background:rgba(255,170,0,.15);color:#ffaa00\">strategy</span></h3>\n      <p class=\"purpose\">A five-phase operational countdown for the retirement transition itself.</p>\n      <p>Turns the plan into a sequence of moves with target dates derived from your timeline: <strong>1</strong> Confirm the money works (final Monte Carlo / guardrail check) → <strong>2</strong> Lock in health coverage (ACA bridge / Medicare) → <strong>3</strong> Decide &amp; file Social Security (SSA accepts filings 4 months ahead) → <strong>4</strong> Put in your notice (HR checklist: PTO payout, final match, vesting) → <strong>5</strong> Turn on the portfolio paycheck (cash reserve → checking autopay, withholding/estimates). Each phase shows a live status chip wired to the same engine as the <strong>Events</strong> tab, plus the landmines to avoid.</p>\n    </div>\n\n    <h3 id=\"g-testing\" style=\"color:#ff6600\">▍Testing</h3>\n\n    <div class=\"tabentry\">\n      <h3>Monte Carlo <span class=\"tag\" style=\"background:rgba(255,102,0,.15);color:#ff6600\">testing</span></h3>\n      <p class=\"purpose\">The probability engine — thousands of randomized futures.</p>\n      <p>Success rate at multiple thresholds, outcome dispersion, and the shape of the 10th-percentile (bad-case) path. Uses the regime-switching model described in section 06 — plus two engine toggles, <strong>STOCHASTIC LONGEVITY</strong> and <strong>LTC DISTRIBUTION</strong>, whose full explanations (and why flipping them moves the success number) live in <a href=\"#longevity\">§06</a>.</p>\n      <p>Five runs build the picture: <strong>A</strong> accumulation up to retirement, <strong>B</strong> the first decade, <strong>C</strong> the full 30 years (with a single long-term-care shock and deaths at life expectancy), <strong>C (no LTC)</strong> the same minus that shock so its cost is visible, and <strong>D — probabilistic long-term care</strong>, which draws a <em>random</em> number of care years for each spouse every run (often zero, occasionally many) instead of one fixed shock. Run D reads the harshest on purpose: it surfaces the late-life \"what if care drags on for years\" risk that a single early shock hides.</p>\n    </div>\n    <div class=\"tabentry\">\n      <h3>Historical Backtest <span class=\"tag\" style=\"background:rgba(255,102,0,.15);color:#ff6600\">testing</span></h3>\n      <p class=\"purpose\">Replays your plan against real market history (1928–2025).</p>\n      <p>Survival rate across every historical start year, a stock/bond cross-check, and the infamous start years (1929, 1966, 1973, 2000, 2008, plus 1982 for contrast) with end balance, low point, and depletion year. A 1966 real-balance chart shows the worst-case grind. Complements the Monte Carlo: it replays real pasts including their actual sequencing.</p>\n      <p class=\"micro\">Holds your asset mix constant; doesn't model taxes, RMDs, Roth, or LTC — it isolates pure sequence-of-returns risk.</p>\n    </div>\n    <div class=\"tabentry\">\n      <h3>What Breaks the Plan <span class=\"tag\" style=\"background:rgba(255,102,0,.15);color:#ff6600\">testing</span></h3>\n      <p class=\"purpose\">Reverse stress test — solves for the break-points.</p>\n      <p>Four plain answers under the active prior: how much more you could spend, how large a one-time LTC/emergency shock you can absorb, how bad returns can get, and how many consecutive crash years at retirement you survive. Switch to BEAR to watch the edges tighten.</p><p>The modeled outflow includes <strong>estimated taxes</strong> (an annual average from the Taxes engine, including Roth-conversion taxes), claim-month-accurate Social Security, and the <strong>survivor transition</strong> (larger SS check only, plus a 25% spending drop, after the first projected death). Not modeled: recurring long-term care, IRMAA surcharges, and market sequence — the Monte Carlo tab covers that.</p><div class='note'><strong>How bad is the return break-point, historically?</strong> The worst rolling <em>decade</em> for US stocks — 2000–2009, the dot-com bust followed by the financial crisis — ran about −3.4%/yr real. In 150+ years of data, <strong>no 20-year stretch has ever produced a negative real total return</strong>: the weakest windows (starting 1929, or 2000) still earned roughly +2%/yr, and every 30-year window on record has been positive (the worst ≈ +3.6%/yr, and that window ended in the depths of 1932). A break-point of several percent <em>negative</em>, sustained for the entire plan, therefore sits far outside anything US market history has produced. One honest caveat: those are <em>stock</em> figures — bonds did suffer negative multi-decade real stretches (roughly 1941–1981), which is exactly the blended-portfolio risk the Monte Carlo's stagflation regime exists to probe.</div>\n    </div>\n    <div class=\"tabentry\">\n      <h3>Survivor Scenario <span class=\"tag\" style=\"background:rgba(255,102,0,.15);color:#ff6600\">testing</span></h3>\n      <p class=\"purpose\">The financial picture when one spouse dies — both cases.</p>\n      <p>Models the loss of the smaller SS check, the flip to Single filing (the \"widow's penalty\"), and the ~25% spending drop. Each case shows income before/after, the SS step-up-vs-loss mechanics, and <strong>years alone</strong> (from life expectancies) — which differ sharply between the two cases and drive how long the higher single-filer taxes apply. Argues for front-loading Roth conversions while both file jointly.</p>\n    </div>\n    <div class=\"tabentry\">\n      <h3>Stress <span class=\"tag\" style=\"background:rgba(255,102,0,.15);color:#ff6600\">testing</span></h3>\n      <p class=\"purpose\">Named adverse scenarios.</p>\n      <p>Runs the plan through named shocks side by side — AI-bubble burst, stagflation, sequence-of-returns, a single LTC event, and the newer <strong>LTC Marathon</strong> — against a no-shock base, with Riskalyze-style risk metrics (volatility, Sharpe/Sortino, max drawdown).</p>\n      <figure>\n        <svg viewBox=\"0 0 760 250\" font-family=\"'JetBrains Mono',monospace\">\n          <text x=\"20\" y=\"24\" fill=\"#6a8a7a\" font-size=\"10\">RETIRE</text>\n          <text x=\"740\" y=\"24\" fill=\"#6a8a7a\" font-size=\"10\" text-anchor=\"end\">DEATH</text>\n          <text x=\"20\" y=\"70\" fill=\"#ffaa00\" font-size=\"11\">SINGLE LTC EVENT</text>\n          <line x1=\"20\" y1=\"92\" x2=\"740\" y2=\"92\" stroke=\"#1a3a2a\"/>\n          <rect x=\"150\" y=\"80\" width=\"46\" height=\"24\" fill=\"rgba(255,170,0,0.3)\" stroke=\"#ffaa00\"/>\n          <text x=\"173\" y=\"124\" fill=\"#6a8a7a\" font-size=\"9\" text-anchor=\"middle\">one bill, early</text>\n          <text x=\"173\" y=\"138\" fill=\"#6a8a7a\" font-size=\"9\" text-anchor=\"middle\">$150-300K · pot still big</text>\n          <text x=\"20\" y=\"180\" fill=\"#aa66ff\" font-size=\"11\">LTC MARATHON</text>\n          <line x1=\"20\" y1=\"202\" x2=\"740\" y2=\"202\" stroke=\"#1a3a2a\"/>\n          <rect x=\"560\" y=\"190\" width=\"30\" height=\"24\" fill=\"rgba(170,102,255,0.22)\" stroke=\"#aa66ff\"/>\n          <rect x=\"592\" y=\"190\" width=\"30\" height=\"24\" fill=\"rgba(170,102,255,0.3)\" stroke=\"#aa66ff\"/>\n          <rect x=\"624\" y=\"190\" width=\"30\" height=\"24\" fill=\"rgba(170,102,255,0.4)\" stroke=\"#aa66ff\"/>\n          <rect x=\"656\" y=\"190\" width=\"30\" height=\"24\" fill=\"rgba(170,102,255,0.5)\" stroke=\"#aa66ff\"/>\n          <text x=\"623\" y=\"234\" fill=\"#6a8a7a\" font-size=\"9\" text-anchor=\"middle\">years of care, late · $120K/yr and rising · pot small, one SS check left</text>\n        </svg>\n        <figcaption>FIG.6 — SAME-ISH TOTAL COST, VERY DIFFERENT TIMING → VERY DIFFERENT RISK</figcaption>\n      </figure>\n      <div class=\"plain\">\n        <span class=\"lbl\">In plain English — why two LTC scenarios?</span>\n        <p>The original \"LTC event\" assumes one big care bill ($150K-300K) fairly early, while your savings are still large. But real long-term care usually arrives <strong>at the very end of life and can drag on for years</strong> — exactly when the pot is smallest and one Social Security check has already stopped. The <strong>LTC Marathon</strong> models that long, late, rising cost. It can add up to a similar total as the single shock yet do far more damage, purely because of <em>when</em> it lands.</p>\n      </div>\n    </div>\n\n    <h3 id=\"g-tools\" style=\"color:#ff4444\">▍Tools &amp; Reference</h3>\n\n    <div class=\"tabentry\">\n      <h3>Ask AI <span class=\"tag\" style=\"background:rgba(255,68,68,.15);color:#ff4444\">ai</span></h3>\n      <p class=\"purpose\">An AI assistant with full context on your plan.</p>\n      <p>Sends a structured summary of your data and results to a language model for natural-language follow-up. It's a real <strong>conversation</strong>: if the AI answers with a question of its own, type your reply in the same box and EXECUTE — the session transcript is re-sent each turn (last 12 messages), so it remembers what it asked. ⟲ NEW SESSION starts fresh. (Self-hosted key users: longer sessions re-send more context, so each turn costs slightly more.) Ships with five universal starter questions:</p>\n      <div class=\"pillrow\">\n        <span class=\"pill\">Will my money last as long as I do?</span>\n        <span class=\"pill\">What if I live longer than expected?</span>\n        <span class=\"pill\">Can I survive a crash right after I retire?</span>\n        <span class=\"pill\">How much can I safely spend each year?</span>\n        <span class=\"pill\">What if inflation stays high?</span>\n      </div>\n      <p class=\"micro\">The assistant can be confidently wrong. Always verify before acting. Self-hosted copies (running outside claude.ai) power this tab with a personal API key via the LOCAL API KEY panel — stored only in that browser, never in the app file or backups, and wiped by Clear All Data. Full guide: <a href=\"#apikey\">§10</a>.</p></div><div class='tabentry'><h3>Checklist <span class='tag' style='background:rgba(0,204,255,.15);color:#00ccff'>tools</span></h3><p class='purpose'>An estate &amp; retirement-readiness checklist.</p><p>Grouped action items (estate documents, beneficiaries, account access, insurance, a survivor playbook) with notes and a contact per item. Survivor-critical items are flagged, progress is tracked, and the completion of the critical items feeds an <strong>Estate Readiness</strong> dimension on the Grade tab. Your checks and notes persist locally and travel in the Export Backup.</p></div><div class='tabentry'><h3>Skins <span class='tag' style='background:rgba(106,138,122,.18);color:#6a8a7a'>tools</span></h3><p class='purpose'>Display themes.</p><p>Thirteen color palettes built on a CSS-variable token system — the original Tactical Green console; four softer darks (Soft Dark Mode, Warm Executive, Low-Glare Dark, Quiet Dark); three light paper themes (Field Manual in red, white &amp; green, Reading Paper in warm sepia, and E-Ink Gray); Midnight Blue, a navy alternative to the greens; Report, a plain business-register light theme; and three built for legibility rather than looks — <strong>High Contrast Light</strong>, <strong>High Contrast Dark</strong>, and <strong>Colorblind-Safe Light</strong> (Okabe–Ito, so gains, losses and warnings stay distinguishable with red–green color blindness). If any text in this app is hard to read, those three are the answer, and the <strong>UI SIZE</strong> control at the top of this tab (100 / 115 / 130 / 150%) enlarges everything — useful on high-DPI displays and for aging eyes. UI SIZE scales the whole layout, so on a narrow screen it makes wide tables need horizontal scrolling sooner, not later. The light themes are the easiest on the eyes in bright rooms and for long text-heavy sessions; the darks suit low light. Each tile previews its own colors; the choice persists in the browser cache and travels in the Export Backup.</p></div><div class='tabentry'><h3>Docs <span class='tag' style='background:rgba(106,138,122,.18);color:#6a8a7a'>tools</span></h3><p class='purpose'>This field manual.</p><p>The full documentation, viewable in-app and downloadable as HTML from the toolbar above; open the downloaded file in your browser and use Print → Save as PDF.</p></div><div class=\"tabentry\">\n      <h3>Verify <span class=\"tag\" style=\"background:rgba(170,102,255,.15);color:#aa66ff\">trust</span></h3>\n      <p class=\"purpose\">A live audit of this copy's statutory constants — run in your browser, every visit.</p>\n      <p>Every tax bracket, deduction, IRMAA tier, RMD divisor, QCD cap, wage base, and state-module fact the math depends on is re-checked against its primary-source value (IRS Rev. Proc. 2025-32, CMS, SSA, IRS Pub. 590-B) the moment you open the tab, with a ✓ or ✗ per line and the citation beside it. Green across the board means <em>this file, in your hands, right now</em> carries the correct law — a tampered or corrupted copy fails loudly. Two longevity checks are statistical and re-sample live. Honest scope: constants, not every formula using them; the source distribution's Node suite, the behavioral tests, and eventually independent professional review cover that ground.</p>\n    </div>\n    <div class='tabentry'><h3>Events <span class='tag' style='background:rgba(255,170,0,.15);color:#ffaa00'>tools</span></h3><p class='purpose'>Every dated obligation in the plan, as live alarms.</p><p>A live alarm for every dated obligation, derived from your timeline and the shared constants (eighteen for a two-person household — several are per-spouse) — the annual tax-constant refresh, the backtest-data append, Roth-conversion and RMD deadlines, Social Security filing windows (SSA accepts applications four months ahead), Medicare initial enrollment and annual Open Enrollment, ACA-bridge open enrollment, estimated quarterly taxes during conversion years, the peer-benchmark refresh behind the Ranking tab (the Fed SCF is triennial), quarterly backup nudges, the annual SSA earnings-record check, a January plan review, and an alarm if your for-life expenses stop before the plan horizon (which would otherwise make the simulator treat your final years as free). Statuses recompute from today's date on every load — <strong>yellow</strong> = getting close (prepare), <strong>green</strong> = action window open (go), <strong>red</strong> = action required or verify, dim = tracking / past — and nothing is stored, so alarms can never go stale or be dismissed and forgotten. The most urgent tier also surfaces as a colored strip above the tabs on every view; clicking it opens this tab. Each event carries plain-language instructions and points at the authoritative source (irs.gov, ssa.gov, cms.gov, medicare.gov, healthcare.gov). Deadlines are informational — verify with the agencies before acting.</p></div>\n    </div>\n    <a class=\"totop-foot\" href=\"#toc\">↑ Back to Table of Contents</a>\n  </div>\n</section>\n\n<!-- XLSX -->\n<section id=\"xlsx\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">08</span> Entering Your Data — the My Data Tab <a class=\"toclink\" href=\"#toc\">↑ Contents</a></h2>\n    <p>The <strong>My Data</strong> tab is where you build or edit your plan. It's a set of plain forms — no file formats to get right. Fill in what applies, then press <strong>Save &amp; Apply</strong> to rebuild every tab from it.</p>\n    <table>\n      <tr><th>Section</th><th>What you enter</th></tr>\n      <tr><td><strong>Household</strong></td><td>Names, single or couple, birth dates, target retirement year, life expectancies, state and its income-tax rate</td></tr>\n      <tr><td><strong>Holdings</strong></td><td>One row per position: ticker/name, balance, asset type, Roth vs Traditional, expense ratio — plus an Other accounts list, where each row also carries its own tax type (Taxable, Traditional, Roth, HSA or Annuity). From v5.26 the engines READ that tax type: Traditional and Annuity balances are taxed as ordinary income as they are spent and Traditional balances count toward RMDs, while Taxable and HSA balances are still modelled as already-taxed cash. Other accounts are still drawn first, but from v5.26 the tax type you set decides what that costs: a Traditional or Annuity balance is taxed as ordinary income as it is spent, and a Traditional balance also counts toward your RMD. Through v5.25 the whole pot was spent tax-free with no RMD even when what you entered there was an IRA, annuity or state plan, which made the Withdrawal tab optimistic. It no longer is.</td></tr>\n      <tr><td><strong>Income</strong></td><td>Social Security for each person (monthly amount, planned claim age, and the full benefit-by-age table), any pension, and an <strong>Other Income Streams</strong> table — rental, post-retirement jobs, annuities, royalties — each with owner, start/end years, COLA flag, and taxable vs tax-free treatment</td></tr>\n      <tr><td><strong>Contributions</strong></td><td>Salaries and ongoing 401(k)/HSA contributions while still working</td></tr>\n      <tr><td><strong>Expenses</strong></td><td>One row per expense: category, label, amount, frequency (monthly / annual / one-time), start and end dates, deductible flag, and whether it applies before, after, or across retirement</td></tr>\n    </table>\n    <div class=\"note\"><strong>Save &amp; Apply</strong> caches everything in your browser and re-derives all 26 tabs. <strong>Export Backup</strong> writes the same data to a <code>.json</code> file; <strong>Import Backup</strong> reads one back. That JSON backup is the only file format the app reads or writes — there's no spreadsheet or Word-document import.</div>\n  </div>\n</section>\n\n<!-- DOCX -->\n<section id=\"docx\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">09</span> The Master Prompt &amp; AI Context <a class=\"toclink\" href=\"#toc\">↑ Contents</a></h2>\n    <p>The <strong>master prompt</strong> is the plain-language briefing the <a href=\"#tabs\">Ask AI</a> tab sends to the language model so its answers are grounded in <em>your</em> plan. You no longer write or upload it — the app <strong>builds it automatically</strong> from your My Data entries (household, portfolio, income) each time you ask a question.</p>\n    <p>It reads like a short situation report. The generated context includes:</p>\n    <table>\n      <tr><th>What the AI sees about your plan</th></tr>\n      <tr><td>Names, ages, filing status, target retirement year, and state</td></tr>\n      <tr><td>Portfolio total, retirement-vs-taxable split, asset mix, weighted expense ratio</td></tr>\n      <tr><td>Social Security (by claim age), pension, and any other income streams you entered</td></tr>\n      <tr><td>Headline results — success rate, median outcome, and the key risks</td></tr>\n    </table>\n    <div class=\"note\">Because it's generated from your data, the AI context stays current automatically and travels inside your exported backup — there's nothing to keep in sync by hand. (Older backups may still contain a <code>masterPrompt</code> field; it's loaded for continuity but the live context is always regenerated from your current numbers.)</div>\n  </div>\n</section>\n\n<!-- API KEY -->\n<section id=\"apikey\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">10</span> Ask AI &amp; Your API Key (Self-Hosted Copies) <a class=\"toclink\" href=\"#toc\">↑ Contents</a></h2>\n    <p class=\"lead\">This section only matters if you run Danger Close <strong>on your own computer</strong> — the downloaded single-file HTML or a local dev server. Inside claude.ai, the platform signs the Ask AI call for you: there is no key, no billing setup, and the LOCAL API KEY panel doesn't even appear. On your own machine, the app has no way to prove to the AI service that anyone should pay for the answer — so you bring your own key.</p>\n    <div class=\"plain\">\n      <span class=\"lbl\">In plain English</span>\n      <p>An API key works like a <strong>prepaid calling card for the AI</strong>. You open a small account with Anthropic (the AI company), put a few dollars on it, and get a secret code starting with <code>sk-ant-</code>. When you ask a question, the code tells Anthropic whose card to charge — typically <em>a fraction of a cent per question</em>. Guard the code the way you'd guard a card number: anyone who has it can spend your balance.</p>\n    </div>\n\n    <h3>Getting a key (one-time, ~5 minutes)</h3>\n    <ol>\n      <li><strong>Create a developer account</strong> at <a href=\"https://console.anthropic.com\">console.anthropic.com</a>. This is <em>separate</em> from a claude.ai login — a Claude Pro or Max subscription does not include API access. You'll verify a phone number during signup.</li>\n      <li><strong>Add a payment method and ~$5 of credit</strong> on the Billing page. Keys don't work until billing exists; the first $5 also raises your rate limit. <strong>Set a monthly spending limit while you're there</strong> — it's the single best protection against surprises.</li>\n      <li><strong>Create the key:</strong> Settings → API keys → Create Key. Name it something identifiable like <code>danger-close</code>. <strong>Copy it immediately</strong> — Anthropic shows the full key exactly once. If you lose it, you don't recover it; you revoke it and make a new one (painless — see rotation below).</li>\n    </ol>\n\n    <h3>Using it in the app</h3>\n    <p>Open the <strong>Ask AI</strong> tab. In any self-hosted copy you'll see the <strong>🔑 LOCAL API KEY</strong> panel just under the \"exactly what's sent\" disclosure. Paste the key, press <strong>SAVE KEY</strong>, and Ask AI is live. The panel then shows the key masked (<code>sk-ant-••••••••1234</code>) with a <strong>FORGET KEY</strong> button that removes it instantly.</p>\n\n    <h3>What it costs &amp; watching your usage</h3>\n    <p>Billing is pay-per-token (a token is roughly ¾ of a word). A typical Danger Close question — your plan context in, a one-screen answer out — costs <strong>well under a cent</strong>; $5 of credit realistically lasts months of regular use. Check the <strong>Usage</strong> and <strong>Billing</strong> pages at console.anthropic.com occasionally: they show spend by day and by key. If usage ever looks unfamiliar, rotate the key (below) first and investigate second.</p>\n\n    <h3>Where the key lives — and whether it survives closing the file</h3>\n    <p>The key is kept in your <strong>browser's private storage for this app</strong> — the same place your plan data lives. It is <em>never written into the HTML or JSX file itself</em>, and it is <em>never included in Export Backup</em>. Practical consequences:</p>\n    <ul>\n      <li><strong>Normal use survives:</strong> Save &amp; Apply, close the file, reopen the same file in the same browser → your plan <em>and</em> your key are still there. Nothing to re-enter day to day.</li>\n      <li><strong>Sharing is safe by construction:</strong> sending someone the HTML file, or one of your <code>.json</code> backups, cannot leak your key — it isn't in either.</li>\n      <li><strong>Some things reset it:</strong> a different browser, a private/incognito window, clearing the browser's site data, or the app's own <strong>Clear All Data</strong> all wipe the key (Clear All Data does so deliberately). Moving or renaming the HTML file <em>may</em> also start a fresh store, depending on how your browser scopes local files. In every such case the fix is 10 seconds: paste the key again (and Import Backup for the plan).</li>\n    </ul>\n\n    <h3>How safe is this? Honest answer: safe design, real residual risks</h3>\n    <table>\n      <tr><th>Built-in protections</th><th>What they don't cover</th></tr>\n      <tr><td>Key travels only over HTTPS, only to <code>api.anthropic.com</code> — nowhere else, ever.</td><td rowspan=\"4\"><strong>Anyone who can use this browser profile can use the key.</strong> For the app to send it, it must be readable — so a family member on your login, a browser extension with page access, IT management software on an employer-owned machine, or malware that owns the computer could all reach it. No design eliminates this class of risk; the mitigations on the left shrink the blast radius to pocket change.</td></tr>\n      <tr><td>Never embedded in the file, never in backups, masked on screen.</td></tr>\n      <tr><td>FORGET KEY removes it instantly; Clear All Data wipes it too.</td></tr>\n      <tr><td>Revocable in seconds at console.anthropic.com — a stolen key dies the moment you kill it.</td></tr>\n    </table>\n    <div class=\"note\"><strong>The three-part habit that makes this genuinely low-risk:</strong> use a <strong>dedicated key</strong> that does nothing but power this app, put a <strong>low monthly spending cap</strong> on it ($5–10), and press <strong>FORGET KEY</strong> whenever you leave the app on a shared or work machine. Worst realistic case then: someone burns a few dollars of AI credit before you revoke.</div>\n\n    <h3>Rotating the key (replacing it)</h3>\n    <p>Rotation is cheap insurance — do it immediately if you ever pasted the key somewhere by mistake, suspect the machine, or see unfamiliar usage, and consider doing it every few months purely out of caution. The whole cycle takes under a minute:</p>\n    <ol>\n      <li>At <a href=\"https://console.anthropic.com/settings/keys\">console.anthropic.com/settings/keys</a>: <strong>revoke</strong> the old key (it stops working within moments), then <strong>Create Key</strong> for a fresh one.</li>\n      <li>In the app: <strong>FORGET KEY</strong>, paste the new key, <strong>SAVE KEY</strong>.</li>\n    </ol>\n    \n    <h3>Exactly what an Ask AI call transmits — the complete list</h3>\n    <table>\n      <tr><th>Item</th><th>Sent?</th><th>Detail</th></tr>\n      <tr><td><strong>Destination</strong></td><td>—</td><td><code>api.anthropic.com</code> over HTTPS — or, if you've configured a Local Model, <code>your-machine/v1/chat/completions</code> and nothing touches Anthropic at all.</td></tr>\n      <tr><td><strong>Your structured plan summary</strong></td><td>YES</td><td>The generated context you can read verbatim under \"EXACTLY WHAT'S SENT\" on the Ask AI tab: names, ages, filing status, state, retirement year, portfolio totals and asset mix, account-type split, Social Security/pension amounts and claim ages, and headline simulation results.</td></tr>\n      <tr><td><strong>Your questions and the running conversation</strong></td><td>YES</td><td>Ask AI is a conversation: each turn re-sends the session so far (your questions and the AI's replies, capped at the last 12 messages) so the model can remember its own follow-up questions and your answers. ⟲ NEW SESSION forgets everything; nothing is stored after you leave.</td></tr>\n      <tr><td><strong>Attachments you added</strong></td><td>YES</td><td>Only files you explicitly attached (images/PDF/text; up to 8). On the Local Model route, images/PDFs are skipped — text only.</td></tr>\n      <tr><td><strong>Account numbers, logins, SSNs</strong></td><td>NO</td><td>The app never collects them, so they cannot transmit.</td></tr>\n      <tr><td><strong>Your API key</strong></td><td>Header only</td><td>Self-hosted copies send it as an HTTPS header to api.anthropic.com only — never in the message body, never to a local model, never anywhere else.</td></tr>\n      <tr><td><strong>Anything from any other tab</strong></td><td>NO</td><td>Only the summary above — not your full expense list, not position-level detail beyond the mix, not your checklist notes.</td></tr>\n      <tr><td><strong>Anything, while Offline Mode is on</strong></td><td>NO</td><td>The toggle at the top of the Ask AI tab hard-disables the feature; the EXECUTE button is dead and the call cannot fire.</td></tr>\n    </table>\n\n    <h3>Offline Mode — the hard switch</h3>\n    <p>Every tab except Ask AI already runs fully offline. The <strong>✈ OFFLINE MODE</strong> toggle at the top of the Ask AI tab closes that last door: while it's on, Ask AI is disabled outright, nothing can transmit, and the app is completely air-gapped. The setting persists between sessions and works everywhere — including inside claude.ai. Use it if you want a guarantee stronger than \"I just won't press EXECUTE.\"</p>\n\n    <h3>Local Model — Ask AI without Anthropic (self-hosted copies)</h3>\n    <p>Self-hosted copies can point Ask AI at an <strong>OpenAI-compatible server on your own computer</strong>, so your plan summary and questions go to your machine and never leave it:</p>\n    <ol>\n      <li><strong>Ollama:</strong> install from ollama.com, pull a model (<code>ollama pull llama3.1</code>), and start the server with browser access allowed: <code>OLLAMA_ORIGINS=\"*\" ollama serve</code>. Endpoint URL: <code>http://localhost:11434/v1</code>.</li>\n      <li><strong>LM Studio:</strong> load a model, start the local server, and <strong>enable CORS</strong> in its server settings. Endpoint URL: <code>http://localhost:1234/v1</code>.</li>\n      <li>In the app: Ask AI → <strong>🖥 LOCAL MODEL</strong> → paste the URL and model name → USE LOCAL MODEL. A violet ACTIVE badge confirms the route; BACK TO ANTHROPIC restores the default.</li>\n    </ol>\n    <div class=\"card warn\"><strong>Honest trade-offs.</strong> Local models here are text-only (image/PDF attachments are skipped), slower on ordinary hardware, and — bluntly — <strong>markedly weaker at tax and retirement reasoning</strong> than the hosted model. The privacy is real; so is the quality drop. Whatever route answers you, verify against the tabs and authoritative sources before acting. If the call fails instantly, it's almost always CORS — revisit step 1/2.</div>\n\n    <p class=\"micro\">Rotating or losing a key never touches your plan data — the two live in separate storage, and the plan's durable copy is always your exported <code>.json</code> backup.</p>\n\n    <div class=\"card warn\"><strong>Never put the key anywhere except the panel (or a git-ignored <code>.env</code> on the dev-server build).</strong> Not in the HTML file, not in a backup, not in an email, chat, screenshot, or code repository. Keys are personal: if someone else wants Ask AI, they create their own in five minutes. If a key ever does escape, revoke it first and ask questions after.</div>\n    <p class=\"micro\">Running the developer (Vite) build instead? The <code>.env</code> proxy in the project README is the stronger option there — the key stays on the server side and never enters the browser at all.</p>\n  </div>\n</section>\n\n\n<!-- RELOAD -->\n<section id=\"reload\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">11</span> Reloading &amp; Resetting <a class=\"toclink\" href=\"#toc\">↑ Contents</a></h2>\n    <ul>\n      <li><strong>Save &amp; Apply</strong> (My Data tab) — writes your edits to the browser cache and rebuilds every tab.</li>\n      <li><strong>Export Backup</strong> / <strong>Import Backup</strong> (My Data tab) — save your whole plan to a <code>.json</code> file, or load one back.</li>\n      <li><strong>Clear All Data</strong> (My Data tab) — wipes the browser cache — everything, including your checklist notes and contacts, display preferences, and any saved API key — and returns you to the landing screen.</li>\n      <li>Your plan is cached in the browser between visits, so the app reopens straight to it — no reloading needed day to day.</li>\n    </ul>\n    <div class=\"note\">The browser cache is the convenience copy; the exported <code>.json</code> is the durable one. Export a fresh backup after any significant change so you can always rebuild on a new browser or device.</div>\n    <h3>Where to keep the backup file — and what to call it</h3>\n    <p>The backup is a plain <code>.json</code> file containing <strong>your real figures</strong> — balances, income, Social Security, pension, and spending. The app never transmits it; pressing Export Backup simply saves it to your device. From that moment it is an ordinary file, so give it the same care you'd give a bank statement: keep it somewhere private — your Documents folder, a personal cloud drive, or a USB stick — rather than a folder you share with other people, and think twice before emailing it.</p>\n    <p>The app fills in a sensible filename for you (<code>dangerclose-backup-</code> plus the date and time), so you can simply press Export. If you'd rather name it yourself, keeping the word <strong>backup</strong> somewhere in the name makes it easy to find later — and, for the small number of people who keep a copy of the app's source folder from GitHub, filenames containing <code>backup</code> are already on that project's ignore list, so a backup saved into that folder stays out of anything published. Nobody using the app normally needs to think about this; the suggested name already handles it.</p>\n    <div class=\"note\">If you maintain the project repository yourself, the ignore rule <code>*[Bb]ackup*.json</code> covers every backup this app produces (and any you rename), while leaving <code>package.json</code> and friends untouched.</div>\n    <h3>Where your data actually lives — and how to prove it to yourself</h3>\n    <p>A point worth being crystal-clear about, especially for the downloaded single-file copy: <strong>your data is never written into the HTML file itself.</strong> The file is a fixed program — you can open it, enter thirty years of financial detail, press Save &amp; Apply a hundred times, and not one byte of the file changes. Everything you enter goes into your <strong>browser's private storage compartment</strong> for that file. That's why your plan reappears when you reopen the same file in the same browser — and why handing the file to someone else, or posting it anywhere, can never hand over your numbers.</p>\n    <p>Don't take this manual's word for it. Any of these takes under two minutes:</p>\n    <table>\n      <tr><th>Test</th><th>How</th><th>What you'll see</th></tr>\n      <tr><td><strong>Two-browser test</strong></td><td>Open the file in Chrome, enter some data, Save &amp; Apply. Leave it open, then open the <em>same file</em> in Microsoft Edge (or Firefox).</td><td>Edge shows the fresh landing screen — no trace of your data. It lives in Chrome's storage, not in the file. (Windows ships with Edge built in, so most machines do have a second browser even if you only ever use one.)</td></tr>\n      <tr><td><strong>Private-window test</strong> (one browser is enough)</td><td>With data saved, open the same file in an incognito / InPrivate window of the same browser.</td><td>Fresh landing screen again — private windows get their own separate, throwaway storage.</td></tr>\n      <tr><td><strong>File-properties test</strong></td><td>Right-click the file in File Explorer → Properties, and note its size and \"Date modified.\" Use the app heavily, Save &amp; Apply, then check Properties again.</td><td>Identical size, identical date — nothing was ever written to the file.</td></tr>\n      <tr><td><strong>Copy test</strong></td><td>Copy the HTML file to a USB stick and open it on another computer.</td><td>Landing screen — the copy carries the program, never the data.</td></tr>\n    </table>\n    <div class=\"card warn\"><strong>The flip side of that privacy:</strong> browser storage is convenient but perishable. Clearing the browser's site data, a browser reset or reinstall, a different browser, a different device — and the plan is simply gone, with no recovery. The exported <code>.json</code> backup is the <strong>only durable copy</strong> of your data. Export one after every meaningful change (My Data → Export Backup); Import Backup rebuilds everything from it in seconds.</div>\n    <p class=\"micro\">The same storage model applies everywhere the app runs — claude.ai and the local dev server included. Your API key (<a href=\"#apikey\">§10</a>) follows the same rule, with one deliberate difference: the key is excluded even from backups.</p>\n  </div>\n</section>\n\n<!-- HSA & MEDICARE CUTOFF -->\n<section id=\"hsa\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">12</span> HSA Contributions &amp; the Medicare Cutoff <a class=\"toclink\" href=\"#toc\">↑ Contents</a></h2>\n    <p class=\"lead\">A Health Savings Account is the most tax-advantaged account there is — pre-tax going in, tax-free growth, tax-free coming out for medical costs. But the <em>contribution</em> side has a hard stop tied to Medicare, not to your retirement date. Miss it and the contributions become penalized excess. This section explains exactly when each of you has to stop.</p>\n\n    <h3>The rule that matters</h3>\n    <p>You <strong>cannot contribute to an HSA for any month you are enrolled in Medicare</strong> — Part A or Part B, and free Part A counts. Retiring changes nothing on its own; <em>Medicare enrollment</em> is the trigger. The two usually land close together, which is why this feels like a retirement rule when it isn't.</p>\n    <div class=\"note\">Being on Medicare only stops <em>new</em> contributions — the account stays fully usable. Withdrawals for qualified medical costs, including Medicare Part B / Part D / Advantage premiums (but <strong>not</strong> Medigap), remain tax-free for life.</div>\n\n    <h3>Two ways Medicare starts — and when you must stop</h3>\n    <table>\n      <tr><th>Situation</th><th>When Part A is effective</th><th>Last HSA-eligible month</th></tr>\n      <tr><td>Claiming Social Security <strong>at or before 65</strong></td><td>Automatically at 65 — and it can't be declined while you're drawing SS</td><td>The month before your 65th-birthday month</td></tr>\n      <tr><td>Claiming SS / enrolling <strong>after 65</strong></td><td>Back-dated up to 6 months from your application (never before 65)</td><td>About 6 months before you file — at the latest</td></tr>\n      <tr><td>Working past 65 on an <strong>employer HDHP</strong></td><td>Deferred until you actually enroll</td><td>You can keep contributing right up to enrollment</td></tr>\n    </table>\n\n    <h3>The 6-month look-back trap</h3>\n    <p>If you delay Social Security and Medicare past 65 and then file, Part A is made <strong>retroactive up to six months</strong> (but never earlier than your 65th birthday). Any HSA contribution that falls inside that retroactive window turns into an excess contribution after the fact. The safe move: <strong>stop contributing at least six months before you file for Medicare or Social Security.</strong></p>\n\n    <h3>The year you stop is prorated</h3>\n    <p>Your annual limit is prorated by the number of HSA-eligible months in that final year — eligible for 4 of 12 months means 4/12 of the limit, and the age-55+ $1,000 catch-up prorates the same way. (The IRS \"last-month rule\" can let you fund a full year if you're eligible on December 1, but it triggers a 13-month testing period — losing eligibility to Medicare the next year claws part of it back — so don't lean on it right at your cutoff.)</p>\n\n    <h3>It can come even earlier than Medicare</h3>\n    <p>Medicare is the <em>latest</em> possible cutoff, not the only one. Contributing also requires that you're covered by a <strong>qualifying high-deductible health plan (HDHP)</strong>. If you drop the HDHP at retirement — moving onto an ACA marketplace plan, a non-HDHP retiree plan, or a spouse's plan — HSA eligibility ends that month regardless of Medicare.</p>\n\n    <h3>Where your actual dates live</h3>\n    <p>The <strong>Events</strong> tab computes each spouse's exact cutoff from the Social Security claiming ages in <strong>My Data</strong>: it shows the last eligible month, whether that final year is full or prorated, and a countdown, and it raises an alarm as the date nears. Change a claiming age and the cutoff moves with it. Treat the rules here as the explanation and the Events tab as the live answer for your plan.</p>\n\n    <div class=\"card warn\"><strong>Not tax advice.</strong> Excess HSA contributions are taxed and carry a 6% annual excise tax until they're withdrawn. Confirm the exact stop date — and any late-year contribution — with your HSA custodian and CPA before acting.</div>\n  </div>\n</section>\n\n<!-- LIMITATIONS -->\n<section id=\"limits\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">13</span> Limitations &amp; Known Issues <a class=\"toclink\" href=\"#toc\">↑ Contents</a></h2>\n    <ul>\n      <li><strong>Tax brackets are simplified.</strong> Federal bracket / standard-deduction logic is approximate; bracket inflation is modeled at 2%/yr. NIIT uses an estimated taxable-account yield (not actual dividends); the AMT check is simplified (standard-deduction add-back only); QCDs are a simplified what-if (a flat annual amount from the year each spouse turns 71; the one-time CRT/CGA election isn't modeled).</li>\n      <li><strong>State tax is an approximation layer.</strong> The 51-jurisdiction module (see the Taxes tab entry) uses effective flat rates in place of progressive state brackets, treats several income-limited exclusions as unconditional, and skips county/city taxes — pick your state in My Data, then verify against your state's own rules.</li>\n      <li><strong>Mortality is deterministic by default</strong> — deaths at exactly the entered life expectancies — with an optional <strong>STOCHASTIC LONGEVITY</strong> toggle on the Monte Carlo tab that samples death ages per run (see §06). The stochastic mode still samples the spouses independently — no joint-mortality correlation.</li>\n      <li><strong>Long-term care is modeled two ways, both simplified.</strong> The default is a single $150K–$300K shock at a fixed age; an optional sustained model (the <strong>LTC DISTRIBUTION</strong> toggle on the Monte Carlo tab, the Stress \"LTC Marathon\", and Run D) draws a multi-year care duration ending at death and escalates it at inflation +1.5%/yr. Neither is a full actuarial care distribution, and insurance payouts and home equity are not credited against the cost — so the sustained figures are deliberately gross (worst-case) numbers.</li>\n      <li><strong>Auto-replacement is a fixed example schedule</strong> and won't match every household. The old fixed part-time-work taper now applies only to the demo data — entering your own income streams (My Data → Other Income Streams) replaces it entirely.</li>\n      <li><strong>Peer benchmarks are point-in-time approximations</strong> from public surveys and will go stale.</li>\n      <li><strong>The Ask AI tab requires network access</strong> to the AI API; offline or rate-limited, it won't return results. Self-hosted copies also need a personal API key (<a href=\"#apikey\">§10</a>).</li>\n      <li><strong>US-only.</strong> No non-US tax residencies, accounts, Social Security analogues, or currencies.</li>\n      <li><strong>Designed for a desktop browser.</strong> The app has no responsive phone layout: on a narrow screen the tab strip wraps heavily, wide tables require horizontal scrolling, and the smallest text sits below the WCAG AA contrast threshold. Simple Mode (◑ SHOW FEWER TABS), the UI SIZE control, and the high-contrast skins materially improve this, but a phone remains a compromised experience.</li>\n      <li><strong>The temporary OBBBA \"senior bonus\" deduction (up to $6,000/person 65+, tax years 2025–2028) is modeled on the Taxes tab, but not in the Roth conversion ladder.</strong> The Taxes tab applies it and phases it out at 6% of MAGI above $75,000 single / $150,000 filing jointly; the ladder and its strategy comparator apply only the ordinary age-65 deduction, so the two tabs can differ for any ladder year at or before 2028. Every other 2026 constant — brackets, deductions, IRMAA tiers, QCD cap, RMD table and ages, wage base — has been verified against IRS Rev. Proc. 2025-32, CMS, and SSA and is asserted by the validation suite that ships with the project.</li>\n      <li><strong>Other accounts are taxed by type, with five simplifications.</strong> Since v5.26 each row you enter under Other accounts carries a tax type and the engines use it. What that leaves approximate: (1) a draw from that pot is taxed <em>in proportion</em> to what the pot holds, not by draining one tax type before another; (2) <strong>HSA balances are modelled as tax-free throughout</strong>, though an HSA is only tax-free for qualified medical costs; (3) a non-qualified <strong>annuity is part after-tax basis</strong>, which one label cannot express — all of it is treated as ordinary income, the pessimistic direction; (4) a <strong>qualified</strong> annuity held inside an IRA does have an RMD and will be mis-classified by the name-based guess — correct it on the row, and any row the app re-classified is named in the review notice; (5) an account name the app cannot classify defaults to <strong>Traditional</strong>, which over-taxes a brokerage account nobody renamed. These are the same simplifications recorded in METHODOLOGY.md.</li>\n      <li><strong>The BASE prior is meaningfully more conservative than historical US equity performance</strong> (see section 06). Success rates read lower than commercial tools at default settings — by design.</li>\n    </ul>\n    \n    \n    <h3>Two kinds of dated information — one updates itself, one needs a new file</h3>\n    <p>Everything time-sensitive in this app falls into exactly two buckets, and knowing which is which tells you what maintenance it needs (short answer: almost none, and none of it is your data).</p>\n    <table>\n      <tr><th></th><th>Your personal timeline</th><th>The baked-in constants</th></tr>\n      <tr><td><strong>What it covers</strong></td><td>Every alarm on the Events tab that's about <em>you</em>: Medicare enrollment windows, your HSA contribution cutoff, Social Security filing windows, Roth-conversion and RMD deadlines, quarterly backup nudges, the January plan review.</td><td>The law-and-data numbers the math runs on: federal tax brackets and deductions, IRMAA tiers, the QCD cap, the Social Security wage base, the state-tax module, peer benchmarks, the backtest history.</td></tr>\n      <tr><td><strong>How it stays current</strong></td><td><strong>By itself, automatically, forever.</strong> Nothing is stored — every alarm is recalculated on every load from the dates in your plan plus today's date. Change a claiming age in My Data and every affected deadline moves instantly.</td><td><strong>Only with a new copy of the file.</strong> These numbers are printed into the app like figures in a book — the file cannot rewrite itself (that immutability is also why it's safe to share). Washington changes them about once a year.</td></tr>\n      <tr><td><strong>What you have to do</strong></td><td>Nothing. Keep your plan accurate in My Data; the alarms follow.</td><td>When the ⌛ STALE DATA strip appears (the January after this build's tax year), you need the current <strong>HTML file</strong>. The current build always lives at <a href=\"https://stextor.github.io/danger-close\">stextor.github.io/danger-close</a> — run it in your browser there, or save a fresh offline HTML copy from that page. (If someone handed you this file directly, you no longer need to go back to them for updates.) Once you have the new HTML file, open it in place of the old one: your plan survives the swap — it lives in your browser, not the file. Export a backup first as cheap insurance.</td></tr>\n    </table>\n    <div class=\"plain\">\n      <span class=\"lbl\">In plain English</span>\n      <p>Think of the app as a <strong>calculator with this year's tax tables printed on the back</strong>. The calculator part never goes stale — your deadlines and alarms are computed fresh from your own dates every time you open it. The printed tables do go stale, once a year, when the IRS publishes new ones — and since the file can't reprint itself, the fix is a fresh copy of the file. You'll never have to guess when: the app tells you, loudly, with a strip across the top that won't go away until the tables are current. The fresh copy is always one click away at <a href=\"https://stextor.github.io/danger-close\">stextor.github.io/danger-close</a> — no need to track down whoever gave you this file. If you maintain it yourself, the Events tab's tax-refresh alarm carries the update workflow.</p>\n    </div>\n\n    <h3>Data vintages — what is baked into this build, and how it stays current</h3>\n    <p>A single-file app cannot quietly update itself — a privacy feature with a maintenance cost. Every dated dataset in this build is listed here, and the app makes their age impossible to miss rather than pretending at an auto-updater:</p>\n    <table>\n      <tr><th>Dataset</th><th>Vintage in this build</th><th>Source</th><th>Refresh cadence</th></tr>\n      <tr><td>Federal tax brackets, deductions, LTCG, QCD cap</td><td>Tax year 2026</td><td>IRS Rev. Proc. 2025-32</td><td>Annual (late Oct)</td></tr>\n      <tr><td>IRMAA tiers &amp; surcharges</td><td>2026</td><td>CMS</td><td>Annual (Nov)</td></tr>\n      <tr><td>Social Security wage base</td><td>2026 ($184,500)</td><td>SSA</td><td>Annual (Oct)</td></tr>\n      <tr><td>State tax module</td><td>2026 approximations</td><td>State DORs / surveys</td><td>Annual</td></tr>\n      <tr><td>RMD Uniform Lifetime Table</td><td>2022 revision (current)</td><td>IRS Pub. 590-B</td><td>Rarely changes</td></tr>\n      <tr><td>Peer benchmarks (Ranking)</td><td>2022 SCF + EBRI/SSA/AALTCI</td><td>Federal Reserve et al.</td><td>SCF is triennial — the 2025 survey publishes ~fall 2026</td></tr>\n      <tr><td>Backtest return/CPI series</td><td>Through 2025</td><td>Damodaran (NYU Stern) + BLS</td><td>Annual (Jan)</td></tr>\n      <tr><td>LTC cost/duration parameters</td><td>2022-24 research vintage</td><td>ASPE / Urban Institute</td><td>Occasional</td></tr>\n    </table>\n    <p><strong>The three-layer freshness system:</strong> <em>(1)</em> the <strong>Events tab</strong> carries a live alarm for each refresh cycle (tax constants, backtest append, SCF release) with paste-in instructions and the authoritative source for each; <em>(2)</em> starting the January after this build's tax year ends, a <strong>⌛ STALE DATA strip</strong> appears above the tabs on every view — amber the first year, red from the second — and cannot be dismissed, because stale tax law silently corrupts every projection; <em>(3)</em> the <strong>validation suite</strong> in the project folder asserts the constants against their cited sources, so a refreshed build proves itself. The update path is deliberately simple: download the current build and Import Backup — your data lives in the browser, not the file, so swapping the file loses nothing.</p>\n\n    <p class=\"micro\">The Historical Backtest tab now provides the historical-replay capability (\"what if I retired in 1966?\") that earlier versions lacked.</p>\n  </div>\n</section>\n\n<!-- FAQ -->\n<section id=\"faq\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">14</span> Troubleshooting &amp; FAQ <a class=\"toclink\" href=\"#toc\">↑ Contents</a></h2>\n    <p>The most common \"is it broken?\" moments, decoded. Almost all of them trace back to one of three things: no simulation has run yet, the browser cache was cleared, or the Ask AI tab can't reach the network.</p>\n    <table>\n      <tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr>\n      <tr><td>Will Social Security run out? Should I plan on a cut?</td><td>Reserve depletion is not bankruptcy \u2014 payroll taxes keep funding checks, just not the full scheduled amount (2026 Trustees Report: ~78% from late 2032 on the retirement fund alone, or ~83% from 2034 if Congress merges in the disability fund).</td><td>Whether Congress acts \u2014 it always has before a cut landed \u2014 is unknowable, so the SS tab\\'s <strong>Trust-Fund Depletion Scenario</strong> panel lets you model it instead of guessing: pick a preset or custom cut and every simulation, the Roth engine, the Dashboard, and the claiming grid recompute. Try your plan both ways; the gap between them is your personal exposure.</td></tr>\n      <tr><td>How do I model rental income, part-time work, an annuity, or other income?</td><td>First-class support now</td><td>My Data → <strong>OTHER INCOME STREAMS</strong>: one row per stream (rental / job / annuity / other) with a monthly amount in today’s dollars, inclusive start and end years (blank end = for life), owner (either spouse or joint — an owner’s stream stops at that person’s projected death), a COLA flag, and taxable vs tax-free treatment. Streams flow through every engine — Monte Carlo, Trajectory, Withdrawal, Taxes (job rows also pay FICA), IRMAA, and the Roth optimizer. For a job after retirement, enter the year the work starts and the last year you expect to work. Entering any stream replaces the built-in example part-time schedule. If you used the old negative-expense-row workaround, move that row here so the tax engines see it.</td></tr>\n      <tr><td>A tab is blank or a chart is missing</td><td>No simulation has run for the selected retirement date yet</td><td>Pick a retirement date at the top — Monte Carlo and Stress auto-run on first visit.</td></tr>\n      <tr><td>Ask AI does nothing when clicked</td><td>It refuses to send until at least one simulation has completed</td><td>Open the Monte Carlo tab once, let it finish, then ask again.</td></tr>\n      <tr><td>Ask AI shows <code>ERROR [4xx/5xx]</code></td><td>The AI API received the request but refused it (rate limit, oversized attachment, outage)</td><td>Wait a minute and retry. Trim attachments — 8-file cap; images, PDF, and text only (no HEIC, no Office files — export those to PDF/CSV).</td></tr>\n      <tr><td>Ask AI shows <code>COMMS ERROR</code></td><td>No network path to the AI API (offline, blocked, or a changed endpoint)</td><td>Check the connection. Self-hosted copy? Paste a personal API key into the LOCAL API KEY panel on the Ask AI tab (see its warning text). Everything else in the app runs fully offline — only Ask AI needs the network.</td></tr>\n      <tr><td><code>REQUEST TIMED OUT (45s)</code></td><td>The question was very broad or the service is slow</td><td>Ask a narrower question and retry.</td></tr>\n      <tr><td>All my data vanished</td><td>The browser cache was cleared, or this is a new browser/device</td><td>My Data → <strong>Import Backup</strong> with your exported <code>.json</code>. Export one regularly — the cache is a convenience copy, not storage (see <a href=\"#start\">§03</a>).</td></tr>\n      <tr><td>A red banner sits on every tab</td><td>An income figure is missing, so an example value was substituted</td><td>Enter the missing Social Security / pension numbers in My Data (see <a href=\"#banner\">§04</a>).</td></tr>\n      <tr><td>My success rate is far below other tools</td><td>The BASE prior is deliberately conservative (see <a href=\"#controls\">§06</a>)</td><td>Not a bug. Switch the scenario prior to BULL-LEANING for history-like assumptions and compare.</td></tr>\n      <tr><td>One edit changed numbers everywhere</td><td>By design — every tab derives from one model (see <a href=\"#flow\">§02</a>)</td><td>Re-check the edit in My Data; Save &amp; Apply rebuilds all 26 tabs from it.</td></tr>\n      <tr><td>My API key vanished from the Ask AI tab</td><td>The key lives in browser storage — a different browser, incognito window, cleared site data, Clear All Data, or (in some browsers) a moved/renamed file starts a fresh store</td><td>Paste the key again (10 seconds) and Import Backup for the plan. By design the key is never inside a backup — see <a href=\"#apikey\">§10</a>.</td></tr>\n      <tr><td>I think my API key leaked</td><td>Keys are instantly revocable — a leaked key is only dangerous while it lives</td><td>Revoke it at console.anthropic.com/settings/keys, create a new one, FORGET KEY in the app, paste the new one, and check the Console usage page (see <a href=\"#apikey\">§10</a>).</td></tr>\n      <tr><td>The HSA cutoff date looks wrong</td><td>It derives from the Social Security claiming ages in My Data</td><td>Fix the claim ages — the Events tab recomputes the cutoff automatically (see <a href=\"#hsa\">§12</a>).</td></tr>\n    </table>\n    <div class=\"note\"><strong>Keeping a copy of this manual:</strong> use the toolbar above the Docs tab to download it as HTML or print it to PDF — useful if you want the reference open while working in another tab.</div>\n  </div>\n</section>\n\n<!-- GLOSSARY -->\n<section id=\"glossary\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">15</span> Glossary <a class=\"toclink\" href=\"#toc\">↑ Contents</a></h2>\n    <p>Concise reference. Many terms have nuances this glosses over — verify against authoritative sources before acting.</p>\n    <div class=\"glossary\">\n      <p class=\"term\"><b>4% Rule</b> — Bengen's heuristic: withdrawing 4% of a starting portfolio (inflation-adjusted thereafter) historically lasted 30 years across most US periods. Often quoted, rarely the right answer for everyone.</p>\n      <p class=\"term\"><b>ACA</b> — Affordable Care Act. The \"ACA bridge\" covers a spouse between job-based coverage and Medicare at 65.</p>\n      <p class=\"term\"><b>API Key</b> — the secret code (starts <code>sk-ant-</code>) that identifies your Anthropic developer account when a self-hosted copy calls the AI service. Created at console.anthropic.com; treat it like a card number and see §10 for the full guide.</p>\n      <p class=\"term\"><b>Agency MBS</b> — Mortgage-backed securities guaranteed by Fannie/Freddie/Ginnie; Treasury-level credit quality with extra yield for prepayment risk.</p>\n      <p class=\"term\"><b>Asset Class</b> — A category of investments with similar behavior (equities, bonds, cash, commodities). The MC classifies holdings this way.</p>\n      <p class='term'><b>Beneficiary Designation</b> — The named recipient on a retirement account or policy; it overrides your will, so keep it current.</p>\n      <p class='term'><b>Bengen / 4% Rule origin</b> — William Bengen's 1994 study established the 4% safe-withdrawal heuristic; later refined by the Trinity Study (Cooley, Hubbard, Walz 1998).</p>\n      <p class=\"term\"><b>Beta</b> — How much a holding moves relative to the market. 1.0 = moves with it; 1.5 = 50% more; 0.5 = 50% less.</p>\n      <p class=\"term\"><b>Bond</b> — A debt instrument paying interest and returning principal at maturity; provides stability and income.</p>\n      <p class='term'><b>Bond Tent</b> — Pfau/Kitces idea of dipping equity exposure right around retirement, then rising again — the shape that defends the fragile early years against sequence risk.</p>\n      <p class=\"term\"><b>Bond Vigilantes</b> — Investors who sell long government bonds (pushing yields up) to protest fiscal policy.</p>\n            <p class='term'><b>CAPE (Shiller P/E)</b> — Cyclically-adjusted price/earnings ratio; high CAPE has historically predicted lower forward real returns, part of the rationale for the conservative BASE prior.</p>\n      <p class='term'><b>Capital Gains</b> — Profit on a sold asset. Long-term (held &gt;1yr) is taxed at 0/15/20%; short-term is taxed as ordinary income.</p>\n      <p class=\"term\"><b>CFA / CFP / CPA</b> — Professional designations for investment analysts / financial planners / accountants. The author holds <strong>none</strong> of these.</p>\n      <p class='term'><b>COLA</b> — Cost-of-living adjustment; the annual inflation raise applied to Social Security and some pensions.</p>\n      <p class='term'><b>Cost Basis</b> — What you paid for a holding; sale proceeds above basis are capital gains. Inherited assets generally get a step-up to date-of-death value.</p>\n      <p class=\"term\"><b>Crisis Scenario</b> — Low-probability severe shock (2008-style). Default 3%/yr under BASE.</p>\n      <p class=\"term\"><b>Crossover Age</b> — The age at which delayed SS claiming's cumulative benefit overtakes earlier claiming. Living past it favors delaying.</p>\n      <p class=\"term\"><b>DCA</b> — Dollar-cost averaging: investing a fixed amount on a schedule regardless of price.</p>\n      <p class=\"term\"><b>Drawdown</b> — Percentage decline from a peak to a trough. \"Max drawdown\" is the worst such decline.</p>\n      <p class=\"term\"><b>Duration</b> — A bond's price sensitivity to rates. 6-yr duration ≈ −6% if rates rise 1%.</p>\n      <p class=\"term\"><b>EBRI</b> — Employee Benefit Research Institute; publishes the Retirement Readiness Index. Cited in Ranking.</p>\n      <p class='term'><b>Effective vs Marginal Rate</b> — Marginal is the rate on your next dollar; effective is total tax ÷ total income. Roth-conversion decisions hinge on the marginal rate.</p>\n      <p class=\"term\"><b>Equity</b> — Stock ownership; \"equities\" = stock holdings collectively.</p>\n      <p class='term'><b>Estate Documents</b> — Will, revocable living trust, durable power of attorney, healthcare proxy/advance directive, and beneficiary designations. Tracked on the Checklist tab.</p>\n      <p class=\"term\"><b>ETF</b> — Exchange-traded fund; a pooled fund trading like a stock. Most index funds are ETFs.</p>\n      <p class=\"term\"><b>Expense Ratio</b> — A fund's annual fee as a % of assets. 0.10% = $10/yr per $10K. Compounds over decades.</p>\n      <p class=\"term\"><b>Fed SCF</b> — Federal Reserve Survey of Consumer Finances; the authoritative US wealth-comparison source. Used in Ranking.</p>\n      <p class=\"term\"><b>Fiduciary</b> — Someone legally bound to act in your best interest. A fee-only fiduciary is paid only by you. The author is <strong>not</strong> your fiduciary.</p>\n      <p class=\"term\"><b>FRA</b> — Full Retirement Age; the age for full Social Security (67 for those born 1960+). Earlier reduces, later increases.</p>\n      <p class=\"term\"><b>Glidepath</b> — A planned allocation change over time. A <em>reverse</em> glidepath (Pfau/Kitces) starts retirement lower-equity, then raises equity to combat sequence risk.</p>\n      <p class=\"term\"><b>Guyton-Klinger Guardrails</b> — Dynamic spending rules: cut if the portfolio falls to a lower band (80% of plan), raise at an upper band (120%).</p>\n      <p class=\"term\"><b>High Yield</b> — Below-investment-grade corporate bonds (\"junk\"); higher yield for higher default risk.</p>\n      <p class=\"term\"><b>HSA</b> — Health Savings Account. Tax-deductible in, tax-free growth, tax-free for qualified medical use; after 65, non-medical use is taxed but not penalized.</p>\n      <p class=\"term\"><b>Index Fund</b> — A fund that passively tracks an index; typically far cheaper than active funds.</p>\n      <p class=\"term\"><b>Investment Grade</b> — Corporate bonds rated BBB-/Baa3 or higher; lower risk and yield than high-yield.</p>\n      <p class=\"term\"><b>IRA</b> — Individual Retirement Account; Traditional (pre-tax in, taxed out) or Roth (after-tax in, tax-free out).</p>\n      <p class=\"term\"><b>IRMAA</b> — Income-Related Monthly Adjustment Amount; a Medicare surcharge based on MAGI two years prior. Cliffs — crossing by $1 can cost thousands.</p>\n      <p class=\"term\"><b>Kitces, Michael</b> — Planning researcher; with Pfau, established the reverse-glidepath work.</p>\n      <p class=\"term\"><b>LTC</b> — Long-Term Care; help with daily activities, largely not covered by Medicare. A major risk — can run $80K–$150K+/yr/person.</p>\n      <p class=\"term\"><b>LTC Duration Tail</b> — The risk that care lasts many years and clusters at the very end of life, when the portfolio is smallest and one spouse's Social Security has stopped. A single early \"LTC shock\" misses it; the Stress LTC Marathon and Monte Carlo Run D exist to show it.</p>\n      <p class=\"term\"><b>MAGI</b> — Modified Adjusted Gross Income; used for IRMAA, Roth limits, and credits. Slightly different from AGI.</p>\n      <p class=\"term\"><b>MBS</b> — Mortgage-backed securities; bonds backed by pools of home mortgages.</p>\n      <p class=\"term\"><b>MFJ</b> — Married Filing Jointly; wider brackets and a higher standard deduction than other statuses.</p>\n      <p class=\"term\"><b>Money Market</b> — Cash-like instruments aiming for a stable $1 NAV; lowest risk and yield.</p>\n      <p class=\"term\"><b>Monte Carlo</b> — Running thousands of randomized projections to estimate the distribution of outcomes.</p>\n      <p class=\"term\"><b>NAPFA</b> — National Association of Personal Financial Advisors; a directory of fee-only fiduciaries (napfa.org).</p>\n      <p class='term'><b>NIIT</b> — Net Investment Income Tax; an extra 3.8% on investment income above MAGI (unindexed) thresholds. Modeled on the Taxes tab from an estimated taxable-account yield.</p>\n      <p class=\"term\"><b>Pension</b> — A defined-benefit income stream from a former employer. The example has a small one; most private workers don't.</p>\n      <p class=\"term\"><b>Percentile</b> — The value below which a stated % of outcomes fall. The 10th-percentile outcome is worse than 90% of cases.</p>\n      <p class=\"term\"><b>Pfau, Wade</b> — Retirement-income researcher (safe withdrawal rates, reverse glidepaths, retirement-income frameworks).</p>\n      <p class='term'><b>Provisional Income</b> — The figure (other income + half of SS) that determines how much of your Social Security is taxable.</p>\n      <p class='term'><b>QCD</b> — Qualified Charitable Distribution; a direct Traditional-IRA→charity gift (age 70½+), excluded from income and MAGI, that can satisfy RMDs. Modeled as a what-if on the Taxes tab (also lowers MAGI on the IRMAA tab); 2026 cap $111K/person, indexed. Roth QCDs are permitted but pointless — Roth withdrawals are already tax-free.</p>\n      <p class=\"term\"><b>Real Yield</b> — Bond yield after expected inflation; TIPS yields are the common reference.</p>\n      <p class=\"term\"><b>Recession Scenario</b> — Moderate contraction (equity ≈ −15%). Default 10%/yr under BASE.</p>\n      <p class=\"term\"><b>RMD</b> — Required Minimum Distribution; forced taxable withdrawals from Traditional accounts starting at 73/75. A key motivation for Roth conversions.</p>\n      <p class=\"term\"><b>Roth Conversion</b> — Moving Traditional money to Roth, paying tax now for tax-free growth later. Common in low-income gap years.</p>\n      <p class=\"term\"><b>Roth IRA / 401(k)</b> — After-tax contributions; growth and qualified withdrawals are tax-free.</p>\n      <p class='term'><b>Roth Ladder</b> — A multi-year sequence of Roth conversions in low-income gap years to shrink future RMDs and the widow's-penalty bracket jump.</p>\n      <p class=\"term\"><b>Ruin Rate</b> — The % of MC paths that hit $0 before the horizon ends.</p>\n      <p class=\"term\"><b>Sequence-of-Returns Risk</b> — The risk that poor early-retirement returns permanently impair the portfolio even if averages are fine. The first 5–10 years are highest-risk.</p>\n      <p class=\"term\"><b>Sharpe Ratio</b> — Excess return over the risk-free rate ÷ standard deviation. Higher is better.</p>\n      <p class=\"term\"><b>Social Security</b> — Federal retirement benefit, claimable 62 (reduced) to 70 (max). Depends on claiming age, work history, longevity.</p>\n      <p class=\"term\"><b>SSA</b> — Social Security Administration; ssa.gov is the authoritative benefit-estimate source.</p>\n      <p class=\"term\"><b>Stagflation</b> — Low growth + high inflation (1970s). The MC scenario uses negative real returns with 6–8% inflation. Default 7%/yr under BASE.</p>\n      <p class='term'><b>Standard Deduction</b> — The flat amount subtracted from income before tax; larger for Married Filing Jointly than Single — the core of the widow's penalty.</p>\n      <p class='term'><b>Step-Up in Basis</b> — At death, taxable assets reset to current market value, erasing the heir's capital-gains liability on prior appreciation.</p>\n      <p class=\"term\"><b>Success Rate</b> — the share of Monte Carlo paths ending above a stated threshold. The app uses several, and each view labels which one it is reporting. Not the same as ruin rate.</p>\n      <p class='term'><b>Survivor Benefit</b> — When a spouse dies, the survivor keeps the larger of the two Social Security checks (not both) — a benefit cut the Survivor tab models.</p>\n      <p class=\"term\"><b>TCJA</b> — 2017 Tax Cuts and Jobs Act. Its individual provisions were originally scheduled to expire after 2025; later legislation (OBBBA) superseded that sunset. See <a href=#limits>§13</a> for what this app actually models.</p>\n      <p class=\"term\"><b>Term Premium</b> — Extra yield long bonds offer over short ones for duration risk.</p>\n      <p class=\"term\"><b>TIPS</b> — Treasury Inflation-Protected Securities; principal adjusts with CPI, giving a real yield.</p>\n      <p class=\"term\"><b>Token (AI billing)</b> — the unit AI usage is billed in, roughly ¾ of a word. A full Ask AI question and answer runs a few thousand tokens — well under a cent.</p>\n      <p class=\"term\"><b>Trad / Traditional</b> — Pre-tax retirement accounts; contributions reduce taxable income, withdrawals taxed, RMDs apply. Opposite of Roth.</p>\n      <p class=\"term\"><b>Treasury</b> — US government debt. T-bills &lt;1yr, T-notes 2–10yr, T-bonds 20–30yr. Lowest credit risk.</p>\n      <p class=\"term\"><b>Volatility</b> — Variation in returns, usually standard deviation. Higher = wider range of outcomes.</p>\n      <p class='term'><b>Widow's Penalty</b> — The tax hit when a surviving spouse files Single: narrower brackets and a smaller standard deduction on often-similar income.</p>\n      <p class=\"term\"><b>Yield Curve</b> — Yields across maturities. \"Steepening\" = long yields rising vs short; \"inverted\" = short above long (a recession signal).</p>\n      <p class='term'><b>Authoritative sources</b> — Verify against <a href='https://www.ssa.gov'>ssa.gov</a> (benefits), <a href='https://www.irs.gov'>irs.gov</a> (tax), <a href='https://www.medicare.gov'>medicare.gov</a> (IRMAA/premiums), and find a fee-only fiduciary at <a href='https://www.napfa.org'>napfa.org</a>.</p>\n    \n    </div>\n    <a class=\"totop-foot\" href=\"#toc\">↑ Back to Table of Contents</a>\n  </div>\n</section>\n\n<!-- FINAL -->\n<section id=\"final\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">16</span> Final Disclaimer <a class=\"toclink\" href=\"#toc\">↑ Contents</a></h2>\n    <div class=\"card danger\">\n      <p>This software is a personal modeling tool the author built for their own use and decided to share. <strong>It is not a product. No support, no warranty, no service commitment, no guarantee of correctness.</strong></p>\n      <p>If you use this software and lose money, miss a tax deadline, claim Social Security at the wrong age, buy the wrong house, run out of money, or experience any other setback — that is your responsibility, not the author's. <strong>The author has no professional financial credentials of any kind</strong> — no CFP, CFA, CPA, Series 65, Enrolled Agent, or law license — and is a stranger on the internet who wrote some JavaScript as a hobby.</p>\n      <p style=\"margin-bottom:0\"><strong>Before any decision this app informs:</strong> consult a fee-only fiduciary advisor (NAPFA.org), a CPA for tax planning (Roth conversions, IRMAA, RMDs), and an estate attorney; verify every input against your statements (custodian, SSA, employer, insurer); and verify every output against a second opinion. If you cannot accept these terms, close the app and use a tool from a regulated provider.</p>\n    </div>\n    <p style=\"font-style:italic;color:var(--ink-faint);font-size:12px\">Danger Close is provided \"AS IS.\" The author retains no responsibility for outcomes resulting from its use.</p>\n  </div>\n</section>\n\n<footer>\n  <div class=\"wrap\">\n    <div class=\"kicker\">// END OF FIELD MANUAL</div>\n    DANGER CLOSE v5.47 · documentation regenerated · not financial advice · guardrails: Guyton-Klinger (80% / 120%)\n  </div>\n</footer>\n\n</body>\n</html>\n";
+const DOCS_HTML = "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>Danger Close — Field Manual</title>\n<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n<link href=\"https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Spline+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap\" rel=\"stylesheet\">\n<style>\n  :root{\n    --bg:#070b09; --bg2:#0b130f; --panel:#0d1611; --panel2:#101c15;\n    --line:#1a3a2a; --line2:#27513a;\n    --green:#00ff88; --green-dim:#3a7a5a; --amber:#ffaa00; --red:#ff4444; --cyan:#00ccff; --violet:#aa66ff; --orange:#ff6600;\n    --ink:#c0d8cc; --ink-dim:#6a8a7a; --ink-faint:#3a7a5a;\n    --mono:'JetBrains Mono',monospace; --disp:'Chakra Petch',sans-serif; --body:'Spline Sans',sans-serif;\n  }\n  *{box-sizing:border-box}\n  html{scroll-behavior:smooth}\n  body{\n    margin:0; background:#070b09; color:var(--ink); font-family:var(--body); font-size:15px; line-height:1.7;\n    background-image:\n      radial-gradient(circle at 15% 10%, rgba(0,255,136,0.05), transparent 40%),\n      radial-gradient(circle at 85% 90%, rgba(0,204,255,0.04), transparent 45%),\n      repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,136,0.012) 3px, transparent 4px);\n  }\n  a{color:var(--cyan); text-decoration:none}\n  a:hover{text-decoration:underline}\n  .wrap{max-width:1000px; margin:0 auto; padding:0 22px}\n\n  /* ── HERO ── */\n  header.hero{\n    position:relative; padding:70px 0 46px; border-bottom:1px solid var(--line); overflow:hidden;\n    background:linear-gradient(180deg, rgba(0,255,136,0.04), transparent);\n  }\n  .reticle{position:absolute; top:50%; right:-60px; transform:translateY(-50%); width:340px; height:340px; opacity:.13; pointer-events:none}\n  .callsign{font-family:var(--mono); font-size:11px; letter-spacing:5px; color:var(--green-dim); margin-bottom:14px}\n  .byline{position:absolute; top:18px; right:22px; z-index:3; font-family:var(--mono); font-size:11px; letter-spacing:2px; color:var(--green-dim)}\n  h1{font-family:var(--disp); font-weight:700; font-size:62px; line-height:.95; margin:0 0 8px; letter-spacing:1px;\n     color:var(--green); text-shadow:0 0 30px rgba(0,255,136,0.25)}\n  h1 .lo{color:var(--ink); display:block; font-size:20px; letter-spacing:8px; font-weight:500; margin-top:12px}\n  .tagline{font-size:17px; color:var(--ink-dim); max-width:620px; margin-top:18px}\n  .meta-strip{display:flex; gap:26px; flex-wrap:wrap; margin-top:26px; font-family:var(--mono); font-size:11px; color:var(--green-dim)}\n  .meta-strip b{color:var(--ink); font-weight:500}\n\n  /* ── SECTION ── */\n  section{padding:46px 0; border-bottom:1px solid var(--line)}\n  h2{font-family:var(--disp); font-weight:600; font-size:30px; color:var(--green); margin:0 0 6px; letter-spacing:.5px;\n     display:flex; flex-wrap:wrap; align-items:center; gap:12px}\n  h2 .num{font-family:var(--mono); font-size:13px; color:var(--green-dim); border:1px solid var(--line2); padding:3px 8px; border-radius:3px}\n  h3{font-family:var(--disp); font-weight:600; font-size:20px; color:var(--ink); margin:30px 0 8px; letter-spacing:.3px}\n  h4{font-family:var(--disp); font-weight:600; font-size:15px; color:var(--amber); margin:18px 0 4px; letter-spacing:.5px; text-transform:uppercase}\n  p{margin:10px 0}\n  .lead{font-size:16px; color:var(--ink)}\n  strong{color:#e6f4ec; font-weight:600}\n  em{color:var(--ink-dim)}\n  code{font-family:var(--mono); font-size:.86em; background:rgba(0,255,136,0.07); border:1px solid var(--line); padding:1px 6px; border-radius:3px; color:var(--green)}\n\n  /* ── CARDS / HUD ── */\n  .card{position:relative; background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:20px 22px; margin:16px 0}\n  .card::before,.card::after{content:\"\"; position:absolute; width:10px; height:10px; border:1.5px solid var(--green-dim)}\n  .card::before{top:-1px; left:-1px; border-right:0; border-bottom:0}\n  .card::after{bottom:-1px; right:-1px; border-left:0; border-top:0}\n  .danger{border-color:var(--red); background:linear-gradient(180deg, rgba(255,68,68,0.07), rgba(255,68,68,0.02))}\n  .danger::before,.danger::after{border-color:var(--red)}\n  .danger h3{color:var(--red)}\n  .note{border-left:3px solid var(--green); background:rgba(0,255,136,0.04); padding:14px 18px; margin:16px 0; border-radius:0 4px 4px 0}\n  .warn{border-left:3px solid var(--amber); background:rgba(255,170,0,0.05)}\n  .crit{border-left:3px solid var(--red); background:rgba(255,68,68,0.05)}\n\n  ul,ol{margin:10px 0; padding-left:22px}\n  li{margin:6px 0}\n  ul.tight li{margin:3px 0}\n\n  /* ── TABLES ── */\n  table{width:100%; border-collapse:collapse; margin:16px 0; font-size:13.5px}\n  th{font-family:var(--mono); font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--ink-dim);\n     text-align:left; padding:9px 11px; background:rgba(0,255,136,0.05); border:1px solid var(--line)}\n  td{padding:9px 11px; border:1px solid var(--line); vertical-align:top; color:var(--ink)}\n  tr:nth-child(even) td{background:rgba(255,255,255,0.012)}\n\n  /* ── TOC ── */\n  .toc{columns:2; column-gap:40px; font-family:var(--mono); font-size:13px}\n  .toc a{display:block; padding:5px 0; color:var(--ink-dim); border-bottom:1px dotted var(--line)}\n  .toc a:hover{color:var(--green); text-decoration:none}\n  .toc .sub{padding-left:18px; font-size:12px}\n\n  /* ── BACK-TO-TOC LINK (sits at the right of every section heading) ── */\n  h2 .toclink{margin-left:auto; font-family:var(--mono); font-size:10px; font-weight:400; letter-spacing:1px;\n    color:var(--ink-faint); border:1px solid var(--line2); padding:5px 10px; border-radius:3px; text-transform:uppercase; white-space:nowrap}\n  h2 .toclink:hover{color:var(--green); border-color:var(--green-dim); background:rgba(0,255,136,0.05); text-decoration:none}\n  .totop-foot{display:inline-block; margin-top:20px; font-family:var(--mono); font-size:11px; letter-spacing:1px;\n    color:var(--ink-faint); border:1px solid var(--line2); padding:7px 13px; border-radius:3px; text-transform:uppercase}\n  .totop-foot:hover{color:var(--green); border-color:var(--green-dim); background:rgba(0,255,136,0.05); text-decoration:none}\n\n  /* ── PLAIN-ENGLISH CALLOUT (for readers who aren't finance pros) ── */\n  .plain{border-left:3px solid var(--cyan); background:rgba(0,204,255,0.05); padding:14px 18px; margin:18px 0; border-radius:0 4px 4px 0}\n  .plain .lbl{display:block; font-family:var(--mono); font-size:10px; letter-spacing:2px; color:var(--cyan); text-transform:uppercase; margin-bottom:7px}\n  .plain p{margin:6px 0}\n  .plain .analogy{color:var(--ink-dim); font-style:italic}\n\n  /* ── TAB MAP ── */\n  .tabmap{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin:20px 0}\n  .tabgroup{border:1px solid var(--line); border-radius:4px; padding:14px; background:var(--panel)}\n  .tabgroup .glabel{font-family:var(--mono); font-size:10px; letter-spacing:2px; text-transform:uppercase; margin-bottom:10px; padding-bottom:6px; border-bottom:1px solid var(--line)}\n  .tabchip{display:block; font-family:var(--disp); font-size:13px; padding:5px 9px; margin:5px 0; border-radius:3px;\n           background:rgba(255,255,255,0.02); border-left:2px solid; color:var(--ink)}\n\n  /* ── TAB ENTRIES ── */\n  .tabentry{border:1px solid var(--line); border-radius:4px; margin:14px 0; padding:16px 20px; background:var(--panel)}\n  .tabentry h3{margin:0 0 4px; display:flex; align-items:center; gap:10px}\n  .tabentry h3 .tag{font-family:var(--mono); font-size:9px; letter-spacing:1px; padding:2px 7px; border-radius:3px; text-transform:uppercase}\n  .tabentry .purpose{color:var(--green); font-size:14px; margin:0 0 10px}\n  .tabentry .micro{font-family:var(--mono); font-size:11px; color:var(--ink-faint); margin-top:8px}\n\n  .pillrow{display:flex; gap:8px; flex-wrap:wrap; margin:8px 0}\n  .pill{font-family:var(--mono); font-size:10px; letter-spacing:.5px; padding:3px 9px; border:1px solid var(--line2); border-radius:20px; color:var(--ink-dim)}\n\n  figure{margin:24px 0; text-align:center}\n  figure svg{max-width:100%; height:auto}\n  figcaption{font-family:var(--mono); font-size:11px; color:var(--ink-faint); margin-top:8px; letter-spacing:.5px}\n\n  .glossary{column-count:2; column-gap:34px; font-size:13px}\n  .glossary .term{break-inside:avoid; margin:0 0 11px}\n  .glossary .term b{font-family:var(--disp); color:var(--green); font-weight:600}\n  @media(max-width:760px){ h1{font-size:42px} .toc,.glossary{column-count:1} .reticle{display:none} }\n\n  footer{padding:40px 0 60px; color:var(--ink-faint); font-size:12px; font-family:var(--mono)}\n  .kicker{font-family:var(--mono); font-size:11px; letter-spacing:3px; color:var(--green-dim); text-transform:uppercase; margin-bottom:4px}\n</style>\n</head>\n<body>\n\n<header class=\"hero\">\n  <div class=\"byline\">Steve T. · built with AI assistance, constants verified against IRS/CMS/SSA · 2026 · not financial advice</div>\n  <svg class=\"reticle\" viewBox=\"0 0 200 200\" fill=\"none\" stroke=\"#00ff88\" stroke-width=\"1\">\n    <circle cx=\"100\" cy=\"100\" r=\"90\"/><circle cx=\"100\" cy=\"100\" r=\"60\"/><circle cx=\"100\" cy=\"100\" r=\"30\"/>\n    <line x1=\"100\" y1=\"0\" x2=\"100\" y2=\"200\"/><line x1=\"0\" y1=\"100\" x2=\"200\" y2=\"100\"/>\n    <circle cx=\"100\" cy=\"100\" r=\"4\" fill=\"#00ff88\"/>\n  </svg>\n  <div class=\"wrap\">\n    <div class=\"callsign\">// FIELD MANUAL · v5.48 · PUBLIC BUILD</div>\n    <h1>DANGER CLOSE<span class=\"lo\">RETIREMENT STRESS-TEST CONSOLE</span></h1>\n    <p class=\"tagline\">A single-page tool that runs Monte Carlo simulations, historical backtests, and stress tests against your own portfolio — built to pressure-test a real retirement plan when the stakes are highest.</p>\n    <div class=\"meta-strip\">\n      <span>STATUS · <b>OPERATIONAL</b></span>\n      <span>TABS · <b>26</b></span>\n      <span>ENGINE · <b>REGIME-SWITCHING MC</b></span>\n      <span>DATA · <b>LOCAL / IN-BROWSER</b></span>\n    </div>\n  </div>\n</header>\n\n<!-- DISCLAIMER -->\n<section>\n  <div class=\"wrap\">\n    <div class=\"card danger\">\n      <h3>⚠ READ BEFORE USING — THIS IS NOT FINANCIAL ADVICE</h3>\n      <p>This software is provided for <strong>educational and entertainment purposes only</strong>. It is not financial, investment, tax, or legal advice.</p>\n      <ul class=\"tight\">\n        <li><strong>The author has no professional financial credentials</strong> — not a CFP, CFA, CPA, Enrolled Agent, or attorney, and has no formal training in finance, tax, or investment management. This is an amateur hobby project.</li>\n        <li><strong>Do not rely on this app to make any financial decision.</strong> Every projection is an estimate from simplified models that may contain bugs, errors, or omissions. Real markets, tax law, and life will differ — possibly by a lot.</li>\n        <li><strong>No fiduciary relationship, no warranty, no liability.</strong> The software is provided \"AS IS.\" You are responsible for your own decisions.</li>\n        <li><strong>Past performance does not predict the future.</strong> Real outcomes can be materially worse than the worst case shown.</li>\n        <li>The embedded AI assistant can be confidently wrong. Tax and law assumptions go stale. Peer rankings are approximate.</li>\n      </ul>\n      <p style=\"margin-bottom:0\">Before acting on anything here, consult a fee-only fiduciary advisor, a CPA, and an estate attorney, and verify every number against authoritative sources (IRS, SSA, your custodian). See the <a href=\"#final\">Final Disclaimer</a>.</p>\n    </div>\n  </div>\n</section>\n\n<!-- TOC -->\n<section id=\"toc\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">00</span> Table of Contents</h2>\n    <div class=\"toc\">\n      <a href=\"#what\">01 · What Danger Close Does</a>\n      <a href=\"#flow\">02 · How Data Flows Through It</a>\n      <a href=\"#start\">03 · Getting Started</a>\n      <a href=\"#banner\">04 · The Data-Integrity Warning Banner</a>\n      <a href=\"#map\">05 · The 26 Tabs at a Glance</a>\n      <a href=\"#controls\">06 · Top-Level Controls &amp; Modeling Approach</a>\n      <a href=\"#tabs\">07 · The Tabs in Detail</a>\n      <a href=\"#g-foundation\" class=\"sub\">Foundation · Scoring</a>\n      <a href=\"#g-strategy\" class=\"sub\">Strategy · Testing · Tools</a>\n      <a href=\"#xlsx\">08 · Entering Your Data (My Data tab)</a>\n      <a href=\"#docx\">09 · The Master Prompt &amp; AI Context</a>\n      <a href=\"#apikey\">10 · Ask AI &amp; Your API Key (Self-Hosted Copies)</a>\n      <a href=\"#reload\">11 · Reloading &amp; Resetting</a>\n      <a href=\"#hsa\">12 · HSA Contributions &amp; the Medicare Cutoff</a>\n      <a href=\"#limits\">13 · Limitations &amp; Known Issues</a>\n      <a href=\"#faq\">14 · Troubleshooting &amp; FAQ</a>\n      <a href=\"#glossary\">15 · Glossary</a>\n      <a href=\"#final\">16 · Final Disclaimer</a>\n    </div>\n  </div>\n</section>\n\n<!-- WHAT IT DOES -->\n<section id=\"what\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">01</span> What Danger Close Does <a class=\"toclink\" href=\"#toc\">↑ Contents</a></h2>\n    <div class=\"plain\">\n      <span class=\"lbl\">In plain English — start here</span>\n      <p>Picture your retirement as one long road trip where nobody can tell you the weather ahead of time. <strong>This app drives that whole trip thousands of times.</strong> Some runs get sunshine (strong markets); some hit storms (a crash, years of high inflation, a long illness). Each run, it checks whether you still have money when the trip ends.</p>\n      <p class=\"analogy\">So when you see \"success rate 90%,\" it means: across 10,000 imagined futures, your savings lasted in about 9,000 of them. Think of it as a weather forecast for your money — useful odds, never a promise.</p>\n    </div>\n    <p class=\"lead\">At its core, the app does six things, all locally in your browser:</p>\n    <ol>\n      <li><strong>Holds your portfolio and household context</strong> — positions, balances, Roth/Traditional split, asset classes, names, DOBs, Social Security, pension, housing, goals — which you type into the <strong>My Data</strong> tab or restore from a saved backup file.</li>\n      <li><strong>Runs Monte Carlo simulations</strong> at the asset-class level using six probability-weighted economic regimes (base, optimistic, pessimistic, recession, stagflation, crisis) at 5,000–10,000 iterations.</li>\n      <li><strong>Models the retirement transition</strong> quarter-by-quarter through year 30 — Social Security claiming, pension start, Roth conversions, home sale and cash purchase, Medicare and the ACA bridge, and long-term care.</li>\n      <li><strong>Builds a withdrawal schedule</strong> — a year-by-year plan of which account funds each year's spending, with account-priority sequencing.</li>\n      <li><strong>Stress-tests the plan</strong> against named adverse scenarios and reverse-solves for the break-points.</li>\n      <li><strong>Provides an Ask AI tab</strong> that sends a structured summary to an AI assistant for natural-language follow-up.</li>\n    </ol>\n    <div class=\"note\">This tool assumes you already have a retirement plan and want to pressure-test it. It is <em>not</em> a \"what is a 401(k)\" tool. Nothing is uploaded to any server except the calls you explicitly send from the Ask AI tab.</div>\n    <figure>\n      <svg viewBox=\"0 0 760 285\" font-family=\"'JetBrains Mono',monospace\">\n        <line x1=\"70\" y1=\"30\" x2=\"70\" y2=\"230\" stroke=\"#1a3a2a\"/>\n        <line x1=\"70\" y1=\"230\" x2=\"660\" y2=\"230\" stroke=\"#1a3a2a\"/>\n        <text x=\"62\" y=\"36\" fill=\"#6a8a7a\" font-size=\"10\" text-anchor=\"end\">MONEY</text>\n        <text x=\"70\" y=\"250\" fill=\"#6a8a7a\" font-size=\"10\">RETIRE</text>\n        <text x=\"660\" y=\"250\" fill=\"#6a8a7a\" font-size=\"10\" text-anchor=\"end\">END OF PLAN</text>\n        <line x1=\"70\" y1=\"185\" x2=\"660\" y2=\"185\" stroke=\"#27513a\" stroke-dasharray=\"4 4\"/>\n        <text x=\"664\" y=\"189\" fill=\"#6a8a7a\" font-size=\"9\">\"not broke\" line</text>\n        <path d=\"M70,150 C240,135 400,108 660,82\" fill=\"none\" stroke=\"#3a7a5a\" stroke-width=\"1\" opacity=\"0.55\"/>\n        <path d=\"M70,150 C240,158 400,168 660,150\" fill=\"none\" stroke=\"#3a7a5a\" stroke-width=\"1\" opacity=\"0.55\"/>\n        <path d=\"M70,150 C240,166 400,192 645,228\" fill=\"none\" stroke=\"#7a3a3a\" stroke-width=\"1\" opacity=\"0.55\"/>\n        <path d=\"M70,150 C220,120 360,80 660,46\" fill=\"none\" stroke=\"#00ff88\" stroke-width=\"2\"/>\n        <text x=\"664\" y=\"49\" fill=\"#00ff88\" font-size=\"9\">good markets</text>\n        <path d=\"M70,150 C240,150 420,138 660,120\" fill=\"none\" stroke=\"#ffaa00\" stroke-width=\"2\"/>\n        <text x=\"664\" y=\"123\" fill=\"#ffaa00\" font-size=\"9\">typical</text>\n        <path d=\"M70,150 C210,176 360,206 545,229\" fill=\"none\" stroke=\"#ff4444\" stroke-width=\"2\"/>\n        <text x=\"540\" y=\"221\" fill=\"#ff4444\" font-size=\"9\" text-anchor=\"end\">runs out ✗</text>\n        <text x=\"365\" y=\"278\" fill=\"#6a8a7a\" font-size=\"10\" text-anchor=\"middle\">one starting portfolio · 10,000 different futures · success = the share that finish above the line</text>\n      </svg>\n      <figcaption>FIG.0 — WHAT A \"MONTE CARLO\" ACTUALLY DOES</figcaption>\n    </figure>\n    <div class=\"note\">\n      <strong>Why \"Danger Close\"?</strong> In artillery, <em>danger close</em> is the call that supporting fire is landing near your own position — the moment that demands maximum precision because the stakes are highest. That's the metaphor, and the whole reason this tool exists: the years surrounding retirement are when a financial mistake lands closest to home, and the math deserves artillery-grade care. To be clear about the styling: the author is a civilian, has never served in the military, and claims no service — the name and the console aesthetic are a design theme borrowed with respect for what the term means.\n    </div>\n  \n    <h3>What's new — v5.22 through v5.28</h3>\n    <p>The current build is named in the header at the top of this manual and in the app footer; this section lists what the last several releases changed, newest first.</p>\n    <p><em>v5.28:</em> this manual corrected in three places — the Withdrawal Strategy entry now names the Other-accounts pot as Priority 1 and describes how it is taxed, §13 gains the five Other-accounts simplifications, and this section replaces one that still announced v5.7 as the current build.</p>\n    <p><em>v5.27:</em> a statement in this manual that v5.26 had made false — that Other accounts are spent tax-free and generate no RMD — removed. The engines were correct throughout; only the manual was wrong.</p>\n    <p><em>v5.26 — the one that moved figures:</em> <strong>Other accounts are now taxed according to their type.</strong> Traditional and Annuity balances are ordinary income as they are spent and Traditional balances count toward RMDs, where previously the whole pot was spent as already-taxed cash even when what you entered there was an IRA. If your plan looked better before this release, that was the optimism v5.24 disclosed. A fifth tax type, <strong>Annuity</strong>, was added because a non-qualified annuity is taxed like pre-tax money but carries no required distribution. The Roth tab's funding check also stopped counting IRA money as cash available to pay conversion tax.</p>\n    <p><em>v5.25:</em> the tax-type field itself added to each Other-accounts row, recorded but not yet used, with a one-time review notice for plans that predated it. <em>v5.24:</em> disclosed, in the app, that the Withdrawal tab was optimistic about this money — the disclosure v5.26 acted on. <em>v5.22:</em> the taxable-residual calculation consolidated to a single definition.</p>\n    <p>Earlier: <em>v5.7 / v5.7.1</em> brought ACA premium-subsidy modelling on the Roth tab, a Guided Setup wizard, Simple Mode, the Dashboard tab, the 51-jurisdiction state-tax model, the Roth solve-for optimizer and conversion-tax funding model, Social Security breakeven cards and the joint claiming-age grid, Monte Carlo toggles for stochastic longevity and LTC duration, a first-class Other Income Streams module, an Offline Mode switch, and the data-vintage staleness system (§13). The Roth break-even was rebuilt as a wealth crossover computed by the full engine, with <em>does not break even</em> a possible answer.</p>\n</div>\n</section>\n\n<!-- DATA FLOW -->\n<section id=\"flow\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">02</span> How Data Flows Through It <a class=\"toclink\" href=\"#toc\">↑ Contents</a></h2>\n    <p>Everything starts from <strong>one in-memory model</strong> (<code>PORTFOLIO</code> + <code>PLAN_TIMELINE</code>), and every tab derives its numbers from that single source. You fill that model one of three ways: <strong>type your data</strong> into the My Data tab, <strong>restore a backup</strong> you exported earlier (a JSON file), or <strong>load the example household</strong> to explore. Whatever you enter is saved privately between visits so the app reopens to your plan, and you can export it to a JSON file to keep or move between devices. Nothing is ever shared, and the only transmission of plan data is the summary the <a href=\"#tabs\">Ask AI</a> tab sends when you explicitly ask a question.</p>\n    <div class=\"plain\">\n      <span class=\"lbl\">In plain English</span>\n      <p>There's no account and nothing to sign up for. The app keeps one private copy of your plan just for you. You either type it in or hand it a backup file you saved before — and everything else you see, every tab, chart, and score, is calculated from that one copy on the spot. Nobody else ever sees it; the only thing that transmits anything is the Ask AI tab, when you press ask.</p>\n    </div>\n    <figure>\n      <svg viewBox=\"0 0 920 360\" font-family=\"'JetBrains Mono',monospace\">\n        <defs>\n          <marker id=\"ar\" markerWidth=\"9\" markerHeight=\"9\" refX=\"7\" refY=\"4.5\" orient=\"auto\"><path d=\"M0,0 L9,4.5 L0,9 z\" fill=\"#3a7a5a\"/></marker>\n        </defs>\n        <rect x=\"20\" y=\"28\" width=\"214\" height=\"48\" rx=\"4\" fill=\"#0d1611\" stroke=\"#00ccff\"/>\n        <text x=\"127\" y=\"49\" fill=\"#00ccff\" font-size=\"12\" text-anchor=\"middle\">My Data tab</text>\n        <text x=\"127\" y=\"66\" fill=\"#6a8a7a\" font-size=\"9\" text-anchor=\"middle\">you type it in</text>\n        <rect x=\"20\" y=\"92\" width=\"214\" height=\"48\" rx=\"4\" fill=\"#0d1611\" stroke=\"#00ccff\"/>\n        <text x=\"127\" y=\"113\" fill=\"#00ccff\" font-size=\"12\" text-anchor=\"middle\">Restore backup</text>\n        <text x=\"127\" y=\"130\" fill=\"#6a8a7a\" font-size=\"9\" text-anchor=\"middle\">a .json file you saved</text>\n        <rect x=\"20\" y=\"156\" width=\"214\" height=\"48\" rx=\"4\" fill=\"#0d1611\" stroke=\"#27513a\"/>\n        <text x=\"127\" y=\"177\" fill=\"#c0d8cc\" font-size=\"12\" text-anchor=\"middle\">Example household</text>\n        <text x=\"127\" y=\"194\" fill=\"#6a8a7a\" font-size=\"9\" text-anchor=\"middle\">explore with demo data</text>\n        <rect x=\"340\" y=\"78\" width=\"200\" height=\"96\" rx=\"4\" fill=\"#101c15\" stroke=\"#00ff88\"/>\n        <text x=\"440\" y=\"110\" fill=\"#00ff88\" font-size=\"12\" text-anchor=\"middle\">PORTFOLIO +</text>\n        <text x=\"440\" y=\"127\" fill=\"#00ff88\" font-size=\"12\" text-anchor=\"middle\">PLAN_TIMELINE</text>\n        <text x=\"440\" y=\"148\" fill=\"#6a8a7a\" font-size=\"9\" text-anchor=\"middle\">one source of truth ·</text>\n        <text x=\"440\" y=\"161\" fill=\"#6a8a7a\" font-size=\"9\" text-anchor=\"middle\">derives all dates/ages</text>\n        <rect x=\"648\" y=\"78\" width=\"160\" height=\"96\" rx=\"4\" fill=\"#0d1611\" stroke=\"#27513a\"/>\n        <text x=\"728\" y=\"118\" fill=\"#c0d8cc\" font-size=\"13\" text-anchor=\"middle\">26 TABS</text>\n        <text x=\"728\" y=\"140\" fill=\"#6a8a7a\" font-size=\"9\" text-anchor=\"middle\">all read the</text>\n        <text x=\"728\" y=\"153\" fill=\"#6a8a7a\" font-size=\"9\" text-anchor=\"middle\">same model</text>\n        <line x1=\"234\" y1=\"52\" x2=\"338\" y2=\"108\" stroke=\"#3a7a5a\" marker-end=\"url(#ar)\"/>\n        <line x1=\"234\" y1=\"116\" x2=\"338\" y2=\"124\" stroke=\"#3a7a5a\" marker-end=\"url(#ar)\"/>\n        <line x1=\"234\" y1=\"180\" x2=\"338\" y2=\"142\" stroke=\"#3a7a5a\" marker-end=\"url(#ar)\"/>\n        <line x1=\"540\" y1=\"126\" x2=\"646\" y2=\"126\" stroke=\"#3a7a5a\" marker-end=\"url(#ar)\"/>\n        <rect x=\"300\" y=\"250\" width=\"448\" height=\"78\" rx=\"4\" fill=\"rgba(0,255,136,0.05)\" stroke=\"#27513a\" stroke-dasharray=\"4 3\"/>\n        <text x=\"524\" y=\"278\" fill=\"#00ff88\" font-size=\"11\" text-anchor=\"middle\">SAVED PRIVATELY · YOURS ALONE</text>\n        <text x=\"524\" y=\"298\" fill=\"#6a8a7a\" font-size=\"9\" text-anchor=\"middle\">reopens to your plan next visit · Export / Import a .json backup</text>\n        <text x=\"524\" y=\"313\" fill=\"#6a8a7a\" font-size=\"9\" text-anchor=\"middle\">to keep it or move between devices · never shared with anyone</text>\n        <line x1=\"440\" y1=\"174\" x2=\"440\" y2=\"248\" stroke=\"#27513a\" stroke-dasharray=\"4 3\" marker-end=\"url(#ar)\"/>\n      </svg>\n      <figcaption>FIG.1 — HOW YOUR DATA MOVES (TYPED OR RESTORED · STAYS PRIVATE)</figcaption>\n    </figure>\n    <p class=\"micro\" style=\"font-family:var(--mono);font-size:11px;color:var(--ink-faint)\">Because every tab derives from one model, the app is fully portable: load a different household and every visible number re-derives. Income figures route through single accessors, so there are no scattered hard-coded values.</p>\n  </div>\n</section>\n\n<!-- GETTING STARTED -->\n<section id=\"start\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">03</span> Getting Started <a class=\"toclink\" href=\"#toc\">↑ Contents</a></h2>\n    <p>All you need is a current browser. On first open you'll see the <strong>landing screen</strong>, which offers three ways to begin:</p>\n    <table>\n      <tr><th>Choice</th><th>What it does</th><th>Best for</th></tr>\n      <tr><td><strong>\ud83e\udded Guided Setup</strong></td><td>Six friendly questions (who, when, money, income, spending, state) build a complete working plan in about three minutes. Also launchable anytime from the My Data tab's 🧭 GUIDED SETUP button — building replaces the current plan; cancelling changes nothing — rough answers welcome, everything editable later in My Data. Finishing starts you in <strong>Simple Mode</strong> (below).</td><td>Your very first plan</td></tr>\n      <tr><td><strong>✏ Start Fresh</strong></td><td>Opens an empty plan; you type your household, holdings, income, and expenses into the My Data tab, then press <strong>Save &amp; Apply</strong>.</td><td>Your first real run</td></tr>\n      <tr><td><strong>↑ Restore from Backup</strong></td><td>Reads a <code>.json</code> backup you exported earlier and rebuilds every tab from it.</td><td>Returning, or new device</td></tr>\n      <tr><td><strong>Use Example Data</strong></td><td>Loads the built-in demo household so you can explore every tab with realistic numbers.</td><td>Kicking the tires</td></tr>\n    </table>\n    <p>After you Save &amp; Apply (or restore a backup), the app <strong>caches your plan in the browser</strong>, so the next visit skips the landing screen and reopens straight to your data. From the My Data tab you can <strong>Export Backup</strong> at any time to save a durable <code>.json</code> copy, and <strong>Clear All Data</strong> to wipe the cache and start over.</p>\n    <div class=\"note\"><strong>Export a backup regularly.</strong> The browser cache is convenient but not permanent — clearing browser data or switching devices loses it. The exported <code>.json</code> file is the durable copy; it carries your whole plan (holdings, income, expenses, the AI context, your estate checklist, and your chosen theme). Curious where your data actually lives — and how to prove the file itself stores nothing? <a href=\"#reload\">§11</a> includes tests you can run yourself.</div>\n  </div>\n</section>\n\n<!-- WARNING BANNER -->\n<section id=\"banner\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">04</span> The Data-Integrity Warning Banner <a class=\"toclink\" href=\"#toc\">↑ Contents</a></h2>\n    <p>To keep the app from quietly showing you someone else's numbers, it tracks where each income figure (Social Security, pension) came from. A banner appears at the top of every tab in two flavors — and understanding <em>when each one can fire</em> tells you how the protection actually works:</p>\n    <div class=\"card crit\" style=\"border-radius:4px\">\n      <h4 style=\"color:var(--red);margin-top:0\">⚠ WARNING — USING EXAMPLE NUMBERS, NOT YOUR DATA (red)</h4>\n      <p style=\"margin:6px 0\">Fires when your plan arrived <em>without income figures of its own</em> — typically an older backup, or a plan saved before the My Data income section existed — and the app had to substitute the demo household's numbers to keep the engines running. It names exactly which fields were substituted (e.g. \"Spouse B Social Security, Pension\") and includes a small diagnostics line showing what it looked for and what it found. Until you enter the real amounts in <strong>My Data → Income</strong> and press Save &amp; Apply, every projection that uses income — taxes, IRMAA, survivor, withdrawals — is unreliable.</p>\n    </div>\n    <div class=\"card warn\" style=\"border-radius:4px\">\n      <h4 style=\"color:var(--amber);margin-top:0\">ⓘ EXAMPLE DATA MODE (amber)</h4>\n      <p style=\"margin:6px 0\">The gentle version. Fires when you deliberately chose \"Use Example Data.\" All figures are illustrative placeholders; no alarm needed.</p>\n    </div>\n    <p><strong>What about income you simply haven't entered yet?</strong> That's the third case, and it works differently by design: an income field left blank in My Data is saved as an honest <strong>$0</strong> — the app never swaps a demo number in behind your form entries. A zero is your number, just probably not your <em>final</em> number, so instead of a banner you'll see it plainly as $0 on the Income tab and in the header's income floor. The red banner is reserved for the genuinely dangerous case: figures that <em>look</em> real but belong to the demo household.</p>\n    <p>When your own numbers are all in place, <strong>no banner appears</strong> — the check costs nothing day-to-day but flags instantly if a demo figure ever stands in for yours.</p>\n  </div>\n</section>\n\n<!-- TAB MAP -->\n<section id=\"map\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">05</span> The 26 Tabs at a Glance <a class=\"toclink\" href=\"#toc\">↑ Contents</a></h2>\n    <p>Tabs are grouped by function. Color marks the family; detail on each is in section <a href=\"#tabs\">07</a>. Feeling like 26 is a lot? The <strong>◑ SHOW FEWER TABS</strong> switch at the end of the tab strip turns on <strong>Simple Mode</strong> — just the six core tabs (My Data, Dashboard, Trajectory, Monte Carlo, SS, Docs) — and remembers your choice. Guided Setup starts new plans there automatically; the full set is always one click away.</p>\n    <div class=\"tabmap\">\n      <div class=\"tabgroup\">\n        <div class=\"glabel\" style=\"color:#00ccff\">FOUNDATION</div>\n        <span class=\"tabchip\" style=\"border-color:#00ccff\">Dashboard</span>\n        <span class=\"tabchip\" style=\"border-color:#00ccff\">My Data</span>\n        <span class=\"tabchip\" style=\"border-color:#00ccff\">Trajectory</span>\n        <span class=\"tabchip\" style=\"border-color:#00ccff\">Expenses</span>\n        <span class=\"tabchip\" style=\"border-color:#00ccff\">Income</span>\n        <span class=\"tabchip\" style=\"border-color:#00ccff\">SS</span>\n        <span class=\"tabchip\" style=\"border-color:#00ccff\">Positions</span>\n      </div>\n      <div class=\"tabgroup\">\n        <div class=\"glabel\" style=\"color:#aa66ff\">SCORING</div>\n        <span class=\"tabchip\" style=\"border-color:#aa66ff\">Grade</span>\n        <span class=\"tabchip\" style=\"border-color:#aa66ff\">Ranking</span>\n      </div>\n      <div class=\"tabgroup\">\n        <div class=\"glabel\" style=\"color:#ffaa00\">STRATEGY</div>\n        <span class=\"tabchip\" style=\"border-color:#ffaa00\">Guardrails</span>\n        <span class=\"tabchip\" style=\"border-color:#ffaa00\">Withdrawal</span>\n        <span class=\"tabchip\" style=\"border-color:#ffaa00\">Roth</span>\n        <span class=\"tabchip\" style=\"border-color:#ffaa00\">Taxes</span>\n        <span class=\"tabchip\" style=\"border-color:#ffaa00\">IRMAA</span>\n        <span class=\"tabchip\" style=\"border-color:#ffaa00\">Exit Plan</span>\n      </div>\n      <div class=\"tabgroup\">\n        <div class=\"glabel\" style=\"color:#ff6600\">TESTING</div>\n        <span class=\"tabchip\" style=\"border-color:#ff6600\">Monte Carlo</span>\n        <span class=\"tabchip\" style=\"border-color:#ff6600\">Backtest</span>\n        <span class=\"tabchip\" style=\"border-color:#ff6600\">What Breaks</span>\n        <span class=\"tabchip\" style=\"border-color:#ff6600\">Survivor</span>\n        <span class=\"tabchip\" style=\"border-color:#ff6600\">Stress</span>\n      </div>\n      <div class=\"tabgroup\">\n        <div class=\"glabel\" style=\"color:#ff4444\">TOOLS</div>\n        <span class=\"tabchip\" style=\"border-color:#ff4444\">Ask AI</span><span class='tabchip' style='border-color:#00ccff'>Checklist</span><span class='tabchip' style='border-color:#6a8a7a'>Skins</span><span class='tabchip' style='border-color:#6a8a7a'>Docs</span><span class='tabchip' style='border-color:#aa66ff'>Verify</span><span class='tabchip' style='border-color:#ffaa00'>Events</span>\n      </div>\n    </div>\n  </div>\n</section>\n\n<!-- CONTROLS + MODELING -->\n<section id=\"controls\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">06</span> Top-Level Controls &amp; Modeling Approach <a class=\"toclink\" href=\"#toc\">↑ Contents</a></h2>\n    <h3>Controls</h3>\n    <ul>\n      <li><strong>Retirement Date Selector</strong> — switches the modeled retirement quarter; recomputes the whole plan.</li>\n      <li><strong>Scenario Prior Selector</strong> — BASE / BEAR-LEANING / BULL-LEANING. Re-weights the six economic regimes feeding the Monte Carlo.</li>\n      <li><strong>Roth Conversion Amount (Roth tab)</strong> — $0–$400,000 (step $5,000), default $70,000/yr. The single biggest lever: it drives <em>four</em> tabs at once — Roth ladder, Withdrawal schedule, Taxes, and IRMAA — all from one shared value.</li>\n      <li><strong>SS Claim-Age slider (SS tab)</strong> — 62–70, drives the claiming optimizer. The spouse names shown are read from your data (My Data tab), not hard-coded.</li>\n      <li><strong>Guardrails Toggle (Trajectory tab)</strong> — show/hide the Guyton-Klinger spending bands.</li>\n    </ul>\n\n    <h3>Modeling Approach — read this</h3>\n    <p>Danger Close uses a <strong>regime-switching mixture model</strong> — with two optional engine toggles on the Monte Carlo tab: <em>stochastic longevity</em> (Gompertz-sampled death ages anchored to your entered life expectancy as the median) and an <em>LTC distribution</em> (a drawn care-duration tail replacing the single shock) — not the classical mean-plus-standard-deviation Monte Carlo most tools use. Each year the simulator picks one of six regimes (under BASE: base 45%, optimistic 20%, pessimistic 15%, recession 10%, stagflation 7%, crisis 3%) and holds it for all four quarters — the regime means are annual outcomes — then applies that regime's return plus a small quarterly noise term. Variance comes mostly from regime-switching, so the AAGR-vs-CAGR \"variance drag\" double-counting bug that affects some tools does <em>not</em> apply here.</p>\n    <div class=\"plain\">\n      <span class=\"lbl\">In plain English</span>\n      <p>Most calculators picture the market as one bumpy \"average\" year repeated over and over. Danger Close instead <strong>rolls a die each year to decide what kind of year it is</strong> — normal, boom, slump, recession, 1970s-style high-inflation, or 2008-style crisis — and uses that year's typical result. Real economies move in streaks (good years cluster together, so do bad ones), and picking a year-type each turn captures that far better than one fixed average.</p>\n    </div>\n    <p><strong>But the BASE prior is deliberately conservative</strong> versus historical US equity performance. Probability-weighted across regimes:</p>\n    <figure>\n      <svg viewBox=\"0 0 760 260\" font-family=\"'JetBrains Mono',monospace\">\n        <!-- axis -->\n        <line x1=\"150\" y1=\"20\" x2=\"150\" y2=\"210\" stroke=\"#1a3a2a\"/>\n        <line x1=\"150\" y1=\"210\" x2=\"720\" y2=\"210\" stroke=\"#1a3a2a\"/>\n        <!-- zero line -->\n        <line x1=\"300\" y1=\"20\" x2=\"300\" y2=\"210\" stroke=\"#27513a\" stroke-dasharray=\"3 3\"/>\n        <text x=\"300\" y=\"232\" fill=\"#6a8a7a\" font-size=\"9\" text-anchor=\"middle\">0%</text>\n        <!-- scale: x = 300 + realReturn*px, px=40 per 1% -->\n        <!-- historical 7.5 -->\n        <text x=\"140\" y=\"50\" fill=\"#6a8a7a\" font-size=\"11\" text-anchor=\"end\">HISTORICAL</text>\n        <rect x=\"300\" y=\"38\" width=\"300\" height=\"22\" fill=\"rgba(0,255,136,0.3)\" stroke=\"#00ff88\"/>\n        <text x=\"610\" y=\"53\" fill=\"#00ff88\" font-size=\"11\">+7.5% real (since 1926)</text>\n        <!-- BULL 2.6 -->\n        <text x=\"140\" y=\"92\" fill=\"#6a8a7a\" font-size=\"11\" text-anchor=\"end\">BULL-LEAN</text>\n        <rect x=\"300\" y=\"80\" width=\"104\" height=\"22\" fill=\"rgba(0,204,255,0.3)\" stroke=\"#00ccff\"/>\n        <text x=\"414\" y=\"95\" fill=\"#00ccff\" font-size=\"11\">+2.6% real</text>\n        <!-- BASE 0.4 -->\n        <text x=\"140\" y=\"134\" fill=\"#6a8a7a\" font-size=\"11\" text-anchor=\"end\">BASE</text>\n        <rect x=\"300\" y=\"122\" width=\"16\" height=\"22\" fill=\"rgba(255,170,0,0.35)\" stroke=\"#ffaa00\"/>\n        <text x=\"326\" y=\"137\" fill=\"#ffaa00\" font-size=\"11\">+0.4% real</text>\n        <!-- BEAR -7.7 -->\n        <text x=\"140\" y=\"176\" fill=\"#6a8a7a\" font-size=\"11\" text-anchor=\"end\">BEAR-LEAN</text>\n        <rect x=\"192\" y=\"164\" width=\"108\" height=\"22\" fill=\"rgba(255,68,68,0.3)\" stroke=\"#ff4444\"/>\n        <text x=\"186\" y=\"179\" fill=\"#ff4444\" font-size=\"11\" text-anchor=\"end\">−7.7% real</text>\n      </svg>\n      <figcaption>FIG.2 — EXPECTED REAL EQUITY RETURN BY PRIOR vs HISTORY</figcaption>\n    </figure>\n    <p>Even the BULL-LEANING prior sits well below realized history. <strong>This is a modeling choice, not a bug</strong> — it follows the conservative-academic tradition (Pfau and others advocate 2–4% forward real returns for planning). In practice, your success rates here will read <em>lower</em> than Boldin/ProjectionLab/Pralana at their defaults, sometimes by 10–20 points. Cross-check critical results against one commercial tool; the gap is the prior's conservatism, not an error. For history-like output, use BULL-LEANING.</p>\n    \n    <h3>Inflation assumptions — one map, three different numbers on purpose</h3>\n    <p>Three inflation figures appear in the app, and the differences are deliberate, each erring conservative in its own direction: <strong>(1) Household inflation ~2.7% expected</strong> — the simulators (Monte Carlo, Trajectory, Stress) don't use a single rate at all; each simulated quarter draws the regime's rate (2.0% in booms, 2.8% base, 3.5% pessimistic, 6.5% in stagflation — probability-weighted ≈2.7% under the BASE prior, between the last 30 years' ~2.5% and the full-century ~3.0%). Spending and Social Security's COLA ride these draws; the pension deliberately doesn't (no COLA). <strong>(2) Tax-threshold indexation 2.0%</strong> — brackets, deductions, and IRMAA tiers grow at 2%/yr in the deterministic tax engines. Law indexes these by <em>chained</em> CPI, which historically runs ~0.3 points below regular CPI — and for thresholds, assuming <em>slower</em> growth is the conservative choice: income outgrowing brackets produces bracket creep, so the model <em>overstates</em> your future taxes rather than flattering them. Raising this number would make Roth math look better, not safer. <strong>(3) LTC costs: inflation +1.5%</strong> — long-term-care costs escalate <em>above</em> whatever inflation each path draws, reflecting decades of care-cost growth outrunning CPI. Same philosophy every time: where an assumption must be picked, pick the direction that makes the plan look slightly worse than reality.</p>\n\n    <h3 id=\"longevity\">Why stochastic longevity matters — the STOCHASTIC LONGEVITY toggle</h3>\n    <p>By default, the simulator assumes both of you live to <em>exactly</em> the life expectancies you entered — clean, transparent, and quietly unrealistic, because nobody dies on schedule. The <strong>STOCHASTIC LONGEVITY</strong> toggle on the Monte Carlo tab replaces that with something closer to life: each of the 10,000 runs <strong>samples a different death age for each spouse</strong> from a Gompertz mortality curve anchored so the life expectancy you entered is the <strong>median</strong> — a 50/50 over-under, not a guarantee. (Anchored at 88, for example, the sampled tenth percentile lands near 74 and the ninetieth near 98.) Your number keeps its meaning; the tails around it become real.</p>\n    <p>That matters because the two tails stress <em>completely different parts of the plan</em>:</p>\n    <ul>\n      <li><strong>Long-life runs — the portfolio stress test.</strong> Live well past the median — late 90s, even past 100 — and the danger is simply outliving the money: more spending years than planned, sequence-of-returns risk compounding over decades, inflation quietly halving purchasing power roughly every 24 years at 3%, and long-term-care odds rising exactly when the balance is smallest.</li>\n      <li><strong>Short-life runs — the survivor stress test.</strong> One spouse dying early triggers the <strong>widowhood penalty</strong>: the household keeps only the larger Social Security check, most fixed expenses (housing, property taxes, insurance, utilities) barely shrink, the survivor is pushed into Single filing's narrower brackets and smaller standard deduction, and healthcare costs often rise. The Survivor tab dissects this case; the toggle folds thousands of variations of it into the headline success rate.</li>\n    </ul>\n    <div class=\"plain\">\n      <span class=\"lbl\">In plain English</span>\n      <p>Instead of asking <em>\"what happens if we live exactly to our life expectancies?\"</em>, the toggle asks the better question: <strong>\"what fraction of thousands of realistic lifetimes — some short, some very long — does this plan survive?\"</strong> Expect the success number to move when you flip it; that movement <em>is</em> the information. One honest limit: the two spouses' lifespans are sampled independently — the real-world correlation of couples' health is not modeled.</p>\n    </div>\n\n    <h3 id=\"ltcdist\">The real shape of long-term-care risk — the LTC DISTRIBUTION toggle</h3>\n    <p>Long-term-care duration is one of the most <strong>right-skewed</strong> risks in retirement — the average hides everything that matters. The research picture: roughly <strong>a third of today's 65-year-olds will never need long-term-care support at all</strong>; the median formal (nursing-home) stay is startlingly brief — often days or weeks of post-acute rehab after a surgery or illness; yet about <strong>20% will need care for more than five years</strong>, and roughly 5% will spend over four years in a nursing home. Duration also splits sharply by sex — women average about <strong>3.7 years</strong> of care need versus <strong>2.2 for men</strong>, largely because women live longer (and spend about 6.1 adult years <em>giving</em> care besides). It is why the long-term-care insurance industry standardized on a <strong>3-year benefit period</strong>: it covers the great majority of claims at a payable premium — while dementia care, the classic budget-breaker, routinely outruns it.</p>\n    <p>The default engine models care as one $150K–$300K event per spouse — the <em>median-ish</em> experience. The <strong>LTC DISTRIBUTION</strong> toggle swaps in the real shape: each run <strong>draws a paid-care duration per spouse</strong> (usually zero, occasionally many years, at ~$120K/yr in today's dollars escalating 1.5%/yr <em>above</em> inflation), anchored to the final years before that run's own death. The expected cost is similar to the single shock; the <strong>ruin tail is far fatter</strong> — because multi-year care lands at the worst possible moment: portfolio at its smallest, one Social Security check already gone.</p>\n    <div class=\"plain\">\n      <span class=\"lbl\">In plain English — and one number reconciled</span>\n      <p>Most people pay little for care; a few pay catastrophically. Averages mislead; the toggle models the lottery instead. One apparent conflict worth squaring: research says ~33% never need <em>any</em> care, while this model draws \"no <em>paid</em> care\" 45% of the time — different measures, not a contradiction, since a large share of real care is unpaid family care that never touches a portfolio. Both agree on the part that matters: <strong>the tail, not the average, is the risk</strong>. Pair the toggle with the Stress tab's LTC Marathon — and if you are evaluating LTC insurance, this is exactly the distribution a 3-year benefit period is priced against.</p>\n    </div>\n\n  </div>\n</section>\n\n<!-- TABS DETAIL -->\n<section id=\"tabs\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">07</span> The Tabs in Detail <a class=\"toclink\" href=\"#toc\">↑ Contents</a></h2>\n    <div class=\"pillrow\" style=\"margin:14px 0 4px\">\n      <a class=\"pill\" href=\"#g-foundation\" style=\"color:#00ccff;border-color:#00ccff\">▍Foundation</a>\n      <a class=\"pill\" href=\"#g-scoring\" style=\"color:#aa66ff;border-color:#aa66ff\">▍Scoring</a>\n      <a class=\"pill\" href=\"#g-strategy\" style=\"color:#ffaa00;border-color:#ffaa00\">▍Strategy</a>\n      <a class=\"pill\" href=\"#g-testing\" style=\"color:#ff6600;border-color:#ff6600\">▍Testing</a>\n      <a class=\"pill\" href=\"#g-tools\" style=\"color:#ff4444;border-color:#ff4444\">▍Tools &amp; Reference</a>\n    </div>\n\n    <h3 id=\"g-foundation\" style=\"color:#00ccff\">▍Foundation</h3>\n\n    <div class=\"tabentry\">\n      <h3>Dashboard <span class=\"tag\" style=\"background:rgba(0,204,255,.15);color:#00ccff\">foundation</span></h3>\n      <p class=\"purpose\">One screen, the three questions retirees actually ask.</p>\n      <p><strong>Will my money last?</strong> (Monte Carlo success and median outcome) · <strong>How much can I spend?</strong> (modeled spending, the guaranteed-income floor, and the resulting portfolio draw rate) · <strong>Can I survive a crash?</strong> (success with poor returns forced into the first three retirement years, vs the no-crash base). Each card links to the tab with the full workings. It's the default landing view once a plan is loaded — and a good place to send a spouse who wants the answer without the other tabs.</p>\n    </div>\n    <div class=\"tabentry\">\n      <h3>My Data <span class=\"tag\" style=\"background:rgba(0,204,255,.15);color:#00ccff\">foundation</span></h3>\n      <p class=\"purpose\">Where your plan lives — the forms every other tab reads from.</p>\n      <p>Household (names, birth dates, retirement year, life expectancies, state tax), holdings, Social Security &amp; pension, contributions, and expenses — plus <strong>Save &amp; Apply</strong>, <strong>Export / Import Backup</strong>, and <strong>Clear All Data</strong>. Section <a href=\"#xlsx\">08</a> walks through every field. If a projection ever looks wrong, this tab is where to look first.</p>\n    </div>\n    <div class=\"tabentry\">\n      <h3>Trajectory <span class=\"tag\" style=\"background:rgba(0,204,255,.15);color:#00ccff\">foundation</span></h3>\n      <p class=\"purpose\">The headline balance-over-time chart from now through year 30.</p>\n      <p>Shows the projected portfolio path with optional Guyton-Klinger guardrail bands. The first read for \"does the line trend up, drift, or deplete?\"</p>\n    </div>\n    <div class=\"tabentry\">\n      <h3>Expenses <span class=\"tag\" style=\"background:rgba(0,204,255,.15);color:#00ccff\">foundation</span></h3>\n      <p class=\"purpose\">Pre- vs post-retirement spending, item by item.</p>\n      <p>Each expense shows its category, amount, and active window (start → end · duration). A delta block shows what <strong>drops off</strong> at retirement (e.g. mortgage), what <strong>adds on</strong> (LTC, ACA, Medicare), and what continues unchanged (marked ↻), with no double-counting.</p>\n      <p class=\"micro\">Tip: recurring \"for-life\" costs (housing, food, utilities, Medicare) should run all the way to the end of the plan. If any stop early, the Events tab raises an alarm — otherwise the simulator treats those later years as free and every success rate looks rosier than it should.</p>\n    </div>\n    <div class=\"tabentry\">\n      <h3>Income <span class=\"tag\" style=\"background:rgba(0,204,255,.15);color:#00ccff\">foundation</span></h3>\n      <p class=\"purpose\">Income stack: Social Security, pension, and your entered income streams (rental, work, annuities).</p>\n      <p>Shows when each stream starts and the combined floor. The key insight it surfaces appears below.</p>\n      <figure>\n        <svg viewBox=\"0 0 720 150\" font-family=\"'JetBrains Mono',monospace\">\n          <text x=\"10\" y=\"30\" fill=\"#6a8a7a\" font-size=\"11\">SPENDING NEED</text>\n          <rect x=\"10\" y=\"40\" width=\"690\" height=\"30\" fill=\"rgba(255,255,255,0.04)\" stroke=\"#27513a\"/>\n          <text x=\"700\" y=\"60\" fill=\"#c0d8cc\" font-size=\"11\" text-anchor=\"end\">~$95K/yr</text>\n          <text x=\"10\" y=\"100\" fill=\"#6a8a7a\" font-size=\"11\">COVERED BY</text>\n          <rect x=\"10\" y=\"110\" width=\"436\" height=\"30\" fill=\"rgba(0,255,136,0.25)\" stroke=\"#00ff88\"/>\n          <text x=\"228\" y=\"130\" fill=\"#00ff88\" font-size=\"11\" text-anchor=\"middle\">GUARANTEED ~$60K (63%)</text>\n          <rect x=\"446\" y=\"110\" width=\"254\" height=\"30\" fill=\"rgba(255,170,0,0.25)\" stroke=\"#ffaa00\"/>\n          <text x=\"573\" y=\"130\" fill=\"#ffaa00\" font-size=\"11\" text-anchor=\"middle\">PORTFOLIO DRAW ~$35K</text>\n        </svg>\n        <figcaption>FIG.3 — INCOME COVERAGE (EXAMPLE HOUSEHOLD): ~2.1% STEADY-STATE WITHDRAWAL RATE</figcaption>\n      </figure>\n      <p class=\"micro\">When guaranteed income covers most of spending, the portfolio draw is tiny — the difference between \"income-replacement capital\" and \"legacy capital.\" This single fact drives most of the app's reassuring results.</p>\n    </div>\n    <div class=\"tabentry\">\n      <h3>SS (Social Security) <span class=\"tag\" style=\"background:rgba(0,204,255,.15);color:#00ccff\">foundation</span></h3>\n      <p class=\"purpose\">Claiming-age optimizer for both spouses.</p>\n      <p>A <strong>trust-fund depletion scenario</strong> panel sits at the top: per the 2026 Trustees Report, the retirement fund alone depletes in late 2032 (then ~78% of scheduled benefits payable — the legal default), or 2034/~83% if Congress merges it with the disability fund. Depletion is not bankruptcy — checks continue at the covered percentage — and Congress has always acted before a cut landed, which is why this is a <em>scenario toggle</em>, not a prediction: flip it and every simulation, the Roth tax engine, the Dashboard, and the claiming grid recompute with post-depletion checks at your chosen percentage (benefit tables and breakeven cards keep showing scheduled amounts for clarity). Three one-click choices — <strong>NO CUT</strong> (scheduled benefits, what your statement shows), <strong>2033 → 78%</strong> (the OASI retirement fund alone — the legal default absent new law), <strong>2034 → 83%</strong> (OASI+DI combined, which requires an act of Congress) — plus custom year/percent fields. When active, a readout shows exactly what happens to each spouse's check and the household total in dollars, with a guide to where the cut ripples. Persisted across sessions. Below it: benefit-by-claiming-age tables (62–70), crossover ages, and the lifetime trade-off of claiming early vs delaying. Names and amounts read from your data. For couples, a dedicated <strong>Spouse B breakeven card</strong> runs the same claim-early-vs-FRA arithmetic on the second record and adds the couple's twist: the <em>smaller</em> check only pays until the first death (the survivor keeps the larger one), so the lower earner's honest breakeven horizon is the joint first death — usually years shorter than their own life expectancy — while a higher-earning Spouse B's delay protects the survivor and runs to the second death. And a <strong>spousal claiming-age grid</strong> sweeps all 81 combinations of both spouses\' claiming ages and scores household lifetime benefits (today\'s dollars, survivor step-up included, deaths at your entered life expectancies), marking the model\'s best cell against your current plan — with its approximations listed right under the grid (no discounting; spousal top-up benefits not modeled).</p>\n    </div>\n    <div class=\"tabentry\">\n      <h3>Positions <span class=\"tag\" style=\"background:rgba(0,204,255,.15);color:#00ccff\">foundation</span></h3>\n      <p class=\"purpose\">The raw holdings table behind everything.</p>\n      <p>Every position with its balance, account type, Roth/Traditional split, and asset class — the audit trail for the rest of the app.</p>\n    </div>\n\n    <h3 id=\"g-scoring\" style=\"color:#aa66ff\">▍Scoring</h3>\n\n    <div class=\"tabentry\">\n      <h3>Grade <span class=\"tag\" style=\"background:rgba(170,102,255,.15);color:#aa66ff\">scoring</span></h3>\n      <p class=\"purpose\">A composite retirement-readiness letter grade.</p>\n      <p>A radar chart across weighted dimensions (portfolio size, income floor, sequence buffer, LTC/tail risk, tax efficiency, diversification, estate readiness), with the evidence and the drag behind each grade.</p>\n    </div>\n    <div class=\"tabentry\">\n      <h3>Ranking <span class=\"tag\" style=\"background:rgba(170,102,255,.15);color:#aa66ff\">scoring</span></h3>\n      <p class=\"purpose\">Where you sit versus US peers.</p>\n      <p>Approximate \"Top N%\" tiers built from public survey data. The Federal Reserve Survey of Consumer Finances (SCF, currently the 2022 survey) is the backbone, with EBRI, SSA, and AALTCI filling in the rest. Heuristic context, not precise statistics — the percentile cut-points and the \"Nx the average\" ratios all trace back to these benchmarks.</p>\n      <p class=\"micro\">Why two savings benchmarks? The SCF surveys the <em>whole population</em> of Americans 55–64, so it includes the ~25% with essentially nothing saved — which drags the average and median down and flatters anyone who has saved consistently. So the tab pairs it with an Empower Personal Dashboard benchmark: balances for people who <em>actively track their money</em> on that platform — a self-selected crowd whose balances run far higher. Read the SCF as the easy mirror (you'll be several multiples of the average) and Empower as the honest one (the savers you actually resemble). Two limits to keep in mind: the figures are hand-entered approximations, not live microdata, and the SCF refreshes only every three years — the 2025 survey publishes ~fall 2026, when the Events tab flags these benchmarks as due for a refresh.</p>\n    </div>\n\n    <h3 id=\"g-strategy\" style=\"color:#ffaa00\">▍Strategy</h3>\n\n    <div class=\"tabentry\">\n      <h3>Guardrails <span class=\"tag\" style=\"background:rgba(255,170,0,.15);color:#ffaa00\">strategy</span></h3>\n      <p class=\"purpose\">Guyton-Klinger dynamic spending rules.</p>\n      <p>Cut spending if the portfolio falls to the lower band (default 80% of plan); raise it if it reaches the upper band (120%). Shows when each band triggers across scenarios.</p>\n    </div>\n    <div class=\"tabentry\">\n      <h3>Withdrawal Strategy <span class=\"tag\" style=\"background:rgba(255,170,0,.15);color:#ffaa00\">strategy</span></h3>\n      <p class=\"purpose\">A year-by-year operational drawdown plan.</p>\n      <p>Three sections: the year-by-year schedule, the account-priority order, and a 3-strategy comparison. <strong>Priority 1 is everything you entered under Other accounts</strong> — spent before the bucketed portfolio, and since v5.26 taxed by the tax type on each row: Traditional and Annuity balances are ordinary income as they are spent, Traditional also counts toward your RMD, and Taxable and HSA balances are spent as already-taxed cash. The bucketed portfolio then follows in Taxable → Traditional → Roth order, with an 8-step order-of-operations. Growth rates link to the active scenario prior; the Roth-conversion column reads the shared slider.</p>\n    </div>\n    <div class=\"tabentry\">\n      <h3>Roth <span class=\"tag\" style=\"background:rgba(255,170,0,.15);color:#ffaa00\">strategy</span></h3>\n      <p class=\"purpose\">The Roth conversion ladder from retirement until the year before RMDs begin (RMD age 73 or 75 by birth year — SECURE 2.0).</p>\n      <p>Projects conversions year by year, the resulting RMD reduction at RMD age (73 for 1951–59 births, 75 for 1960+), and current Traditional/Roth balances (derived from your positions). The <strong>break-even</strong> (v5.7.1) appears under the strategy comparator as a WEALTH CROSSOVER card: your slider strategy and NO CONVERSIONS both run through the full 30-year engine and the card reports the first year your after-tax wealth catches up — so discounting and the opportunity cost of the conversion tax are included mechanically, and for some households the honest answer is that it never does. The conversion window and RMD start are below.</p>\n      <figure>\n        <svg viewBox=\"0 0 720 130\" font-family=\"'JetBrains Mono',monospace\">\n          <line x1=\"30\" y1=\"70\" x2=\"690\" y2=\"70\" stroke=\"#1a3a2a\"/>\n          <rect x=\"60\" y=\"56\" width=\"430\" height=\"28\" fill=\"rgba(0,204,255,0.18)\" stroke=\"#00ccff\"/>\n          <text x=\"275\" y=\"75\" fill=\"#00ccff\" font-size=\"11\" text-anchor=\"middle\">ROTH CONVERSION WINDOW</text>\n          <circle cx=\"60\" cy=\"70\" r=\"5\" fill=\"#00ff88\"/><text x=\"60\" y=\"40\" fill=\"#00ff88\" font-size=\"10\" text-anchor=\"middle\">RETIRE</text>\n          <circle cx=\"490\" cy=\"70\" r=\"5\" fill=\"#ffaa00\"/><text x=\"490\" y=\"40\" fill=\"#ffaa00\" font-size=\"10\" text-anchor=\"middle\">AGE 74</text>\n          <circle cx=\"560\" cy=\"70\" r=\"5\" fill=\"#ff4444\"/><text x=\"560\" y=\"40\" fill=\"#ff4444\" font-size=\"10\" text-anchor=\"middle\">AGE 75</text>\n          <text x=\"620\" y=\"74\" fill=\"#ff4444\" font-size=\"10\">RMDs begin</text>\n          <text x=\"275\" y=\"105\" fill=\"#6a8a7a\" font-size=\"9\" text-anchor=\"middle\">low-income gap years — convert at low brackets, before RMDs force income up</text>\n        </svg>\n        <figcaption>FIG.5 — THE ROTH CONVERSION WINDOW (EXAMPLE HOUSEHOLD, BORN 1964 → RMD AGE 75; 1951–59 BIRTHS START AT 73)</figcaption>\n      </figure>\n      <div class='card warn' style='border-radius:4px;margin-top:14px'><h4 style='margin-top:0;color:var(--amber)'>⚠ PAY CONVERSION TAX FROM OUTSIDE FUNDS — NOT FROM RETIREMENT ASSETS</h4><p style='margin:6px 0'>When you convert, the IRS wants its tax. <strong>Where that tax money comes from changes the math of the whole conversion.</strong> Pay it from a taxable (brokerage/savings) account and the full conversion lands in the Roth. Pay it by withholding from the conversion itself and you shrink the very tax shelter you are building — and if you are under 59½, you get fined for it.</p><h4>Example 1 — age 59½+, $100K conversion at a 24% marginal rate, 20 years at 4.5% growth</h4><ul class='tight'><li><strong>Tax paid from outside funds:</strong> $100,000 enters the Roth → grows to <strong>$241,171, all tax-free</strong>. The $24,000 tax came from your taxable account.</li><li><strong>Tax withheld from the conversion:</strong> only $76,000 enters the Roth → $183,290. The $24,000 you kept in taxable grows to about $52,800 <em>after</em> capital-gains tax. Total ≈ <strong>$236,089 — about $5,100 less</strong>, and that understates it because taxable dividends are taxed every year along the way.</li></ul><p style='margin:6px 0'>The clean way to see it: paying from outside funds is equivalent to <strong>moving an extra $24,000 of taxable money inside the Roth wrapper</strong> — something contribution limits would never otherwise let you do. Withholding throws that free shelter space away.</p><h4>Example 2 — the same conversion under age 59½: now it costs real money</h4><p style='margin:6px 0'>The $24,000 withheld never reaches the Roth, so the IRS treats it as an <strong>early distribution: a 10% penalty = $2,400 in cash, gone immediately</strong>. Add the lost growth on that penalty and the wrapper loss from Example 1, and the total cost is roughly <strong>$10,900 per $100K converted</strong>. On a multi-year ladder this compounds: withholding 24% on a $70K/yr conversion costs $1,680/yr in pure penalty alone. This is the case where <em>never</em> really means never.</p><h4>Example 3 — what if you have no taxable account?</h4><p style='margin:6px 0'>Some households (including the built-in example) hold nearly everything in retirement accounts. Honest answer: conversions can <em>still</em> be worth doing — the Conversion Strategy Comparator on the Roth tab models taxes paid from the taxable account first and Roth second, and conversions still beat doing nothing for the example household — the benefit is simply smaller than with outside funds. If you are under 59½, avoid <em>withholding</em> specifically: pay the tax from current cash flow via estimated payments so the full conversion reaches the Roth and no penalty applies. If you are 59½+ with no outside funds, size conversions so the reduced benefit still clears the bar (low brackets, widow-penalty avoidance, RMD reduction).</p><p class='micro' style='margin-bottom:0'>Rule of thumb: under 59½, never withhold from a conversion. At any age, prefer outside funds — every tax dollar paid from inside the shelter is shelter you permanently lose.</p></div>\n    </div>\n    <div class=\"tabentry\">\n      <h3>Taxes <span class=\"tag\" style=\"background:rgba(255,170,0,.15);color:#ffaa00\">strategy</span></h3>\n      <p class=\"purpose\">Lifetime tax estimate: federal income, capital gains, FICA, state.</p>\n      <p>Lifetime summary cards plus a clickable year-by-year table. Each year breaks gross taxable income into its sources (SS taxable portion, pension, earned income, RMD, Roth conversion, cap gains) via a stacked bar, then subtracts deductions to net taxable and shows the bracket-by-bracket fill. State tax uses a <strong>51-jurisdiction module</strong> (2026 approximations): each state's effective rate, Social Security treatment (only 8 states partially tax SS in 2026), full retirement-income exemptions (IL/MS/PA/IA/MI + the 9 no-tax states), and major 65+ exclusions (e.g. Georgia's $65K/person). Pick your state in My Data — or leave it on manual and the legacy flat rate applies unchanged. It is an approximation layer: effective rates stand in for progressive brackets and several income-limited exclusions are treated as unconditional — verify your state. The Roth slider drives the conversion column live, and a QCD what-if slider models charitable IRA distributions (income exclusion, RMD offset, lower MAGI). The tab reads as <strong>four numbered steps</strong> with a 30-second explainer up top: ① the conversion slider (your what-if dial — the comparator reads it live and names its row after it), ② the tax-funding selector, ③ the six-strategy comparator, ④ the solve-for grid. A <strong>conversion-tax funding</strong> control models where the tax money actually comes from — the question most calculators skip. Three honest cases: a pool you declare as all cost basis (cash, money markets, or an account holding little growth), an <em>appreciated brokerage</em> sale (the engine grosses the sale up to cover the capital-gains tax the sale itself creates — long-term rates stacked on that year's income — and feeds the realized gains into MAGI so the IRMAA lookback two years later sees them), or <em>withholding from the conversion itself</em> for households with no outside money (the conversion pays the bill first, so only the net reaches the Roth — but it covers that bill only up to its own size, and any remainder is still sold from the brokerage and still realizes gain; permanently smaller Roth — sometimes still the winning move; \"never pay conversion tax from the IRA\" assumes outside cash you may not have). Approximations, stated plainly: one blended gain share for the whole account (carried as a running cost basis, not a fixed rate), all long-term, no per-lot selection, no loss harvesting, no wash-sale logic, 59½+ assumed (no early-withdrawal penalty on the withheld slice). The share you enter is the OPENING one: growth accrues gain from there, so even a pool declared at 0 realizes gain on later sales. The Roth tab also carries a <strong>solve-for grid</strong>: 25 conversion policies swept through the deterministic engine and ranked against your chosen objective (after-tax estate, lifetime tax+IRMAA, or widow-year tax) — reported as the model's best cell, never a directive. <span class=\"plain\" style=\"display:block;margin-top:8px\"><span class=\"lbl\">Why the ranked amounts look shuffled</span> The cards are sorted by the <em>result</em> (your chosen goal), not by the conversion amount — so the dollar figures won't climb in order. That's because the relationship between conversion size and the goal is <strong>U-shaped</strong>: there's a sweet-spot amount in the middle, and moving away from it in <em>either</em> direction scores worse. Convert too little and you leave too much in the Traditional account, so bigger future RMDs force up your later taxes; convert too much and you voluntarily push income into higher brackets and IRMAA tiers now. So a small amount and a large amount can land next to each other with nearly the same score — one on each side of the valley. The green <strong>YOU</strong> card is your live slider amount scored the same way, with its rank among all 25 cells and a <strong>&plusmn;$ vs #1</strong> gap on every card so you can see how far each sits from the best. The whole spread is usually small (often $10–40K of lifetime tax+IRMAA on a multi-million-dollar estate), so treat it as fine-tuning — and check the IRMAA tab for which years a bigger conversion trips a Medicare cliff before acting.</span> <div class=\"plain\" style=\"margin-top:8px\"><span class=\"lbl\">The three sliders, in plain English</span><p><strong>Taxable-account yield</strong> — money in a regular brokerage account pays dividends and interest that are taxed every year even if you never sell; the slider is your estimate of that payout rate (last year's 1099-DIV ÷ account balance; ≈1.5% for stock index funds, 3–5% for bonds and cash). No brokerage account? It does nothing. <strong>QCD modeler</strong> — only for charitable givers age 70½+: gifts sent directly from a Traditional IRA to charity never appear on your tax return and still count toward the RMD. If you don't give, leave it at $0. <strong>Roth conversion slider</strong> — lives on the Roth tab; this tab's Roth Conv column follows it live. One input arrives from outside the tab: realized capital gains flow in from the Withdrawal plan's sales — the Monte Carlo scenario and the My Data embedded-gain share move them. Set the yield honestly, leave the other two at zero, and the tab is simply your projected tax life as-is.</p></div></p>\n      <p class=\"micro\">Honest limits: SS taxation uses a simplified provisional-income test; realized cap gains are the Withdrawal plan's own sales (the My Data embedded-gain share sets their opening basis) and they count toward the provisional-income test; NIIT (3.8% on estimated investment income, unindexed thresholds), a simplified AMT check, and QCDs (a what-if slider: excluded from income and MAGI, counts toward the RMD, per-person indexed cap) are modeled.</p>\n    </div>\n    <div class=\"tabentry\">\n      <h3>IRMAA Cliff <span class=\"tag\" style=\"background:rgba(255,170,0,.15);color:#ffaa00\">strategy</span></h3>\n      <p class=\"purpose\">Medicare premium-surcharge cliffs vs your projected income.</p>\n      <p>The tier table, then a year-by-year view of MAGI vs the next cliff with a <strong>2-year lookback</strong> (\"Affects\" column), headroom coloring (amber within $40K, red within $15K), and lifetime surcharge total. Driven by the Roth slider — it shows when a conversion is about to push you over a cliff and cost ~$1,000+/yr per person.</p>\n    </div>\n\n    <div class=\"tabentry\">\n      <h3>ACA Premium Subsidy (on the Roth tab) <span class=\"tag\" style=\"background:rgba(0,204,255,.15);color:#00ccff\">v5.7 · strategy</span></h3>\n      <p class=\"purpose\">Marketplace subsidy vs Roth conversions for anyone retiring before Medicare.</p>\n      <p>If you retire before 65, health coverage comes from the ACA marketplace, and the premium tax credit is set by your MAGI. The enhanced credits expired at the end of 2025, so under <strong>current law</strong> eligibility ends at a hard cliff: one dollar of MAGI over 400% of the prior year's federal poverty level and the entire subsidy — often $10,000–$25,000/yr for a couple in their early 60s — is gone. Roth conversions are MAGI, so a conversion strategy that wins on lifetime tax can quietly lose more in forfeited subsidies. This is frequently a <em>bigger</em> conversion penalty than IRMAA.</p>\n      <p><strong>How to use it:</strong> enter your household's benchmark silver premium (the second-lowest-cost silver plan from healthcare.gov) under My Data → ACA BRIDGE. <strong style=\"color:#ffaa00\">Enter the GROSS premium there and keep your expense rows as what you actually pay</strong> — the field feeds only the Roth tab's subsidy math, so nothing double-counts. The strategy table then gains an <strong>ACA SUB LOST</strong> column (each strategy charged, in real cash, for the subsidy it destroys versus converting nothing) and a <strong>STAY UNDER ACA CLIFF</strong> strategy that converts up to the cliff minus a $500 margin during bridge years, then fills the 24% bracket after Medicare. When that strategy converts $0 in a bridge year, that's the finding, not a bug: any conversion at all clears the cliff for your household.</p>\n      <p><strong>Law scenario toggle:</strong> Congress may restore the enhanced credits. Like the Social Security depletion scenario, this is your choice to stress, not a forecast — CURRENT LAW (400% cliff) or ENHANCED EXTENDED (the ARPA structure: no cliff, benchmark capped at 8.5% of income). Under ENHANCED the cliff strategy is hidden, since no cliff exists to stay under.</p>\n      <p><strong>What the model assumes (and its honest limits):</strong> ACA MAGI counts your <em>full</em> Social Security — the untaxed portion adds back, which is a different MAGI than IRMAA uses, and it can put you on the wrong side of the cliff while your tax return looks fine. Bridge premiums grow at household inflation plus 2 points (medical trend). In years where one spouse has reached Medicare, half the household premium is assumed. Below 100% of FPL the model shows $0 and defers to Medicaid rules it does not model — in BOTH law scenarios. Read that $0 as a blank rather than an answer: it is a placeholder for coverage this app does not price, so bridge years below the line are flagged under the strategy table and excluded from the improvement claim, and a change that lifts you back over the line will look like it buys a whole benchmark premium when the model cannot actually say that. (Through v5.31 the enhanced scenario applied no floor at all and paid the full premium down to zero income; v5.32 fixed that.) Alaska/Hawaii poverty levels, cost-sharing reductions, and plan choice are not modeled — this prices the subsidy, not your healthcare. Constants come from IRS Rev. Proc. 2025-25 and the HHS poverty guidelines, and are checked on the Verify tab.</p>\n    </div>\n\n    <div class=\"tabentry\">\n      <h3>Exit Plan <span class=\"tag\" style=\"background:rgba(255,170,0,.15);color:#ffaa00\">strategy</span></h3>\n      <p class=\"purpose\">A five-phase operational countdown for the retirement transition itself.</p>\n      <p>Turns the plan into a sequence of moves with target dates derived from your timeline: <strong>1</strong> Confirm the money works (final Monte Carlo / guardrail check) → <strong>2</strong> Lock in health coverage (ACA bridge / Medicare) → <strong>3</strong> Decide &amp; file Social Security (SSA accepts filings 4 months ahead) → <strong>4</strong> Put in your notice (HR checklist: PTO payout, final match, vesting) → <strong>5</strong> Turn on the portfolio paycheck (cash reserve → checking autopay, withholding/estimates). Each phase shows a live status chip wired to the same engine as the <strong>Events</strong> tab, plus the landmines to avoid.</p>\n    </div>\n\n    <h3 id=\"g-testing\" style=\"color:#ff6600\">▍Testing</h3>\n\n    <div class=\"tabentry\">\n      <h3>Monte Carlo <span class=\"tag\" style=\"background:rgba(255,102,0,.15);color:#ff6600\">testing</span></h3>\n      <p class=\"purpose\">The probability engine — thousands of randomized futures.</p>\n      <p>Success rate at multiple thresholds, outcome dispersion, and the shape of the 10th-percentile (bad-case) path. Uses the regime-switching model described in section 06 — plus two engine toggles, <strong>STOCHASTIC LONGEVITY</strong> and <strong>LTC DISTRIBUTION</strong>, whose full explanations (and why flipping them moves the success number) live in <a href=\"#longevity\">§06</a>.</p>\n      <p>Five runs build the picture: <strong>A</strong> accumulation up to retirement, <strong>B</strong> the first decade, <strong>C</strong> the full 30 years (with a single long-term-care shock and deaths at life expectancy), <strong>C (no LTC)</strong> the same minus that shock so its cost is visible, and <strong>D — probabilistic long-term care</strong>, which draws a <em>random</em> number of care years for each spouse every run (often zero, occasionally many) instead of one fixed shock. Run D reads the harshest on purpose: it surfaces the late-life \"what if care drags on for years\" risk that a single early shock hides.</p>\n    </div>\n    <div class=\"tabentry\">\n      <h3>Historical Backtest <span class=\"tag\" style=\"background:rgba(255,102,0,.15);color:#ff6600\">testing</span></h3>\n      <p class=\"purpose\">Replays your plan against real market history (1928–2025).</p>\n      <p>Survival rate across every historical start year, a stock/bond cross-check, and the infamous start years (1929, 1966, 1973, 2000, 2008, plus 1982 for contrast) with end balance, low point, and depletion year. A 1966 real-balance chart shows the worst-case grind. Complements the Monte Carlo: it replays real pasts including their actual sequencing.</p>\n      <p class=\"micro\">Holds your asset mix constant; doesn't model taxes, RMDs, Roth, or LTC — it isolates pure sequence-of-returns risk.</p>\n    </div>\n    <div class=\"tabentry\">\n      <h3>What Breaks the Plan <span class=\"tag\" style=\"background:rgba(255,102,0,.15);color:#ff6600\">testing</span></h3>\n      <p class=\"purpose\">Reverse stress test — solves for the break-points.</p>\n      <p>Four plain answers under the active prior: how much more you could spend, how large a one-time LTC/emergency shock you can absorb, how bad returns can get, and how many consecutive crash years at retirement you survive. Switch to BEAR to watch the edges tighten.</p><p>The modeled outflow includes <strong>estimated taxes</strong> (an annual average from the Taxes engine, including Roth-conversion taxes), claim-month-accurate Social Security, and the <strong>survivor transition</strong> (larger SS check only, plus a 25% spending drop, after the first projected death). Not modeled: recurring long-term care, IRMAA surcharges, and market sequence — the Monte Carlo tab covers that.</p><div class='note'><strong>How bad is the return break-point, historically?</strong> The worst rolling <em>decade</em> for US stocks — 2000–2009, the dot-com bust followed by the financial crisis — ran about −3.4%/yr real. In 150+ years of data, <strong>no 20-year stretch has ever produced a negative real total return</strong>: the weakest windows (starting 1929, or 2000) still earned roughly +2%/yr, and every 30-year window on record has been positive (the worst ≈ +3.6%/yr, and that window ended in the depths of 1932). A break-point of several percent <em>negative</em>, sustained for the entire plan, therefore sits far outside anything US market history has produced. One honest caveat: those are <em>stock</em> figures — bonds did suffer negative multi-decade real stretches (roughly 1941–1981), which is exactly the blended-portfolio risk the Monte Carlo's stagflation regime exists to probe.</div>\n    </div>\n    <div class=\"tabentry\">\n      <h3>Survivor Scenario <span class=\"tag\" style=\"background:rgba(255,102,0,.15);color:#ff6600\">testing</span></h3>\n      <p class=\"purpose\">The financial picture when one spouse dies — both cases.</p>\n      <p>Models the loss of the smaller SS check, the flip to Single filing (the \"widow's penalty\"), and the ~25% spending drop. Each case shows income before/after, the SS step-up-vs-loss mechanics, and <strong>years alone</strong> (from life expectancies) — which differ sharply between the two cases and drive how long the higher single-filer taxes apply. Argues for front-loading Roth conversions while both file jointly.</p>\n    </div>\n    <div class=\"tabentry\">\n      <h3>Stress <span class=\"tag\" style=\"background:rgba(255,102,0,.15);color:#ff6600\">testing</span></h3>\n      <p class=\"purpose\">Named adverse scenarios.</p>\n      <p>Runs the plan through named shocks side by side — AI-bubble burst, stagflation, sequence-of-returns, a single LTC event, and the newer <strong>LTC Marathon</strong> — against a no-shock base, with Riskalyze-style risk metrics (volatility, Sharpe/Sortino, max drawdown).</p>\n      <figure>\n        <svg viewBox=\"0 0 760 250\" font-family=\"'JetBrains Mono',monospace\">\n          <text x=\"20\" y=\"24\" fill=\"#6a8a7a\" font-size=\"10\">RETIRE</text>\n          <text x=\"740\" y=\"24\" fill=\"#6a8a7a\" font-size=\"10\" text-anchor=\"end\">DEATH</text>\n          <text x=\"20\" y=\"70\" fill=\"#ffaa00\" font-size=\"11\">SINGLE LTC EVENT</text>\n          <line x1=\"20\" y1=\"92\" x2=\"740\" y2=\"92\" stroke=\"#1a3a2a\"/>\n          <rect x=\"150\" y=\"80\" width=\"46\" height=\"24\" fill=\"rgba(255,170,0,0.3)\" stroke=\"#ffaa00\"/>\n          <text x=\"173\" y=\"124\" fill=\"#6a8a7a\" font-size=\"9\" text-anchor=\"middle\">one bill, early</text>\n          <text x=\"173\" y=\"138\" fill=\"#6a8a7a\" font-size=\"9\" text-anchor=\"middle\">$150-300K · pot still big</text>\n          <text x=\"20\" y=\"180\" fill=\"#aa66ff\" font-size=\"11\">LTC MARATHON</text>\n          <line x1=\"20\" y1=\"202\" x2=\"740\" y2=\"202\" stroke=\"#1a3a2a\"/>\n          <rect x=\"560\" y=\"190\" width=\"30\" height=\"24\" fill=\"rgba(170,102,255,0.22)\" stroke=\"#aa66ff\"/>\n          <rect x=\"592\" y=\"190\" width=\"30\" height=\"24\" fill=\"rgba(170,102,255,0.3)\" stroke=\"#aa66ff\"/>\n          <rect x=\"624\" y=\"190\" width=\"30\" height=\"24\" fill=\"rgba(170,102,255,0.4)\" stroke=\"#aa66ff\"/>\n          <rect x=\"656\" y=\"190\" width=\"30\" height=\"24\" fill=\"rgba(170,102,255,0.5)\" stroke=\"#aa66ff\"/>\n          <text x=\"623\" y=\"234\" fill=\"#6a8a7a\" font-size=\"9\" text-anchor=\"middle\">years of care, late · $120K/yr and rising · pot small, one SS check left</text>\n        </svg>\n        <figcaption>FIG.6 — SAME-ISH TOTAL COST, VERY DIFFERENT TIMING → VERY DIFFERENT RISK</figcaption>\n      </figure>\n      <div class=\"plain\">\n        <span class=\"lbl\">In plain English — why two LTC scenarios?</span>\n        <p>The original \"LTC event\" assumes one big care bill ($150K-300K) fairly early, while your savings are still large. But real long-term care usually arrives <strong>at the very end of life and can drag on for years</strong> — exactly when the pot is smallest and one Social Security check has already stopped. The <strong>LTC Marathon</strong> models that long, late, rising cost. It can add up to a similar total as the single shock yet do far more damage, purely because of <em>when</em> it lands.</p>\n      </div>\n    </div>\n\n    <h3 id=\"g-tools\" style=\"color:#ff4444\">▍Tools &amp; Reference</h3>\n\n    <div class=\"tabentry\">\n      <h3>Ask AI <span class=\"tag\" style=\"background:rgba(255,68,68,.15);color:#ff4444\">ai</span></h3>\n      <p class=\"purpose\">An AI assistant with full context on your plan.</p>\n      <p>Sends a structured summary of your data and results to a language model for natural-language follow-up. It's a real <strong>conversation</strong>: if the AI answers with a question of its own, type your reply in the same box and EXECUTE — the session transcript is re-sent each turn (last 12 messages), so it remembers what it asked. ⟲ NEW SESSION starts fresh. (Self-hosted key users: longer sessions re-send more context, so each turn costs slightly more.) Ships with five universal starter questions:</p>\n      <div class=\"pillrow\">\n        <span class=\"pill\">Will my money last as long as I do?</span>\n        <span class=\"pill\">What if I live longer than expected?</span>\n        <span class=\"pill\">Can I survive a crash right after I retire?</span>\n        <span class=\"pill\">How much can I safely spend each year?</span>\n        <span class=\"pill\">What if inflation stays high?</span>\n      </div>\n      <p class=\"micro\">The assistant can be confidently wrong. Always verify before acting. Self-hosted copies (running outside claude.ai) power this tab with a personal API key via the LOCAL API KEY panel — stored only in that browser, never in the app file or backups, and wiped by Clear All Data. Full guide: <a href=\"#apikey\">§10</a>.</p></div><div class='tabentry'><h3>Checklist <span class='tag' style='background:rgba(0,204,255,.15);color:#00ccff'>tools</span></h3><p class='purpose'>An estate &amp; retirement-readiness checklist.</p><p>Grouped action items (estate documents, beneficiaries, account access, insurance, a survivor playbook) with notes and a contact per item. Survivor-critical items are flagged, progress is tracked, and the completion of the critical items feeds an <strong>Estate Readiness</strong> dimension on the Grade tab. Your checks and notes persist locally and travel in the Export Backup.</p></div><div class='tabentry'><h3>Skins <span class='tag' style='background:rgba(106,138,122,.18);color:#6a8a7a'>tools</span></h3><p class='purpose'>Display themes.</p><p>Thirteen color palettes built on a CSS-variable token system — the original Tactical Green console; four softer darks (Soft Dark Mode, Warm Executive, Low-Glare Dark, Quiet Dark); three light paper themes (Field Manual in red, white &amp; green, Reading Paper in warm sepia, and E-Ink Gray); Midnight Blue, a navy alternative to the greens; Report, a plain business-register light theme; and three built for legibility rather than looks — <strong>High Contrast Light</strong>, <strong>High Contrast Dark</strong>, and <strong>Colorblind-Safe Light</strong> (Okabe–Ito, so gains, losses and warnings stay distinguishable with red–green color blindness). If any text in this app is hard to read, those three are the answer, and the <strong>UI SIZE</strong> control at the top of this tab (100 / 115 / 130 / 150%) enlarges everything — useful on high-DPI displays and for aging eyes. UI SIZE scales the whole layout, so on a narrow screen it makes wide tables need horizontal scrolling sooner, not later. The light themes are the easiest on the eyes in bright rooms and for long text-heavy sessions; the darks suit low light. Each tile previews its own colors; the choice persists in the browser cache and travels in the Export Backup.</p></div><div class='tabentry'><h3>Docs <span class='tag' style='background:rgba(106,138,122,.18);color:#6a8a7a'>tools</span></h3><p class='purpose'>This field manual.</p><p>The full documentation, viewable in-app and downloadable as HTML from the toolbar above; open the downloaded file in your browser and use Print → Save as PDF.</p></div><div class=\"tabentry\">\n      <h3>Verify <span class=\"tag\" style=\"background:rgba(170,102,255,.15);color:#aa66ff\">trust</span></h3>\n      <p class=\"purpose\">A live audit of this copy's statutory constants — run in your browser, every visit.</p>\n      <p>Every tax bracket, deduction, IRMAA tier, RMD divisor, QCD cap, wage base, and state-module fact the math depends on is re-checked against its primary-source value (IRS Rev. Proc. 2025-32, CMS, SSA, IRS Pub. 590-B) the moment you open the tab, with a ✓ or ✗ per line and the citation beside it. Green across the board means <em>this file, in your hands, right now</em> carries the correct law — a tampered or corrupted copy fails loudly. Two longevity checks are statistical and re-sample live. Honest scope: constants, not every formula using them; the source distribution's Node suite, the behavioral tests, and eventually independent professional review cover that ground.</p>\n    </div>\n    <div class='tabentry'><h3>Events <span class='tag' style='background:rgba(255,170,0,.15);color:#ffaa00'>tools</span></h3><p class='purpose'>Every dated obligation in the plan, as live alarms.</p><p>A live alarm for every dated obligation, derived from your timeline and the shared constants (eighteen for a two-person household — several are per-spouse) — the annual tax-constant refresh, the backtest-data append, Roth-conversion and RMD deadlines, Social Security filing windows (SSA accepts applications four months ahead), Medicare initial enrollment and annual Open Enrollment, ACA-bridge open enrollment, estimated quarterly taxes during conversion years, the peer-benchmark refresh behind the Ranking tab (the Fed SCF is triennial), quarterly backup nudges, the annual SSA earnings-record check, a January plan review, and an alarm if your for-life expenses stop before the plan horizon (which would otherwise make the simulator treat your final years as free). Statuses recompute from today's date on every load — <strong>yellow</strong> = getting close (prepare), <strong>green</strong> = action window open (go), <strong>red</strong> = action required or verify, dim = tracking / past — and nothing is stored, so alarms can never go stale or be dismissed and forgotten. The most urgent tier also surfaces as a colored strip above the tabs on every view; clicking it opens this tab. Each event carries plain-language instructions and points at the authoritative source (irs.gov, ssa.gov, cms.gov, medicare.gov, healthcare.gov). Deadlines are informational — verify with the agencies before acting.</p></div>\n    </div>\n    <a class=\"totop-foot\" href=\"#toc\">↑ Back to Table of Contents</a>\n  </div>\n</section>\n\n<!-- XLSX -->\n<section id=\"xlsx\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">08</span> Entering Your Data — the My Data Tab <a class=\"toclink\" href=\"#toc\">↑ Contents</a></h2>\n    <p>The <strong>My Data</strong> tab is where you build or edit your plan. It's a set of plain forms — no file formats to get right. Fill in what applies, then press <strong>Save &amp; Apply</strong> to rebuild every tab from it.</p>\n    <table>\n      <tr><th>Section</th><th>What you enter</th></tr>\n      <tr><td><strong>Household</strong></td><td>Names, single or couple, birth dates, target retirement year, life expectancies, state and its income-tax rate</td></tr>\n      <tr><td><strong>Holdings</strong></td><td>One row per position: ticker/name, balance, asset type, Roth vs Traditional, expense ratio — plus an Other accounts list, where each row also carries its own tax type (Taxable, Traditional, Roth, HSA or Annuity). From v5.26 the engines READ that tax type: Traditional and Annuity balances are taxed as ordinary income as they are spent and Traditional balances count toward RMDs, while Taxable and HSA balances are still modelled as already-taxed cash. Other accounts are still drawn first, but from v5.26 the tax type you set decides what that costs: a Traditional or Annuity balance is taxed as ordinary income as it is spent, and a Traditional balance also counts toward your RMD. Through v5.25 the whole pot was spent tax-free with no RMD even when what you entered there was an IRA, annuity or state plan, which made the Withdrawal tab optimistic. It no longer is.</td></tr>\n      <tr><td><strong>Income</strong></td><td>Social Security for each person (monthly amount, planned claim age, and the full benefit-by-age table), any pension, and an <strong>Other Income Streams</strong> table — rental, post-retirement jobs, annuities, royalties — each with owner, start/end years, COLA flag, and taxable vs tax-free treatment</td></tr>\n      <tr><td><strong>Contributions</strong></td><td>Salaries and ongoing 401(k)/HSA contributions while still working</td></tr>\n      <tr><td><strong>Expenses</strong></td><td>One row per expense: category, label, amount, frequency (monthly / annual / one-time), start and end dates, deductible flag, and whether it applies before, after, or across retirement</td></tr>\n    </table>\n    <div class=\"note\"><strong>Save &amp; Apply</strong> caches everything in your browser and re-derives all 26 tabs. <strong>Export Backup</strong> writes the same data to a <code>.json</code> file; <strong>Import Backup</strong> reads one back. That JSON backup is the only file format the app reads or writes — there's no spreadsheet or Word-document import.</div>\n  </div>\n</section>\n\n<!-- DOCX -->\n<section id=\"docx\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">09</span> The Master Prompt &amp; AI Context <a class=\"toclink\" href=\"#toc\">↑ Contents</a></h2>\n    <p>The <strong>master prompt</strong> is the plain-language briefing the <a href=\"#tabs\">Ask AI</a> tab sends to the language model so its answers are grounded in <em>your</em> plan. You no longer write or upload it — the app <strong>builds it automatically</strong> from your My Data entries (household, portfolio, income) each time you ask a question.</p>\n    <p>It reads like a short situation report. The generated context includes:</p>\n    <table>\n      <tr><th>What the AI sees about your plan</th></tr>\n      <tr><td>Names, ages, filing status, target retirement year, and state</td></tr>\n      <tr><td>Portfolio total, retirement-vs-taxable split, asset mix, weighted expense ratio</td></tr>\n      <tr><td>Social Security (by claim age), pension, and any other income streams you entered</td></tr>\n      <tr><td>Headline results — success rate, median outcome, and the key risks</td></tr>\n    </table>\n    <div class=\"note\">Because it's generated from your data, the AI context stays current automatically and travels inside your exported backup — there's nothing to keep in sync by hand. (Older backups may still contain a <code>masterPrompt</code> field; it's loaded for continuity but the live context is always regenerated from your current numbers.)</div>\n  </div>\n</section>\n\n<!-- API KEY -->\n<section id=\"apikey\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">10</span> Ask AI &amp; Your API Key (Self-Hosted Copies) <a class=\"toclink\" href=\"#toc\">↑ Contents</a></h2>\n    <p class=\"lead\">This section only matters if you run Danger Close <strong>on your own computer</strong> — the downloaded single-file HTML or a local dev server. Inside claude.ai, the platform signs the Ask AI call for you: there is no key, no billing setup, and the LOCAL API KEY panel doesn't even appear. On your own machine, the app has no way to prove to the AI service that anyone should pay for the answer — so you bring your own key.</p>\n    <div class=\"plain\">\n      <span class=\"lbl\">In plain English</span>\n      <p>An API key works like a <strong>prepaid calling card for the AI</strong>. You open a small account with Anthropic (the AI company), put a few dollars on it, and get a secret code starting with <code>sk-ant-</code>. When you ask a question, the code tells Anthropic whose card to charge — typically <em>a fraction of a cent per question</em>. Guard the code the way you'd guard a card number: anyone who has it can spend your balance.</p>\n    </div>\n\n    <h3>Getting a key (one-time, ~5 minutes)</h3>\n    <ol>\n      <li><strong>Create a developer account</strong> at <a href=\"https://console.anthropic.com\">console.anthropic.com</a>. This is <em>separate</em> from a claude.ai login — a Claude Pro or Max subscription does not include API access. You'll verify a phone number during signup.</li>\n      <li><strong>Add a payment method and ~$5 of credit</strong> on the Billing page. Keys don't work until billing exists; the first $5 also raises your rate limit. <strong>Set a monthly spending limit while you're there</strong> — it's the single best protection against surprises.</li>\n      <li><strong>Create the key:</strong> Settings → API keys → Create Key. Name it something identifiable like <code>danger-close</code>. <strong>Copy it immediately</strong> — Anthropic shows the full key exactly once. If you lose it, you don't recover it; you revoke it and make a new one (painless — see rotation below).</li>\n    </ol>\n\n    <h3>Using it in the app</h3>\n    <p>Open the <strong>Ask AI</strong> tab. In any self-hosted copy you'll see the <strong>🔑 LOCAL API KEY</strong> panel just under the \"exactly what's sent\" disclosure. Paste the key, press <strong>SAVE KEY</strong>, and Ask AI is live. The panel then shows the key masked (<code>sk-ant-••••••••1234</code>) with a <strong>FORGET KEY</strong> button that removes it instantly.</p>\n\n    <h3>What it costs &amp; watching your usage</h3>\n    <p>Billing is pay-per-token (a token is roughly ¾ of a word). A typical Danger Close question — your plan context in, a one-screen answer out — costs <strong>well under a cent</strong>; $5 of credit realistically lasts months of regular use. Check the <strong>Usage</strong> and <strong>Billing</strong> pages at console.anthropic.com occasionally: they show spend by day and by key. If usage ever looks unfamiliar, rotate the key (below) first and investigate second.</p>\n\n    <h3>Where the key lives — and whether it survives closing the file</h3>\n    <p>The key is kept in your <strong>browser's private storage for this app</strong> — the same place your plan data lives. It is <em>never written into the HTML or JSX file itself</em>, and it is <em>never included in Export Backup</em>. Practical consequences:</p>\n    <ul>\n      <li><strong>Normal use survives:</strong> Save &amp; Apply, close the file, reopen the same file in the same browser → your plan <em>and</em> your key are still there. Nothing to re-enter day to day.</li>\n      <li><strong>Sharing is safe by construction:</strong> sending someone the HTML file, or one of your <code>.json</code> backups, cannot leak your key — it isn't in either.</li>\n      <li><strong>Some things reset it:</strong> a different browser, a private/incognito window, clearing the browser's site data, or the app's own <strong>Clear All Data</strong> all wipe the key (Clear All Data does so deliberately). Moving or renaming the HTML file <em>may</em> also start a fresh store, depending on how your browser scopes local files. In every such case the fix is 10 seconds: paste the key again (and Import Backup for the plan).</li>\n    </ul>\n\n    <h3>How safe is this? Honest answer: safe design, real residual risks</h3>\n    <table>\n      <tr><th>Built-in protections</th><th>What they don't cover</th></tr>\n      <tr><td>Key travels only over HTTPS, only to <code>api.anthropic.com</code> — nowhere else, ever.</td><td rowspan=\"4\"><strong>Anyone who can use this browser profile can use the key.</strong> For the app to send it, it must be readable — so a family member on your login, a browser extension with page access, IT management software on an employer-owned machine, or malware that owns the computer could all reach it. No design eliminates this class of risk; the mitigations on the left shrink the blast radius to pocket change.</td></tr>\n      <tr><td>Never embedded in the file, never in backups, masked on screen.</td></tr>\n      <tr><td>FORGET KEY removes it instantly; Clear All Data wipes it too.</td></tr>\n      <tr><td>Revocable in seconds at console.anthropic.com — a stolen key dies the moment you kill it.</td></tr>\n    </table>\n    <div class=\"note\"><strong>The three-part habit that makes this genuinely low-risk:</strong> use a <strong>dedicated key</strong> that does nothing but power this app, put a <strong>low monthly spending cap</strong> on it ($5–10), and press <strong>FORGET KEY</strong> whenever you leave the app on a shared or work machine. Worst realistic case then: someone burns a few dollars of AI credit before you revoke.</div>\n\n    <h3>Rotating the key (replacing it)</h3>\n    <p>Rotation is cheap insurance — do it immediately if you ever pasted the key somewhere by mistake, suspect the machine, or see unfamiliar usage, and consider doing it every few months purely out of caution. The whole cycle takes under a minute:</p>\n    <ol>\n      <li>At <a href=\"https://console.anthropic.com/settings/keys\">console.anthropic.com/settings/keys</a>: <strong>revoke</strong> the old key (it stops working within moments), then <strong>Create Key</strong> for a fresh one.</li>\n      <li>In the app: <strong>FORGET KEY</strong>, paste the new key, <strong>SAVE KEY</strong>.</li>\n    </ol>\n    \n    <h3>Exactly what an Ask AI call transmits — the complete list</h3>\n    <table>\n      <tr><th>Item</th><th>Sent?</th><th>Detail</th></tr>\n      <tr><td><strong>Destination</strong></td><td>—</td><td><code>api.anthropic.com</code> over HTTPS — or, if you've configured a Local Model, <code>your-machine/v1/chat/completions</code> and nothing touches Anthropic at all.</td></tr>\n      <tr><td><strong>Your structured plan summary</strong></td><td>YES</td><td>The generated context you can read verbatim under \"EXACTLY WHAT'S SENT\" on the Ask AI tab: names, ages, filing status, state, retirement year, portfolio totals and asset mix, account-type split, Social Security/pension amounts and claim ages, and headline simulation results.</td></tr>\n      <tr><td><strong>Your questions and the running conversation</strong></td><td>YES</td><td>Ask AI is a conversation: each turn re-sends the session so far (your questions and the AI's replies, capped at the last 12 messages) so the model can remember its own follow-up questions and your answers. ⟲ NEW SESSION forgets everything; nothing is stored after you leave.</td></tr>\n      <tr><td><strong>Attachments you added</strong></td><td>YES</td><td>Only files you explicitly attached (images/PDF/text; up to 8). On the Local Model route, images/PDFs are skipped — text only.</td></tr>\n      <tr><td><strong>Account numbers, logins, SSNs</strong></td><td>NO</td><td>The app never collects them, so they cannot transmit.</td></tr>\n      <tr><td><strong>Your API key</strong></td><td>Header only</td><td>Self-hosted copies send it as an HTTPS header to api.anthropic.com only — never in the message body, never to a local model, never anywhere else.</td></tr>\n      <tr><td><strong>Anything from any other tab</strong></td><td>NO</td><td>Only the summary above — not your full expense list, not position-level detail beyond the mix, not your checklist notes.</td></tr>\n      <tr><td><strong>Anything, while Offline Mode is on</strong></td><td>NO</td><td>The toggle at the top of the Ask AI tab hard-disables the feature; the EXECUTE button is dead and the call cannot fire.</td></tr>\n    </table>\n\n    <h3>Offline Mode — the hard switch</h3>\n    <p>Every tab except Ask AI already runs fully offline. The <strong>✈ OFFLINE MODE</strong> toggle at the top of the Ask AI tab closes that last door: while it's on, Ask AI is disabled outright, nothing can transmit, and the app is completely air-gapped. The setting persists between sessions and works everywhere — including inside claude.ai. Use it if you want a guarantee stronger than \"I just won't press EXECUTE.\"</p>\n\n    <h3>Local Model — Ask AI without Anthropic (self-hosted copies)</h3>\n    <p>Self-hosted copies can point Ask AI at an <strong>OpenAI-compatible server on your own computer</strong>, so your plan summary and questions go to your machine and never leave it:</p>\n    <ol>\n      <li><strong>Ollama:</strong> install from ollama.com, pull a model (<code>ollama pull llama3.1</code>), and start the server with browser access allowed: <code>OLLAMA_ORIGINS=\"*\" ollama serve</code>. Endpoint URL: <code>http://localhost:11434/v1</code>.</li>\n      <li><strong>LM Studio:</strong> load a model, start the local server, and <strong>enable CORS</strong> in its server settings. Endpoint URL: <code>http://localhost:1234/v1</code>.</li>\n      <li>In the app: Ask AI → <strong>🖥 LOCAL MODEL</strong> → paste the URL and model name → USE LOCAL MODEL. A violet ACTIVE badge confirms the route; BACK TO ANTHROPIC restores the default.</li>\n    </ol>\n    <div class=\"card warn\"><strong>Honest trade-offs.</strong> Local models here are text-only (image/PDF attachments are skipped), slower on ordinary hardware, and — bluntly — <strong>markedly weaker at tax and retirement reasoning</strong> than the hosted model. The privacy is real; so is the quality drop. Whatever route answers you, verify against the tabs and authoritative sources before acting. If the call fails instantly, it's almost always CORS — revisit step 1/2.</div>\n\n    <p class=\"micro\">Rotating or losing a key never touches your plan data — the two live in separate storage, and the plan's durable copy is always your exported <code>.json</code> backup.</p>\n\n    <div class=\"card warn\"><strong>Never put the key anywhere except the panel (or a git-ignored <code>.env</code> on the dev-server build).</strong> Not in the HTML file, not in a backup, not in an email, chat, screenshot, or code repository. Keys are personal: if someone else wants Ask AI, they create their own in five minutes. If a key ever does escape, revoke it first and ask questions after.</div>\n    <p class=\"micro\">Running the developer (Vite) build instead? The <code>.env</code> proxy in the project README is the stronger option there — the key stays on the server side and never enters the browser at all.</p>\n  </div>\n</section>\n\n\n<!-- RELOAD -->\n<section id=\"reload\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">11</span> Reloading &amp; Resetting <a class=\"toclink\" href=\"#toc\">↑ Contents</a></h2>\n    <ul>\n      <li><strong>Save &amp; Apply</strong> (My Data tab) — writes your edits to the browser cache and rebuilds every tab.</li>\n      <li><strong>Export Backup</strong> / <strong>Import Backup</strong> (My Data tab) — save your whole plan to a <code>.json</code> file, or load one back.</li>\n      <li><strong>Clear All Data</strong> (My Data tab) — wipes the browser cache — everything, including your checklist notes and contacts, display preferences, and any saved API key — and returns you to the landing screen.</li>\n      <li>Your plan is cached in the browser between visits, so the app reopens straight to it — no reloading needed day to day.</li>\n    </ul>\n    <div class=\"note\">The browser cache is the convenience copy; the exported <code>.json</code> is the durable one. Export a fresh backup after any significant change so you can always rebuild on a new browser or device.</div>\n    <h3>Where to keep the backup file — and what to call it</h3>\n    <p>The backup is a plain <code>.json</code> file containing <strong>your real figures</strong> — balances, income, Social Security, pension, and spending. The app never transmits it; pressing Export Backup simply saves it to your device. From that moment it is an ordinary file, so give it the same care you'd give a bank statement: keep it somewhere private — your Documents folder, a personal cloud drive, or a USB stick — rather than a folder you share with other people, and think twice before emailing it.</p>\n    <p>The app fills in a sensible filename for you (<code>dangerclose-backup-</code> plus the date and time), so you can simply press Export. If you'd rather name it yourself, keeping the word <strong>backup</strong> somewhere in the name makes it easy to find later — and, for the small number of people who keep a copy of the app's source folder from GitHub, filenames containing <code>backup</code> are already on that project's ignore list, so a backup saved into that folder stays out of anything published. Nobody using the app normally needs to think about this; the suggested name already handles it.</p>\n    <div class=\"note\">If you maintain the project repository yourself, the ignore rule <code>*[Bb]ackup*.json</code> covers every backup this app produces (and any you rename), while leaving <code>package.json</code> and friends untouched.</div>\n    <h3>Where your data actually lives — and how to prove it to yourself</h3>\n    <p>A point worth being crystal-clear about, especially for the downloaded single-file copy: <strong>your data is never written into the HTML file itself.</strong> The file is a fixed program — you can open it, enter thirty years of financial detail, press Save &amp; Apply a hundred times, and not one byte of the file changes. Everything you enter goes into your <strong>browser's private storage compartment</strong> for that file. That's why your plan reappears when you reopen the same file in the same browser — and why handing the file to someone else, or posting it anywhere, can never hand over your numbers.</p>\n    <p>Don't take this manual's word for it. Any of these takes under two minutes:</p>\n    <table>\n      <tr><th>Test</th><th>How</th><th>What you'll see</th></tr>\n      <tr><td><strong>Two-browser test</strong></td><td>Open the file in Chrome, enter some data, Save &amp; Apply. Leave it open, then open the <em>same file</em> in Microsoft Edge (or Firefox).</td><td>Edge shows the fresh landing screen — no trace of your data. It lives in Chrome's storage, not in the file. (Windows ships with Edge built in, so most machines do have a second browser even if you only ever use one.)</td></tr>\n      <tr><td><strong>Private-window test</strong> (one browser is enough)</td><td>With data saved, open the same file in an incognito / InPrivate window of the same browser.</td><td>Fresh landing screen again — private windows get their own separate, throwaway storage.</td></tr>\n      <tr><td><strong>File-properties test</strong></td><td>Right-click the file in File Explorer → Properties, and note its size and \"Date modified.\" Use the app heavily, Save &amp; Apply, then check Properties again.</td><td>Identical size, identical date — nothing was ever written to the file.</td></tr>\n      <tr><td><strong>Copy test</strong></td><td>Copy the HTML file to a USB stick and open it on another computer.</td><td>Landing screen — the copy carries the program, never the data.</td></tr>\n    </table>\n    <div class=\"card warn\"><strong>The flip side of that privacy:</strong> browser storage is convenient but perishable. Clearing the browser's site data, a browser reset or reinstall, a different browser, a different device — and the plan is simply gone, with no recovery. The exported <code>.json</code> backup is the <strong>only durable copy</strong> of your data. Export one after every meaningful change (My Data → Export Backup); Import Backup rebuilds everything from it in seconds.</div>\n    <p class=\"micro\">The same storage model applies everywhere the app runs — claude.ai and the local dev server included. Your API key (<a href=\"#apikey\">§10</a>) follows the same rule, with one deliberate difference: the key is excluded even from backups.</p>\n  </div>\n</section>\n\n<!-- HSA & MEDICARE CUTOFF -->\n<section id=\"hsa\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">12</span> HSA Contributions &amp; the Medicare Cutoff <a class=\"toclink\" href=\"#toc\">↑ Contents</a></h2>\n    <p class=\"lead\">A Health Savings Account is the most tax-advantaged account there is — pre-tax going in, tax-free growth, tax-free coming out for medical costs. But the <em>contribution</em> side has a hard stop tied to Medicare, not to your retirement date. Miss it and the contributions become penalized excess. This section explains exactly when each of you has to stop.</p>\n\n    <h3>The rule that matters</h3>\n    <p>You <strong>cannot contribute to an HSA for any month you are enrolled in Medicare</strong> — Part A or Part B, and free Part A counts. Retiring changes nothing on its own; <em>Medicare enrollment</em> is the trigger. The two usually land close together, which is why this feels like a retirement rule when it isn't.</p>\n    <div class=\"note\">Being on Medicare only stops <em>new</em> contributions — the account stays fully usable. Withdrawals for qualified medical costs, including Medicare Part B / Part D / Advantage premiums (but <strong>not</strong> Medigap), remain tax-free for life.</div>\n\n    <h3>Two ways Medicare starts — and when you must stop</h3>\n    <table>\n      <tr><th>Situation</th><th>When Part A is effective</th><th>Last HSA-eligible month</th></tr>\n      <tr><td>Claiming Social Security <strong>at or before 65</strong></td><td>Automatically at 65 — and it can't be declined while you're drawing SS</td><td>The month before your 65th-birthday month</td></tr>\n      <tr><td>Claiming SS / enrolling <strong>after 65</strong></td><td>Back-dated up to 6 months from your application (never before 65)</td><td>About 6 months before you file — at the latest</td></tr>\n      <tr><td>Working past 65 on an <strong>employer HDHP</strong></td><td>Deferred until you actually enroll</td><td>You can keep contributing right up to enrollment</td></tr>\n    </table>\n\n    <h3>The 6-month look-back trap</h3>\n    <p>If you delay Social Security and Medicare past 65 and then file, Part A is made <strong>retroactive up to six months</strong> (but never earlier than your 65th birthday). Any HSA contribution that falls inside that retroactive window turns into an excess contribution after the fact. The safe move: <strong>stop contributing at least six months before you file for Medicare or Social Security.</strong></p>\n\n    <h3>The year you stop is prorated</h3>\n    <p>Your annual limit is prorated by the number of HSA-eligible months in that final year — eligible for 4 of 12 months means 4/12 of the limit, and the age-55+ $1,000 catch-up prorates the same way. (The IRS \"last-month rule\" can let you fund a full year if you're eligible on December 1, but it triggers a 13-month testing period — losing eligibility to Medicare the next year claws part of it back — so don't lean on it right at your cutoff.)</p>\n\n    <h3>It can come even earlier than Medicare</h3>\n    <p>Medicare is the <em>latest</em> possible cutoff, not the only one. Contributing also requires that you're covered by a <strong>qualifying high-deductible health plan (HDHP)</strong>. If you drop the HDHP at retirement — moving onto an ACA marketplace plan, a non-HDHP retiree plan, or a spouse's plan — HSA eligibility ends that month regardless of Medicare.</p>\n\n    <h3>Where your actual dates live</h3>\n    <p>The <strong>Events</strong> tab computes each spouse's exact cutoff from the Social Security claiming ages in <strong>My Data</strong>: it shows the last eligible month, whether that final year is full or prorated, and a countdown, and it raises an alarm as the date nears. Change a claiming age and the cutoff moves with it. Treat the rules here as the explanation and the Events tab as the live answer for your plan.</p>\n\n    <div class=\"card warn\"><strong>Not tax advice.</strong> Excess HSA contributions are taxed and carry a 6% annual excise tax until they're withdrawn. Confirm the exact stop date — and any late-year contribution — with your HSA custodian and CPA before acting.</div>\n  </div>\n</section>\n\n<!-- LIMITATIONS -->\n<section id=\"limits\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">13</span> Limitations &amp; Known Issues <a class=\"toclink\" href=\"#toc\">↑ Contents</a></h2>\n    <ul>\n      <li><strong>Tax brackets are simplified.</strong> Federal bracket / standard-deduction logic is approximate; bracket inflation is modeled at 2%/yr. NIIT uses an estimated taxable-account yield (not actual dividends); the AMT check is simplified (standard-deduction add-back only); QCDs are a simplified what-if (a flat annual amount from the year each spouse turns 71; the one-time CRT/CGA election isn't modeled).</li>\n      <li><strong>State tax is an approximation layer.</strong> The 51-jurisdiction module (see the Taxes tab entry) uses effective flat rates in place of progressive state brackets, treats several income-limited exclusions as unconditional, and skips county/city taxes — pick your state in My Data, then verify against your state's own rules.</li>\n      <li><strong>Mortality is deterministic by default</strong> — deaths at exactly the entered life expectancies — with an optional <strong>STOCHASTIC LONGEVITY</strong> toggle on the Monte Carlo tab that samples death ages per run (see §06). The stochastic mode still samples the spouses independently — no joint-mortality correlation.</li>\n      <li><strong>Long-term care is modeled two ways, both simplified.</strong> The default is a single $150K–$300K shock at a fixed age; an optional sustained model (the <strong>LTC DISTRIBUTION</strong> toggle on the Monte Carlo tab, the Stress \"LTC Marathon\", and Run D) draws a multi-year care duration ending at death and escalates it at inflation +1.5%/yr. Neither is a full actuarial care distribution, and insurance payouts and home equity are not credited against the cost — so the sustained figures are deliberately gross (worst-case) numbers.</li>\n      <li><strong>Auto-replacement is a fixed example schedule</strong> and won't match every household. The old fixed part-time-work taper now applies only to the demo data — entering your own income streams (My Data → Other Income Streams) replaces it entirely.</li>\n      <li><strong>Peer benchmarks are point-in-time approximations</strong> from public surveys and will go stale.</li>\n      <li><strong>The Ask AI tab requires network access</strong> to the AI API; offline or rate-limited, it won't return results. Self-hosted copies also need a personal API key (<a href=\"#apikey\">§10</a>).</li>\n      <li><strong>US-only.</strong> No non-US tax residencies, accounts, Social Security analogues, or currencies.</li>\n      <li><strong>Designed for a desktop browser.</strong> The app has no responsive phone layout: on a narrow screen the tab strip wraps heavily, wide tables require horizontal scrolling, and the smallest text sits below the WCAG AA contrast threshold. Simple Mode (◑ SHOW FEWER TABS), the UI SIZE control, and the high-contrast skins materially improve this, but a phone remains a compromised experience.</li>\n      <li><strong>The temporary OBBBA \"senior bonus\" deduction (up to $6,000/person 65+, tax years 2025–2028) is modeled on the Taxes tab, but not in the Roth conversion ladder.</strong> The Taxes tab applies it and phases it out at 6% of MAGI above $75,000 single / $150,000 filing jointly; the ladder and its strategy comparator apply only the ordinary age-65 deduction, so the two tabs can differ for any ladder year at or before 2028. Every other 2026 constant — brackets, deductions, IRMAA tiers, QCD cap, RMD table and ages, wage base — has been verified against IRS Rev. Proc. 2025-32, CMS, and SSA and is asserted by the validation suite that ships with the project.</li>\n      <li><strong>Other accounts are taxed by type, with five simplifications.</strong> Since v5.26 each row you enter under Other accounts carries a tax type and the engines use it. What that leaves approximate: (1) a draw from that pot is taxed <em>in proportion</em> to what the pot holds, not by draining one tax type before another; (2) <strong>HSA balances are modelled as tax-free throughout</strong>, though an HSA is only tax-free for qualified medical costs; (3) a non-qualified <strong>annuity is part after-tax basis</strong>, which one label cannot express — all of it is treated as ordinary income, the pessimistic direction; (4) a <strong>qualified</strong> annuity held inside an IRA does have an RMD and will be mis-classified by the name-based guess — correct it on the row, and any row the app re-classified is named in the review notice; (5) an account name the app cannot classify defaults to <strong>Traditional</strong>, which over-taxes a brokerage account nobody renamed. These are the same simplifications recorded in METHODOLOGY.md.</li>\n      <li><strong>The BASE prior is meaningfully more conservative than historical US equity performance</strong> (see section 06). Success rates read lower than commercial tools at default settings — by design.</li>\n    </ul>\n    \n    \n    <h3>Two kinds of dated information — one updates itself, one needs a new file</h3>\n    <p>Everything time-sensitive in this app falls into exactly two buckets, and knowing which is which tells you what maintenance it needs (short answer: almost none, and none of it is your data).</p>\n    <table>\n      <tr><th></th><th>Your personal timeline</th><th>The baked-in constants</th></tr>\n      <tr><td><strong>What it covers</strong></td><td>Every alarm on the Events tab that's about <em>you</em>: Medicare enrollment windows, your HSA contribution cutoff, Social Security filing windows, Roth-conversion and RMD deadlines, quarterly backup nudges, the January plan review.</td><td>The law-and-data numbers the math runs on: federal tax brackets and deductions, IRMAA tiers, the QCD cap, the Social Security wage base, the state-tax module, peer benchmarks, the backtest history.</td></tr>\n      <tr><td><strong>How it stays current</strong></td><td><strong>By itself, automatically, forever.</strong> Nothing is stored — every alarm is recalculated on every load from the dates in your plan plus today's date. Change a claiming age in My Data and every affected deadline moves instantly.</td><td><strong>Only with a new copy of the file.</strong> These numbers are printed into the app like figures in a book — the file cannot rewrite itself (that immutability is also why it's safe to share). Washington changes them about once a year.</td></tr>\n      <tr><td><strong>What you have to do</strong></td><td>Nothing. Keep your plan accurate in My Data; the alarms follow.</td><td>When the ⌛ STALE DATA strip appears (the January after this build's tax year), you need the current <strong>HTML file</strong>. The current build always lives at <a href=\"https://stextor.github.io/danger-close\">stextor.github.io/danger-close</a> — run it in your browser there, or save a fresh offline HTML copy from that page. (If someone handed you this file directly, you no longer need to go back to them for updates.) Once you have the new HTML file, open it in place of the old one: your plan survives the swap — it lives in your browser, not the file. Export a backup first as cheap insurance.</td></tr>\n    </table>\n    <div class=\"plain\">\n      <span class=\"lbl\">In plain English</span>\n      <p>Think of the app as a <strong>calculator with this year's tax tables printed on the back</strong>. The calculator part never goes stale — your deadlines and alarms are computed fresh from your own dates every time you open it. The printed tables do go stale, once a year, when the IRS publishes new ones — and since the file can't reprint itself, the fix is a fresh copy of the file. You'll never have to guess when: the app tells you, loudly, with a strip across the top that won't go away until the tables are current. The fresh copy is always one click away at <a href=\"https://stextor.github.io/danger-close\">stextor.github.io/danger-close</a> — no need to track down whoever gave you this file. If you maintain it yourself, the Events tab's tax-refresh alarm carries the update workflow.</p>\n    </div>\n\n    <h3>Data vintages — what is baked into this build, and how it stays current</h3>\n    <p>A single-file app cannot quietly update itself — a privacy feature with a maintenance cost. Every dated dataset in this build is listed here, and the app makes their age impossible to miss rather than pretending at an auto-updater:</p>\n    <table>\n      <tr><th>Dataset</th><th>Vintage in this build</th><th>Source</th><th>Refresh cadence</th></tr>\n      <tr><td>Federal tax brackets, deductions, LTCG, QCD cap</td><td>Tax year 2026</td><td>IRS Rev. Proc. 2025-32</td><td>Annual (late Oct)</td></tr>\n      <tr><td>IRMAA tiers &amp; surcharges</td><td>2026</td><td>CMS</td><td>Annual (Nov)</td></tr>\n      <tr><td>Social Security wage base</td><td>2026 ($184,500)</td><td>SSA</td><td>Annual (Oct)</td></tr>\n      <tr><td>State tax module</td><td>2026 approximations</td><td>State DORs / surveys</td><td>Annual</td></tr>\n      <tr><td>RMD Uniform Lifetime Table</td><td>2022 revision (current)</td><td>IRS Pub. 590-B</td><td>Rarely changes</td></tr>\n      <tr><td>Peer benchmarks (Ranking)</td><td>2022 SCF + EBRI/SSA/AALTCI</td><td>Federal Reserve et al.</td><td>SCF is triennial — the 2025 survey publishes ~fall 2026</td></tr>\n      <tr><td>Backtest return/CPI series</td><td>Through 2025</td><td>Damodaran (NYU Stern) + BLS</td><td>Annual (Jan)</td></tr>\n      <tr><td>LTC cost/duration parameters</td><td>2022-24 research vintage</td><td>ASPE / Urban Institute</td><td>Occasional</td></tr>\n    </table>\n    <p><strong>The three-layer freshness system:</strong> <em>(1)</em> the <strong>Events tab</strong> carries a live alarm for each refresh cycle (tax constants, backtest append, SCF release) with paste-in instructions and the authoritative source for each; <em>(2)</em> starting the January after this build's tax year ends, a <strong>⌛ STALE DATA strip</strong> appears above the tabs on every view — amber the first year, red from the second — and cannot be dismissed, because stale tax law silently corrupts every projection; <em>(3)</em> the <strong>validation suite</strong> in the project folder asserts the constants against their cited sources, so a refreshed build proves itself. The update path is deliberately simple: download the current build and Import Backup — your data lives in the browser, not the file, so swapping the file loses nothing.</p>\n\n    <p class=\"micro\">The Historical Backtest tab now provides the historical-replay capability (\"what if I retired in 1966?\") that earlier versions lacked.</p>\n  </div>\n</section>\n\n<!-- FAQ -->\n<section id=\"faq\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">14</span> Troubleshooting &amp; FAQ <a class=\"toclink\" href=\"#toc\">↑ Contents</a></h2>\n    <p>The most common \"is it broken?\" moments, decoded. Almost all of them trace back to one of three things: no simulation has run yet, the browser cache was cleared, or the Ask AI tab can't reach the network.</p>\n    <table>\n      <tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr>\n      <tr><td>Will Social Security run out? Should I plan on a cut?</td><td>Reserve depletion is not bankruptcy \u2014 payroll taxes keep funding checks, just not the full scheduled amount (2026 Trustees Report: ~78% from late 2032 on the retirement fund alone, or ~83% from 2034 if Congress merges in the disability fund).</td><td>Whether Congress acts \u2014 it always has before a cut landed \u2014 is unknowable, so the SS tab\\'s <strong>Trust-Fund Depletion Scenario</strong> panel lets you model it instead of guessing: pick a preset or custom cut and every simulation, the Roth engine, the Dashboard, and the claiming grid recompute. Try your plan both ways; the gap between them is your personal exposure.</td></tr>\n      <tr><td>How do I model rental income, part-time work, an annuity, or other income?</td><td>First-class support now</td><td>My Data → <strong>OTHER INCOME STREAMS</strong>: one row per stream (rental / job / annuity / other) with a monthly amount in today’s dollars, inclusive start and end years (blank end = for life), owner (either spouse or joint — an owner’s stream stops at that person’s projected death), a COLA flag, and taxable vs tax-free treatment. Streams flow through every engine — Monte Carlo, Trajectory, Withdrawal, Taxes (job rows also pay FICA), IRMAA, and the Roth optimizer. For a job after retirement, enter the year the work starts and the last year you expect to work. Entering any stream replaces the built-in example part-time schedule. If you used the old negative-expense-row workaround, move that row here so the tax engines see it.</td></tr>\n      <tr><td>A tab is blank or a chart is missing</td><td>No simulation has run for the selected retirement date yet</td><td>Pick a retirement date at the top — Monte Carlo and Stress auto-run on first visit.</td></tr>\n      <tr><td>Ask AI does nothing when clicked</td><td>It refuses to send until at least one simulation has completed</td><td>Open the Monte Carlo tab once, let it finish, then ask again.</td></tr>\n      <tr><td>Ask AI shows <code>ERROR [4xx/5xx]</code></td><td>The AI API received the request but refused it (rate limit, oversized attachment, outage)</td><td>Wait a minute and retry. Trim attachments — 8-file cap; images, PDF, and text only (no HEIC, no Office files — export those to PDF/CSV).</td></tr>\n      <tr><td>Ask AI shows <code>COMMS ERROR</code></td><td>No network path to the AI API (offline, blocked, or a changed endpoint)</td><td>Check the connection. Self-hosted copy? Paste a personal API key into the LOCAL API KEY panel on the Ask AI tab (see its warning text). Everything else in the app runs fully offline — only Ask AI needs the network.</td></tr>\n      <tr><td><code>REQUEST TIMED OUT (45s)</code></td><td>The question was very broad or the service is slow</td><td>Ask a narrower question and retry.</td></tr>\n      <tr><td>All my data vanished</td><td>The browser cache was cleared, or this is a new browser/device</td><td>My Data → <strong>Import Backup</strong> with your exported <code>.json</code>. Export one regularly — the cache is a convenience copy, not storage (see <a href=\"#start\">§03</a>).</td></tr>\n      <tr><td>A red banner sits on every tab</td><td>An income figure is missing, so an example value was substituted</td><td>Enter the missing Social Security / pension numbers in My Data (see <a href=\"#banner\">§04</a>).</td></tr>\n      <tr><td>My success rate is far below other tools</td><td>The BASE prior is deliberately conservative (see <a href=\"#controls\">§06</a>)</td><td>Not a bug. Switch the scenario prior to BULL-LEANING for history-like assumptions and compare.</td></tr>\n      <tr><td>One edit changed numbers everywhere</td><td>By design — every tab derives from one model (see <a href=\"#flow\">§02</a>)</td><td>Re-check the edit in My Data; Save &amp; Apply rebuilds all 26 tabs from it.</td></tr>\n      <tr><td>My API key vanished from the Ask AI tab</td><td>The key lives in browser storage — a different browser, incognito window, cleared site data, Clear All Data, or (in some browsers) a moved/renamed file starts a fresh store</td><td>Paste the key again (10 seconds) and Import Backup for the plan. By design the key is never inside a backup — see <a href=\"#apikey\">§10</a>.</td></tr>\n      <tr><td>I think my API key leaked</td><td>Keys are instantly revocable — a leaked key is only dangerous while it lives</td><td>Revoke it at console.anthropic.com/settings/keys, create a new one, FORGET KEY in the app, paste the new one, and check the Console usage page (see <a href=\"#apikey\">§10</a>).</td></tr>\n      <tr><td>The HSA cutoff date looks wrong</td><td>It derives from the Social Security claiming ages in My Data</td><td>Fix the claim ages — the Events tab recomputes the cutoff automatically (see <a href=\"#hsa\">§12</a>).</td></tr>\n    </table>\n    <div class=\"note\"><strong>Keeping a copy of this manual:</strong> use the toolbar above the Docs tab to download it as HTML or print it to PDF — useful if you want the reference open while working in another tab.</div>\n  </div>\n</section>\n\n<!-- GLOSSARY -->\n<section id=\"glossary\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">15</span> Glossary <a class=\"toclink\" href=\"#toc\">↑ Contents</a></h2>\n    <p>Concise reference. Many terms have nuances this glosses over — verify against authoritative sources before acting.</p>\n    <div class=\"glossary\">\n      <p class=\"term\"><b>4% Rule</b> — Bengen's heuristic: withdrawing 4% of a starting portfolio (inflation-adjusted thereafter) historically lasted 30 years across most US periods. Often quoted, rarely the right answer for everyone.</p>\n      <p class=\"term\"><b>ACA</b> — Affordable Care Act. The \"ACA bridge\" covers a spouse between job-based coverage and Medicare at 65.</p>\n      <p class=\"term\"><b>API Key</b> — the secret code (starts <code>sk-ant-</code>) that identifies your Anthropic developer account when a self-hosted copy calls the AI service. Created at console.anthropic.com; treat it like a card number and see §10 for the full guide.</p>\n      <p class=\"term\"><b>Agency MBS</b> — Mortgage-backed securities guaranteed by Fannie/Freddie/Ginnie; Treasury-level credit quality with extra yield for prepayment risk.</p>\n      <p class=\"term\"><b>Asset Class</b> — A category of investments with similar behavior (equities, bonds, cash, commodities). The MC classifies holdings this way.</p>\n      <p class='term'><b>Beneficiary Designation</b> — The named recipient on a retirement account or policy; it overrides your will, so keep it current.</p>\n      <p class='term'><b>Bengen / 4% Rule origin</b> — William Bengen's 1994 study established the 4% safe-withdrawal heuristic; later refined by the Trinity Study (Cooley, Hubbard, Walz 1998).</p>\n      <p class=\"term\"><b>Beta</b> — How much a holding moves relative to the market. 1.0 = moves with it; 1.5 = 50% more; 0.5 = 50% less.</p>\n      <p class=\"term\"><b>Bond</b> — A debt instrument paying interest and returning principal at maturity; provides stability and income.</p>\n      <p class='term'><b>Bond Tent</b> — Pfau/Kitces idea of dipping equity exposure right around retirement, then rising again — the shape that defends the fragile early years against sequence risk.</p>\n      <p class=\"term\"><b>Bond Vigilantes</b> — Investors who sell long government bonds (pushing yields up) to protest fiscal policy.</p>\n            <p class='term'><b>CAPE (Shiller P/E)</b> — Cyclically-adjusted price/earnings ratio; high CAPE has historically predicted lower forward real returns, part of the rationale for the conservative BASE prior.</p>\n      <p class='term'><b>Capital Gains</b> — Profit on a sold asset. Long-term (held &gt;1yr) is taxed at 0/15/20%; short-term is taxed as ordinary income.</p>\n      <p class=\"term\"><b>CFA / CFP / CPA</b> — Professional designations for investment analysts / financial planners / accountants. The author holds <strong>none</strong> of these.</p>\n      <p class='term'><b>COLA</b> — Cost-of-living adjustment; the annual inflation raise applied to Social Security and some pensions.</p>\n      <p class='term'><b>Cost Basis</b> — What you paid for a holding; sale proceeds above basis are capital gains. Inherited assets generally get a step-up to date-of-death value.</p>\n      <p class=\"term\"><b>Crisis Scenario</b> — Low-probability severe shock (2008-style). Default 3%/yr under BASE.</p>\n      <p class=\"term\"><b>Crossover Age</b> — The age at which delayed SS claiming's cumulative benefit overtakes earlier claiming. Living past it favors delaying.</p>\n      <p class=\"term\"><b>DCA</b> — Dollar-cost averaging: investing a fixed amount on a schedule regardless of price.</p>\n      <p class=\"term\"><b>Drawdown</b> — Percentage decline from a peak to a trough. \"Max drawdown\" is the worst such decline.</p>\n      <p class=\"term\"><b>Duration</b> — A bond's price sensitivity to rates. 6-yr duration ≈ −6% if rates rise 1%.</p>\n      <p class=\"term\"><b>EBRI</b> — Employee Benefit Research Institute; publishes the Retirement Readiness Index. Cited in Ranking.</p>\n      <p class='term'><b>Effective vs Marginal Rate</b> — Marginal is the rate on your next dollar; effective is total tax ÷ total income. Roth-conversion decisions hinge on the marginal rate.</p>\n      <p class=\"term\"><b>Equity</b> — Stock ownership; \"equities\" = stock holdings collectively.</p>\n      <p class='term'><b>Estate Documents</b> — Will, revocable living trust, durable power of attorney, healthcare proxy/advance directive, and beneficiary designations. Tracked on the Checklist tab.</p>\n      <p class=\"term\"><b>ETF</b> — Exchange-traded fund; a pooled fund trading like a stock. Most index funds are ETFs.</p>\n      <p class=\"term\"><b>Expense Ratio</b> — A fund's annual fee as a % of assets. 0.10% = $10/yr per $10K. Compounds over decades.</p>\n      <p class=\"term\"><b>Fed SCF</b> — Federal Reserve Survey of Consumer Finances; the authoritative US wealth-comparison source. Used in Ranking.</p>\n      <p class=\"term\"><b>Fiduciary</b> — Someone legally bound to act in your best interest. A fee-only fiduciary is paid only by you. The author is <strong>not</strong> your fiduciary.</p>\n      <p class=\"term\"><b>FRA</b> — Full Retirement Age; the age for full Social Security (67 for those born 1960+). Earlier reduces, later increases.</p>\n      <p class=\"term\"><b>Glidepath</b> — A planned allocation change over time. A <em>reverse</em> glidepath (Pfau/Kitces) starts retirement lower-equity, then raises equity to combat sequence risk.</p>\n      <p class=\"term\"><b>Guyton-Klinger Guardrails</b> — Dynamic spending rules: cut if the portfolio falls to a lower band (80% of plan), raise at an upper band (120%).</p>\n      <p class=\"term\"><b>High Yield</b> — Below-investment-grade corporate bonds (\"junk\"); higher yield for higher default risk.</p>\n      <p class=\"term\"><b>HSA</b> — Health Savings Account. Tax-deductible in, tax-free growth, tax-free for qualified medical use; after 65, non-medical use is taxed but not penalized.</p>\n      <p class=\"term\"><b>Index Fund</b> — A fund that passively tracks an index; typically far cheaper than active funds.</p>\n      <p class=\"term\"><b>Investment Grade</b> — Corporate bonds rated BBB-/Baa3 or higher; lower risk and yield than high-yield.</p>\n      <p class=\"term\"><b>IRA</b> — Individual Retirement Account; Traditional (pre-tax in, taxed out) or Roth (after-tax in, tax-free out).</p>\n      <p class=\"term\"><b>IRMAA</b> — Income-Related Monthly Adjustment Amount; a Medicare surcharge based on MAGI two years prior. Cliffs — crossing by $1 can cost thousands.</p>\n      <p class=\"term\"><b>Kitces, Michael</b> — Planning researcher; with Pfau, established the reverse-glidepath work.</p>\n      <p class=\"term\"><b>LTC</b> — Long-Term Care; help with daily activities, largely not covered by Medicare. A major risk — can run $80K–$150K+/yr/person.</p>\n      <p class=\"term\"><b>LTC Duration Tail</b> — The risk that care lasts many years and clusters at the very end of life, when the portfolio is smallest and one spouse's Social Security has stopped. A single early \"LTC shock\" misses it; the Stress LTC Marathon and Monte Carlo Run D exist to show it.</p>\n      <p class=\"term\"><b>MAGI</b> — Modified Adjusted Gross Income; used for IRMAA, Roth limits, and credits. Slightly different from AGI.</p>\n      <p class=\"term\"><b>MBS</b> — Mortgage-backed securities; bonds backed by pools of home mortgages.</p>\n      <p class=\"term\"><b>MFJ</b> — Married Filing Jointly; wider brackets and a higher standard deduction than other statuses.</p>\n      <p class=\"term\"><b>Money Market</b> — Cash-like instruments aiming for a stable $1 NAV; lowest risk and yield.</p>\n      <p class=\"term\"><b>Monte Carlo</b> — Running thousands of randomized projections to estimate the distribution of outcomes.</p>\n      <p class=\"term\"><b>NAPFA</b> — National Association of Personal Financial Advisors; a directory of fee-only fiduciaries (napfa.org).</p>\n      <p class='term'><b>NIIT</b> — Net Investment Income Tax; an extra 3.8% on investment income above MAGI (unindexed) thresholds. Modeled on the Taxes tab from an estimated taxable-account yield.</p>\n      <p class=\"term\"><b>Pension</b> — A defined-benefit income stream from a former employer. The example has a small one; most private workers don't.</p>\n      <p class=\"term\"><b>Percentile</b> — The value below which a stated % of outcomes fall. The 10th-percentile outcome is worse than 90% of cases.</p>\n      <p class=\"term\"><b>Pfau, Wade</b> — Retirement-income researcher (safe withdrawal rates, reverse glidepaths, retirement-income frameworks).</p>\n      <p class='term'><b>Provisional Income</b> — The figure (other income + half of SS) that determines how much of your Social Security is taxable.</p>\n      <p class='term'><b>QCD</b> — Qualified Charitable Distribution; a direct Traditional-IRA→charity gift (age 70½+), excluded from income and MAGI, that can satisfy RMDs. Modeled as a what-if on the Taxes tab (also lowers MAGI on the IRMAA tab); 2026 cap $111K/person, indexed. Roth QCDs are permitted but pointless — Roth withdrawals are already tax-free.</p>\n      <p class=\"term\"><b>Real Yield</b> — Bond yield after expected inflation; TIPS yields are the common reference.</p>\n      <p class=\"term\"><b>Recession Scenario</b> — Moderate contraction (equity ≈ −15%). Default 10%/yr under BASE.</p>\n      <p class=\"term\"><b>RMD</b> — Required Minimum Distribution; forced taxable withdrawals from Traditional accounts starting at 73/75. A key motivation for Roth conversions.</p>\n      <p class=\"term\"><b>Roth Conversion</b> — Moving Traditional money to Roth, paying tax now for tax-free growth later. Common in low-income gap years.</p>\n      <p class=\"term\"><b>Roth IRA / 401(k)</b> — After-tax contributions; growth and qualified withdrawals are tax-free.</p>\n      <p class='term'><b>Roth Ladder</b> — A multi-year sequence of Roth conversions in low-income gap years to shrink future RMDs and the widow's-penalty bracket jump.</p>\n      <p class=\"term\"><b>Ruin Rate</b> — The % of MC paths that hit $0 before the horizon ends.</p>\n      <p class=\"term\"><b>Sequence-of-Returns Risk</b> — The risk that poor early-retirement returns permanently impair the portfolio even if averages are fine. The first 5–10 years are highest-risk.</p>\n      <p class=\"term\"><b>Sharpe Ratio</b> — Excess return over the risk-free rate ÷ standard deviation. Higher is better.</p>\n      <p class=\"term\"><b>Social Security</b> — Federal retirement benefit, claimable 62 (reduced) to 70 (max). Depends on claiming age, work history, longevity.</p>\n      <p class=\"term\"><b>SSA</b> — Social Security Administration; ssa.gov is the authoritative benefit-estimate source.</p>\n      <p class=\"term\"><b>Stagflation</b> — Low growth + high inflation (1970s). The MC scenario uses negative real returns with 6–8% inflation. Default 7%/yr under BASE.</p>\n      <p class='term'><b>Standard Deduction</b> — The flat amount subtracted from income before tax; larger for Married Filing Jointly than Single — the core of the widow's penalty.</p>\n      <p class='term'><b>Step-Up in Basis</b> — At death, taxable assets reset to current market value, erasing the heir's capital-gains liability on prior appreciation.</p>\n      <p class=\"term\"><b>Success Rate</b> — the share of Monte Carlo paths ending above a stated threshold. The app uses several, and each view labels which one it is reporting. Not the same as ruin rate.</p>\n      <p class='term'><b>Survivor Benefit</b> — When a spouse dies, the survivor keeps the larger of the two Social Security checks (not both) — a benefit cut the Survivor tab models.</p>\n      <p class=\"term\"><b>TCJA</b> — 2017 Tax Cuts and Jobs Act. Its individual provisions were originally scheduled to expire after 2025; later legislation (OBBBA) superseded that sunset. See <a href=#limits>§13</a> for what this app actually models.</p>\n      <p class=\"term\"><b>Term Premium</b> — Extra yield long bonds offer over short ones for duration risk.</p>\n      <p class=\"term\"><b>TIPS</b> — Treasury Inflation-Protected Securities; principal adjusts with CPI, giving a real yield.</p>\n      <p class=\"term\"><b>Token (AI billing)</b> — the unit AI usage is billed in, roughly ¾ of a word. A full Ask AI question and answer runs a few thousand tokens — well under a cent.</p>\n      <p class=\"term\"><b>Trad / Traditional</b> — Pre-tax retirement accounts; contributions reduce taxable income, withdrawals taxed, RMDs apply. Opposite of Roth.</p>\n      <p class=\"term\"><b>Treasury</b> — US government debt. T-bills &lt;1yr, T-notes 2–10yr, T-bonds 20–30yr. Lowest credit risk.</p>\n      <p class=\"term\"><b>Volatility</b> — Variation in returns, usually standard deviation. Higher = wider range of outcomes.</p>\n      <p class='term'><b>Widow's Penalty</b> — The tax hit when a surviving spouse files Single: narrower brackets and a smaller standard deduction on often-similar income.</p>\n      <p class=\"term\"><b>Yield Curve</b> — Yields across maturities. \"Steepening\" = long yields rising vs short; \"inverted\" = short above long (a recession signal).</p>\n      <p class='term'><b>Authoritative sources</b> — Verify against <a href='https://www.ssa.gov'>ssa.gov</a> (benefits), <a href='https://www.irs.gov'>irs.gov</a> (tax), <a href='https://www.medicare.gov'>medicare.gov</a> (IRMAA/premiums), and find a fee-only fiduciary at <a href='https://www.napfa.org'>napfa.org</a>.</p>\n    \n    </div>\n    <a class=\"totop-foot\" href=\"#toc\">↑ Back to Table of Contents</a>\n  </div>\n</section>\n\n<!-- FINAL -->\n<section id=\"final\">\n  <div class=\"wrap\">\n    <h2><span class=\"num\">16</span> Final Disclaimer <a class=\"toclink\" href=\"#toc\">↑ Contents</a></h2>\n    <div class=\"card danger\">\n      <p>This software is a personal modeling tool the author built for their own use and decided to share. <strong>It is not a product. No support, no warranty, no service commitment, no guarantee of correctness.</strong></p>\n      <p>If you use this software and lose money, miss a tax deadline, claim Social Security at the wrong age, buy the wrong house, run out of money, or experience any other setback — that is your responsibility, not the author's. <strong>The author has no professional financial credentials of any kind</strong> — no CFP, CFA, CPA, Series 65, Enrolled Agent, or law license — and is a stranger on the internet who wrote some JavaScript as a hobby.</p>\n      <p style=\"margin-bottom:0\"><strong>Before any decision this app informs:</strong> consult a fee-only fiduciary advisor (NAPFA.org), a CPA for tax planning (Roth conversions, IRMAA, RMDs), and an estate attorney; verify every input against your statements (custodian, SSA, employer, insurer); and verify every output against a second opinion. If you cannot accept these terms, close the app and use a tool from a regulated provider.</p>\n    </div>\n    <p style=\"font-style:italic;color:var(--ink-faint);font-size:12px\">Danger Close is provided \"AS IS.\" The author retains no responsibility for outcomes resulting from its use.</p>\n  </div>\n</section>\n\n<footer>\n  <div class=\"wrap\">\n    <div class=\"kicker\">// END OF FIELD MANUAL</div>\n    DANGER CLOSE v5.48 · documentation regenerated · not financial advice · guardrails: Guyton-Klinger (80% / 120%)\n  </div>\n</footer>\n\n</body>\n</html>\n";
 
 // Injected into the docs iframe so its table-of-contents #anchor links scroll (srcDoc has no base URL for native hash nav).
 const DOCS_NAV_SCRIPT = "<scr" + "ipt>document.addEventListener('click',function(e){var a=e.target.closest?e.target.closest('a[href^=\"#\"]'):null;if(a){e.preventDefault();var id=a.getAttribute('href').slice(1);var el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}});</scr" + "ipt>";
@@ -5886,21 +5886,21 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
       {/* HEADER */}
       <div style={{ padding: "14px 20px 10px", borderBottom: "1px solid var(--line)", display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 10 }}>
         <div>
-          <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 1 }} className="lbl">Tactical portfolio command</div>
+          <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 1 }} className="lbl">Tactical portfolio command</div>
           <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "var(--accent)", letterSpacing: 2, animation: "breathe 4s ease-in-out infinite" }}>◉ DANGER CLOSE</h1>
-          <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 3 }}>
+          <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 3 }}>
             {fmtM(PORTFOLIO.household)} │ {PORTFOLIO.asOf} │ Target: {retireYear} │ Pre: ${PRE_MONTHLY}/mo │ Post: ${POST_MONTHLY_EARLY}/mo
             <span title="Active 'Scenario Probability Stress' setting — change it on the Monte Carlo tab">{" │ Scenario: "}<span style={{ color: PROB_PRESETS[scenarioPreset].color, fontWeight: 600 }}>{PROB_PRESETS[scenarioPreset].label}</span></span>
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
 <div style={{ textAlign: "right" }}>
-            <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 1 }} className="lbl">Success rate</div>
+            <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 1 }} className="lbl">Success rate</div>
             <div style={{ fontSize: 30, fontWeight: 700, lineHeight: 1, color: current ? (current.successRate > 0.9 ? "var(--accent)" : current.successRate > 0.8 ? "var(--warn)" : "var(--crit)") : "var(--ink-faint)" }}>
               {simRunning ? "..." : current ? `${(current.successRate * 100).toFixed(1)}%` : "—"}
             </div>
-            <div style={{ fontSize: 8, color: "var(--ink-faint)" }}>10K ITER │ &gt;$800K @ END · PLANNED PATH (NO LTC/MORTALITY SHOCK)</div>
-            <div style={{ fontSize: 8, color: "var(--warn)", letterSpacing: 0.5, marginTop: 2 }} title="Danger Close uses a deliberately conservative return model, so this reads lower than typical retirement calculators — by design. You can change it: open the Monte Carlo tab and pick a different scenario in the 'Scenario Probability Stress' panel (e.g. HISTORICAL targets the long-run US average of ~9% nominal / ~7% real, which reads higher). Every tab re-runs against the model you choose.">⚠ CONSERVATIVE MODEL — READS LOW BY DESIGN · CHANGE IT ON THE MONTE CARLO TAB</div>
+            <div style={{ fontSize: 12, color: "var(--ink-faint)" }}>10K ITER │ &gt;$800K @ END · PLANNED PATH (NO LTC/MORTALITY SHOCK)</div>
+            <div style={{ fontSize: 11, color: "var(--warn)", letterSpacing: 0.5, marginTop: 2 }} title="Danger Close uses a deliberately conservative return model, so this reads lower than typical retirement calculators — by design. You can change it: open the Monte Carlo tab and pick a different scenario in the 'Scenario Probability Stress' panel (e.g. HISTORICAL targets the long-run US average of ~9% nominal / ~7% real, which reads higher). Every tab re-runs against the model you choose.">⚠ CONSERVATIVE MODEL — READS LOW BY DESIGN · CHANGE IT ON THE MONTE CARLO TAB</div>
           </div>
         </div>
       </div>
@@ -5914,12 +5914,12 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
               <button key={yr} className={`rbtn ${sel ? "sel" : ""}`} style={{ "--rc": o.color }} onClick={() => { setRetireYear(yr); setHoveredQ(null); }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
                   <span style={{ fontSize: 13, fontWeight: 700, color: sel ? o.color : "var(--ink-dim)" }}>{o.label}</span>
-                  <span style={{ fontSize: 8, padding: "2px 5px", border: `1px solid ${sel ? o.color : "var(--line2)"}`, color: sel ? o.color : "var(--ink-faint)" }}>{o.tag}</span>
+                  <span style={{ fontSize: 12, padding: "2px 5px", border: `1px solid ${sel ? o.color : "var(--line2)"}`, color: sel ? o.color : "var(--ink-faint)" }}>{o.tag}</span>
                 </div>
-                <div style={{ fontSize: 8, color: "var(--ink-dim)", marginBottom: 6 }}>{o.description()}</div>
+                <div style={{ fontSize: 12, color: "var(--ink-dim)", marginBottom: 6 }}>{o.description()}</div>
                 {d && <div style={{ display: "flex", justifyContent: "space-between" }}>
                   <span style={{ fontSize: 14, fontWeight: 600, color: d.successRate > 0.9 ? "var(--accent)" : d.successRate > 0.8 ? "var(--warn)" : "var(--crit)" }}>{(d.successRate * 100).toFixed(1)}%</span>
-                  <span style={{ fontSize: 10, color: "var(--ink-dim)" }}>median@retire: {fmtM(d.medianAtRetire)}</span>
+                  <span style={{ fontSize: 12, color: "var(--ink-dim)" }}>median@retire: {fmtM(d.medianAtRetire)}</span>
                 </div>}
               </button>
             );
@@ -5936,11 +5936,11 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
           return (
             <div key={b} style={{ background: "rgba(0,0,0,0.25)", padding: "8px 12px", borderBottom: `2px solid ${colors[b]}` }}>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ fontSize: 8, color: "var(--ink-faint)" }}>{bucketNames[b]}</span>
+                <span style={{ fontSize: 12, color: "var(--ink-faint)" }}>{bucketNames[b]}</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", marginTop: 3 }}>
                 <span style={{ fontSize: 16, fontWeight: 600, color: colors[b] }}>{(pct * 100).toFixed(1)}%</span>
-                <span style={{ fontSize: 9, color: "var(--ink-faint)", alignSelf: "flex-end" }}>${(dollars / 1000).toFixed(0)}K</span>
+                <span style={{ fontSize: 12, color: "var(--ink-faint)", alignSelf: "flex-end" }}>${(dollars / 1000).toFixed(0)}K</span>
               </div>
             </div>
           );
@@ -5961,10 +5961,10 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
             background: isParseFailure ? "rgba(255,68,68,0.08)" : "rgba(255,170,0,0.06)",
             borderRadius: 2,
           }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: isParseFailure ? "var(--crit)" : "var(--warn)", letterSpacing: 1 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: isParseFailure ? "var(--crit)" : "var(--warn)", letterSpacing: 1 }}>
               {isParseFailure ? "⚠ WARNING — USING EXAMPLE NUMBERS, NOT YOUR DATA" : "ⓘ EXAMPLE DATA MODE"}
             </div>
-            <div style={{ fontSize: 9, color: "var(--ink)", marginTop: 5, lineHeight: 1.6 }}>
+            <div style={{ fontSize: 12, color: "var(--ink)", marginTop: 5, lineHeight: 1.6 }}>
               {isParseFailure ? (
                 <>
                   Danger Close couldn't find the following income figures in your data, so it filled in
@@ -5975,7 +5975,7 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                   {(() => {
                     const d = PORTFOLIO._incomeDiag || {};
                     return (
-                      <div style={{ marginTop: 6, fontSize: 8, color: "var(--ink-dim)", fontFamily: "monospace" }}>
+                      <div style={{ marginTop: 6, fontSize: 12, color: "var(--ink-dim)", fontFamily: "monospace" }}>
                         diagnostics: saved AI-context text = {d.promptLen ? `${d.promptLen.toLocaleString()} chars` : "none"} ·
                         names = "{PORTFOLIO.nameA}" / "{PORTFOLIO.nameB}" ·
                         income found → SS-A {d.ssAOk ? "✓" : "✗"}, SS-B {d.ssBOk ? "✓" : "✗"}, pension {d.penOk ? "✓" : "✗"}
@@ -6005,7 +6005,7 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
         ))}
         <button onClick={() => toggleSimple(!simpleMode)}
           title={simpleMode ? "Show all 26 tabs" : "Show only the six core tabs"}
-          style={{ marginLeft: "auto", background: "transparent", border: `1px solid ${simpleMode ? "var(--accent)" : "var(--line2)"}`, color: simpleMode ? "var(--accent)" : "var(--ink-faint)", fontFamily: "inherit", fontSize: 8, fontWeight: 700, letterSpacing: 0.5, padding: "4px 10px", borderRadius: 3, cursor: "pointer", alignSelf: "center" }}>
+          style={{ marginLeft: "auto", background: "transparent", border: `1px solid ${simpleMode ? "var(--accent)" : "var(--line2)"}`, color: simpleMode ? "var(--accent)" : "var(--ink-faint)", fontFamily: "inherit", fontSize: 11, fontWeight: 700, letterSpacing: 0.5, padding: "4px 10px", borderRadius: 3, cursor: "pointer", alignSelf: "center" }}>
           {simpleMode ? "◐ SIMPLE MODE — SHOW ALL TABS" : "◑ SHOW FEWER TABS"}
         </button>
       </div>
@@ -6014,16 +6014,16 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
           <div onClick={() => setLeaveTarget(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 300, padding: 20 }}>
             <div onClick={e => e.stopPropagation()} style={{ background: "var(--panel2)", border: "1px solid var(--warn)", borderRadius: 6, maxWidth: 480, width: "100%", padding: "18px 20px" }}>
               <div className="lbl" style={{ fontSize: 12, color: "var(--warn)", fontWeight: 700, marginBottom: 10 }}>● You have unsaved edits in My Data</div>
-              <div style={{ fontSize: 11, color: "var(--ink)", lineHeight: 1.7, marginBottom: 14 }}>
+              <div style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.7, marginBottom: 14 }}>
                 Save them before leaving? <span style={{ color: "var(--ink-dim)" }}>(Saving here is identical to the Save &amp; Apply button on the tab. Discarding keeps the auto-saved draft, so you can still restore this work on your next visit.)</span>
               </div>
               <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", flexWrap: "wrap" }}>
                 <button onClick={() => { const t = leaveTarget; setLeaveTarget(null); setActiveTab(t); setTimeout(() => { if (MYDATA_SAVE) MYDATA_SAVE(); }, 40); }}
-                  style={{ background: "rgba(0,255,136,0.12)", border: "1px solid var(--accent)", color: "var(--accent)", fontFamily: "inherit", fontSize: 10, fontWeight: 700, padding: "8px 14px", borderRadius: 3, cursor: "pointer" }}>SAVE &amp; APPLY, THEN LEAVE</button>
+                  style={{ background: "rgba(0,255,136,0.12)", border: "1px solid var(--accent)", color: "var(--accent)", fontFamily: "inherit", fontSize: 12, fontWeight: 700, padding: "8px 14px", borderRadius: 3, cursor: "pointer" }}>SAVE &amp; APPLY, THEN LEAVE</button>
                 <button onClick={() => { const t = leaveTarget; setLeaveTarget(null); setActiveTab(t); }}
-                  style={{ background: "transparent", border: "1px solid var(--crit)", color: "var(--crit)", fontFamily: "inherit", fontSize: 10, padding: "8px 14px", borderRadius: 3, cursor: "pointer" }}>DISCARD &amp; LEAVE</button>
+                  style={{ background: "transparent", border: "1px solid var(--crit)", color: "var(--crit)", fontFamily: "inherit", fontSize: 12, padding: "8px 14px", borderRadius: 3, cursor: "pointer" }}>DISCARD &amp; LEAVE</button>
                 <button onClick={() => setLeaveTarget(null)}
-                  style={{ background: "transparent", border: "1px solid var(--line2)", color: "var(--ink)", fontFamily: "inherit", fontSize: 10, padding: "8px 14px", borderRadius: 3, cursor: "pointer" }}>STAY</button>
+                  style={{ background: "transparent", border: "1px solid var(--line2)", color: "var(--ink)", fontFamily: "inherit", fontSize: 12, padding: "8px 14px", borderRadius: 3, cursor: "pointer" }}>STAY</button>
               </div>
             </div>
           </div>
@@ -6034,7 +6034,7 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
       {DATA_STALE_YEARS > 0 && (
         <div onClick={() => setActiveTab("events")} title="Open the EVENTS tab for the refresh instructions"
           style={{ margin: "10px 20px 0", padding: "8px 14px", border: `1px solid ${DATA_STALE_YEARS >= 2 ? "var(--crit)" : "var(--warn)"}`,
-            background: DATA_STALE_YEARS >= 2 ? "rgba(255,68,68,0.08)" : "rgba(255,170,0,0.08)", fontSize: 10,
+            background: DATA_STALE_YEARS >= 2 ? "rgba(255,68,68,0.08)" : "rgba(255,170,0,0.08)", fontSize: 12,
             color: DATA_STALE_YEARS >= 2 ? "var(--crit)" : "var(--warn)", cursor: "pointer", lineHeight: 1.5 }}>
           <span style={{ fontWeight: 700, letterSpacing: 1 }}>⌛ STALE DATA:</span>{" "}
           this build's tax &amp; IRMAA constants are for <b>{TAX_CONSTANTS_YEAR}</b> — it is now {new Date().getFullYear()}.
@@ -6056,7 +6056,7 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
         const word = tier === "red" ? "⚠ ACTION REQUIRED" : tier === "green" ? "▶ ACTION WINDOW OPEN" : "◔ GETTING CLOSE";
         return (
           <div onClick={() => setActiveTab("events")} title="Open the EVENTS tab"
-            style={{ margin: "10px 20px 0", padding: "8px 14px", border: `1px solid ${c}`, background: bg, fontSize: 10, color: c, lineHeight: 1.6, cursor: "pointer" }}>
+            style={{ margin: "10px 20px 0", padding: "8px 14px", border: `1px solid ${c}`, background: bg, fontSize: 12, color: c, lineHeight: 1.6, cursor: "pointer" }}>
             <span style={{ fontWeight: 700, letterSpacing: 1 }}>{word}:</span>{" "}
             {hits.map(h => h.title).join("  ·  ")}
             <span style={{ color: "var(--ink-dim)" }}>  —  open the EVENTS tab for instructions</span>
@@ -6077,8 +6077,8 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
           const cats = [...new Set(checks.map(c => c.cat))];
           return (
             <div className="card">
-              <div style={{ fontSize: 11, color: allPass ? "var(--accent)" : "var(--crit)", fontWeight: 600, marginBottom: 2 }} className="lbl">Verification — live constant audit of this copy</div>
-              <div style={{ fontSize: 9, color: "var(--ink-dim)", lineHeight: 1.6, marginBottom: 10 }}>
+              <div style={{ fontSize: 12, color: allPass ? "var(--accent)" : "var(--crit)", fontWeight: 600, marginBottom: 2 }} className="lbl">Verification — live constant audit of this copy</div>
+              <div style={{ fontSize: 12, color: "var(--ink-dim)", lineHeight: 1.6, marginBottom: 10 }}>
                 These checks just ran, in your browser, against the actual numbers inside <em>this copy</em> of the file — not a report of something the author ran once. Every statutory constant the math depends on is asserted against its primary source (IRS Rev. Proc. 2025-32, CMS, SSA, IRS Pub. 590-B). A corrupted or tampered file fails loudly here. The source distribution carries the full Node version of this suite (<code>validation/check_constants.mjs</code>) plus behavioral tests; the constants are for tax year {TAX_CONSTANTS_YEAR}.
               </div>
               <div style={{ fontSize: 16, fontWeight: 700, color: allPass ? "var(--accent)" : "var(--crit)", marginBottom: 12 }}>
@@ -6086,22 +6086,22 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
               </div>
               {cats.map(cat => (
                 <div key={cat} style={{ marginBottom: 12 }}>
-                  <div style={{ fontSize: 9, color: "var(--info)", letterSpacing: 1, fontWeight: 600, marginBottom: 4 }}>{cat}</div>
-                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 9 }}>
+                  <div style={{ fontSize: 11, color: "var(--info)", letterSpacing: 1, fontWeight: 600, marginBottom: 4 }}>{cat}</div>
+                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                     <tbody>
                       {checks.filter(c => c.cat === cat).map((c, i) => (
                         <tr key={i} style={{ borderBottom: "1px solid rgba(26,58,42,0.3)" }}>
                           <td style={{ padding: "4px 8px", width: 24, color: c.pass ? "var(--accent)" : "var(--crit)", fontWeight: 700 }}>{c.pass ? "✓" : "✗"}</td>
                           <td style={{ padding: "4px 8px", color: "var(--ink)" }}>{c.name}</td>
                           <td style={{ padding: "4px 8px", color: c.pass ? "var(--ink-dim)" : "var(--crit)", fontFamily: "'JetBrains Mono',monospace" }}>{String(c.actual)}{!c.pass && <> (expected {String(c.expect)})</>}</td>
-                          <td style={{ padding: "4px 8px", color: "var(--ink-faint)", fontSize: 8 }}>{c.source}</td>
+                          <td style={{ padding: "4px 8px", color: "var(--ink-faint)", fontSize: 12 }}>{c.source}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
               ))}
-              <div style={{ fontSize: 9, color: "var(--ink-faint)", lineHeight: 1.6, marginTop: 6 }}>
+              <div style={{ fontSize: 12, color: "var(--ink-faint)", lineHeight: 1.6, marginTop: 6 }}>
                 Honest scope: this verifies the <em>constants</em>, not every formula that uses them — behavioral tests and (eventually) independent CPA/EA review cover that ground. The two longevity checks are statistical and re-sample on every visit.
               </div>
             </div>
@@ -6121,12 +6121,12 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
           return (
             <div>
               <div className="card" style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600 }}>PLAN EVENTS & ALARMS — {now.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}</div>
-                <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 4, lineHeight: 1.6 }}>
+                <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600 }}>PLAN EVENTS & ALARMS — {now.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}</div>
+                <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 4, lineHeight: 1.6 }}>
                   Every dated obligation in the plan, derived live from your timeline and the shared constants — nothing here is stored, so nothing can go stale.
                   Statuses recompute on every load; the colored strip above the tabs surfaces the most urgent tier app-wide.
                 </div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 14, marginTop: 10, padding: "7px 10px", border: "1px solid var(--line)", background: "rgba(0,0,0,0.2)", fontSize: 9 }}>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 14, marginTop: 10, padding: "7px 10px", border: "1px solid var(--line)", background: "rgba(0,0,0,0.2)", fontSize: 12 }}>
                   <span style={{ color: "var(--ink-faint)", letterSpacing: 2, fontWeight: 600 }} className="lbl">Legend</span>
                   <span style={{ color: "var(--warn)" }}>■ YELLOW — getting close: prepare</span>
                   <span style={{ color: "var(--accent)" }}>■ GREEN — window open: go</span>
@@ -6140,15 +6140,15 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
               {sorted.map(e => (
                 <div key={e.key} className="card" style={{ marginBottom: 10, borderLeft: `3px solid ${C[e.state]}`, opacity: e.state === "past" ? 0.55 : 1, padding: "12px 16px" }}>
                   <div style={{ display: "flex", alignItems: "baseline", gap: 12, flexWrap: "wrap" }}>
-                    <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: 0.5, color: C[e.state], border: `1px solid ${C[e.state]}`, padding: "2px 8px", whiteSpace: "nowrap" }}>{CHIP[e.state]}</span>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: e.state === "past" ? "var(--ink-dim)" : "var(--ink)" }}>{e.title}</span>
-                    <span style={{ fontSize: 9, color: C[e.state] }}>{e.when}</span>
-                    {e.countdown && <span style={{ fontSize: 9, color: "var(--ink-faint)", marginLeft: "auto" }}>{e.countdown}</span>}
+                    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.5, color: C[e.state], border: `1px solid ${C[e.state]}`, padding: "2px 8px", whiteSpace: "nowrap" }}>{CHIP[e.state]}</span>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: e.state === "past" ? "var(--ink-dim)" : "var(--ink)" }}>{e.title}</span>
+                    <span style={{ fontSize: 12, color: C[e.state] }}>{e.when}</span>
+                    {e.countdown && <span style={{ fontSize: 12, color: "var(--ink-faint)", marginLeft: "auto" }}>{e.countdown}</span>}
                   </div>
-                  <div style={{ fontSize: 9, color: "var(--ink-dim)", lineHeight: 1.7, marginTop: 6 }}>{e.instructions}</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-dim)", lineHeight: 1.7, marginTop: 6 }}>{e.instructions}</div>
                 </div>
               ))}
-              <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 8, padding: "8px 12px", fontStyle: "italic", lineHeight: 1.6, textAlign: "center" }}>
+              <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 8, padding: "8px 12px", fontStyle: "italic", lineHeight: 1.6, textAlign: "center" }}>
                 Deadlines here are informational, derived from your plan dates and general program rules (SSA filing lead time, Medicare IEP, SECURE 2.0 RMD ages, IRS/CMS publication cadence).
                 Verify specifics against the agencies before acting — and December alarms assume the action hasn't been taken yet; if it has, disregard.
               </div>
@@ -6237,11 +6237,11 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
             <div>
               {/* HEADER + KEY DATES */}
               <div className="card" style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600 }} className="lbl">How to actually retire</div>
-                <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 4, lineHeight: 1.6 }}>
+                <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600 }} className="lbl">How to actually retire</div>
+                <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 4, lineHeight: 1.6 }}>
                   The order of operations for pulling the trigger — not <em>whether</em> the plan works (that's the Grade / Monte Carlo tabs), but the real-world steps to execute it, sequenced and dated from your own timeline. Retiring isn't one event: it's unplugging four systems — paycheck, health insurance, Social Security, portfolio — and they don't all switch on the same day.
                 </div>
-                <div style={{ fontSize: 10, color: "var(--ink-dim)", marginTop: 10, padding: "8px 12px", border: "1px solid var(--line)", background: "rgba(0,0,0,0.2)", letterSpacing: 0.5 }}>
+                <div style={{ fontSize: 11, color: "var(--ink-dim)", marginTop: 10, padding: "8px 12px", border: "1px solid var(--line)", background: "rgba(0,0,0,0.2)", letterSpacing: 0.5 }}>
                   confirm the money → lock in health coverage → file Social Security → give notice → turn on withdrawals
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 8, marginTop: 12 }}>
@@ -6255,8 +6255,8 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                     [`RMDs · ${nA}`, `${rmdYearA} · age ${tl.rmdAgeA}`],
                   ].map(([k, v]) => (
                     <div key={k} style={{ border: "1px solid var(--line)", padding: "6px 9px", background: "rgba(0,0,0,0.15)" }}>
-                      <div style={{ fontSize: 7.5, color: "var(--ink-faint)", letterSpacing: 1 }}>{k}</div>
-                      <div style={{ fontSize: 11, color: "var(--ink)", fontFamily: "'JetBrains Mono',monospace", marginTop: 2 }}>{v}</div>
+                      <div style={{ fontSize: 11.5, color: "var(--ink-faint)", letterSpacing: 1 }}>{k}</div>
+                      <div style={{ fontSize: 12, color: "var(--ink)", fontFamily: "'JetBrains Mono',monospace", marginTop: 2 }}>{v}</div>
                     </div>
                   ))}
                 </div>
@@ -6268,33 +6268,33 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                   <div style={{ display: "flex", alignItems: "baseline", gap: 12, flexWrap: "wrap" }}>
                     <span style={{ fontSize: 16, fontWeight: 700, color: "var(--accent)", fontFamily: "'JetBrains Mono',monospace" }}>{String(p.n).padStart(2, "0")}</span>
                     <span style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)", letterSpacing: 0.5 }}>{p.title}</span>
-                    <span style={{ fontSize: 9, color: "var(--ink-faint)", marginLeft: "auto" }}>{p.timing}</span>
+                    <span style={{ fontSize: 12, color: "var(--ink-faint)", marginLeft: "auto" }}>{p.timing}</span>
                   </div>
-                  <ul style={{ margin: "8px 0 0", paddingLeft: 18, fontSize: 10, color: "var(--ink-dim)", lineHeight: 1.7 }}>
+                  <ul style={{ margin: "8px 0 0", paddingLeft: 18, fontSize: 12, color: "var(--ink-dim)", lineHeight: 1.7 }}>
                     {p.actions.map((a, i) => <li key={i} style={{ marginBottom: 3 }}>{a}</li>)}
                   </ul>
                   {p.subItems && (
                     <div style={{ margin: "8px 0 0", display: "flex", flexDirection: "column", gap: 6 }}>
                       {p.subItems.map((s, i) => (
-                        <div key={i} style={{ fontSize: 10, color: "var(--ink)", lineHeight: 1.6, padding: "6px 10px", borderLeft: "2px solid var(--info)", background: "rgba(0,204,255,0.04)" }}>{s}</div>
+                        <div key={i} style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.6, padding: "6px 10px", borderLeft: "2px solid var(--info)", background: "rgba(0,204,255,0.04)" }}>{s}</div>
                       ))}
                     </div>
                   )}
                   {p.landmine && (
-                    <div style={{ marginTop: 8, fontSize: 9.5, color: "var(--warn)", lineHeight: 1.6, padding: "7px 10px", border: "1px solid rgba(255,170,0,0.3)", background: "rgba(255,170,0,0.06)" }}>
+                    <div style={{ marginTop: 8, fontSize: 12.5, color: "var(--warn)", lineHeight: 1.6, padding: "7px 10px", border: "1px solid rgba(255,170,0,0.3)", background: "rgba(255,170,0,0.06)" }}>
                       <span style={{ fontWeight: 700, letterSpacing: 1 }}>⚠ LANDMINE — </span>{p.landmine}
                     </div>
                   )}
                   {p.evKeys.filter(k => evByKey[k]).length > 0 && (
                     <div style={{ marginTop: 8, borderTop: "1px solid var(--line)", paddingTop: 7 }}>
-                      <div style={{ fontSize: 7.5, color: "var(--ink-faint)", letterSpacing: 1.5, marginBottom: 4 }} className="lbl">Live status — from your timeline</div>
+                      <div style={{ fontSize: 11.5, color: "var(--ink-faint)", letterSpacing: 1.5, marginBottom: 4 }} className="lbl">Live status — from your timeline</div>
                       {p.evKeys.filter(k => evByKey[k]).map(k => {
                         const ev = evByKey[k];
                         return (
                           <div key={k} onClick={() => setActiveTab("events")} title="Open the EVENTS tab" style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap", cursor: "pointer", marginBottom: 3 }}>
-                            <span style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: 1, color: C[ev.state], border: `1px solid ${C[ev.state]}`, padding: "1px 6px", whiteSpace: "nowrap" }}>{CHIP[ev.state]}</span>
-                            <span style={{ fontSize: 9, color: "var(--ink-dim)" }}>{ev.title}</span>
-                            <span style={{ fontSize: 9, color: C[ev.state] }}>{ev.when}</span>
+                            <span style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: 1, color: C[ev.state], border: `1px solid ${C[ev.state]}`, padding: "1px 6px", whiteSpace: "nowrap" }}>{CHIP[ev.state]}</span>
+                            <span style={{ fontSize: 12, color: "var(--ink-dim)" }}>{ev.title}</span>
+                            <span style={{ fontSize: 12, color: C[ev.state] }}>{ev.when}</span>
                           </div>
                         );
                       })}
@@ -6302,16 +6302,16 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                   )}
                   {p.see.length > 0 && (
                     <div style={{ marginTop: 8, display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
-                      <span style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5 }}>SEE</span>
+                      <span style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5 }}>SEE</span>
                       {p.see.map(k => (
-                        <span key={k} onClick={() => setActiveTab(k)} style={{ fontSize: 8.5, color: "var(--info)", border: "1px solid var(--info)", padding: "2px 7px", cursor: "pointer", letterSpacing: 0.5 }}>{k.toUpperCase()}</span>
+                        <span key={k} onClick={() => setActiveTab(k)} style={{ fontSize: 11.5, color: "var(--info)", border: "1px solid var(--info)", padding: "2px 7px", cursor: "pointer", letterSpacing: 0.5 }}>{k.toUpperCase()}</span>
                       ))}
                     </div>
                   )}
                 </div>
               ))}
 
-              <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 8, padding: "8px 12px", fontStyle: "italic", lineHeight: 1.6, textAlign: "center" }}>
+              <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 8, padding: "8px 12px", fontStyle: "italic", lineHeight: 1.6, textAlign: "center" }}>
                 Steps and dates are derived from your plan timeline and general program rules (SSA 4-month filing lead, Medicare IEP / Part B penalty, ACA bridge, SECURE 2.0 RMD ages). This is logistics — not financial, tax, or legal advice. Confirm specifics with SSA, Medicare, and a fee-only fiduciary planner / CPA before acting. The dated items above recompute live; the EVENTS tab tracks them as alarms.
               </div>
             </div>
@@ -6322,21 +6322,21 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
         {activeTab === "skins" && (
           <div className="card">
             <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", marginBottom: 16, padding: "10px 14px", background: "var(--panel2)", border: "1px solid var(--line)" }}>
-              <span style={{ fontSize: 10, color: "var(--accent)", fontWeight: 700, letterSpacing: 2 }} className="lbl">UI scale</span>
+              <span style={{ fontSize: 11, color: "var(--accent)", fontWeight: 700, letterSpacing: 2 }} className="lbl">UI scale</span>
               {[100, 115, 130, 150].map(v => (
                 <button key={v} onClick={() => onUiScaleChange && onUiScaleChange(v)}
                   style={{
                     background: uiScale === v ? "var(--ring)" : "transparent",
                     border: `1px solid ${uiScale === v ? "var(--accent)" : "var(--line)"}`,
                     color: uiScale === v ? "var(--accent)" : "var(--ink)",
-                    padding: "6px 14px", fontSize: 11, fontWeight: uiScale === v ? 700 : 400,
+                    padding: "6px 14px", fontSize: 12, fontWeight: uiScale === v ? 700 : 400,
                     cursor: "pointer", fontFamily: "inherit", borderRadius: 3,
                   }}>{v}%{uiScale === v ? " ✓" : ""}</button>
               ))}
-              <span style={{ fontSize: 9, color: "var(--ink-faint)" }}>Makes everything bigger — useful on 4K and high-DPI screens. Sticks between sessions. Browser zoom (Ctrl/Cmd +) works on top of it.</span>
+              <span style={{ fontSize: 12, color: "var(--ink-faint)" }}>Makes everything bigger — useful on 4K and high-DPI screens. Sticks between sessions. Browser zoom (Ctrl/Cmd +) works on top of it.</span>
             </div>
-            <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }} className="lbl">Skins — display theme</div>
-            <div style={{ fontSize: 9, color: "var(--ink-faint)", marginBottom: 14, lineHeight: 1.6 }}>
+            <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }} className="lbl">Skins — display theme</div>
+            <div style={{ fontSize: 12, color: "var(--ink-faint)", marginBottom: 14, lineHeight: 1.6 }}>
               Recolors the whole app with a real color palette (not a screen filter). <span style={{ color: "var(--ink)" }}>Tactical Green</span> is the original dark console; Soft Dark Mode, Warm Executive, and Low-Glare Dark are softer dark themes for low light; Field Manual (red, white &amp; green), Reading Paper, and E-Ink Gray are light paper themes — the easiest on the eyes in bright rooms and for long text-heavy sessions. High Contrast Light and High Contrast Dark maximize legibility for small text and aging eyes; Midnight Blue is a navy alternative to the greens; Colorblind-Safe uses the Okabe\u2013Ito palette so gains, losses, and warnings stay distinguishable with red\u2013green color blindness; Report is a plain business register for sharing; Quiet Dark is a soft charcoal for long sessions. Each tile previews its actual colors. Your choice sticks while the app is open.
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(190px, 1fr))", gap: 10 }}>
@@ -6366,7 +6366,7 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                 );
               })}
             </div>
-            <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 14, fontStyle: "italic", lineHeight: 1.6 }}>
+            <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 14, fontStyle: "italic", lineHeight: 1.6 }}>
               The dark themes are still being refined — a few accent spots (Grade category colors, the big letter grade, the SS claim-age highlight row) keep their original bright hues for now. If a specific spot is hard to read, tell me which tab and I'll fix it.
             </div>
           </div>
@@ -6376,8 +6376,8 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
         {activeTab === "docs" && (
           <div className="card" style={{ padding: 0, overflow: "hidden" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderBottom: "1px solid var(--line)", flexWrap: "wrap" }}>
-              <span style={{ fontSize: 9, color: "var(--ink-faint)", letterSpacing: 1, marginRight: "auto" }}>FIELD MANUAL — full documentation for Danger Close</span>
-              <span style={{ fontSize: 8, color: "var(--ink-faint)", fontStyle: "italic" }}>Want a PDF? Download the HTML, open it in your browser, then Print → Save as PDF.</span>
+              <span style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 1, marginRight: "auto" }}>FIELD MANUAL — full documentation for Danger Close</span>
+              <span style={{ fontSize: 12, color: "var(--ink-faint)", fontStyle: "italic" }}>Want a PDF? Download the HTML, open it in your browser, then Print → Save as PDF.</span>
               <button
                 onClick={() => {
                   try {
@@ -6389,7 +6389,7 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                     setTimeout(() => URL.revokeObjectURL(url), 1000);
                   } catch (e) { /* no-op */ }
                 }}
-                style={{ background: "transparent", border: "1px solid var(--info)", color: "var(--info)", fontFamily: "'JetBrains Mono',monospace", fontSize: 10, fontWeight: 600, padding: "6px 12px", borderRadius: 3, cursor: "pointer", letterSpacing: 1 }}>↓ DOWNLOAD HTML</button>
+                style={{ background: "transparent", border: "1px solid var(--info)", color: "var(--info)", fontFamily: "'JetBrains Mono',monospace", fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 3, cursor: "pointer", letterSpacing: 1 }}>↓ DOWNLOAD HTML</button>
             </div>
             <iframe
               title="Danger Close Documentation"
@@ -6404,34 +6404,34 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
           <div className="card">
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10, flexWrap: "wrap", gap: 6 }}>
               <div>
-                <span style={{ fontSize: 11, color: config.color, fontWeight: 600 }}>TRAJECTORY — RETIRE {retireYear}</span>
-                <span style={{ fontSize: 8, color: "var(--ink-faint)", marginLeft: 10 }}>Real expenses │ Guardrails active │ 10K iterations</span>
+                <span style={{ fontSize: 12, color: config.color, fontWeight: 600 }}>TRAJECTORY — RETIRE {retireYear}</span>
+                <span style={{ fontSize: 12, color: "var(--ink-faint)", marginLeft: 10 }}>Real expenses │ Guardrails active │ 10K iterations</span>
               </div>
               <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                <label style={{ fontSize: 9, color: "var(--ink-faint)", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+                <label style={{ fontSize: 12, color: "var(--ink-faint)", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
                   <input type="checkbox" checked={showGuardrails} onChange={e => setShowGuardrails(e.target.checked)}
                     style={{ accentColor: "var(--accent)" }} /> Guardrails
                 </label>
-                <span style={{ fontSize: 8 }}><span style={{ color: "var(--plan)" }}>╌╌</span> Plan</span>
-                <span style={{ fontSize: 8 }}><span style={{ color: "var(--info)" }}>╌╌</span> Upper 120%</span>
-                <span style={{ fontSize: 8 }}><span style={{ color: "var(--crit)" }}>╌╌</span> Lower 80%</span>
+                <span style={{ fontSize: 12 }}><span style={{ color: "var(--plan)" }}>╌╌</span> Plan</span>
+                <span style={{ fontSize: 12 }}><span style={{ color: "var(--info)" }}>╌╌</span> Upper 120%</span>
+                <span style={{ fontSize: 12 }}><span style={{ color: "var(--crit)" }}>╌╌</span> Lower 80%</span>
               </div>
             </div>
             <svg ref={chartRef} style={{ width: "100%", height: 400 }} />
             {current && (PORTFOLIO.household > 0) && (PORTFOLIO.positions && PORTFOLIO.positions.length > 0) && (
-              <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 8, lineHeight: 1.6, padding: "8px 12px", border: "1px solid rgba(58,122,90,0.3)", background: "rgba(0,0,0,0.2)", borderRadius: 3 }}>
+              <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 8, lineHeight: 1.6, padding: "8px 12px", border: "1px solid rgba(58,122,90,0.3)", background: "rgba(0,0,0,0.2)", borderRadius: 3 }}>
                 <span style={{ color: "var(--ink-dim)", fontWeight: 600 }} className="lbl">What's in this projection:</span> the whole household — {PLAN_TIMELINE.single ? "your" : "both spouses'"} balances across <span style={{ color: "var(--ink-dim)" }}>every account you entered (not just the 401(k))</span> and contributions through the working years, then drawdown with {PLAN_TIMELINE.single ? "your Social Security" : "both Social Security checks"}, the pension, and each person's own retirement date{PLAN_TIMELINE.single ? "" : " and claim age"}. It runs on the same regime-switching engine as the Monte Carlo tab (median plus percentile bands). Long-term-care and mortality shocks are applied on the Monte Carlo tab's full 30-year run, not on this median line.
               </div>
             )}
             {(!PORTFOLIO.positions || PORTFOLIO.positions.length === 0 || !(PORTFOLIO.household > 0)) && (
-              <div style={{ fontSize: 10, color: "var(--warn)", background: "rgba(255,170,0,0.06)", border: "1px solid rgba(255,170,0,0.25)", borderRadius: 3, padding: "10px 12px", marginTop: 8, lineHeight: 1.6, textAlign: "center" }}>
+              <div style={{ fontSize: 12, color: "var(--warn)", background: "rgba(255,170,0,0.06)", border: "1px solid rgba(255,170,0,0.25)", borderRadius: 3, padding: "10px 12px", marginTop: 8, lineHeight: 1.6, textAlign: "center" }}>
                 There's no portfolio to project yet. Go to the <span style={{ fontWeight: 600 }}>My Data</span> tab, add your holdings and income, then <span style={{ fontWeight: 600 }}>Save &amp; Apply</span> — the projection will appear here.
               </div>
             )}
             {hoveredQ !== null && current && hoveredQ < current.percentiles.p50.length && (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 8, marginTop: 8, padding: 8, background: "rgba(0,255,136,0.03)", border: "1px solid var(--line)" }}>
                 {[["10TH", "p10", "var(--crit)"], ["25TH", "p25", "var(--warn)"], ["MEDIAN", "p50", config.color], ["75TH", "p75", "var(--info)"], ["90TH", "p90", "var(--info)"]].map(([l, k, c]) => (
-                  <div key={k}><div style={{ fontSize: 8, color: "var(--ink-faint)" }}>{l}</div><div style={{ fontSize: 13, color: c, fontWeight: k === "p50" ? 600 : 400 }}>{fmtM(current.percentiles[k][hoveredQ])}</div></div>
+                  <div key={k}><div style={{ fontSize: 12, color: "var(--ink-faint)" }}>{l}</div><div style={{ fontSize: 13, color: c, fontWeight: k === "p50" ? 600 : 400 }}>{fmtM(current.percentiles[k][hoveredQ])}</div></div>
                 ))}
               </div>
             )}
@@ -6470,13 +6470,13 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
           return (
           <div className="card">
-            <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }} className="lbl">Expense schedule — all line items</div>
-            <div style={{ fontSize: 9, color: "var(--ink-faint)", marginBottom: 6 }}>Every recurring expense in your plan with active date ranges.</div>
+            <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }} className="lbl">Expense schedule — all line items</div>
+            <div style={{ fontSize: 12, color: "var(--ink-faint)", marginBottom: 6 }}>Every recurring expense in your plan with active date ranges.</div>
 
             {/* Legend */}
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 18, fontSize: 8, color: "var(--ink-dim)", marginBottom: 14, padding: "8px 12px", border: "1px solid rgba(58,122,90,0.3)", background: "rgba(0,0,0,0.2)" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 18, fontSize: 12, color: "var(--ink-dim)", marginBottom: 14, padding: "8px 12px", border: "1px solid rgba(58,122,90,0.3)", background: "rgba(0,0,0,0.2)" }}>
               <span style={{ color: "var(--ink-faint)", letterSpacing: 2, fontWeight: 600 }} className="lbl">Legend</span>
-              <span><span style={{ color: "var(--info)", fontSize: 11, marginRight: 4 }}>↻</span>Active in both pre- and post-retirement phases (spans retirement boundary)</span>
+              <span><span style={{ color: "var(--info)", fontSize: 12, marginRight: 4 }}>↻</span>Active in both pre- and post-retirement phases (spans retirement boundary)</span>
               <span><span style={{ color: "var(--warn)", marginRight: 4 }} className="lbl">Yyyy-mm</span>Bounded end date in pre column (amber)</span>
               <span><span style={{ color: "var(--info)", marginRight: 4 }} className="lbl">Yyyy-mm</span>Bounded end date in post column (cyan)</span>
               <span><span style={{ color: "var(--ink-faint)", fontStyle: "italic", marginRight: 4 }}>ongoing</span>Runs through plan horizon ({_horizonYear})</span>
@@ -6486,22 +6486,22 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
               {/* Pre-retirement */}
               <div>
-                <div style={{ fontSize: 10, color: "var(--warn)", fontWeight: 600, marginBottom: 8, padding: "6px 10px", background: "rgba(255,170,0,0.06)", border: "1px solid rgba(255,170,0,0.2)" }}>
+                <div style={{ fontSize: 12, color: "var(--warn)", fontWeight: 600, marginBottom: 8, padding: "6px 10px", background: "rgba(255,170,0,0.06)", border: "1px solid rgba(255,170,0,0.2)" }}>
                   PRE-RETIREMENT — ${PRE_MONTHLY}/mo
                 </div>
                 {_preItems.map((e, i) => {
                   const r = _fmtRange(e);
                   return (
                     <div key={i} style={{ borderBottom: "1px solid rgba(26,58,42,0.3)", padding: "5px 10px 6px" }}>
-                      <div style={{ display: "grid", gridTemplateColumns: "85px 1fr 70px", alignItems: "center", fontSize: 10 }}>
-                        <span style={{ color: "var(--ink-faint)", fontSize: 9 }}>{e.cat}</span>
+                      <div style={{ display: "grid", gridTemplateColumns: "85px 1fr 70px", alignItems: "center", fontSize: 12 }}>
+                        <span style={{ color: "var(--ink-faint)", fontSize: 12 }}>{e.cat}</span>
                         <span style={{ color: "var(--ink)" }}>
                           {e.label}
-                          {e.phase === "both" && <span title={`Continues through retirement (starts ${r.startYM}, ends ${r.endYM})`} style={{ marginLeft: 6, color: "var(--info)", fontSize: 8, cursor: "help" }}>↻</span>}
+                          {e.phase === "both" && <span title={`Continues through retirement (starts ${r.startYM}, ends ${r.endYM})`} style={{ marginLeft: 6, color: "var(--info)", fontSize: 12, cursor: "help" }}>↻</span>}
                         </span>
                         <span style={{ textAlign: "right", color: "var(--warn)", fontWeight: 500 }}>${e.amount}</span>
                       </div>
-                      <div style={{ paddingLeft: 95, fontSize: 8, whiteSpace: "nowrap", marginTop: 2 }}>
+                      <div style={{ paddingLeft: 95, fontSize: 12, whiteSpace: "nowrap", marginTop: 2 }}>
                         <span style={{ color: "var(--ink-faint)" }}>{r.startYM} → </span>
                         <span style={{ color: r.isOngoing ? "var(--ink-faint)" : "var(--warn)", fontStyle: r.isOngoing ? "italic" : "normal" }}>{r.isOngoing ? "ongoing" : r.endYM}</span>
                         {!r.isOngoing && r.duration && <span style={{ color: "var(--ink-faint)", marginLeft: 6 }}>· {r.duration}</span>}
@@ -6512,22 +6512,22 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
               </div>
               {/* Post-retirement */}
               <div>
-                <div style={{ fontSize: 10, color: "var(--info)", fontWeight: 600, marginBottom: 8, padding: "6px 10px", background: "rgba(0,204,255,0.06)", border: "1px solid rgba(0,204,255,0.2)" }}>
+                <div style={{ fontSize: 12, color: "var(--info)", fontWeight: 600, marginBottom: 8, padding: "6px 10px", background: "rgba(0,204,255,0.06)", border: "1px solid rgba(0,204,255,0.2)" }}>
                   POST-RETIREMENT — ${POST_MONTHLY_EARLY}/mo → ${POST_MONTHLY_FULL}/mo (after {fmtMonYr(PLAN_TIMELINE.medicareB)})
                 </div>
                 {_postItems.map((e, i) => {
                   const r = _fmtRange(e);
                   return (
                     <div key={i} style={{ borderBottom: "1px solid rgba(26,58,42,0.3)", padding: "5px 10px 6px" }}>
-                      <div style={{ display: "grid", gridTemplateColumns: "85px 1fr 70px", alignItems: "center", fontSize: 10 }}>
-                        <span style={{ color: "var(--ink-faint)", fontSize: 9 }}>{e.cat}</span>
+                      <div style={{ display: "grid", gridTemplateColumns: "85px 1fr 70px", alignItems: "center", fontSize: 12 }}>
+                        <span style={{ color: "var(--ink-faint)", fontSize: 12 }}>{e.cat}</span>
                         <span style={{ color: "var(--ink)" }}>
                           {e.label}
-                          {e.phase === "both" && <span title={`Active in both pre and post (starts ${r.startYM}, ends ${r.endYM})`} style={{ marginLeft: 6, color: "var(--info)", fontSize: 8, cursor: "help" }}>↻</span>}
+                          {e.phase === "both" && <span title={`Active in both pre and post (starts ${r.startYM}, ends ${r.endYM})`} style={{ marginLeft: 6, color: "var(--info)", fontSize: 12, cursor: "help" }}>↻</span>}
                         </span>
                         <span style={{ textAlign: "right", color: "var(--info)", fontWeight: 500 }}>${e.amount}</span>
                       </div>
-                      <div style={{ paddingLeft: 95, fontSize: 8, whiteSpace: "nowrap", marginTop: 2 }}>
+                      <div style={{ paddingLeft: 95, fontSize: 12, whiteSpace: "nowrap", marginTop: 2 }}>
                         <span style={{ color: "var(--ink-faint)" }}>{r.startYM} → </span>
                         <span style={{ color: r.isOngoing ? "var(--ink-faint)" : "var(--info)", fontStyle: r.isOngoing ? "italic" : "normal" }}>{r.isOngoing ? "ongoing" : r.endYM}</span>
                         {!r.isOngoing && r.duration && <span style={{ color: "var(--ink-faint)", marginLeft: 6 }}>· {r.duration}</span>}
@@ -6540,15 +6540,15 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
             {/* One-time */}
             <div style={{ marginTop: 16 }}>
-              <div style={{ fontSize: 10, color: "var(--crit)", fontWeight: 600, marginBottom: 8, padding: "6px 10px", background: "rgba(255,68,68,0.06)", border: "1px solid rgba(255,68,68,0.2)" }}>
+              <div style={{ fontSize: 12, color: "var(--crit)", fontWeight: 600, marginBottom: 8, padding: "6px 10px", background: "rgba(255,68,68,0.06)", border: "1px solid rgba(255,68,68,0.2)" }}>
                 ONE-TIME EXPENSES
               </div>
               {EXPENSES.filter(e => e.freq === "once").map((e, i) => (
                 <div key={i} className="erow" style={{ gridTemplateColumns: "90px 1fr 80px 65px" }}>
-                  <span style={{ color: "var(--ink-faint)", fontSize: 9 }}>{e.cat}</span>
+                  <span style={{ color: "var(--ink-faint)", fontSize: 12 }}>{e.cat}</span>
                   <span style={{ color: "var(--ink)" }}>{e.label}</span>
                   <span style={{ textAlign: "right", color: "var(--crit)", fontWeight: 600 }}>${e.amount.toLocaleString()}</span>
-                  <span style={{ textAlign: "right", color: "var(--ink-faint)", fontSize: 8 }}>{e.start}</span>
+                  <span style={{ textAlign: "right", color: "var(--ink-faint)", fontSize: 12 }}>{e.start}</span>
                 </div>
               ))}
             </div>
@@ -6584,44 +6584,44 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
               return (
             <div style={{ marginTop: 16, padding: 14, background: "rgba(0,255,136,0.03)", border: "1px solid var(--line)" }}>
-              <div style={{ fontSize: 9, color: "var(--ink-faint)", letterSpacing: 1, marginBottom: 8 }}>EXPENSE DELTA: PRE → POST RETIREMENT (derived from uploaded expense data)</div>
+              <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 1, marginBottom: 8 }}>EXPENSE DELTA: PRE → POST RETIREMENT (derived from uploaded expense data)</div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
-                <div><div style={{ fontSize: 8, color: "var(--ink-faint)" }}>DROPS OFF (pre-only)</div>
-                  {_preByCat.length === 0 && <div style={{ fontSize: 10, color: "var(--ink-dim)", fontStyle: "italic" }}>No pre-only items</div>}
+                <div><div style={{ fontSize: 12, color: "var(--ink-faint)" }}>DROPS OFF (pre-only)</div>
+                  {_preByCat.length === 0 && <div style={{ fontSize: 12, color: "var(--ink-dim)", fontStyle: "italic" }}>No pre-only items</div>}
                   {_preByCat.map(([cat, sum]) => (
-                    <div key={cat} style={{ fontSize: 10, color: "var(--accent)" }}>{cat} -${Math.round(sum).toLocaleString()}</div>
+                    <div key={cat} style={{ fontSize: 12, color: "var(--accent)" }}>{cat} -${Math.round(sum).toLocaleString()}</div>
                   ))}
-                  <div style={{ fontSize: 10, color: "var(--accent)", fontWeight: 600, marginTop: 4 }}>Total: -${Math.round(_preTotal).toLocaleString()}/mo</div>
+                  <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600, marginTop: 4 }}>Total: -${Math.round(_preTotal).toLocaleString()}/mo</div>
                 </div>
-                <div><div style={{ fontSize: 8, color: "var(--ink-faint)" }}>ADDS ON (post-only)</div>
-                  {_postByCat.length === 0 && <div style={{ fontSize: 10, color: "var(--ink-dim)", fontStyle: "italic" }}>No post-only items</div>}
+                <div><div style={{ fontSize: 12, color: "var(--ink-faint)" }}>ADDS ON (post-only)</div>
+                  {_postByCat.length === 0 && <div style={{ fontSize: 12, color: "var(--ink-dim)", fontStyle: "italic" }}>No post-only items</div>}
                   {_postByCat.map(([cat, sum]) => (
-                    <div key={cat} style={{ fontSize: 10, color: "var(--crit)" }}>{cat} +${Math.round(sum).toLocaleString()}</div>
+                    <div key={cat} style={{ fontSize: 12, color: "var(--crit)" }}>{cat} +${Math.round(sum).toLocaleString()}</div>
                   ))}
-                  <div style={{ fontSize: 10, color: "var(--crit)", fontWeight: 600, marginTop: 4 }}>Total: +${Math.round(_postTotal).toLocaleString()}/mo</div>
+                  <div style={{ fontSize: 12, color: "var(--crit)", fontWeight: 600, marginTop: 4 }}>Total: +${Math.round(_postTotal).toLocaleString()}/mo</div>
                 </div>
-                <div><div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Net change</div>
+                <div><div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Net change</div>
                   <div style={{ fontSize: 20, color: _netChange >= 0 ? "var(--crit)" : "var(--accent)", fontWeight: 600 }}>{_netChange >= 0 ? "+" : ""}${Math.round(_netChange).toLocaleString()}/mo</div>
-                  <div style={{ fontSize: 9, color: "var(--ink-dim)" }}>${Math.round(_preTotal).toLocaleString()} dropped, ${Math.round(_postTotal).toLocaleString()} added</div>
-                  {_bothTotal > 0 && <div style={{ fontSize: 9, color: "var(--ink-dim)", marginTop: 2 }}>Plus ${Math.round(_bothTotal).toLocaleString()}/mo carried through (see right →)</div>}
-                  {_medB && <div style={{ fontSize: 9, color: "var(--ink-dim)", marginTop: 2 }}>With both Medicare premiums: ${Math.round(_postTotal).toLocaleString()}</div>}
+                  <div style={{ fontSize: 12, color: "var(--ink-dim)" }}>${Math.round(_preTotal).toLocaleString()} dropped, ${Math.round(_postTotal).toLocaleString()} added</div>
+                  {_bothTotal > 0 && <div style={{ fontSize: 12, color: "var(--ink-dim)", marginTop: 2 }}>Plus ${Math.round(_bothTotal).toLocaleString()}/mo carried through (see right →)</div>}
+                  {_medB && <div style={{ fontSize: 12, color: "var(--ink-dim)", marginTop: 2 }}>With both Medicare premiums: ${Math.round(_postTotal).toLocaleString()}</div>}
                 </div>
-                <div><div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Unchanged through retirement</div>
-                  {_bothItems.length === 0 && <div style={{ fontSize: 10, color: "var(--ink-dim)", fontStyle: "italic" }}>No items carried through</div>}
+                <div><div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Unchanged through retirement</div>
+                  {_bothItems.length === 0 && <div style={{ fontSize: 12, color: "var(--ink-dim)", fontStyle: "italic" }}>No items carried through</div>}
                   {_bothItems.length > 0 && _bothItems.length <= 6 && _bothItems.map((e, i) => (
-                    <div key={i} style={{ fontSize: 9, color: "var(--ink)" }}>{e.label} ${Math.round(e.amount).toLocaleString()}</div>
+                    <div key={i} style={{ fontSize: 12, color: "var(--ink)" }}>{e.label} ${Math.round(e.amount).toLocaleString()}</div>
                   ))}
                   {_bothItems.length > 6 && (() => {
                     const _bothByCat = _groupSum(_bothItems);
                     return _bothByCat.map(([cat, sum]) => (
-                      <div key={cat} style={{ fontSize: 10, color: "var(--ink)" }}>{cat} ${Math.round(sum).toLocaleString()}</div>
+                      <div key={cat} style={{ fontSize: 12, color: "var(--ink)" }}>{cat} ${Math.round(sum).toLocaleString()}</div>
                     ));
                   })()}
-                  {_bothItems.length > 0 && <div style={{ fontSize: 10, color: "var(--info)", fontWeight: 600, marginTop: 4 }}>Total: ${Math.round(_bothTotal).toLocaleString()}/mo</div>}
-                  <div style={{ fontSize: 8, color: "var(--ink-dim)", marginTop: 4, fontStyle: "italic" }}>Active in both pre and post — not a delta.</div>
+                  {_bothItems.length > 0 && <div style={{ fontSize: 12, color: "var(--info)", fontWeight: 600, marginTop: 4 }}>Total: ${Math.round(_bothTotal).toLocaleString()}/mo</div>}
+                  <div style={{ fontSize: 12, color: "var(--ink-dim)", marginTop: 4, fontStyle: "italic" }}>Active in both pre and post — not a delta.</div>
                 </div>
               </div>
-              <div style={{ fontSize: 8, color: "var(--ink-faint)", marginTop: 8, fontStyle: "italic" }}>
+              <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 8, fontStyle: "italic" }}>
                 Categories and amounts are computed from your imported expense data. Items appear in DROPS OFF only if they end before retirement, in ADDS ON only if they start at or after retirement, and in UNCHANGED if they're active across both phases. Property names (when shown above in line items) come from your expense labels.
               </div>
             </div>
@@ -6744,28 +6744,28 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
           return (
             <div className="card">
-              <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }}>INCOME SOURCES & PORTFOLIO DRAW ANALYSIS — RETIRE {retireYear}</div>
-              <div style={{ fontSize: 9, color: "var(--ink-faint)", marginBottom: 14 }}>All income sources with start dates │ Phase-by-phase shortfall analysis │ Net portfolio draw at each stage</div>
+              <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }}>INCOME SOURCES & PORTFOLIO DRAW ANALYSIS — RETIRE {retireYear}</div>
+              <div style={{ fontSize: 12, color: "var(--ink-faint)", marginBottom: 14 }}>All income sources with start dates │ Phase-by-phase shortfall analysis │ Net portfolio draw at each stage</div>
 
               {/* ── Household income timeline ── */}
               <div style={{ marginBottom: 16, padding: "12px 14px", border: "1px solid var(--line)", background: "rgba(0,0,0,0.2)", borderRadius: 4 }}>
-                <div style={{ fontSize: 9, color: "var(--accent)", fontWeight: 600, letterSpacing: 1, marginBottom: 8 }}>HOUSEHOLD INCOME TIMELINE — WHEN EACH SOURCE STARTS{_singleInc ? "" : " · BOTH SPOUSES"}</div>
+                <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, letterSpacing: 1, marginBottom: 8 }}>HOUSEHOLD INCOME TIMELINE — WHEN EACH SOURCE STARTS{_singleInc ? "" : " · BOTH SPOUSES"}</div>
                 <div>
                   {_events.map((e, i) => (
                     <div key={i} style={{ display: "flex", gap: 10, alignItems: "baseline", padding: "4px 0", borderBottom: i < _events.length - 1 ? "1px solid rgba(26,58,42,0.3)" : "none" }}>
-                      <span style={{ fontFamily: "monospace", fontSize: 9, color: "var(--info)", minWidth: 72, flexShrink: 0 }}>{fmtYM(e.ym)}</span>
-                      <span style={{ fontSize: 10, color: "var(--ink)", minWidth: 170, flexShrink: 0 }}>{e.label}</span>
-                      <span style={{ fontSize: 8, color: "var(--ink-dim)" }}>{e.detail}</span>
+                      <span style={{ fontFamily: "monospace", fontSize: 12, color: "var(--info)", minWidth: 72, flexShrink: 0 }}>{fmtYM(e.ym)}</span>
+                      <span style={{ fontSize: 12, color: "var(--ink)", minWidth: 170, flexShrink: 0 }}>{e.label}</span>
+                      <span style={{ fontSize: 12, color: "var(--ink-dim)" }}>{e.detail}</span>
                     </div>
                   ))}
                 </div>
-                <div style={{ fontSize: 8, color: "var(--ink-faint)", marginTop: 8, fontStyle: "italic" }}>Same dates and amounts the Monte Carlo, Taxes, and Survivor tabs use.{_singleInc ? " Single household — no spouse income modeled." : ""}</div>
+                <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 8, fontStyle: "italic" }}>Same dates and amounts the Monte Carlo, Taxes, and Survivor tabs use.{_singleInc ? " Single household — no spouse income modeled." : ""}</div>
               </div>
 
               {/* ── Income Sources ── */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14, marginBottom: 16 }}>
                 <div style={{ padding: "10px 12px", border: "1px solid var(--line)", background: "rgba(0,255,136,0.03)" }}>
-                  <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5, marginBottom: 8 }} className="lbl">Fixed income sources</div>
+                  <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5, marginBottom: 8 }} className="lbl">Fixed income sources</div>
                   {[
                     !_singleInc && { label: `${nB} Social Security`, amount: spouseBSS, start: `At retirement`, color: "var(--accent)" },
                     { label: "Pension (Joint & Survivor)", amount: pension, start: `At retirement`, color: "var(--accent)" },
@@ -6773,22 +6773,22 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                   ].filter(Boolean).map((s, i) => (
                     <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 0", borderBottom: "1px solid rgba(26,58,42,0.3)" }}>
                       <div>
-                        <div style={{ fontSize: 10, color: "var(--ink)" }}>{s.label}</div>
-                        <div style={{ fontSize: 8, color: "var(--ink-faint)" }}>{s.start}</div>
+                        <div style={{ fontSize: 12, color: "var(--ink)" }}>{s.label}</div>
+                        <div style={{ fontSize: 12, color: "var(--ink-faint)" }}>{s.start}</div>
                       </div>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: s.color }}>${s.amount.toLocaleString()}<span style={{ fontSize: 8, color: "var(--ink-faint)" }}>/mo</span></div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: s.color }}>${s.amount.toLocaleString()}<span style={{ fontSize: 12, color: "var(--ink-faint)" }}>/mo</span></div>
                     </div>
                   ))}
                   <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8, padding: "6px 0", borderTop: "2px solid var(--line)" }}>
-                    <span style={{ fontSize: 10, color: "var(--ink)", fontWeight: 600 }}>TOTAL (all flowing)</span>
-                    <span style={{ fontSize: 15, fontWeight: 700, color: "var(--accent)" }}>${totalIncome.toLocaleString()}<span style={{ fontSize: 8, color: "var(--ink-faint)" }}>/mo</span></span>
+                    <span style={{ fontSize: 12, color: "var(--ink)", fontWeight: 600 }}>TOTAL (all flowing)</span>
+                    <span style={{ fontSize: 15, fontWeight: 700, color: "var(--accent)" }}>${totalIncome.toLocaleString()}<span style={{ fontSize: 12, color: "var(--ink-faint)" }}>/mo</span></span>
                   </div>
-                  <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 4 }}>${(totalIncome * 12).toLocaleString()}/yr │ ${(totalIncome * 12 / 12).toLocaleString()}/mo</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 4 }}>${(totalIncome * 12).toLocaleString()}/yr │ ${(totalIncome * 12 / 12).toLocaleString()}/mo</div>
                 </div>
 
                 {/* Key Metrics */}
                 <div style={{ padding: "10px 12px", border: "1px solid var(--line)", background: "rgba(0,255,136,0.03)" }}>
-                  <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5, marginBottom: 8 }} className="lbl">Key income metrics</div>
+                  <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5, marginBottom: 8 }} className="lbl">Key income metrics</div>
                   {[
                     { label: "Income Coverage (full SS)", value: `${((_steadyInc / POST_MONTHLY_FULL) * 100).toFixed(0)}%`, sub: `$${_steadyInc.toLocaleString()} of $${POST_MONTHLY_FULL.toLocaleString()}/mo`, color: _steadyInc / POST_MONTHLY_FULL > 0.7 ? "var(--accent)" : "var(--warn)" },
                     { label: `Income Coverage (pre-${nA} SS)`, value: `${(((spouseBSS + pension) / POST_MONTHLY_EARLY) * 100).toFixed(0)}%`, sub: `$${(spouseBSS + pension).toLocaleString()} of $${POST_MONTHLY_EARLY.toLocaleString()}/mo`, color: "var(--crit)" },
@@ -6796,10 +6796,10 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                     { label: "Monthly Shortfall (car paid off)", value: `-$${(POST_MONTHLY_FULL - 400 - _steadyInc).toLocaleString()}`, sub: `$${postCarDraw.toLocaleString()}/yr from portfolio`, color: "var(--info)" },
                   ].map((m, i) => (
                     <div key={i} style={{ marginBottom: 8 }}>
-                      <div style={{ fontSize: 8, color: "var(--ink-faint)" }}>{m.label}</div>
+                      <div style={{ fontSize: 12, color: "var(--ink-faint)" }}>{m.label}</div>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
                         <span style={{ fontSize: 16, fontWeight: 600, color: m.color }}>{m.value}</span>
-                        <span style={{ fontSize: 8, color: "var(--ink-dim)" }}>{m.sub}</span>
+                        <span style={{ fontSize: 12, color: "var(--ink-dim)" }}>{m.sub}</span>
                       </div>
                     </div>
                   ))}
@@ -6807,27 +6807,27 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
                 {/* SS Gap Impact */}
                 <div style={{ padding: "10px 12px", border: `1px solid ${gapMonths > 0 ? "var(--crit)" : "var(--accent)"}`, background: gapMonths > 0 ? "rgba(255,68,68,0.04)" : "rgba(0,255,136,0.03)" }}>
-                  <div style={{ fontSize: 8, color: gapMonths > 0 ? "var(--crit)" : "var(--accent)", letterSpacing: 0.5, marginBottom: 8 }}>
+                  <div style={{ fontSize: 11, color: gapMonths > 0 ? "var(--crit)" : "var(--accent)", letterSpacing: 0.5, marginBottom: 8 }}>
                     {gapMonths > 0 ? "⚠ SS INCOME GAP" : "✓ NO INCOME GAP"}
                   </div>
                   {gapMonths > 0 ? (<>
                     <div style={{ fontSize: 24, fontWeight: 700, color: "var(--crit)" }}>{gapMonths} months</div>
-                    <div style={{ fontSize: 9, color: "var(--ink-dim)", marginTop: 4 }}>{fmtYM(retireYM)} → {fmtYM(ssAYM - 1)} without {nA} SS</div>
+                    <div style={{ fontSize: 12, color: "var(--ink-dim)", marginTop: 4 }}>{fmtYM(retireYM)} → {fmtYM(ssAYM - 1)} without {nA} SS</div>
                     <div style={{ marginTop: 10, padding: "8px", background: "rgba(255,68,68,0.06)", border: "1px solid rgba(255,68,68,0.2)" }}>
-                      <div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Portfolio draw during gap</div>
+                      <div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Portfolio draw during gap</div>
                       <div style={{ fontSize: 18, fontWeight: 600, color: "var(--crit)", marginTop: 2 }}>${gapDraw.toLocaleString()}</div>
-                      <div style={{ fontSize: 9, color: "var(--ink-dim)" }}>${_gapMoNet.toLocaleString()}/mo × {gapMonths} months</div>
+                      <div style={{ fontSize: 12, color: "var(--ink-dim)" }}>${_gapMoNet.toLocaleString()}/mo × {gapMonths} months</div>
                     </div>
-                    <div style={{ marginTop: 8, fontSize: 9, color: "var(--ink)", lineHeight: 1.6 }}>
+                    <div style={{ marginTop: 8, fontSize: 12, color: "var(--ink)", lineHeight: 1.6 }}>
                       This is the single largest income risk. Each year delayed eliminates 12 months of gap exposure.
                     </div>
                   </>) : (<>
                     <div style={{ fontSize: 18, fontWeight: 600, color: "var(--accent)", marginTop: 4 }}>{nA} SS already flowing</div>
-                    <div style={{ fontSize: 9, color: "var(--ink-dim)", marginTop: 4 }}>Retiring after {fmtMonYr(_tlInc.ssA_date)} means {nA} SS (${spouseASS.toLocaleString()}/mo) is active from day one. No gap period.</div>
+                    <div style={{ fontSize: 12, color: "var(--ink-dim)", marginTop: 4 }}>Retiring after {fmtMonYr(_tlInc.ssA_date)} means {nA} SS (${spouseASS.toLocaleString()}/mo) is active from day one. No gap period.</div>
                     <div style={{ marginTop: 10, padding: "8px", background: "rgba(0,255,136,0.06)", border: "1px solid rgba(0,255,136,0.2)" }}>
-                      <div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Avoided gap cost vs planned</div>
+                      <div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Avoided gap cost vs planned</div>
                       <div style={{ fontSize: 18, fontWeight: 600, color: "var(--accent)", marginTop: 2 }}>${(Math.max(0, ssAYM - (_tlInc.targetRetireYear * 12 + 1)) * _gapMoNet).toLocaleString()}</div>
-                      <div style={{ fontSize: 9, color: "var(--ink-dim)" }}>${_gapMoNet.toLocaleString()}/mo × {Math.max(0, ssAYM - (_tlInc.targetRetireYear * 12 + 1))} months never withdrawn</div>
+                      <div style={{ fontSize: 12, color: "var(--ink-dim)" }}>${_gapMoNet.toLocaleString()}/mo × {Math.max(0, ssAYM - (_tlInc.targetRetireYear * 12 + 1))} months never withdrawn</div>
                     </div>
                   </>)}
                 </div>
@@ -6836,21 +6836,21 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
               {/* ── Other income streams (user-entered) ── */}
               {_incStreams.length > 0 && (
                 <div style={{ marginBottom: 16, padding: "12px 14px", border: "1px solid var(--line)", background: "rgba(0,204,255,0.03)", borderRadius: 4 }}>
-                  <div style={{ fontSize: 9, color: "var(--info)", fontWeight: 600, letterSpacing: 1, marginBottom: 8 }} className="lbl">Other income streams — from my data</div>
+                  <div style={{ fontSize: 11, color: "var(--info)", fontWeight: 600, letterSpacing: 1, marginBottom: 8 }} className="lbl">Other income streams — from my data</div>
                   {_incStreams.map((s, i) => {
                     const _kindLbl = ({ rental: "Rental", work: "Work", annuity: "Annuity", other: "Other" })[s.kind] || "Stream";
                     const _own = s.owner === "A" ? nA : s.owner === "B" ? nB : "Joint";
                     const _life = !s.endYear || Number(s.endYear) >= 9000;
                     return (
                       <div key={i} style={{ display: "flex", gap: 10, alignItems: "baseline", padding: "5px 0", borderBottom: i < _incStreams.length - 1 ? "1px solid rgba(26,58,42,0.3)" : "none" }}>
-                        <span style={{ fontSize: 10, color: "var(--ink)", minWidth: 170, flexShrink: 0 }}>{s.label || _kindLbl}</span>
-                        <span style={{ fontFamily: "monospace", fontSize: 9, color: "var(--info)", minWidth: 96, flexShrink: 0 }}>{s.startYear || "now"}–{_life ? "for life" : s.endYear}</span>
-                        <span style={{ fontSize: 8, color: "var(--ink-dim)", flex: 1 }}>{_own} · {_kindLbl.toLowerCase()} · {s.cola ? "COLA" : "no COLA"} · {s.tax === "taxfree" ? "tax-free" : "taxable"}</span>
-                        <span style={{ fontSize: 12, fontWeight: 600, color: "var(--info)" }}>${(+s.monthly || 0).toLocaleString()}<span style={{ fontSize: 8, color: "var(--ink-faint)" }}>/mo</span></span>
+                        <span style={{ fontSize: 12, color: "var(--ink)", minWidth: 170, flexShrink: 0 }}>{s.label || _kindLbl}</span>
+                        <span style={{ fontFamily: "monospace", fontSize: 12, color: "var(--info)", minWidth: 96, flexShrink: 0 }}>{s.startYear || "now"}–{_life ? "for life" : s.endYear}</span>
+                        <span style={{ fontSize: 12, color: "var(--ink-dim)", flex: 1 }}>{_own} · {_kindLbl.toLowerCase()} · {s.cola ? "COLA" : "no COLA"} · {s.tax === "taxfree" ? "tax-free" : "taxable"}</span>
+                        <span style={{ fontSize: 12, fontWeight: 600, color: "var(--info)" }}>${(+s.monthly || 0).toLocaleString()}<span style={{ fontSize: 12, color: "var(--ink-faint)" }}>/mo</span></span>
                       </div>
                     );
                   })}
-                  <div style={{ fontSize: 8, color: "var(--ink-faint)", marginTop: 8, fontStyle: "italic" }}>
+                  <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 8, fontStyle: "italic" }}>
                     Amounts are today's dollars. In every simulation, COLA'd streams ride the same inflation as Social Security; non-COLA streams stay flat (losing real value). A stream owned by one person stops at that person's death; joint streams continue to the survivor. Taxable streams feed the Taxes and IRMAA tabs (work income also pays FICA); tax-free streams add cash flow only. Edit in My Data → OTHER INCOME STREAMS.
                   </div>
                 </div>
@@ -6858,7 +6858,7 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
               {/* ── Phase Timeline ── */}
               <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 9, color: "var(--ink-faint)", letterSpacing: 1, marginBottom: 8 }}>RETIREMENT INCOME PHASES — RETIRE {retireYear}</div>
+                <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 1, marginBottom: 8 }}>RETIREMENT INCOME PHASES — RETIRE {retireYear}</div>
 
                 {/* Visual bar: income vs expenses */}
                 {phases.map((p, i) => {
@@ -6869,31 +6869,31 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                     <div key={i} style={{ marginBottom: 12, padding: "10px 12px", border: `1px solid ${p.color}33`, background: `${p.color}08` }}>
                       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
                         <div>
-                          <span style={{ fontSize: 10, color: p.color, fontWeight: 600 }}>{p.label}</span>
-                          <span style={{ fontSize: 9, color: "var(--ink-faint)", marginLeft: 8 }}>{p.period}</span>
-                          {p.months !== null && <span style={{ fontSize: 8, color: "var(--ink-faint)", marginLeft: 6 }}>({p.months} mo)</span>}
+                          <span style={{ fontSize: 12, color: p.color, fontWeight: 600 }}>{p.label}</span>
+                          <span style={{ fontSize: 12, color: "var(--ink-faint)", marginLeft: 8 }}>{p.period}</span>
+                          {p.months !== null && <span style={{ fontSize: 12, color: "var(--ink-faint)", marginLeft: 6 }}>({p.months} mo)</span>}
                         </div>
-                        <span style={{ fontSize: 8, color: "var(--ink-dim)" }}>{p.note}</span>
+                        <span style={{ fontSize: 12, color: "var(--ink-dim)" }}>{p.note}</span>
                       </div>
 
                       {/* Stacked bar: income portion vs shortfall */}
                       <div style={{ display: "flex", height: 22, borderRadius: 2, overflow: "hidden", marginBottom: 6 }}>
                         <div style={{ width: `${pctCovered * 100}%`, background: `${p.color}55`, display: "flex", alignItems: "center", paddingLeft: 6, minWidth: 80 }}>
-                          <span style={{ fontSize: 8, color: "var(--ink)", fontWeight: 600 }}>INCOME ${p.income.toLocaleString()}</span>
+                          <span style={{ fontSize: 12, color: "var(--ink)", fontWeight: 600 }}>INCOME ${p.income.toLocaleString()}</span>
                         </div>
                         {shortfall > 0 && (
                           <div style={{ flex: 1, background: "rgba(255,68,68,0.2)", display: "flex", alignItems: "center", paddingLeft: 6 }}>
-                            <span style={{ fontSize: 8, color: "var(--crit)", fontWeight: 600 }}>DRAW −${shortfall.toLocaleString()}/mo</span>
+                            <span style={{ fontSize: 12, color: "var(--crit)", fontWeight: 600 }}>DRAW −${shortfall.toLocaleString()}/mo</span>
                           </div>
                         )}
                       </div>
 
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 8, fontSize: 9 }}>
-                        <div><span style={{ color: "var(--ink-faint)", fontSize: 8 }} className="lbl">Expenses</span><br/><span style={{ color: "var(--ink)" }}>${p.expenses.toLocaleString()}/mo</span></div>
-                        <div><span style={{ color: "var(--ink-faint)", fontSize: 8 }} className="lbl">Income</span><br/><span style={{ color: p.color }}>${p.income.toLocaleString()}/mo</span></div>
-                        <div><span style={{ color: "var(--ink-faint)", fontSize: 8 }} className="lbl">Shortfall</span><br/><span style={{ color: shortfall > 0 ? "var(--crit)" : "var(--accent)" }}>{shortfall > 0 ? `−$${shortfall.toLocaleString()}` : "$0"}/mo</span></div>
-                        <div><span style={{ color: "var(--ink-faint)", fontSize: 8 }} className="lbl">Annual draw</span><br/><span style={{ color: "var(--ink)" }}>${annualDraw(p.expenses, p.income).toLocaleString()}/yr</span></div>
-                        <div><span style={{ color: "var(--ink-faint)", fontSize: 8 }} className="lbl">Implied swr</span><br/><span style={{ color: drawRate > 4 ? "var(--crit)" : drawRate > 3 ? "var(--warn)" : "var(--accent)" }}>{drawRate.toFixed(1)}%</span></div>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 8, fontSize: 12 }}>
+                        <div><span style={{ color: "var(--ink-faint)", fontSize: 12 }} className="lbl">Expenses</span><br/><span style={{ color: "var(--ink)" }}>${p.expenses.toLocaleString()}/mo</span></div>
+                        <div><span style={{ color: "var(--ink-faint)", fontSize: 12 }} className="lbl">Income</span><br/><span style={{ color: p.color }}>${p.income.toLocaleString()}/mo</span></div>
+                        <div><span style={{ color: "var(--ink-faint)", fontSize: 12 }} className="lbl">Shortfall</span><br/><span style={{ color: shortfall > 0 ? "var(--crit)" : "var(--accent)" }}>{shortfall > 0 ? `−$${shortfall.toLocaleString()}` : "$0"}/mo</span></div>
+                        <div><span style={{ color: "var(--ink-faint)", fontSize: 12 }} className="lbl">Annual draw</span><br/><span style={{ color: "var(--ink)" }}>${annualDraw(p.expenses, p.income).toLocaleString()}/yr</span></div>
+                        <div><span style={{ color: "var(--ink-faint)", fontSize: 12 }} className="lbl">Implied swr</span><br/><span style={{ color: drawRate > 4 ? "var(--crit)" : drawRate > 3 ? "var(--warn)" : "var(--accent)" }}>{drawRate.toFixed(1)}%</span></div>
                       </div>
                     </div>
                   );
@@ -6903,33 +6903,33 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
               {/* ── Summary Grid ── */}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
                 <div style={{ padding: "10px 12px", border: "1px solid var(--line)", background: "rgba(0,255,136,0.03)" }}>
-                  <div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Total income gap cost</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Total income gap cost</div>
                   <div style={{ fontSize: 20, fontWeight: 600, color: gapMonths > 0 ? "var(--crit)" : "var(--accent)", marginTop: 4 }}>
                     {gapMonths > 0 ? `$${gapDraw.toLocaleString()}` : "$0"}
                   </div>
-                  <div style={{ fontSize: 8, color: "var(--ink-dim)", marginTop: 2 }}>{gapMonths > 0 ? `${gapMonths} months × $${_gapMoNet.toLocaleString()}` : "No gap at this retire date"}</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-dim)", marginTop: 2 }}>{gapMonths > 0 ? `${gapMonths} months × $${_gapMoNet.toLocaleString()}` : "No gap at this retire date"}</div>
                 </div>
                 <div style={{ padding: "10px 12px", border: "1px solid var(--line)", background: "rgba(0,255,136,0.03)" }}>
-                  <div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Steady-state draw</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Steady-state draw</div>
                   <div style={{ fontSize: 20, fontWeight: 600, color: "var(--warn)", marginTop: 4 }}>${steadyStateDraw.toLocaleString()}/yr</div>
-                  <div style={{ fontSize: 8, color: "var(--ink-dim)", marginTop: 2 }}>${(POST_MONTHLY_FULL - _steadyInc).toLocaleString()}/mo shortfall × 12</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-dim)", marginTop: 2 }}>${(POST_MONTHLY_FULL - _steadyInc).toLocaleString()}/mo shortfall × 12</div>
                 </div>
                 <div style={{ padding: "10px 12px", border: "1px solid var(--line)", background: "rgba(0,255,136,0.03)" }}>
-                  <div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Post-car draw</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Post-car draw</div>
                   <div style={{ fontSize: 20, fontWeight: 600, color: "var(--info)", marginTop: 4 }}>${postCarDraw.toLocaleString()}/yr</div>
-                  <div style={{ fontSize: 8, color: "var(--ink-dim)", marginTop: 2 }}>${(POST_MONTHLY_FULL - 400 - _steadyInc).toLocaleString()}/mo shortfall × 12</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-dim)", marginTop: 2 }}>${(POST_MONTHLY_FULL - 400 - _steadyInc).toLocaleString()}/mo shortfall × 12</div>
                 </div>
                 <div style={{ padding: "10px 12px", border: "1px solid var(--line)", background: "rgba(0,255,136,0.03)" }}>
-                  <div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Roth conversion tax drag</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Roth conversion tax drag</div>
                   <div style={{ fontSize: 20, fontWeight: 600, color: "var(--violet)", marginTop: 4 }}>~$16K/yr</div>
-                  <div style={{ fontSize: 8, color: "var(--ink-dim)", marginTop: 2 }}>$4K/quarter modeled in MC sim</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-dim)", marginTop: 2 }}>$4K/quarter modeled in MC sim</div>
                 </div>
               </div>
 
               {/* ── Income Floor Assessment ── */}
               <div style={{ marginTop: 14, padding: 12, background: "rgba(0,255,136,0.03)", border: "1px solid var(--line)" }}>
-                <div style={{ fontSize: 9, color: "var(--ink-faint)", letterSpacing: 1, marginBottom: 6 }} className="lbl">Income floor assessment</div>
-                <div style={{ fontSize: 10, lineHeight: 1.7, color: "var(--ink)" }}>
+                <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 1, marginBottom: 6 }} className="lbl">Income floor assessment</div>
+                <div style={{ fontSize: 12, lineHeight: 1.7, color: "var(--ink)" }}>
                   Once all Social Security and pension income is flowing ({fmtMonYr(_tlInc.ssA_date)}+), fixed income{_stAt(ph3Start) > 0 ? ` plus $${_stAt(ph3Start).toLocaleString()}/mo of other income streams still active then` : ""} covers <span style={{ color: "var(--accent)", fontWeight: 600 }}>{((_steadyInc / POST_MONTHLY_FULL) * 100).toFixed(0)}%</span> of expenses.
                   The <span style={{ color: "var(--warn)" }}>${(POST_MONTHLY_FULL - _steadyInc).toLocaleString()}/mo shortfall</span> must come from portfolio withdrawals — in this model, sourced from cash and bond holdings first.
                   After the car payment ends, the shortfall drops to <span style={{ color: "var(--info)" }}>${(POST_MONTHLY_FULL - 400 - _steadyInc).toLocaleString()}/mo</span>, implying a sustainable <span style={{ color: "var(--info)" }}>{(postCarDraw / PORTFOLIO.household * 100).toFixed(1)}%</span> withdrawal rate against current portfolio.
@@ -6951,14 +6951,14 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
           const cur = ssCut.on ? (ssCut.year === 2033 && ssCut.pct === 78 ? 1 : ssCut.year === 2034 && ssCut.pct === 83 ? 2 : 3) : 0;
           return (
             <div className="card" style={{ marginBottom: 14, border: `1px solid ${ssCut.on ? "var(--warn)" : "var(--line)"}` }}>
-              <div style={{ fontSize: 10, color: "var(--warn)", letterSpacing: 2, marginBottom: 4 }}>TRUST-FUND DEPLETION SCENARIO — WHAT IF THE RESERVES RUN DRY?</div>
-              <div style={{ fontSize: 9, color: "var(--ink-dim)", lineHeight: 1.6, marginBottom: 8 }}>
+              <div style={{ fontSize: 11, color: "var(--warn)", letterSpacing: 2, marginBottom: 4 }}>TRUST-FUND DEPLETION SCENARIO — WHAT IF THE RESERVES RUN DRY?</div>
+              <div style={{ fontSize: 12, color: "var(--ink-dim)", lineHeight: 1.6, marginBottom: 8 }}>
                 Social Security is mostly pay-as-you-go: today's payroll taxes fund today's checks, with a trust-fund reserve covering the gap since ~2021. <strong>Depletion is not bankruptcy and checks don't stop</strong> — taxes keep flowing; they just cover only part of scheduled benefits. Per the <strong>2026 Trustees Report</strong>: the retirement fund (OASI) alone depletes in late <strong>2032</strong>, paying <strong>~78%</strong> of scheduled benefits thereafter — that's the legal default. Combining it with the disability fund would stretch full benefits to Q3 <strong>2034</strong>, then <strong>~83%</strong> — but that requires an act of Congress. (Older statements citing 2034/81% or $810-per-$1,000 reflect the 2025 report — stale.) Congress has always acted before a cut hit; whether and how it acts this time is unknowable — which is exactly why it's a scenario toggle, not a prediction. Changing it recomputes every simulation, the Roth tax engine, and the claiming grid below.
               </div>
               {/* PICK-ONE SCENARIO GROUP — radio-style so the choices read as choices.
                   Selected row is filled + cyan-bordered; unselected rows keep a visible
                   border and a hollow marker so nothing looks like inert label text. */}
-              <div style={{ fontSize: 9, color: "var(--info)", fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>
+              <div style={{ fontSize: 11, color: "var(--info)", fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>
                 ▼ CHOOSE ONE — CLICK A SCENARIO TO APPLY IT
               </div>
               <div style={{ display: "grid", gap: 6, marginBottom: 8 }}>
@@ -6971,11 +6971,11 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                         border: `1px solid ${on ? "var(--info)" : "var(--line2)"}`,
                         borderLeft: `3px solid ${on ? "var(--info)" : "var(--line2)"}`,
                         color: on ? "var(--ink)" : "var(--ink-dim)",
-                        fontFamily: "inherit", fontSize: 10, fontWeight: on ? 700 : 500,
+                        fontFamily: "inherit", fontSize: 12, fontWeight: on ? 700 : 500,
                         padding: "9px 12px", borderRadius: 3, cursor: "pointer" }}>
                       <span style={{ fontSize: 13, color: on ? "var(--info)" : "var(--ink-faint)", lineHeight: 1 }}>{on ? "◉" : "○"}</span>
                       <span style={{ flex: 1 }}>{p.label}</span>
-                      {on && <span style={{ fontSize: 8, color: "var(--info)", border: "1px solid var(--info)", padding: "2px 6px", borderRadius: 2, letterSpacing: 0.5 }} className="lbl">Applied</span>}
+                      {on && <span style={{ fontSize: 11, color: "var(--info)", border: "1px solid var(--info)", padding: "2px 6px", borderRadius: 2, letterSpacing: 0.5 }} className="lbl">Applied</span>}
                     </button>
                   );
                 })}
@@ -6984,15 +6984,15 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                   border: `1px solid ${cur === 3 ? "var(--info)" : "var(--line2)"}`, borderLeft: `3px solid ${cur === 3 ? "var(--info)" : "var(--line2)"}`,
                   padding: "9px 12px", borderRadius: 3, flexWrap: "wrap" }}>
                   <span style={{ fontSize: 13, color: cur === 3 ? "var(--info)" : "var(--ink-faint)", lineHeight: 1 }}>{cur === 3 ? "◉" : "○"}</span>
-                  <span style={{ fontSize: 10, fontWeight: cur === 3 ? 700 : 500, color: cur === 3 ? "var(--ink)" : "var(--ink-dim)" }} className="lbl">Set my own —</span>
-                  <span style={{ fontSize: 9, color: "var(--ink-dim)" }}>starting in</span>
+                  <span style={{ fontSize: 12, fontWeight: cur === 3 ? 700 : 500, color: cur === 3 ? "var(--ink)" : "var(--ink-dim)" }} className="lbl">Set my own —</span>
+                  <span style={{ fontSize: 12, color: "var(--ink-dim)" }}>starting in</span>
                   <input type="number" value={ssCut.year} min="2026" max="2060" onChange={e => applySsCut({ on: true, year: Number(e.target.value) || 2033, pct: ssCut.pct })}
-                    style={{ width: 62, background: "var(--panel)", border: "1px solid var(--line)", color: "var(--ink)", fontFamily: "inherit", fontSize: 10, padding: "5px 7px", borderRadius: 3 }} />
-                  <span style={{ fontSize: 9, color: "var(--ink-dim)" }}>pay</span>
+                    style={{ width: 62, background: "var(--panel)", border: "1px solid var(--line)", color: "var(--ink)", fontFamily: "inherit", fontSize: 12, padding: "5px 7px", borderRadius: 3 }} />
+                  <span style={{ fontSize: 12, color: "var(--ink-dim)" }}>pay</span>
                   <input type="number" value={ssCut.pct} min="1" max="100" onChange={e => applySsCut({ on: true, year: ssCut.year, pct: Number(e.target.value) || 78 })}
-                    style={{ width: 54, background: "var(--panel)", border: "1px solid var(--line)", color: "var(--ink)", fontFamily: "inherit", fontSize: 10, padding: "5px 7px", borderRadius: 3 }} />
-                  <span style={{ fontSize: 9, color: "var(--ink-dim)" }}>% of scheduled benefits</span>
-                  {cur === 3 && <span style={{ fontSize: 8, color: "var(--info)", border: "1px solid var(--info)", padding: "2px 6px", borderRadius: 2, letterSpacing: 0.5 }} className="lbl">Applied</span>}
+                    style={{ width: 54, background: "var(--panel)", border: "1px solid var(--line)", color: "var(--ink)", fontFamily: "inherit", fontSize: 12, padding: "5px 7px", borderRadius: 3 }} />
+                  <span style={{ fontSize: 12, color: "var(--ink-dim)" }}>% of scheduled benefits</span>
+                  {cur === 3 && <span style={{ fontSize: 11, color: "var(--info)", border: "1px solid var(--info)", padding: "2px 6px", borderRadius: 2, letterSpacing: 0.5 }} className="lbl">Applied</span>}
                 </div>
               </div>
               {ssCut.on && (() => {
@@ -7001,19 +7001,19 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                 const hh = a + b, hhCut = Math.round(hh * f);
                 return (
                   <div style={{ marginTop: 10, padding: "10px 12px", background: "rgba(255,170,0,0.06)", border: "1px solid var(--warn)", borderRadius: 3 }}>
-                    <div style={{ fontSize: 9, color: "var(--warn)", fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>WHAT THIS SCENARIO DOES TO YOUR CHECKS (from {ssCut.year})</div>
-                    <div style={{ display: "flex", gap: 18, flexWrap: "wrap", fontFamily: "'JetBrains Mono',monospace", fontSize: 11 }}>
-                      <div><span style={{ fontSize: 8, color: "var(--ink-faint)" }}>{PORTFOLIO.nameA || "Spouse A"}: </span><span style={{ textDecoration: "line-through", color: "var(--ink-faint)" }}>${Math.round(a).toLocaleString()}</span> → <span style={{ color: "var(--warn)", fontWeight: 700 }}>${Math.round(a * f).toLocaleString()}/mo</span></div>
-                      {!PLAN_TIMELINE.single && <div><span style={{ fontSize: 8, color: "var(--ink-faint)" }}>{PORTFOLIO.nameB || "Spouse B"}: </span><span style={{ textDecoration: "line-through", color: "var(--ink-faint)" }}>${Math.round(b).toLocaleString()}</span> → <span style={{ color: "var(--warn)", fontWeight: 700 }}>${Math.round(b * f).toLocaleString()}/mo</span></div>}
-                      <div><span style={{ fontSize: 8, color: "var(--ink-faint)" }}>household: </span><span style={{ textDecoration: "line-through", color: "var(--ink-faint)" }}>${Math.round(hh).toLocaleString()}</span> → <span style={{ color: "var(--warn)", fontWeight: 700 }}>${hhCut.toLocaleString()}/mo</span> <span style={{ fontSize: 9, color: "var(--crit)" }}>(−${Math.round(hh - hhCut).toLocaleString()}/mo · −${Math.round((hh - hhCut) * 12).toLocaleString()}/yr)</span></div>
+                    <div style={{ fontSize: 11, color: "var(--warn)", fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>WHAT THIS SCENARIO DOES TO YOUR CHECKS (from {ssCut.year})</div>
+                    <div style={{ display: "flex", gap: 18, flexWrap: "wrap", fontFamily: "'JetBrains Mono',monospace", fontSize: 12 }}>
+                      <div><span style={{ fontSize: 12, color: "var(--ink-faint)" }}>{PORTFOLIO.nameA || "Spouse A"}: </span><span style={{ textDecoration: "line-through", color: "var(--ink-faint)" }}>${Math.round(a).toLocaleString()}</span> → <span style={{ color: "var(--warn)", fontWeight: 700 }}>${Math.round(a * f).toLocaleString()}/mo</span></div>
+                      {!PLAN_TIMELINE.single && <div><span style={{ fontSize: 12, color: "var(--ink-faint)" }}>{PORTFOLIO.nameB || "Spouse B"}: </span><span style={{ textDecoration: "line-through", color: "var(--ink-faint)" }}>${Math.round(b).toLocaleString()}</span> → <span style={{ color: "var(--warn)", fontWeight: 700 }}>${Math.round(b * f).toLocaleString()}/mo</span></div>}
+                      <div><span style={{ fontSize: 12, color: "var(--ink-faint)" }}>household: </span><span style={{ textDecoration: "line-through", color: "var(--ink-faint)" }}>${Math.round(hh).toLocaleString()}</span> → <span style={{ color: "var(--warn)", fontWeight: 700 }}>${hhCut.toLocaleString()}/mo</span> <span style={{ fontSize: 12, color: "var(--crit)" }}>(−${Math.round(hh - hhCut).toLocaleString()}/mo · −${Math.round((hh - hhCut) * 12).toLocaleString()}/yr)</span></div>
                     </div>
-                    <div style={{ fontSize: 9, color: "var(--ink-dim)", marginTop: 8, lineHeight: 1.6 }}>
+                    <div style={{ fontSize: 12, color: "var(--ink-dim)", marginTop: 8, lineHeight: 1.6 }}>
                       <strong style={{ color: "var(--ink)" }}>Where to see it ripple:</strong> the <strong>claiming grid below</strong> (every cell's lifetime total drops — the best cell and your current plan both recompute the moment you toggle) · the <strong>Dashboard</strong>'s income floor now shows a scenario line, and its Monte Carlo success recomputes on your next visit · the <strong>Roth tab</strong>'s tax numbers shift (smaller checks = less taxable SS). Deliberately unchanged: the benefit tables and breakeven cards on this tab keep showing <em>scheduled</em> amounts so you can always see law vs scenario side by side.
                     </div>
                   </div>
                 );
               })()}
-              <div style={{ fontSize: 8, color: "var(--ink-faint)", marginTop: 6 }}>Sources: 2026 SSA Trustees Report; explainers at bipartisanpolicy.org, ncpssm.org, cnbc.com (Jun 9, 2026). Descriptive scenario math — not a prediction, not advice.</div>
+              <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 6 }}>Sources: 2026 SSA Trustees Report; explainers at bipartisanpolicy.org, ncpssm.org, cnbc.com (Jun 9, 2026). Descriptive scenario math — not a prediction, not advice.</div>
             </div>
           );
         })()}
@@ -7155,12 +7155,12 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
             <div className="card">
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
                 <div>
-                  <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600 }} className="lbl">Social security timing & optimization</div>
-                  <div style={{ fontSize: 9, color: "var(--ink-faint)" }}>{nA} FRA: age 67 ({fmtMonYr({year: _dobAYear + 67, month: _tlSS.dobA.month})}){!_single && <> │ {nB} FRA: age 67 ({fmtMonYr({year: _dobBYear + 67, month: _tlSS.dobB.month})}) │ Survivor benefit analysis</>} │ Retire {retireYear}</div>
+                  <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600 }} className="lbl">Social security timing & optimization</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-faint)" }}>{nA} FRA: age 67 ({fmtMonYr({year: _dobAYear + 67, month: _tlSS.dobA.month})}){!_single && <> │ {nB} FRA: age 67 ({fmtMonYr({year: _dobBYear + 67, month: _tlSS.dobB.month})}) │ Survivor benefit analysis</>} │ Retire {retireYear}</div>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "flex-end" }}>
-                    <span style={{ fontSize: 9, color: "var(--ink-faint)" }}>{nA.toUpperCase()} CLAIM AGE:</span>
+                    <span style={{ fontSize: 12, color: "var(--ink-faint)" }}>{nA.toUpperCase()} CLAIM AGE:</span>
                     <input type="range" min={62} max={70} step={1} value={spouseAClaimAge}
                       onChange={e => setSpouseAClaimAge(Number(e.target.value))}
                       style={{ width: 140, accentColor: "var(--accent)" }} />
@@ -7170,7 +7170,7 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                   </div>
                   {!_single && (
                     <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "flex-end" }}>
-                      <span style={{ fontSize: 9, color: "var(--ink-faint)" }}>{nB.toUpperCase()} CLAIM AGE:</span>
+                      <span style={{ fontSize: 12, color: "var(--ink-faint)" }}>{nB.toUpperCase()} CLAIM AGE:</span>
                       <input type="range" min={62} max={70} step={1} value={spouseBClaimAge}
                         onChange={e => setSpouseBClaimAge(Number(e.target.value))}
                         style={{ width: 140, accentColor: "var(--violet)" }} />
@@ -7182,56 +7182,56 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                 </div>
               </div>
 
-              <div style={{ fontSize: 9, color: "var(--warn)", background: "rgba(255,170,0,0.06)", border: "1px solid rgba(255,170,0,0.25)", borderRadius: 3, padding: "7px 10px", marginBottom: 12, lineHeight: 1.6 }}>
+              <div style={{ fontSize: 12, color: "var(--warn)", background: "rgba(255,170,0,0.06)", border: "1px solid rgba(255,170,0,0.25)", borderRadius: 3, padding: "7px 10px", marginBottom: 12, lineHeight: 1.6 }}>
                 ⓘ These claim-age sliders are a <span style={{ fontWeight: 600 }}>what-if explorer</span> — they only change the analysis shown on this SS tab. They do <span style={{ fontWeight: 600 }}>not</span> edit your saved plan, and it does not flow into the Monte Carlo or any other tab. To actually set a claim age for your plan, change it in the <span style={{ fontWeight: 600 }}>My Data</span> tab (Social Security → Claim age) and click <span style={{ fontWeight: 600 }}>Save &amp; Apply</span>.
               </div>
 
               {/* ── Top Metrics ── */}
               <div style={{ display: "grid", gridTemplateColumns: _single ? "repeat(3, 1fr)" : "repeat(5, 1fr)", gap: 10, marginBottom: 14 }}>
                 <div style={{ padding: "8px 10px", border: `1px solid ${spouseAClaimAge === 67 ? "var(--accent)" : spouseAClaimAge < 67 ? "var(--crit)" : "var(--info)"}`, background: "rgba(0,255,136,0.03)" }}>
-                  <div style={{ fontSize: 8, color: "var(--ink-faint)" }}>{nA.toUpperCase()} SS @ AGE {spouseAClaimAge}</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-faint)" }}>{nA.toUpperCase()} SS @ AGE {spouseAClaimAge}</div>
                   <div style={{ fontSize: 18, fontWeight: 600, color: spouseAClaimAge === 67 ? "var(--accent)" : spouseAClaimAge < 67 ? "var(--crit)" : "var(--info)", marginTop: 2 }}>
-                    ${selectedBenefit.toLocaleString()}<span style={{ fontSize: 9, color: "var(--ink-faint)" }}>/mo</span>
+                    ${selectedBenefit.toLocaleString()}<span style={{ fontSize: 12, color: "var(--ink-faint)" }}>/mo</span>
                   </div>
-                  <div style={{ fontSize: 8, color: "var(--ink-dim)" }}>{(selectedSpouseA.pct * 100).toFixed(0)}% of FRA │ ${selectedAnnual.toLocaleString()}/yr</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-dim)" }}>{(selectedSpouseA.pct * 100).toFixed(0)}% of FRA │ ${selectedAnnual.toLocaleString()}/yr</div>
                 </div>
                 {!_single && <div style={{ padding: "8px 10px", border: `1px solid ${spouseBClaimAge === 67 ? "var(--accent)" : spouseBClaimAge < 67 ? "var(--crit)" : "var(--violet)"}`, background: "rgba(170,102,255,0.04)" }}>
-                  <div style={{ fontSize: 8, color: "var(--ink-faint)" }}>{nB.toUpperCase()} SS @ AGE {spouseBClaimAge}</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-faint)" }}>{nB.toUpperCase()} SS @ AGE {spouseBClaimAge}</div>
                   <div style={{ fontSize: 18, fontWeight: 600, color: spouseBClaimAge === 67 ? "var(--accent)" : spouseBClaimAge < 67 ? "var(--crit)" : "var(--violet)", marginTop: 2 }}>
-                    ${selectedSpouseB.benefit.toLocaleString()}<span style={{ fontSize: 9, color: "var(--ink-faint)" }}>/mo</span>
+                    ${selectedSpouseB.benefit.toLocaleString()}<span style={{ fontSize: 12, color: "var(--ink-faint)" }}>/mo</span>
                   </div>
-                  <div style={{ fontSize: 8, color: "var(--ink-dim)" }}>{Math.round(selectedSpouseB.benefit / spouseBFRAest * 100)}% of est. FRA │ ${selectedSpouseB.annual.toLocaleString()}/yr</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-dim)" }}>{Math.round(selectedSpouseB.benefit / spouseBFRAest * 100)}% of est. FRA │ ${selectedSpouseB.annual.toLocaleString()}/yr</div>
                 </div>}
                 <div style={{ padding: "8px 10px", border: "1px solid var(--line)", background: "rgba(0,255,136,0.03)" }}>
-                  <div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Combined income (all SS)</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Combined income (all SS)</div>
                   <div style={{ fontSize: 18, fontWeight: 600, color: "var(--accent)", marginTop: 2 }}>
-                    ${(selectedBenefit + (_single ? 0 : selectedSpouseB.benefit) + pension).toLocaleString()}<span style={{ fontSize: 9, color: "var(--ink-faint)" }}>/mo</span>
+                    ${(selectedBenefit + (_single ? 0 : selectedSpouseB.benefit) + pension).toLocaleString()}<span style={{ fontSize: 12, color: "var(--ink-faint)" }}>/mo</span>
                   </div>
-                  <div style={{ fontSize: 8, color: "var(--ink-dim)" }}>{nA} ${selectedBenefit.toLocaleString()}{!_single && ` + ${nB} $${selectedSpouseB.benefit.toLocaleString()}`} + Pension ${pension}</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-dim)" }}>{nA} ${selectedBenefit.toLocaleString()}{!_single && ` + ${nB} $${selectedSpouseB.benefit.toLocaleString()}`} + Pension ${pension}</div>
                 </div>
                 {!_single && <div style={{ padding: "8px 10px", border: "1px solid var(--line)", background: "rgba(0,255,136,0.03)" }}>
-                  <div style={{ fontSize: 8, color: "var(--ink-faint)" }}>SURVIVOR BENEFIT ({nB.toUpperCase()})</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-faint)" }}>SURVIVOR BENEFIT ({nB.toUpperCase()})</div>
                   <div style={{ fontSize: 18, fontWeight: 600, color: "var(--violet)", marginTop: 2 }}>
-                    ${Math.max(selectedSpouseB.benefit, survivorSelected).toLocaleString()}<span style={{ fontSize: 9, color: "var(--ink-faint)" }}>/mo</span>
+                    ${Math.max(selectedSpouseB.benefit, survivorSelected).toLocaleString()}<span style={{ fontSize: 12, color: "var(--ink-faint)" }}>/mo</span>
                   </div>
-                  <div style={{ fontSize: 8, color: "var(--ink-dim)" }}>Max of {nB}'s own (${selectedSpouseB.benefit.toLocaleString()}) or {nA}'s (${survivorSelected.toLocaleString()})</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-dim)" }}>Max of {nB}'s own (${selectedSpouseB.benefit.toLocaleString()}) or {nA}'s (${survivorSelected.toLocaleString()})</div>
                 </div>}
                 <div style={{ padding: "8px 10px", border: `1px solid ${drawDelta > 0 ? "var(--crit)" : drawDelta < 0 ? "var(--accent)" : "var(--line)"}`, background: "rgba(0,255,136,0.03)" }}>
-                  <div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Portfolio draw delta vs FRA</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Portfolio draw delta vs FRA</div>
                   <div style={{ fontSize: 18, fontWeight: 600, color: drawDelta > 0 ? "var(--crit)" : drawDelta < 0 ? "var(--accent)" : "var(--ink)", marginTop: 2 }}>
                     {drawDelta === 0 ? "BASELINE" : `${drawDelta > 0 ? "+" : ""}$${(drawDelta / 1000).toFixed(0)}K`}
                   </div>
-                  <div style={{ fontSize: 8, color: "var(--ink-dim)" }}>{drawDelta > 0 ? "Extra draw during delay period" : drawDelta < 0 ? "Saved by claiming earlier" : "Current plan = FRA"}</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-dim)" }}>{drawDelta > 0 ? "Extra draw during delay period" : drawDelta < 0 ? "Saved by claiming earlier" : "Current plan = FRA"}</div>
                 </div>
               </div>
 
               {/* ── Spouse A's Benefit Table ── */}
               <div style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 9, color: "var(--ink-faint)", letterSpacing: 1, marginBottom: 6 }}>{nA.toUpperCase()} — BENEFIT BY CLAIMING AGE</div>
-                <div style={{ display: "grid", gridTemplateColumns: "45px 75px 60px 75px 45px repeat(5, 1fr)", gap: 0, fontSize: 9 }}>
+                <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 1, marginBottom: 6 }}>{nA.toUpperCase()} — BENEFIT BY CLAIMING AGE</div>
+                <div style={{ display: "grid", gridTemplateColumns: "45px 75px 60px 75px 45px repeat(5, 1fr)", gap: 0, fontSize: 12 }}>
                   {/* Header */}
                   {["AGE", "CLAIM", "% FRA", "MONTHLY", "ANN.", ...cumulativeAges.map(a => `CUM@${a}`)].map(h => (
-                    <div key={h} style={{ padding: "6px 4px", borderBottom: "2px solid var(--line)", color: "var(--ink-faint)", fontSize: 8, fontWeight: 600, textAlign: "right" }}>{h}</div>
+                    <div key={h} style={{ padding: "6px 4px", borderBottom: "2px solid var(--line)", color: "var(--ink-faint)", fontSize: 12, fontWeight: 600, textAlign: "right" }}>{h}</div>
                   ))}
                   {cumulativeData.map((opt, i) => {
                     const isSel = opt.age === spouseAClaimAge;
@@ -7247,14 +7247,14 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                       <div key={`b${i}`} style={{ padding: "6px 4px", borderBottom: "1px solid rgba(26,58,42,0.3)", textAlign: "right", color: rowColor, fontWeight: isSel ? 700 : 500, background: bg }}>
                         ${opt.benefit.toLocaleString()}
                       </div>,
-                      <div key={`y${i}`} style={{ padding: "6px 4px", borderBottom: "1px solid rgba(26,58,42,0.3)", textAlign: "right", color: "var(--ink-dim)", fontSize: 8, background: bg }}>
+                      <div key={`y${i}`} style={{ padding: "6px 4px", borderBottom: "1px solid rgba(26,58,42,0.3)", textAlign: "right", color: "var(--ink-dim)", fontSize: 12, background: bg }}>
                         ${(opt.annual / 1000).toFixed(0)}K
                       </div>,
                       ...cumulativeAges.map(targetAge => {
                         const val = opt.cumulative[targetAge];
                         const isBest = bestAtAge[targetAge] === opt.age;
                         return (
-                          <div key={`c${i}-${targetAge}`} style={{ padding: "6px 4px", borderBottom: "1px solid rgba(26,58,42,0.3)", textAlign: "right", color: isBest ? "var(--accent)" : "var(--ink-dim)", fontWeight: isBest ? 600 : 400, background: bg, fontSize: 8 }}>
+                          <div key={`c${i}-${targetAge}`} style={{ padding: "6px 4px", borderBottom: "1px solid rgba(26,58,42,0.3)", textAlign: "right", color: isBest ? "var(--accent)" : "var(--ink-dim)", fontWeight: isBest ? 600 : 400, background: bg, fontSize: 12 }}>
                             ${(val / 1000).toFixed(0)}K
                           </div>
                         );
@@ -7262,44 +7262,44 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                     ];
                   }).flat()}
                 </div>
-                <div style={{ fontSize: 8, color: "var(--ink-faint)", marginTop: 4 }}>* = Full Retirement Age │ <span style={{ color: "var(--accent)" }}>Green</span> = highest cumulative payout at that age │ Cumulative excludes COLA</div>
+                <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 4 }}>* = Full Retirement Age │ <span style={{ color: "var(--accent)" }}>Green</span> = highest cumulative payout at that age │ Cumulative excludes COLA</div>
               </div>
 
               {/* ── Breakeven + Survivor side by side ── */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
                 {/* Breakeven */}
                 <div style={{ padding: "10px 12px", border: "1px solid var(--line)", background: "rgba(0,255,136,0.03)" }}>
-                  <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5, marginBottom: 8 }}>BREAKEVEN ANALYSIS — AGE {spouseAClaimAge} vs FRA (67)</div>
+                  <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5, marginBottom: 8 }}>BREAKEVEN ANALYSIS — AGE {spouseAClaimAge} vs FRA (67)</div>
                   {spouseAClaimAge === 67 ? (
                     <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600 }}>Current selection IS FRA — no breakeven to calculate</div>
                   ) : breakeven67 && (
                     <div>
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
                         <div>
-                          <div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Forgone benefits</div>
+                          <div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Forgone benefits</div>
                           <div style={{ fontSize: 16, fontWeight: 600, color: "var(--warn)" }}>${breakeven67.forgone.toLocaleString()}</div>
-                          <div style={{ fontSize: 8, color: "var(--ink-dim)" }}>${spouseAOptions.find(o => o.age === breakeven67.earlyAge).benefit.toLocaleString()}/mo × {(breakeven67.lateAge - breakeven67.earlyAge) * 12} months</div>
+                          <div style={{ fontSize: 12, color: "var(--ink-dim)" }}>${spouseAOptions.find(o => o.age === breakeven67.earlyAge).benefit.toLocaleString()}/mo × {(breakeven67.lateAge - breakeven67.earlyAge) * 12} months</div>
                         </div>
                         <div>
-                          <div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Monthly gain (later claim)</div>
+                          <div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Monthly gain (later claim)</div>
                           <div style={{ fontSize: 16, fontWeight: 600, color: "var(--info)" }}>${breakeven67.gainPerMo.toLocaleString()}/mo</div>
-                          <div style={{ fontSize: 8, color: "var(--ink-dim)" }}>${(breakeven67.gainPerMo * 12).toLocaleString()}/yr extra forever</div>
+                          <div style={{ fontSize: 12, color: "var(--ink-dim)" }}>${(breakeven67.gainPerMo * 12).toLocaleString()}/yr extra forever</div>
                         </div>
                       </div>
                       <div style={{ padding: "8px", background: "rgba(0,255,136,0.04)", border: "1px solid var(--line)" }}>
-                        <div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Breakeven age</div>
+                        <div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Breakeven age</div>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
                           <span style={{ fontSize: 22, fontWeight: 700, color: breakeven67.age < 83 ? "var(--accent)" : breakeven67.age < 87 ? "var(--warn)" : "var(--crit)" }}>
                             {breakeven67.age.toFixed(1)}
                           </span>
-                          <span style={{ fontSize: 9, color: "var(--ink-dim)" }}>{breakeven67.months} months after age {breakeven67.lateAge}</span>
+                          <span style={{ fontSize: 12, color: "var(--ink-dim)" }}>{breakeven67.months} months after age {breakeven67.lateAge}</span>
                         </div>
-                        <div style={{ fontSize: 8, color: "var(--ink-dim)", marginTop: 4 }}>
+                        <div style={{ fontSize: 12, color: "var(--ink-dim)", marginTop: 4 }}>
                           {spouseAClaimAge < 67
                             ? `Claiming at ${spouseAClaimAge} wins if ${nA} dies before ${breakeven67.age.toFixed(0)}. FRA wins if ${nA} lives past it.`
                             : `Delaying to ${spouseAClaimAge} wins if ${nA} lives past ${breakeven67.age.toFixed(0)}. FRA wins if ${nA} dies before it.`}
                         </div>
-                        <div style={{ fontSize: 8, color: "var(--ink-faint)", marginTop: 3, fontStyle: "italic" }}>
+                        <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 3, fontStyle: "italic" }}>
                           Undiscounted, constant-dollar comparison (COLA applies to both sides, so it cancels). Investing early benefits instead of spending them would push breakeven a few years later; SS-taxation differences are not modeled. Survivor impact is shown separately at right.
                         </div>
                       </div>
@@ -7309,8 +7309,8 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
                 {/* Survivor Benefit */}
                 {!_single && <div style={{ padding: "10px 12px", border: "1px solid var(--violet)", background: "rgba(170,102,255,0.04)" }}>
-                  <div style={{ fontSize: 8, color: "var(--violet)", letterSpacing: 0.5, marginBottom: 8 }}>SURVIVOR BENEFIT — THE #1 OPTIMIZATION LEVER</div>
-                  <div style={{ fontSize: 9, color: "var(--ink)", lineHeight: 1.6, marginBottom: 8 }}>
+                  <div style={{ fontSize: 11, color: "var(--violet)", letterSpacing: 0.5, marginBottom: 8 }}>SURVIVOR BENEFIT — THE #1 OPTIMIZATION LEVER</div>
+                  <div style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.6, marginBottom: 8 }}>
                     When {nA} dies, {nB} receives the <span style={{ color: "var(--violet)", fontWeight: 600 }}>higher</span> of her own benefit or {nA}'s. {nA} is the higher earner — his claiming age directly sets {nB}'s survivor income floor.
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6, marginBottom: 8 }}>
@@ -7320,13 +7320,13 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                       { label: "CLAIM 70", survivor: ssBenefit(spouseAFRA, 36), color: "var(--info)" },
                     ].map((s, i) => (
                       <div key={i} style={{ padding: "6px", border: "1px solid var(--line)", textAlign: "center" }}>
-                        <div style={{ fontSize: 8, color: "var(--ink-faint)" }}>{s.label}</div>
+                        <div style={{ fontSize: 12, color: "var(--ink-faint)" }}>{s.label}</div>
                         <div style={{ fontSize: 14, fontWeight: 600, color: s.color }}>${s.survivor.toLocaleString()}</div>
-                        <div style={{ fontSize: 8, color: "var(--ink-faint)" }}>{nB} gets /mo</div>
+                        <div style={{ fontSize: 12, color: "var(--ink-faint)" }}>{nB} gets /mo</div>
                       </div>
                     ))}
                   </div>
-                  <div style={{ padding: "6px 8px", background: "rgba(170,102,255,0.06)", border: "1px solid rgba(170,102,255,0.2)", fontSize: 9, color: "var(--ink)", lineHeight: 1.6 }}>
+                  <div style={{ padding: "6px 8px", background: "rgba(170,102,255,0.06)", border: "1px solid rgba(170,102,255,0.2)", fontSize: 12, color: "var(--ink)", lineHeight: 1.6 }}>
                     At selected age {spouseAClaimAge}: {nB}'s survivor benefit = <span style={{ color: "var(--violet)", fontWeight: 600 }}>${survivorSelected.toLocaleString()}/mo</span> (${(survivorSelected * 12).toLocaleString()}/yr).
                     {spouseAClaimAge < 70 && (<> Delaying to 70 would add <span style={{ color: "var(--info)" }}>${(survivorAge70 - survivorSelected).toLocaleString()}/mo</span> ({`$${((survivorAge70 - survivorSelected) * 12).toLocaleString()}`}/yr) to {nB}'s survivor income.</>)}
                     {spouseAClaimAge > 67 && (<><br/>✓ Per CFR § 404.313(e)(1): If {nA} dies <span style={{ color: "var(--accent)" }}>during delay</span>, {nB} gets FRA + all DRCs accrued up to month of death. Delay credits <span style={{ color: "var(--accent)", fontWeight: 600 }}>do pass</span> to surviving spouse.</>)}
@@ -7336,7 +7336,7 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
               {/* ── Portfolio Draw Comparison ── */}
               <div style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 9, color: "var(--ink-faint)", letterSpacing: 1, marginBottom: 8 }}>PORTFOLIO DRAW IMPACT — RETIRE {retireYear}, {nA.toUpperCase()} CLAIMS AT {spouseAClaimAge}</div>
+                <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 1, marginBottom: 8 }}>PORTFOLIO DRAW IMPACT — RETIRE {retireYear}, {nA.toUpperCase()} CLAIMS AT {spouseAClaimAge}</div>
                 {(() => {
                   // Build phase-by-phase comparison: planned-claim vs selected
                   const _spouseBMedicareYr = _tlSS.medicareB.year;
@@ -7362,9 +7362,9 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                   return (
                     <div>
                       <div style={{ overflowX: "auto" }}>
-                      <div style={{ display: "grid", gridTemplateColumns: "50px 85px 85px 85px 85px 85px", gap: 0, fontSize: 9 }}>
+                      <div style={{ display: "grid", gridTemplateColumns: "70px 119px 119px 119px 119px 119px", gap: 0, fontSize: 12 }}>
                         {["YEAR", "DRAW (FRA)", "DRAW (AGE " + spouseAClaimAge + ")", "DELTA", `${nA.toUpperCase()} SS(FRA)`, `${nA.toUpperCase()} SS(${spouseAClaimAge})`].map(h => (
-                          <div key={h} style={{ padding: "6px 5px", borderBottom: "2px solid var(--line)", color: "var(--ink-faint)", fontSize: 8, fontWeight: 600, textAlign: "right" }}>{h}</div>
+                          <div key={h} style={{ padding: "6px 5px", borderBottom: "2px solid var(--line)", color: "var(--ink-faint)", fontSize: 12, fontWeight: 600, textAlign: "right" }}>{h}</div>
                         ))}
                         {years.map((y, i) => {
                           const dColor = y.delta > 0 ? "var(--crit)" : y.delta < 0 ? "var(--accent)" : "var(--ink-dim)";
@@ -7387,25 +7387,25 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                       </div>
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginTop: 10 }}>
                         <div style={{ padding: "8px 10px", border: "1px solid var(--line)", background: "rgba(0,255,136,0.03)" }}>
-                          <div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Total extra draw (window)</div>
+                          <div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Total extra draw (window)</div>
                           <div style={{ fontSize: 16, fontWeight: 600, color: drawDelta > 0 ? "var(--crit)" : drawDelta < 0 ? "var(--accent)" : "var(--ink)" }}>
                             {drawDelta === 0 ? "$0" : `${drawDelta > 0 ? "+" : ""}$${(drawDelta / 1000).toFixed(0)}K`}
                           </div>
-                          <div style={{ fontSize: 8, color: "var(--ink-dim)" }}>vs FRA baseline during delay/advance period</div>
+                          <div style={{ fontSize: 12, color: "var(--ink-dim)" }}>vs FRA baseline during delay/advance period</div>
                         </div>
                         <div style={{ padding: "8px 10px", border: "1px solid var(--line)", background: "rgba(0,255,136,0.03)" }}>
-                          <div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Monthly income gain (permanent)</div>
+                          <div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Monthly income gain (permanent)</div>
                           <div style={{ fontSize: 16, fontWeight: 600, color: selectedBenefit > spouseAFRA ? "var(--info)" : selectedBenefit < spouseAFRA ? "var(--crit)" : "var(--ink)" }}>
                             {selectedBenefit === spouseAFRA ? "$0" : `${selectedBenefit > spouseAFRA ? "+" : ""}$${(selectedBenefit - spouseAFRA).toLocaleString()}/mo`}
                           </div>
-                          <div style={{ fontSize: 8, color: "var(--ink-dim)" }}>${((selectedBenefit - spouseAFRA) * 12).toLocaleString()}/yr {selectedBenefit >= spouseAFRA ? "more" : "less"} than FRA forever</div>
+                          <div style={{ fontSize: 12, color: "var(--ink-dim)" }}>${((selectedBenefit - spouseAFRA) * 12).toLocaleString()}/yr {selectedBenefit >= spouseAFRA ? "more" : "less"} than FRA forever</div>
                         </div>
                         <div style={{ padding: "8px 10px", border: "1px solid var(--line)", background: "rgba(0,255,136,0.03)" }}>
-                          <div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Post-car shortfall</div>
+                          <div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Post-car shortfall</div>
                           <div style={{ fontSize: 16, fontWeight: 600, color: "var(--info)" }}>
-                            ${Math.max(0, POST_MONTHLY_FULL - 400 - (_single ? 0 : spouseBActual.benefit) - pension - selectedBenefit).toLocaleString()}<span style={{ fontSize: 8, color: "var(--ink-faint)" }}>/mo</span>
+                            ${Math.max(0, POST_MONTHLY_FULL - 400 - (_single ? 0 : spouseBActual.benefit) - pension - selectedBenefit).toLocaleString()}<span style={{ fontSize: 12, color: "var(--ink-faint)" }}>/mo</span>
                           </div>
-                          <div style={{ fontSize: 8, color: "var(--ink-dim)" }}>{((Math.max(0, POST_MONTHLY_FULL - 400 - (_single ? 0 : spouseBActual.benefit) - pension - selectedBenefit) * 12) / PORTFOLIO.household * 100).toFixed(1)}% SWR</div>
+                          <div style={{ fontSize: 12, color: "var(--ink-dim)" }}>{((Math.max(0, POST_MONTHLY_FULL - 400 - (_single ? 0 : spouseBActual.benefit) - pension - selectedBenefit) * 12) / PORTFOLIO.household * 100).toFixed(1)}% SWR</div>
                         </div>
                       </div>
                     </div>
@@ -7418,33 +7418,33 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                      benefit was invented by the spousal-top-up derivation against a $0
                      record, while the engines correctly modeled B at $0) ── */}
               {!_single && <div style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 9, color: "var(--ink-faint)", letterSpacing: 1, marginBottom: 6 }}>{nB.toUpperCase()} — BENEFIT BY CLAIMING AGE (EST. FRA: ${Math.round(spouseBFRAest).toLocaleString()}/mo)</div>
+                <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 1, marginBottom: 6 }}>{nB.toUpperCase()} — BENEFIT BY CLAIMING AGE (EST. FRA: ${Math.round(spouseBFRAest).toLocaleString()}/mo)</div>
                 <div style={{ overflowX: "auto" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(9, 1fr)", gap: 4, fontSize: 9, marginBottom: 6 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(9, 1fr)", gap: 4, fontSize: 12, marginBottom: 6 }}>
                   {spouseBOptions.map((opt, i) => {
                     const isModeled = opt.age === spouseBActual.age;
                     const isSel = opt.age === spouseBClaimAge;
                     const isFRA = opt.age === 67;
                     return (
                       <div key={i} style={{ padding: "6px 4px", border: `1px solid ${isSel ? "var(--violet)" : isModeled ? "var(--accent)" : isFRA ? "var(--info)" : "var(--line)"}`, textAlign: "center", background: isSel ? "rgba(170,102,255,0.08)" : isModeled ? "rgba(0,255,136,0.06)" : "transparent" }}>
-                        <div style={{ fontSize: 8, color: "var(--ink-faint)" }}>AGE {opt.age}{isFRA ? "*" : ""}</div>
+                        <div style={{ fontSize: 12, color: "var(--ink-faint)" }}>AGE {opt.age}{isFRA ? "*" : ""}</div>
                         <div style={{ fontSize: 12, fontWeight: isSel || isModeled ? 700 : 400, color: isSel ? "var(--violet)" : isModeled ? "var(--accent)" : isFRA ? "var(--info)" : "var(--ink)" }}>${opt.benefit.toLocaleString()}</div>
-                        <div style={{ fontSize: 8, color: "var(--ink-faint)" }}>{opt.claimDate}</div>
-                        {isSel && <div style={{ fontSize: 8, color: "var(--violet)", marginTop: 2 }}>◀ SLIDER</div>}
-                        {isModeled && !isSel && <div style={{ fontSize: 8, color: "var(--accent)", marginTop: 2 }} className="lbl">Modeled</div>}
+                        <div style={{ fontSize: 12, color: "var(--ink-faint)" }}>{opt.claimDate}</div>
+                        {isSel && <div style={{ fontSize: 12, color: "var(--violet)", marginTop: 2 }}>◀ SLIDER</div>}
+                        {isModeled && !isSel && <div style={{ fontSize: 12, color: "var(--accent)", marginTop: 2 }} className="lbl">Modeled</div>}
                       </div>
                     );
                   })}
                 </div>
                 </div>
-                <div style={{ fontSize: 8, color: "var(--ink-faint)" }}>* = FRA │ Estimated FRA benefit derived from ${spouseBSS.toLocaleString()} at age {_ssSrc.ssB?.plannedAge || 63} ({(_ssSrc.ssB?.plannedAge || 63) >= 67 ? 0 : Math.round((1 - spouseBSS / spouseBFRAest) * 100)}% early reduction). {nB}'s spousal benefit (50% of {nA}'s FRA = ${_spousalBFromA.toLocaleString()}) is {_spousalBApplies ? "above" : "at or below"} {nB}'s own FRA amount (${spouseBFRAest.toLocaleString()}) — {_spousalBApplies ? "so SSA would pay the spousal amount instead" : "own benefit applies"}.</div>
+                <div style={{ fontSize: 12, color: "var(--ink-faint)" }}>* = FRA │ Estimated FRA benefit derived from ${spouseBSS.toLocaleString()} at age {_ssSrc.ssB?.plannedAge || 63} ({(_ssSrc.ssB?.plannedAge || 63) >= 67 ? 0 : Math.round((1 - spouseBSS / spouseBFRAest) * 100)}% early reduction). {nB}'s spousal benefit (50% of {nA}'s FRA = ${_spousalBFromA.toLocaleString()}) is {_spousalBApplies ? "above" : "at or below"} {nB}'s own FRA amount (${spouseBFRAest.toLocaleString()}) — {_spousalBApplies ? "so SSA would pay the spousal amount instead" : "own benefit applies"}.</div>
                 {_spousalBApplies && (
-                  <div style={{ marginTop: 6, padding: "6px 8px", background: "rgba(255,170,0,0.06)", border: "1px solid rgba(255,170,0,0.2)", fontSize: 9, color: "var(--warn)" }}>
+                  <div style={{ marginTop: 6, padding: "6px 8px", background: "rgba(255,170,0,0.06)", border: "1px solid rgba(255,170,0,0.2)", fontSize: 12, color: "var(--warn)" }}>
                     ⚠ SPOUSAL BENEFIT NOT MODELED — this app understates {nB}'s income. Once {nA} has claimed, SSA tops {nB} up from a ${spouseBFRAest.toLocaleString()}/mo own benefit toward ${_spousalBFromA.toLocaleString()}/mo at {nB}'s FRA — roughly <strong>${_spousalBGap.toLocaleString()}/mo (${(_spousalBGap * 12).toLocaleString()}/yr) more</strong> than every projection here assumes. Claiming before FRA reduces the top-up, and it can't start until {nA} files. Every success rate, income floor, and claiming-grid cell is conservative by about this much — check ssa.gov or an advisor for your actual figure.
                   </div>
                 )}
                 {spouseBModelDelta > 0 && (
-                  <div style={{ marginTop: 6, padding: "6px 8px", background: "rgba(255,170,0,0.06)", border: "1px solid rgba(255,170,0,0.2)", fontSize: 9, color: "var(--warn)" }}>
+                  <div style={{ marginTop: 6, padding: "6px 8px", background: "rgba(255,170,0,0.06)", border: "1px solid rgba(255,170,0,0.2)", fontSize: 12, color: "var(--warn)" }}>
                     ⚠ NOTE: MC simulation models {nB} at ${spouseBSS.toLocaleString()}/mo (age {_ssSrc.ssB?.plannedAge || 63} claim). At retire year {retireYear}, {nB} would be {spouseBActual.age} → actual benefit ~${spouseBActual.benefit.toLocaleString()}/mo. Model understates {nB}'s income by ${spouseBModelDelta.toLocaleString()}/mo (${(spouseBModelDelta * 12).toLocaleString()}/yr). This makes success rates slightly conservative.
                   </div>
                 )}
@@ -7452,8 +7452,8 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
               {/* ── Key Assumptions ── */}
               <div style={{ padding: 12, background: "rgba(0,255,136,0.03)", border: "1px solid var(--line)" }}>
-                <div style={{ fontSize: 9, color: "var(--ink-faint)", letterSpacing: 1, marginBottom: 6 }} className="lbl">Assumptions & constraints</div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, fontSize: 9 }}>
+                <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 1, marginBottom: 6 }} className="lbl">Assumptions & constraints</div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, fontSize: 12 }}>
                   <div style={{ color: "var(--ink)", lineHeight: 1.7 }}>
                     <div style={{ color: "var(--accent)", fontWeight: 600, marginBottom: 4 }} className="lbl">Claiming rules applied</div>
                     {nA} born {fmtMonYr(_tlSS.dobA)} │ FRA = 67 ({fmtMonYr({year: _dobAYear + 67, month: _tlSS.dobA.month})})<br/>
@@ -7511,29 +7511,29 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
           }
           return (
             <div className="card" style={{ marginTop: 14 }}>
-              <div style={{ fontSize: 10, color: "var(--info)", letterSpacing: 2, marginBottom: 4 }}>SS BREAKEVEN ANALYSIS — {nB.toUpperCase()}</div>
-              <div style={{ fontSize: 8, color: "var(--ink-dim)", marginBottom: 10 }}>Same arithmetic as {nA}'s breakeven above — claiming at {claimB} vs FRA (67) on {nB}'s own record — plus the piece that's different for the second spouse in a couple.</div>
+              <div style={{ fontSize: 11, color: "var(--info)", letterSpacing: 2, marginBottom: 4 }}>SS BREAKEVEN ANALYSIS — {nB.toUpperCase()}</div>
+              <div style={{ fontSize: 12, color: "var(--ink-dim)", marginBottom: 10 }}>Same arithmetic as {nA}'s breakeven above — claiming at {claimB} vs FRA (67) on {nB}'s own record — plus the piece that's different for the second spouse in a couple.</div>
               {claimB === 67 ? (
                 <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600 }}>Current selection IS FRA (67) — no breakeven to calculate. The couple's-horizon note below still applies if you're weighing 62 or 70.</div>
               ) : be && (
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
                   <div>
-                    <div style={{ fontSize: 8, color: "var(--ink-faint)" }}>FORGONE BENEFITS (WAITING {be.earlyAge}→{be.lateAge})</div>
+                    <div style={{ fontSize: 12, color: "var(--ink-faint)" }}>FORGONE BENEFITS (WAITING {be.earlyAge}→{be.lateAge})</div>
                     <div style={{ fontSize: 16, fontWeight: 600, color: "var(--warn)" }}>${be.forgone.toLocaleString()}</div>
-                    <div style={{ fontSize: 8, color: "var(--ink-dim)" }}>${be.earlyBen.toLocaleString()}/mo × {(be.lateAge - be.earlyAge) * 12} months</div>
+                    <div style={{ fontSize: 12, color: "var(--ink-dim)" }}>${be.earlyBen.toLocaleString()}/mo × {(be.lateAge - be.earlyAge) * 12} months</div>
                   </div>
                   <div>
-                    <div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Monthly gain (later claim)</div>
+                    <div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Monthly gain (later claim)</div>
                     <div style={{ fontSize: 16, fontWeight: 600, color: "var(--info)" }}>${be.gainPerMo.toLocaleString()}/mo</div>
-                    <div style={{ fontSize: 8, color: "var(--ink-dim)" }}>${(be.gainPerMo * 12).toLocaleString()}/yr extra while it pays</div>
+                    <div style={{ fontSize: 12, color: "var(--ink-dim)" }}>${(be.gainPerMo * 12).toLocaleString()}/yr extra while it pays</div>
                   </div>
                   <div style={{ gridColumn: "1 / -1", padding: "8px", background: "rgba(0,204,255,0.04)", border: "1px solid var(--line)" }}>
-                    <div style={{ fontSize: 8, color: "var(--ink-faint)" }}>BREAKEVEN AGE ({nB})</div>
+                    <div style={{ fontSize: 12, color: "var(--ink-faint)" }}>BREAKEVEN AGE ({nB})</div>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
                       <span style={{ fontSize: 22, fontWeight: 700, color: be.age < 83 ? "var(--accent)" : be.age < 87 ? "var(--warn)" : "var(--crit)" }}>{be.age.toFixed(1)}</span>
-                      <span style={{ fontSize: 9, color: "var(--ink-dim)" }}>{be.months} months after age {be.lateAge}</span>
+                      <span style={{ fontSize: 12, color: "var(--ink-dim)" }}>{be.months} months after age {be.lateAge}</span>
                     </div>
-                    <div style={{ fontSize: 8, color: "var(--ink-dim)", marginTop: 4 }}>
+                    <div style={{ fontSize: 12, color: "var(--ink-dim)", marginTop: 4 }}>
                       {claimB < 67
                         ? `Claiming at ${claimB} wins if the benefit stops flowing before ${nB} turns ${be.age.toFixed(0)}; FRA wins past it.`
                         : `Delaying to ${claimB} wins if the benefit keeps flowing past ${nB}'s age ${be.age.toFixed(0)}; FRA wins before it.`}
@@ -7542,15 +7542,15 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                 </div>
               )}
               <div style={{ padding: "10px 12px", border: `1px solid ${isLowerEarner ? "var(--warn)" : "var(--info)"}`, background: isLowerEarner ? "rgba(255,170,0,0.05)" : "rgba(0,204,255,0.04)" }}>
-                <div style={{ fontSize: 8, color: isLowerEarner ? "var(--warn)" : "var(--info)", letterSpacing: 0.5, fontWeight: 600, marginBottom: 4 }}>THE COUPLE'S TWIST — WHAT HORIZON ACTUALLY APPLIES TO {nB.toUpperCase()}</div>
-                <div style={{ fontSize: 9, color: "var(--ink)", lineHeight: 1.6 }}>
+                <div style={{ fontSize: 11, color: isLowerEarner ? "var(--warn)" : "var(--info)", letterSpacing: 0.5, fontWeight: 600, marginBottom: 4 }}>THE COUPLE'S TWIST — WHAT HORIZON ACTUALLY APPLIES TO {nB.toUpperCase()}</div>
+                <div style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.6 }}>
                   {isLowerEarner ? (
                     <>Because {nB} holds the <strong>smaller</strong> check (${Math.round(fraB).toLocaleString()} vs ${Math.round(fraA).toLocaleString()} at FRA), {nB}'s own record only pays until the <strong>first death</strong> — whichever spouse it is. After that, the survivor keeps the larger (that's {nA}'s) check and {nB}'s delayed credits stop mattering. On your entered life expectancies, the first death lands around <strong>{nB}'s age {firstDeathBAge}</strong>{be ? (firstDeathBAge < be.age ? <> — <strong>before</strong> the {be.age.toFixed(1)} breakeven, which is why the standard analysis leans toward the lower earner claiming <strong>earlier</strong></> : <> — <strong>past</strong> the {be.age.toFixed(1)} breakeven, so even on the shortened horizon the later claim still comes out ahead here</>) : null}. Delaying <em>{nA}'s</em> check is what protects the survivor.</>
                   ) : (
                     <>Because {nB} holds the <strong>larger</strong> check (${Math.round(fraB).toLocaleString()} vs ${Math.round(fraA).toLocaleString()} at FRA), {nB}'s record keeps paying until the <strong>second</strong> death — the survivor inherits it. That makes {nB}'s delay <em>stronger</em> than {nB}'s own life expectancy suggests: the honest horizon is whichever of you lives longer. The survivor-protection logic that usually argues for the primary earner delaying applies to <strong>{nB}</strong> in this household.</>
                   )}
                 </div>
-                <div style={{ fontSize: 8, color: "var(--ink-faint)", marginTop: 5, fontStyle: "italic" }}>
+                <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 5, fontStyle: "italic" }}>
                   Undiscounted, today's-dollar arithmetic on your entered life expectancies; spousal top-up benefits (up to 50% of the other's FRA amount) are not modeled and can favor earlier claiming for a much-lower earner. The 81-cell grid below scores every combination jointly; SSA.gov is the authority. Descriptive math, not advice.
                 </div>
               </div>
@@ -7605,12 +7605,12 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
           const nameA = PORTFOLIO.nameA || "Spouse A", nameB = PORTFOLIO.nameB || "Spouse B";
           return (
             <div className="card" style={{ marginTop: 14 }}>
-              <div style={{ fontSize: 10, color: "var(--violet)", letterSpacing: 2, marginBottom: 4 }}>SPOUSAL CLAIMING-AGE GRID — HOUSEHOLD LIFETIME OPTIMIZER (WHAT-IF)</div>
-              <div style={{ fontSize: 9, color: "var(--ink-dim)", lineHeight: 1.6, marginBottom: 10 }}>
+              <div style={{ fontSize: 11, color: "var(--violet)", letterSpacing: 2, marginBottom: 4 }}>SPOUSAL CLAIMING-AGE GRID — HOUSEHOLD LIFETIME OPTIMIZER (WHAT-IF)</div>
+              <div style={{ fontSize: 12, color: "var(--ink-dim)", lineHeight: 1.6, marginBottom: 10 }}>
                 Every combination of claiming ages for both of you, scored by <strong>total household lifetime benefits in today's dollars</strong> — both checks while both alive, the survivor keeping the larger check afterward, deaths at the life expectancies you entered ({nameA} {_tlG.lifeExpA}, {nameB} {_tlG.lifeExpB}). The model's best cell under those assumptions: <span style={{ color: "var(--violet)", fontWeight: 700 }}>{nameA} at {best.cA} / {nameB} at {best.cB} → {fmtK(best.tot)}</span>. Your current plan ({nameA} {curA} / {nameB} {curB}) scores <strong>{fmtK(curTot)}</strong>{best.tot > curTot ? ` — ${fmtK(best.tot - curTot)} below the grid's best` : " — already the grid's best"}.
               </div>
               <div style={{ overflowX: "auto" }}>
-                <table style={{ borderCollapse: "collapse", fontSize: 8, fontFamily: "'JetBrains Mono',monospace" }}>
+                <table style={{ borderCollapse: "collapse", fontSize: 12, fontFamily: "'JetBrains Mono',monospace" }}>
                   <thead><tr>
                     <th style={{ padding: "4px 6px", color: "var(--ink-faint)", textAlign: "left" }}>{nameA} ↓ · {nameB} →</th>
                     {ages.map(cB => <th key={cB} style={{ padding: "4px 6px", color: "var(--ink-dim)" }}>{cB}</th>)}
@@ -7638,7 +7638,7 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                   </tbody>
                 </table>
               </div>
-              <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 8, lineHeight: 1.6 }}>
+              <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 8, lineHeight: 1.6 }}>
                 <span style={{ color: "var(--violet)" }}>▉ violet border</span> = model's best cell · <span style={{ color: "var(--info)" }}>▉ blue border</span> = your current plan.
                 Honest limits: today's dollars with no discounting (a dollar at 85 counts like a dollar at 63 — delaying looks a touch better than a discounted view would show); the survivor step-up is approximated as the larger check from the first death; <strong>spousal top-up benefits (up to 50% of the other's FRA amount) are not modeled</strong>, which understates some claim-early-for-the-lower-earner strategies; deaths are the fixed life expectancies you entered — live shorter and earlier claiming wins, live longer and delay wins bigger. This grid reports arithmetic, not advice; SSA.gov and a fee-only advisor are the authorities.
               </div>
@@ -7864,12 +7864,12 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
           return (
             <div className="card">
-              <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, marginBottom: 14 }}>PORTFOLIO GRADE — RETIRE {retireYear}</div>
+              <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600, marginBottom: 14 }}>PORTFOLIO GRADE — RETIRE {retireYear}</div>
 
               {/* ── Big Grade ── */}
               <div style={{ display: "grid", gridTemplateColumns: "200px 1fr", gap: 20, marginBottom: 20 }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "20px", border: `2px solid ${overallColor}`, background: `${overallColor}08` }}>
-                  <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 1 }} className="lbl">Overall grade</div>
+                  <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 1 }} className="lbl">Overall grade</div>
                   <div style={{ fontSize: 64, fontWeight: 700, color: overallColor, lineHeight: 1 }}>{overallGrade}</div>
                   <div style={{ fontSize: 12, color: "var(--ink-dim)", marginTop: 4 }}>GPA: {weightedGPA.toFixed(2)} / 4.00</div>
                   <div style={{ width: "100%", height: 6, background: "var(--line)", borderRadius: 3, marginTop: 8, overflow: "hidden" }}>
@@ -7877,13 +7877,13 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 9, color: "var(--ink-faint)", letterSpacing: 1, marginBottom: 8 }} className="lbl">Grade distribution</div>
+                  <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 1, marginBottom: 8 }} className="lbl">Grade distribution</div>
                   {categories.map((c, i) => (
                     <div key={i} style={{ display: "grid", gridTemplateColumns: "20px 160px 35px 30px 1fr", alignItems: "center", gap: 6, padding: "4px 0", borderBottom: "1px solid rgba(26,58,42,0.3)" }}>
-                      <span style={{ fontSize: 10, textAlign: "center" }}>{c.icon}</span>
-                      <span style={{ fontSize: 9, color: "var(--ink)" }}>{c.name}</span>
+                      <span style={{ fontSize: 12, textAlign: "center" }}>{c.icon}</span>
+                      <span style={{ fontSize: 12, color: "var(--ink)" }}>{c.name}</span>
                       <span style={{ fontSize: 12, fontWeight: 700, color: c.color, textAlign: "center" }}>{c.grade}</span>
-                      <span style={{ fontSize: 8, color: "var(--ink-faint)", textAlign: "center" }}>{c.weight}%</span>
+                      <span style={{ fontSize: 12, color: "var(--ink-faint)", textAlign: "center" }}>{c.weight}%</span>
                       <div style={{ height: 4, background: "var(--line)", borderRadius: 2, overflow: "hidden" }}>
                         <div style={{ width: `${(c.gpa / 4) * 100}%`, height: "100%", background: c.color, borderRadius: 2 }} />
                       </div>
@@ -7894,21 +7894,21 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
               {/* ── Category Details ── */}
               <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 9, color: "var(--ink-faint)", letterSpacing: 1, marginBottom: 8 }} className="lbl">Category detail — evidence & drag factors</div>
+                <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 1, marginBottom: 8 }} className="lbl">Category detail — evidence & drag factors</div>
                 {categories.map((c, i) => (
                   <div key={i} style={{ marginBottom: 8, padding: "10px 12px", border: `1px solid ${c.color}22`, background: `${c.color}05` }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <span style={{ fontSize: 20, fontWeight: 700, color: c.color }}>{c.grade}</span>
-                        <span style={{ fontSize: 11, color: "var(--ink)", fontWeight: 600 }}>{c.name}</span>
-                        <span style={{ fontSize: 8, color: "var(--ink-faint)", padding: "1px 5px", border: "1px solid var(--line)" }}>Weight: {c.weight}%</span>
+                        <span style={{ fontSize: 12, color: "var(--ink)", fontWeight: 600 }}>{c.name}</span>
+                        <span style={{ fontSize: 12, color: "var(--ink-faint)", padding: "1px 5px", border: "1px solid var(--line)" }}>Weight: {c.weight}%</span>
                       </div>
-                      <span style={{ fontSize: 9, color: "var(--ink-dim)" }}>GPA: {c.gpa.toFixed(1)}</span>
+                      <span style={{ fontSize: 12, color: "var(--ink-dim)" }}>GPA: {c.gpa.toFixed(1)}</span>
                     </div>
-                    <div style={{ fontSize: 9, color: "var(--ink)", marginBottom: 4 }}>
+                    <div style={{ fontSize: 12, color: "var(--ink)", marginBottom: 4 }}>
                       <span style={{ color: "var(--ink-faint)", fontWeight: 600 }} className="lbl">Evidence: </span>{c.evidence}
                     </div>
-                    <div style={{ fontSize: 9, color: c.gpa >= 3.3 ? "var(--ink-dim)" : c.color }}>
+                    <div style={{ fontSize: 12, color: c.gpa >= 3.3 ? "var(--ink-dim)" : c.color }}>
                       <span style={{ color: "var(--ink-faint)", fontWeight: 600 }}>{c.gpa >= 3.3 ? "STATUS: " : "DRAG: "}</span>{c.drag}
                     </div>
                   </div>
@@ -7926,16 +7926,16 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                 if (ranked.length === 0) return null;
                 return (
                   <div style={{ marginBottom: 16, padding: 14, background: "rgba(255,68,68,0.04)", border: "1px solid rgba(255,68,68,0.2)" }}>
-                    <div style={{ fontSize: 9, color: "var(--crit)", letterSpacing: 1, marginBottom: 8 }} className="lbl">Top grade drags — where points are lost</div>
+                    <div style={{ fontSize: 11, color: "var(--crit)", letterSpacing: 1, marginBottom: 8 }} className="lbl">Top grade drags — where points are lost</div>
                     {ranked.map((d, i) => (
                       <div key={i} style={{ display: "flex", gap: 10, marginBottom: i < ranked.length - 1 ? 10 : 0 }}>
                         <div style={{ fontSize: 22, fontWeight: 700, color: d.color, minWidth: 24 }}>#{i + 1}</div>
                         <div>
                           <div style={{ display: "flex", gap: 8, alignItems: "baseline" }}>
-                            <span style={{ fontSize: 10, color: "var(--ink)", fontWeight: 600 }}>{d.name} ({d.grade})</span>
-                            <span style={{ fontSize: 8, color: d.color }}>Lost ~{d.lossPts.toFixed(2)} GPA points (weight {d.weight}%)</span>
+                            <span style={{ fontSize: 12, color: "var(--ink)", fontWeight: 600 }}>{d.name} ({d.grade})</span>
+                            <span style={{ fontSize: 12, color: d.color }}>Lost ~{d.lossPts.toFixed(2)} GPA points (weight {d.weight}%)</span>
                           </div>
-                          <div style={{ fontSize: 9, color: "var(--ink-dim)", lineHeight: 1.6, marginTop: 2 }}>{d.drag}</div>
+                          <div style={{ fontSize: 12, color: "var(--ink-dim)", lineHeight: 1.6, marginTop: 2 }}>{d.drag}</div>
                         </div>
                       </div>
                     ))}
@@ -7946,19 +7946,19 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
               {/* ── Path to A- ── */}
               <div style={{ padding: 14, background: "rgba(0,255,136,0.04)", border: "1px solid rgba(0,255,136,0.2)" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                  <div style={{ fontSize: 9, color: "var(--accent)", letterSpacing: 1 }}>PATH TO {projGrade} — RECOMMENDED ACTIONS</div>
+                  <div style={{ fontSize: 11, color: "var(--accent)", letterSpacing: 1 }}>PATH TO {projGrade} — RECOMMENDED ACTIONS</div>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <div style={{ textAlign: "center" }}>
-                      <div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Current</div>
+                      <div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Current</div>
                       <div style={{ fontSize: 20, fontWeight: 700, color: overallColor }}>{overallGrade}</div>
                     </div>
                     <div style={{ fontSize: 16, color: "var(--ink-faint)" }}>→</div>
                     <div style={{ textAlign: "center" }}>
-                      <div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Projected</div>
+                      <div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Projected</div>
                       <div style={{ fontSize: 20, fontWeight: 700, color: projColor }}>{projGrade}</div>
                     </div>
                     <div style={{ marginLeft: 8 }}>
-                      <div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Gpa lift</div>
+                      <div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Gpa lift</div>
                       <div style={{ fontSize: 14, fontWeight: 600, color: "var(--accent)" }}>+{(projectedGPA - weightedGPA).toFixed(2)}</div>
                     </div>
                   </div>
@@ -7968,33 +7968,33 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                   <div key={i} style={{ display: "grid", gridTemplateColumns: "30px 1fr 180px 90px 60px", alignItems: "center", gap: 8, padding: "8px 0", borderBottom: "1px solid rgba(26,58,42,0.3)" }}>
                     <span style={{ fontSize: 14, fontWeight: 700, color: "var(--accent)", textAlign: "center" }}>{i + 1}</span>
                     <div>
-                      <div style={{ fontSize: 10, color: "var(--ink)", fontWeight: 500 }}>{imp.action}</div>
-                      <div style={{ fontSize: 8, color: "var(--ink-dim)" }}>{imp.impact}</div>
+                      <div style={{ fontSize: 12, color: "var(--ink)", fontWeight: 500 }}>{imp.action}</div>
+                      <div style={{ fontSize: 12, color: "var(--ink-dim)" }}>{imp.impact}</div>
                     </div>
                     <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
                       {imp.categories.map((cat, j) => (
-                        <span key={j} style={{ fontSize: 8, padding: "1px 4px", border: "1px solid var(--line)", color: "var(--ink-dim)" }}>{cat}</span>
+                        <span key={j} style={{ fontSize: 12, padding: "1px 4px", border: "1px solid var(--line)", color: "var(--ink-dim)" }}>{cat}</span>
                       ))}
                     </div>
-                    <span style={{ fontSize: 8, color: imp.difficulty.startsWith("LOW") ? "var(--accent)" : "var(--warn)" }}>{imp.difficulty}</span>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: "var(--accent)", textAlign: "right" }}>+{imp.gpaLift.toFixed(2)}</span>
+                    <span style={{ fontSize: 12, color: imp.difficulty.startsWith("LOW") ? "var(--accent)" : "var(--warn)" }}>{imp.difficulty}</span>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: "var(--accent)", textAlign: "right" }}>+{imp.gpaLift.toFixed(2)}</span>
                   </div>
                 ))}
 
                 <div style={{ marginTop: 12, display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
                   <div style={{ padding: "8px 10px", border: "1px solid var(--line)", background: "rgba(0,255,136,0.03)" }}>
-                    <div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Current equity share</div>
+                    <div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Current equity share</div>
                     <div style={{ fontSize: 16, fontWeight: 600, color: "var(--info)" }}>{(b3a * 100).toFixed(1)}%</div>
-                    <div style={{ fontSize: 8, color: "var(--ink-dim)" }}>Of retirement accounts, as held. Allocation is yours to set — the actions above are insurance, tax, and estate items only.</div>
+                    <div style={{ fontSize: 12, color: "var(--ink-dim)" }}>Of retirement accounts, as held. Allocation is yours to set — the actions above are insurance, tax, and estate items only.</div>
                   </div>
                   <div style={{ padding: "8px 10px", border: "1px solid var(--line)", background: "rgba(0,255,136,0.03)" }}>
-                    <div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Projected MC success</div>
+                    <div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Projected MC success</div>
                     <div style={{ fontSize: 16, fontWeight: 600, color: "var(--accent)" }}>~{Math.min(95, Math.round(successRate * 100) + 3)}–{Math.min(97, Math.round(successRate * 100) + 5)}%</div>
-                    <div style={{ fontSize: 8, color: "var(--ink-dim)" }}>From {(successRate * 100).toFixed(0)}%. {successRate < 0.90 ? "Targets the 90% threshold" : "Builds on strong base"}</div>
+                    <div style={{ fontSize: 12, color: "var(--ink-dim)" }}>From {(successRate * 100).toFixed(0)}%. {successRate < 0.90 ? "Targets the 90% threshold" : "Builds on strong base"}</div>
                   </div>
                   <div style={{ padding: "8px 10px", border: "1px solid var(--line)", background: "rgba(0,255,136,0.03)" }}>
-                    <div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Remaining risk to A</div>
-                    <div style={{ fontSize: 10, fontWeight: 500, color: "var(--warn)", marginTop: 4, lineHeight: 1.6 }}>
+                    <div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Remaining risk to A</div>
+                    <div style={{ fontSize: 12, fontWeight: 500, color: "var(--warn)", marginTop: 4, lineHeight: 1.6 }}>
                       Full A requires LTC managed AND a benign market sequence in years 1–3. Some factors are market-dependent.
                     </div>
                   </div>
@@ -8183,43 +8183,43 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
               <div className="card" style={{ marginBottom: 14 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 14 }}>
                   <div style={{ flex: "1 1 380px" }}>
-                    <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600 }}>PEER RANKING — RETIREMENT READINESS &amp; FINANCIAL HEALTH</div>
-                    <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 4 }}>
+                    <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600 }}>PEER RANKING — RETIREMENT READINESS &amp; FINANCIAL HEALTH</div>
+                    <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 4 }}>
                       Position at age {age} vs Americans age 55–64 │ Sources: Fed SCF 2022, EBRI RRI, SSA
                     </div>
-                    <div style={{ fontSize: 10, color: "var(--ink)", marginTop: 12, lineHeight: 1.6 }}>
+                    <div style={{ fontSize: 12, color: "var(--ink)", marginTop: 12, lineHeight: 1.6 }}>
                       You are in an exceptionally strong position relative to your peers. The numbers below are sobering for
                       most Americans and help illustrate where you stand. You have roughly <span style={{ color: "var(--accent)", fontWeight: 600 }}>{(portfolioVal / peers.meanRetSavings).toFixed(0)}x the average retirement savings</span> for your age group — that is not a modest advantage, it is a structural one.
                     </div>
                   </div>
                   <div style={{ minWidth: 200, border: `2px solid ${overallColor}`, background: `rgba(0,255,136,0.05)`, padding: "14px 18px", textAlign: "center" }}>
-                    <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 1 }} className="lbl">Overall tier</div>
+                    <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 1 }} className="lbl">Overall tier</div>
                     <div style={{ fontSize: 32, fontWeight: 700, color: overallColor, letterSpacing: 2, marginTop: 4, lineHeight: 1 }}>{overallTier}</div>
-                    <div style={{ fontSize: 9, color: "var(--ink-dim)", marginTop: 6 }}>of Americans age {age}</div>
+                    <div style={{ fontSize: 12, color: "var(--ink-dim)", marginTop: 6 }}>of Americans age {age}</div>
                   </div>
                 </div>
 
                 {/* Headline stat cards */}
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginTop: 14 }}>
                   <div style={{ padding: "10px 12px", background: "rgba(0,0,0,0.3)", border: "1px solid var(--line)" }}>
-                    <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Net worth multiple</div>
+                    <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Net worth multiple</div>
                     <div style={{ fontSize: 18, color: "var(--accent)", fontWeight: 600, marginTop: 4 }}>{(netWorth / peers.meanNetWorth).toFixed(1)}x</div>
-                    <div style={{ fontSize: 8, color: "var(--ink-dim)", marginTop: 2 }}>vs ${(peers.meanNetWorth / 1000000).toFixed(1)}M average 55–64</div>
+                    <div style={{ fontSize: 12, color: "var(--ink-dim)", marginTop: 2 }}>vs ${(peers.meanNetWorth / 1000000).toFixed(1)}M average 55–64</div>
                   </div>
                   <div style={{ padding: "10px 12px", background: "rgba(0,0,0,0.3)", border: "1px solid var(--line)" }}>
-                    <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Portfolio multiple</div>
+                    <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Portfolio multiple</div>
                     <div style={{ fontSize: 18, color: "var(--accent)", fontWeight: 600, marginTop: 4 }}>{(portfolioVal / peers.meanRetSavings).toFixed(1)}x</div>
-                    <div style={{ fontSize: 8, color: "var(--ink-dim)", marginTop: 2 }}>vs ${(peers.meanRetSavings / 1000).toFixed(0)}K average 55–64</div>
+                    <div style={{ fontSize: 12, color: "var(--ink-dim)", marginTop: 2 }}>vs ${(peers.meanRetSavings / 1000).toFixed(0)}K average 55–64</div>
                   </div>
                   <div style={{ padding: "10px 12px", background: "rgba(0,0,0,0.3)", border: "1px solid var(--line)" }}>
-                    <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Guaranteed income</div>
+                    <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Guaranteed income</div>
                     <div style={{ fontSize: 18, color: "var(--info)", fontWeight: 600, marginTop: 4 }}>${totalGuaranteed.toLocaleString()}</div>
-                    <div style={{ fontSize: 8, color: "var(--ink-dim)", marginTop: 2 }}>{(totalGuaranteed / peers.avgSSat62).toFixed(1)}x avg SS-only retiree</div>
+                    <div style={{ fontSize: 12, color: "var(--ink-dim)", marginTop: 2 }}>{(totalGuaranteed / peers.avgSSat62).toFixed(1)}x avg SS-only retiree</div>
                   </div>
                   <div style={{ padding: "10px 12px", background: "rgba(0,0,0,0.3)", border: "1px solid var(--line)" }}>
-                    <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">MC success</div>
+                    <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">MC success</div>
                     <div style={{ fontSize: 18, color: mcSuccess >= 0.90 ? "var(--accent)" : "var(--info)", fontWeight: 600, marginTop: 4 }}>{(mcSuccess * 100).toFixed(1)}%</div>
-                    <div style={{ fontSize: 8, color: "var(--ink-dim)", marginTop: 2 }}>vs ~47% of peers on track</div>
+                    <div style={{ fontSize: 12, color: "var(--ink-dim)", marginTop: 2 }}>vs ~47% of peers on track</div>
                   </div>
                 </div>
               </div>
@@ -8255,20 +8255,20 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                   const markPos = Math.max(0, Math.min(100, (Math.log(Math.max(netWorth, 1)) - lo) / (hi - lo) * 100));
                   return (
                     <>
-                      <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600 }} className="lbl">Vs affluent retirees — affluent-community proxy</div>
-                      <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 4, lineHeight: 1.5 }}>
+                      <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600 }} className="lbl">Vs affluent retirees — affluent-community proxy</div>
+                      <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 4, lineHeight: 1.5 }}>
                         An affluent retirement community has no published net-worth dataset, so this compares you against the <span style={{ color: "var(--ink-dim)" }}>top 25% of U.S. households age 55–64</span> (Fed SCF 2022) — a defensible stand-in for an affluent retirement community, which skews wealthier than the national average. <span style={{ fontStyle: "italic" }}>Proxy, not actual community figures.</span>
                       </div>
                       <div style={{ display: "flex", gap: 24, flexWrap: "wrap", marginTop: 12, alignItems: "baseline" }}>
                         <div>
-                          <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Your net worth</div>
+                          <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Your net worth</div>
                           <div style={{ fontSize: 22, color: "var(--accent)", fontWeight: 700 }}>{fmtM(netWorth)}</div>
                         </div>
                         <div>
-                          <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Among affluent retirees</div>
+                          <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Among affluent retirees</div>
                           <div style={{ fontSize: 22, color: "var(--accent)", fontWeight: 700 }}>~{ord(Math.round(affP))} pctile</div>
                         </div>
-                        <div style={{ flex: "1 1 240px", fontSize: 10, color: "var(--ink)", lineHeight: 1.5 }}>
+                        <div style={{ flex: "1 1 240px", fontSize: 12, color: "var(--ink)", lineHeight: 1.5 }}>
                           You sit <span style={{ color: "var(--accent)", fontWeight: 600 }}>{verdict}</span>. Nationally that's about the {ord(Math.round(np))} percentile for your age — among the wealthier residents you'll live near, you're {affP >= 50 ? "above" : "around"} the middle.
                         </div>
                       </div>
@@ -8278,14 +8278,14 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                         </div>
                         <div style={{ display: "flex", justifyContent: "space-between", marginTop: 5 }}>
                           {band.map(([lab, , sub]) => (
-                            <div key={lab} style={{ fontSize: 8, color: "var(--ink-faint)", textAlign: "center" }}>
+                            <div key={lab} style={{ fontSize: 12, color: "var(--ink-faint)", textAlign: "center" }}>
                               <div style={{ fontFamily: "'JetBrains Mono',monospace", color: "var(--ink-dim)" }}>{lab}</div>
                               <div>{sub}</div>
                             </div>
                           ))}
                         </div>
                       </div>
-                      <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 14, fontStyle: "italic", lineHeight: 1.6 }}>
+                      <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 14, fontStyle: "italic", lineHeight: 1.6 }}>
                         An affluent retirement community spans a wide range — from modest fixed-income retirees in patio villas to wealthy households in premier homes — so any single rank is approximate. Your investable portfolio of {fmtM(portfolioVal)} is already ~{(portfolioVal / 1228196).toFixed(1)}x the average retirement savings of engaged savers in their 60s (Empower), pointing to the upper end of that range.
                       </div>
                     </>
@@ -8298,13 +8298,13 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                 <div style={{ marginBottom: 14, padding: "10px 14px", background: "rgba(255,170,0,0.06)", borderLeft: "3px solid var(--warn)", border: "1px solid rgba(255,170,0,0.3)", display: "flex", alignItems: "flex-start", gap: 12 }}>
                   <span style={{ color: "var(--warn)", fontSize: 16, lineHeight: 1, marginTop: 1 }}>⚠</span>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 10, color: "var(--warn)", fontWeight: 600, letterSpacing: 1 }}>USING FALLBACK VALUES — MASTER_PROMPT PARSE FAILED</div>
-                    <div style={{ fontSize: 9, color: "var(--ink)", marginTop: 4, lineHeight: 1.5 }}>
+                    <div style={{ fontSize: 11, color: "var(--warn)", fontWeight: 600, letterSpacing: 1 }}>USING FALLBACK VALUES — MASTER_PROMPT PARSE FAILED</div>
+                    <div style={{ fontSize: 12, color: "var(--ink)", marginTop: 4, lineHeight: 1.5 }}>
                       Could not extract {_fbActive.length} field{_fbActive.length > 1 ? "s" : ""} from MASTER_PROMPT:{" "}
                       <span style={{ color: "var(--warn)", fontWeight: 500 }}>{_fbActive.map(k => _fbNames[k]).join(", ")}</span>.
                       Showing baked-in defaults for {_fbActive.length > 1 ? "these fields" : "this field"} (affected rows marked <span style={{ color: "var(--warn)" }}>⚠</span> below).
                     </div>
-                    <div style={{ fontSize: 8, color: "var(--ink-dim)", marginTop: 6, fontStyle: "italic" }}>
+                    <div style={{ fontSize: 12, color: "var(--ink-dim)", marginTop: 6, fontStyle: "italic" }}>
                       Expected phrasing in MASTER_PROMPT:{" "}
                       
                       <span style={{ color: "var(--ink-dim)" }}>"home: ~$NNN,NNN value, ~$NNN,NNN mortgage at N.NN%, ~$NNN,NNN equity"</span>.
@@ -8316,10 +8316,10 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
               {/* DIMENSION TABLE */}
               <div className="card" style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }} className="lbl">Dimension-by-dimension ranking</div>
-                <div style={{ fontSize: 9, color: "var(--ink-faint)", marginBottom: 12 }}>Each financial-health dimension scored against peer-group medians and survey data.</div>
+                <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }} className="lbl">Dimension-by-dimension ranking</div>
+                <div style={{ fontSize: 12, color: "var(--ink-faint)", marginBottom: 12 }}>Each financial-health dimension scored against peer-group medians and survey data.</div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "180px 1fr 1fr 90px 90px", padding: "7px 10px", background: "rgba(0,255,136,0.04)", border: "1px solid var(--line)", fontSize: 8, color: "var(--ink-dim)", letterSpacing: 0.5 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "180px 1fr 1fr 90px 90px", padding: "7px 10px", background: "rgba(0,255,136,0.04)", border: "1px solid var(--line)", fontSize: 11, color: "var(--ink-dim)", letterSpacing: 0.5 }}>
                   <span className="lbl">Dimension</span>
                   <span className="lbl">Your position</span>
                   <span className="lbl">Peer benchmark (age 62)</span>
@@ -8333,7 +8333,7 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                     gridTemplateColumns: "180px 1fr 1fr 90px 90px",
                     padding: "9px 10px",
                     borderBottom: "1px solid rgba(26,58,42,0.3)",
-                    fontSize: 10,
+                    fontSize: 12,
                     alignItems: "center",
                     transition: "background 0.15s",
                   }}
@@ -8342,11 +8342,11 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                     <span style={{ color: "var(--ink)", fontWeight: 600 }}>
                       {d.name}
                       {d.fallback && (
-                        <span title="Could not parse from MASTER_PROMPT — showing baked-in default" style={{ marginLeft: 6, color: "var(--warn)", fontSize: 10, cursor: "help" }}>⚠</span>
+                        <span title="Could not parse from MASTER_PROMPT — showing baked-in default" style={{ marginLeft: 6, color: "var(--warn)", fontSize: 12, cursor: "help" }}>⚠</span>
                       )}
                     </span>
                     <span style={{ color: "var(--ink)" }}>{d.yours}</span>
-                    <span style={{ color: "var(--ink-dim)", fontSize: 9 }}>{d.benchmark}</span>
+                    <span style={{ color: "var(--ink-dim)", fontSize: 12 }}>{d.benchmark}</span>
                     <span style={{ textAlign: "right", color: "var(--info)", fontWeight: 500 }}>{d.ratio}</span>
                     <span style={{ textAlign: "right", color: d.color, fontWeight: 600, letterSpacing: 1 }}>{d.tier}</span>
                   </div>
@@ -8355,12 +8355,12 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
               {/* BROADER CONTEXT */}
               <div className="card" style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }} className="lbl">The broader context</div>
-                <div style={{ fontSize: 9, color: "var(--ink-faint)", marginBottom: 12 }}>What the data shows for Americans age 55–64 — the whole population vs people who actively save.</div>
+                <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }} className="lbl">The broader context</div>
+                <div style={{ fontSize: 12, color: "var(--ink-faint)", marginBottom: 12 }}>What the data shows for Americans age 55–64 — the whole population vs people who actively save.</div>
 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                   <div>
-                    <div style={{ fontSize: 10, color: "var(--warn)", fontWeight: 600, marginBottom: 8, padding: "6px 10px", background: "rgba(255,170,0,0.05)", border: "1px solid rgba(255,170,0,0.2)" }}>
+                    <div style={{ fontSize: 12, color: "var(--warn)", fontWeight: 600, marginBottom: 8, padding: "6px 10px", background: "rgba(255,170,0,0.05)", border: "1px solid rgba(255,170,0,0.2)" }}>
                       SAVINGS BENCHMARKS — AGE 55–64
                     </div>
                     {[
@@ -8371,7 +8371,7 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                       { l: "% with less than $100K saved", v: `~${peers.pctLessThan100K}%` },
                       { l: "% with essentially nothing saved", v: `~${peers.pctNothing}%` },
                     ].map((row, i) => (
-                      <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "6px 10px", borderBottom: "1px solid rgba(26,58,42,0.3)", fontSize: 10 }}>
+                      <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "6px 10px", borderBottom: "1px solid rgba(26,58,42,0.3)", fontSize: 12 }}>
                         <span style={{ color: "var(--ink)" }}>{row.l}</span>
                         <span style={{ color: "var(--warn)", fontWeight: 500 }}>{row.v}</span>
                       </div>
@@ -8379,7 +8379,7 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                   </div>
 
                   <div>
-                    <div style={{ fontSize: 10, color: "var(--info)", fontWeight: 600, marginBottom: 8, padding: "6px 10px", background: "rgba(0,204,255,0.05)", border: "1px solid rgba(0,204,255,0.2)" }}>
+                    <div style={{ fontSize: 12, color: "var(--info)", fontWeight: 600, marginBottom: 8, padding: "6px 10px", background: "rgba(0,204,255,0.05)", border: "1px solid rgba(0,204,255,0.2)" }}>
                       INCOME &amp; PLANNING SOPHISTICATION
                     </div>
                     {[
@@ -8389,7 +8389,7 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                       { l: "% with LTC insurance (age 50+)", v: `~${peers.pctWithLTC}%` },
                       { l: "% still carrying mortgage age 60+", v: `~${peers.pctMortgage60plus}%` },
                     ].map((row, i) => (
-                      <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "6px 10px", borderBottom: "1px solid rgba(26,58,42,0.3)", fontSize: 10 }}>
+                      <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "6px 10px", borderBottom: "1px solid rgba(26,58,42,0.3)", fontSize: 12 }}>
                         <span style={{ color: "var(--ink)" }}>{row.l}</span>
                         <span style={{ color: "var(--info)", fontWeight: 500 }}>{row.v}</span>
                       </div>
@@ -8397,14 +8397,14 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                   </div>
                 </div>
 
-                <div style={{ marginTop: 14, padding: "10px 12px", background: "rgba(0,204,255,0.04)", borderLeft: "2px solid var(--info)", fontSize: 10, color: "var(--ink)", lineHeight: 1.6 }}>
+                <div style={{ marginTop: 14, padding: "10px 12px", background: "rgba(0,204,255,0.04)", borderLeft: "2px solid var(--info)", fontSize: 12, color: "var(--ink)", lineHeight: 1.6 }}>
                   <span style={{ color: "var(--info)", fontWeight: 600 }}>Which benchmark? </span>
                   Two peer groups, two very different mirrors. Against <span style={{ fontWeight: 600 }}>all Americans 55–64</span> (Fed SCF — which includes the ~{peers.pctNothing}% with essentially nothing saved) your portfolio is{" "}
                   <span style={{ color: "var(--accent)", fontWeight: 600 }}>{(portfolioVal / peers.meanRetSavings).toFixed(1)}x the average</span>. Against <span style={{ fontWeight: 600 }}>people who actively save and track their money</span> (Empower dashboard users — the crowd you actually belong to) it's{" "}
                   <span style={{ color: "var(--accent)", fontWeight: 600 }}>{(portfolioVal / peers.engagedAvgSavings).toFixed(1)}x</span> — a tougher but more honest comparison. Averages run 2–3× medians because a small number of large balances pull them up; the median is what the middle saver has. Neither number alone decides readiness — <span style={{ fontWeight: 600 }}>your spending vs guaranteed income</span> does (see the Income and Withdrawal tabs).
                 </div>
 
-                <div style={{ marginTop: 12, padding: "10px 12px", background: "rgba(0,255,136,0.04)", borderLeft: "2px solid var(--accent)", fontSize: 10, color: "var(--ink)", lineHeight: 1.6 }}>
+                <div style={{ marginTop: 12, padding: "10px 12px", background: "rgba(0,255,136,0.04)", borderLeft: "2px solid var(--accent)", fontSize: 12, color: "var(--ink)", lineHeight: 1.6 }}>
                   <span style={{ color: "var(--accent)", fontWeight: 600 }}>Planning advantage: </span>
                   The overwhelming majority of people your age have no Roth conversion plan, no
                   guardrail framework, and no defined withdrawal sequencing. You have all three — documented, stress-tested,
@@ -8414,21 +8414,21 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
               {/* THINGS TO NOTE — universal risks, no ratings, no perfection implied */}
               <div className="card" style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 11, color: "var(--info)", fontWeight: 600, marginBottom: 4 }} className="lbl">Things to note — risks every plan carries</div>
-                <div style={{ fontSize: 9, color: "var(--ink-faint)", marginBottom: 12 }}>No ranking makes these disappear, and no fix makes a plan "perfect" — they come with retirement itself. Worth keeping in view; the app has tools for examining each.</div>
+                <div style={{ fontSize: 12, color: "var(--info)", fontWeight: 600, marginBottom: 4 }} className="lbl">Things to note — risks every plan carries</div>
+                <div style={{ fontSize: 12, color: "var(--ink-faint)", marginBottom: 12 }}>No ranking makes these disappear, and no fix makes a plan "perfect" — they come with retirement itself. Worth keeping in view; the app has tools for examining each.</div>
 
                 {planNotes.map((w, i) => (
                   <div key={i} style={{ padding: "10px 12px", borderBottom: "1px solid rgba(26,58,42,0.3)" }}>
-                    <div style={{ fontSize: 10, color: "var(--ink)", fontWeight: 600 }}>◈ {w.title}</div>
-                    <div style={{ fontSize: 9, color: "var(--ink-dim)", marginTop: 3, lineHeight: 1.5 }}>{w.detail}</div>
+                    <div style={{ fontSize: 12, color: "var(--ink)", fontWeight: 600 }}>◈ {w.title}</div>
+                    <div style={{ fontSize: 12, color: "var(--ink-dim)", marginTop: 3, lineHeight: 1.5 }}>{w.detail}</div>
                   </div>
                 ))}
               </div>
 
               {/* BOTTOM LINE */}
               <div className="card" style={{ borderColor: "var(--accent)", background: "rgba(0,255,136,0.04)" }}>
-                <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, marginBottom: 8 }}>◉ THE BOTTOM LINE</div>
-                <div style={{ fontSize: 10, color: "var(--ink)", lineHeight: 1.7 }}>
+                <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600, marginBottom: 8 }}>◉ THE BOTTOM LINE</div>
+                <div style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.7 }}>
                   If you walked into a room with 100 randomly selected {age}-year-old Americans, you would rank in the
                   <span style={{ color: "var(--accent)", fontWeight: 600 }}> top {avgPctile.toFixed(0)} </span>
                   by virtually every dimension that matters for retirement security. Your portfolio is roughly{" "}
@@ -8439,7 +8439,7 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                   defined withdrawal sequencing — that fewer than 10% of your peers possess. The remaining exposures are the ones
                   the Testing tabs quantify: the long-term-care tail and the sequence-of-returns window around the retirement date.
                 </div>
-                <div style={{ marginTop: 12, fontSize: 8, color: "var(--ink-faint)", fontStyle: "italic" }}>
+                <div style={{ marginTop: 12, fontSize: 12, color: "var(--ink-faint)", fontStyle: "italic" }}>
                   Peer benchmarks: Federal Reserve Survey of Consumer Finances 2022, EBRI Retirement Readiness Index,
                   SSA Annual Statistical Supplement, AALTCI Sourcebook, and Empower Personal
                   Dashboard (Mar 2026, engaged-saver balances — a self-selected platform sample, not a population
@@ -8453,31 +8453,31 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
         {/* ═══ GUARDRAILS ═══ */}
         {activeTab === "guardrails" && (
           <div className="card">
-            <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }}>GUYTON-KLINGER GUARDRAILS — RETIRE {retireYear}</div>
-            <div style={{ fontSize: 9, color: "var(--ink-faint)", marginBottom: 12 }}>
+            <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }}>GUYTON-KLINGER GUARDRAILS — RETIRE {retireYear}</div>
+            <div style={{ fontSize: 12, color: "var(--ink-faint)", marginBottom: 12 }}>
               Year-end balance vs planned path. Lower guardrail (80%) → cut spending 10%. Upper guardrail (120%) → increase 5% or redirect to Roth conversions.
             </div>
 
             <div style={{ marginBottom: 16, padding: 12, background: "rgba(0,255,136,0.03)", border: "1px solid var(--line)", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
               <div style={{ padding: "8px 10px", border: "1px solid var(--crit)", background: "rgba(255,68,68,0.05)" }}>
-                <div style={{ fontSize: 8, color: "var(--crit)", letterSpacing: 0.5 }} className="lbl">Lower guardrail</div>
+                <div style={{ fontSize: 11, color: "var(--crit)", letterSpacing: 0.5 }} className="lbl">Lower guardrail</div>
                 <div style={{ fontSize: 14, color: "var(--crit)", fontWeight: 600, marginTop: 2 }}>Balance &lt; 80% of Plan</div>
-                <div style={{ fontSize: 9, color: "var(--ink-dim)", marginTop: 2 }}>ACTION: Cut next year spending by 10%</div>
+                <div style={{ fontSize: 12, color: "var(--ink-dim)", marginTop: 2 }}>ACTION: Cut next year spending by 10%</div>
               </div>
               <div style={{ padding: "8px 10px", border: "1px solid var(--accent)", background: "rgba(0,255,136,0.05)" }}>
-                <div style={{ fontSize: 8, color: "var(--accent)", letterSpacing: 0.5 }} className="lbl">Normal range</div>
+                <div style={{ fontSize: 11, color: "var(--accent)", letterSpacing: 0.5 }} className="lbl">Normal range</div>
                 <div style={{ fontSize: 14, color: "var(--accent)", fontWeight: 600, marginTop: 2 }}>80% – 120% of Plan</div>
-                <div style={{ fontSize: 9, color: "var(--ink-dim)", marginTop: 2 }}>ACTION: Continue as planned (inflation-adjusted)</div>
+                <div style={{ fontSize: 12, color: "var(--ink-dim)", marginTop: 2 }}>ACTION: Continue as planned (inflation-adjusted)</div>
               </div>
               <div style={{ padding: "8px 10px", border: "1px solid var(--info)", background: "rgba(0,204,255,0.05)" }}>
-                <div style={{ fontSize: 8, color: "var(--info)", letterSpacing: 0.5 }} className="lbl">Upper guardrail</div>
+                <div style={{ fontSize: 11, color: "var(--info)", letterSpacing: 0.5 }} className="lbl">Upper guardrail</div>
                 <div style={{ fontSize: 14, color: "var(--info)", fontWeight: 600, marginTop: 2 }}>Balance &gt; 120% of Plan</div>
-                <div style={{ fontSize: 9, color: "var(--ink-dim)", marginTop: 2 }}>ACTION: Increase spending 5% or boost Roth conversions</div>
+                <div style={{ fontSize: 12, color: "var(--ink-dim)", marginTop: 2 }}>ACTION: Increase spending 5% or boost Roth conversions</div>
               </div>
             </div>
 
             {/* Table */}
-            <div className="grow" style={{ color: "var(--ink-faint)", fontSize: 8, fontWeight: 600, borderBottom: "2px solid var(--line)" }}>
+            <div className="grow" style={{ color: "var(--ink-faint)", fontSize: 12, fontWeight: 600, borderBottom: "2px solid var(--line)" }}>
               <div style={{ textAlign: "left" }} className="lbl">Year</div><div className="lbl">Planned</div><div style={{ color: "var(--crit)" }} className="lbl">Lower (80%)</div><div style={{ color: "var(--info)" }} className="lbl">Upper (120%)</div>
               <div style={{ color: config.color }} className="lbl">Median sim</div><div style={{ color: "var(--crit)" }}>10TH PCTL</div><div className="lbl">Swr %</div><div className="lbl">Status</div>
             </div>
@@ -8497,14 +8497,14 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                   <div style={{ color: config.color, fontWeight: 500 }}>{fmtM(row.median)}</div>
                   <div style={{ color: row.p10 < row.lower && row.retired ? "var(--crit)" : "var(--ink-dim)" }}>{fmtM(row.p10)}</div>
                   <div style={{ color: "var(--ink)" }}>{row.swr}%</div>
-                  <div style={{ color: statusColor, fontSize: 9, fontWeight: 600 }}>{status}</div>
+                  <div style={{ color: statusColor, fontSize: 12, fontWeight: 600 }}>{status}</div>
                 </div>
               );
             })}
 
             <div style={{ marginTop: 16, padding: 12, background: "rgba(0,255,136,0.03)", border: "1px solid var(--line)" }}>
-              <div style={{ fontSize: 9, color: "var(--ink-faint)", letterSpacing: 1, marginBottom: 6 }} className="lbl">Guardrail interpretation</div>
-              <div style={{ fontSize: 10, lineHeight: 1.7, color: "var(--ink)" }}>
+              <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 1, marginBottom: 6 }} className="lbl">Guardrail interpretation</div>
+              <div style={{ fontSize: 12, lineHeight: 1.7, color: "var(--ink)" }}>
                 The <span style={{ color: "var(--plan)" }}>planned path</span> assumes base-case returns (blended ~4.5% annually). Your <span style={{ color: config.color }}>median simulation</span> will differ because it averages across all 6 scenarios weighted by probability. Watch the <span style={{ color: "var(--crit)" }}>10th percentile</span> column — if it drops below the lower guardrail in year 1 of retirement, that's your sequence-of-returns risk materializing. The spending cut rule (10% reduction) prevents the spiral from accelerating, buying time for equities to recover.
               </div>
             </div>
@@ -8520,33 +8520,33 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
             <div>
               {/* ─── Header ─── */}
               <div className="card" style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600 }}>WITHDRAWAL STRATEGY — RETIRE {retireYear} → AGE-DEATH ({_horizonYr})</div>
-                <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 4 }}>
+                <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600 }}>WITHDRAWAL STRATEGY — RETIRE {retireYear} → AGE-DEATH ({_horizonYr})</div>
+                <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 4 }}>
                   Year-by-year operational schedule │ Account priority sequencing │ Three-strategy comparison
                 </div>
 
                 {/* Summary cards */}
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginTop: 14 }}>
                   <div style={{ padding: 10, background: "rgba(0,0,0,0.3)", border: "1px solid var(--line)" }}>
-                    <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Years modeled</div>
+                    <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Years modeled</div>
                     <div style={{ fontSize: 20, fontWeight: 600, color: "var(--ink)" }}>{schedule.length}</div>
                   </div>
                   <div style={{ padding: 10, background: "rgba(0,0,0,0.3)", border: "1px solid var(--line)" }}>
-                    <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Total withdrawn</div>
+                    <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Total withdrawn</div>
                     <div style={{ fontSize: 18, fontWeight: 600, color: "var(--warn)" }}>${(totalDrawn / 1e6).toFixed(2)}M</div>
                   </div>
                   <div style={{ padding: 10, background: "rgba(0,0,0,0.3)", border: "1px solid var(--line)" }}>
-                    <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Roth converted</div>
+                    <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Roth converted</div>
                     <div style={{ fontSize: 18, fontWeight: 600, color: "var(--info)" }}>${(totalConverted / 1000).toFixed(0)}K</div>
                   </div>
                   <div style={{ padding: 10, background: "rgba(0,0,0,0.3)", border: "1px solid var(--line)" }}>
-                    <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Avg wr (first 10 yr)</div>
+                    <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Avg wr (first 10 yr)</div>
                     <div style={{ fontSize: 20, fontWeight: 600, color: avgWR < 4 ? "var(--accent)" : avgWR < 5 ? "var(--warn)" : "var(--crit)" }}>{avgWR.toFixed(1)}%</div>
                   </div>
                 </div>
 
                 {/* Legend */}
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 16, fontSize: 8, color: "var(--ink-dim)", marginTop: 12, padding: "6px 10px", border: "1px solid rgba(58,122,90,0.3)", background: "rgba(0,0,0,0.2)" }}>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 16, fontSize: 12, color: "var(--ink-dim)", marginTop: 12, padding: "6px 10px", border: "1px solid rgba(58,122,90,0.3)", background: "rgba(0,0,0,0.2)" }}>
                   <span style={{ color: "var(--ink-faint)", letterSpacing: 2, fontWeight: 600 }} className="lbl">Legend</span>
                   <span><span style={{ color: "var(--crit)", marginRight: 4 }}>■</span>SS gap (Spouse A SS not yet flowing)</span>
                   <span><span style={{ color: "var(--accent)", marginRight: 4 }}>■</span>All income active</span>
@@ -8556,8 +8556,8 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
               {/* ─── SECTION A: Year-by-year schedule ─── */}
               <div className="card" style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }} className="lbl">Section A — year-by-year operational schedule</div>
-                <div style={{ fontSize: 9, color: "var(--ink-faint)", marginBottom: 10 }}>
+                <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }} className="lbl">Section A — year-by-year operational schedule</div>
+                <div style={{ fontSize: 12, color: "var(--ink-faint)", marginBottom: 10 }}>
                   Sleeve sequencing (cash → bonds → equity → hedge). RMDs treated as forced trad withdrawals starting at RMD age ({rmdStartAge(_dobAYr)} — SECURE 2.0). <span style={{ color: "var(--warn)" }}>From v5.35 that is how they are actually sourced:</span> the RMD is taken from the Traditional buckets, or — for a named IRA you entered under Other accounts — from that account, and the taxable sleeve then funds only what the RMD did not already cover. Earlier builds sold brokerage to satisfy the RMD and handed the same cash straight back, which left too much compounding in the tax-deferred sleeve and counted those dollars twice in the draw total. Ending balances fall and Total withdrawn falls — <span style={{ color: "var(--warn)" }}>if your numbers moved, that is why.</span> Total withdrawn counts every dollar that left an account, including forced RMD cash the plan did not need to spend, which lands back in the taxable account — it is not a measure of what you spent.
                   Inflation {(_wInfl * 100).toFixed(1)}%/yr (scenario-weighted) applied to expenses, with the same COLA on SS; the pension stays flat (no COLA). Growth rates are the probability-weighted expected returns under the
                   active <span style={{ color: PROB_PRESETS[scenarioPreset].color, fontWeight: 600 }}>{PROB_PRESETS[scenarioPreset].label}</span> scenario
@@ -8565,15 +8565,15 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                   The <span style={{ color: "var(--info)" }}>Conv</span> column reflects the annual Roth conversion amount set by the slider on the Roth tab (currently <span style={{ color: "var(--info)" }}>${(rothAmount / 1000).toFixed(0)}K/yr</span>).
                   The <span style={{ color: "var(--accent)" }}>Work</span> column itemizes post-retirement job income (from My Data → Other Income Streams) separately from the Guaranteed floor — both offset the portfolio draw, so Draw Need = Expenses − Guaranteed − Work.
                 </div>
-                <div style={{ fontSize: 9, color: "var(--warn)", marginBottom: 10, padding: "5px 8px", background: "rgba(255,170,0,0.05)", borderLeft: "2px solid var(--warn)", lineHeight: 1.5 }}>
+                <div style={{ fontSize: 12, color: "var(--warn)", marginBottom: 10, padding: "5px 8px", background: "rgba(255,170,0,0.05)", borderLeft: "2px solid var(--warn)", lineHeight: 1.5 }}>
                   ⚠ This is a single deterministic path using the scenario's <em>average</em> return every year — so under BASE/BEAR it will look flat or declining because it bakes in average crisis frequency into every year. It deliberately matches the Monte Carlo's center of mass, NOT a "normal year." For the distribution of outcomes, see the Monte Carlo and Stress tabs.
                 </div>
 
                 <div style={{ overflowX: "auto" }}>
-                  <div style={{ display: "grid", gridTemplateColumns: "55px 60px 80px 65px 80px 75px 70px 80px 70px 60px 90px", gap: 0, fontSize: 9 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "77px 84px 112px 91px 112px 105px 98px 112px 98px 84px 126px", gap: 0, fontSize: 12 }}>
                     {/* Header row */}
                     {["Year", "Age A/B", "Guaranteed", "Work", "Expenses", "Draw Need", "RMD", "From Source(s)", "Conv", "Bracket", "EOY Portfolio"].map((h, i) => (
-                      <div key={i} style={{ padding: "6px 8px", background: "rgba(0,255,136,0.05)", border: "1px solid var(--line)", color: "var(--ink-dim)", letterSpacing: 0.5, fontSize: 8, fontWeight: 600 }}>{h}</div>
+                      <div key={i} style={{ padding: "6px 8px", background: "rgba(0,255,136,0.05)", border: "1px solid var(--line)", color: "var(--ink-dim)", letterSpacing: 0.5, fontSize: 11, fontWeight: 600 }}>{h}</div>
                     ))}
                     {/* Data rows */}
                     {schedule.map((r, i) => {
@@ -8590,13 +8590,13 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                         <div key={`y${i}`} style={{ padding: "5px 8px", borderBottom: "1px solid rgba(26,58,42,0.3)", color: "var(--ink)", fontWeight: 500, display: "flex", alignItems: "center", gap: 4 }}>
                           <span style={{ width: 6, height: 6, background: dotColor, display: "inline-block", borderRadius: "50%" }}></span>{r.yr}
                         </div>,
-                        <div key={`a${i}`} style={{ padding: "5px 8px", borderBottom: "1px solid rgba(26,58,42,0.3)", color: "var(--ink-dim)", fontSize: 8 }}>{r.ageA}/{r.ageB}</div>,
+                        <div key={`a${i}`} style={{ padding: "5px 8px", borderBottom: "1px solid rgba(26,58,42,0.3)", color: "var(--ink-dim)", fontSize: 12 }}>{r.ageA}/{r.ageB}</div>,
                         <div key={`g${i}`} style={{ padding: "5px 8px", borderBottom: "1px solid rgba(26,58,42,0.3)", color: "var(--info)" }}>${Math.round((r.guaranteed - (r.workAll_y || 0))/1000)}K</div>,
                         <div key={`w${i}`} style={{ padding: "5px 8px", borderBottom: "1px solid rgba(26,58,42,0.3)", color: r.workAll_y > 0 ? "var(--accent)" : "var(--ink-faint)" }}>{r.workAll_y > 0 ? `$${Math.round(r.workAll_y/1000)}K` : "—"}</div>,
                         <div key={`e${i}`} style={{ padding: "5px 8px", borderBottom: "1px solid rgba(26,58,42,0.3)", color: "var(--ink)" }}>${Math.round(r.exp_y/1000)}K</div>,
                         <div key={`d${i}`} style={{ padding: "5px 8px", borderBottom: "1px solid rgba(26,58,42,0.3)", color: r.drawNeeded > 0 ? "var(--warn)" : "var(--ink-faint)" }}>${Math.round(r.drawNeeded/1000)}K</div>,
                         <div key={`r${i}`} style={{ padding: "5px 8px", borderBottom: "1px solid rgba(26,58,42,0.3)", color: r.rmd_y > 0 ? "var(--crit)" : "var(--ink-faint)" }}>{r.rmd_y > 0 ? `$${Math.round(r.rmd_y/1000)}K` : "—"}</div>,
-                        <div key={`b${i}`} style={{ padding: "5px 8px", borderBottom: "1px solid rgba(26,58,42,0.3)", color: "var(--ink)", fontSize: 8 }}>{fromStr}</div>,
+                        <div key={`b${i}`} style={{ padding: "5px 8px", borderBottom: "1px solid rgba(26,58,42,0.3)", color: "var(--ink)", fontSize: 12 }}>{fromStr}</div>,
                         <div key={`c${i}`} style={{ padding: "5px 8px", borderBottom: "1px solid rgba(26,58,42,0.3)", color: r.conv_y > 0 ? "var(--info)" : "var(--ink-faint)" }}>{r.conv_y > 0 ? `$${Math.round(r.conv_y/1000)}K` : "—"}</div>,
                         <div key={`br${i}`} style={{ padding: "5px 8px", borderBottom: "1px solid rgba(26,58,42,0.3)", color: r.bracket >= 24 ? "var(--crit)" : r.bracket >= 22 ? "var(--warn)" : "var(--accent)", fontWeight: 500 }}>{r.bracket}%</div>,
                         <div key={`p${i}`} style={{ padding: "5px 8px", borderBottom: "1px solid rgba(26,58,42,0.3)", color: "var(--ink)", fontWeight: 500 }}>${(r.portfolioTotal/1e6).toFixed(2)}M</div>,
@@ -8608,8 +8608,8 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
               {/* ─── SECTION B: Account priority sequencing ─── */}
               <div className="card" style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }} className="lbl">Section B — account priority sequencing</div>
-                <div style={{ fontSize: 9, color: "var(--ink-faint)", marginBottom: 12 }}>
+                <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }} className="lbl">Section B — account priority sequencing</div>
+                <div style={{ fontSize: 12, color: "var(--ink-faint)", marginBottom: 12 }}>
                   Which account type to draw from first, second, third. The order is tax-aware — higher-tax assets get preserved when possible.
                 </div>
 
@@ -8618,9 +8618,9 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                   <div style={{ padding: 12, border: "2px solid var(--accent)", background: "rgba(0,255,136,0.04)" }}>
                     <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 8 }}>
                       <span style={{ fontSize: 24, fontWeight: 700, color: "var(--accent)" }}>1</span>
-                      <span style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600 }} className="lbl">Taxable / brokerage</span>
+                      <span style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600 }} className="lbl">Taxable / brokerage</span>
                     </div>
-                    <div style={{ fontSize: 9, color: "var(--ink)", lineHeight: 1.7 }}>
+                    <div style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.7 }}>
                       Emergency Fund, taxable brokerage, and everything you entered under Other accounts. From v5.26 each of those carries its own tax type: Traditional and Annuity money is taxed as ordinary income as it is spent, and Traditional money now counts toward your RMD. Starting balance: <span style={{ color: "var(--info)" }}>${(_taxInit / 1000).toFixed(0)}K</span>.<br/>
                       <span style={{ color: "var(--ink-faint)" }}>Why first:</span> Drawing it down early leaves Trad/Roth tax-deferred growth running longer.<br/>
                       <span style={{ color: "var(--ink-faint)" }}>Tax treatment:</span> Taxable and HSA balances here are spent tax-free, as before. <strong>Traditional and Annuity balances are taxed as ordinary income as they are spent</strong>, and Traditional balances count toward your RMD. Until v5.26 this whole pool was modelled as already-taxed cash, which made the plan look better than it was — <span style={{ color: "var(--warn)" }}>if your numbers moved, that is why.</span> One simplification remains: the tax is applied in proportion to what the pool holds, rather than by draining one type before another.<br/>
@@ -8632,9 +8632,9 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                   <div style={{ padding: 12, border: "2px solid var(--warn)", background: "rgba(255,170,0,0.04)" }}>
                     <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 8 }}>
                       <span style={{ fontSize: 24, fontWeight: 700, color: "var(--warn)" }}>2</span>
-                      <span style={{ fontSize: 11, color: "var(--warn)", fontWeight: 600 }}>TRADITIONAL 401(k) / IRA</span>
+                      <span style={{ fontSize: 12, color: "var(--warn)", fontWeight: 600 }}>TRADITIONAL 401(k) / IRA</span>
                     </div>
-                    <div style={{ fontSize: 9, color: "var(--ink)", lineHeight: 1.7 }}>
+                    <div style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.7 }}>
                       Pre-tax retirement accounts. Starting balance: <span style={{ color: "var(--info)" }}>${(_tradInit / 1000).toFixed(0)}K</span>.<br/>
                       <span style={{ color: "var(--ink-faint)" }}>Why second:</span> Withdrawals taxed as ordinary income. Fill 12%/22% brackets opportunistically. <span style={{ color: "var(--warn)" }}>RMDs force this starting age {rmdStartAge(_dobAYr)}</span> whether you need it or not.<br/>
                       <span style={{ color: "var(--ink-faint)" }}>Years active:</span> Roth conversions {retireYear}–{_ladderEnd}, then RMDs from {_rmdStartYr}.
@@ -8645,9 +8645,9 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                   <div style={{ padding: 12, border: "2px solid var(--info)", background: "rgba(0,204,255,0.04)" }}>
                     <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 8 }}>
                       <span style={{ fontSize: 24, fontWeight: 700, color: "var(--info)" }}>3</span>
-                      <span style={{ fontSize: 11, color: "var(--info)", fontWeight: 600 }}>ROTH 401(k) / IRA</span>
+                      <span style={{ fontSize: 12, color: "var(--info)", fontWeight: 600 }}>ROTH 401(k) / IRA</span>
                     </div>
-                    <div style={{ fontSize: 9, color: "var(--ink)", lineHeight: 1.7 }}>
+                    <div style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.7 }}>
                       After-tax retirement accounts. Starting balance: <span style={{ color: "var(--info)" }}>${(_rothInit / 1000).toFixed(0)}K</span>, growing via conversions.<br/>
                       <span style={{ color: "var(--ink-faint)" }}>Why last:</span> Tax-free growth. <span style={{ color: "var(--accent)" }}>No RMDs.</span> Best inheritance vehicle (10-yr rule for non-spouse heirs).<br/>
                       <span style={{ color: "var(--ink-faint)" }}>Years active:</span> Reserve for late-life surge spending and legacy. Tap only when other accounts depleted or tax-bracket-driven.
@@ -8657,8 +8657,8 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
                 {/* Order-of-operations bullet logic */}
                 <div style={{ marginTop: 14, padding: 12, background: "rgba(0,0,0,0.25)", border: "1px solid var(--line)" }}>
-                  <div style={{ fontSize: 9, color: "var(--ink-faint)", letterSpacing: 1, marginBottom: 8 }} className="lbl">Annual withdrawal order of operations</div>
-                  <div style={{ fontSize: 9, color: "var(--ink)", lineHeight: 1.8 }}>
+                  <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 1, marginBottom: 8 }} className="lbl">Annual withdrawal order of operations</div>
+                  <div style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.8 }}>
                     <span style={{ color: "var(--ink-dim)" }} className="lbl">Step 1:</span> Take Social Security + pension + Spouse B work income — guaranteed floor.<br/>
                     <span style={{ color: "var(--ink-dim)" }} className="lbl">Step 2:</span> If age ≥ {rmdStartAge(_dobAYr)}, take RMD from Traditional (forced, taxed as ordinary income).<br/>
                     <span style={{ color: "var(--ink-dim)" }} className="lbl">Step 3:</span> Compute shortfall = expenses − step 1 income − RMD (if any).<br/>
@@ -8673,12 +8673,12 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
               {/* ─── SECTION C: Three-strategy comparison ─── */}
               <div className="card" style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }} className="lbl">Section c — strategy comparison</div>
-                <div style={{ fontSize: 9, color: "var(--ink-faint)", marginBottom: 12 }}>
+                <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }} className="lbl">Section c — strategy comparison</div>
+                <div style={{ fontSize: 12, color: "var(--ink-faint)", marginBottom: 12 }}>
                   Three viable withdrawal philosophies. Each makes different trade-offs between simplicity, tax efficiency, and sequence-risk protection.
                 </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "140px repeat(3, 1fr)", gap: 0, fontSize: 9 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "140px repeat(3, 1fr)", gap: 0, fontSize: 12 }}>
                   {/* Strategy column headers */}
                   <div style={{ padding: 10, background: "rgba(0,255,136,0.05)", borderBottom: "2px solid var(--line)" }}></div>
                   <div style={{ padding: 10, background: "rgba(0,255,136,0.05)", borderBottom: "2px solid var(--accent)", color: "var(--accent)", fontWeight: 600, textAlign: "center" }} className="lbl">Cash-first</div>
@@ -8736,14 +8736,14 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                       floor: "Depends on conversion overlay; default = cash-first profile",
                     },
                   ].map((row, ri) => [
-                    <div key={`l${ri}`} style={{ padding: "8px 10px", borderBottom: "1px solid rgba(26,58,42,0.3)", color: "var(--ink-dim)", fontSize: 9, fontWeight: 500 }}>{row.label}</div>,
+                    <div key={`l${ri}`} style={{ padding: "8px 10px", borderBottom: "1px solid rgba(26,58,42,0.3)", color: "var(--ink-dim)", fontSize: 12, fontWeight: 500 }}>{row.label}</div>,
                     <div key={`b${ri}`} style={{ padding: "8px 10px", borderBottom: "1px solid rgba(26,58,42,0.3)", color: "var(--ink)", lineHeight: 1.5 }}>{row.bucket}</div>,
                     <div key={`t${ri}`} style={{ padding: "8px 10px", borderBottom: "1px solid rgba(26,58,42,0.3)", color: "var(--ink)", lineHeight: 1.5 }}>{row.tax}</div>,
                     <div key={`f${ri}`} style={{ padding: "8px 10px", borderBottom: "1px solid rgba(26,58,42,0.3)", color: "var(--ink)", lineHeight: 1.5 }}>{row.floor}</div>,
                   ]).flat()}
                 </div>
 
-                <div style={{ marginTop: 14, padding: 12, background: "rgba(0,255,136,0.04)", borderLeft: "2px solid var(--accent)", fontSize: 10, color: "var(--ink)", lineHeight: 1.7 }}>
+                <div style={{ marginTop: 14, padding: 12, background: "rgba(0,255,136,0.04)", borderLeft: "2px solid var(--accent)", fontSize: 12, color: "var(--ink)", lineHeight: 1.7 }}>
                   <span style={{ color: "var(--accent)", fontWeight: 600 }}>Recommendation: </span>
                   Most retirees blend cash-first sequencing (for psychological stability) with a tax-optimization overlay (Roth conversions during the {retireYear}–{_ladderEnd} window) and guardrails as a circuit breaker.
                   The schedule in Section A above models exactly this blend. The trade-off you control is the conversion size — larger conversions push you toward "tax-optimized," smaller ones toward "pure cash-first."
@@ -8751,7 +8751,7 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
               </div>
 
               {/* Footer caveat */}
-              <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 8, padding: "8px 12px", fontStyle: "italic", lineHeight: 1.6, textAlign: "center" }}>
+              <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 8, padding: "8px 12px", fontStyle: "italic", lineHeight: 1.6, textAlign: "center" }}>
                 Schedule is deterministic (single path) using the active scenario's probability-weighted average return each year. For the full distribution of outcomes across return scenarios, see the Monte Carlo and Stress tabs.
                 Tax bracket estimates are approximate — actual tax planning requires a CPA. Growth rates track the selected BASE/BEAR/BULL scenario; the MC tab models the full distribution rather than just its center.
               </div>
@@ -9121,8 +9121,8 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
             <div className="card">
               {/* HOW THIS TAB FITS TOGETHER — the connecting narrative laymen were missing. */}
               <div style={{ padding: "10px 12px", marginBottom: 12, background: "rgba(0,255,136,0.04)", border: "1px solid var(--accent)", borderRadius: 3 }}>
-                <div style={{ fontSize: 9, color: "var(--accent)", letterSpacing: 1, fontWeight: 700, marginBottom: 4 }} className="lbl">How this tab fits together (30 seconds)</div>
-                <div style={{ fontSize: 9, color: "var(--ink)", lineHeight: 1.7 }}>
+                <div style={{ fontSize: 11, color: "var(--accent)", letterSpacing: 1, fontWeight: 700, marginBottom: 4 }} className="lbl">How this tab fits together (30 seconds)</div>
+                <div style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.7 }}>
                   A Roth conversion means moving money from your Traditional (pre-tax) accounts into your Roth — paying income tax now so that money and its growth are never taxed again. Whether that trade wins depends on <em>how much</em> you convert and <em>where the tax money comes from</em>. This tab is four steps:
                   {" "}<strong>① the slider</strong> is your what-if dial — "what if I converted $X per year?" — and everything below reads it <em>live</em>;
                   {" "}<strong>② the funding selector</strong> tells every calculation how you'd pay the tax bill;
@@ -9133,17 +9133,17 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
               {/* QCD pointer — people look for QCDs here; the modeler lives on the Taxes tab because
                   QCDs are a Traditional-IRA tool. From a Roth they're technically permitted but pointless:
                   qualified Roth withdrawals are already tax-free and Roth IRAs have no lifetime RMDs to offset. */}
-              <div style={{ fontSize: 8, color: "var(--ink-faint)", padding: "6px 10px", marginBottom: 10, background: "rgba(0,204,255,0.04)", borderLeft: "2px solid var(--info)" }}>
+              <div style={{ fontSize: 12, color: "var(--ink-faint)", padding: "6px 10px", marginBottom: 10, background: "rgba(0,204,255,0.04)", borderLeft: "2px solid var(--info)" }}>
                 Looking for <span style={{ color: "var(--info)", fontWeight: 600 }}>QCDs</span> (Qualified Charitable Distributions)? The modeler lives on the <span style={{ color: "var(--info)", fontWeight: 600 }}>Taxes</span> tab — QCDs come from <strong>Traditional</strong> IRAs (age 70½+), where they're excluded from income, count toward RMDs, and lower MAGI. From a Roth they're technically permitted but provide no benefit: qualified Roth withdrawals are already tax-free, and Roth IRAs have no lifetime RMDs to offset.
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
                 <div>
-                  <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600 }}>ROTH CONVERSION STRATEGY — {_ladderStart}–{_ladderEnd}</div>
-                  <div style={{ fontSize: 9, color: "var(--ink-faint)" }}>Tax brackets (current law) │ State tax per master prompt │ IRMAA 2-year lookback │ RMDs at {PLAN_TIMELINE.rmdAgeA || 75} ({_ladderEnd + 1})</div>
+                  <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600 }}>ROTH CONVERSION STRATEGY — {_ladderStart}–{_ladderEnd}</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-faint)" }}>Tax brackets (current law) │ State tax per master prompt │ IRMAA 2-year lookback │ RMDs at {PLAN_TIMELINE.rmdAgeA || 75} ({_ladderEnd + 1})</div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <span style={{ fontSize: 8, color: "var(--accent)", border: "1px solid var(--accent)", padding: "2px 6px", borderRadius: 3, letterSpacing: 0.5, fontWeight: 700 }} className="lbl">Step 1 · set your what-if</span>
-                  <span style={{ fontSize: 9, color: "var(--ink-faint)" }} className="lbl">Annual conversion:</span>
+                  <span style={{ fontSize: 11, color: "var(--accent)", border: "1px solid var(--accent)", padding: "2px 6px", borderRadius: 3, letterSpacing: 0.5, fontWeight: 700 }} className="lbl">Step 1 · set your what-if</span>
+                  <span style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Annual conversion:</span>
                   <input type="range" min={0} max={400000} step={5000} value={rothAmount}
                     onChange={e => setRothAmount(Number(e.target.value))}
                     style={{ width: 140, accentColor: "var(--accent)" }} />
@@ -9154,29 +9154,29 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
               {/* Parameters box */}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 14 }}>
                 <div style={{ padding: "8px 10px", border: "1px solid var(--line)", background: "rgba(0,255,136,0.03)" }}>
-                  <div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Traditional bal (now)</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Traditional bal (now)</div>
                   <div style={{ fontSize: 14, fontWeight: 600, color: "var(--warn)" }}>${Math.round(_tradFromPortfolio).toLocaleString()}</div>
                 </div>
                 <div style={{ padding: "8px 10px", border: "1px solid var(--line)", background: "rgba(0,255,136,0.03)" }}>
-                  <div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Roth bal (now)</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Roth bal (now)</div>
                   <div style={{ fontSize: 14, fontWeight: 600, color: "var(--accent)" }}>${Math.round(_rothFromPortfolio).toLocaleString()}</div>
                 </div>
                 <div style={{ padding: "8px 10px", border: "1px solid var(--line)", background: "rgba(0,255,136,0.03)" }}>
-                  <div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Total 9-YR conversion</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Total 9-YR conversion</div>
                   <div style={{ fontSize: 14, fontWeight: 600, color: "var(--info)" }}>{fmtM(totalConverted)}</div>
                 </div>
                 <div style={{ padding: "8px 10px", border: "1px solid var(--line)", background: "rgba(0,255,136,0.03)" }}>
-                  <div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Total tax cost</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Total tax cost</div>
                   <div style={{ fontSize: 14, fontWeight: 600, color: "var(--crit)" }}>${totalTax.toLocaleString()}</div>
                 </div>
               </div>
 
               {/* Year-by-year table */}
               <div style={{ overflowX: "auto" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "52px 72px 68px 52px 72px 80px 68px 72px 72px", gap: 0, fontSize: 9, minWidth: 650 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "73px 101px 96px 73px 101px 112px 96px 101px 101px", gap: 0, fontSize: 12, minWidth: 650 }}>
                   {/* Header */}
                   {["YEAR", "CONVERT", "TAXABLE", "RATE", "FED TAX", "MAGI", "IRMAA?", "TRAD BAL", "ROTH BAL"].map(h => (
-                    <div key={h} style={{ padding: "7px 5px", borderBottom: "2px solid var(--line)", color: "var(--ink-faint)", fontSize: 8, fontWeight: 600, textAlign: "right" }}>{h}</div>
+                    <div key={h} style={{ padding: "7px 5px", borderBottom: "2px solid var(--line)", color: "var(--ink-faint)", fontSize: 12, fontWeight: 600, textAlign: "right" }}>{h}</div>
                   ))}
                   {/* Rows */}
                   {rows.map((r, i) => {
@@ -9200,7 +9200,7 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
               {/* Bracket utilization visual */}
               <div style={{ marginTop: 14, padding: 12, background: "rgba(0,255,136,0.03)", border: "1px solid var(--line)" }}>
-                <div style={{ fontSize: 9, color: "var(--ink-faint)", letterSpacing: 1, marginBottom: 8 }}>BRACKET UTILIZATION — {rows[0]?.year || PLAN_TIMELINE.targetRetireYear}</div>
+                <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 1, marginBottom: 8 }}>BRACKET UTILIZATION — {rows[0]?.year || PLAN_TIMELINE.targetRetireYear}</div>
                 <div style={{ display: "flex", gap: 2, height: 24, borderRadius: 2, overflow: "hidden" }}>
                   {(() => {
                     const ti = rows[0]?.taxableIncome || 0;
@@ -9217,13 +9217,13 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                       <div key={i} style={{ position: "relative", height: "100%" }}>
                         <div style={{ height: "100%", width: Math.max(2, (s.max / totalMax) * 500), background: "rgba(26,58,42,0.5)", position: "relative" }}>
                           <div style={{ height: "100%", width: `${(s.width / s.max) * 100}%`, background: s.color, opacity: 0.6 }} />
-                          <span style={{ position: "absolute", top: 5, left: 4, fontSize: 8, color: "var(--ink)", fontWeight: 600 }}>{s.label}</span>
+                          <span style={{ position: "absolute", top: 5, left: 4, fontSize: 12, color: "var(--ink)", fontWeight: 600 }}>{s.label}</span>
                         </div>
                       </div>
                     ));
                   })()}
                   <div style={{ flex: 1, background: "rgba(26,58,42,0.3)", display: "flex", alignItems: "center", paddingLeft: 6 }}>
-                    <span style={{ fontSize: 8, color: "var(--ink-faint)" }}>HEADROOM: ${((rows[0]?.headroom24 || 0) / 1000).toFixed(0)}K to 24% cap</span>
+                    <span style={{ fontSize: 12, color: "var(--ink-faint)" }}>HEADROOM: ${((rows[0]?.headroom24 || 0) / 1000).toFixed(0)}K to 24% cap</span>
                   </div>
                 </div>
               </div>
@@ -9231,27 +9231,27 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
               {/* RMD Impact & Break-even */}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginTop: 14 }}>
                 <div style={{ padding: "10px 12px", border: "1px solid var(--line)", background: "rgba(0,255,136,0.03)" }}>
-                  <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5 }}>FIRST-YEAR RMDs — NO CONVERSION (each at their own age)</div>
-                  <div style={{ fontSize: 15, fontWeight: 600, color: "var(--crit)", marginTop: 4 }}>{(_tlRoth.nameA || "A").split(" ")[0]}: ${_perRmd.A.noConv.toLocaleString()} <span style={{ fontSize: 9, color: "var(--ink-dim)", fontWeight: 400 }}>at {_perRmd.A.age} ({_perRmd.A.yr})</span></div>
-                  {_perRmd.B && <div style={{ fontSize: 15, fontWeight: 600, color: "var(--crit)", marginTop: 2 }}>{(_tlRoth.nameB || "B").split(" ")[0]}: ${_perRmd.B.noConv.toLocaleString()} <span style={{ fontSize: 9, color: "var(--ink-dim)", fontWeight: 400 }}>at {_perRmd.B.age} ({_perRmd.B.yr})</span></div>}
-                  <div style={{ fontSize: 8, color: "var(--ink-dim)", marginTop: 4 }}>Forced taxable income on each person's own balance — likely pushes into 24%+ and triggers IRMAA</div>
+                  <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5 }}>FIRST-YEAR RMDs — NO CONVERSION (each at their own age)</div>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: "var(--crit)", marginTop: 4 }}>{(_tlRoth.nameA || "A").split(" ")[0]}: ${_perRmd.A.noConv.toLocaleString()} <span style={{ fontSize: 12, color: "var(--ink-dim)", fontWeight: 400 }}>at {_perRmd.A.age} ({_perRmd.A.yr})</span></div>
+                  {_perRmd.B && <div style={{ fontSize: 15, fontWeight: 600, color: "var(--crit)", marginTop: 2 }}>{(_tlRoth.nameB || "B").split(" ")[0]}: ${_perRmd.B.noConv.toLocaleString()} <span style={{ fontSize: 12, color: "var(--ink-dim)", fontWeight: 400 }}>at {_perRmd.B.age} ({_perRmd.B.yr})</span></div>}
+                  <div style={{ fontSize: 12, color: "var(--ink-dim)", marginTop: 4 }}>Forced taxable income on each person's own balance — likely pushes into 24%+ and triggers IRMAA</div>
                 </div>
                 <div style={{ padding: "10px 12px", border: "1px solid var(--accent)", background: "rgba(0,255,136,0.03)" }}>
-                  <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5 }}>WITH ${(rothAmount / 1000).toFixed(0)}K/YR CONVERSION</div>
-                  <div style={{ fontSize: 15, fontWeight: 600, color: "var(--accent)", marginTop: 4 }}>{(_tlRoth.nameA || "A").split(" ")[0]}: ${_perRmd.A.withConv.toLocaleString()} <span style={{ fontSize: 9, color: "var(--ink-dim)", fontWeight: 400 }}>at {_perRmd.A.age} ({_perRmd.A.yr})</span></div>
-                  {_perRmd.B && <div style={{ fontSize: 15, fontWeight: 600, color: "var(--accent)", marginTop: 2 }}>{(_tlRoth.nameB || "B").split(" ")[0]}: ${_perRmd.B.withConv.toLocaleString()} <span style={{ fontSize: 9, color: "var(--ink-dim)", fontWeight: 400 }}>at {_perRmd.B.age} ({_perRmd.B.yr})</span></div>}
-                  <div style={{ fontSize: 8, color: "var(--accent)", marginTop: 4 }}>Combined RMDs reduced by ${rmdReduction.toLocaleString()}/yr</div>
+                  <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5 }}>WITH ${(rothAmount / 1000).toFixed(0)}K/YR CONVERSION</div>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: "var(--accent)", marginTop: 4 }}>{(_tlRoth.nameA || "A").split(" ")[0]}: ${_perRmd.A.withConv.toLocaleString()} <span style={{ fontSize: 12, color: "var(--ink-dim)", fontWeight: 400 }}>at {_perRmd.A.age} ({_perRmd.A.yr})</span></div>
+                  {_perRmd.B && <div style={{ fontSize: 15, fontWeight: 600, color: "var(--accent)", marginTop: 2 }}>{(_tlRoth.nameB || "B").split(" ")[0]}: ${_perRmd.B.withConv.toLocaleString()} <span style={{ fontSize: 12, color: "var(--ink-dim)", fontWeight: 400 }}>at {_perRmd.B.age} ({_perRmd.B.yr})</span></div>}
+                  <div style={{ fontSize: 12, color: "var(--accent)", marginTop: 4 }}>Combined RMDs reduced by ${rmdReduction.toLocaleString()}/yr</div>
                 </div>
                 <div style={{ padding: "10px 12px", border: "1px solid var(--line)", background: "rgba(0,255,136,0.03)" }}>
-                  <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Break-even</div>
-                  <div style={{ fontSize: 9, color: "var(--ink-dim)", marginTop: 6, lineHeight: 1.5 }}>Moved below — the WEALTH CROSSOVER card under the strategy comparator now computes this from the full 30-year engine (discounted, opportunity cost included) instead of a flat-rate shortcut.</div>
+                  <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Break-even</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-dim)", marginTop: 6, lineHeight: 1.5 }}>Moved below — the WEALTH CROSSOVER card under the strategy comparator now computes this from the full 30-year engine (discounted, opportunity cost included) instead of a flat-rate shortcut.</div>
                 </div>
               </div>
 
               {/* Key constraints */}
               <div style={{ marginTop: 14, padding: 12, background: "rgba(0,255,136,0.03)", border: "1px solid var(--line)" }}>
-                <div style={{ fontSize: 9, color: "var(--ink-faint)", letterSpacing: 1, marginBottom: 6 }} className="lbl">Constraints & rules</div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, fontSize: 9 }}>
+                <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 1, marginBottom: 6 }} className="lbl">Constraints & rules</div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, fontSize: 12 }}>
                   <div>
                     <div style={{ color: "var(--accent)", fontWeight: 600, marginBottom: 4 }} className="lbl">Tax rules applied</div>
                     <div style={{ color: "var(--ink)", lineHeight: 1.6 }}>
@@ -9279,17 +9279,17 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
               {/* IRMAA calendar */}
               <div style={{ marginTop: 14, padding: 12, background: "rgba(0,255,136,0.03)", border: "1px solid var(--line)" }}>
-                <div style={{ fontSize: 9, color: "var(--ink-faint)", letterSpacing: 1, marginBottom: 6 }} className="lbl">IRMAA lookback calendar</div>
+                <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 1, marginBottom: 6 }} className="lbl">IRMAA lookback calendar</div>
                 <div style={{ overflowX: "auto" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(9, 1fr)", gap: 4, fontSize: 8 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(9, 1fr)", gap: 4, fontSize: 12 }}>
                   {rows.map((r, i) => (
                     <div key={i} style={{ padding: "6px 4px", border: `1px solid ${r.irmaaRisk ? "var(--crit)" : "var(--line)"}`, textAlign: "center", background: r.irmaaRisk ? "rgba(255,68,68,0.06)" : "transparent" }}>
-                      <div style={{ color: "var(--ink-faint)", fontSize: 8 }} className="lbl">Convert</div>
+                      <div style={{ color: "var(--ink-faint)", fontSize: 12 }} className="lbl">Convert</div>
                       <div style={{ color: "var(--ink)", fontWeight: 600 }}>{r.year}</div>
-                      <div style={{ color: "var(--ink-faint)", fontSize: 8, marginTop: 4 }} className="lbl">IRMAA hit</div>
+                      <div style={{ color: "var(--ink-faint)", fontSize: 12, marginTop: 4 }} className="lbl">IRMAA hit</div>
                       <div style={{ color: r.irmaaRisk ? "var(--crit)" : "var(--accent)", fontWeight: 600 }}>{r.irmaaYear}</div>
-                      <div style={{ fontSize: 8, color: "var(--ink-faint)", marginTop: 2 }}>MAGI ${(r.magi / 1000).toFixed(0)}K</div>
-                      <div style={{ fontSize: 8, color: "var(--ink-faint)" }}>Thr ${(r.irmaaThresholdLookback / 1000).toFixed(0)}K</div>
+                      <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 2 }}>MAGI ${(r.magi / 1000).toFixed(0)}K</div>
+                      <div style={{ fontSize: 12, color: "var(--ink-faint)" }}>Thr ${(r.irmaaThresholdLookback / 1000).toFixed(0)}K</div>
                     </div>
                   ))}
                 </div>
@@ -9302,42 +9302,42 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                      or withholding from the conversion (smaller Roth forever). Feeds the
                      comparator AND the solve-for grid below. ── */}
               <div style={{ marginTop: 14, padding: 12, background: "rgba(0,0,0,0.2)", border: "1px solid var(--line)" }}>
-                <div style={{ fontSize: 10, color: "var(--accent)", letterSpacing: 2, marginBottom: 4 }}>STEP 2 · HOW WILL YOU PAY THE CONVERSION TAX?</div>
-                <div style={{ fontSize: 9, color: "var(--ink)", lineHeight: 1.5, marginBottom: 6 }}>
+                <div style={{ fontSize: 11, color: "var(--accent)", letterSpacing: 2, marginBottom: 4 }}>STEP 2 · HOW WILL YOU PAY THE CONVERSION TAX?</div>
+                <div style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.5, marginBottom: 6 }}>
                   <strong>Not sure what to pick?</strong> Paying from a checking/savings account or money market → first option with <strong>0%</strong>. Selling stocks/funds that have grown → first option, and enter roughly what share of that account is growth (a guess like 40 is fine). No money outside your retirement accounts → second option.
                 </div>
-                <div style={{ fontSize: 9, color: "var(--ink-dim)", lineHeight: 1.5, marginBottom: 8 }}>
+                <div style={{ fontSize: 12, color: "var(--ink-dim)", lineHeight: 1.5, marginBottom: 8 }}>
                   "Pay the tax from outside money" is the standard advice — but outside money isn't free if selling it realizes gains, and having <em>no</em> outside money doesn't kill the conversion case. Set how the bill actually gets paid; every number below (comparator + solve-for grid) recomputes accordingly.
                 </div>
                 <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
                   <select value={rothTaxFunding} onChange={e => setRothTaxFunding(e.target.value)}
-                    style={{ background: "var(--panel2)", border: "1px solid var(--line)", color: "var(--ink)", fontFamily: "inherit", fontSize: 9, padding: "5px 8px", borderRadius: 3 }}>
+                    style={{ background: "var(--panel2)", border: "1px solid var(--line)", color: "var(--ink)", fontFamily: "inherit", fontSize: 12, padding: "5px 8px", borderRadius: 3 }}>
                     <option value="taxable">PAY FROM CASH / SAVINGS / BROKERAGE (enter gain % →)</option>
                     <option value="withhold">NO OUTSIDE MONEY — TAKE IT OUT OF THE CONVERSION ITSELF</option>
                   </select>
                   {/* v5.26: was every Other account's balance, which counted a named IRA as money available to
                       pay conversion tax. It never was — spending it is itself a taxable event. */}
                   {rothTaxFunding === "taxable" && taxableInitAll() < 1000 && (
-                    <span style={{ fontSize: 9, color: "var(--warn)", lineHeight: 1.4, maxWidth: 340 }}>
+                    <span style={{ fontSize: 12, color: "var(--warn)", lineHeight: 1.4, maxWidth: 340 }}>
                       ⚠ Your plan shows almost no money outside retirement accounts — the engine will fall back to paying from the Roth, then the Traditional itself. If that's your real situation, the second option models it honestly.
                     </span>
                   )}
                   {rothTaxFunding === "taxable" && (
-                    <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 9, color: "var(--ink)" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--ink)" }}>
                       how much of that account is profit?
                       <input type="number" min="0" max="95" value={rothGainPct}
                         onChange={e => setRothGainPct(Math.max(0, Math.min(95, Number(e.target.value) || 0)))}
-                        style={{ width: 56, background: "var(--panel2)", border: "1px solid var(--line)", color: "var(--ink)", fontFamily: "inherit", fontSize: 9, padding: "5px 7px", borderRadius: 3 }} />%
+                        style={{ width: 56, background: "var(--panel2)", border: "1px solid var(--line)", color: "var(--ink)", fontFamily: "inherit", fontSize: 12, padding: "5px 7px", borderRadius: 3 }} />%
                     </label>
                   )}
                 </div>
                 {rothTaxFunding === "taxable" && (
-                  <div style={{ fontSize: 9, color: "var(--ink-dim)", marginTop: 6, lineHeight: 1.6 }}>
+                  <div style={{ fontSize: 12, color: "var(--ink-dim)", marginTop: 6, lineHeight: 1.6 }}>
                     <strong style={{ color: "var(--ink)" }}>What this means:</strong> when you sell investments, only the <em>profit</em> gets taxed — not the money you originally put in. Example: you paid in $60,000 over the years and the account is worth $100,000 today → $40,000 is profit → enter <strong>40</strong>. Your brokerage statement shows this as <em>"unrealized gain"</em> next to <em>"cost basis."</em> A rough guess is fine; use <strong>0</strong> for pure cash or money-market funds — their share price holds at $1.00, so <em>selling</em> creates no profit. (The interest they pay is a different tax, owed yearly whether you sell or not — the model handles that separately through the account's yield.)
                     {rothGainPct > 0 && <> At your <strong>{rothGainPct}%</strong>: selling <strong>$10,000</strong> to pay conversion tax treats <strong>${(10000 * rothGainPct / 100).toLocaleString()}</strong> of it as taxable profit — the model adds that tax (and its Medicare-premium ripple) to the bill automatically.</>}
                   </div>
                 )}
-                <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 6, lineHeight: 1.5 }}>
+                <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 6, lineHeight: 1.5 }}>
                   {rothTaxFunding === "withhold"
                     ? "Withhold mode: each year's tax+IRMAA bill comes out of the conversion itself first — only the net lands in the Roth. The conversion covers that bill only up to its own size: in any year the bill is bigger, the remainder is still sold from your taxable account and still realizes gains. The cost is a permanently smaller Roth. (Under 59½ the withheld slice would also owe a 10% penalty — not modeled; this analysis assumes 59½+.)"
                     : rothGainPct > 0
@@ -9406,14 +9406,14 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                 const fmtM = v => v >= 1e6 ? `$${(v / 1e6).toFixed(2)}M` : fmtK(v);
                 return (
                   <div style={{ marginTop: 14, padding: 12, background: "rgba(0,204,255,0.03)", border: "1px solid var(--info)" }}>
-                    <div style={{ fontSize: 10, color: "var(--info)", letterSpacing: 2, marginBottom: 4 }} className="lbl">Step 3 · strategy comparator — six approaches, side by side</div>
-                    <div style={{ fontSize: 9, color: "var(--ink)", lineHeight: 1.5, marginBottom: 6 }}>Six ways people actually do conversions — none at all, fill a tax bracket, stay under the Medicare (IRMAA) surcharge line, and <strong>exactly what your slider is set to</strong> — each run through the same 30-year model. This table updates <strong>live</strong> as you move the slider above.</div>
-                    <div style={{ fontSize: 9, color: "var(--ink-dim)", lineHeight: 1.5, marginBottom: 10 }}>
+                    <div style={{ fontSize: 11, color: "var(--info)", letterSpacing: 2, marginBottom: 4 }} className="lbl">Step 3 · strategy comparator — six approaches, side by side</div>
+                    <div style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.5, marginBottom: 6 }}>Six ways people actually do conversions — none at all, fill a tax bracket, stay under the Medicare (IRMAA) surcharge line, and <strong>exactly what your slider is set to</strong> — each run through the same 30-year model. This table updates <strong>live</strong> as you move the slider above.</div>
+                    <div style={{ fontSize: 12, color: "var(--ink-dim)", lineHeight: 1.5, marginBottom: 10 }}>
                       Runs six named conversion policies through the full deterministic projection (same tax engine as the Taxes tab: brackets, SS taxation, NIIT, AMT, state{!P.single && <>, <strong>widow's-penalty filing flip in {P.deathYr1}</strong></>}) plus IRMAA surcharges with the 2-year lookback. Bracket-fill strategies solve each year's conversion to land exactly at the bracket top; "STAY UNDER IRMAA" converts up to the first surcharge cliff. Conversion taxes are paid from the taxable account first — see the field manual's Roth section (Docs tab) for worked examples of why paying conversion tax from retirement assets, especially via withholding before 59½, costs real money. Ranked by <strong>ending after-tax estate</strong> (Roth + taxable at face value; Traditional discounted {Math.round((res[0].heirRate) * 100)}% for heirs' taxes).
                     </div>
                     {(P.currentConv || 0) > 0 && curRes && noneRes && (
                       <div style={{ marginBottom: 10, padding: "10px 12px", border: "1px solid var(--info)", background: "rgba(0,204,255,0.04)" }}>
-                        <div style={{ fontSize: 8, color: "var(--info)", letterSpacing: 0.5, fontWeight: 700 }}>BREAK-EVEN — WEALTH CROSSOVER vs NO CONVERSIONS</div>
+                        <div style={{ fontSize: 11, color: "var(--info)", letterSpacing: 0.5, fontWeight: 700 }}>BREAK-EVEN — WEALTH CROSSOVER vs NO CONVERSIONS</div>
                         {beYr !== null ? (
                           <div style={{ fontSize: 16, fontWeight: 600, color: "var(--accent)", marginTop: 4 }}>
                             {beYr} — age {beAgeA}{beAgeB !== null && beAgeB !== beAgeA ? ` / ${beAgeB}` : ""}
@@ -9421,24 +9421,24 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                         ) : (
                           <div style={{ fontSize: 13, fontWeight: 600, color: "var(--warn)", marginTop: 4 }} className="lbl">Does not break even within the plan</div>
                         )}
-                        <div style={{ fontSize: 9, color: "var(--ink-dim)", marginTop: 4, lineHeight: 1.5 }}>
+                        <div style={{ fontSize: 12, color: "var(--ink-dim)", marginTop: 4, lineHeight: 1.5 }}>
                           {beYr !== null && beWasBehind && <>First year your strategy's after-tax wealth catches the NO CONVERSIONS path (deepest earlier shortfall {fmtK(Math.abs(beDeficitMax))}). Before this year, converting had cost more than it saved; after it, the tax savings compound.</>}
                           {beYr !== null && !beWasBehind && <>Your conversions never fall behind NO CONVERSIONS — the early-year tax cost is ≈$0 (conversions land under the standard deduction before Social Security starts), and by {beYr} the RMD-tax savings pull measurably ahead. Nothing to pay back.</>}
                           {beYr === null && beWasBehind && <>Through the full horizon, the NO CONVERSIONS path stays wealthier in cash terms — at this slider amount, conversions never recoup their cost for this household (deepest shortfall {fmtK(Math.abs(beDeficitMax))}). Check the ESTATE ranking below: Roth dollars pass to heirs untaxed, so a strategy can lose this cash race yet still win on estate.</>}
                           {beYr === null && !beWasBehind && <>No measurable wealth difference at this amount over the horizon.</>}
                         </div>
-                        <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 5, lineHeight: 1.5 }}>
+                        <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 5, lineHeight: 1.5 }}>
                           METHOD: both paths run the full 30-year engine (brackets · SS taxation · NIIT · AMT · state · IRMAA lookback{_hasAca ? " · ACA subsidies" : ""}), wealth compared year-by-year at FACE VALUE (no heir discount — this card answers the cash question; the ESTATE ranking below separately credits Roth's heir-tax advantage). Same-year comparison ≡ discounting at the portfolio's growth rate under the active scenario prior; opportunity cost of conversion tax included mechanically. Tax funding: {P.convTaxFunding === "withhold" ? "withheld from conversion" : "taxable account first"}.
                         </div>
                       </div>
                     )}
                     {_bridgePossible && !_acaPremSet && (
-                      <div style={{ marginBottom: 10, padding: "8px 12px", border: "1px dashed var(--line2)", fontSize: 9, color: "var(--ink-dim)", lineHeight: 1.6 }}>
+                      <div style={{ marginBottom: 10, padding: "8px 12px", border: "1px dashed var(--line2)", fontSize: 12, color: "var(--ink-dim)", lineHeight: 1.6 }}>
                         <span style={{ color: "var(--info)", fontWeight: 700 }}>ACA BRIDGE — PREMIUM SUBSIDY vs CONVERSIONS:</span> you retire before 65, so Roth conversions can cost marketplace premium subsidies — often more than IRMAA. Enter your benchmark silver premium under <span style={{ color: "var(--ink)" }}>My Data → ACA BRIDGE</span> and this table gains an ACA SUB LOST column plus a STAY UNDER ACA CLIFF strategy.
                       </div>
                     )}
                     {_hasAca && (
-                      <div style={{ marginBottom: 10, padding: "8px 12px", border: "1px solid var(--line)", borderLeft: "3px solid var(--info)", background: "var(--panel2)", fontSize: 9, lineHeight: 1.6 }}>
+                      <div style={{ marginBottom: 10, padding: "8px 12px", border: "1px solid var(--line)", borderLeft: "3px solid var(--info)", background: "var(--panel2)", fontSize: 12, lineHeight: 1.6 }}>
                         <span style={{ color: "var(--info)", fontWeight: 700, letterSpacing: 1 }} className="lbl">ACA subsidy law scenario</span>
                         <span style={{ color: "var(--ink-faint)" }}> — the enhanced credits expired end-2025; Congress may restore them. Pick the law to stress:</span>
                         <span style={{ display: "block", marginTop: 6, color: "var(--ink-faint)" }}>Both scenarios stop at the same lower boundary: below 100% of the federal poverty level the model shows <span style={{ color: "var(--ink-dim)" }}>$0 and means "not modelled"</span> — that is Medicaid's territory and this app does not model it. Sub-floor years are flagged under the strategy table. <span style={{ color: "var(--ink-dim)" }}>Before v5.32 the enhanced scenario had no such boundary</span> and paid a full benchmark premium all the way down to zero income, which made the toggle move more than the law it names.</span>
@@ -9446,7 +9446,7 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                           {[["current", "CURRENT LAW (400% cliff)"], ["enhanced", "ENHANCED EXTENDED (8.5% cap)"]].map(([k, lab]) => (
                             <button key={k} onClick={() => applyAcaRegime(k)} style={{
                               background: acaRegime === k ? "var(--ring)" : "transparent", border: `1px solid ${acaRegime === k ? "var(--info)" : "var(--line)"}`,
-                              color: acaRegime === k ? "var(--info)" : "var(--ink-dim)", padding: "3px 10px", fontSize: 8, fontWeight: acaRegime === k ? 700 : 400,
+                              color: acaRegime === k ? "var(--info)" : "var(--ink-dim)", padding: "3px 10px", fontSize: 12, fontWeight: acaRegime === k ? 700 : 400,
                               cursor: "pointer", fontFamily: "inherit", letterSpacing: 1,
                             }}>{lab}{acaRegime === k ? " ✓" : ""}</button>
                           ))}
@@ -9455,10 +9455,10 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                         {acaRegime === "current" && res.some(r => r.key === "acaCliff" && r.totConv === 0) && <span style={{ color: "var(--warn)", marginLeft: 8 }}>STAY UNDER ACA CLIFF converts $0 in bridge years — any conversion clears the cliff for this household.</span>}
                       </div>
                     )}
-                    <div style={{ display: "grid", gridTemplateColumns: _hasAca ? "1.5fr repeat(7, 1fr)" : "1.5fr repeat(6, 1fr)", gap: 0, fontSize: 9 }}>
-                      <div style={{ padding: "5px 6px", color: "var(--ink-faint)", fontSize: 8, letterSpacing: 0.5, borderBottom: "1px solid var(--line2)" }} className="lbl">Strategy</div>
+                    <div style={{ display: "grid", gridTemplateColumns: _hasAca ? "1.5fr repeat(7, 1fr)" : "1.5fr repeat(6, 1fr)", gap: 0, fontSize: 12 }}>
+                      <div style={{ padding: "5px 6px", color: "var(--ink-faint)", fontSize: 11, letterSpacing: 0.5, borderBottom: "1px solid var(--line2)" }} className="lbl">Strategy</div>
                       {["Total converted", "Lifetime tax", "IRMAA total", ...(_hasAca ? [_floorList.length ? "ACA sub lost †" : "ACA sub lost"] : []), P.single ? "— " : "Widow-yrs tax", "End Roth", "After-tax estate"].map((h, i) => (
-                        <div key={i} className="lbl" style={{ padding: "5px 6px", color: "var(--ink-faint)", fontSize: 8, textAlign: "right", borderBottom: "1px solid var(--line2)" }}>{h}</div>
+                        <div key={i} className="lbl" style={{ padding: "5px 6px", color: "var(--ink-faint)", fontSize: 11, textAlign: "right", borderBottom: "1px solid var(--line2)" }}>{h}</div>
                       ))}
                       {res.map(r => {
                         const isBest = r.key === best.key;
@@ -9476,15 +9476,15 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                       })}
                     </div>
                     {_hasAca && _floorList.length > 0 && (
-                      <div style={{ marginTop: 10, padding: "8px 12px", border: "1px solid var(--line)", borderLeft: "3px solid var(--warn)", background: "var(--panel2)", fontSize: 9, lineHeight: 1.6, color: "var(--ink-dim)" }}>
+                      <div style={{ marginTop: 10, padding: "8px 12px", border: "1px solid var(--line)", borderLeft: "3px solid var(--warn)", background: "var(--panel2)", fontSize: 12, lineHeight: 1.6, color: "var(--ink-dim)" }}>
                         <span style={{ color: "var(--warn)", fontWeight: 700, letterSpacing: 1 }} className="lbl">† Sub-floor years — the ACA column is blank here, not zero</span><br />
                         {_floorList.map(y => `${y} (${Math.round(_floorYrs[y] * 100)}% of FPL)`).join(" · ")} {_floorList.length === 1 ? "falls" : "fall"} below 100% of the federal poverty level. Below that line the premium tax credit is not what governs — Medicaid eligibility is, and this model does not model it — so the subsidy shows <span style={{ color: "var(--ink)" }}>$0 as a placeholder for "not modelled"</span>, not as a computed result. <span style={{ color: "var(--ink)" }}>Treat the ACA sub lost column as excluding {_floorList.length === 1 ? "this year" : "these years"}</span>, and be especially careful reading any change that lifts income back over the floor: it will show up as a gain of an entire benchmark premium that the model cannot stand behind. In a non-expansion state the real answer below the floor may genuinely be $0; in an expansion state it is usually Medicaid. The model does not know which you are in.
                       </div>
                     )}
-                    <div style={{ marginTop: 10, fontSize: 9, color: "var(--ink)", lineHeight: 1.5 }}>
+                    <div style={{ marginTop: 10, fontSize: 12, color: "var(--ink)", lineHeight: 1.5 }}>
                       <span style={{ color: "var(--accent)", fontWeight: 600 }}>★ {best.label}</span> projects the largest after-tax estate — {fmtM(best.estate)} vs {fmtM(noneRes.estate)} with no conversions ({best.estate >= noneRes.estate ? "+" : ""}{fmtK(best.estate - noneRes.estate)}){best.key !== "current" && <>; your current plan projects {fmtM(res.find(r => r.key === "current").estate)}</>}.
                     </div>
-                    <div style={{ marginTop: 8, fontSize: 9, color: "var(--ink-faint)", fontStyle: "italic", lineHeight: 1.5 }}>
+                    <div style={{ marginTop: 8, fontSize: 12, color: "var(--ink-faint)", fontStyle: "italic", lineHeight: 1.5 }}>
                       This is a deterministic comparison at a fixed {Math.round(4.5)}% growth rate — not a Monte Carlo — and it inherits every simplification of the tax engine (estimated dividends, no QCDs, deterministic mortality, {Math.round((res[0].heirRate) * 100)}% assumed heir rate on inherited Traditional). Rankings can flip under different growth, longevity, or heir assumptions. Treat the spread between strategies as the signal, not the precise dollars, and verify any large conversion plan with a CPA before acting.
                     </div>
                   </div>
@@ -9536,58 +9536,58 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                 const sliderRank = (ranked && currentRow) ? ranked.filter(r => obj.better(obj.score(r), obj.score(currentRow))).length + 1 : null;
                 return (
                   <div style={{ marginTop: 14, padding: 12, background: "rgba(170,102,255,0.04)", border: "1px solid var(--violet)" }}>
-                    <div style={{ fontSize: 10, color: "var(--violet)", letterSpacing: 2, marginBottom: 4 }}>STEP 4 · SOLVE-FOR GRID — "IF I COULD PICK ANY AMOUNT, WHICH WINS?"</div>
-                    <div style={{ fontSize: 9, color: "var(--ink)", lineHeight: 1.5, marginBottom: 6 }}>Pick a goal and the model tries <strong>25 different conversion sizes</strong>, ranks them for that goal, and <strong>recomputes automatically</strong> whenever you change an input — with your slider's amount shown alongside, live, so you can see how your what-if compares to the model's best. (The 25 swept amounts are fixed $0–$200K, so moving the slider updates your live comparison, not the ranked cells.)</div>
-                    <div style={{ fontSize: 9, color: "var(--ink-dim)", lineHeight: 1.5, marginBottom: 8 }}>
+                    <div style={{ fontSize: 11, color: "var(--violet)", letterSpacing: 2, marginBottom: 4 }}>STEP 4 · SOLVE-FOR GRID — "IF I COULD PICK ANY AMOUNT, WHICH WINS?"</div>
+                    <div style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.5, marginBottom: 6 }}>Pick a goal and the model tries <strong>25 different conversion sizes</strong>, ranks them for that goal, and <strong>recomputes automatically</strong> whenever you change an input — with your slider's amount shown alongside, live, so you can see how your what-if compares to the model's best. (The 25 swept amounts are fixed $0–$200K, so moving the slider updates your live comparison, not the ranked cells.)</div>
+                    <div style={{ fontSize: 12, color: "var(--ink-dim)", lineHeight: 1.5, marginBottom: 8 }}>
                       Sweeps annual conversion amounts $0–$200K (plus the bracket-fill and IRMAA-cap policies) through the same deterministic
                       engine as the comparator below, and ranks every cell against the objective you pick. This reports the <em>model's</em> best
                       cell under BASE assumptions (fixed {Math.round(4.5)}% growth, current law) — a starting point for your own judgment, not a directive.
                     </div>
                     <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", marginBottom: 8 }}>
                       <select value={rothSolveObj} onChange={e => setRothSolveObj(e.target.value)}
-                        style={{ background: "var(--panel2)", border: "1px solid var(--line)", color: "var(--ink)", fontFamily: "inherit", fontSize: 9, padding: "5px 8px", borderRadius: 3 }}>
+                        style={{ background: "var(--panel2)", border: "1px solid var(--line)", color: "var(--ink)", fontFamily: "inherit", fontSize: 12, padding: "5px 8px", borderRadius: 3 }}>
                         {Object.entries(objFns).map(([k, o]) => <option key={k} value={k}>{o.label}</option>)}
                       </select>
                       <span title="This grid recomputes automatically whenever you change an input (tax-funding, gain %, taxable yield, retirement year) — no button to press. The swept amounts don't depend on the slider, so moving the slider updates your live comparison below rather than the ranked cells."
-                        style={{ background: "transparent", border: "1px solid var(--violet)", color: "var(--violet)", fontFamily: "inherit", fontSize: 9, fontWeight: 600, letterSpacing: 1, padding: "6px 12px", borderRadius: 3 }}>
+                        style={{ background: "transparent", border: "1px solid var(--violet)", color: "var(--violet)", fontFamily: "inherit", fontSize: 11, fontWeight: 600, letterSpacing: 1, padding: "6px 12px", borderRadius: 3 }}>
                         ◉ LIVE · AUTO-UPDATES
                       </span>
-                      {winner && <span style={{ fontSize: 10, color: "var(--ink)" }}>Model's best cell: <span style={{ color: "var(--violet)", fontWeight: 700 }}>{winner.label}</span> → {obj.fmt(obj.score(winner))}{currentRow && <> · your slider (${(rothAmount / 1000).toFixed(0)}K/yr, live) → {obj.noun} {obj.fmt(obj.score(currentRow))}</>}</span>}
+                      {winner && <span style={{ fontSize: 12, color: "var(--ink)" }}>Model's best cell: <span style={{ color: "var(--violet)", fontWeight: 700 }}>{winner.label}</span> → {obj.fmt(obj.score(winner))}{currentRow && <> · your slider (${(rothAmount / 1000).toFixed(0)}K/yr, live) → {obj.noun} {obj.fmt(obj.score(currentRow))}</>}</span>}
                     </div>
                     {ranked && (
-                      <div style={{ fontSize: 9, color: "var(--ink-dim)", margin: "6px 0", lineHeight: 1.5 }}>
+                      <div style={{ fontSize: 12, color: "var(--ink-dim)", margin: "6px 0", lineHeight: 1.5 }}>
                         <strong style={{ color: "var(--ink)" }}>How to read a card:</strong> <strong>#</strong> is the rank for your chosen goal (1 = best, not a year) · next to it, the <strong>conversion policy tested</strong> (e.g. "$110K/yr" = convert that amount every year of the window) · the <strong>big number</strong> is that policy's {obj.noun} — the thing being ranked · the bottom line shows both headline outcomes so you can see what each policy trades away. The green <strong style={{ color: "var(--accent)" }}>◉ YOU</strong> card up top is your live slider amount scored the same way, with its rank among all {ranked.length} cells — move the slider and it updates.
                       </div>
                     )}
                     {ranked && currentRow && (
                       <div style={{ marginBottom: 8 }}>
-                        <div style={{ fontSize: 8, color: "var(--accent)", letterSpacing: 0.5, marginBottom: 3, fontWeight: 600 }}>YOUR CURRENT SLIDER PICK (live)</div>
+                        <div style={{ fontSize: 11, color: "var(--accent)", letterSpacing: 0.5, marginBottom: 3, fontWeight: 600 }}>YOUR CURRENT SLIDER PICK (live)</div>
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(118px, 1fr))", gap: 4 }}>
                           <div style={{ padding: "6px 8px", background: "rgba(0,255,136,0.10)", border: "1px solid var(--accent)", borderRadius: 3 }}>
-                            <div style={{ fontSize: 8, color: "var(--accent)", fontWeight: 600 }}>◉ YOU · ${(rothAmount / 1000).toFixed(0)}K/yr{sliderRank ? ` · rank #${sliderRank} of ${ranked.length}` : ""}</div>
-                            <div style={{ fontSize: 10, color: "var(--ink)", fontWeight: 600 }}>{obj.fmt(obj.score(currentRow))} <span style={{ fontSize: 8, color: "var(--ink-faint)", fontWeight: 400 }}>{obj.noun}</span></div>
-                            <div style={{ fontSize: 8, color: "var(--accent)", fontWeight: 600 }}>{gapVsBest(currentRow, ranked[0])}</div>
-                            <div style={{ fontSize: 8, color: "var(--ink-faint)" }}>estate {currentRow.estate >= 1e6 ? `$${(currentRow.estate / 1e6).toFixed(2)}M` : `$${Math.round(currentRow.estate / 1000)}K`} · tax+IRMAA ${Math.round((currentRow.totTax + currentRow.totIrmaa) / 1000)}K</div>
+                            <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600 }}>◉ YOU · ${(rothAmount / 1000).toFixed(0)}K/yr{sliderRank ? ` · rank #${sliderRank} of ${ranked.length}` : ""}</div>
+                            <div style={{ fontSize: 12, color: "var(--ink)", fontWeight: 600 }}>{obj.fmt(obj.score(currentRow))} <span style={{ fontSize: 12, color: "var(--ink-faint)", fontWeight: 400 }}>{obj.noun}</span></div>
+                            <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600 }}>{gapVsBest(currentRow, ranked[0])}</div>
+                            <div style={{ fontSize: 12, color: "var(--ink-faint)" }}>estate {currentRow.estate >= 1e6 ? `$${(currentRow.estate / 1e6).toFixed(2)}M` : `$${Math.round(currentRow.estate / 1000)}K`} · tax+IRMAA ${Math.round((currentRow.totTax + currentRow.totIrmaa) / 1000)}K</div>
                           </div>
                         </div>
                       </div>
                     )}
                     {ranked && (
-                      <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5, marginBottom: 3, fontWeight: 600 }} className="lbl">Model's ranked sweep — top 10</div>
+                      <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5, marginBottom: 3, fontWeight: 600 }} className="lbl">Model's ranked sweep — top 10</div>
                     )}
                     {ranked && (
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(118px, 1fr))", gap: 4 }}>
                         {ranked.slice(0, 10).map((r, i) => (
                           <div key={r.key} style={{ padding: "6px 8px", background: i === 0 ? "rgba(170,102,255,0.12)" : "rgba(0,0,0,0.2)", border: `1px solid ${i === 0 ? "var(--violet)" : "var(--line)"}`, borderRadius: 3 }}>
-                            <div style={{ fontSize: 8, color: i === 0 ? "var(--violet)" : "var(--ink-faint)", fontWeight: 600 }}>#{i + 1}{i === 0 ? " BEST" : ""} · {r.label}</div>
-                            <div style={{ fontSize: 10, color: "var(--ink)", fontWeight: 600 }}>{obj.fmt(obj.score(r))} <span style={{ fontSize: 8, color: "var(--ink-faint)", fontWeight: 400 }}>{obj.noun}</span></div>
-                            <div style={{ fontSize: 8, color: i === 0 ? "var(--violet)" : "var(--ink-dim)", fontWeight: 600 }}>{i === 0 ? "◀ best" : gapVsBest(r, ranked[0])}</div>
-                            <div style={{ fontSize: 8, color: "var(--ink-faint)" }}>estate {r.estate >= 1e6 ? `$${(r.estate / 1e6).toFixed(2)}M` : `$${Math.round(r.estate / 1000)}K`} · tax+IRMAA ${Math.round((r.totTax + r.totIrmaa) / 1000)}K</div>
+                            <div style={{ fontSize: 12, color: i === 0 ? "var(--violet)" : "var(--ink-faint)", fontWeight: 600 }}>#{i + 1}{i === 0 ? " BEST" : ""} · {r.label}</div>
+                            <div style={{ fontSize: 12, color: "var(--ink)", fontWeight: 600 }}>{obj.fmt(obj.score(r))} <span style={{ fontSize: 12, color: "var(--ink-faint)", fontWeight: 400 }}>{obj.noun}</span></div>
+                            <div style={{ fontSize: 12, color: i === 0 ? "var(--violet)" : "var(--ink-dim)", fontWeight: 600 }}>{i === 0 ? "◀ best" : gapVsBest(r, ranked[0])}</div>
+                            <div style={{ fontSize: 12, color: "var(--ink-faint)" }}>estate {r.estate >= 1e6 ? `$${(r.estate / 1e6).toFixed(2)}M` : `$${Math.round(r.estate / 1000)}K`} · tax+IRMAA ${Math.round((r.totTax + r.totIrmaa) / 1000)}K</div>
                           </div>
                         ))}
                       </div>
                     )}
-                    {ranked && <div style={{ fontSize: 8, color: "var(--ink-faint)", marginTop: 6 }}>Top 10 of {ranked.length} cells shown. Deterministic single-path projection — pair any candidate with the Monte Carlo and IRMAA tabs before acting, and remember sequence risk and future law changes are outside this grid.</div>}
+                    {ranked && <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 6 }}>Top 10 of {ranked.length} cells shown. Deterministic single-path projection — pair any candidate with the Monte Carlo and IRMAA tabs before acting, and remember sequence risk and future law changes are outside this grid.</div>}
                   </div>
                 );
               })()}
@@ -9620,8 +9620,8 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
             <div>
               {/* Plain-English orientation — this tab has exactly three levers; everything else is output */}
               <div className="card" style={{ marginBottom: 14, borderLeft: "3px solid var(--info)" }}>
-                <div style={{ fontSize: 8, color: "var(--info)", letterSpacing: 1, fontWeight: 600, marginBottom: 6 }}>ⓘ IN PLAIN ENGLISH — THE THREE CONTROLS</div>
-                <div style={{ fontSize: 9, color: "var(--ink)", lineHeight: 1.7 }}>
+                <div style={{ fontSize: 11, color: "var(--info)", letterSpacing: 1, fontWeight: 600, marginBottom: 6 }}>ⓘ IN PLAIN ENGLISH — THE THREE CONTROLS</div>
+                <div style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.7 }}>
                   This tab has exactly <strong>three levers</strong> — everything else you see is the consequence of them plus the income you entered in My Data.
                   <br />① <span style={{ color: "var(--accent)", fontWeight: 600 }} className="lbl">Taxable-account yield</span> (below): money in a regular brokerage account pays dividends and interest that are taxed <em>every year, even if you never sell</em>. The slider is your estimate of that payout rate — last year's 1099-DIV ÷ account balance works (≈1.5% for stock index funds, 3–5% for bonds and cash). No brokerage account? It does nothing.
                   <br />② <span style={{ color: "var(--positive)", fontWeight: 600 }} className="lbl">QCD modeler</span> (below): only for charitable givers age 70½+. Gifts sent <em>directly</em> from a Traditional IRA to charity never appear on your tax return and still count toward your RMD. If you don't give to charity, leave it at $0 — it does nothing.
@@ -9632,20 +9632,20 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
               </div>
               {/* Header + lifetime summary cards */}
               <div className="card" style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600 }}>LIFETIME TAX ESTIMATE — RETIRE {_retireYr} → {_horizonYr}</div>
-                <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 4 }}>
+                <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600 }}>LIFETIME TAX ESTIMATE — RETIRE {_retireYr} → {_horizonYr}</div>
+                <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 4 }}>
                   Federal income tax (official 2026 brackets per Rev. Proc. 2025-32, incl. OBBBA changes), long-term capital gains + qualified dividends, NIIT, AMT (OBBBA 2026 rules: 50% exemption phase-out from $500K/$1M), the OBBBA $6K/person senior bonus deduction (2025–2028, MAGI phase-out), FICA, and state tax ({_stateName}: {(_stateRate * 100).toFixed(2)}% of taxable income).
                   {FILING} brackets indexed 2%/yr from {_asOfYr} (chained-CPI proxy; deliberately below the ~2.7% household inflation the simulators use — slow bracket growth overstates taxes, the conservative direction); NIIT thresholds (${(_SGL_NIIT_THR/1000).toFixed(0)}K single / ${(_MFJ_NIIT_THR/1000).toFixed(0)}K MFJ) are statutorily <strong>unindexed</strong> and stay frozen, so more income creeps into NIIT range over time. Roth conversions read the Roth-tab slider (${(rothAmount / 1000).toFixed(0)}K/yr).
                   {!_single && <> <span style={{ color: "var(--warn)" }}>After the first spouse's projected death ({_deathYr1}), the survivor's years switch to <strong>Single</strong> filing and keep only the larger Social Security benefit — the "widow's penalty," visible as a step-up in tax and bracket in the table below.</span></>}
                   {" "}QCDs are modeled via the panel below (an income exclusion that counts toward the RMD and lowers MAGI). Not modeled: the one-time split-interest QCD election (CRT/CGA).
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 10, flexWrap: "wrap", padding: "8px 10px", background: "rgba(0,0,0,0.2)", border: "1px solid var(--line)" }}>
-                  <span style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Taxable-account yield (div/int):</span>
+                  <span style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Taxable-account yield (div/int):</span>
                   <input type="range" min={0} max={5} step={0.25} value={taxYield}
                     onChange={e => setTaxYield(Number(e.target.value))}
                     style={{ width: 140, accentColor: "var(--accent)" }} />
                   <span style={{ fontSize: 12, fontWeight: 700, color: "var(--accent)" }}>{taxYield.toFixed(2)}%</span>
-                  <span style={{ fontSize: 8, color: "var(--ink-dim)" }}>
+                  <span style={{ fontSize: 12, color: "var(--ink-dim)" }}>
                     on ${Math.round(_taxableInit / 1000)}K detected taxable holdings → ~${Math.round(_taxableInit * taxYield / 100 / 1000)}K/yr est. dividends/interest (drives NIIT &amp; SS provisional income).
                     {_taxableInit === 0 && " No taxable (non-retirement) holdings detected, so this is $0 and NIIT can only trigger on modeled capital gains."}
                   </span>
@@ -9655,12 +9655,12 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                        spouse turns 71 (proxy for the mid-year 70½ rule). This describes the tax mechanics of an
                        amount YOU choose — it is not a suggestion to give. ── */}
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8, flexWrap: "wrap", padding: "8px 10px", background: "rgba(0,0,0,0.2)", border: "1px solid var(--line)" }}>
-                  <span style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">QCD modeler (what-if):</span>
+                  <span style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">QCD modeler (what-if):</span>
                   <input type="range" min={0} max={(_single ? 1 : 2) * TAX_CONSTS.QCD_LIMIT} step={1000} value={qcdAnnual}
                     onChange={e => setQcdAnnual(Number(e.target.value))}
                     style={{ width: 140, accentColor: "var(--positive)" }} />
                   <span style={{ fontSize: 12, fontWeight: 700, color: qcdAnnual > 0 ? "var(--positive)" : "var(--ink-faint)" }}>${(qcdAnnual / 1000).toFixed(0)}K/yr</span>
-                  <span style={{ fontSize: 8, color: "var(--ink-dim)" }}>
+                  <span style={{ fontSize: 12, color: "var(--ink-dim)" }}>
                     Qualified Charitable Distributions — direct Traditional-IRA→charity transfers from age 70½ (modeled from the year each spouse turns 71).
                     Excluded from income and MAGI, and counts toward the RMD; the gifted dollars leave the Traditional balance.
                     2026 cap: $111K per eligible person (${_single ? "111" : "222"}K here), indexed. Works from Traditional IRAs — <strong>not</strong> Roth (Roth withdrawals are already tax-free) and not 401(k)s directly; DAFs and private foundations don't qualify. Also lowers MAGI on the IRMAA tab.
@@ -9676,18 +9676,18 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                     { label: `STATE (${_stateName.slice(0,4)})`, val: `$${(totState / 1000).toFixed(0)}K`, color: _stateRate > 0 ? "var(--orange)" : "var(--ink-faint)" },
                   ].map((c, i) => (
                     <div key={i} style={{ padding: 10, background: "rgba(0,0,0,0.3)", border: "1px solid var(--line)" }}>
-                      <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5 }}>{c.label}</div>
+                      <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5 }}>{c.label}</div>
                       <div style={{ fontSize: 17, fontWeight: 600, color: c.color, marginTop: 3 }}>{c.val}</div>
                     </div>
                   ))}
                 </div>
-                <div style={{ marginTop: 8, fontSize: 9, color: amtYears > 0 ? "var(--warn)" : "var(--ink-dim)" }}>
+                <div style={{ marginTop: 8, fontSize: 12, color: amtYears > 0 ? "var(--warn)" : "var(--ink-dim)" }}>
                   {amtYears > 0
                     ? <>⚠ AMT applies in {amtYears} projected year{amtYears > 1 ? "s" : ""} (${(totAmt / 1000).toFixed(0)}K total) — usually triggered by very large single-year conversions. See the year detail.</>
                     : <>AMT (alternative minimum tax): <span style={{ color: "var(--positive)", fontWeight: 600 }}>$0 in every projected year</span> — the post-2017 exemption keeps standard-deduction retirees out of AMT. Modeled each year to catch large-conversion edge cases.</>}
                   {niitYears > 0 && totNiit > 0 && <> {" · "}NIIT applies in {niitYears} year{niitYears > 1 ? "s" : ""}.</>}
                 </div>
-                <div style={{ marginTop: 10, fontSize: 9, color: "var(--ink-dim)" }}>
+                <div style={{ marginTop: 10, fontSize: 12, color: "var(--ink-dim)" }}>
                   Lifetime effective tax rate on gross taxable income: <span style={{ color: "var(--ink)", fontWeight: 600 }}>{lifetimeEffRate.toFixed(1)}%</span>
                   {" · "}Lifetime Roth conversions: <span style={{ color: "var(--info)", fontWeight: 600 }}>${(totConversions / 1000).toFixed(0)}K</span> <span style={{ color: "var(--ink-faint)" }}>({convShareOfGross.toFixed(0)}% of all gross taxable income)</span>
                   {totQcd > 0 && <>{" · "}Lifetime QCDs: <span style={{ color: "var(--positive)", fontWeight: 600 }}>${(totQcd / 1000).toFixed(0)}K</span> <span style={{ color: "var(--ink-faint)" }}>(excluded from income &amp; MAGI; counts toward RMDs)</span></>}
@@ -9697,10 +9697,10 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
               {/* TABLE 1 — Yearly summary */}
               <div className="card" style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }} className="lbl">Yearly tax summary</div>
-                <div style={{ fontSize: 9, color: "var(--ink-faint)", marginBottom: 8 }}>Click any row to see its full breakdown below. The <span style={{ color: "var(--info)" }}>Roth Conv</span> column is driven by the Roth-tab slider (currently <span style={{ color: "var(--info)" }}>${(rothAmount / 1000).toFixed(0)}K/yr</span>) — move it and this whole tab recomputes.</div>
+                <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }} className="lbl">Yearly tax summary</div>
+                <div style={{ fontSize: 12, color: "var(--ink-faint)", marginBottom: 8 }}>Click any row to see its full breakdown below. The <span style={{ color: "var(--info)" }}>Roth Conv</span> column is driven by the Roth-tab slider (currently <span style={{ color: "var(--info)" }}>${(rothAmount / 1000).toFixed(0)}K/yr</span>) — move it and this whole tab recomputes.</div>
                 {/* Gross-taxable composition legend */}
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 14, fontSize: 8, color: "var(--ink-dim)", marginBottom: 10, padding: "6px 10px", border: "1px solid rgba(58,122,90,0.3)", background: "rgba(0,0,0,0.2)" }}>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 14, fontSize: 12, color: "var(--ink-dim)", marginBottom: 10, padding: "6px 10px", border: "1px solid rgba(58,122,90,0.3)", background: "rgba(0,0,0,0.2)" }}>
                   <span style={{ color: "var(--ink-faint)", letterSpacing: 2, fontWeight: 600 }}>GROSS TAXABLE =</span>
                   <span><span style={{ display: "inline-block", width: 9, height: 9, background: "var(--accent)", marginRight: 4, verticalAlign: "middle" }}></span>SS (taxable portion)</span>
                   <span><span style={{ display: "inline-block", width: 9, height: 9, background: "var(--positive)", marginRight: 4, verticalAlign: "middle" }}></span>Pension</span>
@@ -9710,16 +9710,16 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                   <span><span style={{ display: "inline-block", width: 9, height: 9, background: "var(--orange)", marginRight: 4, verticalAlign: "middle" }}></span>Cap gains</span>
                 </div>
                 <div style={{ overflowX: "auto" }}>
-                  <div style={{ display: "grid", gridTemplateColumns: "50px 56px 90px 96px 70px 64px 64px 60px 70px 64px 52px", gap: 0, fontSize: 9 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "70px 79px 126px 135px 98px 90px 90px 84px 98px 90px 73px", gap: 0, fontSize: 12 }}>
                     {["Year", "Age A/B", "Gross Taxable", "Roth Conv", "Federal", "Cap Gains", "FICA", `State`, "Total Tax", "Eff Rate", "Bracket"].map((h, i) => (
-                      <div key={i} style={{ padding: "6px 6px", background: "rgba(0,255,136,0.05)", border: "1px solid var(--line)", color: i === 3 ? "var(--info)" : "var(--ink-dim)", letterSpacing: 0.5, fontSize: 8, fontWeight: 600 }}>{h}</div>
+                      <div key={i} style={{ padding: "6px 6px", background: "rgba(0,255,136,0.05)", border: "1px solid var(--line)", color: i === 3 ? "var(--info)" : "var(--ink-dim)", letterSpacing: 0.5, fontSize: 11, fontWeight: 600 }}>{h}</div>
                     ))}
                     {rows.map((r) => {
                       const isSel = r.yr === _selYr;
                       const convPct = r.grossTaxableAll > 0 ? (r.conv_y / r.grossTaxableAll) * 100 : 0;
                       return [
                         <div key={`y${r.yr}`} onClick={() => setTaxDetailYear(r.yr)} style={{ cursor: "pointer", padding: "5px 6px", borderBottom: "1px solid rgba(26,58,42,0.3)", background: isSel ? "rgba(0,255,136,0.08)" : "transparent", color: "var(--ink)", fontWeight: isSel ? 700 : 500 }}>{r.yr}</div>,
-                        <div key={`a${r.yr}`} onClick={() => setTaxDetailYear(r.yr)} style={{ cursor: "pointer", padding: "5px 6px", borderBottom: "1px solid rgba(26,58,42,0.3)", background: isSel ? "rgba(0,255,136,0.08)" : "transparent", color: "var(--ink-dim)", fontSize: 8 }}>{r.ageA}/{r.ageB}</div>,
+                        <div key={`a${r.yr}`} onClick={() => setTaxDetailYear(r.yr)} style={{ cursor: "pointer", padding: "5px 6px", borderBottom: "1px solid rgba(26,58,42,0.3)", background: isSel ? "rgba(0,255,136,0.08)" : "transparent", color: "var(--ink-dim)", fontSize: 12 }}>{r.ageA}/{r.ageB}</div>,
                         <div key={`g${r.yr}`} onClick={() => setTaxDetailYear(r.yr)} style={{ cursor: "pointer", padding: "5px 6px", borderBottom: "1px solid rgba(26,58,42,0.3)", background: isSel ? "rgba(0,255,136,0.08)" : "transparent", color: "var(--ink)" }}>
                           <div>${Math.round(r.grossTaxableAll / 1000)}K</div>
                           {r.grossTaxableAll > 0 && (() => {
@@ -9740,7 +9740,7 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                             );
                           })()}
                         </div>,
-                        <div key={`rc${r.yr}`} onClick={() => setTaxDetailYear(r.yr)} style={{ cursor: "pointer", padding: "5px 6px", borderBottom: "1px solid rgba(26,58,42,0.3)", background: isSel ? "rgba(0,255,136,0.08)" : "transparent", color: r.conv_y > 0 ? "var(--info)" : "var(--ink-faint)" }}>{r.conv_y > 0 ? <span>${Math.round(r.conv_y / 1000)}K <span style={{ color: "var(--ink-faint)", fontSize: 8 }}>({convPct.toFixed(0)}%)</span></span> : "—"}</div>,
+                        <div key={`rc${r.yr}`} onClick={() => setTaxDetailYear(r.yr)} style={{ cursor: "pointer", padding: "5px 6px", borderBottom: "1px solid rgba(26,58,42,0.3)", background: isSel ? "rgba(0,255,136,0.08)" : "transparent", color: r.conv_y > 0 ? "var(--info)" : "var(--ink-faint)" }}>{r.conv_y > 0 ? <span>${Math.round(r.conv_y / 1000)}K <span style={{ color: "var(--ink-faint)", fontSize: 12 }}>({convPct.toFixed(0)}%)</span></span> : "—"}</div>,
                         <div key={`f${r.yr}`} onClick={() => setTaxDetailYear(r.yr)} style={{ cursor: "pointer", padding: "5px 6px", borderBottom: "1px solid rgba(26,58,42,0.3)", background: isSel ? "rgba(0,255,136,0.08)" : "transparent", color: "var(--warn)" }}>${Math.round(r.fedTax / 1000)}K</div>,
                         <div key={`c${r.yr}`} onClick={() => setTaxDetailYear(r.yr)} style={{ cursor: "pointer", padding: "5px 6px", borderBottom: "1px solid rgba(26,58,42,0.3)", background: isSel ? "rgba(0,255,136,0.08)" : "transparent", color: r.capGainsTax > 0 ? "var(--info)" : "var(--ink-faint)" }}>{r.capGainsTax > 0 ? `$${Math.round(r.capGainsTax / 1000)}K` : "—"}</div>,
                         <div key={`fi${r.yr}`} onClick={() => setTaxDetailYear(r.yr)} style={{ cursor: "pointer", padding: "5px 6px", borderBottom: "1px solid rgba(26,58,42,0.3)", background: isSel ? "rgba(0,255,136,0.08)" : "transparent", color: r.fica > 0 ? "var(--violet)" : "var(--ink-faint)" }}>{r.fica > 0 ? `$${Math.round(r.fica / 1000)}K` : "—"}</div>,
@@ -9756,27 +9756,27 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
               {/* TABLE 2 — Detail for selected year */}
               <div className="card" style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }}>DETAIL — {sel.yr} (age{_single ? "" : "s"} {sel.ageA}{!_single && `/${sel.ageB}`}) · {sel.filing}{sel.widowed ? " (survivor)" : ""}</div>
-                {sel.widowed && <div style={{ fontSize: 8, color: "var(--warn)", marginBottom: 6 }}>⚠ Survivor year — filing Single and on one Social Security check (widow's penalty in effect).</div>}
+                <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }}>DETAIL — {sel.yr} (age{_single ? "" : "s"} {sel.ageA}{!_single && `/${sel.ageB}`}) · {sel.filing}{sel.widowed ? " (survivor)" : ""}</div>
+                {sel.widowed && <div style={{ fontSize: 12, color: "var(--warn)", marginBottom: 6 }}>⚠ Survivor year — filing Single and on one Social Security check (widow's penalty in effect).</div>}
                 {/* ── v5.11 disclosures (audit findings C-2C-1 / C-2C-2): two survivor-year
                      simplifications, both conservative, stated where they actually bite. ── */}
-                {sel.widowed && sel.yr === _deathYr1 && <div style={{ fontSize: 8, color: "var(--ink-faint)", marginBottom: 6, lineHeight: 1.5 }}>
+                {sel.widowed && sel.yr === _deathYr1 && <div style={{ fontSize: 12, color: "var(--ink-faint)", marginBottom: 6, lineHeight: 1.5 }}>
                   Year of death: this year is filed <strong>jointly</strong> — the IRS treats the survivor as married for the entire year of death,
                   with Single starting the year after (that switch is why next year's tax jumps). Social Security is already down to one check here,
                   which is the simplification in this row: the deceased's benefit actually runs through the month of death, so a full year at the
                   single check slightly overstates the loss — the conservative direction.
                 </div>}
-                {sel.widowed && <div style={{ fontSize: 8, color: "var(--ink-faint)", marginBottom: 6, lineHeight: 1.5 }}>
+                {sel.widowed && <div style={{ fontSize: 12, color: "var(--ink-faint)", marginBottom: 6, lineHeight: 1.5 }}>
                   Simplification: the survivor is modeled as keeping the larger of the two <strong>actual</strong> Social Security checks. Where the
                   deceased claimed before their full retirement age, the survivor benefit can instead be floored at 82.5% of the deceased's PIA
                   (the RIB-LIM widow's limit), which this model does not apply — so survivor income here may be understated.
                 </div>}
-                <div style={{ fontSize: 9, color: "var(--ink-faint)", marginBottom: 12 }}>Gross taxable income by source → deductions → net taxable → tax by type.</div>
+                <div style={{ fontSize: 12, color: "var(--ink-faint)", marginBottom: 12 }}>Gross taxable income by source → deductions → net taxable → tax by type.</div>
 
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
                   {/* Col 1: Gross taxable income by source */}
                   <div>
-                    <div style={{ fontSize: 8, color: "var(--ink-dim)", letterSpacing: 1, marginBottom: 6, borderBottom: "1px solid var(--line)", paddingBottom: 4 }} className="lbl">Gross taxable income by source</div>
+                    <div style={{ fontSize: 11, color: "var(--ink-dim)", letterSpacing: 1, marginBottom: 6, borderBottom: "1px solid var(--line)", paddingBottom: 4 }} className="lbl">Gross taxable income by source</div>
                     {[
                       { label: `${_tlT.nameA} SS (gross benefit)`, full: sel.ssA_y, dim: true },
                       { label: `${_tlT.nameB} SS (gross benefit)`, full: sel.ssB_y, dim: true },
@@ -9788,39 +9788,39 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                       { label: "Roth conversion", val: sel.conv_y, c: "var(--info)" },
                       { label: "Realized cap gains", val: sel.capGains_y, c: "var(--orange)" },
                     ].filter(x => (x.val || x.full || 0) > 0 || x.hl).map((x, i) => (
-                      <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: 9, padding: "3px 0", color: x.hl ? (x.c || "var(--info)") : x.dim ? "var(--ink-dim)" : (x.c || "var(--ink)"), fontWeight: x.hl ? 600 : 400, borderTop: x.hl ? "1px dashed var(--line)" : "none" }}>
+                      <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "3px 0", color: x.hl ? (x.c || "var(--info)") : x.dim ? "var(--ink-dim)" : (x.c || "var(--ink)"), fontWeight: x.hl ? 600 : 400, borderTop: x.hl ? "1px dashed var(--line)" : "none" }}>
                         <span>{x.dim && "  "}{x.label}</span><span>${Math.round((x.val ?? x.full) / 1000)}K</span>
                       </div>
                     ))}
-                    <div style={{ fontSize: 8, color: "var(--ink-faint)", fontStyle: "italic", padding: "2px 0" }}>Gross SS benefit shown for reference (dim); only the taxable portion counts toward gross taxable.</div>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, padding: "6px 0 0", marginTop: 4, borderTop: "1px solid var(--line)", color: "var(--ink)", fontWeight: 700 }}>
+                    <div style={{ fontSize: 12, color: "var(--ink-faint)", fontStyle: "italic", padding: "2px 0" }}>Gross SS benefit shown for reference (dim); only the taxable portion counts toward gross taxable.</div>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "6px 0 0", marginTop: 4, borderTop: "1px solid var(--line)", color: "var(--ink)", fontWeight: 700 }}>
                       <span>Gross taxable</span><span>${Math.round(sel.grossTaxableAll / 1000)}K</span>
                     </div>
                   </div>
 
                   {/* Col 2: Deductions → net taxable */}
                   <div>
-                    <div style={{ fontSize: 8, color: "var(--ink-dim)", letterSpacing: 1, marginBottom: 6, borderBottom: "1px solid var(--line)", paddingBottom: 4 }}>DEDUCTIONS → NET TAXABLE</div>
+                    <div style={{ fontSize: 11, color: "var(--ink-dim)", letterSpacing: 1, marginBottom: 6, borderBottom: "1px solid var(--line)", paddingBottom: 4 }}>DEDUCTIONS → NET TAXABLE</div>
                     {[
                       { label: "Gross taxable", val: sel.grossTaxableAll },
                       { label: "Standard deduction", val: -sel.stdDed },
                       { label: "Senior deduction (65+)", val: -sel.seniorExtra },
                     ].filter(x => x.val !== 0).map((x, i) => (
-                      <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: 9, padding: "3px 0", color: x.val < 0 ? "var(--accent)" : "var(--ink)" }}>
+                      <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "3px 0", color: x.val < 0 ? "var(--accent)" : "var(--ink)" }}>
                         <span>{x.label}</span><span>{x.val < 0 ? "−" : ""}${Math.round(Math.abs(x.val) / 1000)}K</span>
                       </div>
                     ))}
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, padding: "6px 0 0", marginTop: 4, borderTop: "1px solid var(--line)", color: "var(--warn)", fontWeight: 700 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "6px 0 0", marginTop: 4, borderTop: "1px solid var(--line)", color: "var(--warn)", fontWeight: 700 }}>
                       <span>Net taxable income</span><span>${Math.round(sel.taxableOrdinary / 1000)}K</span>
                     </div>
-                    <div style={{ marginTop: 10, fontSize: 9, color: "var(--ink-faint)", lineHeight: 1.5 }}>
+                    <div style={{ marginTop: 10, fontSize: 12, color: "var(--ink-faint)", lineHeight: 1.5 }}>
                       Net taxable lands in the <span style={{ color: sel.bracket >= 24 ? "var(--crit)" : sel.bracket >= 22 ? "var(--warn)" : "var(--accent)", fontWeight: 600 }}>{sel.bracket}%</span> marginal bracket.
                     </div>
                   </div>
 
                   {/* Col 3: Tax by type */}
                   <div>
-                    <div style={{ fontSize: 8, color: "var(--ink-dim)", letterSpacing: 1, marginBottom: 6, borderBottom: "1px solid var(--line)", paddingBottom: 4 }} className="lbl">Tax by type</div>
+                    <div style={{ fontSize: 11, color: "var(--ink-dim)", letterSpacing: 1, marginBottom: 6, borderBottom: "1px solid var(--line)", paddingBottom: 4 }} className="lbl">Tax by type</div>
                     {[
                       { label: "Federal income", val: sel.fedTax, color: "var(--warn)" },
                       { label: "Cap gains + qualified div", val: sel.capGainsTax, color: "var(--info)" },
@@ -9829,14 +9829,14 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                       { label: "FICA (on earned income)", val: sel.fica, color: "var(--violet)" },
                       { label: `State (${_stateName})`, val: sel.stateTax, color: "var(--orange)" },
                     ].map((x, i) => (
-                      <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: 9, padding: "3px 0", color: x.val > 0 ? x.color : "var(--ink-faint)" }}>
+                      <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "3px 0", color: x.val > 0 ? x.color : "var(--ink-faint)" }}>
                         <span>{x.label}</span><span>{x.val > 0 ? `$${Math.round(x.val / 1000)}K` : "—"}</span>
                       </div>
                     ))}
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, padding: "6px 0 0", marginTop: 4, borderTop: "1px solid var(--line)", color: "var(--crit)", fontWeight: 700 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "6px 0 0", marginTop: 4, borderTop: "1px solid var(--line)", color: "var(--crit)", fontWeight: 700 }}>
                       <span>Total tax</span><span>${Math.round(sel.totalTax / 1000)}K</span>
                     </div>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, padding: "6px 0 0", color: "var(--ink)" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "6px 0 0", color: "var(--ink)" }}>
                       <span>Effective rate</span><span>{sel.effRate.toFixed(1)}%</span>
                     </div>
                   </div>
@@ -9844,7 +9844,7 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
                 {/* Net taxable income by bracket (the actual bracket-by-bracket fill) */}
                 <div style={{ marginTop: 16 }}>
-                  <div style={{ fontSize: 8, color: "var(--ink-dim)", letterSpacing: 1, marginBottom: 6, borderBottom: "1px solid var(--line)", paddingBottom: 4 }}>NET TAXABLE INCOME BY FEDERAL BRACKET — {sel.yr}</div>
+                  <div style={{ fontSize: 11, color: "var(--ink-dim)", letterSpacing: 1, marginBottom: 6, borderBottom: "1px solid var(--line)", paddingBottom: 4 }}>NET TAXABLE INCOME BY FEDERAL BRACKET — {sel.yr}</div>
                   {(() => {
                     let prev = 0, remaining = sel.taxableOrdinary;
                     const segs = [];
@@ -9862,19 +9862,19 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                     const maxFill = Math.max(...segs.map(s => s.filled), 1);
                     return segs.map((s, i) => (
                       <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                        <span style={{ width: 36, fontSize: 9, color: s.rate >= 24 ? "var(--crit)" : s.rate >= 22 ? "var(--warn)" : "var(--accent)", fontWeight: 600 }}>{s.rate}%</span>
+                        <span style={{ width: 36, fontSize: 12, color: s.rate >= 24 ? "var(--crit)" : s.rate >= 22 ? "var(--warn)" : "var(--accent)", fontWeight: 600 }}>{s.rate}%</span>
                         <div style={{ flex: 1, background: "rgba(0,0,0,0.3)", height: 16, position: "relative", border: "1px solid var(--line)" }}>
                           <div style={{ width: `${(s.filled / maxFill) * 100}%`, height: "100%", background: s.rate >= 24 ? "rgba(255,68,68,0.4)" : s.rate >= 22 ? "rgba(255,170,0,0.4)" : "rgba(0,255,136,0.3)" }}></div>
                         </div>
-                        <span style={{ width: 60, fontSize: 8, color: "var(--ink)", textAlign: "right" }}>${Math.round(s.filled / 1000)}K</span>
-                        <span style={{ width: 60, fontSize: 8, color: "var(--ink-dim)", textAlign: "right" }}>tax ${Math.round(s.taxInBracket / 1000)}K</span>
+                        <span style={{ width: 60, fontSize: 12, color: "var(--ink)", textAlign: "right" }}>${Math.round(s.filled / 1000)}K</span>
+                        <span style={{ width: 60, fontSize: 12, color: "var(--ink-dim)", textAlign: "right" }}>tax ${Math.round(s.taxInBracket / 1000)}K</span>
                       </div>
                     ));
                   })()}
                 </div>
               </div>
 
-              <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 8, padding: "8px 12px", fontStyle: "italic", lineHeight: 1.6, textAlign: "center" }}>
+              <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 8, padding: "8px 12px", fontStyle: "italic", lineHeight: 1.6, textAlign: "center" }}>
                 Estimates only — not tax advice. Federal brackets are MFJ inflated 2%/yr; SS taxation uses the simplified provisional-income test (realized capital gains count toward it, as the statute requires); FICA applies only to earned income. State tax uses the 51-jurisdiction module selected in My Data (effective-rate approximations — verify your state), or the manual flat rate if no state is chosen. Realized capital gains are the Withdrawal plan's own sales, under the scenario selected on the Monte Carlo tab — the embedded-gain share in My Data sets their opening basis. NIIT, a simplified AMT check, and the temporary OBBBA senior deduction (through 2028) ARE modeled on this tab — the Roth conversion ladder does not apply the OBBBA deduction, so the two tabs can differ for any ladder year at or before 2028. Actual filing requires a CPA.
               </div>
             </div>
@@ -9895,8 +9895,8 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
           return (
             <div>
               <div className="card" style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600 }} className="lbl">IRMAA cliffs — medicare premium surcharges</div>
-                <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 4, lineHeight: 1.5 }}>
+                <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600 }} className="lbl">IRMAA cliffs — medicare premium surcharges</div>
+                <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 4, lineHeight: 1.5 }}>
                   IRMAA (Income-Related Monthly Adjustment Amount) raises your Medicare Part B & D premiums when MAGI crosses certain thresholds —
                   and it's a <span style={{ color: "var(--crit)" }}>cliff</span>, not a ramp: one dollar over a threshold can cost ~$1,000+/yr <em>per person</em>. The MAGI that counts is from
                   <span style={{ color: "var(--ink)" }}> two years prior</span>, so conversions you do now affect premiums two years out. Your Roth conversions (slider: ${(rothAmount / 1000).toFixed(0)}K/yr) are the main lever pushing MAGI toward these cliffs.{qcdAnnual > 0 && <> QCDs from the Taxes-tab modeler (${(qcdAnnual / 1000).toFixed(0)}K/yr from age 70½) are excluded from MAGI and are reflected in the years below — a common way retirees manage these cliffs.</>}
@@ -9906,10 +9906,10 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
               {/* Tier reference */}
               <div className="card" style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 10, color: "var(--accent)", fontWeight: 600, marginBottom: 8 }}>2026 IRMAA TIERS ({_singleI ? "SINGLE" : "MFJ"}) — annual surcharge per person above standard premium</div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 0, fontSize: 9 }}>
+                <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600, marginBottom: 8 }}>2026 IRMAA TIERS ({_singleI ? "SINGLE" : "MFJ"}) — annual surcharge per person above standard premium</div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 0, fontSize: 12 }}>
                   {[`MAGI Threshold (${_singleI ? "Single" : "MFJ"})`, "Tier", "Added Cost / Person / Yr"].map((h, i) => (
-                    <div key={i} style={{ padding: "6px 8px", background: "rgba(0,255,136,0.05)", border: "1px solid var(--line)", color: "var(--ink-dim)", fontSize: 8, fontWeight: 600, letterSpacing: 0.5 }}>{h}</div>
+                    <div key={i} style={{ padding: "6px 8px", background: "rgba(0,255,136,0.05)", border: "1px solid var(--line)", color: "var(--ink-dim)", fontSize: 11, fontWeight: 600, letterSpacing: 0.5 }}>{h}</div>
                   ))}
                   {IRMAA_TIERS.map((t, i) => ([
                     <div key={`m${i}`} style={{ padding: "6px 8px", borderBottom: "1px solid rgba(26,58,42,0.3)", color: "var(--ink)" }}>{i === 0 ? `≤ $${(t.magiUpper/1000).toFixed(0)}K` : t.magiUpper === Infinity ? `> $${(IRMAA_TIERS[i-1].magiUpper/1000).toFixed(0)}K` : `$${(IRMAA_TIERS[i-1].magiUpper/1000).toFixed(0)}K–$${(t.magiUpper/1000).toFixed(0)}K`}</div>,
@@ -9917,45 +9917,45 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                     <div key={`s${i}`} style={{ padding: "6px 8px", borderBottom: "1px solid rgba(26,58,42,0.3)", color: t.surchargePerPerson > 0 ? "var(--crit)" : "var(--accent)" }}>{t.surchargePerPerson > 0 ? `+$${t.surchargePerPerson.toLocaleString()}` : "$0"}</div>,
                   ])).flat()}
                 </div>
-                <div style={{ fontSize: 8, color: "var(--ink-faint)", marginTop: 6, fontStyle: "italic" }}>Surcharges are approximate 2026 Part B + Part D add-ons, per person, per year. Thresholds inflate ~2%/yr in the projection below.{!_singleI && <> This table is your household's <span style={{ color: "var(--ink)" }}>current</span> status; after the first projected death the survivor is scored against the Single thresholds, which are half these figures.</>}</div>
+                <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 6, fontStyle: "italic" }}>Surcharges are approximate 2026 Part B + Part D add-ons, per person, per year. Thresholds inflate ~2%/yr in the projection below.{!_singleI && <> This table is your household's <span style={{ color: "var(--ink)" }}>current</span> status; after the first projected death the survivor is scored against the Single thresholds, which are half these figures.</>}</div>
               </div>
 
               {/* Summary cards */}
               <div className="card" style={{ marginBottom: 14 }}>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
                   <div style={{ padding: 12, background: "rgba(0,0,0,0.3)", border: "1px solid var(--line)" }}>
-                    <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Lifetime IRMAA surcharges</div>
+                    <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Lifetime IRMAA surcharges</div>
                     <div style={{ fontSize: 24, fontWeight: 700, color: totalIrmaa > 0 ? "var(--crit)" : "var(--accent)" }}>${(totalIrmaa / 1000).toFixed(0)}K</div>
-                    <div style={{ fontSize: 8, color: "var(--ink-dim)" }}>across {yearsHit} year(s) with a surcharge</div>
+                    <div style={{ fontSize: 12, color: "var(--ink-dim)" }}>across {yearsHit} year(s) with a surcharge</div>
                   </div>
                   <div style={{ padding: 12, background: "rgba(0,0,0,0.3)", border: "1px solid var(--line)" }}>
-                    <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Medicare starts</div>
+                    <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Medicare starts</div>
                     <div style={{ fontSize: 16, fontWeight: 600, color: "var(--ink)" }}>{fmtMonYr(_tlI.medicareA)}</div>
-                    {!_singleI && <div style={{ fontSize: 8, color: "var(--ink-dim)" }}>{_tlI.nameB}: {fmtMonYr(_tlI.medicareB)}</div>}
+                    {!_singleI && <div style={{ fontSize: 12, color: "var(--ink-dim)" }}>{_tlI.nameB}: {fmtMonYr(_tlI.medicareB)}</div>}
                   </div>
                   <div style={{ padding: 12, background: "rgba(0,0,0,0.3)", border: "1px solid var(--line)" }}>
-                    <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Conversion-era tier</div>
+                    <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Conversion-era tier</div>
                     {(() => {
                       const convRows = rows.filter(r => r.conv_y > 0 && r.irmaaYr >= _medAYr);
                       const maxTier = convRows.length ? Math.max(...convRows.map(r => r.tier)) : 0;
                       return <div style={{ fontSize: 16, fontWeight: 600, color: tierColors[maxTier] }}>{IRMAA_TIERS[maxTier].label}</div>;
                     })()}
-                    <div style={{ fontSize: 8, color: "var(--ink-dim)" }}>highest tier hit while converting</div>
+                    <div style={{ fontSize: 12, color: "var(--ink-dim)" }}>highest tier hit while converting</div>
                   </div>
                 </div>
               </div>
 
               {/* Year-by-year MAGI vs cliffs */}
               <div className="card" style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 10, color: "var(--accent)", fontWeight: 600, marginBottom: 8 }}>YEAR-BY-YEAR: MAGI vs. THE NEXT CLIFF</div>
+                <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600, marginBottom: 8 }}>YEAR-BY-YEAR: MAGI vs. THE NEXT CLIFF</div>
                 <div style={{ overflowX: "auto" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "50px 64px 90px 96px 90px 90px", gap: 0, fontSize: 9 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "70px 90px 126px 135px 126px 126px", gap: 0, fontSize: 12 }}>
                   {["Tax Yr", "Affects", "MAGI", "Tier", "Headroom to next", "Surcharge"].map((h, i) => (
-                    <div key={i} style={{ padding: "6px 6px", background: "rgba(0,255,136,0.05)", border: "1px solid var(--line)", color: "var(--ink-dim)", fontSize: 8, fontWeight: 600, letterSpacing: 0.5 }}>{h}</div>
+                    <div key={i} style={{ padding: "6px 6px", background: "rgba(0,255,136,0.05)", border: "1px solid var(--line)", color: "var(--ink-dim)", fontSize: 11, fontWeight: 600, letterSpacing: 0.5 }}>{h}</div>
                   ))}
                   {rows.map((r) => ([
                     <div key={`y${r.yr}`} style={{ padding: "5px 6px", borderBottom: "1px solid rgba(26,58,42,0.3)", color: "var(--ink)", fontWeight: 500 }}>{r.yr}</div>,
-                    <div key={`af${r.yr}`} style={{ padding: "5px 6px", borderBottom: "1px solid rgba(26,58,42,0.3)", color: "var(--ink-dim)", fontSize: 8 }}>{r.personsOnMedicare > 0 ? `${r.irmaaYr} prem` : "pre-MC"}</div>,
+                    <div key={`af${r.yr}`} style={{ padding: "5px 6px", borderBottom: "1px solid rgba(26,58,42,0.3)", color: "var(--ink-dim)", fontSize: 12 }}>{r.personsOnMedicare > 0 ? `${r.irmaaYr} prem` : "pre-MC"}</div>,
                     <div key={`mg${r.yr}`} style={{ padding: "5px 6px", borderBottom: "1px solid rgba(26,58,42,0.3)", color: "var(--ink)" }}>${Math.round(r.magi / 1000)}K</div>,
                     <div key={`ti${r.yr}`} style={{ padding: "5px 6px", borderBottom: "1px solid rgba(26,58,42,0.3)", color: tierColors[r.tier], fontWeight: 600 }}>{r.tierLabel.replace("Tier ", "T")}{r.filingSingleI && <span style={{ color: "var(--warn)", fontWeight: 400 }}> · single</span>}</div>,
                     <div key={`hr${r.yr}`} style={{ padding: "5px 6px", borderBottom: "1px solid rgba(26,58,42,0.3)", color: r.headroom === Infinity ? "var(--ink-faint)" : r.headroom < 15000 ? "var(--crit)" : r.headroom < 40000 ? "var(--warn)" : "var(--accent)" }}>{r.headroom === Infinity ? "—" : `$${Math.round(r.headroom / 1000)}K`}</div>,
@@ -9963,13 +9963,13 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                   ])).flat()}
                 </div>
                 </div>
-                <div style={{ fontSize: 8, color: "var(--ink-faint)", marginTop: 8, fontStyle: "italic" }}>
+                <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 8, fontStyle: "italic" }}>
                   "Affects" = the calendar year these premiums actually hit (MAGI has a 2-year lookback). "Headroom" in <span style={{ color: "var(--warn)" }}>amber</span> means you're within $40K of the next cliff; <span style={{ color: "var(--crit)" }}>red</span> means within $15K — trim the Roth slider if you want to stay under.
                   {rows.some(r => r.filingSingleI) && <> Rows marked <span style={{ color: "var(--warn)" }}>· single</span> are survivor years: that tax year is filed Single, so it is scored against the <span style={{ color: "var(--ink)" }}>Single</span> thresholds in the table above — roughly half the MFJ figures, so the same income lands in a higher tier. The surcharge itself is counted per person on Medicare in the <span style={{ color: "var(--ink)" }}>"Affects"</span> year, so it falls to one person for every premium year after the first death — which starts a little earlier than the filing switch, and is why some unmarked rows above already charge for one.</>}
                 </div>
               </div>
 
-              <div style={{ fontSize: 9, color: "var(--ink-faint)", padding: "8px 12px", fontStyle: "italic", lineHeight: 1.6, textAlign: "center" }}>
+              <div style={{ fontSize: 12, color: "var(--ink-faint)", padding: "8px 12px", fontStyle: "italic", lineHeight: 1.6, textAlign: "center" }}>
                 IRMAA tiers and surcharges are approximate and updated annually by CMS — verify current figures before acting. MAGI here is the model's own projected income for the year — the simplified 85%-of-SS assumption plus every other taxable component the plan generates, including dividends and realized capital gains. This tab pairs with the Roth tab: if a conversion pushes you just over a cliff, the surcharge can wipe out part of the conversion's tax benefit. Not tax advice.
               </div>
             </div>
@@ -9999,58 +9999,58 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
           const card = (accent) => ({ flex: "1 1 260px", minWidth: 240, padding: "16px 18px", background: "var(--panel)", border: `1px solid ${accent}`, borderRadius: 4 });
           const big = (c) => ({ fontSize: 30, fontWeight: 700, color: c, fontFamily: "'JetBrains Mono',monospace", margin: "6px 0 2px" });
           const linkBtn = (label, tab, c) => (
-            <button onClick={() => setActiveTab(tab)} style={{ background: "transparent", border: `1px solid ${c}`, color: c, fontFamily: "inherit", fontSize: 8, fontWeight: 600, letterSpacing: 0.5, padding: "4px 10px", borderRadius: 3, cursor: "pointer", marginTop: 8 }}>
+            <button onClick={() => setActiveTab(tab)} style={{ background: "transparent", border: `1px solid ${c}`, color: c, fontFamily: "inherit", fontSize: 11, fontWeight: 600, letterSpacing: 0.5, padding: "4px 10px", borderRadius: 3, cursor: "pointer", marginTop: 8 }}>
               {label} →
             </button>
           );
           return (
             <div className="card">
-              <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, marginBottom: 2 }} className="lbl">Dashboard — the three questions</div>
-              <div style={{ fontSize: 9, color: "var(--ink-dim)", marginBottom: 12 }}>
+              <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600, marginBottom: 2 }} className="lbl">Dashboard — the three questions</div>
+              <div style={{ fontSize: 12, color: "var(--ink-dim)", marginBottom: 12 }}>
                 One screen, the three things every retiree actually asks. Each card links to the tab that shows its full workings. Modeled under the {scenarioPreset} prior for the {retireYear} retirement — switch either at the top and this screen recomputes.
               </div>
-              {busy && <div style={{ fontSize: 10, color: "var(--warn)", marginBottom: 10 }}>⟳ Running 10,000 futures for {retireYear}… (first visit only; cached afterward)</div>}
+              {busy && <div style={{ fontSize: 12, color: "var(--warn)", marginBottom: 10 }}>⟳ Running 10,000 futures for {retireYear}… (first visit only; cached afterward)</div>}
               <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
 
                 <div style={card("var(--accent)")}>
-                  <div style={{ fontSize: 9, letterSpacing: 1, color: "var(--accent)", fontWeight: 600 }}>1 · WILL MY MONEY LAST?</div>
+                  <div style={{ fontSize: 11, letterSpacing: 1, color: "var(--accent)", fontWeight: 600 }}>1 · WILL MY MONEY LAST?</div>
                   <div style={big("var(--accent)")}>{runC ? `${(runC.success * 100).toFixed(1)}%` : "…"}</div>
-                  <div style={{ fontSize: 9, color: "var(--ink)", lineHeight: 1.6 }}>
+                  <div style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.6 }}>
                     of 10,000 modeled futures end the 30-year horizon with more than $500K still invested{medEnd != null && <>; the median path ends near <strong>{fmtM(medEnd)}</strong></>}.
                     {mcLongevity || mcLtcDist ? " (Using your Monte Carlo engine toggles.)" : ""}
                   </div>
-                  <div style={{ fontSize: 8, color: "var(--ink-faint)", marginTop: 6 }}>Remember: the BASE prior is deliberately conservative — real history has been kinder (see Backtest).</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 6 }}>Remember: the BASE prior is deliberately conservative — real history has been kinder (see Backtest).</div>
                   {linkBtn("MONTE CARLO", "montecarlo", "var(--accent)")}
                 </div>
 
                 <div style={card("var(--info)")}>
-                  <div style={{ fontSize: 9, letterSpacing: 1, color: "var(--info)", fontWeight: 600 }}>2 · HOW MUCH CAN I SPEND?</div>
+                  <div style={{ fontSize: 11, letterSpacing: 1, color: "var(--info)", fontWeight: 600 }}>2 · HOW MUCH CAN I SPEND?</div>
                   <div style={big("var(--info)")}>${Math.round(spendMo).toLocaleString()}/mo</div>
-                  <div style={{ fontSize: 9, color: "var(--ink)", lineHeight: 1.6 }}>
+                  <div style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.6 }}>
                     is the plan's modeled spending just after retirement. Once every income check has started, guaranteed income covers <strong>${Math.round(floorMo).toLocaleString()}/mo</strong>, leaving a portfolio draw of <strong>${Math.round(drawMo).toLocaleString()}/mo</strong> — about <strong>{(wRate * 100).toFixed(1)}%/yr</strong> of the portfolio.
                   </div>
                   {ssCut.on && (() => {
                     const f = Math.max(1, Math.min(100, Number(ssCut.pct) || 78)) / 100;
                     const ssPart = getSSA() + (_tlD.single ? 0 : getSSB());
                     const floorCut = Math.round(floorMo - ssPart * (1 - f));
-                    return <div style={{ fontSize: 8, color: "var(--warn)", marginTop: 6 }}>⚠ Under your SS depletion scenario ({ssCut.year} → {ssCut.pct}%), that floor becomes <strong>${floorCut.toLocaleString()}/mo</strong> from {ssCut.year} — the success rate above already reflects it.</div>;
+                    return <div style={{ fontSize: 12, color: "var(--warn)", marginTop: 6 }}>⚠ Under your SS depletion scenario ({ssCut.year} → {ssCut.pct}%), that floor becomes <strong>${floorCut.toLocaleString()}/mo</strong> from {ssCut.year} — the success rate above already reflects it.</div>;
                   })()}
-                  <div style={{ fontSize: 8, color: "var(--ink-faint)", marginTop: 6 }}>Guardrails trim spending ~10% if the balance falls to 80% of plan — the Withdrawal tab shows the year-by-year schedule and What Breaks shows the ceiling.</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 6 }}>Guardrails trim spending ~10% if the balance falls to 80% of plan — the Withdrawal tab shows the year-by-year schedule and What Breaks shows the ceiling.</div>
                   {linkBtn("WITHDRAWAL PLAN", "withdrawal", "var(--info)")}
                 </div>
 
                 <div style={card("var(--warn)")}>
-                  <div style={{ fontSize: 9, letterSpacing: 1, color: "var(--warn)", fontWeight: 600 }}>3 · CAN I SURVIVE A CRASH?</div>
+                  <div style={{ fontSize: 11, letterSpacing: 1, color: "var(--warn)", fontWeight: 600 }}>3 · CAN I SURVIVE A CRASH?</div>
                   <div style={big("var(--warn)")}>{seq ? `${(seq.success * 100).toFixed(1)}%` : "…"}</div>
-                  <div style={{ fontSize: 9, color: "var(--ink)", lineHeight: 1.6 }}>
+                  <div style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.6 }}>
                     of futures still succeed when the model forces <strong>poor returns into your first three retirement years</strong> — the classic sequence-of-returns nightmare{base30s ? <> (vs {(base30s.success * 100).toFixed(1)}% with no forced crash)</> : null}.
                   </div>
-                  <div style={{ fontSize: 8, color: "var(--ink-faint)", marginTop: 6 }}>The Stress tab runs the full scenario battery; Backtest replays real 1929/1966/2008 starts against your mix.</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 6 }}>The Stress tab runs the full scenario battery; Backtest replays real 1929/1966/2008 starts against your mix.</div>
                   {linkBtn("STRESS TESTS", "stress", "var(--warn)")}
                 </div>
 
               </div>
-              <div style={{ fontSize: 8, color: "var(--ink-faint)", marginTop: 12 }}>
+              <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 12 }}>
                 Estimates from simplified models — not advice, not a guarantee. Verify anything that matters (see Docs → Final Disclaimer).
               </div>
             </div>
@@ -10059,9 +10059,9 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
         {activeTab === "montecarlo" && (
           <div className="card">
-            <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }} className="lbl">Monte carlo simulations</div>
+            <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }} className="lbl">Monte carlo simulations</div>
             {/* ── ENGINE OPTIONS — both default OFF for continuity with prior runs ── */}
-            <div style={{ display: "flex", gap: 16, flexWrap: "wrap", padding: "8px 10px", marginBottom: 10, background: "rgba(0,0,0,0.2)", border: "1px solid var(--line)", fontSize: 9 }}>
+            <div style={{ display: "flex", gap: 16, flexWrap: "wrap", padding: "8px 10px", marginBottom: 10, background: "rgba(0,0,0,0.2)", border: "1px solid var(--line)", fontSize: 12 }}>
               <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", color: "var(--ink)" }}>
                 <input type="checkbox" checked={mcLongevity} onChange={e => setMcLongevity(e.target.checked)} style={{ accentColor: "var(--accent)" }} />
                 <span><span style={{ fontWeight: 600 }} className="lbl">Stochastic longevity</span> — sample each spouse's death age per path (Gompertz curve anchored so your entered life expectancy is the <em>median</em>) instead of fixed ages. Long-life paths stress the money; short-life paths stress the survivor.</span>
@@ -10071,32 +10071,32 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                 <span><span style={{ fontWeight: 600 }} className="lbl">LTC distribution</span> — replace the single $150–300K shock with a drawn care-duration distribution (45% no paid care, tail to 8 years at ~$120K/yr real) in each spouse's final years. Similar expected cost, much fatter ruin tail.</span>
               </label>
             </div>
-            <div style={{ fontSize: 9, color: "var(--ink-faint)", marginBottom: 14 }}>
+            <div style={{ fontSize: 12, color: "var(--ink-faint)", marginBottom: 14 }}>
               Three runs: Accumulation (now→{retireYear}), Early Decade ({retireYear}–{retireYear + 10}), Full 30yr ({retireYear}–{retireYear + 30}) │ 10K iterations │ Guyton-Klinger guardrails
               <br />Contributions are added only in the accumulation years; from {retireYear} onward the model is drawdown-only (no salary or contributions).
               <br />Balances reflect your <span style={{ color: "var(--ink)" }}>entire household portfolio</span> — every account you entered, <span style={{ color: "var(--ink)" }}>not just the 401(k)</span>. (The 401(k) holdings are used only to infer your asset-allocation mix, which is then applied to the whole balance.)
             </div>
-            <div style={{ fontSize: 9, color: "var(--warn)", background: "rgba(255,170,0,0.06)", border: "1px solid rgba(255,170,0,0.25)", borderRadius: 3, padding: "10px 12px", marginBottom: 14, lineHeight: 1.7 }}>
+            <div style={{ fontSize: 12, color: "var(--warn)", background: "rgba(255,170,0,0.06)", border: "1px solid rgba(255,170,0,0.25)", borderRadius: 3, padding: "10px 12px", marginBottom: 14, lineHeight: 1.7 }}>
               <span style={{ fontWeight: 700 }}>Why this number may look low — read this.</span> Danger Close runs on a <span style={{ fontWeight: 600 }}>deliberately conservative</span> return model. Its success rate will typically read <span style={{ fontWeight: 600 }}>lower than most mainstream retirement calculators</span> at their default settings — often by 10–20 points. This is <span style={{ fontWeight: 600 }}>by design, not an error</span>: where another tool might show 95%, Danger Close may show ~78% for the same plan. The intent is to pressure-test your plan against a pessimistic world, not to predict the most likely one. If you want output closer to a typical history-based projection, switch the scenario to <span style={{ fontWeight: 600 }} className="lbl">Historical</span> in the panel below — and compare the two to see how much of your result is the plan vs. the model's caution.
             </div>
 
             {/* FUTURE HOME MORTGAGE WHAT-IF — cash purchase vs financing, slider-driven */}
             <div style={{ marginBottom: 14, padding: 12, background: "rgba(0,204,255,0.04)", border: "1px solid #1a3340", borderRadius: 3 }}>
-              <div style={{ fontSize: 9, color: "var(--info)", letterSpacing: 1, marginBottom: 4 }}>◉ FUTURE HOME MORTGAGE WHAT-IF — cash purchase vs financing</div>
-              <div style={{ fontSize: 9, color: "var(--ink-faint)", marginBottom: 12, lineHeight: 1.6 }}>
+              <div style={{ fontSize: 11, color: "var(--info)", letterSpacing: 1, marginBottom: 4 }}>◉ FUTURE HOME MORTGAGE WHAT-IF — cash purchase vs financing</div>
+              <div style={{ fontSize: 12, color: "var(--ink-faint)", marginBottom: 12, lineHeight: 1.6 }}>
                 Slide the mortgage amount to compare buying the Future Home with cash against keeping that cash invested and financing it. The borrowed principal stays in the portfolio; a fixed P&amp;I payment is drawn through the term. Both columns use the realistic 30-yr run (LTC + mortality + auto-replacement) over one shared 6K-iteration market sequence, so the cash-vs-loan delta is clean and moves smoothly with the slider.
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 80px 80px", gap: 14, alignItems: "end", marginBottom: 12 }}>
                 <div>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5, marginBottom: 4 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5, marginBottom: 4 }}>
                     <span className="lbl">Mortgage principal</span>
                     <span style={{ color: "var(--info)", fontFamily: "'JetBrains Mono',monospace", fontSize: 12, fontWeight: 600 }}>${vmPrincipal.toLocaleString()}</span>
                   </div>
                   <input type="range" min={0} max={300000} step={5000} value={vmPrincipal} onChange={e => setVmPrincipal(Number(e.target.value))} style={{ width: "100%", accentColor: "#00ccff" }} />
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 8, color: "var(--ink-faint)" }}><span>$0 — all cash</span><span>$300K</span></div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "var(--ink-faint)" }}><span>$0 — all cash</span><span>$300K</span></div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5, marginBottom: 4 }} className="lbl">Rate %</div>
+                  <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5, marginBottom: 4 }} className="lbl">Rate %</div>
                   <input value={vmRateStr} inputMode="decimal"
                     onChange={e => {
                       const v = e.target.value;
@@ -10108,13 +10108,13 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                     style={{ width: "100%", boxSizing: "border-box", background: "rgba(0,0,0,0.3)", border: "1px solid var(--line)", color: "var(--ink)", fontFamily: "'JetBrains Mono',monospace", fontSize: 12, padding: "5px 6px", borderRadius: 2 }} />
                 </div>
                 <div>
-                  <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5, marginBottom: 4 }} className="lbl">Term yr</div>
+                  <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5, marginBottom: 4 }} className="lbl">Term yr</div>
                   <input inputMode="decimal" value={vmTerm} onChange={e => setVmTerm(Number(e.target.value) || 30)} style={{ width: "100%", boxSizing: "border-box", background: "rgba(0,0,0,0.3)", border: "1px solid var(--line)", color: "var(--ink)", fontFamily: "'JetBrains Mono',monospace", fontSize: 12, padding: "5px 6px", borderRadius: 2 }} />
                 </div>
               </div>
               {(() => {
                 const money = (v) => `${v < 0 ? "−" : ""}${Math.abs(v) >= 1e6 ? `$${(Math.abs(v) / 1e6).toFixed(2)}M` : `$${Math.round(Math.abs(v) / 1000)}K`}`;
-                if (!vmResult || vmRunning) return <div style={{ fontSize: 9, color: "var(--ink-faint)", padding: "6px 0" }}>{vmRunning ? "Recalculating both scenarios…" : "…"}</div>;
+                if (!vmResult || vmRunning) return <div style={{ fontSize: 12, color: "var(--ink-faint)", padding: "6px 0" }}>{vmRunning ? "Recalculating both scenarios…" : "…"}</div>;
                 const dSucc = (vmResult.loan.success - vmResult.cash.success) * 100;
                 const dMed = vmResult.loan.medEnd - vmResult.cash.medEnd;
                 const worse = dMed < 0;
@@ -10122,25 +10122,25 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                   <>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
                       <div style={{ padding: "10px 12px", background: "rgba(0,0,0,0.3)", border: "1px solid var(--accent)" }}>
-                        <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Cash purchase</div>
+                        <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Cash purchase</div>
                         <div style={{ fontSize: 18, color: "var(--accent)", fontWeight: 600, marginTop: 4 }}>{(vmResult.cash.success * 100).toFixed(1)}%</div>
-                        <div style={{ fontSize: 8, color: "var(--ink-dim)" }}>success · &gt;$800K @ 30yr</div>
-                        <div style={{ fontSize: 12, color: "var(--ink)", marginTop: 6, fontFamily: "'JetBrains Mono',monospace" }}>{money(vmResult.cash.medEnd)} <span style={{ fontSize: 8, color: "var(--ink-faint)" }}>median end</span></div>
+                        <div style={{ fontSize: 12, color: "var(--ink-dim)" }}>success · &gt;$800K @ 30yr</div>
+                        <div style={{ fontSize: 12, color: "var(--ink)", marginTop: 6, fontFamily: "'JetBrains Mono',monospace" }}>{money(vmResult.cash.medEnd)} <span style={{ fontSize: 12, color: "var(--ink-faint)" }}>median end</span></div>
                       </div>
                       <div style={{ padding: "10px 12px", background: "rgba(0,0,0,0.3)", border: "1px solid var(--info)" }}>
-                        <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5 }}>${(vmPrincipal / 1000).toFixed(0)}K MORTGAGE @ {vmRate}%</div>
+                        <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5 }}>${(vmPrincipal / 1000).toFixed(0)}K MORTGAGE @ {vmRate}%</div>
                         <div style={{ fontSize: 18, color: "var(--info)", fontWeight: 600, marginTop: 4 }}>{(vmResult.loan.success * 100).toFixed(1)}%</div>
-                        <div style={{ fontSize: 8, color: "var(--ink-dim)" }}>success · ${Math.round(vmResult.moPI).toLocaleString()}/mo P&amp;I</div>
-                        <div style={{ fontSize: 12, color: "var(--ink)", marginTop: 6, fontFamily: "'JetBrains Mono',monospace" }}>{money(vmResult.loan.medEnd)} <span style={{ fontSize: 8, color: "var(--ink-faint)" }}>median end</span></div>
+                        <div style={{ fontSize: 12, color: "var(--ink-dim)" }}>success · ${Math.round(vmResult.moPI).toLocaleString()}/mo P&amp;I</div>
+                        <div style={{ fontSize: 12, color: "var(--ink)", marginTop: 6, fontFamily: "'JetBrains Mono',monospace" }}>{money(vmResult.loan.medEnd)} <span style={{ fontSize: 12, color: "var(--ink-faint)" }}>median end</span></div>
                       </div>
                       <div style={{ padding: "10px 12px", background: worse ? "rgba(255,68,68,0.06)" : "rgba(0,255,136,0.06)", border: `1px solid ${worse ? "var(--crit)" : "var(--accent)"}` }}>
-                        <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5 }}>FINANCING vs CASH</div>
+                        <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5 }}>FINANCING vs CASH</div>
                         <div style={{ fontSize: 18, color: worse ? "var(--crit)" : "var(--accent)", fontWeight: 600, marginTop: 4 }}>{dSucc >= 0 ? "+" : ""}{dSucc.toFixed(1)} pts</div>
-                        <div style={{ fontSize: 8, color: "var(--ink-dim)" }}>success rate</div>
-                        <div style={{ fontSize: 12, color: worse ? "var(--crit)" : "var(--accent)", marginTop: 6, fontFamily: "'JetBrains Mono',monospace" }}>{dMed >= 0 ? "+" : "−"}{money(Math.abs(dMed))} <span style={{ fontSize: 8, color: "var(--ink-faint)" }}>median end</span></div>
+                        <div style={{ fontSize: 12, color: "var(--ink-dim)" }}>success rate</div>
+                        <div style={{ fontSize: 12, color: worse ? "var(--crit)" : "var(--accent)", marginTop: 6, fontFamily: "'JetBrains Mono',monospace" }}>{dMed >= 0 ? "+" : "−"}{money(Math.abs(dMed))} <span style={{ fontSize: 12, color: "var(--ink-faint)" }}>median end</span></div>
                       </div>
                     </div>
-                    <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 10, fontStyle: "italic", lineHeight: 1.6 }}>
+                    <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 10, fontStyle: "italic", lineHeight: 1.6 }}>
                       {vmPrincipal === 0
                         ? "Slide the principal up to model financing part of the purchase."
                         : <>At ${vmPrincipal.toLocaleString()} / {vmRate}% / {vmTerm}yr the loan costs <span style={{ color: "var(--ink-dim)" }}>~{money(vmResult.totalInterest)} in total interest</span> (${Math.round(vmResult.moPI).toLocaleString()}/mo). {worse
@@ -10154,7 +10154,7 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
             {/* SCENARIO PROBABILITY STRESS PANEL */}
             <div style={{ marginBottom: 14, padding: 12, background: "rgba(255,170,0,0.04)", border: "1px solid #3a2a1a" }}>
-              <div style={{ fontSize: 9, color: "var(--warn)", letterSpacing: 1, marginBottom: 8 }}>
+              <div style={{ fontSize: 11, color: "var(--warn)", letterSpacing: 1, marginBottom: 8 }}>
                 ◉ SCENARIO PROBABILITY STRESS — flex weights to test model uncertainty (re-runs all sims)
               </div>
               <div style={{ display: "flex", gap: 6, marginBottom: 10, flexWrap: "wrap", alignItems: "center" }}>
@@ -10166,21 +10166,21 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                       background: scenarioPreset === key ? `${p.color}22` : "transparent",
                       border: `1px solid ${scenarioPreset === key ? p.color : "var(--line)"}`,
                       color: scenarioPreset === key ? p.color : "var(--ink-dim)",
-                      padding: "6px 12px", fontSize: 9, cursor: simRunning ? "wait" : "pointer", fontFamily: "inherit",
+                      padding: "6px 12px", fontSize: 12, cursor: simRunning ? "wait" : "pointer", fontFamily: "inherit",
                       letterSpacing: 1, fontWeight: scenarioPreset === key ? 700 : 400,
                       opacity: simRunning ? 0.5 : 1,
                     }}>
                     {p.label}
                   </button>
                 ))}
-                {simRunning && <span style={{ fontSize: 8, color: "var(--warn)", letterSpacing: 0.5, marginLeft: 6, animation: "breathe 1s ease-in-out infinite" }}>⟳ RE-RUNNING 30K ITERATIONS...</span>}
+                {simRunning && <span style={{ fontSize: 11, color: "var(--warn)", letterSpacing: 0.5, marginLeft: 6, animation: "breathe 1s ease-in-out infinite" }}>⟳ RE-RUNNING 30K ITERATIONS...</span>}
               </div>
-              <div style={{ fontSize: 8, color: "var(--ink-dim)", marginBottom: 8, fontStyle: "italic" }}>{PROB_PRESETS[scenarioPreset].desc}</div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 4, fontSize: 8 }}>
+              <div style={{ fontSize: 12, color: "var(--ink-dim)", marginBottom: 8, fontStyle: "italic" }}>{PROB_PRESETS[scenarioPreset].desc}</div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 4, fontSize: 12 }}>
                 {Object.entries(PROB_PRESETS[scenarioPreset].probs).map(([k, v]) => (
                   <div key={k} style={{ background: "rgba(0,0,0,0.3)", padding: "5px 6px", textAlign: "center", border: "1px solid rgba(26,58,42,0.4)" }}>
-                    <div style={{ color: "var(--ink-dim)", letterSpacing: 0.5, fontSize: 8, marginBottom: 2 }}>{k.toUpperCase().slice(0, 4)}</div>
-                    <div style={{ color: PROB_PRESETS[scenarioPreset].color, fontWeight: 700, fontSize: 11 }}>{(v * 100).toFixed(0)}%</div>
+                    <div style={{ color: "var(--ink-dim)", letterSpacing: 0.5, fontSize: 11, marginBottom: 2 }}>{k.toUpperCase().slice(0, 4)}</div>
+                    <div style={{ color: PROB_PRESETS[scenarioPreset].color, fontWeight: 700, fontSize: 12 }}>{(v * 100).toFixed(0)}%</div>
                   </div>
                 ))}
               </div>
@@ -10198,11 +10198,11 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                 return (
                   <div style={{ marginTop: 10, padding: "8px 10px", background: "rgba(0,0,0,0.25)", border: "1px solid rgba(26,58,42,0.5)" }}>
                     <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "baseline" }}>
-                      <span style={{ fontSize: 8, color: "var(--ink-dim)", letterSpacing: 1 }}>EXPECTED EQUITY RETURN (under this scenario)</span>
+                      <span style={{ fontSize: 11, color: "var(--ink-dim)", letterSpacing: 1 }}>EXPECTED EQUITY RETURN (under this scenario)</span>
                       <span style={{ fontSize: 13, color: PROB_PRESETS[scenarioPreset].color, fontWeight: 700 }}>{(expEquity * 100).toFixed(1)}%</span>
-                      <span style={{ fontSize: 8, color: "var(--ink-dim)" }}>nominal · {(expEquityReal * 100).toFixed(1)}% real (after {(expInflation * 100).toFixed(1)}% inflation)</span>
+                      <span style={{ fontSize: 12, color: "var(--ink-dim)" }}>nominal · {(expEquityReal * 100).toFixed(1)}% real (after {(expInflation * 100).toFixed(1)}% inflation)</span>
                     </div>
-                    <div style={{ fontSize: 9, color: "var(--ink-dim)", marginTop: 6, lineHeight: 1.6 }}>
+                    <div style={{ fontSize: 12, color: "var(--ink-dim)", marginTop: 6, lineHeight: 1.6 }}>
                       <span style={{ color: "var(--ink-dim)" }}>Historical anchor: </span>US equities have returned ~{(HIST_NOM * 100).toFixed(0)}% nominal AAGR / ~{(HIST_REAL * 100).toFixed(0)}% real CAGR since 1926.
                       Your active scenario is <span style={{ color: nomGap < -0.02 ? "var(--warn)" : nomGap > 0.02 ? "var(--info)" : "var(--ink)", fontWeight: 600 }}>
                         {Math.abs(nomGap) < 0.01 ? "in line with history" : nomGap < 0 ? `${Math.abs(nomGap * 100).toFixed(1)}pp below history` : `${(nomGap * 100).toFixed(1)}pp above history`}
@@ -10211,14 +10211,14 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                       {nomGap > 0.02 && "This is an optimistic model — outcomes will be biased toward favorable scenarios."}
                       {Math.abs(nomGap) <= 0.02 && "Outcomes should roughly reflect historical experience on average."}
                     </div>
-                    <div style={{ fontSize: 8, color: "var(--ink-faint)", marginTop: 6, fontStyle: "italic" }}>
+                    <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 6, fontStyle: "italic" }}>
                       Danger Close uses a regime-switching mixture model (not the classical mean+SD Monte Carlo). The expected return above is the probability-weighted average across the 6 regimes. The AAGR/CAGR distinction that affects single-mean models doesn't apply here in the same form — see the documentation for details.
                     </div>
                   </div>
                 );
               })()}
               {scenarioPreset !== "base" && (
-                <div style={{ fontSize: 8, color: "var(--warn)", marginTop: 8, padding: "5px 8px", background: "rgba(255,170,0,0.06)", borderLeft: "2px solid var(--warn)" }}>
+                <div style={{ fontSize: 12, color: "var(--warn)", marginTop: 8, padding: "5px 8px", background: "rgba(255,170,0,0.06)", borderLeft: "2px solid var(--warn)" }}>
                   ⚠ Non-base scenario active. Compare success rate vs BASE preset to gauge MODEL uncertainty (vs sampling noise from iteration count).
                 </div>
               )}
@@ -10238,14 +10238,14 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
               ];
               return (
                 <div>
-                  <div style={{ fontSize: 9, color: "var(--ink-dim)", lineHeight: 1.6, padding: "9px 12px", marginBottom: 12, border: "1px solid var(--line)", background: "rgba(0,0,0,0.2)", borderRadius: 3 }}>
+                  <div style={{ fontSize: 12, color: "var(--ink-dim)", lineHeight: 1.6, padding: "9px 12px", marginBottom: 12, border: "1px solid var(--line)", background: "rgba(0,0,0,0.2)", borderRadius: 3 }}>
                     <span style={{ color: "var(--info)", fontWeight: 600 }} className="lbl">How these compare to the headline number:</span> the big success rate at the top of the screen is the <span style={{ color: "var(--ink)" }}>planned-path</span> figure — % of runs ending above <span style={{ color: "var(--ink)" }}>$800K</span> over your full plan, with <span style={{ color: "var(--ink)" }}>no LTC or mortality shocks</span>. The runs below use a lower <span style={{ color: "var(--ink)" }}>$500K</span> legacy threshold, and <span style={{ color: "var(--ink)" }}>RUN C adds LTC + mortality shocks</span>, so RUN C reads lower on purpose — it's a harsher question, not a contradiction of the headline. <span style={{ color: "var(--ink)" }} className="lbl">Run d</span> is harsher still: 35 years, with sustained late-life care drawn per path instead of RUN C's single capped shock.
                   </div>
                   {/* ── Percentile Summary Table ── */}
-                  <div style={{ display: "grid", gridTemplateColumns: `140px repeat(${runs.length}, 1fr)`, gap: 0, fontSize: 10, marginBottom: 16 }}>
-                    <div style={{ padding: "8px 10px", borderBottom: "2px solid var(--line)", color: "var(--ink-faint)", fontSize: 8 }} className="lbl">Metric</div>
+                  <div style={{ display: "grid", gridTemplateColumns: `140px repeat(${runs.length}, 1fr)`, gap: 0, fontSize: 12, marginBottom: 16 }}>
+                    <div style={{ padding: "8px 10px", borderBottom: "2px solid var(--line)", color: "var(--ink-faint)", fontSize: 12 }} className="lbl">Metric</div>
                     {runs.map(r => (
-                      <div key={r.label} style={{ padding: "8px 10px", borderBottom: `2px solid ${r.color}`, color: r.color, fontWeight: 600, textAlign: "center", fontSize: 8 }}>
+                      <div key={r.label} style={{ padding: "8px 10px", borderBottom: `2px solid ${r.color}`, color: r.color, fontWeight: 600, textAlign: "center", fontSize: 12 }}>
                         {r.label}<br/><span style={{ color: "var(--ink-faint)", fontWeight: 400 }}>{r.sub}</span>
                       </div>
                     ))}
@@ -10264,7 +10264,7 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                       { label: "Iterations", fn: d => d.iterations.toLocaleString(), cf: () => "var(--ink-faint)" },
                       { label: "Time Horizon", fn: d => `${d.totalYears} years`, cf: () => "var(--ink-faint)" },
                     ].map((row, ri) => [
-                      <div key={`l${ri}`} style={{ padding: "6px 10px", borderBottom: "1px solid var(--line)", color: "var(--ink-dim)", fontSize: 9 }}>{row.label}</div>,
+                      <div key={`l${ri}`} style={{ padding: "6px 10px", borderBottom: "1px solid var(--line)", color: "var(--ink-dim)", fontSize: 12 }}>{row.label}</div>,
                       ...runs.map((r, ci) => (
                         <div key={`${ri}-${ci}`} style={{ padding: "6px 10px", borderBottom: "1px solid var(--line)", textAlign: "center", color: row.cf(r.data), fontWeight: 500 }}>
                           {row.fn(r.data)}
@@ -10274,14 +10274,14 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                   </div>
 
                   {/* ── Year-by-Year Median Path ── */}
-                  <div style={{ fontSize: 9, color: "var(--accent)", fontWeight: 600, marginBottom: 8 }}>30-YEAR MEDIAN TRAJECTORY (RUN C — WITH LTC SHOCKS)</div>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 0, fontSize: 9 }}>
-                    <div style={{ padding: "5px 8px", borderBottom: "2px solid var(--line)", color: "var(--ink-faint)", fontWeight: 600, fontSize: 8 }} className="lbl">Year</div>
-                    <div style={{ padding: "5px 8px", borderBottom: "2px solid var(--crit)", color: "var(--crit)", fontWeight: 600, textAlign: "right", fontSize: 8 }}>10TH</div>
-                    <div style={{ padding: "5px 8px", borderBottom: "2px solid var(--warn)", color: "var(--warn)", fontWeight: 600, textAlign: "right", fontSize: 8 }}>25TH</div>
-                    <div style={{ padding: "5px 8px", borderBottom: "2px solid var(--accent)", color: "var(--accent)", fontWeight: 600, textAlign: "right", fontSize: 8 }} className="lbl">Median</div>
-                    <div style={{ padding: "5px 8px", borderBottom: "2px solid var(--info)", color: "var(--info)", fontWeight: 600, textAlign: "right", fontSize: 8 }}>75TH</div>
-                    <div style={{ padding: "5px 8px", borderBottom: "2px solid var(--info)", color: "var(--info)", fontWeight: 600, textAlign: "right", fontSize: 8 }}>90TH</div>
+                  <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600, marginBottom: 8 }}>30-YEAR MEDIAN TRAJECTORY (RUN C — WITH LTC SHOCKS)</div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 0, fontSize: 12 }}>
+                    <div style={{ padding: "5px 8px", borderBottom: "2px solid var(--line)", color: "var(--ink-faint)", fontWeight: 600, fontSize: 12 }} className="lbl">Year</div>
+                    <div style={{ padding: "5px 8px", borderBottom: "2px solid var(--crit)", color: "var(--crit)", fontWeight: 600, textAlign: "right", fontSize: 12 }}>10TH</div>
+                    <div style={{ padding: "5px 8px", borderBottom: "2px solid var(--warn)", color: "var(--warn)", fontWeight: 600, textAlign: "right", fontSize: 12 }}>25TH</div>
+                    <div style={{ padding: "5px 8px", borderBottom: "2px solid var(--accent)", color: "var(--accent)", fontWeight: 600, textAlign: "right", fontSize: 12 }} className="lbl">Median</div>
+                    <div style={{ padding: "5px 8px", borderBottom: "2px solid var(--info)", color: "var(--info)", fontWeight: 600, textAlign: "right", fontSize: 12 }}>75TH</div>
+                    <div style={{ padding: "5px 8px", borderBottom: "2px solid var(--info)", color: "var(--info)", fontWeight: 600, textAlign: "right", fontSize: 12 }}>90TH</div>
                     {runC.pctByYear.p50.map((_, yi) => {
                       const yr = PLAN_TIMELINE.asOfYear + yi;
                       const isRetire = yr === retireYear;
@@ -10306,16 +10306,16 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
                   {/* ── LTC Impact ── */}
                   <div style={{ marginTop: 16, padding: 12, background: "rgba(255,68,68,0.04)", border: "1px solid rgba(255,68,68,0.2)" }}>
-                    <div style={{ fontSize: 9, color: "var(--crit)", letterSpacing: 1, marginBottom: 6 }} className="lbl">LTC shock impact analysis</div>
-                    <div style={{ fontSize: 9, color: "var(--warn)", marginBottom: 8, lineHeight: 1.5 }}>Assumes <span style={{ fontWeight: 600 }}>no long-term-care insurance benefit</span> — the figures below are a gross, out-of-pocket one-time shock ($150K–$300K per person, in the modeled care years). If you carry LTC or hybrid coverage, your real exposure is lower by the policy's benefit.</div>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, fontSize: 10 }}>
-                      <div><div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Median end (with LTC)</div><div style={{ fontSize: 16, fontWeight: 600, color: "var(--crit)" }}>{fmt$(runC.p50)}</div></div>
-                      <div><div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Median end (no LTC)</div><div style={{ fontSize: 16, fontWeight: 600, color: "var(--accent)" }}>{fmt$(runC_noShock.p50)}</div></div>
-                      <div><div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">LTC cost (median)</div><div style={{ fontSize: 16, fontWeight: 600, color: "var(--warn)" }}>{fmt$(runC_noShock.p50 - runC.p50)}</div></div>
-                      <div><div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Ruin rate delta</div><div style={{ fontSize: 16, fontWeight: 600, color: runC.ruin - runC_noShock.ruin > 0.02 ? "var(--crit)" : "var(--warn)" }}>{fmtP(runC.ruin)} vs {fmtP(runC_noShock.ruin)}</div></div>
+                    <div style={{ fontSize: 11, color: "var(--crit)", letterSpacing: 1, marginBottom: 6 }} className="lbl">LTC shock impact analysis</div>
+                    <div style={{ fontSize: 12, color: "var(--warn)", marginBottom: 8, lineHeight: 1.5 }}>Assumes <span style={{ fontWeight: 600 }}>no long-term-care insurance benefit</span> — the figures below are a gross, out-of-pocket one-time shock ($150K–$300K per person, in the modeled care years). If you carry LTC or hybrid coverage, your real exposure is lower by the policy's benefit.</div>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, fontSize: 12 }}>
+                      <div><div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Median end (with LTC)</div><div style={{ fontSize: 16, fontWeight: 600, color: "var(--crit)" }}>{fmt$(runC.p50)}</div></div>
+                      <div><div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Median end (no LTC)</div><div style={{ fontSize: 16, fontWeight: 600, color: "var(--accent)" }}>{fmt$(runC_noShock.p50)}</div></div>
+                      <div><div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">LTC cost (median)</div><div style={{ fontSize: 16, fontWeight: 600, color: "var(--warn)" }}>{fmt$(runC_noShock.p50 - runC.p50)}</div></div>
+                      <div><div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Ruin rate delta</div><div style={{ fontSize: 16, fontWeight: 600, color: runC.ruin - runC_noShock.ruin > 0.02 ? "var(--crit)" : "var(--warn)" }}>{fmtP(runC.ruin)} vs {fmtP(runC_noShock.ruin)}</div></div>
                     </div>
                     {runD_probLTC && (
-                      <div style={{ fontSize: 9, color: "var(--ink-dim)", marginTop: 10, paddingTop: 8, borderTop: "1px solid rgba(255,68,68,0.2)", lineHeight: 1.6 }}>
+                      <div style={{ fontSize: 12, color: "var(--ink-dim)", marginTop: 10, paddingTop: 8, borderTop: "1px solid rgba(255,68,68,0.2)", lineHeight: 1.6 }}>
                         <span style={{ color: "var(--crit)", fontWeight: 600 }} className="lbl">Run d — duration tail:</span> with care duration drawn per path (45% no paid care, up to 8 years at ${(LTC_CARE_ANNUAL / 1000).toFixed(0)}K/yr today's $, inflation +1.5%/yr, landing in each spouse's final years), ruin is <span style={{ color: runD_probLTC.ruin > 0.05 ? "var(--crit)" : "var(--warn)", fontWeight: 600 }}>{fmtP(runD_probLTC.ruin)}</span> vs {fmtP(runC.ruin)} under the single-shock model — same expected cost, very different tail. Fixed-duration version in the Stress tab ("LTC Marathon").
                       </div>
                     )}
@@ -10333,28 +10333,28 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                     const hasLTCprem = (typeof EXPENSES !== "undefined" ? EXPENSES : []).some(e => /ltc|long.?term/i.test(e.label || ""));
                     return (
                       <div style={{ marginTop: 12, padding: 12, background: "rgba(0,255,136,0.04)", border: "1px solid rgba(0,255,136,0.25)" }}>
-                        <div style={{ fontSize: 9, color: "var(--accent)", letterSpacing: 1, marginBottom: 6 }} className="lbl">LTC impact analysis — with insurance</div>
-                        <div style={{ fontSize: 9, color: "var(--ink-dim)", marginBottom: 10, lineHeight: 1.5 }}>
+                        <div style={{ fontSize: 11, color: "var(--accent)", letterSpacing: 1, marginBottom: 6 }} className="lbl">LTC impact analysis — with insurance</div>
+                        <div style={{ fontSize: 12, color: "var(--ink-dim)", marginBottom: 10, lineHeight: 1.5 }}>
                           Estimates the same shock <span style={{ fontWeight: 600 }}>net of an insurance / hybrid policy benefit</span>. RUN C models the gross cost; this card subtracts your policy benefit to approximate the with-coverage outcome. Set your policy's benefit below.
                         </div>
                         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12, flexWrap: "wrap" }}>
-                          <span style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5 }}>POLICY BENEFIT (per event):</span>
+                          <span style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5 }}>POLICY BENEFIT (per event):</span>
                           <input type="range" min={0} max={500000} step={25000} value={ltcBenefit}
                             onChange={e => setLtcBenefit(Number(e.target.value))}
                             style={{ width: 180, accentColor: "var(--accent)" }} />
                           <span style={{ fontSize: 14, fontWeight: 700, color: "var(--accent)" }}>{fmt$(ltcBenefit)}</span>
                         </div>
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, fontSize: 10 }}>
-                          <div><div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">LTC event cost (median)</div><div style={{ fontSize: 16, fontWeight: 600, color: "var(--warn)" }}>{fmt$(grossCost)}</div><div style={{ fontSize: 8, color: "var(--ink-faint)" }}>modeled $150K–$300K</div></div>
-                          <div><div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Insurance covers</div><div style={{ fontSize: 16, fontWeight: 600, color: "var(--info)" }}>{fmt$(covered)}</div><div style={{ fontSize: 8, color: "var(--ink-faint)" }}>{(coverFrac * 100).toFixed(0)}% of the hit</div></div>
-                          <div><div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Remaining out-of-pocket</div><div style={{ fontSize: 16, fontWeight: 600, color: netOOP > 0 ? "var(--crit)" : "var(--accent)" }}>{fmt$(netOOP)}</div></div>
-                          <div><div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Median end (w/ insurance)</div><div style={{ fontSize: 16, fontWeight: 600, color: "var(--accent)" }}>{fmt$(medianWithIns)}</div><div style={{ fontSize: 8, color: "var(--ink-faint)" }}>vs {fmt$(runC.p50)} uninsured</div></div>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, fontSize: 12 }}>
+                          <div><div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">LTC event cost (median)</div><div style={{ fontSize: 16, fontWeight: 600, color: "var(--warn)" }}>{fmt$(grossCost)}</div><div style={{ fontSize: 12, color: "var(--ink-faint)" }}>modeled $150K–$300K</div></div>
+                          <div><div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Insurance covers</div><div style={{ fontSize: 16, fontWeight: 600, color: "var(--info)" }}>{fmt$(covered)}</div><div style={{ fontSize: 12, color: "var(--ink-faint)" }}>{(coverFrac * 100).toFixed(0)}% of the hit</div></div>
+                          <div><div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Remaining out-of-pocket</div><div style={{ fontSize: 16, fontWeight: 600, color: netOOP > 0 ? "var(--crit)" : "var(--accent)" }}>{fmt$(netOOP)}</div></div>
+                          <div><div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Median end (w/ insurance)</div><div style={{ fontSize: 16, fontWeight: 600, color: "var(--accent)" }}>{fmt$(medianWithIns)}</div><div style={{ fontSize: 12, color: "var(--ink-faint)" }}>vs {fmt$(runC.p50)} uninsured</div></div>
                         </div>
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12, fontSize: 10, marginTop: 10 }}>
-                          <div><div style={{ fontSize: 8, color: "var(--ink-faint)" }}>SUCCESS RATE (&gt;$500K)</div><div style={{ fontSize: 14, fontWeight: 600, color: "var(--accent)" }}>~{fmtP(successWithIns)} <span style={{ fontSize: 8, color: "var(--ink-dim)" }}>vs {fmtP(runC.success)} uninsured</span></div></div>
-                          <div><div style={{ fontSize: 9, color: "var(--ink-faint)" }} className="lbl">Survivor impact</div><div style={{ fontSize: 9, color: "var(--ink)", lineHeight: 1.4 }}>Coverage preserves ~{fmt$(covered)} that would otherwise come out of the portfolio a survivor lives on.</div></div>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12, fontSize: 12, marginTop: 10 }}>
+                          <div><div style={{ fontSize: 12, color: "var(--ink-faint)" }}>SUCCESS RATE (&gt;$500K)</div><div style={{ fontSize: 14, fontWeight: 600, color: "var(--accent)" }}>~{fmtP(successWithIns)} <span style={{ fontSize: 12, color: "var(--ink-dim)" }}>vs {fmtP(runC.success)} uninsured</span></div></div>
+                          <div><div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Survivor impact</div><div style={{ fontSize: 11, color: "var(--ink)", lineHeight: 1.4 }}>Coverage preserves ~{fmt$(covered)} that would otherwise come out of the portfolio a survivor lives on.</div></div>
                         </div>
-                        <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 10, lineHeight: 1.5, fontStyle: "italic" }}>
+                        <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 10, lineHeight: 1.5, fontStyle: "italic" }}>
                           Premiums: {hasLTCprem ? "an LTC / long-term-care line is present in your expenses, so the premium cost IS already in the projection." : "no LTC premium line was found in your expenses — if you carry a policy, add its premium on the My Data expenses so the plan reflects the ongoing cost."} This is an approximation (it nets a flat benefit against the median shock; real policies have daily limits, elimination periods, and benefit caps). Confirm your actual coverage with your policy and a fee-only advisor.
                         </div>
                       </div>
@@ -10471,13 +10471,13 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
             <div>
               {/* Header */}
               <div className="card" style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600 }}>HISTORICAL BACKTEST — {planYears}-YEAR RETIREMENT, REAL MARKET SEQUENCES</div>
-                <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 4, lineHeight: 1.5 }}>
+                <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600 }}>HISTORICAL BACKTEST — {planYears}-YEAR RETIREMENT, REAL MARKET SEQUENCES</div>
+                <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 4, lineHeight: 1.5 }}>
                   Runs your plan against actual year-by-year market history ({firstStart}–{lastStart}) instead of simulated returns. Each "start year" asks:
                   <em> "If I had retired into that exact market sequence, would my plan have survived {planYears} years?"</em> Complements the Monte Carlo —
                   Monte Carlo samples possible futures; this replays real pasts, including the actual ordering of good and bad years (sequence risk).
                 </div>
-                <div style={{ fontSize: 8, color: "var(--ink-faint)", marginTop: 6, fontStyle: "italic" }}>
+                <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 6, fontStyle: "italic" }}>
                   Data: S&P 500 total return, 10-yr US Treasury, 3-mo T-Bill, CPI inflation (Damodaran/NYU Stern & BLS, public). Returns applied to your live asset mix
                   (cash {(wB1*100).toFixed(0)}%, bonds {(wB2*100).toFixed(0)}%, equity {(wB3*100).toFixed(0)}%, hedge {(wB4*100).toFixed(0)}%). Sequences extending past {lastStart} use long-run averages for the tail.
                 </div>
@@ -10485,30 +10485,30 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
               {/* Survival summary */}
               <div className="card" style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, marginBottom: 10 }}>SURVIVAL ACROSS ALL HISTORICAL START YEARS ({firstStart}–{lastStart})</div>
+                <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600, marginBottom: 10 }}>SURVIVAL ACROSS ALL HISTORICAL START YEARS ({firstStart}–{lastStart})</div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
                   <div style={{ padding: 12, background: "rgba(0,0,0,0.3)", border: "1px solid var(--line)" }}>
-                    <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Survival rate (your asset mix)</div>
+                    <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Survival rate (your asset mix)</div>
                     <div style={{ fontSize: 26, fontWeight: 700, color: survColor(survBucket) }}>{fmtPct(survBucket)}</div>
-                    <div style={{ fontSize: 8, color: "var(--ink-dim)" }}>{sweepBucket.filter(s => s.survived).length} of {sweepBucket.length} start years survived</div>
+                    <div style={{ fontSize: 12, color: "var(--ink-dim)" }}>{sweepBucket.filter(s => s.survived).length} of {sweepBucket.length} start years survived</div>
                   </div>
                   <div style={{ padding: 12, background: "rgba(0,0,0,0.3)", border: "1px solid var(--line)" }}>
-                    <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Cross-check (stock/bond blend)</div>
+                    <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Cross-check (stock/bond blend)</div>
                     <div style={{ fontSize: 26, fontWeight: 700, color: survColor(survBlend) }}>{fmtPct(survBlend)}</div>
-                    <div style={{ fontSize: 8, color: "var(--ink-dim)" }}>{(equityPct*100).toFixed(0)}% equity / {(bondPct*100).toFixed(0)}% bond / {(cashPct*100).toFixed(0)}% cash</div>
+                    <div style={{ fontSize: 12, color: "var(--ink-dim)" }}>{(equityPct*100).toFixed(0)}% equity / {(bondPct*100).toFixed(0)}% bond / {(cashPct*100).toFixed(0)}% cash</div>
                   </div>
                   <div style={{ padding: 12, background: "rgba(0,0,0,0.3)", border: "1px solid var(--line)" }}>
-                    <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Median ending (real $)</div>
+                    <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Median ending (real $)</div>
                     <div style={{ fontSize: 22, fontWeight: 700, color: "var(--ink)" }}>${(medianEndBucket / 1e6).toFixed(2)}M</div>
-                    <div style={{ fontSize: 8, color: "var(--ink-dim)" }}>in today's dollars, across all starts</div>
+                    <div style={{ fontSize: 12, color: "var(--ink-dim)" }}>in today's dollars, across all starts</div>
                   </div>
                   <div style={{ padding: 12, background: "rgba(0,0,0,0.3)", border: "1px solid var(--line)" }}>
-                    <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Worst start year</div>
+                    <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Worst start year</div>
                     <div style={{ fontSize: 22, fontWeight: 700, color: worstSeq.survived ? "var(--warn)" : "var(--crit)" }}>{worstSeq.histStartYear}</div>
-                    <div style={{ fontSize: 8, color: "var(--ink-dim)" }}>{worstSeq.survived ? `ended $${(worstSeq.endReal/1e6).toFixed(2)}M real` : `depleted ${worstSeq.failedYear}`}</div>
+                    <div style={{ fontSize: 12, color: "var(--ink-dim)" }}>{worstSeq.survived ? `ended $${(worstSeq.endReal/1e6).toFixed(2)}M real` : `depleted ${worstSeq.failedYear}`}</div>
                   </div>
                 </div>
-                <div style={{ marginTop: 10, fontSize: 9, color: "var(--ink-dim)", lineHeight: 1.5 }}>
+                <div style={{ marginTop: 10, fontSize: 12, color: "var(--ink-dim)", lineHeight: 1.5 }}>
                   Compare this survival rate to your Monte Carlo success rate — but note they measure different bars: survival here means "never hit $0",
                   while the MC headline success is "ended above $500K", and the MC also charges LTC shocks, one-time expenses, and Roth-conversion tax drag
                   that this backtest deliberately omits. Expect the backtest to read higher for those structural reasons alone; any remaining gap is your
@@ -10522,7 +10522,7 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                   const wr = startBal > 0 ? (fullDraw / startBal) * 100 : 0;
                   const coverage = fullSpend > 0 ? (fullGuar / fullSpend) * 100 : 0;
                   return (
-                    <div style={{ marginTop: 10, padding: "10px 12px", background: "rgba(0,255,136,0.04)", borderLeft: "2px solid var(--accent)", fontSize: 9, color: "var(--ink)", lineHeight: 1.6 }}>
+                    <div style={{ marginTop: 10, padding: "10px 12px", background: "rgba(0,255,136,0.04)", borderLeft: "2px solid var(--accent)", fontSize: 12, color: "var(--ink)", lineHeight: 1.6 }}>
                       <span style={{ color: "var(--accent)", fontWeight: 600 }}>Why the survival rate is so high: </span>
                       your guaranteed income (Social Security + pension ≈ ${Math.round(fullGuar / 1000)}K/yr) covers about <span style={{ color: "var(--accent)", fontWeight: 600 }}>{coverage.toFixed(0)}%</span> of
                       your ${Math.round(fullSpend / 1000)}K/yr spending once both SS checks flow. That leaves a portfolio draw of only ~${Math.round(fullDraw / 1000)}K/yr —
@@ -10535,11 +10535,11 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
               {/* Named worst-case years */}
               <div className="card" style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }}>THE INFAMOUS START YEARS — WHAT FAILURE (OR SURVIVAL) LOOKS LIKE</div>
-                <div style={{ fontSize: 9, color: "var(--ink-faint)", marginBottom: 12 }}>Retiring into history's hardest sequences. 1966 is generally considered the worst real start year in US history — stagflation gutted balanced portfolios for a decade.</div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 90px 110px 110px 90px", gap: 0, fontSize: 9 }}>
+                <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }}>THE INFAMOUS START YEARS — WHAT FAILURE (OR SURVIVAL) LOOKS LIKE</div>
+                <div style={{ fontSize: 12, color: "var(--ink-faint)", marginBottom: 12 }}>Retiring into history's hardest sequences. 1966 is generally considered the worst real start year in US history — stagflation gutted balanced portfolios for a decade.</div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 90px 110px 110px 90px", gap: 0, fontSize: 12 }}>
                   {["Start Year Scenario", "Survived?", "End (real $)", "Low point (real $)", "Depleted"].map((h, i) => (
-                    <div key={i} style={{ padding: "6px 8px", background: "rgba(0,255,136,0.05)", border: "1px solid var(--line)", color: "var(--ink-dim)", letterSpacing: 0.5, fontSize: 8, fontWeight: 600 }}>{h}</div>
+                    <div key={i} style={{ padding: "6px 8px", background: "rgba(0,255,136,0.05)", border: "1px solid var(--line)", color: "var(--ink-dim)", letterSpacing: 0.5, fontSize: 11, fontWeight: 600 }}>{h}</div>
                   ))}
                   {namedRuns.map((n, i) => {
                     const lowPt = n.run.path.reduce((lo, p) => p.real < lo ? p.real : lo, Infinity);
@@ -10552,15 +10552,15 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                     ];
                   }).flat()}
                 </div>
-                <div style={{ fontSize: 8, color: "var(--ink-faint)", marginTop: 8, fontStyle: "italic" }}>
+                <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 8, fontStyle: "italic" }}>
                   "Low point" is the lowest real (inflation-adjusted) balance the portfolio reached at any point during the sequence — the moment of maximum fear. Surviving on paper while watching your real wealth halve is psychologically very different from a smooth path.
                 </div>
               </div>
 
               {/* Visual: balance trajectory for worst named survivor + the worst overall */}
               <div className="card" style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }} className="lbl">Real balance path — 1966 retiree (the stress case)</div>
-                <div style={{ fontSize: 9, color: "var(--ink-faint)", marginBottom: 10 }}>Inflation-adjusted portfolio value year by year if you had retired in 1966. Watch the real drawdown through the 1970s.</div>
+                <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }} className="lbl">Real balance path — 1966 retiree (the stress case)</div>
+                <div style={{ fontSize: 12, color: "var(--ink-faint)", marginBottom: 10 }}>Inflation-adjusted portfolio value year by year if you had retired in 1966. Watch the real drawdown through the 1970s.</div>
                 {(() => {
                   const run1966 = runSequence(1966, "bucket");
                   const maxBal = Math.max(...run1966.path.map(p => p.real), startBal);
@@ -10574,13 +10574,13 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                     </div>
                   );
                 })()}
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 8, color: "var(--ink-dim)", marginTop: 4 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "var(--ink-dim)", marginTop: 4 }}>
                   <span>{_retireYr} (retire)</span><span>real $ — green {">"}75% of start · amber 40–75% · red {"<"}40%</span><span>{_horizonYr}</span>
                 </div>
               </div>
 
               {/* Footer caveat */}
-              <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 8, padding: "8px 12px", fontStyle: "italic", lineHeight: 1.6, textAlign: "center" }}>
+              <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 8, padding: "8px 12px", fontStyle: "italic", lineHeight: 1.6, textAlign: "center" }}>
                 Backtesting uses real historical returns but assumes your current asset mix is held throughout (annual rebalancing, no allocation drift). Social Security grows with actual historical inflation as a COLA proxy; the pension is held flat (no COLA, per plan). It does NOT model taxes, Roth conversions, RMDs, or LTC shocks — those live in the Monte Carlo, Withdrawal, and Stress tabs. Past performance is not predictive; this answers "what if the future rhymes with a specific past," not "what will happen." Sequences after {lastStart} use long-run average returns for the remaining years.
               </div>
             </div>
@@ -10737,8 +10737,8 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
           return (
             <div>
               <div className="card" style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600 }} className="lbl">What breaks the plan — reverse stress test</div>
-                <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 4, lineHeight: 1.5 }}>
+                <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600 }} className="lbl">What breaks the plan — reverse stress test</div>
+                <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 4, lineHeight: 1.5 }}>
                   Instead of asking "what's my success rate," this solves for the <span style={{ color: "var(--ink)" }}>edges</span>: exactly how much spending, how big a shock,
                   how bad a market, or how many crash years it would take to actually break the plan. Computed under the active <span style={{ color: PROB_PRESETS[scenarioPreset].color, fontWeight: 600 }}>{PROB_PRESETS[scenarioPreset].label}</span> scenario
                   (~{(baseRealReturn * 100).toFixed(1)}% real return). Your steady-state withdrawal rate is just <span style={{ color: "var(--accent)", fontWeight: 600 }}>{baseDrawWR.toFixed(1)}%</span>, so expect these edges to be far away.
@@ -10749,13 +10749,13 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
               {items.map((it, i) => (
                 <div key={i} className="card" style={{ marginBottom: 12 }}>
-                  <div style={{ fontSize: 10, color: "var(--ink-dim)", marginBottom: 4 }}>{it.q}</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-dim)", marginBottom: 4 }}>{it.q}</div>
                   <div style={{ fontSize: 22, fontWeight: 700, color: it.color, marginBottom: 4 }}>{it.a}</div>
-                  <div style={{ fontSize: 9, color: "var(--ink)", lineHeight: 1.5 }}>{it.detail}</div>
+                  <div style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.5 }}>{it.detail}</div>
                 </div>
               ))}
 
-              <div style={{ fontSize: 9, color: "var(--ink-faint)", padding: "8px 12px", fontStyle: "italic", lineHeight: 1.6, textAlign: "center" }}>
+              <div style={{ fontSize: 12, color: "var(--ink-faint)", padding: "8px 12px", fontStyle: "italic", lineHeight: 1.6, textAlign: "center" }}>
                 Reverse stress test uses a deterministic projector (single average path, not a distribution) to find break-points. It does not model taxes or the timing nuance of real market sequences — for those, see the Monte Carlo and Backtest tabs. Thresholds move with the active scenario: switch to BEAR on the Monte Carlo tab to see how much the edges tighten under pessimistic assumptions.
               </div>
             </div>
@@ -10777,18 +10777,18 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
             return (
               <div>
                 <div className="card" style={{ marginBottom: 14 }}>
-                  <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600 }} className="lbl">Survivor scenario — not applicable (single household)</div>
-                  <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 4, lineHeight: 1.5 }}>
+                  <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600 }} className="lbl">Survivor scenario — not applicable (single household)</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 4, lineHeight: 1.5 }}>
                     You've set this plan up as a <span style={{ color: "var(--ink)" }}>single household</span>, so there's no surviving-spouse transition to model — no second Social Security check to lose, no switch in filing status, no widow(er)'s penalty. Your taxes are already computed at <span style={{ color: "var(--ink)" }}>Single</span> rates throughout.
                   </div>
                 </div>
                 <div className="card">
-                  <div style={{ fontSize: 10, color: "var(--violet)", fontWeight: 600, marginBottom: 6 }} className="lbl">What matters instead: the estate at end of plan</div>
-                  <div style={{ fontSize: 9, color: "var(--ink)", lineHeight: 1.7 }}>
+                  <div style={{ fontSize: 12, color: "var(--violet)", fontWeight: 600, marginBottom: 6 }} className="lbl">What matters instead: the estate at end of plan</div>
+                  <div style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.7 }}>
                     For a single person, the relevant end-of-life question is the <span style={{ color: "var(--ink)" }}>legacy / estate</span> you leave, not a survivor's finances. Use the <span style={{ color: "var(--info)" }}>Monte Carlo</span> and <span style={{ color: "var(--info)" }}>Trajectory</span> tabs to see the projected ending balance at each percentile through {_endYr} (your planning horizon), and the <span style={{ color: "var(--info)" }}>Roth</span> and <span style={{ color: "var(--info)" }}>Taxes</span> tabs to see how conversions affect what passes to your heirs tax-free. If estate tax is a concern, note this tool does not model federal or state estate tax — consult an estate attorney.
                   </div>
                 </div>
-                <div style={{ fontSize: 9, color: "var(--ink-faint)", padding: "8px 12px", fontStyle: "italic", lineHeight: 1.6, textAlign: "center" }}>
+                <div style={{ fontSize: 12, color: "var(--ink-faint)", padding: "8px 12px", fontStyle: "italic", lineHeight: 1.6, textAlign: "center" }}>
                   Switch the household type back to "Couple" on the My Data tab to model a surviving-spouse scenario.
                 </div>
               </div>
@@ -10843,26 +10843,26 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
           const Card = ({ c }) => (
             <div className="card" style={{ marginBottom: 14 }}>
-              <div style={{ fontSize: 10, color: "var(--warn)", fontWeight: 600, marginBottom: 8 }}>IF {c.deceasedName.toUpperCase()} DIES FIRST — {c.survivorName.toUpperCase()} SURVIVES</div>
+              <div style={{ fontSize: 12, color: "var(--warn)", fontWeight: 600, marginBottom: 8 }}>IF {c.deceasedName.toUpperCase()} DIES FIRST — {c.survivorName.toUpperCase()} SURVIVES</div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 10 }}>
                 <div style={{ padding: 10, background: "rgba(0,0,0,0.3)", border: "1px solid var(--line)" }}>
-                  <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Monthly income before</div>
+                  <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Monthly income before</div>
                   <div style={{ fontSize: 18, fontWeight: 600, color: "var(--ink)" }}>${Math.round(c.incomeBefore).toLocaleString()}</div>
                 </div>
                 <div style={{ padding: 10, background: "rgba(0,0,0,0.3)", border: "1px solid var(--line)" }}>
-                  <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Monthly income after</div>
+                  <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Monthly income after</div>
                   <div style={{ fontSize: 18, fontWeight: 600, color: "var(--warn)" }}>${Math.round(c.incomeAfter).toLocaleString()}</div>
                 </div>
                 <div style={{ padding: 10, background: "rgba(0,0,0,0.3)", border: "1px solid var(--line)" }}>
-                  <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Income drop</div>
+                  <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5 }} className="lbl">Income drop</div>
                   <div style={{ fontSize: 18, fontWeight: 600, color: c.incomeDropPct > 30 ? "var(--crit)" : "var(--warn)" }}>−{c.incomeDropPct.toFixed(0)}%</div>
                 </div>
                 <div style={{ padding: 10, background: "rgba(0,0,0,0.3)", border: "1px solid var(--line)" }}>
-                  <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5 }}>~YEARS ALONE</div>
+                  <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5 }}>~YEARS ALONE</div>
                   <div style={{ fontSize: 18, fontWeight: 600, color: c.yearsAlone >= 6 ? "var(--crit)" : "var(--warn)" }}>{c.yearsAlone} yr</div>
                 </div>
               </div>
-              <div style={{ fontSize: 9, color: "var(--ink)", lineHeight: 1.7 }}>
+              <div style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.7 }}>
                 <span style={{ color: "var(--ink-faint)" }}>Social Security:</span> Household drops from ${c.ssBefore.toLocaleString()}/mo (both checks) to ${Math.round(c.ssAfter).toLocaleString()}/mo.{" "}
                 {c.steppedUp
                   ? <span>{c.survivorName}'s own ${Math.round(c.survivorOwnSS).toLocaleString()}/mo <span style={{ color: "var(--info)" }}>steps up</span> to {c.deceasedName}'s larger ${Math.round(c.deceasedSS).toLocaleString()}/mo survivor benefit (a +${Math.round(c.stepUpAmount).toLocaleString()}/mo raise vs their own), but {c.deceasedName}'s check no longer stacks on top.</span>
@@ -10882,8 +10882,8 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
           return (
             <div>
               <div className="card" style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600 }} className="lbl">Survivor scenario — the widow(er)'s transition</div>
-                <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 4, lineHeight: 1.5 }}>
+                <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600 }} className="lbl">Survivor scenario — the widow(er)'s transition</div>
+                <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 4, lineHeight: 1.5 }}>
                   When one spouse dies, three things change at once: the household <span style={{ color: "var(--ink)" }}>loses the smaller Social Security check</span> (you keep only the larger),
                   the survivor's <span style={{ color: "var(--ink)" }}>tax filing flips to Single</span> (higher brackets, lower standard deduction — the "widow's penalty"), and <span style={{ color: "var(--ink)" }}>spending drops</span>, but by less than half.
                   This is one of the most under-modeled risks in retirement planning. Both cases below.
@@ -10895,15 +10895,15 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
               {/* Widow's penalty tax note */}
               <div className="card" style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 10, color: "var(--violet)", fontWeight: 600, marginBottom: 6 }} className="lbl">The widow's penalty (tax)</div>
-                <div style={{ fontSize: 9, color: "var(--ink)", lineHeight: 1.7 }}>
+                <div style={{ fontSize: 12, color: "var(--violet)", fontWeight: 600, marginBottom: 6 }} className="lbl">The widow's penalty (tax)</div>
+                <div style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.7 }}>
                   Beyond the income drop, the survivor files as <span style={{ color: "var(--ink)" }}>Single</span> starting the year after the death. The Single standard deduction is about half the MFJ amount,
                   and the brackets are roughly half as wide — so the <span style={{ color: "var(--warn)" }}>same income can land in a higher bracket</span>. A survivor with, say, $80K of income can pay noticeably more tax than the couple did on $90K.
                   This is a strong argument for <span style={{ color: "var(--info)" }}>front-loading Roth conversions while both spouses are alive and filing jointly</span> — exactly the strategy on your Roth tab. Converting now, at MFJ rates, shields the survivor from the higher Single rates later.
                 </div>
               </div>
 
-              <div style={{ fontSize: 9, color: "var(--ink-faint)", padding: "8px 12px", fontStyle: "italic", lineHeight: 1.6, textAlign: "center" }}>
+              <div style={{ fontSize: 12, color: "var(--ink-faint)", padding: "8px 12px", fontStyle: "italic", lineHeight: 1.6, textAlign: "center" }}>
                 Survivor spending assumed at ~75% of joint (housing and fixed costs don't halve). SS survivor rule simplified to "keep the larger benefit." Pension treated as joint &amp; survivor per the master prompt. Actual survivor benefits depend on claiming ages and the specific pension election — confirm with SSA and your pension administrator. Not financial advice.
               </div>
             </div>
@@ -10913,8 +10913,8 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
         {/* ═══ STRESS TESTS ═══ */}
         {activeTab === "stress" && (
           <div className="card">
-            <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }} className="lbl">Stress testing & risk report</div>
-            <div style={{ fontSize: 9, color: "var(--ink-faint)", marginBottom: 14 }}>
+            <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }} className="lbl">Stress testing & risk report</div>
+            <div style={{ fontSize: 12, color: "var(--ink-faint)", marginBottom: 14 }}>
               Scenario stress tests │ Riskalyze-style risk metrics │ Sequence-of-returns │ 5K iterations per scenario │ Retire {retireYear}
             </div>
             {extRunning && <div style={{ textAlign: "center", padding: 40, color: "var(--accent)", animation: "breathe 2s ease-in-out infinite" }}>⟳ RUNNING STRESS TESTS... 5K iterations × 7 scenarios</div>}
@@ -10926,33 +10926,33 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                 <div>
                   {/* ── Risk Metrics Panel ── */}
                   <div style={{ marginBottom: 16, padding: 14, background: "rgba(0,255,136,0.03)", border: "1px solid var(--line)" }}>
-                    <div style={{ fontSize: 9, color: "var(--accent)", letterSpacing: 1, marginBottom: 10 }} className="lbl">Riskalyze-style portfolio risk report</div>
-                    <div style={{ fontSize: 9, color: "var(--ink-faint)", marginBottom: 8, lineHeight: 1.4 }}>Computed from simulated balance paths (net of contributions/withdrawals and annual snapshots) — not pure investment returns, so Sharpe/Sortino read differently than fund-level figures. Drawdown is the median of each path's own worst peak-to-trough.</div>
+                    <div style={{ fontSize: 11, color: "var(--accent)", letterSpacing: 1, marginBottom: 10 }} className="lbl">Riskalyze-style portfolio risk report</div>
+                    <div style={{ fontSize: 12, color: "var(--ink-faint)", marginBottom: 8, lineHeight: 1.4 }}>Computed from simulated balance paths (net of contributions/withdrawals and annual snapshots) — not pure investment returns, so Sharpe/Sortino read differently than fund-level figures. Drawdown is the median of each path's own worst peak-to-trough.</div>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14 }}>
                       <div style={{ textAlign: "center", padding: "10px", border: "1px solid var(--line)" }}>
-                        <div style={{ fontSize: 8, color: "var(--ink-faint)" }} className="lbl">Risk number</div>
+                        <div style={{ fontSize: 12, color: "var(--ink-faint)" }} className="lbl">Risk number</div>
                         <div style={{ fontSize: 28, fontWeight: 700, color: riskMetrics.riskNum < 40 ? "var(--accent)" : riskMetrics.riskNum < 60 ? "var(--warn)" : "var(--crit)" }}>{riskMetrics.riskNum}</div>
-                        <div style={{ fontSize: 8, color: "var(--ink-faint)" }}>1-99 SCALE</div>
+                        <div style={{ fontSize: 12, color: "var(--ink-faint)" }}>1-99 SCALE</div>
                       </div>
                       <div style={{ padding: "10px", border: "1px solid var(--line)" }}>
-                        <div style={{ fontSize: 8, color: "var(--ink-faint)", marginBottom: 6 }} className="lbl">Return metrics</div>
-                        <div style={{ fontSize: 9, color: "var(--ink)", lineHeight: 1.8 }}>
+                        <div style={{ fontSize: 12, color: "var(--ink-faint)", marginBottom: 6 }} className="lbl">Return metrics</div>
+                        <div style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.8 }}>
                           Mean Annual: <span style={{ color: "var(--accent)", fontWeight: 600 }}>{fmtP(riskMetrics.meanRet)}</span><br/>
                           Std Deviation: <span style={{ color: "var(--warn)" }}>{fmtP(riskMetrics.stdDev)}</span><br/>
                           95% CI: <span style={{ color: "var(--crit)" }}>{fmtP(riskMetrics.ci95Low)}</span> to <span style={{ color: "var(--info)" }}>{fmtP(riskMetrics.ci95High)}</span>
                         </div>
                       </div>
                       <div style={{ padding: "10px", border: "1px solid var(--line)" }}>
-                        <div style={{ fontSize: 8, color: "var(--ink-faint)", marginBottom: 6 }} className="lbl">Risk-adjusted</div>
-                        <div style={{ fontSize: 9, color: "var(--ink)", lineHeight: 1.8 }}>
+                        <div style={{ fontSize: 12, color: "var(--ink-faint)", marginBottom: 6 }} className="lbl">Risk-adjusted</div>
+                        <div style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.8 }}>
                           Sharpe Ratio: <span style={{ color: riskMetrics.sharpe > 0.5 ? "var(--accent)" : "var(--warn)", fontWeight: 600 }}>{riskMetrics.sharpe.toFixed(2)}</span><br/>
                           Sortino Ratio: <span style={{ color: riskMetrics.sortino > 1.0 ? "var(--accent)" : "var(--warn)", fontWeight: 600 }}>{riskMetrics.sortino.toFixed(2)}</span><br/>
                           Rf Rate: 4.0% (T-bill proxy)
                         </div>
                       </div>
                       <div style={{ padding: "10px", border: "1px solid var(--line)" }}>
-                        <div style={{ fontSize: 8, color: "var(--ink-faint)", marginBottom: 6 }} className="lbl">Drawdown</div>
-                        <div style={{ fontSize: 9, color: "var(--ink)", lineHeight: 1.8 }}>
+                        <div style={{ fontSize: 12, color: "var(--ink-faint)", marginBottom: 6 }} className="lbl">Drawdown</div>
+                        <div style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.8 }}>
                           Median Max Drawdown: <span style={{ color: riskMetrics.maxDD > 0.30 ? "var(--crit)" : "var(--warn)", fontWeight: 600 }}>{fmtP(riskMetrics.maxDD)}</span><br/>
                           30yr Ruin Rate: <span style={{ color: base30.ruin < 0.03 ? "var(--accent)" : "var(--crit)", fontWeight: 600 }}>{fmtP(base30.ruin)}</span><br/>
                           30yr Success: <span style={{ color: "var(--accent)" }}>{fmtP(base30.success800)} &gt;$800K</span>
@@ -10962,9 +10962,9 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                   </div>
 
                   {/* ── Scenario Comparison ── */}
-                  <div style={{ fontSize: 9, color: "var(--crit)", letterSpacing: 1, marginBottom: 8, fontWeight: 600 }} className="lbl">Scenario stress tests</div>
-                  <div style={{ display: "grid", gridTemplateColumns: "150px repeat(6, 1fr)", gap: 0, fontSize: 10, marginBottom: 16 }}>
-                    <div style={{ padding: "6px 8px", borderBottom: "2px solid var(--line)", color: "var(--ink-faint)", fontSize: 8 }} className="lbl">Metric</div>
+                  <div style={{ fontSize: 11, color: "var(--crit)", letterSpacing: 1, marginBottom: 8, fontWeight: 600 }} className="lbl">Scenario stress tests</div>
+                  <div style={{ display: "grid", gridTemplateColumns: "150px repeat(6, 1fr)", gap: 0, fontSize: 12, marginBottom: 16 }}>
+                    <div style={{ padding: "6px 8px", borderBottom: "2px solid var(--line)", color: "var(--ink-faint)", fontSize: 12 }} className="lbl">Metric</div>
                     {[
                       { label: "AI BUBBLE BURST", sub: "Tech −40%, Yr 1", color: "var(--crit)" },
                       { label: "STAGFLATION", sub: "6-8% infl, 3yr", color: "var(--orange)" },
@@ -10973,7 +10973,7 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                       { label: "LTC MARATHON", sub: "2y+4y pre-death, 35yr", color: "var(--violet)" },
                       { label: "BASE (30yr)", sub: "No shocks", color: "var(--accent)" },
                     ].map(s => (
-                      <div key={s.label} style={{ padding: "6px 8px", borderBottom: `2px solid ${s.color}`, color: s.color, fontWeight: 600, textAlign: "center", fontSize: 8 }}>
+                      <div key={s.label} style={{ padding: "6px 8px", borderBottom: `2px solid ${s.color}`, color: s.color, fontWeight: 600, textAlign: "center", fontSize: 12 }}>
                         {s.label}<br/><span style={{ color: "var(--ink-faint)", fontWeight: 400 }}>{s.sub}</span>
                       </div>
                     ))}
@@ -10984,7 +10984,7 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                       { label: "Median End", fn: d => fmt$(d.p50), cf: () => "var(--ink)" },
                       { label: "90th Pctl End", fn: d => fmt$(d.p90), cf: () => "var(--info)" },
                     ].map((row, ri) => [
-                      <div key={`sl${ri}`} style={{ padding: "5px 8px", borderBottom: "1px solid var(--line)", color: "var(--ink-dim)", fontSize: 9 }}>{row.label}</div>,
+                      <div key={`sl${ri}`} style={{ padding: "5px 8px", borderBottom: "1px solid var(--line)", color: "var(--ink-dim)", fontSize: 12 }}>{row.label}</div>,
                       ...[aiBubble, stagflation, sequence, ltcEvent, ltcMarathon, base30].map((d, ci) => (
                         <div key={`s${ri}-${ci}`} style={{ padding: "5px 8px", borderBottom: "1px solid var(--line)", textAlign: "center", color: row.cf(d), fontWeight: 500 }}>
                           {row.fn(d)}
@@ -11016,8 +11016,8 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                     return (
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12, marginBottom: 16 }}>
                     <div style={{ padding: 12, border: "1px solid rgba(255,68,68,0.3)", background: "rgba(255,68,68,0.04)" }}>
-                      <div style={{ fontSize: 9, color: "var(--crit)", fontWeight: 600, marginBottom: 6 }} className="lbl">Scenario 1: AI bubble burst</div>
-                      <div style={{ fontSize: 9, color: "var(--ink)", lineHeight: 1.7 }}>
+                      <div style={{ fontSize: 12, color: "var(--crit)", fontWeight: 600, marginBottom: 6 }} className="lbl">Scenario 1: AI bubble burst</div>
+                      <div style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.7 }}>
                         Tech/AI crashes 40–50% in Year 1, broad market down 15–20%. Forced crisis + recession scenarios for first 2 years post-retirement.<br/><br/>
                         <span style={{ color: "var(--ink-faint)" }}>Reserve defense:</span> Cash+bonds ({fmtP(PORTFOLIO.bucketActuals[1] + PORTFOLIO.bucketActuals[2])}) provides {((PORTFOLIO.bucketActuals[1] + PORTFOLIO.bucketActuals[2]) * (PORTFOLIO.total401k || PORTFOLIO.household) / (POST_MONTHLY_EARLY * 12)).toFixed(1)} years of expenses without selling equities.<br/>
                         <span style={{ color: "var(--ink-faint)" }}>Hedge response:</span> {_hedgeText}<br/>
@@ -11025,8 +11025,8 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                       </div>
                     </div>
                     <div style={{ padding: 12, border: "1px solid rgba(255,102,0,0.3)", background: "rgba(255,102,0,0.04)" }}>
-                      <div style={{ fontSize: 9, color: "var(--orange)", fontWeight: 600, marginBottom: 6 }} className="lbl">Scenario 2: stagflation</div>
-                      <div style={{ fontSize: 9, color: "var(--ink)", lineHeight: 1.7 }}>
+                      <div style={{ fontSize: 12, color: "var(--orange)", fontWeight: 600, marginBottom: 6 }} className="lbl">Scenario 2: stagflation</div>
+                      <div style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.7 }}>
                         Inflation 6–8% for 3 consecutive years. Equities flat to negative, bonds down 10–15%. Purchasing power erodes while portfolio stagnates.<br/><br/>
                         <span style={{ color: "var(--ink-faint)" }}>TIPS defense:</span> {_tipsText}<br/>
                         <span style={{ color: "var(--ink-faint)" }}>Expense impact:</span> At 7% inflation, ${_exp0.toLocaleString()}/mo becomes ${_exp3.toLocaleString()}/mo in 3 years (+${_expDelta.toLocaleString()}/mo).<br/>
@@ -11034,8 +11034,8 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                       </div>
                     </div>
                     <div style={{ padding: 12, border: "1px solid rgba(170,102,255,0.3)", background: "rgba(170,102,255,0.04)" }}>
-                      <div style={{ fontSize: 9, color: "var(--violet)", fontWeight: 600, marginBottom: 6 }} className="lbl">Scenario 3: LTC events</div>
-                      <div style={{ fontSize: 9, color: "var(--ink)", lineHeight: 1.7 }}>
+                      <div style={{ fontSize: 12, color: "var(--violet)", fontWeight: 600, marginBottom: 6 }} className="lbl">Scenario 3: LTC events</div>
+                      <div style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.7 }}>
                         {nA} needs assisted living at 78 ($150–300K). {nB} at 82 ($150–300K). Combined shock: $300K–$600K over 4–10 years.<br/><br/>
                         <span style={{ color: "var(--ink-faint)" }}>Impact:</span> Median end balance drops {fmt$(ltcEvent.p50 < base30.p50 ? base30.p50 - ltcEvent.p50 : 0)} vs base case.<br/>
                         <span style={{ color: "var(--ink-faint)" }}>Ruin risk:</span> {fmtP(ltcEvent.ruin)} ruin rate (vs {fmtP(base30.ruin)} base).<br/>
@@ -11043,8 +11043,8 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                       </div>
                     </div>
                     <div style={{ padding: 12, border: "1px solid rgba(170,102,255,0.5)", background: "rgba(170,102,255,0.07)" }}>
-                      <div style={{ fontSize: 9, color: "var(--violet)", fontWeight: 600, marginBottom: 6 }} className="lbl">Scenario 4: LTC marathon</div>
-                      <div style={{ fontSize: 9, color: "var(--ink)", lineHeight: 1.7 }}>
+                      <div style={{ fontSize: 12, color: "var(--violet)", fontWeight: 600, marginBottom: 6 }} className="lbl">Scenario 4: LTC marathon</div>
+                      <div style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.7 }}>
                         Sustained care in the final years before each death: {nA} 2 years, {nB} 4 years at ${(LTC_CARE_ANNUAL/1000).toFixed(0)}K/yr (today's $, escalating at inflation +1.5%/yr). Unlike the single shock, the cost lands late — smaller portfolio, one SS check, decades of inflation.<br/><br/>
                         <span style={{ color: "var(--ink-faint)" }}>Impact:</span> Median end (35yr) <span style={{ fontWeight: 600 }}>{fmt$(ltcMarathon.p50)}</span> │ 10th pctl <span style={{ color: "var(--crit)" }}>{fmt$(ltcMarathon.p10)}</span><br/>
                         <span style={{ color: "var(--ink-faint)" }}>Ruin risk:</span> <span style={{ color: ltcMarathon.ruin > 0.10 ? "var(--crit)" : "var(--warn)", fontWeight: 600 }}>{fmtP(ltcMarathon.ruin)}</span> (vs {fmtP(base30.ruin)} base).<br/>
@@ -11057,8 +11057,8 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
                   {/* ── Sequence of Returns Detail ── */}
                   <div style={{ padding: 12, border: "1px solid rgba(255,170,0,0.3)", background: "rgba(255,170,0,0.04)", marginBottom: 16 }}>
-                    <div style={{ fontSize: 9, color: "var(--warn)", fontWeight: 600, marginBottom: 6 }} className="lbl">Sequence-of-returns stress test</div>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, fontSize: 9, color: "var(--ink)", lineHeight: 1.7 }}>
+                    <div style={{ fontSize: 12, color: "var(--warn)", fontWeight: 600, marginBottom: 6 }} className="lbl">Sequence-of-returns stress test</div>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, fontSize: 12, color: "var(--ink)", lineHeight: 1.7 }}>
                       <div>
                         <span style={{ color: "var(--warn)", fontWeight: 600 }}>Poor returns Years 1–3:</span> Pessimistic → Recession → Pessimistic forced sequence.
                         The worst timing — portfolio drawdowns compound with spending withdrawals before markets recover.<br/><br/>
@@ -11084,14 +11084,14 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
                   {/* ── Guardrail Boundaries (Section 8D) ── */}
                   <div style={{ padding: 12, background: "rgba(0,255,136,0.03)", border: "1px solid var(--line)" }}>
-                    <div style={{ fontSize: 9, color: "var(--accent)", letterSpacing: 1, marginBottom: 8 }}>30-YEAR GUARDRAIL BOUNDARIES — PLANNED GLIDE PATH</div>
-                    <div style={{ fontSize: 9, color: "var(--ink-dim)", marginBottom: 8, lineHeight: 1.5 }}>Percentile bands from a 30-year extended run (with mortality + auto-replacement, no separate LTC overlay). This is a different basis than the headline success rate (planned path, &gt;$800K, no shocks) — use it to read the spread, not to match that single number.</div>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 0, fontSize: 9 }}>
-                      <div style={{ padding: "4px 8px", borderBottom: "2px solid var(--line)", color: "var(--ink-faint)", fontWeight: 600, fontSize: 8 }} className="lbl">Year</div>
-                      <div style={{ padding: "4px 8px", borderBottom: "2px solid var(--crit)", color: "var(--crit)", fontWeight: 600, textAlign: "right", fontSize: 8 }} className="lbl">Lower (80%)</div>
-                      <div style={{ padding: "4px 8px", borderBottom: "2px solid var(--plan)", color: "var(--plan)", fontWeight: 600, textAlign: "right", fontSize: 8 }} className="lbl">Planned</div>
-                      <div style={{ padding: "4px 8px", borderBottom: "2px solid var(--info)", color: "var(--info)", fontWeight: 600, textAlign: "right", fontSize: 8 }} className="lbl">Upper (120%)</div>
-                      <div style={{ padding: "4px 8px", borderBottom: "2px solid var(--ink)", color: "var(--ink)", fontWeight: 600, textAlign: "right", fontSize: 8 }} className="lbl">MC median</div>
+                    <div style={{ fontSize: 11, color: "var(--accent)", letterSpacing: 1, marginBottom: 8 }}>30-YEAR GUARDRAIL BOUNDARIES — PLANNED GLIDE PATH</div>
+                    <div style={{ fontSize: 12, color: "var(--ink-dim)", marginBottom: 8, lineHeight: 1.5 }}>Percentile bands from a 30-year extended run (with mortality + auto-replacement, no separate LTC overlay). This is a different basis than the headline success rate (planned path, &gt;$800K, no shocks) — use it to read the spread, not to match that single number.</div>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 0, fontSize: 12 }}>
+                      <div style={{ padding: "4px 8px", borderBottom: "2px solid var(--line)", color: "var(--ink-faint)", fontWeight: 600, fontSize: 12 }} className="lbl">Year</div>
+                      <div style={{ padding: "4px 8px", borderBottom: "2px solid var(--crit)", color: "var(--crit)", fontWeight: 600, textAlign: "right", fontSize: 12 }} className="lbl">Lower (80%)</div>
+                      <div style={{ padding: "4px 8px", borderBottom: "2px solid var(--plan)", color: "var(--plan)", fontWeight: 600, textAlign: "right", fontSize: 12 }} className="lbl">Planned</div>
+                      <div style={{ padding: "4px 8px", borderBottom: "2px solid var(--info)", color: "var(--info)", fontWeight: 600, textAlign: "right", fontSize: 12 }} className="lbl">Upper (120%)</div>
+                      <div style={{ padding: "4px 8px", borderBottom: "2px solid var(--ink)", color: "var(--ink)", fontWeight: 600, textAlign: "right", fontSize: 12 }} className="lbl">MC median</div>
                       {base30.pctByYear.p50.map((med, yi) => {
                         const yr = 2026 + yi;
                         const planned = PORTFOLIO.household * Math.pow(1.04, yi);
@@ -11129,8 +11129,8 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
           return (
             <div>
               <div className="card" style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600 }} className="lbl">Retirement readiness & estate checklist</div>
-                <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 4, lineHeight: 1.6 }}>
+                <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600 }} className="lbl">Retirement readiness & estate checklist</div>
+                <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 4, lineHeight: 1.6 }}>
                   The documents and decisions that protect {_singleCk ? "you and your heirs" : "you and your spouse"} — and that a survivor will desperately need to find. Check items off as you complete them, add notes, and record who to call. Your progress feeds the <span style={{ color: "var(--violet)" }}>Grade</span> tab's estate-readiness score. This is organizational guidance, <span style={{ color: "var(--ink)" }}>not legal advice</span> — work with an estate attorney to execute the documents.
                 </div>
                 <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
@@ -11139,10 +11139,10 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                       <div style={{ width: `${pct}%`, height: "100%", background: barColor, transition: "width 0.3s" }} />
                     </div>
                   </div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: barColor }}>{doneCount}/{total} <span style={{ fontSize: 9, color: "var(--ink-dim)", fontWeight: 400 }}>complete ({pct}%)</span></div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: barColor }}>{doneCount}/{total} <span style={{ fontSize: 12, color: "var(--ink-dim)", fontWeight: 400 }}>complete ({pct}%)</span></div>
                 </div>
                 {critMissing.length > 0 && (
-                  <div style={{ marginTop: 10, fontSize: 9, color: "#ff8888", background: "rgba(255,68,68,0.06)", border: "1px solid rgba(255,68,68,0.25)", borderRadius: 3, padding: "8px 10px", lineHeight: 1.6 }}>
+                  <div style={{ marginTop: 10, fontSize: 12, color: "#ff8888", background: "rgba(255,68,68,0.06)", border: "1px solid rgba(255,68,68,0.25)", borderRadius: 3, padding: "8px 10px", lineHeight: 1.6 }}>
                     ⚠ <span style={{ fontWeight: 600 }}>{critMissing.length} high-risk item{critMissing.length > 1 ? "s" : ""} still open</span> — these create the most danger for {_singleCk ? "your heirs" : "a surviving spouse"} if something happens before they're done: {critMissing.map(it => it.title).join(", ")}.
                   </div>
                 )}
@@ -11150,7 +11150,7 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
 
               {CHECKLIST_GROUPS.map(grp => (
                 <div key={grp.group} className="card" style={{ marginBottom: 12 }}>
-                  <div style={{ fontSize: 9, color: "var(--accent)", letterSpacing: 1, fontWeight: 600, marginBottom: 10, borderBottom: "1px solid var(--line)", paddingBottom: 6 }}>{grp.group.toUpperCase()}</div>
+                  <div style={{ fontSize: 11, color: "var(--accent)", letterSpacing: 1, fontWeight: 600, marginBottom: 10, borderBottom: "1px solid var(--line)", paddingBottom: 6 }}>{grp.group.toUpperCase()}</div>
                   {grp.items.map(it => {
                     const st = _ck[it.id] || {};
                     const done = !!st.done;
@@ -11162,18 +11162,18 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                         <div style={{ flex: 1 }}>
                           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                             <span style={{ fontSize: 12, fontWeight: 600, color: done ? "var(--ink-dim)" : "var(--ink)", textDecoration: done ? "line-through" : "none" }}>{it.title}</span>
-                            {it.critical && <span style={{ fontSize: 8, letterSpacing: 0.5, color: "#ff8888", border: "1px solid rgba(255,68,68,0.4)", borderRadius: 3, padding: "1px 5px" }} className="lbl">Survivor-critical</span>}
+                            {it.critical && <span style={{ fontSize: 11, letterSpacing: 0.5, color: "#ff8888", border: "1px solid rgba(255,68,68,0.4)", borderRadius: 3, padding: "1px 5px" }} className="lbl">Survivor-critical</span>}
                           </div>
-                          <div style={{ fontSize: 9, color: "#8a9a8f", marginTop: 4, lineHeight: 1.55 }}>{it.what}</div>
-                          <div style={{ fontSize: 9, color: "var(--ink-dim)", marginTop: 3, lineHeight: 1.55 }}><span style={{ color: "var(--warn)" }}>Why it matters:</span> {it.why}</div>
-                          <div style={{ fontSize: 9, color: "var(--ink-dim)", marginTop: 3, lineHeight: 1.55 }}><span style={{ color: "var(--info)" }}>When:</span> {it.when}</div>
+                          <div style={{ fontSize: 12, color: "#8a9a8f", marginTop: 4, lineHeight: 1.55 }}>{it.what}</div>
+                          <div style={{ fontSize: 12, color: "var(--ink-dim)", marginTop: 3, lineHeight: 1.55 }}><span style={{ color: "var(--warn)" }}>Why it matters:</span> {it.why}</div>
+                          <div style={{ fontSize: 12, color: "var(--ink-dim)", marginTop: 3, lineHeight: 1.55 }}><span style={{ color: "var(--info)" }}>When:</span> {it.when}</div>
                           <div style={{ display: "flex", gap: 10, marginTop: 8, flexWrap: "wrap" }}>
                             {it.contactLabel !== "—" && (
                               <input value={st.contact || ""} onChange={e => upd(it.id, { contact: e.target.value })} placeholder={it.contactLabel}
-                                style={{ flex: "0 1 220px", background: "rgba(0,0,0,0.3)", border: "1px solid var(--line)", borderRadius: 3, color: "var(--ink)", fontSize: 9, padding: "5px 8px", fontFamily: "inherit" }} />
+                                style={{ flex: "0 1 220px", background: "rgba(0,0,0,0.3)", border: "1px solid var(--line)", borderRadius: 3, color: "var(--ink)", fontSize: 12, padding: "5px 8px", fontFamily: "inherit" }} />
                             )}
                             <input value={st.notes || ""} onChange={e => upd(it.id, { notes: e.target.value })} placeholder="Notes (optional) — location of document, status, reminders…"
-                              style={{ flex: 1, minWidth: 220, background: "rgba(0,0,0,0.3)", border: "1px solid var(--line)", borderRadius: 3, color: "var(--ink)", fontSize: 9, padding: "5px 8px", fontFamily: "inherit" }} />
+                              style={{ flex: 1, minWidth: 220, background: "rgba(0,0,0,0.3)", border: "1px solid var(--line)", borderRadius: 3, color: "var(--ink)", fontSize: 12, padding: "5px 8px", fontFamily: "inherit" }} />
                           </div>
                         </div>
                       </div>
@@ -11182,7 +11182,7 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                 </div>
               ))}
 
-              <div style={{ fontSize: 9, color: "var(--ink-faint)", padding: "8px 12px", fontStyle: "italic", lineHeight: 1.6 }}>
+              <div style={{ fontSize: 12, color: "var(--ink-faint)", padding: "8px 12px", fontStyle: "italic", lineHeight: 1.6 }}>
                 Your check-offs and notes are saved on this device and survive Save &amp; Apply. They are guidance only — none of these documents are created by this app. {_singleCk ? "" : "Items mentioning a spouse apply to whichever of you is the survivor."} Consult a licensed estate attorney to draft and execute anything legal.
               </div>
             </div>
@@ -11192,8 +11192,8 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
         {/* ═══ POSITIONS ═══ */}
         {activeTab === "positions" && (
           <div className="card">
-            <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, marginBottom: 10 }} className="lbl">Position status</div>
-            <div className="prow" style={{ color: "var(--ink-faint)", fontSize: 8, fontWeight: 600, borderBottom: "1px solid var(--line)" }}>
+            <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600, marginBottom: 10 }} className="lbl">Position status</div>
+            <div className="prow" style={{ color: "var(--ink-faint)", fontSize: 12, fontWeight: 600, borderBottom: "1px solid var(--line)" }}>
               <div></div><div className="lbl">Ticker</div><div className="lbl">Name</div><div style={{ textAlign: "right" }} className="lbl">Balance</div><div style={{ textAlign: "center" }} className="lbl">Class</div><div className="lbl">Description</div>
             </div>
             {PORTFOLIO.positions.map(pos => {
@@ -11201,15 +11201,15 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
               return (
                 <div key={pos.ticker} className="prow">
                   <Pulse color={s.color} urgency={s.urgency} /><div style={{ color: "var(--ink)", fontWeight: 500 }}>{pos.ticker}</div>
-                  <div style={{ color: "var(--ink-dim)", fontSize: 9 }}>{pos.name}</div>
+                  <div style={{ color: "var(--ink-dim)", fontSize: 12 }}>{pos.name}</div>
                   <div style={{ textAlign: "right", color: "var(--ink)" }}>{fmt(pos.balance)}</div>
-                  <div style={{ textAlign: "center", fontSize: 8, color: s.color, fontWeight: 600 }}>{s.status}</div>
-                  <div style={{ fontSize: 8, color: "var(--ink-dim)" }}>{s.msg}</div>
+                  <div style={{ textAlign: "center", fontSize: 12, color: s.color, fontWeight: 600 }}>{s.status}</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-dim)" }}>{s.msg}</div>
                 </div>
               );
             })}
             <div style={{ marginTop: 14, padding: 12, background: "rgba(0,255,136,0.03)", border: "1px solid var(--line)" }}>
-              <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 1, marginBottom: 6 }} className="lbl">Plan notes (descriptive)</div>
+              <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 1, marginBottom: 6 }} className="lbl">Plan notes (descriptive)</div>
               {(() => {
                 const b3a = PORTFOLIO.bucketActuals[3];
                 const b4a = PORTFOLIO.bucketActuals[4];
@@ -11224,7 +11224,7 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                     ? { p: "INFO", m: `401K contribs $${_monthlyContrib.toLocaleString()}/mo ($${(_annualContrib/1000).toFixed(1)}K/yr). The Monte Carlo accumulation run can model a higher-savings sensitivity.`, c: "var(--info)" }
                     : null,
                 ].filter(Boolean).map((a, i) => (
-                  <div key={i} style={{ display: "flex", gap: 8, marginBottom: 4, fontSize: 9 }}>
+                  <div key={i} style={{ display: "flex", gap: 8, marginBottom: 4, fontSize: 12 }}>
                     <span style={{ color: a.c, fontWeight: 700, minWidth: 34 }}>[{a.p}]</span><span style={{ color: "var(--ink)" }}>{a.m}</span>
                   </div>
                 ));
@@ -11236,18 +11236,18 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
         {/* ═══ ASK AI ═══ */}
         {activeTab === "command" && (
           <div className="card">
-            <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }} className="lbl">Ask AI console</div>
-            <div style={{ fontSize: 9, color: "var(--ink-faint)", marginBottom: 10, lineHeight: 1.6 }}>
+            <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600, marginBottom: 4 }} className="lbl">Ask AI console</div>
+            <div style={{ fontSize: 12, color: "var(--ink-faint)", marginBottom: 10, lineHeight: 1.6 }}>
               Type a question below and it's sent to an <span style={{ color: "var(--ink)" }}>AI assistant (a large language model)</span>, along with your plan's context. Expand <span style={{ color: "var(--ink)" }}>"exactly what's sent"</span> below to read the full context verbatim before you send it — that panel is the literal payload, not a paraphrase. The AI's answer is its own analysis — treat it as a knowledgeable second opinion, not a guarantee, and not personalized financial advice.
             </div>
 
             {/* ── OFFLINE MODE — the hard switch. Available everywhere, persisted. ── */}
             <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", marginBottom: 10, background: offlineMode ? "rgba(0,255,136,0.07)" : "rgba(0,0,0,0.2)", border: `1px solid ${offlineMode ? "var(--accent)" : "var(--line)"}`, borderRadius: 3 }}>
-              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 9, color: "var(--ink)" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 12, color: "var(--ink)" }}>
                 <input type="checkbox" checked={offlineMode} onChange={e => toggleOffline(e.target.checked)} style={{ accentColor: "var(--accent)" }} />
                 <span style={{ fontWeight: 700, letterSpacing: 1 }}>✈ OFFLINE MODE</span>
               </label>
-              <span style={{ fontSize: 9, color: offlineMode ? "var(--accent)" : "var(--ink-faint)", lineHeight: 1.5 }}>
+              <span style={{ fontSize: 12, color: offlineMode ? "var(--accent)" : "var(--ink-faint)", lineHeight: 1.5 }}>
                 {offlineMode
                   ? "ON — Ask AI is disabled; nothing can leave this browser. Every other tab already runs fully offline."
                   : "Flip this on and the app is fully air-gapped: Ask AI is disabled and no data can transmit, period. The setting persists."}
@@ -11255,14 +11255,14 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
             </div>
 
             <details style={{ marginBottom: 12, border: "1px solid var(--line)", borderRadius: 3, background: "rgba(0,0,0,0.25)" }}>
-              <summary style={{ cursor: "pointer", padding: "8px 10px", fontSize: 9, color: "var(--accent)", fontWeight: 600, letterSpacing: 1, userSelect: "none" }}>
+              <summary style={{ cursor: "pointer", padding: "8px 10px", fontSize: 11, color: "var(--accent)", fontWeight: 600, letterSpacing: 1, userSelect: "none" }}>
                 🔒 EXACTLY WHAT'S SENT TO THE AI — CLICK TO REVIEW
               </summary>
               <div style={{ padding: "0 10px 10px" }}>
-                <div style={{ fontSize: 9, color: "var(--ink-faint)", lineHeight: 1.6, marginBottom: 6 }}>
+                <div style={{ fontSize: 12, color: "var(--ink-faint)", lineHeight: 1.6, marginBottom: 6 }}>
                   When you press EXECUTE, the AI service receives the text below — your saved master prompt plus the live plan context — together with the question you type{aiFiles.filter(f => !f.error).length > 0 ? " and the file(s) you've attached (uploaded in full)" : ""}. Nothing else leaves your device.
                 </div>
-                <pre style={{ background: "rgba(0,0,0,0.45)", border: "1px solid var(--line)", color: "#9ec4b0", fontFamily: "'JetBrains Mono',monospace", fontSize: 9, padding: "10px 12px", borderRadius: 3, lineHeight: 1.6, whiteSpace: "pre-wrap", margin: 0, maxHeight: 260, overflowY: "auto" }}>{aiSystemPrompt || "Load your plan data first — this context fills in once your simulation has run."}</pre>
+                <pre style={{ background: "rgba(0,0,0,0.45)", border: "1px solid var(--line)", color: "#9ec4b0", fontFamily: "'JetBrains Mono',monospace", fontSize: 12, padding: "10px 12px", borderRadius: 3, lineHeight: 1.6, whiteSpace: "pre-wrap", margin: 0, maxHeight: 260, overflowY: "auto" }}>{aiSystemPrompt || "Load your plan data first — this context fills in once your simulation has run."}</pre>
               </div>
             </details>
 
@@ -11272,19 +11272,19 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                    Anthropic's explicit direct-browser-access opt-in. ── */}
             {!IS_CLAUDE_ARTIFACT && (
               <div style={{ marginBottom: 12, padding: "8px 10px", border: `1px solid ${localApiKey ? "var(--positive)" : "var(--warn)"}`, borderRadius: 3, background: "rgba(0,0,0,0.25)" }}>
-                <div style={{ fontSize: 8, letterSpacing: 1, fontWeight: 600, color: localApiKey ? "var(--positive)" : "var(--warn)", marginBottom: 6 }}>
+                <div style={{ fontSize: 11, letterSpacing: 1, fontWeight: 600, color: localApiKey ? "var(--positive)" : "var(--warn)", marginBottom: 6 }}>
                   🔑 LOCAL API KEY — {localApiKey ? "ACTIVE" : "REQUIRED TO USE ASK AI IN THIS SELF-HOSTED COPY"}
                 </div>
                 {localApiKey ? (
                   <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                    <span style={{ fontSize: 10, fontFamily: "'JetBrains Mono',monospace", color: "var(--ink)" }}>
+                    <span style={{ fontSize: 12, fontFamily: "'JetBrains Mono',monospace", color: "var(--ink)" }}>
                       sk-ant-••••••••{localApiKey.slice(-4)}
                     </span>
                     <button onClick={forgetApiKey}
-                      style={{ background: "transparent", border: "1px solid var(--crit)", color: "var(--crit)", fontFamily: "inherit", fontSize: 8, fontWeight: 600, letterSpacing: 0.5, padding: "4px 10px", borderRadius: 3, cursor: "pointer" }}>
+                      style={{ background: "transparent", border: "1px solid var(--crit)", color: "var(--crit)", fontFamily: "inherit", fontSize: 11, fontWeight: 600, letterSpacing: 0.5, padding: "4px 10px", borderRadius: 3, cursor: "pointer" }}>
                       ✕ FORGET KEY
                     </button>
-                    <span style={{ fontSize: 8, color: "var(--ink-faint)" }}>
+                    <span style={{ fontSize: 12, color: "var(--ink-faint)" }}>
                       Stored only in this browser · sent only to api.anthropic.com · usage bills to your Anthropic account · forget it on shared machines.
                     </span>
                   </div>
@@ -11294,13 +11294,13 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                       <input type="password" value={apiKeyDraft} onChange={e => setApiKeyDraft(e.target.value)}
                         onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); saveApiKey(); } }}
                         placeholder="sk-ant-..." autoComplete="off" spellCheck={false}
-                        style={{ flex: "1 1 220px", minWidth: 180, background: "rgba(0,0,0,0.4)", border: "1px solid var(--line)", color: "var(--ink)", fontFamily: "'JetBrains Mono',monospace", fontSize: 10, padding: "6px 8px", borderRadius: 3 }} />
+                        style={{ flex: "1 1 220px", minWidth: 180, background: "rgba(0,0,0,0.4)", border: "1px solid var(--line)", color: "var(--ink)", fontFamily: "'JetBrains Mono',monospace", fontSize: 12, padding: "6px 8px", borderRadius: 3 }} />
                       <button onClick={saveApiKey} disabled={!apiKeyDraft.trim()}
-                        style={{ background: "transparent", border: "1px solid var(--positive)", color: apiKeyDraft.trim() ? "var(--positive)" : "var(--ink-faint)", fontFamily: "inherit", fontSize: 8, fontWeight: 600, letterSpacing: 0.5, padding: "6px 12px", borderRadius: 3, cursor: apiKeyDraft.trim() ? "pointer" : "default" }}>
+                        style={{ background: "transparent", border: "1px solid var(--positive)", color: apiKeyDraft.trim() ? "var(--positive)" : "var(--ink-faint)", fontFamily: "inherit", fontSize: 11, fontWeight: 600, letterSpacing: 0.5, padding: "6px 12px", borderRadius: 3, cursor: apiKeyDraft.trim() ? "pointer" : "default" }}>
                         ▶ SAVE KEY
                       </button>
                     </div>
-                    <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 6, lineHeight: 1.6 }}>
+                    <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 6, lineHeight: 1.6 }}>
                       This copy runs outside claude.ai, so Ask AI needs your own Anthropic API key (create one at console.anthropic.com; usage is pay-per-token and bills to <em>your</em> account).
                       The key is stored <span style={{ color: "var(--ink)" }}>only in this browser</span> — never in the app file, never in Export Backup — and is sent only to api.anthropic.com.
                       Use a <span style={{ color: "var(--ink)" }}>dedicated key with a low monthly spending cap</span>, and note that anyone with access to this browser profile could use it: press FORGET KEY when done on a shared machine. Clear All Data also wipes it.
@@ -11314,33 +11314,33 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                    server on YOUR machine (Ollama / LM Studio) instead of Anthropic. ── */}
             {!IS_CLAUDE_ARTIFACT && !offlineMode && (
               <details style={{ marginBottom: 12, border: `1px solid ${localLLM ? "var(--violet)" : "var(--line)"}`, borderRadius: 3, background: "rgba(0,0,0,0.25)" }} open={!!localLLM}>
-                <summary style={{ cursor: "pointer", padding: "8px 10px", fontSize: 9, color: "var(--violet)", fontWeight: 600, letterSpacing: 1, userSelect: "none" }}>
+                <summary style={{ cursor: "pointer", padding: "8px 10px", fontSize: 11, color: "var(--violet)", fontWeight: 600, letterSpacing: 1, userSelect: "none" }}>
                   🖥 LOCAL MODEL — {localLLM ? `ACTIVE (${localLLM.url})` : "OPTIONAL: RUN ASK AI ON YOUR OWN MACHINE"}
                 </summary>
                 <div style={{ padding: "0 10px 10px" }}>
-                  <div style={{ fontSize: 9, color: "var(--ink-faint)", lineHeight: 1.6, marginBottom: 8 }}>
+                  <div style={{ fontSize: 12, color: "var(--ink-faint)", lineHeight: 1.6, marginBottom: 8 }}>
                     Point Ask AI at an <span style={{ color: "var(--ink)" }}>OpenAI-compatible endpoint on your computer</span> — your plan summary and questions then go to your own machine and <span style={{ color: "var(--ink)" }}>never touch Anthropic</span>. Works with <span style={{ color: "var(--ink)" }}>Ollama</span> (URL <code style={{ color: "var(--violet)" }}>http://localhost:11434/v1</code> — start it with <code style={{ color: "var(--violet)" }}>OLLAMA_ORIGINS="*" ollama serve</code> so the browser may call it) and <span style={{ color: "var(--ink)" }}>LM Studio</span> (URL <code style={{ color: "var(--violet)" }}>http://localhost:1234/v1</code> — enable CORS in its server settings). Honest trade-offs: local models are <span style={{ color: "var(--ink)" }}>text-only here</span> (image/PDF attachments are skipped), typically slower, and materially weaker at tax/retirement reasoning than the hosted model — verify everything, twice.
                   </div>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
                     <input id="dc-llm-url" defaultValue={localLLM ? localLLM.url : ""} placeholder="http://localhost:11434/v1"
-                      style={{ flex: "2 1 240px", background: "var(--panel2)", border: "1px solid var(--line)", color: "var(--ink)", fontFamily: "'JetBrains Mono',monospace", fontSize: 9, padding: "7px 9px", borderRadius: 3 }} />
+                      style={{ flex: "2 1 240px", background: "var(--panel2)", border: "1px solid var(--line)", color: "var(--ink)", fontFamily: "'JetBrains Mono',monospace", fontSize: 12, padding: "7px 9px", borderRadius: 3 }} />
                     <input id="dc-llm-model" defaultValue={localLLM ? (localLLM.model || "") : ""} placeholder="model, e.g. llama3.1"
-                      style={{ flex: "1 1 140px", background: "var(--panel2)", border: "1px solid var(--line)", color: "var(--ink)", fontFamily: "'JetBrains Mono',monospace", fontSize: 9, padding: "7px 9px", borderRadius: 3 }} />
+                      style={{ flex: "1 1 140px", background: "var(--panel2)", border: "1px solid var(--line)", color: "var(--ink)", fontFamily: "'JetBrains Mono',monospace", fontSize: 12, padding: "7px 9px", borderRadius: 3 }} />
                     <button onClick={() => {
                       const url = (document.getElementById("dc-llm-url").value || "").trim();
                       const model = (document.getElementById("dc-llm-model").value || "").trim();
                       if (url) saveLocalLLM({ url, model });
-                    }} style={{ background: "transparent", border: "1px solid var(--violet)", color: "var(--violet)", fontFamily: "inherit", fontSize: 9, fontWeight: 600, padding: "7px 12px", borderRadius: 3, cursor: "pointer", letterSpacing: 1 }}>
+                    }} style={{ background: "transparent", border: "1px solid var(--violet)", color: "var(--violet)", fontFamily: "inherit", fontSize: 11, fontWeight: 600, padding: "7px 12px", borderRadius: 3, cursor: "pointer", letterSpacing: 1 }}>
                       ▶ USE LOCAL MODEL
                     </button>
                     {localLLM && (
                       <button onClick={() => { saveLocalLLM(null); const u = document.getElementById("dc-llm-url"); const m = document.getElementById("dc-llm-model"); if (u) u.value = ""; if (m) m.value = ""; }}
-                        style={{ background: "transparent", border: "1px solid var(--crit)", color: "var(--crit)", fontFamily: "inherit", fontSize: 9, fontWeight: 600, padding: "7px 12px", borderRadius: 3, cursor: "pointer", letterSpacing: 1 }}>
+                        style={{ background: "transparent", border: "1px solid var(--crit)", color: "var(--crit)", fontFamily: "inherit", fontSize: 11, fontWeight: 600, padding: "7px 12px", borderRadius: 3, cursor: "pointer", letterSpacing: 1 }}>
                         ■ BACK TO ANTHROPIC
                       </button>
                     )}
                   </div>
-                  {localLLM && <div style={{ fontSize: 8, color: "var(--violet)", marginTop: 6 }}>ACTIVE — questions go to {localLLM.url}/chat/completions on your machine. No API key needed; the key panel above is ignored while this is set.</div>}
+                  {localLLM && <div style={{ fontSize: 12, color: "var(--violet)", marginTop: 6 }}>ACTIVE — questions go to {localLLM.url}/chat/completions on your machine. No API key needed; the key panel above is ignored while this is set.</div>}
                 </div>
               </details>
             )}
@@ -11353,17 +11353,17 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
                 "What if I live longer than expected?",
                 "What if inflation stays high?",
               ].map((q, i) => (
-                <button key={i} style={{ background: "rgba(0,255,136,0.05)", border: "1px solid var(--line)", color: "var(--ink-dim)", padding: "5px 8px", fontSize: 8, cursor: "pointer", fontFamily: "inherit" }}
+                <button key={i} style={{ background: "rgba(0,255,136,0.05)", border: "1px solid var(--line)", color: "var(--ink-dim)", padding: "5px 8px", fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}
                   onClick={() => setAiQuery(q)}>{q}</button>
               ))}
             </div>
             {aiFiles.length > 0 && (
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 6 }}>
                 {aiFiles.map((f, i) => (
-                  <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 8, padding: "4px 8px", borderRadius: 3, background: f.error ? "rgba(255,68,68,0.08)" : "rgba(0,255,136,0.06)", border: `1px solid ${f.error ? "var(--crit)" : "var(--line)"}`, color: f.error ? "#ff8888" : "var(--ink)" }}>
+                  <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, padding: "4px 8px", borderRadius: 3, background: f.error ? "rgba(255,68,68,0.08)" : "rgba(0,255,136,0.06)", border: `1px solid ${f.error ? "var(--crit)" : "var(--line)"}`, color: f.error ? "#ff8888" : "var(--ink)" }}>
                     <span style={{ color: f.error ? "var(--crit)" : "var(--ink-faint)" }}>{f.error ? "⚠" : f.kind === "image" ? "🖼" : f.kind === "document" ? "📄" : "📝"}</span>
                     {f.name}{f.error ? ` — ${f.error}` : f.size ? ` (${(f.size / 1024).toFixed(0)}KB)` : ""}
-                    <button onClick={() => setAiFiles(prev => prev.filter((_, j) => j !== i))} title="Remove" style={{ background: "none", border: "none", color: "var(--ink-dim)", cursor: "pointer", fontFamily: "inherit", fontSize: 9, padding: 0, lineHeight: 1 }}>✕</button>
+                    <button onClick={() => setAiFiles(prev => prev.filter((_, j) => j !== i))} title="Remove" style={{ background: "none", border: "none", color: "var(--ink-dim)", cursor: "pointer", fontFamily: "inherit", fontSize: 12, padding: 0, lineHeight: 1 }}>✕</button>
                   </span>
                 ))}
               </div>
@@ -11399,29 +11399,29 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
             </div>
             {aiThread.length > 0 && (
               <div style={{ marginTop: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div style={{ fontSize: 8, color: "var(--accent)", letterSpacing: 1 }}>◉ SESSION TRANSCRIPT — the model remembers this conversation; type replies to its questions in the box above</div>
+                <div style={{ fontSize: 11, color: "var(--accent)", letterSpacing: 1 }}>◉ SESSION TRANSCRIPT — the model remembers this conversation; type replies to its questions in the box above</div>
                 <button className="ai-btn" onClick={() => { setAiThread([]); setAiResponse(""); }}
-                  style={{ background: "transparent", borderColor: "var(--ink-faint)", color: "var(--ink-dim)", fontSize: 8, padding: "3px 10px" }}
+                  style={{ background: "transparent", borderColor: "var(--ink-faint)", color: "var(--ink-dim)", fontSize: 12, padding: "3px 10px" }}
                   title="Forget this conversation and start fresh">
                   ⟲ NEW SESSION
                 </button>
               </div>
             )}
             {aiThread.map((m, i) => (
-              <div key={i} style={{ marginTop: 8, padding: "10px 14px", whiteSpace: "pre-wrap", fontSize: 10, lineHeight: 1.6,
+              <div key={i} style={{ marginTop: 8, padding: "10px 14px", whiteSpace: "pre-wrap", fontSize: 12, lineHeight: 1.6,
                 background: m.role === "user" ? "rgba(0,255,136,0.05)" : "var(--panel2)",
                 borderLeft: `3px solid ${m.err ? "var(--crit)" : m.role === "user" ? "var(--accent)" : "var(--info)"}`,
                 border: `1px solid ${m.err ? "var(--crit)" : "var(--line)"}`,
                 color: m.err ? "var(--crit)" : "var(--ink)" }}>
-                <div style={{ fontSize: 8, color: m.err ? "var(--crit)" : m.role === "user" ? "var(--accent)" : "var(--info)", letterSpacing: 1, marginBottom: 4 }}>
+                <div style={{ fontSize: 11, color: m.err ? "var(--crit)" : m.role === "user" ? "var(--accent)" : "var(--info)", letterSpacing: 1, marginBottom: 4 }}>
                   {m.role === "user" ? "▸ YOU" : m.err ? "⚠ SYSTEM" : "◉ AI"}
                 </div>
                 {m.text}
               </div>
             ))}
             {(aiLoading) && (
-              <div style={{ marginTop: 8, padding: 14, background: "var(--panel2)", border: `1px solid ${aiLoading ? "var(--accent)" : "var(--line)"}`, whiteSpace: "pre-wrap", fontSize: 10, lineHeight: 1.7, color: "var(--ink)", maxHeight: 380, overflowY: "auto" }}>
-                <div style={{ fontSize: 8, color: "var(--accent)", letterSpacing: 1, marginBottom: 6 }}>◉ AWAITING RESPONSE...</div>
+              <div style={{ marginTop: 8, padding: 14, background: "var(--panel2)", border: `1px solid ${aiLoading ? "var(--accent)" : "var(--line)"}`, whiteSpace: "pre-wrap", fontSize: 12, lineHeight: 1.7, color: "var(--ink)", maxHeight: 380, overflowY: "auto" }}>
+                <div style={{ fontSize: 11, color: "var(--accent)", letterSpacing: 1, marginBottom: 6 }}>◉ AWAITING RESPONSE...</div>
                 Connecting to AI... <span style={{ animation: "breathe 1s ease-in-out infinite", color: "var(--accent)" }}>▊</span>
               </div>
             )}
@@ -11429,8 +11429,8 @@ function DangerCloseMain({ onReloadData: _onReloadData, onClearAllData, onApplyD
         )}
       </div>
 
-      <div style={{ padding: "10px 20px", borderTop: "1px solid var(--line)", display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 8, fontSize: 10, fontWeight: 700, letterSpacing: 0.3, color: "#ffcc00" }}>
-        <span>DANGER CLOSE v5.47 │ Not financial advice │ Guardrails: Guyton-Klinger (80%/120%)</span>
+      <div style={{ padding: "10px 20px", borderTop: "1px solid var(--line)", display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 8, fontSize: 11, fontWeight: 700, letterSpacing: 0.3, color: "#ffcc00" }}>
+        <span>DANGER CLOSE v5.48 │ Not financial advice │ Guardrails: Guyton-Klinger (80%/120%)</span>
         <span>
           {PORTFOLIO.asOf} │ {EXPENSES.length} expense lines │ {PORTFOLIO.positions.length} positions
           <span style={{ marginLeft: 6 }}>│ Steve T. · built with AI assistance, constants verified against IRS/CMS/SSA · 2026 · not financial advice</span>
@@ -11967,37 +11967,37 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
   };
 
   // ── styles ──
-  const inp = { background: "rgba(0,0,0,0.4)", border: "1px solid var(--line)", color: "var(--ink)", fontFamily: "'JetBrains Mono',monospace", fontSize: 11, padding: "5px 7px", borderRadius: 3, width: "100%", boxSizing: "border-box" };
-  const lbl = { fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5, textTransform: "uppercase", marginBottom: 3, display: "block" };
-  const th = { fontSize: 8, color: "var(--ink-dim)", letterSpacing: 0.5, textTransform: "uppercase", padding: "6px 6px", textAlign: "left", borderBottom: "1px solid var(--line)" };
+  const inp = { background: "rgba(0,0,0,0.4)", border: "1px solid var(--line)", color: "var(--ink)", fontFamily: "'JetBrains Mono',monospace", fontSize: 12, padding: "5px 7px", borderRadius: 3, width: "100%", boxSizing: "border-box" };
+  const lbl = { fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5, textTransform: "uppercase", marginBottom: 3, display: "block" };
+  const th = { fontSize: 11, color: "var(--ink-dim)", letterSpacing: 0.5, textTransform: "uppercase", padding: "6px 6px", textAlign: "left", borderBottom: "1px solid var(--line)" };
 
   return (
     <div onInputCapture={() => { if (!dirty) setDirty(true); }} onChangeCapture={() => { if (!dirty) setDirty(true); }}>
       {draftInfo && (
-        <div style={{ margin: "0 0 10px", padding: "9px 12px", border: "1px solid var(--info)", background: "rgba(0,204,255,0.06)", fontSize: 10, lineHeight: 1.6, display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+        <div style={{ margin: "0 0 10px", padding: "9px 12px", border: "1px solid var(--info)", background: "rgba(0,204,255,0.06)", fontSize: 12, lineHeight: 1.6, display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
           <span>💾 <b>Unsaved work from a previous session was recovered</b>{draftInfo.ts ? ` (${new Date(draftInfo.ts).toLocaleString()})` : ""} — restore it, or discard to keep what's shown now.</span>
-          <button onClick={restoreDraft} style={{ background: "transparent", border: "1px solid var(--info)", color: "var(--info)", fontFamily: "inherit", fontSize: 9, fontWeight: 700, padding: "5px 12px", borderRadius: 3, cursor: "pointer" }}>RESTORE &amp; APPLY DRAFT</button>
-          <button onClick={discardDraft} style={{ background: "transparent", border: "1px solid var(--line2)", color: "var(--ink-dim)", fontFamily: "inherit", fontSize: 9, padding: "5px 12px", borderRadius: 3, cursor: "pointer" }}>DISCARD DRAFT</button>
+          <button onClick={restoreDraft} style={{ background: "transparent", border: "1px solid var(--info)", color: "var(--info)", fontFamily: "inherit", fontSize: 12, fontWeight: 700, padding: "5px 12px", borderRadius: 3, cursor: "pointer" }}>RESTORE &amp; APPLY DRAFT</button>
+          <button onClick={discardDraft} style={{ background: "transparent", border: "1px solid var(--line2)", color: "var(--ink-dim)", fontFamily: "inherit", fontSize: 12, padding: "5px 12px", borderRadius: 3, cursor: "pointer" }}>DISCARD DRAFT</button>
         </div>
       )}
       {dirty && (
-        <div className="lbl" style={{ position: "sticky", top: 0, zIndex: 20, margin: "0 0 10px", padding: "7px 12px", border: "1px solid var(--warn)", background: "rgba(255,170,0,0.10)", fontSize: 10, fontWeight: 700, color: "var(--warn)" }}>
+        <div className="lbl" style={{ position: "sticky", top: 0, zIndex: 20, margin: "0 0 10px", padding: "7px 12px", border: "1px solid var(--warn)", background: "rgba(255,170,0,0.10)", fontSize: 11, fontWeight: 700, color: "var(--warn)" }}>
           <span style={{ marginRight: 12 }}>● Unsaved changes (a draft auto-saves every few seconds)</span>
-          <button onClick={handleSave} title="Identical to the Save &amp; Apply button at the bottom of this tab — placed here so you never have to scroll to save." style={{ background: "rgba(255,170,0,0.15)", border: "1px solid var(--warn)", color: "var(--warn)", fontFamily: "inherit", fontSize: 9, fontWeight: 700, padding: "4px 12px", borderRadius: 3, cursor: "pointer", verticalAlign: "middle" }}>SAVE &amp; APPLY NOW</button>
+          <button onClick={handleSave} title="Identical to the Save &amp; Apply button at the bottom of this tab — placed here so you never have to scroll to save." style={{ background: "rgba(255,170,0,0.15)", border: "1px solid var(--warn)", color: "var(--warn)", fontFamily: "inherit", fontSize: 12, fontWeight: 700, padding: "4px 12px", borderRadius: 3, cursor: "pointer", verticalAlign: "middle" }}>SAVE &amp; APPLY NOW</button>
         </div>
       )}
       <div className="card" style={{ marginBottom: 14 }}>
-        <div style={{ fontSize: 9, color: "var(--ink-faint)", lineHeight: 1.5 }}>
+        <div style={{ fontSize: 12, color: "var(--ink-faint)", lineHeight: 1.5 }}>
           Add each holding once. Asset-class weights and totals are calculated automatically — there are no other sheets to keep in sync.
           Pick the asset type from the dropdown and the classification fills itself. When you're done, hit <span style={{ color: "var(--accent)" }}>Save &amp; Apply</span> and every tab updates.
         </div>
         <div style={{ color: "var(--accent)", background: "rgba(0,255,136,0.05)", border: "1px solid rgba(0,255,136,0.25)", borderRadius: 3, padding: "10px 12px", marginTop: 10, lineHeight: 1.6 }}>
           <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 5 }}><span style={{ fontSize: 18 }}>🔒</span> Private by design</div>
-          <div style={{ fontSize: 9, color: "var(--ink)" }}>No account, no sign-in, and nothing you enter here is ever shared. Your plan auto-saves privately in <span style={{ fontWeight: 600 }}>this browser on this device</span> — so it's still here the next time you open the app in the same browser (clear the browser's site data, or switch browsers or devices, and it's gone). The durable copy is the <span style={{ fontWeight: 600 }}>backup file you export</span> — a plain .json file on your own device. The only time your data leaves this device is when you press ASK on the <span style={{ fontWeight: 600 }}>Ask AI</span> tab. That sends the AI service a summary of your plan — your <span style={{ fontWeight: 600 }}>names, portfolio and account totals, asset-class mix, monthly spending and contributions, retirement income (Social Security &amp; pension), Roth-conversion and guardrail settings, and your projection results</span> — together with the question you type and <span style={{ fontWeight: 600 }}>any files you attach</span> (uploaded in full). Nothing else is ever transmitted, and only when you ask.</div>
+          <div style={{ fontSize: 12, color: "var(--ink)" }}>No account, no sign-in, and nothing you enter here is ever shared. Your plan auto-saves privately in <span style={{ fontWeight: 600 }}>this browser on this device</span> — so it's still here the next time you open the app in the same browser (clear the browser's site data, or switch browsers or devices, and it's gone). The durable copy is the <span style={{ fontWeight: 600 }}>backup file you export</span> — a plain .json file on your own device. The only time your data leaves this device is when you press ASK on the <span style={{ fontWeight: 600 }}>Ask AI</span> tab. That sends the AI service a summary of your plan — your <span style={{ fontWeight: 600 }}>names, portfolio and account totals, asset-class mix, monthly spending and contributions, retirement income (Social Security &amp; pension), Roth-conversion and guardrail settings, and your projection results</span> — together with the question you type and <span style={{ fontWeight: 600 }}>any files you attach</span> (uploaded in full). Nothing else is ever transmitted, and only when you ask.</div>
         </div>
         <div style={{ color: "var(--info)", background: "rgba(0,204,255,0.06)", border: "1px solid rgba(0,204,255,0.25)", borderRadius: 3, padding: "10px 12px", marginTop: 10, lineHeight: 1.6 }}>
           <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 5 }}><span style={{ fontSize: 18 }}>💾</span> Back up your plan</div>
-          <div style={{ fontSize: 9 }}>Your plan auto-saves between visits, but only here — clearing site data, switching browsers or devices, or hitting "Clear All Data" erases it with no automatic recovery. Click <span style={{ fontWeight: 600 }}>Export Backup</span> (below) after you make changes to download a copy you can keep; you can <span style={{ fontWeight: 600 }}>Import Backup</span> to restore it anytime.</div>
+          <div style={{ fontSize: 12 }}>Your plan auto-saves between visits, but only here — clearing site data, switching browsers or devices, or hitting "Clear All Data" erases it with no automatic recovery. Click <span style={{ fontWeight: 600 }}>Export Backup</span> (below) after you make changes to download a copy you can keep; you can <span style={{ fontWeight: 600 }}>Import Backup</span> to restore it anytime.</div>
         </div>
       </div>
 
@@ -12007,7 +12007,7 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
           <div><div style={lbl}>Household total</div><div style={{ fontSize: 18, color: "var(--accent)", fontWeight: 600 }}>${Math.round(household).toLocaleString()}</div></div>
           <div><div style={lbl}>Retirement accts</div><div style={{ fontSize: 15, color: "var(--ink)" }}>${Math.round(total401k).toLocaleString()}</div></div>
           <div><div style={lbl}>Other accounts</div><div style={{ fontSize: 15, color: "var(--ink)" }}>${Math.round(otherTotal).toLocaleString()}</div></div>
-          <div><div style={lbl}>Asset mix</div><div style={{ fontSize: 10, color: "var(--ink-dim)", fontFamily: "'JetBrains Mono',monospace" }}>
+          <div><div style={lbl}>Asset mix</div><div style={{ fontSize: 12, color: "var(--ink-dim)", fontFamily: "'JetBrains Mono',monospace" }}>
             Cash {bucketPct(1).toFixed(0)}% · Bonds {bucketPct(2).toFixed(0)}%<br />Equity {bucketPct(3).toFixed(0)}% · Hedge {bucketPct(4).toFixed(0)}%
           </div></div>
         </div>
@@ -12015,19 +12015,19 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
           <div><span style={lbl}>Weighted expense ratio</span><span style={{ fontSize: 15, color: wtdER > 0.5 ? "var(--crit)" : wtdER > 0.2 ? "var(--warn)" : "var(--accent)", fontWeight: 600 }}>{wtdER.toFixed(2)}%</span></div>
           <div><span style={lbl}>Annual fee cost</span><span style={{ fontSize: 15, color: "var(--ink)", fontWeight: 600 }}>${Math.round(annualFeeCost).toLocaleString()}/yr</span></div>
           <div><span style={lbl}>Projected lifetime fees (~{_horizonYrs} yrs)</span><span style={{ fontSize: 15, color: lifetimeFees > 100000 ? "var(--crit)" : "var(--warn)", fontWeight: 600 }}>${Math.round(lifetimeFees).toLocaleString()}</span></div>
-          <span style={{ fontSize: 8, color: "var(--ink-faint)", fontStyle: "italic" }}>balance-weighted · lifetime assumes balance grows ~4%/yr and pays the same blended ratio</span>
+          <span style={{ fontSize: 12, color: "var(--ink-faint)", fontStyle: "italic" }}>balance-weighted · lifetime assumes balance grows ~4%/yr and pays the same blended ratio</span>
         </div>
       </div>
 
       {/* Names */}
       <div className="card" style={{ marginBottom: 14 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-          <div style={{ fontSize: 10, color: "var(--accent)", fontWeight: 600 }} className="lbl">Household</div>
+          <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600 }} className="lbl">Household</div>
           <div style={{ display: "flex", border: "1px solid var(--line)", borderRadius: 3, overflow: "hidden" }}>
             {[{ k: false, label: "Couple" }, { k: true, label: "Single" }].map(opt => (
               <button key={opt.label} onClick={() => setSingle(opt.k)} style={{
                 background: single === opt.k ? "var(--accent)" : "transparent", color: single === opt.k ? "var(--on-accent)" : "var(--ink-dim)",
-                border: "none", fontFamily: "'JetBrains Mono',monospace", fontSize: 10, fontWeight: 600, padding: "5px 14px", cursor: "pointer",
+                border: "none", fontFamily: "'JetBrains Mono',monospace", fontSize: 12, fontWeight: 600, padding: "5px 14px", cursor: "pointer",
               }}>{opt.label}</button>
             ))}
           </div>
@@ -12036,12 +12036,12 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
           <div><label style={lbl}>{single ? "Your name" : "Spouse A"}</label><input style={inp} value={nameA} onChange={e => setNameA(e.target.value)} placeholder="e.g. Spouse A" /></div>
           {!single && <div><label style={lbl}>Spouse B</label><input style={inp} value={nameB} onChange={e => setNameB(e.target.value)} placeholder="e.g. Spouse B" /></div>}
         </div>
-        {single && <div style={{ fontSize: 8, color: "var(--ink-faint)", marginTop: 8, fontStyle: "italic" }}>Single household: taxes use Single brackets, there's no surviving-spouse scenario, and no second Social Security or LTC event is modeled.</div>}
+        {single && <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 8, fontStyle: "italic" }}>Single household: taxes use Single brackets, there's no surviving-spouse scenario, and no second Social Security or LTC event is modeled.</div>}
       </div>
 
       {/* Household details (formerly only in the master-prompt docx) */}
       <div className="card" style={{ marginBottom: 14 }}>
-        <div style={{ fontSize: 10, color: "var(--accent)", fontWeight: 600, marginBottom: 10 }} className="lbl">Household details</div>
+        <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600, marginBottom: 10 }} className="lbl">Household details</div>
         <div style={{ display: "grid", gridTemplateColumns: single ? "1fr 1fr 1fr" : "1fr 1fr 1fr 1fr", gap: 12, marginBottom: 12 }}>
           <div><label style={lbl}>{single ? "Your birth date" : `${nameA || "Spouse A"} birth date`}</label><input type="date" style={inp} value={dobA} onChange={e => setDobA(e.target.value)} /></div>
           {!single && <div><label style={lbl}>{nameB || "Spouse B"} birth date</label><input type="date" style={inp} value={dobB} onChange={e => setDobB(e.target.value)} /></div>}
@@ -12059,11 +12059,11 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
               <option value="" style={{ background: "var(--panel2)" }}>— manual (flat rate below) —</option>
               {Object.entries(STATE_RULES).map(([c, r]) => <option key={c} value={c} style={{ background: "var(--panel2)" }}>{r.name}{r.rate === 0 ? " (no tax)" : ""}</option>)}
             </select>
-            {stateCode && STATE_RULES[stateCode] && <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 3, lineHeight: 1.5 }}>2026 approx: {(STATE_RULES[stateCode].rate * 100).toFixed(2)}% effective{STATE_RULES[stateCode].retExempt ? " · retirement income exempt" : STATE_RULES[stateCode].excl65 ? ` · $${(STATE_RULES[stateCode].excl65 / 1000).toFixed(0)}K/person 65+ exclusion` : ""}{STATE_RULES[stateCode].ss ? " · partially taxes SS" : " · SS not taxed"} — {STATE_RULES[stateCode].note}. Verify against your state's rules.</div>}
+            {stateCode && STATE_RULES[stateCode] && <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 3, lineHeight: 1.5 }}>2026 approx: {(STATE_RULES[stateCode].rate * 100).toFixed(2)}% effective{STATE_RULES[stateCode].retExempt ? " · retirement income exempt" : STATE_RULES[stateCode].excl65 ? ` · $${(STATE_RULES[stateCode].excl65 / 1000).toFixed(0)}K/person 65+ exclusion` : ""}{STATE_RULES[stateCode].ss ? " · partially taxes SS" : " · SS not taxed"} — {STATE_RULES[stateCode].note}. Verify against your state's rules.</div>}
           </div>
           <div><label style={lbl}>State income tax rate (%)</label><input inputMode="decimal" style={inp} value={stateTax} onChange={e => setStateTax(e.target.value)} placeholder="e.g. 4.99  (0 if none)" />
-            {Number(stateTax) > 0 && Number(stateTax) < 1 && <div style={{ fontSize: 8, color: "var(--warn)", marginTop: 2 }}>⚠ Enter as a percent — e.g. 4.99, not 0.0499</div>}
-            {Number(stateTax) > 20 && <div style={{ fontSize: 8, color: "var(--warn)", marginTop: 2 }}>⚠ That's unusually high for a state income tax — double-check</div>}
+            {Number(stateTax) > 0 && Number(stateTax) < 1 && <div style={{ fontSize: 12, color: "var(--warn)", marginTop: 2 }}>⚠ Enter as a percent — e.g. 4.99, not 0.0499</div>}
+            {Number(stateTax) > 20 && <div style={{ fontSize: 12, color: "var(--warn)", marginTop: 2 }}>⚠ That's unusually high for a state income tax — double-check</div>}
           </div>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12, marginTop: 12 }}>
@@ -12071,10 +12071,10 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
           <div><label style={lbl}>Home value $</label><input inputMode="decimal" style={inp} value={homeValue} onChange={e => setHomeValue(e.target.value)} placeholder="0 if none" /></div>
           <div><label style={lbl}>Mortgage balance $</label><input inputMode="decimal" style={inp} value={mortgageBal} onChange={e => setMortgageBal(e.target.value)} placeholder="0 if paid off" /></div>
           <div><label style={lbl}>Mortgage rate %</label><input inputMode="decimal" style={inp} value={mortgageRate} onChange={e => setMortgageRate(e.target.value)} placeholder="e.g. 4.0" />
-            {Number(mortgageRate) > 0 && Number(mortgageRate) < 1 && <div style={{ fontSize: 8, color: "var(--warn)", marginTop: 2 }}>⚠ Enter as a percent — e.g. 4.0, not 0.04</div>}
-            {Number(mortgageRate) > 20 && <div style={{ fontSize: 8, color: "var(--warn)", marginTop: 2 }}>⚠ {Number(mortgageRate)}% is unusually high for a mortgage — double-check</div>}</div>
+            {Number(mortgageRate) > 0 && Number(mortgageRate) < 1 && <div style={{ fontSize: 12, color: "var(--warn)", marginTop: 2 }}>⚠ Enter as a percent — e.g. 4.0, not 0.04</div>}
+            {Number(mortgageRate) > 20 && <div style={{ fontSize: 12, color: "var(--warn)", marginTop: 2 }}>⚠ {Number(mortgageRate)}% is unusually high for a mortgage — double-check</div>}</div>
         </div>
-        <div style={{ fontSize: 8, color: "var(--ink-faint)", marginTop: 8, fontStyle: "italic" }}>
+        <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 8, fontStyle: "italic" }}>
           These drive the plan timeline, the Roth-conversion window, state tax, and the peer Ranking. "Plan to age" is the age each person's plan runs to. Enter 0 for the state tax rate in no-income-tax states (FL, TX, etc.).
         </div>
       </div>
@@ -12082,13 +12082,13 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
       {/* Holdings */}
       <div className="card" style={{ marginBottom: 14 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-          <div style={{ fontSize: 10, color: "var(--accent)", fontWeight: 600 }}>RETIREMENT HOLDINGS (401k / IRA)</div>
+          <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600 }}>RETIREMENT HOLDINGS (401k / IRA)</div>
           {PORTFOLIO._ownerMigrated && !single && (
-            <div style={{ marginTop: 6, padding: "8px 12px", border: "1px solid var(--warn)", background: "rgba(255,170,0,0.08)", fontSize: 9, color: "var(--warn)", lineHeight: 1.6 }}>
+            <div style={{ marginTop: 6, padding: "8px 12px", border: "1px solid var(--warn)", background: "rgba(255,170,0,0.08)", fontSize: 12, color: "var(--warn)", lineHeight: 1.6 }}>
               ⚠ THIS PLAN PREDATES PER-PERSON OWNERSHIP. All retirement holdings were assigned to {(nameA || "Person A").split(" ")[0]}. If any belong to {(nameB || "Person B").split(" ")[0]}, set the Owner column — it drives each person's RMD age, their conversion window, and the survivor rollover. Save &amp; Apply clears this notice.
             </div>
           )}
-          <button onClick={addRow} style={{ background: "rgba(0,255,136,0.1)", border: "1px solid var(--accent)", color: "var(--accent)", fontFamily: "'JetBrains Mono',monospace", fontSize: 10, padding: "4px 12px", borderRadius: 3, cursor: "pointer" }}>+ Add holding</button>
+          <button onClick={addRow} style={{ background: "rgba(0,255,136,0.1)", border: "1px solid var(--accent)", color: "var(--accent)", fontFamily: "'JetBrains Mono',monospace", fontSize: 12, padding: "4px 12px", borderRadius: 3, cursor: "pointer" }}>+ Add holding</button>
         </div>
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 880 }}>
@@ -12127,10 +12127,10 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
                         title="Roth portion of this balance — the rest stays Traditional."
                         onChange={e => updateRow(r.id, "roth", e.target.value)} />
                     : r.taxType === "roth"
-                      ? <span style={{ fontSize: 9, color: "var(--ink-faint)" }} title="Tax type is Roth — the entire balance is Roth money">= balance</span>
-                      : <span style={{ fontSize: 9, color: "var(--ink-faint)" }} title="Set Tax type to Mixed to enter a Roth portion">—</span>}</td>
+                      ? <span style={{ fontSize: 12, color: "var(--ink-faint)" }} title="Tax type is Roth — the entire balance is Roth money">= balance</span>
+                      : <span style={{ fontSize: 12, color: "var(--ink-faint)" }} title="Set Tax type to Mixed to enter a Roth portion">—</span>}</td>
                   <td style={{ padding: 3 }}><input inputMode="decimal" style={inp} value={r.er} onChange={e => updateRow(r.id, "er", e.target.value)} placeholder="0.00" /></td>
-                  <td style={{ padding: 3, textAlign: "right", fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: num(r.er) > 0 ? "var(--warn)" : "var(--ink-faint)" }}>{num(r.balance) > 0 && num(r.er) > 0 ? `$${Math.round(num(r.balance) * num(r.er) / 100).toLocaleString()}` : "—"}</td>
+                  <td style={{ padding: 3, textAlign: "right", fontFamily: "'JetBrains Mono',monospace", fontSize: 12, color: num(r.er) > 0 ? "var(--warn)" : "var(--ink-faint)" }}>{num(r.balance) > 0 && num(r.er) > 0 ? `$${Math.round(num(r.balance) * num(r.er) / 100).toLocaleString()}` : "—"}</td>
                   <td style={{ padding: 3 }}><input inputMode="decimal" style={inp} value={r.contribPct} onChange={e => updateRow(r.id, "contribPct", e.target.value)} placeholder="0" /></td>
                   <td style={{ padding: 3, textAlign: "center" }}><button onClick={() => delRow(r.id)} style={{ background: "none", border: "none", color: "var(--crit)", cursor: "pointer", fontSize: 13 }} title="Delete">×</button></td>
                 </tr>
@@ -12138,15 +12138,15 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
             </tbody>
             <tfoot>
               <tr>
-                <td colSpan={9} style={{ padding: "8px 6px", textAlign: "right", fontSize: 9, color: "var(--ink-dim)", letterSpacing: 1, borderTop: "2px solid var(--line)", textTransform: "uppercase" }}>Total annual fees →</td>
+                <td colSpan={9} style={{ padding: "8px 6px", textAlign: "right", fontSize: 11, color: "var(--ink-dim)", letterSpacing: 1, borderTop: "2px solid var(--line)", textTransform: "uppercase" }}>Total annual fees →</td>
                 <td style={{ padding: "8px 6px", textAlign: "right", fontFamily: "'JetBrains Mono',monospace", fontSize: 12, fontWeight: 600, color: "var(--warn)", borderTop: "2px solid var(--line)" }}>${Math.round(annualFeeCost).toLocaleString()}</td>
-                <td style={{ padding: "8px 6px", textAlign: "center", fontFamily: "'JetBrains Mono',monospace", fontSize: 11, fontWeight: 600, color: Math.abs(allocSum - 100) < 0.5 ? "var(--accent)" : (allocSum === 0 ? "var(--ink-faint)" : "var(--crit)"), borderTop: "2px solid var(--line)" }} title="Future contribution allocation total — should equal 100%">{allocSum.toFixed(0)}%{allocSum > 0 && Math.round(allocSum) !== 100 && <span style={{ color: "var(--warn)", fontWeight: 600 }}> — scaled to these proportions</span>}{Math.round(allocSum) === 100 && <span style={{ color: "var(--positive)" }}> ✓</span>}</td>
+                <td style={{ padding: "8px 6px", textAlign: "center", fontFamily: "'JetBrains Mono',monospace", fontSize: 12, fontWeight: 600, color: Math.abs(allocSum - 100) < 0.5 ? "var(--accent)" : (allocSum === 0 ? "var(--ink-faint)" : "var(--crit)"), borderTop: "2px solid var(--line)" }} title="Future contribution allocation total — should equal 100%">{allocSum.toFixed(0)}%{allocSum > 0 && Math.round(allocSum) !== 100 && <span style={{ color: "var(--warn)", fontWeight: 600 }}> — scaled to these proportions</span>}{Math.round(allocSum) === 100 && <span style={{ color: "var(--positive)" }}> ✓</span>}</td>
                 <td style={{ borderTop: "2px solid var(--line)" }}></td>
               </tr>
             </tfoot>
           </table>
         </div>
-        {rows.length === 0 && <div style={{ fontSize: 9, color: "var(--ink-faint)", padding: 10, textAlign: "center" }}>No holdings yet — click "+ Add holding".</div>}
+        {rows.length === 0 && <div style={{ fontSize: 12, color: "var(--ink-faint)", padding: 10, textAlign: "center" }}>No holdings yet — click "+ Add holding".</div>}
       </div>
 
       {/* Traditional vs Roth split, by asset class — derived live from the Holdings table's Tax type / Roth $ columns. */}
@@ -12169,18 +12169,18 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
           return (
             <>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
-                <span style={{ fontSize: 10, color: "var(--accent)", fontWeight: 600 }}>TRADITIONAL vs ROTH (by asset class)</span>
-                <span style={{ fontSize: 9, color: "var(--ink-dim)", fontFamily: "'JetBrains Mono',monospace" }}>{f(gTot)} total · {gTot > 0 ? (100 * gRoth / gTot).toFixed(0) : 0}% Roth</span>
+                <span style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600 }}>TRADITIONAL vs ROTH (by asset class)</span>
+                <span style={{ fontSize: 12, color: "var(--ink-dim)", fontFamily: "'JetBrains Mono',monospace" }}>{f(gTot)} total · {gTot > 0 ? (100 * gRoth / gTot).toFixed(0) : 0}% Roth</span>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 8 }}>
                 {[1, 2, 3, 4].map(b => {
                   const t = _tr[b].trad, rth = _tr[b].roth, tot = t + rth;
                   return (
-                    <div key={b} style={{ fontSize: 9, padding: "8px 10px", background: "rgba(0,255,136,0.03)", border: "1px solid var(--line)", borderRadius: 3 }}>
+                    <div key={b} style={{ fontSize: 12, padding: "8px 10px", background: "rgba(0,255,136,0.03)", border: "1px solid var(--line)", borderRadius: 3 }}>
                       <div style={{ color: "var(--ink-dim)", marginBottom: 6 }}>{BUCKET_LABELS[b]}</div>
-                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}><span style={{ color: "var(--ink-faint)" }}>Trad</span><span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: "var(--ink)", fontWeight: 600 }}>{f(t)}</span></div>
-                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}><span style={{ color: "var(--ink-faint)" }}>Roth</span><span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: "var(--info)", fontWeight: 600 }}>{f(rth)}</span></div>
-                      <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 8, color: "var(--ink-faint)", textAlign: "right" }}>{tot > 0 ? (100 * rth / tot).toFixed(0) : 0}% Roth</div>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}><span style={{ color: "var(--ink-faint)" }}>Trad</span><span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 12, color: "var(--ink)", fontWeight: 600 }}>{f(t)}</span></div>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}><span style={{ color: "var(--ink-faint)" }}>Roth</span><span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 12, color: "var(--info)", fontWeight: 600 }}>{f(rth)}</span></div>
+                      <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 12, color: "var(--ink-faint)", textAlign: "right" }}>{tot > 0 ? (100 * rth / tot).toFixed(0) : 0}% Roth</div>
                     </div>
                   );
                 })}
@@ -12190,7 +12190,7 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
                 <div><span style={lbl}>Total Roth</span><span style={{ fontSize: 13, color: "var(--info)", fontWeight: 600 }}>{f(gRoth)}</span></div>
                 <div><span style={lbl}>Roth share</span><span style={{ fontSize: 13, color: "var(--accent)", fontWeight: 600 }}>{gTot > 0 ? (100 * gRoth / gTot).toFixed(1) : 0}%</span></div>
               </div>
-              <div style={{ fontSize: 8, color: "var(--ink-faint)", marginTop: 8, fontStyle: "italic" }}>
+              <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 8, fontStyle: "italic" }}>
                 Derived from the Holdings table's Tax type / Roth $ columns above. Retirement-account holdings only — "Other accounts" below carry their own tax type and are not counted here.
               </div>
             </>
@@ -12201,13 +12201,13 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
       {/* Other accounts */}
       <div className="card" style={{ marginBottom: 14 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-          <div style={{ fontSize: 10, color: "var(--accent)", fontWeight: 600 }}>OTHER ACCOUNTS (HSA, brokerage, cash, etc.)</div>
-          <button onClick={addOther} style={{ background: "rgba(0,255,136,0.1)", border: "1px solid var(--accent)", color: "var(--accent)", fontFamily: "'JetBrains Mono',monospace", fontSize: 10, padding: "4px 12px", borderRadius: 3, cursor: "pointer" }}>+ Add account</button>
+          <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600 }}>OTHER ACCOUNTS (HSA, brokerage, cash, etc.)</div>
+          <button onClick={addOther} style={{ background: "rgba(0,255,136,0.1)", border: "1px solid var(--accent)", color: "var(--accent)", fontFamily: "'JetBrains Mono',monospace", fontSize: 12, padding: "4px 12px", borderRadius: 3, cursor: "pointer" }}>+ Add account</button>
         </div>
         {/* v5.26 — the type now DRIVES tax, RMDs and the Withdrawal tab. It said the opposite at v5.25,
             deliberately: a field that silently does nothing implies the money is already handled
             correctly, so it had to say it did not. Now it does, and it has to say that instead. */}
-        <div style={{ fontSize: 9, color: "var(--ink-dim)", lineHeight: 1.6, margin: "0 0 8px", padding: "8px 10px", background: "rgba(255,170,0,0.06)", border: "1px solid var(--line)", borderRadius: 3 }}>
+        <div style={{ fontSize: 12, color: "var(--ink-dim)", lineHeight: 1.6, margin: "0 0 8px", padding: "8px 10px", background: "rgba(255,170,0,0.06)", border: "1px solid var(--line)", borderRadius: 3 }}>
           <strong style={{ color: "var(--warn)" }}>TAX TYPE DRIVES TAX, RMDs AND THE WITHDRAWAL TAB.</strong> Setting it here tells
           Danger Close taxes these accounts on it. <strong>Traditional and Annuity money is taxed as ordinary
           income as it is spent</strong>, and Traditional money counts toward your RMD. Taxable and HSA balances are spent
@@ -12247,12 +12247,12 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
           </div>
           );
         })}
-        {others.length === 0 && <div style={{ fontSize: 9, color: "var(--ink-faint)", padding: 6 }}>None added.</div>}
+        {others.length === 0 && <div style={{ fontSize: 12, color: "var(--ink-faint)", padding: 6 }}>None added.</div>}
         {/* v5.25 migration notice, re-fired at v5.26 per decision C-6 (D-3/D-5). It reports what was GUESSED, what could NOT be
             guessed, and whose account was reassigned — because a notice that lists only successes
             lets silence read as success, which is the failure this release exists to remove. */}
         {PORTFOLIO._otherTypeMigrated && (
-          <div style={{ marginTop: 10, padding: "8px 12px", border: "1px solid var(--warn)", background: "rgba(255,170,0,0.08)", fontSize: 9, color: "var(--warn)", lineHeight: 1.6 }}>
+          <div style={{ marginTop: 10, padding: "8px 12px", border: "1px solid var(--warn)", background: "rgba(255,170,0,0.08)", fontSize: 12, color: "var(--warn)", lineHeight: 1.6 }}>
             ⚠ YOUR NUMBERS HAVE MOVED. Accounts you entered under Other accounts are now taxed according to the type shown on each row — until this release they were all spent as already-taxed cash, which made the plan look better than it was. Danger Close guessed the type from each account name where you had not set one. Check every row: these guesses now drive tax, RMDs and the Withdrawal tab.
             {PORTFOLIO._otherTypeMigrated.inferred.length > 0 && (
               <div style={{ marginTop: 4 }}>Guessed from the name: {PORTFOLIO._otherTypeMigrated.inferred.map(r => `${r.name} → ${OTHER_TAX_TYPE_LABELS[r.taxType]}`).join(" · ")}</div>
@@ -12277,9 +12277,9 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
             gains-bearing pool excludes ordinary-taxed and HSA balances entered under Other
             accounts (engine: _gainPoolInit = _taxInit - _taxOrdInit - _hsaInit). */}
         <div style={{ marginTop: 14, padding: "12px 14px", border: "1px solid var(--line)", borderLeft: "3px solid var(--info)", background: "var(--panel2)", maxWidth: 560 }}>
-          <div style={{ fontSize: 9, color: "var(--info)", fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>EMBEDDED GAIN IN TAXABLE ACCOUNTS <span style={{ color: "var(--warn)" }}>(in use from v5.36)</span></div>
+          <div style={{ fontSize: 11, color: "var(--info)", fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>EMBEDDED GAIN IN TAXABLE ACCOUNTS <span style={{ color: "var(--warn)" }}>(in use from v5.36)</span></div>
           <div style={{ width: 220 }}><label style={lbl}>Embedded gain, % of brokerage money</label><input inputMode="decimal" style={inp} value={taxableGainPct} onChange={e => setTaxableGainPct(e.target.value)} placeholder="0 = no embedded gain" /></div>
-          <div style={{ fontSize: 9, color: "var(--ink-dim)", lineHeight: 1.6, marginTop: 8 }}>
+          <div style={{ fontSize: 12, color: "var(--ink-dim)", lineHeight: 1.6, marginTop: 8 }}>
             The share of your taxable brokerage money that is unrealized GAIN rather than the cost basis you paid for it. Your custodian's statement or last year's 1099-B carries the basis: the share is the value less the basis, divided by the value. <span style={{ color: "var(--warn)", fontWeight: 700 }}>From v5.36 the model uses this number: the Withdrawal plan realizes gains when it sells brokerage money, and the Taxes and IRMAA tabs carry those gains as income.</span> It applies to brokerage money only — balances entered under Other accounts as Traditional or annuity (taxed as ordinary income) or as HSA are not part of this pool. The share you enter is the OPENING position, not a fixed rate: growth from here adds gain on top of whatever you declare, so even a plan saved at 0 realizes gains in later years — <span style={{ color: "var(--warn)" }}>if your numbers moved at v5.36, that is why.</span> Leaving it at 0 says the pool is all basis today and selling it today would trigger no tax — that is the optimistic assumption for the early years, and one of the few places this app does not lean conservative. Range 0-95%.
           </div>
         </div>
@@ -12288,16 +12288,16 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
       {/* Expenses */}
       <div className="card" style={{ marginBottom: 14 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-          <div style={{ fontSize: 10, color: "var(--accent)", fontWeight: 600 }} className="lbl">Expenses</div>
-          <button onClick={addExp} style={{ background: "rgba(0,255,136,0.1)", border: "1px solid var(--accent)", color: "var(--accent)", fontFamily: "'JetBrains Mono',monospace", fontSize: 10, padding: "4px 12px", borderRadius: 3, cursor: "pointer" }}>+ Add expense</button>
+          <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600 }} className="lbl">Expenses</div>
+          <button onClick={addExp} style={{ background: "rgba(0,255,136,0.1)", border: "1px solid var(--accent)", color: "var(--accent)", fontFamily: "'JetBrains Mono',monospace", fontSize: 12, padding: "4px 12px", borderRadius: 3, cursor: "pointer" }}>+ Add expense</button>
         </div>
         <div style={{ display: "flex", gap: 24, marginBottom: 10 }}>
           <div><span style={lbl}>Monthly now (pre-retirement)</span><span style={{ fontSize: 14, color: "var(--ink)", fontWeight: 600 }}>${Math.round(preMonthly).toLocaleString()}/mo</span></div>
           <div><span style={lbl}>Monthly after retirement</span><span style={{ fontSize: 14, color: "var(--accent)", fontWeight: 600 }}>${Math.round(postMonthly).toLocaleString()}/mo</span></div>
-          <span style={{ fontSize: 8, color: "var(--ink-faint)", fontStyle: "italic", alignSelf: "center" }}>updates live as you edit · one-time costs excluded from the monthly figures</span>
+          <span style={{ fontSize: 12, color: "var(--ink-faint)", fontStyle: "italic", alignSelf: "center" }}>updates live as you edit · one-time costs excluded from the monthly figures</span>
         </div>
         {/* OTHER INCOME — now first-class: point users at the Income Streams module below. */}
-        <div style={{ fontSize: 9, color: "var(--ink-dim)", lineHeight: 1.6, margin: "2px 0 8px", padding: "8px 10px", background: "rgba(0,204,255,0.04)", border: "1px solid var(--line)", borderRadius: 3 }}>
+        <div style={{ fontSize: 12, color: "var(--ink-dim)", lineHeight: 1.6, margin: "2px 0 8px", padding: "8px 10px", background: "rgba(0,204,255,0.04)", border: "1px solid var(--line)", borderRadius: 3 }}>
           <strong style={{ color: "var(--info)" }}>OTHER INCOME (rental, part-time work, annuity, royalties)?</strong> Don't enter income as a negative expense here — use the <strong>OTHER INCOME STREAMS</strong> table below (after Guaranteed Income). It carries start/end years, a COLA flag, and tax treatment, and flows through every projection including the Taxes and IRMAA tabs. If you previously used the old negative-expense workaround, delete that row and re-enter it there so the tax engines see it.
         </div>
         <div style={{ overflowX: "auto" }}>
@@ -12327,7 +12327,7 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
                   </td>
                   <td style={{ padding: 3 }}>
                     {e.freqUI === "once"
-                      ? <span style={{ fontSize: 9, color: "var(--ink-faint)" }}>one-time</span>
+                      ? <span style={{ fontSize: 12, color: "var(--ink-faint)" }}>one-time</span>
                       : <select style={inp} value={e.applies} onChange={ev => updateExp(e.id, "applies", ev.target.value)}>
                           <option value="pre" style={{ background: "var(--panel2)" }}>Before retirement</option>
                           <option value="post" style={{ background: "var(--panel2)" }}>After retirement</option>
@@ -12339,7 +12339,7 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
                       ? <input inputMode="decimal" style={inp} value={e.oneYr} onChange={ev => updateExp(e.id, "oneYr", ev.target.value)} placeholder="Year" />
                       : <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
                           <input inputMode="decimal" style={{ ...inp, width: 50 }} value={e.startYr} onChange={ev => updateExp(e.id, "startYr", ev.target.value)} />
-                          <span style={{ color: "var(--ink-faint)", fontSize: 10 }}>–</span>
+                          <span style={{ color: "var(--ink-faint)", fontSize: 12 }}>–</span>
                           <input inputMode="decimal" style={{ ...inp, width: 50 }} value={e.endYr} onChange={ev => updateExp(e.id, "endYr", ev.target.value)} />
                         </div>}
                   </td>
@@ -12350,21 +12350,21 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
             </tbody>
           </table>
         </div>
-        {exp.length === 0 && <div style={{ fontSize: 9, color: "var(--ink-faint)", padding: 10, textAlign: "center" }}>No expenses yet — click "+ Add expense".</div>}
-        <div style={{ fontSize: 8, color: "var(--ink-faint)", marginTop: 8, fontStyle: "italic" }}>
+        {exp.length === 0 && <div style={{ fontSize: 12, color: "var(--ink-faint)", padding: 10, textAlign: "center" }}>No expenses yet — click "+ Add expense".</div>}
+        <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 8, fontStyle: "italic" }}>
           "When" auto-fills the year range (before/after retirement, or throughout); you can fine-tune the start–end years. Annual amounts are converted to monthly internally. One-time costs apply in the year you set.
         </div>
       </div>
 
       {/* Income */}
       <div className="card" style={{ marginBottom: 14 }}>
-        <div style={{ fontSize: 10, color: "var(--accent)", fontWeight: 600, marginBottom: 6 }} className="lbl">Guaranteed income</div>
-        <div style={{ fontSize: 9, color: "var(--ink-faint)", marginBottom: 12, lineHeight: 1.6 }}>
+        <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600, marginBottom: 6 }} className="lbl">Guaranteed income</div>
+        <div style={{ fontSize: 12, color: "var(--ink-faint)", marginBottom: 12, lineHeight: 1.6 }}>
           To get your Social Security estimate, sign in to your free <span style={{ color: "var(--info)" }}>my Social Security</span> account at <span style={{ color: "var(--ink)" }}>ssa.gov/myaccount</span> (or check your annual SS statement). It shows your projected monthly benefit at age 62, your full retirement age, and 70. Enter the amount for the age you plan to claim — when you change the claim age below, the dollar figure adjusts automatically.
         </div>
         <div style={{ display: "grid", gridTemplateColumns: single ? "1fr" : "1fr 1fr", gap: 16 }}>
           <div>
-            <div style={{ fontSize: 9, color: "var(--ink)", marginBottom: 6 }}>{nameA || "Spouse A"} — Social Security</div>
+            <div style={{ fontSize: 12, color: "var(--ink)", marginBottom: 6 }}>{nameA || "Spouse A"} — Social Security</div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 90px", gap: 8 }}>
               <div><label style={lbl}>Monthly $ at claim age</label><input inputMode="decimal" style={inp} value={ssAamt} onChange={e => setSsAamt(e.target.value)} placeholder="e.g. 2,800" /></div>
               <div><label style={lbl}>Claim age</label>
@@ -12373,7 +12373,7 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
             </div>
           </div>
           {!single && <div>
-            <div style={{ fontSize: 9, color: "var(--ink)", marginBottom: 6 }}>{nameB || "Spouse B"} — Social Security</div>
+            <div style={{ fontSize: 12, color: "var(--ink)", marginBottom: 6 }}>{nameB || "Spouse B"} — Social Security</div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 90px", gap: 8 }}>
               <div><label style={lbl}>Monthly $ at claim age</label><input inputMode="decimal" style={inp} value={ssBamt} onChange={e => setSsBamt(e.target.value)} placeholder="e.g. 1,800" /></div>
               <div><label style={lbl}>Claim age</label>
@@ -12382,32 +12382,32 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
             </div>
           </div>}
         </div>
-        {single && <div style={{ fontSize: 8, color: "var(--warn)", marginTop: 8, fontStyle: "italic" }}>
+        {single && <div style={{ fontSize: 12, color: "var(--warn)", marginTop: 8, fontStyle: "italic" }}>
           Household is set to "Single," so there's no spouse Social Security field. To add a spouse, switch Household to "Couple" at the top of the My Data tab.
         </div>}
         <div style={{ marginTop: 12, width: 220 }}><label style={lbl}>Pension(s) $/month (0 if none)</label><input inputMode="decimal" style={inp} value={pension} onChange={e => setPension(e.target.value)} />
           {Number(String(pension).replace(/[^0-9.]/g, "")) > 25000 && (
-            <div style={{ marginTop: 4, padding: "6px 8px", border: "1px solid var(--warn)", background: "rgba(255,170,0,0.08)", fontSize: 9, color: "var(--warn)", lineHeight: 1.5 }}>
+            <div style={{ marginTop: 4, padding: "6px 8px", border: "1px solid var(--warn)", background: "rgba(255,170,0,0.08)", fontSize: 12, color: "var(--warn)", lineHeight: 1.5 }}>
               ⚠ This field is a MONTHLY payment — ${Number(String(pension).replace(/[^0-9.]/g, "")).toLocaleString()} would model as ${(Number(String(pension).replace(/[^0-9.]/g, "")) * 12).toLocaleString()}/yr for life. A LUMP-SUM pension does not go here: roll-over → a Holdings row (Traditional column); taken as cash → the after-tax amount under Other Accounts. See the Field Manual (Docs tab).
             </div>
           )}</div>
         <div style={{ marginTop: 18, padding: "12px 14px", border: "1px solid var(--line)", borderLeft: "3px solid var(--info)", background: "var(--panel2)", maxWidth: 560 }}>
-          <div style={{ fontSize: 9, color: "var(--info)", fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>ACA BRIDGE (only if retiring before 65)</div>
+          <div style={{ fontSize: 11, color: "var(--info)", fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>ACA BRIDGE (only if retiring before 65)</div>
           <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
             <div style={{ width: 220 }}><label style={lbl}>Benchmark silver premium $/month</label><input inputMode="decimal" style={inp} value={acaPremium} onChange={e => setAcaPremium(e.target.value)} placeholder="0 = feature off" /></div>
             <div style={{ width: 180 }}><label style={lbl}>Household size for FPL (0 = auto)</label><input inputMode="decimal" style={inp} value={acaSize} onChange={e => setAcaSize(e.target.value)} /></div>
           </div>
-          <div style={{ fontSize: 9, color: "var(--ink-dim)", lineHeight: 1.6, marginTop: 8 }}>
+          <div style={{ fontSize: 12, color: "var(--ink-dim)", lineHeight: 1.6, marginTop: 8 }}>
             The second-lowest-cost silver plan for your household from healthcare.gov — the number that sets your premium tax credit. <span style={{ color: "var(--warn)", fontWeight: 700 }}>Enter your GROSS premium here; keep your expense rows as what you actually pay.</span> This field feeds the Roth tab's subsidy math only, so nothing double-counts. The model can't check this number — it varies by county and age. Bridge-year premiums are assumed to grow with household inflation plus 2 points (medical trend); in years where one spouse has reached Medicare, half the household premium is assumed — enter a blended figure if that misstates yours. Below 100% of FPL the model shows $0 and defers to Medicaid rules it does not model — in both subsidy law scenarios, and that $0 is a placeholder for "not modelled" rather than a computed result, so bridge years that fall below the line are flagged under the Roth tab's strategy table and should be left out of any before-and-after comparison; Alaska/Hawaii FPL and cost-sharing reductions are not modeled. Congress may change the subsidy law — the Roth tab has a scenario toggle for that.
           </div>
         </div>
-        <div style={{ fontSize: 8, color: "var(--ink-faint)", marginTop: 8, fontStyle: "italic" }}>The app estimates the other claiming ages automatically for the SS optimizer. The benefit adjustment by age is an approximation — your SSA statement is authoritative.</div>
+        <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 8, fontStyle: "italic" }}>The app estimates the other claiming ages automatically for the SS optimizer. The benefit adjustment by age is an approximation — your SSA statement is authoritative.</div>
       </div>
 
       {/* Other income streams — rental, post-retirement work, annuity, royalties, anything with a window */}
       <div className="card" style={{ marginBottom: 14 }}>
-        <div style={{ fontSize: 10, color: "var(--info)", fontWeight: 600, marginBottom: 6 }}>OTHER INCOME STREAMS <span style={{ color: "var(--ink-faint)", fontWeight: 400 }}>(rental · post-retirement work · annuity · other)</span></div>
-        <div style={{ fontSize: 9, color: "var(--ink-faint)", marginBottom: 10, lineHeight: 1.6 }}>
+        <div style={{ fontSize: 12, color: "var(--info)", fontWeight: 600, marginBottom: 6 }}>OTHER INCOME STREAMS <span style={{ color: "var(--ink-faint)", fontWeight: 400 }}>(rental · post-retirement work · annuity · other)</span></div>
+        <div style={{ fontSize: 12, color: "var(--ink-faint)", marginBottom: 10, lineHeight: 1.6 }}>
           One row per stream, in <span style={{ color: "var(--ink)" }}>today's dollars per month</span>. <span style={{ color: "var(--ink)" }}>Start / end years are inclusive</span> — for a job after retirement, the start year is the year the work begins and the end year is the last year you expect to work before stopping for good; leave the end year <span style={{ color: "var(--ink)" }}>blank for "for life"</span> (a stream owned by one person still stops at that person's projected death; a Joint stream continues to the survivor).
           {" "}<span style={{ color: "var(--ink)" }}>COLA ✓</span> means the amount keeps pace with inflation in the simulations (rent you'd raise, an inflation-adjusted annuity); unchecked means it stays flat and loses buying power (most fixed annuities). Tax: <span style={{ color: "var(--ink)" }}>taxable</span> streams flow into the Taxes and IRMAA projections (a <em>work</em> row also pays payroll/FICA tax there); <span style={{ color: "var(--ink)" }}>tax-free</span> streams (Roth annuity payouts, muni-ladder income) add cash flow only.
         </div>
@@ -12443,29 +12443,29 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
                       <option value="taxfree" style={{ background: "var(--panel2)" }}>tax-free</option>
                     </select>
                   </td>
-                  <td style={{ padding: "3px 4px" }}><button className="btn" style={{ padding: "3px 8px", fontSize: 9 }} onClick={() => delStream(s.id)}>✕</button></td>
+                  <td style={{ padding: "3px 4px" }}><button className="btn" style={{ padding: "3px 8px", fontSize: 12 }} onClick={() => delStream(s.id)}>✕</button></td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
         )}
-        {streams.length === 0 && <div style={{ fontSize: 9, color: "var(--ink-faint)", padding: "6px 0 10px" }}>No income streams yet — most households can skip this. Add one if you expect rent, a job after retirement, an annuity, royalties, or any other income the Social Security / pension fields don't cover.</div>}
+        {streams.length === 0 && <div style={{ fontSize: 12, color: "var(--ink-faint)", padding: "6px 0 10px" }}>No income streams yet — most households can skip this. Add one if you expect rent, a job after retirement, an annuity, royalties, or any other income the Social Security / pension fields don't cover.</div>}
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 6 }}>
-          <button className="btn" style={{ fontSize: 9 }} onClick={addStream}>+ Add income stream</button>
-          <button className="btn" style={{ fontSize: 9 }} onClick={() => addWorkStream(nameA || "Spouse A")}>+ {(nameA || "Spouse A")} works after retirement</button>
-          {!single && <button className="btn" style={{ fontSize: 9 }} onClick={() => addWorkStream(nameB || "Spouse B")}>+ {(nameB || "Spouse B")} works after retirement</button>}
+          <button className="btn" style={{ fontSize: 12 }} onClick={addStream}>+ Add income stream</button>
+          <button className="btn" style={{ fontSize: 12 }} onClick={() => addWorkStream(nameA || "Spouse A")}>+ {(nameA || "Spouse A")} works after retirement</button>
+          {!single && <button className="btn" style={{ fontSize: 12 }} onClick={() => addWorkStream(nameB || "Spouse B")}>+ {(nameB || "Spouse B")} works after retirement</button>}
         </div>
-        {streams.some(s => s.kind === "work") && <div style={{ fontSize: 8, color: "var(--warn)", marginTop: 8, fontStyle: "italic" }}>
+        {streams.some(s => s.kind === "work") && <div style={{ fontSize: 12, color: "var(--warn)", marginTop: 8, fontStyle: "italic" }}>
           ⓘ Job rows: set the start year to the year the work begins and the end year to the last working year — the year you anticipate stopping and not working again. The simulators count the income only inside that window, the Taxes tab treats it as earned income (income tax + FICA), and if the worker claims Social Security before full retirement age, the real-world SSA earnings test may temporarily withhold benefits — not modeled here, so check ssa.gov if you'll work while drawing SS early.
         </div>}
-        <div style={{ fontSize: 8, color: "var(--ink-faint)", marginTop: 6, fontStyle: "italic" }}>These streams flow through every projection: Monte Carlo, Trajectory, Withdrawal, Taxes, IRMAA, Roth optimizer, and the Income tab. Entering any stream here replaces the built-in example part-time-work schedule.</div>
+        <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 6, fontStyle: "italic" }}>These streams flow through every projection: Monte Carlo, Trajectory, Withdrawal, Taxes, IRMAA, Roth optimizer, and the Income tab. Entering any stream here replaces the built-in example part-time-work schedule.</div>
       </div>
 
       {/* Salary & contributions (pre-retirement accumulation) */}
       <div className="card" style={{ marginBottom: 14 }}>
-        <div style={{ fontSize: 10, color: "var(--accent)", fontWeight: 600, marginBottom: 10 }}>SALARY &amp; 401(k) CONTRIBUTIONS <span style={{ color: "var(--ink-faint)", fontWeight: 400 }}>(while still working)</span></div>
-        <div style={{ fontSize: 9, color: "var(--warn)", background: "rgba(255,170,0,0.06)", border: "1px solid rgba(255,170,0,0.25)", borderRadius: 3, padding: "8px 10px", marginBottom: 12, lineHeight: 1.6 }}>
+        <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600, marginBottom: 10 }}>SALARY &amp; 401(k) CONTRIBUTIONS <span style={{ color: "var(--ink-faint)", fontWeight: 400 }}>(while still working)</span></div>
+        <div style={{ fontSize: 12, color: "var(--warn)", background: "rgba(255,170,0,0.06)", border: "1px solid rgba(255,170,0,0.25)", borderRadius: 3, padding: "8px 10px", marginBottom: 12, lineHeight: 1.6 }}>
           ⓘ Contributions <span style={{ fontWeight: 600 }}>stop at each person's own retirement year</span>{!single && retireYrB && Number(retireYrB) !== Number(retireYr) ? ` — yours in ${retireYr || "?"}, ${nameB || "your spouse"}'s in ${retireYrB}` : (retireYr ? ` (${retireYr})` : "")}. The Monte Carlo and every projection treat each person's post-retirement years as <span style={{ fontWeight: 600 }}>drawdown-only</span> — no salary, employer match, or new contributions are added after that person retires. (Social Security still follows each person's own claim age.)
         </div>
         <div style={{ display: "grid", gridTemplateColumns: single ? "1fr" : "1fr 1fr", gap: 12, marginBottom: 14 }}>
@@ -12473,10 +12473,10 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
           {!single && <div><label style={lbl}>{nameB || "Spouse B"} annual salary $</label><input inputMode="decimal" style={inp} value={salaryB} onChange={e => setSalaryB(e.target.value)} placeholder="e.g. 24,000" /></div>}
         </div>
 
-        <div style={{ fontSize: 9, color: "var(--ink)", background: "rgba(0,204,255,0.05)", border: "1px solid rgba(0,204,255,0.25)", borderRadius: 3, padding: "8px 10px", marginBottom: 12, lineHeight: 1.6 }}>
+        <div style={{ fontSize: 12, color: "var(--ink)", background: "rgba(0,204,255,0.05)", border: "1px solid rgba(0,204,255,0.25)", borderRadius: 3, padding: "8px 10px", marginBottom: 12, lineHeight: 1.6 }}>
           Planned monthly savings until each of you stops working. These grow your <em>retirement-start</em> Traditional/Roth balances in the projections — the model still taxes nothing before retirement. Amounts accrue in today's dollars, deliberately without growth (growth on future contributions would double-count what the Monte Carlo already models). HSA contributions are tracked separately below — HSA dollars are neither Traditional nor Roth, so they stay out of both buckets.
         </div>
-        <div style={{ fontSize: 9, color: "var(--ink)", marginBottom: 6 }}>{nameA || "Spouse A"} — Pre-tax (Traditional 401k/IRA) contributions per paycheck</div>
+        <div style={{ fontSize: 12, color: "var(--ink)", marginBottom: 6 }}>{nameA || "Spouse A"} — Pre-tax (Traditional 401k/IRA) contributions per paycheck</div>
         <div style={{ display: "grid", gridTemplateColumns: "140px 1fr 1fr 1fr", gap: 8, alignItems: "end", marginBottom: 8 }}>
           <div><label style={lbl}>Pay frequency</label>
             <select style={inp} value={contribFreq} onChange={e => setContribFreq(e.target.value)}>
@@ -12499,14 +12499,14 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
         </div>
 
         {/* Annual bonus → 401(k). Employee deferral + employer match are both added to the accumulation engine as a once-a-year lump. */}
-        <div style={{ fontSize: 9, color: "var(--ink)", marginBottom: 6, marginTop: 4 }}>{nameA || "Spouse A"} — once-a-year retirement lump <span style={{ color: "var(--ink-faint)" }}>(OPTIONAL — leave blank if none. If an annual bonus, profit-sharing payout, or other yearly lump partly goes into the 401(k), enter it here: the deferral % and employer match % of that lump are added to savings each year while still working)</span></div>
+        <div style={{ fontSize: 12, color: "var(--ink)", marginBottom: 6, marginTop: 4 }}>{nameA || "Spouse A"} — once-a-year retirement lump <span style={{ color: "var(--ink-faint)" }}>(OPTIONAL — leave blank if none. If an annual bonus, profit-sharing payout, or other yearly lump partly goes into the 401(k), enter it here: the deferral % and employer match % of that lump are added to savings each year while still working)</span></div>
         <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr 1.2fr", gap: 12, alignItems: "end", marginBottom: 8 }}>
           <div><label style={lbl}>Annual lump $ (e.g., bonus)</label><input inputMode="decimal" style={inp} value={annualBonus} onChange={e => setAnnualBonus(e.target.value)} placeholder="e.g. 23,000" /></div>
           <div><label style={lbl}>Your deferral %</label><input inputMode="decimal" style={inp} value={bonusDeferralPct} onChange={e => setBonusDeferralPct(e.target.value)} placeholder="e.g. 15" /></div>
           <div><label style={lbl}>Employer match %</label><input inputMode="decimal" style={inp} value={bonusMatchPct} onChange={e => setBonusMatchPct(e.target.value)} placeholder="e.g. 6" /></div>
           <div><span style={lbl}>→ Added to 401(k)/yr</span><span style={{ fontSize: 14, color: "var(--accent)", fontWeight: 600 }}>${Math.round(num(annualBonus) * (num(bonusDeferralPct) + num(bonusMatchPct)) / 100).toLocaleString()}/yr</span></div>
         </div>
-        <div style={{ fontSize: 9, color: "var(--ink-faint)", marginBottom: 12, fontStyle: "italic", lineHeight: 1.6 }}>
+        <div style={{ fontSize: 12, color: "var(--ink-faint)", marginBottom: 12, fontStyle: "italic", lineHeight: 1.6 }}>
           Both portions are Traditional 401(k) money, paid once a year (each spring) until {nameA || "Spouse A"} retires, and flow into your funds by the same Contrib % mix as your paycheck contributions. If your bonus follows your paycheck formula — e.g. 15% deferral with a 100%-up-to-6% match — enter <span style={{ color: "var(--ink)" }}>15</span> and <span style={{ color: "var(--ink)" }}>6</span> (21% of the bonus total). The after-tax remainder of the bonus is spending money and isn't tracked as a portfolio asset.
         </div>
 
@@ -12517,7 +12517,7 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
         </div>
 
         {PORTFOLIO._contribMigrated && (
-          <div style={{ marginTop: 10, padding: "8px 12px", border: "1px solid var(--warn)", background: "rgba(255,170,0,0.08)", fontSize: 9, color: "var(--warn)", lineHeight: 1.6 }}>
+          <div style={{ marginTop: 10, padding: "8px 12px", border: "1px solid var(--warn)", background: "rgba(255,170,0,0.08)", fontSize: 12, color: "var(--warn)", lineHeight: 1.6 }}>
             ⚠ Your previous contribution amounts were carried over as 100% pre-tax — split them if you also make Roth contributions. Save &amp; Apply clears this notice.
           </div>
         )}
@@ -12542,7 +12542,7 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
           const _electiveB = single ? 0 : (num(spouseContribMo) + num(spouseRothMo)) * 12;
           const _over402g = [_electiveA > TAX_CONSTS.LIMIT_402G ? (nameA || "Spouse A") : null, _electiveB > TAX_CONSTS.LIMIT_402G ? (nameB || "Spouse B") : null].filter(Boolean);
           return (
-            <div style={{ marginTop: 10, padding: "8px 12px", background: "rgba(0,255,136,0.04)", borderLeft: "2px solid var(--accent)", fontSize: 9, lineHeight: 1.7 }}>
+            <div style={{ marginTop: 10, padding: "8px 12px", background: "rgba(0,255,136,0.04)", borderLeft: "2px solid var(--accent)", fontSize: 12, lineHeight: 1.7 }}>
               <span style={{ color: "var(--accent)", fontWeight: 600 }}>Projected added by retirement: </span>
               <span style={{ color: "var(--ink)" }}>
                 {(nameA || "Spouse A")} {_fmtK(_tA)} Trad / {_fmtK(_rAv)} Roth ({_yrsA} yr{_yrsA === 1 ? "" : "s"})
@@ -12557,7 +12557,7 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
             </div>
           );
         })()}
-        <div style={{ fontSize: 9, color: "var(--ink-faint)", marginTop: 10, fontStyle: "italic", lineHeight: 1.6 }}>
+        <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 10, fontStyle: "italic", lineHeight: 1.6 }}>
           Enter the three components from your paystub; they are pre-tax (Traditional) money — employer match and supplemental are always pre-tax, and Roth amounts have their own field above. Set how new contributions are split across funds using the <span style={{ color: "var(--ink)" }}>Contrib %</span> column in the Holdings table above — it should total 100% (shown in the holdings footer).
           {allocSum > 0 && Math.abs(allocSum - 100) >= 0.5 && <span style={{ color: "var(--crit)" }}> Your Contrib % currently totals {allocSum.toFixed(0)}% — adjust the holdings so it sums to 100%.</span>}
         </div>
@@ -12578,8 +12578,8 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
           return (
             <div style={{ marginTop: 12, padding: "10px 12px", borderTop: "1px solid var(--line)", background: "rgba(0,255,136,0.03)", borderRadius: 3 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
-                <span style={{ fontSize: 9, color: "var(--accent)", fontWeight: 600, letterSpacing: 1 }}>WHERE CONTRIBUTIONS LAND (by asset class)</span>
-                <span style={{ fontSize: 8, color: _bwSum === 0 ? "var(--ink-faint)" : (Math.abs(_bwSum - 100) < 0.5 ? "var(--accent)" : "var(--crit)"), fontFamily: "'JetBrains Mono',monospace" }}>
+                <span style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, letterSpacing: 1 }}>WHERE CONTRIBUTIONS LAND (by asset class)</span>
+                <span style={{ fontSize: 12, color: _bwSum === 0 ? "var(--ink-faint)" : (Math.abs(_bwSum - 100) < 0.5 ? "var(--accent)" : "var(--crit)"), fontFamily: "'JetBrains Mono',monospace" }}>
                   {_bwSum === 0 ? "no allocation set — contributions follow today's asset mix" : `allocations total ${_bwSum.toFixed(0)}%`}
                 </span>
               </div>
@@ -12587,15 +12587,15 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
                 {[1, 2, 3, 4].map(b => {
                   const pct = _useBalMix ? (_balSum > 0 ? _balW[b] / _balSum : 0) : _bw[b] / _bwSum;
                   return (
-                    <div key={b} style={{ fontSize: 9 }}>
+                    <div key={b} style={{ fontSize: 12 }}>
                       <div style={{ color: "var(--ink-dim)", marginBottom: 2 }}>{BUCKET_LABELS[b]}</div>
-                      <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 13, color: pct > 0 ? "var(--ink)" : "var(--ink-faint)", fontWeight: 600 }}>${Math.round(_totalMo * pct).toLocaleString()}<span style={{ fontSize: 9, color: "var(--ink-faint)" }}>/mo</span></div>
-                      <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, color: "var(--ink-faint)" }}>{(pct * 100).toFixed(0)}%</div>
+                      <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 13, color: pct > 0 ? "var(--ink)" : "var(--ink-faint)", fontWeight: 600 }}>${Math.round(_totalMo * pct).toLocaleString()}<span style={{ fontSize: 12, color: "var(--ink-faint)" }}>/mo</span></div>
+                      <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 12, color: "var(--ink-faint)" }}>{(pct * 100).toFixed(0)}%</div>
                     </div>
                   );
                 })}
               </div>
-              <div style={{ fontSize: 8, color: "var(--ink-faint)", marginTop: 8, fontStyle: "italic" }}>
+              <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 8, fontStyle: "italic" }}>
                 Based on ${Math.round(_totalMo).toLocaleString()}/mo total contributions (401k + HSA{single ? "" : " + spouse"}) {_useBalMix ? "split by today's asset mix (no Holdings Contrib % set, so new money keeps your current allocation)" : "split by the Holdings Contrib %. As this money accumulates, the Monte Carlo gradually tilts your portfolio's asset mix toward this allocation."}
               </div>
             </div>
@@ -12605,12 +12605,12 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
 
       {/* AI context — auto-generated from your data (read-only), plus an optional notes box */}
       <div className="card" style={{ marginBottom: 14 }}>
-        <div style={{ fontSize: 10, color: "var(--accent)", fontWeight: 600, marginBottom: 6 }} className="lbl">Plan summary (form preview)</div>
-        <div style={{ fontSize: 9, color: "var(--ink-faint)", marginBottom: 8, lineHeight: 1.6 }}>
+        <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600, marginBottom: 6 }} className="lbl">Plan summary (form preview)</div>
+        <div style={{ fontSize: 12, color: "var(--ink-faint)", marginBottom: 8, lineHeight: 1.6 }}>
           This is built automatically from the fields above, so the names and numbers are always correct — there's no fragile text to break. The preview below <span style={{ color: "var(--ink)" }}>updates live as you edit</span> the form, and becomes part of your plan's context <span style={{ color: "var(--ink)" }}>only after you press Save &amp; Apply</span>. It's a preview, not the full payload: to see the <span style={{ color: "var(--ink)" }}>exact</span> text sent to the AI (this summary plus your live simulation results), open the <span style={{ color: "var(--ink)" }}>Ask AI</span> tab and expand <span style={{ color: "var(--ink)" }}>"exactly what's sent."</span>
         </div>
-        <div style={{ fontSize: 8, color: "var(--ink-faint)", letterSpacing: 0.5, marginBottom: 4 }} className="lbl">Auto-generated (read-only)</div>
-        <pre style={{ background: "rgba(0,0,0,0.45)", border: "1px solid var(--line)", color: "#9ec4b0", fontFamily: "'JetBrains Mono',monospace", fontSize: 10, padding: "10px 12px", borderRadius: 3, lineHeight: 1.6, whiteSpace: "pre-wrap", margin: 0, maxHeight: 220, overflowY: "auto" }}>{genAIContext()}</pre>
+        <div style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: 0.5, marginBottom: 4 }} className="lbl">Auto-generated (read-only)</div>
+        <pre style={{ background: "rgba(0,0,0,0.45)", border: "1px solid var(--line)", color: "#9ec4b0", fontFamily: "'JetBrains Mono',monospace", fontSize: 12, padding: "10px 12px", borderRadius: 3, lineHeight: 1.6, whiteSpace: "pre-wrap", margin: 0, maxHeight: 220, overflowY: "auto" }}>{genAIContext()}</pre>
       </div>
 
       {showWizard && (
@@ -12626,7 +12626,7 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
         <span style={{ display: "inline-flex", alignItems: "center", gap: 0 }}>
           <input type="text" value={exportName} onChange={e => setExportName(e.target.value)}
             title="Backup filename (saved as .json)"
-            style={{ width: 220, background: "rgba(0,0,0,0.3)", border: "1px solid var(--info)", borderRight: "none", color: "var(--ink)", fontFamily: "'JetBrains Mono',monospace", fontSize: 10, padding: "10px 10px", borderRadius: "3px 0 0 3px", outline: "none" }} />
+            style={{ width: 220, background: "rgba(0,0,0,0.3)", border: "1px solid var(--info)", borderRight: "none", color: "var(--ink)", fontFamily: "'JetBrains Mono',monospace", fontSize: 12, padding: "10px 10px", borderRadius: "3px 0 0 3px", outline: "none" }} />
           <button onClick={handleExport} style={{ background: "transparent", border: "1px solid var(--info)", color: "var(--info)", fontFamily: "'JetBrains Mono',monospace", fontSize: 11, fontWeight: 600, padding: "9px 16px", borderRadius: "0 3px 3px 0", cursor: "pointer", letterSpacing: 1 }}>↓ EXPORT BACKUP</button>
         </span>
         <button onClick={() => fileRef.current && fileRef.current.click()} style={{ background: "transparent", border: "1px solid var(--ink-dim)", color: "var(--ink)", fontFamily: "'JetBrains Mono',monospace", fontSize: 11, fontWeight: 600, padding: "9px 16px", borderRadius: 3, cursor: "pointer", letterSpacing: 1 }}>↑ IMPORT BACKUP</button>
@@ -12643,31 +12643,31 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
             style={{ background: "transparent", border: "1px solid var(--ink-dim)", color: "var(--ink-dim)", fontFamily: "'JetBrains Mono',monospace", fontSize: 11, fontWeight: 600, padding: "9px 16px", borderRadius: 3, cursor: "pointer", letterSpacing: 1 }}>⟳ LOAD SAMPLE DATA</button>
         )}
         <input ref={fileRef} type="file" accept="application/json,.json" onChange={handleImportFile} style={{ display: "none" }} />
-        {saved && <span style={{ color: "var(--accent)", fontSize: 11, fontFamily: "'JetBrains Mono',monospace" }}>✓ Saved — every tab updated &amp; cached for next session</span>}
+        {saved && <span style={{ color: "var(--accent)", fontSize: 12, fontFamily: "'JetBrains Mono',monospace" }}>✓ Saved — every tab updated &amp; cached for next session</span>}
         {exported && (exportMode === "picker"
-          ? <span style={{ color: "var(--info)", fontSize: 11, fontFamily: "'JetBrains Mono',monospace" }}>✓ Backup saved to your chosen folder</span>
+          ? <span style={{ color: "var(--info)", fontSize: 12, fontFamily: "'JetBrains Mono',monospace" }}>✓ Backup saved to your chosen folder</span>
           : exportMode === "share"
-          ? <span style={{ color: "var(--info)", fontSize: 10, fontFamily: "'JetBrains Mono',monospace", maxWidth: 520, lineHeight: 1.5 }}>✓ Share sheet opened — tap <span style={{ fontWeight: 700 }}>"Save to Files"</span> to keep it (or AirDrop/Mail it to another device). If you tapped Cancel, nothing was saved — press EXPORT BACKUP again.</span>
-          : <span style={{ color: "var(--info)", fontSize: 10, fontFamily: "'JetBrains Mono',monospace", maxWidth: 520, lineHeight: 1.5 }}>✓ Saved to your browser's <span style={{ fontWeight: 700 }}>Downloads</span> folder — on a computer, check your browser's download manager or Downloads folder; on iPhone/iPad, check the <span style={{ fontWeight: 700 }}>Files</span> app → Downloads. Don't see it? Some browsers block silent downloads — try again and watch for a save prompt or share sheet.</span>)}
+          ? <span style={{ color: "var(--info)", fontSize: 12, fontFamily: "'JetBrains Mono',monospace", maxWidth: 520, lineHeight: 1.5 }}>✓ Share sheet opened — tap <span style={{ fontWeight: 700 }}>"Save to Files"</span> to keep it (or AirDrop/Mail it to another device). If you tapped Cancel, nothing was saved — press EXPORT BACKUP again.</span>
+          : <span style={{ color: "var(--info)", fontSize: 12, fontFamily: "'JetBrains Mono',monospace", maxWidth: 520, lineHeight: 1.5 }}>✓ Saved to your browser's <span style={{ fontWeight: 700 }}>Downloads</span> folder — on a computer, check your browser's download manager or Downloads folder; on iPhone/iPad, check the <span style={{ fontWeight: 700 }}>Files</span> app → Downloads. Don't see it? Some browsers block silent downloads — try again and watch for a save prompt or share sheet.</span>)}
       </div>
       <div style={{ border: "1px solid var(--line)", borderLeft: "3px solid var(--info)", background: "rgba(0,204,255,0.05)", padding: "10px 14px", marginBottom: 14, maxWidth: 760 }}>
-        <div style={{ fontSize: 9, color: "var(--info)", letterSpacing: 1, fontWeight: 700, marginBottom: 5 }} className="lbl">Where to keep your backup file</div>
-        <div style={{ fontSize: 10, color: "var(--ink)", lineHeight: 1.7 }}>
+        <div style={{ fontSize: 11, color: "var(--info)", letterSpacing: 1, fontWeight: 700, marginBottom: 5 }} className="lbl">Where to keep your backup file</div>
+        <div style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.7 }}>
           This file holds your actual numbers — balances, income, spending. Nothing sends it anywhere; it simply lands in your downloads. Treat it like a bank statement and keep it somewhere private: your Documents folder, a personal cloud drive, or a USB stick, rather than a folder you share with other people.
           <div style={{ marginTop: 5 }}>The name filled in above is already a good one — you can just press Export. If you prefer your own name, keeping the word <code style={{ color: "var(--info)" }}>backup</code> in it makes the file easy to spot later.</div>
           <div style={{ marginTop: 5, color: "var(--ink-dim)" }}>Keep a copy of this app's source folder from GitHub? Filenames containing <code>backup</code> are already on that project's ignore list, so the suggested name needs no thought.</div>
         </div>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
-        {importErr && <span style={{ color: "var(--crit)", fontSize: 10, fontFamily: "'JetBrains Mono',monospace" }}>⚠ {importErr}</span>}        <span style={{ fontSize: 8, color: "var(--ink-faint)", fontStyle: "italic", maxWidth: 520 }}>
+        {importErr && <span style={{ color: "var(--crit)", fontSize: 12, fontFamily: "'JetBrains Mono',monospace" }}>⚠ {importErr}</span>}        <span style={{ fontSize: 12, color: "var(--ink-faint)", fontStyle: "italic", maxWidth: 520 }}>
           Export saves your whole plan (holdings, income, expenses, master prompt, your estate-readiness checklist, and your chosen theme) to a JSON file you can keep or move to another device. Import restores it and recalculates every tab. Importing replaces your current data. Guided Setup answers six quick questions to build a fresh plan from scratch (it only replaces your data when you press BUILD — cancelling changes nothing). Load Sample Data swaps in the fictional example household so you can explore the app without restarting — it also replaces your current data, so export a backup first if you want to keep it.
         </span>
       </div>
 
       {/* Danger zone — destructive, set apart from the main actions */}
       <div style={{ borderTop: "1px solid rgba(255,68,68,0.2)", paddingTop: 12, marginBottom: 8, display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
-        <button onClick={() => setShowClearConfirm(true)} style={{ background: "transparent", border: "1px solid var(--crit)", color: "var(--crit)", fontFamily: "'JetBrains Mono',monospace", fontSize: 10, fontWeight: 600, padding: "8px 14px", borderRadius: 3, cursor: "pointer", letterSpacing: 1 }}>🗑 CLEAR ALL DATA</button>
-        <span style={{ fontSize: 8, color: "var(--ink-faint)", fontStyle: "italic", maxWidth: 520 }}>
+        <button onClick={() => setShowClearConfirm(true)} style={{ background: "transparent", border: "1px solid var(--crit)", color: "var(--crit)", fontFamily: "'JetBrains Mono',monospace", fontSize: 11, fontWeight: 600, padding: "8px 14px", borderRadius: 3, cursor: "pointer", letterSpacing: 1 }}>🗑 CLEAR ALL DATA</button>
+        <span style={{ fontSize: 12, color: "var(--ink-faint)", fontStyle: "italic", maxWidth: 520 }}>
           Wipes everything back to a blank plan (with a confirmation). Export a backup first if you might want it back.
         </span>
       </div>
@@ -12676,10 +12676,10 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
         <div onClick={() => setShowClearConfirm(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: 20 }}>
           <div onClick={e => e.stopPropagation()} style={{ background: "var(--panel2)", border: "1px solid var(--crit)", borderRadius: 6, maxWidth: 460, width: "100%", padding: 22, boxShadow: "0 0 40px rgba(255,68,68,0.2)" }}>
             <div style={{ fontSize: 13, color: "var(--crit)", fontWeight: 700, letterSpacing: 1, marginBottom: 12 }}>🗑 DELETE YOUR ENTIRE PLAN?</div>
-            <div style={{ fontSize: 11, color: "var(--ink)", lineHeight: 1.7, marginBottom: 12 }}>
+            <div style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.7, marginBottom: 12 }}>
               You are about to <span style={{ color: "var(--crit)", fontWeight: 600 }}>permanently delete everything</span> you've entered and start over with a blank form:
             </div>
-            <div style={{ fontSize: 10, color: "#9ec4b0", lineHeight: 1.9, marginBottom: 12, paddingLeft: 6 }}>
+            <div style={{ fontSize: 12, color: "#9ec4b0", lineHeight: 1.9, marginBottom: 12, paddingLeft: 6 }}>
               • all holdings and other accounts<br />
               • income (Social Security, pension)<br />
               • all expenses<br />
@@ -12689,7 +12689,7 @@ function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, 
             <div style={{ fontSize: 11, color: "var(--crit)", fontWeight: 700, background: "rgba(255,68,68,0.08)", border: "1px solid rgba(255,68,68,0.3)", borderRadius: 3, padding: "8px 10px", marginBottom: 8, textAlign: "center", letterSpacing: 1 }}>
               ⚠ THIS CANNOT BE UNDONE
             </div>
-            <div style={{ fontSize: 9, color: "var(--ink-dim)", lineHeight: 1.6, marginBottom: 18 }}>
+            <div style={{ fontSize: 12, color: "var(--ink-dim)", lineHeight: 1.6, marginBottom: 18 }}>
               If you might want this plan back, click Cancel and use <span style={{ color: "var(--info)" }}>Export Backup</span> first.
             </div>
             <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
@@ -12846,7 +12846,7 @@ export default function DangerClose() {
 
   if (phase === "checking") {
     return (
-      <div style={{ ...skinVars(skin), background: "var(--bg)", color: "var(--ink-faint)", fontFamily: "'JetBrains Mono', monospace", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, letterSpacing: 2 }}>
+      <div style={{ ...skinVars(skin), background: "var(--bg)", color: "var(--ink-faint)", fontFamily: "'JetBrains Mono', monospace", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, letterSpacing: 2 }}>
         ◉ LOADING CACHED DATA...
       </div>
     );
