@@ -19,7 +19,7 @@
 //     <h3>IRMAA Cliff <span class="tag" ...>strategy</span></h3>
 // renders as "IRMAA Cliff strategy" but contains no such substring — ~80 characters of badge
 // markup sit between the two words. That exact difference invalidated this scope's own site
-// anchor on 2026-08-25 (SCOPE_D6_SSA44_USER_SIDE.md §7.1), and it is the third recorded instance
+// anchor on 2026-08-25 (SCOPE_D6_SSA44_USER_SIDE.md §7.1), and it is the FOURTH recorded instance
 // of one class: a DERIVED ARTIFACT MISTAKEN FOR THE PRIMARY SOURCE.
 //
 // So when a key fails here, there are two candidate causes and only one correct response:
