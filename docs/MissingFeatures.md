@@ -7,7 +7,7 @@
 | Built `index.html` md5 | `fe6bf7d4230abdacbf7ce1171798feb3` |
 | Phase | 3 (Sections D + E) · governing doc `SCOPE_STANDING_AUDIT.md` §D |
 | Date | 2026-08-12 |
-| Status | **Re-pinned to v5.48 (2026-08-25) — read that block FIRST; it supersedes the v5.39 one.** Original v5.29 status: partial — D-1 verified to source, D-2 onward assessed. |
+| Status | **Re-pinned to v5.48 (2026-08-25) — read that block FIRST; it supersedes the v5.39 one.** ⚠ **D-6 has since CLOSED at v5.49 (2026-08-25)** — see its entry; the v5.48 block's HALF-CLOSED verdict is superseded for that item only, and every other item in that block still stands. Original v5.29 status: partial — D-1 verified to source, D-2 onward assessed. |
 
 > ## RE-PINNED TO v5.48 — 2026-08-25 · THIS BLOCK SUPERSEDES THE v5.39 ONE BELOW
 >
@@ -21,6 +21,30 @@
 > rather than a decoded copy — see the errata below. Two shipped functions were **executed**, not
 > read: `stateTaxAnnual` and `acaApplicablePct`. The regression suite was **not re-run**; no source,
 > test or harness file changed in this session.
+>
+> ### ⚠ ERRATA — 2026-08-25 (v5.49 session): a FOURTH instance, and a miscount of it
+>
+> **3. The v5.49 scope's Field Manual anchor did not exist in the source.** `SCOPE_D6_SSA44_USER_SIDE.md`
+> §3 gave the quote-free anchor `IRMAA Cliff strategy`. That string is not in `DangerClose.jsx`. The
+> heading is `<h3>IRMAA Cliff <span class="tag" style="…">strategy</span></h3>` — the two words are
+> separated by ~80 characters of badge markup. The entry *renders* as "IRMAA Cliff strategy", so the
+> anchor was read off the rendered manual. **The class again: a derived artifact mistaken for the
+> primary source.** Caught before any edit, by resolving the anchor rather than trusting it. The
+> working anchor is the entry's closing text, `push you over a cliff and cost ~$1,000+/yr per
+> person.</p>`, unique at idx 69794.
+>
+> ⚠ **The near-miss was the dangerous part.** `cliff strategy` (lowercase) *does* match — inside the
+> **ACA Premium Subsidy** entry. An anchor that silently lands in the wrong entry is how a disclosure
+> gets appended to unrelated copy.
+>
+> **4. I then miscounted it, in two files that have shipped.** `docs/SCOPE_D6_SSA44_USER_SIDE.md`
+> §7.1 and the header of `qa/t31_disclosure_parity.mjs` both call it *"the third instance"*, and the
+> scope adds that this errata *"already records twice."* Both are wrong: entry 2 below already
+> describes itself as the third, so the anchor error is the **fourth**. The miscount came from
+> counting the errata entries visible in one screenful instead of reading what they say — which is,
+> once more, **a derived artifact mistaken for the primary source**, this time applied to the tally
+> of that very class. ⚠ **Both files need correcting; neither is urgent and neither changes a
+> finding.** Recorded here first because this document is the register.
 >
 > ### ⚠ ERRATA — two errors of mine, recorded here rather than only in chat
 >
@@ -47,7 +71,7 @@
 > | **D-3** | SPLIT, both halves Low | **HOLDS as written — and a NEW sub-item, D-3c, runs the OTHER WAY** |
 > | **D-4** | open, Low-Med | **HOLDS — but reclassify: not a measurable modelling gap** |
 > | **D-5** | open, Decline | **HOLDS unchanged. Decline confirmed** |
-> | **D-6** | partially disclosed | ⚠ **HALF-CLOSED — the half that closed is the creator-side half** |
+> | **D-6** | partially disclosed | ✅ **CLOSED at v5.49 — both halves. `t31` enforces the class** |
 > | **D-7** | unassessed — still owed | ✅ **ASSESSED at last. It is a real gap, and its direction is optimistic** |
 > | **D-8b** | PARTIALLY ADDRESSED | **ACCURATE — confirmed by executing the function** |
 >
@@ -119,7 +143,35 @@
 > Disclosure intact at **L850**, inside `TAX_CONSTS`: *"One-time CRT/CGA election not modeled."*
 > The recurring QCD is still modelled. Nothing has changed and nothing should.
 >
-> ### D-6 — HALF-CLOSED, and the half that closed is the wrong half
+> ### D-6 — ✅ **CLOSED AT v5.49 (2026-08-25), BOTH HALVES.** The box below is the v5.48 finding, kept for the record
+>
+> **What shipped.** The Field Manual's IRMAA Cliff entry and the IRMAA tab both now name **SSA-44**
+> and **work stoppage**, state that the eight life-changing events are a **closed** list, and say
+> plainly that a Roth conversion is not among them. Both state the model **charges every surcharge
+> in full** — it never prices in a successful appeal, so those early years err high, which is the
+> conservative direction and the reason the omission was tolerable while it lasted.
+>
+> **`METHODOLOGY.md` was corrected too, and the box below is wrong about it.** It says the
+> creator-side half was *"fixed, and fixed well."* It was not. It named five of the eight events and
+> said the list *"includes"* them — never that it is **closed**. On a tab driven by the Roth slider
+> that reads as an invitation to infer a conversion-driven spike might qualify. It cannot
+> (`ssa.gov/forms/ssa-44.pdf`; 20 CFR 418.1205). **Neither half was actually complete**, and the
+> incomplete half was the one this document called exemplary — because it was checked for the two
+> keys it had been asked about rather than against the form.
+>
+> **`t31` now enforces the class.** If `METHODOLOGY.md` names a limitation, the render tree or the
+> raw Field Manual must name it too. **No suite had ever read `METHODOLOGY.md`** — every mention of
+> that filename across t1–t30 is a code comment — which is exactly why D-6 could be recorded CLOSED
+> once already on the strength of the creator-side half alone. Before it was allowed to pass, the
+> version bump was built **without** the clause and `t31` run against it: **8 passed, 6 failed**.
+>
+> ⚠ **What `t31` does NOT do.** It asserts a named string appears on both surfaces. It says nothing
+> about whether the two agree, whether the wording is accurate, or whether it is comprehensible. A
+> key can pass against a misleading sentence. Parity of vocabulary is a floor, not a ceiling.
+>
+> ---
+>
+> #### The v5.48 finding, as recorded (superseded)
 >
 > **`METHODOLOGY.md` is fixed, and fixed well.** L840–845 now names the form and the trigger:
 > *"Social Security's life-changing-event redetermination (form SSA-44) … is not modeled. The
@@ -729,7 +781,7 @@ person per tier) and the remedy is a form. **Exposure:** user-side.
 | ~~D-2~~ | Realized gains from ordinary drawdown | ✅ **CLOSED at v5.36** — engine + both tax engines + render | — | — | — |
 | **D-3** | State schedules → flat rate | **SPLIT 2026-08-19; disclosure half CORRECTED DOWN 2026-08-20** — approximation is disclosed, only per-state note detail is uneven | **CONSERVATIVE** (direction corrected) | Note tidy: ride along, no release of its own. Precision: declined/held | Both halves **Low** — **no live high-priority half** |
 | **D-4** | Itemized deductions not modelled | open, unchanged | Conservative | Minority case | Low-Med |
-| **D-6** | IRMAA SSA-44 relief | **partially disclosed** — survivor trigger yes, work stoppage no | Conservative | Build (one clause) | Low |
+| **D-6** | IRMAA SSA-44 relief | ✅ **CLOSED at v5.49** — both surfaces name SSA-44 and work stoppage; the closed eight-event list is stated; `METHODOLOGY.md` corrected in the same release | Conservative | **Done** | — |
 | **D-5** | QCD one-time CRT/CGA election | open, unchanged | Conservative | **Decline** | Very low |
 | **D-7** | State estate / inheritance tax | **unassessed** — still owed | unknown | unassessed | unranked |
 | **D-8** | ACA sub-floor \$0 | **PARTIALLY ADDRESSED (v5.32)** — declined toggle not built | **Both** | Built | see entry |

@@ -144,7 +144,10 @@ That string is not in the source. The heading is:
 entry *renders* as "IRMAA Cliff strategy", so the anchor was taken from the rendered manual rather
 than the raw string.
 
-**This is the third instance of the class the `MissingFeatures.md` errata already records twice —
+**This is the FOURTH instance of the class the `MissingFeatures.md` errata records —
+⚠ corrected 2026-08-25: this read "third" and "records twice", and both were wrong. Errata
+entry 2 already describes itself as the third. The miscount came from counting errata entries
+instead of reading them, which is the same class again, applied to the tally of the class —
 a derived artifact mistaken for the primary source — and it occurred inside the scope written to
 close the second.** Reading the rendered surface is the natural thing to do and it is wrong every
 time; the raw string is the only thing an edit or a test can address.
