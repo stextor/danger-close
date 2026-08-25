@@ -29,7 +29,7 @@ let _s = 42; Math.random = () => { _s = (_s * 1103515245 + 12345) & 0x7fffffff; 
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v546";
-const KNOWN_VERSIONS = ["v546", "v547"];
+const KNOWN_VERSIONS = ["v546", "v547", "v548"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
