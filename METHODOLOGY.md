@@ -840,9 +840,13 @@ Three details of the correction are worth stating, because they are not all keye
 
 **A limitation that remains.** Social Security's life-changing-event redetermination (form SSA-44) — which lets a household ask
 SSA to reassess IRMAA on more current income rather than on the two-year-old return — is not
-modeled. The enumerated events include **work stoppage or reduction, the trigger that applies to
-most newly retired households**, as well as death of a spouse, marriage, divorce and loss of a
-pension. A household that files one may pay less than the
+modeled. There are **eight** enumerated events and **the list is closed** (20 CFR 418.1205):
+marriage, divorce or annulment, death of a spouse, **work stoppage**, work reduction, loss of
+income-producing property, loss of pension income, and an employer settlement payment. Work
+stoppage or reduction is the trigger that applies to most newly retired households. **A Roth
+conversion, a realized capital gain or a home sale is not among them**, so a surcharge this app
+shows from a conversion cannot be appealed away — though a one-off spike leaves the lookback on
+its own after two years. A household that files one may pay less than the
 model projects, so the omission is conservative.
 
 **Where the engines still legitimately differ.** Engines B (Taxes) and C (IRMAA) hold Social
