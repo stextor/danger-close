@@ -52,6 +52,13 @@ failure straight after a clone almost always means that file is missing, not a r
 ## Feature suites (t7–t9, in qa/ one level up)
 Their build inputs are derived from the current leg's artifacts:
 `cp app_v5102.mjs app_testable.mjs` (t7/t8) and `cp dom_v5102.cjs dom_bundle.cjs` (t9) —
+
+**t31 needs `METHODOLOGY.md` at the run-folder root (added v5.49).** It is the first suite to read
+that file, so the flat run folder never had to carry it. t31 exits loudly if it is missing rather than
+skipping — a skipped check that reports green is the exact defect t31 exists to prevent. Also note
+`cp <current>.jsx DangerClose.jsx` at the run-folder root (t8, t14, t16, t19, t22), and that **t19 must
+be run from `qa/`** — it opens `../DangerClose.jsx`, a path relative to the working directory.
+
 `dom_entry_v5102.jsx` additionally exposes `window.__test` for t9 (baseline suites ignore it),
 and `shim.txt` exports `__test` alongside `__g` (guarded, so older splices still load).
 t8 also reads `../DangerClose.jsx`, the canonical current source, from the run-folder root.
