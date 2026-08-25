@@ -1,5 +1,60 @@
 # Changelog
 
+## v5.49 — the SSA-44 disclosure reaches the user, and a test that reads METHODOLOGY.md, 2026-08-25
+
+**Build.** `src/DangerClose.jsx` md5 `2ccc62b669f6ee52c6a0be1709c967a5` · built `index.html` md5
+`a976bf66307ca07464e15ae911468365` · prior build v5.48 (`30ab12fba362b8ce538f66adea9a104b`).
+
+**Disclosure only. No modelling change, and no number the model computes moved** — verified, not
+asserted: cross-version parity **10/10** and the DOM diff's **STRICT branch at 32**, the branch that
+fires only on a pair with no intended differences.
+
+**What was wrong.** IRMAA's two-year lookback prices a household's first Medicare years off working
+income, and form SSA-44 lets them ask SSA to reassess on current income. `METHODOLOGY.md` said so.
+**The app never did.** The limitation was recorded as closed because the creator-side half had been
+written; the user-side half never was, and the user side is where the exposure sits. Neither the
+Field Manual nor the IRMAA tab named SSA-44 anywhere.
+
+**What ships.** The Field Manual's IRMAA Cliff entry and the IRMAA tab now both name SSA-44 and
+work stoppage. Both state that the model **charges every surcharge in full** — it never prices in a
+successful appeal, so those early years err high, which is the conservative direction and the reason
+the omission was tolerable while it lasted.
+
+**A correction made during the build.** The first draft of this copy named five of the eight
+life-changing events and never said the list is **closed**. On a tab driven by the Roth slider that
+reads as an invitation to infer a conversion-driven spike might qualify. It cannot. Checked against
+the primary source (`ssa.gov/forms/ssa-44.pdf`; 20 CFR 418.1205): eight events, closed list, and a
+Roth conversion, a capital gain and a home sale are none of them. The copy was rewritten and
+`METHODOLOGY.md` corrected too — it had the same gap, saying the events *"include"* six of eight.
+
+**`t31`, a new suite: cross-surface disclosure parity.** If `METHODOLOGY.md` names a limitation, the
+render tree or the raw Field Manual must name it too. **No test in this project had ever read
+`METHODOLOGY.md`** — every mention of that filename across t1–t30 is a code comment — so the two
+surfaces could disagree forever and the suite would stay green. This closes the class, not the
+instance. Key set deliberately two: `SSA-44` and `work stoppage`.
+
+It ships with **three controls that must hold on both legs**: one resolving only through the render
+tree, one only through the raw manual, and a sentinel present in `METHODOLOGY.md` and absent from
+both surfaces. No predicate stuck on true or false can satisfy all three. Before the green run, the
+version bump was built **without** the clause and `t31` was run against it: **8 passed, 6 failed.**
+
+**Limitations, stated plainly.** `t31` asserts that a named string appears on both surfaces. It says
+nothing about whether the two agree, whether the wording is accurate, or whether it is
+comprehensible. A key can pass against a misleading sentence. Parity of vocabulary is a floor.
+Matching is case-insensitive — the manual opens a sentence with "Work stoppage", the tab says
+"work stoppage" — but contiguity and freedom from internal markup stay strict, because a phrase
+split by a tag names nothing a reader can search for.
+
+**Tests.** **2,559 app checks, 0 failing** · parity 10/10 · tooling 82 (`t21` 50, DOM diff 32) ·
+**2,641 total**. Prior leg (v5.48) 939 · current leg (v5.49) 942 · parity 10 · feature suites run
+once 668. Built-artifact smoke **16/16** against the shipped `index.html`. Totals computed from
+suite output.
+
+**Harness.** v5.49 had to be registered in 13 version-gated suites, carrying 45 v5.48 behaviour pins
+forward — correct here only because no figure moves. `runsuite.sh` did not call `t29`, `t30` or
+`t31`; it does now. `t31` needs `METHODOLOGY.md` in the flat run folder, a harness input no suite
+had ever required, and it exits loudly rather than skipping if the file is absent.
+
 ## v5.48 — legible defaults: 852 font declarations raised off a 7-to-10px floor, 2026-08-24
 
 **Build.** `src/DangerClose.jsx` md5 `30ab12fba362b8ce538f66adea9a104b` · built `index.html` md5
