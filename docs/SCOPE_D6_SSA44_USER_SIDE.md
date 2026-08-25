@@ -54,14 +54,17 @@ exactly how S-1 and S-3 sat closed-but-unrecorded for nine releases. **The extin
 
 | # | Surface | Anchor (v5.48) | Action |
 |---|---|---|---|
-| 1 | **Field Manual — IRMAA Cliff strategy entry**, inside `DOCS_HTML` (L3593) | quote-free anchor `IRMAA Cliff strategy`; the entry ends *…push you over a cliff and cost ~$1,000+/yr per person.* | **APPEND** the clause |
+| 1 | **Field Manual — IRMAA Cliff strategy entry**, inside `DOCS_HTML` (L3593) | quote-free anchor `push you over a cliff and cost ~$1,000+/yr per person.</p>` — unique, idx 69794. ⚠ **CORRECTED 2026-08-25, see §7** | **APPEND** the clause after that `</p>` |
 | 2 | **IRMAA tab disclosure note** | **L9973**, the paragraph beginning *"IRMAA tiers and surcharges are approximate…"* and ending *"Not tax advice."* | **INSERT** before the closing sentence |
 | 3 | `METHODOLOGY.md` §8 | L840–845 | **NO CHANGE** — already correct |
 | 4 | Version sites ×4 | footer · DATA LOAD header · Field Manual callsign · Field Manual footer | **BUMP** to v5.49 (`t1` STATIC asserts all four) |
 | 5 | `CHANGELOG.md` | newest-first | **NEW ENTRY** + provenance line |
 
-**`DOCS_HTML` handling.** It is one 146,679-char line. Edit with **quote-free anchors**, exclude it
-from any grep or transform, and locate it **by length, not by index**. `METHODOLOGY.md` is untouched
+**`DOCS_HTML` handling.** It is one line of **146,679 bytes / 145,542 code points** (1,137 multi-byte
+UTF-8 characters — em dashes, curly quotes). ⚠ **State the unit.** `awk`/`wc -c` count bytes, Python
+`len()` counts code points; a session comparing one against the other will read drift that is not
+there. Edit with **quote-free anchors**, exclude it from any grep or transform, and locate it **by
+length, not by index** — comparing lengths *within* one measurement, never across two. `METHODOLOGY.md` is untouched
 by convention — it updates on modelling releases, and this changes no model.
 
 ## 4. Tests this ships with
@@ -70,8 +73,11 @@ by convention — it updates on modelling releases, and this changes no model.
 
 1. **Cross-surface parity.** Read `METHODOLOGY.md` from disk. For a declared set of user-relevant
    limitation keys — starting with `SSA-44` and `work stoppage` — assert that if `METHODOLOGY.md`
-   names it, the **render tree or the decoded Field Manual names it too.** This is the first test in
-   the project to read `METHODOLOGY.md`, and it closes the class, not just the instance.
+   names it, the **render tree or the RAW Field Manual string names it too.** This is the first test
+   in the project to read `METHODOLOGY.md`, and it closes the class, not just the instance.
+   ⚠ **Corrected 2026-08-25:** this clause read *"the decoded Field Manual"* and contradicted point 4
+   below, which requires the raw string. **Raw wins** — decoding is what produced the false zeros in
+   the errata, and it is what broke this scope's own site-1 anchor. There is now one instruction.
 2. **Negative control.** A key present in `METHODOLOGY.md` and deliberately absent user-side must
    make the check **fail** when the parity assertion is inverted — otherwise the test passes
    vacuously and we have shipped another green-either-way assertion.
@@ -119,3 +125,41 @@ shipping separately means the clause lands in a day and the mechanism gets its o
 **Recommendation: together.** A disclosure fix with no test to hold it is how D-6 got here.
 
 **D4 · Version.** v5.49, disclosure-only. Confirm.
+
+---
+
+## 7. Corrections made before build — 2026-08-25
+
+Three errors in this scope, found by resolving its own anchors against v5.48 before editing
+anything. Recorded here because the *class* matters more than the instances.
+
+**7.1 · The site-1 anchor did not exist.** §3 gave the quote-free anchor `IRMAA Cliff strategy`.
+That string is not in the source. The heading is:
+
+```html
+<h3>IRMAA Cliff <span class="tag" style="background:rgba(255,170,0,.15);color:#ffaa00">strategy</span></h3>
+```
+
+`IRMAA Cliff` and `strategy` are separated by ~80 characters of markup for the amber badge. The
+entry *renders* as "IRMAA Cliff strategy", so the anchor was taken from the rendered manual rather
+than the raw string.
+
+**This is the third instance of the class the `MissingFeatures.md` errata already records twice —
+a derived artifact mistaken for the primary source — and it occurred inside the scope written to
+close the second.** Reading the rendered surface is the natural thing to do and it is wrong every
+time; the raw string is the only thing an edit or a test can address.
+
+⚠ **The near-miss is worse than the miss.** `cliff strategy` (lowercase) *does* match — at idx
+71936, inside the **ACA Premium Subsidy** entry's law-scenario paragraph. An anchor that lands in
+the wrong entry silently is how a disclosure ends up appended to unrelated copy.
+
+**7.2 · "146,679 chars" is a byte count.** Corrected in §3. Two measurements, one figure, no unit.
+
+**7.3 · §4 contradicted itself on decoded vs raw.** Point 1 said "decoded", point 4 said "raw".
+Resolved to raw. A scope carrying two answers is the same failure this project logged when
+`OPERATIONS.md` §A2 and the manifest disagreed for eleven releases.
+
+**Consequence for `t31`:** the parity test matches literal strings in the **raw** `DOCS_HTML`, so
+it will go red on copy that is visually correct but raw-different — markup inside a key phrase,
+exactly what the heading above does. That strictness is the point, and `t31`'s header says so, so
+that a future session does not "fix" it by decoding.
