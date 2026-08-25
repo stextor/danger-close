@@ -7,7 +7,213 @@
 | Built `index.html` md5 | `fe6bf7d4230abdacbf7ce1171798feb3` |
 | Phase | 3 (Sections D + E) · governing doc `SCOPE_STANDING_AUDIT.md` §D |
 | Date | 2026-08-12 |
-| Status | **Partial — see §0.** D-1 is verified to source. D-2 onward are assessed, not all independently verified. |
+| Status | **Re-pinned to v5.48 (2026-08-25) — read that block FIRST; it supersedes the v5.39 one.** Original v5.29 status: partial — D-1 verified to source, D-2 onward assessed. |
+
+> ## RE-PINNED TO v5.48 — 2026-08-25 · THIS BLOCK SUPERSEDES THE v5.39 ONE BELOW
+>
+> Source `30ab12fba362b8ce538f66adea9a104b`, built `index.html` `8895b249af1313920c0c762a7a22776c`,
+> committed tree `ba6d598`. Nine releases since the v5.39 re-pin. **No fix was made in this session
+> — verification and inventory only.**
+>
+> **Method, stated so its limits are legible.** Every item was verified **by content**: all `L####`
+> citations in this document are pinned to v5.29/v5.39 and most have moved, so none was trusted as
+> an address. The Field Manual was read from the **raw `DOCS_HTML` string** (L3593, 146,679 chars)
+> rather than a decoded copy — see the errata below. Two shipped functions were **executed**, not
+> read: `stateTaxAnnual` and `acaApplicablePct`. The regression suite was **not re-run**; no source,
+> test or harness file changed in this session.
+>
+> ### ⚠ ERRATA — two errors of mine, recorded here rather than only in chat
+>
+> **1. The first state-note census used the wrong discriminator.** It did not treat a note reading
+> *"flat"* as declaring the shape of the schedule, and so returned **33** silent states against
+> `AUDIT_D3_STATE_TAX_DIRECTION.md`'s **30**. The audit's discriminator is the correct one. Re-run
+> with it, the audit's census reproduces at v5.48 **exactly** — 51 / 9 / 9 / 33 / 3 / 30 / 4 / 26,
+> every figure, MD still misfiled. The discrepancy was mine, not the document's.
+>
+> **2. The first Field Manual decode was lossy and produced false zeros.** Stripping tags with
+> `<[^>]+>` let an unmatched `<` consume spans of text: `OBBBA`, `senior` and `standard deduction`
+> all returned **0** hits from the decoded copy while the raw string held 2, 1 and 4. Caught on a
+> sanity check against known manual text. **Every Field Manual result in this block was re-derived
+> from the raw string.** This is the same shape as the error the 2026-08-19 errata below records —
+> a derived artifact mistaken for the primary source — which is now the third instance in this
+> document alone.
+>
+> ### The eight items at v5.48
+>
+> | # | Status at v5.39 | **Status at v5.48** |
+> |---|---|---|
+> | **D-1** | ✅ CLOSED | ✅ **CLOSED — confirmed by content** |
+> | **D-2** | ✅ CLOSED at v5.36 | ✅ **CLOSED — confirmed. Its one live descendant S-1 is now closed too** |
+> | **D-3** | SPLIT, both halves Low | **HOLDS as written — and a NEW sub-item, D-3c, runs the OTHER WAY** |
+> | **D-4** | open, Low-Med | **HOLDS — but reclassify: not a measurable modelling gap** |
+> | **D-5** | open, Decline | **HOLDS unchanged. Decline confirmed** |
+> | **D-6** | partially disclosed | ⚠ **HALF-CLOSED — the half that closed is the creator-side half** |
+> | **D-7** | unassessed — still owed | ✅ **ASSESSED at last. It is a real gap, and its direction is optimistic** |
+> | **D-8b** | PARTIALLY ADDRESSED | **ACCURATE — confirmed by executing the function** |
+>
+> ### D-1 — CLOSED, confirmed
+>
+> `OBBBA_CONSTS` at **L931**; `seniorBonus` at **L5162–5166**, still inside `computeTaxPlan` only;
+> the Verify-tab assertions at **L1273–1280** carry their citation to P.L. 119-21 §70103. Field
+> Manual: *"The temporary OBBBA "senior bonus" deduction … is modeled on the Taxes tab, but not in
+> the Roth conversion ladder"* — accurate, and it names the divergence. `METHODOLOGY.md` L120 states
+> it is modelled, with the phase-out and the MAGI proxy. Nothing here has regressed.
+>
+> ### D-2 — CLOSED, and its descendant is closed too
+>
+> Engine D `_saleFromGain` at **L4779**; Engine B `capGains_y` at **L5140**, computed from
+> `_gainByYr`, not `0`. **The live descendant recorded in the v5.39 box — the IRMAA tab's MAGI
+> sentence not naming `capGain_y` — is now CLOSED.** At **L9973** it reads *"…plus every other
+> taxable component the plan generates, including dividends and realized capital gains."* Tracked
+> as **S-1** in `AUDIT_SECTION_D_DELTA_v5_31_to_v5_39.md`; **that finding should be marked closed
+> there, and in `AUDIT_TOP_FIVE_SUMMARY.md`, which still ranks S-1 as part of its #1.**
+>
+> ### D-3 — holds, and a new sub-item that runs the other way
+>
+> **The 2026-08-20 correction survives contact.** The census reproduces exactly (above). The
+> per-state disclosure has **moved L11889 → L12062** and is otherwise unchanged, rendering for every
+> jurisdiction. `stateTaxAnnual` is still at **L1091** — one of the few citations in this document
+> that did not move — and still models **no state standard deduction**. The setup wizard's state
+> picker (now **L3392**) still shows no note at all. Both halves stay **Low**.
+>
+> **⚠ NEW — D-3c · income-limited exclusions are applied unconditionally, and this under-taxes.**
+> `stateTaxAnnual` computes `const excl = (r.excl65 || 0) * Math.max(0, persons65)` (**L1100**) —
+> a flat multiplication with **no income test anywhere in the engine**. Executed against shipped
+> v5.48, a New Jersey couple both 65+ pays **$0** modelled state tax at $80,000, $120,000 **and
+> $150,000** of retirement income.
+>
+> New Jersey's actual rule (NJ Division of Taxation, *Retirement Income Exclusions*, njit7.shtml;
+> P.L. 2021 c.129): the maximum exclusion is **$100,000 MFJ** — the app uses `excl65: 75000` per
+> person, which is the **single-filer** figure applied twice — available only when total income is
+> $100,000 or less, phasing to 50% at $100,001–125,000, 25% at $125,001–150,000, and to **zero above
+> $150,000, as a hard cliff**. The model is therefore too generous twice over, and both errors run
+> the same way: **it under-taxes**. That is the **optimistic** direction — the one this project's
+> design defaults name as the wrong way to be wrong, and the opposite of D-3's headline verdict.
+>
+> D-3's "conservative" finding was measured on **New York**, which has no such exclusion, so this is
+> not a contradiction of it — it is a different mechanism the New York measurement could not see.
+> Six other states carry the same shape by their own notes: **VA, RI, NM, WI, ME** (income-limited or
+> "approximated as unconditional") and **MD** (whose exclusion in law does not cover traditional IRA
+> withdrawals at all, but does in the model).
+>
+> **Not measured:** the dollar delta. That needs the sourced NJ rate schedule — the same "New York
+> treatment" this entry already says every state needs before a recalibration ships. The exclusion
+> *structure* above is verified against the primary source; the resulting tax is not.
+>
+> ### D-4 — holds, but it is not a measurable modelling gap
+>
+> `METHODOLOGY.md` L120 still discloses it, in the same sentence as the OBBBA text. **The Field
+> Manual does not: `itemiz` returns ZERO hits in the raw `DOCS_HTML`.** The glossary defines
+> *"Standard Deduction"* but never says itemizing is unmodelled. So the disclosure is creator-side
+> only — the D-6 shape.
+>
+> **But the app has no mortgage-interest, SALT or charitable-deduction inputs**, so no household a
+> user can build in this app can express itemizing either way. Per the pattern recorded in the
+> manifest on 2026-08-23, that makes the claim **unfalsifiable within the app's own frame**: it is a
+> scope boundary, not a gap that could be measured and closed. Direction remains conservative (the
+> model can only ever overstate tax here). **Rank it as a boundary note, not as an open modelling
+> item.**
+>
+> ### D-5 — unchanged, decline confirmed
+>
+> Disclosure intact at **L850**, inside `TAX_CONSTS`: *"One-time CRT/CGA election not modeled."*
+> The recurring QCD is still modelled. Nothing has changed and nothing should.
+>
+> ### D-6 — HALF-CLOSED, and the half that closed is the wrong half
+>
+> **`METHODOLOGY.md` is fixed, and fixed well.** L840–845 now names the form and the trigger:
+> *"Social Security's life-changing-event redetermination (form SSA-44) … is not modeled. The
+> enumerated events include **work stoppage or reduction, the trigger that applies to most newly
+> retired households**, as well as death of a spouse, marriage, divorce and loss of a pension. A
+> household that files one may pay less than the model projects, so the omission is conservative."*
+> That is broader than this entry asked for, and it states the direction.
+>
+> **Nothing reached the user.** At v5.48, `SSA-44`, `SSA 44`, `life-changing`, `life changing`,
+> `work stoppage`, `appeal`, `redetermination` and `reassess` return **zero hits in the render tree
+> and zero in the raw `DOCS_HTML`** — the same result the v5.39 check recorded, re-run against raw
+> after the decode error above. The disclosure is still in **exactly one place**, and that place is
+> the one users do not read.
+>
+> This entry sets its own exposure as **user-side** and its severity as *"low as modelling; medium
+> as disclosure."* On that test **nothing has moved**, and the closure should not be recorded as one.
+> **Reclassify as: creator-side CLOSED, user-side OPEN.** The remedy is unchanged and still a
+> clause, not a feature — the Field Manual's IRMAA section and the IRMAA tab's own note, naming work
+> stoppage and pointing at SSA-44.
+>
+> ### D-7 — assessed, 13 days after it was owed
+>
+> **What exists.** The comparator's estate figure, **L4251**:
+> `estate: Math.round(taxBal + rothA + rothB + (tradA + tradB) * (1 - HEIR_RATE))`, with
+> `HEIR_RATE = 0.22` (**L3689**) — a flat assumed heir **income** tax on inherited Traditional. There
+> is **no estate tax of any kind in it**, federal or state. This is not a peripheral number: it is
+> the Roth strategy comparator's **default ranking objective** (**L5386**, `useState("estate")`;
+> **L9518**, *"MAX AFTER-TAX ESTATE (leave the most behind)"*), so it drives which strategy the tab
+> presents as the model's best cell.
+>
+> **What is disclosed.** Exactly one sentence, at **L10788**: *"If estate tax is a concern, note this
+> tool does not model federal or state estate tax — consult an estate attorney."* It sits inside
+> `if (_tlS.single)` on the Survivor tab — the single-household reframe. **A couple never sees it.**
+> `estate tax`, `estate-tax` and `inheritance` return **zero hits in the raw `DOCS_HTML`**, and
+> `METHODOLOGY.md` mentions neither. So: disclosed for single households in one tab, **undisclosed
+> for the mainstream case**.
+>
+> **Direction: optimistic.** Omitting the tax overstates what passes to heirs, and it overstates it
+> inside the figure the tab ranks by.
+>
+> **Boundary test: it passes, and this is what the v5.29 row could not settle.** Oregon's threshold
+> is **$1,000,000**, not indexed and **not portable between spouses**, so a couple faces one
+> exemption at second death — which is exactly when this app's estate figure is struck.
+> Massachusetts is **$2,000,000**, Rhode Island roughly **$1.84M**; twelve states plus DC levy an
+> estate tax and five more (KY, MD, NE, NJ, PA) levy an inheritance tax. The app's audience is
+> households with seven-figure portfolios, and the modelled estate is **portfolio only** — no home —
+> so a real estate crossing these thresholds is larger than the figure the app reports. It makes an
+> existing output more correct rather than adding a new one.
+>
+> **⚠ Sourcing caveat.** The thresholds above come from secondary compilations, which **disagree
+> with each other on the federal exemption** ($13.61M / $13.99M / $15M all appear). The federal
+> figure is out of frame here — this entry's own table already declines federal estate tax as not
+> mainstream — but the disagreement is a warning about the sources. **OR, MA and RI need primary
+> confirmation from their revenue departments before any scope commits to a number.**
+>
+> **Severity: medium**, on direction and on the fact that it sits under a ranked recommendation.
+> **Exposure: user-side.** Cheapest honest fix is to lift the L10788 sentence out of the `single`
+> branch so every household sees it, and say it where the estate ranking is presented.
+>
+> ### D-8b — accurate, confirmed by execution
+>
+> `acaApplicablePct` (**L1215–1233**) tests `fplRatio < ACA_CONSTS.floorMult` **before** the regime
+> branch, so D-8a's fix holds. Executed: at 0.900, 0.980 and 0.999 the function returns `null` in
+> **both** regimes; at 1.000 it returns **0.021** under `current` and **0** under `enhanced`. The
+> disclosure machinery is present as described — *"Sub-floor years — the ACA column is blank here,
+> not zero"*, *"and means "not modelled""*, `acaFloorYrs` at **L3777**.
+>
+> The discontinuity is therefore **starker than this entry states**: under the enhanced scenario the
+> applicable percentage goes `null` → **0**, i.e. from no subsidy modelled to the **entire** benchmark
+> premium, on one dollar of MAGI. **Nothing here changes the product decision** — closing it still
+> means paying a subsidy where the model pays none, and the toggle remains considered and declined.
+>
+> **Carried forward, not re-measured:** the *6 of 24 modelled bridge years below the floor* figure.
+> It came from six reconstructed households in the v5.32 work and was not reproduced this session.
+>
+> ### A coverage finding that outranks several items above
+>
+> `stateTaxAnnual` **is** unit-tested — `t10` drives six archetypes hand-verified to the dollar
+> (FL no-tax, AZ flat, MS `retExempt`, AL `excl65`, MT partial-SS, and the fallback path), plus a
+> non-vacuous control. But every archetype is a **structural branch**, and AL's $6,000 exclusion is
+> not income-limited, so **D-3c above has no assertion anywhere in the suite.**
+>
+> At household level it is starker. Across every fixture in the suite, `stateCode` is **`null`** —
+> the legacy flat-rate fallback, which never touches `STATE_RULES` — with a single exception,
+> `t3_roth.mjs`, which uses **`GA`**. **No full projection in this suite exercises the state module
+> for 50 of its 51 jurisdictions**, and the one that does uses a flat-rate state with a large
+> unconditional exclusion: the least discriminating choice available for detecting either the
+> progressive-schedule approximation or D-3c.
+>
+> This is the manifest's 2026-08-23 pattern — *a fixture that cannot reach a behaviour makes every
+> assertion about it vacuous* — at module scale rather than fixture scale. It is not itself a
+> Section D finding; it is the reason several Section D findings cannot be measured without new
+> fixtures, and any D-3 or D-7 scope should budget for that before it budgets for a fix.
+
 
 > ## RE-PINNED TO v5.39 — 2026-08-18
 >
@@ -283,6 +489,9 @@ consistent with existing precedent and would not require per-lot tracking.
 
 > ### ⚠ DIRECTION CORRECTED 2026-08-19 — measured against v5.40, and the finding splits
 >
+> ⚠ **v5.48: this box HOLDS, and a NEW sub-item D-3c runs the OTHER WAY — income-limited
+> exclusions applied unconditionally, which UNDER-taxes. See the v5.48 re-pin block at the top.**
+>
 > **This entry's direction is wrong.** The approximation was recorded as *"Not uniform"* and was
 > reasoned about downstream as under-taxing high earners and flattering a plan. **It over-taxes**
 > across the entire mainstream range.
@@ -371,6 +580,10 @@ rewrite.
 
 ## D-4 · Itemized deductions are not modelled
 
+> ⚠ **v5.48: reclassified.** Disclosed in `METHODOLOGY.md` only — **zero** mentions in the Field
+> Manual — but the app has no inputs that could express itemizing, so the claim is unfalsifiable
+> within its own frame. A boundary note, not an open modelling item. See the v5.48 block.
+
 **Priority: 4.** *Disclosed limitation* — `METHODOLOGY.md` L120: *"itemized deductions are not
 modeled (standard deduction assumed)."*
 
@@ -409,6 +622,10 @@ RMD), which is the part that matters for mainstream charitable givers.
 ---
 
 ## D-6 · IRMAA life-changing-event relief (SSA-44) appears to be unmodelled and undisclosed
+
+> ⚠ **HALF-CLOSED at v5.48 — see the v5.48 re-pin block at the top.** `METHODOLOGY.md` now names
+> SSA-44 and work stoppage; the render tree and Field Manual still carry **zero** mention of either.
+> Creator-side closed, **user-side open** — and user-side is where this entry sets its exposure.
 
 > ### ⚠ CORRECTED 2026-08-18 — the v5.31 sweep resolved this too broadly
 >
@@ -472,6 +689,11 @@ person per tier) and the remedy is a form. **Exposure:** user-side.
 ---
 
 ## D-7 · Assessed and deliberately excluded
+
+> ✅ **The one row left unassessed here — state estate / inheritance tax — WAS ASSESSED on
+> 2026-08-25. See the v5.48 re-pin block at the top.** Verdict: a real gap, direction **optimistic**,
+> undisclosed for couples, sitting inside the Roth comparator's **default ranking objective**.
+> The other rows in the table below are unchanged.
 
 | Candidate | Why excluded |
 |---|---|
