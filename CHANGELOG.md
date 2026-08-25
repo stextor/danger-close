@@ -1,5 +1,80 @@
 # Changelog
 
+## v5.48 — legible defaults: 852 font declarations raised off a 7-to-10px floor, 2026-08-24
+
+**Build.** `src/DangerClose.jsx` md5 `30ab12fba362b8ce538f66adea9a104b` · built `index.html` md5
+`8895b249af1313920c0c762a7a22776c` · prior build v5.47 (`1395f2e4fc2809ab3e5692b50e2d3409`).
+
+**Presentation only. No modelling change, and no number the model computes moved** — verified, not
+assumed: parity **10/10** across the pair, and the cross-version DOM diff took its **strict** branch
+and passed **32/32**, meaning every rendered figure is byte-identical between v5.47 and v5.48.
+`METHODOLOGY.md` is deliberately untouched, per the convention that it updates on modelling
+releases only.
+
+### What changed
+
+The app declared **1,015 font sizes, 793 of them below 11px — 341 at 8px and 3 at 7px** — for an
+audience within sight of retirement. The floor is now **12px for body text, 11px for labels**, and
+**852 declarations were raised**: 3 from 7px, 341 from 8px, 325 from 9px, 124 from 10px, and 59
+that sat at 11px in body positions.
+
+The five **fixed-pixel grids** — in the withdrawal, roth, taxes, irmaa and ss tabs — were widened
+**1.40×**, which covers both 9→12 (1.333×) and 8→11 (1.375×) with margin and preserves each
+column's relative proportion exactly. That widening is the actual work: those grids cannot reflow,
+and 19 sub-11px declarations sit inside columns as narrow as 50px, where a nine-character currency
+string clips at 12px. All five sit inside `overflowX` wrappers, so they scroll rather than overflow.
+
+**The UI SIZE control is unchanged and still applies `zoom`.** It is now a user-owned adjustment on
+top of a legible default rather than a workaround for an illegible one.
+
+### What this release deliberately did NOT do
+
+**Raising the default `uiScale` was considered and rejected.** It is one line and would have fixed
+legibility everywhere at once — but `zoom` scales the layout as well as the type, so a 390px phone
+at 130% has 300 CSS px of usable width. It trades legibility for width, degrading exactly the form
+factor the work set out to help, and it would have re-opened overflow pressure on the five wide
+grids. `zoom` is the right instrument for a user-owned control and the wrong one for a default.
+
+**No responsive breakpoints were added.** The app still has zero `@media` rules. That was the
+original plan, and re-measuring killed it: the audit justified breakpoints mainly on grids
+overflowing phones, and **all five over-wide grids already sit in scroll wrappers — unwrapped
+overflow is zero.**
+
+### The audit document that prompted this was substantially wrong
+
+`UsabilityFlaws.md` is pinned to v5.38. **Four of its ten findings were already fixed** and it did
+not know: F-6 (money fields now carry 48 `inputMode` attributes), F-10 (UI SIZE is documented in the
+Field Manual), F-2 and F-8 (every over-wide grid is wrapped). F-8 was also **misattributed** — the
+three widest grids, at 785px, 736px and 608px, are in withdrawal, roth and taxes, **not** the SS
+optimizer it names. Four of four claims tested were stale. Its status column should not be trusted
+for the remaining findings without re-measuring first.
+
+### Tests
+
+**2,532 app checks, 0 failing · parity 10/10 · tooling 82 · 2,614 total**, counts parsed from suite
+output, both legs, 47 invocations.
+
+**New: `t30_legible`** — 12 checks on v5.48, 10 on v5.47. It asserts the declared floor, that the
+smallest declared size is exactly 11px, and that no fixed-pixel column is narrower than 70px. It
+carries a **pre-v5.48 branch** so the frozen leg keeps asserting its own state (793 below 11px,
+smallest 7px, columns at 50px) — a revert fails loudly rather than silently. Negative-controlled
+both ways: one declaration returned to 8px fails B-2 and B-3; one column returned to 50px fails C-3
+by name and line.
+
+It locates the 146,679-character `DOCS_HTML` line **by length rather than a pinned index**, and
+asserts the exclusion removed exactly one line — so the floor count cannot be quietly measured over
+the wrong text. `DOCS_HTML` is byte-identical in this release; the Field Manual has its own
+stylesheet and is not the app.
+
+### ⚠ The limitation, stated plainly
+
+**No test in this project can see whether v5.48 looks right.** jsdom performs no layout, so `t30`
+asserts what is *declared* and nothing about rendered boxes. A green run proves the numbers in the
+source are what they claim to be. It does not prove the app is usable. Only inspection at a real
+viewport does that, and the five widened grids are where to look first. Reporting a green suite as
+evidence of a good-looking release would be exactly the vacuity this project has spent the past week
+removing from its own guardrails.
+
 ## Unreleased — `qa/` only: coverage for v5.43–v5.47, and three assertions that could never have fired, 2026-08-23
 
 **No version bump, no release.** Nothing under `src/` changed. Source throughout is v5.47,
