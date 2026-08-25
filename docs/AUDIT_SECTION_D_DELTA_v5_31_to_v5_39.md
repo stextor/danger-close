@@ -7,8 +7,32 @@
 | Verified against | the **committed tree** (fresh clone, commit `d18f7cc`), not a working copy |
 | Predecessor | `AUDIT_PHASE3_SECTION_D_SWEEP.md` — same objective, anchored to **v5.31** |
 | Objective | re-run that sweep's method over the six **modelling** releases shipped since it |
-| Result | **Two live findings**, both the "two surfaces disagree" shape. **S-1 has widened.** One new: **S-3**, in `METHODOLOGY.md`. Two delta subjects **cleared**. |
+| Result | **Two live findings** as written at v5.39 — ⚠ **BOTH ARE NOW CLOSED at v5.48; see the box below.** Both were the "two surfaces disagree" shape. **S-1 had widened.** One new: **S-3**, in `METHODOLOGY.md`. Two delta subjects **cleared**. |
 | Fixes made | **None.** This is an audit. |
+
+> ### ✅ RE-PINNED TO v5.48 — 2026-08-25 · BOTH LIVE FINDINGS ARE CLOSED
+>
+> Source `30ab12fba362b8ce538f66adea9a104b`, tree `ba6d598`. Verified **by content**; the `L####`
+> addresses below are v5.39 addresses and most have moved.
+>
+> - **S-1 · CLOSED, and closed structurally.** The IRMAA tab's MAGI sentence (v5.39 L9792, now
+>   **L9973**) reads *"…plus every other taxable component the plan generates, including dividends
+>   and realized capital gains."* Engine C sums seven components at **L4435** (v5.39 L4399). The
+>   sentence is now a **catch-all with two named examples instead of an enumeration**, so the failure
+>   mode — a list that silently falls behind the sum — is gone rather than patched.
+> - **S-3 · CLOSED.** `METHODOLOGY.md` L678–680 is now past-tense and version-gated: *"Engine B
+>   applied the same simplification **through v5.35** … **From v5.36 that is no longer true and this
+>   parenthetical is historical.**"*
+>
+> **§4's recommendation — *"Fix S-1 and S-3 together, in one small docs release"* — was carried out.**
+> Neither closure was recorded here, and both were found during a records repair nine releases later,
+> which is the fourth and fifth instance of the silent-closure pattern this audit family keeps
+> logging. `AUDIT_TOP_FIVE_SUMMARY.md` ranked S-1 and S-3 inside its **#1** item for that whole
+> window; it is re-pinned in the same pass.
+>
+> **This document is now history.** Its method stands; its findings are discharged. Nothing here is
+> open.
+
 
 ---
 

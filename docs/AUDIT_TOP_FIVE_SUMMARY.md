@@ -3,11 +3,62 @@
 | Field | Value |
 |---|---|
 | Written | 2026-08-18 |
-| Build | **v5.39** · source `7070018f2699503dfac4ca8e0e1b2feb` · tree `a8e59f3` |
+| Build | written against **v5.39** (`7070018f2699503dfac4ca8e0e1b2feb`, tree `a8e59f3`) · **RE-PINNED to v5.48 2026-08-25 — read that box first** |
 | Draws on | Sections A–F: the `FlawsToFix-*` family, `MissingFeatures.md`, `ARCHITECTUREIssues.md`, `UsabilityFlaws.md`, plus the Phase 3 rollup, the v5.31 Section D sweep, the v5.28 2D break-even audit, and the v5.31 → v5.39 delta sweep |
 | Spec | `SCOPE_STANDING_AUDIT.md`: *"provide a two-paragraph standalone summary of the top five most important issues, flaws, or problems from among all findings."* |
 
 ---
+
+> ### ⚠ RE-PINNED TO v5.48 — 2026-08-25 · ITEM 1 IS LARGELY DISCHARGED, AND ITEM 5 JUST HAPPENED AGAIN
+>
+> Source `30ab12fba362b8ce538f66adea9a104b`, tree `ba6d598`. Nine releases since this summary was
+> written. Verified **by content** — every `L####` below was re-resolved against v5.48, because the
+> addresses in this document are v5.39 addresses and most have moved.
+>
+> **Item 1 — *"Disclosures drift off the engines beneath them"* — was ranked #1 "by a distance."
+> Two of its three instances are now CLOSED and the third is half-closed.**
+>
+> | Instance | v5.39 | **v5.48** |
+> |---|---|---|
+> | **S-1** · IRMAA tab's MAGI sentence omits `div_y`, `capGain_y` | OPEN | ✅ **CLOSED, and closed structurally.** L9973 now reads *"…plus every other taxable component the plan generates, including dividends and realized capital gains."* Engine C sums seven components at **L4435**; the sentence is now a **catch-all plus two named examples rather than an enumeration**, so it cannot drift by omission the way it did |
+> | **S-3** · `METHODOLOGY.md` says Engine B defaults gains to $0, present tense | OPEN | ✅ **CLOSED.** L678–680 is now past-tense and version-gated: *"Engine B applied the same simplification **through v5.35** … **From v5.36 that is no longer true and this parenthetical is historical**"* |
+> | **D-6** · IRMAA SSA-44 relief | OPEN | ⚠ **HALF-CLOSED.** `METHODOLOGY.md` L840–845 now names SSA-44 **and work stoppage**. But `SSA-44`, `life-changing`, `work stoppage`, `appeal`, `redetermination` and `reassess` return **zero hits in the render tree and zero in the raw `DOCS_HTML`**. Creator-side closed; **user-side open — and user-side is where D-6 sets its own exposure** |
+>
+> **Ranking consequence.** Item 1 no longer belongs at rank 1 *as an open finding*. But the **pattern**
+> it names is not discharged — the v5.48 Section D re-pin found two fresh instances of exactly this
+> shape: **D-7**, where the only "we do not model estate tax" sentence is gated inside
+> `if (_tlS.single)` so a couple never sees it, and **D-4**, disclosed in `METHODOLOGY.md` and absent
+> from the Field Manual entirely. The instances close; the mechanism keeps producing new ones.
+>
+> **⚠ Item 5 has just demonstrated itself on this document.** Item 5's thesis is that *"the audit's
+> own records went stale silently and hid completed work."* **S-1 and S-3 both closed silently, and
+> this capstone went on ranking them #1 for nine releases.** That is the fourth and fifth silent
+> closure on the same list as D-1, D-2 and C-2C-3 below — found the same way, during a records
+> repair, not by any check designed to find it. **Item 5's case is stronger than when it was written,
+> and on the evidence it now outranks item 1.** The ordering below is left as written rather than
+> renumbered, because renumbering a superseded table hides what changed.
+>
+> **Citations re-resolved at v5.48** (item rows below still carry the v5.39 addresses):
+>
+> | What | v5.39 | v5.48 |
+> |---|---|---|
+> | S-1 · IRMAA tab MAGI sentence | L9792 | **L9973** |
+> | Engine C MAGI sum | L4399 | **L4435** |
+> | `STATE_RULES` | L1005–1057 | L1005–1057 *(unmoved)* |
+> | `stateTaxAnnual` | L1091 | L1091 *(unmoved)* |
+> | rendered per-state note | L11889 | **L12062** |
+> | ACA panel | L9265 | **L9444** |
+> | ACA strategy-table flag | L9302 | **L9480** |
+> | ACA Verify assertion (sub-floor) | L1343 | **L1341** |
+> | `OBBBA_CONSTS` | L931–937 | **L931** |
+> | Engine D realized gain | L4742 | **L4779** |
+> | Engine B `capGains_y` | L5096 | **L5140** |
+>
+> **Unchanged by this re-pin:** items 2, 3 and 4 hold as written. Item 2's D-3 correction stands and
+> its census reproduces exactly at v5.48. Item 3's D-8b remains partial by a product decision already
+> on the record. Item 4's F-1…F-9 were **not** re-verified here — `UsabilityFlaws.md`'s 2026-08-24
+> pass found four of four tested claims stale, so **treat item 4's count as unverified until measured**.
+
 
 > ### ⚠ ERRATA — line citations corrected 2026-08-19
 >
