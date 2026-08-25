@@ -153,7 +153,18 @@ time; the raw string is the only thing an edit or a test can address.
 71936, inside the **ACA Premium Subsidy** entry's law-scenario paragraph. An anchor that lands in
 the wrong entry silently is how a disclosure ends up appended to unrelated copy.
 
-**7.2 · "146,679 chars" is a byte count.** Corrected in §3. Two measurements, one figure, no unit.
+**7.2 · "146,679 chars" is a byte count — and there are THREE measures, not two.**
+Corrected in §3. One line, three numbers, all of them truthfully "its length":
+
+| Measure | v5.48 | v5.49 |
+|---|---|---|
+| code points (Python `len`) | 145,542 | 146,374 |
+| UTF-16 units (JS `.length`) | 145,545 | 146,377 |
+| bytes (utf-8, `wc -c`, `awk length`) | 146,679 | 147,515 |
+
+The third was found on 2026-08-25 when the same string measured 146,374 in Python and 146,377 in
+node. Neither was wrong: **JS `.length` counts UTF-16 units**, and the manual holds three non-BMP
+emoji (🔑 🖥 🧭), each costing two units. **Always say which measure you recorded.**
 
 **7.3 · §4 contradicted itself on decoded vs raw.** Point 1 said "decoded", point 4 said "raw".
 Resolved to raw. A scope carrying two answers is the same failure this project logged when
