@@ -56,6 +56,13 @@ tally "t27-$PRIOR" node t27_half_cap.mjs "$PRIOR"
 tally "t27-$CUR"   node t27_half_cap.mjs "$CUR"
 tally "t28-$PRIOR" node t28_ssB_claim_gate.mjs "$PRIOR"
 tally "t28-$CUR"   node t28_ssB_claim_gate.mjs "$CUR"
+# t29/t30/t31 were absent from this runner until v5.49 — three suites the project could not see.
+tally "t29-$PRIOR" node t29_boundaries.mjs "$PRIOR"
+tally "t29-$CUR"   node t29_boundaries.mjs "$CUR"
+tally "t30-$PRIOR" node t30_legible.mjs "$PRIOR"
+tally "t30-$CUR"   node t30_legible.mjs "$CUR"
+tally "t31-$PRIOR" node t31_disclosure_parity.mjs "$PRIOR"
+tally "t31-$CUR"   node t31_disclosure_parity.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
