@@ -88,10 +88,15 @@ console.log(`t31 \u2014 CROSS-SURFACE DISCLOSURE PARITY (${VER})\n`);
 const docsIdx = LINES.reduce((best, l, i) => (l.length > LINES[best].length ? i : best), 0);
 const DOCS = LINES[docsIdx];                                             // raw, undecoded
 const APP = LINES.filter((_, i) => i !== docsIdx).join("\n");            // the render tree
+// ⚠ THREE different numbers describe this one line and they are all "its length":
+//   146,374 code points  (Python len)   146,377 UTF-16 units (JS .length)   147,515 bytes (utf-8)
+// JS .length counts UTF-16 units, so the 3 non-BMP emoji in the manual (a key, a monitor and a
+// compass) make it exceed the code-point count. Always say WHICH measure you recorded; a
+// session comparing one against another reads drift that is not there.
 
 T("A-1: the DOCS_HTML line is located by length and is the Field Manual",
   DOCS.length > 100000 && DOCS.includes("FIELD MANUAL"),
-  `line ${docsIdx + 1}, ${DOCS.length} code points`);
+  `line ${docsIdx + 1}, ${DOCS.length} UTF-16 units / ${Buffer.byteLength(DOCS, "utf8")} bytes`);
 T("A-2: excluding it leaves the render tree intact",
   LINES.length - APP.split("\n").length === 1);
 T("A-3: METHODOLOGY.md resolved and is the real document",
@@ -99,9 +104,25 @@ T("A-3: METHODOLOGY.md resolved and is the real document",
   `${METH_PATH}, ${METH.length} code points`);
 
 // The parity predicate. Creator-side names it -> at least one user-facing surface names it.
-const inMeth = k => METH.includes(k);
-const inApp  = k => APP.includes(k);
-const inDocs = k => DOCS.includes(k);
+//
+// ⚠ MATCHING IS CASE-INSENSITIVE, AND THAT IS A DELIBERATE NARROWING OF THE LITERAL RULE ABOVE.
+// The claim under test is "this surface NAMES the limitation", not "this surface contains this
+// exact byte sequence". Case is not semantically load-bearing in prose: the approved v5.49 Field
+// Manual copy opens a sentence with "Work stoppage or reduction is one of eight..." while the
+// IRMAA tab note says "work stoppage is one of eight...". Both name it. A case-sensitive check
+// would fail on correct copy and the only way to satisfy it would be to contort a sentence-initial
+// capital out of user-facing English — the test wagging the product.
+//
+// This is NOT a licence to loosen further. Everything else stays strict: the phrase must still be
+// CONTIGUOUS and MARKUP-FREE in the raw string, which is the property that actually catches the
+// failure mode (<strong>work</strong> stoppage names nothing a reader can search for). The
+// negative control in §B-3 still has to detect absence, so case-folding cannot make this suite
+// pass vacuously — if CTRL_NONE ever resolves, the run goes red regardless of case.
+const norm = s => s.toLowerCase();
+const METH_L = norm(METH), APP_L = norm(APP), DOCS_L = norm(DOCS);
+const inMeth = k => METH_L.includes(norm(k));
+const inApp  = k => APP_L.includes(norm(k));
+const inDocs = k => DOCS_L.includes(norm(k));
 const userSide = k => inApp(k) || inDocs(k);
 
 // ── §B · CONTROLS. Run BEFORE the real keys, and on every leg. ───────────────────────────
@@ -172,8 +193,15 @@ if (POST) {
     `docs=${inDocs("work stoppage")} app=${inApp("work stoppage")}`);
   // Direction. The clause must not imply the model prices an appeal in; it does not, and the
   // conservative direction is the reason the omission was acceptable in the first place.
-  T("D-4 [DIRECTION]: the user-side copy states the model charges the full surcharge regardless",
-    /charges the full surcharge/.test(APP) && /charges the full surcharge/.test(DOCS));
+  // ⚠ The phrase is a PARAMETER, set from the APPROVED COPY, not from a draft. It read
+  // "charges the full surcharge" while the wording was still provisional; the copy approved
+  // 2026-08-25 says "charges every surcharge in full" on both surfaces. Updating this to track
+  // approved copy is correct; weakening it to something both a conservative and a non-conservative
+  // sentence would satisfy is not.
+  const DIRECTION = "charges every surcharge in full";
+  T(`D-4 [DIRECTION]: both surfaces state the model ${DIRECTION}`,
+    inApp(DIRECTION) && inDocs(DIRECTION),
+    `app=${inApp(DIRECTION)} docs=${inDocs(DIRECTION)}`);
 } else {
   T("D-1 [KNOWN DEFECT pre-v5.49]: neither surface names SSA-44",
     !inDocs("SSA-44") && !inApp("SSA-44"));
