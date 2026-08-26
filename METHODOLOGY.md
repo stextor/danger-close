@@ -618,6 +618,29 @@ golden-file cross-validation against Pralana/ProjectionLab on identical inputs; 
 brackets (the state layer uses effective rates); ACA premium-subsidy modeling; and stochastic
 health-state modeling.
 
+**No estate tax or inheritance tax is modeled — federal or state (disclosed at v5.50).** The
+strategy comparator and the solve-for grid rank on an estate figure computed as
+`taxable + Roth A + Roth B + (Traditional A + Traditional B) × (1 − HEIR_RATE)`. `HEIR_RATE`
+(0.22) is an assumed heir **income** tax on drawing down an inherited Traditional balance. It is
+not an estate tax and not an inheritance tax, and it touches the Traditional terms only — taxable
+and Roth balances pass through whole. No transfer tax of any kind is deducted at any point.
+
+This matters more than it looks, for two reasons. First, that estate figure is the **default
+ranking objective**, so a household that never opens the objective selector is ranked on it.
+Second, a number of states levy estate or inheritance tax at exemption thresholds well below the
+federal one, and several of those exemptions have no spousal portability, which makes couples —
+this tool's primary audience — the exposed case rather than the protected one.
+
+The direction is **optimistic**: for an affected household the modeled estate is larger than
+reality, and so is the apparent benefit of any strategy ranked on it. Optimistic is the wrong way
+for a deliberately pessimistic tool to be wrong, which is why it is disclosed on both user-facing
+surfaces rather than left to this document. Modeling the tax itself is out of scope — the
+thresholds, exemptions, portability rules and rate ladders differ by jurisdiction and are indexed
+differently — and it is an estate attorney's question, not a drawdown stress-tester's. Specific
+thresholds are deliberately **not** quoted here or in the app: a figure quoted is a figure that
+goes stale, and this project has spent real time repairing documents that went stale exactly that
+way.
+
 A gap called out in earlier revisions is now closed: **other income streams are a first-class
 module.** Each stream (rental / job / annuity / other) carries a monthly amount in today's
 dollars, an inclusive start/end-year window, an owner (either spouse or joint — an owner's

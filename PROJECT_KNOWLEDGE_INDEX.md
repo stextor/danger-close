@@ -25,13 +25,28 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 
 | Field | Value |
 |---|---|
-| Version | **v5.49** |
-| Source file in knowledge | `DangerClose-v5_49.jsx` |
-| Source md5 | `2ccc62b669f6ee52c6a0be1709c967a5` |
-| Built `index.html` md5 | `a976bf66307ca07464e15ae911468365` |
-| Shipped | 2026-08-25 (repo `1c55656`) |
+| Version | **v5.50** |
+| Source file in knowledge | `DangerClose-v5_50.jsx` |
+| Source md5 | `0bef5fc4cb1ebdaf1effffe1783bbd04` |
+| Built `index.html` md5 | `c361f4ea99a061017cbc0d6a27011fe2` |
+| Shipped | 2026-08-26 |
 
-> **Rolled 2026-08-25 at the v5.49 ship.** Both build tables were verified against a fresh clone
+> **Rolled 2026-08-26 at the v5.50 ship.** Rotation removed `DangerClose-v5_48.jsx` and
+> `dom_entry_v548.jsx`; the pool holds exactly `DangerClose-v5_49.jsx` and `DangerClose-v5_50.jsx`,
+> and `dom_entry_v549.jsx` and `dom_entry_v550.jsx`. ⚠ **`dom_entry_v592.jsx` is NOT part of the
+> rotation and must not be deleted** — `v592` is the retired v5.9.2 leg, still registered in four
+> `KNOWN_VERSIONS` arrays (`t1`, `t4`, `t5`, `t6`) and kept deliberately so a retired leg can be run
+> from a locally-supplied source. It was proposed for deletion at the v5.50 build as a suspected
+> typo; the suite is what caught that.
+>
+> **v5.50 is DISCLOSURE ONLY — no modelling change, no computed figure moved.** Verified: parity
+> **10/10** and the DOM diff's **STRICT branch at 32**. The comparator's estate objective is
+> relabelled `MAX ESTATE AFTER HEIR INCOME TAX` and both user surfaces now state that no estate or
+> inheritance tax is applied. ⚠ **The scope's site census listed 2 of 5 sites** — the column header
+> `After-tax estate` was found only by the new DOM extinction check, because both the scope's and the
+> build session's census greps were case-sensitive. Every D-7 pin matches case-insensitively.
+>
+> *(v5.49 rotation, for the record.)* Both build tables were verified against a fresh clone
 > AND against the pool before this edit was considered done: repo `src/DangerClose.jsx`, the pool's
 > `DangerClose-v5_49.jsx` and the suite's build input are **one file by md5**. Rotation removed
 > `DangerClose-v5_47.jsx` and `dom_entry_v547.jsx`; the pool holds exactly `DangerClose-v5_48.jsx`
@@ -402,10 +417,10 @@ should clone. ⚠ **Seven of the original eight still are; `hand_86.mjs` is not*
 
 | Field | Value |
 |---|---|
-| Version | **v5.48** |
-| Source file in knowledge | `DangerClose-v5_48.jsx` |
-| Source md5 | `30ab12fba362b8ce538f66adea9a104b` |
-| Built `index.html` md5 | `8895b249af1313920c0c762a7a22776c` |
+| Version | **v5.49** |
+| Source file in knowledge | `DangerClose-v5_49.jsx` |
+| Source md5 | `2ccc62b669f6ee52c6a0be1709c967a5` |
+| Built `index.html` md5 | `a976bf66307ca07464e15ae911468365` |
 
 > **Rolled 2026-08-25 at the v5.49 ship, in the same pass as the Current build table above.**
 
