@@ -86,6 +86,39 @@ already satisfied before the fix).
 **The negative control was run and recorded.** Built with the version bump and no copy, `t31`
 reported **13 passed / 2 failed**. A key added to a list that is already satisfied proves nothing.
 
+### Post-ship documentation correction (2026-08-26, same build)
+
+**No source change. `src/DangerClose.jsx` is unchanged and the version stays v5.50.** A sweep after
+the ship found the release had corrected the app but left three creator-side documents describing it
+by the label v5.50 deleted:
+
+- **`METHODOLOGY.md`** still called the figure *"after-tax estate"* in three places, including the
+  objective list — while its own new §12 explained why that phrase was wrong. The document
+  contradicted itself. Corrected; the phrase now survives once, in the sentence recording that the
+  figure was renamed.
+- **`MissingFeatures.md`** still carried D-7 as *"unassessed — still owed"* in three places, and its
+  exclusion table justified the row by quoting the deleted label. D-7's **disclosure half is now
+  closed** there, following the D-6 precedent; the modelling half stays declined, stated explicitly
+  so the row is not misread as fully closed.
+- **`AUDIT_PHASE3_ROLLUP.md`** said the item *"needs pricing by a later session."* Annotated in
+  place as priced; the original text is left as written.
+
+**Why nothing caught it.** The `t1` extinction pin reads the `.jsx` source only, and `t31` asked
+whether a key *appears*, never whether a retired label had stopped appearing. `t31` gains **E-1/E-2**:
+`METHODOLOGY.md` must describe the objective by its current label, and may carry the retired one at
+most once, as history. Negative-controlled against the uncorrected file: **18 passed / 2 failed**.
+
+Suite is now **2,587 app checks / 0 failing** (prior leg 943 · current leg 966 · parity 10/10 ·
+feature run once 668); tooling 82; **2,669 total**.
+
+> **The pattern.** v5.50's own lesson was that a document describing the code had drifted from the
+> code. The release then did the same thing in the opposite direction — it changed the code and left
+> the documents. **A rename is not done when the app is right; it is done when every document that
+> names the thing is right.** Sweep the whole tree for the retired string, case-insensitively, before
+> calling a rename complete.
+
+---
+
 ### Provenance
 
 `src/DangerClose.jsx` md5 `0bef5fc4cb1ebdaf1effffe1783bbd04` · built `index.html` md5 `c361f4ea99a061017cbc0d6a27011fe2`

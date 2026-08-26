@@ -295,11 +295,14 @@ overstate income — and all are recorded here rather than corrected silently.
 
 - **Strategy comparator:** six named policies (none / fill-12% / fill-22% / fill-24% / stay-under-
   IRMAA / current plan) run through the full deterministic projection; reports lifetime tax,
-  IRMAA, NIIT, widow-year tax, ending balances, and after-tax estate (heirs' Traditional taxed at
-  an assumed 22%).
+  IRMAA, NIIT, widow-year tax, ending balances, and **estate after heir income tax**
+  (heirs' Traditional taxed at an assumed 22%). That figure deducts an heir *income* tax and
+  nothing else — **no estate or inheritance tax, federal or state**; see §12. It was called
+  "after-tax estate" before v5.50, which asserted a deduction the model never made.
 - **Solve-for grid (v5.5):** sweeps annual conversion amounts $0–$200K in $10K steps plus the
   four policy strategies (25 cells) and ranks all cells against a user-chosen objective — max
-  after-tax estate, min lifetime tax+IRMAA, or min widow-year tax. Deterministic single-path
+  **estate after heir income tax** (the default), min lifetime tax+IRMAA, or min widow-year
+  tax. Deterministic single-path
   (fixed growth, current law). Framed deliberately as "the model's best cell under these
   assumptions," not a directive: sequence risk, future law, and personal factors live outside
   the grid.
@@ -331,7 +334,7 @@ retirement and each spouse's 65th birthday.
 - **Accounting:** a hidden zero-conversion baseline runs first; each strategy's per-year
   subsidy is subtracted from the baseline's, the difference accumulates as **ACA SUB LOST**
   and is charged against the taxable balance in the year incurred (so ending balances and
-  the after-tax estate reflect it). The no-conversion row loses $0 by construction. Timing
+  the estate figure reflect it). The no-conversion row loses $0 by construction. Timing
   is same-year (no lookback — unlike IRMAA).
 - **STAY UNDER ACA CLIFF solver:** bridge years convert up to 400% × FPL − other ACA MAGI −
   a $500 safety margin (full SS counts, so no taxability fixed point is needed); post-
