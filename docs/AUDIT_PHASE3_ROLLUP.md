@@ -187,6 +187,11 @@ tax. Thresholds in some states are low enough to reach this audience, and the Ro
 already ranks by "after-tax estate," so it is not obviously outside the drawdown frame. It needs
 pricing by a later session.
 
+> ✅ **Priced and closed 2026-08-26.** Assessed 2026-08-25, disclosure shipped at **v5.50**. The
+> label quoted above no longer exists — v5.50 renamed it `MAX ESTATE AFTER HEIR INCOME TAX`,
+> precisely because "after-tax estate" asserted a deduction the model never made. Modelling the tax
+> stays declined. See `MissingFeatures.md` D-7 and `CHANGELOG.md` v5.50. *(Text above left as written.)*
+
 ---
 
 ## 4. Honest scope report

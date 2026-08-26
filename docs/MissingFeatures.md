@@ -72,7 +72,7 @@
 > | **D-4** | open, Low-Med | **HOLDS — but reclassify: not a measurable modelling gap** |
 > | **D-5** | open, Decline | **HOLDS unchanged. Decline confirmed** |
 > | **D-6** | partially disclosed | ✅ **CLOSED at v5.49 — both halves. `t31` enforces the class** |
-> | **D-7** | unassessed — still owed | ✅ **ASSESSED at last. It is a real gap, and its direction is optimistic** |
+> | **D-7** | unassessed — still owed | ✅ **ASSESSED 2026-08-25; DISCLOSURE HALF CLOSED at v5.50 (2026-08-26). Modelling half declined — see the box at D-7** |
 > | **D-8b** | PARTIALLY ADDRESSED | **ACCURATE — confirmed by executing the function** |
 >
 > ### D-1 — CLOSED, confirmed
@@ -310,7 +310,7 @@ shipped in the window: v5.32, v5.34, v5.35, v5.36, v5.37, v5.38.
 | **D-4** | unchanged — `METHODOLOGY.md` L120 still discloses it |
 | **D-5** | unchanged — disclosure still at `TAX_CONSTS.QCD_LIMIT` (now L850) |
 | **D-6** | ⚠ **CORRECTED — the v5.31 sweep's resolution was too broad.** See the box at D-6 |
-| **D-7** | unchanged — state estate/inheritance tax still **unassessed** |
+| **D-7** | ✅ **DISCLOSURE HALF CLOSED at v5.50.** Both user surfaces and `METHODOLOGY.md` now state that no estate or inheritance tax is applied and that the direction is optimistic; the objective is relabelled `MAX ESTATE AFTER HEIR INCOME TAX`. `t1` and `t4` pin it, `t31` carries the key. **The tax itself is still not modelled and that is deliberate** — see the box at D-7 |
 | **D-8** | accurate as built, but its closing *"Consequence for D-2"* paragraph is **stale** — flagged in place |
 
 **Two of eight items closed; one newly qualified; one paragraph stale.** The pattern is worth naming:
@@ -742,6 +742,27 @@ person per tier) and the remedy is a form. **Exposure:** user-side.
 
 ## D-7 · Assessed and deliberately excluded
 
+> ### ✅ DISCLOSURE HALF CLOSED AT v5.50 — 2026-08-26
+>
+> **What shipped.** The comparator's estate figure deducts only `HEIR_RATE` (0.22), an assumed heir
+> **income** tax on inherited Traditional balances — no estate or inheritance tax, federal or state,
+> ever entered it. It was labelled `MAX AFTER-TAX ESTATE` and it is the **default ranking objective**.
+> v5.50 narrowed the label to `MAX ESTATE AFTER HEIR INCOME TAX`, narrowed every site that carried the
+> old phrase, and added the limitation to the comparator note, the Field Manual (beside the objective
+> list and in its §13 register) and `METHODOLOGY.md` §12. `t1` and `t4` pin it — `t4` on a **couple**,
+> because the only pre-existing estate text was gated to single households — and `t31` carries a third
+> key. No state, threshold or dollar figure is quoted, deliberately.
+>
+> **What did NOT change, and must not be read as closed:** the tax is still **not modelled**, so the
+> estate figure remains wrong for an affected household — it is now *disclosed* as wrong.
+> `HEIR_RATE` (0.22) is unchanged and **unexamined**, and the default objective is still `estate`.
+> Both are separate questions and neither has been assessed.
+>
+> ⚠ **The rows below were written before this shipped.** The "State estate / inheritance tax" row
+> quotes `after-tax estate` — a label v5.50 deleted. It is annotated in place rather than rewritten,
+> so the original reasoning stays legible.
+
+
 > ✅ **The one row left unassessed here — state estate / inheritance tax — WAS ASSESSED on
 > 2026-08-25. See the v5.48 re-pin block at the top.** Verdict: a real gap, direction **optimistic**,
 > undisclosed for couples, sitting inside the Roth comparator's **default ranking objective**.
@@ -752,7 +773,7 @@ person per tier) and the remedy is a form. **Exposure:** user-side.
 | **Joint-mortality correlation** in the Monte Carlo | Named in the Phase 3 brief as a §13 disclosure and it is one — but it is a **mortality** modelling gap, not a taxation one, so it is out of Section D's scope. It belongs in a mortality scope. Disclosed in §13 and §06. |
 | **Inherited-IRA 10-year rule / beneficiary treatment** | New output outside the drawdown frame — it models the heirs' tax position, not the household's drawdown. Boundary test: decline. |
 | **Federal estate tax** | OBBBA exemption is far above this app's audience. Not mainstream. |
-| **State estate / inheritance tax** | Thresholds in some states (OR, MA) are low enough to reach the app's audience, and the solve-for grid already ranks by "after-tax estate" — so it is not obviously out of frame. **Left unassessed; a later session should price it properly.** |
+| **State estate / inheritance tax** | ⚠ **This row is superseded — assessed 2026-08-25, disclosed at v5.50.** Thresholds in some states are low enough to reach the app's audience, and the solve-for grid ranks by that estate figure by default — so it was never out of frame. **The label it quoted no longer exists**: v5.50 renamed it `MAX ESTATE AFTER HEIR INCOME TAX` precisely because "after-tax estate" asserted a deduction the model never made. Modelling the tax remains declined (18 jurisdictions, own thresholds, portability and rate ladders); the disclosure is the fix. **Left unassessed; a later session should price it properly.** |
 | **HSA post-65 non-medical withdrawals** | Related to the disclosed "HSA modelled as tax-free throughout" simplification, already recorded as one of the five v5.26 `otherAccounts` simplifications in §13 and METHODOLOGY. Not a new finding. |
 | **AMT beyond the simplified screen** | Disclosed (§13: "the AMT check is simplified — standard-deduction add-back only"). `t18` records AMT as not yet compared between Engines A and B. Genuinely a gap, but the population it binds on is very small post-OBBBA. |
 
@@ -783,7 +804,7 @@ person per tier) and the remedy is a form. **Exposure:** user-side.
 | **D-4** | Itemized deductions not modelled | open, unchanged | Conservative | Minority case | Low-Med |
 | **D-6** | IRMAA SSA-44 relief | ✅ **CLOSED at v5.49** — both surfaces name SSA-44 and work stoppage; the closed eight-event list is stated; `METHODOLOGY.md` corrected in the same release | Conservative | **Done** | — |
 | **D-5** | QCD one-time CRT/CGA election | open, unchanged | Conservative | **Decline** | Very low |
-| **D-7** | State estate / inheritance tax | **unassessed** — still owed | unknown | unassessed | unranked |
+| **D-7** | State estate / inheritance tax | ✅ **DISCLOSED at v5.50** — both user surfaces + `METHODOLOGY.md`; objective relabelled; modelling declined | **OPTIMISTIC** (now stated in-app) | Disclosure built, modelling declined | was Med-High |
 | **D-8** | ACA sub-floor \$0 | **PARTIALLY ADDRESSED (v5.32)** — declined toggle not built | **Both** | Built | see entry |
 
 **D-3 was ranked top here on 2026-08-18 and that ranking is superseded** (direction corrected 2026-08-19 — see the box at D-3). Its *disclosure* half stays a live Medium; its *precision* half is held and de-prioritised. What follows is the 2026-08-18 reasoning, kept for the record: **with D-1 and D-2 closed, D-3 is the top-ranked open item** — and it is the one simplification here
