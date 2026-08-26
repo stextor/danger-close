@@ -401,6 +401,21 @@ instance of two documents disagreeing with nothing to compare them (cf. §A2 vs 
 `probe_classify`, and the manifest's deleted rotation-state section). **`qa/tools/package_check.mjs`
 is the executable half — run it on the zip before sending, per §L.**
 
+**`VERIFY.sh` is RETIRED (2026-08-25, v5.49) and no longer runs.** It sat at the repo root calling
+itself "release verification" while pinned to `v537`/`v538` — **eleven releases stale** — and while
+**this file referenced it exactly zero times.** It was not a step anyone skipped; it was a gate that
+had quietly stopped being one, and it read as though any release that did not run it was incomplete.
+The three checks that replace it are already named in this checklist: the **full suite from a clean
+clone**, **`smoke_built`** on the built artifact, and **`package_check`** on the zip. ⚠ **Do not
+revive it by rolling its version pair forward** — that recreates a second release gate nothing
+cross-references, which is the failure this section already records three times. Fourth recorded
+instance of two artifacts disagreeing with nothing to compare them.
+
+**Retire fulfilled `SCOPE_*.md` AT the ship, not after it.** The checklist item above is the one most
+often reached last and skipped. `SCOPE_D6_SSA44_USER_SIDE.md` still read *"Awaiting decisions — do not
+build yet"* for a full day after v5.49 shipped, was verified, and had its documentation follow-up
+land. A fulfilled scope left in that state is indistinguishable from live work.
+
 **Teach the suite the new version tag — expect this every release.** Several suites gate behavior on an
 enumerated list of version tags, and a new tag falls through to the wrong branch. At v5.11 six such
 edits were needed. Two shapes to look for:

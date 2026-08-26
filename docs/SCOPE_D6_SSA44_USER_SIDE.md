@@ -6,7 +6,7 @@
 | Written | 2026-08-25 |
 | Origin | `MissingFeatures.md` D-6, re-pinned to v5.48 on 2026-08-25 |
 | Shape | **Disclosure only.** No engine change. No figure moves. |
-| Status | **Awaiting decisions in §6 — do not build yet** |
+| Status | ✅ **RETIRED — FULFILLED AND SHIPPED AT v5.49 (2026-08-25).** All four decisions were resolved, both clauses shipped, `t31` shipped with them. Kept as the record of how it was built, including §7's corrections. **Nothing here is outstanding — do not treat it as pending work.** ⚠ Retired late: `OPERATIONS.md` §I requires fulfilled scopes to be retired *at the ship*, and this one still read *"do not build yet"* for a day after the release it governed had shipped and been verified. |
 
 ---
 
