@@ -206,7 +206,7 @@ cp <current>.jsx DangerClose.jsx                # t8, t19 — at the RUN-FOLDER 
 
 The qa-baseline README records the first two as a setup line and the third only implicitly, as a precondition on the working folder. All three are listed here because a missing copy produces an import error, not an assertion failure, and an import error is the easiest thing in this project to misread as a regression. Note also that t8, t11–t14, t16, t19 and t22 take **no version argument** — passing one is harmless, omitting a copy is not.
 
-**Parity must run AFTER the prior leg, not before it.** `t2_engines.mjs compare` reads `/tmp/t2_<prior>_fingerprint.json`, which only exists once the prior leg's own `t2` has written it. Running parity first gives `ENOENT` and a stack trace with no explanation. `run_all.sh` and `VERIFY.sh` both order it correctly; a session driving suites by hand may not.
+**Parity must run AFTER the prior leg, not before it.** `t2_engines.mjs compare` reads `/tmp/t2_<prior>_fingerprint.json`, which only exists once the prior leg's own `t2` has written it. Running parity first gives `ENOENT` and a stack trace with no explanation. `run_all.sh` and `runsuite.sh` both order it correctly; a session driving suites by hand may not. (`VERIFY.sh` also did, but it was **RETIRED at v5.49** — eleven releases stale and referenced by no operational document. Its header preserves this caveat.)
 
 ## The part you can check yourself, right now
 

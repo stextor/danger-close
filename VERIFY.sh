@@ -1,4 +1,63 @@
 #!/bin/bash
+# ═════════════════════════════════════════════════════════════════════════════
+#  ⚠  RETIRED 2026-08-25, at v5.49.  THIS SCRIPT NO LONGER RUNS.
+# ═════════════════════════════════════════════════════════════════════════════
+#
+#  It is kept for its record of WHY each control exists — that reasoning is not
+#  written down anywhere else — but it is no longer the release gate and has not
+#  been one for some time.
+#
+#  WHY IT WAS RETIRED.  It was pinned to PRIOR=v537 / CURR=v538 with
+#  EXPECT_SRC_MD5=b8d12481… — v5.38's hash — while the shipped build was v5.49.
+#  ELEVEN releases stale.  It would have failed on its first assertion.
+#
+#  Worse than stale: it was ORPHANED.  `docs/OPERATIONS.md` — which holds the
+#  release checklist (§I), the ship-verification ritual (§F) and the packaging
+#  rules (§L) — contained ZERO references to this file.  A script at the repo
+#  root calling itself "release verification" was outside the release process
+#  entirely, and nothing said so.  It was found on 2026-08-25 during the Section
+#  E remainder sweep, not by any check designed to find it.
+#
+#  It was NOT skipped at the v5.49 ship.  §I never asked for it.  That is the
+#  finding: a file that looks like the gate, is not the gate, and reads as though
+#  a release that did not run it was incomplete.
+#
+#  WHAT SUPERSEDES IT — all three are required by OPERATIONS §I and §L:
+#    1. The full suite from a clean clone     — qa/runsuite.sh <prior> <current>
+#    2. The built artifact                    — qa/smoke_built.mjs <index.html>
+#    3. The zip's shape                       — qa/tools/package_check.mjs
+#  Between them these cover everything this script checked, and unlike this
+#  script they are run every release and fail loudly when they are not.
+#
+#  ⚠ ONE THING BELOW IS STILL TRUE AND STILL WORTH READING.  Parity must run
+#  AFTER the prior leg: `t2_engines.mjs compare` reads a fingerprint file that
+#  only exists once the prior leg's own t2 has written it.  Running it first
+#  gives ENOENT and a stack trace with no explanation.  `run_all.sh` orders it
+#  correctly; a session driving suites by hand may not.  (TESTING.md §209.)
+#
+#  DO NOT "fix" this by rolling the version pair forward.  That reintroduces a
+#  second, competing release gate that nothing cross-references — the exact
+#  shape of failure OPERATIONS §I records three times over.  If you want its
+#  controls back, add them to the suite, where they will be run.
+# ═════════════════════════════════════════════════════════════════════════════
+
+echo "VERIFY.sh is RETIRED (2026-08-25, v5.49) and does not run."
+echo
+echo "  It was pinned to v5.37/v5.38 and was eleven releases stale. It was also"
+echo "  orphaned: OPERATIONS.md never referenced it."
+echo
+echo "  Use instead, per OPERATIONS §I and §L:"
+echo "    qa/runsuite.sh <prior> <current>     full suite, both legs + parity"
+echo "    node qa/smoke_built.mjs <index.html> the shipped artifact"
+echo "    node qa/tools/package_check.mjs <zip> <tree> <workspace>"
+echo
+echo "  The header of this file explains why, and preserves the one caveat"
+echo "  that outlived it (parity must run AFTER the prior leg)."
+exit 2
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ORIGINAL CONTENT BELOW — PRESERVED AS RECORD, NOT EXECUTED
+# ─────────────────────────────────────────────────────────────────────────────
 # ─────────────────────────────────────────────────────────────────────────────
 # Danger Close — release verification · v5.37 (2026-08-16)
 #
