@@ -90,7 +90,7 @@ version lived only in a session sandbox and was never committed.)
 **Repo layout:** `qa/qa-baseline/` holds t1–t6 plus the harness (`env_dom.mjs`, `shim.txt`,
 `mk_testable.sh`, `dom_entry_*.jsx`, `run_all.sh`, `cap_tabs.mjs`, `README.md`); `qa/` holds the feature
 suites; `qa/tools/` holds the parser toolkit (§B1 — **not** suites, they assert nothing); `validation/` is
-the older, separate public-constants suite (kept; different purpose).
+the older, separate public-constants suite (kept; different purpose). **It is NOT part of the release gate and §I does not ask for it** — that is deliberate, and stated here so nobody re-derives it as a missed step, the way `VERIFY.sh` read as one. ⚠ **Its runner is `run.cjs`.** It was `run.js` and could not run at all once `package.json` gained `"type": "module"` — node treats `.js` as ESM and rejects the CommonJS runner. Renaming was the whole fix; the file is byte-identical. Found 2026-08-25 during the Section E remainder sweep. At v5.49 the constants layer passes **48/48**, and **five of six** behavioral tests run (`smoke_entry` 26/26 tabs) — ⚠ **`deep_test` CRASHES** against a moved Roth solve-for button, leaving that directory's only modelling assertions unchecked; repairing it was deliberately out of scope. ⚠ `run.cjs` is a **tenth** jsdom environment — E-6 counts nine, correct for `qa/`; project-wide it is ten, and this copy has never been audited against §C's traps.
 
 **Setup** (from a folder holding the two version `.jsx` files next to `qa/`):
 
