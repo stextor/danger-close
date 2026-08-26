@@ -2,11 +2,39 @@
 
 | Field | Value |
 |---|---|
-| Status | ✅ **ALL FOUR DECISIONS RESOLVED 2026-08-26. BUILDABLE.** See §6 — D-2 was decided **against** the recommendation, deliberately; read its note before writing copy |
+| Status | ☑ **RETIRED — BUILT AND SHIPPED AS v5.50 on 2026-08-26.** Do not build from this document; it is the record of what was decided, not live work. What actually shipped is in `CHANGELOG.md` under v5.50, and it differs from §3 below — see the RETIREMENT NOTE. *(Previously: all four decisions resolved, BUILDABLE.)* See §6 — D-2 was decided **against** the recommendation, deliberately; read its note before writing copy |
 | Build | **v5.49** · `src/DangerClose.jsx` md5 `2ccc62b669f6ee52c6a0be1709c967a5` · repo `5f145f7` · premise verified against source 2026-08-26 |
 | Parent | `MissingFeatures.md` D-7 (assessed at the v5.48 re-pin, 2026-08-25) |
 | Kind | **Disclosure only.** No engine change. No figure moves. Parity 10/10 and the DOM diff's STRICT branch at 32 are the gate |
 | Direction | ⚠ **Optimistic** — the modelled estate is larger than reality for affected households. This project treats optimistic as the wrong way to be wrong |
+
+---
+
+> ### ☑ RETIREMENT NOTE — added at the v5.50 ship, 2026-08-26
+>
+> **This scope was built. It is retired. Its §3 census was incomplete and is left uncorrected below
+> as the record of what was believed at drafting.**
+>
+> **§3 listed two sites carrying `after-tax estate`. There were five.** The three it missed:
+> **L9412**, the comparator description (`Ranked by ending after-tax estate`), which renders inside
+> the *same bordered card* as the L9485 site §3 did list; the **objective list in the Field Manual**,
+> where §3's site 4 said only "APPEND"; and **L9460**, the results-table **column header**
+> (`After-tax estate`) — the heading directly above the ranked figure, and the most prominent of the
+> five. The header was found only when the new DOM extinction check ran: the census greps in this
+> document *and* in the build session were **case-sensitive**, and the header is capitalised.
+>
+> **The pattern worth carrying forward.** A census is a claim about absence, and absence is the one
+> thing a table cannot show you. §3's rows were each individually correct; re-checking them would
+> never have found the sites it omitted. **Re-resolve a census by re-running the search, not by
+> confirming its entries** — and make the search case-insensitive.
+>
+> Two smaller corrections to this document: the Build row cites repo `5f145f7`, which had moved to
+> `9b8dbe8` by the ship (source md5 identical — doc commits, not source drift); and the `DOCS_HTML`
+> measurements in §3 are of the **whole source line**, not the string literal, which measures 21
+> code points fewer. Both truthful; state which span, not just which unit.
+>
+> A scope status line is evidence of what was true when it was written, not of what is true now.
+
 
 ---
 
