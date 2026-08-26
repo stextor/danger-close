@@ -235,6 +235,21 @@ if (POST) {
       inDocs("optimistic") && inApp("optimistic"),
       `docs=${inDocs("optimistic")} app=${inApp("optimistic")}`);
   }
+  if (VER === "v550") {
+    // E · CREATOR-SIDE LABEL DRIFT. Added after the v5.50 ship, when a sweep found METHODOLOGY.md
+    // still describing the objective list as "max after-tax estate" in three places while its own
+    // new section 12 explained why that phrase was wrong. The document contradicted itself, and
+    // nothing caught it: the t1 extinction pin reads the .jsx SOURCE only, and this suite asked
+    // whether a key APPEARS, never whether a retired label had stopped appearing.
+    //
+    // One occurrence is legitimate and expected - the sentence recording that the figure was called
+    // "after-tax estate" before v5.50. More than one means a live description drifted back.
+    const stale = (METH.match(/after-tax estate/gi) || []).length;
+    T("E-1: METHODOLOGY.md describes the objective by its CURRENT label",
+      /estate after heir income tax/i.test(METH));
+    T("E-2 [EXTINCTION]: METHODOLOGY.md carries the retired label at most once, as history",
+      stale <= 1, `occurrences=${stale}`);
+  }
   T(`D-4 [DIRECTION]: both surfaces state the model ${DIRECTION}`,
     inApp(DIRECTION) && inDocs(DIRECTION),
     `app=${inApp(DIRECTION)} docs=${inDocs(DIRECTION)}`);
