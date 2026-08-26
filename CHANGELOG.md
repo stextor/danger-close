@@ -1,5 +1,94 @@
 # Changelog
 
+## v5.51 — the heir rate says it is a guess (2026-08-26)
+
+**Disclosure and structure only. No number the model computes moved** — MC parity **10/10**, DOM
+diff STRICT branch **32**. `HEIR_RATE` is still **0.22**; that was decided, not overlooked.
+
+### What was wrong
+
+The strategy comparator's estate figure has exactly one deduction: `HEIR_RATE`, an assumed income
+tax an heir pays drawing down an inherited Traditional balance. That figure is the **default ranking
+objective**. Three things were true of the constant and none of them were visible:
+
+- **No provenance.** No citation or derivation in the code, `METHODOLOGY.md`, the Field Manual, or
+  any audit or scope document. It matches the federal 22% bracket and was most likely taken from it,
+  but nothing records that.
+- **It was the one tax-shaped constant outside the shared block**, declared as a bare inline literal
+  eleven lines below a comment reading *"All tax/IRMAA constants come from the shared `TAX_CONSTS` /
+  `IRMAA_CONSTS` blocks (single source of truth)."*
+- **No suite asserted its value.** It could have been changed to any number and the suite would have
+  stayed green — for the only deduction in the default ranking objective.
+
+Measured against this build's own 2026 brackets, over the SECURE-Act ten-year drawdown a non-spouse
+heir of a post-RBD decedent faces, realistic effective federal rates run about **13–31%, median near
+24%** — above 0.22 in 17 of 21 scenarios tested. The heir's **state** income tax is excluded
+entirely, though the app models the household's own; a typical 5% state rate moves a heir at
+$150,000 joint income from 22.1% to roughly 27%.
+
+### What changed
+
+- **`HEIR_RATE` is now a module-level assumption beside `BASE_GROWTH`**, with a comment stating what
+  it is, what it excludes, which way it errs, and that no source supports it. **Deliberately not in
+  `TAX_CONSTS`** — that block holds official figures verified against primary sources, and filing a
+  guess there would falsify its own header and blur the line between statutory and assumed.
+- **Both user surfaces now call it an assumption with no statutory source**, name the excluded state
+  income tax specifically, and state that where a heir's real rate is higher the estate reads
+  **optimistic**.
+- **`METHODOLOGY.md` §12** carries the measurement, the ten-year-rule mechanism, and the split
+  direction.
+- **No numeric range appears anywhere the user is shown.** Brackets are indexed annually and nothing
+  in-app carries a date; `METHODOLOGY.md` is dated and revised per release, so the numbers live
+  there. The maintainer-facing comment carries them too, and `t1` asserts both halves of that split.
+
+### Direction — split, and both halves are now stated
+
+Too low a rate credits the Traditional balance too generously, so **the estate figure reads
+optimistic** — the same direction as the unmodelled estate tax disclosed at v5.50, compounding in the
+same number. It also under-credits Roth conversion, biasing the *ranking* the cautious way; that half
+is the safer error and was left alone.
+
+### What this release does NOT fix
+
+**The estate figure is still optimistic for most households.** 0.22 sits below the median realistic
+heir rate and excludes state tax entirely. v5.51 makes the assumption legible and pinned; it does not
+make it right. Changing the value was considered and declined: substituting one undocumented number
+for another moves every comparator figure without making any of them true, and pushes the ranking
+toward more conversion — the direction with real consequences for anyone who acts on it. Making the
+rate user-settable is the real fix and is scoped separately.
+
+### Tests
+
+**2,642 app checks, 0 failing** — prior leg (v5.50) **975** · current leg (v5.51) **989** · parity
+**10/10** · feature suites run once **668**. Tooling **82** (`t21` 50, DOM diff 32). **2,724 total.**
+`smoke_built` **16/16**. Totals computed from suite output.
+
+New: `t1` **+8** (the value, its location, that `TAX_CONSTS` stays statutory-only, the disclosure
+strings, and the D-2 split — no range shown to the user, range present for the maintainer) · `t2`
+**+8**, running on **both** legs because the arithmetic is a true invariant, recomputing every
+strategy's estate from the engine's own returned components and asserting the discount touches the
+Traditional term only · `t4` **+6** (rendered to a **couple**, gated on a `!P.single` witness in the
+same paragraph) · `t31` **+1** (a fourth key).
+
+**Two negative controls, both recorded.**
+
+1. The first `t31` key was **vacuous and the control caught it**. Keyed on the word *"heir"*, it
+   passed on a build with the version bump and no copy at all — because "heir" was already on both
+   surfaces at v5.50. Retargeted to the phrase that actually changed, the control then failed
+   correctly at **20 passed / 1 failed** with `app=false docs=false`.
+2. Changing `HEIR_RATE` from 0.22 to 0.24 — the exact silent drift the pin exists to stop — fails
+   `t2` on five checks and `t1` on two.
+
+> **A key names the thing that changed, not the thing the change is about.** Keying on the subject
+> ("heir") matched text that predated the fix; only the new phrasing discriminates. The control is
+> what tells you which one you wrote.
+
+### Provenance
+
+`src/DangerClose.jsx` md5 `3cf497b834e545ce29c1945fb99ae09a` · built `index.html` md5 `887f02d8678cee49da2c76fc61bd3c98`
+
+---
+
 ## v5.50 — the estate figure now says what it does not deduct (2026-08-26)
 
 **Disclosure only. No engine change, and no number the model computes moved.** MC parity held at
