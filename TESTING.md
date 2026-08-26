@@ -208,6 +208,13 @@ The qa-baseline README records the first two as a setup line and the third only 
 
 **Parity must run AFTER the prior leg, not before it.** `t2_engines.mjs compare` reads `/tmp/t2_<prior>_fingerprint.json`, which only exists once the prior leg's own `t2` has written it. Running parity first gives `ENOENT` and a stack trace with no explanation. `run_all.sh` and `runsuite.sh` both order it correctly; a session driving suites by hand may not. (`VERIFY.sh` also did, but it was **RETIRED at v5.49** — eleven releases stale and referenced by no operational document. Its header preserves this caveat.)
 
+**`validation/` is a separate suite and its checks are NOT in any count above.** It is the older
+public-constants suite, kept deliberately for a different purpose (`OPERATIONS.md` §B), and it is
+**not part of the release gate**. Verified 2026-08-25 against v5.49: `check_constants.mjs` runs
+**48 checks, 0 failing**, each carrying a statutory citation, and it covers constants this suite does
+not touch — `SGL_LTCG`, `SGL_NIIT`, the partial-SS state count and the QCD cap among them. Its
+behavioral half had been **unrunnable entirely** since `package.json` gained `"type": "module"`, which made node reject the CommonJS runner outright; renaming it `run.cjs` was the whole fix. ⚠ **Five of its six tests now run** (`smoke_entry` 26/26 tabs, 0 runtime errors) — **`deep_test` CRASHES**, driving a Roth solve-for RUN button that no longer exists, so the only modelling-shaped assertions in that directory are currently unchecked. See `validation/README.md`.
+
 ## The part you can check yourself, right now
 
 Open the app → **Verify tab**. Every statutory constant the math depends on — federal brackets, deductions, LTCG thresholds and NIIT, IRMAA tiers, RMD divisors, the QCD cap, 402(g) contribution limits, the SS wage base, state-module facts, the longevity engine, and the ACA premium-subsidy tables — is re-checked **live in your browser on every visit** against its cited primary source (IRS Rev. Proc. 2025-32 and 2025-25, Rev. Proc. 2021-36, CMS, SSA, HHS/ASPE, IRS Pub. 590-B). Currently **54 checks**, each showing ✓/✗ and its citation. A tampered, corrupted, or stale copy fails loudly. This is the user-facing guarantee, and it requires trusting nobody: the checks and their expected values are visible in the page source.
