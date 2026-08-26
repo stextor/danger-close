@@ -1,5 +1,97 @@
 # Changelog
 
+## v5.50 — the estate figure now says what it does not deduct (2026-08-26)
+
+**Disclosure only. No engine change, and no number the model computes moved.** MC parity held at
+**10/10** and the DOM diff's STRICT branch at **32** across v5.49 → v5.50.
+
+### What was wrong
+
+The strategy comparator and the solve-for grid rank on an estate figure computed as
+`taxable + Roth A + Roth B + (Traditional A + Traditional B) x (1 - HEIR_RATE)`. `HEIR_RATE` (0.22)
+is an assumed heir **income** tax on drawing down an inherited Traditional balance. It is not an
+estate tax, not an inheritance tax, and it touches the Traditional terms only — taxable and Roth
+balances passed through whole. **No transfer tax of any kind was ever deducted**, and the figure was
+labelled *"MAX AFTER-TAX ESTATE"* — a phrase that asserts precisely the thing that was untrue.
+
+Two things made it worse than a wording slip. That figure is the **default ranking objective**, so a
+household that never opens the objective selector is ranked on it. And **neither** user surface said
+anything: `METHODOLOGY.md` had zero mentions of estate or inheritance tax, the raw Field Manual had
+zero, and the only estate-limitation text in the app sat inside a single-household branch — so a
+**couple never rendered a word of it**, and couples are this tool's primary audience.
+
+The direction of the error is **optimistic**: the modeled estate is larger than reality for an
+affected household, and so is the apparent benefit of any strategy ranked on it. Optimistic is the
+wrong way for a deliberately pessimistic tool to be wrong.
+
+### What changed
+
+- **The label now states what it computes**: `MAX AFTER-TAX ESTATE` → `MAX ESTATE AFTER HEIR INCOME
+  TAX`, and the noun `after-tax estate` → `estate after heir income tax`. The narrowing carries its
+  own limit, so a reader who reads only the label is not misled — which, on a comparison table, is
+  most readers.
+- **Five user-facing sites**, not the two the scope's census listed. The noun feeds four render
+  sites; the winner sentence and the comparator description are hard-coded literals that do not read
+  it; and the results table's **column header** — the heading directly above the ranked figure — was
+  a fifth. See "What this release found" below.
+- **The comparator note** now states that the figure applies no estate tax and no inheritance tax,
+  federal or state, that some states levy one at thresholds well below the federal exemption, and
+  that the direction is optimistic.
+- **The Field Manual** carries the same disclosure beside the objective list, and a new entry in its
+  own §13 limitations register.
+- **`METHODOLOGY.md` §12** gains the limitation, the mechanism, and the reason it is not modeled.
+
+**No state, threshold or dollar figure is quoted anywhere in the shipped copy.** That was a
+deliberate decision against the scope's own recommendation: a clause quoting a threshold is a clause
+that goes stale, and this project has spent real time repairing documents that went stale that way.
+
+### What this release does NOT fix — read this
+
+The estate figure is still **wrong for affected households**; it is now *disclosed* as wrong. A
+couple in an estate-tax state still sees an overstated estate and still gets a strategy ranked on it.
+Modeling the tax is out of scope: the thresholds, exemptions, portability rules and rate ladders
+differ by jurisdiction and are indexed differently. `HEIR_RATE` (0.22) is unchanged and the default
+objective is still `estate` — both are separate questions.
+
+### What this release found
+
+- **A case-sensitive census misses capitalised sites.** The results-table column header read
+  `After-tax estate`. The census greps in **both** the scope and the build session were
+  case-sensitive and missed it; it was found only when the new DOM extinction check ran for the
+  first time. Every pin added here matches **case-insensitively**.
+- **`t31` reported the disclosure as present at v5.49 — for two wrong reasons.** `inApp` is a
+  source-text search and cannot see JSX gating, so the single-household-gated card satisfied it; and
+  `METHODOLOGY.md` is one shared file at the run-folder root, so a frozen leg is read against the
+  *current* document. Its keys are now gated **per key to the release that landed them**, and the
+  pre-v5.50 pin asserts what was actually true of those builds (the Field Manual never named it).
+- **`t31` was failing on the v548 leg, invisibly**, because `runsuite.sh` only runs it for the prior
+  and current tags. Fixed by the same per-key gating.
+
+### Tests
+
+**2,585 app checks, 0 failing** — prior leg (v5.49) **943** · current leg (v5.50) **964** · parity
+**10/10** · feature suites run once **668**. Tooling **82** (`t21` 50, DOM diff 32). **2,667 total.**
+`smoke_built` **16/16** against the shipped artifact. Totals computed from suite output.
+
+Per-suite, current leg: t1 165 · t2 27 · t3 36 · t4 236 · t5 58 · t6 21 · t10 163 · t23 25 · t24 38 ·
+t25 45 · t26 25 · t27 18 · t28 34 · t29 43 · t30 12 · t31 18.
+
+New this release: `t1` **+10** (STATIC extinction pins covering every narrowed string, plus a
+case-insensitive invariant that the old phrase appears nowhere in the source) · `t4` **+8** (the
+comparator disclosure rendered by a **couple**, gated on a `!P.single`-only witness in the same
+paragraph, so the check cannot go vacuous) · `t31` **+3 on the current leg** (third key `estate tax`,
+plus both surfaces asserted separately because the parity predicate is an OR and the app arm was
+already satisfied before the fix).
+
+**The negative control was run and recorded.** Built with the version bump and no copy, `t31`
+reported **13 passed / 2 failed**. A key added to a list that is already satisfied proves nothing.
+
+### Provenance
+
+`src/DangerClose.jsx` md5 `0bef5fc4cb1ebdaf1effffe1783bbd04` · built `index.html` md5 `c361f4ea99a061017cbc0d6a27011fe2`
+
+---
+
 ## v5.49 — the SSA-44 disclosure reaches the user, and a test that reads METHODOLOGY.md, 2026-08-25
 
 **Build.** `src/DangerClose.jsx` md5 `2ccc62b669f6ee52c6a0be1709c967a5` · built `index.html` md5
