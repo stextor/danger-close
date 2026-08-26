@@ -47,7 +47,7 @@ import { dirname, join } from "path";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v549";
-const KNOWN_VERSIONS = ["v548", "v549"];
+const KNOWN_VERSIONS = ["v548", "v549", "v550"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   process.exit(1);
@@ -151,10 +151,17 @@ T(`B-3 [NEGATIVE CONTROL]: "${CTRL_NONE}" is named creator-side and reachable on
 // ── §C · the declared key set ────────────────────────────────────────────────────────────
 // Each key is a string a user would plausibly search for, kept short and markup-free.
 const KEYS = [
-  { key: "SSA-44",
+  { key: "SSA-44", since: "v549",
     why: "the form number is the only searchable handle a household has for IRMAA relief" },
-  { key: "work stoppage",
+  { key: "work stoppage", since: "v549",
     why: "the enumerated trigger that applies to most newly retired households" },
+  // Added v5.50 (D-7). The comparator's estate figure carries NO estate or inheritance tax of any
+  // kind — HEIR_RATE is an heir INCOME tax on Traditional balances only — and that figure is the
+  // DEFAULT ranking objective. Before v5.50 neither surface said so: METHODOLOGY.md had zero
+  // mentions and the raw Field Manual had zero, while the only in-app estate-limitation text was
+  // gated to single households, so a couple never rendered it. Direction: OPTIMISTIC.
+  { key: "estate tax", since: "v550",
+    why: "the default ranking objective is an estate figure that deducts no estate tax at all" },
 ];
 
 T("C-0: every declared key is named in METHODOLOGY.md \u2014 parity is only owed for limitations " +
@@ -162,12 +169,30 @@ T("C-0: every declared key is named in METHODOLOGY.md \u2014 parity is only owed
   KEYS.every(k => inMeth(k.key)),
   KEYS.filter(k => !inMeth(k.key)).map(k => k.key).join(", "));
 
-const POST = VER === "v549";
-for (const { key, why } of KEYS) {
-  if (POST) {
+const POST = VER === "v549" || VER === "v550";
+// EACH KEY IS GATED TO THE RELEASE THAT LANDED IT, not to the shared POST flag above.
+// Found at the v5.50 build. Under one shared gate the v549 leg went GREEN on v5.50's expectation
+// for the wrong reason twice over - METHODOLOGY.md is ONE shared file at the run-folder root, so a
+// frozen leg is read against the CURRENT document; and inApp is a source-text search that cannot
+// see JSX gating, so v5.49's single-household-gated estate card satisfied it even though a COUPLE
+// never rendered a word of it - while the v548 leg FAILED outright, invisibly, because runsuite.sh
+// only runs t31 for the prior and current tags.
+const ORDER = ["v548", "v549", "v550"];
+const post = k => ORDER.indexOf(VER) >= ORDER.indexOf(k.since);
+for (const k of KEYS) {
+  const { key, why, since } = k;
+  if (post(k)) {
     T(`C [PARITY]: "${key}" is named creator-side AND user-side \u2014 ${why}`,
       inMeth(key) && userSide(key),
       `meth=${inMeth(key)} app=${inApp(key)} docs=${inDocs(key)}`);
+  } else if (since === "v550") {
+    // Pre-v5.50 estate-tax state, pinned to what was ACTUALLY true of those builds. The render tree
+    // DID carry the phrase - inside a single-household branch - so a !userSide pin would be false.
+    // What was true, and what v5.50 changed, is that the FIELD MANUAL never named it at all.
+    T(`C [KNOWN DEFECT pre-v5.50]: "${key}" never reaches the FIELD MANUAL, and the only ` +
+      "render-tree mention is gated to single households, so a couple sees nothing",
+      !inDocs(key),
+      `app=${inApp(key)} docs=${inDocs(key)}`);
   } else {
     // The pre-v5.49 state, PINNED so the frozen leg keeps asserting what was actually true of it.
     // Inverting an assertion without gating it applies the new expectation to every frozen leg and
@@ -199,6 +224,17 @@ if (POST) {
   // approved copy is correct; weakening it to something both a conservative and a non-conservative
   // sentence would satisfy is not.
   const DIRECTION = "charges every surcharge in full";
+  if (VER === "v550") {
+    // The C predicate is an OR, and for this key the app arm was ALREADY satisfied before the fix
+    // by single-gated text. Asserting the manual arm separately is what makes the key mean anything.
+    T("D-5: the FIELD MANUAL names estate tax - the arm that was empty before v5.50",
+      inDocs("estate tax"));
+    T("D-6: the RENDER TREE names it outside the single-household branch",
+      inApp("no estate tax and no inheritance tax"));
+    T("D-7 [DIRECTION]: both surfaces name the direction of the error as optimistic",
+      inDocs("optimistic") && inApp("optimistic"),
+      `docs=${inDocs("optimistic")} app=${inApp("optimistic")}`);
+  }
   T(`D-4 [DIRECTION]: both surfaces state the model ${DIRECTION}`,
     inApp(DIRECTION) && inDocs(DIRECTION),
     `app=${inApp(DIRECTION)} docs=${inDocs(DIRECTION)}`);
