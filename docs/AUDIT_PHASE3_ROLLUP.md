@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Date | 2026-08-12 |
-| Build under audit | **v5.29** · `4ef69e9a820fac18b99aa2aa46a8b2a1` |
+| Build under audit | **v5.29** · `4ef69e9a820fac18b99aa2aa46a8b2a1` · **RE-PINNED to v5.49 on 2026-08-25 — read that box first; §5 is superseded** |
 | Built `index.html` | `fe6bf7d4230abdacbf7ce1171798feb3` |
 | Prior build | v5.28 · `9e06482087f415661196b1c47f7e8be0` |
 | Governing document | `SCOPE_STANDING_AUDIT.md` §§D, E |
@@ -11,6 +11,65 @@
 | Result | **Section E covered. Section D partial and labelled as such.** No fixes made. |
 
 ---
+
+> ## ⚠ RE-PINNED TO v5.49 — 2026-08-25 · READ THIS BOX FIRST; §5's PLAN TABLE WAS WRONG ABOUT HALF THE AUDIT
+>
+> Source `2ccc62b669f6ee52c6a0be1709c967a5`, built `index.html` `a976bf66307ca07464e15ae911468365`,
+> repo `fc5f174`. **Twenty releases since this document was written at v5.29.**
+>
+> **Why this repair happened at all.** This is the document a session reads to find out where the
+> audit stands. It was asked that question on 2026-08-25 and **gave a wrong answer about two of the
+> four phases** — which is the capstone's item 5 ("the audit's own records go stale silently")
+> landing on the audit's own orientation document. It was found by reading it against the documents
+> it describes, not by any check designed to find it.
+>
+> ### The plan table in §5 is superseded
+>
+> | Phase | §5 said (v5.29) | **Verified at v5.49** |
+> |---|---|---|
+> | 1 · A+B | ✅ v5.10.1 | ✅ holds — **A-2 still open**, Low, needs its own scope |
+> | 2 · C | ✅ complete | ✅ holds — and its findings became `t10`'s **163** tax-case assertions, so Phase 2 left a permanent suite, not just a document |
+> | 3 · E | ✅ covered | ✅ holds, with the named remainder in §4 still unreached |
+> | 3 · D | ◐ partial | ◐ **much further than this document knows** — swept at v5.31, delta'd to v5.39, re-pinned to v5.48, D-6 closed at v5.49 |
+> | **4 · F** | ⬜ **not started** | ❌ **WRONG — done.** `UsabilityFlaws.md` is pinned at v5.38 with F-1…F-16; **F-2, F-6 and F-8 were FIXED at v5.40** |
+> | **capstone** | "not written here… comes after Phase 4" | ❌ **WRONG — written**, and re-pinned to v5.48 on 2026-08-25 |
+>
+> ⚠ **A caveat §5 could not have known.** F-2/F-6/F-8 are pinned by **source-text** invariants in
+> `t1`. "Fixed" means the wrapper and the keyboard hint are present in the shipped source — **no
+> device or headless-layout verification was ever run**, so nothing has been measured at 380px.
+>
+> ### Section E findings, re-checked by content at v5.49
+>
+> Not all thirteen — the ones carrying concrete, checkable code claims. **Line numbers in §2 are
+> v5.29 addresses and have moved; these were re-resolved.**
+>
+> | Finding | v5.29 | **v5.49** |
+> |---|---|---|
+> | **E-2** · four OBBBA values outside `TAX_CONSTS`, time-fused at 2028 with no alarm | OPEN, ranked top-three | ✅ **CLOSED (v5.31).** A named `OBBBA_CONSTS` block now carries them with the statutory cite (P.L. 119-21 §70103); `SENIOR_BONUS_SUNSET_YEAR: 2028` is an explicit constant whose comment states it is **deliberately** not tied to `TAX_CONSTANTS_YEAR`; and the **Verify tab checks them** (L1273–1274). The fuse is lit, labelled and alarmed |
+> | **E-6** · jsdom environment duplicated nine times | 9 | ⚠ **HOLDS, exactly 9.** Nine files still call `new JSDOM` directly; ten import `env_dom`. The split §2 calls the finding is unchanged |
+> | **E-4** · version literal ×4, no constant | OPEN | ⚠ **HOLDS.** Zero `VERSION` constants. Confirmed the hard way on 2026-08-25: shipping v5.49 meant hand-editing four literals, two of them inside `DOCS_HTML` |
+> | **E-5** · backup does not identify the build | OPEN | ⚠ **HOLDS.** Still `app: "DangerClose", version: 5` — a schema version that reads like a build version |
+> | **E-11** · `DOCS_HTML` measured at 144,008 vs recorded ~141–142,000 | "recorded figures disagree" | ⚠ **HOLDS, and the MECHANISM is now known.** One line has **three** truthful lengths: at v5.49, **146,374 code points · 146,377 UTF-16 units · 147,515 bytes**. `awk`/`wc -c` count bytes, Python `len()` counts code points, and JS `.length` counts UTF-16 units — the manual holds three non-BMP emoji (🔑 🖥 🧭), each costing two. **E-11 is a units defect, not a drift defect.** The remedy is to state the unit, never the bare number |
+>
+> **Not re-verified:** E-1, E-3, E-7, E-8, E-9, E-10, E-12, E-13. **Assume stale until measured.**
+> E-13 in particular describes a stale manifest entry, and the manifest has been rewritten repeatedly
+> since v5.29.
+>
+> ### What §4's scope report still gets right
+>
+> Its judgement that **"Section D should be re-run, with the undisclosed-gap sweep as its explicit
+> objective"** was correct and has since been acted on three times over. Its list of what Section E
+> did **not** reach — the 12,151-line file's structure, `DOCS_HTML` internals, and the
+> `validation/` ↔ `qa/` relationship — **is still accurate and still unaddressed.** That is the
+> largest untouched area left in the whole audit.
+>
+> ### The lesson, since this is the third document to need this repair
+>
+> `MissingFeatures.md`, `AUDIT_TOP_FIVE_SUMMARY.md` and now this one all went stale the same way:
+> **a document that describes the state of other documents has no mechanism telling it when they
+> change.** `t31` (v5.49) is the first automated check of that shape anywhere in the project, and it
+> covers exactly two keys across one pair of surfaces. Everything else here is still checked by a
+> human noticing.
 
 ## 1. Freshness check (OPERATIONS §A) — passed clean
 
@@ -147,12 +206,17 @@ undisclosed-gap sweep as its explicit objective, before the top-five summary is 
 
 ## 5. Where this leaves the plan
 
-| Phase | Sections | Status |
+⚠ **SUPERSEDED — see the v5.49 re-pin box at the top of this document.** This table was accurate at
+v5.29 and is wrong at v5.49 in two rows: Phase 4 is **done**, and the top-five capstone is
+**written**. Left as originally recorded rather than edited in place, so that what changed stays
+visible.
+
+| Phase | Sections | Status (as recorded at v5.29) |
 |---|---|---|
 | 1 | A + B — creator exposure, PII | ✅ v5.10.1 |
 | 2 | C — numerical validation | ✅ complete (`AUDIT_2E_STATE_AND_PHASE2_ROLLUP.md`) |
 | **3** | **D + E** | **E ✅ · D ◐ partial — this document** |
-| 4 | F — usability, desktop + small screen | ⬜ not started |
+| 4 | F — usability, desktop + small screen | ⬜ not started ← **wrong at v5.49** |
 
 **The two-paragraph top-five summary is not written here.** Per the session brief it comes after
 Phase 4 — and on this session's evidence it should also wait for Section D to be completed, since two
