@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | **Awaiting decisions in §6 — do not build yet** |
+| Status | ✅ **ALL FOUR DECISIONS RESOLVED 2026-08-26. BUILDABLE.** See §6 — D-2 was decided **against** the recommendation, deliberately; read its note before writing copy |
 | Build | **v5.49** · `src/DangerClose.jsx` md5 `2ccc62b669f6ee52c6a0be1709c967a5` · repo `5f145f7` · premise verified against source 2026-08-26 |
 | Parent | `MissingFeatures.md` D-7 (assessed at the v5.48 re-pin, 2026-08-25) |
 | Kind | **Disclosure only.** No engine change. No figure moves. Parity 10/10 and the DOM diff's STRICT branch at 32 are the gate |
@@ -95,8 +95,8 @@ correction to an output the app already produces.
 
 | # | Site | Anchor | Change |
 |---|---|---|---|
-| 1 | **The objective label**, L9518 | `MAX AFTER-TAX ESTATE (leave the most behind)` | ⚠ Depends on **D-1** |
-| 2 | **The winner sentence**, L9485 | `projects the largest after-tax` | ⚠ Depends on **D-1** |
+| 1 | **The objective label + noun**, L9518 | `MAX AFTER-TAX ESTATE (leave the most behind)` and `noun: "after-tax estate"` | **NARROW both** per D-1 → `MAX ESTATE AFTER HEIR INCOME TAX` / `estate after heir income tax` |
+| 2 | **The winner sentence**, L9485 | `projects the largest after-tax estate` | **NARROW** — ⚠ this is **hard-coded literal JSX text**, NOT derived from the `noun`. Editing L9518 alone leaves this one saying "after-tax" |
 | 3 | **Comparator note**, L9488 | begins `This is a deterministic comparison at a fixed` | **APPEND** the limitation clause — this note already carries the comparator's caveats |
 | 4 | **Field Manual**, inside `DOCS_HTML` (L3593) | ⚠ anchor to be resolved **by content at build time**, never by index | **APPEND** to the strategy-comparator entry |
 | 5 | **`METHODOLOGY.md`** | the limitations section | **ADD** — no estate/inheritance tax is modelled, and the direction is optimistic |
@@ -128,6 +128,18 @@ This scope reuses it.
 4. Version ×4 is asserted by `t1` STATIC; parity 10/10 and the DOM diff STRICT at 32 gate "no figure
    moved."
 
+5. ⚠ **Nothing currently asserts the objective label at all.** Grepping `qa/` for `AFTER-TAX ESTATE`
+   returns **zero hits**, so no suite would have caught this string being wrong, and none will catch
+   the new one drifting. **Pin the narrowed label in `t1`'s STATIC block** alongside the version
+   strings. This is the extinction invariant for D-1: without it, the label can silently revert to a
+   claim the app cannot support, and the only thing standing between a user and that claim is
+   nobody having edited the line.
+
+6. ⚠ **The `noun` at L9518 feeds four render sites** (L9555, L9559, L9568, L9583) — the "Model's best
+   cell" line, the how-to-read-a-card legend, and both per-card figures. Narrowing the noun fixes all
+   four in one edit, but it also means **a careless noun edit changes five things at once**. Check all
+   four render correctly, not just the objective selector.
+
 ---
 
 ## 5. What this fix does NOT achieve — state it in the release
@@ -140,7 +152,27 @@ shape as D-8b's ACA sub-floor: the honest disclosure of a known simplification, 
 
 ## 6. Decisions for Steve — **build only after these are resolved**
 
-**D-1 · The "after-tax" label (L9518, L9485). The most important decision here.**
+### ✅ RESOLVED 2026-08-26 — all four
+
+| # | Decision |
+|---|---|
+| **D-1** | ✅ **(b) NARROW the label** → `MAX ESTATE AFTER HEIR INCOME TAX`, noun → `estate after heir income tax`. The label carries its own limit, so the correction cannot be skipped by a reader who reads only the label — which, on a comparison table, is most of them. **The disclosure clause still ships**; what changes is that it explains rather than corrects. |
+| **D-2** | ✅ **KEEP IT GENERAL — no state names, no thresholds.** ⚠ **Decided against the recommendation, and the reasoning is worth keeping:** a clause naming Oregon at $1M and Massachusetts at $2M is a clause that goes stale, and this project has spent three days repairing documents that went stale exactly that way. Oregon's SB 1511 was already pending as of mid-2026 and would move its threshold. A general clause is durable and needs no "verify current figures" pointer because it quotes no figure. |
+| **D-3** | ✅ **One key — `estate tax`.** `t31`'s set goes from two to three, no further. |
+| **D-4** | ✅ **v5.50.** |
+
+⚠ **What D-2 forbids in the shipped copy.** §1's Oregon/Massachusetts figures and the $205,000 couple
+example are **scope rationale, for deciding whether this was worth building. They must NOT appear in
+the app.** The clause says that some states levy estate or inheritance tax at thresholds well below
+the federal exemption, that the model applies none of them, and that the direction is optimistic —
+without naming a state, a threshold, or a dollar figure. **A build session that copies §1's numbers
+into the Field Manual has broken D-2.**
+
+---
+
+### The original D-1 framing, kept as the record of what was weighed
+
+**D-1 · The "after-tax" label (L9518, L9485).**
 The phrase asserts something untrue. Three options:
 - **(a) Leave it, disclose beside it.** Smallest change; the label keeps saying "after-tax" while a
   clause nearby explains what that excludes.
