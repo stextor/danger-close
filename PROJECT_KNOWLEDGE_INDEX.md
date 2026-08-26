@@ -25,13 +25,19 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 
 | Field | Value |
 |---|---|
-| Version | **v5.50** |
-| Source file in knowledge | `DangerClose-v5_50.jsx` |
-| Source md5 | `0bef5fc4cb1ebdaf1effffe1783bbd04` |
-| Built `index.html` md5 | `c361f4ea99a061017cbc0d6a27011fe2` |
+| Version | **v5.51** |
+| Source file in knowledge | `DangerClose-v5_51.jsx` |
+| Source md5 | `3cf497b834e545ce29c1945fb99ae09a` |
+| Built `index.html` md5 | `887f02d8678cee49da2c76fc61bd3c98` |
 | Shipped | 2026-08-26 |
 
-> **Rolled 2026-08-26 at the v5.50 ship.** Rotation removed `DangerClose-v5_48.jsx` and
+> **Rolled 2026-08-26 at the v5.51 ship.** Rotation removed `DangerClose-v5_49.jsx` and
+> `dom_entry_v549.jsx`; the pool holds exactly `DangerClose-v5_50.jsx` and `DangerClose-v5_51.jsx`,
+> and `dom_entry_v550.jsx` and `dom_entry_v551.jsx`. ⚠ `dom_entry_v592.jsx` is still NOT part of
+> the rotation (retired v5.9.2 leg — see below). **v5.51 is disclosure + structure only: parity
+> 10/10, DOM diff STRICT 32, `HEIR_RATE` still 0.22 by decision.**
+>
+> *(v5.50 rotation, for the record.)* Rotation removed `DangerClose-v5_48.jsx` and
 > `dom_entry_v548.jsx`; the pool holds exactly `DangerClose-v5_49.jsx` and `DangerClose-v5_50.jsx`,
 > and `dom_entry_v549.jsx` and `dom_entry_v550.jsx`. ⚠ **`dom_entry_v592.jsx` is NOT part of the
 > rotation and must not be deleted** — `v592` is the retired v5.9.2 leg, still registered in four
@@ -417,10 +423,10 @@ should clone. ⚠ **Seven of the original eight still are; `hand_86.mjs` is not*
 
 | Field | Value |
 |---|---|
-| Version | **v5.49** |
-| Source file in knowledge | `DangerClose-v5_49.jsx` |
-| Source md5 | `2ccc62b669f6ee52c6a0be1709c967a5` |
-| Built `index.html` md5 | `a976bf66307ca07464e15ae911468365` |
+| Version | **v5.50** |
+| Source file in knowledge | `DangerClose-v5_50.jsx` |
+| Source md5 | `0bef5fc4cb1ebdaf1effffe1783bbd04` |
+| Built `index.html` md5 | `c361f4ea99a061017cbc0d6a27011fe2` |
 
 > **Rolled 2026-08-25 at the v5.49 ship, in the same pass as the Current build table above.**
 

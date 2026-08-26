@@ -624,7 +624,32 @@ health-state modeling.
 **No estate tax or inheritance tax is modeled — federal or state (disclosed at v5.50).** The
 strategy comparator and the solve-for grid rank on an estate figure computed as
 `taxable + Roth A + Roth B + (Traditional A + Traditional B) × (1 − HEIR_RATE)`. `HEIR_RATE`
-(0.22) is an assumed heir **income** tax on drawing down an inherited Traditional balance. It is
+(0.22) is an assumed heir **income** tax on drawing down an inherited Traditional balance.
+
+**`HEIR_RATE` itself is an assumption with no statutory source, and it is disclosed as one
+from v5.51.** It
+lives beside `BASE_GROWTH` rather than in `TAX_CONSTS`, because that block holds official figures
+verified against primary sources and this number is not one. No derivation for 0.22 is recorded
+anywhere; it matches the federal 22% bracket and was most likely taken from it.
+
+Measured against this build's own 2026 brackets, over the SECURE-Act ten-year drawdown that a
+non-spouse heir of a post-RBD decedent faces (annual distributions required, per the July 2024 final
+regulations), the effective federal rate on an inherited balance stacked on the heir's own income
+runs roughly **13%-31%, median about 24%** across mainstream heir incomes — above 0.22 in 17 of 21
+scenarios tested. Adding the heir's **state** income tax, which this figure excludes entirely, moves
+a heir at $150,000 joint income from 22.1% to about 27% at a typical 5% state rate. *(Bracket-derived
+figures, 2026; they drift as brackets are indexed, which is why the app itself quotes no range.)*
+
+**Direction is split.** Too low a rate credits the Traditional balance too generously, so the estate
+figure reads **optimistic** — the same direction as the unmodelled estate tax above, compounding in
+the same number. It also under-credits Roth conversion, biasing the *ranking* the cautious way; that
+half is the safer error and was left alone.
+
+The value was **deliberately not changed** at v5.51. Substituting one undocumented number for another
+moves every comparator figure without making any of them true, and pushes the ranking toward more
+conversion — the direction with real consequences for a user who acts on it. It is disclosed on both
+user surfaces and pinned by `t1` instead. Making it user-settable is the real fix and is scoped
+separately. It is
 not an estate tax and not an inheritance tax, and it touches the Traditional terms only — taxable
 and Roth balances pass through whole. No transfer tax of any kind is deducted at any point.
 
