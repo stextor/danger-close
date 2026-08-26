@@ -207,6 +207,29 @@ console.log(`t2 — ENGINES (${VER})`);
   T("ROTH: conversions shrink the Traditional pool vs none", cur.finalTrad < none.finalTrad || cur.endTrad < none.endTrad || true);
   fp.roth = { n: res.length, keys: res.map(r => r.key).sort(), estates: res.map(r => rnd(r.estate)).sort((a, b) => a - b) };
   fp.rothCurrentEstate = rnd(cur.estate);
+
+  // ─── v5.51 D-9 · the estate formula, pinned TO THE DOLLAR ───
+  // The estate figure is the comparator's DEFAULT ranking objective and HEIR_RATE is its ONLY
+  // deduction. Until v5.51 nothing asserted the rate's value or the arithmetic around it, so the
+  // constant could have been edited to any number - or the formula reshaped - with the suite green.
+  // Recomputing it here from the engine's OWN returned components is what makes that impossible:
+  // it fails if the rate moves, if a term is dropped, or if a transfer tax is quietly folded in.
+  for (const r of res) {
+    const recomputed = Math.round(r.endTaxable + r.endRoth + r.endTrad * (1 - 0.22));
+    T(`ROTH ESTATE [D-9]: ${r.key} estate == taxable + roth + trad x (1 - 0.22) to the dollar`,
+      Math.abs(recomputed - r.estate) <= 1, `engine=${r.estate} recomputed=${recomputed}`);
+  }
+  T("ROTH ESTATE [D-9]: the engine reports the heir rate it used, and it is 0.22",
+    res.every(r => r.heirRate === 0.22), String(res[0].heirRate));
+  // Roth and taxable pass through WHOLE - correct: inherited Roth is untaxed and taxable assets
+  // receive a step-up in basis at death. Only the Traditional term carries the discount.
+  {
+    const r = res[0];
+    const noDiscount = Math.round(r.endTaxable + r.endRoth + r.endTrad);
+    T("ROTH ESTATE [D-9]: the discount touches the Traditional term ONLY",
+      Math.abs((noDiscount - r.estate) - Math.round(r.endTrad * 0.22)) <= 1,
+      `gap=${noDiscount - r.estate} expected=${Math.round(r.endTrad * 0.22)}`);
+  }
 }
 
 // ═══ Roth strategy engine, ACA BRIDGE household — E-15 ═══════════════════════════════════════
