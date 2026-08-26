@@ -7,7 +7,7 @@
 | Base source | `src/DangerClose.jsx` md5 **`976a03fe16cd401b9735bbb21675bf5f`** (v5.42) |
 | Kind | Modelling fix · `src/` change · version bump · new invariants · METHODOLOGY update |
 | Decision | **D-2 resolved: (b).** Maintainer's call, 2026-08-21 |
-| Status | **SCOPED — one open decision (D-2b-1), does not block. Buildable.** |
+| Status | ✅ **RETIRED 2026-08-26 by the scope-retirement sweep.** **BUILT AND SHIPPED AT v5.43** (2026-08-21). Verified by content at v5.49: `ssTaxable = ssTot * 0.85` survives only as a COMMENTED-OUT line (L4413); the live code at L4430 applies §86. ⚠ Retired **6 releases late** — it read *"Buildable"* the whole time. Kept as the record of how the work was scoped and built — **nothing here is outstanding; do not treat it as pending work.** |
 
 ---
 

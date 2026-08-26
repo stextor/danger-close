@@ -416,6 +416,33 @@ often reached last and skipped. `SCOPE_D6_SSA44_USER_SIDE.md` still read *"Await
 build yet"* for a full day after v5.49 shipped, was verified, and had its documentation follow-up
 land. A fulfilled scope left in that state is indistinguishable from live work.
 
+⚠ **Swept 2026-08-26, and the step was not merely slipping — it had stopped happening.** Of the nine
+`SCOPE_*.md` carrying live-looking status lines, **seven were already built and shipped**:
+
+| Scope | Status line said | Actually shipped |
+|---|---|---|
+| `FIX_realized_capital_gains_v5_32` | "Ready to build" | **v5.36** — 13 releases earlier |
+| `FIX_docs_v5_39` | "DRAFT — **do not build**" | **v5.39** |
+| `FIX_roth_tab_rmd_magi` | "BUILDABLE… **not yet built**" | **v5.41** |
+| `ENGINE_C_SS86` | "Buildable" | **v5.43** |
+| `ITEMS_3_6_perRmd` | "**NOT BUILDABLE** — two blocking" | items at **v5.44** and **v5.47** |
+| `ENGINE_B_ROTH_HALF_CAP` | "two decisions open, **both blocking**" | **v5.45** |
+| `ROTH_TAB_MAGI_MEASUREMENT` | "measured and validated" | fulfilled; never retired |
+
+**Two of them said DO NOT PROCEED about work already shipped.** A session picking up work by scanning
+status lines would have skipped exactly those, and skipped them for the strongest-sounding reason.
+
+⚠ **The information already existed and nothing compared it.** The manifest's own rows described
+`ENGINE_C_SS86` as *"fulfilled at the ship"* and `ITEMS_3_6_perRmd` as shipped — **while the scopes
+themselves said Buildable and NOT BUILDABLE.** This is the two-documents-disagree failure again, with
+the answer sitting in the file that indexes the other one.
+
+**What to do about it.** A scope's status line is written by the session that *drafts* it and read by
+sessions that come *later*; nothing in the release path makes the drafting session's claim expire.
+Until something checks it, the honest reading is: **treat any scope status line as evidence of what
+was true when it was written, not of what is true now** — and confirm against the CHANGELOG and the
+source before believing either "buildable" or "blocked."
+
 **Teach the suite the new version tag — expect this every release.** Several suites gate behavior on an
 enumerated list of version tags, and a new tag falls through to the wrong branch. At v5.11 six such
 edits were needed. Two shapes to look for:

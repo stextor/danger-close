@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | **DECISIONS RESOLVED 2026-08-20. BUILDABLE.** Derivation done — `DERIVATION_roth_tab_rmd_magi.md`. Not yet built |
+| Status | ✅ **RETIRED 2026-08-26 by the scope-retirement sweep.** **BUILT AND SHIPPED AT v5.41** (2026-08-20) — the release titled *"the Roth tab's MAGI now includes required minimum distributions."* Verified at v5.49: L4896 sums `rmd_y` into the tab's MAGI. ⚠ Retired **8 releases late**; it read *"Not yet built"* while built. Kept as the record of how the work was scoped and built — **nothing here is outstanding; do not treat it as pending work.** |
 | Build | **v5.40** · `src/DangerClose.jsx` md5 `6b7cebb1476ee66e57079b713b94ba75` · premise verified against source 2026-08-20 |
 | Parent | `SCOPE_ROTH_TAB_MAGI_MEASUREMENT.md` (D-C answered) · `MEASUREMENT_roth_tab_magi_v5_40.md` rev 2 §6 |
 | Kind | **A modelling fix.** `src/` change, version bump, new extinction invariants |

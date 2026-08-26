@@ -7,7 +7,7 @@
 | Class | **Presentation-only.** No engine change, no constant change, no modeling change. Parity must stay **8/8**. |
 | Source of findings | `UsabilityFlaws.md` (Section F, Phase 4) — F-10…F-19 |
 | Date | 2026-08-18 |
-| Status | **DRAFT — decisions D-1…D-8 unresolved. Do not build.** |
+| Status | ✅ **RETIRED 2026-08-26 by the scope-retirement sweep.** **BUILT AND SHIPPED AT v5.39** (2026-08-18) — the release titled *"Field Manual correctness: a callout that never rendered, a table that lost a column, and six undocumented skins."* Its premise names the same three items the release fixed. ⚠ Retired late; it read *"Do not build"* about work already shipped. Kept as the record of how the work was scoped and built — **nothing here is outstanding; do not treat it as pending work.** |
 
 ---
 

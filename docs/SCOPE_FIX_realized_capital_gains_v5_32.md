@@ -9,7 +9,7 @@
 | Proposed version | **v5.32** |
 | Engine behaviour | Capability changes; **with the shipped default of 0, no figure moves.** Parity 8/8 strict is the gate — §5 |
 | **Revision** | **Rev C, 2026-08-13.** Rev A was written from inspection and carried two false premises (§1.1, §1.2). Rev B recommended a non-zero default because it was *the conservative direction*; **a six-household measurement falsified that too** (§1.3). All corrections recorded in place |
-| Status | ✅ **ALL EIGHT DECISIONS RESOLVED. Ready to build.** §6 |
+| Status | ✅ **RETIRED 2026-08-26 by the scope-retirement sweep.** **BUILT AND SHIPPED AT v5.36** (2026-08-16) — the release titled *"the drawdown realizes capital gains, and the tax engines consume them."* Verified at v5.49: `capGain_y` is summed into MAGI at L4435 and L4896. Section D records the same fix as **D-2, CLOSED**. ⚠ Retired **13 releases late** — the longest in this sweep. Kept as the record of how the work was scoped and built — **nothing here is outstanding; do not treat it as pending work.** |
 | Supersedes | `SCOPE_FIX_realized_capital_gains_v5_32_RevB.md` — **delete it from the pool.** The `_RevB` filename also broke convention: the revision belongs in this header, as `SCOPE_FIX_otherAccounts_tax_treatment_v5_21.md` shows |
 
 ---

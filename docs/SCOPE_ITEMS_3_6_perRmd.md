@@ -6,7 +6,7 @@
 | Target | **v5.44** |
 | Base source | `src/DangerClose.jsx` md5 **`7a9c6cfdaecaed0ebc77e98bfcd98b54`** (v5.43) |
 | Kind | Modelling fix · `src/` change · version bump · new invariants · METHODOLOGY update |
-| Status | **SCOPED, NOT BUILDABLE YET — two decisions open (D-3a, D-6a), both blocking** |
+| Status | ✅ **RETIRED 2026-08-26 by the scope-retirement sweep.** **BOTH ITEMS BUILT AND SHIPPED.** Item 3 (the `noConv` counterfactual grown over the wrong span) at **v5.44**; item 6 (annuity money in the RMD basis, three sites) at **v5.47**. Verified at v5.49: L1676 and L1703 both carry the past-tense fix — *"The RMD basis excludes annuity money."* ⚠ Retired late, and like the half-cap scope it read **NOT BUILDABLE / both blocking** while shipped. Kept as the record of how the work was scoped and built — **nothing here is outstanding; do not treat it as pending work.** |
 | Grouped because | Items 3 and 6 are the same forty lines. Item 3 is `yrs`/`t0` at L9007–9010; item 6 is `t0` at L9007. One census, one fixture, one control run |
 
 ---

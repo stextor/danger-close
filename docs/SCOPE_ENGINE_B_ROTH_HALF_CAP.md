@@ -6,7 +6,7 @@
 | Target | **v5.45** |
 | Base source | `src/DangerClose.jsx` md5 **`cd87419e7e8ae182c0efdb30cb7b1305`** (v5.44) |
 | Kind | Modelling fix · `src/` change · version bump · new invariants · METHODOLOGY update |
-| Status | **SCOPED — two decisions open (D-47a, D-47b), both blocking** |
+| Status | ✅ **RETIRED 2026-08-26 by the scope-retirement sweep.** **BUILT AND SHIPPED AT v5.45** (2026-08-22). D-47a and D-47b were resolved and built. Verified at v5.49: L5033–5034 carries the past-tense account of the dropped ½-of-benefits term, and `t27_half_cap.mjs` ships 18 checks passing on both legs. ⚠ Retired **4 releases late**, and this was the worst of the set — it did not merely look pending, it told a session **DO NOT PROCEED** on decisions already made. Kept as the record of how the work was scoped and built — **nothing here is outstanding; do not treat it as pending work.** |
 | Grouped because | One defect, one statutory clause, one oracle, and **two contiguous income bands** — see §3 |
 
 ---

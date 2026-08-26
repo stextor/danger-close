@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | **MEASURED AND VALIDATED 2026-08-20. §3 steps 1-5 all complete.** Results in `MEASUREMENT_roth_tab_magi_v5_40.md` **rev 2** (rev 1 carried a wrong `dobA` — see its §1). D-A/D-B/D-D resolved. **D-C answered by HH3: 8 of 8 ladder years render the wrong IRMAA verdict** — the defect is user-visible, not hygiene |
+| Status | ✅ **RETIRED 2026-08-26 by the scope-retirement sweep.** **FULFILLED — measurement complete, and its child scope `SCOPE_FIX_roth_tab_rmd_magi.md` was built at v5.41.** Status text was accurate; it simply was never retired. §3 steps 1–5 all complete. Kept as the record of how the work was scoped and built — **nothing here is outstanding; do not treat it as pending work.** | Results in `MEASUREMENT_roth_tab_magi_v5_40.md` **rev 2** (rev 1 carried a wrong `dobA` — see its §1). D-A/D-B/D-D resolved. **D-C answered by HH3: 8 of 8 ladder years render the wrong IRMAA verdict** — the defect is user-visible, not hygiene |
 | ⚠ Revision 2 | 2026-08-20. **§1(c) below was wrong and is corrected in place** — see `STOP-REPORT-v5_40-roth-tab-section86.md`. The direction hypothesis in §1 "Net" was also wrong, and so was the inversion my stop report proposed to replace it. Both are superseded by §1d |
 | Build | **v5.40** · `src/DangerClose.jsx` md5 `6b7cebb1476ee66e57079b713b94ba75` · committed tree `027fbd2` |
 | Asked for by | `SCOPE_STRUCTURAL_MAGI_EXTINCTION.md` §6, which opened this rather than closing it; D4 of that scope waits on the outcome |
