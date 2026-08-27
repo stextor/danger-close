@@ -83,6 +83,46 @@ same paragraph) · `t31` **+1** (a fourth key).
 > ("heir") matched text that predated the fix; only the new phrasing discriminates. The control is
 > what tells you which one you wrote.
 
+### Post-ship documentation correction (2026-08-26, same build)
+
+**No source change. `src/DangerClose.jsx` is unchanged and the version stays v5.51.** A sweep after
+the ship found this release had done the same thing v5.50 did: fixed the app and left documents
+describing the old state. Three, one of them materially misleading.
+
+- **`docs/ASSESSMENT_HEIR_RATE.md` shipped already stale** — it went into the v5.51 package
+  describing the pre-v5.51 code in present tense: *"declared inline as a bare literal"*, *"No suite
+  pins it"*, *"an unjustified, unpinned constant is steering the default ranking."* All fixed by the
+  release it shipped alongside. **Worse, its §8 Option 1 still recommended moving `HEIR_RATE` into
+  `TAX_CONSTS`** — the option the D-9 scope examined and rejected, and the opposite of what shipped.
+  A session reading that table would have implemented the rejected option. Annotated in place with a
+  superseded-in-part header and a struck, corrected Option 1; §3–§7 (the law, the measured rates,
+  the flip point, the split direction) stand unchanged.
+- **`MissingFeatures.md`** still called `HEIR_RATE` *"unexamined"* and said *"neither has been
+  assessed"*, inside the D-7 closure block written at v5.50. Corrected, with the default objective
+  correctly left as still unassessed.
+- **`PROJECT_KNOWLEDGE_INDEX.md`** still listed `SCOPE_D7` as *"BUILDABLE as v5.50"* two releases
+  after it was built, and carried no row for `SCOPE_D9` or the assessment. Refreshed.
+- **`SCOPE_D9`** was retired at the ship but never given the retirement note `SCOPE_D7` got. Added,
+  including the vacuous-key finding the scope did not anticipate.
+
+**This is the fourth instance of one pattern in a week**, and the count is the point: the v5.50
+census miss, the `METHODOLOGY` label drift, and now this twice over. **Nothing tests documents.**
+`t31` asserts that specific phrases appear on both user surfaces; it cannot see that a recommendation
+table has gone out of date, or that a retired scope kept advertising as open. A suite check — that
+any `SCOPE_*.md` or `ASSESSMENT_*.md` marked RETIRED carries a retirement note, and that no retired
+document's recommendation survives unannotated — is deliberately **not** bolted on here; it needs a
+harness change to put `docs/` in the run folder, and improvising that in a correction pass is how the
+next defect gets introduced. It is scoped separately.
+
+Suite unchanged at **2,642 app checks / 0 failing**; **2,724 total**. No test or source file changed.
+
+> **A release is not finished when the app is right and the tests are green. It is finished when
+> every document that describes what changed has been re-read against what shipped** — including the
+> documents created by that same release, which are the easiest to assume are current precisely
+> because the ink is wet.
+
+---
+
 ### Provenance
 
 `src/DangerClose.jsx` md5 `3cf497b834e545ce29c1945fb99ae09a` · built `index.html` md5 `887f02d8678cee49da2c76fc61bd3c98`
