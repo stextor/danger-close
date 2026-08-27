@@ -35,6 +35,9 @@ build/
 Thumbs.db
 *.swp
 
+# run-folder alias (OPERATIONS §B / TESTING.md setup) — never a repo file
+/DangerClose.jsx
+
 # Logs
 npm-debug.log*
 yarn-error.log*
