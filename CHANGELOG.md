@@ -179,6 +179,38 @@ choosing deletion.
 
 ---
 
+### D4 re-homed, and the deletion rule that should have caught it (2026-08-26, ops, same build)
+
+**No source, no test, no rebuild. `src/DangerClose.jsx` unchanged; version stays v5.51.**
+
+Deleting `SCOPE_STRUCTURAL_MAGI_EXTINCTION.md` was cleared by confirming that what it **built**
+survived — the CHANGELOG entry for the structural S-1 assertion, and four suites still asserting the
+invariant. **That check was incomplete.** The scope also carried **D4, an open product-voice decision
+for the maintainer**, explicitly marked *"no recommendation offered."* A CHANGELOG records what
+shipped, which is exactly what an open question is not, so nothing else held it. It was recovered
+from git history.
+
+**D4 is now `MissingFeatures.md` D-10**, and it is still live at v5.51 — verified rather than assumed.
+Engine C builds IRMAA MAGI from **seven** terms (L4459); the Roth tab builds it from **five** (L8997).
+v5.41 closed the RMD term only: **dividends and realized capital gains remain absent**, and the app
+carries no text cueing that the two figures differ. `MEASUREMENT_roth_tab_magi_v5_40.md` recorded
+IRMAA **verdict inversions** in constructed households, so the open question is not cosmetic.
+Direction is **optimistic** — omitting income terms understates MAGI and flatters the plan.
+
+*(D-10, not D-4: this register already has a D-4, a different item. The collision is why the number
+changed on re-homing.)*
+
+**`OPERATIONS.md` §G gains the rule that would have caught it:** before deleting, check for
+**unresolved decisions**, not just built outcomes — grep for `OPEN`, `awaiting`, `yours`, `no
+recommendation` and the decision table, and confirm every decision is resolved or re-homed somewhere
+that survives. The rule is recorded with the instance, because it was got wrong on the same day the
+neighbouring deletion rules were written.
+
+Also repaired: the manifest's scope-retirement-sweep row still named the deleted file as *"still
+genuinely open"* — a dangling reference pointing at nothing.
+
+---
+
 ### Provenance
 
 `src/DangerClose.jsx` md5 `3cf497b834e545ce29c1945fb99ae09a` · built `index.html` md5 `887f02d8678cee49da2c76fc61bd3c98`
