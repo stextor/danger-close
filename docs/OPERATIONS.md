@@ -288,6 +288,32 @@ Counted by AST 2026-08-11. *(An earlier note said seven and listed only three im
 duplication, not the exact number.)* The audit is cheap now that `qa/tools/diverge.cjs` exists and is
 a candidate for its own small scope.
 
+### C3. The run folder IS a clone, so its artifacts get committed (added 2026-08-27)
+
+**The flat working folder of §B and the repo checkout are the same directory**, so `git add .` in a
+run folder sweeps the aliases and build products in with the real changes. This is not hypothetical:
+at the **v5.52 ship the root `DangerClose.jsx` alias was committed**, and it was caught only because
+the §F verification diffed two clones file-by-file — 24 files had changed where the package held 23.
+Nothing in the release path would have reported it.
+
+**Why that one mattered more than it looks.** `t8`, `t14`, `t16`, `t19` and `t22` read
+`../DangerClose.jsx`. With a copy committed, those five suites run from a clean clone against
+*whatever that copy holds* — identical to `src/DangerClose.jsx` on the day it lands, and **stale from
+the next release onward**, reporting green against an old build. Same shape as the v5.30
+`t8_invariant` drift (§A2) and the same reason: a test input that can go stale silently. The
+missing-file error IS the signal — TESTING.md says so — and a committed copy deletes it.
+
+`.gitignore` now carries root-anchored rules for the four artifact classes, verified three ways:
+zero of 232 tracked files become ignored, every artifact is caught, and a seeded run folder that
+staged **8 files** before the rules stages **none** after. ⚠ **The leading slashes are load-bearing**
+— `/DangerClose.jsx` must not become `DangerClose.jsx`, which would also ignore `src/`.
+
+⚠ **The baseline files are NOT in this set and must never be added to it.** `qa/t1_units.mjs`,
+`qa/env_dom.mjs`, `qa/shim.txt`, `qa/dom_entry_*.jsx` and the rest look like run-folder artifacts
+because the run folder is flat — but they are real repo files at `qa/qa-baseline/`. A rule matching
+them would make the suite uncommittable. The first census of this ran to 68 candidates; **64 were
+that false positive.**
+
 ## D. Defect-pin discipline
 
 When a bug is found but not yet fixed, it gets a dated `[KNOWN DEFECT]` test that asserts **today's wrong
