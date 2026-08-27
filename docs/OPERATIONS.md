@@ -11,6 +11,28 @@ a ground rule from the instructions, it is making that rule executable, not rest
 
 ## A. Anchoring to builds — by role, not by frozen hash
 
+> ### ⚠ A0 · State nothing a command has not printed *this session* (added 2026-08-26)
+>
+> **No count, hash, file list, status line or test result goes into a deliverable, a chat message or
+> a scope unless a command in the current session produced it.** Not "the suite was 2,641" — run it.
+> Not "that scope is buildable" — open it. Not "the pool matches" — diff it. Recall is not evidence,
+> and neither is a number that was true one release ago.
+>
+> This is a rule rather than advice because the week of 2026-08-26 produced **five** instances in one
+> project, every one caught by a command and none by memory:
+>
+> | Asserted | Actually |
+> |---|---|
+> | a site census listed every place a label appeared | it was case-sensitive; the most prominent site was capitalised and missed |
+> | a release had corrected its documents | `METHODOLOGY.md` still used the label the release deleted, three times |
+> | a pool-vs-tree check was reporting drift | the script's `REPO` still pointed at a two-release-old clone |
+> | `TAX_CONSTS` was the right home for a constant | that block is statutory-only and says so in its own header |
+> | *"the previous doc-fix passed package_check 25/25"* | it was **never run on that package at all** |
+>
+> The last one shipped. The tell is always the same: a claim that feels settled enough not to check,
+> which is exactly the claim that has gone stale. **Cheapest possible test — if a sentence contains a
+> number or a state, name the command that printed it.**
+
 The suite always compares two builds **by ROLE**, and the roles roll forward every release — so never
 hardcode a specific version or hash as "the baseline." The live values live in the manifest and the
 CHANGELOG, not in this file.
@@ -383,8 +405,24 @@ suite from a clean clone · refresh project knowledge once with the final state,
 fulfilled `SCOPE_*.md` · if this release fixed a defect that was invisible in the example data, add the
 boundary that hid it to the census (**§K1** — the rule lives there, deliberately not repeated here) · publish on GitHub (a normal commit — no tag; see §G) · end the CHANGELOG
 entry with the source and built md5s (the provenance line, §G — this replaces what a tag would
-have given us) · **package per §L — one zip, two destinations, with the suite re-run from the
+have given us) · **re-read every document this release CREATES or TOUCHES against what actually
+shipped** (see below) · **package per §L — one zip, two destinations, with the suite re-run from the
 packaged copies before the zip is cut.**
+
+**Re-read the documents the release itself authored.** The checklist above already retires fulfilled
+scopes; this is the wider case, and it is the one that has bitten twice. v5.50 fixed the app and left
+`METHODOLOGY.md` describing the label it had just deleted, in three places, while its own new section
+explained why that label was wrong. v5.51 then shipped `ASSESSMENT_HEIR_RATE.md` — **written for that
+release, packaged in that release** — still describing the pre-fix code in the present tense, and
+still recommending in its options table the option the scope had examined and **rejected**. Neither
+was drift over time; both were wrong at the moment of shipping.
+
+The practical form is a search, not a proofread: **grep the whole tree, case-insensitively, for any
+term the release retired or any state it changed**, and read every hit that is not explicitly marked
+as history. A document created by the release is the *most* likely to be stale and the *least* likely
+to be checked, because the ink is wet and it feels current. A retired document keeps its body as the
+record of what was believed — but anything in it that reads as a live instruction gets annotated in
+place, so the wrong recommendation and its correction stay visible together.
 
 **§L is the last step, and it is where the SESSION's work ends.** Everything after it — uploading to
 the repo, deleting and re-uploading the pool, making the commit — is the maintainer's, done FROM the
@@ -534,7 +572,30 @@ are present; every `MANIFEST.txt` md5 matches the file it names; `github/` holds
 files that differ from the committed tree — so both a *missing* file and a needlessly-shipped
 *unchanged* one fail; `knowledge/` is flat, carries no built `index.html`, and holds exactly one
 `DangerClose-v5_*.jsx`; and `MANIFEST.txt` records that the suite was run from the packaged copies.
-Run it before sending. This exists because §L was skipped at v5.42 while being perfectly legible —
+Run it before sending — **on EVERY package, including ones that ship no app source.**
+
+**Ops packages (added 2026-08-26).** Not every zip is a release. A documentation or tooling package
+ships no `DangerClose-v5_*.jsx` and no built `index.html`, so the app-release predicates above cannot
+apply to it — and `package_check` knows this even though this section previously did not. Such a
+package **declares `KIND: ops` on its own line in `MANIFEST.txt`**; undeclared, the tool fails closed
+to `app-release` and reports failures that are artifacts of the mis-declaration rather than real
+defects. An ops package also takes an **unversioned** outer folder name, `danger-close-<slug>`, so it
+cannot be mistaken for a release, and its manifest still has to record how it *was* verified — the
+standard does not lapse just because no app suite applies.
+
+⚠ **`F-1` runs in BOTH modes and is not a formality: the pool is ADD-ONLY.** A same-name upload
+creates a *second* copy rather than replacing the first, so every package — release or ops — must
+name its delete-first list explicitly in `README-FIRST.md`.
+
+This paragraph exists because the v5.50 documentation package was **shipped without `package_check`
+being run at all**. The cause was legible in hindsight: this section described the tool purely in
+release terms — one versioned source in `knowledge/`, a suite run from the packaged copies — none of
+which a doc package can satisfy, so it read as a section that did not apply. Re-run afterwards, that
+zip failed **4 of 25**, and one failure (the missing delete-first list) was real in either mode.
+**A section that visibly does not apply to the package in hand will be skipped, so it has to say
+which packages it covers.**
+
+This exists because §L was skipped at v5.42 while being perfectly legible —
 a rule nothing checks is a rule this project has now watched drift five separate times (§B2), and
 the answer here is the same as everywhere else: make it fail loudly.
 
