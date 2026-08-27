@@ -123,6 +123,38 @@ Suite unchanged at **2,642 app checks / 0 failing**; **2,724 total**. No test or
 
 ---
 
+### Process fix — `OPERATIONS.md` (2026-08-26, ops package, same build)
+
+**No source, no test, no document the app renders. `src/DangerClose.jsx` unchanged; version stays
+v5.51.** `OPERATIONS.md` only, plus its scope.
+
+Two defects shipped this week and neither was a modelling error:
+
+- **The v5.50 documentation package was shipped without `package_check` being run at all.** Re-run
+  afterwards it fails **4 of 25**. The cause was in §L, which described the tool purely in release
+  terms — one versioned source in `knowledge/`, a suite run from the packaged copies — none of which
+  a doc package can satisfy. It read as a section that did not apply, so it was skipped. `§L` now
+  covers ops packages explicitly: `KIND: ops` declared in `MANIFEST.txt`, an unversioned folder name,
+  and `F-1`'s delete-first list required in **both** modes because **the pool is add-only** — a
+  same-name upload creates a second copy rather than replacing one.
+- **`ASSESSMENT_HEIR_RATE.md` shipped stale inside the release that fixed it**, still recommending
+  the option the scope had rejected. §I gains a release-close step: re-read every document the
+  release **creates or touches** against what shipped, as a case-insensitive tree search for retired
+  terms rather than a proofread.
+
+**§A gains A0**, a standing rule: *state no count, hash, status or test result that a command has
+printed in the current session.* Five instances in one week, none caught by memory — including the
+claim that the v5.50 package had passed `package_check`, which was never run on it.
+
+**The suite check proposed alongside this was deliberately not built.** The failure worth preventing
+is a reader landing mid-document on a stale recommendation, and no mechanical predicate catches that:
+a status-line check would not have caught it, because the document that failed *had* a status line.
+Building a weak test that looks rigorous is worse than recording that this one is a checklist item.
+
+**This is the first package to declare `KIND: ops`** — under the rule it is itself adding.
+
+---
+
 ### Provenance
 
 `src/DangerClose.jsx` md5 `3cf497b834e545ce29c1945fb99ae09a` · built `index.html` md5 `887f02d8678cee49da2c76fc61bd3c98`
