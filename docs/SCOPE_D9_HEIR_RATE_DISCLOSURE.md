@@ -11,6 +11,26 @@
 
 ---
 
+> ### ☑ RETIREMENT NOTE — added 2026-08-26, after the v5.51 ship
+>
+> **Built and shipped. Everything below §0 describes v5.50 and is left uncorrected as the record of
+> what was true at drafting** — so §1's *"declared as a bare literal"* and *"No suite asserts the
+> value"* read as history, not as current state. Both were fixed by this scope.
+>
+> All four decisions were resolved as recommended: **D-1 (a)** module-level beside `BASE_GROWTH`,
+> **D-2 (a)** no numeric range in-app, **D-3 (a)** name the excluded state income tax, **D-4** v5.51.
+> The gate held: parity 10/10, DOM diff STRICT 32, `HEIR_RATE` unchanged at 0.22.
+>
+> One thing the scope did not anticipate: **the first `t31` key was vacuous.** Keyed on the word
+> *"heir"*, it passed against a build with the version bump and no disclosure copy at all, because
+> "heir" was already on both surfaces at v5.50. The negative control is the only reason that was
+> caught. Retargeted to the phrase that actually changed, it failed correctly. *A key names the
+> thing that changed, not the thing the change is about.*
+>
+> §4's out-of-scope list still holds: the value, heir state tax, the default objective.
+
+---
+
 ## 1. Premise — verified against v5.50 source, not assumed
 
 `HEIR_RATE = 0.22` (**L3689**) is the **only** deduction in the comparator's estate figure

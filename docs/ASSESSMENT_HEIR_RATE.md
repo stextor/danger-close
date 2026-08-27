@@ -7,8 +7,36 @@
 | Verdict | **A real gap. Direction is SPLIT** — optimistic on the estate *level*, conservative on the *ranking* |
 | Severity | **Medium** — disclosed, bounded, but it compounds with D-7 in the same figure |
 | Boundary test | **Passes** — every couple with a Traditional balance and children is exposed |
+| Status | ☑ **ACTED ON — disclosure built and shipped as v5.51, 2026-08-26.** See the note below |
 
 ---
+
+> ### ⚠ SUPERSEDED IN PART — read this before §1, §2 or §8
+>
+> **This document was written against v5.50 and shipped, unannotated, in the v5.51 package that
+> fixed what it describes.** That was an error at the ship, not drift afterwards. The analysis in
+> §3–§7 stands — the law, the measured rates, the flip point, the split direction, the compounding
+> with D-7 — and none of it is changed by the fix. What is now **false** is every present-tense
+> claim about the code's state:
+>
+> | Said here | True at v5.50 | True from **v5.51** |
+> |---|---|---|
+> | §2 · *"declared inline as a bare literal"* | yes | **no** — module-level assumption beside `BASE_GROWTH` |
+> | §2 · *"No suite pins it"* | yes | **no** — `t1` pins the value and location; `t2` pins the estate arithmetic to the dollar |
+> | §5 · *"an unjustified, unpinned constant is steering the default ranking"* | yes | **still unjustified, no longer unpinned or undisclosed** |
+> | §9 · register draft, *"not in `TAX_CONSTS`, unpinned by any suite"* | yes | superseded by the live D-9 row in `MissingFeatures.md` |
+>
+> ⚠ **§8's Option 1 recommends the option that was examined and REJECTED.** It says to move
+> `HEIR_RATE` **into `TAX_CONSTS`**. The D-9 scope found that wrong: `TAX_CONSTS` declares itself
+> *"Official 2026 figures per IRS Rev. Proc. 2025-32 (verified against primary sources)"*, and
+> filing an assumption with no source there would falsify the block's own header and blur the line
+> between statutory and guessed. **What shipped is the module-level constant beside `BASE_GROWTH`,
+> and `t1` now asserts `TAX_CONSTS` stays statutory-only.** The row is annotated in place rather
+> than rewritten, so the wrong recommendation and its correction stay visible together.
+>
+> **The value was NOT changed and will not be** without a separate decision: 0.22 still stands.
+> Option 3 — a user-settable rate — remains the real fix and is still unscoped.
+
 
 ## 1. What it is, and what it is not
 
@@ -155,7 +183,7 @@ conversion, which is the direction with real consequences for a user who acts on
 
 | | What | Cost | Figures move? |
 |---|---|---|---|
-| **1** | Move `HEIR_RATE` into `TAX_CONSTS` with a comment stating what it is, what it is not, and that it is an assumption rather than a statutory rate. Pin it in `t1`. Disclose the sensitivity in-app and in `METHODOLOGY.md`: the number is a guess, real heir rates run roughly 13–31%, state tax is excluded, and the estate reading is optimistic if the heir's rate is higher. | Small | **No** |
+| **1** | ⚠ **AS WRITTEN THIS IS WRONG — see the note at the top. What shipped at v5.51 was a module-level assumption beside `BASE_GROWTH`, NOT this.** ~~Move `HEIR_RATE` into `TAX_CONSTS`~~ with a comment stating what it is, what it is not, and that it is an assumption rather than a statutory rate. Pin it in `t1`. Disclose the sensitivity in-app and in `METHODOLOGY.md`: the number is a guess, real heir rates run roughly 13–31%, state tax is excluded, and the estate reading is optimistic if the heir's rate is higher. | Small | **No** |
 | **2** | Re-anchor the default to ~0.24–0.25 | Medium | **Yes** — full re-verification |
 | **3** | Expose it as a user input, defaulting to 0.22 | Larger, needs a scope | Only if the user changes it |
 

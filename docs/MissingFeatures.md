@@ -755,8 +755,10 @@ person per tier) and the remedy is a form. **Exposure:** user-side.
 >
 > **What did NOT change, and must not be read as closed:** the tax is still **not modelled**, so the
 > estate figure remains wrong for an affected household — it is now *disclosed* as wrong.
-> `HEIR_RATE` (0.22) is unchanged and **unexamined**, and the default objective is still `estate`.
-> Both are separate questions and neither has been assessed.
+> `HEIR_RATE` (0.22) is unchanged, and the default objective is still `estate`. Both are separate
+> questions. ☑ **Updated 2026-08-26:** `HEIR_RATE` has since been assessed and disclosed — see the
+> **D-9** row and `ASSESSMENT_HEIR_RATE.md`. Its value is still 0.22, by decision. The default
+> objective remains genuinely unassessed.
 >
 > ⚠ **The rows below were written before this shipped.** The "State estate / inheritance tax" row
 > quotes `after-tax estate` — a label v5.50 deleted. It is annotated in place rather than rewritten,
