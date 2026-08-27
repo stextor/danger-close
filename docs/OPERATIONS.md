@@ -371,6 +371,19 @@ probably named in the manifest. **Delete from the repo, delete from the pool, an
 its manifest row** — otherwise §A2's both-direction check reports it as a pool-only file, which is
 drift, and the manifest keeps advertising a file nobody can open.
 
+⚠ **Before deleting, check for UNRESOLVED DECISIONS — not just built outcomes.** A `CHANGELOG`
+records what shipped, which is precisely what an open question is not. Grep the document for `OPEN`,
+`awaiting`, `yours`, `no recommendation`, and its decision table, and confirm every decision in it is
+either resolved or re-homed somewhere that survives. **An open decision is the one thing deletion
+destroys that nothing else carries.**
+
+This is a rule because it was got wrong the day the rule above was written. On 2026-08-26
+`SCOPE_STRUCTURAL_MAGI_EXTINCTION.md` was deleted after confirming — correctly — that what it *built*
+survived in the CHANGELOG and four suites. It also carried **D4, an open product-voice decision for
+the maintainer**, explicitly marked *"no recommendation offered."* Nothing else held it. It was
+recovered from git history and re-homed as `MissingFeatures.md` **D-10**; had the deletion gone
+unexamined for longer, the only record would have been a commit nobody had a reason to look for.
+
 **Prefer retiring to deleting.** A retired scope keeps the record of what was decided and why, which
 is the thing future sessions actually need; deletion keeps only the outcome. Deletion is defensible
 when the outcome is preserved elsewhere — before deleting, confirm it, by command. When
