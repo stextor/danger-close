@@ -1152,3 +1152,52 @@ line falls $41,288 → $40,910 — meaning **conversions now look slightly less 
 previously claimed**. And the HSA fix moves MAGI without moving federal tax on this household. A
 single sentence claiming this release makes the plan look better would be wrong on all three
 counts.
+
+## The Roth tab's IRMAA MAGI is narrower than Engine C's (v5.52)
+
+The app computes an IRMAA MAGI in two places, renders both under the label MAGI, and until v5.52
+said nothing about the fact that they are different figures.
+
+**Engine C** (`computeIrmaaPlan`, which drives the IRMAA Cliff tab) carries **seven** terms:
+
+```
+ssTaxable + pen_y + work_y + rmdTax_y + conv_y + div_y + capGain_y
+```
+
+**The Roth conversion ladder's per-year render block** carries **five**:
+
+```
+pension + spouseBWork + taxableSS + conv_y + rmd_y
+```
+
+Term by term, the ladder **omits dividends and realized capital gains** — `div_y` and `capGain_y` —
+and its earned-income term is narrower again: Engine C's `work_y` covers the household's other
+income streams, while `spouseBWork` is one spouse's. v5.41 closed the RMD term only; the comment it
+left in the source says Engine C "has always carried its `rmdTax_y` term; this render block did
+not, and the two disagreed." They still disagree, in two more terms.
+
+### The consequence, measured
+
+The ladder table's `IRMAA?` column renders a per-year verdict — a warning glyph and the premium
+year, or a tick and the premium year — from `triggersIrmaa`, which compares the **narrow** figure
+to the threshold. So the verdict inherits the omission.
+
+On a taxable-heavy household, **8 of 8 ladder years render the wrong verdict**: a tick in a year a
+surcharge is in fact due. On the shipped example household the understatement runs about **$45,000**
+in each of the two years after RMDs begin — enough to matter, not enough to change the tier the
+table displays, which is why it is invisible without measuring it.
+
+### Direction
+
+**Optimistic.** Both omitted terms are additive, so leaving them out can only push MAGI down, only
+push the verdict toward the tick, and only make the conversion plan look safer than it is. That is
+this project's wrong way to be wrong, and it is why the divergence is disclosed now rather than
+waiting for the fix.
+
+### What v5.52 did and did not do
+
+v5.52 is **disclosure only**. No engine changed and no computed figure moved — MC parity 10/10 and
+the cross-version DOM diff's STRICT branch at 32 are the mechanical form of that claim. The Roth
+tab's IRMAA verdict is still wrong for a taxable-heavy household; it is now labelled as narrower
+rather than presented as the same figure the IRMAA tab shows. Reconciling the two expressions is a
+separate, scoped, not-yet-built change.

@@ -25,13 +25,20 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 
 | Field | Value |
 |---|---|
-| Version | **v5.51** |
-| Source file in knowledge | `DangerClose-v5_51.jsx` |
-| Source md5 | `3cf497b834e545ce29c1945fb99ae09a` |
-| Built `index.html` md5 | `887f02d8678cee49da2c76fc61bd3c98` |
-| Shipped | 2026-08-26 |
+| Version | **v5.52** |
+| Source file in knowledge | `DangerClose-v5_52.jsx` |
+| Source md5 | `40fd122d557a4fb00653c3e4384e1650` |
+| Built `index.html` md5 | `f1944c844d7b9b603ac977da4e58b77f` |
+| Shipped | 2026-08-27 |
 
-> **Rolled 2026-08-26 at the v5.51 ship.** Rotation removed `DangerClose-v5_49.jsx` and
+> **Rolled 2026-08-27 at the v5.52 ship.** Rotation removed `DangerClose-v5_50.jsx` and
+> `dom_entry_v550.jsx`; the pool holds exactly `DangerClose-v5_51.jsx` and `DangerClose-v5_52.jsx`,
+> and `dom_entry_v551.jsx` and `dom_entry_v552.jsx`. ⚠ `dom_entry_v592.jsx` is still NOT part of
+> the rotation (retired v5.9.2 leg — see below). **v5.52 is disclosure only: parity 10/10, DOM diff
+> STRICT 32, and both IRMAA MAGI expressions byte-for-byte what they were at v5.51 — now pinned by
+> `t1`, which nothing asserted before.**
+>
+> *(v5.51 rotation, for the record.)* **Rolled 2026-08-26 at the v5.51 ship.** Rotation removed `DangerClose-v5_49.jsx` and
 > `dom_entry_v549.jsx`; the pool holds exactly `DangerClose-v5_50.jsx` and `DangerClose-v5_51.jsx`,
 > and `dom_entry_v550.jsx` and `dom_entry_v551.jsx`. ⚠ `dom_entry_v592.jsx` is still NOT part of
 > the rotation (retired v5.9.2 leg — see below). **v5.51 is disclosure + structure only: parity
@@ -423,10 +430,10 @@ should clone. ⚠ **Seven of the original eight still are; `hand_86.mjs` is not*
 
 | Field | Value |
 |---|---|
-| Version | **v5.50** |
-| Source file in knowledge | `DangerClose-v5_50.jsx` |
-| Source md5 | `0bef5fc4cb1ebdaf1effffe1783bbd04` |
-| Built `index.html` md5 | `c361f4ea99a061017cbc0d6a27011fe2` |
+| Version | **v5.51** |
+| Source file in knowledge | `DangerClose-v5_51.jsx` |
+| Source md5 | `3cf497b834e545ce29c1945fb99ae09a` |
+| Built `index.html` md5 | `887f02d8678cee49da2c76fc61bd3c98` |
 
 > **Rolled 2026-08-25 at the v5.49 ship, in the same pass as the Current build table above.**
 
@@ -626,6 +633,9 @@ hashed. Delete before uploading, not after:
 
 | Delete | Because |
 |---|---|
+| `DangerClose-v5_50.jsx` | **rotated out at v5.52** — a rotation is TWO deletes, the `.jsx` and its `dom_entry`. The pair is now **v5.52 current / v5.51 prior, exactly two** |
+| `dom_entry_v550.jsx` | its source rotated out with it |
+| `COMMIT_MESSAGE.txt` | the pool copy carried the **v5.49** message through two releases — found at the v5.52 confidence test. It is a per-release packaging artifact; the v5.52 zip replaces it |
 | `DangerClose-v5_46.jsx` | rotated out at v5.48 (with `dom_entry_v546.jsx` — a rotation is TWO deletes, the `.jsx` and its `dom_entry` hash row) — the pair is now **v5.48 current / v5.47 prior, exactly two** |
 | `dom_entry_v543.jsx` | its source rotated out with it |
 | `controls.sh` | superseded by `controls_v542.sh`. Unrunnable since v5.40 (it hardcoded `SRC=v538.jsx`); keeping both invited someone running the dead one. **DONE 2026-08-21 — deleted from the pool and the repo, and its two rows above removed in the same edit.** The v5.40 decision to keep it stale deliberately is hereby superseded: that reasoning held while it was the ONLY control program, and stopped holding the moment a working successor existed |
