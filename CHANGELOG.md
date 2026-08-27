@@ -155,6 +155,30 @@ Building a weak test that looks rigorous is worse than recording that this one i
 
 ---
 
+### Two document deletions and the rules they earned (2026-08-26, ops, same build)
+
+**No source, no test, no rebuild. `src/DangerClose.jsx` unchanged; version stays v5.51.**
+
+- **`validation/PROJECT_KNOWLEDGE_INDEX.md` deleted.** A second copy of the manifest, arrived in an
+  "Add files via upload" commit, referenced by nothing, frozen at **v5.49** — naming `2ccc62b6…` as
+  the current source two releases after it stopped being, and 47 lines adrift. The manifest is the
+  worst document to have a stale twin of: §A's freshness check reads it to learn which build is
+  current, so a session opening the copy would anchor to a two-release-old source and be wrong in a
+  way that looks right. `OPERATIONS.md` §G now requires exactly one, at the repo root.
+- **`docs/SCOPE_STRUCTURAL_MAGI_EXTINCTION.md` deleted.** Built 2026-08-20 and never retired — missed
+  by the 2026-08-26 retirement sweep, which is the more interesting half: the sweep that exists to
+  catch this did not. Before deleting, the outcome was confirmed preserved by command: the CHANGELOG
+  entry for the structural S-1 assertion stands, and four suites still assert the invariant. Only the
+  decision record was lost.
+
+**§G gains two rules.** One manifest, one copy, at the repo root. And **deleting a document is a
+three-place operation** — repo, knowledge pool, and its manifest row — because a file deleted from
+only the repo shows up as pool-only drift in §A2 while the manifest keeps advertising it. §G also now
+says to prefer retiring over deleting, and to confirm by command that the outcome survives before
+choosing deletion.
+
+---
+
 ### Provenance
 
 `src/DangerClose.jsx` md5 `3cf497b834e545ce29c1945fb99ae09a` · built `index.html` md5 `887f02d8678cee49da2c76fc61bd3c98`
