@@ -1,0 +1,63 @@
+# ─────────────────────────────────────────────────────────────
+# CREDENTIALS — never commit. Per the permanent security rule in
+# DangerClose_Public.jsx: no API key may ever appear in source,
+# built HTML, or an exported backup.
+# ─────────────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+secrets.json
+
+# ─────────────────────────────────────────────────────────────
+# PERSONAL DATA — real household figures must not be published.
+# ─────────────────────────────────────────────────────────────
+DangerClose_Local.html
+*_Local.html
+*_Private.*
+*[Bb]ackup*.json
+my-data*.json
+my_data*.json
+/private/
+
+# Build output and dependencies
+node_modules/
+dist/
+build/
+.vite/
+*.tsbuildinfo
+
+# Editor and OS cruft
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+
+# Logs
+npm-debug.log*
+yarn-error.log*
+*.log
+
+# ─────────────────────────────────────────────────────────────
+# RUN-FOLDER ARTIFACTS — never repo files, at any path.
+#
+# The suite runs from a FLAT working folder (OPERATIONS §B, TESTING.md
+# setup): sources at the root, every test and harness file together in
+# one qa/. When that folder IS a clone, `git add .` sweeps the aliases
+# and build products in with the real changes. That happened at v5.52 —
+# the root DangerClose.jsx alias was committed, and because five suites
+# (t8, t14, t16, t19, t22) read ../DangerClose.jsx, a committed copy
+# would have let them run against a STALE source from a clean clone and
+# report green. The missing-file error is the signal; these rules keep it.
+#
+# ⚠ Leading slashes are load-bearing: they pin each rule to the repo
+# root so src/DangerClose.jsx stays tracked.
+# ─────────────────────────────────────────────────────────────
+/DangerClose.jsx
+/v5*.jsx
+qa/app_*.jsx
+qa/app_*.mjs
+qa/dom_bundle.cjs
+qa/dom_v*.cjs
