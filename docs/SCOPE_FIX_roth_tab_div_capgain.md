@@ -1,6 +1,19 @@
 # SCOPE — the Roth tab's omitted dividend and capital-gain terms
 
-**Status: SCOPED, NOT BUILDABLE YET. Four decisions open (§6), one of them load-bearing.**
+**Status: ⚫ SUPERSEDED 2026-08-27 by `SCOPE_D10_MODELLING_v5_53.md`. Do not build from this
+document.** Its four decisions are resolved there, against v5.52. Retained as the record of what
+was believed at v5.41 — and because three of its premises did not survive re-measurement:
+
+- **§6 D-3 is dead.** v5.47 took the HSA out of the dividend base at all three engine sites and
+  `t1` STRUCT S-9 pins it. There is no overstatement left to copy or fix.
+- **§6 D-2's "$630" was the GAINS half only**, read as the whole omission. Re-measured at v5.52:
+  gains contribute **$342 across the ladder**, dividends **$4,200** — the total is $4,542, 7× the
+  figure this document reasons from.
+- **The precision-ceiling note points at the wrong layer.** The effect is below the ±$500 DOM
+  ceiling, so dollar assertions belong at the ENGINE, where they are exact — not at the rendered
+  figure, where this document put them.
+
+Every line citation below is v5.41's and has moved. Re-resolved in the successor's §2.
 
 | Field | Value |
 |---|---|
