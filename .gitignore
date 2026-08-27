@@ -35,10 +35,36 @@ build/
 Thumbs.db
 *.swp
 
-# run-folder alias (OPERATIONS §B / TESTING.md setup) — never a repo file
-/DangerClose.jsx
-
 # Logs
 npm-debug.log*
 yarn-error.log*
 *.log
+
+# ─────────────────────────────────────────────────────────────
+# RUN-FOLDER ARTIFACTS (OPERATIONS §B, §C3 / TESTING.md setup)
+# — never repo files, at any path.
+#
+# The suite runs from a FLAT working folder: sources at the root, every
+# test and harness file together in one qa/. When that folder IS a clone,
+# `git add .` sweeps the aliases and build products in with the real
+# changes. That happened at v5.52 — the root DangerClose.jsx alias was
+# committed, and because five suites (t8, t14, t16, t19, t22) read
+# ../DangerClose.jsx, a committed copy would have let them run against a
+# STALE source from a clean clone and report green. The missing-file
+# error is the signal; these rules keep it.
+#
+# ⚠ Leading slashes are load-bearing: they pin each rule to the repo root
+# so src/DangerClose.jsx stays tracked.
+#
+# ⚠ The qa-baseline files are deliberately NOT here. qa/t1_units.mjs,
+# qa/env_dom.mjs, qa/shim.txt and qa/dom_entry_*.jsx look like artifacts
+# because the run folder is flat, but they are real repo files at
+# qa/qa-baseline/ — 64 of the first census's 68 candidates were that
+# false positive, and a rule matching them makes the suite uncommittable.
+# ─────────────────────────────────────────────────────────────
+/DangerClose.jsx
+/v5*.jsx
+qa/app_*.jsx
+qa/app_*.mjs
+qa/dom_bundle.cjs
+qa/dom_v*.cjs
