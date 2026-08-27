@@ -1,5 +1,96 @@
 # Changelog
 
+## v5.52 — the Roth tab's IRMAA verdict says its MAGI is narrower (2026-08-27)
+
+**Disclosure only. No engine changed and no number the model computes moved** — MC parity **10/10**,
+DOM diff STRICT branch **32**. Both MAGI expressions are byte-for-byte what they were at v5.51.
+
+### What was wrong
+
+The app works out an IRMAA MAGI in **two places** and renders both under the label MAGI, with
+nothing anywhere cueing the reader that they are different figures.
+
+| | Terms | Expression |
+|---|---|---|
+| Engine C, behind the IRMAA tab | **7** | `ssTaxable + pen_y + work_y + rmdTax_y + conv_y + div_y + capGain_y` |
+| The Roth ladder's render block | **5** | `pension + spouseBWork + taxableSS + conv_y + rmd_y` |
+
+The ladder omits **dividends** and **realized capital gains**, and its earned-income term is narrower
+again — Engine C's `work_y` covers the household's other income streams where the ladder reads one
+spouse's. v5.41 closed the RMD term and left a comment in the source saying Engine C "has always
+carried its `rmdTax_y` term; this render block did not, and the two disagreed." They still disagreed,
+in two more terms.
+
+That matters because the ladder table's `IRMAA?` column renders a **per-year verdict** from the
+narrow figure. On a taxable-heavy household **8 of 8 ladder years render the wrong verdict** — a
+clear year where a surcharge is in fact due. On the shipped example household the understatement runs
+about **$45,000** in each of the two years after RMDs begin, which is enough to matter and not enough
+to change the tier the table displays, so it is invisible without measuring it.
+
+Both omitted terms are additive, so the error only ever runs one way. **Direction: optimistic** —
+this project's wrong way to be wrong.
+
+### What changed
+
+- **The ladder footnote**, directly under the table whose `IRMAA?` column carries the verdict, now
+  says the column's MAGI is narrower than the IRMAA tab's, names the two omitted terms, says the
+  figure reads too low, names the direction as optimistic, and routes the reader to the IRMAA tab as
+  the fuller figure. Not the verdict cell — that is a single glyph with no room, and the table's
+  other mechanics are already explained in this footnote.
+- **Field Manual §13**, the limitations register, gains the same disclosure as a bullet beside the
+  estate-tax one, whose direction it shares.
+- **`METHODOLOGY.md`** carries both expressions term by term, the measured consequence, and the
+  direction. **No measured figure appears anywhere the user is shown** — a number derived from one
+  household goes stale and nothing in-app carries a date, the same call made at v5.50 and v5.51.
+
+### What this does NOT fix
+
+**The Roth tab's IRMAA verdict is still wrong for a taxable-heavy household.** It is now disclosed as
+approximate; it is not corrected. A user can still read a clear year where a surcharge is due.
+Reconciling the two expressions is separately scoped, has four open decisions, and has not been
+built. Disclosure does not close the modelling half.
+
+Also untouched, and unchanged by this release: the SS-cliff term in the same block, and the fact that
+`work_y` vs `spouseBWork` is a third divergence rather than a rounding difference.
+
+### Tests
+
+**2,674 app checks, 0 failing** — prior leg v5.51 **990** · current leg v5.52 **1,006** · parity
+**10/10** · feature suites run once **668**. Tooling **82** (`t21` 50, DOM diff **32**), counted
+separately. **2,756 total.** Built-artifact smoke `smoke_built` **16/16**.
+
+New this release: `t1` **+7**, `t4` **+7**, `t31` **+3** on the current leg and **+1** on the frozen
+one. `t1` pins **both** MAGI expressions — nothing asserted either before, so an edit that silently
+reconciled or further diverged them would have gone green. `t4` asserts the clause in the rendered
+DOM behind a fixture gate that is the ladder footnote's **own** couple branch, so a couple-blind
+fixture fails loudly instead of passing vacuously. `t31` gains a fifth cross-surface key.
+
+**Negative control, run before the copy existed:** `t31` **21 passed / 3 failed**, with the key true
+creator-side and absent from both user surfaces; after the copy, **24 / 0**. The key is the clause
+that changed, not the subject it is about — `MAGI` and `IRMAA` are already on both surfaces, and even
+`dividends and realized capital gains` already had a hit in the render tree, so any of those would
+have passed before the fix existed.
+
+### Corrections and findings recorded during the build
+
+- **Both MAGI sites assign to a variable literally named `magi`,** in two scopes. The first draft of
+  the `t1` pin asserted the seven-term form was absent as a `const magi =` and failed against Engine
+  C's own line — the check was wrong, the app was right. The pins now count occurrences. That the
+  *code* uses one name for two quantities is part of why "one label, two figures" stayed invisible.
+- **The narrow arithmetic appears twice** — once as `magi`, once as `grossTaxable`, a different
+  quantity for a different purpose. A pin on the arithmetic would match the wrong site.
+- **There are five `v5.51` strings in the source, not four.** The fifth is a history comment
+  recording that `HEIR_RATE` was deliberately not changed at v5.51, and bumping it would have
+  falsified it.
+- `TESTING.md`'s per-suite section had been stale at **v5.48** for three releases, under a note
+  recording that this same header was once fourteen releases stale. Rolled here with measured
+  figures. Its cross-version table still carries three disagreeing totals; that is annotated as an
+  open erratum rather than guessed at.
+
+**Provenance.** Source `src/DangerClose.jsx` md5 `40fd122d557a4fb00653c3e4384e1650` · built
+`index.html` md5 `f1944c844d7b9b603ac977da4e58b77f` · built from that source with the real
+`src/main.jsx` (`d9eca7b469a3fb7ec1c5325fd4bf8145`).
+
 ## v5.51 — the heir rate says it is a guess (2026-08-26)
 
 **Disclosure and structure only. No number the model computes moved** — MC parity **10/10**, DOM
