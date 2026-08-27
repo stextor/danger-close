@@ -346,6 +346,39 @@ not a real regression.
   Built `index.html` is repo-only. Rebuilding generated bundles each session is deliberate — a stored
   bundle can go stale against its source, which is the failure the freshness check exists to prevent.
 
+### One manifest, one copy, at the repo root (added 2026-08-26)
+
+**`PROJECT_KNOWLEDGE_INDEX.md` exists exactly once, at the repo root.** No second copy, in any
+subfolder, for any reason.
+
+This is a rule because a second copy existed. `validation/PROJECT_KNOWLEDGE_INDEX.md` arrived in an
+"Add files via upload" commit, was referenced by nothing, and sat frozen at **v5.49** — naming
+`2ccc62b6…` as the current source two releases after it stopped being. It had drifted 47 lines from
+the real manifest by the time it was found.
+
+**The manifest is the worst possible document to have a stale twin of**, because §A's freshness
+check — the first step of all substantive work — reads it to learn which build is current. A session
+that opened the copy would anchor to a two-release-old source and be wrong in a way that looks
+entirely right, with every downstream check passing against the wrong baseline. If a subfolder needs
+build context, it gets a pointer to the root manifest, never a copy. *(`validation/README.md` is not
+a violation: it is that suite's own README, and its "last verified against v5.49" is a true statement
+about when the validation suite last ran, not a claim about the current build.)*
+
+### Deleting a document is a THREE-place operation (added 2026-08-26)
+
+A document deleted from the repo is not deleted. It also lives in the flat knowledge pool, and it is
+probably named in the manifest. **Delete from the repo, delete from the pool, and clear or annotate
+its manifest row** — otherwise §A2's both-direction check reports it as a pool-only file, which is
+drift, and the manifest keeps advertising a file nobody can open.
+
+**Prefer retiring to deleting.** A retired scope keeps the record of what was decided and why, which
+is the thing future sessions actually need; deletion keeps only the outcome. Deletion is defensible
+when the outcome is preserved elsewhere — before deleting, confirm it, by command. When
+`SCOPE_STRUCTURAL_MAGI_EXTINCTION.md` was deleted on 2026-08-26 the check passed: `CHANGELOG.md`
+carries the full entry for what it built and four suites still assert the invariant, so only the
+decision record was lost. That check is the precondition, not a formality — this project has already
+deleted a manifest section rather than repairing it once.
+
 ### Project knowledge is flat, add-only — so delete-first
 
 Uploading a file whose name already exists creates a **second copy** rather than replacing the first. Two
