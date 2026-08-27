@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | ✅ **ALL THREE DECISIONS RESOLVED 2026-08-26. BUILDABLE.** |
+| Status | ⚫ **RETIRED — BUILT AND SHIPPED AT v5.52, 2026-08-27.** Retired AT the ship per OPERATIONS §I. The body below is the record of what was believed when it was written; read §7 for where it was wrong. |
 | Build | **v5.51** · `src/DangerClose.jsx` md5 `3cf497b834e545ce29c1945fb99ae09a` · repo `9762121` · premise verified against source 2026-08-26 |
 | Parent | `MissingFeatures.md` **D-10**, re-homed from the deleted `SCOPE_STRUCTURAL_MAGI_EXTINCTION.md` (its D4) |
 | Kind | **Disclosure only.** No engine change. No figure moves. Parity 10/10 and DOM diff STRICT 32 are the gate |
@@ -88,3 +88,44 @@ footnote two lines below is where the table's other mechanics are already explai
 The Roth tab's IRMAA verdict **remains wrong** for taxable-heavy households; it is now *disclosed* as
 approximate. A user can still read a green tick in a year a surcharge is due. That is the reason the
 fix is scheduled rather than dismissed, and the CHANGELOG must not imply otherwise.
+
+
+---
+
+## 7. Retirement note — written at the v5.52 ship, 2026-08-27
+
+**Built and shipped as specified.** All three decisions were honoured: disclosure now with the fix
+deferred (D-1), qualitative in-app with the numbers in `METHODOLOGY.md` (D-2), and both surfaces
+(D-3). The ladder footnote and Field Manual §13 carry the clause; no measured figure reaches a user
+surface. Parity **10/10**, DOM diff STRICT **32**, suite **2,674 app checks / 0 failing**, built
+artifact `smoke_built` **16/16**. Source md5 `40fd122d557a4fb00653c3e4384e1650`, built `index.html`
+`f1944c844d7b9b603ac977da4e58b77f`.
+
+**Where this scope was wrong or incomplete — recorded so the next census is run, not confirmed.**
+
+1. **§1's table is right about the two expressions and silent about a third fact that matters:
+   BOTH sites assign to a variable literally named `magi`.** The first draft of the `t1` pin asserted
+   that the seven-term form did not appear as a `const magi =` and failed against Engine C's own
+   line. The pins are now occurrence counts. That the *code* uses one name for two quantities is part
+   of why "one label, two figures" stayed invisible, and it belongs in the premise.
+
+2. **§1 cites L8997 for the narrow expression; the same arithmetic also appears at L9002** as
+   `grossTaxable` — a different quantity for a different purpose, so the citation is correct, but a
+   pin written against the *arithmetic* rather than the *assignment* would have matched the wrong
+   site and gone green after someone changed the one that matters.
+
+3. **§2's anchor `IRMAA: 2-year lookback` has TWO occurrences, not one** — L8826 is a source
+   comment, L9296 the rendered footnote. §2 named the right site; it did not say the anchor was
+   ambiguous.
+
+4. **The four-site version bump is a five-occurrence problem.** `v5.51` appears five times in the
+   source; the fifth is a history comment recording that `HEIR_RATE` was deliberately not changed at
+   v5.51, and bumping it would have falsified it.
+
+5. **`DOCS_HTML` measured 147,887 code points at v5.51 as §2 states, and 148,827 after this
+   release's bullet.** Line 3616 both times, resolved by content.
+
+**What remains open, unchanged by this release.** `SCOPE_FIX_roth_tab_div_capgain.md` still scopes
+the modelling half and is still **NOT BUILDABLE** with four decisions open. The Roth tab's IRMAA
+verdict is still wrong for a taxable-heavy household — disclosed, not fixed. The SS-cliff term is
+still untouched. **This scope closed D-10's disclosure half only.**
