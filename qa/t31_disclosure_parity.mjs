@@ -47,7 +47,7 @@ import { dirname, join } from "path";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v549";
-const KNOWN_VERSIONS = ["v548", "v549", "v550", "v551"];
+const KNOWN_VERSIONS = ["v548", "v549", "v550", "v551", "v552"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   process.exit(1);
@@ -167,6 +167,17 @@ const KEYS = [
     why: "the estate figure's ONLY deduction is an assumed heir rate that no source supports" },
   { key: "estate tax", since: "v550",
     why: "the default ranking objective is an estate figure that deducts no estate tax at all" },
+  // Added v5.52 (D-10). The app computes an IRMAA MAGI in TWO places and renders both under the
+  // label MAGI: Engine C carries seven terms, the Roth ladder's render block carries five. The
+  // ladder omits div_y and capGain_y, and its per-year IRMAA verdict is computed from the narrow
+  // figure - so a taxable-heavy household reads a tick in a year a surcharge is due. Measured at
+  // 8 of 8 ladder years wrong. Direction: OPTIMISTIC.
+  // WHY THIS KEY AND NOT "MAGI" OR "IRMAA": both words are already all over both surfaces, so a
+  // key on the SUBJECT passes before the fix exists - the exact vacuity the v5.51 control caught.
+  // "dividends and realized capital gains" is also already present once in the render tree. The
+  // key names what CHANGED: the clause that says the ladder figure LEAVES THEM OUT.
+  { key: "omits dividends and realized capital gains", since: "v552",
+    why: "the ladder's IRMAA verdict is computed from a MAGI missing two additive terms" },
 ];
 
 T("C-0: every declared key is named in METHODOLOGY.md \u2014 parity is only owed for limitations " +
@@ -174,7 +185,7 @@ T("C-0: every declared key is named in METHODOLOGY.md \u2014 parity is only owed
   KEYS.every(k => inMeth(k.key)),
   KEYS.filter(k => !inMeth(k.key)).map(k => k.key).join(", "));
 
-const POST = VER === "v549" || VER === "v550" || VER === "v551";
+const POST = VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552";
 // EACH KEY IS GATED TO THE RELEASE THAT LANDED IT, not to the shared POST flag above.
 // Found at the v5.50 build. Under one shared gate the v549 leg went GREEN on v5.50's expectation
 // for the wrong reason twice over - METHODOLOGY.md is ONE shared file at the run-folder root, so a
@@ -182,7 +193,7 @@ const POST = VER === "v549" || VER === "v550" || VER === "v551";
 // see JSX gating, so v5.49's single-household-gated estate card satisfied it even though a COUPLE
 // never rendered a word of it - while the v548 leg FAILED outright, invisibly, because runsuite.sh
 // only runs t31 for the prior and current tags.
-const ORDER = ["v548", "v549", "v550", "v551"];
+const ORDER = ["v548", "v549", "v550", "v551", "v552"];
 const post = k => ORDER.indexOf(VER) >= ORDER.indexOf(k.since);
 for (const k of KEYS) {
   const { key, why, since } = k;
@@ -190,6 +201,14 @@ for (const k of KEYS) {
     T(`C [PARITY]: "${key}" is named creator-side AND user-side \u2014 ${why}`,
       inMeth(key) && userSide(key),
       `meth=${inMeth(key)} app=${inApp(key)} docs=${inDocs(key)}`);
+  } else if (since === "v552") {
+    // Pre-v5.52 state. Both expressions existed and diverged; NEITHER user surface said so, and
+    // no assertion anywhere pinned either expression. An appears/does-not-appear pin on "MAGI"
+    // would be vacuous - it is on both surfaces already - so the pin is on the CLAUSE.
+    T(`C [KNOWN DEFECT pre-v5.52]: "${key}" - the two MAGI figures diverge and neither user ` +
+      "surface discloses it",
+      !userSide(key),
+      `app=${inApp(key)} docs=${inDocs(key)}`);
   } else if (since === "v551") {
     // Pre-v5.51 heir-rate state. The word appears on both surfaces at v5.50 already (the estate
     // figure names "heirs' taxes"), so an appears/does-not-appear pin would be vacuous. What was
@@ -237,7 +256,7 @@ if (POST) {
   // approved copy is correct; weakening it to something both a conservative and a non-conservative
   // sentence would satisfy is not.
   const DIRECTION = "charges every surcharge in full";
-  if (VER === "v550" || VER === "v551") {
+  if (VER === "v550" || VER === "v551" || VER === "v552") {
     // The C predicate is an OR, and for this key the app arm was ALREADY satisfied before the fix
     // by single-gated text. Asserting the manual arm separately is what makes the key mean anything.
     T("D-5: the FIELD MANUAL names estate tax - the arm that was empty before v5.50",
@@ -248,7 +267,7 @@ if (POST) {
       inDocs("optimistic") && inApp("optimistic"),
       `docs=${inDocs("optimistic")} app=${inApp("optimistic")}`);
   }
-  if (VER === "v550" || VER === "v551") {
+  if (VER === "v550" || VER === "v551" || VER === "v552") {
     // E · CREATOR-SIDE LABEL DRIFT. Added after the v5.50 ship, when a sweep found METHODOLOGY.md
     // still describing the objective list as "max after-tax estate" in three places while its own
     // new section 12 explained why that phrase was wrong. The document contradicted itself, and
@@ -262,6 +281,14 @@ if (POST) {
       /estate after heir income tax/i.test(METH));
     T("E-2 [EXTINCTION]: METHODOLOGY.md carries the retired label at most once, as history",
       stale <= 1, `occurrences=${stale}`);
+  }
+  if (VER === "v552") {
+    // D-10. Asserted per surface: the OR in §C is satisfied by either one alone, and D-3 resolved
+    // that BOTH surfaces owe this clause - the ladder footnote and the Field Manual register.
+    T("D-8: the RENDER TREE names the divergence - the ladder footnote under the IRMAA? column",
+      inApp("omits dividends and realized capital gains"));
+    T("D-9: the FIELD MANUAL names it - the §13 limitations register",
+      inDocs("omits dividends and realized capital gains"));
   }
   T(`D-4 [DIRECTION]: both surfaces state the model ${DIRECTION}`,
     inApp(DIRECTION) && inDocs(DIRECTION),
