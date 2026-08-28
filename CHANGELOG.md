@@ -1,5 +1,51 @@
 # Changelog
 
+## Unreleased — docs only: v5.54 halted mid-build; a version bump costs 62 gates, not four sites, 2026-08-28
+
+**No source ships. v5.53 remains current and untouched.** `KIND: ops`.
+
+`docs/STOP-REPORT-v5_54-session-budget.md`. The v5.54 build was started with §6's four decisions
+resolved, got as far as complete-and-parsing source edits, and **stopped before the suite**. An
+unverified source change must not ship, so it does not: the working file rides in a `workbench/`
+folder outside both upload destinations.
+
+### The finding
+
+The scope priced the suite cost of this release as *"`t31` gains one key; `ORDER` gains `v554`."*
+Measured during the build: **62 version-gate expressions across the suite name `VER === "v553"`** —
+t1 18, t4 21, t5 3, t6 2, t23–t28 11 — plus **14 `KNOWN_VERSIONS` registries**. They cannot be
+extended mechanically: a blind transform asserts v5.53's expectations for v5.54, which is correct for
+most gates and **wrong for every gate covering copy this release changes**. `t4` walks the DOM, the
+state selector is in the DOM, and the state selector is what v5.54 rewrites. That is the v5.27 defect
+`OPERATIONS` §B2 exists to prevent, applied 62 times.
+
+> **A version bump is priced in this project as "four in-app sites." That is the SOURCE cost. The
+> SUITE cost is 62 gated expressions and 14 registries, and no document records it. Every previous
+> bump paid it and none wrote it down.**
+
+`t31` also has **three** version lists — `KNOWN_VERSIONS`, `POST`, `ORDER` — where the scope named
+one. Its fail-closed guard caught that on the first run, which is it working.
+
+### What was built, and is not shipping
+
+Four notes rewritten with **dated** statutory figures (both are indexed annually; an undated figure
+is a fresh staleness liability — the §E failure corrected the same day) and `overstates it`
+disambiguated to `overstates the exclusion`. The caption reframed once at its head to
+`Model (2026 approx): …`, which was **widened from the scope**: the *other* generated clause tells a
+Colorado user *"partially taxes SS"* while CO fully exempts federally-taxed SS at 65+. `METHODOLOGY.md`
+§6 corrected and **routed** to the audit rather than carrying verification marks that expire. Field
+Manual §13 gains the SS-offset disclosure. `t31` gains its key — measured at **0 hits on both
+surfaces before any copy was written**, so it cannot pass before the fix exists — with **no `until`**,
+because this sentence stays true until the offset is modelled: the release that models it must
+**invert** the key, not expire it.
+
+⚠ Dropping the dollar figures from MD's and ME's notes would have broken **`t10` §2E L467**, which
+asserts every state with `excl65 > 0` names a figure in its note. Dating them keeps it green and
+honest.
+
+Working source `7f42dbf98125ce1425fdabe968b92c96` — **not verified, must not ship.**
+v5.53 unchanged: `12a007ed8e57a391acba67b799eb5a2f` · `c99fd1fe27998e1dff2aa192c7e48ea2`.
+
 ## Unreleased — docs only: the v5.54 disclosure scope, and the same NJ error found creator-side, 2026-08-28
 
 **No version bump here. Scope only — four decisions open in its §6, nothing built.** `KIND: ops`.
