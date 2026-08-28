@@ -215,6 +215,15 @@ move `fp.stateTax` only if it changes GA, which it will not. Worth knowing befor
 
 ## 7. Open decisions — Steve
 
+> ⚠ **READ `docs/AUDIT_STATE_EXCL65_NOTES.md` §0 BEFORE RESOLVING THESE.** It post-dates this scope
+> by hours and finds the **D-3c class mis-specified**: D-3c is defined as *"income-limited in law,
+> applied unconditionally,"* and of the four defective states found, only New Jersey is
+> income-limited. Maryland, Maine and Colorado reduce the exclusion by **Social Security received** —
+> a mechanism nothing in this project models, and one `boundaries.mjs`'s `state_excl_limited` row
+> cannot see. **None of that invalidates D3-a, D3-b or D3-c below** — the NJ case is still correct,
+> still dollar-exact, and still worth building. It does mean the archetype this scope adds should be
+> named and commented as **one mechanism of at least two**, not as *the* D-3c case.
+
 **D3-a · Host. RECOMMEND: `t10` §2E, as D3 ratified.** Confirmed correct on the evidence above
 rather than on the file-count reasoning D3 was ratified with. The finding in §5 gets recorded beside
 D3 the way `SCOPE_CLAIM_EXPIRY_VERIFICATION.md` records its D-3 deviation — wrong reasoning and right
@@ -241,8 +250,16 @@ you want that written in rather than discovered later.**
 bands below it, and the model gates on 65 where NJ gates on 62. This is precisely the defect class
 §2E's note scan was built to find, one level further out — the note contradicts the statute rather
 than the code. **Out of scope here** (this scope's Shape field forbids source changes) and it would
-require a version bump. **Recommend a separate, small release. Your call whether it goes before this
-one, after it, or together with the D-3c repair.**
+require a version bump.
+
+> ⚠ **SUPERSEDED SAME DAY — do not act on the recommendation this paragraph originally carried.**
+> It recommended *"a separate, small release"* for NJ's note. `docs/AUDIT_STATE_EXCL65_NOTES.md`,
+> written hours later, checked six of the nineteen `excl65` states against their revenue authorities
+> and found **four wrong** — and found that **only NJ is income-limited at all**. Correcting NJ alone
+> would now imply a review of the module that has not happened. **This decision routes to that audit
+> and does not restate its conclusions**, because a second copy of an answer is what goes stale.
+> — recorded rather than edited away, so the wrong recommendation and its correction stay visible
+> together, the way `SCOPE_CLAIM_EXPIRY_VERIFICATION.md` records its D-3 deviation.
 
 **D3-e · The pool refresh in §6 is a different job. RECOMMEND: cut it first and separately.** This
 scope's package will itself touch `CHANGELOG.md`; stacking a correction on a stale base is how §H's
