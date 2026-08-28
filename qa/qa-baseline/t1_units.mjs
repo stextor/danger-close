@@ -14,7 +14,7 @@ const VER = process.argv[2] || "v510";
 // change the CHECK COUNT: with an unregistered tag t3 ran 35 checks instead of 36, and the count is
 // the number that goes in the release headline. Registering a new version in the ladders below is
 // now mandatory, and an unregistered tag stops the run instead of quietly testing the wrong thing.
-const KNOWN_VERSIONS = ["v510", "v5101", "v5102", "v511", "v512", "v513", "v514", "v515", "v516", "v517", "v518", "v519", "v520", "v521", "v522", "v523", "v524", "v525", "v526", "v527", "v528", "v529", "v530", "v531", "v532", "v533", "v534", "v535", "v536", "v537", "v538", "v539", "v540", "v541", "v542", "v543", "v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552", "v592"];
+const KNOWN_VERSIONS = ["v510", "v5101", "v5102", "v511", "v512", "v513", "v514", "v515", "v516", "v517", "v518", "v519", "v520", "v521", "v522", "v523", "v524", "v525", "v526", "v527", "v528", "v529", "v530", "v531", "v532", "v533", "v534", "v535", "v536", "v537", "v538", "v539", "v540", "v541", "v542", "v543", "v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v592"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is not registered in this suite.");
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -25,17 +25,17 @@ if (!KNOWN_VERSIONS.includes(VER)) {
 const IS510 = VER !== "v592"; // v5.10-family features (v510 and v5101)
 const IS5101 = VER === "v5101";
 const IS5102 = VER === "v5102";
-const IS511 = VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552")));
-const IS514 = VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552"))); // v5.14 IRMAA indexation Verify checks present
+const IS511 = VER === "v511" || VER === "v512" || VER === "v513" || VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553")));
+const IS514 = VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553"))); // v5.14 IRMAA indexation Verify checks present
 const SRC = fs.readFileSync(new URL(`../${VER}.jsx`, import.meta.url), "utf8");
-const V540 = VER === "v540" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552"); // v5.41/v5.42 carry the v5.40 pins forward
-const V541 = VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552"); // v5.42 carries the v5.41 pins forward — its magi term set and RMD basis are unchanged
-const V542 = VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552"); // v5.43 keeps the §86 upper-tier phase-in
-const V543 = VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552");
-const V544 = VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552");
-const V545 = VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552");
-const V546 = VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552");
-const V547 = VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552"); // v5.47: HSA out of the dividend base (S-9); the Roth tab's RMD-exempt share (S-8) // v5.46: the Roth ladder gates spouse B's SS by B's claim date (STRUCT S-7) // v5.45: the §86(a)(1) ½ cap, both places (STRUCT S-6) // v5.42: the §86 upper-tier phase-in (STRUCT S-3)
+const V540 = VER === "v540" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553"); // v5.41/v5.42 carry the v5.40 pins forward
+const V541 = VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553"); // v5.42 carries the v5.41 pins forward — its magi term set and RMD basis are unchanged
+const V542 = VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553"); // v5.43 keeps the §86 upper-tier phase-in
+const V543 = VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553");
+const V544 = VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553");
+const V545 = VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553");
+const V546 = VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553");
+const V547 = VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553"); // v5.47: HSA out of the dividend base (S-9); the Roth tab's RMD-exempt share (S-8) // v5.46: the Roth ladder gates spouse B's SS by B's claim date (STRUCT S-7) // v5.45: the §86(a)(1) ½ cap, both places (STRUCT S-6) // v5.42: the §86 upper-tier phase-in (STRUCT S-3)
 // v5.33: parsed once so STATIC claims about call sites are AST facts, not line matches.
 const { Parser: _AcornParser } = await import("acorn");
 const _acornJsx = (await import("acorn-jsx")).default;
@@ -63,7 +63,7 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
   // see them — it rendered green on constants it had never checked.
   // v5.33 adds NO row (decision 4, 2026-08-13): the embedded-gain field is recorded but not
   // read by any engine, so there is nothing for a Verify row to check against a source.
-  const _verifyCount = (VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552")))) ? 66 : VER === "v531" ? 62 : IS514 ? 57 : IS510 ? 54 : 53;
+  const _verifyCount = (VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553")))) ? 66 : VER === "v531" ? 62 : IS514 ? 57 : IS510 ? 54 : 53;
   T(`VERIFY: check count is ${_verifyCount}`, checks.length === _verifyCount, `got ${checks.length}`);
   const bad = checks.filter(c => !c.pass);
   T("VERIFY: every check passes", bad.length === 0, bad.map(b => b.name).join("; "));
@@ -94,7 +94,7 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
 // read back off the source. Asserting a constant against itself proves nothing.
 {
   const o = g.OBBBA_CONSTS ? g.OBBBA_CONSTS() : undefined;
-  if (VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552")))) {
+  if (VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553")))) {
     T("OBBBA: constants block exists and is exported", o && typeof o === "object", String(o));
     T("OBBBA: deduction is $6,000 per person 65+", o.SENIOR_BONUS_PER_PERSON === 6000, String(o?.SENIOR_BONUS_PER_PERSON));
     T("OBBBA: single MAGI phase-out starts at $75,000", o.SENIOR_BONUS_THR_SGL === 75000, String(o?.SENIOR_BONUS_THR_SGL));
@@ -227,7 +227,7 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
 
 // ═══ Statics — the source file itself ═══
 {
-  const verStr = VER === "v552" ? "v5.52" : VER === "v551" ? "v5.51" : VER === "v550" ? "v5.50" : VER === "v549" ? "v5.49" : VER === "v548" ? "v5.48" : VER === "v547" ? "v5.47" : VER === "v546" ? "v5.46" : VER === "v545" ? "v5.45" : VER === "v544" ? "v5.44" : VER === "v543" ? "v5.43" : VER === "v542" ? "v5.42" : VER === "v541" ? "v5.41" : VER === "v540" ? "v5.40" : VER === "v539" ? "v5.39" : VER === "v538" ? "v5.38" : VER === "v537" ? "v5.37" : VER === "v536" ? "v5.36" : VER === "v535" ? "v5.35" : VER === "v534" ? "v5.34" : VER === "v533" ? "v5.33" : VER === "v532" ? "v5.32" : VER === "v531" ? "v5.31" : VER === "v530" ? "v5.30" : VER === "v529" ? "v5.29" : VER === "v528" ? "v5.28" : VER === "v527" ? "v5.27" : VER === "v526" ? "v5.26" : VER === "v525" ? "v5.25" : VER === "v524" ? "v5.24" : VER === "v523" ? "v5.23" : VER === "v522" ? "v5.22" : VER === "v521" ? "v5.21" : VER === "v520" ? "v5.20" : VER === "v519" ? "v5.19" : VER === "v518" ? "v5.18" : VER === "v517" ? "v5.17" : VER === "v516" ? "v5.16" : VER === "v515" ? "v5.15" : VER === "v514" ? "v5.14" : VER === "v513" ? "v5.13" : VER === "v512" ? "v5.12" : VER === "v511" ? "v5.11" : IS5102 ? "v5.10.2" : IS5101 ? "v5.10.1" : IS510 ? "v5.10" : "v5.9.2";
+  const verStr = VER === "v553" ? "v5.53" : VER === "v552" ? "v5.52" : VER === "v551" ? "v5.51" : VER === "v550" ? "v5.50" : VER === "v549" ? "v5.49" : VER === "v548" ? "v5.48" : VER === "v547" ? "v5.47" : VER === "v546" ? "v5.46" : VER === "v545" ? "v5.45" : VER === "v544" ? "v5.44" : VER === "v543" ? "v5.43" : VER === "v542" ? "v5.42" : VER === "v541" ? "v5.41" : VER === "v540" ? "v5.40" : VER === "v539" ? "v5.39" : VER === "v538" ? "v5.38" : VER === "v537" ? "v5.37" : VER === "v536" ? "v5.36" : VER === "v535" ? "v5.35" : VER === "v534" ? "v5.34" : VER === "v533" ? "v5.33" : VER === "v532" ? "v5.32" : VER === "v531" ? "v5.31" : VER === "v530" ? "v5.30" : VER === "v529" ? "v5.29" : VER === "v528" ? "v5.28" : VER === "v527" ? "v5.27" : VER === "v526" ? "v5.26" : VER === "v525" ? "v5.25" : VER === "v524" ? "v5.24" : VER === "v523" ? "v5.23" : VER === "v522" ? "v5.22" : VER === "v521" ? "v5.21" : VER === "v520" ? "v5.20" : VER === "v519" ? "v5.19" : VER === "v518" ? "v5.18" : VER === "v517" ? "v5.17" : VER === "v516" ? "v5.16" : VER === "v515" ? "v5.15" : VER === "v514" ? "v5.14" : VER === "v513" ? "v5.13" : VER === "v512" ? "v5.12" : VER === "v511" ? "v5.11" : IS5102 ? "v5.10.2" : IS5101 ? "v5.10.1" : IS510 ? "v5.10" : "v5.9.2";
   T(`STATIC: field-manual callsign carries ${verStr}`, SRC.includes(`FIELD MANUAL · ${verStr} · PUBLIC BUILD`));
   T(`STATIC: end-of-manual footer carries ${verStr}`, SRC.includes(`DANGER CLOSE ${verStr} · documentation regenerated`));
   // v5.10.2: the remaining two of the four in-app version sites, asserted exactly
@@ -249,7 +249,7 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
   // a capital A, and the case-sensitive census greps in BOTH the scope and the build session missed
   // it — it was found only when the t4 DOM extinction check ran. A case-sensitive pin here would
   // have the same blind spot.
-  if (VER === "v551" || VER === "v552") {
+  if (VER === "v551" || VER === "v552" || VER === "v553") {
     // ─── v5.51 D-9 · HEIR_RATE gets a home, a pin and a disclosure ───
     // Before v5.51 this constant was a bare inline literal with a one-line comment, no citation
     // anywhere in the repo, and NO SUITE ASSERTED ITS VALUE - it could have been changed to any
@@ -313,7 +313,43 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
     T("D10-7 [SITE]: the clause sits in the ladder footnote, under the table it qualifies - not in the verdict cell",
       /IRMAA: 2-year lookback[\s\S]{0,900}it omits dividends and realized capital gains/.test(SRC));
   }
-  if (VER === "v550" || VER === "v551" || VER === "v552") {
+  if (VER === "v553") {
+    // ─── v5.53 D-10 modelling half · the ladder's MAGI now carries the dividend term ───
+    // The v5.52 block above pinned the two expressions APART and pinned the clause that disclosed
+    // the gap. v5.53 closes the dividend half, which FALSIFIES four of those seven assertions - so
+    // this is a new block rather than an extended ladder. Extending would have asserted, of the
+    // build that fixed the defect, that the defect was still present.
+    //
+    // Same counting discipline as v5.52, for the same reason: `magi` names two different
+    // quantities in two scopes, and the ladder block computes the narrow arithmetic TWICE - once
+    // as `magi` and once as `grossTaxable`. Pin the ASSIGNMENT and COUNT it.
+    //
+    // User-surface disclosure is NOT re-asserted here: t31 owns sentence parity across both
+    // surfaces, carries the v5.52 sentence's extinction through its `until` field, and pins the
+    // term that REMAINS missing. Duplicating it here would create a second answer that drifts.
+    const _c = (t) => SRC.split(t).length - 1;
+    const _C7 = "const magi = ssTaxable + pen_y + work_y + rmdTax_y + conv_y + div_y + capGain_y;";
+    const _L5 = "const magi = pension + spouseBWork + taxableSS + conv_y + rmd_y;";
+    const _L6 = "const magi = pension + spouseBWork + taxableSS + conv_y + rmd_y + _divLadder;";
+    const _GT = "const grossTaxable = pension + spouseBWork + taxableSS + conv_y + rmd_y;";
+    T("D10-1 [PIN]: Engine C's IRMAA MAGI still carries all seven terms, at exactly one site - this release did not touch it",
+      _c(_C7) === 1, `occurrences=${_c(_C7)}`);
+    T("D10-2 [EXTINCTION]: the ladder's FIVE-term MAGI is gone - the release that made it wrong removed it",
+      _c(_L5) === 0, `occurrences=${_c(_L5)}`);
+    T("D10-3 [PIN]: the ladder's MAGI carries the dividend term, at exactly one site",
+      _c(_L6) === 1, `occurrences=${_c(_L6)}`);
+    T("D10-4 [PIN]: provisional income carries it too - the omission compounded through taxableSS, so both sites owe the term",
+      _c("const nonSSincome = pension + spouseBWork + conv_y + rmd_y + _divLadder;") === 1);
+    T("D10-5 [D-1 PIN]: `grossTaxable` still does NOT carry it - dividends are preferential-rate income and this block has no capital-gains path",
+      _c(_GT) === 1 && !/const grossTaxable = [^;]*_divLadder/.test(SRC), `occurrences=${_c(_GT)}`);
+    T("D10-6 [D-4]: the base is computed ONCE, not per year - a decaying base is a different model and is disclosed, not silently adopted",
+      _c("const _divLadder =") === 1, `occurrences=${_c("const _divLadder =")}`);
+    T("D10-7 [v5.47 MIRROR]: the dividend base holds the HSA sleeve out - a qualified HSA withdrawal cannot throw off a taxable dividend",
+      /const _divLadder =[^;]*_rsbL\.othHsa/.test(SRC));
+    T("D10-8 [PIN]: the two expressions are STILL different - capGain_y remains, so reconciling them is still a scoped change, not a silent one",
+      _c(_C7) === 1 && _c(_L6) === 1 && _C7 !== _L6);
+  }
+  if (VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553") {
     T("EXT D-7: the objective label states what it actually computes",
       SRC.includes("MAX ESTATE AFTER HEIR INCOME TAX (leave the most behind)"));
     T("EXT D-7: the objective noun is narrowed",
@@ -449,7 +485,13 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
     })();
     T("STRUCT S-2: the Roth tab declares a magi summing taxableSS and conv_y", !!_rothMagi,
       _rothMagi ? _rothMagi.join(" + ") : "not found");
-    const _S2_EXPECT = V541
+    // v5.53 registers a SIXTH term. Per the gating note above, the oracle moves for the leg that
+    // changed and the frozen legs keep asserting their own correct answer — the set is corrected,
+    // not the assertion loosened.
+    const _V553 = VER === "v553";
+    const _S2_EXPECT = _V553
+      ? ["pension", "spouseBWork", "taxableSS", "conv_y", "rmd_y", "_divLadder"]
+      : V541
       ? ["pension", "spouseBWork", "taxableSS", "conv_y", "rmd_y"]
       : ["pension", "spouseBWork", "taxableSS", "conv_y"];
     T(`STRUCT S-2: Roth-tab magi term set is exactly the registered set for this build (${_S2_EXPECT.length} terms, order-insensitive)`,
@@ -460,7 +502,30 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
       // The three sites move together or the omissions compound (scope §3): an RMD missing
       // from the Sec.86 base understates taxableSS, which understates magi a SECOND time.
       T("STRUCT S-2 (V541): rmd_y is also in the Sec.86 provisional base (nonSSincome)",
-        /const nonSSincome = pension \+ spouseBWork \+ conv_y \+ rmd_y;/.test(SRC));
+        _V553
+          ? /const nonSSincome = pension \+ spouseBWork \+ conv_y \+ rmd_y \+ _divLadder;/.test(SRC)
+          : /const nonSSincome = pension \+ spouseBWork \+ conv_y \+ rmd_y;/.test(SRC));
+      if (_V553) {
+        // ─── RESIDUAL (v5.53) — what the ladder STILL does not carry ───────────────────
+        // v5.53 closed the dividend term and narrowed the disclosure to match. Two differences
+        // survive, and the disclosure on both user surfaces names them. This pins the residual so
+        // the two cannot drift apart again: close one of these without rewriting the disclosure
+        // and this fails.
+        //
+        // ⚠ THIS IS A LOCK, and it is green BECAUSE the terms are still missing. A release that
+        // adds capGain_y to the ladder MUST tighten this in the SAME release — otherwise the
+        // correct move is to make the test pass by reverting the fix, and the assertion is holding
+        // the omission in place rather than guarding it. Same for the work_y / spouseBWork pair.
+        const _ladderHas = (t) => !!_rothMagi && _rothMagi.includes(t);
+        T("RESIDUAL [LOCK]: the ladder still does NOT carry capGain_y — the term the narrowed disclosure still names",
+          !_ladderHas("capGain_y"), _rothMagi ? _rothMagi.join(" + ") : "not found");
+        T("RESIDUAL [LOCK]: the ladder still reads one spouse's earnings, not the household's — spouseBWork present, work_y absent",
+          _ladderHas("spouseBWork") && !_ladderHas("work_y"));
+        T("RESIDUAL: Engine C carries BOTH of the terms the ladder lacks — the gap is the ladder's, not a disagreement about the law",
+          _terms.includes("capGain_y") && _terms.includes("work_y"));
+        T("RESIDUAL [DIRECTION]: every surviving difference is ADDITIVE, so the ladder's MAGI can only read low — the disclosed direction is optimistic",
+          _terms.includes("capGain_y") && _terms.includes("work_y") && !_ladderHas("capGain_y"));
+      }
       T("STRUCT S-2 (V541): rmd_y is also in grossTaxable",
         /const grossTaxable = pension \+ spouseBWork \+ taxableSS \+ conv_y \+ rmd_y;/.test(SRC));
       // BASIS (Pub. 590-B): the divisor applies to the PRIOR 31 December balance. A test that
@@ -734,7 +799,7 @@ console.log(`t1 — UNITS & STATICS (${VER})`);
 // leg, which legitimately still has none — the v5.28 defect, not a fix.
 {
   const IS533 = VER === "v533";
-  const IS536 = VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552")));
+  const IS536 = VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553")));
   const IS534 = VER === "v534" || VER === "v535" || IS536;
   const HAS_GAIN_FIELD = IS533 || IS534;
   const P0 = g.PORTFOLIO();
