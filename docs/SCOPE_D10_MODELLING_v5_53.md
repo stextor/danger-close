@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | 🔨 **BUILT, SUITE GREEN, NOT YET SHIPPED (2026-08-27).** Source and tests complete; artifact, documents and packaging remain. See §9 for what the build found and §10 for what is left |
+| Status | ☑ **RETIRED: BUILT AND SHIPPED AS v5.53 (2026-08-28).** Source `12a007ed8e57a391acba67b799eb5a2f`, built `index.html` `c99fd1fe27998e1dff2aa192c7e48ea2`, suite **2,724 app checks / 0 failing**. Body kept as the record of what was decided; **read the status line, not the prose tense** — everything below is written as pending work and is not. *(Superseded status line: 🔨 BUILT, SUITE GREEN, NOT YET SHIPPED (2026-08-27).* Source and tests complete; artifact, documents and packaging remain. See §9 for what the build found and §10 for what is left |
 | Build | **v5.52** · `src/DangerClose.jsx` md5 `40fd122d557a4fb00653c3e4384e1650` · repo `8acc62f` · every citation below re-resolved BY CONTENT against that source |
 | Supersedes | `SCOPE_FIX_roth_tab_div_capgain.md` (2026-08-21, base v5.41 `18152190e9b699529642ae2983b3ae2c`, target v5.42, never built) |
 | Parent | `MissingFeatures.md` **D-10**. Its disclosure half shipped at v5.52; this is the modelling half |

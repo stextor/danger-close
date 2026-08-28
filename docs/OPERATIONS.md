@@ -655,6 +655,16 @@ defects. An ops package also takes an **unversioned** outer folder name, `danger
 cannot be mistaken for a release, and its manifest still has to record how it *was* verified — the
 standard does not lapse just because no app suite applies.
 
+⚠ **Upload by editing in place, not by drag-and-drop (added 2026-08-28).** §L has always described
+what goes in the zip and never how the files reach the repo, and that gap has now cost two commits
+twice over. **GitHub's drag-and-drop upload silently renames dotfiles** — it landed a `.gitignore` as
+a file called `download`, which then had to be found and deleted. The same upload path **drops the
+executable bit on any NEW shell script**, which lands as `100644` and cannot be run as
+`./script.sh`; replacing an *existing* tracked file preserves its mode, which is why
+`qa/runsuite.sh` survived the v5.53 upload at `100755` while a new script would not have. Edit in
+place for dotfiles and for any new `.sh`, and check `git ls-files -s` afterwards — the repo's shell
+scripts are all `100755` and a `100644` among them is the tell.
+
 ⚠ **`F-1` runs in BOTH modes and is not a formality: the pool is ADD-ONLY.** A same-name upload
 creates a *second* copy rather than replacing the first, so every package — release or ops — must
 name its delete-first list explicitly in `README-FIRST.md`.

@@ -1,5 +1,18 @@
 # SESSION BRIEF — finish and ship v5.53
 
+> ☑ **FULFILLED — v5.53 SHIPPED 2026-08-28. This brief is history; do not work from it.**
+> Every task in §2 is done. Two of its statements were falsified by events and are corrected here
+> rather than in place, so the original stays readable:
+> - **§0 "the work exists only in a session workspace and you should assume it is gone"** — true of
+>   the workspace, but the source changes, the METHODOLOGY addition and 11 of the 16 qa files had
+>   been **committed** (`778b42f`, `0418f81`, `c88413a`). Only the five baseline suites' registration
+>   was genuinely lost, and it was rebuilt.
+> - **§0 "repo `8acc62f`"** — HEAD had moved to `c88413a` before this was picked up.
+> - **§0 suite totals (2,718 app / 2,800)** — the shipped figures are **2,724 app / 2,806**. Prior
+>   leg, parity, feature suites and tooling reproduce exactly; the current leg is 1,028 not 1,022,
+>   because the registration was rebuilt rather than recovered. **Quote the CHANGELOG, not this.**
+
+
 **Written** 2026-08-27, at the end of the session that built it. **This is a brief, not the scope.**
 `SCOPE_D10_MODELLING_v5_53.md` is the scope; read its **§9 and §10** in full before touching
 anything — they were written at the end of the build and carry what the build actually found.
