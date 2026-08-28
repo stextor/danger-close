@@ -428,13 +428,31 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
       "SCOPE_v5_40_disclosures_and_mechanics.md", // SCOPE ONLY, open decisions in its §7
       "SCOPE_FIX_tidyup_six.md",                  // three decisions open in its §7
       "SCOPE_STANDING_AUDIT.md",                  // not a build scope at all (OPERATIONS §K)
+      "SCOPE_POOL_AND_ALLOWLIST_HYGIENE.md",       // four decisions open in its §6
+      // ⚠ AN ENTRY HERE IS A CLAIM, AND IT EXPIRES EXACTLY LIKE A STATUS LINE DOES.
+      // Two of the first four entries were stale on the day this list shipped: v5_40 and
+      // tidyup_six were placed here from a session brief's classification rather than from the
+      // tree, and both were already fulfilled — v5.40 and v5.42–v5.47 respectively. I-2 would
+      // have caught them; this list excused them. Before adding a name, do the same content
+      // check a retirement needs: read what the releases actually SHIPPED. Before leaving one
+      // here, ask when it was last true.
       // ⚠ SCOPE_CLAIM_EXPIRY_VERIFICATION.md was here while it was open. It was retired at its own
       // ship on 2026-08-28 and REMOVED from this list in the same edit, which is the discipline
       // this list needs: an allowlist that keeps a retired scope is a stale claim about a stale
       // claim. If you add an entry, note what closes it.
     ]);
     const RETIRED = /\bRETIRED\b|\bSUPERSEDED\b|\bFULFILLED\b/;
-    const scopes = readdirSync(docs).filter(f => /^SCOPE_.*\.md$/.test(f)).sort();
+    // ⚠ The INVENTORY is post-ship too, not just the reading of each file. A scope the package
+    // ADDS does not exist in the clone, so a clone-only listing makes I-3 report it as an
+    // allowlist entry naming a nonexistent scope — which is what happened the first time this
+    // release was packaged, on its own new scope. I-2 was fixed to read the post-ship tree and
+    // I-3 was left reading the pre-ship one; the two must agree on what "the tree" means.
+    const fromClone = readdirSync(docs).filter(f => /^SCOPE_.*\.md$/.test(f));
+    const ghDocs = join(GH, "docs");
+    const fromPkg = existsSync(ghDocs)
+      ? readdirSync(ghDocs).filter(f => /^SCOPE_.*\.md$/.test(f))
+      : [];
+    const scopes = [...new Set([...fromClone, ...fromPkg])].sort();
     // ⚠ Read each scope from the PACKAGE when the package replaces it, and from the clone
     // otherwise — i.e. evaluate the tree AS THIS PACKAGE WILL LEAVE IT. Reading the clone alone
     // was the first draft and it was wrong in the worst direction: a release that retires a scope

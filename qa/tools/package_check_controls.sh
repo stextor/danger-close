@@ -192,7 +192,20 @@ else
   skip "P22 the 66db033 shape" "no prior-release .jsx available to roll back to"
 fi
 
-runc "P23 every scope removed — a green reading from an EMPTY SET" I-1 "rm -f docs/SCOPE_*.md"
+
+# ⚠ P23 must empty BOTH sides. The scope inventory became a UNION of the clone's docs/ and the
+# package's github/docs/ on 2026-08-28, so stripping the clone alone leaves any scope the package
+# ships and I-1 correctly still finds one. Emptying only the clone made this control stop firing —
+# the control was measuring the old shape, not a regression.
+rm -rf /tmp/pkctle /tmp/pkctlf && cp -r "$CLONE" /tmp/pkctle && cp -r "$APP" /tmp/pkctlf
+rm -f /tmp/pkctle/docs/SCOPE_*.md /tmp/pkctlf/github/docs/SCOPE_*.md
+out23=$(node "$PKG_CHECK" /tmp/pkctlf /tmp/pkctle 2>&1)
+if echo "$out23" | grep -q "✗ I-1"; then
+  PASS=$((PASS+1)); printf "  CAUGHT by %-6s %s\n" "I-1" "P23 every scope removed from BOTH sides — a green reading from an EMPTY SET"
+else
+  MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** P23 the sweep reports green against an empty set\n"
+fi
+rm -rf /tmp/pkctle /tmp/pkctlf
 runc "P24 a shipped scope loses its retirement marker and reads live again" I-2 \
   "for f in docs/SCOPE_*.md; do grep -qE 'RETIRED|SUPERSEDED|FULFILLED' \"\$f\" && { grep -vE 'RETIRED|SUPERSEDED|FULFILLED' \"\$f\" > \"\$f.t\" && mv \"\$f.t\" \"\$f\"; break; }; done"
 runc "P25 a NEW unclassified scope is added" I-2 \
