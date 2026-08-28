@@ -546,6 +546,15 @@ reading what the release actually shipped. Both sections have negative controls 
 `qa/tools/package_check_controls.sh` (P20–P28), including a false-positive control: a check that
 cries wolf on a clean tree gets ignored, and an ignored gate has stopped being a gate.
 
+**The census controls are `qa/tools/controls_state.sh`** (added 2026-08-28), five controls pinning
+`t29`'s `F-5`–`F-8` — the no-hardcoded-state-code property, the empty-set guard, D-3c reachability,
+and legacy/module independence. Run it with the flat working folder as its argument. ⚠ **It was left
+out of the release that added those assertions**, on the reasoning that `t29` §C already re-derives
+the flip assertions — which covers **S5 only**. F-5 through F-8 are property pins and nothing
+re-derives them, so for one release four of seven new assertions had no evidence they could fail.
+The two control harnesses are separate on purpose and both are named here: a control file nothing
+references is the `VERIFY.sh` shape, and the fix for that is a checklist entry, not another script.
+
 **`VERIFY.sh` is RETIRED (2026-08-25, v5.49) and no longer runs.** It sat at the repo root calling
 itself "release verification" while pinned to `v537`/`v538` — **eleven releases stale** — and while
 **this file referenced it exactly zero times.** It was not a step anyone skipped; it was a gate that
