@@ -149,6 +149,45 @@ T("C-reverse: 'ladder_windows' goes from clear to ON when both spouses share a b
     literals.length === 0, literals.join(", "));
 }
 
+// ── F (cont.) · the STATE rows, added 2026-08-28 with the three-way census split ─────────────
+// The state census was ONE row keyed on the legacy flat rate until this release. That row read ON
+// for the fallback path only, so a household using the 51-jurisdiction STATE_RULES module showed
+// the census a muted state-tax path while exercising the module fully. The `state` fixture proves
+// it: it sets stateCode "TS", which is not a STATE_RULES key, and it clears `state_tax` while
+// leaving `state_code` OFF.
+{
+  const toolSrc = (await import("fs")).readFileSync(TOOL, "utf8");
+  const RULES = G.STATE_RULES();
+
+  // F-5 is F-4's exact analogue for the state list. F-1-style comparisons catch a WRONG list;
+  // only this catches a list that is currently right and written down. Match quoted two-letter
+  // uppercase tokens against real STATE_RULES keys, so the check cannot be fooled by prose.
+  const quoted = [...toolSrc.matchAll(/["'`]([A-Z]{2})["'`]/g)].map(m => m[1]);
+  const hardcoded = [...new Set(quoted.filter(c => Object.prototype.hasOwnProperty.call(RULES, c)))];
+  T("F-5: the census source hardcodes NO state code \u2014 the list is read live from STATE_RULES",
+    hardcoded.length === 0, hardcoded.join(", "));
+
+  // ⚠ F-6 is the empty-set guard, and it is the one that would have failed quietly. If no state
+  // in STATE_RULES matches the income-limit pattern, `state_excl_limited` can never read ON and
+  // every assertion about it passes vacuously \u2014 green from an empty set (OPERATIONS \u00a7B2).
+  // This release found that exact defect twice in its own tooling, so it is pinned here.
+  const limited = Object.entries(RULES)
+    .filter(([, r]) => (r.excl65 || 0) > 0 && /income[- ]limited|income limit/i.test(r.note || ""));
+  T("F-6: at least one STATE_RULES entry carries an income-limited 65+ exclusion \u2014 otherwise the D-3c row is vacuous",
+    limited.length > 0, `${limited.length} found`);
+
+  // F-7: and the row must actually be reachable from a shipped fixture, not merely definable.
+  // A boundary nothing can cross is a boundary the census cannot help with.
+  T("F-7: a fixture exists that turns the D-3c row ON",
+    by(at("stateExclCliff"), "state_excl_limited").onBoundary === false,
+    "stateExclCliff should read ON");
+
+  // F-8: the module row and the legacy row are genuinely independent \u2014 the whole reason for
+  // splitting them. The legacy fixture must NOT light the module row.
+  T("F-8: the legacy `state` fixture clears state_tax WITHOUT lighting state_code \u2014 the split is load-bearing",
+    by(at("state"), "state_tax").onBoundary === false && by(at("state"), "state_code").onBoundary === true);
+}
+
 // ── §G · the printer does not lie about the count ────────────────────────────────────────
 {
   const txt = table(example);
