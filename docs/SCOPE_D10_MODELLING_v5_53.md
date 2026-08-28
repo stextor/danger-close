@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | ✅ **ALL FOUR DECISIONS RESOLVED 2026-08-27. BUILDABLE.** |
+| Status | 🔨 **BUILT, SUITE GREEN, NOT YET SHIPPED (2026-08-27).** Source and tests complete; artifact, documents and packaging remain. See §9 for what the build found and §10 for what is left |
 | Build | **v5.52** · `src/DangerClose.jsx` md5 `40fd122d557a4fb00653c3e4384e1650` · repo `8acc62f` · every citation below re-resolved BY CONTENT against that source |
 | Supersedes | `SCOPE_FIX_roth_tab_div_capgain.md` (2026-08-21, base v5.41 `18152190e9b699529642ae2983b3ae2c`, target v5.42, never built) |
 | Parent | `MissingFeatures.md` **D-10**. Its disclosure half shipped at v5.52; this is the modelling half |
@@ -149,3 +149,64 @@ narrowed in the same release — the ladder footnote at L9297 and Field Manual �
 `t31` and `t4_dom` currently assert. **A release that fixes half the disclosed defect and leaves the
 disclosure unchanged is the v5.26 failure again** (OPERATIONS §B2: a disclosure assertion becomes a
 lock the moment its disclosure becomes false).
+
+
+---
+
+## 9. What the build found — added 2026-08-27, at the end of the build session
+
+Four things this scope did not anticipate. All are settled; they are recorded because the next
+release in this area will meet them again.
+
+**9.1 ⚠ THE DOM DIFF CANNOT WITNESS THIS RELEASE.** `domdiff_withdrawal.mjs` reports **32** on the
+v5.52→v5.53 pair — the reading that means *no figures moved* — and it is **correct and meaningless**.
+Its own header says it walks the Withdrawal, Taxes and IRMAA tabs. **The Roth tab is not among
+them.** The release's headline gate is structurally blind to the tab the release changes. `t32`'s
+header records this; §7 of this scope did not notice it either. A green number that means less than
+it looks like (OPERATIONS §B2).
+
+**9.2 Two suites model §86 and BOTH had to gain the term.** `t24` failed 7 and `t28` failed 12 on the
+current leg. Neither was a defect: both build an independent §86 statute model, and **neither model
+carried a dividend term while Engine C's `_prov86` always has.** They were asserting the *pre-fix*
+expression. Corrected by adding the statutory term to the MODEL, bound to the app's own accessors so
+it tracks the household rather than freezing a figure, and gated to v5.53.
+
+⚠ **The ordering matters and should be repeated.** In `t24`, correcting the oracle fixed 4 of 7
+outright; the remaining 3 were frozen K-figures on rows the corrected oracle then validated to
+±$500. **The oracle is the independent derivation; the spot pins are pins on it.** Fixing the spot
+figures first would have been adjusting expectations until they matched.
+
+**9.3 `t8`'s census pin caught the new call site.** `taxableInitAll` went from 1 definition + 7 call
+sites to 1 + 8, because `_divLadder` reads the same taxable base Engine C does. The pin went red,
+which is it working. ⚠ `t8` takes no version tag — it reads the root `DangerClose.jsx` alias, so it
+always describes the CURRENT build and is **not** gated per leg.
+
+**9.4 The health warning was added, by Steve's decision of 2026-08-27.** The `IRMAA?` column header
+now renders **`IRMAA? †`** and the footnote opens *"† The IRMAA? column is an indication, not a
+verdict."* ⚠ **Framed as a PERMANENT qualifier, not an interim notice.** The question was put as
+"until the fix ships" — but v5.53 *is* the fix, so a temporary notice would be obsolete on arrival.
+What remains true afterwards is narrower: the verdict stays approximate because `capGain_y` and the
+`work_y`/`spouseBWork` difference are still out. **Do not remove this when the last two terms land —
+revisit the wording instead.**
+
+## 10. State at the end of the build session
+
+**Source complete.** `v553.jsx` md5 `12a007ed8e57a391acba67b799eb5a2f`, built from v5.52
+`40fd122d557a4fb00653c3e4384e1650`. `METHODOLOGY.md` updated.
+
+**Suite green, both legs, from suite output:**
+
+| | passed | failed |
+|---|---|---|
+| prior leg v5.52 | 1,018 | 0 |
+| current leg v5.53 | 1,022 | 0 |
+| parity | **10** | 0 |
+| feature suites run once | 668 | 0 |
+| **app total** | **2,718** | **0** |
+| tooling (`t21` 50, DOM diff 32) | 82 | 0 |
+| **grand** | **2,800** | **0** |
+
+`t32_ladder_dividend.mjs` is **new** — 12 checks on the current leg, 11 on the prior, with the
+near-cliff fixture of §7.4 and the four negative controls of §7.6 including the detector control.
+
+**Not done:** the built artifact, the documents, and packaging. Listed in the session brief.
