@@ -1201,3 +1201,60 @@ the cross-version DOM diff's STRICT branch at 32 are the mechanical form of that
 tab's IRMAA verdict is still wrong for a taxable-heavy household; it is now labelled as narrower
 rather than presented as the same figure the IRMAA tab shows. Reconciling the two expressions is a
 separate, scoped, not-yet-built change.
+
+
+## The Roth ladder's IRMAA MAGI carries dividends (v5.53)
+
+v5.52 disclosed that the app computed an IRMAA MAGI in two places under one label. v5.53 closes the
+term that mattered: the ladder's IRMAA MAGI now **counts the taxable sleeve's dividends**, as
+Engine C always has. The Roth conversion ladder's per-year block now carries
+
+```
+pension + spouseBWork + taxableSS + conv_y + rmd_y + _divLadder
+```
+
+where `_divLadder` mirrors Engine C's expression exactly, **including the v5.47 HSA holdout** — a
+qualified HSA withdrawal is tax-free, so those dollars cannot throw off a taxable dividend:
+
+```
+Math.round(Math.max(0, taxableInitAll() - (_rsbL.othHsa || 0)) * (taxYield / 100))
+```
+
+### Why dividends and not the other two terms
+
+Measured at v5.52, engine-exact, on three households:
+
+| Household | omitted per year | across the ladder | wrong IRMAA verdicts |
+|---|---|---|---|
+| The shipped example, at the app's default 2.0% yield | mean $454, max $762 | $4,542 | 0 of 10 |
+| A $1.5M brokerage sleeve at 2% | mean $30,454 | $304,542 | 0 of 10 |
+| The same sleeve with MAGI beside the tier-1 threshold | mean $30,420 | $304,200 | **5 of 10** |
+
+**Dividends were essentially the whole effect.** Realized capital gains contributed **$342 across ten
+ladder years** on the example household and nothing at all on the two constructed ones. Reading them
+out of the withdrawal plan means hoisting a series out of a closure it is currently built outside of,
+which is real plumbing for a figure that cannot move an IRMAA tier. They are deliberately left out,
+and the app says so.
+
+**Size and harm are unrelated, and that is the useful finding.** The $1.5M-brokerage household
+carried an omission of about a quarter of its MAGI and every verdict it rendered was still right,
+because its distance to the next cliff ran $98,000–$127,000. The near-cliff household carried the
+same omission and read tier 0 in five years where it was actually in tier 1 — failing to warn about
+$11,500 of surcharge. What decides whether the omission reaches a user is proximity to a threshold.
+
+### Two terms still differ, and both are disclosed
+
+- **`capGain_y`** — realized capital gains, left out by the decision above.
+- **`work_y` vs `spouseBWork`** — Engine C counts the household's other income streams; the ladder
+  counts one spouse's earned income. Narrower, untouched by this release.
+
+Both can only add to MAGI, so the residual error remains **optimistic**, and the Roth tab's figure
+remains slightly below the IRMAA tab's. The IRMAA tab is the fuller figure.
+
+### One disagreement disclosed rather than reconciled
+
+The dividend base is held **constant** for the whole plan, at `taxableInitAll()`, matching Engine C.
+`runRothStrategies` instead tracks a **decaying** `taxBal` as the sleeve is spent down. The two
+disagree by construction. Constant is the conservative choice — a higher MAGI held for longer — and
+matching Engine C is what makes the two figures comparable at all, which is the point of this
+release. Reconciling them is not attempted here.
