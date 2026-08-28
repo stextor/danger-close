@@ -41,6 +41,48 @@ export const HOUSEHOLDS = {
     flips: ["state_tax"],
     apply: P => { P.stateTaxRate = 0.05; P.stateName = "Test State"; P.stateCode = "TS"; },
   },
+  // ── STATE MODULE fixtures (added 2026-08-28) ────────────────────────────────────────────
+  // ⚠ The `state` fixture above sets `stateCode: "TS"`, which is NOT a key in STATE_RULES. It
+  // clears the LEGACY flat-rate row and leaves the 51-jurisdiction module unexercised — which is
+  // exactly the confusion the three-way census split exists to end, and is why these two are
+  // separate fixtures rather than edits to that one. Leave `state` alone: it is the legacy-path
+  // fixture and it is still the only one.
+  //
+  // Clears the state-module row.
+  stateProgressive: {
+    why: "New York — a real STATE_RULES key, so the 51-jurisdiction module runs instead of the legacy rate. " +
+         "NY is chosen because it is the ONE state already measured against a sourced 2026 schedule " +
+         "(docs/AUDIT_D3_STATE_TAX_DIRECTION.md, Form IT-2105-I), so expected figures exist and are " +
+         "hand-verified; any other state means sourcing a schedule first.",
+    flips: ["state_code"],
+    apply: P => {
+      P.stateCode = "NY"; P.stateName = "New York";
+      // The legacy rate is cleared so the module is the ONLY live path. Leaving it set would make
+      // a green result ambiguous about which branch of stateTaxAnnual produced the figure.
+      P.stateTaxRate = 0;
+    },
+  },
+  // Clears the income-limited-exclusion row (the D-3c class).
+  stateExclCliff: {
+    why: "New Jersey, both spouses 65+ — NJ's retirement-income exclusion is capped by income in law " +
+         "(~$150K, hard cliff) and applied UNCONDITIONALLY by stateTaxAnnual, so this is the one " +
+         "household shape from which D-3c is reachable at all. Elsewhere the unconditional " +
+         "subtraction is correct and a fixture there would prove nothing.",
+    flips: ["state_code", "state_excl_limited"],
+    apply: P => {
+      P.stateCode = "NJ"; P.stateName = "New Jersey";
+      P.stateTaxRate = 0;
+      // Both spouses over 65, so persons65 = 2 and the per-person exclusion is fully engaged.
+      // Without this the row still reads ON but the defect it names is only half-sized.
+      P.dobA = "1955-03-10"; P.dobB = "1956-07-22";
+    },
+  },
+  // ⚠ NO `stateEstate` FIXTURE — deliberately, by decision D2. Nothing in the app computes state
+  // estate tax, so the fixture could only assert an ABSENCE, and an absence-assertion written
+  // before the behaviour exists is the coupling this project keeps paying for. The census row it
+  // would have needed (`state_code`) ships here; the fixture waits for the D-7 release, where it
+  // has something to measure. Recorded so it is not rediscovered as an omission.
+
   // Clears the income-stream row.
   streams: {
     why: "an ordinary income stream — the stream paths become reachable",
