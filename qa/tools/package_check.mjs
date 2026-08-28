@@ -362,8 +362,20 @@ console.log("\nH. Provenance \u2014 what GitHub holds vs what the CHANGELOG clai
     const ch = readFileSync(chPath, "utf8");
     // Newest entry only. The provenance line (OPERATIONS §G, from v5.12) ends that entry and
     // carries both md5s; older entries have their own and must not be matched.
+    // ⚠ Slice FROM the newest `## v` heading, not from the top of the file. The original sliced
+    // from byte 0, which was correct only while the newest version entry was also the FIRST
+    // entry. On 2026-08-28 five `## Unreleased — qa/ only:` entries were added above v5.53 —
+    // legitimately, that is the house convention for ops work — and each correctly quoted the
+    // v5.53 source hash. That widened this window to include them, and H-1 then PASSED against a
+    // v5.53 provenance line whose md5 had been corrupted, because the hash was still findable
+    // elsewhere in the window. Caught by testing it before shipping the entries that caused it.
+    //
+    // The lesson is the one this release cycle keeps re-teaching: when a check's INPUTS change,
+    // the check can quietly start asserting something weaker than its name claims. Ask what it
+    // would take to fail, every time it passes.
     const firstHeading = ch.indexOf("\n## v");
-    const head = firstHeading > 0 ? ch.slice(0, ch.indexOf("\n## v", firstHeading + 1)) : ch;
+    const end = firstHeading >= 0 ? ch.indexOf("\n## v", firstHeading + 1) : -1;
+    const head = firstHeading >= 0 ? ch.slice(firstHeading, end > 0 ? end : undefined) : ch;
     const hashes = [...head.matchAll(/\b([0-9a-f]{32})\b/g)].map(m => m[1]);
     const version = (/^## (v[0-9][^\s—-]*)/m.exec(ch) || [, "?"])[1];
     if (hashes.length < 2) {

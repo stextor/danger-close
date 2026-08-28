@@ -168,15 +168,21 @@ if [ -n "$CH_SRC" ] && [ -n "$CH_BLT" ]; then
     "python3 - <<'EOF'
 import io
 p='/tmp/pkctlc/CHANGELOG.md'; t=io.open(p,encoding='utf-8').read()
+# Corrupt INSIDE the newest version entry, mirroring the window section H reads.
+# Slicing from byte 0 broke on 2026-08-28 when Unreleased ops entries were added ABOVE
+# v5.53 quoting the same source hash: .replace(..,1) then hit an Unreleased entry and H-1
+# correctly still passed. THE CONTROL was wrong, not the check. Third time this cycle.
 i=t.index('\n## v'); j=t.index('\n## v', i+1)
-io.open(p,'w',encoding='utf-8').write(t[:j].replace('$CH_SRC','deadbeefdeadbeefdeadbeefdeadbeef',1)+t[j:])
+seg=t[i:j].replace('$CH_SRC','deadbeefdeadbeefdeadbeefdeadbeef',1)
+io.open(p,'w',encoding='utf-8').write(t[:i]+seg+t[j:])
 EOF"
   runc "P21 CHANGELOG provenance names the wrong BUILT md5" H-2 \
     "python3 - <<'EOF'
 import io
 p='/tmp/pkctlc/CHANGELOG.md'; t=io.open(p,encoding='utf-8').read()
 i=t.index('\n## v'); j=t.index('\n## v', i+1)
-io.open(p,'w',encoding='utf-8').write(t[:j].replace('$CH_BLT','0badc0de0badc0de0badc0de0badc0de',1)+t[j:])
+seg=t[i:j].replace('$CH_BLT','0badc0de0badc0de0badc0de0badc0de',1)
+io.open(p,'w',encoding='utf-8').write(t[:i]+seg+t[j:])
 EOF"
 else
   skip "P20/P21 provenance md5 controls" "could not read the current-build md5 pair from PROJECT_KNOWLEDGE_INDEX.md"
