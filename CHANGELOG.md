@@ -1,5 +1,126 @@
 # Changelog
 
+## v5.53 — the Roth ladder's IRMAA MAGI counts dividends (2026-08-28)
+
+**A modelling change, and the first half of the D-10 fix.** The Roth conversion ladder's IRMAA MAGI
+now carries the taxable sleeve's dividends, as the IRMAA tab's engine always has. MC parity
+**10/10** — no simulation engine changed. The DOM diff STRICT branch reads **32**, and that is not
+evidence the release is inert: see *Why the DOM diff cannot see this* below.
+
+### What was wrong
+
+v5.52 disclosed that the app computes an IRMAA MAGI in **two places** and labels both MAGI, the
+ladder's being narrower by three terms. It disclosed the gap and closed none of it. This release
+closes the term that carried essentially the whole effect.
+
+| | Terms | Expression |
+|---|---|---|
+| Engine C, behind the IRMAA tab | **7** | `ssTaxable + pen_y + work_y + rmdTax_y + conv_y + div_y + capGain_y` |
+| The Roth ladder, at v5.52 | **5** | `pension + spouseBWork + taxableSS + conv_y + rmd_y` |
+| The Roth ladder, at v5.53 | **6** | `pension + spouseBWork + taxableSS + conv_y + rmd_y + _divLadder` |
+
+### What changed
+
+`_divLadder` is computed **once**, outside the per-year loop, and added to both the ladder's `magi`
+and its §86 provisional base `nonSSincome` — the two move together, because an omission from the
+provisional base understates `taxableSS`, which understates `magi` a second time. It mirrors Engine
+C's expression exactly, **including the v5.47 HSA holdout**: a qualified HSA withdrawal is tax-free,
+so those dollars cannot throw off a taxable dividend.
+
+It is **deliberately not added to `grossTaxable`** (decision D-1). Dividends are preferential-rate
+income and that block has no capital-gains bracket path, so folding them into the ordinary stack
+would tax them at ordinary rates — a worse answer than omitting them. The tax and marginal-rate
+columns therefore still ignore dividends, unchanged and disclosed.
+
+The dividend base is held **constant** for the whole plan (decision D-4), matching Engine C, where
+`runRothStrategies` tracks a decaying balance. The two disagree by construction; constant is the
+conservative choice and is what makes the two figures comparable at all. Disclosed in
+`METHODOLOGY.md` rather than reconciled.
+
+The disclosure was **narrowed in the same release**, on both user surfaces, and the `IRMAA?` column
+gained a permanent qualifier: *"† The IRMAA? column is an indication, not a verdict."* That is not
+an interim note pending the rest of the fix — a column deciding a per-year verdict from a MAGI that
+is knowingly narrower than the tab beside it should say so whatever its remaining error.
+
+### What this does NOT fix
+
+**Two terms still differ, and the Roth tab's MAGI is still narrower than the IRMAA tab's.**
+
+- **`capGain_y`** — realized capital gains. Measured at **$342 across ten ladder years** on the
+  example household, and $0 on both constructed test households. Reading them out of the withdrawal
+  plan means hoisting a series out of a closure it is built outside of — real plumbing for a figure
+  that could not move an IRMAA tier in any household measured (decision D-2).
+- **`work_y` vs `spouseBWork`** — Engine C counts the household's other income streams; the ladder
+  counts one spouse's earned income. Out of scope, untouched.
+
+Both can only **add** to MAGI, so the residual error still runs one way. **Direction: optimistic** —
+the same direction as the estate simplification, and the ladder can still read a clear verdict in a
+year a surcharge is due. Both terms are named on both user surfaces and in `METHODOLOGY.md`.
+
+### Size and harm are unrelated — the useful finding
+
+Measured engine-exact on three households: a $1.5M brokerage sleeve omitted about **a quarter of its
+MAGI** and every verdict it rendered was still **right**, because its distance to the next cliff ran
+$98,000–$127,000. The same sleeve placed beside the tier-1 threshold read tier 0 in **5 of 10** years
+where it was in tier 1 — failing to warn about **$11,500** of surcharge. What decides whether the
+omission reaches a user is proximity to a threshold, not the size of the omission.
+
+### Why the DOM diff cannot see this
+
+On the shipped example household the term is a mean of **$454/yr** — below the **±$500** render
+ceiling (§M), so no rendered figure moves and the DOM diff correctly reports **32**, its
+"nothing moved" reading. It is also blind to the Roth tab by construction. **A gate that cannot see
+the thing it gates reports green either way**; `t32` is the witness for this release, and
+`qa/runsuite.sh` did not invoke it until this release added it.
+
+### Tests
+
+**2,724 app checks, 0 failing** — prior leg v5.52 **1,018** · current leg v5.53 **1,028** · parity
+**10/10** · feature suites run once **668**. Tooling **82** (`t21` 50, DOM diff **32**), counted
+separately. **2,806 total**, 0 suites died. Run from the packaged copies in a folder built fresh
+from the committed tree.
+
+**New: `t32_ladder_dividend.mjs`** — the engine-layer witness. Asserts the ladder's term equals
+Engine C's *to the dollar*, the HSA holdout, a near-cliff fixture where the term decides the tier,
+and **four negative controls** (zero yield, no brokerage sleeve, a detector that reports 0 on a
+household far from any cliff, and Engine C untouched).
+
+`t31` gained an `until` field: the v5.52 disclosure sentence expires at v5.52, and past it the
+assertion **inverts to absence**, so the wording this release falsified is pinned extinct on both
+surfaces rather than merely replaced.
+
+### Corrections and findings recorded during the build
+
+**Two §86 statute models were wrong, not the app.** `t24` failed 7 and `t28` failed 12 against the
+new build; both models lacked the dividend term Engine C has always carried. The oracle was
+corrected first, which fixed 4 of `t24`'s 7 outright and left 3 spot pins the corrected oracle then
+validated. Adjusting the frozen figures first would have been adjusting until it matched.
+
+**`t8`'s census pin went red, and that was the pin working** — it caught the call site this release
+added. Rolled 8 → 9. `t8` reads the root source alias and always describes the current build, so its
+counts are not gated per leg.
+
+**The v5.53 suite registration was rebuilt, not recovered.** The build session's workspace was lost;
+the source survived only as a committed diff, and the five baseline suites' registration did not
+survive at all. It was re-derived from the committed suites — 49 sites in four shapes — so the
+current leg is **1,028** where the build session recorded 1,022. The +6 is a new `RESIDUAL` block in
+`t1` (4 assertions) and two further checks in `t4`'s footnote block. Prior leg, parity, feature
+suites and tooling all reproduce the build session's figures exactly.
+
+⚠ **`t1`'s `RESIDUAL` block is a LOCK.** It is green *because* `capGain_y` and `work_y` are still
+absent from the ladder. A release closing either term must tighten it in the **same** release, or
+the cheapest way to make the suite pass is to revert the fix.
+
+**A manifest that read correctly and parsed as zero rows.** `package_check`'s C-1 anchors on
+`^[0-9a-f]{32}`; an indented, path-prefixed manifest parsed as **0 rows**, and C-2 and C-3 then
+reported green *against an empty set*. Found by running the tool on a package the section appeared
+not to cover — which is the same reason the v5.50 package shipped unchecked.
+
+**Provenance.** Source `src/DangerClose.jsx` md5 `12a007ed8e57a391acba67b799eb5a2f` · built
+`index.html` md5 `c99fd1fe27998e1dff2aa192c7e48ea2`, built per §N from the canonical source and the
+real `src/main.jsx` (`d9eca7b469a3fb7ec1c5325fd4bf8145`), `smoke_built` **16/16** including the
+`window.storage` round-trip.
+
 ## v5.52 — the Roth tab's IRMAA verdict says its MAGI is narrower (2026-08-27)
 
 **Disclosure only. No engine changed and no number the model computes moved** — MC parity **10/10**,
