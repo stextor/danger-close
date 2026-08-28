@@ -1,5 +1,62 @@
 # Changelog
 
+## Unreleased — `qa/` and docs only: the D-3c scope, a parity count that was stale in the section warning it would be, 2026-08-28
+
+**No version bump. No source change. No figure moves.** `KIND: ops`.
+
+### The scope
+
+`docs/SCOPE_D3_NJ_EXCL_DOLLAR_EXACT.md` — decision **D3** of `SCOPE_STATE_FIXTURES.md`, the last
+ratified decision from that scope left undone: a dollar-exact case for the **D-3c** class, a state
+whose 65+ retirement-income exclusion is income-limited in law but applied unconditionally by
+`stateTaxAnnual`. **Scope only. Five decisions open in its §7. Nothing here is built.**
+
+The premise, the New Jersey figures and the host are all verified rather than assumed. The figures
+come from the NJ Division of Taxation — the Retirement Income Exclusions page (Last Updated 12/03/25)
+and Tax Rate Schedule Table B (served as "2020 and After", page Last Updated 03/24/26) — computed by
+two independent arithmetic methods that agree to the cent, then compared against engine output
+executed separately. At $200,000 of retirement income for a 65+ MFJ couple the model returns $2,750
+against $8,442.70; the exclusion error understates by $8,250 and the flat-rate approximation
+overstates by $2,302.50, **so the two effects carry opposite signs** and neither alone explains the
+net. The net direction is optimistic.
+
+### What was wrong
+
+**`OPERATIONS.md` §E said the MC-parity guardrail is 9/9. It is 10/10, and has been for several
+releases.** The fingerprint carries ten keys; the manifest, this file and `TESTING.md` all said 10/10
+while §E said 9/9. This is the **second** time that line has gone stale — it was 8/8 until
+2026-08-21 — and the paragraph immediately below it predicted exactly this, in writing, and did not
+prevent it. Corrected, with the prediction's failure recorded next to it rather than quietly tidied.
+
+**`TESTING.md`'s run-folder block listed three copies. There are four.** `METHODOLOGY.md` at the
+run-folder root has been required since `t31` landed at **v5.49**; it was recorded in §L5 of that
+same file and in the qa-baseline README, but not in the block a session copies from. Both `t31` legs
+died at module load this session for exactly that. A precondition recorded somewhere other than the
+checklist people execute is not recorded.
+
+**The knowledge pool was one package behind in five files, and one of them would have read as a
+regression.** The repo half of the 2026-08-28 refresh landed; the `knowledge/` half did not. Stale:
+`CHANGELOG.md` (all five 2026-08-28 entries missing), `OPERATIONS.md`, `package_check.mjs` (340 lines
+against 502 — no §H, no §I), `package_check_controls.sh` (146 against 261 — no P20–P28), and
+**`t8_invariant.mjs`, which asserts 7 `taxableInitAll` call sites where the committed file asserts 8
+for v5.53's `_divLadder`.** `qa/tools/controls_state.sh` was absent from the pool entirely. The app
+was never defective and the repo was always correct; only the pool had drifted — the v5.30 shape,
+recurring. All six refreshed here.
+
+`package_check.mjs` gains one OPEN-allowlist entry for the new scope, carrying the condition that
+closes it, per that list's own rule.
+
+### Verification
+
+Full suite run this session from a clean clone of `74497fd`: **2,738 app checks, 0 failing** — v5.52
+leg 1,025 · v5.53 leg 1,035 · parity **10/10** · ungated feature 668 · tooling 82 · `smoke_built`
+16/16 · **0 died**. This package changes no suite file, so that run is the baseline it inherits
+rather than a claim about the package; what the package itself was verified against is recorded in
+its `MANIFEST.txt`.
+
+Source unchanged at v5.53: `12a007ed8e57a391acba67b799eb5a2f` · built `index.html`
+`c99fd1fe27998e1dff2aa192c7e48ea2`.
+
 ## Unreleased — `qa/` only: the state census splits into three rows, and two state fixtures, 2026-08-28
 
 **No version bump, no release.** Nothing under `src/` changed. Source throughout is v5.53,

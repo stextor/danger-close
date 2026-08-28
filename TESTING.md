@@ -205,15 +205,18 @@ run overwrites nothing, but the stray files will confuse the next session's hash
 
 Both cost a session's time on 2026-08-13 and neither is a defect.
 
-**After `mk_testable.sh`, three files must be copied into place** or nine suites die at module load in a way that reads like a broken build:
+**After `mk_testable.sh`, four files must be copied into place** or ten suites die at module load in a way that reads like a broken build:
 
 ```
 cp qa/app_<current>.mjs qa/app_testable.mjs     # t7, t8, t19, t22
 cp qa/dom_<current>.cjs qa/dom_bundle.cjs       # t9, t11-t14, t16
 cp <current>.jsx DangerClose.jsx                # t8, t19 — at the RUN-FOLDER ROOT
+cp METHODOLOGY.md .                             # t31 — at the RUN-FOLDER ROOT
 ```
 
-The qa-baseline README records the first two as a setup line and the third only implicitly, as a precondition on the working folder. All three are listed here because a missing copy produces an import error, not an assertion failure, and an import error is the easiest thing in this project to misread as a regression. Note also that t8, t11–t14, t16, t19 and t22 take **no version argument** — passing one is harmless, omitting a copy is not.
+The qa-baseline README records the first two as a setup line and the third only implicitly, as a precondition on the working folder. All four are listed here because a missing copy produces an import error, not an assertion failure, and an import error is the easiest thing in this project to misread as a regression. Note also that t8, t11–t14, t16, t19 and t22 take **no version argument** — passing one is harmless, omitting a copy is not.
+
+⚠ **The fourth line was added 2026-08-28 and the omission was live for four releases.** `METHODOLOGY.md`'s presence at the run-folder root has been required since `t31` landed at v5.49, and it was recorded in **§L5 of this file** and in the qa-baseline README — but not *here*, in the block a session actually copies from. A session following this list alone therefore lost both `t31` legs to a `FATAL: METHODOLOGY.md not found`, twice, after already losing five suites to the first three lines. **A precondition recorded somewhere other than the checklist people execute is not recorded.** `t31` fails loudly and legibly, which is the only reason this cost minutes rather than a session.
 
 **Parity must run AFTER the prior leg, not before it.** `t2_engines.mjs compare` reads `/tmp/t2_<prior>_fingerprint.json`, which only exists once the prior leg's own `t2` has written it. Running parity first gives `ENOENT` and a stack trace with no explanation. `run_all.sh` and `runsuite.sh` both order it correctly; a session driving suites by hand may not. (`VERIFY.sh` also did, but it was **RETIRED at v5.49** — eleven releases stale and referenced by no operational document. Its header preserves this caveat.)
 
