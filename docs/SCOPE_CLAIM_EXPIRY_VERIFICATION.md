@@ -2,7 +2,8 @@
 
 | Field | Value |
 |---|---|
-| Status | **SCOPE ONLY — NO BUILD.** Four decisions open in §7. Nothing in this document has been built, and §7 must be resolved before anything is |
+| Status | ☑ **RETIRED — BUILT AND SHIPPED 2026-08-28**, as an ops package against v5.53 (no version bump). §7 resolved as recommended: **D-1 A1+A2** · **D-2 B2** · **D-3 see the deviation below** · **D-4 both halves, one release**. Built as `package_check.mjs` sections **H** and **I**, named in `OPERATIONS.md` §I, with negative controls P20–P28. Do not build from this document; read the status line, not the prose tense. |
+| ⚠ D-3 deviation | **D-3 placed the scope sweep in `runsuite.sh`. It was built into `package_check.mjs` instead, and the reason is a fact D-3 did not know:** `runsuite.sh` runs from `qa/` in a **flat working folder** that has no `docs/`, so the sweep would have found **zero scopes and reported green against an empty set** — the exact defect §I-1 now guards. `package_check.mjs` already takes a clone, so it can see the scopes. Raised before building rather than absorbed silently. |
 | Written | 2026-08-28 |
 | Against | **v5.53** · `src/DangerClose.jsx` md5 `12a007ed8e57a391acba67b799eb5a2f` · built `index.html` md5 `c99fd1fe27998e1dff2aa192c7e48ea2` · repo HEAD `b825fa5` |
 | Freshness (§A/§A2) | Run this session. Manifest = pool = committed tree on the source. **Suite drift found** — see §2 |

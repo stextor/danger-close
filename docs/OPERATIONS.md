@@ -511,6 +511,41 @@ instance of two documents disagreeing with nothing to compare them (cf. §A2 vs 
 `probe_classify`, and the manifest's deleted rotation-state section). **`qa/tools/package_check.mjs`
 is the executable half — run it on the zip before sending, per §L.**
 
+**Two checks were added to `package_check.mjs` on 2026-08-28, and they are named HERE because a
+gate nothing cross-references is the failure this section already records four times.**
+
+- **§H · provenance over an independent path.** Fetches `src/DangerClose.jsx` and `index.html` from
+  `raw.githubusercontent.com` — not the clone — and requires **both** md5s to appear in the newest
+  CHANGELOG entry's provenance line. This catches the shape that went undetected at v5.53: commit
+  `66db033` was titled "v5.53" while its `src/DangerClose.jsx` still hashed to **v5.52's** source,
+  because the built artifact was pushed ahead of the source. Offline, it **skips loudly**; it never
+  passes blind.
+- **§I · scope status-line sweep.** Lists every `docs/SCOPE_*.md` that carries neither a retirement
+  marker nor a place on the OPEN allowlist held inside the check itself. It **reports; it does not
+  decide** — see the warning below.
+
+⚠ **§H proves what the REPO holds, not what Pages SERVES.** A session cannot reach
+`stextor.github.io` (HTTP 403 — not in the egress allowlist), and Pages can trail a commit by
+minutes. The only thing that verifies the served bytes is the maintainer running this after a
+publish, and comparing the two lines it prints to the CHANGELOG's provenance line for that release:
+
+```bash
+curl -fsSL https://stextor.github.io/danger-close/ | md5sum          # what visitors actually get
+curl -fsSL https://raw.githubusercontent.com/stextor/danger-close/main/index.html | md5sum
+```
+
+Its weakness is this project's oldest one — a gate nobody is forced to run — so §H exists to cover
+the part that *can* be automated, and this paragraph exists so nobody mistakes one for the other.
+
+⚠ **Do NOT "improve" §I into something that retires scopes automatically.** The obvious rule —
+*the scope names a version, that version is in the CHANGELOG, therefore retire it* — is **unsound**,
+and the first row proves it: `## v5.34` is in the CHANGELOG, but v5.34 narrowed mid-build and the
+work re-landed at **v5.36**. That rule would have written a false history into the record
+automatically, at every ship. A machine can find candidates; only a person can close one, by
+reading what the release actually shipped. Both sections have negative controls in
+`qa/tools/package_check_controls.sh` (P20–P28), including a false-positive control: a check that
+cries wolf on a clean tree gets ignored, and an ignored gate has stopped being a gate.
+
 **`VERIFY.sh` is RETIRED (2026-08-25, v5.49) and no longer runs.** It sat at the repo root calling
 itself "release verification" while pinned to `v537`/`v538` — **eleven releases stale** — and while
 **this file referenced it exactly zero times.** It was not a step anyone skipped; it was a gate that
