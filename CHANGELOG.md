@@ -1,5 +1,38 @@
 # Changelog
 
+## Unreleased — docs only: the v5.54 disclosure scope, and the same NJ error found creator-side, 2026-08-28
+
+**No version bump here. Scope only — four decisions open in its §6, nothing built.** `KIND: ops`.
+
+`docs/SCOPE_v5_54_STATE_DISCLOSURE.md`. The route chosen for the audit's findings is **disclosure,
+not modelling**: the app will say what the model does instead of asserting what the law is.
+
+**Scoping it found the defect on a second surface.** `METHODOLOGY.md` §6 carries **the same wrong NJ
+fact** as the in-app note — *"NJ up to $75K income-limited"* — and its *Not modeled* list discloses
+the **income-limit** class only. **The Social Security offset is disclosed nowhere, on either
+surface**, and it is the mechanism in three of the four defective states. `t31` could not catch that:
+it asserts parity for limitations `METHODOLOGY.md` claims, and it claims this one nowhere.
+
+The scope ships three things beyond the four corrected notes. The clause generated at **L12103** from
+`excl65` itself — `· $75K/person 65+ exclusion`, rendered for all 19 states with an exclusion — is
+reworded to `model applies …`, because it states a modelling parameter as a legal fact and no
+corrected note can sit beside it otherwise. A standing caveat is added, **deliberately with no
+count**: *"6 of 19 verified"* would be true today and stale at the next audit, which is precisely the
+§E failure this week's earlier package corrected. And `t31` gains one key, `reduced by Social
+Security`, measured this session at **0 hits on both surfaces** so it cannot pass before the fix
+exists.
+
+⚠ The scope records that **two of its own four line numbers were wrong when first drafted** — it read
+L1052/L1055 for ME/MD where `census.cjs` resolves L1048/L1049. Caught by running the tool before the
+scope shipped rather than after, and left visible in the row rather than quietly corrected.
+
+Also flagged and **not** resolved: `STATE_RULES.CO` carries `ss: 0.5` while §6 says CO's 65+ *"may
+deduct all federally-taxed SS"*. That is a modelling contradiction, and a disclosure release must not
+settle it by rewording the note to match the code.
+
+Source unchanged at v5.53: `12a007ed8e57a391acba67b799eb5a2f` · built `index.html`
+`c99fd1fe27998e1dff2aa192c7e48ea2`.
+
 ## Unreleased — docs only: six state exclusion notes checked against primary sources, four wrong, 2026-08-28
 
 **No version bump. No source change. No figure moves. Findings only — nothing is fixed.** `KIND: ops`.
