@@ -1,5 +1,18 @@
 # SCOPE OF WORK — Standing Code Audit, Phase 2 (Section C)
 
+> ## ✅ RETIRED 2026-08-28 — FULFILLED. Phase 2 (Section C) executed and completed at **v5.28**.
+>
+> **Do not treat this as pending work.** The status line below reads *"APPROVED … Execution may begin
+> with sub-phase 2A"* and was true when written, on 2026-08-07.
+>
+> Confirmed by content, not by a version heading: `docs/AUDIT_2E_STATE_AND_PHASE2_ROLLUP.md` states
+> *"Sub-phase 2E is complete. Phase 2 (Section C) is complete"* — dated 2026-08-12, against build
+> v5.28 — and names **this document's D-5** as its governing decision. The audit ran through its
+> sub-phases and rolled up; Phase 3 followed (`AUDIT_PHASE3_ROLLUP.md`). Body kept as the record of
+> how the audit was scoped and what its five decisions were.
+>
+> *Retired 2026-08-28 by the second scope-retirement sweep. The first sweep (§I, 2026-08-26) found seven of nine stale; twelve had drifted again by v5.53. Confirmed by CONTENT against the release that shipped it — not by the presence of a version heading in the CHANGELOG, which is not evidence (see this file's note, and v5.34's).*
+
 **Status:** APPROVED — all five decisions resolved by Steve, 2026-08-07 (§7). Execution may begin with
 sub-phase 2A.
 

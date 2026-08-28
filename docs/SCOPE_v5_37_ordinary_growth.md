@@ -1,5 +1,16 @@
 # SCOPE — v5.37: ordinary money grows, and its growth is taxed (E-15)
 
+> ## ☑ RETIRED 2026-08-28 — BUILT AND SHIPPED AS **v5.37** (2026-08-16).
+>
+> **Do not build from this document.** The status line below reads *"DECISIONS RESOLVED by Steve,
+> 2026-08-16 — ready to build"* and was true when written, against shipped v5.36.
+>
+> Confirmed by content: `CHANGELOG.md` v5.37 — *"ordinary money grows, and its growth is finally
+> taxed (E-15 fixed)"* — is this scope's governing finding and its fix. Body kept as the record of
+> what was decided and why.
+>
+> *Retired 2026-08-28 by the second scope-retirement sweep. The first sweep (§I, 2026-08-26) found seven of nine stale; twelve had drifted again by v5.53. Confirmed by CONTENT against the release that shipped it — not by the presence of a version heading in the CHANGELOG, which is not evidence (see this file's note, and v5.34's).*
+
 **Governing finding:** `docs/ARCHITECTUREIssues.md` E-15 · **Premise verified against:**
 `src/DangerClose.jsx` md5 `b7396c1c14861dc149b71e8edb1a00d5` (shipped v5.36), 2026-08-16, by AST
 census (`qa/tools/census.cjs`) and direct reading — not inherited from the finding text.

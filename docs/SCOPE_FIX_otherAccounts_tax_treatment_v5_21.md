@@ -1,5 +1,28 @@
 # SCOPE — Give `otherAccounts` a tax treatment (finding D-2D-3)
 
+> ## ✅ RETIRED 2026-08-28 — FULFILLED. All THREE child releases shipped: (a) v5.22 · (b) v5.24 · (c) v5.25.
+>
+> **Do not build from this document.** Its status line below reads *"§7 RESOLVED … The build gate is
+> open for release (a) only; (b) and (c) build in sequence after it"* — true when written on
+> 2026-08-10, against shipped v5.21. This is a **parent** scope, so retiring it required confirming
+> every child, not one release; §G is explicit that an open decision is the thing retirement must not
+> bury.
+>
+> | D-7 release | What it was | Shipped | Confirmed by |
+> |---|---|---|---|
+> | **(a)** consolidate residual | the ×7 `Math.max(0, balance − roth − trad)` duplication → one helper | **v5.22** | CHANGELOG v5.22, *"the first of three … deliberately changes no output at all"* |
+> | **(b)** Engine D `magi` + false copy | the Withdrawal tab's false Priority 1 copy | **v5.24** | scoped separately as `SCOPE_ENGINE_D_MAGI_v5_24.md`; CHANGELOG v5.24 |
+> | **(c)** fold and classify | give `otherAccounts` a recorded tax treatment | **v5.25** | CHANGELOG v5.25, *"Other accounts now record what kind of money they hold"*; and in source at `OTHER_TAX_TYPES` plus the `applyLoadedData` name back-fill |
+>
+> ⚠ **One decision did NOT ship as decided, and the divergence is recorded here rather than lost.**
+> **D-2** resolved that HSA would be *"held out of the split entirely — classified as neither trad
+> nor Roth."* The shipped code went further: `hsa` is one of the five members of `OTHER_TAX_TYPES`,
+> alongside `taxable`, `trad`, `roth` and `annuity`. The outcome is defensible and is not a defect —
+> but it is not what D-2 says, and a reader of D-2 alone would be misled. Body kept as the record of
+> all seven decisions and the three premise corrections that produced revision 2.
+>
+> *Retired 2026-08-28 by the second scope-retirement sweep. The first sweep (§I, 2026-08-26) found seven of nine stale; twelve had drifted again by v5.53. Confirmed by CONTENT against the release that shipped it — not by the presence of a version heading in the CHANGELOG, which is not evidence (see this file's note, and v5.34's).*
+
 **REVISION 2 — supersedes `SCOPE_FIX_otherAccounts_tax_treatment_v5_15.md`.**
 **Status:** **§7 RESOLVED 2026-08-10.** Nothing built in the re-verification session. Release (a) —
 the residual consolidation — is scoped separately in `SCOPE_CONSOLIDATE_taxable_residual_v5_22.md`

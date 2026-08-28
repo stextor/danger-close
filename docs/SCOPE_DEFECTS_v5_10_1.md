@@ -1,5 +1,17 @@
 # Danger Close — v5.10.1 scope (defect-fix release)
 
+> ## ✅ RETIRED 2026-08-28 — BUILT AND SHIPPED AS **v5.10.1**.
+>
+> **Do not build from this document.** It carries no status line of its own, which is why it read as
+> live: there was nothing in it to go stale, and nothing to mark it done either.
+>
+> Confirmed by content: `CHANGELOG.md` v5.10.1 is *"the three pre-existing defects found by the
+> rebuilt regression baseline, and nothing else"* — this scope's subject — and records each fix as a
+> dated KNOWN-DEFECT pin flipped to a positive assertion. Body kept as the record of what was found
+> and how it was fixed.
+>
+> *Retired 2026-08-28 by the second scope-retirement sweep. The first sweep (§I, 2026-08-26) found seven of nine stale; twelve had drifted again by v5.53. Confirmed by CONTENT against the release that shipped it — not by the presence of a version heading in the CHANGELOG, which is not evidence (see this file's note, and v5.34's).*
+
 **Type:** patch release · defect fixes only, no new features
 **Base:** v5.10 (`src/DangerClose.jsx` md5 `204d8e64be7ed07813c01476b8761647`)
 **Regression baseline:** v5.9.2 (`a1f0d4a76565c63494628e957c66ff91`)

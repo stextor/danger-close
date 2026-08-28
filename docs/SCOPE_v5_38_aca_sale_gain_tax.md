@@ -1,5 +1,16 @@
 # SCOPE — v5.38: the ACA-premium sale's gain is taxed (the standing candidate)
 
+> ## ☑ RETIRED 2026-08-28 — BUILT AND SHIPPED AS **v5.38** (2026-08-17).
+>
+> **Do not build from this document.** The status line below reads *"§8 decisions RESOLVED by Steve
+> … Build may proceed"* and was true when written, against shipped v5.37.
+>
+> Confirmed by content: `CHANGELOG.md` v5.38 — *"the ACA-premium sale's gain is taxed, and the IRMAA
+> lookback sees it"* — is this scope's subject, including the lookback routing that its rev B
+> cross-reference correction was about. Body kept as the record of what was decided and why.
+>
+> *Retired 2026-08-28 by the second scope-retirement sweep. The first sweep (§I, 2026-08-26) found seven of nine stale; twelve had drifted again by v5.53. Confirmed by CONTENT against the release that shipped it — not by the presence of a version heading in the CHANGELOG, which is not evidence (see this file's note, and v5.34's).*
+
 **Rev B — §8 decisions RESOLVED by Steve, 2026-08-17 (recommendations adopted as stated).
 Build may proceed.** Rev B also corrects one cross-reference error in §4 (it said "decision 2"
 where the lookback question is decision 1) and folds decision 1's ripples into §3/§5/§6.

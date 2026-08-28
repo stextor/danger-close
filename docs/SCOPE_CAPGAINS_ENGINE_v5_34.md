@@ -1,5 +1,24 @@
 # SCOPE — v5.34 · the engine half of realized capital gains
 
+> ## ⚫ RETIRED 2026-08-28 — SUPERSEDED. The work here did NOT ship at v5.34; it shipped at **v5.36**.
+>
+> **Do not build from this document.** Its status line below still reads *"ALL DECISIONS RESOLVED.
+> BUILD AUTHORISED"* and was true when written, on 2026-08-14, against shipped v5.33.
+>
+> ⚠ **Read the reason carefully, because the obvious test gives the wrong answer.** `## v5.34` is
+> present in `CHANGELOG.md`, so a sweep that retires a scope whenever its named version shipped would
+> retire this one as *"built at v5.34"* — and would be recording a false history. **v5.34 narrowed
+> mid-build.** Its own entry says the capital-gains engine work *"is backed out and held for v5.35"*;
+> what v5.34 actually shipped was the conversion-funding basis tracker, Engine A only. The work
+> scoped here re-landed at **v5.36**, under `SCOPE_v5_36_drawdown_capital_gains.md` — whose title
+> says *"(S-7, re-landed)"* for exactly this reason.
+>
+> **A version heading in the CHANGELOG proves a release happened, not that this scope's contents were
+> in it.** That is the general lesson and it is why the 2026-08-28 sweep checked content rather than
+> version numbers. Superseded by the v5.36 scope; body kept as the record of what was decided.
+>
+> *Retired 2026-08-28 by the second scope-retirement sweep. The first sweep (§I, 2026-08-26) found seven of nine stale; twelve had drifted again by v5.53. Confirmed by CONTENT against the release that shipped it — not by the presence of a version heading in the CHANGELOG, which is not evidence (see this file's note, and v5.34's).*
+
 **Status — rev B, 2026-08-14: ALL DECISIONS RESOLVED. BUILD AUTHORISED.** No source has been
 edited yet. §9 records each decision, who took it and why; §5's D-4 work is **discharged** by the
 v5.33 D-4 test addendum, which shipped separately.

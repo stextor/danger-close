@@ -1,5 +1,21 @@
 # SCOPE — release (b), Engine D `magi` + the false copy
 
+> ## ☑ RETIRED 2026-08-28 — BUILT AND SHIPPED AS **v5.24**, twenty-nine releases before this note.
+>
+> **Do not build from this document.** Its status line below reads **"BUILD GATE OPEN"** — the
+> strongest "pick me up" signal in the tree, and false since 2026-08-11. It was true the day it was
+> written, against shipped v5.23, and nothing in the release path made it expire.
+>
+> Confirmed by content: this scope declares *"Version: v5.24 — disclosure-only; no engine touched"*
+> and its subject is the Withdrawal tab's false Priority 1 copy plus the Field Manual's matching
+> "non-retirement" error. `CHANGELOG.md` v5.24 is that release almost word for word — *"The
+> Withdrawal tab was telling users something false about $147,000 of the example household … No
+> engine is touched."* This is release **(b)** of the three defined by D-7 in its governing parent,
+> `SCOPE_FIX_otherAccounts_tax_treatment_v5_21.md`. Body kept as the record of what was decided,
+> including §1's correction of the premise it inherited.
+>
+> *Retired 2026-08-28 by the second scope-retirement sweep. The first sweep (§I, 2026-08-26) found seven of nine stale; twelve had drifted again by v5.53. Confirmed by CONTENT against the release that shipped it — not by the presence of a version heading in the CHANGELOG, which is not evidence (see this file's note, and v5.34's).*
+
 **Status: BUILD GATE OPEN. §7 decisions RESOLVED 2026-08-11 (Option 3 · blunt · METHODOLOGY yes).**
 The premise as carried forward does **not** hold — §1 — and the release is re-scoped accordingly.
 No source has been changed by this document.

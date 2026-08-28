@@ -553,6 +553,31 @@ Until something checks it, the honest reading is: **treat any scope status line 
 was true when it was written, not of what is true now** — and confirm against the CHANGELOG and the
 source before believing either "buildable" or "blocked."
 
+⚠ **Swept again 2026-08-28, and the rule above held while nothing enforced it.** Twenty-odd releases
+after the first sweep, **twelve** scopes carried live-looking status lines again. Eight were retired;
+four are genuinely open. The worst read **BUILD GATE OPEN** about `SCOPE_ENGINE_D_MAGI_v5_24.md`,
+shipped at v5.24 — **twenty-nine releases earlier**, and the strongest "pick me up" signal in the
+tree. The first sweep did not fail; it simply was not repeated, because nothing repeats it.
+
+⚠ **A version heading in the CHANGELOG is NOT evidence that a scope's work shipped.** This is the
+sharp lesson of the second sweep and it disqualifies the obvious automation. `## v5.34` is in the
+CHANGELOG, so the test *"named version shipped → retire"* marks `SCOPE_CAPGAINS_ENGINE_v5_34.md`
+built at v5.34. **It was not.** v5.34 narrowed mid-build — its own entry says the capital-gains
+engine work *"is backed out and held for v5.35"* — and the work re-landed at **v5.36**. That test
+would have written a false history into the record, automatically, at every ship. A second brief
+error found the same day: four scopes were classified as unconfirmable because they *"predate the
+CHANGELOG's oldest entry (`## v5.7`)"* — v5.10.1, v5.10.2, v5.21 and v5.24 all **postdate** v5.7 and
+all have entries. Decimal sort is not version sort.
+
+**The sound test is the expensive one: read what the release actually shipped and compare it to what
+the scope proposed.** Automation can find candidates; it cannot resolve them. A parent scope needs
+every child confirmed, not one release — `SCOPE_FIX_otherAccounts_tax_treatment_v5_21.md` defined
+three, which landed at v5.22, v5.24 and v5.25, and one of its seven decisions (D-2, on HSA) did not
+ship as decided. Retiring on the parent's name alone would have buried that. The standing options
+for making any of this expire automatically are scoped, undecided, in
+`docs/SCOPE_CLAIM_EXPIRY_VERIFICATION.md` — which also covers the served-page half of the same
+failure class, deliberately, so this project does not acquire two more gates nothing runs.
+
 **Teach the suite the new version tag — expect this every release.** Several suites gate behavior on an
 enumerated list of version tags, and a new tag falls through to the wrong branch. At v5.11 six such
 edits were needed. Two shapes to look for:

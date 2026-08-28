@@ -1,5 +1,18 @@
 # SCOPE — v5.36: the drawdown realizes capital gains (S-7, re-landed)
 
+> ## ☑ RETIRED 2026-08-28 — BUILT AND SHIPPED AS **v5.36** (2026-08-16).
+>
+> **Do not build from this document.** The status line below reads *"ALL SEVEN DECISIONS RESOLVED —
+> BUILD AUTHORISED"* and was true when written, on 2026-08-15, against shipped v5.35.
+>
+> Confirmed by content: `CHANGELOG.md` v5.36 — *"the drawdown realizes capital gains, and the tax
+> engines consume them"* — describes this scope's subject, Engine D realizing gain on the spending
+> sale (never on the sleeve RMD) with Engines B and C consuming the series. This scope is where the
+> v5.34 engine work re-landed after that release narrowed; see `SCOPE_CAPGAINS_ENGINE_v5_34.md`.
+> Body kept as the record of what was decided and why.
+>
+> *Retired 2026-08-28 by the second scope-retirement sweep. The first sweep (§I, 2026-08-26) found seven of nine stale; twelve had drifted again by v5.53. Confirmed by CONTENT against the release that shipped it — not by the presence of a version heading in the CHANGELOG, which is not evidence (see this file's note, and v5.34's).*
+
 **Revision 3, 2026-08-15. ALL SEVEN DECISIONS RESOLVED — BUILD AUTHORISED.** Supersedes revisions 1
 and 2. Revision 2 raised a seventh decision that revision 1 did not contain; it is resolved as **(b)**,
 and the mitigation its resolution depended on has been **tested rather than assumed** — §5a.
