@@ -63,6 +63,11 @@ tally "t30-$PRIOR" node t30_legible.mjs "$PRIOR"
 tally "t30-$CUR"   node t30_legible.mjs "$CUR"
 tally "t31-$PRIOR" node t31_disclosure_parity.mjs "$PRIOR"
 tally "t31-$CUR"   node t31_disclosure_parity.mjs "$CUR"
+# t32 (v5.53) is the ONLY suite that witnesses the ladder-dividend release at the engine layer.
+# The DOM diff reports "nothing moved" for it by construction (it is blind to the Roth tab), so a
+# runner that stops at t31 would report this release green without executing anything that can see it.
+tally "t32-$PRIOR" node t32_ladder_dividend.mjs "$PRIOR"
+tally "t32-$CUR"   node t32_ladder_dividend.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
