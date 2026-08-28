@@ -333,6 +333,138 @@ if (!WORK || !existsSync(WORK)) {
     missing.length === 0, missing.join(" | "));
 }
 
+// ── H · PROVENANCE over an INDEPENDENT path (added 2026-08-28, decision D-1 route A1) ────
+// Every other check in this file reads the clone. The clone is the same object the package was
+// built against, so it cannot answer "does what GitHub actually holds match what the release
+// CLAIMS?" — a claim that nothing makes expire (docs/SCOPE_CLAIM_EXPIRY_VERIFICATION.md §1).
+//
+// The gap is not hypothetical. Commit 66db033 was titled "v5.53" while `src/DangerClose.jsx` at
+// that commit still hashed to v5.52's source: the built artifact went up ahead of the source, and
+// for the span between that commit and b825fa5 the repo carried a release whose source was the
+// PREVIOUS one. Nothing detected the window while it was open.
+//
+// So: fetch the two artifacts over raw.githubusercontent.com — a path that is not the clone — and
+// compare BOTH to the provenance line of the newest CHANGELOG entry. Source alone is not enough;
+// built alone is not enough; the 66db033 shape is precisely the two disagreeing.
+//
+// ⚠ This proves what the REPO holds, not what Pages SERVES. Pages can trail a commit, and a
+// session cannot reach stextor.github.io (403 — not in the egress allowlist). The maintainer-side
+// one-liner in OPERATIONS §I is the only thing that verifies the served bytes, and this check does
+// not replace it. Saying so here is the point: a check that overstates what it proves is worse
+// than no check.
+console.log("\nH. Provenance \u2014 what GitHub holds vs what the CHANGELOG claims (independent path)");
+{
+  const RAW = "https://raw.githubusercontent.com/stextor/danger-close/main";
+  const chPath = join(CLONE, "CHANGELOG.md");
+  if (!existsSync(chPath)) {
+    skipped("H-1: provenance cross-check", "no CHANGELOG.md in the clone");
+  } else {
+    const ch = readFileSync(chPath, "utf8");
+    // Newest entry only. The provenance line (OPERATIONS §G, from v5.12) ends that entry and
+    // carries both md5s; older entries have their own and must not be matched.
+    const firstHeading = ch.indexOf("\n## v");
+    const head = firstHeading > 0 ? ch.slice(0, ch.indexOf("\n## v", firstHeading + 1)) : ch;
+    const hashes = [...head.matchAll(/\b([0-9a-f]{32})\b/g)].map(m => m[1]);
+    const version = (/^## (v[0-9][^\s—-]*)/m.exec(ch) || [, "?"])[1];
+    if (hashes.length < 2) {
+      skipped("H-1: provenance cross-check",
+        `newest CHANGELOG entry (${version}) carries ${hashes.length} md5(s); need the source+built pair`);
+    } else {
+      let fetched = null;
+      try {
+        const get = u => execFileSync("curl", ["-fsSL", "--max-time", "25", u],
+          { maxBuffer: 1 << 28, encoding: "buffer" });
+        fetched = {
+          src: createHash("md5").update(get(`${RAW}/src/DangerClose.jsx`)).digest("hex"),
+          built: createHash("md5").update(get(`${RAW}/index.html`)).digest("hex"),
+        };
+      } catch (e) {
+        // Offline is a legitimate state; a silent pass is not. Skip loudly, per this file's idiom.
+        skipped("H-1: provenance cross-check", `could not reach raw.githubusercontent.com (${e.code || "fetch failed"})`);
+      }
+      if (fetched) {
+        const set = new Set(hashes);
+        ck(`H-1: served source md5 appears in the newest CHANGELOG entry (${version})`,
+          set.has(fetched.src), `fetched ${fetched.src.slice(0, 8)}, entry lists ${hashes.map(h => h.slice(0, 8)).join(" ")}`);
+        ck(`H-2: served built index.html md5 appears in the newest CHANGELOG entry (${version})`,
+          set.has(fetched.built), `fetched ${fetched.built.slice(0, 8)}, entry lists ${hashes.map(h => h.slice(0, 8)).join(" ")}`);
+        // The 66db033 shape: both individually plausible, but taken from different releases.
+        // Also compare to the clone — a mismatch here means the clone and the raw path disagree,
+        // which is either a mid-push window or a cache, and is worth saying out loud either way.
+        const cs = existsSync(join(CLONE, "src/DangerClose.jsx")) ? md5(join(CLONE, "src/DangerClose.jsx")) : null;
+        const cb = existsSync(join(CLONE, "index.html")) ? md5(join(CLONE, "index.html")) : null;
+        ck("H-3: the independent path and the clone agree on both artifacts",
+          cs === fetched.src && cb === fetched.built,
+          `clone src=${(cs || "?").slice(0, 8)} raw src=${fetched.src.slice(0, 8)} | clone built=${(cb || "?").slice(0, 8)} raw built=${fetched.built.slice(0, 8)}`);
+      }
+    }
+  }
+}
+
+// ── I · SCOPE STATUS LINES (added 2026-08-28, decision D-2 route B2) ─────────────────────
+// A scope's status line is written by the session that drafts it and read by every session after;
+// nothing in the release path makes it expire. Swept 2026-08-26: nine live-looking, SEVEN already
+// shipped, two saying DO NOT PROCEED about shipped work. Swept again 2026-08-28: twelve, one
+// reading BUILD GATE OPEN about work shipped twenty-nine releases earlier.
+//
+// ⚠ This REPORTS; it does not decide, and that is deliberate. The obvious automation — "the scope
+// names a version, that version is in the CHANGELOG, so retire it" — is UNSOUND. `## v5.34` is in
+// the CHANGELOG, but v5.34 narrowed mid-build ("backed out and held for v5.35") and the work
+// re-landed at v5.36; that test would have written a false history automatically, at every ship.
+// Resolving a candidate means reading what the release actually shipped. A machine can find the
+// candidates; only a person can close them.
+//
+// The OPEN list below is the allowlist, and it lives HERE rather than in a document on purpose: a
+// scope that is neither retired nor listed fails this check, so adding one without classifying it
+// is loud. Keep it short, and delete from it when a scope is retired.
+console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, does not decide)");
+{
+  const docs = join(CLONE, "docs");
+  if (!existsSync(docs)) {
+    skipped("I-1: scope status-line sweep", "no docs/ in the clone");
+  } else {
+    const OPEN = new Set([
+      "SCOPE_STATE_FIXTURES.md",                  // awaiting decisions in its §5
+      "SCOPE_v5_40_disclosures_and_mechanics.md", // SCOPE ONLY, open decisions in its §7
+      "SCOPE_FIX_tidyup_six.md",                  // three decisions open in its §7
+      "SCOPE_STANDING_AUDIT.md",                  // not a build scope at all (OPERATIONS §K)
+      // ⚠ SCOPE_CLAIM_EXPIRY_VERIFICATION.md was here while it was open. It was retired at its own
+      // ship on 2026-08-28 and REMOVED from this list in the same edit, which is the discipline
+      // this list needs: an allowlist that keeps a retired scope is a stale claim about a stale
+      // claim. If you add an entry, note what closes it.
+    ]);
+    const RETIRED = /\bRETIRED\b|\bSUPERSEDED\b|\bFULFILLED\b/;
+    const scopes = readdirSync(docs).filter(f => /^SCOPE_.*\.md$/.test(f)).sort();
+    // ⚠ Read each scope from the PACKAGE when the package replaces it, and from the clone
+    // otherwise — i.e. evaluate the tree AS THIS PACKAGE WILL LEAVE IT. Reading the clone alone
+    // was the first draft and it was wrong in the worst direction: a release that retires a scope
+    // would be marked red BY the retirement it is shipping, so every well-behaved package would
+    // trip this check and it would be trained into noise within two releases. The question worth
+    // asking is not "is the tree clean now" but "will the tree be clean once this lands."
+    const shipped = f => {
+      const p = join(GH, "docs", f);
+      return existsSync(p) ? p : join(docs, f);
+    };
+    // A sweep that finds no scopes is a green reading from an empty set (OPERATIONS §B2). Say so.
+    ck("I-1: the scope sweep actually found scopes to sweep", scopes.length > 0, `${scopes.length} found`);
+    const unclassified = [];
+    for (const f of scopes) {
+      if (OPEN.has(f)) continue;
+      // Read the head only: a retirement marker belongs at the top, where a reader meets it.
+      const head = readFileSync(shipped(f), "utf8").split("\n").slice(0, 12).join("\n");
+      if (!RETIRED.test(head)) unclassified.push(f);
+    }
+    ck("I-2: every scope is retired/superseded/fulfilled or on the OPEN allowlist, AS THIS PACKAGE LEAVES THE TREE",
+      unclassified.length === 0,
+      unclassified.length ? `unclassified: ${unclassified.join(", ")} \u2014 read what the release SHIPPED, not the version number` : "");
+    // The allowlist is itself a claim that expires. A stale entry is the same defect one level up.
+    const ghosts = [...OPEN].filter(f => !scopes.includes(f));
+    ck("I-3: no OPEN-allowlist entry names a scope that no longer exists",
+      ghosts.length === 0, ghosts.join(", "));
+    console.log(`     (informational: ${scopes.length} scopes, ${OPEN.size} held open by name)`);
+  }
+}
+
 // ── verdict ──────────────────────────────────────────────────────────────────────────────
 console.log(`\npackage_check: ${pass} passed, ${fail} failed, ${skip} skipped`);
 if (skip) console.log("  \u26a0 A SKIPPED check is not a passed one. Re-run with a clone to close the gap.");

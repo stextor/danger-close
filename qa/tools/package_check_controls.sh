@@ -66,7 +66,11 @@ run () {   # $1 = label, $2 = expected check id, $3.. = mutation commands run in
   ( cd "$D" && eval "$@" ) >/dev/null 2>&1
   local out fired
   out=$(node "$PKG_CHECK" "$D" "$CLONE" 2>&1)
-  fired=$(echo "$out" | grep "✗" | grep -oE '[A-G]-[0-9]+b?' | sort -u | tr '\n' ',')
+  # ⚠ The character class must cover EVERY section package_check emits. It read [A-G] until
+  # 2026-08-28, when sections H and I were added — under the old class every H/I control would
+  # have printed *** NOT CAUGHT ***, which reads as "the new checks are broken" when in fact the
+  # harness could not see them. Widen this the same day you add a section.
+  fired=$(echo "$out" | grep "✗" | grep -oE '[A-I]-[0-9]+b?' | sort -u | tr '\n' ',')
   if echo "$fired" | grep -q "$want"; then
     PASS=$((PASS+1)); printf "  CAUGHT by %-6s %s\n" "$want" "$label"
   else
@@ -138,9 +142,101 @@ else
   skip "P15 KIND undeclared (fail-closed default)" "no ops package given as the third argument"
 fi
 
-rm -rf /tmp/pkctl
-echo
-echo "CONTROLS: $PASS fired as expected, $MISS did NOT, $SKIP skipped"
+# ── P20–P28 · sections H and I (added 2026-08-28) ─────────────────────────────────────────────
+# These differ in kind from everything above: H and I assert about the CLONE, not the package, so
+# they need a helper that perturbs a copy of the clone and leaves the package alone.
+runc () {  # $1 = label, $2 = expected check id, $3.. = mutation commands run inside the clone copy
+  local label="$1" want="$2"; shift 2
+  rm -rf /tmp/pkctlc && cp -r "$CLONE" /tmp/pkctlc
+  ( cd /tmp/pkctlc && eval "$@" ) >/dev/null 2>&1
+  local out fired
+  out=$(node "$PKG_CHECK" "$APP" /tmp/pkctlc 2>&1)
+  fired=$(echo "$out" | grep "✗" | grep -oE '[A-I]-[0-9]+b?' | sort -u | tr '\n' ',')
+  if echo "$fired" | grep -q "$want"; then
+    PASS=$((PASS+1)); printf "  CAUGHT by %-6s %s\n" "$want" "$label"
+  else
+    MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** (wanted %s, fired: %s) %s\n" "$want" "${fired:-none}" "$label"
+  fi
+  rm -rf /tmp/pkctlc
+}
+
+CH_SRC=$(grep -oE '^\| Source md5 \| `[0-9a-f]{32}`' "$CLONE/PROJECT_KNOWLEDGE_INDEX.md" 2>/dev/null | grep -oE '[0-9a-f]{32}' | head -1)
+CH_BLT=$(grep -oE '^\| Built .index.html. md5 \| `[0-9a-f]{32}`' "$CLONE/PROJECT_KNOWLEDGE_INDEX.md" 2>/dev/null | grep -oE '[0-9a-f]{32}' | head -1)
+
+if [ -n "$CH_SRC" ] && [ -n "$CH_BLT" ]; then
+  runc "P20 CHANGELOG provenance names the wrong SOURCE md5" H-1 \
+    "python3 - <<'EOF'
+import io
+p='/tmp/pkctlc/CHANGELOG.md'; t=io.open(p,encoding='utf-8').read()
+i=t.index('\n## v'); j=t.index('\n## v', i+1)
+io.open(p,'w',encoding='utf-8').write(t[:j].replace('$CH_SRC','deadbeefdeadbeefdeadbeefdeadbeef',1)+t[j:])
+EOF"
+  runc "P21 CHANGELOG provenance names the wrong BUILT md5" H-2 \
+    "python3 - <<'EOF'
+import io
+p='/tmp/pkctlc/CHANGELOG.md'; t=io.open(p,encoding='utf-8').read()
+i=t.index('\n## v'); j=t.index('\n## v', i+1)
+io.open(p,'w',encoding='utf-8').write(t[:j].replace('$CH_BLT','0badc0de0badc0de0badc0de0badc0de',1)+t[j:])
+EOF"
+else
+  skip "P20/P21 provenance md5 controls" "could not read the current-build md5 pair from PROJECT_KNOWLEDGE_INDEX.md"
+fi
+
+# P22 is THE control for this section: the 66db033 shape, where the built artifact was pushed
+# ahead of the source and the repo carried a release whose source was the previous one.
+PRIOR_JSX=$(ls /mnt/project/DangerClose-v5_*.jsx 2>/dev/null | head -1)
+if [ -n "$PRIOR_JSX" ]; then
+  runc "P22 clone source is a DIFFERENT release from the served one (the 66db033 shape)" H-3 \
+    "cp '$PRIOR_JSX' src/DangerClose.jsx"
+else
+  skip "P22 the 66db033 shape" "no prior-release .jsx available to roll back to"
+fi
+
+runc "P23 every scope removed — a green reading from an EMPTY SET" I-1 "rm -f docs/SCOPE_*.md"
+runc "P24 a shipped scope loses its retirement marker and reads live again" I-2 \
+  "for f in docs/SCOPE_*.md; do grep -qE 'RETIRED|SUPERSEDED|FULFILLED' \"\$f\" && { grep -vE 'RETIRED|SUPERSEDED|FULFILLED' \"\$f\" > \"\$f.t\" && mv \"\$f.t\" \"\$f\"; break; }; done"
+runc "P25 a NEW unclassified scope is added" I-2 \
+  "printf '# SCOPE\n\n**Status: BUILD AUTHORISED.**\n' > docs/SCOPE___control__.md"
+runc "P26 an OPEN-allowlist entry names a scope that no longer exists" I-3 \
+  "rm -f docs/SCOPE_FIX_tidyup_six.md"
+
+# ── P27 · the FALSE-POSITIVE control, and the one most worth keeping ──────────────────────────
+# A reporting check that cries wolf on a clean tree gets ignored, and an ignored gate has stopped
+# being a gate — the VERIFY.sh failure by a different route. Assert the clean tree stays GREEN.
+#
+# ⚠ "Clean" means the tree AS THIS PACKAGE WILL LEAVE IT, not the tree as committed today. On its
+# first draft this control compared against the bare clone and failed — correctly, because the
+# package retires a scope that is still unclassified in the committed tree. The check was right and
+# the control was asking the wrong question. Overlay github/ onto a clone copy first: that is the
+# state the sweep will actually meet after the upload.
+rm -rf /tmp/pkctlp && cp -r "$CLONE" /tmp/pkctlp
+( cd "$APP/github" && find . -type f -print0 | while IFS= read -r -d '' f; do
+    mkdir -p "/tmp/pkctlp/$(dirname "$f")" && cp "$f" "/tmp/pkctlp/$f"
+  done ) >/dev/null 2>&1
+out27=$(node "$PKG_CHECK" "$APP" /tmp/pkctlp 2>&1)
+if echo "$out27" | grep -q "✓ I-2"; then
+  PASS=$((PASS+1)); printf "  CAUGHT by %-6s %s\n" "I-2" "P27 the POST-SHIP tree produces no scope candidates (false-positive control)"
+else
+  MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** P27 the sweep flags the post-ship tree — it will be ignored\n"
+  echo "$out27" | grep "I-2" | sed 's/^/      /'
+fi
+rm -rf /tmp/pkctlp
+
+# ── P28 · offline must SKIP LOUDLY, never pass ────────────────────────────────────────────────
+# H depends on the network. The failure mode to prevent is not "offline"; it is "offline and
+# green." So the assertion here is a SKIP, not a failure — and this control was WRONG on its first
+# draft: it demanded H-1 go red, which would have meant "no CHANGELOG" was treated as a defect in
+# the repo rather than a gap in what this tool could see. The check was right and the control was
+# wrong. Kept as written, because the distinction is the whole point of the section.
+rm -rf /tmp/pkctlc && cp -r "$CLONE" /tmp/pkctlc && rm -f /tmp/pkctlc/CHANGELOG.md
+out28=$(node "$PKG_CHECK" "$APP" /tmp/pkctlc 2>&1)
+if echo "$out28" | grep -q "SKIPPED: H-1"; then
+  PASS=$((PASS+1)); printf "  CAUGHT by %-6s %s\n" "H-1" "P28 CHANGELOG absent — H skips LOUDLY instead of passing"
+else
+  MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** P28 H did not skip loudly with no CHANGELOG — it may be passing blind\n"
+fi
+rm -rf /tmp/pkctlc
+
 [ "$SKIP" -gt 0 ] && echo "  ⚠ A SKIPPED control is not a passing one."
 [ "$MISS" -gt 0 ] && { echo "  A control that does not fire is a FINDING — investigate the check, never soften it."; exit 1; }
 exit 0
