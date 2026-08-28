@@ -47,7 +47,7 @@ import { dirname, join } from "path";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v549";
-const KNOWN_VERSIONS = ["v548", "v549", "v550", "v551", "v552"];
+const KNOWN_VERSIONS = ["v548", "v549", "v550", "v551", "v552", "v553"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   process.exit(1);
@@ -176,8 +176,19 @@ const KEYS = [
   // key on the SUBJECT passes before the fix exists - the exact vacuity the v5.51 control caught.
   // "dividends and realized capital gains" is also already present once in the render tree. The
   // key names what CHANGED: the clause that says the ladder figure LEAVES THEM OUT.
-  { key: "omits dividends and realized capital gains", since: "v552",
-    why: "the ladder's IRMAA verdict is computed from a MAGI missing two additive terms" },
+  // ⚠ `until` is set because v5.53 CARRIES the dividend term, so this sentence is false from
+  // v5.53 on. A key with no expiry would hold the stale copy in place and pass because it
+  // survived — the v5.26 lock, one level up (OPERATIONS §B2).
+  { key: "omits dividends and realized capital gains", since: "v552", until: "v552",
+    why: "the ladder's IRMAA verdict was computed from a MAGI missing two additive terms" },
+  // Added v5.53 (D-10 modelling half). Dividends now land; realized capital gains do not, by
+  // decision D-2, and the earned-income term stays narrower by scope. The disclosure narrowed
+  // with the fix, in the same release, and this key is what holds those two together.
+  // ⚠ KEY CHOICE. "realized capital gains" would be vacuous: v5.52's copy already contained it
+  // ("omits dividends and realized capital gains"), so a key on it passes before the fix exists.
+  // The key names what v5.53 CHANGED — that the column now carries the dividend term.
+  { key: "counts the taxable sleeve's dividends", since: "v553",
+    why: "the ladder's MAGI now carries the term that was the whole measured effect" },
 ];
 
 T("C-0: every declared key is named in METHODOLOGY.md \u2014 parity is only owed for limitations " +
@@ -185,7 +196,7 @@ T("C-0: every declared key is named in METHODOLOGY.md \u2014 parity is only owed
   KEYS.every(k => inMeth(k.key)),
   KEYS.filter(k => !inMeth(k.key)).map(k => k.key).join(", "));
 
-const POST = VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552";
+const POST = VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553";
 // EACH KEY IS GATED TO THE RELEASE THAT LANDED IT, not to the shared POST flag above.
 // Found at the v5.50 build. Under one shared gate the v549 leg went GREEN on v5.50's expectation
 // for the wrong reason twice over - METHODOLOGY.md is ONE shared file at the run-folder root, so a
@@ -193,14 +204,23 @@ const POST = VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552
 // see JSX gating, so v5.49's single-household-gated estate card satisfied it even though a COUPLE
 // never rendered a word of it - while the v548 leg FAILED outright, invisibly, because runsuite.sh
 // only runs t31 for the prior and current tags.
-const ORDER = ["v548", "v549", "v550", "v551", "v552"];
+const ORDER = ["v548", "v549", "v550", "v551", "v552", "v553"];
 const post = k => ORDER.indexOf(VER) >= ORDER.indexOf(k.since);
 for (const k of KEYS) {
   const { key, why, since } = k;
-  if (post(k)) {
+  const expired = k.until && ORDER.indexOf(VER) > ORDER.indexOf(k.until);
+  if (expired) {
+    // The release that falsified this clause also removed it. Assert the ABSENCE, on the legs
+    // where absence is correct — the inversion, gated (OPERATIONS §B2).
+    T(`C [EXTINCTION post-${k.until}]: "${key}" is gone from both user surfaces — the release that made it false removed it`,
+      !userSide(key), `app=${inApp(key)} docs=${inDocs(key)}`);
+  } else if (post(k)) {
     T(`C [PARITY]: "${key}" is named creator-side AND user-side \u2014 ${why}`,
       inMeth(key) && userSide(key),
       `meth=${inMeth(key)} app=${inApp(key)} docs=${inDocs(key)}`);
+  } else if (since === "v553") {
+    T(`C [KNOWN DEFECT pre-v5.53]: "${key}" — the ladder's MAGI does not yet carry the dividend term`,
+      !userSide(key), `app=${inApp(key)} docs=${inDocs(key)}`);
   } else if (since === "v552") {
     // Pre-v5.52 state. Both expressions existed and diverged; NEITHER user surface said so, and
     // no assertion anywhere pinned either expression. An appears/does-not-appear pin on "MAGI"
@@ -256,7 +276,7 @@ if (POST) {
   // approved copy is correct; weakening it to something both a conservative and a non-conservative
   // sentence would satisfy is not.
   const DIRECTION = "charges every surcharge in full";
-  if (VER === "v550" || VER === "v551" || VER === "v552") {
+  if (VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553") {
     // The C predicate is an OR, and for this key the app arm was ALREADY satisfied before the fix
     // by single-gated text. Asserting the manual arm separately is what makes the key mean anything.
     T("D-5: the FIELD MANUAL names estate tax - the arm that was empty before v5.50",
@@ -267,7 +287,7 @@ if (POST) {
       inDocs("optimistic") && inApp("optimistic"),
       `docs=${inDocs("optimistic")} app=${inApp("optimistic")}`);
   }
-  if (VER === "v550" || VER === "v551" || VER === "v552") {
+  if (VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553") {
     // E · CREATOR-SIDE LABEL DRIFT. Added after the v5.50 ship, when a sweep found METHODOLOGY.md
     // still describing the objective list as "max after-tax estate" in three places while its own
     // new section 12 explained why that phrase was wrong. The document contradicted itself, and
@@ -289,6 +309,14 @@ if (POST) {
       inApp("omits dividends and realized capital gains"));
     T("D-9: the FIELD MANUAL names it - the §13 limitations register",
       inDocs("omits dividends and realized capital gains"));
+  }
+  if (VER === "v553") {
+    T("D-10: the RENDER TREE says the column now counts dividends",
+      inApp("counts the taxable sleeve's dividends"));
+    T("D-11: the FIELD MANUAL does too",
+      inDocs("counts the taxable sleeve's dividends"));
+    T("D-12: the RENDER TREE still names the term that REMAINS missing — a partial fix must not read as complete",
+      inApp("it omits realized capital gains"));
   }
   T(`D-4 [DIRECTION]: both surfaces state the model ${DIRECTION}`,
     inApp(DIRECTION) && inDocs(DIRECTION),

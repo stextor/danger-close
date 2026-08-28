@@ -53,13 +53,21 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true; window.IS_REACT_ACT_ENVIRONMENT = tr
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v546";
-const KNOWN_VERSIONS = ["v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552"];
+const KNOWN_VERSIONS = ["v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553"];
+// The dividend term the ladder carries from v5.53, read from the app's own accessors rather than
+// hardcoded so it tracks the example household instead of freezing a figure into the model.
+const _appD = (await import(`./app_${VER}.mjs`)).__g;
+const _tlD = typeof _appD.PLAN_TIMELINE === "function" ? _appD.PLAN_TIMELINE() : _appD.PLAN_TIMELINE;
+const DIV = (VER === "v553")
+  ? Math.round(Math.max(0, _appD.taxableInitAll()
+      - (_appD.retireStartBalances(_tlD.rothLadderStart).othHsa || 0)) * (2.0 / 100))
+  : 0;
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST_FIX = VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552");
+const POST_FIX = VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553");
 
 // The repo keeps the oracle at qa/tools/hand_86.mjs; PROJECT KNOWLEDGE IS FLAT and holds it
 // beside the suites. Resolve rather than assume, and say which copy was used (the t21/t24
@@ -100,9 +108,13 @@ function ladder(rothAmount, ssTerm) {
     const cA = (capA + capB) > 0 ? conv * (capA / (capA + capB)) : 0;
     a = Math.max(0, gA - cA - rA); b = Math.max(0, gB - (conv - cA) - rB);
     const ss = ssTerm(y);
-    const nonSS = PEN + taper(y) + conv + rmd;
+    // v5.53 (D-10 modelling half): the taxable sleeve's DIVIDENDS enter the §86 provisional base
+    // and magi. Engine C's `_prov86` has always carried `div_y`; the ladder does from v5.53, so
+    // this model must too or it asserts the PRE-FIX expression. Same correction as t24's oracle.
+    // ⚠ Gated: v5.52 and earlier legitimately carry no such term (OPERATIONS §B2).
+    const nonSS = PEN + taper(y) + conv + rmd + DIV;
     const taxableSS = Math.round(statute86(ss, nonSS, true));
-    out.push({ y, ss, magi: PEN + taper(y) + taxableSS + conv + rmd });
+    out.push({ y, ss, magi: PEN + taper(y) + taxableSS + conv + rmd + DIV });
   }
   return out;
 }

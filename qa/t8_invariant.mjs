@@ -156,7 +156,11 @@ T.applyLoadedData({ portfolio: port, expenses: [], incomeFromForm: true });
   const uses = (SRC.match(/taxableInitFromPositions\(/g) || []).length;
   ck("taxableInitFromPositions: 1 definition + exactly 1 caller (taxableInitAll)", uses === 2, `found ${uses}`);
   const usesAll = (SRC.match(/taxableInitAll\(/g) || []).length;
-  ck("taxableInitAll: 1 definition + 7 call sites", usesAll === 8, `found ${usesAll}`);
+  ck("taxableInitAll: 1 definition + 8 call sites", usesAll === 9, `found ${usesAll}`);
+  // v5.53 (D-10 modelling half) added the eighth call: the Roth ladder's `_divLadder` reads the
+  // same taxable base Engine C does, which is the point of the release. This census pin CAUGHT
+  // that addition and went red — working as intended. ⚠ t8 takes no version tag; it reads the
+  // root DangerClose.jsx alias, so it always describes the CURRENT build and is not gated.
 
   // 3) K2 — the Roth tax-funding gate. Through v5.25 it summed EVERY Other account's balance,
   //    counting a named IRA as money available to pay conversion tax. It never was: spending that

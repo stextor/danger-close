@@ -55,13 +55,13 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true; window.IS_REACT_ACT_ENVIRONMENT = tr
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v542";
-const KNOWN_VERSIONS = ["v540", "v541", "v542", "v543", "v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552"];
+const KNOWN_VERSIONS = ["v540", "v541", "v542", "v543", "v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST_FIX = VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552");
+const POST_FIX = VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553");
 
 // The repo keeps the oracle at qa/tools/hand_86.mjs; PROJECT KNOWLEDGE IS FLAT and holds it
 // beside the suites. Resolve rather than assume, and say which copy was used, so a stale
@@ -83,6 +83,17 @@ const T = (name, ok, detail = "") => {
 // ── the SHIPPED (pre-fix) upper tier, transcribed verbatim from v5.41 L8880-8883 ──────────
 // Kept so the prior leg can be asserted positively and so §C can name the exact wrong number
 // the fix must no longer produce. NOT used to compute any v542 expectation.
+// The dividend term the ladder carries from v5.53. Bound to the app's own accessors via the
+// testable bundle, not hardcoded, so it tracks the example household rather than freezing one
+// figure into the model. ⚠ `G` is already a growth constant in this file — namespaced as `_app`.
+const _appMod = await import(`./app_${VER}.mjs`);
+const _app = _appMod.__g;
+const _tlD = typeof _app.PLAN_TIMELINE === "function" ? _app.PLAN_TIMELINE() : _app.PLAN_TIMELINE;
+const DIV = (VER === "v553")
+  ? Math.round(Math.max(0, _app.taxableInitAll()
+      - (_app.retireStartBalances(_tlD.rothLadderStart).othHsa || 0)) * (2.0 / 100))
+  : 0;
+
 function cliff86(ss, nonSS, T1, T2) {
   const prov = nonSS + ss * 0.5;
   if (prov > T2) return Math.round(ss * 0.85);
@@ -124,11 +135,16 @@ function ladder(rothAmount, ssFn) {
     a = Math.max(0, gA - cA - rA); b = Math.max(0, gB - (conv - cA) - rB);
 
     const ss = (y >= SSA_YR ? SSA : 0) + bTerm(y);
-    const nonSS = PEN + taper(y) + conv + rmd;
+    // v5.53 (D-10 modelling half): the taxable sleeve's DIVIDENDS enter both the §86 provisional
+    // base and magi. Engine C's `_prov86` has always carried `div_y`; the ladder now does too, so
+    // this statute model has to as well or it is asserting the PRE-FIX expression. Constant for
+    // the plan (decision D-4) and the HSA is held out (v5.47), exactly as the app computes it.
+    // ⚠ Gated: v5.52 and earlier legitimately carry no such term and must keep replaying green.
+    const nonSS = PEN + taper(y) + conv + rmd + DIV;
     const taxableSS = ssFn(ss, nonSS);
     out.push({
       y, prov: nonSS + ss * 0.5, ss, taxableSS,
-      magi: PEN + taper(y) + taxableSS + conv + rmd,
+      magi: PEN + taper(y) + taxableSS + conv + rmd + DIV,
     });
   }
   return out;
@@ -230,9 +246,15 @@ if (POST_FIX) {
   let allPlateau = [2032, 2033, 2034, 2035, 2036, 2037, 2038].every(y => by[y] === 29);
   T("C-1 (V542): at $15K the 2032\u20132038 plateau reads $29K, not the cliff's $67K (\u2212$38,030)",
     allPlateau, JSON.stringify(by));
-  T("C-2 (V542): 2031 reads $56K, not the cliff's $82K (\u2212$25,280)", by[2031] === 56, `$${by[2031]}K`);
-  T("C-3 (V542): 2029 reads $49K, not the cliff's $53K (\u2212$4,200)", by[2029] === 49, `$${by[2029]}K`);
-  T("C-4 (V542): 2030 reads $45K, not the cliff's $51K (\u2212$5,900)", by[2030] === 45, `$${by[2030]}K`);
+  // ⚠ These three are FROZEN K-FIGURES on rows the B-series statute model already validates to
+  // ±$500. v5.53 adds the dividend term ($420 on this household), which pushes each of them over
+  // a K boundary — a rendered figure moving by exactly the term that was added, not a regression.
+  // The oracle, not this list, is the independent derivation; these are spot pins on its rows.
+  // Gated per leg: v5.52 and earlier legitimately read the lower figure (OPERATIONS §B2).
+  const _k = (v553, older) => (VER === "v553" ? v553 : older);
+  T(`C-2 (V542): 2031 reads $${_k(57, 56)}K, not the cliff's $82K`, by[2031] === _k(57, 56), `$${by[2031]}K`);
+  T(`C-3 (V542): 2029 reads $${_k(50, 49)}K, not the cliff's $53K`, by[2029] === _k(50, 49), `$${by[2029]}K`);
+  T(`C-4 (V542): 2030 reads $${_k(46, 45)}K, not the cliff's $51K`, by[2030] === _k(46, 45), `$${by[2030]}K`);
   // The tail is PAST convergence even at this slider position, so it must NOT move. This is
   // the guard against a fix that simply scaled everything down.
   T("C-5 (V542): 2039 is unchanged at $135K \u2014 past convergence, the fix must not touch it",
