@@ -1,5 +1,193 @@
 # Changelog
 
+## Unreleased — `qa/` only: the state census splits into three rows, and two state fixtures, 2026-08-28
+
+**No version bump, no release.** Nothing under `src/` changed. Source throughout is v5.53,
+`src/DangerClose.jsx` md5 `12a007ed8e57a391acba67b799eb5a2f`. No computed figure moves.
+
+Builds `docs/SCOPE_STATE_FIXTURES.md`, decisions D1–D4.
+
+The state census was **one** row keyed on `P.stateTaxRate`. That row reads ON for the legacy
+flat-rate fallback only, and `stateTaxAnnual` branches on `STATE_RULES[code]` **before** it looks at
+the fallback rate — so a household with a real state code and no legacy rate showed the census a
+muted state-tax path while exercising the 51-jurisdiction module fully. One row, three behaviours,
+and the census could not say which was live. Now three: `state_tax` (legacy), `state_code` (module),
+`state_excl_limited` (the D-3c class, where a state's 65+ exclusion is income-limited in law and
+unconditional in the model). The third reads its state list **live** from `STATE_RULES`, matched on
+each rule's own note — no state code is written down in the tool, per §K1.
+
+Two fixtures in `qa/tools/fixture/households.mjs`: `stateProgressive` (New York, chosen because it
+is the one state already measured against a sourced 2026 schedule, so expected figures exist and are
+hand-verified) and `stateExclCliff` (New Jersey, both spouses 65+). **No `stateEstate` fixture** —
+held by decision D2, because nothing computes state estate tax yet and the fixture could only assert
+an absence.
+
+### The census run found the thing worth finding
+
+Run on each proposed fixture before any test code was written, per the scope's §3C:
+
+| household | `state_tax` | `state_code` | `state_excl_limited` |
+|---|---|---|---|
+| shipped example | OFF | OFF | OFF |
+| `state` (existing) | **ON** | OFF | OFF |
+| `stateProgressive` | OFF | **ON** | OFF |
+| `stateExclCliff` | OFF | **ON** | **ON** |
+
+Row two is the finding. The existing `state` fixture sets `stateCode: "TS"`, **not a `STATE_RULES`
+key**, so under the old single row it read ON while the whole module stayed unexercised. `F-8` now
+pins that the legacy fixture must not light the module row.
+
+`t29` 43 → **50**. Section C already re-derives flip assertions from each fixture's declared `flips`,
+so both new fixtures are covered without new code; F-5 through F-8 are new. Suite **2,738 / 0**.
+
+**Limitation, stated rather than implied: decision D3 is NOT built.** The dollar-exact D-3c case
+needs New Jersey's 2026 schedule and exclusion phase-down hand-verified from a primary source. The
+fixture and census row it needs now exist; the arithmetic does not. **Verified this session: no suite
+anywhere passes a real state code, so `stateTaxAnnual` has zero dollar-exact coverage today.**
+
+**Decision D4 was not followed, and the scope contradicts itself.** D4 says test-infrastructure
+releases still bump; the same scope's Shape field says *"no source change."* A bump edits four
+in-app version sites, which is a source change. `git log -- qa/` settles it — `ea307f7` changed the
+MC-parity guardrail as a "qa/ only" commit with no bump.
+
+---
+
+## Unreleased — docs only: the pool/allowlist hygiene scope, and I-3 reads the post-ship tree, 2026-08-28
+
+**No version bump, no release.** Source unchanged at v5.53 `12a007ed8e57a391acba67b799eb5a2f`.
+
+Adds `docs/SCOPE_POOL_AND_ALLOWLIST_HYGIENE.md` — **scope only, four decisions open in its §6.**
+
+**Two of the four entries on `package_check`'s OPEN allowlist were stale on the day the allowlist
+shipped.** `SCOPE_v5_40_disclosures_and_mechanics` was fulfilled at v5.40 — all five premises
+verified resolved at v5.53, and the v5.40 entry names S-1 verbatim. `SCOPE_FIX_tidyup_six` was
+fulfilled across v5.42–v5.47: all seven items, and its three "open" decisions resolved by events.
+Both were placed on the allowlist from a session brief's classification **rather than from the
+tree**, in the release whose whole lesson is that a status line expires. §I-2 would have caught
+both; the allowlist excused them. The list now carries that warning where the list lives.
+
+Also records that the pool's scope shelf is inverted against §G — 15 retired scopes, 2 open, with
+two live scopes absent entirely — and that the cleanup needs **13 documents read for unresolved
+decisions**, not swept.
+
+### A defect in checks added the same day, found by using them
+
+§I-2 was fixed to evaluate the **post-ship** tree; **§I-3 was left reading the pre-ship one.** So a
+package adding a brand-new scope had that scope reported as an allowlist entry naming a nonexistent
+file — which is what happened the first time this release was packaged, on its own scope. The scope
+inventory is now a **union** of the clone's `docs/` and the package's `github/docs/`.
+
+Control **P23 stopped firing as a result, and the control was wrong, not the check**: it emptied only
+the clone, and with a union inventory the package's own scope is still found. It now empties both
+sides. **Second control in two releases found measuring a shape that had changed.**
+
+---
+
+## Unreleased — `qa/` only: package_check gains provenance and scope-status checks, 2026-08-28
+
+**No version bump, no release.** Source unchanged at v5.53 `12a007ed8e57a391acba67b799eb5a2f`.
+
+Builds `docs/SCOPE_CLAIM_EXPIRY_VERIFICATION.md`, retired in the same package. Both halves address
+one failure class: **a written claim that nothing makes expire.**
+
+**§H · provenance over an independent path.** Fetches `src/DangerClose.jsx` and `index.html` from
+`raw.githubusercontent.com` — not the clone — and requires **both** md5s in the newest CHANGELOG
+entry's provenance line. This is the shape nothing caught at v5.53: commit `66db033` was titled
+"v5.53" while its `src/DangerClose.jsx` still hashed to **v5.52's** source, because the built
+artifact was pushed ahead of the source. Offline, §H **skips loudly**; it never passes blind.
+
+**§I · scope status-line sweep.** Reports any `docs/SCOPE_*.md` carrying neither a retirement marker
+nor a place on an OPEN allowlist held inside the check. **It reports; it does not decide** — the
+obvious automation is unsound, and §I-2's own comment records why.
+
+⚠ **§H proves what the repo holds, not what Pages serves.** A session gets HTTP 403 from
+`stextor.github.io`. `OPERATIONS.md` §I carries the maintainer-side one-liner for the served bytes,
+and says which proves what.
+
+Nine negative controls, **P20–P28**, including P22 reproducing the `66db033` shape and P27 asserting
+a clean tree stays green — a check that cries wolf gets ignored, and an ignored gate has stopped
+being a gate. **P28 records a control that was wrong on its first draft**: it demanded H-1 go red on
+a missing CHANGELOG when the correct behaviour is a loud skip. The harness's own `fired` regex read
+`[A-G]` and was **widened to `[A-I]`**; without that every new control would have printed
+`*** NOT CAUGHT ***`, reading as "the checks are broken" when the harness simply could not see them.
+
+**Deviation from the ratified D-3, raised rather than absorbed.** D-3 placed the scope sweep in
+`runsuite.sh`, which runs from `qa/` in the flat working folder with no `docs/` — the sweep would
+have found **zero scopes and reported green against an empty set**, the exact defect I-1 guards.
+
+---
+
+## Unreleased — docs only: eight scopes retired, TESTING.md rolled to v5.53, the pool's suite refreshed, 2026-08-28
+
+**No version bump, no release.** Source unchanged at v5.53 `12a007ed8e57a391acba67b799eb5a2f`.
+
+Eight `SCOPE_*.md` retired in place per §I, annotated so the stale recommendation and its correction
+stay visible together: `SCOPE_CAPGAINS_ENGINE_v5_34` (superseded), `SCOPE_v5_36`, `SCOPE_v5_37`,
+`SCOPE_v5_38`, `SCOPE_AUDIT_PHASE2_v5_10_2` (Phase 2 complete at v5.28),
+`SCOPE_DEFECTS_v5_10_1`, `SCOPE_ENGINE_D_MAGI_v5_24`, `SCOPE_FIX_otherAccounts_tax_treatment_v5_21`.
+The worst read **BUILD GATE OPEN** about work shipped at v5.24 — **twenty-nine releases earlier.**
+
+### A version heading in the CHANGELOG is not evidence that a scope's work shipped
+
+`## v5.34` is present, but **v5.34 narrowed mid-build** — its own entry says the capital-gains work
+was *"backed out and held for v5.35"* — and the work re-landed at **v5.36**. Retiring on the version
+number would have written a false history. Every retirement here was confirmed against what the
+release actually shipped. The mirror case is v5.40, where the heading **is** accurate: the lesson is
+not that headings lie, it is to read the content either way.
+
+A parent scope needs every child confirmed, not one release:
+`SCOPE_FIX_otherAccounts_tax_treatment_v5_21` defined three, landing at v5.22, v5.24 and v5.25 — and
+one of its seven decisions (**D-2, on HSA**) did not ship as decided. Retiring on the parent's name
+alone would have buried that.
+
+### The pool was a release stale, and the manifest was RIGHT
+
+Ten test files (`t8`, `t23`–`t31`) sat in the pool at v5.52 content, and
+**`t32_ladder_dividend.mjs` — the only suite that witnesses the v5.53 release — was absent
+entirely.** Every one of those ten md5 cells in `PROJECT_KNOWLEDGE_INDEX.md` was **already correct**:
+the v5.53 refresh rewrote the hashes and did not upload the files. Manifest and pool disagreed in the
+one direction §A2's fallback table catches in a single command, and nothing compared them. **A hash
+table nothing is compared against is documentation, not a check.**
+
+`TESTING.md` rolled to v5.53 / **32 suites** from suite output parsed that day; it had been pinned at
+v5.47 / 29 suites, so `t30` and `t32` appeared zero times each. The v5.53 ship had rolled that
+header's *numbers* and left two claims in the **same sentence** stale — the DOM-diff pair still read
+`v5.51→v5.52`, and the `t31` key list stopped at v5.52. **Rolling a figure is not rolling a line.**
+
+---
+
+## Unreleased — `qa/` only: negative controls for the state census, recorded rather than assumed, 2026-08-28
+
+**No version bump, no release.** Source unchanged at v5.53 `12a007ed8e57a391acba67b799eb5a2f`.
+
+Adds `qa/tools/controls_state.sh`. **This should have shipped with the census split and did not.**
+
+The omission was reasoned and the reasoning was wrong: the argument was that `t29` section C already
+re-derives the flip assertions from each fixture's declared `flips`, so a second harness would
+re-test the same property. **That covers S5 only.** S1–S4 pin **F-5 through F-8** — the
+no-hardcoded-state-code property, the empty-set guard, reachability, and legacy/module independence
+— and nothing re-derives those. A valid argument about one control was generalised to five, leaving
+**no durable evidence that four of seven new assertions can fail.** §B2 is explicit that a control
+never observed firing is not evidence.
+
+| | breaks | must turn red |
+|---|---|---|
+| S1 | a state code written into the census source | `F-5` |
+| S2 | `stateExclCliff` loses its `stateCode` | `F-7` |
+| S3 | the legacy fixture given a real `STATE_RULES` key | `F-8` |
+| S4 | every income-limit note stripped from `STATE_RULES`, app rebuilt | `F-6` |
+| S5 | a fixture declaring a flip it does not produce | section `C` |
+
+**S4 is the one worth keeping.** If no `STATE_RULES` entry carried an income-limited exclusion,
+`state_excl_limited` could never read ON and every assertion about it would pass vacuously — green
+from an empty set, which this release cycle hit **three** separate times: `package_check` C-2/C-3
+against zero manifest rows, the scope sweep against zero scopes, and this row against zero states.
+S4 costs a rebuild and is worth it.
+
+All five fired before the assertions they guard were accepted.
+
+---
+
 ## v5.53 — the Roth ladder's IRMAA MAGI counts dividends (2026-08-28)
 
 **A modelling change, and the first half of the D-10 fix.** The Roth conversion ladder's IRMAA MAGI
