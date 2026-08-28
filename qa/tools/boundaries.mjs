@@ -85,9 +85,45 @@ export function census(G) {
              : "OUTSIDE — the ½ cap is unreachable from this household");
   }
 
+  // ── STATE TAX · three rows, because one row could not tell three behaviours apart ──────────
+  // Until 2026-08-28 this was a single `state_tax` row keyed on `P.stateTaxRate`. That row reads
+  // ON for the LEGACY FLAT-RATE FALLBACK only. The 51-jurisdiction `STATE_RULES` module is
+  // selected by `P.stateCode` and is a different code path — `stateTaxAnnual` branches on
+  // `STATE_RULES[code]` before it ever looks at the fallback rate — so a household with a real
+  // state code and no legacy rate showed this census a muted state-tax path while exercising the
+  // module fully. One row, three behaviours, and the census could not say which was live.
   const rate = Number(P.stateTaxRate || 0);
-  row("state_tax", "state tax rate", rate ? rate : "0 / unset", "0 vs non-zero", !rate,
-    rate ? "exercises the state-tax path" : "ZERO — the state-tax path is muted");
+  const code = P.stateCode || null;
+  const RULES = (G.STATE_RULES && G.STATE_RULES()) || {};
+  const rule = code ? RULES[code] : null;
+
+  row("state_tax", "legacy flat rate", rate ? rate : "0 / unset", "0 vs non-zero", !rate,
+    rate ? "exercises the LEGACY fallback path" : "ZERO — the legacy fallback is muted");
+
+  row("state_code", "state code", code || "unset", "unset vs in STATE_RULES", !rule,
+    rule ? `exercises the ${Object.keys(RULES).length}-jurisdiction module (${rule.name})`
+         : "UNSET — the state module is unexercised; only the legacy path can run");
+
+  // D-3c: `stateTaxAnnual` subtracts `excl65` unconditionally, but several states cap the
+  // exclusion by income and cut it off at a hard cliff. The defect is only REACHABLE from a
+  // household whose state has such an exclusion — elsewhere the unconditional subtraction is
+  // correct and a fixture there proves nothing.
+  //
+  // ⚠ The state list is read LIVE from `STATE_RULES` and matched on the rule's own note text.
+  // No state code is written down here. §K1: a tool that keeps its own copy of a threshold is a
+  // second answer that drifts, and this census exists because the app and the tool disagreeing
+  // is the failure mode. If a state's note stops flagging its income limit, this row goes quiet
+  // — which is correct, because the note is where that fact lives today.
+  const LIMIT_NOTE = /income[- ]limited|income limit/i;
+  const limited = Object.entries(RULES)
+    .filter(([, r]) => (r.excl65 || 0) > 0 && LIMIT_NOTE.test(r.note || ""))
+    .map(([c]) => c);
+  const onLimited = !!(code && limited.includes(code));
+  row("state_excl_limited", "income-limited 65+ exclusion",
+    onLimited ? `${code} (excl65 $${(rule.excl65 || 0).toLocaleString()})` : (code || "unset"),
+    `state in {${limited.join(",") || "none found"}}`, !onLimited,
+    onLimited ? "exercises the D-3c class — the exclusion is income-limited in law, unconditional in the model"
+              : `OUT — D-3c is unreachable; ${limited.length} state(s) in the module carry an income-limited exclusion`);
 
   const streams = (P.incomeStreams || []).length;
   row("income_streams", "income streams", streams, "0 vs >0", streams === 0,
