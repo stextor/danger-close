@@ -326,14 +326,29 @@ code, flip its pin to a positive assertion, and the fix is self-verifying.
 
 `t2_engines.mjs compare` asserts that under common seeded random numbers with identical inputs, the Monte
 Carlo, extended MC, stress, and Roth engines produce **byte-identical** output across the active version
-pair. Any release claiming "engines unchanged" must keep this **9/9**. If a fix that shouldn't touch the
+pair. Any release claiming "engines unchanged" must keep this **10/10**. If a fix that shouldn't touch the
 engines breaks parity, **the fix has overreached — stop and narrow it.**
 
-⚠ **The figure is 9/9, not 8/8 — corrected 2026-08-21.** The fingerprint carries **nine** keys; it has
-since the E-15 addendum, and `qa/qa-baseline/README.md` has said 9/9 for several releases while this
-section said 8/8. Build briefs inherited the wrong number from here and had to correct it inline,
-release after release, without anyone changing the source they were correcting. Verified at the v5.42
-ship: `node t2_engines.mjs compare v541 v542` returns **9 passed, 0 failed**.
+⚠ **The figure is 10/10, not 9/9 — corrected 2026-08-28, and this is the SECOND time this line has
+gone stale.** The fingerprint carries **ten** keys, printed from `/tmp/t2_v553_fingerprint.json`:
+`mc, extMC, stress, roth, rothCurrentEstate, rothAca, rothOther, ssTable, stateTax, inflation`.
+Verified this session: `node t2_engines.mjs compare v552 v553` returns **10 passed, 0 failed**. The
+manifest, `CHANGELOG.md` and `TESTING.md` have all said 10/10 for several releases while this section
+said 9/9 — the same shape as the 8/8 → 9/9 correction below, with the same documents on the same
+sides.
+
+> **The sharp part: the paragraph immediately following predicted this exact failure and did not
+> prevent it.** *"The number has moved once and will move again if the fingerprint gains a key."* It
+> gained one. A warning that a figure will go stale does nothing to stop the figure going stale — it
+> only makes the staleness legible after someone checks. **The durable fix is the standing
+> instruction below, not the number above:** read the count off the run, and treat any figure written
+> here as evidence of what was true on the day it was typed.
+
+⚠ *(Retained for the record.)* **The figure was 9/9, not 8/8 — corrected 2026-08-21.** `qa/qa-baseline/README.md`
+had said 9/9 for several releases while this section said 8/8. Build briefs inherited the wrong number
+from here and had to correct it inline, release after release, without anyone changing the source they
+were correcting. Verified at the v5.42 ship: `node t2_engines.mjs compare v541 v542` returned **9 passed,
+0 failed**.
 
 **Do not hardcode this count in a build brief.** Read it off the run. The number has moved once and
 will move again if the fingerprint gains a key — and a brief that carries a stale expectation invites
