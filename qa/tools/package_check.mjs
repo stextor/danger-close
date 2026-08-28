@@ -441,6 +441,10 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
       "SCOPE_FIX_tidyup_six.md",                  // three decisions open in its §7
       "SCOPE_STANDING_AUDIT.md",                  // not a build scope at all (OPERATIONS §K)
       "SCOPE_POOL_AND_ALLOWLIST_HYGIENE.md",       // four decisions open in its §6
+      "SCOPE_D3_NJ_EXCL_DOLLAR_EXACT.md",          // five decisions open in its §7 (D3-a..D3-e)
+      // → CLOSED BY: the release that adds the NJ archetype to t10 §2E. Retire the scope at that
+      //   ship and delete this line in the SAME edit — the discipline the CLAIM_EXPIRY entry above
+      //   records. Added 2026-08-28 with the scope itself, so I-2 never saw an unclassified file.
       // ⚠ AN ENTRY HERE IS A CLAIM, AND IT EXPIRES EXACTLY LIKE A STATUS LINE DOES.
       // Two of the first four entries were stale on the day this list shipped: v5_40 and
       // tidyup_six were placed here from a session brief's classification rather than from the
