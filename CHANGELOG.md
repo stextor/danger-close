@@ -1,5 +1,45 @@
 # Changelog
 
+## Unreleased — docs only: six state exclusion notes checked against primary sources, four wrong, 2026-08-28
+
+**No version bump. No source change. No figure moves. Findings only — nothing is fixed.** `KIND: ops`.
+
+`docs/AUDIT_STATE_EXCL65_NOTES.md`. The `note` on each `STATE_RULES` entry is **rendered to the
+user** at `DangerClose.jsx` L12103, beside a second clause generated from `excl65` itself. Nothing
+had ever compared those notes to the statutes they describe. Six of the nineteen states with
+`excl65 > 0` were checked against their own revenue authorities. **Four misstate their own law.**
+
+| | |
+|---|---|
+| **NJ** ✗ | $100,000 **household** cap, not $75K/person — the model grants a couple $150,000. Gates on 62, not 65. Two phase-down bands, not one cliff |
+| **MD** ✗ | figure stale ($36,200 against $40,600 for CY2026) and the exclusion is **reduced dollar-for-dollar by Social Security** — undisclosed |
+| **ME** ✗ | figure stale ($35,000 against $48,216) plus the same **SS offset**, plus an income phaseout new for 2025 |
+| **CO** ✗ | $24,000 and the per-person doubling are both right, but it is **one cap shared between SS and pension**; the note reads as two stacking benefits |
+| **GA** ✓ | correct — per-person, joint may claim twice the individual amount, no income limit |
+| **NY** ✓ | correct — $20,000 per person at 59½+, already hand-verified in `AUDIT_D3_STATE_TAX_DIRECTION.md` |
+
+**The finding that matters most is not the count.** D-3c is defined as *"income-limited in law,
+applied unconditionally."* Of the four defective states, **only New Jersey is income-limited.** MD,
+ME and CO reduce the exclusion by **Social Security received** — a mechanism no scope, census row,
+fixture or test in this project describes. `boundaries.mjs`'s `state_excl_limited` row keys on a note
+flagging an income limit, so it reads ON for NJ and **OFF for the three states where the defect bites
+harder**, because an SS offset affects every retiree with Social Security rather than only those
+above a threshold. A gate built from the single example anybody had looked at encoded that example's
+mechanism as the category.
+
+Two further corrections to working assumptions. The class is **not uniformly optimistic** — Maine's
+stale figure errs the other way, so any disclosure written for this class must not claim one
+direction. And `t10` §2E's note scan asks only whether a note *names a figure*; all four defective
+notes pass it.
+
+**Coverage is 6 of 19 and the audit says so in its own §5.** Thirteen states are unchecked, KY at
+$31,110 the largest of them. No rates were checked, only exclusions. The audit proposes no fix, and
+records why correcting NJ alone would now be worse than leaving it: it would imply a review that has
+not happened.
+
+Source unchanged at v5.53: `12a007ed8e57a391acba67b799eb5a2f` · built `index.html`
+`c99fd1fe27998e1dff2aa192c7e48ea2`.
+
 ## Unreleased — `qa/` and docs only: the D-3c scope, a parity count that was stale in the section warning it would be, 2026-08-28
 
 **No version bump. No source change. No figure moves.** `KIND: ops`.
