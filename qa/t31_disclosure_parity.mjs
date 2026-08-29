@@ -47,7 +47,7 @@ import { dirname, join } from "path";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v549";
-const KNOWN_VERSIONS = ["v548", "v549", "v550", "v551", "v552", "v553"];
+const KNOWN_VERSIONS = ["v548", "v549", "v550", "v551", "v552", "v553", "v554"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   process.exit(1);
@@ -189,6 +189,25 @@ const KEYS = [
   // The key names what v5.53 CHANGED — that the column now carries the dividend term.
   { key: "counts the taxable sleeve's dividends", since: "v553",
     why: "the ladder's MAGI now carries the term that was the whole measured effect" },
+  // Added v5.54. AUDIT_STATE_EXCL65_NOTES.md checked six of the nineteen states carrying a 65+
+  // exclusion against their own revenue authorities; FOUR misstate their own law. Three of the four
+  // — MD, ME, CO — reduce the exclusion by SOCIAL SECURITY RECEIVED, and the model applies none of
+  // it. Direction: OPTIMISTIC (overstates the exclusion, understates state tax).
+  // ⚠ WHY THIS KEY. "Social Security", "exclusion" and "state tax" are each already all over both
+  // surfaces, so a key on the SUBJECT passes before the fix exists — the vacuity the v5.51 and
+  // v5.52 controls each caught. Measured before writing any copy: "reduced by Social Security",
+  // "Social Security offset" and "offset by Social Security" all returned 0 hits in METHODOLOGY.md
+  // AND 0 in source. The key names the MECHANISM the release discloses.
+  // ⚠ IT IS A LITERAL SUBSTRING. The shipped copy says "reduced by Social Security received" in
+  // MD's and ME's notes and "reduced by Social Security" in the Field Manual §13 and METHODOLOGY
+  // §6. Rewriting any of those as "reduced dollar-for-dollar by Social Security" — the statute's
+  // own phrasing, and the better sentence — would break this key against CORRECT copy. Change the
+  // key in the same edit if the copy changes.
+  // ⚠ NO `until`. Unlike v5.52's key this sentence does not expire on a modelling fix: it states
+  // what the model does NOT do, so it stays true until the offset is actually modelled. The
+  // release that models it must invert this key, not merely expire it.
+  { key: "reduced by Social Security", since: "v554",
+    why: "three of the four verified exclusions are reduced by Social Security and the model applies none of it" },
 ];
 
 T("C-0: every declared key is named in METHODOLOGY.md \u2014 parity is only owed for limitations " +
@@ -196,7 +215,7 @@ T("C-0: every declared key is named in METHODOLOGY.md \u2014 parity is only owed
   KEYS.every(k => inMeth(k.key)),
   KEYS.filter(k => !inMeth(k.key)).map(k => k.key).join(", "));
 
-const POST = VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553";
+const POST = VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554";
 // EACH KEY IS GATED TO THE RELEASE THAT LANDED IT, not to the shared POST flag above.
 // Found at the v5.50 build. Under one shared gate the v549 leg went GREEN on v5.50's expectation
 // for the wrong reason twice over - METHODOLOGY.md is ONE shared file at the run-folder root, so a
@@ -204,7 +223,7 @@ const POST = VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552
 // see JSX gating, so v5.49's single-household-gated estate card satisfied it even though a COUPLE
 // never rendered a word of it - while the v548 leg FAILED outright, invisibly, because runsuite.sh
 // only runs t31 for the prior and current tags.
-const ORDER = ["v548", "v549", "v550", "v551", "v552", "v553"];
+const ORDER = ["v548", "v549", "v550", "v551", "v552", "v553", "v554"];
 const post = k => ORDER.indexOf(VER) >= ORDER.indexOf(k.since);
 for (const k of KEYS) {
   const { key, why, since } = k;
@@ -276,7 +295,7 @@ if (POST) {
   // approved copy is correct; weakening it to something both a conservative and a non-conservative
   // sentence would satisfy is not.
   const DIRECTION = "charges every surcharge in full";
-  if (VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553") {
+  if (VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554") {
     // The C predicate is an OR, and for this key the app arm was ALREADY satisfied before the fix
     // by single-gated text. Asserting the manual arm separately is what makes the key mean anything.
     T("D-5: the FIELD MANUAL names estate tax - the arm that was empty before v5.50",
@@ -287,7 +306,7 @@ if (POST) {
       inDocs("optimistic") && inApp("optimistic"),
       `docs=${inDocs("optimistic")} app=${inApp("optimistic")}`);
   }
-  if (VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553") {
+  if (VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554") {
     // E · CREATOR-SIDE LABEL DRIFT. Added after the v5.50 ship, when a sweep found METHODOLOGY.md
     // still describing the objective list as "max after-tax estate" in three places while its own
     // new section 12 explained why that phrase was wrong. The document contradicted itself, and
@@ -310,7 +329,7 @@ if (POST) {
     T("D-9: the FIELD MANUAL names it - the §13 limitations register",
       inDocs("omits dividends and realized capital gains"));
   }
-  if (VER === "v553") {
+  if (VER === "v553" || VER === "v554") {
     T("D-10: the RENDER TREE says the column now counts dividends",
       inApp("counts the taxable sleeve's dividends"));
     T("D-11: the FIELD MANUAL does too",
