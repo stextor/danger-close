@@ -165,6 +165,47 @@ hits → **15 distinct source sites**; `positions` 49 → 46; `taxType` 56 → 5
 "17 hits" is quoted in `SCOPE_OTHERACCOUNTS_TAXTYPE_v5_25.md` §3 and the v5.26 scope §4. **The error
 direction is safe** — it over-reports, sending a reader to more sites than exist, never fewer.
 
+### B1a. §B1 covers the SUITE too — and the question a grep cannot even ask (added 2026-08-29)
+
+**Two gaps in the section above, both found the same day, both by a grep that returned a confident
+wrong answer.**
+
+**First: this rule is not scoped to the app source.** The four tools point at `DangerClose.jsx`, so
+§B1 read as a rule about the app and the suite read as exempt. It is not. A claim about what the
+*suite* asserts — which builds a gate covers, whether any assertion names a string a release
+removes — is a census claim and takes the same treatment. `acorn` + `acorn-jsx` + `acorn-walk` are
+already dependencies (§B setup step 1) and parse the `.mjs` suites directly. **A walk that collects
+every `Literal`, `TemplateElement` and regex node across `qa/` is roughly twenty lines and is the
+correct instrument.** Note it must run from a directory where `acorn` resolves.
+
+**Second, and the one with no workaround: a grep cannot execute a regex.** The suite matches
+rendered copy with regex literals. When a release rewrites that copy, the only question worth
+asking is *"does the new text still match this matcher?"* — and grep cannot ask it. It can at best
+find the matcher; it can never evaluate it. **Extract every regex literal in the suite by AST and
+run each one against the old and the new text.** The output is a candidate list, not a verdict:
+expect false positives from matchers that never see the text in question (a number-formatting
+`/,/g`, an account-name classifier), so every candidate is read before it is called a finding.
+
+**The instance.** A v5.54 search for `INCOME-LIMITED` across the suite returned zero hits and was
+reported as evidence that the release created no §B2 stale-copy lock. The live matcher is
+`t29_boundaries.mjs` L175 `/income[- ]limited|income limit/i` — **case-insensitive**, which is the
+§A0 failure repeating as a property of greps rather than of one census. Re-run by AST with the
+regexes executed, it showed `t29`'s F-6 guarded set dropping from **five** members to **four**
+(NJ's rewritten note leaves the set; NM, RI, VA, WI remain). F-6 asserts `length > 0`, so it still
+passes — **a near-miss, not a failure, and no gate decision changed.** But F-6 is the empty-set
+guard whose own comment calls it *"the one that would have failed quietly,"* the four survivors are
+exactly the states D-3 reword next, and `t29` is ungated so it bites every leg.
+
+**What the same pass confirmed clean**, and could not have been trusted from a grep: 19 entries
+with `excl65 > 0` and **0** without a dollar figure on both builds (so §2E L467 holds and the
+stop-report's decision to *date* the MD/ME figures rather than drop them was right); 8 partial-SS
+states with **0** notes missing an SS mention on both builds; and the §13 copy's claim of
+**"nineteen states"** carrying a 65+ exclusion, verified by counting the AST rather than the prose.
+
+**The tell, as always:** a search that returns *nothing* feels like an answer and is the cheapest
+possible thing to get wrong, because there is no output to sanity-check. A zero from a grep is not
+a finding. A zero from a parser is.
+
 ### B2. A green suite is not evidence of coverage — measure it, don't infer it
 
 **A suite passing tells you nothing about what it would have caught.** Coverage is a property that has
