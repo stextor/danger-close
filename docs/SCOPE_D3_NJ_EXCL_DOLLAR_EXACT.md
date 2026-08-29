@@ -1,12 +1,36 @@
 # SCOPE — D-3c dollar-exact: New Jersey's income-limited retirement exclusion
 
+> ## ⛔ RETIRED — BUILT 2026-08-29 on v5.54 `2e27826c495d3d70ca49ccf71cf238ec`
+>
+> Shipped as nine assertions in `t10_taxcases.mjs` §2E. **Test-only: no source change, no version
+> bump, parity 10/10 unchanged.** Suite 2,750 → **2,768** app checks, 0 failing.
+>
+> **Decisions as resolved.** D3-a host `t10` §2E — as recommended. D3-b assert **both**, statutory
+> gap as `[KNOWN DEFECT]` pins — as recommended. D3-c **no gate today, with the comment saying a
+> gate becomes necessary the moment D-3c is fixed** — as recommended. **D3-d was BUILT BY v5.54**,
+> which corrected NJ's note; the decision is spent, not open. **D3-e is spent too** — `OPERATIONS.md`
+> §E was corrected 9/9 → 10/10 on 2026-08-28 and the pool refresh it asked for is done.
+>
+> **Premise re-verified against v5.54 by parser before building**, not assumed: `stateTaxAnnual`
+> still at L1114, the three call sites still at L3965 / L4082 (Engine A) and L5231 (Engine B), and
+> the exclusion arithmetic **byte-identical** to v5.53. All four model figures **executed** against
+> the v5.54 bundle and all four matched this scope's table. The statutory figures were **re-derived
+> independently** from NJ Table B rather than inherited — $1,050.00, $3,026.25, $8,697.50 — and
+> agree to the cent.
+>
+> **One thing this scope did not foresee.** Its §7 note called NJ *"one mechanism of at least two."*
+> It is one of at least **three**: `docs/AUDIT_STATE_EXCL65_ROUND2.md` §0 finds the model's single
+> `persons65` gate cannot express a per-state age threshold, and KY has none, DE's is 60, NJ's own
+> is 62. The shipped comment names all three.
+
+
 | Field | Value |
 |---|---|
 | Premise verified against | **v5.53** · source `12a007ed8e57a391acba67b799eb5a2f` · tree `74497fd` |
 | Written | 2026-08-28 |
 | Origin | **Decision D3 of `docs/SCOPE_STATE_FIXTURES.md`** — the last ratified decision from that scope left undone |
 | Shape | **Test infrastructure only.** No source change. No figure moves. No version bump. |
-| Status | **Awaiting decisions in §7 — do not build yet** |
+| Status | **⛔ RETIRED — BUILT 2026-08-29.** All decisions resolved; see the retirement note below |
 
 **Baseline confirmed by command this session**, not carried forward: full suite **2,738 app checks / 0
 failing** (v5.52 leg 1,025 · v5.53 leg 1,035 · parity 10/10 · ungated feature 668), tooling 82,
