@@ -495,6 +495,104 @@ const pass2E = pass, fail2E = fail;
       Object.keys(R).filter(c => R[c].ss > 0).length, 8);
     T("2E: and no state claims SS treatment it does not model",
       Object.keys(R).filter(c => !R[c].ss && /\bss (is )?taxed|taxes social security/i.test(R[c].note || "")).length, 0);
+
+    // ── D-3c DOLLAR-EXACT. Deliberately NOT numbered as an archetype: §2E's header names the five
+    // rule-table archetypes D-5 scoped, and this is not a sixth. It is a measurement of how far one
+    // of them sits from the statute. An exclusion that is INCOME-LIMITED IN LAW and applied
+    // UNCONDITIONALLY by `stateTaxAnnual`. New Jersey. Archetypes 1-6 above ask whether the code
+    // implements the documented approximation correctly; this one measures, in dollars, how far the
+    // documented approximation is from the statute. It is the INSTRUMENT, NOT THE REPAIR —
+    // SCOPE_STATE_FIXTURES §4 is explicit that fixing D-3c is a separate job, and this block does
+    // not reopen it.
+    //
+    // ⚠ NJ IS ONE MECHANISM OF AT LEAST THREE, not "the" D-3c case. The 65+ exclusion class is
+    // wrong in at least three distinct ways, and only the first is what this block measures:
+    //   1. INCOME-LIMITED IN LAW, APPLIED UNCONDITIONALLY  — NJ. Measured below.
+    //   2. REDUCED BY SOCIAL SECURITY RECEIVED             — MD, ME, CO. Nothing in this project
+    //      models it; `boundaries.mjs`'s state_excl_limited row cannot see it. Disclosed at v5.54,
+    //      not modelled. See docs/AUDIT_STATE_EXCL65_NOTES.md.
+    //   3. AGE THRESHOLD BELOW 65                          — KY has NO age test at all, DE is 60,
+    //      NJ itself is 62, SC is tiered. `excl65 * persons65` can only express "65 or over", so
+    //      every such state is UNDER-applied for ages threshold-to-64. Direction is CONSERVATIVE,
+    //      the opposite of (1) and (2). See docs/AUDIT_STATE_EXCL65_ROUND2.md §0.
+    //
+    // Household: MFJ, both 65+, NJ, RETIREMENT INCOME ONLY — no SS (NJ excludes it from gross
+    // income entirely), no wages, no gains. Total income therefore equals retirement income, which
+    // is what makes the exclusion band unambiguous.
+    //
+    // SOURCES — NJ Division of Taxation, not a summary site and not the model's own `note`:
+    //   [S1] Retirement Income Exclusions, nj.gov/treasury/taxation/njit7.shtml
+    //   [S2] Tax Rate Schedules (Table B, MFJ)
+    //   [S3] Personal exemptions: $1,000 each + $1,000 each at 65+ = $4,000 for this household
+    //
+    // NJ's exclusion is a percentage OF PENSION INCOME (capped at $100,000 MFJ), not a percentage
+    // of the cap — the distinction that makes $120,000 exclude $60,000 rather than $50,000:
+    //   income <= $100,000  -> 100%      $100,001-125,000 -> 50%
+    //   $125,001-150,000    ->  25%      above $150,000   ->  0%
+    //
+    // | income   | NJ excl  | NJ base  | NJ tax [S2] | after exempt [S3] | model excl | model tax |
+    // | $ 90,000 | $ 90,000 | $      0 | $     0.00  | $     0.00        | $ 90,000   | $    0.00 |
+    // | $120,000 | $ 60,000 | $ 60,000 | $ 1,050.00  | $   952.00        | $120,000   | $    0.00 |
+    // | $140,000 | $ 35,000 | $105,000 | $ 3,026.25  | $ 2,805.25        | $140,000   | $    0.00 |
+    // | $200,000 | $      0 | $200,000 | $ 8,697.50  | $ 8,442.70        | $150,000   | $2,750.00 |
+    //
+    // NJ hand-arithmetic, Table B MFJ, each bracket walked independently of the subtract form:
+    //   $ 60,000 base -> 2.45%  band: 0.0245 x  60,000 -   420.00 = $1,050.00
+    //   $105,000 base -> 5.525% band: 0.05525 x 105,000 - 2,775.00 = $3,026.25
+    //   $200,000 base -> 6.37%  band: 0.0637 x 200,000 - 4,042.50 = $8,697.50
+    //
+    // MODEL hand-arithmetic: excl = 75,000 x 2 = 150,000, unconditional at every income.
+    //   retBase = max(0, income - 150,000);  tax = 0.055 x retBase
+    //   $ 90,000 -> max(0, -60,000) = 0        -> $0.00
+    //   $120,000 -> max(0, -30,000) = 0        -> $0.00
+    //   $140,000 -> max(0, -10,000) = 0        -> $0.00
+    //   $200,000 -> max(0,  50,000) = 50,000   -> 0.055 x 50,000 = $2,750.00
+    const NJ = inc => S({ code: "NJ", fallbackRate: 0, retIncome: inc, pen: 0, work: 0,
+                          capGains: 0, ssTaxableFed: 0, persons65: 2 });
+
+    T("2E D-3c (NJ, MFJ 65+): $90,000 — below the limit, model and statute agree",  NJ(90000),  0);
+    T("2E D-3c (NJ, MFJ 65+): $120,000 — model shields everything",                 NJ(120000), 0);
+    T("2E D-3c (NJ, MFJ 65+): $140,000 — model still shields everything",           NJ(140000), 0);
+    T("2E D-3c (NJ, MFJ 65+): $200,000 — model taxes only income above $150,000",   NJ(200000), 2750);
+
+    // NOT VACUOUS. $90,000 is the AGREEMENT point: below NJ's threshold the statute also shields
+    // everything, so this case set cannot be read as "the model is simply always wrong". Without
+    // it, an implementation that returned 0 for every NJ input would pass three of the four.
+    T("2E D-3c control: the $90,000 agreement point is a real agreement, not a shared zero",
+      NJ(90000) === 0 && NJ(200000) > 0 ? 1 : 0, 1);
+
+    // [KNOWN DEFECT 2026-08-29 | NJ exclusion applied unconditionally] — OPERATIONS §D pin.
+    // The gap is asserted, not just the model's output, so the pin records WHAT is wrong and BY HOW
+    // MUCH. Comparison is against the NO-EXEMPTION column: the model has no personal-exemption
+    // concept, so that is the comparable quantity. The after-exemption figures are carried in the
+    // table above so the household's actual liability is on the record and this test cannot be
+    // accused of picking the flattering comparison.
+    // FLIP THESE PINS when D-3c is fixed — at that point NJ(120000) should be 1050, NJ(140000)
+    // should be 3026.25, and the gaps go to zero.
+    //
+    // ⚠ NO VERSION GATE TODAY, AND THAT IS A DECISION, NOT AN OVERSIGHT (OPERATIONS §B2).
+    // This block adds no source change, so all four figures are true on BOTH legs of every pair
+    // that replays it. THE MOMENT D-3c IS FIXED, THESE PINS NEED A GATE — the frozen prior leg will
+    // legitimately carry the unconditional behaviour, and asserting the fix against it is exactly
+    // the v5.27 mistake §B2 exists to prevent. §2E already has the `_v` variable for that purpose,
+    // used by the Montana pin above. Write the gate in the same release as the fix, not later.
+    T("[KNOWN DEFECT 2026-08-29] NJ $120,000: model understates by the full statutory tax",
+      Number((1050.00 - NJ(120000)).toFixed(2)), 1050.00);
+    T("[KNOWN DEFECT 2026-08-29] NJ $140,000: model understates by the full statutory tax",
+      Number((3026.25 - NJ(140000)).toFixed(2)), 3026.25);
+    T("[KNOWN DEFECT 2026-08-29] NJ $200,000: model understates by $5,947.50",
+      Number((8697.50 - NJ(200000)).toFixed(2)), 5947.50);
+
+    // THE TWO ERRORS HAVE OPPOSITE SIGNS, which is why a single wrong figure cannot be blamed on
+    // either alone. Decomposed at $200,000, one term at a time:
+    //   model as shipped                                    $ 2,750.00
+    //   correct exclusion ($0), model's flat 5.5%            $11,000.00   exclusion: +$8,250.00
+    //   + NJ Table B graduated schedule                      $ 8,697.50   rate:      -$2,302.50
+    // The exclusion error is OPTIMISTIC and larger; the flat-rate error is CONSERVATIVE and
+    // smaller; the net is optimistic, which is the direction this project treats as the wrong way
+    // to be wrong.
+    T("2E D-3c: the flat-rate term alone would OVERstate, so the net error is not one effect",
+      Number((0.055 * 200000 - 8697.50).toFixed(2)), 2302.50);
   }
 }
 const pass2Ecount = pass - pass2E, fail2Ecount = fail - fail2E;
