@@ -1,5 +1,16 @@
 # SCOPE — v5.54: the state exclusion notes say what the model does, not what the law is
 
+> ## ⛔ RETIRED — BUILT AND SHIPPED AS v5.54, 2026-08-29
+>
+> All four §6 decisions were resolved (two amended; see the CHANGELOG and the stop-report §1) and the
+> release shipped. Its `package_check` OPEN-allowlist entry was deleted in the same edit, per §L.
+> **Kept, not deleted, per §G's "prefer retiring to deleting".** Two things it got wrong are worth
+> carrying forward: its §4 site census priced the suite cost as *"`t31` gains one key"* against an
+> actual **62 gated expressions and 14 registries**, and it did not foresee that rewording NJ's note
+> would drop it out of `t29`'s `state_excl_limited` boundary set. Both are recorded in
+> `docs/FINDINGS-v5_54-session-2.md` and `OPERATIONS.md` §B1a.
+
+
 | Field | Value |
 |---|---|
 | Premise verified against | **v5.53** · source `12a007ed8e57a391acba67b799eb5a2f` · tree `49fcffa` |
