@@ -31,6 +31,17 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 | Built `index.html` md5 | `93d78df5e01f462ad603644bdf418b8d` |
 | Shipped | 2026-08-29 |
 
+> **Test-infrastructure release, 2026-08-29 (no version bump).** `t10_taxcases.mjs` §2E gained the
+> D-3c dollar-exact New Jersey case set; suite 2,750 → **2,768**, parity 10/10, source unchanged at
+> `2e27826c495d3d70ca49ccf71cf238ec`. `SCOPE_D3_NJ_EXCL_DOLLAR_EXACT.md` is **RETIRED** and its
+> `package_check` OPEN-allowlist entry was deleted in the same edit.
+>
+> ⚠ **`AUDIT_STATE_EXCL65_ROUND2.md` is NEW in both repo and pool** (uploaded 2026-08-29; this row
+> was deferred from the v5.54 ship rather than editing the manifest twice in one day). It is the
+> successor to `AUDIT_STATE_EXCL65_NOTES.md` and both are kept — the predecessor covered 6 of 19
+> states, round 2 covers 2 of the remaining 13, and **11 are still unchecked**. Its §0 records a
+> **structural** finding: `excl65 × persons65` has one age gate and the states have at least four.
+>
 > **Rolled 2026-08-29 at the v5.54 ship.** Rotation removed `DangerClose-v5_52.jsx` and
 > `dom_entry_v552.jsx` — a rotation is TWO deletes. The pool holds exactly `DangerClose-v5_53.jsx`
 > and `DangerClose-v5_54.jsx`, and `dom_entry_v553.jsx` and `dom_entry_v554.jsx`.

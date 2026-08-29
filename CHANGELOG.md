@@ -1,5 +1,68 @@
 # Changelog
 
+## Test infrastructure — D-3c dollar-exact: New Jersey's income-limited exclusion, 2026-08-29
+
+**No source change. No version bump — this ships on v5.54 `2e27826c495d3d70ca49ccf71cf238ec`.**
+Parity 10/10 unchanged. `KIND: ops` — no app source ships and the pool does not rotate, which is what that kind means; it is not a statement about docs-versus-code.
+
+`t10_taxcases.mjs` §2E gains nine assertions measuring, **in dollars**, how far the model's New
+Jersey treatment sits from the statute. §2E previously asked only whether the code implements its
+own documented approximation correctly; this measures the approximation itself against the law.
+
+**Suite: 2,750 → 2,768 app checks, 0 failing** — v5.53 leg 1,045 · v5.54 leg 1,045 · parity 10/10 ·
+feature suites once 668. Tooling 82, counted separately. §2E 21 → 30, `t10` 163 → 172. The +18 is
+nine assertions replayed on both legs.
+
+### What is asserted, and why both halves
+
+Four **model** figures (MFJ, both 65+, NJ, retirement income only) and three **gap** pins carrying
+the statutory shortfall as `[KNOWN DEFECT]`, so the pins record what is wrong *and by how much*
+rather than merely recording current behaviour:
+
+| income | NJ excl | NJ tax | model excl | model tax | gap |
+|---|---|---|---|---|---|
+| $90,000 | $90,000 | $0.00 | $90,000 | $0.00 | — agreement point |
+| $120,000 | $60,000 | $1,050.00 | $120,000 | $0.00 | $1,050.00 |
+| $140,000 | $35,000 | $3,026.25 | $140,000 | $0.00 | $3,026.25 |
+| $200,000 | $0 | $8,697.50 | $150,000 | $2,750.00 | $5,947.50 |
+
+Statutory figures were **re-derived independently** from NJ Table B, not inherited from the scope —
+`0.0245 × 60,000 − 420`, `0.05525 × 105,000 − 2,775`, `0.0637 × 200,000 − 4,042.50` — and agree to
+the cent. NJ's exclusion is a percentage **of pension income** capped at $100,000 MFJ, not a
+percentage of the cap; that is why $120,000 excludes $60,000 rather than $50,000.
+
+**The two errors have opposite signs**, which is asserted rather than asserted-about: the exclusion
+error is optimistic and larger (+$8,250 at $200,000), the flat-rate error is conservative and
+smaller (−$2,302.50). A single wrong figure cannot be blamed on either alone. **Net direction is
+optimistic** — the model understates New Jersey tax.
+
+**Comparison is against the no-exemption column** because the model has no personal-exemption
+concept. The after-exemption figures ($952.00 / $2,805.25 / $8,442.70) are carried in the test's
+own table so the household's real liability is on the record and the comparison cannot be accused
+of being the flattering one.
+
+### Disclosed, not glossed
+
+- **This is the instrument, not the repair.** D-3c is not fixed. `SCOPE_STATE_FIXTURES` §4 is
+  explicit that fixing it is a separate job and this release does not reopen it.
+- **No version gate today, and that is a decision.** With no source change the figures are true on
+  both legs. The comment states that a gate becomes necessary the moment D-3c is fixed, because the
+  frozen prior leg will legitimately carry the unconditional behaviour — the v5.27 mistake
+  `OPERATIONS.md` §B2 exists to prevent. §2E already carries the `_v` variable for it.
+- **New Jersey is one mechanism of at least THREE**, and the shipped comment names all three:
+  income-limited-applied-unconditionally (NJ, measured here); reduced-by-Social-Security (MD, ME,
+  CO — disclosed at v5.54, not modelled); and **age threshold below 65** — KY has no age test at
+  all, DE's is 60, NJ's own is 62, SC's is tiered. `excl65 × persons65` cannot express any of them.
+- **Negative-controlled**, all three assertion classes: breaking a model figure, neutering a gap
+  pin, and breaking the non-vacuous control each fire exactly one failure and nothing else.
+
+### Also in this package
+
+`docs/AUDIT_STATE_EXCL65_ROUND2.md` gets its manifest row, deferred from the v5.54 ship so the
+manifest was not edited twice in one day. It checked 2 of the 13 remaining exclusion states — both
+wrong, both by the age-gate mechanism above — and flags two unresolved items ahead of any new state:
+Kentucky's 2026 rate, and Delaware **HB 108**, which may have raised $12,500 to $25,000.
+
 ## v5.54 — state exclusion notes say what the LAW is, not just what the model does, 2026-08-29
 
 **Disclosure only. No modelling change: parity 10/10, and every `STATE_RULES` numeric field —
