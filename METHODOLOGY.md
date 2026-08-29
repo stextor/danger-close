@@ -129,7 +129,7 @@ for a typical retiree; Social Security treatment (43 jurisdictions none; the eig
 since their income thresholds exempt most retirees; WV's phase-out completed for 2026);
 full retirement-income exemptions (IL, MS, PA, IA 55+, MI post-phase-in, plus the nine
 no-income-tax states); and major 65+ retirement-income exclusions where they exist (e.g., GA
-$65K/person, KY $31,110, NY $20K, NJ up to $75K income-limited, VA $12K, SC $15K, DE $12.5K).
+$65K/person, KY $31,110, NY $20K, NJ a $100K HOUSEHOLD cap at 62+ (not per-person), VA $12K, SC $15K, DE $12.5K). **Which of these have been checked against a primary source, and what was found, is recorded in `AUDIT_STATE_EXCL65_NOTES.md` — this section routes there rather than restating it, because a verification claim expires and a dated audit does not.**
 
 One shared calculator serves the Taxes engine, the Roth strategy comparator, and the Withdrawal
 engine, so the three can never disagree. Selecting no state preserves the legacy flat-rate
@@ -137,9 +137,9 @@ behavior exactly (backward compatible with every existing backup).
 
 **This is an approximation layer and is labeled as such in the UI.** Not modeled: progressive
 state brackets (effective rate instead), county/city income taxes (IN, MD partially folded, NYC
-not), income limits on several exclusions (NJ, VA, RI approximated as unconditional), state
+not), income limits on several exclusions (NJ, VA, RI approximated as unconditional), **exclusions that are reduced by Social Security received (MD and ME dollar-for-dollar; CO shares one $24K cap between SS and pension) — the model applies none of that, which overstates those exclusions and understates state tax**, state
 standard deductions/credits, pension-source distinctions (AL/HI DB exemptions), and WA's
-capital-gains excise. Verify your state.
+capital-gains excise. **The modelled MD and ME amounts also trail their current statutory figures.** Verify your state.
 
 ## 7. Roth conversion modeling
 

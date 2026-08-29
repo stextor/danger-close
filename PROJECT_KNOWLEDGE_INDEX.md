@@ -25,12 +25,27 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 
 | Field | Value |
 |---|---|
-| Version | **v5.53** |
-| Source file in knowledge | `DangerClose-v5_53.jsx` |
-| Source md5 | `12a007ed8e57a391acba67b799eb5a2f` |
-| Built `index.html` md5 | `c99fd1fe27998e1dff2aa192c7e48ea2` |
-| Shipped | 2026-08-28 |
+| Version | **v5.54** |
+| Source file in knowledge | `DangerClose-v5_54.jsx` |
+| Source md5 | `2e27826c495d3d70ca49ccf71cf238ec` |
+| Built `index.html` md5 | `93d78df5e01f462ad603644bdf418b8d` |
+| Shipped | 2026-08-29 |
 
+> **Rolled 2026-08-29 at the v5.54 ship.** Rotation removed `DangerClose-v5_52.jsx` and
+> `dom_entry_v552.jsx` — a rotation is TWO deletes. The pool holds exactly `DangerClose-v5_53.jsx`
+> and `DangerClose-v5_54.jsx`, and `dom_entry_v553.jsx` and `dom_entry_v554.jsx`. ⚠ `dom_entry_v592.jsx`
+> is still NOT part of the rotation (retired v5.9.2 leg — see below). **v5.54 is DISCLOSURE ONLY:
+> parity 10/10, every `STATE_RULES` numeric field byte-identical, and `t4` did NOT move (252 both
+> legs) — the DOM suite is blind to the state-selector caption this release rewrites, and the DOM
+> diff's ±$500 ceiling cannot see it either. `t31` is the witness. A "nothing moved" reading is not
+> evidence of correctness here.**
+>
+> ⚠ **`STOP-REPORT-v5_54-session-budget.md` is DELETED from the pool at this ship** — it was a
+> handover, not history. The repo copy stays. `SCOPE_v5_54_STATE_DISCLOSURE.md` is RETIRED and its
+> `package_check` OPEN-allowlist entry deleted in the same edit. `docs/FINDINGS-v5_54-session-2.md`
+> is NEW (repo + pool) and records a phantom-edit drift incident and the AST-over-grep technique now
+> in `OPERATIONS.md` §B1a; delete it from the pool once its findings are carried into the D-3 scope.
+>
 > **Rolled 2026-08-28 at the v5.53 ship.** Rotation removed `DangerClose-v5_51.jsx` and
 > `dom_entry_v551.jsx` — a rotation is TWO deletes. The pool holds exactly `DangerClose-v5_52.jsx`
 > and `DangerClose-v5_53.jsx`, and `dom_entry_v552.jsx` and `dom_entry_v553.jsx`. ⚠ `dom_entry_v592.jsx`
