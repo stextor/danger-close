@@ -1,5 +1,86 @@
 # Changelog
 
+## v5.54 — state exclusion notes say what the LAW is, not just what the model does, 2026-08-29
+
+**Disclosure only. No modelling change: parity 10/10, and every `STATE_RULES` numeric field —
+`rate`, `ss`, `retExempt`, `excl65` — is byte-for-byte what it was at v5.53 on all four rewritten
+states.** `KIND: app-release`.
+
+`AUDIT_STATE_EXCL65_NOTES.md` checked six of the nineteen states carrying a 65+ exclusion against
+their own revenue authorities. **Four misstate their own law**, and three of those four — Maryland,
+Maine, Colorado — reduce the exclusion by **Social Security received**, which the model applies none
+of. Direction: **optimistic** — it overstates the exclusion and understates state tax.
+
+### What changed
+
+- **Four notes rewritten** — CO, ME, MD, NJ. Statutory figures are **dated** (`$40,600 (2026)`,
+  `$48,216 (2025, indexed)`) because both index annually and an undated figure is a fresh staleness
+  liability. Dropping them was considered and rejected: `t10` §2E asserts that every state with
+  `excl65 > 0` names a dollar figure, and dating keeps that check green *and* honest.
+- **The state-selector caption** now reads `Model (2026 approx): … effective rate` — the old head
+  read as a claim about the law rather than about the model. Fixed at the caption head, so it covers
+  every generated clause including any added later. This also corrects a Colorado reader being told
+  *"partially taxes SS"* (CO carries `ss: 0.5`) while CO fully exempts federally-taxed SS at 65+.
+- **A standing caveat** appended to the caption, carrying **no count** by decision — a count would be
+  true today and stale at the next audit.
+- **Field Manual §13** gains the Social Security offset disclosure.
+- **`METHODOLOGY.md` §6** — NJ corrected to a household cap at 62+, the SS-offset class added to
+  *Not modeled*, and coverage **routed** to `AUDIT_STATE_EXCL65_NOTES.md`, which is dated and owns
+  it. Marking states "verified" inline was rejected: that is a claim that expires.
+
+### Tests
+
+**2,750 app checks, 0 failing** — v5.53 leg 1,036 · v5.54 leg 1,036 · parity **10/10** · feature
+suites run once 668. Tooling is 82 (`t21` 50 · DOM diff 32) and is counted separately.
+Built-artifact smoke `smoke_built` **16/16**.
+
+`t31` gains one key, `reduced by Social Security`, gated `since: "v554"`. **Measured before any copy
+was written:** that phrase, `Social Security offset` and `offset by Social Security` all returned
+**0 hits** in `METHODOLOGY.md` and 0 in source, so the key cannot pass before the fix exists.
+**Negative-controlled both ways:** breaking the phrase in `METHODOLOGY.md` fails 2 checks (C-0 plus
+parity, `meth=false app=true docs=true`); breaking it in source fails 1 (`meth=true app=false
+docs=false`). The key takes **no `until`** deliberately — it states what the model does *not* do, so
+it stays true until the offset is modelled, and the release that models it must **invert** this key,
+not expire it.
+
+### Limitations and approximations, stated
+
+- **Thirteen of the nineteen 65+ exclusion states remain unverified.** Kentucky's $31,110 is the
+  largest exposure. The audit is dated and names what it covered; the app routes to it rather than
+  claiming coverage it does not have.
+- **The Social Security offset is disclosed, not modelled.** Modelling it needs `ssGross` and a
+  per-spouse replacement for `persons65`; that is its own scope.
+- **Maryland's and Maine's modelled amounts trail the current statutory figures** — `excl65` is
+  unchanged at $36,200 and $35,000 against $40,600 and $48,216. The notes say so.
+- **`STATE_RULES.CO` carries `ss: 0.5`** while its note says 65+ deduct all federally-taxed SS. That
+  contradiction is **disclosed, not resolved.**
+- **`t4` did not move**, at 252 on both legs. The release rewrites rendered copy and the DOM suite
+  is blind to it; the DOM diff's ±$500 render ceiling cannot see this release at all. **A "nothing
+  moved" reading is not evidence of correctness here — `t31` is the witness.**
+
+### Two findings this release paid for
+
+**A version bump costs 62 gated expressions, not four in-app sites.** Four is the *source* cost. The
+*suite* cost is 62 version-gate expressions naming the prior tag plus 14 `KNOWN_VERSIONS` registries,
+each decided individually — a blind extension asserts the prior build's expectations for the new one.
+Every previous bump paid this and none recorded it. Decided here: 60 extend, 2 are ternary lookup
+tables (`t1`'s `verStr`, `t4`'s `_badge`) that take a **new arm**, not an extended condition — the
+blanket transform would have made v5.54 render as "v5.53".
+
+**A grep cannot execute a regex, and that gap hid a real defect.** A case-sensitive suite search for
+`INCOME-LIMITED` returned zero hits and was reported as evidence the release created no stale-copy
+lock. The live matcher is `/income[- ]limited|income limit/i`. Re-run by AST with every regex
+literal executed against old and new copy, NJ's rewritten note left the `state_excl_limited`
+boundary set — and because the `stateExclCliff` fixture pins NJ specifically, `t29` F-7 failed. The
+NJ note now carries the house-style `income-limited:` phrase its four sibling notes already use.
+`OPERATIONS.md` §B1a records the technique. **Still open:** the same pass shows Maine belongs in
+that set and is missing from it, because v5.54 is the first release whose note discloses ME's
+$250K MFJ phase-out at all — a pre-existing under-count better disclosure exposed, carried to the
+D-3 scope rather than fixed here.
+
+Source md5 `2e27826c495d3d70ca49ccf71cf238ec` · built `index.html` md5
+`93d78df5e01f462ad603644bdf418b8d`.
+
 ## Unreleased — docs only: v5.54 halted mid-build; a version bump costs 62 gates, not four sites, 2026-08-28
 
 **No source ships. v5.53 remains current and untouched.** `KIND: ops`.
