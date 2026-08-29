@@ -33,8 +33,28 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 
 > **Rolled 2026-08-29 at the v5.54 ship.** Rotation removed `DangerClose-v5_52.jsx` and
 > `dom_entry_v552.jsx` — a rotation is TWO deletes. The pool holds exactly `DangerClose-v5_53.jsx`
-> and `DangerClose-v5_54.jsx`, and `dom_entry_v553.jsx` and `dom_entry_v554.jsx`. ⚠ `dom_entry_v592.jsx`
-> is still NOT part of the rotation (retired v5.9.2 leg — see below). **v5.54 is DISCLOSURE ONLY:
+> and `DangerClose-v5_54.jsx`, and `dom_entry_v553.jsx` and `dom_entry_v554.jsx`.
+>
+> ⚠ **CORRECTION, 2026-08-29 — `dom_entry_v592.jsx` IS NOT AND HAS NEVER BEEN A POOL FILE.** Every
+> rotation entry from v5.50 onward carries the warning *"NOT part of the rotation and must not be
+> deleted,"* attached to a paragraph that is otherwise entirely about what the **pool** holds — so it
+> reads as a claim that the pool holds it. **It does not, and the maintainer confirms it has never
+> been in a release zip, which is the only way a pool file can arrive.** The underlying fact is true
+> but is about the **repo**: `qa/qa-baseline/dom_entry_v592.jsx` is kept deliberately (it was
+> proposed for deletion at v5.50 as a suspected typo and the suite caught it), and `v592` is still
+> registered in four `KNOWN_VERSIONS` arrays — `t1`, `t4`, `t5`, `t6`, verified by parser
+> 2026-08-29, not recalled.
+>
+> **A pool copy would be inert anyway.** `dom_entry_v592.jsx` imports `./app_v592.jsx`, which
+> `mk_testable.sh` generates from `v592.jsx` — and that source is in **neither** the repo nor the
+> pool by deliberate decision (`qa/qa-baseline/README.md`: local-only, maintainer-supplied). Anyone
+> able to run the retired leg is working from a checkout that already has the repo's copy.
+>
+> ⚠ **Why the freshness check could not catch this:** §A2 lists superseded `dom_entry_*` under
+> *expected repo-only*, so a pool-absent / repo-present entry file is filtered out by design. The
+> §A2 scan at the v5.54 build reported the pool clean and this claim had been false for five
+> releases underneath it. **The historical entries below are left unedited — they are a record of
+> what was believed at each rotation. This note supersedes their v592 sentence.** **v5.54 is DISCLOSURE ONLY:
 > parity 10/10, every `STATE_RULES` numeric field byte-identical, and `t4` did NOT move (252 both
 > legs) — the DOM suite is blind to the state-selector caption this release rewrites, and the DOM
 > diff's ±$500 ceiling cannot see it either. `t31` is the witness. A "nothing moved" reading is not
