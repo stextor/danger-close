@@ -25,12 +25,19 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 
 | Field | Value |
 |---|---|
-| Version | **v5.54** |
-| Source file in knowledge | `DangerClose-v5_54.jsx` |
-| Source md5 | `2e27826c495d3d70ca49ccf71cf238ec` |
-| Built `index.html` md5 | `93d78df5e01f462ad603644bdf418b8d` |
+| Version | **v5.55** |
+| Source file in knowledge | `DangerClose-v5_55.jsx` |
+| Source md5 | `31761794c4c69ec255ca5cd856d48b8f` |
+| Built `index.html` md5 | `d26050b78c46e1561bd36161ce083a4e` |
 | Shipped | 2026-08-29 |
 
+> **Rolled 2026-08-29 at the v5.55 ship.** Rotation removed `DangerClose-v5_53.jsx` and
+> `dom_entry_v553.jsx` — a rotation is TWO deletes. The pool holds exactly `DangerClose-v5_54.jsx`
+> and `DangerClose-v5_55.jsx`, and `dom_entry_v554.jsx` and `dom_entry_v555.jsx`.
+> **v5.55 is a MODELLING change and figures move DOWN** for KY and DE households below 65; parity
+> stayed 10/10, which is the evidence both engines moved identically.
+> `SCOPE_STATE_EXCL_AGE_GATE.md` is **RETIRED**.
+>
 > **Test-infrastructure release, 2026-08-29 (no version bump).** `t10_taxcases.mjs` §2E gained the
 > D-3c dollar-exact New Jersey case set; suite 2,750 → **2,768**, parity 10/10, source unchanged at
 > `2e27826c495d3d70ca49ccf71cf238ec`. `SCOPE_D3_NJ_EXCL_DOLLAR_EXACT.md` is **RETIRED** and its

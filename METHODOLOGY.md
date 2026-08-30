@@ -131,13 +131,25 @@ full retirement-income exemptions (IL, MS, PA, IA 55+, MI post-phase-in, plus th
 no-income-tax states); and major 65+ retirement-income exclusions where they exist (e.g., GA
 $65K/person, KY $31,110, NY $20K, NJ a $100K HOUSEHOLD cap at 62+ (not per-person), VA $12K, SC $15K, DE $12.5K). **Which of these have been checked against a primary source, and what was found, is recorded in `AUDIT_STATE_EXCL65_NOTES.md` — this section routes there rather than restating it, because a verification claim expires and a dated audit does not.**
 
+**The age at which an exclusion starts is modelled per state (v5.55), not assumed to be 65.**
+`STATE_RULES.exclAge` carries a state's own floor and is absent for the 47 states that use 65.
+Two are set: **Kentucky attaches no age test in law** (verified against KY DOR Schedule M) and
+**Delaware's starts at 60** (30 Del. C. §1106). Before v5.55 every state was gated on a hardcoded
+65, which withheld a real statutory exclusion from households below that age and so **overstated**
+state tax — the conservative direction, which is why it went unnoticed. Two known thresholds are
+deliberately **not** applied: New Jersey's 62, because NJ's cap is a household amount and applying
+the age alone would grant a 62-64 couple more exclusion than the statute allows; and South
+Carolina's under-65 tier, which is a second amount rather than an earlier start. Both are stated in
+their own state notes. **Thirteen of the nineteen exclusion states remain unverified, so more
+thresholds may differ from 65 than are modelled here.**
+
 One shared calculator serves the Taxes engine, the Roth strategy comparator, and the Withdrawal
 engine, so the three can never disagree. Selecting no state preserves the legacy flat-rate
 behavior exactly (backward compatible with every existing backup).
 
 **This is an approximation layer and is labeled as such in the UI.** Not modeled: progressive
 state brackets (effective rate instead), county/city income taxes (IN, MD partially folded, NYC
-not), income limits on several exclusions (NJ, VA, RI approximated as unconditional), **exclusions that are reduced by Social Security received (MD and ME dollar-for-dollar; CO shares one $24K cap between SS and pension) — the model applies none of that, which overstates those exclusions and understates state tax**, state
+not), income limits on several exclusions (NJ, VA, RI approximated as unconditional), NJ's 62 age floor and SC's under-65 tier (both disclosed, neither applied), **exclusions that are reduced by Social Security received (MD and ME dollar-for-dollar; CO shares one $24K cap between SS and pension) — the model applies none of that, which overstates those exclusions and understates state tax**, state
 standard deductions/credits, pension-source distinctions (AL/HI DB exemptions), and WA's
 capital-gains excise. **The modelled MD and ME amounts also trail their current statutory figures.** Verify your state.
 
