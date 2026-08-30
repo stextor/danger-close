@@ -1,5 +1,78 @@
 # Changelog
 
+## v5.55 — the age a state's exclusion starts is now the state's own, not a hardcoded 65, 2026-08-29
+
+**Modelling change. Figures move — and they move DOWN.** `KIND: app-release`. Parity 10/10.
+
+Every state's 65+ retirement-income exclusion was gated on a hardcoded `65` at all three call sites.
+The states do not agree on 65. **Kentucky attaches no age test in law at all; Delaware's starts at
+60.** Both were verified against their own revenue authorities — KY DOR Schedule M and 30 Del. C.
+§1106 — in `docs/AUDIT_STATE_EXCL65_ROUND2.md`.
+
+The old behaviour withheld a real statutory exclusion from households below 65 and therefore
+**overstated** state tax. That is the *conservative* direction, which is why it survived undisclosed
+through fifty-odd releases. It lands on ages 60-64 — the early-retirement band this app exists to
+model. Correcting it makes the plan look slightly better, and correct beat conservative here by an
+explicit decision rather than by default.
+
+### What changed
+
+- **`STATE_RULES.exclAge`** — a new optional per-state age floor, absent for the 47 states that use
+  65 so the diff stays readable. Two are set: `KY: 0` and `DE: 60`.
+- **`stateTaxAnnual` takes `ageA`, `ageB` and `single`** and applies the state's floor internally,
+  so the threshold lives with the rule table rather than being duplicated across three call sites in
+  two engines. `persons65` is retained **only** as a fallback, so a caller that supplies no ages
+  degrades to the old behaviour instead of silently excluding nothing.
+- **Field Manual §13 and `METHODOLOGY.md`** both state what is now modelled and what is not.
+
+### Deliberately NOT applied, and why
+
+- **New Jersey's 62.** NJ's cap is a **household** amount, not per-person. Applying the age alone
+  would grant a 62-64 couple $150,000 against a $100,000 statutory cap — **worse, not better**, and
+  it would widen the gap the `t10` §2E D-3c pins measure. Both axes together or neither; this
+  release does neither and says so in NJ's note.
+- **South Carolina's under-65 tier.** That is a second *amount* ($10K under 65, $15K at 65+), not an
+  earlier start, and `exclAge` cannot express it. Stated in SC's note.
+
+### Tests
+
+**2,785 app checks, 0 failing** — v5.54 leg 1,048 · v5.55 leg 1,059 · **parity 10/10** · feature
+suites once 668. Tooling 82, counted separately. `smoke_built` 16/16. §2E 30 → 44, `t10` 172 → 186.
+
+Thirteen assertions in `t10` §2E, **gated to v555+** with a `[KNOWN DEFECT pre-v5.55]` else-branch so
+the frozen prior leg pins the old behaviour and the flip is self-verifying. Four are **extinction
+invariants**: that NJ and SC carry no `exclAge` *by decision*; that no state's note names a non-65
+age while its code still uses 65 — the exact defect class this release closes, negative-controlled
+by injecting a state whose note says 62; and that the D-3c pins do not move, which they do not.
+
+### Findings this release paid for
+
+- **Parity 10/10 held**, which is the evidence that both engines moved identically rather than one.
+- **The new assertions were initially ungated and failed the frozen leg 9 times** — the v5.27 mistake
+  §B2 exists to prevent, made on the release whose own notes warn about it. Caught by the suite.
+- **`t31` has THREE version lists and rolling two of them fails silently.** `ORDER` drives
+  `indexOf(VER)`, so an unrolled tag scores −1 and *every* key takes its pre-fix branch: 6 failures
+  with no hint that a list was missing. A comment now sits at the site.
+- **A version string inside a state note would have weakened a smoke check.** `t9` proves the shell
+  stamped a version by matching `/v5\.\d+/` against the whole body; two notes briefly carried
+  "modelled from v5.55", so a broken badge could have been masked by a note. Removed. Found by
+  executing every suite regex against the old and new note text — the technique `OPERATIONS.md`
+  §B1a records.
+- **A version bump costs 62 gated expressions and 15 registries**, not the 14 previously recorded.
+  `t29_boundaries.mjs` carries one and has no `VER ===` gate, which is what makes it easy to miss.
+
+### Limitations, stated
+
+- **Thirteen of the nineteen exclusion states are still unverified.** Every one checked so far has
+  been wrong in some detail. More floors may differ from 65 than are modelled here.
+- **Two unresolved items outrank any new state:** Delaware **HB 108**, which may have raised $12,500
+  to $25,000, and Kentucky's 2026 rate — the model carries 4%, the DOR page says 4%, secondary
+  sources say 3.5%. Neither is resolved and neither is asserted.
+- **D-3c and the Social Security offset are still not modelled.** Both remain pinned and disclosed.
+
+Source md5 `31761794c4c69ec255ca5cd856d48b8f` · built `index.html` md5
+`d26050b78c46e1561bd36161ce083a4e`.
+
 ## Test infrastructure — D-3c dollar-exact: New Jersey's income-limited exclusion, 2026-08-29
 
 **No source change. No version bump — this ships on v5.54 `2e27826c495d3d70ca49ccf71cf238ec`.**
