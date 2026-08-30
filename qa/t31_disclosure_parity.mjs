@@ -47,7 +47,7 @@ import { dirname, join } from "path";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v549";
-const KNOWN_VERSIONS = ["v548", "v549", "v550", "v551", "v552", "v553", "v554"];
+const KNOWN_VERSIONS = ["v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   process.exit(1);
@@ -215,7 +215,7 @@ T("C-0: every declared key is named in METHODOLOGY.md \u2014 parity is only owed
   KEYS.every(k => inMeth(k.key)),
   KEYS.filter(k => !inMeth(k.key)).map(k => k.key).join(", "));
 
-const POST = VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554";
+const POST = VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555";
 // EACH KEY IS GATED TO THE RELEASE THAT LANDED IT, not to the shared POST flag above.
 // Found at the v5.50 build. Under one shared gate the v549 leg went GREEN on v5.50's expectation
 // for the wrong reason twice over - METHODOLOGY.md is ONE shared file at the run-folder root, so a
@@ -223,7 +223,11 @@ const POST = VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552
 // see JSX gating, so v5.49's single-household-gated estate card satisfied it even though a COUPLE
 // never rendered a word of it - while the v548 leg FAILED outright, invisibly, because runsuite.sh
 // only runs t31 for the prior and current tags.
-const ORDER = ["v548", "v549", "v550", "v551", "v552", "v553", "v554"];
+const ORDER = ["v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555"];
+// ⚠ THIS IS THE THIRD OF THREE VERSION LISTS in this file — KNOWN_VERSIONS (L50), POST (L218)
+// and ORDER. `post()` uses ORDER.indexOf(VER), so an unrolled tag scores -1 and EVERY key
+// silently takes its pre-fix branch. Rolling two of the three fails 6 checks with no hint
+// that a list is missing. Roll all three together.
 const post = k => ORDER.indexOf(VER) >= ORDER.indexOf(k.since);
 for (const k of KEYS) {
   const { key, why, since } = k;
@@ -295,7 +299,7 @@ if (POST) {
   // approved copy is correct; weakening it to something both a conservative and a non-conservative
   // sentence would satisfy is not.
   const DIRECTION = "charges every surcharge in full";
-  if (VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554") {
+  if (VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555") {
     // The C predicate is an OR, and for this key the app arm was ALREADY satisfied before the fix
     // by single-gated text. Asserting the manual arm separately is what makes the key mean anything.
     T("D-5: the FIELD MANUAL names estate tax - the arm that was empty before v5.50",
@@ -306,7 +310,7 @@ if (POST) {
       inDocs("optimistic") && inApp("optimistic"),
       `docs=${inDocs("optimistic")} app=${inApp("optimistic")}`);
   }
-  if (VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554") {
+  if (VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555") {
     // E · CREATOR-SIDE LABEL DRIFT. Added after the v5.50 ship, when a sweep found METHODOLOGY.md
     // still describing the objective list as "max after-tax estate" in three places while its own
     // new section 12 explained why that phrase was wrong. The document contradicted itself, and
@@ -329,7 +333,7 @@ if (POST) {
     T("D-9: the FIELD MANUAL names it - the §13 limitations register",
       inDocs("omits dividends and realized capital gains"));
   }
-  if (VER === "v553" || VER === "v554") {
+  if (VER === "v553" || VER === "v554" || VER === "v555") {
     T("D-10: the RENDER TREE says the column now counts dividends",
       inApp("counts the taxable sleeve's dividends"));
     T("D-11: the FIELD MANUAL does too",

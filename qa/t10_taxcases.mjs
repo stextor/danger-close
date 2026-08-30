@@ -593,6 +593,91 @@ const pass2E = pass, fail2E = fail;
     // to be wrong.
     T("2E D-3c: the flat-rate term alone would OVERstate, so the net error is not one effect",
       Number((0.055 * 200000 - 8697.50).toFixed(2)), 2302.50);
+
+    // ⚠ GATED TO v555+ per OPERATIONS §B2. v5.54 and earlier legitimately apply a hardcoded 65 at
+    // every state, and asserting the fix against them breaks the frozen prior-leg replay — the
+    // v5.27 mistake. The else-branch pins the pre-fix behaviour so the flip is self-verifying.
+    if (_v >= 555) {
+      // ── AGE FLOOR (v5.55). `excl65` used to be gated on a hardcoded 65 at all three call sites.
+      // The states do not agree on 65: Kentucky attaches NO age test in law, Delaware's starts at 60.
+      // `STATE_RULES.exclAge` carries a state's own floor and is absent for the 47 that use 65.
+      // Verified against KY DOR Schedule M and 30 Del. C. §1106 — docs/AUDIT_STATE_EXCL65_ROUND2.md.
+      //
+      // ⚠ DIRECTION: this makes the estimate LOWER, not higher. The old behaviour withheld a real
+      // statutory exclusion and so OVERSTATED state tax — the conservative direction, which is why it
+      // survived undisclosed. Correct beat conservative here by decision (scope D-c).
+      const AGE = (code, ageA, ageB, over) =>
+        S({ code, fallbackRate: 0, retIncome: 100000, pen: 0, work: 0, capGains: 0,
+            ssTaxableFed: 0, ageA, ageB, single: !!over });
+
+      // hand KY (rate 4%, $31,110 each, NO floor): 0.04 x (100,000 - 62,220) = 0.04 x 37,780 = 1,511.20
+      T("2E age (KY, no statutory age test): a 60-year-old couple gets the full exclusion",
+        AGE("KY", 60, 60), 1511.20);
+      T("2E age (KY): and so does a 45-year-old couple — there is no floor to clear",
+        AGE("KY", 45, 45), 1511.20);
+      // hand DE (rate 5.5%, $12,500 each, floor 60):
+      //   61/61 -> 0.055 x (100,000 - 25,000) = 4,125.00
+      //   59/59 -> 0.055 x  100,000           = 5,500.00
+      //   61/59 -> 0.055 x (100,000 - 12,500) = 4,812.50
+      T("2E age (DE, floor 60): both spouses over the floor get one exclusion each",
+        AGE("DE", 61, 61), 4125.00);
+      T("2E age (DE, floor 60): both under the floor get nothing",
+        AGE("DE", 59, 59), 5500.00);
+      T("2E age (DE, floor 60): one each side of the floor gets exactly one exclusion",
+        AGE("DE", 61, 59), 4812.50);
+
+      // NOT VACUOUS, and this is the assertion that would have caught a global floor change:
+      // a state with NO exclAge must still use 65. AL's statutory floor IS 65, so it must not move.
+      // hand AL (4.5%, $6,000 each): 65/65 -> 0.045 x (100,000 - 12,000) = 3,960.00
+      //                              64/64 -> 0.045 x  100,000           = 4,500.00
+      T("2E age control: a state with no exclAge still uses 65 (AL, both 65)", AGE("AL", 65, 65), 3960.00);
+      T("2E age control: and denies it one year earlier (AL, both 64)",       AGE("AL", 64, 64), 4500.00);
+      T("2E age control: exactly two states carry an exclAge",
+        Object.keys(R).filter(c => R[c].exclAge !== undefined).length, 2);
+      T("2E age control: and they are KY and DE",
+        Object.keys(R).filter(c => R[c].exclAge !== undefined).sort().join(",") === "DE,KY" ? 1 : 0, 1);
+
+      // ── EXTINCTION INVARIANTS (OPERATIONS §D). Each pins a defect class shut, not a figure.
+      // [1] The two thresholds v5.55 deliberately does NOT model. Decisions D-d and D-e.
+      //     NJ's cap is a HOUSEHOLD amount, so applying its 62 floor alone would grant a 62-64 couple
+      //     $150,000 against a $100,000 statutory cap — worse, not better. SC's under-65 rule is a
+      //     second AMOUNT, not an earlier start, and exclAge cannot express it.
+      T("[BY DECISION v5.55] NJ carries no exclAge — its 62 floor is disclosed, not modelled",
+        R.NJ.exclAge === undefined ? 1 : 0, 1);
+      T("[BY DECISION v5.55] SC carries no exclAge — its under-65 tier is a second amount, not a floor",
+        R.SC.exclAge === undefined ? 1 : 0, 1);
+      // [2] A state that claims an age in its note must not silently keep the 65 default. This is the
+      //     class the whole release exists to close: note said 60, code said 65, nothing compared them.
+      T("2E notes: no state's note names a non-65 age while its code still uses 65",
+        Object.keys(R).filter(c => {
+          const n = (R[c].note || "").toLowerCase();
+          if (R[c].exclAge !== undefined) return false;                 // already modelled
+          if (!R[c].excl65) return false;                               // no exclusion to gate
+          if (/\bnot modelled\b|\bnot modeled\b|\bdisclosed\b/.test(n)) return false;  // deliberate, stated
+          return /\bfrom age (5\d|6[0-4])\b|\b(5\d|6[0-4])\+/.test(n);
+        }).length, 0);
+      // [3] The D-3c pins above measure a 65+ household. This release must not move them.
+      T("2E age: the D-3c NJ case set is untouched by the age work (65+ household)",
+        S({ code: "NJ", fallbackRate: 0, retIncome: 200000, pen: 0, work: 0, capGains: 0,
+            ssTaxableFed: 0, ageA: 65, ageB: 65 }), 2750);
+      // [4] The legacy count path must still work for a caller that supplies no ages, or a partial
+      //     caller would silently receive NO exclusion instead of the old behaviour.
+      T("2E age: a caller supplying persons65 and no ages still gets the old behaviour",
+        S({ code: "AL", fallbackRate: 0, retIncome: 100000, pen: 0, work: 0, capGains: 0,
+            ssTaxableFed: 0, persons65: 2 }), 3960.00);
+    } else {
+      // [KNOWN DEFECT pre-v5.55] every state's exclusion was gated on a hardcoded 65, so a state
+      // with a lower statutory floor — or none at all — withheld a real exclusion. CONSERVATIVE
+      // direction: it overstated state tax. These flip at v5.55.
+      T("[KNOWN DEFECT pre-v5.55] KY's exclusion was withheld below 65 despite no statutory age test",
+        S({ code: "KY", fallbackRate: 0, retIncome: 100000, pen: 0, work: 0, capGains: 0,
+            ssTaxableFed: 0, ageA: 60, ageB: 60 }), 0.04 * 100000);
+      T("[KNOWN DEFECT pre-v5.55] DE's exclusion was withheld from 60-64 despite a statutory floor of 60",
+        S({ code: "DE", fallbackRate: 0, retIncome: 100000, pen: 0, work: 0, capGains: 0,
+            ssTaxableFed: 0, ageA: 61, ageB: 61 }), 0.055 * 100000);
+      T("[KNOWN DEFECT pre-v5.55] no state carried an exclAge field at all",
+        Object.keys(R).filter(c => R[c].exclAge !== undefined).length, 0);
+    }
   }
 }
 const pass2Ecount = pass - pass2E, fail2Ecount = fail - fail2E;
