@@ -1,12 +1,32 @@
 # SCOPE — the state exclusion age gate: a per-state floor and per-spouse ages
 
+> ## ⛔ RETIRED — SHIPPED AS v5.55, 2026-08-29 · source `31761794c4c69ec255ca5cd856d48b8f`
+>
+> All six §7 decisions resolved and built. **D-a** `exclAge` on `STATE_RULES`, **D-b** ages passed
+> and the floor applied internally, **D-c the CORRECT route** — full exclusion from the state's own
+> floor, chosen over the conservative default by explicit decision, **D-d** SC's tier out and
+> disclosed, **D-e** NJ left at 65 and disclosed, **D-f** built now rather than after the remaining
+> states.
+>
+> **Suite 2,768 → 2,785, 0 failing. Parity 10/10** — the evidence both engines moved identically.
+>
+> **§2's central claim held:** per-spouse ages were already in scope at all three call sites, so the
+> refactor was local rather than plumbing. **§2's correction to the handover held too** — there is
+> no `ssGross`; Engine A binds `ss` at L3829 and Engine B binds `ssTotal` at L5119.
+>
+> **Two things this scope did not foresee.** Its §6 said the new assertions would need a gate "or
+> the frozen prior leg gets asserted against a fix it predates" — and they shipped ungated first
+> and failed that leg 9 times, exactly as written. And §5's site census missed that `t31` has a
+> THIRD version list, `ORDER`, whose omission fails 6 checks silently.
+
+
 | Field | Value |
 |---|---|
 | Premise verified against | **v5.54** · source `2e27826c495d3d70ca49ccf71cf238ec` · tree `67b6cf3` |
 | Written | 2026-08-29 |
 | Origin | `docs/AUDIT_STATE_EXCL65_ROUND2.md` §0 — the model has one age gate, the states have at least four |
 | Shape | **Modelling change. Figures move. Version bump.** |
-| Status | **Awaiting decisions in §7 — do not build yet** |
+| Status | **⛔ RETIRED — BUILT AND SHIPPED AS v5.55, 2026-08-29** |
 
 **Baseline confirmed by command this session**, not carried forward: **2,768 app checks / 0 failing**
 (v5.53 leg 1,045 · v5.54 leg 1,045 · parity 10/10 · feature suites once 668), tooling 82, run from a
