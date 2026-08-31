@@ -610,11 +610,18 @@ const pass2E = pass, fail2E = fail;
         S({ code, fallbackRate: 0, retIncome: 100000, pen: 0, work: 0, capGains: 0,
             ssTaxableFed: 0, ageA, ageB, single: !!over });
 
-      // hand KY (rate 4%, $31,110 each, NO floor): 0.04 x (100,000 - 62,220) = 0.04 x 37,780 = 1,511.20
-      T("2E age (KY, no statutory age test): a 60-year-old couple gets the full exclusion",
-        AGE("KY", 60, 60), 1511.20);
-      T("2E age (KY): and so does a 45-year-old couple — there is no floor to clear",
-        AGE("KY", 45, 45), 1511.20);
+      // hand KY ($31,110 each, NO floor). The EXCLUSION is unchanged by v5.57; only the RATE moves.
+      //   base = 100,000 - 62,220 = 37,780
+      //   pre-v5.57  0.040 x 37,780 = 1,511.20
+      //   v5.57+     0.035 x 37,780 = 1,322.30   (HB 1, 2025 — KRS 141.020, effective TY2026)
+      // ⚠ GATED ON THE VERSION TAG, and NOT on a rate read back from STATE_RULES. A pin that
+      //   sources its expectation from the app agrees with the app when the app is wrong, which
+      //   is exactly the defect this release corrects. (scope D-3)
+      const _kyAge = _v >= 557 ? 1322.30 : 1511.20;
+      T(`2E age (KY, no statutory age test): a 60-year-old couple gets the full exclusion — $${_kyAge}`,
+        AGE("KY", 60, 60), _kyAge);
+      T(`2E age (KY): and so does a 45-year-old couple — there is no floor to clear — $${_kyAge}`,
+        AGE("KY", 45, 45), _kyAge);
       // hand DE (rate 5.5%, $12,500 each, floor 60):
       //   61/61 -> 0.055 x (100,000 - 25,000) = 4,125.00
       //   59/59 -> 0.055 x  100,000           = 5,500.00
@@ -752,9 +759,43 @@ const pass2E = pass, fail2E = fail;
       T("2E ssOffset: the D-3c NJ pins are untouched (NJ has no ssOffset)",
         S({ code: "NJ", fallbackRate: 0, retIncome: 200000, pen: 0, work: 0, capGains: 0,
             ssTaxableFed: 0, ssGrossA: 40000, ssGrossB: 40000, ageA: 65, ageB: 65 }), 2750);
+      // KY carries no ssOffset, so Social Security must not touch its exclusion on EITHER build.
+      // The figure moves at v5.57 for the RATE alone — same gate, same reason.
       T("2E ssOffset: the v5.55 age floors are untouched (KY has no ssOffset)",
         S({ code: "KY", fallbackRate: 0, retIncome: 100000, pen: 0, work: 0, capGains: 0,
-            ssTaxableFed: 0, ssGrossA: 30000, ssGrossB: 30000, ageA: 60, ageB: 60 }), 1511.20);
+            ssTaxableFed: 0, ssGrossA: 30000, ssGrossB: 30000, ageA: 60, ageB: 60 }),
+        _v >= 557 ? 1322.30 : 1511.20);
+      // —— v5.57 EXTINCTION · a rate and the note describing it must not drift apart ——
+      // THE CLASS THIS CLOSES. Kentucky carried 4% in code and 3.5% in law for eight months and
+      // nothing compared the two. The note is the only place a reader sees which YEAR a rate
+      // belongs to, so moving the constant and leaving the note is the same defect in other
+      // clothes — the v5.55 finding was its mirror ("the note is right and the code is wrong").
+      if (_v >= 557) {
+        // ⚠ AS A BOOLEAN, NOT AS A NUMBER. `T` compares with EPS = $0.01, a tolerance sized for
+        //   DOLLAR figures. A RATE differs by 0.005 here, so the numeric form passed against a
+        //   reverted 4% build and would pass for anything from 2.5% to 4.5% — vacuous coverage of
+        //   exactly the constant this release corrects. Found by negative control C1, not by review.
+        T("[EXTINCTION v5.57] KY's modelled rate is exactly 3.5%",
+          R.KY.rate === 0.035 ? 1 : 0, 1);
+        T("[EXTINCTION v5.57] and KY's note states that rate, so moving one without the other fails",
+          /\b3\.5\s*%/.test(R.KY.note) ? 1 : 0, 1);
+        T("[EXTINCTION v5.57] KY's note names the year the rate takes effect",
+          /\b2026\b/.test(R.KY.note) ? 1 : 0, 1);
+        T("[EXTINCTION v5.57] and cites the enacting act, not a secondary source",
+          /HB\s*1\b/.test(R.KY.note) && /141\.020/.test(R.KY.note) ? 1 : 0, 1);
+        // DE was AUDITED and found CORRECT at v5.57 — HB 108 never left committee. Pinned so a
+        // future session does not "fix" it toward a bill that is not law.
+        T("[BY DECISION v5.57] DE stays $12,500 — HB 108 was introduced, never enacted",
+          R.DE.excl65, 12500);
+        T("[BY DECISION v5.57] and DE's note discloses that military pensions differ and are unmodelled",
+          /military pension/i.test(R.DE.note) ? 1 : 0, 1);
+      } else {
+        T("[KNOWN DEFECT pre-v5.57] KY carried exactly 4% after the statute moved to 3.5%",
+          R.KY.rate === 0.04 ? 1 : 0, 1);   // boolean for the same EPS reason as above
+        T("[KNOWN DEFECT pre-v5.57] and its note named no rate year at all",
+          /\b2026\b/.test(R.KY.note) ? 1 : 0, 0);
+      }
+
       T("2E ssOffset: an unflagged state ignores Social Security entirely (AL)",
         S({ code: "AL", fallbackRate: 0, retIncome: 100000, pen: 0, work: 0, capGains: 0,
             ssTaxableFed: 0, ssGrossA: 50000, ssGrossB: 50000, ageA: 65, ageB: 65 }), 3960.00);
