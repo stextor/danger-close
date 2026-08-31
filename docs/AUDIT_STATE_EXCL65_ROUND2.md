@@ -62,7 +62,13 @@ one refactor.** That is worth knowing before either is scoped.
 audit's pattern was *"the note misstates the law."* Here the note is accurate and `persons65`
 silently imposes an age test the statute does not have.
 
-⚠ **UNRESOLVED — rate.** The model carries `0.04`. The KY DOR's own Individual Income Tax page still
+✅ **RESOLVED AT v5.57 — the rate was STALE and is now 3.5%.** HB 1 of the 2025 Regular Session,
+signed by the Governor 6 February 2025 (Acts Ch. 1), amended KRS 141.020 to cut the rate from 4% to
+3.5% for taxable years beginning on or after 1 January 2026. The DOR page was the stale source, as
+this paragraph suspected. The model now carries `0.035` and the note carries the year and the act.
+The original text is kept below as the record of what was known when.
+
+⚠ **WAS UNRESOLVED — rate.** The model carries `0.04`. The KY DOR's own Individual Income Tax page still
 reads *"The tax rate is four (4) percent."* Multiple secondary sources report a reduction to **3.5%
 effective 2026**, which would make the modelled rate stale for the "2026 approx" the caption claims.
 **I did not resolve this against the enacting statute and am not recording a verdict on it.** The DOR
@@ -92,7 +98,13 @@ service. Out of scope for a flat model; worth a note only if the class is ever m
   model applies the exclusion only against retirement and pension income, then taxes capital gains
   separately. Direction here is **also conservative**.
 
-⚠ **UNRESOLVED — staleness.** Delaware **HB 108** (153rd General Assembly) raises the exclusion from
+✅ **RESOLVED AT v5.57 — HB 108 IS NOT LAW and the modelled $12,500 is CORRECT.** The Delaware
+General Assembly's own record shows it introduced 8 April 2025, assigned to House Revenue & Finance,
+and never moved: no chapter number, no effective date, and empty amendment, committee-report,
+roll-call and action histories. **The largest suspected error in either audit round was not real.**
+The original text is kept below as the record of what was known when.
+
+⚠ **WAS UNRESOLVED — staleness.** Delaware **HB 108** (153rd General Assembly) raises the exclusion from
 $12,500 to **$25,000** for persons 60 and older. Sources conflict on whether it is enacted and
 effective for TY2025: one describes it as effective *"for taxable years beginning on or after
 January 1, 2025"*, another describes it as a proposal. **I did not establish its status and am
