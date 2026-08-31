@@ -25,12 +25,28 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 
 | Field | Value |
 |---|---|
-| Version | **v5.56** |
-| Source file in knowledge | `DangerClose-v5_56.jsx` |
-| Source md5 | `b191cc577646faa138ffc6149a0aa646` |
-| Built `index.html` md5 | `14a20fe9efc70cf65e1a46f4820d69e8` |
-| Shipped | 2026-08-30 |
+| Version | **v5.57** |
+| Source file in knowledge | `DangerClose-v5_57.jsx` |
+| Source md5 | `0daebb4af466b9095db79117daefcd32` |
+| Built `index.html` md5 | `0cc9d4c2fa1973f39328795bc85d1636` |
+| Shipped | 2026-08-31 |
 
+> **Rolled 2026-08-31 at the v5.57 ship.** Rotation removed `DangerClose-v5_55.jsx` and
+> `dom_entry_v555.jsx` — a rotation is TWO deletes. The pool holds exactly `DangerClose-v5_56.jsx`
+> and `DangerClose-v5_57.jsx`, and `dom_entry_v556.jsx` and `dom_entry_v557.jsx`.
+> **v5.57 is a MODELLING change and Kentucky's figures move DOWN**; nothing about Delaware moved.
+> Parity stayed 10/10. `SCOPE_KY_RATE_DE_HB108.md` is **RETIRED** and its `package_check`
+> OPEN-allowlist entry was deleted in the same edit.
+>
+> ⚠ **`AUDIT_STATE_EXCL65_ROUND2.md` changed at this ship** — its two ⚠ UNRESOLVED blocks are
+> resolved in place rather than left standing, because a resolved flag nobody clears is how this
+> project acquires a second answer that drifts (decision D-5).
+>
+> ⚠ **The `v592` orphan has now caused a SECOND defect.** Four `KNOWN_VERSIONS` registries end in
+> that retired tag rather than the current one, so a version roll keyed on the current tag skips
+> `t1`, `t4`, `t5` and `t6`. It failed loudly this time. It is still repo-only, still passes §A2's
+> expected-repo-only list silently, and it is now overdue.
+>
 > **Rolled 2026-08-30 at the v5.56 ship.** Rotation removed `DangerClose-v5_54.jsx` and
 > `dom_entry_v554.jsx` — a rotation is TWO deletes. The pool holds exactly `DangerClose-v5_55.jsx`
 > and `DangerClose-v5_56.jsx`, and `dom_entry_v555.jsx` and `dom_entry_v556.jsx`.

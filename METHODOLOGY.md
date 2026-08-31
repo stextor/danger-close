@@ -1332,3 +1332,48 @@ A caller that supplies only a count of qualifying people, and no ages, cannot su
 Social Security, so no offset is applied on that path. It returns the unoffset exclusion **at the
 corrected cap** — the cap fix reaches it, the offset does not. That is asserted explicitly rather
 than left to be inferred.
+
+## Two state figures re-checked against the legislatures (v5.57)
+
+Both were flagged **UNRESOLVED** in `AUDIT_STATE_EXCL65_ROUND2.md`, which recorded no verdict on
+either. Both are now settled against primary sources, and they resolved in opposite directions.
+
+### Kentucky's rate was stale. It is 3.5% for 2026.
+
+**HB 1 of the 2025 Regular Session**, signed by the Governor on 6 February 2025 (Acts Ch. 1),
+amended **KRS 141.020** to reduce the individual income tax rate **from four percent to 3.5 percent
+for taxable years beginning on or after January 1, 2026**. The model carried `0.04`.
+
+The audit could not resolve this because the Kentucky Department of Revenue's own Individual Income
+Tax page still read *four (4) percent*. The audit noted that page also still cited the Internal
+Revenue Code as of 31 December 2024 and guessed it had not been updated for TY2026. That guess was
+right: the department's page was stale and the statute was not. **A revenue department's summary
+page is a secondary source. The enacting act is the primary one.**
+
+**Direction: figures move DOWN.** Charging 4% where the law says 3.5% overstated Kentucky state tax
+by an eighth. Conservative, and wrong — the same shape as the v5.55 Kentucky age gate, and resolved
+the same way: correct beats conservative, by explicit decision rather than by default.
+
+Kentucky's rate can fall again. HB 1 continues an annual trigger process under which the General
+Assembly may cut the rate for TY2027 and onward, toward zero. **The modelled rate therefore carries
+its effective year and its enacting act in the state's own note**, so the next reader can see the
+vintage without re-deriving it, and a test asserts that the note and the constant agree.
+
+### Delaware's $12,500 is correct. The bill that would have doubled it is not law.
+
+**HB 108 of the 153rd General Assembly** would have raised the personal income tax pension exclusion
+from $12,500 to $25,000. The audit called it *the single largest proportional error found in either
+audit round* — **if enacted**. It was not enacted. The Delaware General Assembly's own record shows
+it introduced on 8 April 2025, assigned to House Revenue & Finance, and never moved: no chapter
+number, no effective date, and empty amendment, committee-report, roll-call and action histories.
+
+**Nothing in the model changes for Delaware.** The figure is pinned, with a note recording why, so a
+future session does not "correct" it toward a bill that never passed.
+
+### One Delaware thing that is disclosed rather than modelled
+
+Delaware excludes **United States military pensions** under a separate and more generous rule than
+the general 60+ exclusion this model uses. The model has no military-pension concept at all. The
+state's note now says so. **No amount is asserted**: separate legislation phasing those figures in
+was not resolved against its enacting record, and an unverified number is worse than an
+acknowledged gap.
