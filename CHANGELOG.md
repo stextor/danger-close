@@ -1,5 +1,87 @@
 # Changelog
 
+## v5.57 — Kentucky's rate is 3.5% for 2026; Delaware's $12,500 was right all along, 2026-08-31
+
+**Modelling change. Figures move — and for Kentucky they move DOWN.** `KIND: app-release`.
+Parity 10/10.
+
+Two figures were flagged **UNRESOLVED** in `docs/AUDIT_STATE_EXCL65_ROUND2.md`, which deliberately
+recorded no verdict on either. Both are now settled against the legislatures themselves, and they
+resolved in opposite directions.
+
+### Kentucky — the modelled rate was stale
+
+**HB 1 of the 2025 Regular Session, signed 6 February 2025 (Acts Ch. 1)**, amended KRS 141.020 to
+cut the individual income tax rate **from 4% to 3.5% for taxable years beginning on or after
+1 January 2026**. The model carried 4%.
+
+The audit could not settle this because the Kentucky Department of Revenue's own page still read
+*four (4) percent*. It noted that page also still cited the IRC as of 31 December 2024 and guessed
+it was not updated for TY2026. The guess was right. **A department summary page is a secondary
+source; the enacting act is the primary one.**
+
+Charging 4% where the law says 3.5% **overstated** Kentucky state tax by an eighth — conservative
+and wrong, the same shape as v5.55's Kentucky age gate and resolved the same way.
+
+**Kentucky's note now carries the rate, its effective year and its enacting act**, because HB 1
+continues an annual trigger toward 0% and this number will go stale again. A test asserts the note
+and the constant agree, so moving one without the other fails.
+
+### Delaware — the feared error was not real
+
+**HB 108 was introduced on 8 April 2025, assigned to House Revenue & Finance, and never moved.** No
+chapter number, no effective date, empty amendment, committee-report, roll-call and action
+histories. The audit called it *the single largest proportional error found in either audit round*
+if enacted. It was not enacted. `excl65: 12500` is correct and **nothing about Delaware moved**.
+
+The figure is now pinned with its reason, so a future session does not "fix" it toward a bill that
+is not law.
+
+### One thing disclosed rather than modelled
+
+Delaware excludes **United States military pensions** under a separate, more generous rule. The
+model has no military-pension concept. The state's note says so, and **asserts no amount** —
+separate legislation phasing those figures in was not resolved against its enacting record, and an
+unverified number is worse than an acknowledged gap.
+
+### Two findings from the build itself, both caught by instruments rather than by review
+
+- **A test of mine was vacuous and a negative control found it.** The rate extinction check compared
+  `R.KY.rate` to `0.035` through the suite's `T` helper, which uses an EPS of **$0.01** — a
+  tolerance sized for dollar figures. A rate differs by 0.005, so the check passed against a
+  deliberately reverted 4% build and would have passed for anything between 2.5% and 4.5%. It is now
+  a boolean identity. **The assertion covering this release's entire point covered nothing, and only
+  running the control revealed it.**
+- **Four `KNOWN_VERSIONS` registries end in the retired `v592` tag, not the current one**, so a
+  version roll keyed on the current tag skips `t1`, `t4`, `t5` and `t6` entirely. They failed loudly
+  with `FATAL: version tag not registered`, which is the good outcome, but it is the second distinct
+  defect the `v592` orphan has caused.
+
+### Verification
+
+**2,858 app checks, 0 failing** — v5.56 leg 1,087 · v5.57 leg 1,091 · **parity 10/10** · feature
+suites run once 670. Tooling `t21` 50 and the DOM diff 32 is **82**, counted separately; GRAND
+2,940. `smoke_built` **16/16**. The pre-edit baseline was green first, with the four version-site
+STATIC checks failing exactly as expected before the source moved.
+
+**Five negative controls fire and C0 is correctly silent.** Reverting the rate fails 4; stripping
+the year from the note 3; pushing Delaware to the HB 108 figure 3; removing the military-pension
+disclosure 1; leaving one version site at v5.56, 1. The §B1a copy sweep executed all 406 suite
+regexes against both states' notes on both builds: **no matcher lost its text.**
+
+**Provenance.** Source md5 `0daebb4af466b9095db79117daefcd32` · built `index.html` md5
+`0cc9d4c2fa1973f39328795bc85d1636`.
+
+### Limitations, stated rather than implied
+
+- **Kentucky's rate will go stale again** by design of HB 1's trigger. The note carries its vintage;
+  nothing checks it against the statute automatically.
+- **Delaware's military-pension figures are unresolved**, deliberately, and no amount is asserted.
+- **Kentucky's Schedule P** additional exclusion for government retirees with pre-1998 service is
+  not modelled.
+- **11 of 19 exclusion states remain unverified.** The audit ranks RI, SC and MT next.
+- Both states remain **effective-rate** approximations like every other entry in the module.
+
 ## v5.56 — Maryland's and Maine's Social Security offset is modelled, and the exclusion becomes per person, 2026-08-30
 
 **Modelling change. Figures move — and they move UP.** `KIND: app-release`. Parity 10/10.
@@ -71,6 +153,11 @@ at $2,750.00, KY's v5.55 age floor at $1,511.20, AL ignoring Social Security ent
 reverting the caps 10; deleting the flag 14; removing the zero floor 5; unwiring the call sites 1;
 restoring the false §13 clause 1; leaving one version site at v5.55, 1. A comment-only edit fires
 nothing, so the harness earned those verdicts rather than rubber-stamping them.
+
+**Provenance.** Source md5 `b191cc577646faa138ffc6149a0aa646` · built `index.html` md5
+`14a20fe9efc70cf65e1a46f4820d69e8`. *(Added 2026-08-31: this entry shipped without the pair that
+OPERATIONS §N3 check 3 requires, which is why `package_check` H-1 SKIPPED at the v5.57 packaging
+rather than passing. Both hashes were verified against the committed tree before being written.)*
 
 ### Limitations, stated rather than implied
 
