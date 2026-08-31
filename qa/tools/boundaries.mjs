@@ -125,6 +125,19 @@ export function census(G) {
     onLimited ? "exercises the D-3c class — the exclusion is income-limited in law, unconditional in the model"
               : `OUT — D-3c is unreachable; ${limited.length} state(s) in the module carry an income-limited exclusion`);
 
+  // v5.56 — the SS-offset class. ⚠ KEYED ON THE `ssOffset` FLAG, NOT ON NOTE PROSE. The row above
+  // keys on a note "flagging an income limit", and that is exactly what broke when NJ's note was
+  // reworded at v5.54: the phrase moved, the state silently left the set, and t29's F-7 failed.
+  // A flag is data; prose is not. The audit's own finding was that a note-keyed row reads OFF for
+  // MD, ME and CO — the states where the defect is worse — so this row must not repeat the shape.
+  const ssOff = Object.entries(RULES).filter(([, r]) => !!r.ssOffset).map(([c]) => c);
+  const onSsOff = !!(code && ssOff.includes(code));
+  row("state_ss_offset", "SS-offset 65+ exclusion",
+    onSsOff ? `${code} (cap $${(rule.excl65 || 0).toLocaleString()})` : (code || "unset"),
+    `state in {${ssOff.join(",") || "none found"}}`, !onSsOff,
+    onSsOff ? "exercises the SS-offset class — the exclusion is reduced by Social Security received"
+            : `OUT — the SS-offset paths are unexercised; ${ssOff.length} state(s) carry ssOffset`);
+
   const streams = (P.incomeStreams || []).length;
   row("income_streams", "income streams", streams, "0 vs >0", streams === 0,
     streams ? "exercises the income-stream paths" : "NONE — the income-stream paths are unexercised");

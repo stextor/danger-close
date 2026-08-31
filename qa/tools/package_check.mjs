@@ -440,8 +440,6 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
       "SCOPE_v5_40_disclosures_and_mechanics.md", // SCOPE ONLY, open decisions in its §7
       "SCOPE_FIX_tidyup_six.md",                  // three decisions open in its §7
       "SCOPE_STANDING_AUDIT.md",                  // not a build scope at all (OPERATIONS §K)
-      "SCOPE_STATE_SS_OFFSET.md",                 // decisions RESOLVED; build halted on budget
-      // → CLOSED BY: the v5.56 ship. Retire it there and delete this line in the SAME edit.
       "SCOPE_POOL_AND_ALLOWLIST_HYGIENE.md",       // four decisions open in its §6
     ]);
     const RETIRED = /\bRETIRED\b|\bSUPERSEDED\b|\bFULFILLED\b/;
