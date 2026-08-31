@@ -149,9 +149,9 @@ behavior exactly (backward compatible with every existing backup).
 
 **This is an approximation layer and is labeled as such in the UI.** Not modeled: progressive
 state brackets (effective rate instead), county/city income taxes (IN, MD partially folded, NYC
-not), income limits on several exclusions (NJ, VA, RI approximated as unconditional), NJ's 62 age floor and SC's under-65 tier (both disclosed, neither applied), **exclusions that are reduced by Social Security received (MD and ME dollar-for-dollar; CO shares one $24K cap between SS and pension) — the model applies none of that, which overstates those exclusions and understates state tax**, state
+not), income limits on several exclusions (NJ, VA, RI approximated as unconditional), NJ's 62 age floor and SC's under-65 tier (both disclosed, neither applied), **Colorado's shared $24K cap between Social Security and pension — a cap the two share rather than one reducing the other, which overstates Colorado's exclusion and understates its state tax**. Maryland's and Maine's exclusions, which are reduced by Social Security received dollar-for-dollar, ARE applied as of v5.56 (§12), state
 standard deductions/credits, pension-source distinctions (AL/HI DB exemptions), and WA's
-capital-gains excise. **The modelled MD and ME amounts also trail their current statutory figures.** Verify your state.
+capital-gains excise. Verify your state.
 
 ## 7. Roth conversion modeling
 
@@ -1270,3 +1270,65 @@ The dividend base is held **constant** for the whole plan, at `taxableInitAll()`
 disagree by construction. Constant is the conservative choice — a higher MAGI held for longer — and
 matching Engine C is what makes the two figures comparable at all, which is the point of this
 release. Reconciling them is not attempted here.
+
+## The Social Security offset on state 65+ exclusions (v5.56)
+
+Maryland and Maine both reduce their 65+ retirement-income exclusion **dollar-for-dollar by the
+Social Security the taxpayer actually received**. Through v5.55 the model applied neither reduction,
+granted each qualifying spouse the full cap, and disclosed the gap.
+As of v5.56, **Maryland's and Maine's dollar-for-dollar reductions are modelled**.
+
+### The exclusion is now per person, because a count cannot express the offset
+
+The previous rule was `cap × (number of qualifying spouses)`. That form cannot carry the offset at
+all: the reduction is a property of an individual's own benefit, and each person's exclusion floors
+at zero independently. Two households with identical total Social Security and identical qualifying
+counts get different answers, and the old expression had no way to say so. Maryland, both spouses
+65, $120,000 of retirement income:
+
+| Social Security A / B | exclusion | state tax |
+|---|---|---|
+| $10,000 / $50,000 | $30,600 + $0 | **$6,705.00** |
+| $30,000 / $30,000 | $10,600 + $10,600 | **$7,410.00** |
+
+The second household's larger spouse-B offset is capped by that spouse's own $40,600, so the excess
+$9,400 of the first household's spouse B is not available to shelter spouse A. Both figures were
+hand-computed before the engine was changed and matched to the dollar.
+
+### The offset uses gross benefits, not the federally taxable part
+
+Maine's statute counts taxable **and** nontaxable benefits; Maryland's counts all Social Security
+received. The engine therefore takes `ssGrossA` / `ssGrossB` — the received amounts — not
+`ssTaxableFed`, which is at most 85% and frequently far less. Using the taxable portion would
+under-apply the offset and leave the model **optimistic**, which is the wrong direction.
+
+### Direction: figures move UP
+
+This release **raises** estimated state tax for affected Maryland and Maine households. The previous
+treatment granted an exclusion the statutes do not, which overstated the exclusion and understated
+the tax.
+
+### Two modelled amounts were stale and were corrected in the same release
+
+Maryland's modelled cap moved **$36,200 → $40,600** (2026) and Maine's **$35,000 → $48,216** (2025,
+indexed to the Social Security maximum). Both were verified against the states' own revenue
+authorities. Correcting the caps in the same release means the direction reported above is the net
+of both changes, not of the offset alone.
+
+### What is still not modelled, and is disclosed rather than fixed
+
+- **Railroad Retirement**, which both statutes name alongside Social Security. The model has no
+  Railroad Retirement concept at all.
+- **Maine's income phaseout** above $125,000 single / $250,000 MFJ.
+- **Colorado's shared $24,000 cap**, which covers Social Security and pension together rather than
+  reducing one by the other. It is a different mechanism and is deliberately out of scope; Colorado
+  carries no offset flag.
+
+All three are stated in the affected states' notes and in Field Manual §13.
+
+### The legacy call path
+
+A caller that supplies only a count of qualifying people, and no ages, cannot supply per-person
+Social Security, so no offset is applied on that path. It returns the unoffset exclusion **at the
+corrected cap** — the cap fix reaches it, the offset does not. That is asserted explicitly rather
+than left to be inferred.

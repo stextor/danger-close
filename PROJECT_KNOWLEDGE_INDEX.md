@@ -25,12 +25,30 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 
 | Field | Value |
 |---|---|
-| Version | **v5.55** |
-| Source file in knowledge | `DangerClose-v5_55.jsx` |
-| Source md5 | `31761794c4c69ec255ca5cd856d48b8f` |
-| Built `index.html` md5 | `d26050b78c46e1561bd36161ce083a4e` |
-| Shipped | 2026-08-29 |
+| Version | **v5.56** |
+| Source file in knowledge | `DangerClose-v5_56.jsx` |
+| Source md5 | `b191cc577646faa138ffc6149a0aa646` |
+| Built `index.html` md5 | `14a20fe9efc70cf65e1a46f4820d69e8` |
+| Shipped | 2026-08-30 |
 
+> **Rolled 2026-08-30 at the v5.56 ship.** Rotation removed `DangerClose-v5_54.jsx` and
+> `dom_entry_v554.jsx` — a rotation is TWO deletes. The pool holds exactly `DangerClose-v5_55.jsx`
+> and `DangerClose-v5_56.jsx`, and `dom_entry_v555.jsx` and `dom_entry_v556.jsx`.
+> **v5.56 is a MODELLING change and figures move UP** for Maryland and Maine households 65+ that
+> receive Social Security; parity stayed 10/10, which is the evidence both engines moved
+> identically. `SCOPE_STATE_SS_OFFSET.md` is **RETIRED** and its `package_check` OPEN-allowlist
+> entry was deleted in the same edit.
+> **`STOP-REPORT-v5_56-session-budget.md` is DELETED from the pool** at this ship — it was a
+> handover, not history, and the repo copy stays at `docs/`.
+>
+> ⚠ **This release shipped three defects that a green suite could not see, and they were found by
+> negative control, not by the suite.** Two sentences in Field Manual §13 and two in
+> `METHODOLOGY.md` were falsified by the modelling change and left standing; nothing in the suite
+> reached the three engine call sites; and the new `boundaries.mjs` row asserted nothing. All
+> three are fixed and each now has a control that fires. **The lesson is recorded here because it
+> generalises: a modelling release must sweep the prose its own change falsifies, and `t31`'s
+> per-key comments are where a previous release writes down which key this one must invert.**
+>
 > **Rolled 2026-08-29 at the v5.55 ship.** Rotation removed `DangerClose-v5_53.jsx` and
 > `dom_entry_v553.jsx` — a rotation is TWO deletes. The pool holds exactly `DangerClose-v5_54.jsx`
 > and `DangerClose-v5_55.jsx`, and `dom_entry_v554.jsx` and `dom_entry_v555.jsx`.
