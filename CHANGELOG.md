@@ -1,5 +1,89 @@
 # Changelog
 
+## v5.56 — Maryland's and Maine's Social Security offset is modelled, and the exclusion becomes per person, 2026-08-30
+
+**Modelling change. Figures move — and they move UP.** `KIND: app-release`. Parity 10/10.
+
+Maryland and Maine both reduce their 65+ retirement-income exclusion **dollar-for-dollar by the
+Social Security the taxpayer actually received**. Through v5.55 the model applied neither, granted
+each qualifying spouse the full cap, and disclosed the gap. That was the *optimistic* direction — it
+overstated the exclusion and understated state tax — which is why correcting it raises figures.
+
+### What changed
+
+- **`STATE_RULES.ssOffset`** — a new optional per-state flag, present on **MD and ME only**.
+  Colorado is deliberately excluded: its $24,000 cap is *shared* between Social Security and pension
+  rather than reducing one by the other, which is a different mechanism.
+- **The exclusion is computed PER PERSON**, `max(0, cap − that person's gross SS)` for each
+  qualifying spouse, summed — replacing `cap × count`. A count cannot express the offset: each
+  person's exclusion floors at zero independently, so two households with identical total Social
+  Security and identical qualifying counts get different answers. Maryland, both 65, $120,000 of
+  retirement income: SS of $10,000/$50,000 gives an exclusion of $30,600 + $0 and **$6,705.00** of
+  tax; SS of $30,000/$30,000 gives $10,600 + $10,600 and **$7,410.00**. That asymmetry is asserted,
+  not merely described.
+- **The offset uses GROSS benefits, not `ssTaxableFed`.** Maine's statute counts taxable and
+  nontaxable benefits; Maryland's counts all Social Security received. The federally taxable portion
+  is at most 85% and often far less, so using it would under-apply the offset and leave the model
+  optimistic.
+- **Two stale amounts corrected in the same release** — MD `$36,200 → $40,600` (2026), ME
+  `$35,000 → $48,216` (2025, indexed to the Social Security maximum). The reported direction is the
+  net of both changes, not of the offset alone.
+- **The legacy count path** returns the unoffset exclusion **at the corrected cap**. It is not
+  "pre-v5.56 behaviour" — the cap fix reaches it, the offset does not — and a test says so.
+- **Field Manual §13 and `METHODOLOGY.md`** disclose the offset, its direction, and three related
+  things still not modelled: Railroad Retirement (named by both statutes), Maine's income phaseout,
+  and Colorado's shared cap.
+
+### Three defects found by negative control at the ship, and fixed in the same release
+
+The engine was correct and the suite was green. All three were found by reverting a property on
+purpose and watching what failed — and in each case nothing did.
+
+- **The Field Manual contradicted itself.** §13 gained a sentence saying the offset is modelled
+  while leaving, a few bullets away, *"the model applies none of that, which overstates those
+  exclusions and understates state tax"* and *"the modelled amounts for Maryland and Maine trail the
+  current statutory figures."* Both were falsified by this release. `METHODOLOGY.md` carried the
+  same two claims. All corrected. `t31`'s v5.54 key had predicted this release **by name** — its own
+  comment reads *"the release that models it must invert this key, not merely expire it"* — and it
+  passed anyway, because the literal substring it matches survived inside the now-false sentence.
+  That is a disclosure assertion acting as a lock on dead copy (OPERATIONS §B2). The key's mechanism
+  claim stays live and un-expired, because Colorado's shared cap is still unmodelled; what inverts
+  is the claim about the model, now a separate `since: "v556"` key with a gated pre-fix pin.
+- **Nothing in the suite reached the three engine call sites.** The new assertions call
+  `stateTaxAnnual` directly as a unit. Rewriting all three call sites to pass zero — destroying the
+  offset in every engine — failed **zero** checks. A site regressing to `ssTaxableFed` would have
+  shipped green and silently under-applied the offset. `t8` gains an extinction invariant on the
+  argument **binding**, not just the property name.
+- **The new `boundaries.mjs` row asserted nothing.** Deleting `ssOffset` from both states failed
+  zero `t29` checks. The row now drives in both directions and reads the cap from the app rather
+  than restating it. Written ungated first, which failed the frozen leg three times — the §B2
+  mistake v5.55 also made — and gated before it shipped.
+
+### Verification
+
+**2,832 app checks, 0 failing** — v5.55 leg 1,067 · v5.56 leg 1,085 · **parity 10/10** · feature
+suites run once 670. Tooling `t21` 50 and the DOM diff 32 is **82** and counted separately; GRAND
+2,914. Built-artifact smoke `smoke_built` **16/16**. Thirteen figures hand-computed before any test
+was written and matched to the dollar, including the two above. Unmoved and pinned: NJ's D-3c case
+at $2,750.00, KY's v5.55 age floor at $1,511.20, AL ignoring Social Security entirely at $3,960.00.
+
+**Seven negative controls fire and C0 is correctly silent.** Reverting the per-person rule fails 9;
+reverting the caps 10; deleting the flag 14; removing the zero floor 5; unwiring the call sites 1;
+restoring the false §13 clause 1; leaving one version site at v5.55, 1. A comment-only edit fires
+nothing, so the harness earned those verdicts rather than rubber-stamping them.
+
+### Limitations, stated rather than implied
+
+- **Railroad Retirement is not modelled at all.** Both statutes count it alongside Social Security.
+  A household with Railroad Retirement will see its exclusion overstated.
+- **Maine's phaseout** above $125,000 single / $250,000 MFJ is not applied. Same mechanism as NJ,
+  VA and RI's income limits; all four deserve one release.
+- **Colorado's shared $24K cap** is unmodelled, and its `ss: 0.5` still contradicts a note saying
+  65+ deduct all federally-taxed Social Security. Disclosed, not resolved.
+- **11 of 19 exclusion states remain unverified** against their own revenue authorities. Delaware
+  HB 108 and Kentucky's 2026 rate are both unresolved and neither is asserted here.
+- The MD/ME figures are **effective-rate** approximations like every other state in the module.
+
 ## v5.55 — the age a state's exclusion starts is now the state's own, not a hardcoded 65, 2026-08-29
 
 **Modelling change. Figures move — and they move DOWN.** `KIND: app-release`. Parity 10/10.
