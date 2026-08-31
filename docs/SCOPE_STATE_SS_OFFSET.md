@@ -6,8 +6,24 @@
 | Written | 2026-08-29 |
 | Origin | `AUDIT_STATE_EXCL65_NOTES.md` §1 — MD and ME reduce the exclusion by Social Security received; disclosed at v5.54, not modelled |
 | Shape | **Modelling change. Figures move UP — this is the optimistic error being corrected.** Version bump. |
-| Status | **DECISIONS RESOLVED 2026-08-29 — build in progress, halted on session budget** |
-| Handover | `STOP-REPORT-v5_56-session-budget.md` — authoritative for what is built and what remains |
+| Status | **RETIRED — SHIPPED AS v5.56, 2026-08-30** |
+| Handover | `STOP-REPORT-v5_56-session-budget.md` — the halt this scope survived; history, not live |
+
+> ## ⛔ RETIRED — SHIPPED AS v5.56, 2026-08-30 · source `b191cc577646faa138ffc6149a0aa646`
+>
+> All six decisions resolved and built. **D-a** `ssOffset: true` on MD and ME only, **D-b** the
+> exclusion computed per person and summed, **D-c** both stale caps corrected in the same release
+> (MD `36200 → 40600`, ME `35000 → 48216`), **D-d** Maine's phaseout OUT and disclosed, **D-e**
+> Colorado OUT and its `ss: 0.5` contradiction still disclosed rather than resolved, **D-f** a
+> `boundaries.mjs` row keyed on the flag rather than on note prose.
+>
+> **Three things this scope did not anticipate, all found by negative control at the ship and all
+> fixed in the same release.** The build the scope produced was correct at the engine and left
+> three holes around it: the Field Manual and `METHODOLOGY.md` both still said *the model applies
+> none of that* and that MD's and ME's amounts *trail the current statutory figures*, three
+> sentences this release falsified and did not rewrite; nothing in the suite reached the three
+> engine call sites, so destroying the offset in every engine failed zero checks; and the new
+> `boundaries.mjs` row had no assertion at all. See `CHANGELOG.md` v5.56.
 
 **Baseline confirmed by command:** **2,785 app checks / 0 failing** (v5.54 leg 1,048 · v5.55 leg
 1,059 · parity 10/10 · feature once 668), tooling 82, run from a clean clone of `6a23758`.
