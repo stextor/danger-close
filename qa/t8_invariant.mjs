@@ -180,5 +180,39 @@ T.applyLoadedData({ portfolio: port, expenses: [], incomeFromForm: true });
   ck("stale 'reduces stay inline' comment retired", !SRC.includes("those reduces stay inline at their sites"));
 }
 
+// ── v5.56 · THE STATE SS OFFSET REACHES THE ENGINES, not just the helper ────────────────────
+// WHY THIS EXISTS, and it is a §B2 finding, not a precaution. t10's v5.56 set calls
+// `stateTaxAnnual` DIRECTLY as a unit. A negative control that rewrote all three engine call
+// sites to pass `ssGrossA: 0, ssGrossB: 0` — destroying the offset in every engine — failed
+// ZERO checks. The unit was covered and the wiring was not, so a call site regressing to
+// `ssTaxableFed` (at most 85% of the benefit, usually far less) would under-apply the offset,
+// leave the model OPTIMISTIC, and ship green. This is the extinction invariant for that class.
+//
+// It asserts the ARGUMENT BINDING, not merely the property name: `ssGrossA: 0` names the
+// property too. The bound identifiers are the post-widowhood-collapse SS values — resolved by
+// `census.cjs` scope chains, not by eye, because L4117 sits between two collapses.
+{
+  // ⚠ the DEFINITION is `function stateTaxAnnual({ ... })` and matches this pattern too — it was
+  //   counted as a fourth site on the first run of this check. Excluded positionally.
+  const SITES = [...SRC_NOCOMMENT.matchAll(/stateTaxAnnual\(\{/g)].map(m => m.index)
+    .filter(i => !/function\s+$/.test(SRC_NOCOMMENT.slice(Math.max(0, i - 12), i)));
+  ck("stateTaxAnnual has exactly 3 call sites (definition excluded)", SITES.length === 3,
+     `found ${SITES.length}`);
+  let wired = 0;
+  for (const i of SITES) {
+    // balanced-brace scan of the single object argument — the call is always `({ ... })`
+    let d = 0, j = i + "stateTaxAnnual(".length, end = j;
+    for (; j < SRC_NOCOMMENT.length; j++) {
+      const c = SRC_NOCOMMENT[j];
+      if (c === "{") d++;
+      else if (c === "}") { d--; if (d === 0) { end = j; break; } }
+    }
+    const args = SRC_NOCOMMENT.slice(i, end);
+    if (/ssGrossA:\s*ssA_y\b/.test(args) && /ssGrossB:\s*ssB_y\b/.test(args)) wired++;
+  }
+  ck("[EXTINCTION v5.56] every stateTaxAnnual call site passes GROSS SS (ssGrossA: ssA_y, ssGrossB: ssB_y)",
+     wired === 3, `${wired} of ${SITES.length} sites wired`);
+}
+
 console.log(`\nt8 SUITE: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

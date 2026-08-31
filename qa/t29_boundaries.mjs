@@ -29,7 +29,7 @@ let _s = 42; Math.random = () => { _s = (_s * 1103515245 + 12345) & 0x7fffffff; 
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v546";
-const KNOWN_VERSIONS = ["v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555"];
+const KNOWN_VERSIONS = ["v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -125,6 +125,43 @@ T("C-reverse: 'ladder_windows' goes from clear to ON when both spouses share a b
     by(rows, "dobB_month").value === "n/a" && by(rows, "ssB_claim").value === "n/a" && by(rows, "ssB_band").value === "n/a");
   T("E-4: and those n/a rows are not counted as boundaries",
     !by(rows, "dobB_month").onBoundary && !by(rows, "ssB_claim").onBoundary && !by(rows, "ssB_band").onBoundary);
+}
+
+// -- E2 . the SS-offset row (v5.56) ------------------------------------------------------
+// The row shipped with the v5.56 offset and NOTHING ASSERTED IT. A negative control that deleted
+// `ssOffset` from MD and ME failed zero t29 checks: the row existed, reported, and discriminated
+// nothing. A census row nobody drives is exactly the row this suite's header calls worse than no
+// row at all. Driven in BOTH directions, and keyed on the app's own flag so deleting the flag
+// flips it -- the row must not become a second, drifting list of states.
+{
+  const atState = code => {
+    const p = build(G, "state"); p.stateCode = code;
+    G.applyLoadedData({ portfolio: p }); const r = census(G); reset(); return r;
+  };
+  const md = by(atState("MD"), "state_ss_offset"), al = by(atState("AL"), "state_ss_offset");
+  // GATED. These were written ungated and failed the frozen v5.55 leg three times -- no state
+  // carries `ssOffset` on that build, so the row correctly reports the class unexercised there.
+  // That is the v5.27 mistake OPERATIONS §B2 exists to prevent, and v5.55 made it too. Each leg
+  // asserts what was true of ITS OWN build.
+  const _v = Number(VER.replace(/[^0-9]/g, ""));
+  T("E2-2: a non-offset state leaves the class unexercised -- the row IS on a boundary for AL",
+    !!al && al.onBoundary === true, al ? al.value : "row missing");
+  if (_v >= 556) {
+    T("E2-1: an offset state is EXERCISED -- the row is not on a boundary for MD",
+      !!md && md.onBoundary === false, md ? md.value : "row missing");
+    T("E2-3: the row names the state and its cap, read from the app rather than restated here",
+      !!md && md.value.includes("MD") &&
+        md.value.includes(G.STATE_RULES().MD.excl65.toLocaleString()),
+      md ? md.value : "row missing");
+    T("E2-4: the boundary column is DERIVED from the ssOffset flag, so deleting the flag moves it",
+      !!md && md.boundary.includes("MD") && md.boundary.includes("ME"),
+      md ? md.boundary : "row missing");
+  } else {
+    T("E2-1 [KNOWN DEFECT pre-v5.56]: no state carries ssOffset, so even MD reads unexercised",
+      !!md && md.onBoundary === true, md ? md.value : "row missing");
+    T("E2-4 [KNOWN DEFECT pre-v5.56]: the boundary column finds no offset states at all",
+      !!md && /none found/.test(md.boundary), md ? md.boundary : "row missing");
+  }
 }
 
 // ── §F · NO CONSTANT IS HARDCODED \u2014 the census must move if the app's do ───────────────

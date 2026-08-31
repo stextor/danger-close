@@ -36,17 +36,17 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true; window.IS_REACT_ACT_ENVIRONMENT = tr
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v544";
-const KNOWN_VERSIONS = ["v542", "v543", "v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555"];
+const KNOWN_VERSIONS = ["v542", "v543", "v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST_FIX = VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555");
+const POST_FIX = VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556");
 // v5.47 — tidy-up item 6. The Roth tab's RMD cards now scale by (1 - annShare), so the
 // no-conversion counterfactual sits on the RMD-BEARING balance instead of the whole
 // Traditional balance. Legs v542-v546 keep asserting their own correct pre-state.
-const POST_ITEM6 = VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555");
+const POST_ITEM6 = VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556");
 const { __g } = await import(pathToFileURL(join(HERE, `app_${VER}.mjs`)).href);
 
 let pass = 0, fail = 0;

@@ -678,6 +678,102 @@ const pass2E = pass, fail2E = fail;
       T("[KNOWN DEFECT pre-v5.55] no state carried an exclAge field at all",
         Object.keys(R).filter(c => R[c].exclAge !== undefined).length, 0);
     }
+
+    // ── SS OFFSET (v5.56). Maryland and Maine reduce the exclusion DOLLAR-FOR-DOLLAR by the Social
+    // Security each taxpayer actually RECEIVED. Sources: Comptroller of MD, Maryland Pension
+    // Exclusion KB0010012 / Worksheet 13A; Maine Revenue Services Individual Income Tax FAQ and the
+    // 2025 Form 1040ME instructions. Recorded in docs/AUDIT_STATE_EXCL65_NOTES.md §1.
+    //
+    // ⚠ DIRECTION: this RAISES the estimate. The old treatment granted the full exclusion whatever
+    // the household's Social Security, which OVERSTATED it — the optimistic direction, and the only
+    // one of the three exclusion mechanisms that erred that way.
+    //
+    // ⚠ GROSS, NOT `ssTaxableFed`. Both statutes count benefits RECEIVED — Maine's says taxable and
+    // nontaxable explicitly. `ssTaxableFed` is at most 85% and often far less, so wiring it in here
+    // would under-apply the offset. The gross-vs-taxable case below is what catches that mistake.
+    if (_v >= 556) {
+      const OFF = (code, retIncome, ssA, ssB, rate) =>
+        S({ code, fallbackRate: 0, retIncome, pen: 0, work: 0, capGains: 0, ssTaxableFed: 0,
+            ssGrossA: ssA, ssGrossB: ssB, ageA: 65, ageB: 65 });
+      // hand MD (cap $40,600 each, 7.5%, retIncome $120,000):
+      //   SS 0      -> excl 2 x 40,600 = 81,200 -> 0.075 x  38,800 = 2,910.00
+      //   SS 10k ea -> excl 2 x 30,600 = 61,200 -> 0.075 x  58,800 = 4,410.00
+      //   SS 40k ea -> excl 2 x    600 =  1,200 -> 0.075 x 118,800 = 8,910.00
+      //   SS 50k ea -> excl 0 (floored, NOT -9,400 each) -> 0.075 x 120,000 = 9,000.00
+      T("2E ssOffset (MD): zero Social Security leaves the exclusion whole", OFF("MD",120000,0,0),      2910.00);
+      T("2E ssOffset (MD): $10,000 each reduces it dollar-for-dollar",      OFF("MD",120000,10000,10000), 4410.00);
+      T("2E ssOffset (MD): $40,000 each all but eliminates it",             OFF("MD",120000,40000,40000), 8910.00);
+      T("2E ssOffset (MD): above the cap it FLOORS at zero, never negative",OFF("MD",120000,50000,50000), 9000.00);
+      // hand ME (cap $48,216 each, 7.15%, retIncome $150,000):
+      //   SS 0      -> excl 96,432 -> 0.0715 x  53,568 = 3,830.11 (3,830.112 -> banker-free round)
+      //   SS 20k ea -> excl 56,432 -> 0.0715 x  93,568 = 6,690.11
+      //   SS 50k ea -> excl 0      -> 0.0715 x 150,000 = 10,725.00
+      T("2E ssOffset (ME): zero Social Security leaves the deduction whole", OFF("ME",150000,0,0),         3830.112);
+      T("2E ssOffset (ME): $20,000 each reduces it dollar-for-dollar",       OFF("ME",150000,20000,20000), 6690.112);
+      T("2E ssOffset (ME): above the cap the deduction is gone entirely",    OFF("ME",150000,50000,50000), 10725.00);
+
+      // THE ASSERTION THAT JUSTIFIES THE REWRITE. Before v5.56 the exclusion was `cap x count`, and
+      // a count cannot distinguish these two households — same total SS, same number of qualifying
+      // people, DIFFERENT statutory exclusion, because each person's offset floors independently.
+      //   10k/50k -> (40,600-10,000) + (40,600-40,600 floored at 0... no: 40,600-50,000 -> 0)
+      //           -> 30,600 + 0 = 30,600 -> 0.075 x 89,400 = 6,705.00
+      //   30k/30k -> 10,600 + 10,600 = 21,200 -> 0.075 x 98,800 = 7,410.00
+      T("2E ssOffset (MD): asymmetric spouses — $10k/$50k", OFF("MD",120000,10000,50000), 6705.00);
+      T("2E ssOffset (MD): and the SAME TOTAL split evenly gives a DIFFERENT answer",
+        OFF("MD",120000,30000,30000), 7410.00);
+      T("2E ssOffset: the two differ — a per-person offset is not expressible as a count",
+        OFF("MD",120000,10000,50000) === OFF("MD",120000,30000,30000) ? 0 : 1, 1);
+
+      // GROSS, NOT TAXABLE. ssTaxableFed is deliberately 0 in every case above; if someone rewires
+      // the offset to read it, every MD/ME assertion above returns the unoffset figure and this
+      // case pins the reason.
+      T("2E ssOffset: the offset reads GROSS SS — ssTaxableFed does not drive it",
+        S({ code: "MD", fallbackRate: 0, retIncome: 120000, pen: 0, work: 0, capGains: 0,
+            ssTaxableFed: 99999, ssGrossA: 50000, ssGrossB: 50000, ageA: 65, ageB: 65 }), 9000.00);
+
+      // ── EXTINCTION INVARIANTS
+      T("[BY DECISION v5.56] exactly two states carry ssOffset",
+        Object.keys(R).filter(c => R[c].ssOffset).length, 2);
+      T("[BY DECISION v5.56] and they are MD and ME",
+        Object.keys(R).filter(c => R[c].ssOffset).sort().join(",") === "MD,ME" ? 1 : 0, 1);
+      // CO is deliberately NOT flagged: its $24K is a SHARED CAP covering SS and pension together,
+      // not a dollar-for-dollar reduction of one by the other. A third mechanism, out of scope.
+      T("[BY DECISION v5.56] CO carries no ssOffset — its shared cap is a different mechanism",
+        R.CO.ssOffset === undefined ? 1 : 0, 1);
+      // Every ssOffset state must SAY so. This is the class the release closes: the offset was the
+      // dominant effect for MD and ME and the notes did not mention it until v5.54.
+      T("2E ssOffset: every flagged state's note names the Social Security reduction",
+        Object.keys(R).filter(c => R[c].ssOffset &&
+          !/reduced dollar-for-dollar by the social security/i.test(R[c].note || "")).length, 0);
+      // The statutory amounts were corrected in the same release (decision D-c).
+      T("2E ssOffset (MD): the modelled cap is the current statutory figure", R.MD.excl65, 40600);
+      T("2E ssOffset (ME): the modelled cap is the current statutory figure", R.ME.excl65, 48216);
+      // AND THE OTHER TWO MECHANISMS MUST NOT MOVE.
+      T("2E ssOffset: the D-3c NJ pins are untouched (NJ has no ssOffset)",
+        S({ code: "NJ", fallbackRate: 0, retIncome: 200000, pen: 0, work: 0, capGains: 0,
+            ssTaxableFed: 0, ssGrossA: 40000, ssGrossB: 40000, ageA: 65, ageB: 65 }), 2750);
+      T("2E ssOffset: the v5.55 age floors are untouched (KY has no ssOffset)",
+        S({ code: "KY", fallbackRate: 0, retIncome: 100000, pen: 0, work: 0, capGains: 0,
+            ssTaxableFed: 0, ssGrossA: 30000, ssGrossB: 30000, ageA: 60, ageB: 60 }), 1511.20);
+      T("2E ssOffset: an unflagged state ignores Social Security entirely (AL)",
+        S({ code: "AL", fallbackRate: 0, retIncome: 100000, pen: 0, work: 0, capGains: 0,
+            ssTaxableFed: 0, ssGrossA: 50000, ssGrossB: 50000, ageA: 65, ageB: 65 }), 3960.00);
+      // The legacy count path cannot offset — it has no per-person SS — so it returns the UNOFFSET
+      // exclusion at the CURRENT cap. Not "pre-v5.56 behaviour": the cap correction applies there too.
+      T("2E ssOffset: the count fallback returns the unoffset exclusion at the current cap",
+        S({ code: "MD", fallbackRate: 0, retIncome: 120000, pen: 0, work: 0, capGains: 0,
+            ssTaxableFed: 0, persons65: 2 }), 2910.00);
+    } else {
+      // [KNOWN DEFECT pre-v5.56] the exclusion ignored Social Security entirely, and both caps were
+      // stale. MD granted $72,400 to a couple whose statutory exclusion was near zero.
+      T("[KNOWN DEFECT pre-v5.56] MD granted the full exclusion however much SS was received",
+        S({ code: "MD", fallbackRate: 0, retIncome: 120000, pen: 0, work: 0, capGains: 0,
+            ssTaxableFed: 0, ageA: 65, ageB: 65 }), 0.075 * (120000 - 72400));
+      T("[KNOWN DEFECT pre-v5.56] MD's modelled cap trailed the statutory figure", R.MD.excl65, 36200);
+      T("[KNOWN DEFECT pre-v5.56] ME's modelled cap trailed the statutory figure", R.ME.excl65, 35000);
+      T("[KNOWN DEFECT pre-v5.56] no state carried an ssOffset flag at all",
+        Object.keys(R).filter(c => R[c].ssOffset).length, 0);
+    }
   }
 }
 const pass2Ecount = pass - pass2E, fail2Ecount = fail - fail2E;
