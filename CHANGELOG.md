@@ -1,5 +1,85 @@
 # Changelog
 
+## ops · the allowlist that excused itself, and three gate blind spots, 2026-09-01
+
+**Documentation and tooling only.** `KIND: ops`. No `src/` change, no version bump, no figure
+moves, no rebuilt artifact. The app is untouched and still `0daebb4af466b9095db79117daefcd32`.
+
+### The allowlist was excusing two scopes whose work had shipped
+
+`package_check`'s OPEN allowlist named `SCOPE_v5_40_disclosures_and_mechanics.md` and
+`SCOPE_FIX_tidyup_six.md` as open. Both were **fulfilled** — v5.40, and v5.42–v5.47 respectively.
+They were added at v5.54 on a session brief's classification **with no content check**, in the
+release whose entire lesson was that a status line is evidence of what was true when it was
+written. `I-2` would have caught both; the allowlist excused them, for four releases.
+
+Every premise was re-verified by content against v5.57 before either was retired: `METHODOLOGY.md`
+now reads "through v5.35" in the past tense, `t31` asserts both SSA-44 keys, `t30` asserts the
+`overflowX` wrapper in three places, 48 `inputMode` attributes are present, and all six
+v5.42–v5.47 CHANGELOG entries exist. Both scopes are now **RETIRED** and off the list, and the rule
+that would have stopped them is recorded **where the list lives** — an allowlist entry needs the
+same content check a retirement does.
+
+Removing them made `I-2` fire immediately on exactly those two scopes, which is the proof the fix
+works rather than merely the claim.
+
+### Three gate blind spots, each one a check that skipped the case it existed for
+
+- **`G-2` — the new-file case `G-1` structurally cannot see.** `G-1`'s loop reads
+  `if (!repoAll.has(r)) continue;`, so it only considers workspace files that already exist in the
+  repo. It can catch a file you *changed* and forgot to ship; it can never catch one you *created*.
+  v5.57 shipped `github/qa/tools/` **empty**, leaving out three instruments its own CHANGELOG
+  cites, and `G-1` passed. `G-2` asks only about hand-written files under `qa/`, deliberately —
+  a check that cries wolf gets ignored, which is the `VERIFY.sh` failure by another road.
+- **`KIND: handover`.** A stop package carries a workbench and no shippable half. It previously had
+  to declare `ops` and have `G-1` softened by hand — a gate talked round rather than gated, which
+  is what §B2 exists to forbid.
+- **Section `J` — the pool, after the upload.** Everything else in `package_check` runs *before*
+  the upload and cannot see what landed. Four separate post-ship corrections in August 2026 — a
+  mode bit, a stale pool `package_check.mjs`, a stale `CHANGELOG.md` and three missing pool tools —
+  were every one of them found by hand-diffing rather than by a gate. `J-1` catches a file that
+  never reached the pool, `J-2` a same-name upload done without the delete first, `J-3`/`J-4` a
+  rotation where only one of the two deletes happened. Run it again after uploading; it is skipped
+  and says so when no pool is given.
+
+### Verification
+
+**Five negative controls fire and N0 is silent** (`qa/tools/controls_v5571.sh`): a knowledge file
+absent from the pool catches `J-1`; a stale same-name upload `J-2`; a third source leg `J-3`; a new
+uncommitted instrument `G-2`; and `KIND: handover` is accepted rather than defaulting.
+
+**Two control fixtures were wrong before the checks were.** `J-3` fired on a clean package because
+the fixture pool held one source leg where the invariant is two, and `G-2` stayed silent because
+the fixture used a file that had *already shipped* — so `G-2` correctly treated it as `G-1`'s
+business. Both were corrected and both checks then fired. Recorded because a control that fails for
+its own reasons reads exactly like a check that does not work.
+
+**The app suite was not re-run, and that is deliberate.** This release changes no file the suite
+reads: `package_check.mjs` is not in any suite, and the rest is Markdown. The standing figure from
+this session's run against the committed tree is **2,858 app checks, 0 failing** · v5.56 leg 1,087 ·
+v5.57 leg 1,091 · parity 10/10 · once 670 · tooling 82 · GRAND 2,940.
+
+### Two findings recorded, not fixed
+
+- **`P17` in `package_check_controls.sh` does not fire, and did not before this release either.**
+  Verified by running the identical harness against the unmodified gate. `E-1b` is meant to catch a
+  both-destinations file omitted from `github/`; `C-2` and `D-1` catch it instead, so nothing
+  escapes — but the named check is vacuous and should be either fixed or retired.
+- **`dom_entry_v592.jsx` is NOT an orphan, and earlier releases of mine said otherwise.**
+  `qa/qa-baseline/README.md` documents it: `v592` is the retired **v5.9.2** leg, the suites still
+  understand the tag deliberately, and `v592.jsx` is intentionally local-only. It is correctly
+  repo-only and §A2's classification of it is right. The v5.57 tag-roll broke on registries ending
+  `"v592"]` because **the transform keyed on the current tag**, which is a defect in the transform,
+  not in the repo. The claim that it was "overdue" is withdrawn.
+
+### The pool cleanup is DEFERRED, by decision
+
+`SCOPE_POOL_AND_ALLOWLIST_HYGIENE.md` stays open for exactly one remaining item. The inversion has
+**deepened**: measured 2026-09-01 the pool holds **20 retired scopes to 3 open**, against 15/2 when
+the scope was written, and the two scopes retired above were never in the pool at all. All 20 also
+exist in the repo so no content is lost by deleting them — but **all 20 carry decision language**,
+so §G's read is not optional, and it is a session of its own rather than a corner of this one.
+
 ## v5.57 — Kentucky's rate is 3.5% for 2026; Delaware's $12,500 was right all along, 2026-08-31
 
 **Modelling change. Figures move — and for Kentucky they move DOWN.** `KIND: app-release`.
