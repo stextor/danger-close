@@ -1,5 +1,38 @@
 # Changelog
 
+## ops · the deferred pool read, and what it found, 2026-09-01
+
+**Pool hygiene only.** `KIND: ops`. No `src/` change, no version bump, no repo file moves except a
+scope retirement and one allowlist line. The app is untouched at `0daebb4af466b9095db79117daefcd32`.
+
+`SCOPE_POOL_AND_ALLOWLIST_HYGIENE.md` deferred one item under decision D-3(b): read all 22 retired
+scopes in the pool for unresolved decisions before deleting any of them, because §G requires the
+check for unresolved *decisions*, not just for built *outcomes*. That read is done and the scope is
+**RETIRED**, with its allowlist entry deleted in the same edit.
+
+### Nothing was lost
+
+Twenty-one of the twenty-two carry an explicit retirement note recording what shipped and how each
+decision resolved. **One carries no retirement note at all**, and it was the only one
+that could have hidden anything: `SCOPE_FIX_roth_tab_div_capgain.md` is **SUPERSEDED and was never
+built**. A superseded scope is retired by another document's say-so, and that say-so is the thing
+that has to be checked rather than taken.
+
+Its status line claims its four decisions are resolved in `SCOPE_D10_MODELLING_v5_53.md`. The one
+worth checking was **D-4** — hold the Roth tab's dividend base constant, and *flag the disagreement
+with `runRothStrategies`' decaying `taxBal` in `METHODOLOGY.md`*. **That flag exists**, under
+*"One disagreement disclosed rather than reconciled"*. The recommendation was carried out, so
+nothing needed re-homing to `MissingFeatures.md` and D-4(a) was decided but not needed.
+
+**The finding worth keeping is the shape, not the count: read the scope with no retirement note
+first.** A self-documenting retirement is evidence; an inherited one is a claim.
+
+### The pool deletions
+
+All 23 leaving the pool also exist in the repo, so no content is lost. They are a **pool action** — the list is in
+this package's README-FIRST. After it, the pool holds two scopes, both genuinely open,
+and the shelf is the right way up for the first time since v5.53.
+
 ## ops · the allowlist that excused itself, and three gate blind spots, 2026-09-01
 
 **Documentation and tooling only.** `KIND: ops`. No `src/` change, no version bump, no figure
