@@ -2,7 +2,29 @@
 
 | Field | Value |
 |---|---|
-| Status | **SCOPE ONLY — NO BUILD.** Four decisions open in §6. Nothing here has been built |
+| Status | **PARTIALLY SHIPPED at v5.57.1 — the pool cleanup is DEFERRED by decision D-3(b)** |
+
+> ## ⚠ PARTIALLY SHIPPED — v5.57.1, 2026-09-01. Read this before acting on anything below.
+>
+> **Decisions resolved:** D-1(a) one release · D-2(a) all retired scopes leave the pool ·
+> **D-3(b) a later dedicated pass** · D-4(a) re-home to `MissingFeatures.md` ·
+> **D-5(fold in)** the ops-gate items.
+>
+> **SHIPPED at v5.57.1:** both stale allowlist entries removed and the two scopes retired by
+> content; the content-check rule recorded where the list lives; `package_check` gained **G-2**
+> (the new-file case G-1 structurally cannot see), **`KIND: handover`**, and **section J**, a
+> post-ship pool verification.
+>
+> **STILL OPEN — this is the whole of what remains:** the pool cleanup. §1b's inversion has
+> **deepened** since this was written — measured 2026-09-01 the pool holds **20 retired scopes to
+> 3 open**, against 15/2 at v5.53, and `SCOPE_v5_40_disclosures_and_mechanics` and
+> `SCOPE_FIX_tidyup_six` are *still* absent from it. All 20 retired pool scopes also exist in the
+> repo, so deleting the pool copy loses no content — but **all 20 carry decision language**, so
+> §G's read is not optional. That read is the deferred work and it is a session of its own.
+>
+> ⚠ **One premise below is now WRONG and is corrected here rather than edited away:** §1a says the
+> allowlist holds four entries. It held five by v5.57 — it gained this scope itself — and holds
+> three after v5.57.1.
 | Written | 2026-08-28 |
 | Against | **v5.53** · `src/DangerClose.jsx` `12a007ed8e57a391acba67b799eb5a2f` · repo HEAD `46cc14a` |
 | Shape | **Documentation and tooling only.** No `src/` change. No version bump. No figure moves |

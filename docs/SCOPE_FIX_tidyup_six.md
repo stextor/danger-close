@@ -1,7 +1,16 @@
 # SCOPE — the six deferred corrections (the "tidy-up")
 
-**Status: SCOPED. Three decisions open (§7). One item should probably be pulled OUT and shipped on
-its own — see §2.**
+**Status: RETIRED — FULFILLED ACROSS v5.42–v5.47, confirmed by content 2026-09-01.**
+
+> ## ⛔ RETIRED — FULFILLED ACROSS v5.42–v5.47 · confirmed by content, not by version heading
+>
+> All seven items shipped: 1→v5.42 · 2→v5.46 · 3→v5.44 · **4 and 7→v5.45** · 5 and 6→v5.47. All six
+> CHANGELOG entries verified present against the v5.57 tree (`0daebb4af466b9095db79117daefcd32`) on
+> 2026-09-01. The three §7 decisions were resolved by events: **D-1** in the document itself,
+> **D-2** by v5.43's Engine C §86 work, **D-3** by item 5 at v5.47.
+>
+> ⚠ **Allowlisted as open for four releases after its work had shipped**, for the same reason and in
+> the same edit as `SCOPE_v5_40_disclosures_and_mechanics.md`. See that scope's retirement note.
 
 | Field | Value |
 |---|---|

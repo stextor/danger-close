@@ -6,7 +6,20 @@
 | Base build | **v5.39** · source `7070018f2699503dfac4ca8e0e1b2feb` · built `0563e2f6db79c19b4729bec6e09a458a` · tree `a8e59f3` |
 | Target | **v5.40** |
 | Decisions resolved | S-1 phrasing → **generic**; bundling → **all four ride together**; extinction assertion → **its own scope, out of scope here** |
-| Status | **SCOPE ONLY — no build.** Open decisions in §7 must be resolved first |
+| Status | **RETIRED — FULFILLED AT v5.40, CONFIRMED BY CONTENT 2026-09-01** |
+
+> ## ⛔ RETIRED — FULFILLED AT v5.40 · confirmed by content against v5.57, not by version heading
+>
+> Every premise re-checked against `0daebb4af466b9095db79117daefcd32` on 2026-09-01:
+> **S-3** `METHODOLOGY.md` now reads *through v5.35* — past tense, the defect it described is gone.
+> **D-6** `t31` asserts BOTH the SSA-44 and work-stoppage keys (closed v5.49).
+> **F-2/F-8** `t30` asserts grids sit inside an `overflowX` wrapper, in three places.
+> **F-6** 48 `inputMode` attributes are present in source.
+>
+> ⚠ **This scope sat on `package_check`'s OPEN allowlist for four releases after its work had
+> shipped.** It was added at v5.54 on a session brief's classification, with no content check, in
+> the release whose whole lesson was that status lines go stale. `I-2` would have caught it; the
+> allowlist excused it. The rule that would have stopped it is now recorded where the list lives.
 
 **Every line number below was derived from the unmodified `src/DangerClose.jsx`** and re-resolved by
 confirming the cited line contains the code claimed. This is stated because the 2026-08-18 documents
