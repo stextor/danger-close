@@ -89,8 +89,21 @@ and the taper. Draft for approval — the exact text is decision **D-1**:
 and **must be negative-controlled before it is believed** — the risk `SCOPE_v5_54_STATE_DISCLOSURE`
 §3 named and the one that earns its keep here.
 
-**C · Version bump**, four in-app sites (footer, DATA LOAD header, Field Manual callsign, Field
-Manual footer), asserted by `t1` STATIC.
+**C · Version bump to v5.58.** ⚠ **CORRECTED 2026-09-01 — this scope originally priced this as
+"four in-app sites" and that was wrong**, in the same way and by the same factor as the v5.54 scope
+the stop-report criticised. Four sites is the SOURCE cost. Measured with `qa/tools/vercensus.cjs`
+against v5.57, the SUITE cost is **15 files to register the tag, 16 ladder entries, and 62 gated
+expressions** — 78 judgement points, `t4` alone holding 21. The registries are fail-closed and halt
+the suite with FATAL if missed; this was confirmed empirically by running `t1` against an
+unregistered `v558`.
+
+**This is the single largest line item in the release and it is not mechanical.** Each gate asks
+whether v5.58 makes that assertion false; extending them blindly is the v5.28 defect applied 62
+times. Budget the build accordingly — v5.54 halted mid-build on exactly this.
+
+⚠ **Most of those 62 should be cheap for THIS release**, because §2's census found no suite file
+asserts VA text and this release rewrites no DOM copy — but *cheap* is a prediction, and it must be
+confirmed gate by gate rather than assumed. That assumption is what the v5.54 scope made.
 
 **D · A negative control.** Revert the note and require the new `t31` key to fail. Per §B2 a green
 suite is not coverage; the v5.57 rate assertion passed against a deliberately reverted build.
