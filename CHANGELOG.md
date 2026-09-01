@@ -52,6 +52,12 @@ unverified number is worse than an acknowledged gap.
   deliberately reverted 4% build and would have passed for anything between 2.5% and 4.5%. It is now
   a boolean identity. **The assertion covering this release's entire point covered nothing, and only
   running the control revealed it.**
+- **`package_check` G-1 cannot see a NEW file.** The first cut of this zip shipped
+  `github/qa/tools/` **empty**, leaving out three instruments this entry cites. G-1 is the check
+  for that and passed anyway, twice: once handed the verification folder, which is built from the
+  package and can only agree with it, and once correctly invoked, because it skips any workspace
+  file with no repo counterpart — and a new file is precisely that. Found by the maintainer
+  noticing an empty directory, not by the gate. Recorded, not fixed.
 - **Four `KNOWN_VERSIONS` registries end in the retired `v592` tag, not the current one**, so a
   version roll keyed on the current tag skips `t1`, `t4`, `t5` and `t6` entirely. They failed loudly
   with `FATAL: version tag not registered`, which is the good outcome, but it is the second distinct
