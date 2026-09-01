@@ -31,6 +31,14 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 | Built `index.html` md5 | `0cc9d4c2fa1973f39328795bc85d1636` |
 | Shipped | 2026-08-31 |
 
+> **Pool read complete 2026-09-01.** All 22 retired pool scopes read for unresolved decisions;
+> **nothing was lost** and nothing needed re-homing. `SCOPE_POOL_AND_ALLOWLIST_HYGIENE.md` is
+> **RETIRED** and off the allowlist. 23 scopes leave the pool (all exist in the repo);
+> the shelf then reads TWO scopes, both genuinely open.
+> ⚠ **Read the scope with NO retirement note first.** Twenty-one self-documented; the one that did
+> not — `SCOPE_FIX_roth_tab_div_capgain.md`, SUPERSEDED and never built — was the only one that
+> could have hidden a decision. Its D-4 was checked against `METHODOLOGY.md` and had been carried out.
+>
 > **Ops package 2026-09-01 — no version bump.** `package_check`'s OPEN allowlist dropped
 > `SCOPE_v5_40_disclosures_and_mechanics.md` and `SCOPE_FIX_tidyup_six.md`, both **RETIRED** after
 > re-verifying every premise by content against v5.57. The gate gained `G-2`, `KIND: handover` and
