@@ -1,5 +1,108 @@
 # Changelog
 
+## v5.58 · Virginia's 65+ age-deduction note stated the wrong income thresholds, 2026-09-02
+
+**Disclosure only. One string, plus the version bump. No engine change and no figure moves** — MC
+parity held **10/10** across the `STATE_RULES` edit, which is the witness that copy moved and the
+engines did not.
+
+`STATE_RULES.VA.note` stated income limits of **~$75K/$150K**. Va. Code § 58.1-322.03(5) says
+**$50,000 single / $75,000 married** — the $12,000 age deduction for those born after 1 January 1939
+who have attained 65 is reduced $1 for every $1 that adjusted federal AGI exceeds those figures, and
+"adjusted" FAGI excludes Social Security and other benefits taxed solely under IRC § 86. The note
+overstated both thresholds, by $25,000 single and $75,000 married.
+
+**The error ran OPTIMISTIC, and it compounded rather than mitigated.** The model already applies this
+exclusion unconditionally (the open D-3c defect); a note claiming the limit bites far later than it
+does pushes the same way. Both errors under-taxed.
+
+The statute was read at `law.lis.virginia.gov`, § 58.1-322.03, 2026-updated section — the primary
+source, not a secondary summary and not this project's own audit. Its amendment history runs through
+2026, c. 7 and 2026 Sp. Sess. I, c. 1; subdivision 5's figures are untouched by them.
+
+### What did NOT change, stated plainly
+
+**The model still applies Virginia's deduction unconditionally.** This release corrects what the app
+*says*, not what it *computes*. No projected figure moves by a cent in any state. Fixing the
+application is a data-model change (D-3c) and needs its own scope.
+
+Two statutory details remain unmodelled and are named rather than glossed: the reduction is a
+**continuous dollar-for-dollar taper**, which `excl65` cannot express; and the income measure
+**excludes Social Security**, which the model would have to construct specially. Deliberately not
+asserted: where a couple's deduction reaches zero when both spouses claim $12,000. Secondary sources
+disagree and it is unsettled against Schedule ADJ, so no dollar-exact Virginia figure is claimed
+anywhere in this release.
+
+### METHODOLOGY.md was in scope after all
+
+The scope originally excluded it on the stated ground that the file "does not mention Virginia."
+**That was false.** §6 L152 names VA in exactly this context — *"income limits on several exclusions
+(NJ, VA, RI approximated as unconditional)"*. The search that produced the zero looked for the word
+"Virginia" while the document uses the two-letter code, and a form-sensitive search returning a
+confident zero is the failure mode OPERATIONS §A0 exists for: there is no output to sanity-check.
+
+The consequence was the dangerous direction — it removed needed work from a release rather than
+adding spurious work. The creator-side sentence was not inaccurate, but it named the approximation
+without ever naming the limit. It now carries the thresholds, which is also what makes the new `t31`
+key possible: C-0 admits no key the creator side does not name.
+
+### Coverage, and why the key is the figures
+
+`t31` gains **`$50K single/$75K married`**, gated `since: "v558"` with a pre-v5.58 branch so the
+frozen leg keeps asserting what was true of its own build.
+
+**The key was measured, not chosen.** Against the realistic future regression — thresholds reverted,
+the surrounding prose left intact — `reduced $1 for every $1`, `adjusted federal AGI` and `overstates
+the deduction` **all still pass**. Only the figures catch it, because the figures are what was wrong.
+`income-limited` (8 hits at v5.57) and `unconditional` (4) are vacuous outright: they pass before the
+fix exists, the trap this suite already records at v5.51, v5.52 and v5.54.
+
+⚠ The key is a **literal substring in that abbreviated form on both surfaces on purpose.** METHODOLOGY
+writes full figures and "dollar-for-dollar" elsewhere; writing them that way here would break the key
+against correct copy. The note and METHODOLOGY §6 change together or not at all.
+
+**Three negative controls fire:** the note fully reverted; the thresholds reverted with prose intact;
+and METHODOLOGY reworded to its own house style, which fails C-0 and the parity check together.
+Before the key existed, a reverted build passed **744 checks** across `t10`, `t29`, `t30`, `t31`, `t4`
+and `t1` — this release had no coverage at all until the key landed, which is why it was not optional.
+
+### Tooling added — uncounted, and NOT covered by t21
+
+`qa/tools/vercensus_list.cjs`, `f6_probe.cjs`, `suite_regex_probe.cjs`. They assert nothing and are
+counted in no check total. ⚠ **They are not covered by `t21`**, so §B1's "an unexpected result from
+these tools is a finding, provided `t21` is green" does **not** extend to them. Each was hand-
+controlled this session — `vercensus` returns 63 for v556 against 62 for v557 and refuses an unknown
+tag; `f6_probe` drops the guarded set to four when `income-limited` is removed — but a control run
+once is not a suite. `t21` coverage for them is **owed work, not done work**.
+
+### Verification
+
+**2,864 app checks, 0 failing** — v5.57 leg 1,092 · v5.58 leg 1,092 · parity **10/10** · feature
+suites run once 670. Tooling **82** (`t21` 50 · cross-version DOM diff 32), counted separately.
+GRAND 2,946. Built-artifact smoke `smoke_built` **16/16**, including the `window.storage` round-trip.
+
+*Per-suite at v5.58, current leg, parsed from suite output 2026-09-02 — 32 suites:* `t1` 185 · `t2` 35 · `t3` 36 · `t4` 252 · `t5` 58 · `t6` 21 · `t7` 41 · `t8` 40 · `t9` 14 · `t10` 213 · `t11` 40 · `t12` 23 · `t13` 42 · `t14` 44 · `t15` 11 · `t16` 24 · `t17` 74 · `t18` 67 · `t19` 65 · `t20` 100 · `t21` 50 · `t22` 85 · `t23` 25 · `t24` 38 · `t25` 45 · `t26` 25 · `t27` 18 · `t28` 34 · `t29` 54 · `t30` 12 · `t31` 29 · `t32` 12.
+
+The frozen v5.57 leg replays **unchanged**, which is the check that no new expectation leaked
+backwards onto a build that predates it (§B2). ⚠ **`t31` moves 28 → 29 on BOTH legs**, not just the
+current one: the new key is asserted on every leg, in its pre-fix form on v5.57.
+
+⚠ **The DOM diff cannot witness this release.** Its ±$500 render ceiling means a disclosure change is
+invisible to it, so its "nothing moved" reading is not evidence of correctness here. `t31` is the
+witness.
+
+**A version bump costs more than the four in-app sites.** Measured with `qa/tools/vercensus.cjs`:
+15 files to register the tag, 16 ladder entries, and **62 gated expressions requiring individual
+judgement** — 78 judgement points, `t4` holding 21. Two of the 62 are **ternary version-string maps**
+needing a new arm rather than an extension (`t1` `verStr`, `t4` `_badge`); an extended condition there
+renders the new build under the old version string. Four ladders end in the retired `v592` tag, so the
+new tag is inserted positionally, not appended.
+
+⚠ The one-line `DOCS_HTML` blob holds **three** `v5.57` strings and only two are version sites; the
+third is prose recording what was re-checked *at* v5.57. It is history and was left alone.
+
+Source `6690b2c78953a7a4a1cee413d3523b59` · built `index.html` `ae9ac897595bba39785f8a6e04bd9e1a`
+
 ## ops · the deferred pool read, and what it found, 2026-09-01
 
 **Pool hygiene only.** `KIND: ops`. No `src/` change, no version bump, no repo file moves except a
