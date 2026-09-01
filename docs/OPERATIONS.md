@@ -519,6 +519,26 @@ will not announce itself.
 A repo clone settles these questions cheaply and settles related ones at the same time — it is also the
 fastest way to check whether project knowledge has drifted from what is actually committed.
 
+### ⚠ Section `J` cannot see a DELETION — the three-place rule is unverified (added 2026-09-01)
+
+The rule above is the one part of §G **no check enforces**. `package_check`'s section `J` (`J-1`,
+`J-2`) verifies that everything in a package's `knowledge/` reached the pool and is current. It says
+nothing about files that should have **left**, and nothing about manifest rows that should have gone
+with them. A deletion is verified by hand or not at all — which is why the 23 scope deletions of
+2026-09-01 were hand-checked.
+
+**The gap is not theoretical.** On 2026-09-01 the manifest was found carrying **ten md5 rows naming
+files that had already left the pool** — three rotated `dom_entry_*` and seven retired documents —
+alongside **19 rows whose recorded hash no longer matched the file**. Nothing had flagged either,
+because `J` only looks for arrivals. Worse, the ten rows were stale in their *prose* as well: six of
+the seven scopes carry a **RETIRED** marker in their own first twelve lines while their rows still
+described them as *"ACTIVE, awaiting decisions."* A row freezes when written and nothing re-reads it.
+
+Both sets were repaired the same day and the table now reconciles against pool and clone in every
+row. **The check that would have caught them does not exist yet.** Until it does, treat the
+three-place rule as a manual discipline and re-derive it with a parser — not a grep — whenever a
+document leaves.
+
 ## H. GitHub folder creation
 
 No standalone "create folder." Type `folder/file.md` in the filename field when creating a file, drag a
