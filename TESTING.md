@@ -383,6 +383,29 @@ Three things follow, and they are now standing practice rather than a one-off no
 The counts on this page are honest about how many assertions run and pass. They have never been, and
 are not now, a measure of how much of the app is meaningfully watched.
 
+## Known gate defects — filed here because they had no home (added 2026-09-01)
+
+Two defects in `package_check.mjs` and its control harness. They are recorded here rather than in
+`OPERATIONS.md` because they are harness behaviour, not a rule. Both had survived two sessions in
+chat and in expired `README-FIRST.md` files, which is how an item gets lost.
+
+- **`D-1` fails on every post-ship run.** It is a pre-ship check and the harness carries no mode
+  signal, so a package verified *after* it ships reports a failure that means nothing. Passing a
+  pool directory is an unambiguous signal that the ship already happened, so `D-1` can gate itself
+  off when `POOL` is set. Noted deliberately rather than changed inside the v5.57 release, which was
+  already verified.
+- **`P17` in `package_check_controls.sh` does not fire**, and did not before v5.57.1 either —
+  confirmed by running the identical harness against the unmodified gate. `E-1b` is meant to catch a
+  both-destinations file omitted from `github/`; `C-2` and `D-1` catch that case instead, so nothing
+  escapes, but the named control is **vacuous**. A control that cannot fail is worse than no control
+  (§B2), so this should be repaired rather than retired.
+
+⚠ **The case for repairing `P17` got stronger on 2026-09-01.** A corrected manifest was uploaded as
+`PROJECT_KNOWLEDGE_INDEX (1).md` to both destinations, leaving a **stale twin at the repo root under
+the canonical name** — the exact condition §G's one-copy rule exists to prevent. **No gate saw it**,
+because both files were individually valid and only their *names* were wrong. It was caught by
+comparing filenames against §G by hand. Cross-destination naming is the gap.
+
 ## What the tests don't cover
 
 No independent professional review of the tax, IRMAA, or ACA modeling has occurred. The app's limitations sections (Field Manual §13, METHODOLOGY §12, and the in-app ACA notes) list the simplifications that remain by design — simplified SS taxability, effective-rate state approximations, deterministic-by-default mortality, and the rest. The suites prove the code implements the documented model; they cannot prove the model matches your life.
