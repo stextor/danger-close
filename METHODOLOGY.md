@@ -149,7 +149,7 @@ behavior exactly (backward compatible with every existing backup).
 
 **This is an approximation layer and is labeled as such in the UI.** Not modeled: progressive
 state brackets (effective rate instead), county/city income taxes (IN, MD partially folded, NYC
-not), income limits on several exclusions (NJ, VA, RI approximated as unconditional), NJ's 62 age floor and SC's under-65 tier (both disclosed, neither applied), **Colorado's shared $24K cap between Social Security and pension — a cap the two share rather than one reducing the other, which overstates Colorado's exclusion and understates its state tax**. Maryland's and Maine's exclusions, which are reduced by Social Security received dollar-for-dollar, ARE applied as of v5.56 (§12), state
+not), income limits on several exclusions (NJ, VA, RI approximated as unconditional — **Virginia's $12K age deduction in fact tapers $1 for every $1 of adjusted federal AGI above $50K single/$75K married, so applying it in full overstates the deduction and understates Virginia's state tax**), NJ's 62 age floor and SC's under-65 tier (both disclosed, neither applied), **Colorado's shared $24K cap between Social Security and pension — a cap the two share rather than one reducing the other, which overstates Colorado's exclusion and understates its state tax**. Maryland's and Maine's exclusions, which are reduced by Social Security received dollar-for-dollar, ARE applied as of v5.56 (§12), state
 standard deductions/credits, pension-source distinctions (AL/HI DB exemptions), and WA's
 capital-gains excise. Verify your state.
 
