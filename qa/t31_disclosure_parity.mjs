@@ -47,7 +47,7 @@ import { dirname, join } from "path";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v549";
-const KNOWN_VERSIONS = ["v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557"];
+const KNOWN_VERSIONS = ["v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   process.exit(1);
@@ -215,6 +215,24 @@ const KEYS = [
   // work this way. What inverts is the CLAIM ABOUT THE MODEL, and that is this key.
   // ⚠ LITERAL SUBSTRING, and it is carried by the Field Manual s13 clause AND METHODOLOGY s12 in
   // the same words on purpose. Measured before it was written: 0 hits on v5.55, both surfaces.
+  // Added v5.58 (D-3c disclosure half, AUDIT_STATE_EXCL65_ROUND3 §2a). VA's note stated income
+  // thresholds of ~$75K/$150K; Va. Code § 58.1-322.03(5) says $50,000 single / $75,000 married —
+  // read at law.lis.virginia.gov, 2026-updated section, not from a secondary source. The note
+  // told the reader the limit bites $25K/$75K later than it does, COMPOUNDING the unconditional
+  // application rather than mitigating it. Direction: OPTIMISTIC, both errors the same way.
+  // ⚠ WHY THIS KEY AND NOT THE TAPER PHRASE. "reduced $1 for every $1", "adjusted federal AGI" and
+  // "overstates the deduction" were each measured against the realistic future regression — the
+  // thresholds reverted with the surrounding prose left intact — and ALL THREE STILL PASS it. Only
+  // the figures catch it, because the figures are what was wrong. "income-limited" (8 hits at
+  // v5.57) and "unconditional" (4) are vacuous outright: they pass before the fix exists, the trap
+  // this file already records at v5.51, v5.52 and v5.54.
+  // ⚠ LITERAL SUBSTRING, IN THIS ABBREVIATED FORM, ON BOTH SURFACES ON PURPOSE. METHODOLOGY §6
+  // writes full figures and "dollar-for-dollar" elsewhere; writing them that way here would break
+  // this key against CORRECT copy. The note and METHODOLOGY §6 change together or not at all.
+  // ⚠ NO `until`. The sentence states what the model does NOT do, so it stays true until D-3c is
+  // actually modelled. The release that models it must INVERT this key, not expire it.
+  { key: "$50K single/$75K married", since: "v558",
+    why: "the corrected statutory thresholds are the whole release, and only the figures catch a revert" },
   { key: "Maryland's and Maine's dollar-for-dollar reductions are modelled", since: "v556",
     why: "the offset IS applied as of v5.56, so a manual still saying the model applies none of it contradicts the engine" },
 ];
@@ -224,7 +242,7 @@ T("C-0: every declared key is named in METHODOLOGY.md \u2014 parity is only owed
   KEYS.every(k => inMeth(k.key)),
   KEYS.filter(k => !inMeth(k.key)).map(k => k.key).join(", "));
 
-const POST = VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557";
+const POST = VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558";
 // EACH KEY IS GATED TO THE RELEASE THAT LANDED IT, not to the shared POST flag above.
 // Found at the v5.50 build. Under one shared gate the v549 leg went GREEN on v5.50's expectation
 // for the wrong reason twice over - METHODOLOGY.md is ONE shared file at the run-folder root, so a
@@ -232,7 +250,7 @@ const POST = VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552
 // see JSX gating, so v5.49's single-household-gated estate card satisfied it even though a COUPLE
 // never rendered a word of it - while the v548 leg FAILED outright, invisibly, because runsuite.sh
 // only runs t31 for the prior and current tags.
-const ORDER = ["v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557"];
+const ORDER = ["v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558"];
 // ⚠ THIS IS THE THIRD OF THREE VERSION LISTS in this file — KNOWN_VERSIONS (L50), POST (L218)
 // and ORDER. `post()` uses ORDER.indexOf(VER), so an unrolled tag scores -1 and EVERY key
 // silently takes its pre-fix branch. Rolling two of the three fails 6 checks with no hint
@@ -250,6 +268,16 @@ for (const k of KEYS) {
     T(`C [PARITY]: "${key}" is named creator-side AND user-side \u2014 ${why}`,
       inMeth(key) && userSide(key),
       `meth=${inMeth(key)} app=${inApp(key)} docs=${inDocs(key)}`);
+  } else if (since === "v558") {
+    // Pre-v5.58 state. v5.57's note carries the WRONG thresholds (~$75K/$150K), so the corrected
+    // figures are absent from both user surfaces — correct for that build, and pinned rather than
+    // inverted bare so the frozen leg keeps replaying green (OPERATIONS §B2, the v5.27 defect).
+    // Note this asserts absence of the CORRECT figures, not presence of the wrong ones: the old
+    // note is a different sentence, and pinning its exact text here would lock copy this release
+    // deletes — the v5.26 lock, which is the failure one level up from a stale gate.
+    T(`C [KNOWN DEFECT pre-v5.58]: "${key}" — VA's note states the wrong income thresholds and ` +
+      "neither user surface carries the statutory ones",
+      inMeth(key) && !userSide(key), `meth=${inMeth(key)} app=${inApp(key)} docs=${inDocs(key)}`);
   } else if (since === "v556") {
     // Pre-v5.56 state: the offset was disclosed as NOT modelled, so the corrected sentence must be
     // absent. Gated rather than inverted bare — an ungated inversion asserts the fix against builds
@@ -314,7 +342,7 @@ if (POST) {
   // approved copy is correct; weakening it to something both a conservative and a non-conservative
   // sentence would satisfy is not.
   const DIRECTION = "charges every surcharge in full";
-  if (VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557") {
+  if (VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558") {
     // The C predicate is an OR, and for this key the app arm was ALREADY satisfied before the fix
     // by single-gated text. Asserting the manual arm separately is what makes the key mean anything.
     T("D-5: the FIELD MANUAL names estate tax - the arm that was empty before v5.50",
@@ -325,7 +353,7 @@ if (POST) {
       inDocs("optimistic") && inApp("optimistic"),
       `docs=${inDocs("optimistic")} app=${inApp("optimistic")}`);
   }
-  if (VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557") {
+  if (VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558") {
     // E · CREATOR-SIDE LABEL DRIFT. Added after the v5.50 ship, when a sweep found METHODOLOGY.md
     // still describing the objective list as "max after-tax estate" in three places while its own
     // new section 12 explained why that phrase was wrong. The document contradicted itself, and
@@ -348,7 +376,7 @@ if (POST) {
     T("D-9: the FIELD MANUAL names it - the §13 limitations register",
       inDocs("omits dividends and realized capital gains"));
   }
-  if (VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557") {
+  if (VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558") {
     T("D-10: the RENDER TREE says the column now counts dividends",
       inApp("counts the taxable sleeve's dividends"));
     T("D-11: the FIELD MANUAL does too",
