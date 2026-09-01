@@ -383,6 +383,42 @@ Three things follow, and they are now standing practice rather than a one-off no
 The counts on this page are honest about how many assertions run and pass. They have never been, and
 are not now, a measure of how much of the app is meaningfully watched.
 
+## What a version bump actually costs (measured 2026-09-01)
+
+**A version bump is priced in this project as "four in-app sites"** — footer, DATA LOAD header, Field
+Manual callsign, Field Manual footer. **That is the SOURCE cost only.** The suite cost is an order of
+magnitude larger, and until this entry existed **no document recorded it anywhere**.
+
+Measured against v5.57 with `qa/tools/vercensus.cjs`:
+
+| | from v5.57 |
+|---|---|
+| suite files that must register the new tag | **15** |
+| ladder entries (mechanical append) | **16** |
+| **gated expressions (each a judgement)** | **62** |
+| total judgement points | **78** |
+
+`t4_dom.mjs` alone carries **21** gated expressions and is where to start, because they are the ones
+most likely to cover changed copy.
+
+**The registries are fail-closed**, which is them working. An unregistered tag halts the suite:
+
+```
+✗ FATAL: version tag "v558" is not registered in this suite.
+  Add it to the version ladders in this file BEFORE running.
+```
+
+⚠ **The 62 are not a script.** Each asks whether the new build makes that assertion false. Extending
+them blindly applies a new expectation to frozen legs that legitimately still contain the old copy —
+the v5.28 defect, applied once per gate.
+
+**Why this entry exists, and it is the point.** The v5.54 stop-report measured this cost, called that
+scope *"wrong by roughly a factor of sixty,"* and closed with the finding that **no document records
+it**. That gap was never filled — so on 2026-09-01 `SCOPE_VA_NOTE_CORRECTION.md` §3C priced a bump at
+*"four in-app sites"* and made the identical error, with the stop-report naming it sitting in the same
+repo. **Re-derive the number with the tool rather than quoting the table above**; a figure written into
+prose is exactly what goes stale (§A0).
+
 ## Known gate defects — filed here because they had no home (added 2026-09-01)
 
 Two defects in `package_check.mjs` and its control harness. They are recorded here rather than in
