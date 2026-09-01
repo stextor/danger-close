@@ -9,7 +9,8 @@
 // It answers the question §L actually cares about — "is this zip shaped right, and does it contain
 // exactly the right files?" — rather than "did someone remember to read §L."
 //
-//   usage: node qa/tools/package_check.mjs <zip-or-unpacked-dir> [clone-dir] [workspace-dir]
+//   usage: node qa/tools/package_check.mjs <zip-or-unpacked-dir> [clone-dir] [workspace-dir] [pool-dir]
+//   The pool argument is POST-SHIP: run it again after uploading to close section J.
 //
 // The clone is the committed tree to diff `github/` against. Omit it and the content checks that
 // need it are SKIPPED AND SAID SO — never silently passed. Clone it yourself with:
@@ -51,6 +52,7 @@ const walk = (dir, base = dir) => {
 const ARG = process.argv[2];
 const CLONE = process.argv[3] || null;
 const WORK = process.argv[4] || null;
+const POOL = process.argv[5] || null;
 if (!ARG) {
   console.log("usage: node package_check.mjs <zip-or-unpacked-dir> [clone-dir]");
   process.exit(2);
@@ -73,7 +75,11 @@ if (statSync(ARG).isDirectory()) {
 // FAIL-CLOSED: an undeclared package is treated as an app release and must meet the full bar.
 // Declare in MANIFEST.txt with a line reading:  KIND: app-release   or   KIND: ops
 const _man0 = existsSync(join(ROOT, "MANIFEST.txt")) ? readFileSync(join(ROOT, "MANIFEST.txt"), "utf8") : "";
-const KIND = (/^KIND:\s*(app-release|ops)\s*$/mi.exec(_man0) || [, "app-release"])[1].toLowerCase();
+// `handover` (added v5.57.1): a STOP package. It carries a workbench of unverified work and a
+// stop-report, has no shippable half, and must NOT be measured against §L's release bar. Before
+// this existed a handover had to declare `ops` and have G-1 softened by hand — a gate talked round
+// instead of gated, which is the thing §B2 exists to forbid.
+const KIND = (/^KIND:\s*(app-release|ops|handover)\s*$/mi.exec(_man0) || [, "app-release"])[1].toLowerCase();
 
 console.log(`package_check \u2014 OPERATIONS \u00a7L`);
 console.log(`     kind:    ${KIND}${/^KIND:/mi.test(_man0) ? "" : "  (UNDECLARED \u2014 defaulting to app-release, fail-closed)"}`);
@@ -331,6 +337,35 @@ if (!WORK || !existsSync(WORK)) {
   }
   ck("G-1: every workspace file that differs from the committed tree is in github/",
     missing.length === 0, missing.join(" | "));
+
+  // ── G-2 (added v5.57.1) · the case G-1 STRUCTURALLY CANNOT SEE ────────────────────────────
+  // G-1's loop reads `if (!repoAll.has(r)) continue;` — it only considers workspace files that
+  // ALREADY EXIST in the repo. A brand-new file has no counterpart, so it is skipped. G-1 can
+  // catch a file you CHANGED and forgot to ship; it can never catch one you CREATED.
+  //
+  // THE INSTANCE THAT EARNED THIS. v5.57 shipped `github/qa/tools/` EMPTY. Three instruments the
+  // release's own CHANGELOG cites — `vergates.cjs`, `notes_probe.cjs`, `lits.cjs` — were left in
+  // the workspace. G-1 passed twice: once because it was handed the VERIFICATION folder, which is
+  // derived from the package and can only agree with it, and once correctly invoked, because of
+  // the `continue` above. Found by the maintainer noticing an empty directory.
+  //
+  // ⚠ SCOPED DELIBERATELY, because a check that cries wolf gets ignored — the VERIFY.sh failure
+  //   by another road. A run folder is FULL of legitimately new files: built artifacts, the two
+  //   source legs, node_modules. G-2 asks only about hand-written suite and tool files under
+  //   `qa/`, which is where a forgotten instrument actually lands.
+  const DERIVED = /^(app_|dom_|v5\d|DangerClose\.jsx|package(-lock)?\.json|METHODOLOGY\.md)/;
+  const orphans = [];
+  for (const w of walk(WORK)) {
+    if (w.startsWith("node_modules/") || w.includes("/node_modules/")) continue;
+    if (!w.startsWith("qa/")) continue;                       // sources at the root are the legs
+    const leaf = w.slice(w.lastIndexOf("/") + 1);
+    if (DERIVED.test(leaf)) continue;                          // built by mk_testable / esbuild
+    if (!/\.(mjs|cjs|jsx|js|sh|md)$/.test(leaf)) continue;     // fixtures and data are not owed
+    if (candidates(w).some(r => repoAll.has(r))) continue;     // not new; G-1 owns it
+    if (!ghSet.has(w) && !ghSet.has(`qa/qa-baseline/${leaf}`)) orphans.push(w);
+  }
+  ck("G-2: every NEW hand-written file under qa/ is in github/ (the case G-1 skips)",
+    orphans.length === 0, orphans.join(" | "));
 }
 
 // ── H · PROVENANCE over an INDEPENDENT path (added 2026-08-28, decision D-1 route A1) ────
@@ -435,12 +470,19 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
   if (!existsSync(docs)) {
     skipped("I-1: scope status-line sweep", "no docs/ in the clone");
   } else {
+    // ⚠ AN ENTRY HERE NEEDS THE SAME CONTENT CHECK A RETIREMENT DOES. Read the scope's premises
+    //   against the CURRENT source and decide whether they still hold. A status line is evidence
+    //   of what was true when it was written, nothing more.
+    //   THE INSTANCE THAT EARNED THIS. Two entries were added at v5.54 on the strength of a
+    //   session brief's classification, with no content check, in the release whose entire lesson
+    //   was that status lines go stale. Both named scopes whose work had ALREADY SHIPPED —
+    //   `SCOPE_v5_40_disclosures_and_mechanics` at v5.40 and `SCOPE_FIX_tidyup_six` across
+    //   v5.42–v5.47. I-2 would have caught both. This list excused them, for four releases.
+    //   Removed at v5.57.1 after re-verifying every premise by content against v5.57.
     const OPEN = new Set([
       "SCOPE_STATE_FIXTURES.md",                  // awaiting decisions in its §5
-      "SCOPE_v5_40_disclosures_and_mechanics.md", // SCOPE ONLY, open decisions in its §7
-      "SCOPE_FIX_tidyup_six.md",                  // three decisions open in its §7
       "SCOPE_STANDING_AUDIT.md",                  // not a build scope at all (OPERATIONS §K)
-      "SCOPE_POOL_AND_ALLOWLIST_HYGIENE.md",       // four decisions open in its §6
+      "SCOPE_POOL_AND_ALLOWLIST_HYGIENE.md",      // pool cleanup DEFERRED; see its §6 D-3
     ]);
     const RETIRED = /\bRETIRED\b|\bSUPERSEDED\b|\bFULFILLED\b/;
     // ⚠ The INVENTORY is post-ship too, not just the reading of each file. A scope the package
@@ -485,6 +527,35 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
 }
 
 // ── verdict ──────────────────────────────────────────────────────────────────────────────
+// ── J · the POOL, after the upload ───────────────────────────────────────────────────────
+// Optional 4th argument: a directory holding the project-knowledge pool. Everything above runs
+// BEFORE the upload and cannot see what actually landed. Four separate post-ship corrections in
+// August 2026 were all caught by hand-diffing rather than by a gate; this is that diff, gated.
+if (POOL && existsSync(POOL)) {
+  console.log("\nJ. Pool \u2014 what actually landed in project knowledge");
+  const kn = join(ROOT, "knowledge");
+  if (!existsSync(kn)) {
+    skipped("J-1: knowledge/ vs the pool", "this package has no knowledge/ half");
+  } else {
+    const absent = [], stale = [];
+    for (const f of walk(kn)) {
+      const there = join(POOL, f);
+      if (!existsSync(there)) absent.push(f);
+      else if (md5(join(kn, f)) !== md5(there)) stale.push(f);
+    }
+    ck("J-1: every knowledge/ file reached the pool", absent.length === 0, absent.join(" | "));
+    ck("J-2: and none of them landed STALE \u2014 the pool is add-only, so a same-name upload " +
+       "without the delete first leaves the OLD copy in place",
+      stale.length === 0, stale.join(" | "));
+    // A rotation is TWO deletes. A pool holding three source legs means one was missed.
+    const legs = readdirSync(POOL).filter(f => /^DangerClose-v5_\d+\.jsx$/.test(f)).sort();
+    const doms = readdirSync(POOL).filter(f => /^dom_entry_v5\d+\.jsx$/.test(f)).sort();
+    ck("J-3: the pool holds exactly two source legs (a rotation is TWO deletes)",
+      legs.length === 2, legs.join(", ") || "none");
+    ck("J-4: and exactly two dom entries", doms.length === 2, doms.join(", ") || "none");
+  }
+}
+
 console.log(`\npackage_check: ${pass} passed, ${fail} failed, ${skip} skipped`);
 if (skip) console.log("  \u26a0 A SKIPPED check is not a passed one. Re-run with a clone to close the gap.");
 if (fail) { console.log("\nDO NOT SEND THIS ZIP:"); fails.forEach(f => console.log(f)); }
