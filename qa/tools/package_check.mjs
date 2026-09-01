@@ -480,7 +480,7 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
     //   v5.42–v5.47. I-2 would have caught both. This list excused them, for four releases.
     //   Removed at v5.57.1 after re-verifying every premise by content against v5.57.
     const OPEN = new Set([
-      "SCOPE_STATE_FIXTURES.md",                  // awaiting decisions in its §5
+      "SCOPE_VA_NOTE_CORRECTION.md",              // awaiting decisions in its §6
       "SCOPE_STANDING_AUDIT.md",                  // not a build scope at all (OPERATIONS §K)
     ]);
     const RETIRED = /\bRETIRED\b|\bSUPERSEDED\b|\bFULFILLED\b/;
