@@ -48,7 +48,7 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 > leaves this table asserting a hash the pool does not have — the same class of half-landed refresh
 > that left `controls_state.sh` absent from the pool on 2026-08-28.
 > ⚠ **This manifest still carries KNOWN-STALE rows that this drop deliberately does NOT touch**:
-> 18 md5 rows whose file matches the repo byte-for-byte but whose recorded hash does not, and 10 rows
+> 19 md5 rows whose file matches the repo byte-for-byte but whose recorded hash does not, and 10 rows
 > naming files already deleted from the pool (`dom_entry_v548/552/553` and the scopes retired at the
 > pool read). Both were measured 2026-09-01 by diffing every row against pool and clone. Repairing
 > them is a separate decision, not a side effect of a docs drop.
