@@ -482,7 +482,6 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
     const OPEN = new Set([
       "SCOPE_STATE_FIXTURES.md",                  // awaiting decisions in its §5
       "SCOPE_STANDING_AUDIT.md",                  // not a build scope at all (OPERATIONS §K)
-      "SCOPE_POOL_AND_ALLOWLIST_HYGIENE.md",      // pool cleanup DEFERRED; see its §6 D-3
     ]);
     const RETIRED = /\bRETIRED\b|\bSUPERSEDED\b|\bFULFILLED\b/;
     // ⚠ The INVENTORY is post-ship too, not just the reading of each file. A scope the package
