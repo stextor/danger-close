@@ -31,6 +31,15 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 | Built `index.html` md5 | `0cc9d4c2fa1973f39328795bc85d1636` |
 | Shipped | 2026-08-31 |
 
+> **Ops package 2026-09-01 — no version bump.** `package_check`'s OPEN allowlist dropped
+> `SCOPE_v5_40_disclosures_and_mechanics.md` and `SCOPE_FIX_tidyup_six.md`, both **RETIRED** after
+> re-verifying every premise by content against v5.57. The gate gained `G-2`, `KIND: handover` and
+> section `J` (post-ship pool verification). The app is untouched at
+> `0daebb4af466b9095db79117daefcd32`. **`SCOPE_POOL_AND_ALLOWLIST_HYGIENE.md` stays OPEN** for the
+> deferred pool cleanup only — 20 retired scopes to 3 open, all 20 carrying decision language.
+> ⚠ **`dom_entry_v592.jsx` is NOT an orphan** — it is the retired v5.9.2 leg, documented in
+> `qa-baseline/README.md`, correctly repo-only. Earlier notes of mine calling it overdue were wrong.
+>
 > **Rolled 2026-08-31 at the v5.57 ship.** Rotation removed `DangerClose-v5_55.jsx` and
 > `dom_entry_v555.jsx` — a rotation is TWO deletes. The pool holds exactly `DangerClose-v5_56.jsx`
 > and `DangerClose-v5_57.jsx`, and `dom_entry_v556.jsx` and `dom_entry_v557.jsx`.
