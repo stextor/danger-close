@@ -2,7 +2,32 @@
 
 | Field | Value |
 |---|---|
-| Status | **PARTIALLY SHIPPED at v5.57.1 — the pool cleanup is DEFERRED by decision D-3(b)** |
+| Status | **RETIRED — COMPLETE 2026-09-01. The deferred pool read is done; nothing remains.** |
+
+> ## ⛔ RETIRED — COMPLETE, 2026-09-01
+>
+> The allowlist half shipped in the ops package of 2026-09-01. **The deferred read (D-3(b)) is now
+> done, and this is its result.**
+>
+> **All 22 retired scopes in the pool were read for unresolved decisions, and NOTHING was lost.**
+> Twenty-one carry an explicit retirement note recording what was built and how each decision
+> resolved. One of them, `SCOPE_FIX_roth_tab_div_capgain.md`, carries **no retirement note at
+> all** — it is SUPERSEDED and was never built, which is precisely the shape that nearly lost D4.
+> Its status line says its four decisions are resolved in `SCOPE_D10_MODELLING_v5_53.md`, and that
+> claim was checked rather than taken: its **D-4** recommended holding the dividend base constant
+> and *flagging the disagreement in `METHODOLOGY.md`*. That flag exists, at `METHODOLOGY.md`
+> §"One disagreement disclosed rather than reconciled" — the constant `taxableInitAll()` base
+> against `runRothStrategies`' decaying `taxBal`. **The recommendation was carried out.**
+>
+> **Nothing needed re-homing to `MissingFeatures.md`**, so D-4(a) was decided and not needed.
+>
+> **All 23 leaving the pool also exist in the repo**, so deleting the pool copy loses no content. The deletion list
+> is in this package's README-FIRST; the deletions themselves are a pool action, not a repo one.
+>
+> ⚠ **The finding worth keeping is the shape, not the count.** A scope with no retirement note is
+> the one to read first — a SUPERSEDED document is retired by another document's say-so, and that
+> say-so is what has to be checked. Twenty-one self-documented; the one that did not was the only one
+> that could have hidden something.
 
 > ## ⚠ PARTIALLY SHIPPED — v5.57.1, 2026-09-01. Read this before acting on anything below.
 >
