@@ -484,6 +484,10 @@ const pass2E = pass, fail2E = fail;
     // mistake made at v5.27 and the reason that rule exists. History asserts the pin; v5.29 asserts
     // the fix. Caught here by the prior leg failing 1, not by remembering.
     const _v = Number(String(VER).replace(/[^0-9]/g, "")) || 0;   // "v529" -> 529
+    // The note-vs-code age matcher (see the §2E extinction invariant below for why the range
+    // excludes exactly 65 and why it recognises only two phrasings). Declared HERE rather than
+    // at its use site because two sibling version blocks both need it.
+    const _AGE_NOTE = /\bfrom age (5\d|6[0-46-9]|7\d)\b|\b(5\d|6[0-46-9]|7\d)\+/;
     if (_v >= 529) {
       T("[FIXED v5.29] every partial-SS state discloses SS treatment in its note",
         Object.keys(R).filter(c => R[c].ss > 0 && !/social security|\bss\b/i.test(R[c].note || "")).length, 0);
@@ -639,10 +643,17 @@ const pass2E = pass, fail2E = fail;
       //                              64/64 -> 0.045 x  100,000           = 4,500.00
       T("2E age control: a state with no exclAge still uses 65 (AL, both 65)", AGE("AL", 65, 65), 3960.00);
       T("2E age control: and denies it one year earlier (AL, both 64)",       AGE("AL", 64, 64), 4500.00);
-      T("2E age control: exactly two states carry an exclAge",
-        Object.keys(R).filter(c => R[c].exclAge !== undefined).length, 2);
-      T("2E age control: and they are KY and DE",
-        Object.keys(R).filter(c => R[c].exclAge !== undefined).sort().join(",") === "DE,KY" ? 1 : 0, 1);
+      if (_v >= 560) {
+        T("2E age control: exactly four states carry an exclAge",
+          Object.keys(R).filter(c => R[c].exclAge !== undefined).length, 4);
+        T("2E age control: and they are DE, KY, RI and WI",
+          Object.keys(R).filter(c => R[c].exclAge !== undefined).sort().join(",") === "DE,KY,RI,WI" ? 1 : 0, 1);
+      } else {
+        T("2E age control: exactly two states carry an exclAge",
+          Object.keys(R).filter(c => R[c].exclAge !== undefined).length, 2);
+        T("2E age control: and they are KY and DE",
+          Object.keys(R).filter(c => R[c].exclAge !== undefined).sort().join(",") === "DE,KY" ? 1 : 0, 1);
+      }
 
       // ── EXTINCTION INVARIANTS (OPERATIONS §D). Each pins a defect class shut, not a figure.
       // [1] The two thresholds v5.55 deliberately does NOT model. Decisions D-d and D-e.
@@ -655,14 +666,39 @@ const pass2E = pass, fail2E = fail;
         R.SC.exclAge === undefined ? 1 : 0, 1);
       // [2] A state that claims an age in its note must not silently keep the 65 default. This is the
       //     class the whole release exists to close: note said 60, code said 65, nothing compared them.
-      T("2E notes: no state's note names a non-65 age while its code still uses 65",
-        Object.keys(R).filter(c => {
-          const n = (R[c].note || "").toLowerCase();
-          if (R[c].exclAge !== undefined) return false;                 // already modelled
-          if (!R[c].excl65) return false;                               // no exclusion to gate
-          if (/\bnot modelled\b|\bnot modeled\b|\bdisclosed\b/.test(n)) return false;  // deliberate, stated
-          return /\bfrom age (5\d|6[0-4])\b|\b(5\d|6[0-4])\+/.test(n);
-        }).length, 0);
+      //
+      //     ⚠ v5.60 WIDENED THE AGE RANGE, and the widening is not "past 64" — that was the obvious
+      //     reading and it is wrong. The engine's default floor IS 65, so a note reading "65+" beside
+      //     no exclAge is AGREEMENT, not a defect: extending the range to 6\d flags CO, GA, LA, MT,
+      //     NM, VA and WV, all of them correct. 65 is the one value that must be EXCLUDED, not the
+      //     top of the range — hence 6[0-46-9]. Measured, not reasoned: the naive widening returned
+      //     eight states against shipped v5.59 and this one returns exactly WI.
+      //
+      //     ⚠ AND THE MATCHER RECOGNISES EXACTLY TWO PHRASINGS — "from age NN" and "NN+". Rhode
+      //     Island's v5.59 note said "requires full retirement age (67)" and was therefore invisible
+      //     to this invariant in ANY widening, which is half of why the v5.60 defect survived v5.55.
+      //     RI's note now says "from age 67" so the check can see it. A third state wording an age
+      //     some other way would be invisible again; that limitation is recorded in TESTING.md
+      //     rather than papered over with a longer phrase list.
+      const _ageNoteOffenders = (pat) => Object.keys(R).filter(c => {
+        const n = (R[c].note || "").toLowerCase();
+        if (R[c].exclAge !== undefined) return false;                 // already modelled
+        if (!R[c].excl65) return false;                               // no exclusion to gate
+        if (/\bnot modelled\b|\bnot modeled\b|\bdisclosed\b/.test(n)) return false;  // deliberate, stated
+        return pat.test(n);
+      });
+      if (_v >= 560) {
+        T("2E notes: no state's note names an age other than 65 while its code still uses 65",
+          _ageNoteOffenders(_AGE_NOTE).length, 0);
+      } else {
+        // The frozen leg carries the defect, so the WIDENED matcher must FIRE here. This is the
+        // invariant's own non-vacuity proof, made permanent: if a future edit narrows the pattern
+        // back, this pin fails on the prior leg rather than passing silently on both.
+        T("[KNOWN DEFECT pre-v5.60] the widened matcher fires on WI, whose note named a 67 floor its code did not apply",
+          _ageNoteOffenders(_AGE_NOTE).join(",") === "WI" ? 1 : 0, 1);
+        T("[KNOWN DEFECT pre-v5.60] and RI is absent from that set — its wording was invisible to the matcher, not merely out of range",
+          _ageNoteOffenders(_AGE_NOTE).includes("RI") ? 1 : 0, 0);
+      }
       // [3] The D-3c pins above measure a 65+ household. This release must not move them.
       T("2E age: the D-3c NJ case set is untouched by the age work (65+ household)",
         S({ code: "NJ", fallbackRate: 0, retIncome: 200000, pen: 0, work: 0, capGains: 0,
@@ -826,8 +862,13 @@ const pass2E = pass, fail2E = fail;
           /\$50,000/.test(R.RI.note) ? 1 : 0, 1);
         T("[EXTINCTION v5.59] RI hand case: a qualifying 68/68 couple pays tax on half of SS only",
           RIWI("RI", 80000), 1020.00);
-        T("[DISCLOSED v5.59] RI's note names the full-retirement-age floor the model does not apply",
-          /full retirement age/i.test(R.RI.note) && /\b67\b/.test(R.RI.note) ? 1 : 0, 1);
+        if (_v >= 560) {
+          T("[APPLIED v5.60] RI's note names the full-retirement-age floor AND the model applies it",
+            /full retirement age/i.test(R.RI.note) && /\b67\b/.test(R.RI.note) && R.RI.exclAge === 67 ? 1 : 0, 1);
+        } else {
+          T("[KNOWN DEFECT pre-v5.60] RI's note named the full-retirement-age floor the model did not apply",
+            /full retirement age/i.test(R.RI.note) && /\b67\b/.test(R.RI.note) && R.RI.exclAge === undefined ? 1 : 0, 1);
+        }
         T("[DISCLOSED v5.59] RI's note names the IRA exclusion and the AGI cliff, dated to TY2025",
           /IRA/.test(R.RI.note) && /cliff/i.test(R.RI.note) && /TY2025: \$133,500/.test(R.RI.note) ? 1 : 0, 1);
         T("[EXTINCTION v5.59] WI's modelled exclusion is exactly $24,000 per person (2025 Wis. Act 15)",
@@ -836,8 +877,13 @@ const pass2E = pass, fail2E = fail;
           /\$24,000/.test(R.WI.note) ? 1 : 0, 1);
         T("[EXTINCTION v5.59] WI hand case: a qualifying 68/68 couple is taxed on income above 2 x $24,000",
           RIWI("WI", 60000), 636.00);
-        T("[DISCLOSED v5.59] WI's note names the 67 floor the model does not apply",
-          /\b67\b/.test(R.WI.note) ? 1 : 0, 1);
+        if (_v >= 560) {
+          T("[APPLIED v5.60] WI's note names the 67 floor AND the model applies it",
+            /\b67\b/.test(R.WI.note) && R.WI.exclAge === 67 ? 1 : 0, 1);
+        } else {
+          T("[KNOWN DEFECT pre-v5.60] WI's note named the 67 floor the model did not apply",
+            /\b67\b/.test(R.WI.note) && R.WI.exclAge === undefined ? 1 : 0, 1);
+        }
         // Decision D-F (ROUND4 §6): WI LEAVES t29's F-6 income-limited guarded set by wording alone —
         // its $24,000 provision has no income test, so "income-limited" would be false. RI STAYS: its
         // AGI cliff IS an income limit. Both pinned here with the SAME regex t29 L212 executes, so the
@@ -855,6 +901,89 @@ const pass2E = pass, fail2E = fail;
           R.WI.excl65 === 5000 ? 1 : 0, 1);
         T("[KNOWN DEFECT pre-v5.59] WI hand case at the stale figure",
           RIWI("WI", 60000), 2650.00);
+      }
+
+      // ─── v5.60 · Rhode Island and Wisconsin gate at 67, not at the model's default 65 ───
+      // SCOPE_EXCL_AGE_RI_WI.md / AUDIT_STATE_EXCL65_ROUND4.md §2b, §2c, §6 D-D. Both statutes
+      // gate on full retirement age: RIGL § 44-30-12(c)(9) ties the pension/annuity modification to
+      // "the age used for calculating full or unreduced Social Security retirement benefits" — 67
+      // for anyone born 1960 or later — and Wis. Stat. § 71.05(6)(b)54m. reads "67 or over".
+      // The model applied both from 65, so a 65- or 66-year-old received an exclusion the statute
+      // denies. v5.59 made that error LARGER by correcting the amounts ($20K->$50K, $5K->$24K).
+      // Direction: CONSERVATIVE in every cell — tax rises or stays flat, never falls.
+      //
+      // Nothing else moves. `exclAge` already existed and is read in exactly ONE place (the `_floor`
+      // const in stateTaxAnnual), so this is two properties and no engine code.
+      //
+      // Every figure below was hand-computed from the rule table BEFORE the engine ran:
+      //   RI  rate 0.05, ss 0.5, cap 50,000, retIncome 80,000, taxable SS 40,800 -> ssBase 20,400
+      //     66/66  no one qualifies -> excl 0      -> 0.05 x (80,000 + 20,400) = 5,020.00
+      //     68/66  one qualifies    -> excl 50,000 -> 0.05 x (30,000 + 20,400) = 2,520.00
+      //     68/68  both qualify     -> excl 100,000, retBase floors at 0 -> 0.05 x 20,400 = 1,020.00
+      //   WI  rate 0.053, ss 0, cap 24,000, retIncome 60,000 -> ssBase 0
+      //     66/66  excl 0      -> 0.053 x 60,000 = 3,180.00
+      //     68/66  excl 24,000 -> 0.053 x 36,000 = 1,908.00
+      //     68/68  excl 48,000 -> 0.053 x 12,000 =   636.00
+      //
+      // The MIXED-AGE rows are the load-bearing ones: a household-level implementation of the floor
+      // would pass 66/66 and 68/68 and fail 68/66. They are why this block is not just two identities.
+      const RIWI_AGE = (code, retIncome, ageA, ageB) =>
+        S({ code, fallbackRate: 0, retIncome, pen: 0, work: 0, capGains: 0, ssTaxableFed: 40800,
+            ssGrossA: 24000, ssGrossB: 24000, ageA, ageB });
+      if (_v >= 560) {
+        T("[EXTINCTION v5.60] RI gates its exclusion at 67, the statutory full retirement age",
+          R.RI.exclAge === 67 ? 1 : 0, 1);
+        T("[EXTINCTION v5.60] WI gates its exclusion at 67 (Wis. Stat. § 71.05(6)(b)54m.)",
+          R.WI.exclAge === 67 ? 1 : 0, 1);
+        T("[EXTINCTION v5.60] RI denies the exclusion to a 66/66 couple, as the statute does",
+          RIWI_AGE("RI", 80000, 66, 66), 5020.00);
+        T("[EXTINCTION v5.60] WI denies the exclusion to a 66/66 couple, as the statute does",
+          RIWI_AGE("WI", 60000, 66, 66), 3180.00);
+        T("[EXTINCTION v5.60] RI grants ONE exclusion at 68/66 — the floor is per person, not per return",
+          RIWI_AGE("RI", 80000, 68, 66), 2520.00);
+        T("[EXTINCTION v5.60] WI grants ONE exclusion at 68/66 — the floor is per person, not per return",
+          RIWI_AGE("WI", 60000, 68, 66), 1908.00);
+        T("[EXTINCTION v5.60] and the qualifying 68/68 RI couple is UNCHANGED from v5.59",
+          RIWI_AGE("RI", 80000, 68, 68), 1020.00);
+        T("[EXTINCTION v5.60] and the qualifying 68/68 WI couple is UNCHANGED from v5.59",
+          RIWI_AGE("WI", 60000, 68, 68), 636.00);
+        T("[EXTINCTION v5.60] the correction is confined to the window: RI 66/66 now costs exactly 0.05 x 80,000 more",
+          Math.round((RIWI_AGE("RI", 80000, 66, 66) - RIWI_AGE("RI", 80000, 68, 68)) * 100) / 100, 4000.00);
+        T("[EXTINCTION v5.60] and WI 66/66 exactly 0.053 x 48,000 more",
+          Math.round((RIWI_AGE("WI", 60000, 66, 66) - RIWI_AGE("WI", 60000, 68, 68)) * 100) / 100, 2544.00);
+        T("[BY DECISION v5.60] NM keeps the implicit 65 default — its pass is separate (ROUND4 D-C)",
+          R.NM.exclAge === undefined ? 1 : 0, 1);
+        // ⚠ ADDED after the C5/C6 negative controls came back NOT CAUGHT. Without these two, a
+        //   note could go false, or go invisible to the invariant guarding it, and the whole
+        //   suite stayed green. Neither hole was hypothetical: both controls demonstrated it.
+        //
+        //   [C6] The L658 invariant can only see "from age NN" and "NN+". If either note is
+        //   reworded to phrase the age some other way, the invariant silently stops covering that
+        //   state — which is precisely how RI's v5.59 note escaped it. Assert reachability here,
+        //   so the coverage is a tested property rather than a happy accident of wording.
+        T("[APPLIED v5.60] RI's note stays VISIBLE to the note-vs-code matcher that guards it",
+          _AGE_NOTE.test((R.RI.note || "").toLowerCase()) ? 1 : 0, 1);
+        T("[APPLIED v5.60] WI's note stays VISIBLE to the note-vs-code matcher that guards it",
+          _AGE_NOTE.test((R.WI.note || "").toLowerCase()) ? 1 : 0, 1);
+        //   [C5] And neither note may still claim the model starts the exclusion at 65. The
+        //   mention-67 checks above pass on the STALE v5.59 wording, because it names 67 twice
+        //   while asserting the model ignores it.
+        T("[APPLIED v5.60] and neither note still claims the model applies the exclusion from 65",
+          /\bfrom 65\b/.test(R.RI.note || "") || /\bfrom 65\b/.test(R.WI.note || "") ? 1 : 0, 0);
+      } else {
+        // Pre-fix state: the exclusion was granted two years early, understating state tax. This is
+        // the only OPTIMISTIC error left in either state, and these pins are what makes it visible.
+        T("[KNOWN DEFECT pre-v5.60] RI carried no exclAge, so its exclusion started at 65",
+          R.RI.exclAge === undefined ? 1 : 0, 1);
+        T("[KNOWN DEFECT pre-v5.60] WI carried no exclAge, so its exclusion started at 65",
+          R.WI.exclAge === undefined ? 1 : 0, 1);
+        T("[KNOWN DEFECT pre-v5.60] RI granted a 66/66 couple the full $100,000 the statute denies them",
+          RIWI_AGE("RI", 80000, 66, 66), 1020.00);
+        T("[KNOWN DEFECT pre-v5.60] WI granted a 66/66 couple the full $48,000 the statute denies them",
+          RIWI_AGE("WI", 60000, 66, 66), 636.00);
+        T("[KNOWN DEFECT pre-v5.60] and the model could not tell 66/66 from 68/68 in either state",
+          (RIWI_AGE("RI", 80000, 66, 66) === RIWI_AGE("RI", 80000, 68, 68) &&
+           RIWI_AGE("WI", 60000, 66, 66) === RIWI_AGE("WI", 60000, 68, 68)) ? 1 : 0, 1);
       }
 
       T("2E ssOffset: an unflagged state ignores Social Security entirely (AL)",
