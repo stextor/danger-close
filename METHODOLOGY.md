@@ -149,7 +149,7 @@ behavior exactly (backward compatible with every existing backup).
 
 **This is an approximation layer and is labeled as such in the UI.** Not modeled: progressive
 state brackets (effective rate instead), county/city income taxes (IN, MD partially folded, NYC
-not), income limits on several exclusions (NJ, VA, RI approximated as unconditional — **Virginia's $12K age deduction in fact tapers $1 for every $1 of adjusted federal AGI above $50K single/$75K married, so applying it in full overstates the deduction and understates Virginia's state tax**), NJ's 62 age floor and SC's under-65 tier (both disclosed, neither applied), **Colorado's shared $24K cap between Social Security and pension — a cap the two share rather than one reducing the other, which overstates Colorado's exclusion and understates its state tax**. Maryland's and Maine's exclusions, which are reduced by Social Security received dollar-for-dollar, ARE applied as of v5.56 (§12), state
+not), income limits on several exclusions (NJ, VA, RI approximated as unconditional; RI's and WI's full-retirement-age (67) floors are not applied — the model starts both at 65, see the v5.59 section — **Virginia's $12K age deduction in fact tapers $1 for every $1 of adjusted federal AGI above $50K single/$75K married, so applying it in full overstates the deduction and understates Virginia's state tax**), NJ's 62 age floor and SC's under-65 tier (both disclosed, neither applied), **Colorado's shared $24K cap between Social Security and pension — a cap the two share rather than one reducing the other, which overstates Colorado's exclusion and understates its state tax**. Maryland's and Maine's exclusions, which are reduced by Social Security received dollar-for-dollar, ARE applied as of v5.56 (§12), state
 standard deductions/credits, pension-source distinctions (AL/HI DB exemptions), and WA's
 capital-gains excise. Verify your state.
 
@@ -1377,3 +1377,55 @@ the general 60+ exclusion this model uses. The model has no military-pension con
 state's note now says so. **No amount is asserted**: separate legislation phasing those figures in
 was not resolved against its enacting record, and an unverified number is worse than an
 acknowledged gap.
+
+## Two state exclusion amounts were a legislative cycle stale (v5.59)
+
+`AUDIT_STATE_EXCL65_ROUND4.md` (§2b, §2c) found that two `STATE_RULES` entries carried a real
+provision at a superseded amount. Both figures move toward the statute; nothing else in the module
+changes, and no engine code moves. Direction for a household that qualifies under the statute:
+**conservative → less conservative**, because the model was granting less relief than the law allows.
+
+### Rhode Island's pension and annuity modification is $50,000 per person from TY2025
+
+**R.I. Gen. Laws § 44-30-12(c)(9)**, as amended by **P.L. 2024, ch. 117, art. 6, § 21**, steps the
+modification from $15,000 (TY2017–22) to $20,000 (TY2023–24) to **$50,000 for tax years beginning on
+or after 1 January 2025**. The model carried $20,000 — a full legislative cycle stale. The modelled
+amount is now the **$50,000 pension/401k exclusion** per qualifying person. The per-person reading of
+a joint return's cap rests on the Division of Taxation's *Retirement Income Tax Guide* (Pub. 2026-01)
+rather than on the statute alone, so no dollar figure is asserted for the couple cap.
+
+Four statutory conditions remain unmodelled and are named in the state's note: the modification
+requires **full retirement age** (67 for anyone born 1960 or later) while the model applies it from
+65; it is gated by a **hard AGI cliff** (TY2025: **$133,500 MFJ / $107,000 single**, indexed annually
+— TY2026 was not read) which the model ignores; **IRA distributions do not qualify** (only Form 1040
+line 5b income does) and the model has no IRA-vs-employer-plan distinction; and the Social Security
+modification carries the same two gates and removes all federally-taxable SS where it applies, while
+the model taxes half. The sign of the error therefore depends on which side of the cliff a household
+sits, whether both spouses have reached 67, and what kind of account the money is in: conservative
+under the cliff past 67 with employer-plan money, optimistic otherwise. Rhode Island also enacted, in
+its 2026 session, the removal of the age threshold from the SS modification for TY2027+ (HB 7127
+Sub A, Art. 6 § 5); it is recorded here and not modelled.
+
+### Wisconsin's exclusion is $24,000 at 67+ with no income test
+
+**Wis. Stat. § 71.05(6)(b)54m.**, created by **2025 Wis. Act 15**, allows **$24,000 at 67+** ($48,000
+for a joint return where both have reached 67) with **no income limit**. The model carried the older
+$5,000 provision, which required 65+ and federal AGI under $15,000 single / $30,000 married. The
+modelled amount is now the **$24,000 retirement-income exclusion** per person. The 67 floor is not
+modelled: the model applies the amount from 65, so a 65–66 household is granted an exclusion the
+statute denies — **optimistic for those two years, exact from 67**. Wisconsin's statute was carried
+from `AUDIT_STATE_EXCL65_ROUND3.md` §2b and not re-read for this release.
+
+Because the provision is not income-tested, Wisconsin's note no longer says "income-limited", and it
+therefore **leaves the suite's income-limited guarded set** (t29 F-6), which goes from five members
+to four (NJ, NM, RI, VA) by wording alone; the assertion itself is untouched. Rhode Island stays in
+the set because its AGI cliff is an income limit.
+
+### What did not move, and why
+
+New Mexico is untouched (its own pass, disclosure-first — ROUND4 §6 D-C). No `exclAge` moves for
+either state: a gate change alongside a figure change cannot be attributed if a downstream figure
+moves, and RI's gate interacts with the cliff and the IRA distinction in ways the audit did not
+measure. The eight-state `ss: 0.5` blend is unchanged. `MissingFeatures.md` D-11 records the group
+these three states form — a modelled figure that is right on one side of a statutory gate and wrong
+on the other — as distinct from the D-3c optimistic class (NJ, VA).
