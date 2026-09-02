@@ -162,6 +162,8 @@ further evidence that rollup was never the cause of the v5.30 divergence. It als
 expectation carried into this session that the artifact would not reproduce. v5.60's own artifact
 rebuilt to the same hash twice in-session.
 
+Source `23877f903a14ba43dd707a43d98b0df4` · built `index.html` `278cb053b93f4b389c99f1e1ad31b591`
+
 ### Documents
 
 `METHODOLOGY.md` (mandatory — modelling changed; the v5.59 section's "applies from 65" sentences are
