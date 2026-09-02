@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | **DECISIONS RESOLVED — buildable.** Premise verified 2026-09-02 against v5.58 source and statute; re-verify at §A2 before building |
+| Status | ✅ **SHIPPED at v5.59, 2026-09-02.** Build record in §8. RETIRED as an active scope — kept as the release's build record, per `SCOPE_VA_NOTE_CORRECTION.md`'s pattern. One expectation in §5(d) was impossible by construction and is corrected in §8, not silently |
 | Written against | **v5.58** · source `6690b2c78953a7a4a1cee413d3523b59` · tree `3d7c205` |
 | Target | **v5.59** · tag `v559` |
 | Parent finding | `AUDIT_STATE_EXCL65_ROUND4.md` §2b, §2c, §4, §6 |
@@ -151,18 +151,18 @@ grep for them.**
 
 | | |
 |---|---|
-| Build date | |
-| Source md5 (v5.59) | |
-| Built `index.html` md5 | |
-| Repo commit | |
-| vercensus (files / ladders / gated) | |
-| Suite total (per-suite in CHANGELOG) | |
-| Parity | |
-| F-6 set after | |
-| `t31` keys accepted (and which revert each failed on) | |
-| Controls run, each failure read | |
-| Premise re-verified at §A2 (Y/N, any drift) | |
-| `package_check` H/J post-upload | |
+| Build date | 2026-09-02 |
+| Source md5 (v5.59) | `ed89d2f214302942e5bd6355d923c9cf` |
+| Built `index.html` md5 | `c6ac96552dbc598e4812f4229ba425ad` (smoke_built 16/16; §N3 1–4 pass) |
+| Repo commit | built against tree `2e6336a`; the ship commit is Steve's — record it here after push |
+| vercensus (files / ladders / gated) | **15 / 17 / 63** from v558 (80 judgement points; 78 rolled, 2 belong to the v5.58 key) |
+| Suite total (per-suite in CHANGELOG) | **2,883 app, 0 failing** · v5.59 leg 1,105 · v5.58 leg 1,098 · run-once 670 · tooling 82 · GRAND 2,965 |
+| Parity | 10/10 — expected and blind: zero RI/WI fixtures (AST walk re-run this session) |
+| F-6 set after | **4** — NJ, NM, RI, VA (`f6_probe.cjs` executed on the final wording) |
+| `t31` keys accepted (and which revert each failed on) | **Not the §5(b) candidates.** `$24,000` is VACUOUS on v5.58 (1 app hit, 5 docs hits); `$50,000` is clean on user surfaces but already in METHODOLOGY (VA). Shipped: `$50,000 pension/401k exclusion` (fails on C3, RI note reverted) and `$24,000 retirement-income exclusion` (fails on C4, WI note reverted). 0 hits on v5.58 across app, docs, METHODOLOGY. ⚠ §5(b)(i) — "accepted only if the FIGURE-only revert fails it" — cannot be satisfied by any prose key; the constant is `t10`'s (identity + hand case). |
+| Controls run, each failure read | `qa/controls_v559.sh`: C0 null (fires nothing) · C1 RI 20000: t10 2 · C2 WI 5000: t10 2 · C3 RI note: t10 3 + t31 1 · C4 WI note: t10 3 + t31 1 · C5 RI clause dropped: t10 2 · C6 WI "no income limit": t10 1 · C7 footer: t1 1. ⚠ C4's first edition patched COLORADO (shared `excl65: 24000` anchor) and reported 1 wrong failure — re-anchored on the state entry. §5(d) control 1's expectation that t31 fails on a constant revert was wrong (see row above). |
+| Premise re-verified at §A2 (Y/N, any drift) | **Y** — every §2 fact reproduced by AST/read against `2e6336a`; no drift. Freshness: 108/110 pool files byte-identical; `COMMIT_MESSAGE.txt` (v5.49 leftover, on the delete-first list since v5.52) is the one unexpected pool-only file |
+| `package_check` H/J post-upload | pending Steve's upload — H and J fail by construction before it; re-run after |
 
 ---
 

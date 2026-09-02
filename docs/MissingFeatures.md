@@ -101,6 +101,11 @@
 > picker (now **L3392**) still shows no note at all. Both halves stay **Low**.
 >
 > **⚠ NEW — D-3c · income-limited exclusions are applied unconditionally, and this under-taxes.**
+> ⚠ **Membership closed 2026-09-02 (ROUND4 §6 D-A): the optimistic income-limited class is NJ + VA, and
+> nothing else.** New Mexico, Rhode Island and Wisconsin are **not** D-3c members — their error changes
+> SIGN across a statutory gate rather than running one way. They are **D-11**, below. Maine is out
+> (ROUND3 §2d). The New Jersey measurements in this box are unaffected.
+>
 > `stateTaxAnnual` computes `const excl = (r.excl65 || 0) * Math.max(0, persons65)` (**L1100**) —
 > a flat multiplication with **no income test anywhere in the engine**. Executed against shipped
 > v5.48, a New Jersey couple both 65+ pays **$0** modelled state tax at $80,000, $120,000 **and
@@ -810,6 +815,7 @@ person per tier) and the remedy is a form. **Exposure:** user-side.
 | **D-10** | Two MAGI figures render under one IRMAA label with no cue they are computed differently | ◐ **DISCLOSURE HALF SHIPPED at v5.52 (2026-08-27). MODELLING HALF STILL OPEN.** ⚠ **The product call is MADE and must not be re-litigated** — `SCOPE_D10_MAGI_DIVERGENCE_DISCLOSURE.md` (RETIRED) resolved it: disclose now, qualitative in-app, both surfaces. The ladder footnote and Field Manual §13 now name the omitted terms and the direction; `METHODOLOGY.md` carries both expressions term by term. `t1` pins BOTH expressions, which nothing did before. **What remains: the verdict is still WRONG for a taxable-heavy household** — disclosed, not fixed. `SCOPE_FIX_roth_tab_div_capgain.md` scopes the fix and is **NOT BUILDABLE, four decisions open**. *(Prior status, superseded:)* ⚠ OPEN — a product-voice call awaiting Steve. Re-homed 2026-08-26 from the deleted `SCOPE_STRUCTURAL_MAGI_EXTINCTION.md`, where it was that scope's **D4** — *not* this register's D-4, which is a different item. Confirmed still live at v5.51: Engine C builds MAGI from **seven** terms (L4459 — `ssTaxable + pen_y + work_y + rmdTax_y + conv_y + div_y + capGain_y`) while the Roth tab builds it from **five** (L8997 — `pension + spouseBWork + taxableSS + conv_y + rmd_y`). v5.41 closed the RMD term only; **dividends and realized capital gains remain absent**, and `work_y` vs `spouseBWork` is narrower again. The app carries no text cueing the difference — zero hits for any such phrase. ~~**The question is whether to disclose an unmeasured divergence now or wait**~~ — **ANSWERED AND SHIPPED at v5.52.** It had already been measured; disclosure was the resolved call, not an open one. The original scope offered no recommendation deliberately, calling it a call about the app's contract with its user rather than a technical one. ⚠ Note `MEASUREMENT_roth_tab_magi_v5_40.md` recorded IRMAA **verdict inversions** in constructed households, so this is not purely cosmetic | **Optimistic** — omitting income terms understates MAGI, understates the IRMAA trigger, and flatters the plan | Disclosure is a `src/` change and a version bump; needs its own scope | Unranked — awaiting the product call |
 | **D-9** | Heir income-tax rate on inherited Traditional is an unjustified constant | ✅ **DISCLOSED at v5.51** — both user surfaces + `METHODOLOGY.md`; promoted to a module-level assumption beside `BASE_GROWTH` (deliberately NOT `TAX_CONSTS`); value **unchanged at 0.22 by decision**; pinned by `t1` and by a to-the-dollar arithmetic invariant in `t2` | **OPTIMISTIC** on the estate level (compounds with D-7 in the same figure), conservative on the ranking | Disclosure built; user-settable rate is the real fix, scoped separately | Medium |
 | **D-8** | ACA sub-floor \$0 | **PARTIALLY ADDRESSED (v5.32)** — declined toggle not built | **Both** | Built | see entry |
+| **D-11** | Three states' 65+ figures are right on one side of a statutory gate the data model cannot hold and wrong on the other (NM, RI, WI) | ◐ **RI and WI amounts CORRECTED at v5.59** (20,000 → 50,000; 5,000 → 24,000); the gates — FRA/67 floors, RI's AGI cliff and IRA exclusion, NM's SS cliff — remain unmodelled and disclosed; **NM untouched, own pass** | **MIXED** — sign flips at the gate (stated in each note) | Disclose now; gate modelling needs a data-model field | Medium |
 
 **D-3 was ranked top here on 2026-08-18 and that ranking is superseded** (direction corrected 2026-08-19 — see the box at D-3). Its *disclosure* half stays a live Medium; its *precision* half is held and de-prioritised. What follows is the 2026-08-18 reasoning, kept for the record: **with D-1 and D-2 closed, D-3 is the top-ranked open item** — and it is the one simplification here
 that is **not reliably conservative**, so it can flatter a plan. That makes it the natural successor
@@ -877,3 +883,46 @@ artifact held constant both ways needed the declined toggle. So the capital-gain
 That is a coherent outcome, and it is now a decision on the record rather than a discovery at the
 next release. What D-8b does give that release is a principled way to identify which households'
 apparent improvement is this artifact.
+
+## D-11 · Three states' modelled 65+ figures are correct on one side of a statutory gate and wrong on the other — New Mexico, Rhode Island, Wisconsin
+
+**Opened 2026-09-02 from `docs/AUDIT_STATE_EXCL65_ROUND4.md` §4 and §6 D-A.** ROUND3 §4 established
+that `excl65` (a scalar) and `persons65` / per-person ages (a count and a floor) cannot express a
+taper, bands, a cliff, a household cap, an income measure excluding Social Security, or an
+account-type distinction. ROUND4 supplies the consequence: **wherever the statute puts a gate the
+model cannot hold, the model does not merely lose precision — it changes sign across the gate.** That
+is a different property from D-3c's (NJ, VA), where applying the exclusion unconditionally flatters
+the plan at every income the app models, and it is not served by the same fix, disclosure or release.
+
+| State | The gate the model cannot hold | Model vs statute (ROUND4 §4, both spouses 68, MFJ) |
+|---|---|---|
+| **NM** | SS exempt only under $150,000 MFJ AGI (hard cliff); the $8K 65+ exemption is zero above $51,000 MFJ, unindexed since 1987 | +$216 conservative below the SS cliff; **−$1,784 optimistic** above it — the two errors mask each other until exactly $150,000 of AGI |
+| **RI** | FRA (67) floor; AGI cliff (TY2025: $133,500 MFJ / $107,000 single); IRA distributions do not qualify; SS modification carries the same gates | +$1,020 to +$3,020 conservative under the cliff with employer-plan money; **−$980 optimistic** if the money is an IRA; **−$3,020 optimistic** at or over the cliff, and again at 65–66 |
+| **WI** | 67 floor, no income test | **−$530 optimistic** at 65–66; from 67 the model now matches the statute (v5.59) |
+
+**What v5.59 did.** Corrected the two *amounts* that were a legislative cycle stale — RI `excl65`
+20,000 → **50,000** (P.L. 2024 ch. 117, TY2025+), WI 5,000 → **24,000** (2025 Wis. Act 15) — and
+rewrote both notes to name every gate the model does not apply. Direction of the figure move:
+conservative toward statute for qualifying households. **What it deliberately did not do** (ROUND4
+§6 D-D): set `exclAge` to 67 for either state, model RI's cliff or IRA exclusion, touch New Mexico,
+or touch the eight-state `ss: 0.5` blend. A gate change alongside a figure change cannot be
+attributed if a downstream figure moves.
+
+**What remains.** (a) `exclAge: 67` for RI and WI — the cheapest gate, already supported by the data
+model, held back only for attribution; its own small release, after measuring the 65–66 window. (b)
+New Mexico, disclosure-first (D-C): its note is accurate and misleading, its `ss: 0.5` blends across a
+0%/100% cliff the note states and the model ignores. (c) RI's cliff and IRA exclusion, and NM's SS
+cliff, need a data-model field the engines do not carry — an income-gated exclusion and an
+account-type flag — which is the same structural gap as D-3c's taper and should be scoped once, not
+per state. Rhode Island's TY2027 removal of the age threshold from its SS modification (HB 7127 Sub
+A, Art. 6 § 5) is recorded in ROUND4 §2b and belongs to whichever release models (c).
+
+**Direction, stated for the product's identity:** mixed and sign-changing, which is worse for a
+deliberately pessimistic tool than a one-way optimistic error, because it cannot be bounded by a
+single caveat. Each of the three notes now states which side of its gate the model is on.
+
+**Coverage.** `t10` §2E pins the RI/WI amounts as boolean identities with hand cases, both notes'
+disclosure conditions, and both F-6 memberships; `t31` carries `$50,000 pension/401k exclusion` and
+`$24,000 retirement-income exclusion`. Before v5.59 no assertion in the suite named any of the three.
+NM has none still.
+
