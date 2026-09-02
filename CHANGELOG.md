@@ -1,5 +1,176 @@
 # Changelog
 
+## v5.60 · Rhode Island and Wisconsin gated their exclusions at 65, not the statutory 67, 2026-09-02
+
+**Two `STATE_RULES` properties are ADDED — `exclAge: 67` on RI and on WI — and two notes are
+rewritten. No figure moves and no engine code changes.** `exclAge` already existed and is read in
+exactly one place, the `_floor` constant in `stateTaxAnnual`, so the modelling change is two
+properties. Output moves for any household domiciled in either state, as at v5.59 and unlike v5.58.
+
+This is the half `SCOPE_EXCL65_STALE_RI_WI.md` deliberately held back. ROUND4 §6 **D-D** deferred it
+on the grounds that a gate change landing beside a figure change cannot be attributed if a downstream
+figure moves; the figures shipped at v5.59 and `t10` §2E pins them, so a gate-only release now has
+clean attribution. Parent findings: `docs/AUDIT_STATE_EXCL65_ROUND4.md` §2b, §2c, §6 D-D; scope
+`docs/SCOPE_EXCL_AGE_RI_WI.md`, whose decisions D-1 through D-6 were resolved before the build.
+
+| | statutory floor | source |
+|---|---|---|
+| RI | **67** | R.I. Gen. Laws § 44-30-12(c)(9) — "the age used for calculating full or unreduced Social Security retirement benefits", 67 for anyone born 1960 or later |
+| WI | **67** | Wis. Stat. § 71.05(6)(b)54m., 2025 Wis. Act 15 — "67 or over" |
+
+**Direction: CONSERVATIVE in every measured cell.** Tax rises or stays flat, never falls. This was the
+last *optimistic* error in either state, and v5.59 enlarged it by growing the amounts it applied two
+years early. All six cells were hand-computed from the rule table before the engine ran:
+
+| state | ages | v5.59 | v5.60 | delta |
+|---|---|---|---|---|
+| RI | 66/66 | 1,020.00 | **5,020.00** | +4,000.00 |
+| RI | 68/66 | 1,020.00 | **2,520.00** | +1,500.00 |
+| RI | 68/68 | 1,020.00 | 1,020.00 | — |
+| WI | 66/66 | 636.00 | **3,180.00** | +2,544.00 |
+| WI | 68/66 | 636.00 | **1,908.00** | +1,272.00 |
+| WI | 68/68 | 636.00 | 636.00 | — |
+
+*(RI: retirement income $80,000, federally-taxable SS $40,800, rate 5%, `ss` 0.5. WI: $60,000, rate
+5.3%, `ss` 0. Gross SS $24,000 each, no pension or wages.)* The **mixed-age rows are the load-bearing
+ones**: the floor is applied per person, so a household-level implementation would pass 66/66 and
+68/68 and fail 68/66. The 68/68 rows are unchanged, which is the proof the correction is confined to
+the 65–66 window.
+
+### What did NOT change, and the limitations that REMAIN
+
+- **Rhode Island's AGI cliff is still not modelled.** TY2025: $133,500 MFJ / $107,000 single, a hard
+  cutoff. The model applies the $50,000 regardless of income. The TY2026 indexed pair was located but
+  not read, so only TY2025 figures are stated.
+- **Rhode Island's IRA exclusion is still not modelled.** Only Form 1040 line 5b income qualifies.
+  `STATE_RULES` carries no employer-plan-vs-IRA field; **D-11 (c)** scopes that once across states,
+  not per state.
+- **Rhode Island's Social Security modification** carries the same gates and removes *all*
+  federally-taxable SS where it applies; the model's `ss: 0.5` blend taxes half unconditionally. RI's
+  2026 session removed the age threshold from the SS modification for TY2027+ (HB 7127 Sub A, Art. 6
+  § 5) — recorded, not modelled, and it applies to the SS modification rather than to this exclusion.
+- **Rhode Island's $100,000 couple cap is still not asserted dollar-exact** (ROUND4 D-E): the
+  per-person reading rests on the Division of Taxation's guide rather than on the statute alone. The
+  per-person *floor* shipped here is a separate question and is what `exclAge` already implements.
+- **New Mexico is untouched** (ROUND4 D-C) and keeps the implicit 65 default; its pass is its own.
+- **Delaware's `exclAge: 60` was not re-read** — out of scope, and nothing here suggests it is stale.
+- **Neither statute was re-read this session.** Both are carried from ROUND4 §2b/§2c, and WI's is
+  carried in ROUND4 from ROUND3 §2b.
+
+Net: RI's remaining sign depends on which side of the cliff the household sits and whether the money
+is an employer plan or an IRA — conservative under the cliff, optimistic above it. **Wisconsin is now
+correct on this provision**, so its note states the floor positively and its optimism disclosure is
+deleted rather than left as a limitation that no longer exists.
+
+### The extinction invariant was blind to this defect class — and the fix is not what it looked like
+
+`t10`'s v5.55 invariant asserts that no state's note names a non-65 age while its code still uses 65.
+It is the check this whole family of releases exists to maintain, and **it never saw RI or WI.** Its
+matcher stopped at 64.
+
+**Widening it "past 64" — the obvious reading — is wrong, and was measured to be wrong before it was
+written.** The engine's default floor *is* 65, so a note reading "65+" beside no `exclAge` is
+agreement, not a defect. Extending the range to `6\d` flags **CO, GA, LA, MT, NM, VA and WV**, all of
+them correct. **65 is the one value that must be excluded, not the top of the range**; the shipped
+matcher is `(5\d|6[0-46-9]|7\d)`, which returns exactly `WI` against shipped v5.59 and nothing after
+the fix.
+
+**And Rhode Island was invisible to it for a second, independent reason.** The matcher recognises
+exactly two phrasings — `from age NN` and `NN+`. RI's v5.59 note said *"requires full retirement age
+(67)"*, which is neither, so **no widening of the numeric range would have reached it.** RI's note now
+says "from age 67" (decision D-6), and two new assertions pin that both notes remain *visible* to the
+matcher that guards them — coverage as a tested property rather than an accident of wording. The
+remaining limitation is that a third state wording an age some other way would be invisible again;
+that is recorded in `TESTING.md` rather than papered over with a longer phrase list.
+
+The widening is proved non-vacuous **permanently rather than once**: on the frozen v5.59 leg the
+widened matcher is asserted to fire, naming WI, and RI is asserted absent from that set. Narrow the
+pattern again and the prior leg fails.
+
+### Coverage — and two holes the negative controls found in the tests themselves
+
+`t10` §2E gains a v5.60 block: **14 checks on the current leg, 5 pre-fix pins on the frozen v5.59
+leg**, plus the two rewritten v5.59 disclosure pins and the rolled membership assertions
+(`t10` 224 → **238** current, 217 → **230** prior).
+
+⚠ **Two `t10` assertions had names that would have gone false while their regexes kept passing.** The
+v5.59 pins read *"RI's note names the full-retirement-age floor **the model does not apply**"* — but
+they only asked whether the note mentions 67, so after this release they would have gone on passing
+while their titles stated the opposite of the truth. Both were **rewritten, not re-gated**: they now
+assert the note names the floor *and* the model applies it, with `[KNOWN DEFECT pre-v5.60]` twins on
+the frozen leg. A silently-true assertion with a false name is worse than a failing one.
+
+⚠ **Two further holes were found by the controls coming back NOT CAUGHT, and are the most useful
+thing in this release.** Reverting WI's note to its v5.59 text with `exclAge` intact fired **nothing**
+— the mention-67 check passes on the stale wording, because that wording names 67 twice while
+asserting the model ignores it. And rewording RI's note back to an invisible phrasing fired
+**nothing**, silently removing RI from the invariant's coverage. Both are the defect class this
+release exists to close, reproduced inside the tests written to close it. Closed by three assertions:
+both notes must stay visible to the matcher, and neither may still claim the exclusion applies from
+65. Re-run, C5 and C6 now fire.
+
+**`qa/controls_v560.sh`** — eight §B2 controls plus a comment-only null, each reverting ONE thing,
+every failure read: **C1** RI `exclAge` removed: `t10` 8; **C2** WI removed: `t10` 8; **C3** RI
+`exclAge: 65` — the *silent* form of the same defect: `t10` 5; **C4** RI note → v5.59 clause: `t10` 3;
+**C5** WI note → v5.59 clause: `t10` 1; **C6** RI note reworded to the matcher-invisible phrasing:
+`t10` 1; **C7** footer left at v5.59: `t1` 1; **C8** the L658 matcher narrowed back to its v5.55
+range: `t10` 3 across both legs. C0 (comment only) fires nothing.
+
+⚠ **The controls runner reported its own null control as a finding.** C0's correct outcome is
+silence, and the shared verdict line printed *"NOT CAUGHT — THIS IS THE FINDING"* for it. Fixed with
+an inverted expectation; a control that reports its own success as a failure is the same class of
+defect these controls hunt.
+
+### Suite totals — parsed from suite output, not restated
+
+**2,910 app checks, 0 failing.** Current v5.60 leg **1,119** · prior v5.59 leg **1,111** · run-once
+670 · MC parity 10/10 · tooling 82 (`t21` 50, DOM diff 32) — GRAND 2,992. `smoke_built` 16/16 on the
+built artifact. Per suite, current leg: `t1` 185 · `t2` 35 · `t3` 36 · `t4` 252 · `t5` 58 · `t6` 21
+· `t7` 41 · `t8` 40 · `t9` 14 · `t10` **238** · `t11` 40 · `t12` 23 · `t13` 42 · `t14` 44 · `t15` 11
+· `t16` 24 · `t17` 74 · `t18` 67 · `t19` 65 · `t20` 100 · `t21` 50 · `t22` 85 · `t23` 25 · `t24` 38
+· `t25` 45 · `t26` 25 · `t27` 18 · `t28` 34 · `t29` 54 · `t30` 12 · `t31` 31 · `t32` 12. The frozen
+v5.59 leg replays at 1,111 = 1,105 + 6 (`t10` pre-fix pins and the two widened-matcher pins); every
+other suite on it is unchanged, the check that no new expectation leaked backwards (§B2).
+
+**MC parity holding 10/10 is expected and BLIND**, not reassuring: no parity or suite fixture is
+domiciled in RI or WI. Re-confirmed this session by AST walk over every literal, template, regex and
+member access across all 32 suites — the only non-generated RI/WI references outside `t10` are two
+`t31` assertion *names*, and the parity household is Georgia. **The DOM diff (32/32) is not a witness
+here** either, for the same reason.
+
+**F-6 re-executed on the final wording with `qa/tools/f6_probe.cjs`: the guarded set stays at 4**
+(NJ, NM, RI, VA). RI keeps its cliff language and stays in; WI's note still contains no form of
+"income limit". A grep cannot evaluate this; the matcher was run against the shipped text.
+
+**Version-bump cost, measured with `qa/tools/vercensus.cjs v559`**: 15 files, 18 ladder entries,
+**63 gated expressions** — 81 judgement points. **78 were rolled** (16 ladder entries — 15
+`KNOWN_VERSIONS` plus `t31`'s `ORDER` — 60 chain gates, and 2 ternary NEW ARMS in `t1` `verStr` /
+`t4` `_badge`). **Three were deliberately not rolled**: `t31`'s two `since: "v559"` key entries and
+its `since === "v559"` branch, which pin the v5.59 *figures* and stay at v5.59 forever. 78 + 3 = 81. Four registries end in the
+retired `v592` and took `v560` positionally. `domdiff_withdrawal.mjs` needed no edit — confirmed by
+reading its ladder, which covers new tags by a numeric rule (`<= 39`), not assumed.
+
+⚠ **The registry edit halted rather than guessing.** `t31`'s `KNOWN_VERSIONS` and `ORDER` arrays are
+textually identical, so an anchor on the array contents matched twice; the script exited and the
+anchors were re-keyed to the `const` names. An unrolled `ORDER` scores −1 from `indexOf` and every
+`t31` key silently takes its pre-fix branch.
+
+✅ **The immediately-prior release reproduced byte-identically** on a fresh scaffold — v5.59 rebuilt
+to `c6ac96552dbc598e4812f4229ba425ad`, matching its published artifact, **on rollup 4.63.1 rather
+than the 4.62.4 recorded at v5.31**. This is the §N3a check that matters, it passed, and it is
+further evidence that rollup was never the cause of the v5.30 divergence. It also contradicts the
+expectation carried into this session that the artifact would not reproduce. v5.60's own artifact
+rebuilt to the same hash twice in-session.
+
+### Documents
+
+`METHODOLOGY.md` (mandatory — modelling changed; the v5.59 section's "applies from 65" sentences are
+corrected there too) · `TESTING.md` (counts, `controls_v560.sh`, and the two-phrasing limitation
+recorded as a lesson) · `MissingFeatures.md` (**D-11 (a) closes for RI and WI**; New Mexico's stays
+open) · `SCOPE_EXCL_AGE_RI_WI.md` §8 build record, status SHIPPED · `PROJECT_KNOWLEDGE_INDEX.md`
+rotation · `SCOPE_VA_NOTE_CORRECTION.md` retired to SHIPPED at v5.58 and dropped from
+`package_check`'s OPEN allowlist in the same edit.
+
 ## v5.59 · Rhode Island and Wisconsin 65+ exclusions carried superseded amounts, 2026-09-02
 
 **Two `STATE_RULES` figures move, both toward the statute. No engine code changes.** A figure in
