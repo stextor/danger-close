@@ -47,7 +47,7 @@ import { dirname, join } from "path";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v549";
-const KNOWN_VERSIONS = ["v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558"];
+const KNOWN_VERSIONS = ["v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   process.exit(1);
@@ -233,6 +233,28 @@ const KEYS = [
   // actually modelled. The release that models it must INVERT this key, not expire it.
   { key: "$50K single/$75K married", since: "v558",
     why: "the corrected statutory thresholds are the whole release, and only the figures catch a revert" },
+  // Added v5.59 (SCOPE_EXCL65_STALE_RI_WI.md; AUDIT_STATE_EXCL65_ROUND4 §2b, §2c). Two STATE_RULES
+  // figures were a legislative cycle stale: RI $20,000 (TY2023-24; $50,000 per person from TY2025,
+  // P.L. 2024 ch. 117) and WI $5,000 (the old income-tested provision; $24,000 at 67+, 2025 Wis.
+  // Act 15). Both notes rewritten to name the figure AND the 67 floor the model does not apply.
+  // ⚠ WHY THESE KEYS AND NOT THE BARE FIGURES. The brief's candidates were "$50,000" and "$24,000".
+  // Measured on v5.58 before writing: "$24,000" already has 1 app hit and 5 Field Manual hits, so
+  // it PASSES BEFORE THE FIX EXISTS — the vacuous-key trap this file records at v5.51/52/54/58.
+  // "$50,000" is clean on both user surfaces but already sits in METHODOLOGY §6 (Virginia's
+  // sentence), so C-0 could not force a Rhode Island sentence into METHODOLOGY. Each key below
+  // binds the figure to its provision: 0 hits on v5.58 across app, docs AND METHODOLOGY. A
+  // figure-only revert of the note ("$20K pension/401k exclusion") fails the RI key; the WI old
+  // note ("$5K retirement exclusion") fails the WI key.
+  // ⚠ A t31 key reads PROSE. It cannot see STATE_RULES.excl65 — a revert of the CONSTANT with the
+  // note intact is caught by t10 §2E's v5.59 block (boolean identity + hand case), not here. The
+  // scope's control 1 expected this key to fail on a constant-only revert; that expectation was
+  // impossible by construction and is corrected in the scope's §8 build record.
+  // ⚠ NO `until`. Both sentences state what the model DOES (the amount) and does NOT do (the age
+  // floor); the release that models exclAge for RI/WI must revisit the wording, not expire the key.
+  { key: "$50,000 pension/401k exclusion", since: "v559",
+    why: "the corrected RI statutory amount is half the release, and only the figure catches a revert" },
+  { key: "$24,000 retirement-income exclusion", since: "v559",
+    why: "the corrected WI statutory amount is the other half, and only the figure catches a revert" },
   { key: "Maryland's and Maine's dollar-for-dollar reductions are modelled", since: "v556",
     why: "the offset IS applied as of v5.56, so a manual still saying the model applies none of it contradicts the engine" },
 ];
@@ -242,7 +264,7 @@ T("C-0: every declared key is named in METHODOLOGY.md \u2014 parity is only owed
   KEYS.every(k => inMeth(k.key)),
   KEYS.filter(k => !inMeth(k.key)).map(k => k.key).join(", "));
 
-const POST = VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558";
+const POST = VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559";
 // EACH KEY IS GATED TO THE RELEASE THAT LANDED IT, not to the shared POST flag above.
 // Found at the v5.50 build. Under one shared gate the v549 leg went GREEN on v5.50's expectation
 // for the wrong reason twice over - METHODOLOGY.md is ONE shared file at the run-folder root, so a
@@ -250,7 +272,7 @@ const POST = VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552
 // see JSX gating, so v5.49's single-household-gated estate card satisfied it even though a COUPLE
 // never rendered a word of it - while the v548 leg FAILED outright, invisibly, because runsuite.sh
 // only runs t31 for the prior and current tags.
-const ORDER = ["v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558"];
+const ORDER = ["v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559"];
 // ⚠ THIS IS THE THIRD OF THREE VERSION LISTS in this file — KNOWN_VERSIONS (L50), POST (L218)
 // and ORDER. `post()` uses ORDER.indexOf(VER), so an unrolled tag scores -1 and EVERY key
 // silently takes its pre-fix branch. Rolling two of the three fails 6 checks with no hint
@@ -268,6 +290,14 @@ for (const k of KEYS) {
     T(`C [PARITY]: "${key}" is named creator-side AND user-side \u2014 ${why}`,
       inMeth(key) && userSide(key),
       `meth=${inMeth(key)} app=${inApp(key)} docs=${inDocs(key)}`);
+  } else if (since === "v559") {
+    // Pre-v5.59 state. v5.58's RI and WI notes carry the superseded amounts, so the corrected
+    // figure-plus-provision phrases are absent from both user surfaces — correct for that build,
+    // pinned rather than inverted bare (OPERATIONS §B2). Absence of the CORRECT phrase is asserted,
+    // not presence of the old note, which would lock copy this release deletes (the v5.26 lock).
+    T(`C [KNOWN DEFECT pre-v5.59]: "${key}" — the note carries a superseded amount and ` +
+      "neither user surface carries the statutory one",
+      inMeth(key) && !userSide(key), `meth=${inMeth(key)} app=${inApp(key)} docs=${inDocs(key)}`);
   } else if (since === "v558") {
     // Pre-v5.58 state. v5.57's note carries the WRONG thresholds (~$75K/$150K), so the corrected
     // figures are absent from both user surfaces — correct for that build, and pinned rather than
@@ -342,7 +372,7 @@ if (POST) {
   // approved copy is correct; weakening it to something both a conservative and a non-conservative
   // sentence would satisfy is not.
   const DIRECTION = "charges every surcharge in full";
-  if (VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558") {
+  if (VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559") {
     // The C predicate is an OR, and for this key the app arm was ALREADY satisfied before the fix
     // by single-gated text. Asserting the manual arm separately is what makes the key mean anything.
     T("D-5: the FIELD MANUAL names estate tax - the arm that was empty before v5.50",
@@ -353,7 +383,7 @@ if (POST) {
       inDocs("optimistic") && inApp("optimistic"),
       `docs=${inDocs("optimistic")} app=${inApp("optimistic")}`);
   }
-  if (VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558") {
+  if (VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559") {
     // E · CREATOR-SIDE LABEL DRIFT. Added after the v5.50 ship, when a sweep found METHODOLOGY.md
     // still describing the objective list as "max after-tax estate" in three places while its own
     // new section 12 explained why that phrase was wrong. The document contradicted itself, and
@@ -376,7 +406,7 @@ if (POST) {
     T("D-9: the FIELD MANUAL names it - the §13 limitations register",
       inDocs("omits dividends and realized capital gains"));
   }
-  if (VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558") {
+  if (VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559") {
     T("D-10: the RENDER TREE says the column now counts dividends",
       inApp("counts the taxable sleeve's dividends"));
     T("D-11: the FIELD MANUAL does too",

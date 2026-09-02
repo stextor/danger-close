@@ -796,6 +796,67 @@ const pass2E = pass, fail2E = fail;
           /\b2026\b/.test(R.KY.note) ? 1 : 0, 0);
       }
 
+      // ─── v5.59 · Rhode Island and Wisconsin `excl65` carried SUPERSEDED amounts ───
+      // SCOPE_EXCL65_STALE_RI_WI.md / AUDIT_STATE_EXCL65_ROUND4.md §2b, §2c. RI carried $20,000 —
+      // the TY2023-24 figure; RIGL § 44-30-12(c)(9) as amended by P.L. 2024 ch. 117 art. 6 § 21 is
+      // $50,000 per qualifying person for TY2025+. WI carried $5,000 — the older income-tested
+      // provision; Wis. Stat. § 71.05(6)(b)54m. (2025 Wis. Act 15) is $24,000 at 67+, no income limit.
+      // Before this block NO assertion in the suite named RI or WI (AST walk, 2026-09-02), so a build
+      // with either stale figure restored passed every check that existed. Direction of the figure
+      // move: CONSERVATIVE-toward-statute for qualifying households. What is NOT modelled and is
+      // pinned as disclosed rather than fixed: the 67 floor in both states (model applies from 65),
+      // RI's AGI cliff, and RI's IRA-vs-employer-plan distinction.
+      //
+      // Every expected figure was computed by hand from the rule table BEFORE the engine ran:
+      //   RI: both 68, retIncome 80,000, taxable SS 40,800, no pension, rate 0.05, ss 0.5
+      //       excl 2 x 50,000 = 100,000 >= 80,000 -> retBase 0; ssBase 0.5 x 40,800 = 20,400
+      //       -> 0.05 x 20,400 = 1,020.00      (pre-fix: excl 40,000 -> 0.05 x 60,400 = 3,020.00)
+      //   WI: both 68, retIncome 60,000, taxable SS 40,800, rate 0.053, ss 0
+      //       excl 2 x 24,000 = 48,000 -> retBase 12,000 -> 0.053 x 12,000 = 636.00
+      //                                        (pre-fix: excl 10,000 -> 0.053 x 50,000 = 2,650.00)
+      const RIWI = (code, retIncome) =>
+        S({ code, fallbackRate: 0, retIncome, pen: 0, work: 0, capGains: 0, ssTaxableFed: 40800,
+            ssGrossA: 24000, ssGrossB: 24000, ageA: 68, ageB: 68 });
+      if (_v >= 559) {
+        // Figures as BOOLEAN IDENTITIES, per the v5.57 EPS lesson — these are dollar constants so the
+        // numeric form would also work, but the identity form cannot go vacuous if EPS is ever widened.
+        T("[EXTINCTION v5.59] RI's modelled exclusion is exactly $50,000 per person (TY2025+)",
+          R.RI.excl65 === 50000 ? 1 : 0, 1);
+        T("[EXTINCTION v5.59] and RI's note states that figure, so moving one without the other fails",
+          /\$50,000/.test(R.RI.note) ? 1 : 0, 1);
+        T("[EXTINCTION v5.59] RI hand case: a qualifying 68/68 couple pays tax on half of SS only",
+          RIWI("RI", 80000), 1020.00);
+        T("[DISCLOSED v5.59] RI's note names the full-retirement-age floor the model does not apply",
+          /full retirement age/i.test(R.RI.note) && /\b67\b/.test(R.RI.note) ? 1 : 0, 1);
+        T("[DISCLOSED v5.59] RI's note names the IRA exclusion and the AGI cliff, dated to TY2025",
+          /IRA/.test(R.RI.note) && /cliff/i.test(R.RI.note) && /TY2025: \$133,500/.test(R.RI.note) ? 1 : 0, 1);
+        T("[EXTINCTION v5.59] WI's modelled exclusion is exactly $24,000 per person (2025 Wis. Act 15)",
+          R.WI.excl65 === 24000 ? 1 : 0, 1);
+        T("[EXTINCTION v5.59] and WI's note states that figure",
+          /\$24,000/.test(R.WI.note) ? 1 : 0, 1);
+        T("[EXTINCTION v5.59] WI hand case: a qualifying 68/68 couple is taxed on income above 2 x $24,000",
+          RIWI("WI", 60000), 636.00);
+        T("[DISCLOSED v5.59] WI's note names the 67 floor the model does not apply",
+          /\b67\b/.test(R.WI.note) ? 1 : 0, 1);
+        // Decision D-F (ROUND4 §6): WI LEAVES t29's F-6 income-limited guarded set by wording alone —
+        // its $24,000 provision has no income test, so "income-limited" would be false. RI STAYS: its
+        // AGI cliff IS an income limit. Both pinned here with the SAME regex t29 L212 executes, so the
+        // deliberate 5 -> 4 shrink is asserted rather than left to a `length > 0` guard.
+        T("[BY DECISION v5.59] WI's note does not match the F-6 income-limited matcher (not income-tested in law)",
+          /income[- ]limited|income limit/i.test(R.WI.note) ? 1 : 0, 0);
+        T("[BY DECISION v5.59] RI's note still matches it (the AGI cliff is an income limit)",
+          /income[- ]limited|income limit/i.test(R.RI.note) ? 1 : 0, 1);
+      } else {
+        T("[KNOWN DEFECT pre-v5.59] RI carried the TY2023-24 $20,000 after the statute moved to $50,000",
+          R.RI.excl65 === 20000 ? 1 : 0, 1);
+        T("[KNOWN DEFECT pre-v5.59] RI hand case at the stale figure",
+          RIWI("RI", 80000), 3020.00);
+        T("[KNOWN DEFECT pre-v5.59] WI carried the superseded income-tested $5,000",
+          R.WI.excl65 === 5000 ? 1 : 0, 1);
+        T("[KNOWN DEFECT pre-v5.59] WI hand case at the stale figure",
+          RIWI("WI", 60000), 2650.00);
+      }
+
       T("2E ssOffset: an unflagged state ignores Social Security entirely (AL)",
         S({ code: "AL", fallbackRate: 0, retIncome: 100000, pen: 0, work: 0, capGains: 0,
             ssTaxableFed: 0, ssGrossA: 50000, ssGrossB: 50000, ageA: 65, ageB: 65 }), 3960.00);
