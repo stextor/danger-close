@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **DECISIONS OPEN — not buildable until §7 is resolved.** |
+| Status | **RETIRED — SHIPPED as v5.60, 2026-09-02.** Decisions D-1 … D-6 resolved before the build; see §8, and §8a for what the build found that this scope did not predict. Kept as the build record. |
 | Written | 2026-09-02, against shipped **v5.59** · source `ed89d2f214302942e5bd6355d923c9cf` · tree `4784a4a` |
 | Parent findings | `AUDIT_STATE_EXCL65_ROUND4.md` §2b, §2c, §6 **D-D** (the deferral this scope collects) · `MissingFeatures.md` **D-11 (a)** |
 | Predecessor | `SCOPE_EXCL65_STALE_RI_WI.md` — shipped as v5.59; this is the half it deliberately held back |
@@ -272,20 +272,50 @@ disclosures (cliff, IRA, SS) untouched.
 
 | | |
 |---|---|
-| Build date | |
-| Source md5 (v5.60) | |
-| Built `index.html` md5 | |
-| Repo tree built against | |
-| Premise re-verified at §A2 (Y/N; any drift from §2) | |
-| vercensus (files / ladders / gated) | |
-| Suite total, per-suite in CHANGELOG | |
-| Parity (and confirmation it is still blind) | |
-| The six §2.4 cells, recomputed | |
-| L658 widening proved non-vacuous (how) | |
-| Controls run, each failure read | |
-| Decisions as built (D-1 … D-5) | |
-| Ops items 6.1 / 6.2 done | |
-| `package_check` H/J post-upload | |
+| Build date | 2026-09-02 |
+| Source md5 (v5.60) | `23877f903a14ba43dd707a43d98b0df4` |
+| Built `index.html` md5 | `278cb053b93f4b389c99f1e1ad31b591` (rebuilt twice in-session to the same hash) |
+| Repo tree built against | `b25af32` — **not the `4784a4a` this scope recorded**; re-read from the clone |
+| Premise re-verified at §A2 (Y/N; any drift from §2) | **Y, no drift.** Pool 110 files, 109 byte-identical, one expected pool-only (`DangerClose-v5_58.jsx`); `COMMIT_MESSAGE.txt` absent and stayed absent. §2.1 and §2.2 re-measured by AST: `exclAge` read in one place (L1132), DE 60 / KY 0 / NM, RI, WI absent, notes verbatim as §2.7 quotes them |
+| vercensus (files / ladders / gated) | `vercensus.cjs v559` → **15 / 18 / 63 = 81**. 78 rolled (16 ladder entries, 60 chain gates, 2 ternary new arms), 3 deliberately not (`t31`'s two `since: "v559"` keys and its `since ===` branch) |
+| Suite total, per-suite in CHANGELOG | **2,910 app checks, 0 failing** — current leg 1,119 · prior 1,111 · run-once 670 · parity 10 · tooling 82 · GRAND 2,992 · `smoke_built` 16/16 |
+| Parity (and confirmation it is still blind) | 10/10, **blind and confirmed so**: AST walk over all 32 suites found no fixture domiciled in RI or WI; the only non-generated references outside `t10` are two `t31` assertion names, and the parity household is Georgia. DOM diff 32/32, not a witness for the same reason |
+| The six §2.4 cells, recomputed | All six reproduce to the cent, hand-computed from the rule table **before** the engine ran (`hand_v560.py`): RI 5,020.00 / 2,520.00 / 1,020.00; WI 3,180.00 / 1,908.00 / 636.00 |
+| L658 widening proved non-vacuous (how) | **Two ways.** Permanently, by a frozen-leg pin asserting the widened matcher fires and names exactly `WI`; and once, by control C8 narrowing the matcher back to its v5.55 range, which fails that pin plus both visibility pins |
+| Controls run, each failure read | `qa/controls_v560.sh`, eight plus a null. C1 8 · C2 8 · C3 5 · C4 3 · C5 1 · C6 1 · C7 1 · C8 3; C0 correctly silent. **C5 and C6 came back NOT CAUGHT on the first run** — see §8a |
+| Decisions as built (D-1 … D-6) | **D-1** per person for both, as recommended — the mixed-age 68/66 cells test it. **D-2** DE's 60 left alone. **D-3** no new `t31` key; the age is covered by `t10` note assertions instead. **D-4** the `package_check` build-table check left out, still open as an ops item. **D-5** WI's floor stated positively, optimism disclosure deleted. **D-6** (opened during verification) RI's note rephrased to "from age 67" so the invariant can see it, with the two-phrasing limitation recorded in `TESTING.md` |
+| Ops items 6.1 / 6.2 done | Both. `SCOPE_VA_NOTE_CORRECTION.md` retired to SHIPPED at v5.58 and dropped from `package_check`'s OPEN allowlist in the same edit; the manifest's `COMMIT_MESSAGE.txt` tense corrected |
+| `package_check` H/J post-upload | *(fill after upload — H and J fail BY CONSTRUCTION before it)* |
+
+### 8a · What the build found that this scope did not predict
+
+**§2.6 and §5(c) were wrong, and were corrected before anything was written.** The scope said to
+"widen the L658 age range past 64". Measured first: a naive widening to `6\d` flags **CO, GA, LA, MT,
+NM, VA and WV**, all of them correct — the engine's default floor *is* 65, so a note saying "65+"
+beside no `exclAge` is agreement. **65 is the one value to exclude, not the top of the range.**
+
+**And RI was invisible for a second reason the scope did not identify.** The matcher recognises only
+`from age NN` and `NN+`; RI's v5.59 note said "requires full retirement age (67)", so **no widening
+would have reached it.** §5(c)'s instruction to "revert one `exclAge` and confirm the invariant now
+fires" would have produced silence if a session had picked RI — reading exactly like a vacuous
+widening. Resolved as decision D-6.
+
+**Two negative controls came back NOT CAUGHT, and both were holes in the new tests.** Reverting WI's
+note to its stale wording with `exclAge` intact fired nothing (the guard only asked whether the note
+*mentions* 67, and the stale wording mentions it twice while denying the model uses it); rewording
+RI's note to an invisible phrasing also fired nothing. Closed by three assertions — both notes must
+stay visible to the matcher, and neither may still claim the exclusion applies from 65.
+
+**Three smaller ones, recorded because each cost time or nearly shipped.** `t10`'s `T()` compares
+numerically, so a string expectation scores `NaN` and fails — caught on the frozen leg. `t31`'s
+`KNOWN_VERSIONS` and `ORDER` arrays are textually identical, so a contents-anchored edit matched
+twice and the script halted rather than guessing. And the controls runner reported its own null
+control as a finding, which is fixed with an inverted expectation.
+
+**One expectation carried into the session was wrong in the good direction.** The brief expected the
+artifact not to rebuild byte-identically. **v5.59 reproduced exactly** — `c6ac96552dbc598e4812f4229ba425ad`
+— on rollup 4.63.1 rather than the 4.62.4 recorded at v5.31, which is the §N3a check that matters and
+further evidence rollup was never the cause of the v5.30 divergence.
 
 ---
 

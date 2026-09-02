@@ -6,7 +6,11 @@
 | Written | 2026-09-01 |
 | Origin | `AUDIT_STATE_EXCL65_ROUND3.md` §2a; decision **D-C** of its §6 |
 | Shape | **Disclosure only. One string. No figure moves. No engine change.** |
-| Status | **DECISIONS RESOLVED 2026-09-02 — cleared to build as v5.58.** See §6. |
+| Status | **RETIRED — SHIPPED as v5.58, 2026-09-02.** Virginia's note now states the correct
+$12,000 age-deduction income thresholds; the release is recorded in `CHANGELOG.md` under v5.58 and
+in `METHODOLOGY.md`. Kept as the build record. Its §6 decisions were resolved as built; nothing in
+it is awaiting a maintainer answer, which is why it also leaves `package_check`'s OPEN allowlist in
+the same edit (v5.60 ops item 6.1). |
 | Statute re-verified | 2026-09-02 against the **primary source** — `law.lis.virginia.gov` § 58.1-322.03, 2026-updated section (page dated 8/30/2026). See §1. |
 
 ---

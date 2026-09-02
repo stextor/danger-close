@@ -815,7 +815,7 @@ person per tier) and the remedy is a form. **Exposure:** user-side.
 | **D-10** | Two MAGI figures render under one IRMAA label with no cue they are computed differently | ◐ **DISCLOSURE HALF SHIPPED at v5.52 (2026-08-27). MODELLING HALF STILL OPEN.** ⚠ **The product call is MADE and must not be re-litigated** — `SCOPE_D10_MAGI_DIVERGENCE_DISCLOSURE.md` (RETIRED) resolved it: disclose now, qualitative in-app, both surfaces. The ladder footnote and Field Manual §13 now name the omitted terms and the direction; `METHODOLOGY.md` carries both expressions term by term. `t1` pins BOTH expressions, which nothing did before. **What remains: the verdict is still WRONG for a taxable-heavy household** — disclosed, not fixed. `SCOPE_FIX_roth_tab_div_capgain.md` scopes the fix and is **NOT BUILDABLE, four decisions open**. *(Prior status, superseded:)* ⚠ OPEN — a product-voice call awaiting Steve. Re-homed 2026-08-26 from the deleted `SCOPE_STRUCTURAL_MAGI_EXTINCTION.md`, where it was that scope's **D4** — *not* this register's D-4, which is a different item. Confirmed still live at v5.51: Engine C builds MAGI from **seven** terms (L4459 — `ssTaxable + pen_y + work_y + rmdTax_y + conv_y + div_y + capGain_y`) while the Roth tab builds it from **five** (L8997 — `pension + spouseBWork + taxableSS + conv_y + rmd_y`). v5.41 closed the RMD term only; **dividends and realized capital gains remain absent**, and `work_y` vs `spouseBWork` is narrower again. The app carries no text cueing the difference — zero hits for any such phrase. ~~**The question is whether to disclose an unmeasured divergence now or wait**~~ — **ANSWERED AND SHIPPED at v5.52.** It had already been measured; disclosure was the resolved call, not an open one. The original scope offered no recommendation deliberately, calling it a call about the app's contract with its user rather than a technical one. ⚠ Note `MEASUREMENT_roth_tab_magi_v5_40.md` recorded IRMAA **verdict inversions** in constructed households, so this is not purely cosmetic | **Optimistic** — omitting income terms understates MAGI, understates the IRMAA trigger, and flatters the plan | Disclosure is a `src/` change and a version bump; needs its own scope | Unranked — awaiting the product call |
 | **D-9** | Heir income-tax rate on inherited Traditional is an unjustified constant | ✅ **DISCLOSED at v5.51** — both user surfaces + `METHODOLOGY.md`; promoted to a module-level assumption beside `BASE_GROWTH` (deliberately NOT `TAX_CONSTS`); value **unchanged at 0.22 by decision**; pinned by `t1` and by a to-the-dollar arithmetic invariant in `t2` | **OPTIMISTIC** on the estate level (compounds with D-7 in the same figure), conservative on the ranking | Disclosure built; user-settable rate is the real fix, scoped separately | Medium |
 | **D-8** | ACA sub-floor \$0 | **PARTIALLY ADDRESSED (v5.32)** — declined toggle not built | **Both** | Built | see entry |
-| **D-11** | Three states' 65+ figures are right on one side of a statutory gate the data model cannot hold and wrong on the other (NM, RI, WI) | ◐ **RI and WI amounts CORRECTED at v5.59** (20,000 → 50,000; 5,000 → 24,000); the gates — FRA/67 floors, RI's AGI cliff and IRA exclusion, NM's SS cliff — remain unmodelled and disclosed; **NM untouched, own pass** | **MIXED** — sign flips at the gate (stated in each note) | Disclose now; gate modelling needs a data-model field | Medium |
+| **D-11** | Three states' 65+ figures are right on one side of a statutory gate the data model cannot hold and wrong on the other (NM, RI, WI) | ◐ **RI and WI amounts CORRECTED at v5.59** (20,000 → 50,000; 5,000 → 24,000) and their **67 age floors MODELLED at v5.60** (`exclAge: 67`, per person) — **WI is now exact on this provision**; RI's AGI cliff and IRA exclusion remain unmodelled and disclosed, and **NM is untouched, own pass** | **MIXED for NM and RI** — sign flips at the remaining gates (stated in each note); WI no longer flips | Disclose now; the remaining gates need a data-model field | Medium |
 
 **D-3 was ranked top here on 2026-08-18 and that ranking is superseded** (direction corrected 2026-08-19 — see the box at D-3). Its *disclosure* half stays a live Medium; its *precision* half is held and de-prioritised. What follows is the 2026-08-18 reasoning, kept for the record: **with D-1 and D-2 closed, D-3 is the top-ranked open item** — and it is the one simplification here
 that is **not reliably conservative**, so it can flatter a plan. That makes it the natural successor
@@ -897,8 +897,8 @@ the plan at every income the app models, and it is not served by the same fix, d
 | State | The gate the model cannot hold | Model vs statute (ROUND4 §4, both spouses 68, MFJ) |
 |---|---|---|
 | **NM** | SS exempt only under $150,000 MFJ AGI (hard cliff); the $8K 65+ exemption is zero above $51,000 MFJ, unindexed since 1987 | +$216 conservative below the SS cliff; **−$1,784 optimistic** above it — the two errors mask each other until exactly $150,000 of AGI |
-| **RI** | FRA (67) floor; AGI cliff (TY2025: $133,500 MFJ / $107,000 single); IRA distributions do not qualify; SS modification carries the same gates | +$1,020 to +$3,020 conservative under the cliff with employer-plan money; **−$980 optimistic** if the money is an IRA; **−$3,020 optimistic** at or over the cliff, and again at 65–66 |
-| **WI** | 67 floor, no income test | **−$530 optimistic** at 65–66; from 67 the model now matches the statute (v5.59) |
+| **RI** | ~~FRA (67) floor~~ **modelled v5.60**; AGI cliff (TY2025: $133,500 MFJ / $107,000 single); IRA distributions do not qualify; SS modification carries the same gates | conservative under the cliff with employer-plan money; **optimistic** if the money is an IRA; **optimistic** at or over the cliff. The **65–66 window is closed** — a couple at 66 on $80,000 now pays $5,020 rather than $1,020 |
+| **WI** | ~~67 floor~~ **modelled v5.60**, no income test | **None remaining.** The 65–66 window is closed (a couple at 66 on $60,000 now pays $3,180 rather than $636) and the model matched the statute from 67 already — **WI is exact on this provision** |
 
 **What v5.59 did.** Corrected the two *amounts* that were a legislative cycle stale — RI `excl65`
 20,000 → **50,000** (P.L. 2024 ch. 117, TY2025+), WI 5,000 → **24,000** (2025 Wis. Act 15) — and
@@ -908,8 +908,14 @@ conservative toward statute for qualifying households. **What it deliberately di
 or touch the eight-state `ss: 0.5` blend. A gate change alongside a figure change cannot be
 attributed if a downstream figure moves.
 
-**What remains.** (a) `exclAge: 67` for RI and WI — the cheapest gate, already supported by the data
-model, held back only for attribution; its own small release, after measuring the 65–66 window. (b)
+**What v5.60 did.** Set `exclAge: 67` on RI and WI — the cheapest gate, already supported by the data
+model — and rewrote both notes. No figure moved; direction conservative in every measured cell. It
+also widened `t10`'s note-vs-code extinction invariant, which had been blind to both states: its age
+range stopped at 64, and RI's wording was invisible to it regardless of range. **This closes (a).**
+
+**What remains.** (a) ~~`exclAge: 67` for RI and WI~~ — **CLOSED at v5.60.** New Mexico still keeps
+the implicit 65 default; whether its exemption carries a different floor was not established and
+belongs to its own pass. (b)
 New Mexico, disclosure-first (D-C): its note is accurate and misleading, its `ss: 0.5` blends across a
 0%/100% cliff the note states and the model ignores. (c) RI's cliff and IRA exclusion, and NM's SS
 cliff, need a data-model field the engines do not carry — an income-gated exclusion and an
@@ -923,6 +929,9 @@ single caveat. Each of the three notes now states which side of its gate the mod
 
 **Coverage.** `t10` §2E pins the RI/WI amounts as boolean identities with hand cases, both notes'
 disclosure conditions, and both F-6 memberships; `t31` carries `$50,000 pension/401k exclusion` and
-`$24,000 retirement-income exclusion`. Before v5.59 no assertion in the suite named any of the three.
-NM has none still.
+`$24,000 retirement-income exclusion`. v5.60 adds both `exclAge` identities, the 66/66 denial and
+mixed-age 68/66 hand cases in each state (the cells that prove the floor is per person), 68/68 cells
+unchanged, pre-fix pins on the frozen leg, and two assertions that each note stays **visible** to the
+note-vs-code matcher that guards it. Before v5.59 no assertion in the suite named any of the three.
+**NM has none still** — which is the honest reading of why its half of D-11 is still open.
 
