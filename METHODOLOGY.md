@@ -132,9 +132,10 @@ no-income-tax states); and major 65+ retirement-income exclusions where they exi
 $65K/person, KY $31,110, NY $20K, NJ a $100K HOUSEHOLD cap at 62+ (not per-person), VA $12K, SC $15K, DE $12.5K). **Which of these have been checked against a primary source, and what was found, is recorded in `AUDIT_STATE_EXCL65_NOTES.md` — this section routes there rather than restating it, because a verification claim expires and a dated audit does not.**
 
 **The age at which an exclusion starts is modelled per state (v5.55), not assumed to be 65.**
-`STATE_RULES.exclAge` carries a state's own floor and is absent for the 47 states that use 65.
-Two are set: **Kentucky attaches no age test in law** (verified against KY DOR Schedule M) and
-**Delaware's starts at 60** (30 Del. C. §1106). Before v5.55 every state was gated on a hardcoded
+`STATE_RULES.exclAge` carries a state's own floor and is absent for the 45 states that use 65.
+Four are set: **Kentucky attaches no age test in law** (verified against KY DOR Schedule M),
+**Delaware's starts at 60** (30 Del. C. §1106), and as of v5.60 **Rhode Island's and Wisconsin's
+start at 67**, the full retirement age both statutes require. Before v5.55 every state was gated on a hardcoded
 65, which withheld a real statutory exclusion from households below that age and so **overstated**
 state tax — the conservative direction, which is why it went unnoticed. Two known thresholds are
 deliberately **not** applied: New Jersey's 62, because NJ's cap is a household amount and applying
@@ -1394,15 +1395,16 @@ amount is now the **$50,000 pension/401k exclusion** per qualifying person. The 
 a joint return's cap rests on the Division of Taxation's *Retirement Income Tax Guide* (Pub. 2026-01)
 rather than on the statute alone, so no dollar figure is asserted for the couple cap.
 
-Four statutory conditions remain unmodelled and are named in the state's note: the modification
-requires **full retirement age** (67 for anyone born 1960 or later) while the model applies it from
-65; it is gated by a **hard AGI cliff** (TY2025: **$133,500 MFJ / $107,000 single**, indexed annually
+Four statutory conditions were unmodelled at v5.59 and are named in the state's note. **The first
+of them — the requirement of full retirement age, 67 for anyone born 1960 or later — is modelled as
+of v5.60** (see below). The rest remain: it is gated by a **hard AGI cliff** (TY2025: **$133,500 MFJ / $107,000 single**, indexed annually
 — TY2026 was not read) which the model ignores; **IRA distributions do not qualify** (only Form 1040
 line 5b income does) and the model has no IRA-vs-employer-plan distinction; and the Social Security
 modification carries the same two gates and removes all federally-taxable SS where it applies, while
-the model taxes half. The sign of the error therefore depends on which side of the cliff a household
-sits, whether both spouses have reached 67, and what kind of account the money is in: conservative
-under the cliff past 67 with employer-plan money, optimistic otherwise. Rhode Island also enacted, in
+the model taxes half. The sign of the error therefore depended, at v5.59, on which side of the cliff a household
+sat, whether both spouses had reached 67, and what kind of account the money was in. **With the age
+gate modelled from v5.60 the age term drops out**, leaving two: conservative under the cliff with
+employer-plan money, optimistic above it or on IRA money. Rhode Island also enacted, in
 its 2026 session, the removal of the age threshold from the SS modification for TY2027+ (HB 7127
 Sub A, Art. 6 § 5); it is recorded here and not modelled.
 
@@ -1411,9 +1413,10 @@ Sub A, Art. 6 § 5); it is recorded here and not modelled.
 **Wis. Stat. § 71.05(6)(b)54m.**, created by **2025 Wis. Act 15**, allows **$24,000 at 67+** ($48,000
 for a joint return where both have reached 67) with **no income limit**. The model carried the older
 $5,000 provision, which required 65+ and federal AGI under $15,000 single / $30,000 married. The
-modelled amount is now the **$24,000 retirement-income exclusion** per person. The 67 floor is not
-modelled: the model applies the amount from 65, so a 65–66 household is granted an exclusion the
-statute denies — **optimistic for those two years, exact from 67**. Wisconsin's statute was carried
+modelled amount is now the **$24,000 retirement-income exclusion** per person. At v5.59 the 67 floor was not
+modelled: the amount applied from 65, so a 65–66 household was granted an exclusion the statute
+denies — optimistic for those two years, exact from 67. **v5.60 models the floor, and Wisconsin's
+treatment of this provision is now exact at every age.** Wisconsin's statute was carried
 from `AUDIT_STATE_EXCL65_ROUND3.md` §2b and not re-read for this release.
 
 Because the provision is not income-tested, Wisconsin's note no longer says "income-limited", and it
@@ -1421,11 +1424,33 @@ therefore **leaves the suite's income-limited guarded set** (t29 F-6), which goe
 to four (NJ, NM, RI, VA) by wording alone; the assertion itself is untouched. Rhode Island stays in
 the set because its AGI cliff is an income limit.
 
+### The Rhode Island and Wisconsin exclusions start at 67, not 65 (v5.60)
+
+Both statutes gate on **full retirement age**, and the model gated both on its default of 65. **R.I.
+Gen. Laws § 44-30-12(c)(9)** ties the modification to *"the age used for calculating full or
+unreduced Social Security retirement benefits"* — **67** for anyone born 1960 or later — and **Wis.
+Stat. § 71.05(6)(b)54m.** reads *"67 or over"*. Each state's entry now carries `exclAge: 67`, and the
+floor is compared **per person**, so one spouse past 67 and one below receives one exclusion rather
+than two or none. Neither statute was re-read for this release; both are carried from
+`AUDIT_STATE_EXCL65_ROUND4.md` §2b and §2c.
+
+**The direction is conservative**, and this was the last optimistic error in either state. A 65- or
+66-year-old household had been granted an exclusion the statute denies — and v5.59 made that larger
+by correcting the amounts it was granting two years early. For a couple at 66 with $80,000 of
+retirement income, Rhode Island tax rises from $1,020 to $5,020; the equivalent Wisconsin couple on
+$60,000 rises from $636 to $3,180. Households where both spouses have reached 67 are unchanged.
+
+**No figure moved and no engine code changed.** `exclAge` already existed — it was introduced at
+v5.55 for Kentucky and Delaware — and is read in exactly one place, so this is two properties in the
+rule table. What it does *not* fix is everything else Rhode Island's statute conditions on: the AGI
+cliff and the IRA-versus-employer-plan distinction both need a data-model field the engines do not
+carry, and `MissingFeatures.md` **D-11 (c)** scopes those once across states rather than per state.
+
 ### What did not move, and why
 
-New Mexico is untouched (its own pass, disclosure-first — ROUND4 §6 D-C). No `exclAge` moves for
-either state: a gate change alongside a figure change cannot be attributed if a downstream figure
-moves, and RI's gate interacts with the cliff and the IRA distinction in ways the audit did not
-measure. The eight-state `ss: 0.5` blend is unchanged. `MissingFeatures.md` D-11 records the group
+New Mexico is untouched (its own pass, disclosure-first — ROUND4 §6 D-C). No `exclAge` moved for
+either state **in v5.59**: a gate change alongside a figure change cannot be attributed if a
+downstream figure moves. That deferral was spent at **v5.60**, which set both gates and moved no
+figure — see the section below. The eight-state `ss: 0.5` blend is unchanged. `MissingFeatures.md` D-11 records the group
 these three states form — a modelled figure that is right on one side of a statutory gate and wrong
 on the other — as distinct from the D-3c optimistic class (NJ, VA).
