@@ -1,5 +1,144 @@
 # Changelog
 
+## v5.59 · Rhode Island and Wisconsin 65+ exclusions carried superseded amounts, 2026-09-02
+
+**Two `STATE_RULES` figures move, both toward the statute. No engine code changes.** A figure in
+`STATE_RULES` feeds `stateTaxAnnual`, so the model's output changes for any household domiciled in
+Rhode Island or Wisconsin — this is not a note-only release like v5.58. MC parity still held
+**10/10**, and that is expected rather than reassuring: no parity or suite fixture is domiciled in
+either state (AST walk over every literal, template, regex and member access across all 32 suites:
+**zero** RI/WI references, re-run this session), so parity is blind to the change by construction.
+The witnesses are `t10` §2E's new hand cases and `t31`'s two new keys.
+
+| | field | v5.58 | v5.59 | statute |
+|---|---|---|---|---|
+| RI | `excl65` | 20,000 | **50,000** | R.I. Gen. Laws § 44-30-12(c)(9), P.L. 2024 ch. 117 art. 6 § 21 — TY2025+ |
+| WI | `excl65` | 5,000 | **24,000** | Wis. Stat. § 71.05(6)(b)54m., 2025 Wis. Act 15 — 67+ |
+
+Both are the same defect: a real provision carried at an amount a legislative cycle stale. Both
+notes are rewritten to name the figure and every statutory condition the model does not apply.
+Parent finding: `docs/AUDIT_STATE_EXCL65_ROUND4.md` §2b, §2c, §4; scope
+`docs/SCOPE_EXCL65_STALE_RI_WI.md`, whose decisions D-A through D-F were resolved before the build.
+
+**Direction: ONE direction for this entry — CONSERVATIVE toward statute for the households that
+qualify.** For a couple past 67 with employer-plan money, the model was granting less relief than the
+law allows: ROUND4 §4 measures **+$2,020/yr** RI and **+$2,014/yr** WI at the model's own rates. That
+is the direction of the *figure move*. It is not the direction of the *remaining error*, which is
+mixed and stated next.
+
+### What did NOT change, and the limitations that REMAIN
+
+- **The 67 floor is not modelled in either state.** Both statutes gate at full retirement age (67 for
+  anyone born 1960 or later); the model applies both amounts from 65. A 65–66 household is granted an
+  exclusion the statute denies — **optimistic for those two years**, now by a larger amount than
+  before, because the amount grew. `exclAge` exists and could carry 67; it was deliberately not set
+  (D-D): a gate change alongside a figure change cannot be attributed if a downstream figure moves,
+  and RI's gate interacts with the cliff and the IRA distinction in ways ROUND4 did not measure.
+- **Rhode Island's AGI cliff is not modelled.** TY2025: $133,500 MFJ / $107,000 single, a hard cutoff
+  — full modification under it, none at or over it. The model applies the $50,000 regardless of
+  income. The TY2026 indexed pair was located but not read, so only TY2025 figures are stated.
+- **Rhode Island's IRA exclusion is not modelled.** Only Form 1040 line 5b income qualifies; IRA
+  distributions of every kind do not. `STATE_RULES` has no employer-plan-vs-IRA field and the engines
+  never carry the distinction. The model applies the $50,000 to all retirement income.
+- **Rhode Island's Social Security modification** carries the same two gates and removes *all*
+  federally-taxable SS where it applies; the model's `ss: 0.5` blend taxes half unconditionally.
+  RI's 2026 session removed the age threshold from the SS modification for TY2027+ (HB 7127 Sub A,
+  Art. 6 § 5) — recorded, not modelled; the enrolled bill text was not read.
+- **Rhode Island's $100,000 couple cap is not asserted dollar-exact** (D-E): the per-person reading
+  rests on the Division of Taxation's guide rather than on the statute alone.
+- **New Mexico is untouched** (D-C). Its `excl65` is not stale and its note is not false; it is a
+  disclosure problem first and gets its own pass.
+- **Wisconsin's statute was carried from ROUND3 §2b, not re-read.**
+
+Net: RI's sign now depends on three things at once — which side of the cliff, whether both spouses
+have reached 67, and whether the money is an employer plan or an IRA — conservative under the cliff
+past 67 with employer-plan money, optimistic otherwise. WI is optimistic in the 65–66 window and
+matches the statute from 67. All of this is in the two notes, METHODOLOGY's new section, and
+`MissingFeatures.md` **D-11**, the new finding for this gate-shaped group (NM, RI, WI) — distinct
+from D-3c's optimistic income-limited class, which closes at **NJ + VA** (D-A).
+
+### The F-6 guarded set shrinks 5 → 4, deliberately
+
+`t29` F-6 selects every `excl65 > 0` state whose note matches `/income[- ]limited|income limit/i`
+and asserts the set is non-empty. Wisconsin's $24,000 provision has **no** income test, so its note
+now reads *"not income-tested"* — chosen because *"no income limit"*, a true sentence, would have kept
+WI in the set and made the set semantically wrong. Executed with `qa/tools/f6_probe.cjs`: **5 (NJ, NM,
+RI, VA, WI) → 4 (NJ, NM, RI, VA)**. Rhode Island stays because its AGI cliff *is* an income limit.
+The `t29` assertion is untouched (D-F); `t10` pins both memberships with the same regex, so the shrink
+is asserted rather than left to a `length > 0` guard. A grep cannot evaluate this; the matcher was run.
+
+### Coverage — built from nothing, and negative-controlled
+
+Before this release **no assertion in the suite named RI or WI** — by name, by code or by member
+access — so a build with either stale figure restored passed every check that existed.
+
+`t10` §2E gains a v5.59 block: **11 checks on the current leg, 4 pre-fix pins on the frozen v5.58
+leg** (`t10` 213 → **224** current, 213 → **217** prior). Figures are asserted as **boolean
+identities** (the v5.57 EPS lesson) and by hand cases computed before the engine ran: RI 68/68,
+retirement income $80,000, taxable SS $40,800 → exclusion 2×$50,000 wipes the retirement base,
+$20,400 of SS at 5% = **$1,020.00** (was $3,020.00); WI 68/68, $60,000 → $12,000 base at 5.3% =
+**$636.00** (was $2,650.00). The disclosure conditions (67 floor, IRA, cliff dated TY2025) and both
+F-6 memberships are pinned.
+
+`t31` gains two keys, `since: "v559"`, no `until` (`t31` 29 → **31 on BOTH legs**, in pre-fix form on
+v5.58). ⚠ **The brief's candidate keys were `$50,000` and `$24,000`, and `$24,000` is vacuous** —
+measured on v5.58 before writing, it already has 1 render-tree hit and 5 Field Manual hits, so it
+passes before the fix exists. `$50,000` is clean on both user surfaces but already sits in
+METHODOLOGY §6 (Virginia's sentence), so C-0 could not have forced a Rhode Island sentence into
+METHODOLOGY. The keys shipped bind figure to provision — **`$50,000 pension/401k exclusion`** and
+**`$24,000 retirement-income exclusion`** — 0 hits on v5.58 across render tree, Field Manual *and*
+METHODOLOGY, each failing on its note's figure reverted with the prose intact.
+
+⚠ **One scope expectation was impossible by construction and is corrected here.** Scope §5(d)
+control 1 expected the `t31` RI key to fail when the *constant* is reverted with the note intact. A
+`t31` key reads prose and cannot see `STATE_RULES.excl65`. The constant is caught by `t10`'s boolean
+identity and hand case; the note is caught by `t31` and `t10`'s note checks. Both halves are
+controlled separately below.
+
+**`qa/controls_v559.sh`** — seven §B2 controls plus a comment-only null, each reverting ONE property,
+every failure read: **C1** RI constant → 20000, note intact: `t10` 2 (identity + hand case, which
+reports $3,020 — the pre-fix hand figure); **C2** WI constant → 5000: `t10` 2; **C3** RI note → v5.58
+string: `t10` 3 + `t31` 1; **C4** WI note → v5.58 string: `t10` 3 + `t31` 1, F-6 back to 5; **C5** RI
+note keeps the figure but drops the FRA/IRA/cliff clause (the v5.26 half-edit class): `t10` 2; **C6**
+WI note phrased *"no income limit"*: `t10` 1 (the D-F trap, caught); **C7** footer at v5.58: `t1` 1.
+C0 (comment only) fires nothing. ⚠ **C4's first edition failed for its own reasons**: anchored on
+`excl65: 24000, note: "` it patched **Colorado** (also 24000), reported 1 failure — the wrong one —
+and left the WI key untouched. Re-anchored on the state entry; both editions are in the script's
+header. A control that fails reads exactly like a check that works.
+
+### Suite totals — parsed from suite output, not restated
+
+**2,883 app checks, 0 failing.** Current v5.59 leg **1,105** · prior v5.58 leg **1,098** · run-once
+670 · MC parity 10/10 · tooling 82 (`t21` 50, DOM diff 32) — GRAND 2,965. `smoke_built` 16/16 on the
+built artifact. Per suite, current leg: `t1` 185 · `t2` 35 · `t3` 36 · `t4` 252 · `t5` 58 · `t6` 21
+· `t7` 41 · `t8` 40 · `t9` 14 · `t10` **224** · `t11` 40 · `t12` 23 · `t13` 42 · `t14` 44 · `t15` 11
+· `t16` 24 · `t17` 74 · `t18` 67 · `t19` 65 · `t20` 100 · `t21` 50 · `t22` 85 · `t23` 25 · `t24` 38
+· `t25` 45 · `t26` 25 · `t27` 18 · `t28` 34 · `t29` 54 · `t30` 12 · `t31` **31** · `t32` 12. The
+frozen v5.58 leg replays at 1,098 = 1,092 + 4 (`t10` pins) + 2 (`t31` pre-fix keys); every other
+suite on it is unchanged, the check that no new expectation leaked backwards (§B2).
+
+**The DOM diff (32/32) is not a witness here**: its household is not in RI or WI (same census), so
+"nothing moved" is the expected reading, not evidence.
+
+**Version-bump cost, measured with `qa/tools/vercensus.cjs v558`**: 15 files, 17 ladder entries,
+**63 gated expressions** — 80 judgement points, every one enumerated by position before rolling. 78
+were rolled (16 ladders, 2 ternary NEW ARMS in `t1` `verStr` / `t4` `_badge`, 60 chain gates); the
+two untouched are `t31`'s `since: "v558"` key and its `since === "v558"` branch, which belong to the
+v5.58 key. Five registries end in the retired `v592` and took `v559` positionally.
+`domdiff_withdrawal.mjs` needed no edit — its ladder covers new tags by a numeric rule.
+
+⚠ **Freshness finding.** `COMMIT_MESSAGE.txt` sits in the pool carrying the **v5.49** message; it has
+been on the manifest's delete-first list since v5.52 and ROUND4 §7 called it "expected." The manifest
+is right. It is on this release's delete-first list.
+
+⚠ **The v5.58 artifact did not reproduce byte-identically on this scaffold** (`a281824c…` against the
+published `ae9ac897…`). The divergence is a single expression inside mammoth's bundled docx code, with
+mammoth at 1.12.1 in both the committed lockfile and the install and rollup 4.63.1 matching the
+lockfile — so the v5.58 build used a different dependency tree, not a different source. Per §N3a the
+binding checks are `smoke_built` 16/16 and §N3, both passed; the hash is recorded for provenance.
+
+Source `ed89d2f214302942e5bd6355d923c9cf` · built `index.html` `c6ac96552dbc598e4812f4229ba425ad`
+
 ## v5.58 · Virginia's 65+ age-deduction note stated the wrong income thresholds, 2026-09-02
 
 **Disclosure only. One string, plus the version bump. No engine change and no figure moves** — MC
