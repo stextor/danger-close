@@ -2,10 +2,14 @@
 
 | | |
 |---|---|
-| Status | **DECISIONS RESOLVED 2026-09-02 — all seven as recommended. NOT yet buildable: D-7 puts a narrow ROUND5 audit first, and D-2 depends on its answer.** Next artifact is `AUDIT_STATE_INCOME_BASES_ROUND5.md`, not code. |
-| Premise measured against | shipped **v5.60**, source `23877f903a14ba43dd707a43d98b0df4`, clone `33f699d`, 2026-09-02 |
-| Parent findings | `MissingFeatures.md` **D-11 (c)** · `AUDIT_STATE_EXCL65_ROUND4.md` §2a, §2b, §4 · `AUDIT_STATE_EXCL65_ROUND3.md` §4 |
+| Status | **ROUND5 COMPLETE (2026-09-03). D-1, D-4, D-5, D-6, D-7 stand as approved. D-2 and D-3 are RE-DECIDED and AWAIT MAINTAINER APPROVAL.** Not buildable until they are approved. |
+| Premise measured against | shipped **v5.60**, source `23877f903a14ba43dd707a43d98b0df4`, clone **`e1f7adb`**, 2026-09-03 |
+| Parent findings | `MissingFeatures.md` **D-11 (c)** · `AUDIT_STATE_INCOME_BASES_ROUND5.md` (complete) · `AUDIT_STATE_EXCL65_ROUND4.md` §2a, §2b, §4 · `AUDIT_STATE_EXCL65_ROUND3.md` §4 |
 | Kind | **Data-model feature.** Engine code changes. This is not a rule-table edit. |
+
+> **Clone tag corrected.** This line previously read `33f699d`, which was accurate when written.
+> Re-read from a fresh clone on 2026-09-03: `d590bcd` and `513f666` added this file and the ROUND5
+> audit under `docs/`, and `e1f7adb` is an empty commit.
 
 ---
 
@@ -15,15 +19,13 @@ Five states' exclusions and two states' Social Security treatment are conditione
 and the data model cannot hold a condition. `excl65` is a scalar and `persons65` is a count, so every
 income-limited provision is currently applied **unconditionally**.
 
-The consequence is that the app grants households a break the statute denies them:
-
 | state | statute conditions on | what the model does | direction |
 |---|---|---|---|
 | **NM** | nine-band step, **$0 above $51,000** AGI (MFJ), never indexed since 1987 | grants $8,000 per person always | optimistic, and for the target household the provision **does not exist** |
-| **RI** | hard AGI cliff, TY2025 $133,500 MFJ / $107,000 single | grants $50,000 per person always | optimistic above the cliff |
-| **VA** | income-limited age deduction | applied unconditionally | optimistic above the limit |
-| **NJ** | income-limited pension exclusion | applied unconditionally | optimistic above the limit |
-| **CT** | income-limited pension/IRA exemptions | **not modelled at all**, and says so | — |
+| **RI** | hard AGI cliff, **TY2025 $133,750 MFJ / $107,000 single** | grants $50,000 per person always | optimistic above the cliff |
+| **VA** | $12,000 per person, single $1-for-$1 taper on joint AFAGI above $50,000/$75,000 | applied unconditionally | optimistic above the threshold |
+| **NJ** | household cap at 62, then percentage tiers, **zero above $150,000** of NJ gross income | grants $75,000 per person from 65 | optimistic |
+| **CT** | 100% of pension/annuity/IRA below $75,000/$100,000 federal AGI, stepped percentage above | **not modelled at all**, and says so | ⚠ **PESSIMISTIC — the model overstates CT tax** |
 
 **The maintainer's instruction of 2026-09-02 governs this work**: state tax rules are not assumptions,
 so the project's conservative-direction tiebreaker does not apply to them. Where the statute is
@@ -31,9 +33,19 @@ knowable and the model can express it, model it. Where the model *cannot* expres
 to make the model able — not to pick a scalar and lean it pessimistic. That is what this scope is
 for, and it is why "ship New Mexico as a disclosed scalar" is not the recommendation.
 
-Note what the table shows: **the existing simplifications run optimistic, not conservative.** The
-conservative default was never load-bearing here, so nothing shipped needs unwinding — but the
-excuse "it is disclosed and the app leans pessimistic anyway" was never available either.
+> ⚠ **Two corrections from the completed ROUND5, 2026-09-03.**
+>
+> **Rhode Island's figure was wrong.** This table read $133,500. Rhode Island's own TY2025 guide
+> prints $133,500, but the statute's indexing formula does not admit it — see
+> `AUDIT_STATE_INCOME_BASES_ROUND5.md` §2e and §8. **The shipped app note carries the same error and
+> needs correcting.**
+>
+> **Connecticut's direction reverses, and this section's conclusion needs qualifying.** This section
+> previously ended: *"the existing simplifications run optimistic, not conservative."* That is true of
+> the four modelled states. **Connecticut is materially pessimistic** — from TY2026 the model taxes
+> 100% of a CT household's pension, 401(k) and IRA income at 5% where the statute taxes none of it
+> below $100,000 of AGI. An unmodelled provision is not a neutral one, and this scope should not have
+> assumed it was.
 
 ---
 
@@ -41,8 +53,7 @@ excuse "it is disclosed and the app leans pessimistic anyway" was never availabl
 
 ### 2.1 `stateTaxAnnual` has exactly three call sites, in three engines
 
-AST census against v5.60 (`census.cjs v560.jsx stateTaxAnnual`) — 4 hits, one definition and three
-calls:
+AST census against v5.60 — 4 hits, one definition and three calls:
 
 | line | enclosing | notes |
 |---|---|---|
@@ -59,8 +70,6 @@ the same thing** across all three, or the app answers one statutory question thr
 
 ### 2.2 ⚠ THE FINDING — the app already carries FOUR different MAGI definitions, and nothing compares them
 
-This is the premise fact that changes the shape of the work, and it was not in D-11 (c).
-
 | line | context | definition |
 |---|---|---|
 | 4102 | Roth ladder engine | `grossOrd + qdcg` |
@@ -69,38 +78,44 @@ This is the premise fact that changes the shape of the work, and it was not in D
 | 9047 | a render block | `pension + spouseBWork + taxableSS + conv_y + rmd_y + _divLadder` |
 
 **No suite asserts these agree.** Eighteen suite files mention `magi`; none contains a parity,
-equality or agreement assertion across engines. `METHODOLOGY.md` already documents one divergence in
-its own words — the ladder's MAGI omits dividend income and realized capital gains that the IRMAA
-engine includes — and calls it "a separate and larger correction."
+equality or agreement assertion across engines. `METHODOLOGY.md` already documents one divergence —
+the ladder's MAGI omits dividend income and realized capital gains that the IRMAA engine includes —
+and calls it "a separate and larger correction."
 
-**Why this matters here more than it did before.** v5.43 closed exactly this class for §86: the app
-was "answering one statutory question two ways depending on which tab was open," and the fix shipped
-with an invariant reading *term sets equal, values equal, with no carve-out*. Hanging a state
-income threshold off the nearest available MAGI would recreate that defect on a new statute — a
-household would qualify for New Mexico's exemption on one tab and not on another.
+**Why this matters here.** v5.43 closed exactly this class for §86: the app was "answering one
+statutory question two ways depending on which tab was open." Hanging a state income threshold off
+the nearest available MAGI would recreate that defect on a new statute.
 
-**So the hard part of this feature is not the `STATE_RULES` field. It is defining ONE state-income
-measure and proving all three call sites compute it identically.** The field is the easy half.
+**So the hard part of this feature is not the `STATE_RULES` field. It is defining the state-income
+measures and proving all three call sites compute them identically.**
 
-### 2.3 What `STATE_RULES` can hold today
+### 2.3 What `STATE_RULES` can hold today — re-measured 2026-09-03
 
-51 entries, flat objects of scalars: `name`, `rate`, `ss`, `retExempt`, `excl65`, `exclAge`, `note`.
-`exclAge` (added v5.55, extended v5.60) is the precedent for an optional per-state field and is read
-in exactly one place. Nothing in the table is nested, so a band table would be the first
-non-scalar value — see §7 D-3 for whether that matters to the whole-table assertions.
+51 entries. **Six fields on every entry** (`name`, `rate`, `ss`, `retExempt`, `excl65`, `note`) and
+**two optional fields already present**: `exclAge` on **4** states (DE, KY, RI, WI) and `ssOffset` on
+**2** (ME, MD).
 
-### 2.4 What was NOT established, stated plainly
+> ⚠ **This section previously said "nothing in the table is nested, so a band table would be the first
+> non-scalar value."** True about nesting, but it understated the precedent. **`ssOffset` carries no
+> data — it selects behaviour** inside `_one` at L1145–1148, branching the exclusion computation for
+> Maine and Maryland. A shape discriminator is the generalisation of something the table already does.
 
-- **Which income base each statute actually names.** New Mexico's § 7-2-5.2 and Rhode Island's
-  cliff both key off adjusted gross income, but Virginia's is "adjusted federal adjusted gross
-  income" and **New Jersey's gross income excludes Social Security entirely**. These were not
-  re-read for this scope. A single measure is an approximation whose size is unmeasured.
-- **Whether New Mexico's stepped table interacts with its graduated rate schedule** — carried
-  unresolved from ROUND4 §3.
-- **Rhode Island's TY2026 indexed thresholds** (ADV 2025-22) — located but never read. TY2025 is
-  still the only verified pair.
-- **Connecticut, New Jersey and Virginia's current figures** were not verified for this scope at all.
-- **How often any threshold actually binds** — see §6, which is why that is the first deliverable.
+### 2.4 What was NOT established — **now established, see ROUND5**
+
+Every item in this list has been closed except where noted:
+
+- ~~Which income base each statute names~~ → **three in law, two the model can express**, differing by
+  one argument (`ssTaxableFed`). ROUND5 §3.
+- ~~New Jersey's phase-out percentages and whether $100,000/$150,000 are indexed~~ → **captured from
+  the codified section; NOT indexed**. ROUND5 §2b.
+- ~~Rhode Island's TY2026 indexed thresholds (ADV 2025-22)~~ → **the advisory never contained them**;
+  RI publishes a year in arrears, expected November 2026. ROUND5 §2e.
+- ~~Connecticut, New Jersey and Virginia's current figures~~ → **all three verified**. ROUND5 §2b–§2d.
+- **Still open — New Mexico's stepped table versus its graduated rate schedule**, carried from
+  ROUND4 §3. Outside ROUND5's remit.
+- **Still open — Connecticut's band boundaries at exactly $100,000 / $150,000**, a gap in the
+  published table. Resolve against the CT-1040 instructions before populating CT.
+- **Still open — how often any threshold binds.** See §6.
 
 ---
 
@@ -108,12 +123,12 @@ non-scalar value — see §7 D-3 for whether that matters to the whole-table ass
 
 | site | what |
 |---|---|
-| `stateTaxAnnual` L1114 | signature gains an income measure or its components; `_floor` logic gains a band lookup |
-| call sites L3996 / L4114 / L5265 | each must supply whatever the measure needs, identically |
-| `STATE_RULES` | new optional field on NM, RI, VA, NJ (+ CT if it stops being unmodelled) |
-| notes for those states | every one currently discloses the limitation as unmodelled; all must be rewritten |
-| `t10` §2E | the whole-table assertions, the F-6 guarded set (currently 4: NJ, NM, RI, VA), the note-vs-code invariant |
-| `t29` L212 | the F-6 matcher — states leaving the guarded set is the *point* of this release |
+| `stateTaxAnnual` L1114 | signature gains nothing new — both measures are expressions over existing arguments; `_floor`/`_cap` logic gains a band lookup and a taper |
+| call sites L3996 / L4114 / L5265 | must be **proven** to sum to the same measure; no new parameters |
+| `STATE_RULES` | **new optional field, ADDITIVE** — on NM, RI, VA, NJ, CT |
+| notes for those states | all five disclose the limitation as unmodelled; all five must be rewritten. **RI's also carries a wrong figure** |
+| `t10` §2E | whole-table assertions, the F-6 guarded set (NJ, NM, RI, VA), the note-vs-code invariant — **see §7 D-3, this constrains the field's design** |
+| `t29` L212 | the F-6 empty-set guard — same constraint |
 | `t31` | disclosure-parity keys for any figure that becomes real |
 | `METHODOLOGY.md` | mandatory; plus the state-tax paragraph the maintainer's rule needs stated explicitly |
 
@@ -121,15 +136,19 @@ non-scalar value — see §7 D-3 for whether that matters to the whole-table ass
 
 ## 4 · Explicitly OUT of scope
 
-- **The `ss: 0.5` blend across the eight partial-SS states.** It is the same defect class — no
-  statute contains a 50% — and it is the natural *next* release. Bundling it destroys attribution
-  for both. The field should be designed so Social Security can use it later (§7 D-4).
-- **Fixing the four-way MAGI divergence** (§2.2). Contained rather than fixed, if D-1 resolves to a
-  self-contained measure. Recorded as its own finding either way.
-- **Re-auditing CT, NJ, VA figures**, and the nine of nineteen exclusion states still unchecked.
-- **Any state's rate, `retExempt`, or `exclAge`.**
-- **RI's IRA-versus-employer-plan distinction.** Different problem: the statute is known and the
-  *household's facts* are not. It needs an input, not a threshold.
+- **The `ss: 0.5` blend across the eight partial-SS states.** Same defect class, natural *next*
+  release; bundling destroys attribution. ⚠ ROUND5 found **Connecticut's `ss: 0.5` is wrong in both
+  directions** — 100% exempt below the thresholds, and above them the cap is 25% of *total benefits
+  received*, a different base. That belongs to this out-of-scope release, not this one.
+- **Fixing the four-way MAGI divergence** (§2.2). Contained, not fixed. Its own scope.
+- **The nine of nineteen exclusion states still unchecked.**
+- **Any state's rate, `retExempt`, or `exclAge`.** ⚠ ROUND5 confirms RI's `exclAge: 67` is **correct**
+  for anyone born 1960 or later and mildly conservative for a 1955–1959 cohort. No change warranted.
+- **RI's IRA-versus-employer-plan distinction.** Needs an input, not a threshold.
+- **Virginia's pre-1939 unconditional deduction and its Disability Income interaction**, New Jersey's
+  disabled-at-any-age route, New Mexico's blindness route, Rhode Island's military pension
+  modification. All confirmed real; none expressible without new household inputs. **Disclose, don't
+  model.**
 
 ---
 
@@ -137,86 +156,113 @@ non-scalar value — see §7 D-3 for whether that matters to the whole-table ass
 
 - Hand-computed cells for each populated state **on both sides of every threshold**, and — for New
   Mexico — inside at least three of the nine bands, since a cliff implementation would pass a
-  two-sided test and fail a band.
+  two-sided test and fail a band. **For Connecticut, inside at least three of the ten.**
+- **For Virginia specifically: a case in the taper range with BOTH spouses qualifying**, because the
+  reduction is applied once to the combined $24,000 and a per-spouse implementation is wrong by a
+  factor of two there and correct everywhere else.
+- **For New Jersey: a case in each percentage tier**, since the dollar cap and the percentage never
+  bind together and a cap-then-percentage implementation would pass a tier-1 test.
 - **A cross-engine parity invariant**: the same household priced through all three call sites yields
-  the same state-income measure and the same state tax. This is the guardrail §2.2 says is missing,
-  and it is the single most valuable test in the release.
-- Boundary pins **at** each threshold (at, one dollar below, one dollar above) — cliffs are exactly
-  where an off-by-one hides.
+  the same state-income measure and the same state tax. The single most valuable test in the release.
+- Boundary pins **at** each threshold (at, one dollar below, one dollar above).
 - An extinction invariant: **no state whose note claims an income limit may carry an unconditional
-  exclusion**, the generalisation of the v5.60 note-vs-code check.
+  exclusion**, generalising the v5.60 note-vs-code check.
 - Negative controls that revert each new field and each threshold, per §B2, **read individually**.
 
 ---
 
 ## 6 · First deliverable is a measurement, not code
 
-Before any decision below is answerable, one number is needed: **how often does each threshold
-actually bind for the households this app models?**
+Unchanged. **How often does each threshold actually bind for the households this app models?**
 
-⚠ **This cannot be measured from the existing fixtures.** `qa/tools/fixture/households.mjs` holds
-boundary-clearing variants of one shipped example household — each built to sit on or clear exactly
-one named boundary — so counting them says nothing about a population. And **the engines compute no
-AGI-like state income at all**, so there is currently nothing to compare a threshold against.
+⚠ This cannot be measured from the existing fixtures. `qa/tools/fixture/households.mjs` holds
+boundary-clearing variants of one shipped example household, so counting them says nothing about a
+population. And the engines compute no AGI-like state income at all.
 
-The measurement therefore needs a purpose-built set of households spanning plausible spending and
-portfolio levels, and it needs the income measure from D-1 to exist first. That is not a detour:
-**defining the measure is the first step of the feature and of the measurement alike**, which is why
-shipping New Mexico as a scalar is not meaningfully cheaper than doing this properly.
+The measurement needs a purpose-built set of households and it needs the measure from D-1 to exist
+first. That is not a detour: **defining the measure is the first step of the feature and of the
+measurement alike.**
 
 ---
 
-## 7 · Decisions — RESOLVED 2026-09-02, all as recommended
+## 7 · Decisions
 
-> Maintainer approved all seven on 2026-09-02. Recorded verbatim below with the resolution on each.
-> **The build is still gated**: D-7 requires the ROUND5 audit first, and D-2 cannot be answered until
-> ROUND5 establishes New Jersey's income base.
+> **D-1, D-4, D-5, D-6, D-7 were approved 2026-09-02 and all five stand** — see
+> `AUDIT_STATE_INCOME_BASES_ROUND5.md` §6 for what the completed audit did to each.
+> **D-2 and D-3 were invalidated by ROUND5 and are re-decided below. They await approval.**
 
-**D-1 · Where does the state income measure come from?**
-(a) reuse the nearest existing MAGI at each call site — cheapest, and bakes §2.2's divergence into a
-new statute; (b) compute it **inside `stateTaxAnnual`** from the arguments it already receives —
-identical by construction, no new plumbing, but §2.1 shows the three call sites pass different field
-sets and the sums must be proven equal; (c) compute one measure upstream and thread it through all
-three engines — most correct, most invasive.
-**Recommendation: (b)**, with the §5 cross-engine parity invariant as the proof obligation. It is the
-only option that cannot silently diverge, because there is only one expression.
+### D-2 · One income base, or per-state bases? — **RE-DECIDED, awaiting approval**
 
-**D-2 · One income base, or per-state bases?**
-Each statute names a different base, and New Jersey's genuinely excludes Social Security.
-**Recommendation: one base now**, with the divergence disclosed per state in its note and NJ flagged
-explicitly — *provided* §6's measurement shows the approximation is small. If NJ's base moves it
-across its threshold in normal years, NJ stays unmodelled rather than modelled wrongly.
+The 2026-09-02 recommendation was *one base now, with divergence disclosed*. ROUND5 killed it: three
+statutes name three bases and two of them exclude Social Security. But the PARTIAL draft's
+replacement reading — per-state base selection — overstated the cost.
 
-**D-3 · Cliff-only shape, or a general band table?**
-RI, VA and NJ are cliffs; New Mexico is nine bands. A cliff-only field would need migrating later.
-**Recommendation: a general shape** — an ordered list of `{ upTo, amount }` — with a cliff expressed
-as two rows. Costs little more now and avoids a second migration. ⚠ This would be the first
-non-scalar value in `STATE_RULES`; the whole-table assertions in `t10` must be checked against it
-before building, not after.
+**Reduced to the terms `stateTaxAnnual` already receives, there are exactly two measures:**
 
-**D-4 · Design for Social Security now, or later?**
-**Recommendation: design for it, use it later.** The SS cliffs are the same shape, so the field
-should be able to express them — but populating them belongs to the `ss: 0.5` release, out of scope
-here per §4.
+| model base | expression | states |
+|---|---|---|
+| `agi` | `retIncome + pen + work + capGains + ssTaxableFed` | NM, RI, CT |
+| `agiExSS` | `retIncome + pen + work + capGains` | VA, NJ |
 
-**D-5 · What about the four-way MAGI divergence itself?**
-**Recommendation: do not fix it in this release, but log it as a finding in its own right and add
-the cross-engine parity invariant for the *state* measure only.** If D-1 resolves to (b), state tax
-is insulated from the divergence and the two problems stay separable. It should get its own scope.
+**Options.**
+(a) One base, as approved — **now known wrong**; for a couple with $40,000 of Social Security it moves
+the measure across a cliff in two states.
+(b) **Two bases selected by a per-state `base` field** — one extra term, one extra field, no new
+arguments, both expressions self-contained inside `stateTaxAnnual`.
+(c) Five per-state bases modelling each statute's own definition — needs NJ gross-income categories
+the model does not carry, for a difference that does not move a mainstream household.
 
-**D-6 · Does this release change any state's output before all five are populated?**
-**Recommendation: no.** An unpopulated state behaves exactly as it does today. That makes the field
-shippable independently of the state-by-state corrections, and each state then becomes a small,
-attributable release of its own.
+**Recommendation: (b).** It is exact for Virginia, close for New Jersey, and it keeps D-1 and D-5
+intact because both expressions live in one function. **The residual gap is disclosed, not modelled**:
+New Jersey's true gross income differs from `agiExSS` in ways the model cannot see, and neither
+measure carries dividend or interest income at all — an **optimistic** direction that must be said
+out loud in every populated state's note.
 
-**D-7 · Does a ROUND5 audit come first?**
-§2.4 lists four unverified statutory facts, and D-2 depends on one of them.
-**Recommendation: a narrow ROUND5 covering only the income BASE and thresholds for NM, RI, VA, NJ, CT
-— not a full re-audit.** Building the field against unverified bases is how a correct mechanism ends
-up carrying wrong numbers.
+### D-3 · Cliff-only shape, or a general band table? — **RE-DECIDED, awaiting approval**
+
+The 2026-09-02 recommendation was an ordered list of `{ upTo, amount }`. ROUND5 called it
+insufficient and counted four shapes. **Reading all five statutes, the count is two** — and three
+things that looked like shape are orthogonal attributes.
+
+**Two shapes:**
+- **`bands`** — ordered rows, each carrying **either** a dollar `amount` **or** a `pct` of qualifying
+  income. Expresses NM (9 amount rows), RI (2 — a cliff), CT (10 pct rows), and **NJ's mixed table
+  for free** (1 amount row, 2 pct rows, zero).
+- **`taper`** — `max(0, perPerson × qualifying − max(0, measure − threshold))`. Virginia only.
+
+**Three orthogonal attributes:** `base` (D-2), `unit` (`person` for NM/RI/VA, `household` for NJ, per
+return for CT), and the existing `exclAge` (62 for NJ, 0 for CT, 67 for RI).
+
+**And one constraint the suite imposes, checked before building as this decision required.**
+`t10` §2E's note-vs-code guard reads `r.excl65 > 0`; `t29`'s F-6 empty-set guard reads
+`(r.excl65 || 0) > 0`. Executed 2026-09-03: an array or object compared `> 0` yields **false**.
+⚠ **If the band table replaces `excl65`, every converted state drops silently out of both guards** —
+a vacuous pass, on exactly the states the release changes, in the two checks written to catch this.
+
+**Options.**
+(a) `{ upTo, amount }` only, as approved — **cannot express CT or NJ's tiers at all**.
+(b) **Additive optional field carrying `{ kind: 'bands' | 'taper', ... }` with mixed amount/pct rows,
+`excl65` left in place as a scalar.**
+(c) Replace `excl65` with a rich object — cleaner data model, **breaks both whole-table guards
+silently**.
+
+**Recommendation: (b).** Additive matches the `exclAge` and `ssOffset` precedent, keeps the guards
+meaningful, and leaves an unpopulated state behaving exactly as today, which is what D-6 requires.
+The cost is one redundant scalar per populated state; the alternative is a green suite that has
+stopped checking the thing it was written for.
+
+**⚠ One consequence to accept openly.** Every threshold in all five statutes is per filing status —
+MFJ, single, MFS, and for CT head of household. The model carries only a `single` boolean. **Two
+columns are all that can be expressed**, and the MFS and head-of-household figures must be disclosed
+as unmodelled rather than folded silently into one of the two.
 
 ---
 
 ## 8 · Build record
 
 *(empty — this scope has not been built)*
+
+---
+
+*Destination: `docs/SCOPE_INCOME_CONDITIONING.md` in the repo, and the knowledge pool — replacing the
+2026-09-02 copy in both.*
