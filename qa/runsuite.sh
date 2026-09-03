@@ -68,6 +68,11 @@ tally "t31-$CUR"   node t31_disclosure_parity.mjs "$CUR"
 # runner that stops at t31 would report this release green without executing anything that can see it.
 tally "t32-$PRIOR" node t32_ladder_dividend.mjs "$PRIOR"
 tally "t32-$CUR"   node t32_ladder_dividend.mjs "$CUR"
+# t33 (v5.63) carries the suite's FIRST stream-bearing fixtures. Every other fixture sets
+# incomeStreams to 0 or [], so nothing else in this runner can reach the Roth comparator's
+# FICA path at all. Both legs: the prior leg asserts the defect, the current leg the fix.
+tally "t33-$PRIOR" node t33_roth_stream_fica.mjs "$PRIOR"
+tally "t33-$CUR"   node t33_roth_stream_fica.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
