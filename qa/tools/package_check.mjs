@@ -563,6 +563,140 @@ if (POOL && existsSync(POOL)) {
   }
 }
 
+
+// ── K · the MANIFEST vs external truth (added 2026-09-03, ops item D-4) ──────────────────
+//
+// WHY THIS EXISTS, and why it is NOT the check D-4 asked for. D-4 was carried for ELEVEN releases
+// as "nothing compares the manifest's two build tables," and PROJECT_KNOWLEDGE_INDEX.md's own
+// Prior-build table proposed the remedy: "a one-line package_check assertion would close it."
+//
+// At the v5.61 ship the manifest was omitted from the release package, so NEITHER table rolled.
+// Run against that defect, the proposed assertion PASSES: Current v5.60 / Prior v5.59 is a
+// perfectly self-consistent pair. So does "the Current table's md5 matches the pool file it
+// names" — the manifest was internally coherent while describing the wrong build entirely.
+//
+// Internal consistency is the one property a not-updated-at-all manifest preserves. So every
+// check below that can catch that class anchors the manifest to EXTERNAL truth: the clone's
+// CHANGELOG, the clone's source and artifact, and the pool's actual contents. Had D-4 been built
+// as described, it would have shipped green through the defect that motivated it and been
+// trusted. That is §B2 one level up — a check carried on an untested description of what it
+// would catch.
+console.log("\nK. Manifest — PROJECT_KNOWLEDGE_INDEX.md vs the clone and the pool");
+{
+  // ⚠ Read the manifest the package WILL LEAVE, not the one already there. A package whose whole
+  // job is to correct this document would otherwise be failed BY the correction it is shipping, and
+  // every well-behaved manifest fix would trip K and train it into noise within two releases. This
+  // is the identical mistake I-2's own comment records making and fixing on its first draft; it was
+  // made again here, on the first package section K was run against, and caught the same way.
+  // Order: the package's github/ copy, then knowledge/, then the pool, then the clone.
+  const mCands = [join(GH, "PROJECT_KNOWLEDGE_INDEX.md"), join(KN, "PROJECT_KNOWLEDGE_INDEX.md"),
+                  POOL && join(POOL, "PROJECT_KNOWLEDGE_INDEX.md"),
+                  CLONE && join(CLONE, "PROJECT_KNOWLEDGE_INDEX.md")];
+  const mPath = mCands.find(p => p && existsSync(p));
+  if (!mPath) {
+    skipped("K-1..K-9: manifest checks", "no manifest in the package, the pool or the clone");
+  } else {
+    const src = mPath.startsWith(GH) ? "the package's github/" : mPath.startsWith(KN) ? "the package's knowledge/"
+              : (POOL && mPath.startsWith(POOL)) ? "the pool" : "the clone";
+    console.log(`     (reading the manifest from ${src})`);
+    const M = readFileSync(mPath, "utf8");
+    // Build tables are pipe rows under a heading. Read the FIRST table after each heading only:
+    // both sections carry historical rolled-notes below them and those must not be parsed.
+    const table = heading => {
+      const i = M.indexOf(heading);
+      if (i < 0) return null;
+      const out = {};
+      for (const line of M.slice(i, i + 800).split("\n")) {
+        const m = line.match(/^\|\s*([^|]+?)\s*\|\s*(.+?)\s*\|\s*$/);
+        if (!m) continue;
+        const k = m[1].replace(/`/g, "").trim(), v = m[2].replace(/[`*]/g, "").trim();
+        if (k && k !== "Field" && !/^-+$/.test(k)) out[k] = v;
+      }
+      return Object.keys(out).length ? out : null;
+    };
+    const C = table("## Current build"), P = table("## Prior build");
+    if (!C || !P) {
+      ck("K-0: both build tables parse", false, "Current or Prior table not found \u2014 headings moved?");
+    } else {
+      ck("K-0: both build tables parse", true);
+
+      // K-1..K-3 anchor the CURRENT table to the committed tree. These are the three that catch
+      // a manifest which simply was not updated.
+      if (CLONE && existsSync(CLONE)) {
+        const clV = (readFileSync(join(CLONE, "CHANGELOG.md"), "utf8").match(/^## (v[\d._]+)/m) || [])[1];
+        ck("K-1: manifest's Current version == the newest CHANGELOG entry",
+          C.Version === clV, `manifest ${C.Version}, CHANGELOG ${clV}`);
+        const srcP = join(CLONE, "src/DangerClose.jsx"), artP = join(CLONE, "index.html");
+        ck("K-2: manifest's Current source md5 == the committed src/DangerClose.jsx",
+          existsSync(srcP) && C["Source md5"] === md5(srcP),
+          `manifest ${C["Source md5"]}, tree ${existsSync(srcP) ? md5(srcP) : "absent"}`);
+        ck("K-3: manifest's Current built md5 == the committed index.html",
+          existsSync(artP) && C["Built index.html md5"] === md5(artP),
+          `manifest ${C["Built index.html md5"]}, tree ${existsSync(artP) ? md5(artP) : "absent"}`);
+      } else {
+        skipped("K-1..K-3: Current table vs the committed tree", "no clone given");
+      }
+
+      // K-4..K-6 anchor BOTH tables to the pool. K-4 is what catches a table naming a leg the
+      // rotation has already removed.
+      if (POOL && existsSync(POOL)) {
+        const named = [C, P].map(t => t["Source file in knowledge"]);
+        const missing = named.filter(f => !f || !existsSync(join(POOL, f)));
+        ck("K-4: every source file the two tables name is still in the pool",
+          missing.length === 0, missing.join(", "));
+        const wrong = [];
+        for (const t of [C, P]) {
+          const f = t["Source file in knowledge"];
+          if (!f || !existsSync(join(POOL, f))) continue;
+          if (md5(join(POOL, f)) !== t["Source md5"]) wrong.push(`${f} (table ${t["Source md5"]}, pool ${md5(join(POOL, f))})`);
+        }
+        ck("K-5: each table's source md5 == the actual md5 of the pool file it names",
+          wrong.length === 0, wrong.join(" | "));
+        const legs = readdirSync(POOL).filter(f => /^DangerClose-v5_\d+\.jsx$/.test(f)).sort();
+        ck("K-6: the pool's two legs ARE the two the tables name",
+          legs.join() === named.filter(Boolean).sort().join(),
+          `pool [${legs.join(", ")}] vs manifest [${named.filter(Boolean).sort().join(", ")}]`);
+
+        // K-8: the §A2 fallback hash table. Its own header records 2026-08-28, when it "VOUCHED
+        // for two stale pool files, and the freshness check passed on them." At v5.61, 21 of its
+        // 72 hashed rows were wrong. A fallback nobody checks is a fallback that lies.
+        const rows = [...M.matchAll(/\|\s*`?([A-Za-z0-9_.-]+\.(?:mjs|cjs|jsx|js|sh|md|html|json|txt))`?\s*\|[^|]*\|?\s*`?([0-9a-f]{32})`?/g)];
+        const seen = new Set(), badHash = [], ghostRow = [];
+        for (const [, f, h] of rows) {
+          if (seen.has(f + h)) continue; seen.add(f + h);
+          const there = join(POOL, f);
+          if (!existsSync(there)) { ghostRow.push(f); continue; }
+          if (md5(there) !== h) badHash.push(f);
+        }
+        ck("K-8: every hashed manifest row matches its pool file, and names a file that exists",
+          badHash.length === 0 && ghostRow.length === 0,
+          [badHash.length ? `stale: ${badHash.join(", ")}` : "",
+           ghostRow.length ? `not in pool: ${ghostRow.join(", ")}` : ""].filter(Boolean).join(" | "));
+
+        // K-9: §G requires every pool file listed explicitly — "never elide a range with '…',
+        // because a file inside the ellipsis becomes invisible." 14 pool files were unnamed at
+        // v5.61, eleven of them predating it.
+        const unlisted = readdirSync(POOL).filter(f => !M.includes(f));
+        ck("K-9: every pool file is named somewhere in the manifest (\u00a7G: list every file explicitly)",
+          unlisted.length === 0, unlisted.join(", "));
+      } else {
+        skipped("K-4..K-6, K-8, K-9: manifest vs the pool", "no pool given \u2014 this is the POST-SHIP half");
+      }
+
+      // K-7 is D-4 EXACTLY AS ORIGINALLY FRAMED, and it is kept deliberately underneath a warning.
+      // \u26a0 IT DOES NOT FIRE on a manifest that was never updated: if neither table rolls they stay
+      // mutually consistent, which is precisely the v5.61 defect. It DOES catch the other real
+      // case \u2014 one table rolled and the other not \u2014 which ran for SEVEN releases before v5.59
+      // caught it by eye. Ship it, but never as the manifest's only guard: K-1..K-6 are the ones
+      // that catch a stale-in-both-tables manifest. The danger was never this assertion; it was
+      // believing it sufficient.
+      const num = v => Number(String(v).replace(/[^\d]/g, ""));
+      ck("K-7: Prior is exactly one release below Current (WEAK \u2014 cannot see a both-tables-stale manifest; see K-1..K-6)",
+        num(C.Version) === num(P.Version) + 1, `Current ${C.Version}, Prior ${P.Version}`);
+    }
+  }
+}
+
 console.log(`\npackage_check: ${pass} passed, ${fail} failed, ${skip} skipped`);
 if (skip) console.log("  \u26a0 A SKIPPED check is not a passed one. Re-run with a clone to close the gap.");
 if (fail) { console.log("\nDO NOT SEND THIS ZIP:"); fails.forEach(f => console.log(f)); }

@@ -70,7 +70,7 @@ run () {   # $1 = label, $2 = expected check id, $3.. = mutation commands run in
   # 2026-08-28, when sections H and I were added — under the old class every H/I control would
   # have printed *** NOT CAUGHT ***, which reads as "the new checks are broken" when in fact the
   # harness could not see them. Widen this the same day you add a section.
-  fired=$(echo "$out" | grep "✗" | grep -oE '[A-I]-[0-9]+b?' | sort -u | tr '\n' ',')
+  fired=$(echo "$out" | grep "✗" | grep -oE '[A-K]-[0-9]+b?' | sort -u | tr '\n' ',')
   if echo "$fired" | grep -q "$want"; then
     PASS=$((PASS+1)); printf "  CAUGHT by %-6s %s\n" "$want" "$label"
   else
@@ -151,7 +151,7 @@ runc () {  # $1 = label, $2 = expected check id, $3.. = mutation commands run in
   ( cd /tmp/pkctlc && eval "$@" ) >/dev/null 2>&1
   local out fired
   out=$(node "$PKG_CHECK" "$APP" /tmp/pkctlc 2>&1)
-  fired=$(echo "$out" | grep "✗" | grep -oE '[A-I]-[0-9]+b?' | sort -u | tr '\n' ',')
+  fired=$(echo "$out" | grep "✗" | grep -oE '[A-K]-[0-9]+b?' | sort -u | tr '\n' ',')
   if echo "$fired" | grep -q "$want"; then
     PASS=$((PASS+1)); printf "  CAUGHT by %-6s %s\n" "$want" "$label"
   else
@@ -216,8 +216,19 @@ runc "P24 a shipped scope loses its retirement marker and reads live again" I-2 
   "for f in docs/SCOPE_*.md; do grep -qE 'RETIRED|SUPERSEDED|FULFILLED' \"\$f\" && { grep -vE 'RETIRED|SUPERSEDED|FULFILLED' \"\$f\" > \"\$f.t\" && mv \"\$f.t\" \"\$f\"; break; }; done"
 runc "P25 a NEW unclassified scope is added" I-2 \
   "printf '# SCOPE\n\n**Status: BUILD AUTHORISED.**\n' > docs/SCOPE___control__.md"
-runc "P26 an OPEN-allowlist entry names a scope that no longer exists" I-3 \
-  "rm -f docs/SCOPE_FIX_tidyup_six.md"
+# ⚠ DERIVED, not named (fixed 2026-09-03). This control hardcoded `SCOPE_FIX_tidyup_six.md`,
+# which was on the OPEN allowlist when the control was written and is not now — so removing it
+# could not trip I-3 and the control reported NOT CAUGHT for an unknown number of releases while
+# I-3 itself was innocent. That is the exact rot this harness's own header warns about
+# ("every target file is DERIVED from the package rather than named"), reappearing in a control
+# the same header was written to fix. Read the live allowlist out of package_check.mjs instead.
+OPEN_SCOPE=$(grep -oE '"SCOPE_[A-Za-z0-9_]+\.md"' "$PKG_CHECK" | tr -d '"' | head -1)
+if [ -z "$OPEN_SCOPE" ] || [ ! -f "$CLONE/docs/$OPEN_SCOPE" ]; then
+  SKIP=$((SKIP+1)); echo "  - SKIPPED: P26 - could not derive a live OPEN-allowlist scope from $PKG_CHECK"
+else
+runc "P26 an OPEN-allowlist entry names a scope that no longer exists ($OPEN_SCOPE)" I-3 \
+  "rm -f docs/$OPEN_SCOPE"
+fi
 
 # ── P27 · the FALSE-POSITIVE control, and the one most worth keeping ──────────────────────────
 # A reporting check that cries wolf on a clean tree gets ignored, and an ignored gate has stopped
@@ -255,6 +266,104 @@ else
   MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** P28 H did not skip loudly with no CHANGELOG — it may be passing blind\n"
 fi
 rm -rf /tmp/pkctlc
+
+
+# ── SECTION K CONTROLS (added 2026-09-03) ────────────────────────────────────────────────
+# K reads the MANIFEST against the clone and the pool, so these need a POOL argument the `run`
+# helper above does not pass. They get their own runner and their own scratch pool.
+#
+# ⚠ P29 is the reason section K exists. It reproduces the v5.61 defect exactly — the manifest not
+# updated at all, so NEITHER build table rolls — and asserts two things: that K-1 CATCHES it, and
+# that **K-7 DOES NOT**. K-7 is D-4 exactly as it was written and carried for eleven releases, and
+# the whole finding behind this package is that it cannot see this defect. If K-7 ever starts
+# firing on P29, someone has changed it into a different check and its WEAK label is a lie.
+POOLARG="${4:-}"
+if [ -z "$POOLARG" ] || [ ! -d "$POOLARG" ]; then
+  SKIP=$((SKIP+1)); echo "  - SKIPPED: P29..P35 (section K) - no pool dir given. usage: $(basename "$0") <app-pkg> <clone> <ops-pkg-or-empty> <pool>"
+else
+
+runk () {  # $1 = label, $2 = expected id, $3 = "NOT:<id>" or "", $4 = python mutation source
+  local label="$1" want="$2" mustnot="$3" mut="$4"
+  rm -rf /tmp/pkpool && cp -r "$POOLARG" /tmp/pkpool
+  if ! python3 -c "$mut" >/dev/null 2>&1; then
+    MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** %s (mutation did not apply - control is INVALID)\n" "$label"; return
+  fi
+  local out fired
+  out=$(node "$PKG_CHECK" "$APP" "$CLONE" "" /tmp/pkpool 2>&1)
+  fired=$(echo "$out" | grep "✗" | grep -oE '[A-K]-[0-9]+b?' | sort -u | tr '\n' ',')
+  if [ -n "$mustnot" ] && echo "$fired" | grep -q "${mustnot#NOT:}"; then
+    MISS=$((MISS+1)); printf "  *** FINDING *** %s - %s fired when it must NOT (fired: %s)\n" "$label" "${mustnot#NOT:}" "$fired"
+    rm -rf /tmp/pkpool; return
+  fi
+  if echo "$fired" | grep -q "$want"; then
+    PASS=$((PASS+1)); printf "  CAUGHT by %-6s %s%s\n" "$want" "$label" "${mustnot:+   [and ${mustnot#NOT:} correctly silent]}"
+  else
+    MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** %s (wanted %s, fired: %s)\n" "$label" "$want" "$fired"
+  fi
+  rm -rf /tmp/pkpool
+}
+
+runk "P29 THE v5.61 DEFECT - manifest not updated at all, NEITHER table rolled" "K-1" "NOT:K-7" "
+p='/tmp/pkpool/PROJECT_KNOWLEDGE_INDEX.md'; s=open(p).read()
+a=s.index('## Current build'); b=s.index('## Prior build')
+cur=s[a:b].replace('| Version | **v5.61** |','| Version | **v5.60** |',1)
+pri=s[b:].replace('| Version | **v5.60** |','| Version | **v5.59** |',1)
+assert cur!=s[a:b] and pri!=s[b:]
+open(p,'w').write(s[:a]+cur+pri)
+"
+
+runk "P30 Current source md5 corrupted" "K-2" "" "
+p='/tmp/pkpool/PROJECT_KNOWLEDGE_INDEX.md'; s=open(p).read()
+a=s.index('## Current build'); b=s.index('## Prior build')
+blk=s[a:b].replace('7e1a02881256142c5b9206045e76e2ec','0000000000000000000000000000dead',1)
+assert blk!=s[a:b]
+open(p,'w').write(s[:a]+blk+s[b:])
+"
+
+runk "P31 Current built-artifact md5 corrupted" "K-3" "" "
+p='/tmp/pkpool/PROJECT_KNOWLEDGE_INDEX.md'; s=open(p).read()
+a=s.index('## Current build'); b=s.index('## Prior build')
+blk=s[a:b].replace('ba3968f24e06eb989d9171cbd9a8c796','0000000000000000000000000000beef',1)
+assert blk!=s[a:b]
+open(p,'w').write(s[:a]+blk+s[b:])
+"
+
+runk "P32 a fallback hash-table row goes stale" "K-8" "" "
+import re
+p='/tmp/pkpool/PROJECT_KNOWLEDGE_INDEX.md'; s=open(p).read()
+m=re.search(r'\`t29_boundaries\.mjs\` \| \`([0-9a-f]{32})\`', s)
+assert m
+open(p,'w').write(s[:m.start(1)]+'0'*32+s[m.end(1):])
+"
+
+runk "P33 a pool file loses its only manifest row" "K-9" "" "
+p='/tmp/pkpool/PROJECT_KNOWLEDGE_INDEX.md'; s=open(p).read()
+assert 'vergates.cjs' in s
+open(p,'w').write(s.replace('vergates.cjs','REMOVED_BY_CONTROL.cjs'))
+"
+
+runk "P34 Current rolled but Prior NOT - the defect that ran for seven releases" "K-7" "" "
+p='/tmp/pkpool/PROJECT_KNOWLEDGE_INDEX.md'; s=open(p).read()
+b=s.index('## Prior build')
+pri=s[b:].replace('| Version | **v5.60** |','| Version | **v5.55** |',1)
+assert pri!=s[b:]
+open(p,'w').write(s[:b]+pri)
+"
+
+# P35: the manifest is GONE from BOTH clone and pool. K must SKIP LOUDLY, never pass blind.
+# This is the E-14 shape: a check that cannot reach its input and reports green is worse than none.
+rm -rf /tmp/pkpool /tmp/pkclone2
+cp -r "$POOLARG" /tmp/pkpool && rm -f /tmp/pkpool/PROJECT_KNOWLEDGE_INDEX.md
+cp -r "$CLONE" /tmp/pkclone2 && rm -f /tmp/pkclone2/PROJECT_KNOWLEDGE_INDEX.md
+out35=$(node "$PKG_CHECK" "$APP" /tmp/pkclone2 "" /tmp/pkpool 2>&1)
+if echo "$out35" | grep -q "SKIPPED: K-1..K-9"; then
+  PASS=$((PASS+1)); printf "  CAUGHT by %-6s %s\n" "K-*" "P35 manifest absent - K skips LOUDLY instead of passing blind"
+else
+  MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** P35 K did not skip loudly with no manifest - it may be passing blind\n"
+fi
+rm -rf /tmp/pkpool /tmp/pkclone2
+
+fi
 
 [ "$SKIP" -gt 0 ] && echo "  ⚠ A SKIPPED control is not a passing one."
 [ "$MISS" -gt 0 ] && { echo "  A control that does not fire is a FINDING — investigate the check, never soften it."; exit 1; }
