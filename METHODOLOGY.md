@@ -145,12 +145,31 @@ their own state notes. **Thirteen of the nineteen exclusion states remain unveri
 thresholds may differ from 65 than are modelled here.**
 
 One shared calculator serves the Taxes engine, the Roth strategy comparator, and the Withdrawal
-engine, so the three can never disagree. Selecting no state preserves the legacy flat-rate
+engine.
+
+⚠ **Corrected at v5.62. Until then this paragraph read "… so the three can never disagree", and
+that was false.** They shared the calculator but not the ARGUMENTS. Through v5.61 the two Roth call
+sites passed `retIncome: max(0, taxableOrd − ssT)`, which is (a) net of the FEDERAL standard
+deduction — a deduction this section explicitly lists as not modelled, and the wrong jurisdiction's
+in any case — and (b) undecomposed, so wage income was folded into `retIncome` and collected the
+state RETIREMENT-income exclusion. In the five states that exempt retirement income entirely
+(IL, MI, MS, IA, PA) that exempted the household's wages outright. **The three engines disagreed in
+all 42 taxing jurisdictions**, by up to **$2,656/yr** on an ordinary household, always in the same
+direction: the Roth engines under-taxed, so conversion and break-even output was **optimistic**
+against the Taxes tab. v5.62 makes all three pass gross components. **What guarantees agreement is
+not the shared calculator but the argument shape**, and that shape is now asserted — `t8` checks
+every call site at the source, `t10` §2E checks the behaviour.
+
+⚠ **One residual, disclosed rather than modelled.** `otherOrd` — non-work ordinary income such as
+rental or annuity streams — is computed only in the Taxes engine. The Roth engines' income base is
+`pen + work + rmd` and never carries it, so for a household with such income the engines still
+differ. Adding it changes federal tax, Social Security taxation, IRMAA and conversion sizing, so it
+is a separate change; the suite pins the gap as a known defect. Selecting no state preserves the legacy flat-rate
 behavior exactly (backward compatible with every existing backup).
 
 **This is an approximation layer and is labeled as such in the UI.** Not modeled: progressive
 state brackets (effective rate instead), county/city income taxes (IN, MD partially folded, NYC
-not), income limits on several exclusions (NJ, VA, RI approximated as unconditional; RI's and WI's full-retirement-age (67) floors are not applied — the model starts both at 65, see the v5.59 section — **Virginia's $12K age deduction in fact tapers $1 for every $1 of adjusted federal AGI above $50K single/$75K married, so applying it in full overstates the deduction and understates Virginia's state tax**), NJ's 62 age floor and SC's under-65 tier (both disclosed, neither applied), **Colorado's shared $24K cap between Social Security and pension — a cap the two share rather than one reducing the other, which overstates Colorado's exclusion and understates its state tax**. Maryland's and Maine's exclusions, which are reduced by Social Security received dollar-for-dollar, ARE applied as of v5.56 (§12), state
+not), income limits on several exclusions (NJ, VA, RI approximated as unconditional; ⚠ *this clause was stale and is corrected at v5.62: v5.60 DID apply RI's and WI's full-retirement-age (67) floors, as stated above — the contradiction stood within this one document for two releases* — **Virginia's $12K age deduction in fact tapers $1 for every $1 of adjusted federal AGI above $50K single/$75K married, so applying it in full overstates the deduction and understates Virginia's state tax**), NJ's 62 age floor and SC's under-65 tier (both disclosed, neither applied), **Colorado's shared $24K cap between Social Security and pension — a cap the two share rather than one reducing the other, which overstates Colorado's exclusion and understates its state tax**. Maryland's and Maine's exclusions, which are reduced by Social Security received dollar-for-dollar, ARE applied as of v5.56 (§12), state
 standard deductions/credits, pension-source distinctions (AL/HI DB exemptions), and WA's
 capital-gains excise. Verify your state.
 
