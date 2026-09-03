@@ -897,7 +897,7 @@ the plan at every income the app models, and it is not served by the same fix, d
 | State | The gate the model cannot hold | Model vs statute (ROUND4 §4, both spouses 68, MFJ) |
 |---|---|---|
 | **NM** | SS exempt only under $150,000 MFJ AGI (hard cliff); the $8K 65+ exemption is zero above $51,000 MFJ, unindexed since 1987 | +$216 conservative below the SS cliff; **−$1,784 optimistic** above it — the two errors mask each other until exactly $150,000 of AGI |
-| **RI** | ~~FRA (67) floor~~ **modelled v5.60**; AGI cliff (TY2025: $133,500 MFJ / $107,000 single); IRA distributions do not qualify; SS modification carries the same gates | conservative under the cliff with employer-plan money; **optimistic** if the money is an IRA; **optimistic** at or over the cliff. The **65–66 window is closed** — a couple at 66 on $80,000 now pays $5,020 rather than $1,020 |
+| **RI** | ~~FRA (67) floor~~ **modelled v5.60**; AGI cliff (TY2025: $133,750 MFJ / $107,000 single, per ADV 2025-22 — corrected v5.61; RI's own PUB 2026-01 prints $133,500, which the statute's indexing formula does not admit); IRA distributions do not qualify; SS modification carries the same gates | conservative under the cliff with employer-plan money; **optimistic** if the money is an IRA; **optimistic** at or over the cliff. The **65–66 window is closed** — a couple at 66 on $80,000 now pays $5,020 rather than $1,020 |
 | **WI** | ~~67 floor~~ **modelled v5.60**, no income test | **None remaining.** The 65–66 window is closed (a couple at 66 on $60,000 now pays $3,180 rather than $636) and the model matched the statute from 67 already — **WI is exact on this provision** |
 
 **What v5.59 did.** Corrected the two *amounts* that were a legislative cycle stale — RI `excl65`

@@ -119,7 +119,7 @@ Four conditions the statute attaches, of which the model expresses none:
    model's floor for RI is 65 (no `exclAge`; only DE at 60 and KY at 0 carry one). A 65- or
    66-year-old Rhode Island retiree qualifies for nothing and the model grants them the full amount.
 2. **The AGI test is a hard cliff**, at the (c)(8) thresholds, which (c)(9)(vi) ties (c)(9) to.
-   For **TY2025** those are **$133,500 MFJ / $107,000 single and MFS**. Under = full modification;
+   For **TY2025** those are **$133,750 MFJ / $107,000 single and MFS**. ⚠ *Corrected 2026-09-03: this round wrote $133,500, following PUB 2026-01. ADV 2025-22 gives $133,750 and the statute's indexing formula proves it — ROUND5 §2e. Shipped at v5.61.* Under = full modification;
    at or over = none.
 3. **IRA distributions do not qualify at all.** Only income properly on federal Form 1040 **line 5b**
    — pensions, 401(k), 403(b), governmental 457(b), TSP, annuities. Traditional, Roth, SEP and
@@ -182,7 +182,7 @@ recorded in §5 as a refinement owed, not a contradiction.
   bill text was not read**, and the Division's own citation in that summary points at
   § 44-30-2.6(c) where § 44-30-12(c) is meant, which the document itself warns may happen.
 - **Rhode Island's TY2026 inflation-adjusted thresholds.** Published in ADV 2025-22 (November 2025),
-  located but not read. **TY2025 — $107,000 / $133,500 — is the only verified pair.**
+  located but not read. **TY2025 — $107,000 / $133,750 — is the only verified pair.** ⚠ *Corrected 2026-09-03: written here as $133,500; see ROUND5 §2e. ADV 2025-22 was subsequently read in full and contains no TY2026 retirement thresholds — RI publishes them a year in arrears, so the TY2026 item closes as NOT OBTAINABLE YET.*
 - **Whether the $100,000 Rhode Island couple cap survives on the statute alone** (§2b).
 - **Wisconsin's statute**, carried from ROUND3 rather than re-read (§2c).
 - **Whether New Mexico's stepped table interacts with its graduated rate schedule** in any way a
@@ -286,7 +286,7 @@ figure change plus a gate change in one release cannot be attributed if somethin
 
 **D-E · Does the Rhode Island $50,000 get asserted dollar-exact?**
 *Recommendation: **yes for the $50,000 per-person amount; no for the AGI threshold.*** The $50,000 is
-in the statute in plain terms. The **$133,500 / $107,000 pair should be dated to TY2025** wherever it
+in the statute in plain terms. The **$133,750 / $107,000 pair should be dated to TY2025** wherever it
 appears — the same treatment §B1a records for the MD/ME figures — because it is indexed annually and
 TY2026 was not read. And **no dollar-exact figure for the $100,000 couple cap**, which rests on the
 Division's guide rather than the statute (§2b).

@@ -6,7 +6,7 @@
 | Written | 2026-09-03 |
 | Origin | `AUDIT_STATE_INCOME_BASES_ROUND5.md` §2e and §8 |
 | Shape | **Disclosure only. One string. No figure the engine reads moves. No engine change.** ⚠ **But NOT a one-line release — see §2, the suite pins the old figure literally.** |
-| Status | **AWAITING MAINTAINER DECISION** — §6. Not built. |
+| Status | **FULFILLED** — built and shipped as **v5.61**, 2026-09-03. §6 resolved: D-a ship alone, D-b (iii). §7 is the build record. |
 | Precedent | `SCOPE_VA_NOTE_CORRECTION.md`, shipped v5.58. Same shape, same class, same verification pattern. |
 
 ---
@@ -194,9 +194,96 @@ your call.
 
 ---
 
-## 7. Build record
+## 7. Build record — built and shipped 2026-09-03 as v5.61
 
-*(empty — this scope has not been built)*
+**Shipped.** Source `7e1a02881256142c5b9206045e76e2ec` · built `index.html`
+`ba3968f24e06eb989d9171cbd9a8c796`. Decisions taken as recommended: **D-a** ship alone as v5.61,
+**D-b (iii)** `per ADV 2025-22`, **D-c** no project position.
+
+**Counts, computed from suite output:** v5.61 leg **1,121** · v5.60 leg **1,119** (unchanged, as §5
+required) · run-once **670** · parity **10/10** · **2,920 app checks, 0 failing**. Tooling 82.
+`smoke_built` 16/16.
+
+### ⚠ Correction to this scope's own §2
+
+**§2 attributes its code census to `qa/tools/state_dump.cjs`. No such file exists.** `qa/tools/`
+holds twelve `.cjs` files and that is not among them. The census was re-derived for the build by AST
+(`STATE_RULES` resolved from a `VariableDeclarator` walk) and **its substance was correct**: `RI.note`
+resolves at **L1068**, the figure appears once in the source, and `$133,750` appeared nowhere.
+`f6_probe.cjs` and `notes_probe.cjs` both do this class of work and either could have produced it.
+The finding is provenance, not arithmetic — but §A0's standard is that a sentence carrying a number
+names the command that printed it, and this one named a command that cannot be run.
+
+### What §3 shipped, item by item
+
+1. **The note** — corrected to `$133,750 ... , per ADV 2025-22` per D-b (iii). `133,500` now appears
+   **0** times in the source.
+2. **Version bump** — 4 in-app sites, found and replaced by count, 0 stale strings remaining. Suite
+   cost re-derived rather than quoted: `vercensus` measured **78 judgement points** (59 chain arms,
+   16 ladder members, 3 ternaries). The three ternaries were handled by hand: `t1`'s `verStr` and
+   `t4`'s `_badge` took **new arms**; `t24`'s `_k` ends a chain and took an **extension**. `t10`
+   needed no registry roll — it derives `_v` numerically.
+3. **`t10` L873** — split at `_v >= 561`, plus two new v5.61-only checks (extinction of `133,500`,
+   and a pin on the citation).
+4. **`t31`** — **verified unchanged, and the suite decided it, not the builder.** `t31`'s own header
+   states the key set is deliberately small and that *"widening it is a scope, not a convenience."*
+   The RI key binds `$50,000 pension/401k exclusion`, which this release does not touch. Only the
+   version registries rolled. A `$133,750` key was considered and rejected on that instruction.
+5. **`CHANGELOG.md`** — v5.61 entry added; the two historical entries are **not** rewritten.
+6. **`METHODOLOGY.md`** (full derivation), **`MissingFeatures.md`**, **`AUDIT_STATE_EXCL65_ROUND4.md`**
+   (3 sites), **`SCOPE_EXCL65_STALE_RI_WI.md`** — all corrected with dated notes, not silently.
+   `SCOPE_INCOME_CONDITIONING.md` already carried its correction from the audit session.
+7. **Rebuild** — see below.
+
+### §5 verification, and what it turned up
+
+- **The matchers were executed before the source was edited**, not after. Exactly one verdict flipped:
+  the `$133,500` pin. F-6's guarded set held at **four (NJ, NM, RI, VA)** with RI in it.
+- **A whole-suite AST sweep** (§B1a; `suite_regex_probe.cjs`, 376 regex literals) found a **second**
+  flip: `t29_boundaries.mjs` L112's `/75/`, because `$133,750` contains `75`. Read and adjudicated
+  innocent — it tests an RMD-age row that never sees a state note. It is the false-positive class
+  §B1a warns about, and it was read rather than assumed.
+- **Six negative controls** (`qa/controls_v561.sh`), one more than §5 asked for. **C5 is not in this
+  scope**: it falsifies the *pre-v5.61* pin on the frozen v5.60 leg, proving the gated split is a
+  split and not an inversion. It fires.
+- ⚠ **C2 came back NOT CAUGHT on its first run, and the verdict was correct.** Nothing pinned
+  `ADV 2025-22`, so the clause D-b exists to provide could have been deleted without the suite
+  noticing. Per §B2 the control was not adjusted — an assertion was added. That is the +1 taking the
+  leg from 1,120 to 1,121. The control's *label* was separately wrong (written expecting silence
+  while left at `EXPECT=fail`), which is the same defect `controls_v560.sh` records making at its C0.
+
+### ⚠ An arithmetic refinement this scope did not have
+
+ADV 2025-22's own **TY2024 MFS** figure is **$104,225** — an increase of $24,225, a multiple of $25,
+not $50. Rhode Island's practice therefore deviates from the stated rounding rule somewhere, which
+weakens a bare "$50 rounding" argument. **It does not rescue $133,500.** Stated as a ratio bound
+instead: under any rounding convention the two thresholds' ratios to their bases can differ by at
+most ~0.0006, and $133,500 implies 1.3350 against the single's 1.3375 — a gap four times too large.
+The verdict holds; the argument is simply better made as a ratio bound than a $50 bound, and
+`METHODOLOGY.md` and the CHANGELOG state it that way.
+
+### ⚠ Build reproducibility — `mammoth` had moved
+
+§N3a's prior-release check **failed on first run**: rebuilding v5.60 from its own unmodified source
+gave `fd2f302ed8351c665c936571b99446fd` against the published `278cb053b93f4b389c99f1e1ad31b591`.
+Per §N3a the tree was suspected before the source, and correctly: the first differing bytes sat inside
+vendored `mammoth` code (`Object.create(null)` vs `{}`), and `mammoth` resolves through an unpinned
+`^1.8.0` caret. It had advanced to **1.12.2**. Pinned to **1.12.1** (`--no-save`, so `package.json`
+stays byte-identical to knowledge), v5.60 reproduces **exactly**.
+
+v5.61 was then built against that pin, which buys a stronger provenance claim than a hash alone:
+**applying this release's five textual edits to the v5.60 artifact reproduces the v5.61 artifact
+byte-for-byte.** The artifact diff is provably nothing but the intended change. A committed lockfile
+remains the real fix (§N3a says so) and is not this release's work.
+
+### Open items this build leaves behind
+
+- The `state_dump.cjs` provenance error above, corrected here.
+- **`OPERATIONS.md` §B1a's F-6 membership list is stale.** It records "NM, RI, VA, WI remain" from a
+  v5.54 pass; the set at v5.60/v5.61 is **NJ, NM, RI, VA**. That paragraph is explicitly a dated
+  record so this is drift rather than contradiction — but it reads as current.
+- `ri_probe.cjs`, written for this build, is **session-only** and deliberately not shipped. Its home
+  is the deferred `qa/tools/` ops package, not a release it would be verifying.
 
 ---
 

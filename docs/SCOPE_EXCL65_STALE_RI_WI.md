@@ -144,7 +144,7 @@ grep for them.**
 | D-B | Wisconsin | **Ships with RI**, same defect class, same direction |
 | D-C | New Mexico | **Not in this release.** Own pass, disclosure-first |
 | D-D | What moves | **Amounts only.** No `exclAge` |
-| D-E | Dollar-exact | RI **$50,000 yes**; AGI threshold **dated to TY2025** ($133,500 / $107,000) wherever stated; **no** dollar-exact for the $100,000 couple cap (department-load-bearing) |
+| D-E | Dollar-exact | RI **$50,000 yes**; AGI threshold **dated to TY2025** ($133,500 / $107,000) — ⚠ **the MFJ figure is wrong; corrected to $133,750 at v5.61** (2026-09-03), see `AUDIT_STATE_INCOME_BASES_ROUND5.md` §2e wherever stated; **no** dollar-exact for the $100,000 couple cap (department-load-bearing) |
 | D-F | F-6 set | **WI leaves the set** by note wording (5→4); `t29` assertion untouched; shrink recorded |
 
 ## 8 · Build record — filled by the building session
