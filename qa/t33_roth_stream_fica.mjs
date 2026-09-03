@@ -32,17 +32,41 @@ const VER = process.argv[2] || "v563";
 
 // ─── VERSION-TAG REGISTRY GUARD (t3 convention) ───
 // An unregistered tag would fall off the end of the gate below and silently run the WRONG
-// expectation. New suite at v5.63, so its registry starts at the active pair; EXTEND it every
-// release, then RUN — never extend and assume.
-const KNOWN_VERSIONS = ["v562", "v563"];
+// expectation. EXTEND this every release, then RUN — never extend and assume.
+//
+// ⚠ v561 is registered even though this suite is new at v5.63. The runner calls t33 on BOTH legs
+// of whatever pair it is given, and until v5.63 ships the repo's shipped pair is v5.61 → v5.62 —
+// so a clean-clone verification run would otherwise halt this suite on its first leg. v5.61 is
+// pre-fix like v5.62; only the two ABSOLUTE pins differ, because v5.62 raised state tax in the
+// Roth outputs (SCOPE_ENGINE_STATE_PARITY). Everything else here is a DELTA between two streams
+// on one build and is therefore version-independent by construction.
+const KNOWN_VERSIONS = ["v561", "v562", "v563"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is not registered in this suite.");
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
-  console.log("    Add it to KNOWN_VERSIONS and to POST_FIX below BEFORE running.");
+  console.log("    Add it to KNOWN_VERSIONS, to PINS, and to POST_FIX below BEFORE running.");
   process.exit(1);
 }
 // The fix landed at v5.63. Every later tag is post-fix and must be added here as well.
 const POST_FIX = VER === "v563";
+
+// The only two build-specific ABSOLUTE figures in this suite. Kept in one table so a tag added to
+// KNOWN_VERSIONS without its pins fails CLOSED rather than reading someone else's numbers — the
+// fail-open registry defect t3's own header records.
+//   noStream : lifetime tax with no income streams at all (group G)
+//   acaConv  : the cliff solver's lifetime conversions, pre-fix (group E)
+// v5.62 and v5.63 share both values, and that is the point of group G: this release moves nothing
+// for a household without streams. v5.61 differs because v5.62 changed the state-tax arguments.
+const PINS = {
+  v561: { noStream: 169596, acaConv: 1202522 },
+  v562: { noStream: 174883, acaConv: 1203137 },
+  v563: { noStream: 174883, acaConv: 1203137 },
+};
+if (!PINS[VER]) {
+  console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is registered but has no PINS entry.");
+  process.exit(1);
+}
+const PIN = PINS[VER];
 
 const m = await import(`./app_${VER}.mjs`);
 const g = m.__g;
@@ -158,7 +182,7 @@ console.log("\n  C — extinction: equal rental and wage streams, second-order c
     T("C-1: one stream-year — rental is cheaper than wage by EXACTLY one year of FICA",
       w1 - r1 === FICA_YEAR, `delta ${w1 - r1}, expected ${FICA_YEAR}`);
   } else {
-    T("C-1 [PRE-FIX v5.62]: one stream-year — rental and wage are IDENTICAL (rental charged FICA)",
+    T("C-1 [PRE-FIX]: one stream-year — rental and wage are IDENTICAL (rental charged FICA)",
       w1 - r1 === 0, `delta ${w1 - r1}`);
   }
 
@@ -170,9 +194,9 @@ console.log("\n  C — extinction: equal rental and wage streams, second-order c
     T("C-3: the delta divides into whole stream-years at the hand-computed rate",
       (wF - rF) % FICA_YEAR === 0 && (wF - rF) / FICA_YEAR === FICA_YEARS);
   } else {
-    T("C-2 [PRE-FIX v5.62]: full span — rental and wage are IDENTICAL",
+    T("C-2 [PRE-FIX]: full span — rental and wage are IDENTICAL",
       wF - rF === 0, `delta ${wF - rF}`);
-    T("C-3 [PRE-FIX v5.62]: the defect is total, not partial — not one dollar of difference",
+    T("C-3 [PRE-FIX]: the defect is total, not partial — not one dollar of difference",
       wF === rF, `${wF} vs ${rF}`);
   }
 
@@ -202,7 +226,7 @@ console.log("\n  D — annuity, royalty and untyped streams are non-work too");
   if (POST_FIX) {
     T("D-4: and all three are cheaper than the wage stream", aF < wF && oF < wF && uF < wF);
   } else {
-    T("D-4 [PRE-FIX v5.62]: all three are charged FICA exactly as the wage stream is",
+    T("D-4 [PRE-FIX]: all three are charged FICA exactly as the wage stream is",
       aF === wF && oF === wF && uF === wF);
   }
 }
@@ -238,11 +262,11 @@ console.log("\n  E — the ACA-bridge path (second FICA site, via the cliff solv
     T("E-4: lifetime tax on the cliff strategy falls for the non-work stream",
       w.totTax - r.totTax === 60041, `delta ${w.totTax - r.totTax}`);
   } else {
-    T("E-2 [PRE-FIX v5.62]: the cliff solver converts the SAME amount either way",
+    T("E-2 [PRE-FIX]: the cliff solver converts the SAME amount either way",
       w.totConv === r.totConv, `${w.totConv} vs ${r.totConv}`);
-    T("E-3 [PRE-FIX v5.62]: the sale sub-engine charges rental income FICA exactly as it does wages",
-      w.totConv === 1203137 && r.totConv === 1203137, `${w.totConv} / ${r.totConv}`);
-    T("E-4 [PRE-FIX v5.62]: lifetime tax on the cliff strategy is identical",
+    T("E-3 [PRE-FIX]: the sale sub-engine charges rental income FICA exactly as it does wages",
+      w.totConv === PIN.acaConv && r.totConv === PIN.acaConv, `${w.totConv} / ${r.totConv} vs pin ${PIN.acaConv}`);
+    T("E-4 [PRE-FIX]: lifetime tax on the cliff strategy is identical",
       w.totTax === r.totTax, `${w.totTax} vs ${r.totTax}`);
   }
 }
@@ -265,10 +289,10 @@ console.log("\n  F — second-order: IRMAA and NIIT move on a tier-crossing hous
     T("F-4: the mechanism is the taxable pool, so IRMAA moves in tiers, not smoothly",
       (r.totIrmaa - w.totIrmaa) % 10 === 0, String(r.totIrmaa - w.totIrmaa));
   } else {
-    T("F-1 [PRE-FIX v5.62]: lifetime tax is identical", r.totTax === w.totTax, `${r.totTax} vs ${w.totTax}`);
-    T("F-2 [PRE-FIX v5.62]: IRMAA is identical", r.totIrmaa === w.totIrmaa, `${r.totIrmaa} vs ${w.totIrmaa}`);
-    T("F-3 [PRE-FIX v5.62]: NIIT is identical", r.totNiit === w.totNiit, `${r.totNiit} vs ${w.totNiit}`);
-    T("F-4 [PRE-FIX v5.62]: the whole result set is indistinguishable by stream kind",
+    T("F-1 [PRE-FIX]: lifetime tax is identical", r.totTax === w.totTax, `${r.totTax} vs ${w.totTax}`);
+    T("F-2 [PRE-FIX]: IRMAA is identical", r.totIrmaa === w.totIrmaa, `${r.totIrmaa} vs ${w.totIrmaa}`);
+    T("F-3 [PRE-FIX]: NIIT is identical", r.totNiit === w.totNiit, `${r.totNiit} vs ${w.totNiit}`);
+    T("F-4 [PRE-FIX]: the whole result set is indistinguishable by stream kind",
       r.estate === w.estate, `${r.estate} vs ${w.estate}`);
   }
 }
@@ -279,8 +303,8 @@ console.log("\n  F — second-order: IRMAA and NIIT move on a tier-crossing hous
 console.log("\n  G — a stream-free household is untouched by this release");
 {
   const noStream = totTax([]);
-  T("G-1: no streams — lifetime tax is the same figure on both legs",
-    noStream === 174883, String(noStream));
+  T("G-1: no streams — lifetime tax matches this build's pin",
+    noStream === PIN.noStream, `${noStream} vs pin ${PIN.noStream}`);
   T("G-2: and it differs from every stream-bearing reading above (the fixtures are doing work)",
     noStream !== totTax(stream("work"), NO_SECOND_ORDER));
 }
