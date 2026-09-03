@@ -16,7 +16,7 @@ const VER = process.argv[2] || "v510";
 // change the CHECK COUNT: with an unregistered tag t3 ran 35 checks instead of 36, and the count is
 // the number that goes in the release headline. Registering a new version in the ladders below is
 // now mandatory, and an unregistered tag stops the run instead of quietly testing the wrong thing.
-const KNOWN_VERSIONS = ["v510", "v5101", "v5102", "v511", "v512", "v513", "v514", "v515", "v516", "v517", "v518", "v519", "v520", "v521", "v522", "v523", "v524", "v525", "v526", "v527", "v528", "v529", "v530", "v531", "v532", "v533", "v534", "v535", "v536", "v537", "v538", "v539", "v540", "v541", "v542", "v543", "v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v592"];
+const KNOWN_VERSIONS = ["v510", "v5101", "v5102", "v511", "v512", "v513", "v514", "v515", "v516", "v517", "v518", "v519", "v520", "v521", "v522", "v523", "v524", "v525", "v526", "v527", "v528", "v529", "v530", "v531", "v532", "v533", "v534", "v535", "v536", "v537", "v538", "v539", "v540", "v541", "v542", "v543", "v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v592"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is not registered in this suite.");
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -62,7 +62,7 @@ await click(example); await flush(); await flush();
   const t = body().textContent || "";
   // Exact per-tag string: "v5.10" is a PREFIX of v5.10.1/v5.10.2, so a substring test
   // passed for the whole v5.10 family by luck and broke at v5.11. Map the tag explicitly.
-  const _badge = VER === "v560" ? "v5.60" : VER === "v559" ? "v5.59" : VER === "v558" ? "v5.58" : VER === "v557" ? "v5.57" : VER === "v556" ? "v5.56" : VER === "v555" ? "v5.55" : VER === "v554" ? "v5.54" : VER === "v553" ? "v5.53" : VER === "v552" ? "v5.52" : VER === "v551" ? "v5.51" : VER === "v550" ? "v5.50" : VER === "v549" ? "v5.49" : VER === "v548" ? "v5.48" : VER === "v547" ? "v5.47" : VER === "v546" ? "v5.46" : VER === "v545" ? "v5.45" : VER === "v544" ? "v5.44" : VER === "v543" ? "v5.43" : VER === "v542" ? "v5.42" : VER === "v541" ? "v5.41" : VER === "v540" ? "v5.40" : VER === "v539" ? "v5.39" : VER === "v538" ? "v5.38" : VER === "v537" ? "v5.37" : VER === "v536" ? "v5.36" : VER === "v535" ? "v5.35" : VER === "v534" ? "v5.34" : VER === "v533" ? "v5.33" : VER === "v532" ? "v5.32" : VER === "v531" ? "v5.31" : VER === "v530" ? "v5.30" : VER === "v529" ? "v5.29" : VER === "v528" ? "v5.28" : VER === "v527" ? "v5.27" : VER === "v526" ? "v5.26" : VER === "v525" ? "v5.25" : VER === "v524" ? "v5.24" : VER === "v523" ? "v5.23" : VER === "v522" ? "v5.22" : VER === "v521" ? "v5.21" : VER === "v520" ? "v5.20" : VER === "v519" ? "v5.19" : VER === "v518" ? "v5.18" : VER === "v517" ? "v5.17" : VER === "v516" ? "v5.16" : VER === "v515" ? "v5.15" : VER === "v514" ? "v5.14" : VER === "v513" ? "v5.13" : VER === "v512" ? "v5.12" : VER === "v511" ? "v5.11" : VER === "v5102" ? "v5.10.2"
+  const _badge = VER === "v561" ? "v5.61" : VER === "v560" ? "v5.60" : VER === "v559" ? "v5.59" : VER === "v558" ? "v5.58" : VER === "v557" ? "v5.57" : VER === "v556" ? "v5.56" : VER === "v555" ? "v5.55" : VER === "v554" ? "v5.54" : VER === "v553" ? "v5.53" : VER === "v552" ? "v5.52" : VER === "v551" ? "v5.51" : VER === "v550" ? "v5.50" : VER === "v549" ? "v5.49" : VER === "v548" ? "v5.48" : VER === "v547" ? "v5.47" : VER === "v546" ? "v5.46" : VER === "v545" ? "v5.45" : VER === "v544" ? "v5.44" : VER === "v543" ? "v5.43" : VER === "v542" ? "v5.42" : VER === "v541" ? "v5.41" : VER === "v540" ? "v5.40" : VER === "v539" ? "v5.39" : VER === "v538" ? "v5.38" : VER === "v537" ? "v5.37" : VER === "v536" ? "v5.36" : VER === "v535" ? "v5.35" : VER === "v534" ? "v5.34" : VER === "v533" ? "v5.33" : VER === "v532" ? "v5.32" : VER === "v531" ? "v5.31" : VER === "v530" ? "v5.30" : VER === "v529" ? "v5.29" : VER === "v528" ? "v5.28" : VER === "v527" ? "v5.27" : VER === "v526" ? "v5.26" : VER === "v525" ? "v5.25" : VER === "v524" ? "v5.24" : VER === "v523" ? "v5.23" : VER === "v522" ? "v5.22" : VER === "v521" ? "v5.21" : VER === "v520" ? "v5.20" : VER === "v519" ? "v5.19" : VER === "v518" ? "v5.18" : VER === "v517" ? "v5.17" : VER === "v516" ? "v5.16" : VER === "v515" ? "v5.15" : VER === "v514" ? "v5.14" : VER === "v513" ? "v5.13" : VER === "v512" ? "v5.12" : VER === "v511" ? "v5.11" : VER === "v5102" ? "v5.10.2"
     : VER === "v5101" ? "v5.10.1" : IS510 ? "v5.10" : "v5.9.2";
   T(`SHELL: version badge reads ${_badge}`, t.includes(_badge));
   T("SHELL: amber example-data banner fires", has(t, "EXAMPLE DATA MODE") || has(t, "built-in example household"));
@@ -143,7 +143,7 @@ if (VER === "v552") {
   T("D10-6 [D-2]: no measured figure is shown to the user — the numbers live in METHODOLOGY.md",
     !/\$?45,?000/.test(rt10) && !/8 of 8/i.test(rt10));
 }
-if (VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560") {
+if (VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561") {
   // ─── v5.53 D-10 · the footnote reports a NARROWED gap, and the column carries a health warning ───
   // A new block, not an extended ladder: v5.53 rewrites the sentence v5.52 asserted, so extending
   // the gate would assert the pre-fix wording against the build that replaced it.
@@ -173,7 +173,7 @@ if (VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER 
   T("D10-9 [D-2]: no measured figure is shown to the user — the numbers live in METHODOLOGY.md",
     !/\$?45,?000/.test(rt10) && !/8 of 8/i.test(rt10) && !/\$?342\b/.test(rt10));
 }
-if (VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560") {
+if (VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561") {
   // ─── v5.51 D-9 · the heir rate is disclosed as an assumption, to a COUPLE ───
   // Same reasoning as D-7's fixture gate: the comparator is a couple-first surface, and a
   // couple-blind fixture would assert the disclosure exists while never rendering the household
@@ -192,7 +192,7 @@ if (VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER 
   T("D9-5 [D-2]: no numeric heir-rate range is shown to the user",
     !/13\s*[-\u2013]\s*31\s*%/.test(rt9));
 }
-if (VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560") {
+if (VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561") {
   const rt = per["roth"] || "";
   T("D7-0 [FIXTURE GATE]: the roth tab is rendering a COUPLE — without this every check below is vacuous",
     /widow.{0,3}s-penalty filing flip/i.test(rt));
@@ -231,7 +231,7 @@ if (VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER 
 // NOT pinned defects: the modelling is unchanged and remains wrong. Release (c) fixes the model;
 // this release only stops the app from denying it. Flip nothing here when (c) lands — instead
 // re-point these at whatever (c) makes true.
-if (VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560")))) {
+if (VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561")))) {
   const w = per["withdrawal"] || "";
   const norm = w.toLowerCase();
   T("V524 withdrawal: 'already-taxed principal' claim is GONE", !norm.includes("already-taxed principal"));
@@ -268,7 +268,7 @@ if (VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER 
   // withdrawals" shipped for many releases while the sequencer actually sold brokerage to satisfy
   // them. v5.35 is the release that makes an EXISTING disclosure true — the mirror image of the
   // §B2 lock hazard, and worth naming because the usual failure runs the other way.
-  if (VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560")))) {
+  if (VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561")))) {
     T("V535 withdrawal: says the RMD is now sourced from where the money lives",
       norm.includes("from v5.35 that is how they are actually sourced"));
     T("V535 withdrawal: names the taxable sleeve as funding only the remainder",
@@ -315,7 +315,7 @@ sig("events", ["MEDICARE", "RMD", "HSA", "BACKUP"]);
 // DOCS_HTML reaches the DOM ONLY through <iframe srcDoc={...}> (v5.24 L5625), and jsdom does not
 // fold iframe srcdoc into body.textContent. Reading per["docs"] here would make every assertion
 // below pass vacuously on BOTH builds — the OPERATIONS section B2 failure. Read the attribute.
-if (VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560")))) {
+if (VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561")))) {
   const docsTab = tabs().find(b => b.textContent.trim() === "docs");
   await click(docsTab); await flush();
   const frame = body().querySelector('iframe[title="Danger Close Documentation"]');
@@ -333,9 +333,9 @@ if (VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER 
   // assertion here reads TEXT, and the text was fine — only the markup was broken.
   // This assertion reads the markup itself. It must stay generic (any attribute, not just
   // `plain`), because the failure is a property of how the literal is written, not of one string.
-  if ((VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560")))) {
+  if ((VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561")))) {
     const escAttrs = man.match(/[a-zA-Z-]+=\\+"/g) || [];
-    if ((VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560"))) {
+    if ((VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561"))) {
       T("V539 docs: EXTINCTION — no attribute in the runtime manual carries a literal backslash",
         escAttrs.length === 0, `found ${escAttrs.length}: ${[...new Set(escAttrs)].join(" ")}`);
     } else {
@@ -348,7 +348,7 @@ if (VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER 
     // undercounts. Verified totals: 9 on v5.38 (one pair broken), 10 on v5.39.
     const plainDivs = (man.match(/class="plain"/g) || []).length;
     const plainLbls = (man.match(/class="lbl"/g) || []).length;
-    if ((VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560"))) {
+    if ((VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561"))) {
       T("V539 docs: all 10 plain-English callouts carry the class", plainDivs === 10, String(plainDivs));
       T("V539 docs: all 10 callout labels carry the class", plainLbls === 10, String(plainLbls));
     } else {
@@ -358,7 +358,7 @@ if (VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER 
   }
 
   // ── v5.39 DOCUMENTATION CORRECTNESS — each with its extinction pair ────────────────────────
-  if ((VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560"))) {
+  if ((VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561"))) {
     T("V539 docs: tab count is 26 in the FIG.1 figure", man.includes(">26 TABS<"));
     T("V539 docs: EXTINCTION — no '25 TABS' anywhere", !man.includes("25 TABS"));
     T("V539 docs: §05 body text says 26", man.includes("Feeling like 26 is a lot"));
@@ -451,7 +451,7 @@ if (VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER 
   // without gating would break the frozen legs and make the release notes state a total the suite
   // will not produce.
   // v5.31 keeps this copy verbatim: D-4 declined touching DOCS_HTML, and §13 stays true.
-  if (VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560")))) {
+  if (VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561")))) {
     T("V530 docs: §13 states the bonus IS modeled on the Taxes tab",
       man.includes("is modeled on the Taxes tab, but not in the Roth conversion ladder"));
     T("V530 docs: §13 names the phase-out thresholds",
@@ -523,7 +523,7 @@ if (VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER 
 // The field is RECORDED and read by no engine, so no figure anywhere can witness it. The only
 // evidence that the UI exists at all is the DOM, which makes this block the sole coverage of
 // decisions D-1, D-2, D-4 and D-5 as the user actually meets them.
-if (VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560")))) {
+if (VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530" || VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561")))) {
   await click(tabs().find(b => b.textContent.trim() === "my data")); await flush();
   const md = (body().textContent || "").replace(/\s+/g, " ");
   // Scope to the Other accounts CARD. A page-wide select query also catches the Holdings table's
@@ -603,7 +603,7 @@ if (VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER 
 {
   const tx = per["taxes"] || "";
   T("TAXES TAB: the OBBBA deduction is named in the tab header", tx.includes("OBBBA $6K/person senior bonus deduction"));
-  if (VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560")))) {
+  if (VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561")))) {
     T("V531 taxes: the footnote states the OBBBA deduction IS modeled here",
       tx.includes("the temporary OBBBA senior deduction (through 2028) ARE modeled on this tab"));
     T("V531 taxes: the footnote discloses the Roth-ladder divergence",
@@ -616,7 +616,7 @@ if (VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER 
       tx.includes("Estimates only") && tx.includes("Actual filing requires a CPA"));
     // GATED PER LEG (§B2): v5.36 wires Engine D's gains into this tab, falsifying the
     // "$0 unless a sale is modeled" sentence those legs legitimately carry.
-    if (VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560")))) {
+    if (VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561")))) {
       T("V536 taxes: the footnote names the gains' SOURCE (the Withdrawal plan's sales)",
         tx.includes("Realized capital gains are the Withdrawal plan's own sales"));
       T("V536 taxes: ...and what sets their basis (the My Data embedded-gain share)",
@@ -644,12 +644,12 @@ if (VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER 
   const v = per["verify"] || "";
   // v5.14 adds three IRMAA-indexation checks to the Verify tab (see t1's note).
   const _vCount = (VER === "v514" || VER === "v515" || VER === "v516" || VER === "v517" || VER === "v518" || VER === "v519" || VER === "v520" || VER === "v521" || VER === "v522" || VER === "v523" || VER === "v524" || VER === "v525" || VER === "v526" || VER === "v527" || VER === "v528" || VER === "v529" || VER === "v530") ? "57" : IS510 ? "54" : "53";
-  const _vCountV = (VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560")))) ? "66" : VER === "v531" ? "62" : _vCount;
+  const _vCountV = (VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561")))) ? "66" : VER === "v531" ? "62" : _vCount;
   T(`VERIFY TAB: reports ${_vCountV} checks`, v.includes(_vCountV));
   T("VERIFY TAB: no failing marks rendered", !/✗/.test(v));
   // v5.31 — the four OBBBA constants become checkable here for the first time (E-2), plus the
   // D-2 dated sunset row. Gated: on earlier builds the tab correctly has no such category.
-  if (VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560")))) {
+  if (VER === "v531" || VER === "v532" || VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561")))) {
     T("V531 verify: the OBBBA senior-bonus category renders", v.includes("OBBBA SENIOR BONUS"));
     T("V531 verify: the per-person deduction row is present", v.includes("Deduction per person 65+"));
     T("V531 verify: both MAGI phase-out rows are present",
@@ -737,7 +737,7 @@ if (IS510) {
 // alone would instead leave the CURRENT build with no coverage of this panel at all, which is
 // how it stood before this release. INVERT AT v5.35, when an engine actually reads the field.
 // Only the release NAMED in the copy differs between the legs, and that assertion is gated.
-if (VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560")))) {
+if (VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561")))) {
   const _pfx = VER === "v536" ? "V536" : VER === "v533" ? "V533" : "V534";
   const _namesRel = VER === "v533" ? "no figure on any tab changes until v5.34"
                                    : "no figure on any tab changes until v5.35";
@@ -752,7 +752,7 @@ if (VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER 
   // the label, asserted verbatim — this is the lock. GATED PER LEG (§B2): v5.36 is the
   // release that consumes the field, falsifying the recorded-not-used copy the earlier
   // legs legitimately carry, and landing scope v5.36 §9's label fix (brokerage, not pool).
-  if (VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560")))) {
+  if (VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561")))) {
     T(`${_pfx} my data: the panel is labelled IN USE FROM v5.36`, txt.includes("(in use from v5.36)"), txt.slice(0, 120));
     T(`${_pfx} my data: the label scopes the share to BROKERAGE money (scope §9)`,
       txt.includes("Embedded gain, % of brokerage money"), txt.slice(0, 200));
@@ -860,8 +860,8 @@ if (VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER 
 // tracker makes the declared share the OPENING basis only, and growth accrues gain from there —
 // so the same sentence became false the moment the tracker landed. OPERATIONS §B2: gate per leg.
 // Each leg asserts the copy ITS OWN build carries; the prior leg is not a defect pin.
-if (VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560")))) {
-  const NEW = VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560")));
+if (VER === "v533" || VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561")))) {
+  const NEW = VER === "v534" || VER === "v535" || VER === "v536" || VER === "v537" || (VER === "v538" || (VER === "v539" || VER === "v540" || VER === "v541" || VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561")));
 
   // ── The Field Manual (iframe srcdoc — a textContent read passes vacuously, see L159) ──
   await click(tabs().find(b => b.textContent.trim() === "docs")); await flush();
