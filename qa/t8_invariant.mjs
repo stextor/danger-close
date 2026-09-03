@@ -199,6 +199,7 @@ T.applyLoadedData({ portfolio: port, expenses: [], incomeFromForm: true });
   ck("stateTaxAnnual has exactly 3 call sites (definition excluded)", SITES.length === 3,
      `found ${SITES.length}`);
   let wired = 0;
+  const ARGS = [];
   for (const i of SITES) {
     // balanced-brace scan of the single object argument — the call is always `({ ... })`
     let d = 0, j = i + "stateTaxAnnual(".length, end = j;
@@ -208,10 +209,37 @@ T.applyLoadedData({ portfolio: port, expenses: [], incomeFromForm: true });
       else if (c === "}") { d--; if (d === 0) { end = j; break; } }
     }
     const args = SRC_NOCOMMENT.slice(i, end);
+    ARGS.push(args);
     if (/ssGrossA:\s*ssA_y\b/.test(args) && /ssGrossB:\s*ssB_y\b/.test(args)) wired++;
   }
   ck("[EXTINCTION v5.56] every stateTaxAnnual call site passes GROSS SS (ssGrossA: ssA_y, ssGrossB: ssB_y)",
      wired === 3, `${wired} of ${SITES.length} sites wired`);
+
+  // ── v5.62 · the SECOND instance of the class this block exists for ──────────────────────
+  // The v5.56 control above found the unit covered and the WIRING not. It happened again, and
+  // in the same function: until v5.62 the two Roth call sites passed
+  //     retIncome: Math.max(0, taxableOrd - ssT)
+  // which is wrong twice over. (1) `taxableOrd` is net of the FEDERAL standard deduction, and
+  // METHODOLOGY's state layer is an effective-rate approximation that explicitly does NOT model
+  // standard deductions — so a federal deduction was being netted off a state base. (2) it is
+  // undecomposed, so `work` was folded into `retIncome` and collected the state RETIREMENT
+  // exclusion; in the five retExempt states that exempted the household's WAGES outright.
+  //
+  // The three engines share one calculator, and METHODOLOGY said in so many words that they
+  // therefore "can never disagree". They shared the calculator but not the ARGUMENTS, and
+  // disagreed in ALL 42 taxing states by up to $2,656/yr, always UNDER-taxing the Roth engines.
+  // Every suite touching Roth or state tax passed against a scratch fix with ZERO checks moving.
+  //
+  // ⚠ These read ARGS, which comes from SRC_NOCOMMENT and a balanced-brace scan. A raw text
+  // window would match a COMMENT describing the old shape — the v5.41/v5.44 defect this file
+  // already records, which a first draft of these very checks reproduced.
+  const netted = ARGS.filter(a => /retIncome:\s*Math\.max\(\s*0\s*,\s*taxableOrd/.test(a));
+  ck("[EXTINCTION v5.62] no stateTaxAnnual call site passes a post-federal-deduction taxableOrd as retIncome",
+     netted.length === 0, `${netted.length} of ${SITES.length} sites still netted`);
+  const decomposed = ARGS.filter(a => /\bpen:\s*[A-Za-z_]/.test(a) && /\bwork:\s*[A-Za-z_]/.test(a));
+  ck("[EXTINCTION v5.62] every stateTaxAnnual call site passes `pen` and `work` as bound identifiers, " +
+     "not folded into retIncome (the exclusion is for retirement income, not wages)",
+     decomposed.length === 3, `${decomposed.length} of ${SITES.length} sites decomposed`);
 }
 
 console.log(`\nt8 SUITE: ${pass} passed, ${fail} failed`);

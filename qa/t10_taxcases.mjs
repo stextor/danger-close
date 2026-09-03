@@ -1025,6 +1025,72 @@ const pass2E = pass, fail2E = fail;
       T("[KNOWN DEFECT pre-v5.56] no state carried an ssOffset flag at all",
         Object.keys(R).filter(c => R[c].ssOffset).length, 0);
     }
+
+    // ── v5.62 · the exclusion is for RETIREMENT income, not wages ──────────────────────
+    // Behavioural half of the v5.62 fix; the ARGUMENT-SHAPE half lives in t8 with the v5.56
+    // extinction check of the same class. Kept apart deliberately: t8 reads the source and is
+    // run-once, this reads the calculator and replays per leg.
+    //
+    // ⚠ NOT a "parity" test, and it is not called one. It does not run the three engines and
+    // compare them — the Roth comparator is not callable from the test surface. It asserts what
+    // the calculator does with correctly-shaped arguments. Calling this parity would repeat
+    // METHODOLOGY's "the three can never disagree", which is the claim that let the defect ship.
+    {
+      const _retEx = Object.keys(R).filter(c => R[c].rate && R[c].retExempt);
+      let _wagesTaxed = 0;
+      for (const code of _retEx) {
+        const t = S({ code, fallbackRate: 0, retIncome: 0, pen: 0, work: 28000, capGains: 0,
+                      ssTaxableFed: 0, ageA: 67, ageB: 67 });
+        if (t > 0) _wagesTaxed++;
+      }
+      T(`[INVARIANT v5.62] wages are still taxed in all ${_retEx.length} retExempt states — a full ` +
+        `RETIREMENT-income exemption is not a wage exemption`,
+        _wagesTaxed === _retEx.length ? 1 : 0, 1);
+
+      // An unused exclusion must not spill from retirement income onto wages. Split vs folded:
+      // $5,000 retirement + $60,000 wages must cost MORE than $65,000 of pure retirement income
+      // wherever the exclusion is large enough to swallow the $5,000 and keep going.
+      const _big = Object.keys(R).filter(c => R[c].rate && (R[c].excl65 || 0) >= 20000);
+      let _spill = [];
+      for (const code of _big) {
+        const split = S({ code, fallbackRate: 0, retIncome: 5000, pen: 0, work: 60000, capGains: 0,
+                          ssTaxableFed: 0, ageA: 67, ageB: 67 });
+        const folded = S({ code, fallbackRate: 0, retIncome: 65000, pen: 0, work: 0, capGains: 0,
+                           ssTaxableFed: 0, ageA: 67, ageB: 67 });
+        if (Math.round(split) <= Math.round(folded)) _spill.push(code);
+      }
+      T(`[INVARIANT v5.62] in the ${_big.length} states with a $20k+ exclusion, an unused exclusion ` +
+        `does NOT spill onto wages (spilling: ${_spill.join(", ") || "none"})`,
+        _spill.length, 0);
+
+      // Hand-computed to the dollar, not read and judged plausible. Household: $28,000 wages,
+      // $18,000 pension, $22,000 RMD, $8,000 qualified dividends/gains, $18,000 taxable SS,
+      // both 67. In a retExempt state the retirement income and pension are exempt and SS is
+      // untaxed, so the base is wages + gains = $36,000.
+      const _H = { fallbackRate: 0, retIncome: 22000, pen: 18000, work: 28000, capGains: 8000,
+                   ssTaxableFed: 18000, ssGrossA: 22000, ssGrossB: 14000, ageA: 67, ageB: 67 };
+      T("[HAND v5.62] PA (retExempt, 3.07%): 0.0307 × (28,000 + 8,000) = $1,105.20",
+        S({ code: "PA", ..._H }), 1105.2);
+      T("[HAND v5.62] IL (retExempt, 4.95%): 0.0495 × (28,000 + 8,000) = $1,782",
+        S({ code: "IL", ..._H }), 1782);
+
+      // ⚠ KNOWN RESIDUAL, deliberately not fixed at v5.62 (scope D-b). `otherOrd` — non-work
+      // ordinary streams — is computed ONLY in the Taxes engine (L5160); the Roth engines'
+      // `base` is `pen + work + rmd` and never carries it. So the engines still describe a
+      // household with rental or annuity income differently. Adding it changes `ord`, and so
+      // federal tax, SS taxation, IRMAA and bracket-fill conversion sizing — its own release
+      // with its own hand-verified cells. THIS PIN FLIPS when that lands.
+      const _codes = Object.keys(R).filter(c => R[c].rate);
+      let _resid = 0;
+      for (const code of _codes) {
+        const a = S({ code, ..._H });
+        const b = S({ code, ..._H, work: _H.work + 12000 });
+        if (Math.round(a) !== Math.round(b)) _resid++;
+      }
+      T("[KNOWN DEFECT pre-otherOrd] other ordinary income still moves state tax, and the Roth " +
+        "engines cannot see it — engine agreement is exact ONLY for households without it",
+        _resid === _codes.length ? 1 : 0, 1);
+    }
   }
 }
 const pass2Ecount = pass - pass2E, fail2Ecount = fail - fail2E;
