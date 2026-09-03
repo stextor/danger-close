@@ -493,6 +493,22 @@ out of the commit that shipped it. Only
 `DangerClose.jsx` gets a version suffix; everything else is single-and-current, except `SITE_CENSUS_*`,
 `SCOPE_*`, and `FlawsToFix-*`, which carry a version by nature.
 
+### ⚠ What does NOT rotate (added 2026-09-03)
+
+The rotation rule above is scoped to **app sources**, and nothing else in the pool rotates on a
+release. In particular the pool **keeps every `controls_v*.sh`** — at v5.61 it held `controls_v557`,
+`controls_v5571`, `controls_v559`, `controls_v560` and `controls_v561` simultaneously, and that is
+correct: each is the negative-control record for the release that wrote it, and a control script is
+evidence, not scaffolding.
+
+**`dom_entry_*.jsx` DOES rotate** with its source leg — `package_check` J-4 asserts exactly two —
+and its row in the §A2 fallback hash table must be pruned in the same pass, or the table names a
+file the pool no longer holds (K-8).
+
+Recorded because a v5.61 delivery note told the maintainer to delete `controls_v559.sh` as
+rotation. It was wrong, and the pool's own contents contradicted it in plain sight. The rule was
+never written down, so it was re-derived, and re-derived wrongly.
+
 ### The manifest is mandatory
 
 A model doesn't reliably infer "v5.11 > v5.10 so v5.11 is canonical" from filenames.
@@ -772,6 +788,14 @@ danger-close-<version>/
 ├── github/              <- loose files go to repo root; folder names ARE repo paths
 └── knowledge/           <- flat; knowledge has no folders
 ```
+
+⚠ **`PROJECT_KNOWLEDGE_INDEX.md` is a RELEASE DELIVERABLE, not optional housekeeping** (added
+2026-09-03). §G has always called the manifest mandatory and step 1 of the freshness check, but
+§L — the checklist a session actually packages from — never named it, and at v5.61 it was omitted
+from the zip entirely. Both build tables were left describing the previous release, the §A2 fallback
+hash table carried **21 wrong hashes**, and **12 pool files had no row at all**. Nothing caught it;
+post-ship verification did. **Every release package that changes any pooled file ships an updated
+manifest**, and `package_check` **section K** now asserts it against the clone and the pool.
 
 Rules: versioned outer folder · loose files at the top of `github/`, no `root/` wrapper · **changed files
 only** (for the repo, differs from what's committed; for knowledge, differs from *or is absent from* the

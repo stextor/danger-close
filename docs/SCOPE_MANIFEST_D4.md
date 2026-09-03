@@ -6,7 +6,7 @@
 | Written | 2026-09-03 |
 | Origin | post-ship verification of v5.61; open ops item **D-4**, deferred eleven releases |
 | Shape | **Ops package.** No app source, no rebuild, no version bump. One document corrected, one gate extended, controls added. |
-| Status | **AWAITING MAINTAINER DECISION** — §6. Not built. |
+| Status | **FULFILLED** — built and shipped as the 2026-09-03 ops package. §6 resolved: D-a (iii), D-b yes, D-c full check, D-d ship labelled, D-e together, D-f yes. §7 is the build record. |
 | Precedent | `SCOPE_OPS_PROCESS_FIX.md`; `OPERATIONS.md` §L "Ops packages (added 2026-08-26)" |
 
 ---
@@ -213,9 +213,78 @@ that it works.
 
 ---
 
-## 7. Build record
+## 7. Build record — built 2026-09-03
 
-*(empty — this scope has not been built)*
+**Decisions taken as recommended:** D-a **(iii) full reconciliation** · D-b **yes** · D-c **full
+check** · D-d **ship K-7 labelled WEAK** · D-e **together** · D-f **yes**.
+
+### Section K, proved against the live defect before the fix
+
+Run against the manifest **as it stood**, section K reproduced §1b exactly — K-1, K-2, K-3, K-4,
+K-6, K-8 and K-9 fired; **K-7 passed**. Against the corrected manifest, all nine are green. K-5 now
+passes in both states rather than firing as §1b predicted, because K-4 already excludes a table
+naming a file the pool no longer holds and K-5 only hashes files that exist — a cleaner split of the
+same coverage, not a lost check.
+
+### The manifest correction, measured
+
+**21 stale hashes refreshed** (20 from v5.61, 1 — `SCOPE_VA_NOTE_CORRECTION.md` — already wrong
+before it) · **1 ghost row removed** (`dom_entry_v559.jsx`, rotated out) · **both build tables
+rolled** · **12 unlisted pool files given rows** · the v5.61 rotation recorded in the retirement
+list, including that `controls_v559.sh` was listed for deletion **in error**. K-9 now reports zero
+unlisted files.
+
+⚠ **A self-reference the build had to resolve.** K-8 fired on `package_check.mjs` and
+`package_check_controls.sh` — the two files this package itself changes — because the manifest must
+record their **post-ship** hashes, not the ones currently in the pool. Any future package that
+touches a hashed pool file has the same problem, and K-8 is what makes it visible instead of silent.
+
+### ⚠ The finding this build did not go looking for
+
+**The stale manifest had silently disabled two negative controls.** Controls **P20** and **P21**
+derive their mutation anchor from `PROJECT_KNOWLEDGE_INDEX.md`'s Current-build table
+(`package_check_controls.sh` L163–164). With the manifest stale, that anchor was the **v5.60** source
+and artifact hashes, which do not appear in the newest CHANGELOG entry — so the mutation was a
+**silent no-op** and both controls reported NOT CAUGHT while H-1 and H-2 were entirely innocent.
+Verified against the **unmodified** gate, so this predates section K and is not an artefact of it.
+**Both fire again the moment the manifest is correct.**
+
+This reclassifies the defect. The manifest is not documentation that had gone stale — it is an input
+the control harness reads as ground truth, and its staleness propagated into the verification layer.
+A stale manifest does not merely misinform the next session; it turns off checks.
+
+### ⚠ A second rotted control, unrelated to the manifest
+
+**P26** hardcoded `SCOPE_FIX_tidyup_six.md` as its OPEN-allowlist target. That scope left the
+allowlist at some point, so removing it could not trip I-3, and the control reported NOT CAUGHT for
+an unknown number of releases while I-3 was innocent. This is precisely the rot
+`package_check_controls.sh`'s own 2026-08-23 header was rewritten to eliminate — *"every target file
+is DERIVED from the package rather than named"* — reappearing in a control that header did not
+reach. **Fixed: P26 now reads the live allowlist out of `package_check.mjs`.**
+
+**P17 remains non-firing and is unchanged here.** It is already recorded in `TESTING.md` as a control
+that does not fire and did not before either. It is not this package's work and is not silently
+fixed.
+
+### Controls
+
+**Seven new: P29–P35.** All fire. **P29 is the one this package exists for** — it reproduces the
+v5.61 defect exactly (neither build table rolled) and asserts both that **K-1 catches it** and that
+**K-7 does not**. It passes on both counts. If K-7 ever starts firing on P29, its WEAK label has
+become a lie and the comment on it must be re-read, not the control adjusted.
+
+P34 is K-7's justification: Current rolled, Prior not — the defect that ran for seven releases before
+v5.59 caught it by eye. K-7 catches that one, which is why it ships rather than being dropped.
+P35 asserts K **skips loudly** with no manifest rather than passing blind — the E-14 shape.
+
+The harness's section-matching class was widened from `[A-I]` to `[A-K]` **in both runners**. Its own
+comment requires this the same day a section is added; it had two copies and the comment named one.
+
+### What this build did NOT do
+
+No app source, no rebuild, no version bump — v5.61 remains the current build, its source and artifact
+untouched and re-verified. No lockfile for the `mammoth` reproducibility problem. No auto-generated
+manifest. Historical rolled-notes were not rewritten.
 
 ---
 
