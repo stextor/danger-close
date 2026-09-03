@@ -482,6 +482,14 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
     const OPEN = new Set([
       "SCOPE_STANDING_AUDIT.md",                  // not a build scope at all (OPERATIONS §K)
       "SCOPE_HOUSEKEEPING_THREE.md",              // awaiting decisions in its §5
+      // Added v5.61. The income-conditioning field is gated on D-2 and D-3, which the maintainer
+      // has not resolved — so the scope is legitimately OPEN and none of RETIRED/SUPERSEDED/
+      // FULFILLED is true of it. It landed in the tree on 2026-09-03, one release before this
+      // one, so it would have failed I-2 on ANY package cut after that date; v5.61 did not
+      // create this condition, it was the first package to meet it. ⚠ This entry EXPIRES the
+      // moment D-2 and D-3 are decided and the field is built — I-3 will not catch a stale
+      // entry that still names a real file, only one naming a file that is gone.
+      "SCOPE_INCOME_CONDITIONING.md",             // awaiting D-2 and D-3 (its §6)
     ]);
     const RETIRED = /\bRETIRED\b|\bSUPERSEDED\b|\bFULFILLED\b/;
     // ⚠ The INVENTORY is post-ship too, not just the reading of each file. A scope the package
