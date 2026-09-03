@@ -1,5 +1,99 @@
 # Changelog
 
+## v5.61 · Rhode Island's own filing-season guide states a threshold its statute cannot produce, 2026-09-03
+
+**One string changes. No computed output moves, and no engine code is touched.** `STATE_RULES.RI.note`
+gave Rhode Island's TY2025 MFJ pension/SS threshold as **$133,500**; it is **$133,750**. The AGI cliff
+is not modelled, so no code path reads the figure — but it ships to users in the app's own note, and a
+user checking the app against Rhode Island's guide would have found the app wrong. That is why this is
+a release and not a documentation edit. Parent findings:
+`docs/AUDIT_STATE_INCOME_BASES_ROUND5.md` §2e and §8; scope `docs/SCOPE_RI_THRESHOLD_CORRECTION.md`.
+
+**Two official Rhode Island publications disagree, and the statute settles it.**
+
+| source | date | TY2025 single / HoH / MFS | TY2025 MFJ |
+|---|---|---|---|
+| **ADV 2025-22** | 3 Nov 2025 | $107,000 | **$133,750** |
+| **PUB 2026-01** Retirement Income Guide | Feb 2026 | $107,000 | **$133,500** |
+
+PUB 2026-01 states $133,500 **nine times** — its threshold table, two body sections, and seven worked
+examples. It is the later document and the filing-season guide, which is why the project adopted it,
+and why this was not a careless figure to have taken.
+
+**It is still wrong.** R.I. Gen. Laws § 44-30-12(c)(8) sets base-tax-year-2000 amounts of $80,000
+(single/HoH/MFS) and $100,000 (MFJ/QW) and adjusts **both by one cost-of-living factor**. TY2024
+confirms the mechanism exactly: $104,200 ÷ $80,000 = $130,250 ÷ $100,000 = **1.3025**. Against the
+verified TY2025 single figure of $107,000, $133,500 would put the MFJ threshold at 1.3350 times its
+base while the single sits at 1.3375 times its own — a gap of 0.0025, roughly **four times larger than
+any rounding step in the statute can produce**. The admissible MFJ value is **$133,750 or $133,800**.
+$133,750 is also the only one preserving the exact 1.25 ratio TY2024 confirms. **ADV 2025-22 is right.**
+
+The corrected note cites its source — `per ADV 2025-22` — rather than arguing the point in a state-rule
+note. `METHODOLOGY.md` carries the full derivation.
+
+**Limitations, stated rather than implied.** The cliff itself remains **unmodelled**: the app still
+ignores it entirely, so a household above the threshold is still modelled optimistically. This release
+corrects what the app *says* the threshold is, not what it computes. RI's TY2026 thresholds are **not
+obtainable** — the state publishes them a year in arrears and the November 2026 advisory does not
+exist yet; ROUND4's open item to read them closes as not-yet-available, not as obtained. The
+`$133,800` alternative cannot be excluded from the rounding bound alone; $133,750 is adopted because
+ADV 2025-22 states it and it preserves the confirmed ratio.
+
+**Testing — 2,920 app checks, 0 failing.** v5.61 leg **1,121** · v5.60 leg **1,119** · run-once **670**
+· parity **10/10**. Tooling 82 (`t21` 50, cross-version DOM diff 32), counted separately. Built-artifact
+smoke `smoke_built` **16/16**.
+
+`t10` L873's assertion pinned the literal string `TY2025: $133,500` and ran on **both** legs, so
+correcting the note would have failed the current build while leaving it would have blocked the fix.
+It is now a **version-gated split** at `_v >= 561`, matching the idiom used for v5.60's `exclAge`
+change eight lines above: the v5.61 branch asserts the corrected figure, and the `else` branch pins
+$133,500 as `[KNOWN DEFECT pre-v5.61]` for the frozen legs, which legitimately carry it. Asserting a
+correction against a frozen build is the v5.27 defect; inverting an assertion without gating it is the
+v5.28 defect that the v5.27 fix itself caused. Two new checks ride with it on the v5.61 leg: an
+extinction assertion that `133,500` is gone from the note, and a pin on the `ADV 2025-22` citation.
+
+**Six negative controls (`qa/controls_v561.sh`), all read individually.** C0 (comment-only) correctly
+silent; reverting the figure fires 3 checks; dropping the citation fires 1; wording RI off the
+`income[- ]limited` matcher fires the by-decision pin; leaving one of the four version sites at v5.60
+fires `t1`'s STATIC check; and falsifying the *pre-v5.61* pin on the frozen v5.60 leg fires — proving
+the gated split is a split rather than an inversion. **The citation control initially did NOT fire,
+and that verdict was correct**: nothing pinned `ADV 2025-22`, so the clause could have been deleted
+silently. The remedy was a new assertion, not a relabelled control.
+
+⚠ **The rewording was checked against every live matcher before the source was edited**, by executing
+the regexes rather than searching for them. Rhode Island is one of only four states holding `t29`'s
+F-6 income-limited set open; that set stays at four (NJ, NM, RI, VA). A whole-suite AST sweep of 376
+regex literals found exactly two whose verdict changes: the intended `$133,500` pin, and
+`t29_boundaries.mjs` L112's `/75/`, which matches because `$133,750` contains `75` and which tests an
+RMD-age row that never sees a state note. Read, adjudicated, innocent.
+
+⚠ **Build reproducibility — `mammoth` moved, and it is pinned for this build.** Rebuilding v5.60 from
+its own unmodified source did **not** reproduce its published artifact: `mammoth` resolves through an
+unpinned caret and had advanced from 1.12.1 to 1.12.2, changing the vendored bundle. Pinned back to
+**1.12.1**, v5.60 reproduces byte-identically (`278cb053b93f4b389c99f1e1ad31b591`), and v5.61 is built
+against that pin — so applying this release's five textual edits to the v5.60 artifact reproduces the
+v5.61 artifact **exactly**. The dependency change is therefore *not* riding along in this release.
+`package.json` is unchanged (`--no-save`). A committed lockfile remains the real fix and is not this
+release's work.
+
+⚠ **`qa/tools/package_check.mjs` gains one allowlist entry**, and it is data rather than logic.
+`SCOPE_INCOME_CONDITIONING.md` is gated on decisions D-2 and D-3, which are unresolved, so it is
+legitimately OPEN and none of the words check `I-2` looks for is true of it. That scope landed in the
+tree on 2026-09-03, so **any** package cut after that date would have failed `I-2`; this release is
+the first one cut. The entry records its own expiry — it must be removed when D-2 and D-3 are
+decided. The alternative was writing a false status line into a scope, or shipping a zip the gate
+refuses.
+
+**Source md5** `7e1a02881256142c5b9206045e76e2ec` · **built `index.html` md5**
+`ba3968f24e06eb989d9171cbd9a8c796`. Toolchain: node 22.22.2, vite 5.4.21, @vitejs/plugin-react 4.7.0,
+vite-plugin-singlefile 2.3.3, rollup 4.63.1, react/react-dom 18.3.1, mammoth 1.12.1 (pinned), jsdom
+30.0.1.
+
+**Not in this release**, and recorded so the omissions are deliberate: Connecticut, where from TY2026
+the model taxes 100% of a household's pension, 401(k) and IRA income that the statute exempts below
+$100,000 AGI — the largest single-state error in the current set; the income-conditioning field; the
+eight-state `ss: 0.5` blend; and modelling the RI cliff.
+
 ## v5.60 · Rhode Island and Wisconsin gated their exclusions at 65, not the statutory 67, 2026-09-02
 
 **Two `STATE_RULES` properties are ADDED — `exclAge: 67` on RI and on WI — and two notes are
