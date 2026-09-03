@@ -1397,11 +1397,29 @@ rather than on the statute alone, so no dollar figure is asserted for the couple
 
 Four statutory conditions were unmodelled at v5.59 and are named in the state's note. **The first
 of them — the requirement of full retirement age, 67 for anyone born 1960 or later — is modelled as
-of v5.60** (see below). The rest remain: it is gated by a **hard AGI cliff** (TY2025: **$133,500 MFJ / $107,000 single**, indexed annually
-— TY2026 was not read) which the model ignores; **IRA distributions do not qualify** (only Form 1040
+of v5.60** (see below). The rest remain: it is gated by a **hard AGI cliff** (TY2025: **$133,750 MFJ / $107,000 single**, indexed annually
+— TY2026 is not published until November 2026) which the model ignores; **IRA distributions do not qualify** (only Form 1040
 line 5b income does) and the model has no IRA-vs-employer-plan distinction; and the Social Security
 modification carries the same two gates and removes all federally-taxable SS where it applies, while
-the model taxes half. The sign of the error therefore depended, at v5.59, on which side of the cliff a household
+the model taxes half.
+
+**On the MFJ threshold figure, corrected at v5.61.** Through v5.60 the note and this document gave
+the TY2025 MFJ threshold as **$133,500**, taken from the Division of Taxation's own *Retirement
+Income Tax Guide* (PUB 2026-01, February 2026), which states it nine times. That figure is wrong,
+and Rhode Island's other publication has it right: **ADV 2025-22 (3 November 2025) gives $133,750**.
+The statute settles which to follow without reference to either document's authority. R.I. Gen. Laws
+§ 44-30-12(c)(8) sets base-tax-year-2000 amounts of $80,000 (single/HoH/MFS) and $100,000 (MFJ/QW)
+and adjusts **both by one cost-of-living factor**, so the two thresholds cannot stand in different
+ratios to their bases beyond a rounding step. TY2024 confirms the mechanism exactly:
+$104,200 ÷ $80,000 = $130,250 ÷ $100,000 = 1.3025. Against the verified TY2025 single figure of
+$107,000, $133,500 would imply an MFJ ratio of 1.3350 versus the single's 1.3375 — a gap of 0.0025,
+about four times larger than any rounding step can produce. **The admissible MFJ value is $133,750 or
+$133,800; $133,500 is not admissible.** The app follows ADV 2025-22 and cites it in the note, because
+a user checking the app against Rhode Island's filing-season guide will otherwise find a mismatch and
+reasonably conclude the app is wrong. **No computed output changed** — the cliff is not modelled, so
+no code path reads this figure. It is a disclosure correction that nonetheless ships to users.
+
+The sign of the error therefore depended, at v5.59, on which side of the cliff a household
 sat, whether both spouses had reached 67, and what kind of account the money was in. **With the age
 gate modelled from v5.60 the age term drops out**, leaving two: conservative under the cliff with
 employer-plan money, optimistic above it or on IRA money. Rhode Island also enacted, in
