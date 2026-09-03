@@ -490,6 +490,14 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
       // moment D-2 and D-3 are decided and the field is built — I-3 will not catch a stale
       // entry that still names a real file, only one naming a file that is gone.
       "SCOPE_INCOME_CONDITIONING.md",             // awaiting D-2 and D-3 (its §6)
+      // Added 2026-09-03. Its decisions ARE resolved — so it is not open in the sense the two
+      // entries above are — but nothing has SHIPPED, so RETIRED/SUPERSEDED/FULFILLED are all
+      // false of it and marking it any of them would write a false history, which is exactly
+      // what the header of this section says a machine must never do. The build stopped after
+      // the engine fix; STOP-REPORT-v5_63-fica-workbench.md carries the remainder.
+      // \u26a0 EXPIRES THE MOMENT v5.63 SHIPS. I-3 cannot catch this entry going stale: it only
+      // catches an entry naming a file that is GONE, and this file will still be there.
+      "SCOPE_ROTH_FICA_OTHERORD.md",              // decided, built in part, NOT shipped
     ]);
     const RETIRED = /\bRETIRED\b|\bSUPERSEDED\b|\bFULFILLED\b/;
     // ⚠ The INVENTORY is post-ship too, not just the reading of each file. A scope the package
