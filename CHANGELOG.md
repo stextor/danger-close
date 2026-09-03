@@ -1,5 +1,87 @@
 # Changelog
 
+## v5.62 · the three engines share one state-tax calculator and disagreed anyway, 2026-09-03
+
+**State tax rises in the Roth outputs. Nothing else moves.** Scope: `docs/SCOPE_ENGINE_STATE_PARITY.md`.
+
+`stateTaxAnnual` grants the state retirement exclusion to `retIncome + pen` and adds `work` outside
+it. The Taxes engine passed gross components. **The two Roth engines passed
+`retIncome: max(0, taxableOrd − ssT)` and no `pen` or `work` at all** — wrong twice over:
+
+1. `taxableOrd` is net of the **federal standard deduction**. `METHODOLOGY` describes the state layer
+   as an effective-rate approximation that explicitly does **not** model standard deductions, so a
+   federal deduction was being netted off a state base.
+2. It is undecomposed, and the Roth engines' income base is `pen + work + rmd` — so **wage income was
+   folded into `retIncome` and collected the state RETIREMENT exclusion.** In the five states that
+   exempt retirement income entirely (IL, MI, MS, IA, PA) that exempted the household's **wages**.
+
+**The three engines disagreed in all 42 taxing jurisdictions**, by up to **$2,656/yr** on an ordinary
+household (67/67 couple, $28k wages, $18k pension, $22k RMD, $8k qualified dividends and gains, $18k
+taxable SS), **always in the same direction: the Roth engines under-taxed.** Roth conversion and
+break-even output was therefore optimistic against the model's own Taxes tab. All three call sites
+now pass gross components.
+
+⚠ **`METHODOLOGY` asserted the opposite, and that is probably why nobody looked.** It read *"One
+shared calculator serves the Taxes engine, the Roth strategy comparator, and the Withdrawal engine,
+so the three can never disagree."* They shared the calculator but not the arguments. Corrected: what
+guarantees agreement is the argument shape, and that shape is now asserted. A second, unrelated stale
+clause in the same file — claiming RI's and WI's age-67 floors are not applied, which v5.60 applied
+and the same document says so twelve lines above — is corrected in the same pass and disclosed
+separately rather than folded in silently.
+
+⚠ **Limitation, pinned rather than hidden.** `otherOrd` — non-work ordinary income such as rental or
+annuity streams — is computed **only** in the Taxes engine; the Roth engines' base never carries it.
+**Engine agreement is exact only for households without such income.** Fixing it changes federal tax,
+Social Security taxation, IRMAA and bracket-fill conversion sizing, so it is a separate release with
+its own hand-verified cells. The suite pins the gap as `[KNOWN DEFECT pre-otherOrd]`, which flips
+when that lands.
+
+**Testing — 2,934 app checks, 0 failing.** v5.62 leg **1,126** · v5.61 leg **1,126** · run-once **672**
+· parity **10/10**. Tooling 82. `smoke_built` **16/16**.
+
+⚠ **MC parity is 10/10 and it is EXPECTED AND BLIND.** §E treats parity as the "engines unchanged"
+line and this release deliberately changes engine output, so a green parity needs explaining rather
+than accepting. `PORTFOLIO` carries no `stateCode`, so all three parity fixtures resolve to
+`stateCode: null` and never consult `STATE_RULES`. **Parity cannot see this change.** It is not
+evidence of no regression here; the suite work below is.
+
+**The real content of this release is the tests, because nothing caught this.** A scratch fix was
+built first and every suite touching Roth or state tax run against it: t3 36, t4 252, t23 25, t26 25,
+t32 12, t10 240, t2 35, t7 41, t8 40 — **all green, zero checks moved.** The suite had no opinion
+about Roth-engine state tax at all.
+
+Coverage was added to the two files that already owned the class, not to a new suite:
+- **`t8_invariant` 40 → 42** (run-once, so **no version-ladder cost**). It already carried
+  `[EXTINCTION v5.56] every stateTaxAnnual call site passes GROSS SS` — the same class — and already
+  excluded the definition and stripped comments. Two checks added: no call site passes a
+  post-deduction `taxableOrd` as `retIncome`, and every site passes `pen` and `work` as bound
+  identifiers.
+- **`t10` §2E 98 → 103**: wages still taxed in all five retExempt states; an unused exclusion does
+  not spill onto wages in the nine states with a $20k+ exclusion; two hand-computed cells (PA
+  $1,105.20, IL $1,782, worked independently to the dollar); and the `otherOrd` pin. **No version
+  gate** — v5.62 does not change the calculator, only the wiring, so these hold on both legs.
+
+**Six negative controls (`qa/controls_v562.sh`), each failure read.** C0 correctly silent. The defect
+had two independent halves and a partial fix would have been easy to ship, so they are reverted
+**separately**: C1a (revert the deduction netting) fires both extinction checks; C1b (keep gross
+totals but fold `work` back into `retIncome`) fires **only** the decomposition one. C2 adds a fourth
+call site and is caught. C3 grants the exclusion to wages and fires 5 checks including both hand
+cells. C4 catches a stale version site.
+
+✅ **§N3a passed:** v5.61 rebuilt byte-identically to its published `ba3968f2…` with **`mammoth`
+pinned to 1.12.1** (`--no-save`; `package.json` unchanged). The v5.61 reproducibility finding paid
+off one release later — and still argues for a committed lockfile, since the pin worked only because
+it was remembered.
+
+**Source md5** `827566da23ba3f37a3d7a66432afddfe` · **built `index.html` md5**
+`ceb7fb4af26560b0944030ffb5da1d6a`. Toolchain: node 22.22.2, vite 5.4.21, @vitejs/plugin-react 4.7.0,
+vite-plugin-singlefile 2.3.3, rollup 4.63.1, react/react-dom 18.3.1, mammoth 1.12.1 (pinned),
+jsdom 30.0.1.
+
+**Not in this release:** `otherOrd` in the Roth engines (next); the income-conditioning field, whose
+D-2 (b, named-string `base`) and D-3 (b, additive) are approved and were waiting on this; Connecticut;
+the eight-state `ss: 0.5` blend.
+
 ## OPS 2026-09-03 · the manifest went stale at v5.61, and it had turned off two negative controls
 
 **No app change.** No source edit, no rebuild, no version bump — **v5.61 remains the current build**,
