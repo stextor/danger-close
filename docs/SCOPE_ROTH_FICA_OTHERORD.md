@@ -6,7 +6,15 @@ build record when the release ships.
 **Build:** v5.62 · source `827566da23ba3f37a3d7a66432afddfe` · repo tree `2d23fe3`.
 **Baseline recomputed this session: 2,934 app checks, 0 failing** (per-leg 1,126 ×2, run-once 672,
 parity 10, `smoke_built` 16/16).
-**Status: DECISIONS OPEN. Do not build until §7 is resolved.**
+**Status: DECIDED 2026-09-03 — BUILD STARTED AND STOPPED. Not shipped.**
+D-1 withdrew itself on inspection; D-2 through D-5 were decided by the maintainer, all in the
+direction this scope recommended. The build then ran as far as the engine fix and the suite
+registration and stopped there. **`STOP-REPORT-v5_63-fica-workbench.md` is the live entry point** —
+it lists what remains, and it supersedes this file for the question "what do I do next."
+
+⚠ **This scope is deliberately NOT marked FULFILLED, and it is on `package_check`'s I-2 OPEN
+allowlist.** Nothing has shipped. The allowlist entry expires the moment v5.63 ships, at which point
+§7 becomes the build record and the head of this file gains a FULFILLED marker.
 
 Companion evidence: `FINDINGS-v5_63-otherOrd.md`. Everything asserted here was printed by a command;
 nothing is carried from the session brief, whose premise this scope replaces.
@@ -122,7 +130,11 @@ move and state the mechanism.
 - The owed D-a statutory check, the `mammoth` lockfile, `package_check` section K's pre-upload
   failures, and the `qa/tools/` home for probes.
 
-## 7 · Open decisions — Steve
+## 7 · Decisions — ALL RESOLVED 2026-09-03
+
+*Recorded as written, with the outcome on each. Kept rather than deleted: §G prefers retiring to
+deleting precisely because the reasoning is what a later session needs, and the outcome alone is
+what deletion keeps.*
 
 **D-1 · The $1 double-rounding — WITHDRAWN, the fix already closes it.** The gap was between the
 shipped Roth engine's `round(total)` and the Taxes engine's `round(work) + round(other)`. AST-resolved
@@ -139,16 +151,24 @@ behaviour; (b) also record that v5.62 disclosed a gap that did not exist. **Reco
 A user who read the v5.62 text deserves to know it was withdrawn, and this project's failure mode is
 documents that quietly stop matching.
 
+> **DECIDED: (b).** `METHODOLOGY` records that the v5.62 disclosure was withdrawn.
+
 **D-3 · L4446 and L8997.** Leave unfiltered (correct, but a reader must re-derive why) or make them
 explicitly `work + otherOrd` (self-documenting, more sites to bump). **Recommend leave**, with a
 one-line comment at each saying the total is deliberate because nothing there charges FICA.
+
+> **DECIDED: leave unfiltered, comment at each.** Both comments are in the workbench source.
 
 **D-4 · The `t10` pin.** Retire the mislabelled `[KNOWN DEFECT pre-otherOrd]` check and replace it,
 or keep it renamed to what it actually tests? **Recommend retire** — it asserts that adding $12,000
 to a taxed base changes the tax, which no release will ever falsify.
 
+> **DECIDED: retire.** Not yet done — it is item 2 on the stop report.
+
 **D-5 · Ship alone?** This is now a modelling release, not a note correction. **Recommend yes,
 alone**, as v5.63, with `METHODOLOGY` updated.
+
+> **DECIDED: ship alone as v5.63.**
 
 **D-6 · How the flip finding is reported.** The 336-household sweep is a grid I chose, so **10.7% is
 a property of the grid, not of the user population** — the stream sizes and conversion levels I picked
@@ -157,6 +177,8 @@ Options: (a) publish the percentage; (b) report it as an **existence result** �
 36 of 336 grid points, smallest shipped top-two gap $301, concentrated in single filers — and state
 the grid; (c) widen the sweep first. **Recommend (b).** It is the only one of the three that says
 something true. (c) buys a different arbitrary number for a session's budget.
+
+> **DECIDED: (b), existence result.** Do not publish 10.7% as a prevalence.
 
 ## 8 · Workspace state
 
