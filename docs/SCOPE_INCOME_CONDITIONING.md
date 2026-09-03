@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **DECISIONS OPEN — not buildable until §7 is resolved.** |
+| Status | **DECISIONS RESOLVED 2026-09-02 — all seven as recommended. NOT yet buildable: D-7 puts a narrow ROUND5 audit first, and D-2 depends on its answer.** Next artifact is `AUDIT_STATE_INCOME_BASES_ROUND5.md`, not code. |
 | Premise measured against | shipped **v5.60**, source `23877f903a14ba43dd707a43d98b0df4`, clone `33f699d`, 2026-09-02 |
 | Parent findings | `MissingFeatures.md` **D-11 (c)** · `AUDIT_STATE_EXCL65_ROUND4.md` §2a, §2b, §4 · `AUDIT_STATE_EXCL65_ROUND3.md` §4 |
 | Kind | **Data-model feature.** Engine code changes. This is not a rule-table edit. |
@@ -166,7 +166,11 @@ shipping New Mexico as a scalar is not meaningfully cheaper than doing this prop
 
 ---
 
-## 7 · Decisions — OPEN, with recommendations
+## 7 · Decisions — RESOLVED 2026-09-02, all as recommended
+
+> Maintainer approved all seven on 2026-09-02. Recorded verbatim below with the resolution on each.
+> **The build is still gated**: D-7 requires the ROUND5 audit first, and D-2 cannot be answered until
+> ROUND5 establishes New Jersey's income base.
 
 **D-1 · Where does the state income measure come from?**
 (a) reuse the nearest existing MAGI at each call site — cheapest, and bakes §2.2's divergence into a
