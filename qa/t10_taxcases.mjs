@@ -869,8 +869,28 @@ const pass2E = pass, fail2E = fail;
           T("[KNOWN DEFECT pre-v5.60] RI's note named the full-retirement-age floor the model did not apply",
             /full retirement age/i.test(R.RI.note) && /\b67\b/.test(R.RI.note) && R.RI.exclAge === undefined ? 1 : 0, 1);
         }
-        T("[DISCLOSED v5.59] RI's note names the IRA exclusion and the AGI cliff, dated to TY2025",
-          /IRA/.test(R.RI.note) && /cliff/i.test(R.RI.note) && /TY2025: \$133,500/.test(R.RI.note) ? 1 : 0, 1);
+        // ⚠ VERSION-GATED, not inverted in place. The frozen legs legitimately carry $133,500 —
+        // RI's own filing-season guide (PUB 2026-01) prints it nine times, which is where it came
+        // from. Asserting the correction against them is the v5.27 mistake §B2 exists to prevent.
+        // The correction rests on RI's own indexing formula, not on preferring one publication:
+        // § 44-30-12(c)(8) applies ONE COLA factor to base-year-2000 amounts of $80,000 and
+        // $100,000, so the two thresholds cannot have different ratios to their bases. TY2024
+        // confirms it exactly (104,200/80,000 = 130,250/100,000 = 1.3025). At the verified TY2025
+        // single of $107,000 the MFJ value must be $133,750 or $133,800; $133,500 is not admissible.
+        if (_v >= 561) {
+          T("[FIXED v5.61] RI's note names the IRA exclusion and the AGI cliff at the statutory TY2025 MFJ threshold",
+            /IRA/.test(R.RI.note) && /cliff/i.test(R.RI.note) && /TY2025: \$133,750/.test(R.RI.note) ? 1 : 0, 1);
+          T("[EXTINCTION v5.61] and the inadmissible $133,500 is gone from RI's note",
+            /133,500/.test(R.RI.note) ? 1 : 0, 0);
+          // The citation is not decoration. RI's own filing-season guide prints $133,500 nine
+          // times, so a user checking the app against it needs to know which source the app
+          // followed. Control C2 proved the clause was droppable without the suite noticing.
+          T("[FIXED v5.61] and the note cites the source it followed, since RI's own guide disagrees",
+            /ADV 2025-22/.test(R.RI.note) ? 1 : 0, 1);
+        } else {
+          T("[KNOWN DEFECT pre-v5.61] RI's note named the TY2025 MFJ threshold as $133,500, which the indexing formula does not admit",
+            /IRA/.test(R.RI.note) && /cliff/i.test(R.RI.note) && /TY2025: \$133,500/.test(R.RI.note) ? 1 : 0, 1);
+        }
         T("[EXTINCTION v5.59] WI's modelled exclusion is exactly $24,000 per person (2025 Wis. Act 15)",
           R.WI.excl65 === 24000 ? 1 : 0, 1);
         T("[EXTINCTION v5.59] and WI's note states that figure",
