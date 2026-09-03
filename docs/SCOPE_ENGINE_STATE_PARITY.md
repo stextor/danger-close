@@ -6,7 +6,7 @@
 | Written | 2026-09-03 |
 | Origin | the measurement `SCOPE_INCOME_CONDITIONING.md` §6 requires, run before building that field |
 | Shipping as | **v5.62, alone** |
-| Status | **AWAITING MAINTAINER DECISION** — §6. Not built. |
+| Status | **FULFILLED** — shipped as **v5.62**, 2026-09-03. §6: D-a yes, D-b no, D-c no note, D-d yes. §7 is the build record. |
 | Blocks | `SCOPE_INCOME_CONDITIONING.md`. Its parity invariant cannot be written until this lands. |
 
 ---
@@ -170,9 +170,69 @@ correction rather than folded in silently. *(Approved 2026-09-03.)*
 
 ---
 
-## 7. Build record
+## 7. Build record — shipped 2026-09-03 as v5.62
 
-*(empty — this scope has not been built)*
+Source `827566da23ba3f37a3d7a66432afddfe` · built `index.html` `ceb7fb4af26560b0944030ffb5da1d6a`.
+**2,934 app checks, 0 failing** — v5.62 leg 1,126 · v5.61 leg 1,126 · run-once 672 · parity 10/10 ·
+tooling 82 · `smoke_built` 16/16. All recomputed from output.
+
+### §5's "cross-engine parity invariant" was built, then deleted, and that was the right call
+
+It was first written as a new per-leg suite, `t33`. **`t8_invariant` already owned the class.** It
+carried `[EXTINCTION v5.56] every stateTaxAnnual call site passes GROSS SS`, already asserted
+"exactly 3 call sites (definition excluded)", already stripped comments before scanning, and its
+charter is a description of this very defect: *"A negative control that rewrote all three engine call
+sites … failed ZERO checks. The unit was covered and the wiring was not."* v5.62 is the second
+instance of the class t8 exists for. `t33` rediscovered three of t8's documented traps the hard way —
+the definition matching as a fourth call site, an optional regex prefix the engine skips, and a raw
+window that would match comments (the v5.41/v5.44 defect).
+
+**Final placement:** argument-shape checks in **`t8` (40 → 42, run-once, NO version-ladder cost)**;
+behaviour in **`t10` §2E (98 → 103)**. `t33` deleted.
+
+⚠ **And it is not called "parity".** It does not run the three engines and compare them — the Roth
+comparator is not reachable from the test surface (`__engines` exports only `computeTaxPlan` and
+`computeIrmaaPlan`), which runs into §M's instrumentation ceiling. Naming it parity would repeat
+`METHODOLOGY`'s "can never disagree", the claim that let this ship.
+
+⚠ **`t10` §2E's five checks are UNGATED and hold on both legs.** Not an oversight: v5.62 changes
+call-site WIRING, not the calculator, so behaviour is identical on both legs and the wiring is
+guarded at the source by t8. A single-suite design would have gated the lot at `_v >= 562` and
+asserted less than it appeared to.
+
+### Controls — `qa/controls_v562.sh`, six, each failure read
+
+C0 silent. **C1a and C1b revert the defect's two halves SEPARATELY**, because a partial fix would
+otherwise pass: C1a (deduction netting) fires both extinction checks, C1b (fold `work` back into
+`retIncome`) fires **only** the decomposition one. C2 adds a fourth call site — caught. C3 grants the
+exclusion to wages — 5 failures including both hand cells. C4 — stale version site.
+
+### ⚠ MC parity is 10/10 and BLIND
+
+§E treats parity as the "engines unchanged" line and this release deliberately changes engine output.
+`PORTFOLIO` carries no `stateCode`, so all three parity fixtures resolve to `stateCode: null` and
+never reach `STATE_RULES`. **Parity cannot see this change** and is not evidence of no regression.
+
+### ✅ §N3a passed
+
+v5.61 rebuilt byte-identically to `ba3968f2…` with `mammoth` pinned to 1.12.1 (`--no-save`).
+Still argues for a committed lockfile: the pin worked because it was remembered.
+
+### Decisions as taken
+
+**D-a** yes — the Taxes engine is correct, settled on `METHODOLOGY`'s own text (effective-rate
+approximation; standard deductions explicitly not modelled). ⚠ **The statutory cross-check named in
+D-a was NOT performed.** The document is unambiguous and the direction is conservative, but "state
+retirement exclusions do not cover wages" remains verified against the project's own methodology
+rather than against two statutes. **Recorded as owed.**
+**D-b** no — `otherOrd` is a separate release, pinned as `[KNOWN DEFECT pre-otherOrd]`.
+**D-c** no in-app note. **D-d** yes — both `METHODOLOGY` corrections shipped.
+
+### Open
+
+**The `otherOrd` release should be next.** It blocks nothing formally, but it leaves the Roth engines
+blind to rental and annuity income — affecting federal tax and conversion sizing, not just state tax —
+and it sits in front of the income-conditioning field and Connecticut.
 
 ---
 
