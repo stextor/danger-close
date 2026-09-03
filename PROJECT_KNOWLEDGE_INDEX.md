@@ -906,9 +906,26 @@ file is named here, so a third occurrence fails loudly instead of waiting for so
 | `SCOPE_INCOME_CONDITIONING.md` | An income-conditioning field for state exclusions (D-11 (c)) | **OPEN — gated on D-2 and D-3, unresolved.** On `package_check`'s OPEN allowlist; that entry expires when they are decided |
 | `SCOPE_HOUSEKEEPING_THREE.md` | Three housekeeping items | **OPEN — awaiting decisions in its §5.** On the OPEN allowlist |
 | `SCOPE_RI_THRESHOLD_CORRECTION.md` | Rhode Island's TY2025 MFJ threshold | **FULFILLED** — shipped as v5.61; §7 is the build record |
-| `SCOPE_ENGINE_STATE_PARITY.md` | The three engines shared one state-tax calculator and disagreed anyway | **FULFILLED** — shipped as v5.62; §7 is the build record |
+| `SCOPE_ENGINE_STATE_PARITY.md` | The three engines shared one state-tax calculator and disagreed anyway | **FULFILLED** — shipped as v5.62; §7 is the build record. ⚠ **Its §2 and §7 assert an `otherOrd` gap that was verified FALSE on 2026-09-03** — see `FINDINGS-v5_63-otherOrd.md`. Read that first; the disclosure is corrected by the pending v5.63 release |
 | `SCOPE_MANIFEST_D4.md` | This manifest's staleness, and the D-4 check | **the scope for the 2026-09-03 ops package** |
 | `STATUS_v5_50_shipped.md` | Ship record for v5.50 | historical |
+
+### Added 2026-09-03 (second upload that day) — the `otherOrd` verification and the v5.63 workbench
+
+**These three rows exist because the pool gained three files the same afternoon.** `package_check`
+K-9 asserts every pool file is named here; adding the files without the rows would fail the next
+package, which is the failure mode the section above this one records twice.
+
+| File | What it is | Status |
+|---|---|---|
+| `FINDINGS-v5_63-otherOrd.md` | The `otherOrd` question settled by execution: the v5.62 disclosed gap is **FALSE** (complement identity executed with non-zero readings on both sides), and the Roth comparator instead charges **FICA on rental and annuity income** at two sites. Also records why the earlier runtime attempt read `0`, the six AST-resolved `streamsAnnualAt` call sites, the mislabelled `t10` pin, and two harness facts absent from `TESTING.md` | **current — read before touching `runRothStrategies` or the v5.62 disclosure** |
+| `SCOPE_ROTH_FICA_OTHERORD.md` | Scope for v5.63: fix the FICA defect and correct the false disclosure together | **APPROVED 2026-09-03** — D-1 withdrawn (the fix closes it), D-2..D-5 decided by the maintainer. §4's blast radius is measured, not assumed |
+| `STOP-REPORT-v5_63-fica-workbench.md` | v5.63 stopped mid-build: engine fix applied from canonical v5.62 and **2,934 app checks green on both legs**, but no new tests, controls, `METHODOLOGY`, `CHANGELOG` or built artifact. Lists what remains, in order | **OPEN — the entry point for the next session.** The workbench `github/` half is NOT committed |
+
+⚠ **The suite total being UNCHANGED across the v5.63 fix is not reassurance.** No suite fixture
+carries a non-zero income stream, so the changed path is unreachable by every existing check. That
+is why the defect shipped. Recorded here because a session reading only the counts would draw the
+opposite conclusion.
 
 ## Retirement list (delete-first; nothing replaces these)
 
