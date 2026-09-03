@@ -124,10 +124,15 @@ move and state the mechanism.
 
 ## 7 · Open decisions — Steve
 
-**D-1 · The $1 double-rounding.** The Roth engine rounds the stream total; the Taxes engine rounds
-each half and adds. Measured delta up to **$1/yr**, direction unpredictable. Options: (a) leave and
-say "agree to within a dollar" in `METHODOLOGY`; (b) align both to round once. **Recommend (a)** —
-(b) touches the Taxes engine, which this release otherwise does not, and $1 does not justify that.
+**D-1 · The $1 double-rounding — WITHDRAWN, the fix already closes it.** The gap was between the
+shipped Roth engine's `round(total)` and the Taxes engine's `round(work) + round(other)`. AST-resolved
+against the candidate, the fix makes the Roth engine round each half independently at L3767/L3768 —
+**the identical expression the Taxes engine uses at L5167/5168**. There is nothing left to decide and
+nothing to disclose: post-fix the two engines compute the same arithmetic, not merely the same value
+to within a dollar. `METHODOLOGY` should say they agree, without the hedge.
+
+*(This entry originally recommended leaving the gap and hedging the wording. That recommendation was
+made before the candidate's own structure was checked, and it was wrong.)*
 
 **D-2 · What `METHODOLOGY` says about the history.** Options: (a) describe only the corrected
 behaviour; (b) also record that v5.62 disclosed a gap that did not exist. **Recommend (b), briefly.**
@@ -145,10 +150,13 @@ to a taxed base changes the tax, which no release will ever falsify.
 **D-5 · Ship alone?** This is now a modelling release, not a note correction. **Recommend yes,
 alone**, as v5.63, with `METHODOLOGY` updated.
 
-**D-6 · How hard to hunt for a worse flip.** The 336-household sweep is a grid, not a proof. Options:
-(a) accept 10.7% as the headline and disclose the method; (b) widen the sweep before ship.
-**Recommend (a)** — the finding is already decisive and a wider grid changes the percentage, not
-the conclusion.
+**D-6 · How the flip finding is reported.** The 336-household sweep is a grid I chose, so **10.7% is
+a property of the grid, not of the user population** — the stream sizes and conversion levels I picked
+set it, and quoting it as a prevalence would be a made-up statistic dressed as a measurement.
+Options: (a) publish the percentage; (b) report it as an **existence result** — flips occur, found at
+36 of 336 grid points, smallest shipped top-two gap $301, concentrated in single filers — and state
+the grid; (c) widen the sweep first. **Recommend (b).** It is the only one of the three that says
+something true. (c) buys a different arbitrary number for a session's budget.
 
 ## 8 · Workspace state
 
