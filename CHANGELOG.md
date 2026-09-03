@@ -1,5 +1,63 @@
 # Changelog
 
+## OPS 2026-09-03 · the manifest went stale at v5.61, and it had turned off two negative controls
+
+**No app change.** No source edit, no rebuild, no version bump — **v5.61 remains the current build**,
+its source `7e1a02881256142c5b9206045e76e2ec` and artifact `ba3968f24e06eb989d9171cbd9a8c796`
+untouched and re-verified. This corrects `PROJECT_KNOWLEDGE_INDEX.md` and builds the check that
+would have caught it. Scope: `docs/SCOPE_MANIFEST_D4.md`, now **FULFILLED**.
+
+**The defect.** The manifest was omitted from the v5.61 release package. Both build tables were left
+describing v5.60, the §A2 fallback hash table carried **21 wrong hashes**, one row named a file the
+rotation had removed, and **12 pool files had no row at all** — eleven of them predating v5.61.
+Nothing caught it; post-ship verification did. §G has always called the manifest mandatory, but §L,
+the checklist a session actually packages from, never named it. §L now does.
+
+⚠ **D-4 as recorded for eleven releases would NOT have caught this.** It was carried as *"nothing
+compares the manifest's two build tables"*, and this file's own manifest proposed a one-line
+assertion. Run against the real defect, that assertion **passes**: neither table rolled, so
+Current v5.60 / Prior v5.59 stayed mutually consistent while the document described the wrong build.
+Internal consistency is the one property a never-updated manifest preserves. The check therefore
+anchors the manifest to **external truth** — the clone's CHANGELOG, its source and artifact, and the
+pool's actual contents. Had D-4 been built as described it would have shipped green through the
+defect that motivated it. That is §B2 one level up: a check carried for eleven releases on an
+untested description of what it would catch.
+
+⚠ **And the stale manifest had silently disabled two negative controls.** `package_check_controls.sh`
+derives P20 and P21's mutation anchor from the manifest's Current-build table. With the manifest
+stale that anchor was the v5.60 hashes, which do not appear in the newest CHANGELOG entry — so the
+mutation was a no-op and both controls reported NOT CAUGHT while the checks they guard were
+innocent. Verified against the **unmodified** gate, so it predates this work. **Both fire again once
+the manifest is correct.** The manifest is not documentation; it is an input the verification layer
+reads as ground truth, and its staleness propagated into that layer.
+
+**A second rotted control, unrelated.** P26 hardcoded a scope that has since left the OPEN allowlist,
+so it could not trip I-3 and had been reporting NOT CAUGHT for an unknown number of releases. It now
+derives its target from the live allowlist. **P17 remains non-firing**, is already recorded in
+`TESTING.md`, and is deliberately not touched here.
+
+**What shipped.** `package_check.mjs` gains **section K** (K-0 through K-9). K-1..K-3 anchor the
+Current table to the committed tree; K-4..K-6 anchor both tables to the pool; K-8 checks every hashed
+row against its pool file; K-9 asserts §G's rule that every pool file is named. **K-7 is D-4 exactly
+as originally written and ships labelled WEAK**, because it catches the other real case — one table
+rolled and the other not, which ran for seven releases — but cannot see a both-tables-stale manifest.
+It is never the only guard.
+
+`package_check_controls.sh` gains **seven controls, P29–P35, all firing**. P29 reproduces the v5.61
+defect and asserts both that K-1 catches it and that **K-7 does not**. P34 is K-7's justification.
+P35 asserts K skips loudly with no manifest rather than passing blind. The harness's section-matching
+class was widened from `[A-I]` to `[A-K]` in **both** runners.
+
+`OPERATIONS.md` §L now names the manifest as a release deliverable, and §G records **what does not
+rotate**: the pool keeps every `controls_v*.sh`, while `dom_entry_*.jsx` rotates with its source leg.
+A v5.61 delivery note wrongly told the maintainer to delete `controls_v559.sh`; the pool already held
+`controls_v557.sh` and `controls_v5571.sh`, contradicting the instruction in plain sight.
+
+**Verification.** Section K reproduced the scope's predicted fired/passed table against the live
+defect before the fix, and is green against the corrected manifest. All seven new controls fire, and
+the pre-existing ones still do. `package_check` on this package with `KIND: ops`. **No app suite was
+run and no check count is claimed, because no app file changed.**
+
 ## v5.61 · Rhode Island's own filing-season guide states a threshold its statute cannot produce, 2026-09-03
 
 **One string changes. No computed output moves, and no engine code is touched.** `STATE_RULES.RI.note`
