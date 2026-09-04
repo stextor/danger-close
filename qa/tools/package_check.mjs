@@ -482,14 +482,20 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
     const OPEN = new Set([
       "SCOPE_STANDING_AUDIT.md",                  // not a build scope at all (OPERATIONS §K)
       "SCOPE_HOUSEKEEPING_THREE.md",              // awaiting decisions in its §5
-      // Added v5.61. The income-conditioning field is gated on D-2 and D-3, which the maintainer
-      // has not resolved — so the scope is legitimately OPEN and none of RETIRED/SUPERSEDED/
-      // FULFILLED is true of it. It landed in the tree on 2026-09-03, one release before this
-      // one, so it would have failed I-2 on ANY package cut after that date; v5.61 did not
-      // create this condition, it was the first package to meet it. ⚠ This entry EXPIRES the
-      // moment D-2 and D-3 are decided and the field is built — I-3 will not catch a stale
-      // entry that still names a real file, only one naming a file that is gone.
-      "SCOPE_INCOME_CONDITIONING.md",             // awaiting D-2 and D-3 (its §6)
+      // Added v5.61, REWRITTEN 2026-09-04. The reason changed and the entry did not expire.
+      // D-2 and D-3 were APPROVED on 2026-09-04 — (b) and (b) — so this scope is no longer
+      // awaiting decisions; it is approved and NOT YET BUILT, which is still legitimately OPEN
+      // and still none of RETIRED/SUPERSEDED/FULFILLED. ⚠ The entry now EXPIRES WHEN THE FIELD
+      // SHIPS, and nothing here can detect that: I-3 fires only on an entry naming a file that
+      // is GONE, and this file will still be there. A person removes it, in the release that
+      // builds the field — the same mechanism, and the same warning shape, as the
+      // SCOPE_ROTH_FICA_OTHERORD entry removed below.
+      "SCOPE_INCOME_CONDITIONING.md",             // approved 2026-09-04, unbuilt (its §7)
+      // Added 2026-09-04 with the scope itself. Its two decisions (H-1, H-2) are RESOLVED, but
+      // H-2 and the third scope-status sweep are unbuilt, so it carries no retirement marker and
+      // would fail I-2 on any package cut after it lands. Expires when H-2 has been executed and
+      // the sweep run — again, only a person can retire it.
+      "SCOPE_TREE_AND_POOL_HOUSEKEEPING.md",      // decided 2026-09-04, H-2 + sweep unbuilt (its §5)
       // ── REMOVED 2026-09-04 at the v5.63 ship: "SCOPE_ROTH_FICA_OTHERORD.md". Its entry was
       // added 2026-09-03 with the note that it EXPIRES THE MOMENT v5.63 SHIPS and that I-3
       // could not catch it going stale, since I-3 only fires on an entry naming a file that is
