@@ -31,6 +31,20 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 | Built `index.html` md5 | `5998e8b60c5f45ded623d500fce09a86` |
 | Shipped | 2026-09-04 |
 
+> **Ops package 2026-09-04 (decisions) — NO VERSION BUMP.** v5.63 remains current, source
+> `b2deba49e68bee6c29300f2f8cf0a7e3`, artifact `5998e8b60c5f45ded623d500fce09a86`, both re-verified
+> against a fresh clone at `37cea89` that day. **Two maintainer decisions landed and one documented
+> disagreement was closed.** `SCOPE_INCOME_CONDITIONING.md`'s D-2 and D-3 are **approved, (b) and
+> (b)**, and its premise was re-anchored from v5.60 to v5.63 — v5.62 rewrote all three
+> `stateTaxAnnual` call sites to gross components, falsifying the scope's §2.1, and v5.63 made the
+> `work` argument carry `work + otherOrd`, so the approved base expressions must not be described as
+> wages. `SCOPE_TREE_AND_POOL_HOUSEKEEPING.md` is **new**, with H-1 (keep all 57 `dom_entry_*.jsx`)
+> and H-2 (move 24 completed-history files out of the pool) both resolved and neither built.
+> ⚠ **`package_check`'s I-2 allowlist now holds four entries**, and the `SCOPE_INCOME_CONDITIONING`
+> one had its REASON rewritten rather than removed — an allowlist entry whose justification goes
+> stale is as invisible to I-3 as a ghost entry is. ⚠ **No app suite was run and none applies**: no
+> source, suite or fixture changed, so a green total would have been a reading from an unrelated set.
+
 > **Rolled 2026-09-04 at the v5.63 ship.** Rotation removed `DangerClose-v5_61.jsx` and
 > `dom_entry_v561.jsx`; the pool holds exactly `DangerClose-v5_62.jsx` and `DangerClose-v5_63.jsx`,
 > and `dom_entry_v562.jsx` and `dom_entry_v563.jsx`. **v5.63 is a CALCULATOR change**: the Roth
@@ -552,7 +566,7 @@ row that was never written cannot be found by reading the table.
 | `SCOPE_STATE_FIXTURES.md` | `becf9a95657e403de23358996e7778e3` | `docs/SCOPE_STATE_FIXTURES.md` — ☑ **RETIRED 2026-09-01: FULFILLED AT v5.54**, verified against v5.57. ⚠ Its `package_check` OPEN-allowlist entry was deleted in the same edit. ⚠ **RETIRED not deleted**: the deferred `stateEstate` fixture (D2) appears nowhere in `MissingFeatures.md`, so this document is its only record. **Its §4 ordering constraint on D-3c is now DISCHARGED.** *(Prior status:)* The prerequisite for D-3c and D-7: every suite fixture sets `stateCode: null` (the legacy fallback) except `t3`'s `GA`, so 50 of 51 jurisdictions are unexercised at household level, and `t10`'s six archetypes are structural branches that miss the income-limited-exclusion class entirely. ⚠ Also splits `boundaries.mjs` **L88–90**, whose `state_tax` row is keyed on the legacy scalar and reads ON while `STATE_RULES` is muted |
 | `STATUS_v5_42_shipped.md` | `1021fb74188a077a0c22788a1efd0904` | `docs/STATUS_v5_42_shipped.md` — **NEW at v5.42.** The ship record: the §86 cliff, the five-slider test design and why the default proves nothing, the six negative controls and the one that is a documented no-op, the middle-tier `[KNOWN DEFECT]` found mid-build, and the four items left open |
 | `hand_86.mjs` | `981b425c4fc738abb49046a97cd0fea0` | `qa/tools/hand_86.mjs` — **PROMOTED TO SUITE ORACLE at v5.42** and added to the pool (it was repo-only through v5.41, which is why the v5.42 brief had to record its hash separately). `statute86` is transcribed from 26 U.S.C. §86 at law.cornell.edu, **not from any app expression**, and is imported by BOTH `t24` and `qa/tools/derive_v542.mjs` — one oracle on both sides, deliberately, because at v5.41 a second independent derivation drifted and the brief's table shipped wrong twice. ⚠ **The three app copies inside it are v5.40 transcriptions and are now HISTORY** — `rothTab` records the cliff v5.42 replaced. Asserts nothing; counted in NO check total |
-| `package_check.mjs` | `232b96ce74520ac5826f6662af00115f` | `qa/tools/package_check.mjs` — ⚠ **hash rolled 2026-09-03** (was `999dd7a15f…`): the I-2 OPEN allowlist gained `SCOPE_ROTH_FICA_OTHERORD.md`, decided but not shipped. ⚠ **That entry expires when v5.63 ships and `I-3` CANNOT catch it going stale** — I-3 only fires on an entry naming a file that is gone, and this one will still exist. ⚠ **hash corrected 2026-09-02**: the row read `6133144820…` while pool AND repo held `ee1a1a8f63…` (the 2026-09-01 G-2/J rewrite landed and the row did not roll — the 2026-08-28 shape again). **NEW at v5.42 (added 2026-08-21).** Validates a release zip against OPERATIONS §L before it is sent: structure, MANIFEST truthfulness, changed-files-only against a clone, `knowledge/` flatness and the two-source rotation, cross-destination byte-identity, and the delete-first list. **25 checks (24 on an ops package), negative-controlled 16 ways, all firing.** Packages declare `KIND: app-release` or `KIND: ops` in MANIFEST.txt; release-only checks are gated on it and an **undeclared package fails closed**. Without a clone the tree-diff checks are SKIPPED and say so. Asserts about the DELIVERY, not the build — counted in NO release check total |
+| `package_check.mjs` | `da166ebfd12376c0d6eb8888839eb148` | `qa/tools/package_check.mjs` — ⚠ **hash rolled 2026-09-04** (was `232b96ce74…`): the I-2 OPEN allowlist gained `SCOPE_TREE_AND_POOL_HOUSEKEEPING.md`, and the `SCOPE_INCOME_CONDITIONING.md` entry's *comment* was rewritten — its reason changed from *awaiting D-2 and D-3* to *approved 2026-09-04, unbuilt*, and its expiry moved from "when the decisions are made" to "when the field ships." ⚠ **An allowlist entry whose REASON goes stale is invisible to I-3 exactly as a stale entry is** — I-3 fires only on an entry naming a file that is gone. Previously **rolled 2026-09-03** (was `999dd7a15f…`): the I-2 OPEN allowlist gained `SCOPE_ROTH_FICA_OTHERORD.md`, decided but not shipped. ⚠ **That entry expires when v5.63 ships and `I-3` CANNOT catch it going stale** — I-3 only fires on an entry naming a file that is gone, and this one will still exist. ⚠ **hash corrected 2026-09-02**: the row read `6133144820…` while pool AND repo held `ee1a1a8f63…` (the 2026-09-01 G-2/J rewrite landed and the row did not roll — the 2026-08-28 shape again). **NEW at v5.42 (added 2026-08-21).** Validates a release zip against OPERATIONS §L before it is sent: structure, MANIFEST truthfulness, changed-files-only against a clone, `knowledge/` flatness and the two-source rotation, cross-destination byte-identity, and the delete-first list. **25 checks (24 on an ops package), negative-controlled 16 ways, all firing.** Packages declare `KIND: app-release` or `KIND: ops` in MANIFEST.txt; release-only checks are gated on it and an **undeclared package fails closed**. Without a clone the tree-diff checks are SKIPPED and say so. Asserts about the DELIVERY, not the build — counted in NO release check total |
 | `package_check_controls.sh` | `46712844dbe1efd691535cacb974b2ad` | `qa/tools/package_check_controls.sh` — the negative-control harness for `package_check.mjs` (§B2). **REWRITTEN 2026-08-23**: it hardcoded absolute paths from a dead session, so anywhere else it printed *** NOT CAUGHT *** for every control — reading as "the checks are broken" rather than "the inputs are missing" — and exited **0**. Now self-locating, argument-driven, deriving its targets from the package, and exiting non-zero when a control does not fire. **17 controls, all firing**, including P19, which asserts `G-1` stays QUIET on a clean workspace. Tooling — counted in no app total |
 | `controls_source.sh` | `1c86f79d37b1527b335dffebfa462163` | `qa/controls_source.sh` — the SOURCE-level negative-control harness (§B2): reverts a fix, rebuilds, and requires the named suites to FAIL. **Renamed and repaired 2026-08-23 from `controls_v542.sh`**, which is DELETED. The version is out of the filename (it described `SRC=`, not the controls, and made the file look stale whenever a tag rolled). All 19 anchors were intact at v5.47 — the defect was that `rebuild()` built only `app_<tag>.mjs` while `t24` reads `dom_<tag>.cjs`, so **four controls reported a FALSE `NOT CAUGHT`**. Now rebuilds both, and `verify_artifacts()` refuses a verdict unless every consumed artifact is newer than the source. **C0** is a control that must NOT fire. ⚠ Covers v5.36 and v5.42 only — **nothing covers v5.43–v5.47** |
 | `t2_engines.mjs` | `790864a132c17c01367976094518863b` | `qa/qa-baseline/t2_engines.mjs` |
@@ -915,7 +929,8 @@ file is named here, so a third occurrence fails loudly instead of waiting for so
 | File | What it is | Status |
 |---|---|---|
 | `AUDIT_STATE_INCOME_BASES_ROUND5.md` | State income bases and thresholds, round 5. Four findings; the Rhode Island one shipped as v5.61 | **COMPLETE**. Three findings still open — Connecticut is the largest single-state error currently known |
-| `SCOPE_INCOME_CONDITIONING.md` | An income-conditioning field for state exclusions (D-11 (c)) | **OPEN — gated on D-2 and D-3, unresolved.** On `package_check`'s OPEN allowlist; that entry expires when they are decided |
+| `SCOPE_INCOME_CONDITIONING.md` | An income-conditioning field for state exclusions (D-11 (c)) | **OPEN — APPROVED 2026-09-04, NOT YET BUILT.** ⚠ Row rewritten 2026-09-04: it said *"gated on D-2 and D-3, unresolved"* while `CHANGELOG.md`'s v5.62 entry said both were approved — a four-document disagreement (this row, the scope's status line, `package_check`'s allowlist comment, the CHANGELOG) that nothing compared, the **fifth** of its class. D-2 **(b)** two bases via a per-state `base` field and D-3 **(b)** additive `{ kind: 'bands' \| 'taper' }` with `excl65` kept as a scalar are approved; all seven decisions are now resolved. ⚠ **Its premise was re-anchored from v5.60 to v5.63 in the same pass** — v5.62 rewrote all three `stateTaxAnnual` call sites to gross components and v5.63 made `work` carry `work + otherOrd`, so every line number and the falsified "the three call sites do not pass the same fields" claim were corrected. Stays on `package_check`'s OPEN allowlist; **that entry now expires when the field SHIPS, and only a person can retire it** |
+| `SCOPE_TREE_AND_POOL_HOUSEKEEPING.md` | Repo and pool housekeeping — the `dom_entry_*` set, and whether completed history needs to be in the pool | **OPEN — decisions RESOLVED 2026-09-04, work NOT BUILT.** H-1: **keep all 57 `dom_entry_*.jsx`** — the draft's "251 KB" was the whole `qa/qa-baseline/` directory (257,413 bytes) attributed to the 57-file subset, which is **18,913 bytes**; with the size corrected there is no case against §G's *prefer retiring to deleting*. H-2: **move the 24 completed `AUDIT_*`/`STATUS_*`/`STOP-REPORT-*`/`FINDINGS-*` (283,558 bytes) out of the pool, keep them in the repo**, with a repo-only manifest row each, carving out `FINDINGS-v5_63-otherOrd.md` and any audit a live scope cites. **H-3**: the repo carries the qa-baseline README **twice** — `qa/qa-baseline/README.md` and `docs/qa-baseline-README.md` are byte-identical (`605c263afbe2f30a3fc2ba720aba1925`), the `docs/` copy an upload artifact from `dcc14c1` that nothing references; decided **delete the `docs/` copy**. ⚠ **H-2, H-3 and the third scope-status sweep are UNBUILT.** ⚠ **Tooling finding recorded with H-3**: `package_check`'s **E-1b** resolves knowledge files against the CLONE, so a package that DELETES a repo file is marked red by its own deletion — the defect **I-2 was already fixed for**, in the same file On `package_check`'s OPEN allowlist |
 | `SCOPE_HOUSEKEEPING_THREE.md` | Three housekeeping items | **OPEN — awaiting decisions in its §5.** On the OPEN allowlist |
 | `SCOPE_RI_THRESHOLD_CORRECTION.md` | Rhode Island's TY2025 MFJ threshold | **FULFILLED** — shipped as v5.61; §7 is the build record |
 | `SCOPE_ENGINE_STATE_PARITY.md` | The three engines shared one state-tax calculator and disagreed anyway | **FULFILLED** — shipped as v5.62; §7 is the build record. ⚠ **Its §2 and §7 assert an `otherOrd` gap that was verified FALSE on 2026-09-03** — see `FINDINGS-v5_63-otherOrd.md`. Read that first; the disclosure is corrected by the pending v5.63 release |
@@ -940,6 +955,29 @@ is why the defect shipped. Recorded here because a session reading only the coun
 opposite conclusion.
 
 ## Retirement list (delete-first; nothing replaces these)
+
+### At the ops upload of 2026-09-04 (decisions package) — DELETE THESE FIRST
+
+**No version bump. v5.63 remains the current build**, source `b2deba49e68bee6c29300f2f8cf0a7e3`,
+artifact `5998e8b60c5f45ded623d500fce09a86`. No app source, no `t*.mjs`, no fixture was touched.
+
+| Delete | Because |
+|---|---|
+| `SCOPE_INCOME_CONDITIONING.md` | replaced — D-2/D-3 approved, premise re-anchored v5.60 → v5.63 |
+| `PROJECT_KNOWLEDGE_INDEX.md` | replaced — this file |
+| `CHANGELOG.md` | replaced — the ops entry for this package |
+| `package_check.mjs` | replaced — I-2 allowlist |
+| `qa-baseline-README.md` | replaced — the H-1 annotation and the git-tag correction |
+
+⚠ `SCOPE_TREE_AND_POOL_HOUSEKEEPING.md` is **NEW** — nothing to delete first, but it does need a
+row (it has one, above) or the next `package_check` **K-9** fails.
+
+⚠ **The pool is ADD-ONLY (§L F-1).** All five files above must be deleted before the new copies are
+uploaded. `README-FIRST.md` carries the same list; this row exists so the manifest carries it too.
+
+⚠ **This package does NOT execute H-2.** The 24 completed-history files stay in the pool for now and
+keep their existing rows. When H-2 is built, those rows are rewritten as repo-only in the same pass —
+`package_check` K-9 is what makes that safe, and K-8 does not object to an unhashed row.
 
 ### At the v5.63 upload (2026-09-04) — DELETE THESE FIRST
 

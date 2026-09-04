@@ -1,5 +1,127 @@
 # Changelog
 
+## OPS 2026-09-04 · two decisions, and four documents that disagreed about one of them
+
+**No app change.** No source edit, no rebuild, no version bump — **v5.63 remains the current build**,
+source `b2deba49e68bee6c29300f2f8cf0a7e3` and artifact `5998e8b60c5f45ded623d500fce09a86`, both
+re-verified against a fresh clone at `37cea89`. No `t*.mjs`, no fixture and no `METHODOLOGY` change.
+Scope: `docs/SCOPE_TREE_AND_POOL_HOUSEKEEPING.md` (new) and `docs/SCOPE_INCOME_CONDITIONING.md`.
+
+### The disagreement
+
+`CHANGELOG.md`'s **v5.62** entry stated that the income-conditioning field's *"D-2 (b, named-string
+`base`) and D-3 (b, additive) are approved."* Three other documents said the opposite: the scope's
+own status line, its `PROJECT_KNOWLEDGE_INDEX.md` row, and the comment on `package_check`'s I-2
+allowlist entry all described both decisions as unresolved. Nothing compares those four artifacts,
+which is the **fifth** recorded instance of this class.
+
+**The chronology was established from git rather than inferred, and it contradicts the obvious
+reading.** `docs/SCOPE_INCOME_CONDITIONING.md` landed at `dcc14c1` — the v5.61 commit — already
+carrying the ROUND5 re-decided text, and has not been modified since; the file is byte-identical
+across the commit, the tree and the pool (`af5015f1…`). The v5.62 entry was written afterwards, at
+`00face0`, and it names the **current** options both by letter and by shape. The superseded options
+were *one shared base* and `{ upTo, amount }` — neither of which that sentence describes. So the
+entry cannot have been a stale approval carried forward onto renumbered text, which is what a
+handover note written the same week proposed; the likelier history is the reverse, that an approval
+was given and three documents were never updated. **This is not established and is now moot**: the
+maintainer approved (b) and (b) in writing on 2026-09-04, and all four documents carry that date.
+
+⚠ **The lesson is the one already recorded four times.** A fact stated in four places drifts in
+whichever one is not read next. Two of the four here are machine-readable — a manifest row and a
+source comment — and neither is checked against the CHANGELOG by anything.
+
+### What the two decisions were
+
+- **D-2 (b)** — two income measures, `agi` and `agiExSS`, selected by a per-state `base` field.
+  Both are expressions over arguments `stateTaxAnnual` already receives, so no call site changes.
+- **D-3 (b)** — an additive `{ kind: 'bands' | 'taper', … }` field, with `excl65` **kept** as a
+  scalar. Re-verified before approval: `qa/t10_taxcases.mjs` L467 reads `r.excl65 > 0` and
+  `qa/t29_boundaries.mjs` L233 reads `(r.excl65 || 0) > 0`, and an array or object compared `> 0`
+  evaluates **false** — so replacing the scalar with a rich object empties both guarded sets on
+  exactly the states the feature changes, and both checks keep passing. The approval carries a new
+  invariant with it: the redundant scalar must be asserted equal to what the band table yields at
+  zero income, or it becomes a second source of truth nothing compares.
+
+### The scope's premise was two releases stale and one of its claims was false
+
+`SCOPE_INCOME_CONDITIONING.md` was anchored to v5.60. Re-measured against v5.63 by AST:
+
+- **Every line number moved.** `stateTaxAnnual`'s three call sites are L4003 / L4128 / L5283, not
+  L3996 / L4114 / L5265; the four MAGI definitions are L4116 / L4509 / L4970 / L9066.
+- **Its central §2.1 claim is falsified.** It read *"the three call sites do not pass the same
+  fields,"* with the two Roth sites folding pension and work into `retIncome`. **v5.62 rewrote both
+  to gross components** — all three now pass an identical field set. That makes the feature cheaper,
+  not more expensive: the burden of proving three shapes sum to one measure is now a same-shape
+  comparison.
+- ⚠ **`work` no longer means wages.** All three sites pass `work + otherOrd` as of v5.63, so rental,
+  annuity and royalty income ride in that argument. Arithmetically that is what a state base should
+  contain and the approved expressions are correct as written — but **no disclosure note for this
+  feature may call the term wages**, and neither measure carries dividend or interest income at all.
+- What did **not** move: `STATE_RULES` is still 51 entries with six universal fields, `exclAge` on
+  DE/KY/RI/WI and `ssOffset` on ME/MD.
+
+### Housekeeping — two decisions, and a measurement error owned
+
+A new scope, `SCOPE_TREE_AND_POOL_HOUSEKEEPING.md`, with both of its decisions resolved and neither
+of its two remaining work items built.
+
+- **H-1 — keep all 57 `dom_entry_*.jsx`.** ⚠ **The draft's central number was wrong by a factor of
+  thirteen.** It gave the 57 files as **251 KB**; they are **18,913 bytes**. 251 KB is the size of
+  the whole `qa/qa-baseline/` directory — 257,413 bytes — attributed to the subset inside it, most
+  likely through a `du` reading of 4 KB blocks. With the size corrected, deleting the 54 unreachable
+  shims saves about 18 KB against a documented capability, and §G's *prefer retiring to deleting*
+  governs. The census question was answered by parse, not grep: an AST walk over `qa/` finds **57
+  distinct version tags, every one registered** in the `KNOWN_VERSIONS` guards. Those registries name
+  tags rather than files, so deletion would not have broken a run — it would have left 57 registered
+  tags against three runnable legs.
+- **H-2 — move completed history out of the pool, keep it in the repo.** 24 `AUDIT_*`, `STATUS_*`,
+  `STOP-REPORT-*` and `FINDINGS-*` files, 283,558 bytes, load into every session's context and are
+  all durably committed. They become repo-only with a manifest row each, carving out
+  `FINDINGS-v5_63-otherOrd.md` and any audit a live scope cites. **Not executed in this package.**
+- **A second finding, made while writing H-1's annotation.** `qa/qa-baseline/README.md` said
+  `v510.jsx` was *"recoverable from its git tag."* **There is no such tag** — `git ls-remote --tags
+  origin` returns nothing, and OPERATIONS §G has said since 2026-08-09 that this project uses none.
+  The false sentence sat in the one place a session would read while hunting for that exact file.
+  Corrected.
+- ⚠ **H-3, found while packaging: the repo carries the `qa-baseline` README twice.**
+  `qa/qa-baseline/README.md` and `docs/qa-baseline-README.md` are byte-identical
+  (`605c263afbe2f30a3fc2ba720aba1925`); the `docs/` copy landed at `dcc14c1` as a 90-line single-file
+  addition, the shape of the pool's *flattened* name being uploaded into `docs/`. Nothing points at
+  it. This is the class §G names under *One manifest, one copy* — and it would have gone stale **in
+  this package**, which edits the real file and would have left the duplicate still claiming a git
+  tag that does not exist. **Decided: delete the `docs/` copy. Not executed here** — see below.
+- ⚠ **A tooling finding, and it is a second instance of a known shape.** `package_check`'s **E-1b**
+  resolves a `knowledge/` file to its repo counterpart by basename **against the clone**, i.e. the
+  pre-ship tree. A deletion cannot be expressed in a zip, so a package that removes a repo file is
+  marked red **by the removal it is shipping**. That is precisely the defect **I-2 was fixed for**,
+  whose own comment states the rule: *"the question worth asking is not 'is the tree clean now' but
+  'will the tree be clean once this lands.'"* E-1b was left reading the pre-ship tree alone.
+  **What this package did instead of deleting:** shipped the corrected README to **both** repo paths,
+  so no copy carries the false sentence. The duplicate survives one more package, deliberately.
+- **The pool has no orphans, and that is worth recording rather than re-deriving.** Compared in both
+  directions by content hash: every pool file has a byte-identical committed counterpart except four,
+  and all four are expected — the rotated `DangerClose-v5_62/63.jsx` pair, plus `tools_fixture.jsx`
+  and `vite_config.js`, which are the mount's renamings of `qa/tools/fixture/fixture.jsx` and
+  `vite.config.js`.
+
+### Limitations of this package, stated rather than implied
+
+- **No app suite was run, and none applies.** No source, suite or fixture changed, so a green total
+  would be a reading from an unrelated set (§B2). The package was verified with `package_check`
+  against a fresh clone; that tool asserts about the delivery and is counted in no check total.
+- **The `package_check` allowlist entry for `SCOPE_INCOME_CONDITIONING.md` was rewritten, not
+  removed**, because the scope is approved but unbuilt. Its expiry moved from *when the decisions are
+  made* to *when the field ships*. ⚠ I-3 cannot catch either — it fires only on an entry naming a
+  file that is gone, and this file will still be there.
+- **H-2 and H-3 are decided and not done.** The 24 files remain in the pool with their existing
+  rows, and `docs/qa-baseline-README.md` is still in the tree.
+- **The third scope-status sweep is not started.** 43 `SCOPE_*` files; the two prior sweeps found
+  nineteen stale status lines between them, and §I is explicit that reading what each release
+  actually shipped is the expensive, unavoidable part.
+- **No statutory figure in this package was re-verified.** Nothing here ships one. The income
+  conditioning build must check all five states against primary sources at build time — Rhode Island
+  especially, whose own filing guide prints a threshold its indexing statute cannot produce.
+
 ## v5.63 · the Roth comparator charged payroll tax on rental income, 2026-09-04
 
 **FICA is now charged on earned income only, in the Roth strategy comparator. Nothing else moves.**
