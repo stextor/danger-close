@@ -160,11 +160,25 @@ against the Taxes tab. v5.62 makes all three pass gross components. **What guara
 not the shared calculator but the argument shape**, and that shape is now asserted — `t8` checks
 every call site at the source, `t10` §2E checks the behaviour.
 
-⚠ **One residual, disclosed rather than modelled.** `otherOrd` — non-work ordinary income such as
-rental or annuity streams — is computed only in the Taxes engine. The Roth engines' income base is
-`pen + work + rmd` and never carries it, so for a household with such income the engines still
-differ. Adding it changes federal tax, Social Security taxation, IRMAA and conversion sizing, so it
-is a separate change; the suite pins the gap as a known defect. Selecting no state preserves the legacy flat-rate
+⚠ **The residual this paragraph disclosed at v5.62 is WITHDRAWN at v5.63, because it was not
+there.** The v5.62 text read: *"`otherOrd` — non-work ordinary income such as rental or annuity
+streams — is computed only in the Taxes engine. The Roth engines' income base is `pen + work + rmd`
+and never carries it, so for a household with such income the engines still differ."* Measured by
+execution at the v5.63 build, `streamsAnnualAt` was already handing the Roth comparator the SAME
+ordinary total either way — the gap the disclosure described did not exist for the state layer, and
+the suite pin that claimed to hold it open asserted only that adding money to a taxed base changes
+the tax. Both are gone: the pin is retired (t10 §2E) and this is the correction. A user who read the
+v5.62 text should know it was withdrawn rather than quietly deleted.
+
+⚠ **What WAS wrong, and is fixed at v5.63, is a different thing entirely: FICA.** The Roth
+comparator folded every ordinary stream into `work` and charged 7.65% payroll tax on the total — so
+rental, annuity and royalty income was charged FICA it has never been subject to, at both of the
+engine's two FICA sites. The Taxes engine has always split earned from unearned income for exactly
+this reason. Because that tax is real money in the comparison, **it changed which conversion
+strategy scored best on `estate`, the field the Roth tab ranks on**; flips were found at 36 points
+of a 336-household grid, the smallest shipped top-two gap among them $301, concentrated in single
+filers. That is an existence result on a grid this project chose — it is not a prevalence, and no
+percentage should be read off it. Selecting no state preserves the legacy flat-rate
 behavior exactly (backward compatible with every existing backup).
 
 **This is an approximation layer and is labeled as such in the UI.** Not modeled: progressive
@@ -709,7 +723,15 @@ treatment. Streams flow through every engine — planned trajectory, both Monte 
 what-breaks, the withdrawal schedule, the tax engine (job rows also pay FICA up to the wage
 base), IRMAA MAGI, and the Roth optimizer. Entering any stream replaces the built-in example
 part-time taper, and the old negative-expense-row workaround is superseded (moving such rows
-into the module lets the tax engines see the income). Remaining honest limits of the module:
+into the module lets the tax engines see the income). **From v5.63 the Roth optimizer charges FICA
+on job rows only, as the tax engine always has.** Through v5.62 it charged payroll tax on every
+ordinary stream, rental and annuity included; §6 sets out what that moved. One consequence of the
+correction is worth naming because it is second-order and runs against intuition: a smaller tax
+bill leaves a larger taxable balance, which pays more dividends, which raises MAGI — so on a
+household sitting near an IRMAA threshold the surcharge can RISE even though lifetime tax falls.
+Measured on one such household the Medicare surcharge moved **+$2,300** while lifetime tax fell;
+on another it moved **−$1,740**. The direction is not fixed, and this release does not claim IRMAA
+or NIIT are untouched. Remaining honest limits of the module:
 one amount per stream (no per-year schedules), annual granularity on the window, and no
 state-specific treatment beyond the state layer's ordinary handling. These are the known
 edges of the map.
