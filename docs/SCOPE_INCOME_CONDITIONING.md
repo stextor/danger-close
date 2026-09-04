@@ -2,8 +2,9 @@
 
 | | |
 |---|---|
-| Status | **APPROVED AND BUILDABLE (2026-09-04). All seven decisions are resolved: D-1, D-4, D-5, D-6, D-7 approved 2026-09-02; D-2 (b) and D-3 (b) approved 2026-09-04.** Not yet built. |
-| Premise measured against | **re-measured against shipped v5.63**, source `b2deba49e68bee6c29300f2f8cf0a7e3`, clone **`37cea89`**, 2026-09-04. *(Previously anchored to v5.60 `23877f90…`; v5.62 and v5.63 both changed the call sites — see §2.1.)* |
+| Status | **APPROVED AND BUILDABLE. Eleven decisions resolved: D-1, D-4, D-5, D-6, D-7 approved 2026-09-02; D-2 (b) and D-3 (b) approved 2026-09-04; B-1 (a), B-2, B-3 and B-4 approved 2026-09-04 — see §7b.** ⚠ **§8's pre-build gate (steps 1–3) is COMPLETE**, so the next session builds rather than researches. Not yet built. |
+| Premise measured against | **re-measured against shipped v5.63**, source `b2deba49e68bee6c29300f2f8cf0a7e3`, clone `37cea89`, 2026-09-04; **re-confirmed at repo HEAD `4ca47a5` on 2026-09-04** — §2.1's census re-run (4 hits, L1114 / L4003 / L4128 / L5283) and `STATE_RULES` re-dumped by AST (L1028, 51 entries, `exclAge` on 4, `ssOffset` on 2), both unchanged. Suite re-measured at that anchor: **3,010 app checks / 0 failing**, parity 10/10. *(Previously anchored to v5.60 `23877f90…`; v5.62 and v5.63 both changed the call sites — see §2.1.)* |
+| Statutory oracle | **`FINDINGS-v5_63-state-statutes.md`** — all five statutes read against primary or official sources 2026-09-04. **The build encodes its tables and does not re-derive them.** |
 | Parent findings | `MissingFeatures.md` **D-11 (c)** · `AUDIT_STATE_INCOME_BASES_ROUND5.md` (complete) · `AUDIT_STATE_EXCL65_ROUND4.md` §2a, §2b, §4 · `AUDIT_STATE_EXCL65_ROUND3.md` §4 |
 | Kind | **Data-model feature.** Engine code changes. This is not a rule-table edit. |
 
@@ -166,11 +167,19 @@ Every item in this list has been closed except where noted:
 - ~~Rhode Island's TY2026 indexed thresholds (ADV 2025-22)~~ → **the advisory never contained them**;
   RI publishes a year in arrears, expected November 2026. ROUND5 §2e.
 - ~~Connecticut, New Jersey and Virginia's current figures~~ → **all three verified**. ROUND5 §2b–§2d.
-- **Still open — New Mexico's stepped table versus its graduated rate schedule**, carried from
-  ROUND4 §3. Outside ROUND5's remit.
-- **Still open — Connecticut's band boundaries at exactly $100,000 / $150,000**, a gap in the
-  published table. Resolve against the CT-1040 instructions before populating CT.
-- **Still open — how often any threshold binds.** See §6.
+- ~~New Mexico's stepped table versus its graduated rate schedule~~ → **CLOSED 2026-09-04.** It does
+  interact, and the flat `rate: 0.049` gets it wrong in a bounded way. The exemption reduces net
+  income, so its cash value is the marginal rate; § 7-2-7 (as amended by Laws 2024 ch. 67 § 5) puts
+  MFJ taxable income at AGI ≤ $51,000 — the only range where the exemption is non-zero — in the
+  **1.5%–3.2%** brackets. **The model over-values the exemption by roughly 1.5× to 3× wherever it is
+  non-zero: an optimistic residual, to be disclosed, not modelled.** It runs opposite to the headline
+  correction, which is strongly conservative. No mechanism change. `FINDINGS` §7a.
+- ~~Connecticut's band boundaries at exactly $100,000 / $150,000~~ → **CLOSED 2026-09-04** against the
+  TY2026 Form CT-1040ES table, which reads "$150,000 and up → 0" and phrases eligibility as *less
+  than*. **At exactly the threshold the factor is zero, not 2.5%.** This is what forced B-2.
+  `FINDINGS` §3.
+- **Still open — how often any threshold binds.** See §6. This is the only §2.4 item the build does
+  not inherit closed, and B-1 (a) is what makes it answerable.
 
 ---
 
@@ -222,6 +231,18 @@ Every item in this list has been closed except where noted:
 - **A cross-engine parity invariant**: the same household priced through all three call sites yields
   the same state-income measure and the same state tax. The single most valuable test in the release.
 - Boundary pins **at** each threshold (at, one dollar below, one dollar above).
+- ⚠ **The pins must discriminate the comparator, which B-2 makes a per-table property.** Four statutes
+  are inclusive at the band top ("not over $30,000", "not more than $125,000", "at or below");
+  **Connecticut is exclusive** ("$150,000 and up → 0"). A pin *at* the threshold is the only one of
+  the three that can tell `lte` from `lt`, so it is the load-bearing one, and a suite that only tests
+  one-below and one-above would pass with the comparator inverted on every state.
+- ⚠ **Which tests land in which release, under B-1 (a).** The measure-only release ships the
+  cross-engine parity invariant, the evaluator's band and taper arithmetic against the
+  `FINDINGS` tables driven through a **synthetic** jurisdiction, the comparator pins, and an
+  assertion that **no `STATE_RULES` entry carries `exclTest`** — which is what makes "no output
+  change" a tested claim rather than a stated one. The hand-computed per-state cells, the
+  `excl65`-equals-table-at-zero invariant and the note-vs-code extinction invariant land with the
+  state each belongs to, since none of them can exist before a state is populated.
 - An extinction invariant: **no state whose note claims an income limit may carry an unconditional
   exclusion**, generalising the v5.60 note-vs-code check.
 - ⚠ **The invariant D-3 (b) creates a need for, added 2026-09-04 with the approval.** Keeping
@@ -339,28 +360,116 @@ as unmodelled rather than folded silently into one of the two.
 
 ---
 
+## 7b · Build decisions — raised by the completed pre-build gate, **all four APPROVED 2026-09-04**
+
+> **None of these was among the seven.** They surfaced only once the statutes had been read and the
+> build was about to start, and three of them change something a user or a reader would notice. They
+> are recorded here rather than left as implementation detail because the project's rule is that a
+> judgement call affecting the app's direction or a user's numbers gets asked, not assumed.
+
+### B-1 · Does the first release populate a state, or only build the measure? — **(a) APPROVED**
+
+**(a) Measure-only.** D-1's income measure, D-2's two bases, D-3's evaluator, the cross-engine parity
+invariant, **zero states populated** — so no user-visible change at all.
+**(b)** Measure plus Connecticut together, so the first release moves a number.
+
+**Rationale for (a): attribution.** If the evaluator and Connecticut's ten-row table land in the same
+release and a figure comes out wrong, the CHANGELOG cannot say which one was at fault — and CT is the
+state where a wrong figure moves the most money, in the direction that turns a pessimistic error
+into an optimistic one. (a) also makes §6's binding-frequency measurement possible **before** five
+tables are committed to, which is the order §6 has asked for since the scope was written.
+
+⚠ **The cost, to be stated plainly in the CHANGELOG rather than glossed:** one release a user cannot
+see. Its entry must say so in those words, and must not imply a modelling improvement that has not
+reached anyone yet.
+
+### B-2 · One comparator for all five tables, or a per-table one? — **per-table, APPROVED**
+
+The field carries **`cmp: 'lte' | 'lt'`, defaulting to `'lte'`**; Connecticut sets `'lt'`.
+
+Four statutes are inclusive at the band top, Connecticut is exclusive (§2.4, `FINDINGS` §3). For
+whole-dollar income the two agree — but the model's measure is a **sum of floats, not a rounded
+return figure**, so they do not agree in general. The alternatives were rounding the measure (which
+invents a rule no statute states) or picking one comparator for all five (which silently misprices
+whichever state loses). One extra key, and it is what gives the §5 boundary pins something to catch.
+
+### B-3 · Populate Rhode Island on TY2025 figures, or wait for November 2026? — **TY2025, dated, APPROVED**
+
+RI publishes a year in arrears; the TY2026 pair is expected in the November 2026 advisory and did not
+exist on 2026-09-04. Populating on **$107,000 / $133,750** puts the cliff slightly below where TY2026's
+will sit, so marginally more households lose the exclusion and pay more modelled tax — **the
+conservative direction**.
+
+⚠ **The maintainer's 2026-09-02 instruction says the conservative tiebreaker does not apply to state
+tax rules, because the statute is knowable. The point here is that this one is not knowable yet** —
+the figure does not exist to be read. That is a different situation from picking a scalar and leaning
+it pessimistic, and it is why this is decided rather than deferred. **The note must name the tax
+year** ("TY2025 thresholds; Rhode Island publishes a year in arrears, TY2026 expected November 2026")
+so the figure is dated rather than merely stated, and the November advisory becomes an ordinary
+constants refresh.
+
+The alternative — holding RI back — leaves it wrong in the **optimistic** direction (an unconditional
+$50,000 per person, every income) for another three months, which is the worse of the two errors.
+
+### B-4 · The field's name — **`exclTest`, APPROVED**
+
+D-3 approved the shape, not the name. `exclTest` reads as "the test that conditions `excl65`", which
+is what it is, and it sorts beside `exclAge` in every state row. `incomeTest` was the alternative:
+clearer read in isolation, but it loses the tie to the exclusion it governs. Low stakes — decided now
+only because the name is about to appear across 51 rows and several suites, where renaming is a site
+census rather than an edit.
+
+---
+
 ## 8 · Build record
 
-*(not yet built — the decisions are resolved and the premise is re-anchored to v5.63, which is what
-the 2026-09-04 ops package delivered. The build itself is the next release.)*
+*(not yet built. **The pre-build gate below is COMPLETE as of 2026-09-04** — steps 1, 2 and 3 were
+executed and recorded, so the next session writes code. The build itself is the next release, and
+under B-1 (a) it is the measure only.)*
 
-**What the build session must do FIRST, in this order:**
+**The three-step gate, and what each returned.** *(Kept rather than deleted: it is the record of what
+was checked, and step 1 must be re-run against whatever is current when the build actually starts.)*
 
-1. **§A freshness check** against whatever is current then. This file's premise is v5.63; if a
-   release has landed since, re-run §2.1's census before writing a line of code. Two releases
-   invalidated it once already.
-2. **Re-read every statutory figure against its primary source.** NM's nine bands, RI's indexed
-   cliff, CT's ten tiers, NJ's tiers and VA's taper are carried here from
-   `AUDIT_STATE_INCOME_BASES_ROUND5.md` and have **not** been re-checked against primary sources
-   since. ⚠ **Rhode Island in particular**: ROUND5 §2e/§8 records that the state's own TY2025
-   filing-season guide prints a threshold its indexing statute cannot produce, and the shipped app
-   note carried the same figure until v5.61. Read §2e before quoting any RI number.
-3. **Resolve the two items §2.4 still lists as open** — New Mexico's stepped table versus its
-   graduated schedule, and Connecticut's band boundaries at exactly $100,000 / $150,000 — against the
-   CT-1040 instructions and the NM schedule, not against this document.
+1. **§A freshness check — DONE, clean.** Source, both artifacts and the whole pool matched the
+   manifest at repo HEAD `4ca47a5`; §2.1's census and the `STATE_RULES` dump were re-run and are
+   unchanged; the suite measured 3,010 / 0. ⚠ **Re-run this step anyway.** If a release has landed
+   since 2026-09-04, re-run §2.1's census before writing a line of code — two releases invalidated
+   this premise once already.
+2. **Re-read every statutory figure against its primary source — DONE.** All five read
+   first-hand on 2026-09-04 and recorded in **`FINDINGS-v5_63-state-statutes.md`**: NM § 7-2-5.2 (all
+   three tables) and § 7-2-7; CT's **TY2026** phase-out table from Form CT-1040ES (Rev. 01/26); NJ's
+   tiers from the chaptered P.L. 2021 c.129 text; VA § 58.1-322.03(5)(b) **plus the Form 760 Age
+   Deduction Worksheet**, which is what settles the once-vs-twice taper mechanic the statute alone
+   leaves ambiguous; RI's thresholds from ADV 2025-22. **The build encodes those tables and cites
+   that file — it does not re-derive them.**
+   ⚠ Two things the re-read added. RI's shipped note was verified **correct** at v5.63 by AST dump
+   (`$133,750 MFJ/$107,000 single`), so the ROUND5 §8 defect is confirmed closed from the source
+   rather than from the CHANGELOG. And RI gives **married filing separately its own column**
+   ($104,225 for TY2024, $107,000 for TY2025), so MFS must not be assumed to track single in the
+   unmodelled-filing-status disclosure.
+3. **Resolve the two items §2.4 listed as open — DONE, both closed.** See §2.4. Connecticut's
+   boundary resolution is what produced **B-2**; New Mexico's rate interaction is a disclosure, not a
+   mechanism.
+
+**What the build session does now, in this order:**
+
+1. Re-run gate step 1 against whatever is current.
+2. Build **D-1's measure, D-2's two bases and D-3's evaluator** as `exclTest` (B-4), with the
+   comparator of B-2, **populating no state** (B-1 (a)). Ship it with §5's measure-only test set.
+3. Run §6's binding-frequency measurement, which the measure now makes possible.
+4. Populate one state per release, **Connecticut first** — the only one of the five whose current
+   simplification runs pessimistic, and the largest single-state dollar error for a mainstream
+   household. Rhode Island populates on dated TY2025 figures per **B-3**.
 
 ---
 
 *Destination: `docs/SCOPE_INCOME_CONDITIONING.md` in the repo, and the knowledge pool — replacing the
-2026-09-03 copy in both. It stays on `package_check`'s I-2 OPEN allowlist until it is BUILT, with the
-allowlist comment rewritten: it is no longer awaiting decisions, it is approved and unbuilt.*
+2026-09-04 copy in both. It stays on `package_check`'s I-2 OPEN allowlist until it is BUILT; the
+allowlist comment still reads correctly (approved and unbuilt) and needs no rewrite — ⚠ but check it
+rather than assuming, since a stale allowlist REASON is as invisible to I-3 as a ghost entry is.*
+
+*⚠ **This revision adds a second pool file**, `FINDINGS-v5_63-state-statutes.md`, which needs its own
+manifest row — a pool file without one is exactly the gap that hid the missing `src/index.html` for
+eleven releases. Suggested row for the reference-documents table:*
+
+| `FINDINGS-v5_63-state-statutes.md` | The statutory oracle for the five income-conditioned states (NM, RI, VA, NJ, CT) — every figure read against a primary or official source 2026-09-04, plus the two ROUND5 open items closed and the four build decisions they produced. **The populate releases test against these tables; they are not re-derived.** RI's TY2026 pair is not published and is expected November 2026 | when a statute changes or RI's TY2026 advisory issues |
