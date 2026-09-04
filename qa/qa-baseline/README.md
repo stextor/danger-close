@@ -44,10 +44,31 @@ Override the parity pair with `node t2_engines.mjs compare <prior> <current>`.
 ### Retired legs
 The **v5.10 leg (252 checks under the current suites) and v5.9.2 leg (234) are retired history** — it is no longer part of the active pair.
 The suites still understand both version tags, and their `dom_entry_*.jsx` files are kept, but
-`v510.jsx` and `v592.jsx` are intentionally not committed (local-only files the maintainer
-supplies — v510 recoverable from its git tag). To run a retired leg, place its `.jsx` in the
-run-folder root yourself, then `./mk_testable.sh <tag> && ./run_all.sh <tag>`. A retired-leg
-failure straight after a clone almost always means that file is missing, not a real regression.
+`v510.jsx` and `v592.jsx` are intentionally not committed — they are local-only files the maintainer
+supplies. To run a retired leg, place its `.jsx` in the run-folder root yourself, then
+`./mk_testable.sh <tag> && ./run_all.sh <tag>`. A retired-leg failure straight after a clone almost
+always means that file is missing, not a real regression.
+
+> ⚠ **This paragraph said `v510.jsx` was "recoverable from its git tag." IT IS NOT. Corrected
+> 2026-09-04.** `git ls-remote --tags origin` returns nothing: **this repo has no tags, for any
+> version, and none are planned** (OPERATIONS §G, decided 2026-08-09). Recovering a retired source
+> means finding the commit that shipped it — archaeology, guided by the source md5 in that release's
+> CHANGELOG provenance line. The wrong sentence sat in the one place a session would read it while
+> hunting for exactly that file.
+
+### Which `dom_entry_*.jsx` can actually be run (added 2026-09-04)
+
+This directory holds **57** of them, one per release since v5.10, totalling 18,913 bytes — four-line
+shims, not bulk. **Three are reachable:** `v562` and `v563`, the live comparison pair, and `v592`,
+the retired v5.9.2 leg above. The other **54** import an `app_vXXX.jsx` that `mk_testable.sh` builds
+from a `<tag>.jsx` the repo does not carry, so they can be run only by whoever holds that source
+locally.
+
+**They are kept deliberately** (scope `docs/SCOPE_TREE_AND_POOL_HOUSEKEEPING.md`, decision H-1, 2026-09-04).
+Every one of the 57 tags is registered in the `KNOWN_VERSIONS` guard in this directory's suites, and
+those registries name tags rather than files, so deleting the shims would not break a run — it would
+leave 57 registered tags against three runnable legs. The saving would have been about 18 KB.
+**Do not treat the 54 as clutter and do not delete them without re-reading H-1.**
 
 ## Feature suites (t7–t9, in qa/ one level up)
 Their build inputs are derived from the current leg's artifacts:
