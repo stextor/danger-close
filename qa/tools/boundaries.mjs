@@ -142,6 +142,24 @@ export function census(G) {
   row("income_streams", "income streams", streams, "0 vs >0", streams === 0,
     streams ? "exercises the income-stream paths" : "NONE — the income-stream paths are unexercised");
 
+  // ── stream_kinds · ADDED at v5.63, under the §K1 maintenance rule ──────────────────────
+  // The defect v5.63 fixed was invisible to 2,934 green checks: the Roth comparator charged FICA
+  // on EVERY ordinary stream, and no fixture in the suite carried a non-zero stream at all. But
+  // `income_streams` above would not have been enough on its own — it counts streams, and a
+  // WORK-only stream reads "exercised" there while never reaching the defect, because FICA on
+  // wages is correct. What had to be non-zero was a NON-WORK stream. That is this row.
+  //   The default is the app's own: `streamsAnnualAt` filters on `(s.kind || "other")`, so a
+  // stream with no `kind` is non-work. Mirrored here rather than restated as a list of kinds —
+  // if the app ever changes the default, this row must change with it and nothing else here
+  // encodes a kind name.
+  const kinds = (P.incomeStreams || []).map(s => s.kind || "other");
+  const nonWork = kinds.filter(k => k !== "work").length;
+  row("stream_kinds", "non-work streams", `${nonWork} of ${kinds.length}`,
+    "0 vs >0 non-work", nonWork === 0,
+    nonWork ? "exercises the non-work ordinary paths — FICA, and the work/non-work split"
+            : (kinds.length ? "NONE — streams are work-only; the FICA split is unexercised"
+                            : "NONE — no streams at all, so the FICA split is unexercised"));
+
   const wA = tl.rothLadderEndA, wB = tl.rothLadderEndB;
   row("ladder_windows", "ladder windows", single ? `A ends ${wA}` : `A ends ${wA}, B ends ${wB}`,
     "identical vs differing", single ? true : wA === wB,
