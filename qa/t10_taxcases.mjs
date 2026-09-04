@@ -1074,22 +1074,16 @@ const pass2E = pass, fail2E = fail;
       T("[HAND v5.62] IL (retExempt, 4.95%): 0.0495 × (28,000 + 8,000) = $1,782",
         S({ code: "IL", ..._H }), 1782);
 
-      // ⚠ KNOWN RESIDUAL, deliberately not fixed at v5.62 (scope D-b). `otherOrd` — non-work
-      // ordinary streams — is computed ONLY in the Taxes engine (L5160); the Roth engines'
-      // `base` is `pen + work + rmd` and never carries it. So the engines still describe a
-      // household with rental or annuity income differently. Adding it changes `ord`, and so
-      // federal tax, SS taxation, IRMAA and bracket-fill conversion sizing — its own release
-      // with its own hand-verified cells. THIS PIN FLIPS when that lands.
-      const _codes = Object.keys(R).filter(c => R[c].rate);
-      let _resid = 0;
-      for (const code of _codes) {
-        const a = S({ code, ..._H });
-        const b = S({ code, ..._H, work: _H.work + 12000 });
-        if (Math.round(a) !== Math.round(b)) _resid++;
-      }
-      T("[KNOWN DEFECT pre-otherOrd] other ordinary income still moves state tax, and the Roth " +
-        "engines cannot see it — engine agreement is exact ONLY for households without it",
-        _resid === _codes.length ? 1 : 0, 1);
+      // ── RETIRED at v5.63 (scope D-4): the [KNOWN DEFECT pre-otherOrd] pin that stood here ──
+      // It added $12,000 to `work` and asserted state tax moved in every taxing state — i.e. that
+      // adding money to a taxed base changes the tax, which no release will ever falsify. Its
+      // LABEL claimed the Roth engines cannot see non-work ordinary income; measured at the v5.63
+      // build, `stateTaxAnnual` was already receiving the same total either way, so the gap the
+      // label described did not exist even when it was written. A check whose assertion is trivial
+      // and whose label is false is worse than no check: it reads as coverage.
+      // The real question — does `streamsAnnualAt` partition ordinary income into work and
+      // non-work — is executed in t33 §B, with BOTH sides asserted non-zero first. Not restated
+      // here: a second copy of an answer is what goes stale.
     }
   }
 }
