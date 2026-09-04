@@ -86,9 +86,21 @@ export const HOUSEHOLDS = {
   // Clears the income-stream row.
   streams: {
     why: "an ordinary income stream — the stream paths become reachable",
-    flips: ["income_streams"],
+    flips: ["income_streams", "stream_kinds"],
     apply: P => {
       P.incomeStreams = [{ label: "Rental", monthly: 500, startYear: 2029, endYear: 9999, cola: false, tax: "ordinary" }];
+    },
+  },
+  // Clears `income_streams` and DELIBERATELY LEAVES `stream_kinds` ON. Added at v5.63 with the
+  // row itself: without this fixture the new row would be driven in one direction only, and a
+  // row that can only ever go one way discriminates nothing — the E2 lesson, which cost a
+  // release when the SS-offset row shipped with nothing asserting it. This stream carries an
+  // explicit `kind: "work"`, so the count row reads exercised while the FICA split does not.
+  streamsWork: {
+    why: "a WORK-only stream — streams exist, but the non-work/FICA split stays unexercised",
+    flips: ["income_streams"],
+    apply: P => {
+      P.incomeStreams = [{ label: "Part-time", monthly: 500, startYear: 2029, endYear: 9999, cola: false, tax: "ordinary", kind: "work" }];
     },
   },
   // Moves spouse A onto the OTHER SECURE 2.0 branch. This row can never read "clear" for a single
