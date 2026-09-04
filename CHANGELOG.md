@@ -1,5 +1,90 @@
 # Changelog
 
+## v5.63 · the Roth comparator charged payroll tax on rental income, 2026-09-04
+
+**FICA is now charged on earned income only, in the Roth strategy comparator. Nothing else moves.**
+Scope: `docs/SCOPE_ROTH_FICA_OTHERORD.md`.
+
+`runRothStrategies` built `annualWork` from **every** ordinary income stream — rental, annuity,
+royalty, "other" — and then charged 7.65% payroll tax on the total, at **both** of its FICA sites.
+Rental income has never been subject to FICA. The Taxes engine has always split earned from
+unearned income for exactly this reason (`kind: "work"` / `excludeKind: "work"`); this engine never
+did.
+
+**This changed which strategy the Roth tab recommends.** The tab ranks on `estate`, and a tax that
+should not exist is real money in that comparison. On a 336-household grid the top-two ordering
+flipped at **36 points**, the smallest shipped gap among them **$301**, concentrated in single
+filers. ⚠ That is an **existence result on a grid this project chose** — it is not a prevalence and
+no percentage should be read off it.
+
+**The fix is one line of substance.** `annualWork` gains a `kind: "work"` filter; a new
+`annualOtherOrd` picks up the complement. **The two FICA expressions are not touched** — they
+become correct once `work` stops carrying non-work income. The two state-tax call sites then add
+`otherOrd` back explicitly (`work + otherOrd`), so **the state base is arithmetically the same
+value it was**; the decomposition is now visible rather than implied. Two further sites are
+deliberately left unfiltered and now say so in comments: the ladder solver needs the ordinary
+total, and nothing there charges FICA.
+
+⚠ **Second-order effects are real and run against intuition.** A smaller tax bill leaves a larger
+taxable balance, which pays more dividends, which raises MAGI. On a household near an IRMAA
+threshold the surcharge can **rise** even though lifetime tax falls: measured **+$2,300** on one
+household and **−$1,740** on another. **This release does not claim IRMAA or NIIT are untouched**,
+and the direction is not fixed. `METHODOLOGY` §6 says so.
+
+⚠ **A v5.62 disclosure is WITHDRAWN, not quietly deleted.** v5.62 disclosed that `otherOrd` was
+computed only in the Taxes engine and that "engine agreement is exact only for households without
+such income", and pinned it in the suite as `[KNOWN DEFECT pre-otherOrd]`. Measured by execution at
+this build, `stateTaxAnnual` was already receiving the same ordinary total either way — **the gap
+that text described did not exist for the state layer.** The pin asserted only that adding $12,000
+to a taxed base changes the tax, which no release will ever falsify, under a label that claimed
+something false. The pin is retired, `METHODOLOGY` quotes the withdrawn text before retracting it,
+and the real defect the investigation found instead is the FICA one above.
+
+**Testing — 2,996 app checks, 0 failing.** v5.63 leg **1,157** · v5.62 leg **1,157** · run-once
+**672** · parity **10/10**. Tooling 82.
+
+⚠ **MC parity is 10/10 and it is EXPECTED AND BLIND**, the same way it was at v5.62. The three
+parity fixtures carry no income streams, so the changed code path is never entered. **Parity is not
+evidence here**; the suite work below is.
+
+⚠ **The suite total moving by only +64 is the measurement of a gap, not reassurance.** Before this
+release **no fixture in the suite carried a non-zero income stream** — measured by AST at this
+build: 15 sites set `incomeStreams`, every one `monthly: 0` or `[]`, eleven of them the identical
+deliberate line that neutralises the demo part-time taper so cross-engine comparisons stay clean.
+That convention is right, and its side effect was that **the defective code path was unreachable
+from every fixture the suite had.** 2,934 checks were green against a live defect for as long as
+the feature has existed.
+
+**`qa/t33_roth_stream_fica.mjs`, new — the first stream-bearing fixtures this suite has ever had.**
+32 checks per leg, gated: the v5.62 leg asserts the defect, the v5.63 leg asserts the fix, so both
+legs stay green and honest. Hand-verified to the dollar: a $2,000/month stream is $24,000/yr, below
+the OASDI wage base, so FICA is `24,000 × 0.062 + 24,000 × 0.0145 = $1,836`/yr; the engine's span
+was **measured** by single-year stream windows, not assumed, at 2027–2058 = 32 years; and the
+lifetime delta between an identical rental and wage stream is exactly `32 × 1,836 = $58,752` once
+the second-order channel is closed. Also covered: the work/non-work complement with **both sides
+asserted non-zero first**, annuity and untyped streams (a stream with no `kind` defaults to
+`"other"`, so a fix special-casing "rental" would pass the main test and fail this one), and an
+inertness control proving a stream-free household is untouched.
+
+⚠ **A first version of the ACA group was blind, and a negative control caught it.**
+`_estSaleGain` — the engine's second FICA site — is reached **only** from the STAY UNDER ACA CLIFF
+solver; setting the ACA fields and reading the slider row never enters it. That version showed a
+large, real, entirely main-path delta and looked like coverage, and controls C2a and C4 did not
+fire against it. Per §B2 the non-firing was treated as the finding and the test was repaired, not
+the control. The group now reads `key: "acaCliff"` and asserts on `totConv`: the cliff solver sizes
+each year's conversion against an estimated sale gain that includes FICA, so the wrong FICA moves
+the conversion the strategy chooses — a field nothing else in the suite can move.
+
+**`t10` §2E 103 → 102**: the retired `otherOrd` pin, replaced by a note recording why it went and
+pointing at `t33` §B rather than restating it.
+
+**Five negative controls (`qa/controls_v563.sh`), each failure read.** The engine has two FICA
+sites and one source edit corrects both, so a control reverting them together proves nothing about
+either: **C2a and C2b simulate the two half-fixes by pushing the unfiltered total back into one
+site at a time.** C2a fires exactly 2 checks, both in the ACA group, while the main-path groups stay
+green — the partial-ship case. C1 (revert the filter entirely) fires 11; C2b fires 11; C3 and C4
+revert the two state-base additions separately and fire 9 and 2.
+
 ## v5.62 · the three engines share one state-tax calculator and disagreed anyway, 2026-09-03
 
 **State tax rises in the Roth outputs. Nothing else moves.** Scope: `docs/SCOPE_ENGINE_STATE_PARITY.md`.
