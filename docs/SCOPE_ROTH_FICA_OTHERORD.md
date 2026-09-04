@@ -6,15 +6,23 @@ build record when the release ships.
 **Build:** v5.62 · source `827566da23ba3f37a3d7a66432afddfe` · repo tree `2d23fe3`.
 **Baseline recomputed this session: 2,934 app checks, 0 failing** (per-leg 1,126 ×2, run-once 672,
 parity 10, `smoke_built` 16/16).
-**Status: DECIDED 2026-09-03 — BUILD STARTED AND STOPPED. Not shipped.**
-D-1 withdrew itself on inspection; D-2 through D-5 were decided by the maintainer, all in the
-direction this scope recommended. The build then ran as far as the engine fix and the suite
-registration and stopped there. **`STOP-REPORT-v5_63-fica-workbench.md` is the live entry point** —
-it lists what remains, and it supersedes this file for the question "what do I do next."
+**Status: FULFILLED — shipped as v5.63 on 2026-09-04.** §7 is the build record.
+Source `b2deba49e68bee6c29300f2f8cf0a7e3` · built `index.html` `5998e8b60c5f45ded623d500fce09a86` ·
+**3,010 app checks, 0 failing** (per-leg 1,164 ×2, run-once 672, parity 10 — blind here), run from
+the packaged copies; five negative controls all firing, `smoke_built` 16/16.
 
-⚠ **This scope is deliberately NOT marked FULFILLED, and it is on `package_check`'s I-2 OPEN
-allowlist.** Nothing has shipped. The allowlist entry expires the moment v5.63 ships, at which point
-§7 becomes the build record and the head of this file gains a FULFILLED marker.
+> **Retained below as written, as the record of what was believed.** The status line that stood here
+> read *"DECIDED 2026-09-03 — BUILD STARTED AND STOPPED. Not shipped"* and pointed at
+> `STOP-REPORT-v5_63-fica-workbench.md` as the live entry point. Both are now history: the stop
+> report is superseded by this release, and the `package_check` I-2 allowlist entry that held this
+> file open was removed in the same commit. D-1 withdrew itself on inspection; D-2 through D-6 were
+> decided by the maintainer, all in the direction this scope recommended, and all shipped.
+>
+> ⚠ **Two things this scope did not anticipate**, both found at the build and both recorded in the
+> v5.63 CHANGELOG rather than here: the suite's `v563` version-gate registration was absent from the
+> repo and had to be redone across sixteen files, and §N3a's build recipe did not use the
+> `package-lock.json` committed at v5.62, which cost the release its bit-reproducibility until the
+> recipe was corrected.
 
 Companion evidence: `FINDINGS-v5_63-otherOrd.md`. Everything asserted here was printed by a command;
 nothing is carried from the session brief, whose premise this scope replaces.
@@ -163,7 +171,9 @@ one-line comment at each saying the total is deliberate because nothing there ch
 or keep it renamed to what it actually tests? **Recommend retire** — it asserts that adding $12,000
 to a taxed base changes the tax, which no release will ever falsify.
 
-> **DECIDED: retire.** Not yet done — it is item 2 on the stop report.
+> **DECIDED: retire.** ~~Not yet done — it is item 2 on the stop report.~~ **DONE and shipped at
+> v5.63**: `t10` §2E went 103 → 102, the pin replaced by a note recording why it went and pointing
+> at `t33` §B. Annotated in place rather than rewritten (§I).
 
 **D-5 · Ship alone?** This is now a modelling release, not a note correction. **Recommend yes,
 alone**, as v5.63, with `METHODOLOGY` updated.

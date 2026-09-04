@@ -855,6 +855,24 @@ rather than inferring it. At v5.11 a reconstructed `src/main.jsx` produced a bui
 and was silently unable to persist data (§N2). A reconstruction also must not be packaged, because
 uploading it would overwrite the real file in the repo.
 
+⚠ **A STOP enumerates EVERY modified file and its destination — source and suite alike (added
+2026-09-04).** §L governs release packaging, and a stopped build is not a release, so a session that
+runs out of budget mid-build has no section telling it what to do with the code it has already
+written. The v5.63 stop cut a correct handover zip containing the documents, committed those, and
+left the modified code out of both the repo and the zip. Two things were lost, not one: the
+maintainer happened to keep `DangerClose-v5_63.jsx` on local disk, but **the suite's `v563`
+version-gate extensions across sixteen files and the new `dom_entry_v563.jsx` survived nowhere** —
+work that had already hit the `t24` `_k` trap once and had to be redone from scratch, trap included,
+by the next session.
+
+The tell is that "code" reads as *the app source*. It is not: a version-gate edit, a new
+`dom_entry_*.jsx`, a control script and a fixture are all code, and all of them are release inputs.
+**A stop report ends with a table of every file the session modified or created, its md5, and where
+it goes** — repo path, knowledge, both, or session-only. If a stop leaves modified files that are
+not being committed, the report says so in that table rather than in prose, because prose is what
+was read and skimmed the first time. A handover that names only what was *finished* hands over the
+finished half and silently discards the rest.
+
 ## M. Engine instrumentation ceiling (added 2026-08-08)
 
 Not every engine is testable to the dollar, and a scope must not assume otherwise.
@@ -930,8 +948,9 @@ Both failures below are structural — they recur in any session starting from k
 | `src/main.jsx` | **The browser bootstrap — not a trivial mount.** Installs a `window.storage` localStorage shim and an Anthropic fetch wrapper *before* rendering. |
 | `vite.config.js` | `root: "src"`, `viteSingleFile()`, output to `../dist`. |
 | `package.json` | Pins the toolchain. |
+| `package-lock.json` | **Also a build input.** Pins the *resolved* tree, including `mammoth`, which `package.json`'s `^1.8.0` does not. Install with `npm ci`, never `npm install` — §N3a. |
 
-Build: copy the four scaffold files plus canonical source into a scratch folder, `npm install`, then
+Build: copy the five scaffold files plus canonical source into a scratch folder, `npm ci`, then
 `npx vite build` → `dist/index.html`. Publish by copying that file over the repo-root `index.html`.
 
 **Mount-name gotcha:** project knowledge presents the config to a session as **`vite_config.js`** (the
@@ -974,17 +993,27 @@ Run all four against `dist/index.html`:
 
 ### N3a. The runnable recipe (executed 2026-08-11, not inferred)
 
-From a clean folder holding the four §N1 scaffold files plus the canonical source as
-`src/DangerClose.jsx`. Copy the config to **`vite.config.js` — with the dot** (§N1 gotcha; §G).
+From a clean folder holding the four §N1 scaffold files **plus `package-lock.json`** and the canonical
+source as `src/DangerClose.jsx`. Copy the config to **`vite.config.js` — with the dot** (§N1 gotcha; §G).
 
 ```
-npm install
+npm ci                          # NOT `npm install` — see the lockfile note below
 npm install --no-save jsdom     # harness dep, deliberately NOT in package.json; --no-save
                                 # keeps the scaffold package.json byte-identical to knowledge
 npx vite build                  # -> dist/index.html, the ONLY output
 node qa/smoke_built.mjs         # -> 16 checks. An optional first argument overrides the
                                 # input path: `node qa/smoke_built.mjs some/other.html`
 ```
+
+⚠ **`package-lock.json` is a build input, added 2026-09-04 at the v5.63 build.** It was committed at
+v5.62 and this recipe did not know about it for one release, which is exactly the shape §A2 records
+for `src/index.html`: a build input present in the repo and absent from the recipe. Under the old
+four-file recipe, rebuilding v5.62 from its own unmodified source gave
+`99dbcac2fbe3dbc8e0207278e9179ea8` against the published `ceb7fb4af26560b0944030ffb5da1d6a` — 85
+bytes, all inside the vendored `mammoth` bundle, because `package.json` carries `mammoth: ^1.8.0`
+and a plain `npm install` resolves 1.12.2 over the lockfile's 1.12.1. With `npm ci` it reproduced
+byte-identically. **Do not "simplify" this back to `npm install`**, and do not re-derive the
+`mammoth` pin as a thing to remember — the lockfile is what remembers it now.
 
 **The build emits `dist/index.html` and nothing else.** `qa/smoke_built.mjs` derives its own
 classic-script copy in-process, writes it beside the input as `*.__smoketest__.html`, and unlinks it on
@@ -1033,8 +1062,12 @@ and react-dom 18.3.1, node 22.22.2, jsdom 30.
 complete, and after v5.31 a mismatch against the *immediately-prior* release is worth investigating
 rather than shrugging at — but a mismatch against an *older* release is expected and means little.
 **The binding check on a built artifact is `smoke_built.mjs` at 16/16 plus the §N3 checks — not the
-hash.** Record the built md5 for provenance, and do not hold a release for it. If byte-identical
-rebuilds are ever wanted back, the fix is a committed lockfile, not a longer list here.
+hash.** Record the built md5 for provenance, and do not hold a release for it. ⚠ **The last sentence
+of this paragraph used to read "If byte-identical rebuilds are ever wanted back, the fix is a
+committed lockfile, not a longer list here." That fix landed at v5.62 and this section did not
+notice for a release** — see the lockfile note above. With `npm ci`, byte-identical rebuilds are
+back, and a mismatch against the immediately-prior release is now a real signal rather than an
+expected toolchain drift.
 
 ### N4. Three jsdom traps when testing the built file
 

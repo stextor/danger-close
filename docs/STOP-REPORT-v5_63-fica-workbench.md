@@ -1,5 +1,27 @@
 # STOP REPORT — v5.63 FICA fix, built and green, tests and docs outstanding
 
+> ## ⚠ SUPERSEDED 2026-09-04 — v5.63 SHIPPED. Retained as the record, not as an instruction.
+>
+> Source `b2deba49e68bee6c29300f2f8cf0a7e3` · built `index.html` `5998e8b60c5f45ded623d500fce09a86` ·
+> 3,010 app checks, 0 failing · five negative controls all firing · `smoke_built` 16/16.
+> **Nothing below is a live to-do.** `SCOPE_ROTH_FICA_OTHERORD.md` §7 is the build record and the
+> v5.63 CHANGELOG entry is the account of what shipped.
+>
+> **Two things this report did not hand over, and they are why OPERATIONS §L gained a paragraph.**
+> It listed the documents it had finished and named the modified app source, and the documents were
+> committed. It did **not** enumerate the rest of the modified code: the suite's `v563` version-gate
+> extensions across sixteen files and the new `qa/qa-baseline/dom_entry_v563.jsx` existed only in
+> that session's workspace and survived nowhere. The next session found the repo registering `v562`
+> in eighteen files and `v563` in two, redid the registration from scratch, and hit the `t24` `_k`
+> trap this report had already documented — the trap note survived; the work it described did not.
+> §L now requires a stop to end with a table of **every** file it modified or created, its md5, and
+> where that file goes.
+>
+> ⚠ Its `mammoth` note — *"pin it to 1.12.1 with `package.json` kept byte-identical"* — was reported
+> here as unverified and is now resolved, in a third way. No pin is needed for the build to succeed;
+> the pin was about reproducibility, and it had **already landed** as the committed
+> `package-lock.json`. What was missing was OPERATIONS §N3a using it. See the v5.63 CHANGELOG.
+
 **Why this is a stop and not a release.** The engine fix is in, deliberately applied from canonical
 v5.62, and the full suite is green on both legs. What a release also requires — new tests for new
 behaviour, negative controls, `METHODOLOGY`, `CHANGELOG`, `TESTING`, the built `index.html`, and a
