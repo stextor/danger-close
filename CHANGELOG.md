@@ -40,14 +40,28 @@ to a taxed base changes the tax, which no release will ever falsify, under a lab
 something false. The pin is retired, `METHODOLOGY` quotes the withdrawn text before retracting it,
 and the real defect the investigation found instead is the FICA one above.
 
-**Testing — 2,996 app checks, 0 failing.** v5.63 leg **1,157** · v5.62 leg **1,157** · run-once
-**672** · parity **10/10**. Tooling 82.
+**Testing — 3,010 app checks, 0 failing**, run from the packaged copies. v5.63 leg **1,164** ·
+v5.62 leg **1,164** · run-once **672** · parity **10/10**. Tooling 82.
 
 ⚠ **MC parity is 10/10 and it is EXPECTED AND BLIND**, the same way it was at v5.62. The three
 parity fixtures carry no income streams, so the changed code path is never entered. **Parity is not
 evidence here**; the suite work below is.
 
-⚠ **The suite total moving by only +64 is the measurement of a gap, not reassurance.** Before this
+**The boundary census grew, under §K1's maintenance rule.** `qa/tools/boundaries.mjs` gains a
+`stream_kinds` row and `t29` goes 54 → 61 per leg. The rule is that a release fixing a defect
+invisible in the example data adds the boundary that hid it — and the row that already existed,
+`income_streams`, would **not** have caught this one: it counts streams, so a work-only stream reads
+*exercised* while never reaching the FICA path. What had to be non-zero was a **non-work** stream.
+A `streamsWork` fixture drives the new row in the opposite direction from the old one, because a
+census row nothing can move is the failure `t29` §E2 already records against the SS-offset row.
+Two controls, both firing: stripping the fixture's `kind: "work"`, and collapsing the row to count
+all streams.
+
+⚠ **The FIX's own contribution to the suite total is +62, and that is the measurement of a gap, not
+reassurance.** (`t33` adds 32 per leg and the retired `t10` pin removes 1, so +31 per leg, +62
+across two, carrying 2,934 → 2,996; the census work above adds a further +14 to reach **3,010**.
+This entry said **+64** when it was written and `TESTING.md` said +62; the arithmetic here is the
+one that holds, and the error is recorded rather than silently corrected.) Before this
 release **no fixture in the suite carried a non-zero income stream** — measured by AST at this
 build: 15 sites set `incomeStreams`, every one `monthly: 0` or `[]`, eleven of them the identical
 deliberate line that neutralises the demo part-time taper so cross-engine comparisons stay clean.
@@ -84,6 +98,37 @@ either: **C2a and C2b simulate the two half-fixes by pushing the unfiltered tota
 site at a time.** C2a fires exactly 2 checks, both in the ACA group, while the main-path groups stay
 green — the partial-ship case. C1 (revert the filter entirely) fires 11; C2b fires 11; C3 and C4
 revert the two state-base additions separately and fire 9 and 2.
+
+**The suite had to be taught the `v563` tag, and that work was not in the repo.** Sixteen suites gate
+behaviour on an enumerated version list; two ladder heads (`t1`'s `verStr`, `t4`'s `_badge`) take a
+new arm, sixty OR-chain members and sixteen registry/`ORDER` arrays take the tag, and
+`qa/qa-baseline/dom_entry_v563.jsx` is new. `t24`'s `_k` is the trap: it ends in a ternary
+**condition**, not a ladder arm, so a transform that skips ladder heads skips it silently. It was
+caught by per-file counts failing to reconcile, not by the run — both branches happened to agree on
+this release, so the suite would have stayed green while the tag took the wrong branch.
+
+⚠ **§N3a's recipe and the repo disagreed about the build, and the repo was right.** Rebuilding v5.62
+from its own unmodified source under the documented four-file scaffold gave
+`99dbcac2fbe3dbc8e0207278e9179ea8` against the published `ceb7fb4af26560b0944030ffb5da1d6a` — an
+85-byte difference confined to a single 22 KB window inside the vendored `mammoth` bundle
+(`Object.create(null)` where the published file has `{}`); the app's own code was byte-identical.
+The cause is that v5.62's committed **`package-lock.json`** pins `mammoth` to 1.12.1 while §N3a
+copies four scaffold files and never copies the lock, so a plain `npm install` resolves 1.12.2.
+Rebuilt with `npm ci` from that lockfile, v5.62 reproduced its published artifact **exactly**. The
+lockfile v5.62's own entry argued for did land; the recipe that would use it did not. **§N3a now
+names `package-lock.json` as a fifth scaffold file and `npm ci` as the install step**, and this
+release is built that way. The pin is no longer something that has to be remembered.
+
+**Source md5** `b2deba49e68bee6c29300f2f8cf0a7e3` · **built `index.html` md5**
+`5998e8b60c5f45ded623d500fce09a86`. Toolchain: node 22.22.2, vite 5.4.21, @vitejs/plugin-react 4.7.0,
+vite-plugin-singlefile 2.3.3, rollup 4.63.1, react/react-dom 18.3.1, mammoth 1.12.1 (from the
+lockfile), jsdom 30.0.1.
+
+**Not in this release:** a `t31` extinction key. The scope assumed one would be needed; measured, the
+withdrawn v5.62 disclosure never reached a user surface — the gap language returns zero hits in both
+the render tree and `DOCS_HTML` — so there is nothing to invert and an added key would be vacuous,
+which `t31`'s own header warns against twice with two recorded instances. The honest candidate is the
+second-order IRMAA caveat, and that needs new user-facing copy, which was outside this scope.
 
 ## v5.62 · the three engines share one state-tax calculator and disagreed anyway, 2026-09-03
 
