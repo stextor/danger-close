@@ -29,7 +29,7 @@ let _s = 42; Math.random = () => { _s = (_s * 1103515245 + 12345) & 0x7fffffff; 
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v546";
-const KNOWN_VERSIONS = ["v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562"];
+const KNOWN_VERSIONS = ["v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -68,7 +68,8 @@ const ids = example.map(r => r.id);
 T("A-2: row ids are unique \u2014 a duplicate id would make every lookup below ambiguous",
   new Set(ids).size === ids.length);
 for (const id of ["filing", "dobA_month", "dobB_month", "rmd_age_A", "rmd_age_B", "ssA_claim",
-                  "ssB_claim", "ssA_band", "ssB_band", "state_tax", "income_streams", "ladder_windows"])
+                  "ssB_claim", "ssA_band", "ssB_band", "state_tax", "income_streams", "stream_kinds",
+                  "ladder_windows"])
   T(`A-3: row '${id}' is present`, ids.includes(id));
 T("A-4: every row carries a verdict and a note", example.every(r => typeof r.onBoundary === "boolean" && r.note));
 
@@ -105,6 +106,26 @@ for (const [name, spec] of Object.entries(HOUSEHOLDS)) {
 // function that only ever reports ON.
 T("C-reverse: 'ladder_windows' goes from clear to ON when both spouses share a birth year",
   !by(example, "ladder_windows").onBoundary && by(at("sameWindows"), "ladder_windows").onBoundary);
+
+// -- C-kinds . the v5.63 row, driven in BOTH directions (§K1 maintenance rule; the E2 lesson).
+// `income_streams` counts streams and `stream_kinds` asks whether any of them is NON-work. The
+// two must be able to disagree, or the new row is a duplicate of the old one wearing a new id --
+// which is exactly the "row nobody drives" failure E2 records. A WORK-only stream is the case
+// that separates them: streams exist, so the count row clears, while the FICA split stays
+// unexercised and the kinds row stays ON. This is the boundary that hid the v5.63 defect.
+{
+  const w = at("streamsWork");
+  T("C-kinds-1: a work-only stream CLEARS the count row -- streams do exist",
+    !by(w, "income_streams").onBoundary, by(w, "income_streams").value);
+  T("C-kinds-2: ...and LEAVES the non-work row ON -- the FICA split is still unexercised",
+    by(w, "stream_kinds").onBoundary, by(w, "stream_kinds").value);
+  T("C-kinds-3: the two rows therefore DISAGREE on this household -- the new row is not a "
+    + "restatement of the old one",
+    by(w, "income_streams").onBoundary !== by(w, "stream_kinds").onBoundary);
+  T("C-kinds-4: an untyped stream counts as NON-work, matching the app's own "
+    + "`(s.kind || \"other\")` default -- a fix special-casing \"rental\" would not move this",
+    !by(at("streams"), "stream_kinds").onBoundary, by(at("streams"), "stream_kinds").value);
+}
 
 // ── §D · the branch-report rows, which cannot flip within one household ──────────────────
 {
