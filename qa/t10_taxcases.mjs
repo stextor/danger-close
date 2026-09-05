@@ -643,7 +643,16 @@ const pass2E = pass, fail2E = fail;
       //                              64/64 -> 0.045 x  100,000           = 4,500.00
       T("2E age control: a state with no exclAge still uses 65 (AL, both 65)", AGE("AL", 65, 65), 3960.00);
       T("2E age control: and denies it one year earlier (AL, both 64)",       AGE("AL", 64, 64), 4500.00);
-      if (_v >= 560) {
+      // ⚠ GATED AGAIN AT v565 (OPERATIONS §B2). Connecticut joins the set: populating its
+      // income-conditioned exemption REQUIRES `exclAge: 0`, because Connecticut conditions on
+      // income alone and the engine's default floor is 65. v5.64 and earlier legitimately carry
+      // four, so the five-member expectation must not be asserted against them.
+      if (_v >= 565) {
+        T("2E age control: exactly five states carry an exclAge",
+          Object.keys(R).filter(c => R[c].exclAge !== undefined).length, 5);
+        T("2E age control: and they are CT, DE, KY, RI and WI",
+          Object.keys(R).filter(c => R[c].exclAge !== undefined).sort().join(",") === "CT,DE,KY,RI,WI" ? 1 : 0, 1);
+      } else if (_v >= 560) {
         T("2E age control: exactly four states carry an exclAge",
           Object.keys(R).filter(c => R[c].exclAge !== undefined).length, 4);
         T("2E age control: and they are DE, KY, RI and WI",

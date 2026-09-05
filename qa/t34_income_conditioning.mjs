@@ -26,7 +26,7 @@ import "./env_dom.mjs";
 let _s = 42; Math.random = () => { _s = (_s * 1103515245 + 12345) & 0x7fffffff; return _s / 0x7fffffff; };
 
 const VER = process.argv[2] || "v564";
-const KNOWN_VERSIONS = ["v564"];
+const KNOWN_VERSIONS = ["v564", "v565"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -47,15 +47,36 @@ console.log(`t34 — INCOME CONDITIONING (${VER})`);
 
 // ── §A · The release populates nothing, and that is asserted ─────────────────────────────────
 // If this section fails, either a state was populated without a scope, or B-1 (a) was abandoned.
+// ⚠ GATED PER LEG at v5.65 (OPERATIONS §B2). v5.64 legitimately populates NOTHING and asserting
+// the populated set against it would break the frozen prior-leg replay — the v5.27 mistake. The
+// populated set is asserted EXACTLY, not as "at least CT": a release that populates a second state
+// without a scope fails here rather than passing on a `.includes`.
 {
-  const withTest = Object.entries(RULES).filter(([, r]) => r && r.exclTest !== undefined);
-  T("A-1: NO STATE_RULES entry carries `exclTest` at v5.64 — the release changes no output (B-1 (a))",
-    withTest.length === 0);
-  if (withTest.length) console.log(`        populated: ${withTest.map(([c]) => c).join(", ")}`);
+  const _v = Number(String(VER).replace(/[^0-9]/g, "")) || 0;
+  const withTest = Object.entries(RULES).filter(([, r]) => r && r.exclTest !== undefined).map(([c]) => c).sort();
+  if (_v >= 565) {
+    T("A-1 [v5.65]: EXACTLY ONE state carries `exclTest` — Connecticut, the first populated state",
+      withTest.join(",") === "CT");
+    if (withTest.join(",") !== "CT") console.log(`        populated: ${withTest.join(", ") || "(none)"}`);
+    T("A-3 [v5.65]: the other four income-conditioned states are still present and still UNPOPULATED — they remain optimistic and convert one release at a time",
+      ["NM", "RI", "VA", "NJ"].every((c) => RULES[c] && RULES[c].exclTest === undefined));
+    // Non-vacuity: A-1 must be reading a real, well-formed table, not merely a present key.
+    T("A-4 [v5.65]: and CT's table is a `bands` test on the `agi` base with the EXCLUSIVE comparator (B-2)",
+      RULES.CT.exclTest.kind === "bands" && RULES.CT.exclTest.base === "agi" &&
+      RULES.CT.exclTest.cmp === "lt" && RULES.CT.exclTest.unit === "household");
+    T("A-5 [v5.65]: CT carries `exclAge: 0` — without it `_floor` defaults to 65 and every under-65 household is silently denied the exemption Connecticut grants on income alone",
+      RULES.CT.exclAge === 0);
+    T("A-6 [v5.65]: `exclTest` and `ssOffset` remain mutually exclusive — no state carries both",
+      Object.values(RULES).every((r) => !(r.exclTest !== undefined && r.ssOffset)));
+  } else {
+    T("A-1 [pre-v5.65]: NO STATE_RULES entry carries `exclTest` at v5.64 — that release changes no output (B-1 (a))",
+      withTest.length === 0);
+    if (withTest.length) console.log(`        populated: ${withTest.join(", ")}`);
+    T("A-3 [pre-v5.65]: the five income-conditioned states are all still present and unpopulated",
+      ["NM", "RI", "VA", "NJ", "CT"].every((c) => RULES[c] && RULES[c].exclTest === undefined));
+  }
   T("A-2: `excl65` is still a NUMBER on every entry — the t10/t29 whole-table guards read `> 0`, and an object compared `> 0` is false (D-3 (b))",
     Object.values(RULES).every((r) => typeof r.excl65 === "number"));
-  T("A-3: the five income-conditioned states are all still present and unpopulated",
-    ["NM", "RI", "VA", "NJ", "CT"].every((c) => RULES[c] && RULES[c].exclTest === undefined));
 }
 
 // ── Harness: a synthetic jurisdiction, added and removed per case ────────────────────────────

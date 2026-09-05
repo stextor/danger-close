@@ -55,13 +55,13 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true; window.IS_REACT_ACT_ENVIRONMENT = tr
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v542";
-const KNOWN_VERSIONS = ["v540", "v541", "v542", "v543", "v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564"];
+const KNOWN_VERSIONS = ["v540", "v541", "v542", "v543", "v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST_FIX = VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564");
+const POST_FIX = VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565");
 
 // The repo keeps the oracle at qa/tools/hand_86.mjs; PROJECT KNOWLEDGE IS FLAT and holds it
 // beside the suites. Resolve rather than assume, and say which copy was used, so a stale
@@ -89,7 +89,7 @@ const T = (name, ok, detail = "") => {
 const _appMod = await import(`./app_${VER}.mjs`);
 const _app = _appMod.__g;
 const _tlD = typeof _app.PLAN_TIMELINE === "function" ? _app.PLAN_TIMELINE() : _app.PLAN_TIMELINE;
-const DIV = (VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564")
+const DIV = (VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565")
   ? Math.round(Math.max(0, _app.taxableInitAll()
       - (_app.retireStartBalances(_tlD.rothLadderStart).othHsa || 0)) * (2.0 / 100))
   : 0;
@@ -251,7 +251,7 @@ if (POST_FIX) {
   // a K boundary — a rendered figure moving by exactly the term that was added, not a regression.
   // The oracle, not this list, is the independent derivation; these are spot pins on its rows.
   // Gated per leg: v5.52 and earlier legitimately read the lower figure (OPERATIONS §B2).
-  const _k = (v553, older) => (VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" ? v553 : older);
+  const _k = (v553, older) => (VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" ? v553 : older);
   T(`C-2 (V542): 2031 reads $${_k(57, 56)}K, not the cliff's $82K`, by[2031] === _k(57, 56), `$${by[2031]}K`);
   T(`C-3 (V542): 2029 reads $${_k(50, 49)}K, not the cliff's $53K`, by[2029] === _k(50, 49), `$${by[2029]}K`);
   T(`C-4 (V542): 2030 reads $${_k(46, 45)}K, not the cliff's $51K`, by[2030] === _k(46, 45), `$${by[2030]}K`);

@@ -77,6 +77,11 @@ tally "t33-$CUR"   node t33_roth_stream_fica.mjs "$CUR"
 # earlier build, so running it against the prior leg would fail for the right reason and report as
 # a regression. Its own KNOWN_VERSIONS guard refuses any other tag.
 tally "t34-$CUR"   node t34_income_conditioning.mjs "$CUR"
+# t35 (v5.65) runs on BOTH legs by construction. The prior leg carries Connecticut UNPOPULATED and
+# asserts the pre-fix figures; the current leg asserts the populated ones. A current-leg-only suite
+# could not show that anything moved, which is the whole claim of a populate release.
+tally "t35-$PRIOR" node t35_state_populate.mjs "$PRIOR"
+tally "t35-$CUR"   node t35_state_populate.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
