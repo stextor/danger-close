@@ -131,6 +131,25 @@ full retirement-income exemptions (IL, MS, PA, IA 55+, MI post-phase-in, plus th
 no-income-tax states); and major 65+ retirement-income exclusions where they exist (e.g., GA
 $65K/person, KY $31,110, NY $20K, NJ a $100K HOUSEHOLD cap at 62+ (not per-person), VA $12K, SC $15K, DE $12.5K). **Which of these have been checked against a primary source, and what was found, is recorded in `AUDIT_STATE_EXCL65_NOTES.md` — this section routes there rather than restating it, because a verification claim expires and a dated audit does not.**
 
+**Income conditioning: the machinery exists as of v5.64, and no state uses it yet.** Five states
+condition their exclusion on income in law — New Mexico, Rhode Island, Virginia, New Jersey and
+Connecticut — and this model applies all five **unconditionally**, granting exclusions to households
+the statutes exclude. That is an **optimistic** simplification and it is the largest known error in
+this module. v5.64 added the mechanism to fix it: an income measure computed inside the state engine,
+two bases (`agi`, and `agiExSS` — which is Virginia's AFAGI exactly and approximates New Jersey's
+gross income), and an optional per-state field holding either a band table or a continuous taper.
+**No state carries that field at v5.64**, so nothing has changed for any household yet; the five
+convert one release at a time, each with its own hand-computed test cells. The statutes are recorded
+in `docs/FINDINGS-v5_63-state-statutes.md`, read against primary sources rather than secondary guides.
+
+Two properties of that measure will matter when the states land, and both are stated here rather than
+discovered later. **It carries no dividend or interest income**, because the state engine is never
+passed either — so a household whose state income is materially dividend-driven will sit lower on a
+band table than the statute would put it, again optimistically. And **the band comparator is a
+per-state property, not a convention**: four of the five statutes are inclusive at the top of a band
+while Connecticut is exclusive, so at exactly $150,000 of federal AGI a Connecticut couple's
+pension exemption is zero rather than 2.5%.
+
 **The age at which an exclusion starts is modelled per state (v5.55), not assumed to be 65.**
 `STATE_RULES.exclAge` carries a state's own floor and is absent for the 45 states that use 65.
 Four are set: **Kentucky attaches no age test in law** (verified against KY DOR Schedule M),
