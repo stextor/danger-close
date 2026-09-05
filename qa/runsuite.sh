@@ -73,6 +73,10 @@ tally "t32-$CUR"   node t32_ladder_dividend.mjs "$CUR"
 # FICA path at all. Both legs: the prior leg asserts the defect, the current leg the fix.
 tally "t33-$PRIOR" node t33_roth_stream_fica.mjs "$PRIOR"
 tally "t33-$CUR"   node t33_roth_stream_fica.mjs "$CUR"
+# t34 (v5.64) is CURRENT-LEG ONLY by construction: it tests machinery that does not exist on any
+# earlier build, so running it against the prior leg would fail for the right reason and report as
+# a regression. Its own KNOWN_VERSIONS guard refuses any other tag.
+tally "t34-$CUR"   node t34_income_conditioning.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

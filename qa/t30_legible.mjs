@@ -25,7 +25,7 @@ import { dirname, join } from "path";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v548";
-const KNOWN_VERSIONS = ["v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563"];
+const KNOWN_VERSIONS = ["v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   process.exit(1);
@@ -51,7 +51,7 @@ T("A-2: excluding it removes exactly one line", LINES.length - APP.split("\n").l
 
 // ── §B · the declared floor ─────────────────────────────────────────────────────────────
 const sizes = [...APP.matchAll(/fontSize:\s*(\d+)/g)].map(m => Number(m[1]));
-const POST = (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563");
+const POST = (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564");
 T("B-1: the app declares font sizes at all (the regex still matches the idiom)",
   sizes.length > 500, `${sizes.length} declarations`);
 

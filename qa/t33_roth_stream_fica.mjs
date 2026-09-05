@@ -40,7 +40,7 @@ const VER = process.argv[2] || "v563";
 // pre-fix like v5.62; only the two ABSOLUTE pins differ, because v5.62 raised state tax in the
 // Roth outputs (SCOPE_ENGINE_STATE_PARITY). Everything else here is a DELTA between two streams
 // on one build and is therefore version-independent by construction.
-const KNOWN_VERSIONS = ["v561", "v562", "v563"];
+const KNOWN_VERSIONS = ["v561", "v562", "v563", "v564"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is not registered in this suite.");
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -48,7 +48,7 @@ if (!KNOWN_VERSIONS.includes(VER)) {
   process.exit(1);
 }
 // The fix landed at v5.63. Every later tag is post-fix and must be added here as well.
-const POST_FIX = VER === "v563";
+const POST_FIX = VER === "v563" || VER === "v564";
 
 // The only two build-specific ABSOLUTE figures in this suite. Kept in one table so a tag added to
 // KNOWN_VERSIONS without its pins fails CLOSED rather than reading someone else's numbers — the
@@ -61,6 +61,11 @@ const PINS = {
   v561: { noStream: 169596, acaConv: 1202522 },
   v562: { noStream: 174883, acaConv: 1203137 },
   v563: { noStream: 174883, acaConv: 1203137 },
+  // v5.64 builds the income-conditioning measure and evaluator and populates NO state
+  // (SCOPE_INCOME_CONDITIONING B-1 (a)), so it must move NEITHER figure. Carrying v5.63's values
+  // forward here is not a copy — it is the assertion that the release changed no output, and if
+  // either number has moved this suite says so rather than tracking it.
+  v564: { noStream: 174883, acaConv: 1203137 },
 };
 if (!PINS[VER]) {
   console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is registered but has no PINS entry.");

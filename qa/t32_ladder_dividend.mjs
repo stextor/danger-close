@@ -25,12 +25,12 @@
 // usage: node qa/t32_ladder_dividend.mjs <tag>
 
 const VER = process.argv[2] || "v553";
-const KNOWN_VERSIONS = ["v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563"];
+const KNOWN_VERSIONS = ["v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   process.exit(1);
 }
-const POST = VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563";
+const POST = VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564";
 
 // The source is read as well as the engine: A-2 below reconstructs the ladder's expression from
 // its inputs, which would pass VACUOUSLY on a leg whose ladder does not carry the term at all.
