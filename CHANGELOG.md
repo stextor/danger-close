@@ -1,5 +1,102 @@
 # Changelog
 
+## v5.64 — the income-conditioning measure (no user-visible change)
+
+**Source `02ea7e398a35bbade8a89e6ca57edac0` · artifact `1f10e4a64cc19cd4c68ac49fb933b30a` · built
+from that source, verified by hash.**
+
+⚠ **This release changes nothing a user can see, and that is deliberate.** It builds the machinery
+that lets a state's exclusion depend on income, and populates **no state with it**. Every household
+gets exactly the figures v5.63 gave them. If you are looking for a modelling improvement here, there
+isn't one yet — it arrives one state at a time in later releases.
+
+### Why ship machinery on its own
+
+Five states condition their retirement exclusion on income in law — New Mexico, Rhode Island,
+Virginia, New Jersey and Connecticut — and the app applies all five **unconditionally**, because
+`STATE_RULES` had a scalar and a count and no way to hold a condition. Fixing that means two separate
+things: an evaluator, and five statutory tables. Landing them together would mean that a wrong figure
+could not be attributed to either. So the evaluator ships first, tested against the real tables
+through a synthetic jurisdiction, and each state follows in its own release with its own
+hand-computed cells. (`docs/SCOPE_INCOME_CONDITIONING.md` decision B-1.)
+
+It also unblocks a measurement that should have come first: how often any of these thresholds
+actually binds for the households this app models. That could not be asked before the income measure
+existed.
+
+### What was added
+
+- **The measure**, computed inside `stateTaxAnnual` from arguments it already receives — never
+  borrowed from one of the app's four MAGI definitions, which disagree with each other and which
+  nothing compares.
+- **Two bases**, differing by one term: `agi` (New Mexico, Rhode Island, Connecticut) and `agiExSS`
+  (Virginia, New Jersey). `agiExSS` is Virginia's AFAGI exactly; for New Jersey it is an
+  approximation of gross income.
+- **An optional `exclTest` field** carrying either `bands` (ordered rows, each a dollar amount or a
+  percentage) or `taper` (a continuous $1-for-$1 reduction). `excl65` stays a scalar beside it.
+- **A per-table comparator.** Four of the five statutes are inclusive at the band top; Connecticut is
+  exclusive — its TY2026 table ends "$150,000 and up → 0" and phrases eligibility as *less than*, so
+  at exactly $150,000 the factor is zero, not 2.5%.
+
+### Limitations, stated rather than implied
+
+- **No state uses any of this yet.** Every one of the five is still applied unconditionally, which
+  is **optimistic** — the app currently grants exclusions to households the statutes exclude.
+- **Neither base carries dividend or interest income**, because `stateTaxAnnual` is never passed it.
+  A household whose state income is materially dividend-driven will sit lower on a band table than
+  the statute would put it. Optimistic, and it will be disclosed in each state's note as it lands.
+- **The measure is a float sum, not a rounded return figure.** Real returns round to whole dollars;
+  this does not, which is precisely why the comparator is per-table rather than assumed.
+- New Mexico carries a known residual for later: its exemption reduces taxable income, so its value
+  is the marginal rate, and the model's flat 4.9% **over-values** it by roughly 1.5× to 3× in the
+  only range where the exemption exists. A disclosure, not a mechanism.
+
+### Tests
+
+**3,069 app checks, 0 failing** (v5.63 → v5.64, both legs). Tooling, counted separately: `t21` 50,
+`domdiff` 32. The rise of 59 from v5.63's 3,010 is `t34` and nothing else — every prior-leg suite
+reports the figure it reported before.
+
+| suite | checks |
+|---|---|
+| `t34_income_conditioning.mjs` (new) | 59 — New Mexico's nine bands, Virginia's taper, Connecticut's ten percentage rows, New Jersey's mixed table, the measure's terms, and the malformed-table floor |
+| baseline `t1`–`t6`, `t10`, both legs | 1,662 |
+| feature suites | 1,338 |
+| MC parity | 10 |
+
+Three things are asserted rather than assumed:
+
+- **No `STATE_RULES` entry carries `exclTest`**, so "populates nothing" is tested, not stated.
+- `t33`'s two absolute pins — lifetime tax for a stream-free household, and the ACA solver's lifetime
+  conversions — **hold unchanged at v5.64**, which is the direct evidence that no output moved.
+- Ten negative controls (`qa/controls_v564.sh`) break the evaluator ten ways and **all ten fire**,
+  including both comparator inversions and a Virginia taper that subtracts the excess per spouse
+  instead of once — an error that is wrong by a factor of two through the entire phase-out range and
+  correct everywhere else, so it passes any two-sided test.
+
+### Two suite defects found while building this, both fixed
+
+Neither was in the app; both were in the harness, and both were found by running rather than reading.
+
+- **`t24`'s `_k` gate was missed by a version-registration script.** The script extended every
+  `VER === "v563"` gate except those followed by a ternary, to protect the version-*string* mappings
+  in `t1` and `t4` — but `t24`'s is a real gate chain that merely ends in one, so v5.64 silently took
+  pre-v5.53 expectations and three checks failed. A blanket rule was the wrong instrument; reading
+  the three surviving ternaries individually was the right one. Same class as the eighteen-file miss
+  at v5.63.
+- **`t33` halted with no result line** — the mode that reads as green to anything counting only
+  failures. It was the suite working: a tag registered without a matching pins entry fails **closed**
+  rather than silently reading another build's absolute figures.
+
+### Statutory sources
+
+`docs/FINDINGS-v5_63-state-statutes.md` (new) records all five statutes read against primary or
+official sources: N.M. Stat. § 7-2-5.2 and § 7-2-7; Connecticut's TY2026 phase-out table from Form
+CT-1040ES; New Jersey's tiers from the chaptered P.L. 2021 c.129 text; Va. Code § 58.1-322.03(5)(b)
+plus the Form 760 Age Deduction Worksheet, which is what settles the taper's once-not-twice mechanic;
+and Rhode Island's thresholds from ADV 2025-22. The populate releases test against those tables
+rather than re-deriving them.
+
 ## OPS 2026-09-04 · two decisions, and four documents that disagreed about one of them
 
 **No app change.** No source edit, no rebuild, no version bump — **v5.63 remains the current build**,
