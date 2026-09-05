@@ -1,5 +1,110 @@
 # Changelog
 
+## v5.65 — Connecticut's pension exemption is now income-conditioned (the first state to move)
+
+**Source `7604fac5dab891bb31905544d11072f8` · artifact `b4ea0bd1d6993aadd0b7fedcfe47e580` · built
+from that source, verified by hash.**
+
+**This release changes a number, and it changes it in the direction that makes plans look better.**
+v5.64 built the machinery to let a state's retirement exclusion depend on income and deliberately
+populated no state with it. This is the first release that uses it, and Connecticut is the first
+state — chosen to go first, and alone, precisely because it is the one whose correction is
+optimistic. A Connecticut household will see less modelled state tax than it saw at v5.64.
+
+### Why Connecticut was wrong, and wrong in an unusual direction
+
+Five states condition their retirement exclusion on income in law: New Mexico, Rhode Island,
+Virginia, New Jersey and Connecticut. Four of them grant an exclusion this model applied
+**unconditionally**, handing it to households the statute excludes — optimistic. Connecticut was the
+odd one out: it granted **nothing at all**. `STATE_RULES` could hold a dollar amount and a count, not
+a phase-out, so Connecticut's schedule was recorded as a zero and disclosed as unmodelled. The
+placeholder was pessimistic, and it was the largest single-state dollar error this model carried for
+a mainstream household.
+
+Connecticut now uses the TY2026 phase-out schedule from Form CT-1040ES (Rev. 01/26), page 5, read
+first-hand and transcribed in `docs/FINDINGS-v5_63-state-statutes.md` §3 rather than re-derived:
+100% of pension and IRA income exempt below $100,000 of federal AGI on a joint return ($75,000
+single), stepping down through eight bands to nothing at $150,000 and above ($100,000 single).
+Applied **per return, not per person**, with **no age test at all** — Connecticut conditions on
+income alone, which is why its rule row carries `exclAge: 0` (Kentucky is the existing precedent).
+
+**What that is worth.** A Connecticut couple with $90,000 of retirement income goes from $4,500 of
+modelled state tax to $0. At $118,000, from $5,900 to $3,540. At $135,000, from $6,750 to $6,412.50.
+At and above $150,000 of federal AGI the statute grants nothing and the two builds agree exactly.
+
+### Limitations and approximations — read these before trusting the figure
+
+- **The income measure carries no dividend or interest income.** The state engine is never passed
+  either. A Connecticut household whose income is materially dividend- or interest-driven therefore
+  sits **lower** on the band table than the statute would place it and receives a **larger**
+  exemption than it is entitled to. This is an optimistic error, it is live today rather than
+  hypothetical, and it is stated in Connecticut's own in-app state note.
+- **The rate is still a flat 5% approximation** of Connecticut's graduated schedule, as it was
+  before. This release changes the exemption, not the rate.
+- **Social Security is still approximated** as taxing half the federally-taxable portion, unchanged.
+- **The other four states are still unconditional and still optimistic.** New Mexico, Rhode Island,
+  Virginia and New Jersey convert one release at a time. Rhode Island will populate on dated TY2025
+  figures, because its TY2026 pair is not published until November 2026.
+- **The measure is a sum of floats, not a rounded return figure.** Connecticut is the only one of the
+  five statutes that is exclusive at the top of a band, so its comparator is `lt` where the other
+  four will be `lte`. For whole-dollar income the two agree; in general they do not.
+
+### Tests — 3,246 app checks, 0 failing
+
+Up 177 from v5.64's 3,069. (`t21` 50 and the DOM diff 32 are counted separately, as always.)
+
+| suite | v5.64 leg | v5.65 leg |
+|---|---|---|
+| t1 units | 185 | 185 |
+| t2 engines | 35 | 35 |
+| t3 roth | 36 | 36 |
+| t4 dom | 252 | 252 |
+| t5 storage | 58 | 58 |
+| t6 single | 21 | 21 |
+| t10 tax cases | 244 | 244 |
+| MC parity (t2 compare) | — | 10 |
+| t7–t20, t22 (single-leg) | — | 672 |
+| t23–t33 (both legs) | 313 | 313 |
+| t34 income conditioning | — | 62 |
+| **t35 state populate (NEW)** | **82** | **92** |
+
+**`t35_state_populate.mjs` is new and runs on BOTH legs.** The prior leg asserts Connecticut's
+pre-populate figures — no exemption, the whole retirement base taxed — and the current leg asserts
+the populated ones. A current-leg-only suite could not demonstrate that anything moved, which is the
+entire claim of a populate release. It carries the hand-computed cells across six bands in both
+filing columns, boundary pins **at** all nine thresholds in each column plus one dollar either side,
+the `excl65`-equals-table-at-zero invariant, the note-vs-code disclosure locks, and a cross-engine
+parity check that re-prices every row the tax engine produced through the state module directly and
+requires agreement to the cent.
+
+Three assertions carry the claim that only Connecticut moved: `t34` §A asserts the populated set is
+**exactly** `CT` rather than "at least CT"; `t33`'s two absolute pins are a Georgia household and
+hold unchanged; and `t35` §D-7 pins the remaining income-limited-but-unconditional set at exactly
+NM, NJ, RI, VA.
+
+### Negative controls
+
+Eleven, in `qa/controls_v565.sh`, all firing: the comparator flipped to `lte`, `exclAge` dropped so
+the engine's default 65 floor silently reappears, the base switched to `agiExSS`, the unit made
+per-person, a mistyped threshold, a mistyped factor, the single column pointed at the joint
+thresholds, the terminal row deleted, a dollar figure written into the dead `excl65` scalar, and the
+note reverted in each of two directions.
+
+**One of them found a defect in the new suite rather than in the source, and it is recorded here
+because the project's rule is that a control which does not fire is the finding.** The disclosure
+check for the dividend/interest omission originally asserted only that the words "dividend" and
+"interest" appeared in the state note. A note claiming the exact opposite — that the measure *does*
+carry them — would have passed. The control caught it; the assertion was rewritten to require a
+negation near the noun, and the matcher's deliberate narrowness is recorded at its site.
+
+### Harness note
+
+Registering the new tag touched 17 suite files. The four baseline registries end `"v564", "v592"` —
+the retired v5.9.2 leg sorts last — so a transform anchored on the tag being final missed all four
+and reported them as needing no change. The AST verification caught it, not the transform. This is
+the same class as v5.64's `t24` ternary miss and v5.63's eighteen-file miss: **a blanket pattern is
+the wrong instrument for version registration, and only a parser sweep afterwards is evidence.**
+
 ## v5.64 — the income-conditioning measure (no user-visible change)
 
 **Source `02ea7e398a35bbade8a89e6ca57edac0` · artifact `1f10e4a64cc19cd4c68ac49fb933b30a` · built
