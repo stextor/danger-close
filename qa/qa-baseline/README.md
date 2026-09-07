@@ -80,6 +80,32 @@ skipping — a skipped check that reports green is the exact defect t31 exists t
 `cp <current>.jsx DangerClose.jsx` at the run-folder root (t8, t14, t16, t19, t22), and that **t19 must
 be run from `qa/`** — it opens `../DangerClose.jsx`, a path relative to the working directory.
 
+### ⚠ The feature suites' ARGUMENTS are not all version tags (added 2026-09-07)
+
+**This cost a session its release.** At the v5.66 build ten feature suites reported `0 passed, 0
+failed` — the empty-set reading OPERATIONS §B2 calls worse than a failure — and diagnosing it was
+the whole reason that session stopped. **None of it was an app defect.** Three causes:
+
+- **`dom_bundle.cjs` was never derived.** `cp app_<cur>.mjs app_testable.mjs` is only half the
+  setup; `cp dom_<cur>.cjs dom_bundle.cjs` is the other half, and `cp <cur>.jsx DangerClose.jsx`
+  at the run-folder root is the third. Both are stated above and were still missed, so they are
+  restated here as a checklist rather than as prose.
+- **`t11`–`t16` take a MODULE PATH, not a version tag.** `require(process.argv[2] ||
+  "./dom_bundle.cjs")`. Passing `v566` gives `Error: Cannot find module 'v566'` and the suite dies
+  before printing anything. **Run them with no argument.**
+- **`t22`'s argument is the PRIOR build tag**, not the current one — its Group F imports
+  `app_<prior>.mjs`. The committed default is `v532`, whose source the repo does not carry, so it
+  fails on a clean clone unless given the live prior tag: `node t22_aca_floor.mjs <prior>`.
+
+**`t29` resolves its census tool and fixtures from `tools/` OR flat** (the pool is flat, the repo is
+not). If neither is present it prints `0 passed, 1 failed — census tool or fixtures not found`,
+which is honest but easy to mistake for a real failure. **`t21` requires `tools/` specifically** and
+dies at the first tool import without it.
+
+**`qa/runsuite.sh` already encodes every one of these**, and reports `DIED` rather than `0/0` for a
+suite that printed no total. Use it rather than hand-rolling a loop; a hand-rolled loop is what
+produced the ten silent suites.
+
 `dom_entry_v5102.jsx` additionally exposes `window.__test` for t9 (baseline suites ignore it),
 and `shim.txt` exports `__test` alongside `__g` (guarded, so older splices still load).
 t8 also reads `../DangerClose.jsx`, the canonical current source, from the run-folder root.
