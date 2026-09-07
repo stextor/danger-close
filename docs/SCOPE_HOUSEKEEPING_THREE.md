@@ -4,7 +4,7 @@
 |---|---|
 | Premise verified against | **v5.58** · source `6690b2c78953a7a4a1cee413d3523b59` · tree `2c3ebc9` |
 | Written | 2026-09-02 |
-| Status | ◑ **ITEMS A AND C BUILT AND SHIPPED 2026-09-07. ITEM B REMAINS OPEN.** All five decisions are answered: **D-1 split** (A + C together, B alone), **D-2 build it**, **D-3 six documents rowed, the rest named as deliberately unrowed**, **D-4 no self-row**, **D-5 the command with a dated measurement beside it**. ⚠ **This scope stays on `package_check`’s I-2 OPEN allowlist** — Item B is unbuilt, and D-2’s prerequisite (how many tools are actually uncovered) is still unanswered. *(Superseded: "AWAITING DECISIONS in §5 — do not build yet.")* |
+| Status | ◑ **ITEMS A AND C BUILT AND SHIPPED 2026-09-07. ITEM B REMAINS OPEN, on a CORRECTED premise.** All five §5 decisions answered: **D-1 split**, **D-2 build it**, **D-3 six documents rowed and the rest named as deliberately unrowed**, **D-4 no self-row**, **D-5 the command with a dated measurement beside it**. ⚠ **D-B-1 resolved 2026-09-07 as (c) then (a):** §2’s *"three tools added at v5.58"* is wrong — **it is NINE**, four of them predating v5.58 and one postdating it, and **six cannot be reached by a `.jsx` fixture at all.** See the banner in §2. **This scope stays on `package_check`’s I-2 OPEN allowlist** until Item B builds. *(Superseded: "AWAITING DECISIONS in §5 — do not build yet.")* |
 | Shape | **Item A** documentation · **Item B** a real build with new checks · **Item C** documentation, mechanically generated |
 | Premises re-checked | **2026-09-07** by the third scope-status sweep, against v5.65 `7604fac5dab891bb31905544d11072f8`, repo `2c20873`. **A was TRUE and is worse than stated · B was TRUE · C's numbers were WRONG.** See the banner below |
 
@@ -118,6 +118,51 @@ which is the §B2 failure this suite was written to prevent.
 ⚠ **This changes the check count** (`t21` 50 → higher), which cascades into `CHANGELOG.md`,
 `TESTING.md` and the manifest. **No version bump** — the app source does not change, so this is an
 `ops` package and none of §5's 78 judgement points apply.
+
+> ### ⚠ PREMISE CORRECTED 2026-09-07 (D-B-1 (c)) — IT IS NINE TOOLS, NOT THREE
+
+> §2 above says *"the three tools added at v5.58."* **Measured from a FULL-history clone (750
+> commits) rather than a shallow one, and by a crisp definition — tools that parse with `acorn`, the
+> class §B1's warrant actually covers — `t21` fails to reach NINE:**
+>
+> | Not covered by `t21` | First committed | |
+> |---|---|---|
+> | `copylock.cjs`, `lits.cjs`, `notes_probe.cjs`, `vergates.cjs` | 2026-08-31 | pool |
+> | `f6_probe.cjs`, `suite_regex_probe.cjs`, `vercensus.cjs`, `vercensus_list.cjs` | 2026-09-01 | mixed |
+> | `state_rows.cjs` | 2026-09-04 | repo-only |
+>
+> `t21` covers `census.cjs`, `funcmap.cjs`, `diverge.cjs` and `residual.cjs`, all committed
+> 2026-08-10.
+>
+> ⚠ **The dating was wrong in BOTH directions, which is why the count could not be right.** Four of
+> the nine **predate** v5.58 — they arrived 2026-08-31, around v5.57 — and one **postdates** it by
+> three days. §2 named a three-shaped slice of a nine-file set and dated all of it to one release.
+>
+> ⚠ **THE HARDER HALF, AND IT IS WHY THIS ITEM IS NOT BUILT.** §2 already warned that `f6_probe` and
+> `suite_regex_probe` *"do not take `DangerClose.jsx` as their subject"* and that the fixture may not
+> exercise them. **That is true of SIX of the nine**, read from their own usage lines: `copylock`
+> takes two sources plus suite directories; `lits` takes numbers and directories; `suite_regex_probe`
+> takes two text files and directories; `vercensus` and `vercensus_list` take a version tag and
+> directories. **`f6_probe` is the only clean fit for a `.jsx` fixture.**
+>
+> `qa/tools/fixture/fixture.jsx` is one `.jsx` file. **Extending it does not reach six of the nine** —
+> they need a purpose-built *directory* fixture, and a shared one would have to satisfy a
+> suite-walker, a text-differ and a version-tag census at once. That is a second fixture KIND with
+> its own negative controls, plus an unanswered question about whether repo-only tools belong in a
+> pool-facing suite at all.
+>
+> **This is exactly the stop condition D-2 named:** *"if the fixture work turns out to need its own
+> design, STOP and report rather than writing thin cases to reach a number."* It was reported, not
+> worked around.
+>
+> **D-B-1 resolved 2026-09-07: (c) then (a).** Correct the premise first — this note — then build
+> coverage only for the tools the existing fixture can actually reach, and **disclose the rest in
+> `TESTING.md` rather than covering them thinly.** The directory-fixture work is a separate scope if
+> it is ever wanted.
+>
+> ⚠ **`t21`'s check count will therefore rise by less than §2 implies**, and `TESTING.md` will carry
+> a named list of uncovered tools rather than silence. A suite that says what it does not cover is
+> worth more than one that appears to cover everything.
 
 > ### ✅ VERIFIED 2026-09-07 — the gap is real and unchanged
 >
