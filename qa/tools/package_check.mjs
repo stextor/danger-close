@@ -237,7 +237,38 @@ ck("E-1: files shipped to BOTH destinations are byte-identical in both",
 // documents that live in both places ship to both, so a `knowledge/` file whose repo counterpart
 // EXISTS and DIFFERS is a file that should have gone to `github/` too. That is exactly the shape
 // of the v5.47 miss, and it needs no extra input.
+// ── E-1b · ROUTE (a), 2026-09-07 · EVALUATE THE TREE AS THIS PACKAGE WILL LEAVE IT ────────
+// THE DEFECT. E-1b resolved a knowledge/ file to its repo counterpart by basename against the
+// CLONE — the PRE-ship tree. A deletion cannot be expressed as a file in a zip; it is an
+// instruction in README-FIRST.md. So a package that removes a repo path kept resolving to the
+// path it was removing, and E-1b reported the package red BECAUSE OF THE DELETION IT WAS
+// SHIPPING. H-3 (`docs/qa-baseline-README.md`, a byte-identical duplicate) could not be executed
+// for that reason alone, and the scope recorded it rather than working around it.
+//
+// ⚠ THIS IS THE THIRD INSTANCE OF ONE DEFECT SHAPE IN THIS FILE. I-2 was fixed for it and its own
+// comment states the principle — "not 'is the tree clean now' but 'will the tree be clean once
+// this lands'". I-3 was then found reading the pre-ship tree while I-2 read the post-ship one.
+// E-1b was left reading the pre-ship tree alone. K-8 was found with the same shape on 2026-09-07
+// and is fixed below. **When a fix like this lands, sweep the WHOLE file for the shape.**
+//
+// THE DECLARATION IS AN EXACT LINE FORM, DELIBERATELY. D-2 accepts a full path appearing anywhere
+// in README-FIRST, which is safe for D-2 (it asks "was this path declared at all?"). It would NOT
+// be safe here: README-FIRST lists every shipped github/ path, so a bare `includes` would let a
+// file's own upload row silently switch off the gate for it — the P5 defect exactly, which was a
+// basename `includes` excusing every misplaced file by its own filename. A deletion therefore
+// declares itself and nothing else can:
+//
+//     DELETE FROM REPO: docs/qa-baseline-README.md
+//
+// One path per line, full repo path, nothing else on the line. Negative-controlled by P36/P37.
+const declaredRepoDeletions = () => {
+  const rf = existsSync(join(ROOT, "README-FIRST.md"))
+    ? readFileSync(join(ROOT, "README-FIRST.md"), "utf8") : "";
+  return new Set([...rf.matchAll(/^\s*DELETE FROM REPO:\s*`?([^\s`|]+)`?\s*$/gmi)].map(m => m[1]));
+};
 if (CLONE && existsSync(CLONE)) {
+  const deleted = declaredRepoDeletions();
+  if (deleted.size) console.log(`     (declared repo deletions: ${[...deleted].join(", ")})`);
   const repoAll = walk(CLONE).filter(f => !f.startsWith(".git/"));
   const byBase = new Map();
   for (const r of repoAll) {
@@ -255,6 +286,11 @@ if (CLONE && existsSync(CLONE)) {
     // from here, and guessing which one was meant is how a check starts lying.
     if (cands.length !== 1) continue;
     const repoPath = cands[0];
+    // ⚠ The package is REMOVING this path, so there is nothing to ship to it. Checked BEFORE the
+    // md5 comparison deliberately: a deletion is owed nothing whether the bytes match or not, and
+    // H-3's file is a BYTE-IDENTICAL duplicate, so a check placed after the comparison would
+    // silently never exercise this branch on the very case it was written for.
+    if (deleted.has(repoPath)) continue;
     if (md5(join(CLONE, repoPath)) === md5(join(KN, k))) continue;   // identical: nothing owed
     if (!ghSet.has(repoPath)) orphans.push(`${k} (differs from ${repoPath}, absent from github/)`);
   }
@@ -683,11 +719,20 @@ console.log("\nK. Manifest — PROJECT_KNOWLEDGE_INDEX.md vs the clone and the p
         // 72 hashed rows were wrong. A fallback nobody checks is a fallback that lies.
         const rows = [...M.matchAll(/\|\s*`?([A-Za-z0-9_.-]+\.(?:mjs|cjs|jsx|js|sh|md|html|json|txt))`?\s*\|[^|]*\|?\s*`?([0-9a-f]{32})`?/g)];
         const seen = new Set(), badHash = [], ghostRow = [];
+        // ⚠ FIXED 2026-09-07 — AS THIS PACKAGE WILL LEAVE THE POOL, not as it finds it. THE
+        // INSTANCE: the 2026-09-07 manifest-repair package changed `package_check.mjs` and did
+        // NOT roll its own hash row. K-8 passed pre-ship and went red the moment the package
+        // landed. It could not have done otherwise — it compared the NEW manifest row against
+        // the OLD pool copy, and pre-upload those are the two things that are guaranteed not to
+        // correspond. **A row for a file the package is replacing is exactly the row most likely
+        // to need rolling, and it was the one row K-8 structurally could not check.**
+        // Third instance of the shape I-2 and E-1b were fixed for; see E-1b's note.
         for (const [, f, h] of rows) {
           if (seen.has(f + h)) continue; seen.add(f + h);
-          const there = join(POOL, f);
+          const shipped = join(KN, f);                 // the package's own knowledge/ copy, if any
+          const there = existsSync(shipped) ? shipped : join(POOL, f);
           if (!existsSync(there)) { ghostRow.push(f); continue; }
-          if (md5(there) !== h) badHash.push(f);
+          if (md5(there) !== h) badHash.push(f + (there === shipped ? " (vs the package's own copy)" : ""));
         }
         ck("K-8: every hashed manifest row matches its pool file, and names a file that exists",
           badHash.length === 0 && ghostRow.length === 0,

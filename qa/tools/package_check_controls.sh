@@ -268,6 +268,55 @@ fi
 rm -rf /tmp/pkctlc
 
 
+# ── E-1b ROUTE (a) CONTROLS (added 2026-09-07) ───────────────────────────────────────────
+# E-1b learned to skip a repo path whose deletion README-FIRST declares. A gate that learns to
+# stay quiet needs two controls, not one: that it still FIRES on the real defect, and that the
+# new escape hatch cannot be opened by accident.
+#
+# ⚠ P36 IS THE ONE THAT MATTERS. A gate that stops firing is worse than no gate, and the v5.47
+# omission E-1b exists to catch must still be caught with the new code in place.
+e1b_ctl () {   # $1 = label, $2 = "FIRE" or "QUIET", $3 = README-FIRST line to append (or "")
+  local label="$1" want="$2" rfline="$3"
+  rm -rf /tmp/pke1b && cp -r "$APP" /tmp/pke1b
+  # Build the v5.47 shape from whatever this package holds: take a knowledge/ file that HAS an
+  # unambiguous repo counterpart, perturb it, and remove that counterpart from github/.
+  local target rp
+  target=$(node -e '
+    const {readFileSync,existsSync,readdirSync,statSync}=require("fs");const {join,relative,sep}=require("path");
+    const walk=(d,b=d)=>readdirSync(d).flatMap(e=>{const p=join(d,e);
+      return statSync(p).isDirectory()?walk(p,b):[relative(b,p).split(sep).join("/")];});
+    const CL=process.argv[1],KN=process.argv[2];
+    const all=walk(CL).filter(f=>!f.startsWith(".git/"));const by=new Map();
+    for(const r of all){const b=r.split("/").pop();(by.get(b)||by.set(b,[]).get(b)).push(r);}
+    for(const k of readdirSync(KN)){const c=by.get(k)||[];if(c.length===1){console.log(k+"|"+c[0]);break;}}
+  ' "$CLONE" /tmp/pke1b/knowledge)
+  if [ -z "$target" ]; then
+    MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** %s (no resolvable knowledge/ file - control is INVALID)\n" "$label"
+    rm -rf /tmp/pke1b; return
+  fi
+  local kf="${target%%|*}"; rp="${target##*|}"
+  printf '\nPERTURBED BY CONTROL\n' >> "/tmp/pke1b/knowledge/$kf"
+  rm -f "/tmp/pke1b/github/$rp"
+  [ -n "$rfline" ] && printf '\n%s %s\n' "$rfline" "$rp" >> /tmp/pke1b/README-FIRST.md
+  local fired
+  fired=$(node "$PKG_CHECK" /tmp/pke1b "$CLONE" 2>&1 | grep "✗" | grep -oE 'E-1b' | head -1)
+  if [ "$want" = "FIRE" ] && [ -n "$fired" ]; then
+    PASS=$((PASS+1)); printf "  CAUGHT by %-6s %s\n" "E-1b" "$label"
+  elif [ "$want" = "QUIET" ] && [ -z "$fired" ]; then
+    PASS=$((PASS+1)); printf "  CORRECTLY SILENT   %s\n" "$label"
+  else
+    MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** %s (wanted %s, E-1b fired: %s)\n" "$label" "$want" "${fired:-no}"
+  fi
+  rm -rf /tmp/pke1b
+}
+
+e1b_ctl "P36 THE v5.47 SHAPE - changed knowledge/ file, counterpart absent from github/, NO declaration" "FIRE" ""
+e1b_ctl "P37 the same package, with the deletion DECLARED - E-1b must go quiet" "QUIET" "DELETE FROM REPO:"
+# ⚠ P38 is the P5 lesson applied to the new hatch. README-FIRST names every shipped github/ path
+# in prose already, so if the declaration were a loose `includes` the gate would switch itself off
+# for every file it ships. The path must be on a DELETE FROM REPO line and nowhere else will do.
+e1b_ctl "P38 the path merely MENTIONED in README-FIRST, not declared deleted - must still FIRE" "FIRE" "upload this file to"
+
 # ── SECTION K CONTROLS (added 2026-09-03) ────────────────────────────────────────────────
 # K reads the MANIFEST against the clone and the pool, so these need a POOL argument the `run`
 # helper above does not pass. They get their own runner and their own scratch pool.
@@ -349,6 +398,63 @@ pri=s[b:].replace('| Version | **v5.60** |','| Version | **v5.55** |',1)
 assert pri!=s[b:]
 open(p,'w').write(s[:b]+pri)
 "
+
+# P39/P40 · K-8 reads the file AS THE PACKAGE WILL LEAVE IT (added 2026-09-07)
+#
+# ⚠ P39 IS A REGRESSION CONTROL FOR A DEFECT THAT SHIPPED. The 2026-09-07 manifest-repair package
+# changed package_check.mjs and did not roll its own hash row. K-8 was GREEN pre-ship and RED the
+# moment the package landed, because it compared the new manifest row against the OLD pool copy.
+# With the fix, the row is compared to the package's knowledge/ copy when the package ships one,
+# so the stale row is caught BEFORE the zip goes out. P39 reproduces that exact defect.
+#
+# P40 is the pair: K-8 must still catch a stale row for a file the package does NOT ship, which is
+# the only case the old code could see. Losing that is the way this fix could go wrong.
+k8_ctl () {   # $1 = label, $2 = FIRE|QUIET, $3 = ship-into-knowledge? yes|no, $4 = perturb? yes|no
+  local label="$1" want="$2" ship="$3" perturb="$4"
+  [ -z "$POOLARG" ] && return
+  rm -rf /tmp/pkk8 && cp -r "$APP" /tmp/pkk8
+  # pick any pool file that carries a hashed manifest row
+  local pick
+  pick=$(node -e '
+    const {readFileSync,existsSync}=require("fs");
+    const M=readFileSync(process.argv[1]+"/PROJECT_KNOWLEDGE_INDEX.md","utf8");
+    for(const m of M.matchAll(/\|\s*`?([A-Za-z0-9_.\-]+\.(?:mjs|cjs|sh))`?\s*\|[^|]*\|?\s*`?([0-9a-f]{32})`?/g))
+      if(existsSync(process.argv[1]+"/"+m[1])){console.log(m[1]);break;}
+  ' "$POOLARG")
+  if [ -z "$pick" ]; then
+    MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** %s (no hashed pool row found - control is INVALID)\n" "$label"; return
+  fi
+  mkdir -p /tmp/pkk8/knowledge
+  if [ "$ship" = "yes" ]; then
+    cp "$POOLARG/$pick" "/tmp/pkk8/knowledge/$pick"
+    [ "$perturb" = "yes" ] && printf '\n// PERTURBED BY CONTROL\n' >> "/tmp/pkk8/knowledge/$pick"
+  fi
+  rm -rf /tmp/pkpool8 && cp -r "$POOLARG" /tmp/pkpool8
+  if [ "$ship" = "no" ] && [ "$perturb" = "yes" ]; then
+    printf '\n// PERTURBED BY CONTROL\n' >> "/tmp/pkpool8/$pick"   # pool drifts from its row
+  fi
+  # ⚠ MATCH ON THE PICKED FILE, NOT JUST "K-8". The first draft grepped for the id alone and
+  # reported P41 NOT CAUGHT — because the package under test had a GENUINELY stale row for a
+  # different file, so K-8 was firing for a real reason the control had nothing to do with. A
+  # control that cannot tell its own mutation from the ambient state is measuring the ambient
+  # state. (The finding it accidentally surfaced was real and is fixed in this package.)
+  local fired
+  fired=$(node "$PKG_CHECK" /tmp/pkk8 "$CLONE" "" /tmp/pkpool8 2>&1 \
+          | grep "✗" | grep "K-8" | grep -F "$pick" | head -1)
+  [ -n "$fired" ] && fired="K-8"
+  if [ "$want" = "FIRE" ] && [ -n "$fired" ]; then
+    PASS=$((PASS+1)); printf "  CAUGHT by %-6s %s (%s)\n" "K-8" "$label" "$pick"
+  elif [ "$want" = "QUIET" ] && [ -z "$fired" ]; then
+    PASS=$((PASS+1)); printf "  CORRECTLY SILENT   %s (%s)\n" "$label" "$pick"
+  else
+    MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** %s (wanted %s, K-8 fired: %s)\n" "$label" "$want" "${fired:-no}"
+  fi
+  rm -rf /tmp/pkk8 /tmp/pkpool8
+}
+
+k8_ctl "P39 THE 2026-09-07 DEFECT - package ships a changed file, its manifest row NOT rolled" "FIRE" "yes" "yes"
+k8_ctl "P40 the old case is not lost - pool drifts from its row, package ships nothing" "FIRE" "no" "yes"
+k8_ctl "P41 package ships the file and the row DOES match it - K-8 must stay quiet" "QUIET" "yes" "no"
 
 # P35: the manifest is GONE from BOTH clone and pool. K must SKIP LOUDLY, never pass blind.
 # This is the E-14 shape: a check that cannot reach its input and reports green is worse than none.
