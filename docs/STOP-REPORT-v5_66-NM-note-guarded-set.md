@@ -1,5 +1,27 @@
 # STOP REPORT — New Mexico (v5.66), halted at the note rewrite
 
+> ## ☑ D-NM-1 ANSWERED 2026-09-07 — (c). THIS REPORT IS NO LONGER THE ENTRY POINT.
+>
+> **Read `STOP-REPORT-v5_66-nm-session2.md` instead.** That is the live handover for New Mexico;
+> this document is the record of how the release was stopped the first time and why.
+>
+> §4's decision is **RESOLVED as (c)**: ship New Mexico on a note that RETAINS the phrase
+> *"income-limited"* so the guarded set survives, and scope the selector fix separately. **The note
+> half is built** — NM's row now carries the phrase plus a comment at the site saying it is
+> load-bearing, and `t35` **D-7a** pins it: NM must leave the income-limited set by CONVERTING, not
+> by rewording. A negative control fires on the reword.
+>
+> ⚠ **THE SECOND HALF OF (c) IS STILL OWED.** (c) was *"ship the safe note AND scope the selector
+> fix in the same session, not as an intention."* **That scope is not written.** A test that selects
+> a state set by executing a regex against user-facing copy will break again the next time the copy
+> improves, and this is already the second occurrence. **Until it is written, (c) has quietly become
+> (a)** — which §4 explicitly says is not an acceptable final answer.
+>
+> ⚠ **Nothing else in this document is live.** §3's finding stands as the record of the defect;
+> §4's options (a) and (b) are spent. Retired as an entry point 2026-09-07, one day after it was
+> written — which is the point of retiring a document AT the moment its decision lands rather than a
+> release later.
+
 > ## ⚠ FILED 2026-09-07 — this report's own destination line was WRONG, and is corrected here
 >
 > **It read *"Session-only. Nothing shipped."*** It was then filed in `docs/` and the pool anyway,
