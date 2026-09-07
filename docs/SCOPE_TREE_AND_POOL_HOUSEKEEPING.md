@@ -2,10 +2,49 @@
 
 | | |
 |---|---|
-| Status | **OPEN — decisions resolved 2026-09-04, NOT YET BUILT.** H-1, H-2 and H-3 are answered; the work itself (the duplicate delete, the pool move, the scope sweep) is a later package. |
+| Status | ☑ **RETIRED 2026-09-07 — FULFILLED. H-1 … H-6 all resolved and built; §5's four items all done.** Do not build from this document; it is the record of what was decided and why. *(Superseded status line: "OPEN — decisions resolved 2026-09-04, NOT YET BUILT."* H-1, H-2 and H-3 are answered; the work itself is a later package.) See the retirement note below for what closed it and what it deliberately leaves behind |
 | Premise measured against | shipped **v5.63**, source `b2deba49e68bee6c29300f2f8cf0a7e3`, repo HEAD **`37cea89`**, pool as refreshed at the v5.63 ship |
 | Kind | **Housekeeping.** No engine code. No modelling change. `METHODOLOGY` is not touched. |
 | Requested by | the maintainer, 2026-09-04 — *"the pool and the repo have a lot of files that may not be necessary"* |
+
+> ### ☑ RETIREMENT NOTE — added 2026-09-07, at the moment the last item closed
+>
+> **Retired AT completion rather than a release later, per OPERATIONS §I.** This scope's own §8 is
+> the reason the timing matters: a cleanup document that reads as live work is exactly what invites
+> a future session to redo it, and every file such a session looks at looks redundant by
+> construction.
+>
+> **What closed it, in order:**
+>
+> | | Closed | Where |
+> |---|---|---|
+> | H-1 · keep all 57 `dom_entry_*.jsx` | 2026-09-04 | ops package (annotation + git-tag correction) |
+> | H-2 · completed history goes repo-only | 2026-09-05 + 2026-09-07 | pool deletions, then the 24 manifest rows — **two sessions, and K-8 was red in between** |
+> | H-3 · the duplicated qa-baseline README | 2026-09-07 | third package; the fix shipped first, the deletion second |
+> | H-4 · a deliberate pool carve-out | 2026-09-07 | route (a) |
+> | H-5 · six history documents given repo-only rows | 2026-09-07 | route (a) |
+> | H-6 · section K's seven negative controls | 2026-09-07 | fourth package — they had all been measuring nothing |
+> | §5 item 4 · the third scope-status sweep | 2026-09-07 | fifth package — 44 scopes read; **the defect class it hunted did not appear** |
+>
+> ⚠ **THREE THINGS THIS SCOPE DOES NOT CARRY AWAY WITH IT.** They are named here because retiring a
+> document is where open threads get lost, and §G says an open item is the one thing retirement
+> destroys that nothing else holds:
+>
+> 1. **`K-10` is PROPOSED AND NOT BUILT** — the manifest → pool direction. Its detail is in §4a and
+>    it stays there. ⚠ The naive form (*every row names a pool file*) is **wrong** and would fire on
+>    dozens of legitimate repo-only rows; the correct form is *every row NOT marked repo-only names
+>    a pool file*, which makes the marker load-bearing and needs its own §B2 control.
+> 2. **`E-1b` is blind to three pool files by rename** — `tools_fixture.jsx`, `vite_config.js` and
+>    now `qa-baseline-README.md`. That is E-1b's existing `cands.length !== 1` rule, not a new
+>    defect. Recorded in §9. Not built.
+> 3. **`P1–P28` were never re-validated.** They need an un-uploaded **app-release** package; the
+>    2026-09-07 sessions had only ops packages. ⚠ **Whether the six NOT CAUGHT reports are an input
+>    artefact or a real defect is UNKNOWN and must not be assumed** — that assumption is what let the
+>    whole K block rot for four days while reporting `CAUGHT`.
+>
+> **This scope leaves `package_check`'s I-2 OPEN allowlist in the same package that retires it** —
+> its entry named H-3 and the sweep as its expiry condition, and both are done. Three places, one
+> package, which is the lesson H-2 paid for.
 
 > **Every count in §1 was printed by a command on 2026-09-04, at `37cea89`.** Re-run them before
 > building; §A0 applies to this file exactly as to any other. ⚠ **Two counts in the 2026-09-04 draft
