@@ -6,7 +6,11 @@
 | Written | 2026-08-25 |
 | Origin | coverage finding in the `MissingFeatures.md` v5.48 re-pin |
 | Shape | **Test infrastructure only.** No source change. No figure moves. |
-| Status | ☑ **RETIRED: FULFILLED AT v5.54 (2026-08-29).** Verified against **v5.57** `0daebb4af466b9095db79117daefcd32`, tree `57575c6`, on 2026-09-01. `CHANGELOG.md` L691 records *Builds `docs/SCOPE_STATE_FIXTURES.md`, decisions D1–D4*. **This status line read "do not build yet" for three releases after the build.** |
+| Status | ☑ **RETIRED: FULFILLED AT v5.54 (2026-08-29).** Verified against **v5.57** `0daebb4af466b9095db79117daefcd32`, tree `57575c6`, on 2026-09-01. `CHANGELOG.md` records *Builds `docs/SCOPE_STATE_FIXTURES.md`, decisions D1–D4* — in the entry
+titled *"Unreleased — `qa/` only: the state census splits into three rows, and two state fixtures,
+2026-08-28."* ⚠ **That citation read "L691" until 2026-09-07 and was dead by then: the line is now
+2087.** `CHANGELOG.md` grows at the TOP, so every line number into it rots by the length of the next
+entry. Cite entries by title, never by line — corrected by the third scope-status sweep. **This status line read "do not build yet" for three releases after the build.** |
 | What was verified | §3A — all three census rows live in `boundaries.mjs` (`state_tax` narrowed L100, `state_code` L103, `state_excl_limited` L122). §3B — `stateProgressive` (New York, per **D1**) and `stateExclCliff` built in `households.mjs`. `t29` §F-6/F-7/F-8 pin the new rows as §3A required. **D2** followed: no `stateEstate` fixture. **D3** followed: `t10` §2E carries the D-3c dollar-exact block |
 | ⚠ CARRIED FORWARD | **The `stateEstate` fixture is deliberately deferred to the D-7 release** by D2's resolution — and `stateEstate` appears **nowhere in `MissingFeatures.md`**, so THIS DOCUMENT is its only record. That is why this scope is RETIRED and not deleted (§G: prefer retiring to deleting). Re-home it before any future deletion |
 | ⚠ §4 still governs | *"Any fix to D-3c… builds the instrument, not the repair."* The instrument now exists, so that ordering constraint is **discharged** — a D-3c fix may proceed in its own release |

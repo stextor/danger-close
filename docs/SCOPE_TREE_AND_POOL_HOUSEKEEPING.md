@@ -307,7 +307,12 @@ than bolted on at the end of a repair package.
 3. Execute H-2: rewrite the 24 manifest rows as repo-only, name all 24 in the package's
    `README-FIRST.md` delete-first list, and run `package_check` with the pool argument **before and
    after** the maintainer's deletion pass.
-4. **A third scope-status sweep.** 43 `SCOPE_*` files. The 2026-08-26 sweep found **seven of nine**
+4. **A third scope-status sweep. EXECUTED 2026-09-07** — see *Still not built* below for the result,
+   and the fifth ops package's CHANGELOG entry for the findings. ⚠ **The count below says 43; it is
+   44**, measured 2026-09-07 (`ls docs/SCOPE_*.md | wc -l`). Left visible rather than silently
+   corrected, because a hardcoded file count in a prose document is precisely the thing that goes
+   stale between sessions — the argument Item C of `SCOPE_HOUSEKEEPING_THREE.md` is about.
+   *(As written:)* 43 `SCOPE_*` files. The 2026-08-26 sweep found **seven of nine**
    live-looking status lines describing already-shipped work, two of them saying *do not proceed*;
    the 2026-08-28 sweep found **twelve** more, the worst reading **BUILD GATE OPEN** about work
    shipped twenty-nine releases earlier. §I is explicit that the sound test is the expensive one —
@@ -427,9 +432,28 @@ to a counterpart. There is now none, so **E-1b skips it** — it joins `tools_fi
 `cands.length !== 1` rule (*"guessing which one was meant is how a check starts lying"*), not a new
 defect, and the fix if it ever matters is a rename map rather than a looser match. **Not built.**
 
-### Still not built
+### Still not built — NOTHING. Both remaining items are built as of 2026-09-07.
 
-The **third scope-status sweep** (§5 item 4) and **H-6** (§4a — section K's negative controls).
+> ⚠ **This heading was WRONG for part of one day, and the error is the point.** It read *"The third
+> scope-status sweep (§5 item 4) and **H-6** (§4a — section K's negative controls)"* while §4a of
+> **this same document**, forty lines above, already carried *"H-6 · RESOLVED AND BUILT 2026-09-07"*
+> with a full build record beneath it. Both statements were written the same day, hours apart, and
+> **neither noticed the other** — the exact shape the project instructions name: two copies of one
+> answer, in one file, drifting silently. Found by the third scope-status sweep, 2026-09-07.
+
+- **H-6** — BUILT 2026-09-07, fourth ops package. See §4a for the build record and for the open half
+  (**P1–P28 were not re-validated** and need an un-uploaded app-release package).
+- **The third scope-status sweep** (§5 item 4) — **EXECUTED 2026-09-07, fifth ops package.** All 44
+  `SCOPE_*.md` files read against what their release actually shipped. **The defect class the two
+  prior sweeps existed to catch did not appear** — no scope claims work that did not ship. Three
+  other things did appear, all recorded in that package's CHANGELOG entry and annotated in place:
+  `SCOPE_BOUNDARY_CENSUS.md`'s ops package has **no CHANGELOG entry at all**;
+  `SCOPE_D10_MODELLING_v5_53.md`'s status line overstates its build by half; and this document
+  contradicted itself, above.
+
+**What this leaves open in this scope: nothing.** H-1 through H-6 are resolved and built, and §5's
+four items are done. `SCOPE_HOUSEKEEPING_THREE.md` remains OPEN on its own decisions and is a
+separate document; **K-10 remains proposed and not built** and is recorded in §4a, not here.
 
 ---
 

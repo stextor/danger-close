@@ -1,5 +1,28 @@
 # SCOPE — the Roth tab's omitted dividend and capital-gain terms (D-10's modelling half)
 
+> ## ⚫ RETIRED — but read this first: THE TITLE AND STATUS LINE OVERSTATE BY HALF
+>
+> *(Added 2026-09-07 by the third scope-status sweep. The scope is retired; the summary is wrong.)*
+>
+> The title names two terms. **Only the dividend term shipped.** The status line says *"BUILT AND
+> SHIPPED AS v5.53"* without qualification, and a reader who stops there will conclude that capital
+> gains landed at v5.53. They did not, and they still have not at v5.65.
+>
+> **This is not a false marker — it is a true marker read at the wrong grain.** §6 below records
+> **D-2 resolved as (c): dividends only, gains stay out** — a deliberate, measured call ($342 across
+> the entire ladder on the example household, $0 on both constructed ones). The v5.53 CHANGELOG
+> entry carries a section headed *What this does NOT fix* that names `capGain_y` explicitly. Nothing
+> was hidden; the summary was just wider than the build.
+>
+> **Re-verified at source 2026-09-07 rather than recalled** (`qa/tools/census.cjs` against v5.65
+> `7604fac5dab891bb31905544d11072f8`): the ladder computes `const qdcg = div_y;` with no
+> capital-gain term, while Engine C's IRMAA MAGI carries `+ capGain_y`. §6's invariant — *the
+> ladder's term set == Engine C's, minus `{capGain_y}`* — still holds exactly as written.
+>
+> **Nothing is re-opened by this note.** D-2 stays resolved; §6's warning that a later release adding
+> `capGain_y` must tighten the invariant in the same release stays live. The correction is to the
+> summary only.
+
 | Field | Value |
 |---|---|
 | Status | ☑ **RETIRED: BUILT AND SHIPPED AS v5.53 (2026-08-28).** Source `12a007ed8e57a391acba67b799eb5a2f`, built `index.html` `c99fd1fe27998e1dff2aa192c7e48ea2`, suite **2,724 app checks / 0 failing**. Body kept as the record of what was decided; **read the status line, not the prose tense** — everything below is written as pending work and is not. *(Superseded status line: 🔨 BUILT, SUITE GREEN, NOT YET SHIPPED (2026-08-27).* Source and tests complete; artifact, documents and packaging remain. See §9 for what the build found and §10 for what is left |

@@ -4,8 +4,26 @@
 |---|---|
 | Premise verified against | **v5.58** · source `6690b2c78953a7a4a1cee413d3523b59` · tree `2c3ebc9` |
 | Written | 2026-09-02 |
-| Status | **AWAITING DECISIONS in §5 — do not build yet** |
+| Status | **AWAITING DECISIONS in §5 — do not build yet.** Unchanged 2026-09-07: D-1…D-4 are still Steve's, and **D-5 is new** |
 | Shape | **Item A** documentation · **Item B** a real build with new checks · **Item C** documentation, mechanically generated |
+| Premises re-checked | **2026-09-07** by the third scope-status sweep, against v5.65 `7604fac5dab891bb31905544d11072f8`, repo `2c20873`. **A was TRUE and is worse than stated · B was TRUE · C's numbers were WRONG.** See the banner below |
+
+> ## ⚠ PREMISE RE-CHECK, 2026-09-07 — nothing here is built; two items are confirmed and one was wrong
+>
+> The handover into that session recorded Items A and B as **unverified** and Item C as carrying a
+> stale figure. All three were checked. **No item was built and no decision was resolved** — that is
+> still gated on §5.
+>
+> | | Verdict |
+> |---|---|
+> | **Item A** — `MissingFeatures.md` D-10 advertises a fix as open | ✅ **TRUE, and worse than §1 states.** Still stale on the live tree twelve releases after v5.53 |
+> | **Item B** — `t21` does not cover the tools added at v5.58 | ✅ **TRUE.** The three tools appear in `t21_tools.mjs` **zero times** |
+> | **Item C** — "42 pool files carry no md5 row" | ❌ **WRONG. It is 37**, and §3's *"107 files, 72 rows"* is wrong too |
+>
+> ⚠ **A live scope reasoning from a wrong number is the failure §2 of
+> `SCOPE_TREE_AND_POOL_HOUSEKEEPING.md` demonstrates on itself** — the number that would have
+> justified a deletion was wrong by a factor of thirteen. Item C's figure has now gone stale **twice
+> in five days**. That is what **D-5** is about.
 
 **Why one scope for three items.** They were raised together and they share a destination, but they
 are **not one job** — B changes the check count and A and C do not, and B alone needs negative
@@ -48,6 +66,26 @@ same edit, or the row sends a reader to a superseded document.
 **Sites: 1** (`MissingFeatures.md` L810). No suite asserts D-10's text — **to be confirmed by AST
 before editing**, not assumed; use `qa/tools/suite_regex_probe.cjs`.
 
+> ### ✅ VERIFIED 2026-09-07 — still stale, and stale in three ways rather than one
+>
+> Re-read on the live tree at v5.65 (`2c20873`). **The row is at L815, not L810** — it moved when
+> D-11 was written; find it by the string `| **D-10** |`, not by line. Everything §1 above says
+> about it holds, and there is one more error than §1 records:
+>
+> 1. *"MODELLING HALF STILL OPEN"* — half of it shipped at **v5.53**, 2026-08-28.
+> 2. *"dividends and realized capital gains remain absent"* — dividends are present as `_divLadder`.
+> 3. It points at `SCOPE_FIX_roth_tab_div_capgain.md` as *"NOT BUILDABLE, four decisions open."*
+>    That document is **SUPERSEDED and was never built**; the live successor is
+>    `SCOPE_D10_MODELLING_v5_53.md`, which shipped.
+> 4. ⚠ **Not recorded in §1:** it also describes the Roth tab as *"**five** (L8997)"* terms. It is
+>    **six** since v5.53, and that line number is dead too.
+>
+> **So the corrected row must fix four things, not three.** ⚠ And it must say — as §1 already
+> insists — that `capGain_y`'s absence is a **resolved decision**, not an oversight. A register that
+> re-opens a settled call is the failure D-10's own warning is about.
+>
+> **Not corrected here.** Correcting it *is* Item A, and Item A is gated on **D-1**.
+
 ## 2 · Item B — `t21` does not cover the three tools added at v5.58
 
 `qa/tools/vercensus_list.cjs`, `f6_probe.cjs`, `suite_regex_probe.cjs` shipped at v5.58 as uncounted
@@ -81,9 +119,50 @@ which is the §B2 failure this suite was written to prevent.
 `TESTING.md` and the manifest. **No version bump** — the app source does not change, so this is an
 `ops` package and none of §5's 78 judgement points apply.
 
-## 3 · Item C — 42 pool files carry no md5 row
+> ### ✅ VERIFIED 2026-09-07 — the gap is real and unchanged
+>
+> Read on the live tree at v5.65. **`qa/t21_tools.mjs` references `funcmap`, `census.cjs`, `diverge`
+> and `residual` and nothing else.** `vercensus_list.cjs`, `f6_probe.cjs` and `suite_regex_probe.cjs`
+> occur in it **zero times**. All three exist in `qa/tools/`. §B1's warrant does not reach them, as
+> §2 says.
+>
+> ⚠ **ONE THING THIS SESSION COULD NOT SETTLE, recorded rather than assumed.** §2 says *"the three
+> tools added at v5.58."* `qa/tools/` now holds **39 entries**, and a `--depth 1` clone carries no
+> history to date them against. **Whether three is still the right number, or is the number as of
+> v5.58, is UNKNOWN.** Resolve it before building — with a full-history clone, not by inspection —
+> because a scope that ships coverage for three tools when five need it produces exactly the partial
+> green §B2 exists to prevent. This does not change **D-2**; it changes the size of the answer to it.
 
-Measured 2026-09-02 against the live pool: 107 files, **72 md5 rows**, **42 files with no row**
+## 3 · Item C — the pool files that carry no md5 row
+
+> ### ❌ THE FIGURE BELOW IS STALE. Corrected 2026-09-07 — and this is the second time.
+>
+> **Measured against the live pool on 2026-09-07 with K-8's own regex** (not a hand count, not a
+> grep): **110 pool files · 73 hashed rows · 37 files with no row · 0 stale · 0 ghost · 0 unlisted.**
+>
+> The number moved because the four ops packages of 2026-09-07 added rows. It had already moved once
+> before that: §3's own header and first line disagree with each other's vintage. **The figure in
+> this item has now been wrong twice in five days**, which is the whole of **D-5** below.
+>
+> **Derive it, do not read it.** The command is in §3a; it is the same expression `package_check`'s
+> K-8 uses, so it cannot drift from the gate:
+>
+> ```bash
+> node --input-type=module -e '
+> import {readFileSync,readdirSync,existsSync} from "fs"; import {join} from "path";
+> const POOL=process.argv[1];
+> const M=readFileSync(join(POOL,"PROJECT_KNOWLEDGE_INDEX.md"),"utf8");
+> const rows=[...M.matchAll(/\|\s*`?([A-Za-z0-9_.-]+\.(?:mjs|cjs|jsx|js|sh|md|html|json|txt))`?\s*\|[^|]*\|?\s*`?([0-9a-f]{32})`?/g)];
+> const hashed=new Set(rows.map(r=>r[1])); const pool=readdirSync(POOL);
+> console.log(pool.length,"files ·",hashed.size,"hashed rows ·",pool.filter(f=>!hashed.has(f)).length,"with no row");
+> ' /mnt/project
+> ```
+>
+> ⚠ **The composition of the 37, not just the count, is what D-3 needs.** The named files below are
+> still in the unrowed set — that part of §3 did not go stale, and it is the part the argument rests
+> on.
+
+*(As written 2026-09-02, and wrong:)* Measured 2026-09-02 against the live pool: 107 files, **72 md5 rows**, **42 files with no row**
 (`vite_config.js` excluded as the known mount artifact). Among them: **`CHANGELOG.md`, `TESTING.md`,
 `OPERATIONS.md`, `METHODOLOGY.md`, `PROJECT_KNOWLEDGE_INDEX.md`, `README.md`,
 `MissingFeatures.md`**, both current sources, both current dom entries, and 20-odd audits and status
@@ -104,8 +183,14 @@ That is decision **D-3**.
 
 ⚠ **A row is a maintenance obligation, not a free check.** Every release that edits a listed file
 must rewrite its row, and a row that goes stale is worse than no row: it returns a false green rather
-than no answer. That is exactly what happened to `t8`. **Adding 42 rows adds 42 chances to do that**,
-which is the argument for a narrower set.
+than no answer. That is exactly what happened to `t8`. **Adding 42 rows adds 42 chances to do that**
+*(read 37 — see the banner)*, which is the argument for a narrower set.
+
+⚠ **That argument got a fresh instance on 2026-09-07 and it cuts toward the narrow set.** The first
+of that day's four ops packages changed `package_check.mjs` and **did not roll that file's own hash
+row**; K-8 passed pre-ship and went red the moment the package landed. **The row most likely to need
+rolling is the row for a file the package itself changes**, and it was the one row K-8 structurally
+could not check until it was fixed the same day. Every row added is a row with that property.
 
 ## 4 · Explicitly out of scope
 
@@ -143,3 +228,27 @@ oversight and re-opens this.*
 **D-4 · Does the manifest carry a row for itself?** *Recommendation: **no.** It cannot be correct at
 the moment it is written. State that explicitly in the table's header rather than leaving a
 conspicuous absence.*
+
+**D-5 · Should Item C ship a NUMBER or a COMMAND? (raised 2026-09-07 by the third scope-status
+sweep.)** Item C as written states a count. That count has been wrong twice in five days — 42 when
+it was 37, and 107/72 when it was 110/73 — both times because an ops package added rows between the
+writing and the reading. The alternative is that the item ships **no count at all**: the manifest's
+table header names the derivation command (the one in §3's banner, which is K-8's own expression),
+and the count is produced on demand by whoever needs it.
+
+*Recommendation: **the command, and keep a dated measurement beside it, not instead of it.** The
+count is genuinely useful — it is what makes the gap legible at a glance, and D-3 cannot be reasoned
+about without knowing roughly how many files are in play. But a bare number in a document that
+nothing re-runs is a second answer, which is this project's recurring failure. Write it as
+`37 as of 2026-09-07 — derive with: <command>`, so the figure carries its own expiry and the reader
+can settle it in one command rather than trusting it. This costs one line and resolves nothing else;
+**it does not touch D-3**, which is still about which files get rows.*
+
+⚠ **This is a decision, not a correction, which is why it is here and not applied.** Changing what
+Item C ships changes the shape of the item, and §5 gates that on Steve.
+
+---
+
+*Destination: **project knowledge, AND `docs/` in the repo**, as `SCOPE_HOUSEKEEPING_THREE.md` —
+standard scope handling. It stays on `package_check`'s **I-2 OPEN allowlist**: its decisions are
+unresolved, which is the allowlist's own criterion, and its work is unbuilt.*

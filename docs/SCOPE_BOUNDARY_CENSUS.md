@@ -5,6 +5,32 @@ answered as recommended and the work shipped as the ops package `danger-close-bo
 (`qa/tools/boundaries.mjs`, `qa/tools/fixture/households.mjs`, `qa/t29_boundaries.mjs`, OPERATIONS
 §K1). **This document is history, not a work item** — nothing here is outstanding.
 
+> ## ⚠ ADDED 2026-09-07 by the third scope-status sweep — THIS PACKAGE HAS NO CHANGELOG ENTRY
+>
+> **The work is real; the release record is not.** All four artifacts named above exist in the tree
+> and were confirmed present this session. But `danger-close-boundary-census` occurs **exactly once
+> in the whole repository — in the sentence above.** There is no `CHANGELOG.md` entry for it, on
+> 2026-08-23 or any other date.
+>
+> Its only trace in the release history is a reconciliation footnote inside the **v5.47** entry:
+> *"`t29`'s 43 checks are counted per leg here and appeared in neither of that entry's two tables."*
+> A whole suite arriving, recorded as an accounting correction to somebody else's totals.
+>
+> **Why this is worth a banner rather than a shrug.** `SCOPE_TREE_AND_POOL_HOUSEKEEPING.md` §6 calls
+> the CHANGELOG *"the release history and the only durable record this project has, since it uses no
+> git tags."* Work outside that record is recoverable only from a commit nobody has a reason to look
+> for — the same shape as the deleted-scope failure §G's three-place rule exists for.
+>
+> ⚠ **No entry is being back-dated.** An entry written now from inference would be a second answer
+> about what shipped, assembled from the artifacts rather than from the session that shipped them,
+> and this project's recurring failure is exactly that. The gap is named here and in the
+> 2026-09-07 (fifth package) CHANGELOG entry; **filling it, if it is ever filled, is its own decision
+> and needs the commit that carried the work.**
+>
+> **The lesson generalises past this file:** an ops package is the kind of release most likely to
+> skip its own entry, because nothing about it fails when the entry is missing. §I's checklist asks
+> for a CHANGELOG entry; nothing checks that one was written.
+
 ⚠ **Where the build deviated from this scope, so the two do not disagree silently.** §4 below lists
 **thirteen** rows; the shipped census has **twelve**. The dropped row is *combined SS vs the §86
 convergence point*, and it was dropped on purpose: convergence depends on where the conversion
