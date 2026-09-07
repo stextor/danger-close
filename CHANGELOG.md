@@ -1,5 +1,167 @@
 # Changelog
 
+## ops 2026-09-07 (fifth package) — the third scope-status sweep: 44 scopes read, and the release that was never written down
+
+**No version bump. v5.65 remains the current build**, source `7604fac5dab891bb31905544d11072f8`,
+artifact `b4ea0bd1d6993aadd0b7fedcfe47e580`, repo HEAD `2c20873` at the start of this work. No app
+source, no `t*.mjs`, no fixture, no `qa/tools/` change, no `index.html`. Documents only.
+
+This closes **§5 item 4** of `SCOPE_TREE_AND_POOL_HOUSEKEEPING.md` — the third scope-status sweep,
+the item that file called its largest and said not to bundle. It was not bundled.
+
+### The headline is a negative result, and it is the cheapest possible outcome
+
+**All 44 `SCOPE_*.md` files were read against what their release actually shipped**, per §I's
+standard: the version number in a marker is not evidence, so every claim was resolved against the
+CHANGELOG entry for the release it names, and several against the source.
+
+**The defect class the two prior sweeps existed to catch did not appear.** The 2026-08-26 sweep
+found seven of nine live-looking status lines describing shipped work; 2026-08-28 found twelve more,
+the worst reading **BUILD GATE OPEN** about work shipped twenty-nine releases earlier. This sweep
+found **none of that shape**. Every scope claiming FULFILLED has work that shipped, and every one of
+the eight carrying a marker *and* live-sounding language turned out to be a retirement banner
+quoting its own superseded status line, or prose about a different document's history.
+
+A sweep that finds little is easy to under-report, so it is reported here as a result rather than as
+an absence. What it did find is three things, none of them the defect it went looking for.
+
+### 1 · An ops package shipped with no CHANGELOG entry at all
+
+`SCOPE_BOUNDARY_CENSUS.md` records its work as having shipped on 2026-08-23 as the ops package
+`danger-close-boundary-census`. **The work is real and present** — `qa/tools/boundaries.mjs`,
+`qa/tools/fixture/households.mjs`, `qa/t29_boundaries.mjs` and OPERATIONS §K1 all exist. **There is
+no CHANGELOG entry for it.** The package name occurs exactly once in the whole tree: in the scope's
+own claim about it.
+
+Its only trace in the release history is a reconciliation footnote inside v5.47, which reads
+*"`t29`'s 43 checks are counted per leg here and appeared in neither of that entry's two tables."*
+That sentence is the record of a suite arriving, written as an accounting correction.
+
+**This matters more than a missing entry usually would.** §6 of the housekeeping scope calls the
+CHANGELOG *"the release history and the only durable record this project has, since it uses no git
+tags."* A whole ops package outside that record is recoverable only from a commit nobody has a
+reason to look for — the same failure shape as the deleted scope §G's three-place rule was written
+for. **No entry is being back-dated here**, because a reconstructed entry is a second answer written
+from inference; the scope is annotated in place instead, and the gap is named.
+
+### 2 · A retirement marker that overstates by half
+
+`SCOPE_D10_MODELLING_v5_53.md` is titled *"the Roth tab's omitted dividend **and capital-gain**
+terms"* and its status line reads **"BUILT AND SHIPPED AS v5.53."** Only the dividend half shipped.
+
+This is **not** a false marker. The scope's own §6 records **D-2 resolved as (c), dividends only,
+gains stay out** — a deliberate call, on a measured $342 across the entire ladder. The v5.53 entry
+has a section headed *What this does NOT fix* that says so. Verified at source this session rather
+than recalled: the ladder computes `const qdcg = div_y;` with no capital-gain term, while Engine C's
+IRMAA MAGI carries `+ capGain_y`.
+
+**The defect is that a reader who stops at the status line concludes both terms landed**, and the
+title invites exactly that. Annotated in place; nothing is re-opened.
+
+### 3 · A document that contradicts itself about its own build state
+
+`SCOPE_TREE_AND_POOL_HOUSEKEEPING.md` §4a records **"H-6 · RESOLVED AND BUILT 2026-09-07"** with a
+full build record beneath it. Its §9 *Still not built* section, forty lines later, lists **H-6** as
+not built. Both were true at different hours of the same day and nothing reconciled them.
+
+This is the shape the project instructions name: two statements of one fact, in one document, that
+will not notice each other. §9 is corrected here — it now records both the sweep and H-6 as built,
+which leaves it empty of unbuilt items and says so.
+
+### `SCOPE_HOUSEKEEPING_THREE.md` — its three items are now verified, and its own counts were wrong
+
+The scope is legitimately OPEN (*"AWAITING DECISIONS in §5 — do not build yet"*) and none of its
+three items is built here. **The decisions D-1…D-4 remain Steve's and are untouched.** What changed
+is that all three premises were checked, because a live scope reasoning from a wrong number is the
+failure its own §2 demonstrates.
+
+- **Item C's figures were both stale.** It states *"42 pool files carry no md5 row"* and its §3
+  states *"107 files, 72 md5 rows."* Measured this session against the live pool with **K-8's own
+  regex**, not a hand count: **110 pool files, 73 hashed rows, 37 with no row.** The number moved
+  because the four earlier ops packages of 2026-09-07 added rows. Restated — and a **D-5** is raised
+  asking whether the item should name the derivation command instead of a number, since this count
+  has now gone stale twice in five days.
+- **Item A is VERIFIED and is worse than the scope states.** `MissingFeatures.md`'s D-10 row still
+  reads *"MODELLING HALF STILL OPEN"* and *"dividends and realized capital gains remain absent."*
+  Dividends landed at **v5.53**, twelve releases ago. The row also still describes the Roth tab as
+  **five terms** (it is six), and still points a reader at `SCOPE_FIX_roth_tab_div_capgain.md` as
+  *"NOT BUILDABLE, four decisions open"* — a document that is superseded and was never built. **Not
+  corrected here**: correcting it *is* Item A, and Item A is gated on D-1.
+- **Item B is VERIFIED.** `qa/t21_tools.mjs` references `funcmap`, `census.cjs`, `diverge` and
+  `residual` and nothing else; `vercensus_list.cjs`, `f6_probe.cjs` and `suite_regex_probe.cjs`
+  appear in it **zero times**. §B1's warrant — *an unexpected tool result is a finding on its own,
+  provided `t21` is green* — still does not reach them. ⚠ One thing this session could **not**
+  settle and did not assume: Item B says *"the three tools added at v5.58,"* and a `--depth 1` clone
+  carries no history to date `qa/tools/`'s 39 entries against. Whether three is still the right
+  number is recorded as an open question rather than repeated as a fact.
+
+### A structural nuisance worth naming once
+
+**Line-number citations into `CHANGELOG.md` are guaranteed to rot**, because that file grows at the
+top. `SCOPE_STATE_FIXTURES.md` cites *"`CHANGELOG.md` L691"* as the evidence for its own build; the
+cited text now sits at **L2087**. The claim is true and the pointer is dead. Corrected to quote the
+entry by title, which does not move. Two other scopes carry source line numbers from v5.49 that have
+since moved; those were re-resolved **by content** with `census.cjs` and left as history, since their
+own text marks them as verified-at-a-build.
+
+### ⚠ A trap this package hit while packaging itself, recorded because it will recur
+
+**Annotating a retired scope in place can un-retire it, as far as the gate is concerned.** `I-2`
+reads only the **first 12 lines** of each scope. The first draft of the banner added to
+`SCOPE_D10_MODELLING_v5_53.md` pushed its status table past line 12, and `package_check` reported the
+scope as **unclassified** — a scope retired eleven days ago, failing the retirement check because it
+had been annotated. Caught by running the tool, not by review.
+
+The 12-line window is deliberate and good — a 2026-09-07 test confirmed it is what stops I-2 passing
+`SCOPE_HOUSEKEEPING_THREE` on ambient `SUPERSEDED` text at line 43. **The rule that follows is: a
+banner prepended to a retired scope must carry the retirement word in its own heading.** All three
+banners added by this package do.
+
+### What was verified, and how
+
+Freshness check per §A run first and in both directions: **109 of 110 pool files match a repo file
+byte-for-byte.** The single non-match is `DangerClose-v5_64.jsx`, the prior-build leg, which the repo
+does not keep — expected, not drift. The pool's `index.html` is `src/index.html`, the Vite template
+and a build *input*; the built artifact at the repo root is the other one. Manifest re-measured
+against the live pool: **73 hashed rows, 0 stale, 0 ghost, 0 unlisted.**
+
+Source-level claims were re-resolved with `qa/tools/census.cjs` rather than grepped, per §B1:
+`HEIR_RATE` is `0.22` at module level with two consumers, confirming `SCOPE_D9_HEIR_RATE_DISCLOSURE`;
+`capGain_y` and `rmd_y` are summed into MAGI at the sites their scopes claim, confirming
+`SCOPE_FIX_realized_capital_gains_v5_32` and `SCOPE_FIX_roth_tab_rmd_magi` at lines that have moved
+since those markers were written.
+
+**No suite was run and none applies.** No source, no `t*.mjs`, no fixture and no tool is touched, so
+a green reading would be a green reading from an unrelated set — §7 of the housekeeping scope says to
+state that rather than quote a total. `package_check` was run on this package.
+
+### Disclosed limitations
+
+- **The sweep's unit of evidence is the CHANGELOG entry**, not the shipped bytes of each release.
+  For the three scopes whose claims were checked at source, that is stronger; for the rest it is what
+  §I asks for and no more. A release whose entry described work it did not contain would still pass
+  this sweep, and nothing in the project can currently see that.
+- **Item B's "three tools" figure is unconfirmed**, as above.
+- **Nothing in `MissingFeatures.md` was corrected**, though D-10 is known stale, because that edit is
+  a gated build item.
+- **No entry is reconstructed for the boundary-census package.** The gap is recorded, not filled.
+
+### Still open
+
+- **`SCOPE_HOUSEKEEPING_THREE.md`** — Items A, B and C, gated on **D-1…D-4**, now plus **D-5**.
+- **P1–P28 re-validation** at the next app release, before anything else. Six of them report NOT
+  CAUGHT against an ops package and **whether that is an input artefact or a real defect is still
+  unknown** — it must not be assumed.
+- **K-10** — the manifest → pool direction, proposed and not built. The naive form (*every row names
+  a pool file*) is wrong and would fire on dozens of legitimate repo-only rows.
+- **`SCOPE_INCOME_CONDITIONING.md`'s I-2 allowlist entry**, which expires when the fifth
+  income-conditioned state converts. Connecticut shipped at v5.65; **NM, RI, VA and NJ remain
+  unconditional and optimistic.** Nothing can detect this; only a person can retire it.
+
+**Provenance.** No source or artifact change: v5.65 remains `7604fac5dab891bb31905544d11072f8` /
+`b4ea0bd1d6993aadd0b7fedcfe47e580`.
+
+
 ## ops 2026-09-07 (fourth package) — H-6: the controls that guard the manifest were guarding nothing
 
 **No version bump. v5.65 remains the current build**, source `7604fac5dab891bb31905544d11072f8`,

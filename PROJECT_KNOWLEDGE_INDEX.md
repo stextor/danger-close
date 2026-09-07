@@ -70,6 +70,28 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 > transform. v5.63 lost eighteen files this way and v5.64 lost `t24`'s ternary. **A blanket pattern
 > is the wrong instrument for version registration; only a parser sweep afterwards is evidence.**
 
+> ⚠ **THE THIRD SCOPE-STATUS SWEEP RAN 2026-09-07 (fifth ops package). All 44 `SCOPE_*.md` files
+> were read against what their release actually shipped**, per OPERATIONS §I. **The defect class the
+> two prior sweeps existed to catch did not appear** — no scope claims work that did not ship. Three
+> other findings did, all annotated in place and recorded in that package's CHANGELOG entry:
+> `SCOPE_BOUNDARY_CENSUS.md`'s ops package has **no CHANGELOG entry at all** (the work exists; the
+> record does not, and none was back-dated); `SCOPE_D10_MODELLING_v5_53.md`'s status line reads
+> *"BUILT AND SHIPPED"* when only the dividend half of its title shipped, by resolved decision; and
+> `SCOPE_TREE_AND_POOL_HOUSEKEEPING.md` **contradicted itself about H-6** — §4a recorded it built
+> while §9 listed it unbuilt, hours apart, in one file.
+>
+> ⚠ **`SCOPE_HOUSEKEEPING_THREE.md`'s three premises were re-checked and it stays OPEN.** Items A
+> and B are **TRUE** (D-10's register row is stale twelve releases on, in four ways not three;
+> `t21` covers none of the three newer tools). **Item C's counts were WRONG** — it says 42, and the
+> live pool measures **110 files · 73 hashed rows · 37 with no row**. Nothing was built and D-1…D-4
+> are still Steve's; **D-5 is new** and asks whether that item should ship a command rather than a
+> number, since the figure has now gone stale twice in five days.
+>
+> ⚠ **A count in this manifest or in a scope is a claim with an expiry date.** Two of the three
+> figures Item C rests on were stale within five days, moved by ordinary ops packages. Where a
+> number can be derived, prefer naming the command — §A2's clone comparison is the model, and it is
+> the one check in this project that has never itself gone stale.
+
 > ⚠ **STANDING LESSON, from the v5.64 post-ship correction (kept because it earned its place).**
 > Two rows added by the v5.64 packaging carried **fabricated hashes** — `dom_entry_v564.jsx` and
 > `t34_income_conditioning.mjs`. The packaging session rolled existing rows with a script that
@@ -1043,6 +1065,31 @@ retired and superseded. They get no row because there is no file. Checked 2026-0
 committed tree, so the next sweep does not re-open them.
 
 ## Retirement list (delete-first; nothing replaces these)
+
+### At the ops upload of 2026-09-07 (fifth package, the third scope-status sweep) — DELETE THESE FIRST
+
+**No version bump.** v5.65 remains current. No app source, no `t*.mjs`, no fixture, no `qa/tools/`
+change, no `index.html`. Documents only.
+
+| Delete from the POOL | Because |
+|---|---|
+| `PROJECT_KNOWLEDGE_INDEX.md` | replaced — this file |
+| `CHANGELOG.md` | replaced — the ops entry for this package |
+| `SCOPE_TREE_AND_POOL_HOUSEKEEPING.md` | replaced — §5 item 4 executed; §9's H-6 self-contradiction corrected |
+| `SCOPE_HOUSEKEEPING_THREE.md` | replaced — three premises re-checked, Item C's counts corrected, **D-5** raised |
+
+**No deletion from the repo.** Nothing is removed anywhere by this package.
+
+> ⚠ **FOUR REPO-ONLY DOCUMENTS ALSO CHANGE and are NOT in the pool** — they ship to `docs/` only:
+> `SCOPE_BOUNDARY_CENSUS.md`, `SCOPE_D10_MODELLING_v5_53.md`, `SCOPE_STATE_FIXTURES.md` (annotations
+> from the sweep). They have no pool copy and no hash row, which is correct and is H-2's settled
+> shape.
+>
+> ⚠ **NO HASH ROW NEEDS ROLLING BY THIS PACKAGE, and that is not luck — it is Item C.** All four
+> pooled files it replaces are in the **37 that carry no md5 row**. K-8 therefore cannot see any of
+> them, in either direction. That is precisely the gap `SCOPE_HOUSEKEEPING_THREE.md` Item C is
+> about, and this package is an instance of it rather than a fix for it. **A package that changes
+> `CHANGELOG.md`, the manifest and two scopes touches nothing K-8 can check.**
 
 ### At the ops upload of 2026-09-07 (third package, H-3) — DELETE THESE FIRST
 
