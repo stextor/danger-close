@@ -1,5 +1,105 @@
 # Changelog
 
+## ops 2026-09-07 (sixth package) — D-7: the housekeeping scope retires, and takes its allowlist entry with it
+
+**No version bump. v5.65 remains the current build**, source `7604fac5dab891bb31905544d11072f8`,
+artifact `b4ea0bd1d6993aadd0b7fedcfe47e580`, repo HEAD `f0554c5` at the start of this work. No app
+source, no `t*.mjs`, no fixture, no `index.html`. One `qa/tools/` change, one document, the manifest.
+
+### What changed
+
+`SCOPE_TREE_AND_POOL_HOUSEKEEPING.md` is **RETIRED**. H-1 through H-6 are all resolved and built, and
+§5's four items are all done — the last of them, the third scope-status sweep, ran in the fifth
+package of the same day. Its status line read *"OPEN — decisions resolved, NOT YET BUILT"* until now.
+
+In the same edit, `package_check.mjs`'s **I-2 OPEN allowlist loses that scope's entry.** The entry
+named its own expiry when it was written on 2026-09-04 — *"Expires when BOTH of those are done"*,
+meaning H-3 and the sweep — and both are done. The allowlist now holds **three** entries:
+`SCOPE_STANDING_AUDIT.md`, `SCOPE_HOUSEKEEPING_THREE.md` and `SCOPE_INCOME_CONDITIONING.md`.
+
+### The two halves had to ship together, and that is demonstrated rather than asserted
+
+Either half alone is wrong, in opposite directions:
+
+- **Drop the entry, leave the scope open** → I-2 reports the scope unclassified. A correct
+  retirement becomes a red gate.
+- **Retire the scope, leave the entry** → I-2 passes, but the allowlist keeps a permanent excuse for
+  a scope that no longer needs one. **`I-3` cannot see this**: it fires only on an entry naming a
+  file that is *gone*, and the file is still there.
+
+Both were run as negative controls against this package rather than reasoned about. The second is
+the more interesting: it is **green**, and green is the wrong answer. That is the whole class of
+defect this allowlist keeps producing — an entry that stays correct while its reason rots, invisible
+to every check in the project.
+
+### The hash row was rolled, first, and deliberately
+
+`package_check.mjs` carries an md5 row in the manifest, and **this package changes that file.** The
+row is rolled to `775e248b28e78e3867a87030f241ad13`, computed into place.
+
+This is called out because the manifest-repair package of **this same day** changed this same file
+and did *not* roll its row: K-8 passed pre-ship and went red the moment the package landed, because
+pre-upload the check compares the new row against the old pool copy — the two things guaranteed not
+to correspond. **The row for a file the package itself changes is the row most likely to need
+rolling and the one the gate could least see.**
+
+⚠ **The other document in this package has no row at all.** `SCOPE_TREE_AND_POOL_HOUSEKEEPING.md` is
+among the **37 pool files carrying no md5 row**, so K-8 cannot see it in either direction. That is
+Item C of `SCOPE_HOUSEKEEPING_THREE.md`, still unbuilt, and this is another instance of it rather
+than a fix for it.
+
+### An error made and corrected in-session, recorded because the CHANGELOG is where errors go
+
+**The first edit to `package_check.mjs` left the file syntactically invalid.** Removing the allowlist
+entry with a replacement that carried its own closing bracket produced **two** `]);` and a
+`SyntaxError` on load. It was caught by `node --check`, not by reading the diff — the same lesson as
+P41 and the stale manifest row earlier today: **both of that day's errors were caught by running
+things and neither by review.** A second, quieter consequence of the same edit was fixed with it: the
+comment block above the removed entry described *that* entry and was orphaned by its removal, left
+pointing at nothing. It is folded into the removal note instead.
+
+### Three things the retired scope does NOT carry away with it
+
+Named in the retirement note itself, because §G is explicit that an open item is the one thing
+retirement destroys and nothing else holds:
+
+1. **`K-10` is proposed and NOT built** — the manifest → pool direction. ⚠ Its naive form (*every row
+   names a pool file*) is **wrong** and would fire on dozens of legitimate repo-only rows; the correct
+   form is *every row NOT marked repo-only names a pool file*, which makes the marker load-bearing
+   and needs its own §B2 control.
+2. **`E-1b` is blind to three pool files by rename** — `tools_fixture.jsx`, `vite_config.js` and
+   `qa-baseline-README.md`. Its existing `cands.length !== 1` rule, not a new defect. Not built.
+3. **`P1–P28` were never re-validated.** They need an un-uploaded **app-release** package; every
+   2026-09-07 session had only ops packages. ⚠ **Whether the six NOT CAUGHT reports are an input
+   artefact or a real defect is UNKNOWN and must not be assumed.**
+
+### Verification
+
+**No suite was run and none applies** — no source, no `t*.mjs`, no fixture. `package_check.mjs` is
+tooling and asserts nothing about the app; it is counted in no release total (§B1).
+
+- OPERATIONS §A freshness check run first against a fresh clone at `f0554c5`. Source and artifact
+  unchanged and matching the manifest.
+- `node --check` on the edited `package_check.mjs`.
+- **Three negative controls, run rather than reasoned about:** entry dropped + scope retired (the
+  shipped state) → I-2 green; entry dropped + scope NOT retired → I-2 fires; scope retired + entry
+  still present (the old tool) → I-2 green and I-3 silent, which is the failure this package exists
+  to prevent and which nothing can detect.
+- `package_check` run on the package with the committed tool.
+
+### Still open
+
+- **`SCOPE_HOUSEKEEPING_THREE.md`** — Items A, B and C on **D-1…D-5**, now all answered by the
+  maintainer and queued: A + C as one ops package, B with **K-10** afterwards.
+- **New Mexico**, the next income-conditioned state, is the next app release — and **P1–P28 get
+  re-run before it, not after.**
+- **`SCOPE_INCOME_CONDITIONING.md`'s I-2 entry** expires when the fifth state converts. NM, RI, VA
+  and NJ remain unconditional and optimistic. Only a person can retire it.
+
+**Provenance.** No source or artifact change: v5.65 remains `7604fac5dab891bb31905544d11072f8` /
+`b4ea0bd1d6993aadd0b7fedcfe47e580`.
+
+
 ## ops 2026-09-07 (fifth package) — the third scope-status sweep: 44 scopes read, and the release that was never written down
 
 **No version bump. v5.65 remains the current build**, source `7604fac5dab891bb31905544d11072f8`,

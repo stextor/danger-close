@@ -70,6 +70,18 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 > transform. v5.63 lost eighteen files this way and v5.64 lost `t24`'s ternary. **A blanket pattern
 > is the wrong instrument for version registration; only a parser sweep afterwards is evidence.**
 
+> ⚠ **`SCOPE_TREE_AND_POOL_HOUSEKEEPING.md` IS RETIRED as of 2026-09-07 (sixth package), and left
+> `package_check`'s I-2 OPEN allowlist in the same edit.** H-1 through H-6 are resolved and built and
+> §5's four items are done, the last being the third scope-status sweep. **The allowlist now holds
+> three entries**, not four: `SCOPE_STANDING_AUDIT.md` (not a build scope), `SCOPE_HOUSEKEEPING_THREE.md`
+> (awaiting D-1…D-5) and `SCOPE_INCOME_CONDITIONING.md` (CT shipped at v5.65; NM, RI, VA and NJ open).
+>
+> ⚠ **Three things that scope did NOT carry away with it, named here because retirement is where
+> open threads get lost:** **K-10** is proposed and not built (and its naive form is wrong);
+> **E-1b is blind to three pool files by rename**; and **P1–P28 were never re-validated** — they need
+> an un-uploaded app-release package, and **whether their six NOT CAUGHT reports are an input
+> artefact or a real defect is UNKNOWN and must not be assumed.**
+
 > ⚠ **THE THIRD SCOPE-STATUS SWEEP RAN 2026-09-07 (fifth ops package). All 44 `SCOPE_*.md` files
 > were read against what their release actually shipped**, per OPERATIONS §I. **The defect class the
 > two prior sweeps existed to catch did not appear** — no scope claims work that did not ship. Three
@@ -640,7 +652,7 @@ row that was never written cannot be found by reading the table.
 | `SCOPE_STATE_FIXTURES.md` | `becf9a95657e403de23358996e7778e3` | `docs/SCOPE_STATE_FIXTURES.md` — ☑ **RETIRED 2026-09-01: FULFILLED AT v5.54**, verified against v5.57. ⚠ Its `package_check` OPEN-allowlist entry was deleted in the same edit. ⚠ **RETIRED not deleted**: the deferred `stateEstate` fixture (D2) appears nowhere in `MissingFeatures.md`, so this document is its only record. **Its §4 ordering constraint on D-3c is now DISCHARGED.** *(Prior status:)* The prerequisite for D-3c and D-7: every suite fixture sets `stateCode: null` (the legacy fallback) except `t3`'s `GA`, so 50 of 51 jurisdictions are unexercised at household level, and `t10`'s six archetypes are structural branches that miss the income-limited-exclusion class entirely. ⚠ Also splits `boundaries.mjs` **L88–90**, whose `state_tax` row is keyed on the legacy scalar and reads ON while `STATE_RULES` is muted |
 | `STATUS_v5_42_shipped.md` | *(no hash — REPO-ONLY, not in the pool)* | ⚠ **REPO-ONLY since 2026-09-05 (H-2).** Fetch from the repo; it is not in project knowledge, so it has no pool hash to fall back on. `docs/STATUS_v5_42_shipped.md` — **NEW at v5.42.** The ship record: the §86 cliff, the five-slider test design and why the default proves nothing, the six negative controls and the one that is a documented no-op, the middle-tier `[KNOWN DEFECT]` found mid-build, and the four items left open |
 | `hand_86.mjs` | `981b425c4fc738abb49046a97cd0fea0` | `qa/tools/hand_86.mjs` — **PROMOTED TO SUITE ORACLE at v5.42** and added to the pool (it was repo-only through v5.41, which is why the v5.42 brief had to record its hash separately). `statute86` is transcribed from 26 U.S.C. §86 at law.cornell.edu, **not from any app expression**, and is imported by BOTH `t24` and `qa/tools/derive_v542.mjs` — one oracle on both sides, deliberately, because at v5.41 a second independent derivation drifted and the brief's table shipped wrong twice. ⚠ **The three app copies inside it are v5.40 transcriptions and are now HISTORY** — `rothTab` records the cliff v5.42 replaced. Asserts nothing; counted in NO check total |
-| `package_check.mjs` | `c6ea907826a1b51bd091506fa74e8d09` | `qa/tools/package_check.mjs` — ⚠ **hash rolled 2026-09-04** (was `232b96ce74…`): the I-2 OPEN allowlist gained `SCOPE_TREE_AND_POOL_HOUSEKEEPING.md`, and the `SCOPE_INCOME_CONDITIONING.md` entry's *comment* was rewritten — its reason changed from *awaiting D-2 and D-3* to *approved 2026-09-04, unbuilt*, and its expiry moved from "when the decisions are made" to "when the field ships." ⚠ **An allowlist entry whose REASON goes stale is invisible to I-3 exactly as a stale entry is** — I-3 fires only on an entry naming a file that is gone. Previously **rolled 2026-09-03** (was `999dd7a15f…`): the I-2 OPEN allowlist gained `SCOPE_ROTH_FICA_OTHERORD.md`, decided but not shipped. ⚠ **That entry expires when v5.63 ships and `I-3` CANNOT catch it going stale** — I-3 only fires on an entry naming a file that is gone, and this one will still exist. ⚠ **hash corrected 2026-09-02**: the row read `6133144820…` while pool AND repo held `ee1a1a8f63…` (the 2026-09-01 G-2/J rewrite landed and the row did not roll — the 2026-08-28 shape again). **NEW at v5.42 (added 2026-08-21).** Validates a release zip against OPERATIONS §L before it is sent: structure, MANIFEST truthfulness, changed-files-only against a clone, `knowledge/` flatness and the two-source rotation, cross-destination byte-identity, and the delete-first list. **25 checks (24 on an ops package), negative-controlled 16 ways, all firing.** Packages declare `KIND: app-release` or `KIND: ops` in MANIFEST.txt; release-only checks are gated on it and an **undeclared package fails closed**. Without a clone the tree-diff checks are SKIPPED and say so. Asserts about the DELIVERY, not the build — counted in NO release check total |
+| `package_check.mjs` | `775e248b28e78e3867a87030f241ad13` | `qa/tools/package_check.mjs` — ⚠ **hash rolled 2026-09-07 (sixth package)** (was `c6ea907826…`): the I-2 OPEN allowlist **lost** `SCOPE_TREE_AND_POOL_HOUSEKEEPING.md`, whose stated expiry — H-3 and the third scope-status sweep — was met on 2026-09-07, and which was retired in the same package. ⚠ **Rolled deliberately and first**: the 2026-09-07 manifest-repair package changed this same file and did NOT roll this row, so K-8 passed pre-ship and went red the moment the package landed. **The row for a file the package itself changes is the row most likely to need rolling.** Previously ⚠ **rolled 2026-09-04** (was `232b96ce74…`): the I-2 OPEN allowlist gained `SCOPE_TREE_AND_POOL_HOUSEKEEPING.md`, and the `SCOPE_INCOME_CONDITIONING.md` entry's *comment* was rewritten — its reason changed from *awaiting D-2 and D-3* to *approved 2026-09-04, unbuilt*, and its expiry moved from "when the decisions are made" to "when the field ships." ⚠ **An allowlist entry whose REASON goes stale is invisible to I-3 exactly as a stale entry is** — I-3 fires only on an entry naming a file that is gone. Previously **rolled 2026-09-03** (was `999dd7a15f…`): the I-2 OPEN allowlist gained `SCOPE_ROTH_FICA_OTHERORD.md`, decided but not shipped. ⚠ **That entry expires when v5.63 ships and `I-3` CANNOT catch it going stale** — I-3 only fires on an entry naming a file that is gone, and this one will still exist. ⚠ **hash corrected 2026-09-02**: the row read `6133144820…` while pool AND repo held `ee1a1a8f63…` (the 2026-09-01 G-2/J rewrite landed and the row did not roll — the 2026-08-28 shape again). **NEW at v5.42 (added 2026-08-21).** Validates a release zip against OPERATIONS §L before it is sent: structure, MANIFEST truthfulness, changed-files-only against a clone, `knowledge/` flatness and the two-source rotation, cross-destination byte-identity, and the delete-first list. **25 checks (24 on an ops package), negative-controlled 16 ways, all firing.** Packages declare `KIND: app-release` or `KIND: ops` in MANIFEST.txt; release-only checks are gated on it and an **undeclared package fails closed**. Without a clone the tree-diff checks are SKIPPED and say so. Asserts about the DELIVERY, not the build — counted in NO release check total |
 | `package_check_controls.sh` | `259074d9aa758cbf4ab663d05609339d` | `qa/tools/package_check_controls.sh` — ⚠ **SECTION K REWRITTEN 2026-09-07 (H-6): all seven K controls were measuring nothing.** They mutated a scratch copy of the POOL, but K reads the manifest from the PACKAGE's `github/` copy — so once §L required every package to ship a manifest, every K control edited a file K never opened. Four reported INVALID, **P32 passed SPURIOUSLY** (K-8 fired on an unrelated stale row) and P33 fired the wrong id. Now: the PACKAGE is copied and its manifest mutated in `github/` AND `knowledge/`; every value is DERIVED, not hardcoded (the old ones named `v5.61` and two v5.61-era hashes literally); P32/P33 carry a **needle** so a control cannot pass on someone else's failure; P35 now removes the manifest from the package too, which it never did. **Null-controlled: suppress the mutations and all six go quiet.** ⚠ **P1–P28 were NOT re-validated** — they need an un-uploaded APP-RELEASE package and none exists; recorded as the open half. the negative-control harness for `package_check.mjs` (§B2). **REWRITTEN 2026-08-23**: it hardcoded absolute paths from a dead session, so anywhere else it printed *** NOT CAUGHT *** for every control — reading as "the checks are broken" rather than "the inputs are missing" — and exited **0**. Now self-locating, argument-driven, deriving its targets from the package, and exiting non-zero when a control does not fire. **17 controls, all firing**, including P19, which asserts `G-1` stays QUIET on a clean workspace. Tooling — counted in no app total |
 | `controls_source.sh` | `1c86f79d37b1527b335dffebfa462163` | `qa/controls_source.sh` — the SOURCE-level negative-control harness (§B2): reverts a fix, rebuilds, and requires the named suites to FAIL. **Renamed and repaired 2026-08-23 from `controls_v542.sh`**, which is DELETED. The version is out of the filename (it described `SRC=`, not the controls, and made the file look stale whenever a tag rolled). All 19 anchors were intact at v5.47 — the defect was that `rebuild()` built only `app_<tag>.mjs` while `t24` reads `dom_<tag>.cjs`, so **four controls reported a FALSE `NOT CAUGHT`**. Now rebuilds both, and `verify_artifacts()` refuses a verdict unless every consumed artifact is newer than the source. **C0** is a control that must NOT fire. ⚠ Covers v5.36 and v5.42 only — **nothing covers v5.43–v5.47** |
 | `t2_engines.mjs` | `790864a132c17c01367976094518863b` | `qa/qa-baseline/t2_engines.mjs` |
@@ -1065,6 +1077,36 @@ retired and superseded. They get no row because there is no file. Checked 2026-0
 committed tree, so the next sweep does not re-open them.
 
 ## Retirement list (delete-first; nothing replaces these)
+
+### At the ops upload of 2026-09-07 (sixth package, D-7 — the housekeeping scope retires) — DELETE THESE FIRST
+
+**No version bump.** v5.65 remains current. No app source, no `t*.mjs`, no fixture, no `index.html`.
+
+| Delete from the POOL | Because |
+|---|---|
+| `PROJECT_KNOWLEDGE_INDEX.md` | replaced — this file |
+| `CHANGELOG.md` | replaced — the ops entry for this package |
+| `SCOPE_TREE_AND_POOL_HOUSEKEEPING.md` | replaced — **RETIRED**; H-1…H-6 and §5's four items are all built |
+| `package_check.mjs` | replaced — the I-2 OPEN allowlist loses that scope's expired entry |
+
+**No deletion from the repo.** Nothing is removed anywhere by this package.
+
+> ⚠ **THE HASH ROW FOR `package_check.mjs` WAS ROLLED, AND THAT IS THE WHOLE POINT OF SAYING SO.**
+> The manifest-repair package of 2026-09-07 changed this same file and left its row stale; K-8
+> passed pre-ship and went red the instant the package landed, because pre-upload it compares the
+> NEW row against the OLD pool copy. **The row for a file the package itself changes is the row most
+> likely to need rolling and the one the gate could least see.** It is rolled here to
+> `775e248b28e78e3867a87030f241ad13`, computed into place, never typed.
+>
+> ⚠ **`SCOPE_TREE_AND_POOL_HOUSEKEEPING.md` carries NO md5 row** — it is among the 37 files that
+> have none, so K-8 cannot see it in either direction. That is Item C of
+> `SCOPE_HOUSEKEEPING_THREE.md`, still unbuilt, and this package is another instance of it.
+>
+> ⚠ **THE SCOPE'S RETIREMENT AND THE ALLOWLIST REMOVAL SHIP TOGETHER, DELIBERATELY.** Either half
+> alone is wrong: dropping the entry while the scope still reads *"OPEN — NOT YET BUILT"* turns a
+> correct retirement into a red I-2, and retiring the scope while the entry stands leaves a
+> permanent excuse that `I-3` cannot see. Three places, one package — the lesson H-2 paid two days
+> of a red K-8 for.
 
 ### At the ops upload of 2026-09-07 (fifth package, the third scope-status sweep) — DELETE THESE FIRST
 
