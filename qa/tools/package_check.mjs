@@ -726,7 +726,25 @@ console.log("\nK. Manifest — PROJECT_KNOWLEDGE_INDEX.md vs the clone and the p
         // K-8: the §A2 fallback hash table. Its own header records 2026-08-28, when it "VOUCHED
         // for two stale pool files, and the freshness check passed on them." At v5.61, 21 of its
         // 72 hashed rows were wrong. A fallback nobody checks is a fallback that lies.
-        const rows = [...M.matchAll(/\|\s*`?([A-Za-z0-9_.-]+\.(?:mjs|cjs|jsx|js|sh|md|html|json|txt))`?\s*\|[^|]*\|?\s*`?([0-9a-f]{32})`?/g)];
+        // ⚠ TIGHTENED 2026-09-07 (D-C-1 (a)). The matcher was:
+        //     /\|\s*`?(<file>)`?\s*\|[^|]*\|?\s*`?([0-9a-f]{32})`?/g
+        // whose `[^|]*\|?\s*` let ANY prose sit between the filename and the hash — so a
+        // DESCRIPTION row that merely QUOTES an md5 was read as that file's hash row.
+        // THE INSTANCE: `MissingFeatures.md`'s index row carries the historical note
+        // "RE-PINNED TO v5.48 on 2026-08-25 (`6b30580a…`, tree `ba6d598`)". K-8 read that dated
+        // statement about a PAST build as a live hash. It had been accidentally CORRECT for two
+        // weeks because the file had not been edited since; the first edit to it turned K-8 red,
+        // pointing at a row that is not a row and a hash nobody should ever roll — rolling it
+        // would have falsified the record of what the file WAS at v5.48.
+        // ⚠ The file also therefore did NOT appear in the "carries no md5 row" set, so
+        // `SCOPE_HOUSEKEEPING_THREE.md` Item C listed it as unrowed while this check saw it as
+        // rowed. A human and the gate disagreed about the same file, and neither could see the
+        // other. That disagreement WAS the defect.
+        // The form now required is the row's own cell: `| <file> | <hash> |`, anchored at the
+        // start of a line, with the hash cell holding NOTHING BUT the hash. Measured against the
+        // live manifest before and after: 73 -> 72 rows, the single dropped entry being the false
+        // one, no legitimate row lost and no hash disagreement.
+        const rows = [...M.matchAll(/^\|\s*`?([A-Za-z0-9_.-]+\.(?:mjs|cjs|jsx|js|sh|md|html|json|txt))`?\s*\|\s*`?([0-9a-f]{32})`?\s*\|/gm)];
         const seen = new Set(), badHash = [], ghostRow = [];
         // ⚠ FIXED 2026-09-07 — AS THIS PACKAGE WILL LEAVE THE POOL, not as it finds it. THE
         // INSTANCE: the 2026-09-07 manifest-repair package changed `package_check.mjs` and did

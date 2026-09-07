@@ -482,6 +482,59 @@ else
   MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** P35 K did not skip loudly with no manifest - it may be passing blind\n"
 fi
 rm -rf /tmp/pkpool /tmp/pkclone2 /tmp/pkpkg
+
+# ── P42 / P43 · D-C-1 (a): K-8 must read a hash ROW, not a hash QUOTED IN PROSE ──────────────
+# ⚠ WHY THESE EXIST. K-8's matcher allowed any prose between the filename and the hash, so a
+# DESCRIPTION row that merely quoted an md5 was read as that file's hash row. The instance was
+# `MissingFeatures.md`, whose index row carries "RE-PINNED TO v5.48 on 2026-08-25 (`6b30580a…`)".
+# K-8 read that dated statement about a PAST build as a live hash — accidentally correct for two
+# weeks, and red the moment the file was first edited, pointing at a hash nobody should ever roll.
+#
+# ⚠ THE PAIR IS THE POINT, and it is the H-6 lesson. P42 alone would pass if K-8 were simply
+# deleted. P43 proves the check still WORKS after being narrowed. A control that only shows a check
+# going quiet has not distinguished "fixed" from "broken".
+# ⚠ Both carry a NEEDLE so neither can pass on an unrelated K-8 failure — the P41/P32 lesson.
+
+# P42 is bespoke rather than a runk call: runk asserts that a check FIRES, and P42's whole claim is
+# that none does. Written out so the assertion is visible instead of inverted through a helper.
+rm -rf /tmp/pkpool /tmp/pkpkg
+cp -r "$POOLARG" /tmp/pkpool && cp -r "$APP" /tmp/pkpkg
+if python3 - <<'P42PY' >/dev/null 2>&1
+import os
+MANPATHS=[q for q in ['/tmp/pkpkg/github/PROJECT_KNOWLEDGE_INDEX.md',
+                      '/tmp/pkpkg/knowledge/PROJECT_KNOWLEDGE_INDEX.md',
+                      '/tmp/pkpool/PROJECT_KNOWLEDGE_INDEX.md'] if os.path.exists(q)]
+assert MANPATHS, 'no manifest anywhere - control is INVALID'
+s=open(MANPATHS[0]).read()
+row='| `t1_units.mjs` | audit note: was pinned at `00000000000000000000000000000000` before v5.30 | history |\n'
+assert row not in s, 'needle already present - control is INVALID'
+for q in MANPATHS: open(q,'w').write(s.rstrip()+'\n'+row)
+P42PY
+then
+  out42=$(node "$PKG_CHECK" /tmp/pkpkg "$CLONE" "" /tmp/pkpool 2>&1)
+  # â  NEEDLE, and it is load-bearing. The first draft asserted "K-8 did not fire AT ALL" and
+  # reported a FINDING on a run where K-8 was firing for an unrelated stale row. That is the P41 and
+  # P32 defect exactly: a control that cannot tell its own mutation from the ambient state is
+  # measuring the ambient state. The claim is narrower and correct - K-8 must not name THIS file.
+  if echo "$out42" | grep "â" | grep "K-8" | grep -q "t1_units.mjs"; then
+    MISS=$((MISS+1)); printf "  *** FINDING *** %s\n" "P42 K-8 named t1_units.mjs from a hash QUOTED IN PROSE - the D-C-1 matcher fix has regressed"
+  else
+    PASS=$((PASS+1)); printf "  CAUGHT by %-6s %s\n" "K-8" "P42 a hash quoted in prose is correctly IGNORED (D-C-1)"
+  fi
+else
+  MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** P42 mutation did not apply - control is INVALID\n"
+fi
+rm -rf /tmp/pkpool /tmp/pkpkg
+
+runk "P43 A REAL HASH ROW STILL FIRES after the matcher was narrowed (D-C-1)" "K-8" "" "
+s=rd()
+import re
+m=re.search(r'^\|\s*\`?(t1_units\.mjs)\`?\s*\|\s*\`?([0-9a-f]{32})\`?\s*\|', s, re.M)
+assert m, 'no real hash row for t1_units.mjs - control is INVALID'
+wr(s[:m.start(2)]+'deadbeef'+m.group(2)[8:]+s[m.end(2):])
+" "t1_units.mjs"
+
+[ "$SKIP" -gt 0 ] && echo "  ⚠ A SKIPPED control is not a passing one."
 fi
 
 [ "$SKIP" -gt 0 ] && echo "  ⚠ A SKIPPED control is not a passing one."
