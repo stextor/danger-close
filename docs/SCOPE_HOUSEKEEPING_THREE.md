@@ -4,7 +4,7 @@
 |---|---|
 | Premise verified against | **v5.58** · source `6690b2c78953a7a4a1cee413d3523b59` · tree `2c3ebc9` |
 | Written | 2026-09-02 |
-| Status | **AWAITING DECISIONS in §5 — do not build yet.** Unchanged 2026-09-07: D-1…D-4 are still Steve's, and **D-5 is new** |
+| Status | ◑ **ITEMS A AND C BUILT AND SHIPPED 2026-09-07. ITEM B REMAINS OPEN.** All five decisions are answered: **D-1 split** (A + C together, B alone), **D-2 build it**, **D-3 six documents rowed, the rest named as deliberately unrowed**, **D-4 no self-row**, **D-5 the command with a dated measurement beside it**. ⚠ **This scope stays on `package_check`’s I-2 OPEN allowlist** — Item B is unbuilt, and D-2’s prerequisite (how many tools are actually uncovered) is still unanswered. *(Superseded: "AWAITING DECISIONS in §5 — do not build yet.")* |
 | Shape | **Item A** documentation · **Item B** a real build with new checks · **Item C** documentation, mechanically generated |
 | Premises re-checked | **2026-09-07** by the third scope-status sweep, against v5.65 `7604fac5dab891bb31905544d11072f8`, repo `2c20873`. **A was TRUE and is worse than stated · B was TRUE · C's numbers were WRONG.** See the banner below |
 
@@ -252,3 +252,61 @@ Item C ships changes the shape of the item, and §5 gates that on Steve.
 *Destination: **project knowledge, AND `docs/` in the repo**, as `SCOPE_HOUSEKEEPING_THREE.md` —
 standard scope handling. It stays on `package_check`'s **I-2 OPEN allowlist**: its decisions are
 unresolved, which is the allowlist's own criterion, and its work is unbuilt.*
+
+---
+
+## 6 · Build record — Items A and C, 2026-09-07
+
+**Shipped as one ops package, per D-1.** No version bump, no suite: neither item touches source,
+`t*.mjs` or a fixture.
+
+### ⚠ A PREREQUISITE NOBODY FORESAW, and it cost a package
+
+**Item A could not ship until `package_check` was fixed first.** Editing `MissingFeatures.md` turned
+**K-8 red** — its matcher allowed prose between a filename and an md5, so this file's own index row,
+which quotes the historical *"RE-PINNED TO v5.48 on 2026-08-25 (`6b30580a…`)"*, was read as its live
+hash row. Accidentally correct for two weeks; red on the first edit. Decided as **D-C-1 (a)** and
+shipped as its own package ahead of this one, with controls **P42** and **P43**.
+
+⚠ **The quieter half is the one to remember.** Because K-8 saw a row there, `MissingFeatures.md` did
+**not** appear in the no-row set — so **§3 of this scope listed it as unrowed while the gate saw it
+as rowed.** A human and a check disagreed about one file and neither could see the other. §3's
+premise was wrong for a reason §3 could not have detected.
+
+### Item A — what actually shipped
+
+**Five corrections, not the four §1 listed.** The fifth was found while editing: the row's ranking
+cell still read *"Unranked — awaiting the product call"* when that call was made and shipped at v5.52.
+It now reads **Low**, because the one remaining term is a resolved decision and nothing in the row is
+awaiting an answer.
+
+The corrected row states the position re-resolved **by AST against v5.65**, not by line number, and
+says exactly what is still open and no more: `capGain_y` absent **by resolved decision D-2 (c)**, and
+the narrower earned-income term. It points at `SCOPE_D10_MODELLING_v5_53.md` and marks
+`SCOPE_FIX_roth_tab_div_capgain.md` superseded.
+
+⚠ **Confirmed before editing, as §1 required: no suite asserts D-10's text.** `t31` is the only
+suite that mentions `MissingFeatures.md` and only in a comment; it reads `METHODOLOGY.md`, never this
+file.
+
+### Item C — six rows, and a deviation from D-3 stated rather than taken quietly
+
+Rowed: `OPERATIONS.md`, `TESTING.md`, `METHODOLOGY.md`, `CHANGELOG.md`, `MissingFeatures.md`,
+`README.md`. The unrowed sets are named **in the manifest** with reasons, per D-3's second half.
+
+⚠ **D-3's recommendation also named both app sources. They were EXCLUDED, on evidence found while
+building it.** The two build tables already carry `Source md5` for both, and `package_check` **K-4,
+K-5 and K-6** already assert those against the pool. A second row would be **a second copy of a fact
+the build tables own**, free to drift from it — this project's defining failure. **Covered, not
+skipped**, and written into the manifest as reasoning.
+
+**D-4 honoured:** the manifest carries no row for itself, and says why rather than leaving a
+conspicuous absence. **D-5 honoured:** the count ships as *"37 as of 2026-09-07"* beside K-8's own
+derivation command, so the figure carries its own expiry.
+
+### What Item B still needs before it can start
+
+⚠ **D-2's prerequisite is unanswered.** §2 says *"the three tools added at v5.58"*; `qa/tools/` holds
+**39 entries** and a `--depth 1` clone carries no history to date them. **Whether three is still the
+right number is UNKNOWN.** Settle it with a full-history clone first — coverage for three when five
+need it is the partial green §B2 exists to prevent.
