@@ -28,7 +28,8 @@ import "./env_dom.mjs";
 let _s = 42; Math.random = () => { _s = (_s * 1103515245 + 12345) & 0x7fffffff; return _s / 0x7fffffff; };
 
 const VER = process.argv[2] || "v565";
-const KNOWN_VERSIONS = ["v564", "v565"];
+const _vt = Number(String(VER).replace(/[^0-9]/g, "")) || 0;
+const KNOWN_VERSIONS = ["v564", "v565", "v566"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -281,8 +282,22 @@ const ctTax = (args) => ST({
     (R[c].excl65 || 0) > 0 &&
     R[c].exclTest === undefined &&
     /income[- ]limited|income limit/i.test(R[c].note || ""));
-  T(`D-7: the income-limited-but-unconditional set is exactly NM, NJ, RI, VA — four states still to convert (found: ${offenders.sort().join(",") || "none"})`,
-    offenders.sort().join(",") === "NJ,NM,RI,VA");
+  // ⚠ GATED AT v566, NOT REWRITTEN — §B2's gate-the-inversion rule. New Mexico converted at v5.66,
+  // so it leaves this set. The pre-v5.66 form is kept because it is the truth on the earlier legs.
+  // ⚠ THE SET SHRINKS BY ONE PER CONVERSION AND MUST REACH ZERO. When the last of NJ, RI and VA
+  // converts, D-8's non-empty guard below INVERTS and both must be gated together in that release.
+  if (_vt >= 566) {
+    T(`D-7 [v5.66]: the income-limited-but-unconditional set is exactly NJ, RI, VA — THREE states still to convert, NM having converted (found: ${offenders.sort().join(",") || "none"})`,
+      offenders.sort().join(",") === "NJ,RI,VA");
+    // ⚠ EXTINCTION INVARIANT: NM must be OUT of this set for the right reason — because it carries
+    // a table, not because its note stopped saying "income-limited". Rewording the note out of the
+    // guarded set would ALSO empty it here, silently, and that is the v5.54 New Jersey defect.
+    T("D-7a [v5.66]: NM left the set by CONVERTING, not by rewording — its note still matches the income-limited selector AND it now carries an `exclTest`",
+      /income[- ]limited|income limit/i.test(R.NM.note || "") && R.NM.exclTest !== undefined);
+  } else {
+    T(`D-7: the income-limited-but-unconditional set is exactly NM, NJ, RI, VA — four states still to convert (found: ${offenders.sort().join(",") || "none"})`,
+      offenders.sort().join(",") === "NJ,NM,RI,VA");
+  }
   // and the guard against the set going quiet for the wrong reason (OPERATIONS §B2's empty-set trap)
   T("D-8: that set is non-empty — an empty one would make D-7 pass vacuously once a note is reworded",
     offenders.length > 0);

@@ -26,7 +26,7 @@ import "./env_dom.mjs";
 let _s = 42; Math.random = () => { _s = (_s * 1103515245 + 12345) & 0x7fffffff; return _s / 0x7fffffff; };
 
 const VER = process.argv[2] || "v564";
-const KNOWN_VERSIONS = ["v564", "v565"];
+const KNOWN_VERSIONS = ["v564", "v565", "v566"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -54,7 +54,49 @@ console.log(`t34 — INCOME CONDITIONING (${VER})`);
 {
   const _v = Number(String(VER).replace(/[^0-9]/g, "")) || 0;
   const withTest = Object.entries(RULES).filter(([, r]) => r && r.exclTest !== undefined).map(([c]) => c).sort();
-  if (_v >= 565) {
+  // ⚠ GATED AT v566, NOT REWRITTEN (OPERATIONS §B2's gate-the-inversion rule). The pre-v5.66 form
+  // asserted EXACTLY "CT" and is kept for the earlier legs, where it is still the truth. Rewriting
+  // it in place would have made the frozen legs assert a state of the world they never shipped in,
+  // which is the v5.27 defect this rule exists to prevent.
+  if (_v >= 566) {
+    T("A-1 [v5.66]: EXACTLY TWO states carry `exclTest` — Connecticut and New Mexico, in conversion order",
+      withTest.join(",") === "CT,NM");
+    if (withTest.join(",") !== "CT,NM") console.log(`        populated: ${withTest.join(", ") || "(none)"}`);
+    T("A-3 [v5.66]: the remaining THREE income-conditioned states are still present and still UNPOPULATED — they remain optimistic and convert one release at a time",
+      ["RI", "VA", "NJ"].every((c) => RULES[c] && RULES[c].exclTest === undefined));
+    // ⚠ EXTINCTION INVARIANT for the defect this release fixes: NM's exemption must NOT be a flat
+    // scalar at every income. A future edit that drops `exclTest` from NM reinstates the optimism.
+    T("A-7 [v5.66]: NM's table is a `bands` test on `agi`, PER PERSON, with the INCLUSIVE comparator — the statute reads \"not over\", so `cmp` is absent and defaults to `lte` (B-2)",
+      RULES.NM.exclTest?.kind === "bands" && RULES.NM.exclTest?.base === "agi" &&
+      RULES.NM.exclTest?.unit === "person" && RULES.NM.exclTest?.cmp === undefined);
+    // ⚠ NM carries NO `exclAge`, and that is CORRECT rather than an omission: NMSA 1978 § 7-2-5.2
+    // grants the exemption at 65, which is `_floor`'s own default. Connecticut needed `exclAge: 0`
+    // because its statute has NO age gate at all. Pinned so the v5.65 lesson does not invert.
+    T("A-8 [v5.66]: NM carries NO `exclAge` — the statutory floor IS 65, which is `_floor`'s default; CT's explicit 0 is the exception, not the pattern",
+      RULES.NM.exclAge === undefined && RULES.CT.exclAge === 0);
+    // ⚠ A-9 ORIGINALLY CHECKED ONLY rows[0] AND rows[8], AND A NEGATIVE CONTROL CAUGHT IT: changing
+    // the $1,000 band to $9,999 passed all of t34 and all of t35. The seven middle amounts were
+    // asserted by nothing. Fixed by pinning the WHOLE sequence — a table test that checks its own
+    // endpoints is checking that a table exists, not that it is right.
+    T("A-9 [v5.66]: NM's nine amounts are EXACTLY $8,000→$0 in $1,000 steps, on BOTH filing statuses — every band, not just the endpoints",
+      JSON.stringify((RULES.NM.exclTest?.rows?.joint || []).map((r) => r.amount)) === JSON.stringify([8000, 7000, 6000, 5000, 4000, 3000, 2000, 1000, 0]) &&
+      JSON.stringify((RULES.NM.exclTest?.rows?.single || []).map((r) => r.amount)) === JSON.stringify([8000, 7000, 6000, 5000, 4000, 3000, 2000, 1000, 0]));
+    T("A-9a [v5.66]: and both tables terminate at Infinity — without it a household above the last band falls through to zero by accident rather than by the statute",
+      RULES.NM.exclTest?.rows?.joint?.[8]?.upTo === Infinity && RULES.NM.exclTest?.rows?.single?.[8]?.upTo === Infinity);
+    T("A-10 [v5.66]: NM's band tops match NMSA 1978 § 7-2-5.2 exactly — transcribed from the statutory oracle, not re-derived",
+      JSON.stringify((RULES.NM.exclTest?.rows?.joint || []).map((r) => r.upTo).slice(0, 8)) === JSON.stringify([30000, 33000, 36000, 39000, 42000, 45000, 48000, 51000]) &&
+      JSON.stringify((RULES.NM.exclTest?.rows?.single || []).map((r) => r.upTo).slice(0, 8)) === JSON.stringify([18000, 19500, 21000, 22500, 24000, 25500, 27000, 28500]));
+    // ⚠ A-4..A-6 are REPEATED in this branch deliberately. They are still true at v5.66 and
+    // dropping them here would be silent coverage loss — the shape §B2 exists to catch, and the
+    // reason this block was re-read after gating rather than assumed correct.
+    T("A-4 [v5.66]: CT's table is still a `bands` test on the `agi` base with the EXCLUSIVE comparator (B-2)",
+      RULES.CT.exclTest.kind === "bands" && RULES.CT.exclTest.base === "agi" &&
+      RULES.CT.exclTest.cmp === "lt" && RULES.CT.exclTest.unit === "household");
+    T("A-5 [v5.66]: CT still carries `exclAge: 0` — without it `_floor` defaults to 65 and every under-65 household is silently denied the exemption Connecticut grants on income alone",
+      RULES.CT.exclAge === 0);
+    T("A-6 [v5.66]: `exclTest` and `ssOffset` remain mutually exclusive — no state carries both",
+      Object.values(RULES).every((r) => !(r.exclTest !== undefined && r.ssOffset)));
+  } else if (_v >= 565) {
     T("A-1 [v5.65]: EXACTLY ONE state carries `exclTest` — Connecticut, the first populated state",
       withTest.join(",") === "CT");
     if (withTest.join(",") !== "CT") console.log(`        populated: ${withTest.join(", ") || "(none)"}`);
