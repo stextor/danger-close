@@ -1,5 +1,89 @@
 # Changelog
 
+## ops 2026-09-07 (second package) — three gate blind spots of one shape, and the row that proved it
+
+**No version bump. v5.65 remains the current build**, source `7604fac5dab891bb31905544d11072f8`,
+artifact `b4ea0bd1d6993aadd0b7fedcfe47e580`, repo HEAD `d0e17f4` at the start of this work. No app
+source, no `t*.mjs`, no fixture, no `index.html`. No app suite applies and no app check total is
+quoted.
+
+### ⚠ First: an error in the package shipped four hours earlier, and why nothing caught it
+
+The manifest-repair package changed `qa/tools/package_check.mjs` and **did not roll that file's own
+hash row in the manifest.** `package_check` was run four times before the zip was cut and passed
+K-8 every time; the post-upload re-run went red immediately, naming `package_check.mjs`.
+
+**K-8 could not have caught it.** It compared the package's NEW manifest row against the OLD pool
+copy — and before an upload, those are the two things guaranteed not to correspond. **The row for a
+file the package is replacing is exactly the row most likely to need rolling, and it was the one row
+K-8 was structurally unable to check.** The error was mine; the blind spot was older.
+
+### The shape, and the sweep it earned
+
+That is the **third instance of one defect** in `package_check.mjs`: a check reading the tree as it
+finds it rather than **as the package will leave it**. I-2 was fixed for it and its own comment
+states the principle. I-3 was then found reading the pre-ship tree while I-2 read the post-ship one.
+Now E-1b and K-8. **When a fix of this shape lands, sweep the whole file for the shape** — that
+lesson is written at the E-1b site, where the next reader will be.
+
+- **K-8 fixed** — a row is compared to the package's own `knowledge/` copy when the package ships
+  one, and to the pool otherwise. **Controls P39, P40, P41.**
+- **E-1b fixed (H-3 route (a))** — it now reads declared repo deletions from `README-FIRST.md`.
+  This unblocks H-3, which could not be executed for a year-old reason: deleting
+  `docs/qa-baseline-README.md` made E-1b report the package red **because of the deletion it was
+  shipping**. **Controls P36, P37, P38.**
+- ⚠ **The declaration is an exact line form** — `DELETE FROM REPO: <full repo path>` — **not a loose
+  `includes`.** D-2 uses a plain `includes` and that is safe for D-2. It would not be safe here:
+  `README-FIRST.md` already names every shipped `github/` path, so a loose match would let a file's
+  own upload row silently switch the gate off for it. That is the **P5 defect** one level up, and
+  **P38 pins it**: a path merely mentioned must still make E-1b fire.
+
+**Six new negative controls, all firing** (§B2). Two of them assert a gate stays QUIET, which is the
+half that is easy to skip: P37 (the deletion declared) and P41 (the row matches). ⚠ **P41 failed on
+its first draft** — it grepped for `K-8` alone and could not distinguish its own mutation from the
+package's genuinely stale row. **A control that cannot tell its own mutation from the ambient state
+is measuring the ambient state.** It was repaired to match on the picked filename; the finding it
+accidentally surfaced was real.
+
+### Also in this package
+
+- **Two tool hash rows rolled**, computed into place: `package_check.mjs` and
+  `package_check_controls.sh`. A full audit of all **73 hashed manifest rows against the live pool**
+  now shows **73 matching, 0 stale, 0 ghost.**
+- **H-4 RESOLVED — (a).** `STOP-REPORT-v5_63-fica-workbench.md` stays in the pool and is now a
+  **named carve-out in §4**, so the next sweep does not re-propose it.
+- **H-5 RESOLVED — (a).** Six history documents that were named only in prose now have proper
+  repo-only rows. ⚠ **Six, not the three a row-anchored search reported** — the table parser found
+  them, which is §B1 working. Two further prose names correctly get no row: they are struck through
+  as retired and the files are genuinely absent from `docs/`.
+
+### ⚠ A NEW FINDING, RECORDED AND NOT FIXED: section K's controls are mostly measuring nothing
+
+Found while validating this package's own controls. **Four of the seven K controls report
+`mutation did not apply - control is INVALID`** (P29–P31, P34) and **P33 fires the wrong check.**
+The cause is a line of K that is *correct*: K reads the manifest from the package's `github/` copy
+first, deliberately — but P29–P34 mutate a scratch copy of the **pool**, which K never reads once a
+package ships a manifest, and §L now requires every release package to ship one.
+
+⚠ **P32 reported `CAUGHT` and that pass was spurious** — K-8 fired on the real stale row, not on
+P32's mutation. The three reporting INVALID are the honest ones; P32 and P33 are the dangerous pair.
+**Until this is repaired, section K's controls should not be cited as evidence that section K
+works.** Written up as **H-6** in `SCOPE_TREE_AND_POOL_HOUSEKEEPING.md` §4a, with the decision it
+needs. Not fixed here: this package already changes two gates, and rewriting seven more controls in
+the same pass is how a harness gets rewritten without being re-verified.
+
+### Limitations and what this package deliberately does NOT do
+
+- **`docs/qa-baseline-README.md` is NOT deleted.** The fix ships in this package and the deletion in
+  the next, validated by the fixed gate — otherwise the check that passed is not the check that was
+  in force. **H-3 is not closed until the deletion lands.**
+- **The third scope-status sweep is not run.**
+- **H-6 is recorded, not fixed. K-10 is still proposed, not built.**
+- **This package's `package_check.mjs` was validated by the COMMITTED tool.** The new behaviour is
+  demonstrated separately by the six controls, which run the new tool by design — that is what a
+  control harness is for, and it is not the gate.
+
+
 ## ops 2026-09-07 — the manifest catches up with the pool (H-2's third place)
 
 **No version bump. v5.65 remains the current build**, source `7604fac5dab891bb31905544d11072f8`,
