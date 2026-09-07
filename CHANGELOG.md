@@ -1,5 +1,82 @@
 # Changelog
 
+## ops 2026-09-07 (eleventh package) — the New Mexico handover's third place, and a report that outlived its own decision by a day
+
+**No version bump. v5.65 remains the current build**, source `7604fac5dab891bb31905544d11072f8`,
+artifact `b4ea0bd1d6993aadd0b7fedcfe47e580`, repo HEAD `36f24ab` at the start of this work. No app
+source, no `t*.mjs`, no fixture, no `qa/tools/` change, no `index.html`. Two documents and a row.
+
+### `K-9` was red again, for the same reason as the seventh package
+
+`STOP-REPORT-v5_66-nm-session2.md` was filed to `docs/` and to the pool and **named nowhere in the
+manifest**, so K-9 — *every pool file is named somewhere in the manifest* — went red the moment it
+landed. **Two of §G's three places, executed in different passes. Third occurrence this week**, after
+H-2 and the seventh package.
+
+⚠ **This one was foreseen and shipped anyway**, which is worse than the other two and is why it is
+recorded plainly. The handover package's own `README-FIRST.md` said: *"Its manifest row is NOT in
+this zip, so K-9 goes red on upload."* The reasoning was that touching the manifest would also mean
+rolling `CHANGELOG.md`'s new md5 row for a CHANGELOG that package did not change. **That reasoning
+was sound about the row and wrong about the conclusion**: the answer was to carry the CHANGELOG too,
+not to ship a known-red gate. A gate that everyone knows is red is how the K block rotted for four
+days while reporting `CAUGHT`.
+
+The row added is a **description row** — `File | What it is | Status` — reading **OPEN: the entry
+point for the New Mexico session**. No md5 row: D-3 excludes this class, and
+`STOP-REPORT-v5_63-fica-workbench.md` has never had one either.
+
+### A document outlived its own decision by one day
+
+`STOP-REPORT-v5_66-NM-note-guarded-set.md` was written on 2026-09-07 to put **D-NM-1** to the
+maintainer. D-NM-1 was answered **the same day** — (c) — and the note half was built. But the report
+still read as the live entry point, with four unresolved options in its §4, and **its manifest row
+still said *"Read §4 (D-NM-1) FIRST."***
+
+That is the exact defect the third scope-status sweep spent this morning hunting across 44 files:
+**a document whose status line describes a world that has moved on.** Found one day later, on a
+document this project created after the sweep. Annotated in place per §G's *prefer retiring to
+deleting*: the body stays as the record of how the release was first stopped, with a banner naming
+the live successor.
+
+⚠ **THE ANNOTATION RECORDS WHAT IS STILL OWED, NOT JUST WHAT CLOSED.** (c) was *"ship the safe note
+AND scope the selector fix in the same session, not as an intention."* **The note half is built and
+pinned** — NM's row keeps the phrase *"income-limited"*, a comment at the site says it is
+load-bearing, `t35` **D-7a** asserts NM left the guarded set by CONVERTING rather than by rewording,
+and a negative control fires on the reword. **The scope half is NOT written. Until it is, (c) has
+quietly become (a)**, which §4 of that report explicitly calls not an acceptable final answer.
+
+### The obligation, honoured a second time
+
+`CHANGELOG.md`'s md5 row is rolled here, computed into place after this entry was final. Second
+package to face it since the row was added.
+
+### Verification
+
+**No suite was run and none applies** — no source, no `t*.mjs`, no fixture, no tooling.
+
+- OPERATIONS §A freshness check against a fresh clone at `36f24ab`; source and artifact unchanged.
+- **The handover's own upload verified before anything else:** all 20 `github/` files byte-identical
+  to what shipped, the pool at 112, and — checked rather than assumed — **`src/DangerClose.jsx` still
+  carries no `v5.66` string and the pool still holds exactly two `.jsx` sources.** The unshipped
+  v5.66 source did not leak into either destination, which was the one thing that could have gone
+  quietly wrong.
+- **K-9 re-tested against the live pool with the manifest as this package leaves it:** all 112 files
+  named. It reported `UNLISTED: 1` before.
+- `package_check` run on this package **with the pool argument**, from the committed tool.
+
+### Still open
+
+- **New Mexico**, per `STOP-REPORT-v5_66-nm-session2.md` §3: a **dollar-exact** behavioural test
+  first, then the ten silent suites, METHODOLOGY, the artifact, and packaging.
+- ⚠ **D-NM-1 (c)'s selector scope**, still unwritten.
+- **Item B** of `SCOPE_HOUSEKEEPING_THREE.md`, route (a) on the corrected premise. **K-10**, proposed.
+- ⚠ **P1–P28** against New Mexico's own package, before its zip is sent. **Still unknown, still not
+  to be assumed.**
+
+**Provenance.** No source or artifact change: v5.65 remains `7604fac5dab891bb31905544d11072f8` /
+`b4ea0bd1d6993aadd0b7fedcfe47e580`.
+
+
 ## ops 2026-09-07 (tenth package) — D-B-1: Item B's premise said three tools; it is nine, and six are unreachable
 
 **No version bump. v5.65 remains the current build**, source `7604fac5dab891bb31905544d11072f8`,

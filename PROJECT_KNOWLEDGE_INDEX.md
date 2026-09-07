@@ -636,7 +636,7 @@ console.log(pool.length,"files ·",hashed.size,"hashed rows ·",pool.filter(f=>!
 | `OPERATIONS.md` | `c5bd81892d21385ceaec8ea8bea9db68` | `docs/OPERATIONS.md` |
 | `TESTING.md` | `4f601cfbd43a1323a640bdc17ffd1d29` | `TESTING.md` |
 | `METHODOLOGY.md` | `f47b4ed305980a2084fc888eaee07c6e` | `METHODOLOGY.md` |
-| `CHANGELOG.md` | `5fa897343ed62c981ec6c36229043011` | `CHANGELOG.md` — ⚠ **rolled 2026-09-07 (tenth package), the FIRST outing of the obligation this row created.** It changes in every package by definition, so its row is rolled in every package, computed into place **after** the entry is final |
+| `CHANGELOG.md` | `ef3866f6d9121ab307c825187df1a43a` | `CHANGELOG.md` — ⚠ **rolled 2026-09-07 (tenth package), the FIRST outing of the obligation this row created.** It changes in every package by definition, so its row is rolled in every package, computed into place **after** the entry is final |
 | `MissingFeatures.md` | `7d1072184573ef5cc5befe46cc40ece1` | `docs/MissingFeatures.md` |
 | `README.md` | `eec58396f932b3209de79c2400dbfb88` | `README.md` |
 
@@ -1113,7 +1113,8 @@ package, which is the failure mode the section above this one records twice.
 | `FINDINGS-v5_63-otherOrd.md` | The `otherOrd` question settled by execution: the v5.62 disclosed gap is **FALSE** (complement identity executed with non-zero readings on both sides), and the Roth comparator instead charges **FICA on rental and annuity income** at two sites. Also records why the earlier runtime attempt read `0`, the six AST-resolved `streamsAnnualAt` call sites, the mislabelled `t10` pin, and two harness facts absent from `TESTING.md` | **current — read before touching `runRothStrategies` or the v5.62 disclosure** |
 | `SCOPE_ROTH_FICA_OTHERORD.md` | Scope for v5.63: fix the FICA defect and correct the false disclosure together | **APPROVED 2026-09-03** — D-1 withdrawn (the fix closes it), D-2..D-5 decided by the maintainer. §4's blast radius is measured, not assumed |
 | `STOP-REPORT-v5_63-fica-workbench.md` | v5.63 stopped mid-build: engine fix applied from canonical v5.62 and **2,934 app checks green on both legs**, but no new tests, controls, `METHODOLOGY`, `CHANGELOG` or built artifact. Lists what remains, in order | **OPEN — the entry point for the next session.** The workbench `github/` half is NOT committed |
-| `STOP-REPORT-v5_66-NM-note-guarded-set.md` | **New Mexico (v5.66) stopped mid-build, on a DECISION not a defect.** The premise is verified and good: `_fromTest` already supports NM's nine `amount` bands, `cmp` already defaults to the inclusive comparator NM needs, and `_floor` already defaults to 65 — so this release is a table transcription into tested machinery, and its direction is OPTIMISTIC → conservative. ⚠ **The stop is §3's finding: rewording NM's note to state the phase-out silently drops NM out of the income-limited guarded set** that `boundaries.mjs` L117 and `t10` L921–923 both select with `/income[- ]limited|income limit/i` against the note string — and `t10` still reports **244 passed / 0 failed**. A shrinking set is invisible to a green suite. **Second occurrence: the same shape hit NJ at v5.54.** §5 also lists `t34`'s unregistered `v566` tag and the `exclAge: 65` legibility question | **OPEN — the entry point for the New Mexico session. Read §4 (D-NM-1) FIRST; the build cannot resume until it is answered.** ⚠ Its `v566.jsx` draft was deliberately NOT preserved — if D-NM-1 resolves as (a) the note text changes anyway, so the draft would preserve the wrong string. Rotates to repo-only when NM ships (H-2) |
+| `STOP-REPORT-v5_66-NM-note-guarded-set.md` | **How New Mexico was stopped the FIRST time, and the defect that stopped it.** §3 is the finding: rewording NM's note to state its phase-out silently drops NM out of the income-limited guarded set that `boundaries.mjs` and `t10` both select with `/income[- ]limited|income limit/i` **against the user-facing note string** — and `t10` still reports green. Second occurrence; the same shape hit New Jersey at v5.54 | ☑ **SUPERSEDED as the entry point 2026-09-07. D-NM-1 is ANSWERED — (c) — and the note half is BUILT and pinned by `t35` D-7a.** Read `STOP-REPORT-v5_66-nm-session2.md` instead. ⚠ **(c)'s SECOND half is still owed:** the selector scope is unwritten, and until it is written **(c) has become (a)**, which §4 of that report says is not acceptable. Body kept as the record |
+| `STOP-REPORT-v5_66-nm-session2.md` | **The live New Mexico handover.** Source written and version-bumped at all four in-app sites; **eighteen suites register `v566`, verified by an AST sweep**; two Connecticut-only assertions **gated, not rewritten**; six new `t34` assertions and `t35` **D-7a**, with five negative controls and two null controls all behaving. ⚠ Records two errors caught by running things and not by review: an assertion that checked only its table's endpoints, and a **workspace drift** that only the null control could have noticed | ⚠ **OPEN — THE ENTRY POINT FOR THE NEW MEXICO SESSION. Read §3 first; it is the resume order.** Stopped because **ten feature suites do not run in that workspace** (`0 passed, 0 failed` — an empty set, not a pass), and no release ships on a partial suite. Owed: a **dollar-exact** NM test, METHODOLOGY, the artifact, packaging, and **P1–P28 against NM's own package**. ⚠ The v5.66 source is NOT in the repo or the pool — it is held in the handover zip |
 
 ⚠ **The suite total being UNCHANGED across the v5.63 fix is not reassurance.** No suite fixture
 carries a non-zero income stream, so the changed path is unreachable by every existing check. That
@@ -1147,6 +1148,30 @@ retired and superseded. They get no row because there is no file. Checked 2026-0
 committed tree, so the next sweep does not re-open them.
 
 ## Retirement list (delete-first; nothing replaces these)
+
+### At the ops upload of 2026-09-07 (eleventh package — the NM handover's third place) — DELETE THESE FIRST
+
+**No version bump.** v5.65 remains current. No app source, no `t*.mjs`, no fixture, no tooling.
+
+| Delete from the POOL | Because |
+|---|---|
+| `PROJECT_KNOWLEDGE_INDEX.md` | replaced — this file; the row K-9 was missing, and `CHANGELOG.md`'s md5 row rolled |
+| `CHANGELOG.md` | replaced — the ops entry for this package |
+
+**No deletion from the repo.** `STOP-REPORT-v5_66-nm-session2.md` is already in both destinations and
+is **not** re-uploaded — only its manifest row was missing.
+
+> ⚠ **K-9 HAS NOW GONE RED THREE TIMES THIS WEEK FOR ONE REASON: §G's three places done in two
+> passes.** H-2 (pool deletions and manifest rows two sessions apart), the seventh package, and this
+> one. ⚠ **This third instance was FORESEEN AND SHIPPED ANYWAY** — the handover package's own
+> `README-FIRST.md` predicted it. The reasoning was sound about the CHANGELOG row and wrong about
+> the conclusion: carry the CHANGELOG too, rather than ship a known-red gate.
+>
+> ⚠ **`STOP-REPORT-v5_66-NM-note-guarded-set.md` is also updated in the repo** (`docs/` only — it has
+> no pool copy). Its decision was answered the same day it was written and its row still said *"Read
+> §4 (D-NM-1) FIRST."* That is the defect the third scope-status sweep hunted across 44 files,
+> recurring one day later on a document created after the sweep.
+
 
 ### At the ops upload of 2026-09-07 (tenth package, D-B-1 (c) — Item B's premise) — DELETE THESE FIRST
 
