@@ -482,20 +482,28 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
     const OPEN = new Set([
       "SCOPE_STANDING_AUDIT.md",                  // not a build scope at all (OPERATIONS §K)
       "SCOPE_HOUSEKEEPING_THREE.md",              // awaiting decisions in its §5
-      // Added v5.61, REWRITTEN 2026-09-04. The reason changed and the entry did not expire.
-      // D-2 and D-3 were APPROVED on 2026-09-04 — (b) and (b) — so this scope is no longer
-      // awaiting decisions; it is approved and NOT YET BUILT, which is still legitimately OPEN
-      // and still none of RETIRED/SUPERSEDED/FULFILLED. ⚠ The entry now EXPIRES WHEN THE FIELD
-      // SHIPS, and nothing here can detect that: I-3 fires only on an entry naming a file that
+      // Added v5.61, REWRITTEN 2026-09-04, REASON CORRECTED 2026-09-07. The entry is right and
+      // its reason has now gone stale TWICE, which is the point of this comment.
+      //   2026-09-04: reason changed from "awaiting D-2 and D-3" to "approved, unbuilt", and the
+      //   expiry was written as WHEN THE FIELD SHIPS — phrased for a single shipping moment.
+      //   2026-09-07: that expiry was already wrong when it was written. The scope converts FIVE
+      //   states ONE PER RELEASE, so it ships five times. v5.65 built the CONNECTICUT half; the
+      //   field has shipped and the scope is still legitimately OPEN. An expiry that assumed one
+      //   moment would have had to be rewritten four more times, so it is restated as a COUNT.
+      // ⚠ NOW EXPIRES WHEN THE LAST OF THE FIVE CONVERTS — NM, RI, VA and NJ remain unconditional
+      // as of v5.65. Nothing here can detect that: I-3 fires only on an entry naming a file that
       // is GONE, and this file will still be there. A person removes it, in the release that
-      // builds the field — the same mechanism, and the same warning shape, as the
+      // converts the fifth state — the same mechanism, and the same warning shape, as the
       // SCOPE_ROTH_FICA_OTHERORD entry removed below.
-      "SCOPE_INCOME_CONDITIONING.md",             // approved 2026-09-04, unbuilt (its §7)
-      // Added 2026-09-04 with the scope itself. Its two decisions (H-1, H-2) are RESOLVED, but
-      // H-2 and the third scope-status sweep are unbuilt, so it carries no retirement marker and
-      // would fail I-2 on any package cut after it lands. Expires when H-2 has been executed and
-      // the sweep run — again, only a person can retire it.
-      "SCOPE_TREE_AND_POOL_HOUSEKEEPING.md",      // decided 2026-09-04, H-2 + sweep unbuilt (its §5)
+      "SCOPE_INCOME_CONDITIONING.md",             // PARTIALLY BUILT: CT shipped v5.65; NM/RI/VA/NJ open
+      // Added 2026-09-04 with the scope itself. Its three decisions (H-1, H-2, H-3) are RESOLVED.
+      // ⚠ REASON CORRECTED 2026-09-07, and the correction is the same shape as the one above: the
+      // entry was written expecting H-2 to be a single act. It was not. The maintainer executed the
+      // POOL DELETIONS on 2026-09-05 and the MANIFEST rows were rewritten on 2026-09-07 — two
+      // places of §G's three, in two different sessions, with K-8 red in between. What remains is
+      // H-3 (the docs/qa-baseline-README.md deletion) and the third scope-status sweep.
+      // Expires when BOTH of those are done — again, only a person can retire it.
+      "SCOPE_TREE_AND_POOL_HOUSEKEEPING.md",      // H-2 done 2026-09-07; H-3 + sweep still unbuilt (its §5)
       // ── REMOVED 2026-09-04 at the v5.63 ship: "SCOPE_ROTH_FICA_OTHERORD.md". Its entry was
       // added 2026-09-03 with the note that it EXPIRES THE MOMENT v5.63 SHIPS and that I-3
       // could not catch it going stale, since I-3 only fires on an entry naming a file that is
