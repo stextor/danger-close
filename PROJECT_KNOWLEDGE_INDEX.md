@@ -25,15 +25,39 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 
 | Field | Value |
 |---|---|
-| Version | **v5.65** |
-| Source file in knowledge | `DangerClose-v5_65.jsx` |
-| Source md5 | `7604fac5dab891bb31905544d11072f8` |
-| Built `index.html` md5 | `b4ea0bd1d6993aadd0b7fedcfe47e580` |
-| Shipped | 2026-09-05 |
+| Version | **v5.66** |
+| Source file in knowledge | `DangerClose-v5_66.jsx` |
+| Source md5 | `31b43e094307ef5f996570c090478e13` |
+| Built `index.html` md5 | `af4612323092c3c2aa6f0b408185f01f` |
+| Shipped | 2026-09-07 |
 
-> **Rolled 2026-09-05 at the v5.65 ship.** Rotation removes `DangerClose-v5_63.jsx` and
-> `dom_entry_v563.jsx` from the POOL; the pool holds exactly `DangerClose-v5_64.jsx` and
-> `DangerClose-v5_65.jsx`, and `dom_entry_v564.jsx` and `dom_entry_v565.jsx`. ⚠ Every
+> **Rolled 2026-09-07 at the v5.66 ship.** Rotation removes `DangerClose-v5_64.jsx` and
+> `dom_entry_v564.jsx` from the POOL; the pool holds exactly `DangerClose-v5_65.jsx` and
+> `DangerClose-v5_66.jsx`, and `dom_entry_v565.jsx` and `dom_entry_v566.jsx`. ⚠ Every
+> `dom_entry_*.jsx` stays in the REPO as history — H-1 (2026-09-04) decided that, and rotation
+> governs the pool only.
+>
+> **v5.66 POPULATES NEW MEXICO and CHANGES A USER'S NUMBER**, in the CONSERVATIVE direction — the
+> first of the four states whose unconditional exclusion was making plans look better than the
+> statute allows. The model granted a flat $8,000 per person 65+ at every income level; NMSA 1978
+> § 7-2-5.2 steps it down $1,000 per band to $0 above $51,000 joint / $28,500 single AGI. A couple
+> with $60,000 of retirement income was under-taxed by $784/yr. Transcribed from
+> `FINDINGS-v5_63-state-statutes.md` §2, not re-derived. **NJ, RI and VA remain unconditional and
+> optimistic — THREE left, not four.**
+>
+> ⚠ **The built artifact's hash is trustworthy, not merely recorded.** Per §N3a the scaffold check
+> ran: rebuilding v5.65 from its own unmodified source reproduced the published
+> `b4ea0bd1d6993aadd0b7fedcfe47e580` byte-identically, so the tree matches and this build's hash
+> means something. `smoke_built` 16/16, exit 0.
+>
+> ⚠ **THE POOL WAS STALE FOR 20 FILES ON ARRIVAL AT THIS SHIP** — 18 suite files carrying the v566
+> registration plus `SCOPE_STATE_FIXTURES.md` and `STOP-REPORT-v5_66-NM-note-guarded-set.md`. The
+> repo was ahead in every case; they landed in packages after the last refresh. **This package
+> clears all 20.** Recorded because a session working from the pool alone would have been running
+> pre-v566 suites while believing itself current — exactly the §A2 failure mode.
+>
+> *(Superseded, retained: the v5.65 note read — rotation removed `DangerClose-v5_63.jsx` and
+> `dom_entry_v563.jsx`; the pool held `DangerClose-v5_64.jsx` and `DangerClose-v5_65.jsx`.)* ⚠ Every
 > `dom_entry_*.jsx` stays in the REPO as history — H-1 (2026-09-04) decided that, and rotation
 > governs the pool only.
 >
@@ -636,7 +660,7 @@ console.log(pool.length,"files ·",hashed.size,"hashed rows ·",pool.filter(f=>!
 | `OPERATIONS.md` | `c5bd81892d21385ceaec8ea8bea9db68` | `docs/OPERATIONS.md` |
 | `TESTING.md` | `4f601cfbd43a1323a640bdc17ffd1d29` | `TESTING.md` |
 | `METHODOLOGY.md` | `f47b4ed305980a2084fc888eaee07c6e` | `METHODOLOGY.md` |
-| `CHANGELOG.md` | `ef3866f6d9121ab307c825187df1a43a` | `CHANGELOG.md` — ⚠ **rolled 2026-09-07 (tenth package), the FIRST outing of the obligation this row created.** It changes in every package by definition, so its row is rolled in every package, computed into place **after** the entry is final |
+| `CHANGELOG.md` | `11a6e7ec06a51f339803cdbb89719d38` | `CHANGELOG.md` — ⚠ **rolled 2026-09-07 (v5.66 ship), the SECOND outing of the obligation this row created.** *(Previously `ef3866f6d9…`, rolled the same day at the tenth package.)* It changes in every package by definition, so its row is rolled in every package, computed into place **after** the entry is final |
 | `MissingFeatures.md` | `7d1072184573ef5cc5befe46cc40ece1` | `docs/MissingFeatures.md` |
 | `README.md` | `eec58396f932b3209de79c2400dbfb88` | `README.md` |
 
@@ -827,12 +851,17 @@ should clone. ⚠ **Seven of the original eight still are; `hand_86.mjs` is not*
 
 | Field | Value |
 |---|---|
-| Version | **v5.64** |
-| Source file in knowledge | `DangerClose-v5_64.jsx` |
-| Source md5 | `02ea7e398a35bbade8a89e6ca57edac0` |
-| Built `index.html` md5 | `1f10e4a64cc19cd4c68ac49fb933b30a` |
+| Version | **v5.65** |
+| Source file in knowledge | `DangerClose-v5_65.jsx` |
+| Source md5 | `7604fac5dab891bb31905544d11072f8` |
+| Built `index.html` md5 | `b4ea0bd1d6993aadd0b7fedcfe47e580` |
 
-> **Rolled 2026-09-05 at the v5.65 ship.** The pair is now **v5.64 prior / v5.65 current**.
+> **Rolled 2026-09-07 at the v5.66 ship.** The pair is now **v5.65 prior / v5.66 current**. ⚠ This
+> table is what `package_check` **K-7** reads, and rolling the Current table WITHOUT rolling this one
+> leaves K-7 red with *"Prior is not exactly one release below Current"* — which is what happened on
+> the first packaging attempt of v5.66 and is why K-7 exists. Roll both tables in the same edit.
+>
+> *(Superseded, retained: rolled 2026-09-05 at the v5.65 ship, when the pair was v5.64 / v5.65.)*
 >
 > *(Kept from the previous roll, because the lesson is the table's own.)* ⚠ **This table was missed on the first pass of the v5.64
 > release's packaging and `package_check` K-7 caught it** — the Current table was rolled to v5.64

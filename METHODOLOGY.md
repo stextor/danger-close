@@ -131,8 +131,9 @@ full retirement-income exemptions (IL, MS, PA, IA 55+, MI post-phase-in, plus th
 no-income-tax states); and major 65+ retirement-income exclusions where they exist (e.g., GA
 $65K/person, KY $31,110, NY $20K, NJ a $100K HOUSEHOLD cap at 62+ (not per-person), VA $12K, SC $15K, DE $12.5K). **Which of these have been checked against a primary source, and what was found, is recorded in `AUDIT_STATE_EXCL65_NOTES.md` — this section routes there rather than restating it, because a verification claim expires and a dated audit does not.**
 
-**Income conditioning: the machinery exists as of v5.64, and Connecticut is the first state to use
-it (v5.65).** Five states condition their exclusion on income in law — New Mexico, Rhode Island,
+**Income conditioning: the machinery exists as of v5.64, Connecticut was the first state to use it
+(v5.65), and New Mexico is the second (v5.66).** Five states condition their exclusion on income in
+law — New Mexico, Rhode Island,
 Virginia, New Jersey and Connecticut. v5.64 added the mechanism: an income measure computed inside
 the state engine, two bases (`agi`, and `agiExSS` — which is Virginia's AFAGI exactly and
 approximates New Jersey's gross income), and an optional per-state field holding either a band table
@@ -152,18 +153,37 @@ return ($75,000 single), stepping down through eight bands to nothing at $150,00
 ($100,000 single). It is applied **per return, not per person**, and there is **no age test at all** —
 Connecticut conditions on income alone.
 
-**The other four remain unconditional and remain optimistic.** New Mexico, Rhode Island, Virginia and
+**New Mexico is populated as of v5.66, and it moves in the CONSERVATIVE direction — figures go
+down for affected households.** New Mexico is the first of the four states whose unconditional
+exclusion was making plans look better than the statute allows, so this is the release where that
+optimism starts being paid back. The model granted a flat $8,000 per person 65 or older at **every
+income level**; NMSA 1978 § 7-2-5.2 steps that exemption down $1,000 per band and reaches **$0 above
+$51,000 of federal AGI on a joint return, $28,500 single**. A retired couple with $60,000 of
+retirement income in New Mexico was under-taxed by this model by $784 a year; that household now
+pays the statutory figure. The exemption is **per qualifying individual**, the age floor is **65**
+(the statute's own, and the engine's default), and the band tops are **inclusive** — at exactly
+$30,000 of joint AGI the full $8,000 each still applies.
+
+Two limitations are disclosed rather than buried. The table **has not been indexed since Laws 1987,
+ch. 264, § 6**, so it is a 1987 schedule applied to 2026 income and it bites far more households
+than it did when written; the model reproduces the statute as it stands rather than inflating it.
+And the statute also grants the exemption to **blind individuals at any age**, which this model has
+no way to express — a blind New Mexico claimant under 65 is modelled as receiving nothing, which
+overstates their state tax.
+
+**Two of the five remain unconditional and remain optimistic.** Rhode Island, Virginia and
 New Jersey still grant their exclusions to households the statutes exclude. That is the largest known
 error left in this module.
 
 Two properties of the measure are stated here rather than discovered later. **It carries no dividend
 or interest income**, because the state engine is never passed either — so a household whose state
 income is materially dividend-driven sits lower on a band table than the statute would put it, and
-receives a larger exemption than it should. For Connecticut that is a live, disclosed error today,
-not a future one, and it is named in Connecticut's own state note. And **the band comparator is a
+receives a larger exemption than it should. For Connecticut and New Mexico that is a live, disclosed
+error today, not a future one, and it is named in each state's own note. And **the band comparator is a
 per-state property, not a convention**: four of the five statutes are inclusive at the top of a band
 while Connecticut is exclusive, so at exactly $150,000 of federal AGI a Connecticut couple's pension
-exemption is zero rather than 2.5%.
+exemption is zero rather than 2.5%. New Mexico is one of the inclusive four — its tables read "not
+over," so exactly $30,000 of joint AGI takes the $8,000 row, not the $7,000 one.
 
 **The age at which an exclusion starts is modelled per state (v5.55), not assumed to be 65.**
 `STATE_RULES.exclAge` carries a state's own floor and is absent for the states that use 65.
@@ -1542,7 +1562,9 @@ carry, and `MissingFeatures.md` **D-11 (c)** scopes those once across states rat
 
 ### What did not move, and why
 
-New Mexico is untouched (its own pass, disclosure-first — ROUND4 §6 D-C). No `exclAge` moved for
+New Mexico was untouched **through v5.65** (its own pass, disclosure-first — ROUND4 §6 D-C); that
+pass was taken at **v5.66**, which populated its income-conditioned exemption — see the income-conditioning
+section above. No `exclAge` moved for
 either state **in v5.59**: a gate change alongside a figure change cannot be attributed if a
 downstream figure moves. That deferral was spent at **v5.60**, which set both gates and moved no
 figure — see the section below. The eight-state `ss: 0.5` blend is unchanged. `MissingFeatures.md` D-11 records the group
