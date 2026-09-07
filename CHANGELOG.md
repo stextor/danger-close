@@ -1,5 +1,112 @@
 # Changelog
 
+## ops 2026-09-07 (ninth package) — Items A and C: a register row stale for twelve releases, and six files the freshness check could not see
+
+**No version bump. v5.65 remains the current build**, source `7604fac5dab891bb31905544d11072f8`,
+artifact `b4ea0bd1d6993aadd0b7fedcfe47e580`, repo HEAD `29a898d` at the start of this work. No app
+source, no `t*.mjs`, no fixture, no `qa/tools/` change, no `index.html`. Documents only.
+
+Builds **Items A and C** of `SCOPE_HOUSEKEEPING_THREE.md`, together and without Item B, per **D-1**.
+All five decisions are answered; **Item B remains open** and the scope stays on the I-2 allowlist.
+
+### Item A — `MissingFeatures.md`'s D-10 row was wrong in FIVE ways, not four
+
+The row advertised work as outstanding that had shipped twelve releases earlier — *"MODELLING HALF
+STILL OPEN"*, *"dividends and realized capital gains remain absent"* — when `_divLadder` landed at
+**v5.53**. It also described the Roth ladder as **five** terms when it is six, and pointed at
+`SCOPE_FIX_roth_tab_div_capgain.md` as the live route when that document is **superseded and was
+never built**.
+
+**The fifth was found while editing and was in no scope:** the ranking cell still read *"Unranked —
+awaiting the product call"* when that call was made and shipped at **v5.52**. A register row cannot
+be awaiting an answer that arrived thirteen releases ago. It now reads **Low**.
+
+The corrected row states the position **re-resolved by AST against v5.65**, not by line number — every
+line the old row cited had moved — and says exactly what is still open and no more: `capGain_y` is
+absent **by resolved decision D-2 (c)**, measured at $342 across the whole ladder, and the
+earned-income term is narrower by scope. ⚠ It says so explicitly, because **a register that
+re-litigates a settled call is the failure this row's own warning is about.**
+
+⚠ **Confirmed before editing rather than assumed: no suite asserts D-10's text.** `t31` is the only
+suite naming `MissingFeatures.md`, and only in a comment; it reads `METHODOLOGY.md`.
+
+### Item C — six md5 rows, and why not the other thirty-one
+
+Before this package **37 of 111 pool files carried no md5 row**, so §A2's offline fallback could not
+compare them at all. Not a wrong answer — *no* answer. A stale `OPERATIONS.md` or `TESTING.md` in the
+pool was invisible by construction.
+
+Rowed, per **D-3**: `OPERATIONS.md`, `TESTING.md`, `METHODOLOGY.md`, `CHANGELOG.md`,
+`MissingFeatures.md`, `README.md` — the documents whose staleness would actively mislead a session
+about build state. **Not all 37.** A row is a maintenance obligation and **a stale row is worse than
+no row**: it returns a false green rather than no answer, which is exactly what happened to `t8`, and
+again on 2026-09-07 when a package changed `package_check.mjs` and did not roll its row.
+
+**The unrowed sets are named in the manifest with reasons**, per D-3's second half, so the next
+session reads a decision rather than an oversight: the frozen `AUDIT_*`, `STATUS_*`, `FINDINGS-*` and
+`STOP-REPORT-*` documents (history; nothing reads them for build state), and the `controls_v*.sh` set
+(never edited after their release). **D-4:** the manifest carries no row for itself and says why — it
+cannot be correct at the moment it is written.
+
+⚠ **A DEVIATION FROM D-3, STATED RATHER THAN TAKEN QUIETLY.** D-3's recommendation also named both
+app sources. **They were excluded**, on evidence found while building it: the two build tables
+already carry `Source md5` for both, and `package_check` **K-4, K-5 and K-6** already assert those
+against the pool. A second row would be **a second copy of a fact the build tables own**, free to
+drift from it — this project's defining failure, and the reason §A2's `probe_classify` bullet was
+wrong in both directions for months. **Covered, not skipped.**
+
+**D-5:** the count ships as *"37 as of 2026-09-07"* beside **K-8's own derivation command**, so the
+figure carries its own expiry and cannot drift from the gate. That figure had already been wrong
+twice in five days — recorded as *42* when it was 37, and *107 files / 72 rows* when it was 110 / 73.
+
+### ⚠ The obligation this creates, stated plainly rather than discovered later
+
+`CHANGELOG.md` changes in **every** package by definition, and `MissingFeatures.md` changes often. So
+**every future package touching them must now roll their rows.** That is six new chances to ship a
+stale row — the trap K-8 caught twice this week. Accepted deliberately: K-8 reads the package's own
+`knowledge/` copy first, so a rolled row is checked against the file actually shipping and a package
+that forgets goes red **pre-ship** rather than after.
+
+### A prerequisite nobody foresaw, and it cost a package
+
+**Item A could not ship until `package_check` was fixed first.** Editing `MissingFeatures.md` turned
+K-8 red, because its matcher read a historical md5 quoted in that file's own index row as its live
+hash. Decided as **D-C-1 (a)** and shipped as the eighth package, ahead of this one, with controls
+P42 and P43. **The fix shipped first and the edit second, so the check that passed is the check that
+was in force** — H-3's ordering, for H-3's reason.
+
+⚠ **And the quieter half is the one that matters.** Because K-8 saw a row there,
+`MissingFeatures.md` did not appear in the no-row set — so **§3 of the scope listed it as unrowed
+while the gate saw it as rowed.** A human and a check disagreed about one file and neither could see
+the other. §3's premise was wrong for a reason §3 could not have detected, and the count is now 37
+rather than the 42 it claimed for a different reason again.
+
+### Verification
+
+**No suite was run and none applies** — no source, no `t*.mjs`, no fixture, no tooling.
+
+- OPERATIONS §A freshness check against a fresh clone at `29a898d`; source and artifact unchanged.
+- **K-8 re-tested with the NEW matcher against the manifest as this package leaves it**: every rowed
+  file matches the copy actually shipping, 0 stale, 0 ghost. The six new rows were **computed into
+  place, never typed** — `CHANGELOG.md`'s row last, after its own text was final.
+- **K-9 re-tested**: all 111 pool files still named.
+- Confirmed by AST that no suite asserts D-10's text before editing it.
+- `package_check` run on this package from the committed tool.
+
+### Still open
+
+- **Item B** — `t21` coverage for the newer `qa/tools/` scripts, with **K-10** after it. ⚠ **D-2's
+  prerequisite is unanswered:** §2 says *"the three tools added at v5.58"*, `qa/tools/` holds **39
+  entries**, and a shallow clone cannot date them. **Whether three is still right is UNKNOWN** —
+  settle it with a full-history clone before building.
+- **D-NM-1** — the guarded-set decision blocking New Mexico.
+- ⚠ **P1–P28 still not re-validated.** New Mexico's package will be the first that can settle whether
+  their six NOT CAUGHT reports are an input artefact or a real defect. **It must not be assumed.**
+
+**Provenance.** No source or artifact change: v5.65 remains `7604fac5dab891bb31905544d11072f8` /
+`b4ea0bd1d6993aadd0b7fedcfe47e580`.
+
+
 ## ops 2026-09-07 (eighth package) — D-C-1: K-8 was reading a sentence as a hash row
 
 **No version bump. v5.65 remains the current build**, source `7604fac5dab891bb31905544d11072f8`,

@@ -604,6 +604,75 @@ row that was never written cannot be found by reading the table.
 `qa/tools/fixture/fixture.jsx` in the repo (byte-identical), and the baseline suites live under
 `qa/qa-baseline/`. Match by content, not by filename position.
 
+
+### ⚠ Added 2026-09-07 — Item C of `SCOPE_HOUSEKEEPING_THREE.md`, decisions D-3, D-4 and D-5
+
+**The gap this closes.** Before this package **37 of the 111 pool files carried no md5 row**, so
+§A2's offline fallback could not compare them at all — a stale `OPERATIONS.md` or `TESTING.md` in
+the pool was **invisible by construction**. Not a wrong answer: *no* answer. That is why §A2 says
+prefer the clone, and the clone is what has caught every instance.
+
+⚠ **DERIVE THE COUNT, DO NOT READ IT (decision D-5).** The figure is true only on the date beside
+it, and it had already gone stale **twice in five days** — recorded as *42* when it was 37, and
+*107 files / 72 rows* when it was 110 / 73, both times moved by ordinary ops packages between the
+writing and the reading. **37 as of 2026-09-07**; the command below is the authority, and it is
+`package_check` K-8's own expression so it cannot drift away from the gate:
+
+```bash
+node --input-type=module -e '
+import {readFileSync,readdirSync} from "fs"; import {join} from "path";
+const POOL=process.argv[1];
+const M=readFileSync(join(POOL,"PROJECT_KNOWLEDGE_INDEX.md"),"utf8");
+const rows=[...M.matchAll(/^\|\s*`?([A-Za-z0-9_.-]+\.(?:mjs|cjs|jsx|js|sh|md|html|json|txt))`?\s*\|\s*`?([0-9a-f]{32})`?\s*\|/gm)];
+const hashed=new Set(rows.map(r=>r[1])); const pool=readdirSync(POOL);
+console.log(pool.length,"files ·",hashed.size,"hashed rows ·",pool.filter(f=>!hashed.has(f)).length,"with no row");
+' /mnt/project
+```
+
+**Rowed here (decision D-3) — the six documents whose staleness would actively mislead a session:**
+
+| Pool file | md5 | Repo path |
+|---|---|---|
+| `OPERATIONS.md` | `c5bd81892d21385ceaec8ea8bea9db68` | `docs/OPERATIONS.md` |
+| `TESTING.md` | `4f601cfbd43a1323a640bdc17ffd1d29` | `TESTING.md` |
+| `METHODOLOGY.md` | `f47b4ed305980a2084fc888eaee07c6e` | `METHODOLOGY.md` |
+| `CHANGELOG.md` | `d7b375803914f95686f995b16c02b458` | `CHANGELOG.md` |
+| `MissingFeatures.md` | `7d1072184573ef5cc5befe46cc40ece1` | `docs/MissingFeatures.md` |
+| `README.md` | `eec58396f932b3209de79c2400dbfb88` | `README.md` |
+
+⚠ **NOT all 37, and this is a decision rather than an omission.** A row is a **maintenance
+obligation, not a free check**: every release editing a listed file must rewrite its row, and **a
+stale row is worse than no row** — it returns a false green rather than no answer. That is what
+happened to `t8`, and again on 2026-09-07 when a package changed `package_check.mjs` and left its
+row stale.
+
+**Deliberately UNROWED, with reasons (D-3's second half). Say why, or the next session reads the**
+**gap as an oversight and re-opens this:**
+
+- ⚠ **`PROJECT_KNOWLEDGE_INDEX.md` — this file (decision D-4).** It **cannot** carry a row for
+  itself: the hash would have to be computed before the row containing it is written, so it is
+  wrong at the moment of writing, always. Stated rather than left as a conspicuous absence.
+- ⚠ **`DangerClose-v5_64.jsx` and `DangerClose-v5_65.jsx` — the two app sources. D-3's
+  recommendation named them; they are EXCLUDED on evidence found while building it.** The two build
+  tables at the top of this file already carry `Source md5` for both, and `package_check` **K-4,
+  K-5 and K-6** already assert those against the pool. A second row would be **a second copy of a
+  fact the build tables own**, free to drift from it — this project's defining failure, and the
+  reason §A2's `probe_classify` bullet was wrong in both directions for months. **Covered, not
+  skipped.**
+- **`dom_entry_v564.jsx` and `dom_entry_v565.jsx`** already had rows before this package.
+- **The frozen `AUDIT_*`, `STATUS_*`, `FINDINGS-*`, `STOP-REPORT-*` and retired `SCOPE_*`
+  documents.** History; nothing reads them for build state. Rowing ~20 of them buys twenty
+  maintenance obligations for no protection. `STOP-REPORT-v5_63-fica-workbench.md` has never had
+  one, and neither does `STOP-REPORT-v5_66-NM-note-guarded-set.md`.
+- **The `controls_v*.sh` set.** Kept forever by §G's no-rotation rule and never edited after their
+  release; a row on a file that never changes protects nothing.
+
+⚠ **THE OBLIGATION THIS CREATES.** `CHANGELOG.md` changes in **every** package by definition and
+`MissingFeatures.md` changes often, so **every future package touching them must roll their rows.**
+Six new chances to ship a stale row. Accepted deliberately: K-8 reads the package's own
+`knowledge/` copy first, so a rolled row is checked against the file actually shipping and a package
+that forgets goes red **pre-ship** rather than after.
+
 | Pool file | md5 | Repo path |
 |---|---|---|
 | `cap_tabs.mjs` | `9057b96d48b84f99dc322f7fc983674a` | `qa/qa-baseline/cap_tabs.mjs` |
@@ -1078,6 +1147,29 @@ retired and superseded. They get no row because there is no file. Checked 2026-0
 committed tree, so the next sweep does not re-open them.
 
 ## Retirement list (delete-first; nothing replaces these)
+
+### At the ops upload of 2026-09-07 (ninth package, Items A and C) — DELETE THESE FIRST
+
+**No version bump.** v5.65 remains current. No app source, no `t*.mjs`, no fixture, no tooling.
+
+| Delete from the POOL | Because |
+|---|---|
+| `PROJECT_KNOWLEDGE_INDEX.md` | replaced — this file; Item C's six rows and the unrowed list |
+| `CHANGELOG.md` | replaced — the ops entry for this package |
+| `MissingFeatures.md` | replaced — Item A; the D-10 row corrected in five places |
+| `SCOPE_HOUSEKEEPING_THREE.md` | replaced — Items A and C recorded as built; Item B stays OPEN |
+
+**No deletion from the repo.**
+
+> ⚠ **THREE OF THE FOUR NOW CARRY MD5 ROWS THAT THIS PACKAGE ITSELF ROLLED** — `CHANGELOG.md` and
+> `MissingFeatures.md` by Item C, computed into place with `CHANGELOG.md`'s taken **last**, after its
+> own text was final. That ordering is not optional: its row lives in a different file, so the hash
+> must be computed after the entry is written and never touched again.
+>
+> ⚠ **`SCOPE_HOUSEKEEPING_THREE.md` carries no row and gets none** — D-3 excludes scope documents.
+> It stays on `package_check`'s **I-2 OPEN allowlist**: Item B is unbuilt and D-2's prerequisite is
+> unanswered.
+
 
 ### At the ops upload of 2026-09-07 (eighth package, D-C-1 (a) — K-8 learns a row from a sentence) — DELETE THESE FIRST
 
