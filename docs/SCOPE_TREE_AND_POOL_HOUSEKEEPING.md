@@ -238,7 +238,26 @@ intact in `docs/`.
 row is what tells a future session a document exists at all — and by that argument a prose mention
 is a row that has already half-decayed. But it is not urgent and it fails no gate.
 
-### H-6 · ⚠ NEW FINDING 2026-09-07, NOT FIXED — the section-K controls are mostly measuring nothing
+### H-6 · RESOLVED AND BUILT 2026-09-07 — route (a), mutate the manifest K actually reads
+
+**The decision was between two routes and it was a real one.** (a) mutate the manifest K reads — the
+package's `github/` copy; (b) hand K a package with **no** manifest so it falls back to the pool.
+**(a), because (b) tests a configuration that never occurs**: §L requires every release package to
+ship a manifest, so (b) would be a green reading from a shape no release has — the empty-set failure
+P23 exists to catch, one level up.
+
+**Built:** the package is copied and its manifest mutated in `github/` **and** `knowledge/`; every
+value is **derived** rather than hardcoded; P32 and P33 carry a **needle** so a control cannot pass
+on an unrelated failure; P35 now removes the manifest from the package too. **All seven fire, and a
+null control (mutations suppressed) makes all six mutation-driven ones go quiet.**
+
+⚠ **THE OPEN HALF, stated rather than implied: P1–P28 were not re-validated.** They need an
+un-uploaded **app-release** package and this session had only ops packages; run against one, six of
+them report NOT CAUGHT for that reason alone. **Whether that is input or defect is unknown and must
+not be assumed** — it is exactly the assumption that let the K block rot. Re-run the full harness at
+the next app release, before anything else.
+
+*(The finding as it was written:)*
 
 Found by running `package_check_controls.sh` while validating this package's own new controls.
 **Four of the seven K controls report `mutation did not apply - control is INVALID`** (P29, P30,
