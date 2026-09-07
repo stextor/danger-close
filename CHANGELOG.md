@@ -1,5 +1,76 @@
 # Changelog
 
+## ops 2026-09-07 (fourth package) — H-6: the controls that guard the manifest were guarding nothing
+
+**No version bump. v5.65 remains the current build**, source `7604fac5dab891bb31905544d11072f8`,
+artifact `b4ea0bd1d6993aadd0b7fedcfe47e580`, repo HEAD `25af988` at the start of this work. No app
+source, no `t*.mjs`, no fixture, no `index.html`, and **no change to `package_check.mjs`** — only its
+negative-control harness.
+
+### What was wrong
+
+`package_check`'s **section K** is what guards the manifest, and repairing that manifest cost three
+packages this afternoon. **All seven of K's negative controls were measuring nothing.**
+
+They mutated the manifest in a scratch copy of the **pool**. But K reads the manifest from the
+**package's `github/` copy** first — deliberately, so that a package whose job is to correct the
+manifest is not failed by the correction it ships. §L requires every release package to ship a
+manifest, and has since 2026-09-03 — **the same day these controls were written.** So every one of
+them edited a file K never opened.
+
+- **P29, P30, P31, P34** reported *mutation did not apply — control is INVALID*. They fail closed,
+  which makes them the honest ones. They also hardcoded `v5.61`, `v5.60` and two v5.61-era hashes
+  literally, so they went stale the release after they were written.
+- ⚠ **P32 reported `CAUGHT`, and the pass was spurious.** K-8 was firing — on a genuinely stale row
+  for a different file, not on P32's mutation. **A control that cannot tell its own mutation from
+  the ambient state is measuring the ambient state.**
+- **P33** fired K-8 where it wanted K-9, for the same reason.
+- **P35 passed for the wrong reason.** It removed the manifest from the clone and the pool, but not
+  from the package — so K found the package's copy and had nothing to skip.
+
+### The decision, and why route (a)
+
+Two routes existed: **(a)** mutate the manifest K actually reads, or **(b)** hand K a package with no
+manifest so it falls back to the pool. **(a)**, because **(b) tests a configuration that never
+occurs** — §L requires every release package to ship a manifest, so (b) would be a green reading from
+a shape no release has. That is the empty-set failure P23 exists to catch, one level up.
+
+### What changed
+
+The package is copied and its manifest mutated in `github/` **and** `knowledge/`. **Every value is
+derived from the manifest under test**, so nothing can go stale at the next release. P32 and P33
+carry a **needle** — the failure line must name the file the control itself changed — which is the
+fix P41 needed on its first draft the same afternoon. P35 now removes the manifest from the package
+too.
+
+**All seven fire.** And a **null control** — the same harness with the mutation writes suppressed —
+makes all six mutation-driven controls report NOT CAUGHT, which is what shows they are sensitive to
+their own mutation rather than to the ambient state. P35 correctly still passes under the null,
+because it deletes files directly rather than through the suppressed write.
+
+### ⚠ The open half, stated rather than implied
+
+**P1–P28 were NOT re-validated.** They need an un-uploaded **app-release** package and this session
+had only ops packages; run against one, six report NOT CAUGHT for that reason alone. **Whether that
+is input or defect is unknown, and must not be assumed** — assuming it is input is precisely what let
+the K block rot for four days. **Re-run the full harness at the next app release, before anything
+else.**
+
+### Post-upload close-out of the H-3 package
+
+**J-2 GREEN, K-8 GREEN.** 44 passed / 1 failed / 0 skipped, the failure being D-1, the expected
+post-upload inversion. `docs/qa-baseline-README.md` is gone; `qa/qa-baseline/README.md` and the
+pool's `qa-baseline-README.md` are both intact at `cbbbb3bae7149cfbcdad7f8e061b5f2a`. **All 73
+hashed manifest rows match the live pool: 0 stale, 0 ghost.**
+
+### Still open
+
+- **The third scope-status sweep** (§5 item 4) — the largest remaining item, and the one §5 says not
+  to bundle. Two prior sweeps found nineteen stale status lines between them.
+- **P1–P28 re-validation** at the next app release.
+- **K-10** — the manifest → pool direction, proposed and not built.
+
+
 ## ops 2026-09-07 (third package) — H-3 closed: the duplicate is gone, and the gate could see it go
 
 **No version bump. v5.65 remains the current build**, source `7604fac5dab891bb31905544d11072f8`,
