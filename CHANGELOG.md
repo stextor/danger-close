@@ -1,5 +1,103 @@
 # Changelog
 
+## v5.66 — New Mexico's 65+ exemption becomes income-conditioned, 2026-09-07
+
+**Figures MOVE, in the conservative direction.** Source `31b43e094307ef5f996570c090478e13`,
+artifact `af4612323092c3c2aa6f0b408185f01f`, built from repo `7fc8b58`.
+
+**3,310 app checks, 0 failing** (`t21` 50 and `domdiff` 32 counted separately), computed from the
+runner's output rather than restated. Per suite on the v5.66 leg: t1 185 · t2 35 · t3 36 · t4 252 ·
+t5 58 · t6 21 · t10 **288** · t7 41 · t8 42 · t9 14 · t11 40 · t12 23 · t13 42 · t14 44 · t15 11 ·
+t16 24 · t17 74 · t18 67 · t19 65 · t20 100 · t22 85 · t23 25 · t24 38 · t25 45 · t26 25 · t27 18 ·
+t28 34 · t29 61 · t30 12 · t31 31 · t32 12 · t33 32 · t34 67 · t35 93. Parity `t2 compare` 10/10 —
+the engines are unchanged across the v5.65 → v5.66 boundary. The rise of 64 from v5.65's 3,246 is
+`t10` (+44 on the current leg, +4 on the frozen leg) and `t35` D-7a plus the gating.
+
+### What changed
+
+New Mexico's `STATE_RULES` row carries the nine AGI bands of **NMSA 1978 § 7-2-5.2**, transcribed
+from `docs/FINDINGS-v5_63-state-statutes.md` §2 and not re-derived. The model granted a flat $8,000
+per person 65 or older at **every income level**; the statute steps it down $1,000 per band to **$0
+above $51,000 of joint AGI / $28,500 single**. Per qualifying individual, age floor 65, band tops
+inclusive.
+
+**Direction: optimistic → conservative. Affected New Mexico households now show MORE state tax.** A
+couple with $60,000 of retirement income was under-taxed by **$784/yr**; a single filer at $35,000
+by **$392/yr**. Households at or below the top band are unchanged, and no cell moves the other way.
+
+New Mexico is the second of five income-conditioned states to convert (Connecticut, v5.65, was the
+first and the only one that moved optimistically). **NJ, RI and VA remain unconditional and remain
+optimistic** — three left, not four.
+
+### Limitations, disclosed rather than implied
+
+- **The table has not been indexed since Laws 1987, ch. 264, § 6.** It is a 1987 schedule applied to
+  2026 income and bites far more households than when written. The model reproduces the statute as
+  it stands; it does not inflate it.
+- **Blind claimants at any age** also qualify under the statute. The model has no way to express
+  that, so a blind New Mexico claimant under 65 is modelled as receiving nothing — which
+  **overstates** their state tax.
+- The income measure **carries no dividend or interest income**, because the state engine is never
+  passed either. A dividend-driven household sits lower on the band table than the statute would put
+  it and receives a larger exemption than it should. Named in New Mexico's own state note.
+
+### Verified to the dollar, and two coverage failures found by controls rather than by review
+
+`t10` §2E now prices **every band of both tables** — 18 cells at the band tops, 14 more one dollar
+past each top — plus the age floor, the per-person unit, the AGI measure, the wage-spill clamp, an
+extinction invariant and the scalar-consistency check. Expected values come from
+`qa/tools/oracle_nm.py`, an independent implementation of the statutory table typed from the
+findings document and never from `STATE_RULES`.
+
+⚠ **The first draft priced only four of eighteen rows.** Mutating the $4,000 band to $4,500 left
+`t10` entirely green — a table test checking its own endpoints, which is the same defect a control
+found in `t34` A-9's first draft during the previous session. **Twice in two suites in one release.**
+
+⚠ **A wrong band TOP was invisible to the dollar path.** Moving the $36,000 joint top to $37,000
+changed no priced cell. `t34` A-10 does catch it — verified directly, it fires alone on that
+mutation — but by comparing the table to a literal, not by pricing a household. A top correct in the
+table but mis-read by the row-selection loop would pass A-10 and fail nothing. The one-dollar-over
+cells close it; the overlap is deliberate and recorded at the site.
+
+Eight negative controls: **C0 silent; C1, C1b, C2, C3, C4, C5, C6, C7 all fire.** The control
+harness (`qa/tools/controls_v566_nm.py`) never edits the canonical source — each mutant is built
+into a throwaway tag from a pristine read — so the mid-run death that poisoned the previous
+session's baseline cannot recur. Source md5 verified unchanged across the whole run.
+
+### ⚠ Ten feature suites reported `0 passed, 0 failed` and this is what it was
+
+The previous session stopped here, correctly: an empty set is not a pass. Three distinct causes,
+**none of them an app defect**.
+
+- **Nine were harness setup.** `dom_bundle.cjs` was never derived from `dom_v566.cjs`, and
+  `DangerClose.jsx` was not at the run-folder root.
+- **Two were invocation.** `t22`'s argument is the **prior** build tag (default `v532`, a source the
+  repo does not carry); `t11`–`t16` take a **module path**, not a version tag — `node
+  t11_survivor_rmd.mjs v566` dies with `Cannot find module 'v566'`. Both conventions lived only in
+  each suite's own header; they are now in the qa-baseline README, which is where a session looks.
+- **One was real.** `t33` failed **closed** — *"registered but has no PINS entry."* It carries a
+  **second** version registry, a table of absolute dollar figures, separate from `KNOWN_VERSIONS`.
+  The AST sweep that verified version registration looked at `KNOWN_VERSIONS` arrays and could not
+  see it. An AST census confirms `t33` is the only suite with that shape. Its household is in
+  Georgia, so its pins holding is itself the assertion that the New Mexico change did not leak.
+
+### Also in this release
+
+- `qa/domdiff_withdrawal.mjs`'s hardcoded default pair was **stale by 26 releases** (`v539 → v540`)
+  and is rolled to `v565 → v566`, header and code in one edit as its own warning requires.
+- **`docs/SCOPE_STATE_SET_SELECTOR.md` — the second half of D-NM-1 (c), written rather than
+  intended.** Seven sites select a state set by executing a regex against user-facing copy; census
+  by AST, not by grep. Recommends a structural `STATE_RULES` field. Not built — it is a scope.
+- `METHODOLOGY.md` updated (a modelling change). One stale line corrected: it still said New Mexico
+  was untouched and awaiting its own pass.
+
+### Known-stale on arrival, and cleared by this package
+
+The knowledge pool was stale for **20 files** — 18 suite files carrying the v566 registration plus
+two documents — because they landed in repo packages after the last refresh. The repo was ahead in
+every case. Named here because a session working from the pool alone would have been running
+pre-v566 suites.
+
 ## ops 2026-09-07 (eleventh package) — the New Mexico handover's third place, and a report that outlived its own decision by a day
 
 **No version bump. v5.65 remains the current build**, source `7604fac5dab891bb31905544d11072f8`,
