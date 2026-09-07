@@ -531,7 +531,8 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
       // is GONE, and this file will still be there. A person removes it, in the release that
       // converts the fifth state — the same mechanism, and the same warning shape, as the
       // SCOPE_ROTH_FICA_OTHERORD entry removed below.
-      "SCOPE_INCOME_CONDITIONING.md",             // PARTIALLY BUILT: CT shipped v5.65; NM/RI/VA/NJ open
+      "SCOPE_INCOME_CONDITIONING.md",             // PARTIALLY BUILT: CT v5.65, NM v5.66; RI/VA/NJ open — THREE left
+      "SCOPE_STATE_SET_SELECTOR.md",              // OPEN, written v5.66 (D-NM-1 (c) second half); expires when the structural field ships
       // ⚠ The comment that used to sit here described SCOPE_TREE_AND_POOL_HOUSEKEEPING.md and was
       // orphaned when that entry was removed on 2026-09-07; it is folded into the removal note
       // below rather than left pointing at nothing.
