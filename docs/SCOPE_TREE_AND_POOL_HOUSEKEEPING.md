@@ -189,6 +189,50 @@ hash* passes before and after the maintainer's deletes.
 
 ---
 
+## 4a · Two decisions the H-2 repair raised — OPEN, for Steve
+
+### H-4 · `STOP-REPORT-v5_63-fica-workbench.md` is still in the pool. Keep it or move it?
+
+It is the one history-class document that H-2 nominated and the 2026-09-05 deletion pass did not
+remove, and **§4 does not name it as a carve-out.** So it is either a deliberate keep or an
+oversight, and the difference matters: an unrecorded keep gets re-proposed by the next sweep and
+deleted by a session that reads §4 as exhaustive.
+
+- **(a) Deliberate keep.** Name it as a carve-out here, in §4, alongside `FINDINGS-v5_63-otherOrd.md`.
+  Nothing else changes; its row already carries no hash.
+- **(b) Oversight.** It joins the other 18: delete from the pool, and its row is marked repo-only in
+  the same pass as everything else was on 2026-09-07.
+
+**Recommendation: (a).** It is 6,778 bytes — the cheapest document in the class — and it is the stop
+report for the FICA workbench, which is the most recent unfinished piece of engine work in the
+project. A session that hits that ground benefits from having it loaded rather than fetched. But
+this is a judgement about how you work, not a rule, which is why it is a question and not a finding.
+
+### H-5 · Six history documents have prose mentions but no manifest row. Give them rows?
+
+Listed in §9 above. **Nothing is broken** — K-9 is satisfied by a prose mention and all six are
+intact in `docs/`.
+
+- **(a) Give each a proper repo-only row**, in the same table as the other 24. Costs six rows;
+  makes all thirty findable by the same scan.
+- **(b) Leave them as prose.** Costs nothing now; leaves six documents that a reader scanning the
+  tables will conclude do not exist.
+
+**Recommendation: (a)**, because §G's whole argument for *retiring rather than deleting* is that a
+row is what tells a future session a document exists at all — and by that argument a prose mention
+is a row that has already half-decayed. But it is not urgent and it fails no gate.
+
+### The gate blind spot behind both — proposed K-10, NOT built
+
+K-8 checks **hashed** rows only; K-9 runs pool → manifest. **Nothing runs manifest → pool for an
+unhashed row**, which is why 22 of the 24 stale rows were undetectable. ⚠ **A naive K-10 (*every row
+names a pool file*) would be wrong and would fire on dozens of legitimate rows** — the manifest
+deliberately carries repo-only rows for `qa/tools/*`, for retired documents, and now for these 24.
+The check has to be *every row that is NOT marked repo-only names a file in the pool*, which means
+the marker becomes load-bearing and needs a fixed spelling. **That is a real design decision, it
+needs its own negative control per §B2, and it is not free** — so it is written down here rather
+than bolted on at the end of a repair package.
+
 ## 5 · What building this scope would do
 
 1. Apply the `qa/qa-baseline/README.md` annotation and git-tag correction (H-1). **Done in the
@@ -250,7 +294,44 @@ thirteen.
 
 ## 9 · Build record
 
-*(H-1's annotation shipped in the 2026-09-04 ops package. H-2 and the sweep are not built.)*
+*(H-1's annotation shipped in the 2026-09-04 ops package.)*
+
+### H-2 — EXECUTED, in two halves, across three days
+
+| When | What | By |
+|---|---|---|
+| 2026-09-04 | scope written, H-2 resolved as (b) | build session |
+| 2026-09-05 | **pool deletions** | the maintainer, at the v5.65 upload |
+| 2026-09-07 | **24 manifest rows rewritten as repo-only** | ops package `manifest-repair` |
+
+⚠ **The gap between the second and third rows is the finding, and this scope predicted it.** §7 says
+in as many words: *"What no check covers: the deletion itself… the three-place rule is a manual
+discipline."* It was correct, and the discipline was not kept — `package_check` **K-8** was red for
+two days. **A scope that names a manual step as its own weakest point should schedule that step into
+the same package, not the next one.**
+
+**Three corrections to this scope's own numbers, measured 2026-09-07 rather than recalled:**
+
+1. **§4 says "24 files, 283,558 bytes" in the pool.** The count of files deleted is **18**, not 24.
+   The pool holds **6** history-class documents today — the two carve-outs §4 names
+   (`FINDINGS-v5_63-otherOrd.md`, `AUDIT_STATE_INCOME_BASES_ROUND5.md`), three more the build session
+   re-derived as §4 instructed (`AUDIT_STATE_EXCL65_ROUND3.md`, `AUDIT_STATE_EXCL65_ROUND4.md`,
+   `FINDINGS-v5_63-state-statutes.md`), and `STOP-REPORT-v5_63-fica-workbench.md`, which is **not a
+   named carve-out and is decision H-4 below.**
+2. **The number of ROWS needing rewrite is 24, and it is not the same number.** Six rows were already
+   naming non-pool files before H-2 ran. §5's *"rewrite the 24 manifest rows"* conflated files with
+   rows; they were never the same set.
+3. **Six history documents are named in the manifest only in PROSE, with no table row at all** —
+   `AUDIT_STATE_EXCL65_ROUND2.md`, `FINDINGS-v5_54-session-2.md`, `STATUS_v5_37_shipped.md`,
+   `STATUS_v5_43_shipped.md`, `STOP-REPORT-v5_54-session-budget.md`,
+   `STOP-REPORT-v5_56-session-budget.md`. All six are intact in `docs/`. K-9 passes on a prose
+   mention, so none is broken — but none is findable by a reader scanning the tables either. **Open
+   as H-5.**
+
+### Still not built
+
+**H-3** (the `docs/qa-baseline-README.md` deletion and the E-1b fix that must precede it) and the
+**third scope-status sweep** (§5 item 4). Both are unchanged by this package.
 
 ---
 
