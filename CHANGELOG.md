@@ -1,5 +1,89 @@
 # Changelog
 
+## ops 2026-09-07 (eighth package) — D-C-1: K-8 was reading a sentence as a hash row
+
+**No version bump. v5.65 remains the current build**, source `7604fac5dab891bb31905544d11072f8`,
+artifact `b4ea0bd1d6993aadd0b7fedcfe47e580`, repo HEAD `6b23149` at the start of this work. No app
+source, no `t*.mjs`, no fixture, no `index.html`. Two `qa/tools/` files, the CHANGELOG, the manifest.
+
+### What was wrong
+
+`package_check`'s **K-8** locates hash rows in the manifest with a regex. Its matcher allowed **any
+prose** between the filename and the md5:
+
+> `\|\s*` + *file* + `\s*\|[^|]*\|?\s*` + *hash*
+
+So a **description** row that merely *quoted* an md5 was read as that file's hash row. The instance:
+`MissingFeatures.md`'s index row carries the historical note *"RE-PINNED TO v5.48 on 2026-08-25
+(`6b30580a…`, tree `ba6d598`)"*. **K-8 read that dated statement about a past build as a live hash.**
+
+⚠ **It had been accidentally CORRECT for two weeks**, because the file had not been edited since that
+re-pin. **The first edit to it turned K-8 red** — pointing at a row that is not a row, and at a hash
+nobody should ever roll, because rolling it would falsify the record of what the file *was* at v5.48.
+
+**Two consequences worth separating.** The gate went red on a correct edit, which is the loud half.
+The quiet half is worse: `MissingFeatures.md` therefore did **not** appear in the "carries no md5
+row" set, so `SCOPE_HOUSEKEEPING_THREE.md` Item C listed it as unrowed while this check saw it as
+rowed. **A human and the gate disagreed about the same file and neither could see the other.** That
+disagreement was the defect; the red gate was only its symptom.
+
+### What changed
+
+The matcher now requires the row's own cell — `| <file> | <hash> |`, anchored at the start of a line,
+with the hash cell holding **nothing but the hash**. Measured against the live manifest before and
+after: **73 → 72 rows, the single dropped entry being the false one.** No legitimate row lost, no
+hash disagreement on any file that kept its row.
+
+### Two controls, because one would have proved nothing
+
+- **P42** — a description row quoting a deliberately wrong hash for a real pool file is appended;
+  **K-8 must not name that file.** ⚠ Its first draft asserted *"K-8 did not fire at all"* and reported
+  a FINDING on a run where K-8 was firing for an unrelated stale row. **A control that cannot tell
+  its own mutation from the ambient state is measuring the ambient state** — the P41 and P32 defect,
+  now its third occurrence in this harness. It carries a **needle**: the failure line must name
+  `t1_units.mjs`.
+- **P43** — a real hash row is corrupted and **K-8 must still fire.**
+
+⚠ **The pair is the point, and it is H-6's lesson.** P42 alone would pass if K-8 were simply deleted.
+P43 is what distinguishes *narrowed* from *broken*. Both were run and both behave as claimed.
+
+### Why this shipped alone, ahead of the work that found it
+
+**Items A and C of `SCOPE_HOUSEKEEPING_THREE.md` are blocked on this.** Item A rewrites the stale
+D-10 row in `MissingFeatures.md`, and until this fix lands *any* edit to that file turns K-8 red. The
+fix ships first and the edit second, validated by the fixed gate — the same ordering H-3 used on
+2026-09-07, and for the same reason: **shipping both together would mean the check that passed is not
+the check that was in force.**
+
+⚠ `SCOPE_TREE_AND_POOL_HOUSEKEEPING.md` §6 put *"fixing `package_check`'s gaps"* out of housekeeping's
+scope, each needing its own scope. This is that separate package, decided as **D-C-1 (a)**.
+
+### Verification
+
+**No suite was run and none applies** — no app source, no `t*.mjs`, no fixture. `qa/tools/` asserts
+nothing about the app and is counted in no release total (§B1).
+
+- OPERATIONS §A freshness check against a fresh clone at `6b23149`; source and artifact unchanged.
+- `node --check` on `package_check.mjs`, `bash -n` on `package_check_controls.sh`.
+- **The loose and strict matchers run side by side against the live manifest**: 73 vs 72, one
+  dropped, none added, no hash disagreement.
+- **Section K's controls re-run: P29–P35 and P42–P43 all behave as documented.**
+- `package_check` run on this package.
+
+⚠ **P1–P28 were again NOT re-validated** — they need an un-uploaded **app-release** package and this
+is an ops package. Six report NOT CAUGHT against one, and **whether that is an input artefact or a
+real defect remains UNKNOWN.** New Mexico's package will be the first that can settle it.
+
+### Still open
+
+- **D-NM-1** — the guarded-set decision blocking New Mexico.
+- **Items A and C** — built in the session that found this and **held**, unblocked by this package.
+- **K-10**, proposed and not built.
+
+**Provenance.** No source or artifact change: v5.65 remains `7604fac5dab891bb31905544d11072f8` /
+`b4ea0bd1d6993aadd0b7fedcfe47e580`.
+
+
 ## ops 2026-09-07 (seventh package) — the stop report's third place, and a document that argued with the shelf it sat on
 
 **No version bump. v5.65 remains the current build**, source `7604fac5dab891bb31905544d11072f8`,
