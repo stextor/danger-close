@@ -1044,6 +1044,7 @@ package, which is the failure mode the section above this one records twice.
 | `FINDINGS-v5_63-otherOrd.md` | The `otherOrd` question settled by execution: the v5.62 disclosed gap is **FALSE** (complement identity executed with non-zero readings on both sides), and the Roth comparator instead charges **FICA on rental and annuity income** at two sites. Also records why the earlier runtime attempt read `0`, the six AST-resolved `streamsAnnualAt` call sites, the mislabelled `t10` pin, and two harness facts absent from `TESTING.md` | **current — read before touching `runRothStrategies` or the v5.62 disclosure** |
 | `SCOPE_ROTH_FICA_OTHERORD.md` | Scope for v5.63: fix the FICA defect and correct the false disclosure together | **APPROVED 2026-09-03** — D-1 withdrawn (the fix closes it), D-2..D-5 decided by the maintainer. §4's blast radius is measured, not assumed |
 | `STOP-REPORT-v5_63-fica-workbench.md` | v5.63 stopped mid-build: engine fix applied from canonical v5.62 and **2,934 app checks green on both legs**, but no new tests, controls, `METHODOLOGY`, `CHANGELOG` or built artifact. Lists what remains, in order | **OPEN — the entry point for the next session.** The workbench `github/` half is NOT committed |
+| `STOP-REPORT-v5_66-NM-note-guarded-set.md` | **New Mexico (v5.66) stopped mid-build, on a DECISION not a defect.** The premise is verified and good: `_fromTest` already supports NM's nine `amount` bands, `cmp` already defaults to the inclusive comparator NM needs, and `_floor` already defaults to 65 — so this release is a table transcription into tested machinery, and its direction is OPTIMISTIC → conservative. ⚠ **The stop is §3's finding: rewording NM's note to state the phase-out silently drops NM out of the income-limited guarded set** that `boundaries.mjs` L117 and `t10` L921–923 both select with `/income[- ]limited|income limit/i` against the note string — and `t10` still reports **244 passed / 0 failed**. A shrinking set is invisible to a green suite. **Second occurrence: the same shape hit NJ at v5.54.** §5 also lists `t34`'s unregistered `v566` tag and the `exclAge: 65` legibility question | **OPEN — the entry point for the New Mexico session. Read §4 (D-NM-1) FIRST; the build cannot resume until it is answered.** ⚠ Its `v566.jsx` draft was deliberately NOT preserved — if D-NM-1 resolves as (a) the note text changes anyway, so the draft would preserve the wrong string. Rotates to repo-only when NM ships (H-2) |
 
 ⚠ **The suite total being UNCHANGED across the v5.63 fix is not reassurance.** No suite fixture
 carries a non-zero income stream, so the changed path is unreachable by every existing check. That
@@ -1077,6 +1078,39 @@ retired and superseded. They get no row because there is no file. Checked 2026-0
 committed tree, so the next sweep does not re-open them.
 
 ## Retirement list (delete-first; nothing replaces these)
+
+### At the ops upload of 2026-09-07 (seventh package — the NM stop report gets its third place) — DELETE THESE FIRST
+
+**No version bump.** v5.65 remains current. No app source, no `t*.mjs`, no fixture, no tooling change.
+
+| Delete from the POOL | Because |
+|---|---|
+| `PROJECT_KNOWLEDGE_INDEX.md` | replaced — this file |
+| `CHANGELOG.md` | replaced — the ops entry for this package |
+| ⚠ `STOP-REPORT-NM-note-guarded-set.md` | **RENAMED.** Its replacement is `STOP-REPORT-v5_66-NM-note-guarded-set.md`, uploaded fresh |
+
+> ⚠ **AND ONE DELETION FROM THE REPO, because a rename is a delete plus an upload in BOTH places:**
+> **`DELETE FROM REPO: docs/STOP-REPORT-NM-note-guarded-set.md`**
+>
+> The pool is add-only and the repo is not, but the rename has to happen in both or the two
+> destinations hold the same document under two names. §G records that exact outcome: *"Renaming a
+> file is also a delete-plus-upload: if the old name isn't removed, the pool holds the same document
+> twice under two names (observed 2026-08)."*
+>
+> ⚠ **WHY THIS PACKAGE EXISTS AT ALL: `K-9` IS RED ON THE LIVE POOL RIGHT NOW.** The stop report was
+> filed to `docs/` and the pool on 2026-09-07 and named nowhere in this manifest, so K-9 — *every
+> pool file is named somewhere in the manifest* — went red the moment it landed. **Two of §G's three
+> places, done in different passes.** That is H-2's failure exactly, which left K-8 red for two days,
+> and it is why §G calls this a three-place operation rather than a two-place one.
+>
+> ⚠ **The report also carried a FALSE STATEMENT ABOUT ITS OWN DESTINATION** — it read *"Session-only.
+> Nothing shipped"* while sitting in the pool. Corrected in place, with the reasoning kept, rather
+> than quietly overwritten.
+>
+> **No md5 hash row is added.** Stop reports do not carry one — `STOP-REPORT-v5_63-fica-workbench.md`
+> has none either, and it is among the 37 pool files with no row. Item C of
+> `SCOPE_HOUSEKEEPING_THREE.md`, unbuilt, and **D-3's recommendation is explicitly not to row this
+> class of document**.
 
 ### At the ops upload of 2026-09-07 (sixth package, D-7 — the housekeeping scope retires) — DELETE THESE FIRST
 

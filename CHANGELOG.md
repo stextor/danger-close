@@ -1,5 +1,93 @@
 # Changelog
 
+## ops 2026-09-07 (seventh package) — the stop report's third place, and a document that argued with the shelf it sat on
+
+**No version bump. v5.65 remains the current build**, source `7604fac5dab891bb31905544d11072f8`,
+artifact `b4ea0bd1d6993aadd0b7fedcfe47e580`, repo HEAD `feb7f67` at the start of this work. No app
+source, no `t*.mjs`, no fixture, no `qa/tools/` change, no `index.html`. Two documents and a rename.
+
+### `K-9` was RED on the live pool, and had been since the file landed
+
+The New Mexico stop report was filed to `docs/` and to the pool on 2026-09-07 and **named nowhere in
+`PROJECT_KNOWLEDGE_INDEX.md`.** `package_check`'s **K-9** — *every pool file is named somewhere in
+the manifest* — went red the moment it arrived, and stayed red because the third place was never
+done.
+
+**Two of §G's three places, executed in different passes.** That is H-2's failure reproduced four
+days later: its pool deletions and its manifest rewrite happened two sessions apart and left K-8 red
+in between. §G calls this a **three**-place operation for exactly this reason, and the lesson each
+time is the same — **schedule all three into one package.** This package is the third place.
+
+The row is a **description row**, not an md5 row: `File | What it is | Status`, reading **OPEN — the
+entry point for the New Mexico session.** No hash row is added. `STOP-REPORT-v5_63-fica-workbench.md`
+carries none either, and **D-3's recommendation in `SCOPE_HOUSEKEEPING_THREE.md` is explicitly not to
+row this class of document** — a row is a maintenance obligation, and a stale row is worse than none.
+
+### The report contained a false statement about its own destination
+
+It opened *"Session-only. Nothing shipped. No package cut."* — and was then correctly filed in two
+durable places. **A document instructing its reader to let it expire, from inside the pool it is
+sitting in, is a document arguing with the shelf it is on.**
+
+The recommendation was made without checking precedent and the precedent contradicts it: the repo
+holds **eight** stop reports under `docs/`, and the one describing still-live work is **also in the
+pool with a manifest row**; the seven completed ones are repo-only. That is H-2's settled shape — a
+live handover goes to both and rotates to repo-only once the work it hands over has shipped.
+Corrected **in place, with the reasoning kept**, per §I: a retired document keeps its body as the
+record of what was believed, and anything reading as a live instruction gets annotated rather than
+overwritten.
+
+### Renamed, and a rename is a delete in BOTH destinations
+
+`STOP-REPORT-NM-note-guarded-set.md` → **`STOP-REPORT-v5_66-NM-note-guarded-set.md`**. All eight
+siblings carry the version they stopped in; this one did not, and a file that sorts away from its
+siblings is one the next scope sweep reads as a different kind of thing.
+
+⚠ The old name is deleted from the **pool** (add-only: a same-name upload would leave both) **and
+from the repo** (`DELETE FROM REPO: docs/STOP-REPORT-NM-note-guarded-set.md`, the declaration E-1b
+learned to read on 2026-09-07). §G: *"Renaming a file is also a delete-plus-upload: if the old name
+isn't removed, the pool holds the same document twice under two names."*
+
+### What the report actually hands over, unchanged by this package
+
+**New Mexico stopped on a DECISION, not a defect, and the premise is good.** `_fromTest` already
+supports NM's nine `amount` bands, `cmp` already defaults to the inclusive comparator the statute
+needs, and `_floor` already defaults to 65 — the release is a table transcription into tested
+machinery, and its direction is **optimistic → conservative**.
+
+⚠ **The stop is that rewording NM's note to state its phase-out silently drops NM out of the
+income-limited guarded set**, which `boundaries.mjs` and `t10` both select with
+`/income[- ]limited|income limit/i` **against the user-facing note string** — and `t10` still reports
+**244 passed / 0 failed**. A shrinking set is invisible to a green suite. **Second occurrence: the
+same shape hit New Jersey at v5.54**, is recorded in `boundaries.mjs`'s own comment, and nothing was
+built to catch it since. **D-NM-1 is open and the build cannot resume until it is answered.**
+
+### Verification
+
+**No suite was run and none applies** — no source, no `t*.mjs`, no fixture, no tooling.
+
+- OPERATIONS §A freshness check against a fresh clone at `feb7f67`: source and artifact unchanged and
+  matching the manifest's Current table.
+- **K-9 re-tested against the live pool with the manifest as this package leaves it:** all **111**
+  pool files listed, with the renamed report substituted for the old name. It was `UNLISTED: 1`
+  before.
+- `package_check` run on this package from the committed tool.
+
+### Still open
+
+- **D-NM-1** — the guarded-set decision. Recommendation on record: **(c)**, ship NM on a safe note
+  and scope the selector fix separately, *scoped in the same session, not left as an intention*.
+- **`SCOPE_HOUSEKEEPING_THREE.md`** — Items A, B, C, decisions answered and queued.
+- **P1–P28** run against **New Mexico's own package**, before its zip is sent. ⚠ The earlier phrasing
+  *"before New Mexico"* was not executable: they need an un-uploaded **app-release** package, and NM's
+  will be the first one. **Whether their six NOT CAUGHT reports are an input artefact or a real
+  defect remains unknown and must not be assumed.**
+- **K-10** — proposed, not built.
+
+**Provenance.** No source or artifact change: v5.65 remains `7604fac5dab891bb31905544d11072f8` /
+`b4ea0bd1d6993aadd0b7fedcfe47e580`.
+
+
 ## ops 2026-09-07 (sixth package) — D-7: the housekeeping scope retires, and takes its allowlist entry with it
 
 **No version bump. v5.65 remains the current build**, source `7604fac5dab891bb31905544d11072f8`,
