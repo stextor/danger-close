@@ -532,14 +532,23 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
       // converts the fifth state — the same mechanism, and the same warning shape, as the
       // SCOPE_ROTH_FICA_OTHERORD entry removed below.
       "SCOPE_INCOME_CONDITIONING.md",             // PARTIALLY BUILT: CT shipped v5.65; NM/RI/VA/NJ open
-      // Added 2026-09-04 with the scope itself. Its three decisions (H-1, H-2, H-3) are RESOLVED.
-      // ⚠ REASON CORRECTED 2026-09-07, and the correction is the same shape as the one above: the
-      // entry was written expecting H-2 to be a single act. It was not. The maintainer executed the
-      // POOL DELETIONS on 2026-09-05 and the MANIFEST rows were rewritten on 2026-09-07 — two
-      // places of §G's three, in two different sessions, with K-8 red in between. What remains is
-      // H-3 (the docs/qa-baseline-README.md deletion) and the third scope-status sweep.
-      // Expires when BOTH of those are done — again, only a person can retire it.
-      "SCOPE_TREE_AND_POOL_HOUSEKEEPING.md",      // H-2 done 2026-09-07; H-3 + sweep still unbuilt (its §5)
+      // ⚠ The comment that used to sit here described SCOPE_TREE_AND_POOL_HOUSEKEEPING.md and was
+      // orphaned when that entry was removed on 2026-09-07; it is folded into the removal note
+      // below rather than left pointing at nothing.
+      // ── REMOVED 2026-09-07 (sixth package): "SCOPE_TREE_AND_POOL_HOUSEKEEPING.md", added
+      // 2026-09-04. Its entry named its own expiry — "Expires when BOTH of those are done", meaning
+      // H-3 and the third scope-status sweep. H-3 closed in the third package of 2026-09-07 and the
+      // sweep ran in the fifth, so the condition was MET and the entry was removed in the next
+      // package, together with the scope's retirement.
+      //   ⚠ THE TWO HALVES MUST SHIP TOGETHER. This file's first 12 lines are all I-2 reads, so
+      //   dropping the allowlist entry while the scope still reads "OPEN — NOT YET BUILT" turns a
+      //   correct retirement into a red gate, and retiring the scope without dropping the entry
+      //   leaves a permanent excuse behind. They shipped together.
+      //   ⚠ Its reason had ALREADY gone stale once, on 2026-09-07, for the same cause as the
+      //   INCOME_CONDITIONING entry above: it was written expecting H-2 to be a single act, and H-2
+      //   took two sessions with K-8 red in between. That is the THIRD entry in this block whose
+      //   REASON rotted while the entry itself stayed correct, and I-3 can see none of them — I-3
+      //   fires only on an entry naming a file that is GONE. Only a person retires this class.
       // ── REMOVED 2026-09-04 at the v5.63 ship: "SCOPE_ROTH_FICA_OTHERORD.md". Its entry was
       // added 2026-09-03 with the note that it EXPIRES THE MOMENT v5.63 SHIPS and that I-3
       // could not catch it going stale, since I-3 only fires on an entry naming a file that is
