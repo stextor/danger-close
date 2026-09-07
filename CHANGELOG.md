@@ -1,5 +1,78 @@
 # Changelog
 
+## ops 2026-09-07 (third package) — H-3 closed: the duplicate is gone, and the gate could see it go
+
+**No version bump. v5.65 remains the current build**, source `7604fac5dab891bb31905544d11072f8`,
+artifact `b4ea0bd1d6993aadd0b7fedcfe47e580`, repo HEAD `c41c18b` at the start of this work. No app
+source, no `t*.mjs`, no fixture, no `index.html`, **and no tooling change** — this package is
+validated by the gate the previous one shipped, which is the whole reason the two were split.
+
+### What changed
+
+**`docs/qa-baseline-README.md` is deleted.** It was a byte-identical duplicate of
+`qa/qa-baseline/README.md` that landed at `dcc14c1` as an upload artifact — the pool's *flattened*
+name uploaded into `docs/` as though it were a document. §G's deletion precondition is met in its
+strongest form: the outcome is preserved **byte-identically** at another path and the document
+carries no decision of its own.
+
+**Declared as `DELETE FROM REPO: docs/qa-baseline-README.md`** in `README-FIRST.md` — the **first
+use** of the declaration E-1b learned to read earlier the same day.
+
+### ⚠ Why this is a separate package from its own fix
+
+H-3 was resolved on 2026-09-04 and could not be executed for a tooling reason: E-1b resolved a
+`knowledge/` file to its repo counterpart against the **pre-ship** clone, so a package shipping the
+deletion went red **because of the deletion it was shipping.** The fix shipped in the second package
+of 2026-09-07; this is the third, and it ships only the deletion.
+
+**Shipping both together would have meant the check that passed was not the check that was in
+force.** That is the same discipline as §B2's gate-the-inversion rule, one level up.
+
+⚠ **Contrast with H-2, four hours earlier.** That deletion was split across two *sessions* — pool on
+2026-09-05, manifest rows on 2026-09-07 — and left `package_check` **K-8 red for two days**. **A
+split between packages is discipline; a split between sessions is a dropped third place.** All three
+of §G's places are in this one package: the repo deletion, the pool (untouched, deliberately), and
+the manifest row.
+
+### Verified at deletion time, not recalled
+
+- **All three copies byte-identical** at `cbbbb3bae7149cfbcdad7f8e061b5f2a`. ⚠ The scope's §3a
+  records `605c263a…` at 5,913 bytes; that is the **pre-correction** pair and is now history — the
+  2026-09-04 package rewrote the file to 7,382 bytes. **A hash written into prose goes stale; this
+  one did, in three days.**
+- **Full reference census across the repo and the pool.** Every mention of the name is prose *about*
+  the duplicate. Nothing loads it. The one scope naming the bare basename
+  (`SCOPE_FIX_otherAccounts_tax_treatment_v5_21.md`) maps it explicitly to `qa/qa-baseline/README.md`.
+- ⚠ **The pool's `qa-baseline-README.md` is NOT deleted and must not be.** It is the legitimate
+  flattened name and keeps its own manifest row.
+
+### ⚠ A consequence of the deletion, recorded so it is not found as a surprise
+
+Before this, exactly one repo path carried the basename `qa-baseline-README.md`, so E-1b could
+resolve the pool file to a counterpart. There is now **none**, so E-1b skips it. It joins
+`tools_fixture.jsx` and `vite_config.js` as **the three pool files E-1b is blind to by rename.**
+
+That is E-1b's existing `cands.length !== 1` rule — *"guessing which one was meant is how a check
+starts lying"* — and not a new defect. But it is worth stating plainly: **removing a duplicate
+removed the one thing that made this file visible to that check.** The remedy, if it ever matters,
+is a rename map rather than a looser match. **Not built.**
+
+### Post-upload close-out of the previous package
+
+Run before this work started, with the now-committed fixed tool: **J-2 GREEN, K-8 GREEN**, 44
+passed / 1 failed / 0 skipped, the one failure being D-1 — the expected post-upload inversion. The
+pool holds 110 files with no add-only duplicates, every shipped file byte-identical in both
+destinations, and every `.sh` still `100755`. **All six new negative controls re-run from the
+committed copies and all six fire.**
+
+### Still open
+
+- **The third scope-status sweep** (§5 item 4) — the single largest remaining item.
+- **H-6** — section K's negative controls are mostly measuring nothing. ⚠ **Until repaired, they are
+  not evidence that section K works.**
+- **K-10** — the manifest → pool direction, proposed and not built.
+
+
 ## ops 2026-09-07 (second package) — three gate blind spots of one shape, and the row that proved it
 
 **No version bump. v5.65 remains the current build**, source `7604fac5dab891bb31905544d11072f8`,
