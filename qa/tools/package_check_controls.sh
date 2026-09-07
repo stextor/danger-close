@@ -331,144 +331,157 @@ if [ -z "$POOLARG" ] || [ ! -d "$POOLARG" ]; then
   SKIP=$((SKIP+1)); echo "  - SKIPPED: P29..P35 (section K) - no pool dir given. usage: $(basename "$0") <app-pkg> <clone> <ops-pkg-or-empty> <pool>"
 else
 
-runk () {  # $1 = label, $2 = expected id, $3 = "NOT:<id>" or "", $4 = python mutation source
-  local label="$1" want="$2" mustnot="$3" mut="$4"
-  rm -rf /tmp/pkpool && cp -r "$POOLARG" /tmp/pkpool
-  if ! python3 -c "$mut" >/dev/null 2>&1; then
-    MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** %s (mutation did not apply - control is INVALID)\n" "$label"; return
+# ⚠ REWRITTEN 2026-09-07 (H-6). THE ENTIRE K BLOCK BELOW WAS MEASURING NOTHING.
+#
+# THE DEFECT. `runk` mutated the manifest in a scratch copy of the POOL. But K reads the manifest
+# from the PACKAGE's github/ copy first, deliberately — "a package whose whole job is to correct
+# this document would otherwise be failed BY the correction it is shipping." So once §L required
+# every release package to ship a manifest (2026-09-03, the same day these controls were written),
+# every one of these controls edited a file K never opened.
+#
+# WHAT THAT LOOKED LIKE, measured 2026-09-07: P29, P30, P31 and P34 reported
+# "mutation did not apply - control is INVALID" — they fail closed, which is why they were the
+# honest ones. **P32 reported CAUGHT and the pass was SPURIOUS**: K-8 fired, but on the package's
+# genuinely stale package_check.mjs row, not on P32's mutation. P33 fired K-8 instead of K-9 for
+# the same reason. **A control that cannot tell its own mutation from the ambient state is
+# measuring the ambient state.** That is the identical defect P41 had on its first draft, caught
+# the same afternoon; the fix there and here is to match on the thing the control itself changed.
+#
+# THE FIX, and why this route rather than the other. Two were available: mutate the manifest K
+# actually reads, or hand K a package with no manifest so it falls back to the pool. **The second
+# tests a configuration that never occurs** — §L requires every release package to ship a manifest —
+# so it would be a green reading from a shape no release has. These now copy the PACKAGE, mutate
+# its manifest in BOTH github/ and knowledge/, and run against that.
+#
+# ⚠ AND NOTHING IS HARDCODED ANY MORE. The old P29/P30/P31/P34 named `v5.61`, `v5.60`,
+# `7e1a0288…` and `ba3968f2…` literally, so they went stale the release after they were written
+# and had reported INVALID ever since. Every value is now DERIVED from the manifest under test.
+#
+# ⚠ P29 is still the reason section K exists. It reproduces the v5.61 defect — the manifest not
+# updated at all, so NEITHER build table rolls — and asserts two things: that K-1 CATCHES it, and
+# that **K-7 DOES NOT**. If K-7 ever starts firing on P29, someone has changed it into a different
+# check and its WEAK label is a lie.
+
+# runk: $1 label, $2 expected id, $3 "NOT:<id>" or "", $4 python mutation, $5 optional needle the
+#       failure line must contain (disambiguation — the P41/P32 lesson)
+runk () {
+  local label="$1" want="$2" mustnot="$3" mut="$4" needle="${5:-}"
+  rm -rf /tmp/pkpool /tmp/pkpkg
+  cp -r "$POOLARG" /tmp/pkpool
+  cp -r "$APP" /tmp/pkpkg
+  # Every copy of the manifest this package could present to K. K prefers github/, then knowledge/,
+  # then the pool — mutate all of them so the control does not depend on that ordering.
+  local pre="
+import os
+MANPATHS=[q for q in ['/tmp/pkpkg/github/PROJECT_KNOWLEDGE_INDEX.md',
+                      '/tmp/pkpkg/knowledge/PROJECT_KNOWLEDGE_INDEX.md',
+                      '/tmp/pkpool/PROJECT_KNOWLEDGE_INDEX.md'] if os.path.exists(q)]
+assert MANPATHS, 'no manifest anywhere - control is INVALID'
+def rd(): return open(MANPATHS[0]).read()
+def wr(s):
+    for q in MANPATHS: open(q,'w').write(s)
+"
+  if ! python3 -c "$pre$mut" >/dev/null 2>&1; then
+    MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** %s (mutation did not apply - control is INVALID)\n" "$label"
+    rm -rf /tmp/pkpool /tmp/pkpkg; return
   fi
-  local out fired
-  out=$(node "$PKG_CHECK" "$APP" "$CLONE" "" /tmp/pkpool 2>&1)
+  local out fired hit
+  out=$(node "$PKG_CHECK" /tmp/pkpkg "$CLONE" "" /tmp/pkpool 2>&1)
   fired=$(echo "$out" | grep "✗" | grep -oE '[A-K]-[0-9]+b?' | sort -u | tr '\n' ',')
   if [ -n "$mustnot" ] && echo "$fired" | grep -q "${mustnot#NOT:}"; then
     MISS=$((MISS+1)); printf "  *** FINDING *** %s - %s fired when it must NOT (fired: %s)\n" "$label" "${mustnot#NOT:}" "$fired"
-    rm -rf /tmp/pkpool; return
+    rm -rf /tmp/pkpool /tmp/pkpkg; return
+  fi
+  # ⚠ When a needle is given the failure line must name the control's OWN mutation. Without this a
+  # control passes on any unrelated failure of the same check — which is how P32 passed spuriously.
+  if [ -n "$needle" ]; then
+    hit=$(echo "$out" | grep "✗" | grep -- "$want" | grep -F -- "$needle")
+    [ -n "$hit" ] || fired="(no line naming $needle)"
   fi
   if echo "$fired" | grep -q "$want"; then
     PASS=$((PASS+1)); printf "  CAUGHT by %-6s %s%s\n" "$want" "$label" "${mustnot:+   [and ${mustnot#NOT:} correctly silent]}"
   else
-    MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** %s (wanted %s, fired: %s)\n" "$label" "$want" "$fired"
+    MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** %s (wanted %s, fired: %s)\n" "$label" "$want" "${fired:-none}"
   fi
-  rm -rf /tmp/pkpool
+  rm -rf /tmp/pkpool /tmp/pkpkg
 }
 
 runk "P29 THE v5.61 DEFECT - manifest not updated at all, NEITHER table rolled" "K-1" "NOT:K-7" "
-p='/tmp/pkpool/PROJECT_KNOWLEDGE_INDEX.md'; s=open(p).read()
+import re
+s=rd()
 a=s.index('## Current build'); b=s.index('## Prior build')
-cur=s[a:b].replace('| Version | **v5.61** |','| Version | **v5.60** |',1)
-pri=s[b:].replace('| Version | **v5.60** |','| Version | **v5.59** |',1)
-assert cur!=s[a:b] and pri!=s[b:]
-open(p,'w').write(s[:a]+cur+pri)
+def ver(blk): return re.search(r'\| Version \| \*\*(v5\.(\d+))\*\* \|', blk)
+mc=ver(s[a:b]); mp=ver(s[b:]); assert mc and mp, 'version rows not found'
+n=int(mc.group(2))
+cur=s[a:b].replace(mc.group(1), 'v5.%d'%(n-1), 1)
+pri=s[b:].replace(mp.group(1), 'v5.%d'%(n-2), 1)
+assert cur!=s[a:b] and pri!=s[b:], 'neither table moved'
+wr(s[:a]+cur+pri)
 "
 
 runk "P30 Current source md5 corrupted" "K-2" "" "
-p='/tmp/pkpool/PROJECT_KNOWLEDGE_INDEX.md'; s=open(p).read()
+import re
+s=rd()
 a=s.index('## Current build'); b=s.index('## Prior build')
-blk=s[a:b].replace('7e1a02881256142c5b9206045e76e2ec','0000000000000000000000000000dead',1)
-assert blk!=s[a:b]
-open(p,'w').write(s[:a]+blk+s[b:])
+m=re.search(r'\| Source md5 \| .?([0-9a-f]{32})', s[a:b]); assert m, 'no Source md5 row'
+wr(s[:a]+s[a:b].replace(m.group(1),'0'*28+'dead',1)+s[b:])
 "
 
 runk "P31 Current built-artifact md5 corrupted" "K-3" "" "
-p='/tmp/pkpool/PROJECT_KNOWLEDGE_INDEX.md'; s=open(p).read()
-a=s.index('## Current build'); b=s.index('## Prior build')
-blk=s[a:b].replace('ba3968f24e06eb989d9171cbd9a8c796','0000000000000000000000000000beef',1)
-assert blk!=s[a:b]
-open(p,'w').write(s[:a]+blk+s[b:])
-"
-
-runk "P32 a fallback hash-table row goes stale" "K-8" "" "
 import re
-p='/tmp/pkpool/PROJECT_KNOWLEDGE_INDEX.md'; s=open(p).read()
-m=re.search(r'\`t29_boundaries\.mjs\` \| \`([0-9a-f]{32})\`', s)
-assert m
-open(p,'w').write(s[:m.start(1)]+'0'*32+s[m.end(1):])
+s=rd()
+a=s.index('## Current build'); b=s.index('## Prior build')
+m=re.search(r'index\.html.{0,2} md5 \| .?([0-9a-f]{32})', s[a:b]); assert m, 'no built md5 row'
+wr(s[:a]+s[a:b].replace(m.group(1),'0'*28+'beef',1)+s[b:])
 "
 
-runk "P33 a pool file loses its only manifest row" "K-9" "" "
-p='/tmp/pkpool/PROJECT_KNOWLEDGE_INDEX.md'; s=open(p).read()
-assert 'vergates.cjs' in s
-open(p,'w').write(s.replace('vergates.cjs','REMOVED_BY_CONTROL.cjs'))
-"
+# ⚠ P32 CARRIES A NEEDLE. Its predecessor reported CAUGHT while K-8 was firing on an unrelated
+# genuinely-stale row. The needle is the filename this control itself corrupted.
+P32F=$(node -e '
+  const {readFileSync,existsSync}=require("fs");const d=process.argv[1];
+  const M=readFileSync(d+"/PROJECT_KNOWLEDGE_INDEX.md","utf8");
+  for(const m of M.matchAll(/\|\s*`?([A-Za-z0-9_.\-]+\.(?:mjs|cjs|sh))`?\s*\|\s*`?([0-9a-f]{32})`?/g))
+    if(existsSync(d+"/"+m[1])){console.log(m[1]);break;}' "$POOLARG")
+runk "P32 a fallback hash-table row goes stale ($P32F)" "K-8" "" "
+import re
+s=rd(); f=re.escape('$P32F')
+m=re.search(r'.'+f+r'. \| .([0-9a-f]{32})', s); assert m, 'row not found'
+wr(s[:m.start(1)]+'0'*32+s[m.end(1):])
+" "$P32F"
+
+# ⚠ P33 CARRIES A NEEDLE for the same reason, and asserts K-9 specifically: renaming a filename
+# also breaks that file's hash row, so K-8 fires too and the id alone cannot tell them apart.
+P33F=$(node -e '
+  const {readFileSync,readdirSync}=require("fs");const d=process.argv[1];
+  const M=readFileSync(d+"/PROJECT_KNOWLEDGE_INDEX.md","utf8");
+  for(const f of readdirSync(d)) if(/\.(cjs|mjs)$/.test(f) && M.includes(f)){console.log(f);break;}' "$POOLARG")
+runk "P33 a pool file loses its only manifest row ($P33F)" "K-9" "" "
+s=rd(); assert '$P33F' in s, 'name not in manifest'
+wr(s.replace('$P33F','REMOVED_BY_CONTROL.cjs'))
+" "$P33F"
 
 runk "P34 Current rolled but Prior NOT - the defect that ran for seven releases" "K-7" "" "
-p='/tmp/pkpool/PROJECT_KNOWLEDGE_INDEX.md'; s=open(p).read()
-b=s.index('## Prior build')
-pri=s[b:].replace('| Version | **v5.60** |','| Version | **v5.55** |',1)
-assert pri!=s[b:]
-open(p,'w').write(s[:b]+pri)
+import re
+s=rd(); b=s.index('## Prior build')
+m=re.search(r'\| Version \| \*\*(v5\.(\d+))\*\* \|', s[b:]); assert m, 'Prior version row not found'
+wr(s[:b]+s[b:].replace(m.group(1),'v5.%d'%(int(m.group(2))-5),1))
 "
 
-# P39/P40 · K-8 reads the file AS THE PACKAGE WILL LEAVE IT (added 2026-09-07)
-#
-# ⚠ P39 IS A REGRESSION CONTROL FOR A DEFECT THAT SHIPPED. The 2026-09-07 manifest-repair package
-# changed package_check.mjs and did not roll its own hash row. K-8 was GREEN pre-ship and RED the
-# moment the package landed, because it compared the new manifest row against the OLD pool copy.
-# With the fix, the row is compared to the package's knowledge/ copy when the package ships one,
-# so the stale row is caught BEFORE the zip goes out. P39 reproduces that exact defect.
-#
-# P40 is the pair: K-8 must still catch a stale row for a file the package does NOT ship, which is
-# the only case the old code could see. Losing that is the way this fix could go wrong.
-k8_ctl () {   # $1 = label, $2 = FIRE|QUIET, $3 = ship-into-knowledge? yes|no, $4 = perturb? yes|no
-  local label="$1" want="$2" ship="$3" perturb="$4"
-  [ -z "$POOLARG" ] && return
-  rm -rf /tmp/pkk8 && cp -r "$APP" /tmp/pkk8
-  # pick any pool file that carries a hashed manifest row
-  local pick
-  pick=$(node -e '
-    const {readFileSync,existsSync}=require("fs");
-    const M=readFileSync(process.argv[1]+"/PROJECT_KNOWLEDGE_INDEX.md","utf8");
-    for(const m of M.matchAll(/\|\s*`?([A-Za-z0-9_.\-]+\.(?:mjs|cjs|sh))`?\s*\|[^|]*\|?\s*`?([0-9a-f]{32})`?/g))
-      if(existsSync(process.argv[1]+"/"+m[1])){console.log(m[1]);break;}
-  ' "$POOLARG")
-  if [ -z "$pick" ]; then
-    MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** %s (no hashed pool row found - control is INVALID)\n" "$label"; return
-  fi
-  mkdir -p /tmp/pkk8/knowledge
-  if [ "$ship" = "yes" ]; then
-    cp "$POOLARG/$pick" "/tmp/pkk8/knowledge/$pick"
-    [ "$perturb" = "yes" ] && printf '\n// PERTURBED BY CONTROL\n' >> "/tmp/pkk8/knowledge/$pick"
-  fi
-  rm -rf /tmp/pkpool8 && cp -r "$POOLARG" /tmp/pkpool8
-  if [ "$ship" = "no" ] && [ "$perturb" = "yes" ]; then
-    printf '\n// PERTURBED BY CONTROL\n' >> "/tmp/pkpool8/$pick"   # pool drifts from its row
-  fi
-  # ⚠ MATCH ON THE PICKED FILE, NOT JUST "K-8". The first draft grepped for the id alone and
-  # reported P41 NOT CAUGHT — because the package under test had a GENUINELY stale row for a
-  # different file, so K-8 was firing for a real reason the control had nothing to do with. A
-  # control that cannot tell its own mutation from the ambient state is measuring the ambient
-  # state. (The finding it accidentally surfaced was real and is fixed in this package.)
-  local fired
-  fired=$(node "$PKG_CHECK" /tmp/pkk8 "$CLONE" "" /tmp/pkpool8 2>&1 \
-          | grep "✗" | grep "K-8" | grep -F "$pick" | head -1)
-  [ -n "$fired" ] && fired="K-8"
-  if [ "$want" = "FIRE" ] && [ -n "$fired" ]; then
-    PASS=$((PASS+1)); printf "  CAUGHT by %-6s %s (%s)\n" "K-8" "$label" "$pick"
-  elif [ "$want" = "QUIET" ] && [ -z "$fired" ]; then
-    PASS=$((PASS+1)); printf "  CORRECTLY SILENT   %s (%s)\n" "$label" "$pick"
-  else
-    MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** %s (wanted %s, K-8 fired: %s)\n" "$label" "$want" "${fired:-no}"
-  fi
-  rm -rf /tmp/pkk8 /tmp/pkpool8
-}
-
-k8_ctl "P39 THE 2026-09-07 DEFECT - package ships a changed file, its manifest row NOT rolled" "FIRE" "yes" "yes"
-k8_ctl "P40 the old case is not lost - pool drifts from its row, package ships nothing" "FIRE" "no" "yes"
-k8_ctl "P41 package ships the file and the row DOES match it - K-8 must stay quiet" "QUIET" "yes" "no"
-
-# P35: the manifest is GONE from BOTH clone and pool. K must SKIP LOUDLY, never pass blind.
-# This is the E-14 shape: a check that cannot reach its input and reports green is worse than none.
-rm -rf /tmp/pkpool /tmp/pkclone2
+# ⚠ P35: the manifest is GONE from the PACKAGE, the clone AND the pool. K must SKIP LOUDLY, never
+# pass blind — the E-14 shape, where a check that cannot reach its input and reports green is worse
+# than none. ⚠ THE PACKAGE HALF IS NEW: the old version removed it from the clone and pool only, so
+# K still found the package's own copy and had nothing to skip. It was passing for the wrong reason.
+rm -rf /tmp/pkpool /tmp/pkclone2 /tmp/pkpkg
 cp -r "$POOLARG" /tmp/pkpool && rm -f /tmp/pkpool/PROJECT_KNOWLEDGE_INDEX.md
 cp -r "$CLONE" /tmp/pkclone2 && rm -f /tmp/pkclone2/PROJECT_KNOWLEDGE_INDEX.md
-out35=$(node "$PKG_CHECK" "$APP" /tmp/pkclone2 "" /tmp/pkpool 2>&1)
+cp -r "$APP" /tmp/pkpkg && rm -f /tmp/pkpkg/github/PROJECT_KNOWLEDGE_INDEX.md /tmp/pkpkg/knowledge/PROJECT_KNOWLEDGE_INDEX.md
+out35=$(node "$PKG_CHECK" /tmp/pkpkg /tmp/pkclone2 "" /tmp/pkpool 2>&1)
 if echo "$out35" | grep -q "SKIPPED: K-1..K-9"; then
-  PASS=$((PASS+1)); printf "  CAUGHT by %-6s %s\n" "K-*" "P35 manifest absent - K skips LOUDLY instead of passing blind"
+  PASS=$((PASS+1)); printf "  CAUGHT by %-6s %s\n" "K-*" "P35 manifest absent EVERYWHERE - K skips LOUDLY instead of passing blind"
 else
   MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** P35 K did not skip loudly with no manifest - it may be passing blind\n"
 fi
-rm -rf /tmp/pkpool /tmp/pkclone2
-
+rm -rf /tmp/pkpool /tmp/pkclone2 /tmp/pkpkg
 fi
 
 [ "$SKIP" -gt 0 ] && echo "  ⚠ A SKIPPED control is not a passing one."
