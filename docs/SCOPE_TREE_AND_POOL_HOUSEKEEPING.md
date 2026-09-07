@@ -171,8 +171,10 @@ Remove completed audits and status reports from the pool, keep them in the repo,
 manifest row saying *repo-only, and where to find it*. A session that needs one is pointed at
 `docs/<name>` and fetches it.
 
-**Carve-outs that stay in the pool:** `FINDINGS-v5_63-otherOrd.md`, and any audit a **live** scope
-cites — a session reading a live scope must be able to open its evidence without a fetch. As of
+**Carve-outs that stay in the pool:** `FINDINGS-v5_63-otherOrd.md`,
+**`STOP-REPORT-v5_63-fica-workbench.md`** (added 2026-09-07 by decision H-4 — the FICA workbench is
+the most recent unfinished engine work in the project and a session that reaches that ground should
+have it loaded, not fetched), and any audit a **live** scope cites — a session reading a live scope must be able to open its evidence without a fetch. As of
 2026-09-04 that means `AUDIT_STATE_INCOME_BASES_ROUND5.md` stays, because
 `SCOPE_INCOME_CONDITIONING.md` is approved-and-unbuilt and its build session must read ROUND5 §2e
 before quoting a Rhode Island figure. **The carve-out list is re-derived at build time, not copied
@@ -191,7 +193,13 @@ hash* passes before and after the maintainer's deletes.
 
 ## 4a · Two decisions the H-2 repair raised — OPEN, for Steve
 
-### H-4 · `STOP-REPORT-v5_63-fica-workbench.md` is still in the pool. Keep it or move it?
+### H-4 · RESOLVED 2026-09-07 — **(a), a deliberate carve-out. It stays in the pool.**
+
+⚠ **It is now a NAMED carve-out in §4**, which is the point of the decision: an unrecorded keep is
+re-proposed by the next sweep and deleted by a session reading §4 as exhaustive. Its manifest row
+already carries no hash, so nothing else changes.
+
+*(The question as it was put:)*
 
 It is the one history-class document that H-2 nominated and the 2026-09-05 deletion pass did not
 remove, and **§4 does not name it as a carve-out.** So it is either a deliberate keep or an
@@ -208,7 +216,15 @@ report for the FICA workbench, which is the most recent unfinished piece of engi
 project. A session that hits that ground benefits from having it loaded rather than fetched. But
 this is a judgement about how you work, not a rule, which is why it is a question and not a finding.
 
-### H-5 · Six history documents have prose mentions but no manifest row. Give them rows?
+### H-5 · RESOLVED 2026-09-07 — **(a), all six given proper repo-only rows.**
+
+Shipped in the same package. ⚠ **There were SIX, not the three a row-anchored search reported** —
+the table parser found them. Two further prose names (`STATUS_v5_36_partial.md`,
+`STATUS_v5_32_ACA_FLOOR_PARTIAL.md`) correctly get no row: they are struck-through as retired and
+the files do not exist in `docs/`. Verified against the committed tree, so the next sweep does not
+re-open them.
+
+*(The question as it was put:)*
 
 Listed in §9 above. **Nothing is broken** — K-9 is satisfied by a prose mention and all six are
 intact in `docs/`.
@@ -221,6 +237,34 @@ intact in `docs/`.
 **Recommendation: (a)**, because §G's whole argument for *retiring rather than deleting* is that a
 row is what tells a future session a document exists at all — and by that argument a prose mention
 is a row that has already half-decayed. But it is not urgent and it fails no gate.
+
+### H-6 · ⚠ NEW FINDING 2026-09-07, NOT FIXED — the section-K controls are mostly measuring nothing
+
+Found by running `package_check_controls.sh` while validating this package's own new controls.
+**Four of the seven K controls report `mutation did not apply - control is INVALID`** (P29, P30,
+P31, P34) and **P33 fires the wrong check.** Only P35 is unambiguously sound.
+
+**The cause is one line of K, and it is a line that is CORRECT.** K reads the manifest from the
+package's `github/` copy first, deliberately — *"a package whose whole job is to correct this
+document would otherwise be failed BY the correction it is shipping."* But **P29–P34 mutate the
+manifest in a scratch copy of the POOL.** So whenever the package under test ships a manifest — which
+every release package now must, per §L — the controls edit a file K never reads.
+
+⚠ **P32 REPORTED `CAUGHT` AND THAT PASS WAS SPURIOUS.** K-8 fired, but on this package's genuinely
+stale `package_check.mjs` row, not on P32's mutation. **A control that cannot tell its own mutation
+from the ambient state is measuring the ambient state** — which is exactly the defect my own P41 had
+on its first draft, caught the same afternoon and fixed by matching on the picked filename.
+P29–P34 need the same treatment.
+
+⚠ **The three that report INVALID are the honest ones.** They fail closed and say so. P32 and P33
+are the dangerous pair: one passes for the wrong reason and one fires the wrong id.
+
+**Not fixed here, deliberately.** This package already changes two gates and adds six controls;
+repairing seven more controls in the same pass is how a control harness gets rewritten without
+being re-verified. It also needs a decision — mutate the package's `github/` manifest rather than
+the pool's, or give the K controls a package with no manifest at all — and the two answers test
+different things. **⚠ Until this is fixed, section K's controls should not be cited as evidence
+that section K works.**
 
 ### The gate blind spot behind both — proposed K-10, NOT built
 
@@ -328,10 +372,26 @@ the same package, not the next one.**
    mention, so none is broken — but none is findable by a reader scanning the tables either. **Open
    as H-5.**
 
+### H-3 — route (a) BUILT 2026-09-07; the DELETION is still owed
+
+`package_check`'s **E-1b** now evaluates the tree as the package will leave it, reading declared
+repo deletions from `README-FIRST.md`. The declaration is an **exact line form** —
+`DELETE FROM REPO: <full repo path>` — and not a loose `includes`, because README-FIRST already
+names every shipped `github/` path in prose and a loose match would let a file's own upload row
+switch the gate off for it. That is the **P5 defect** (a basename `includes` excusing every
+misplaced file by its own filename) reproduced one level up, and **P38 is the control that pins
+it**: a path merely mentioned must still make E-1b fire.
+
+⚠ **THE DELETION OF `docs/qa-baseline-README.md` IS DELIBERATELY NOT IN THE SAME PACKAGE.** The fix
+ships first and the deletion next, validated by the fixed gate; shipping both together would mean
+the check that passed is not the check that was in force. **H-3 is not closed until the deletion
+lands.** All three copies are byte-identical at `cbbbb3bae7149cfbcdad7f8e061b5f2a`, verified
+2026-09-07 — §3a's recorded hash and byte count are the pre-correction ones and are now history.
+
 ### Still not built
 
-**H-3** (the `docs/qa-baseline-README.md` deletion and the E-1b fix that must precede it) and the
-**third scope-status sweep** (§5 item 4). Both are unchanged by this package.
+The **`docs/qa-baseline-README.md` deletion itself**, and the **third scope-status sweep**
+(§5 item 4).
 
 ---
 
