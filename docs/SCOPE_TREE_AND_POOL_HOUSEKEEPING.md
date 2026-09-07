@@ -388,10 +388,29 @@ the check that passed is not the check that was in force. **H-3 is not closed un
 lands.** All three copies are byte-identical at `cbbbb3bae7149cfbcdad7f8e061b5f2a`, verified
 2026-09-07 — §3a's recorded hash and byte count are the pre-correction ones and are now history.
 
+### H-3 — CLOSED 2026-09-07. The deletion shipped in the next package, as required.
+
+`docs/qa-baseline-README.md` is deleted, declared as `DELETE FROM REPO: docs/qa-baseline-README.md`
+in that package's `README-FIRST.md` — **the first use of the declaration E-1b learned to read.**
+Two packages, deliberately: the fix first, the deletion second, validated by the fixed gate. Had
+they shipped together, the check that passed would not have been the check that was in force.
+
+**Re-verified at deletion time rather than recalled:** all three copies byte-identical at
+`cbbbb3bae7149cfbcdad7f8e061b5f2a` (§3a's `605c263a…`/5,913 bytes is the PRE-correction pair and is
+now history — the 2026-09-04 package rewrote the file), and a full reference census found every
+mention of the name to be prose *about* the duplicate. The one scope naming the bare basename maps
+it explicitly to `qa/qa-baseline/README.md`.
+
+⚠ **A CONSEQUENCE, RECORDED SO IT IS NOT DISCOVERED AS A SURPRISE.** Before the deletion there was
+exactly one repo path with the basename `qa-baseline-README.md`, so E-1b could resolve the pool file
+to a counterpart. There is now none, so **E-1b skips it** — it joins `tools_fixture.jsx` and
+`vite_config.js` as the three pool files E-1b is blind to **by rename**. That is E-1b's existing
+`cands.length !== 1` rule (*"guessing which one was meant is how a check starts lying"*), not a new
+defect, and the fix if it ever matters is a rename map rather than a looser match. **Not built.**
+
 ### Still not built
 
-The **`docs/qa-baseline-README.md` deletion itself**, and the **third scope-status sweep**
-(§5 item 4).
+The **third scope-status sweep** (§5 item 4) and **H-6** (§4a — section K's negative controls).
 
 ---
 
