@@ -1,5 +1,5 @@
 // Cross-version DOM comparison of the TAX-BEARING TABS (Engine D's Withdrawal tab, Engine B's
-// Taxes tab, Engine C's IRMAA tab). Default pair v539 -> v540.
+// Taxes tab, Engine C's IRMAA tab). Default pair v565 -> v566.
 // RE-POINT THE DEFAULT EVERY RELEASE — it is hardcoded, and a stale default dies at module
 // load looking for a bundle the run folder does not contain (observed at the v5.34 build:
 // the committed default was still v529 -> v530, four releases behind).
@@ -79,7 +79,7 @@
 import { JSDOM } from "jsdom";
 import { createRequire } from "module";
 
-const [VA, VB] = [process.argv[2] || "v539", process.argv[3] || "v540"];
+const [VA, VB] = [process.argv[2] || "v565", process.argv[3] || "v566"];
 
 // One mount per leg; the three tabs are read by clicking through the mounted app (the t4
 // idiom), because six separate jsdom mounts cost more time than this file is worth.

@@ -71,6 +71,15 @@ const PINS = {
   // is the assertion that a populate release touches only the state it populates. If either number
   // has moved, the CT change has leaked into a state it has no business reaching.
   v565: { noStream: 174883, acaConv: 1203137 },
+  // v5.66 populates NEW MEXICO's income-conditioned exemption (NMSA 1978 § 7-2-5.2). This suite's
+  // household is in GEORGIA (`stateCode: "GA"`, L96), so neither figure may move — carrying v5.65's
+  // values forward is the assertion that a populate release touches only the state it populates.
+  // If either number has moved, the NM change has leaked into a state it has no business reaching.
+  // ⚠ THIS ENTRY WAS MISSING when v566 was added to KNOWN_VERSIONS at the v5.66 build. The AST
+  // sweep that verified version registration looked at KNOWN_VERSIONS arrays; PINS is a SECOND
+  // registry in this one file and was not in the sweep's shape. The suite failed CLOSED and said
+  // so, which is the whole reason the guard above exists — but the sweep should have found it.
+  v566: { noStream: 174883, acaConv: 1203137 },
 };
 if (!PINS[VER]) {
   console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is registered but has no PINS entry.");

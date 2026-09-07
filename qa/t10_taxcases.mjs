@@ -1093,6 +1093,135 @@ const pass2E = pass, fail2E = fail;
       // The real question — does `streamsAnnualAt` partition ordinary income into work and
       // non-work — is executed in t33 §B, with BOTH sides asserted non-zero first. Not restated
       // here: a second copy of an answer is what goes stale.
+
+      // ── v5.66 · NEW MEXICO's exemption becomes income-conditioned ──────────────────────
+      // NMSA 1978 § 7-2-5.2, transcribed in FINDINGS-v5_63-state-statutes.md §2 and NOT re-derived.
+      // $8,000 per qualifying individual 65+, stepping $1,000 per band to $0 above $51,000 MFJ /
+      // $28,500 single of federal AGI. Never indexed since Laws 1987, ch. 264, § 6.
+      //
+      // ⚠ WHY THIS BLOCK EXISTS AT ALL. Every OTHER assertion this release added — t34 A-7..A-10,
+      // t35 D-7a — is STRUCTURAL: it reads the table and checks its shape. A table can be shaped
+      // perfectly and still be wired to nothing, or wired to the wrong measure, and every one of
+      // those assertions would stay green. These are the only checks in the release that price a
+      // New Mexico household through `stateTaxAnnual` and compare the DOLLARS.
+      //
+      // Every figure was hand-computed from the statute and the engine formula BEFORE the engine
+      // was run (probe: 10/10 agreed to the cent). Formula, read from stateTaxAnnual:
+      //   m       = retIncome + pen + work + capGains + ssTaxableFed        [base "agi"]
+      //   qual    = #{ age >= 65 }                                          [no exclAge; floor 65]
+      //   row     = first row with m <= row.upTo                            [cmp lte, the default]
+      //   exclFin = row.amount * qual                                       [unit "person"]
+      //   tax     = 0.049 x (max(0, retIncome+pen-exclFin) + work + 0.5*ssTaxableFed + capGains)
+      //
+      // DIRECTION: CONSERVATIVE in every moving cell. v5.65 granted the flat $8,000 at every income
+      // level, which the statute denies above the top band; tax RISES for affected households and
+      // falls nowhere. The unchanged cells are unchanged for a reason each states.
+      const NM = (a) => S({ code: "NM", fallbackRate: 0, retIncome: 0, pen: 0, work: 0, capGains: 0,
+                            ssTaxableFed: 0, ageA: null, ageB: null, ...a });
+      if (_v >= 566) {
+        // — EVERY BAND, BOTH STATUSES, PRICED TO THE DOLLAR. Eighteen cells, one per row of each
+        //   statutory table plus the first dollar past each top band.
+        //
+        //   ⚠ THIS SWEEP REPLACED A BOUNDARY-ONLY DRAFT, AND A NEGATIVE CONTROL IS WHY. The first
+        //   version of this block priced $30,000, $30,001, $60,000 and three single cells — six
+        //   dollar-exact assertions that between them touched only FOUR of the eighteen rows.
+        //   Mutating the $4,000 joint band to $4,500 left t10 entirely GREEN. That is the same
+        //   defect the v5.66 session-2 controls found in `t34` A-9's first draft (a table test that
+        //   checks its endpoints is checking that a table exists, not that it is right) — found
+        //   twice, in two suites, in one release. Pricing every row is the form that cannot recur.
+        //
+        //   Expected values come from `qa/oracle_nm.py`, an INDEPENDENT implementation of the
+        //   statutory table typed from FINDINGS-v5_63-state-statutes.md §2, never from STATE_RULES.
+        //   Each cell: all income is retirement income, so AGI == retIncome and the row is exact.
+        const _NM_JOINT = [[30000, 686.00], [33000, 931.00], [36000, 1176.00], [39000, 1421.00],
+                           [42000, 1666.00], [45000, 1911.00], [48000, 2156.00], [51000, 2401.00],
+                           [51001, 2499.049]];
+        const _NM_SINGLE = [[18000, 490.00], [19500, 612.50], [21000, 735.00], [22500, 857.50],
+                            [24000, 980.00], [25500, 1102.50], [27000, 1225.00], [28500, 1347.50],
+                            [28501, 1396.549]];
+        for (const [agi, exp] of _NM_JOINT)
+          T(`[HAND v5.66] NM joint, AGI $${agi.toLocaleString()} -> $${exp.toFixed(2)}`,
+            NM({ retIncome: agi, ageA: 70, ageB: 68 }), exp);
+        for (const [agi, exp] of _NM_SINGLE)
+          T(`[HAND v5.66] NM single, AGI $${agi.toLocaleString()} -> $${exp.toFixed(2)}`,
+            NM({ retIncome: agi, ageA: 70, single: true }), exp);
+        // — ONE DOLLAR OVER EVERY BAND TOP. The sweep above prices each top; these price the first
+        //   dollar past it, which is what pins the top itself in the DOLLAR path.
+        //
+        //   ⚠ ADDED BECAUSE A CONTROL WENT SILENT, and the overlap with `t34` A-10 is deliberate
+        //   rather than an oversight. Moving the $36,000 joint top to $37,000 left every cell above
+        //   unchanged — $36,000 still takes that row and $39,000 still takes the next — so t10 was
+        //   blind to a wrong band top. `t34` A-10 DOES catch it (verified: it fires alone on that
+        //   mutation), but it catches it by comparing the TABLE to a transcribed literal. These
+        //   cells catch it by pricing a HOUSEHOLD. A top that is correct in the table but mis-read
+        //   by the row-selection loop — an off-by-one comparator, rows evaluated out of order —
+        //   passes A-10 and would have failed nothing here. Two failure modes, not one answer twice.
+        const _NM_JOINT_OVER = [[30001, 784.049], [33001, 1029.049], [36001, 1274.049],
+                                [39001, 1519.049], [42001, 1764.049], [45001, 2009.049],
+                                [48001, 2254.049]];
+        const _NM_SINGLE_OVER = [[18001, 539.049], [19501, 661.549], [21001, 784.049],
+                                 [22501, 906.549], [24001, 1029.049], [25501, 1151.549],
+                                 [27001, 1274.049]];
+        for (const [agi, exp] of _NM_JOINT_OVER)
+          T(`[HAND v5.66] NM joint, AGI $${agi.toLocaleString()} (one dollar past a band top) -> $${exp.toFixed(2)}`,
+            NM({ retIncome: agi, ageA: 70, ageB: 68 }), exp);
+        for (const [agi, exp] of _NM_SINGLE_OVER)
+          T(`[HAND v5.66] NM single, AGI $${agi.toLocaleString()} (one dollar past a band top) -> $${exp.toFixed(2)}`,
+            NM({ retIncome: agi, ageA: 70, single: true }), exp);
+        // — the band tops are INCLUSIVE ("not over $30,000"), which the sweep above asserts at every
+        //   row; this pair makes the STEP itself explicit. An `lt` comparator fails these two.
+        T("[HAND v5.66] NM joint: one dollar over $30,000 costs 0.049 x (1 + 2,000) = $98.05",
+          NM({ retIncome: 30001, ageA: 70, ageB: 68 }) - NM({ retIncome: 30000, ageA: 70, ageB: 68 }), 98.049);
+        T("[HAND v5.66] NM single: one dollar over $18,000 costs 0.049 x (1 + 1,000) = $49.05",
+          NM({ retIncome: 18001, ageA: 70, single: true }) - NM({ retIncome: 18000, ageA: 70, single: true }), 49.049);
+        // — above the top band, which is the whole point of the release
+        T("[HAND v5.66] NM joint at $60,000 AGI: above $51,000, exemption is $0 — 0.049 x 60,000 = $2,940.00",
+          NM({ retIncome: 60000, ageA: 70, ageB: 68 }), 2940.00);
+        T("[HAND v5.66] NM single at $35,000 AGI: above $28,500, exemption is $0 — 0.049 x 35,000 = $1,715.00",
+          NM({ retIncome: 35000, ageA: 70, single: true }), 1715.00);
+        // — the age floor is per person and still 65, and the row amount is granted PER PERSON.
+        //   A household-level implementation passes the 70/68 sweep and fails this one.
+        T("[HAND v5.66] NM joint, both under 65: no qualifying person, no exemption at any income — $980.00",
+          NM({ retIncome: 20000, ageA: 60, ageB: 58 }), 980.00);
+        T("[HAND v5.66] NM joint, ONE spouse 65+: the row amount is granted once, not twice — 0.049 x 22,000 = $1,078.00",
+          NM({ retIncome: 30000, ageA: 70, ageB: 60 }), 1078.00);
+        // — THE MEASURE. `base: "agi"` means federally-taxable SS, wages/other ordinary and realized
+        //   gains all ride it. These two cells are the ones a wrong base fails: if the measure read
+        //   retirement income alone, the first would price at $833.00 and the second at $1,421.00.
+        T("[HAND v5.66] NM: taxable SS rides the AGI measure — $28K retirement + $10K taxable SS lands two bands down — $1,127.00",
+          NM({ retIncome: 28000, ssTaxableFed: 10000, ageA: 70, ageB: 68 }), 1127.00);
+        T("[HAND v5.66] NM: wages/other ordinary and realized gains ride it too — $20K + $15K + $10K = $45,000, the $3,000 row — $1,911.00",
+          NM({ retIncome: 20000, work: 15000, capGains: 10000, ageA: 70, ageB: 68 }), 1911.00);
+        // — the clamp: an exemption bigger than the retirement income it applies to must not spill
+        //   onto wages. Same class as the v5.62 spill checks above, priced on the conditioned table.
+        T("[HAND v5.66] NM: the exemption cannot shelter wages — $500 retirement against $8,000 of exemption clamps at zero — 0.049 x 40,000 = $1,960.00",
+          NM({ retIncome: 500, work: 40000, ageA: 70, ageB: 68 }), 1960.00);
+        // — EXTINCTION (OPERATIONS §D). The defect class is "the exemption is blind to income."
+        //   Under v5.65 a $30,000 step up the table cost exactly the rate on the income (0.049 x
+        //   30,000 = $1,470.00) because the exemption never moved. It must never cost that again.
+        T("[EXTINCTION v5.66] NM's exemption is no longer income-blind: a $30K step up the table costs MORE than the rate on the income alone",
+          (NM({ retIncome: 60000, ageA: 70, ageB: 68 }) - NM({ retIncome: 30000, ageA: 70, ageB: 68 })) > 1470.00 + EPS ? 1 : 0, 1);
+        // — the scalar beside the table. stateTaxAnnual L1231 requires this of every populated
+        //   state: `excl65` stays a scalar for the `> 0` whole-table guards (t10 L467, t29 L233),
+        //   so it must equal what the table yields at zero income or it is a second source of truth.
+        T("[INVARIANT v5.66] NM's excl65 scalar still equals its band table's amount at zero income",
+          R.NM.excl65, 8000);
+        T("[INVARIANT v5.66] and NM carries no exclAge — the statute's floor IS 65, the engine default",
+          R.NM.exclAge === undefined ? 1 : 0, 1);
+      } else {
+        // Pre-fix state. The flat $8,000 was granted at EVERY income level, so the model understated
+        // New Mexico tax for any household above the top band — an OPTIMISTIC error, and the only
+        // kind this project treats as urgent. These pins make the pre-v5.66 behaviour visible on the
+        // frozen leg rather than leaving it as an absence.
+        T("[KNOWN DEFECT pre-v5.66] NM granted the full $8,000 each at $60,000 AGI, which § 7-2-5.2 denies — $2,156.00",
+          NM({ retIncome: 60000, ageA: 70, ageB: 68 }), 2156.00);
+        T("[KNOWN DEFECT pre-v5.66] and the same at $35,000 single, above the $28,500 cut-off — $1,323.00",
+          NM({ retIncome: 35000, ageA: 70, single: true }), 1323.00);
+        T("[KNOWN DEFECT pre-v5.66] the exemption was income-BLIND: a $30K step up the table cost exactly the rate on the income, 0.049 x 30,000",
+          NM({ retIncome: 60000, ageA: 70, ageB: 68 }) - NM({ retIncome: 30000, ageA: 70, ageB: 68 }), 1470.00);
+        T("[KNOWN DEFECT pre-v5.66] NM carried no exclTest at all",
+          R.NM.exclTest === undefined ? 1 : 0, 1);
+      }
     }
   }
 }
