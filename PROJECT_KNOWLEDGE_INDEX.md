@@ -636,7 +636,7 @@ console.log(pool.length,"files ·",hashed.size,"hashed rows ·",pool.filter(f=>!
 | `OPERATIONS.md` | `c5bd81892d21385ceaec8ea8bea9db68` | `docs/OPERATIONS.md` |
 | `TESTING.md` | `4f601cfbd43a1323a640bdc17ffd1d29` | `TESTING.md` |
 | `METHODOLOGY.md` | `f47b4ed305980a2084fc888eaee07c6e` | `METHODOLOGY.md` |
-| `CHANGELOG.md` | `d7b375803914f95686f995b16c02b458` | `CHANGELOG.md` |
+| `CHANGELOG.md` | `5fa897343ed62c981ec6c36229043011` | `CHANGELOG.md` — ⚠ **rolled 2026-09-07 (tenth package), the FIRST outing of the obligation this row created.** It changes in every package by definition, so its row is rolled in every package, computed into place **after** the entry is final |
 | `MissingFeatures.md` | `7d1072184573ef5cc5befe46cc40ece1` | `docs/MissingFeatures.md` |
 | `README.md` | `eec58396f932b3209de79c2400dbfb88` | `README.md` |
 
@@ -1147,6 +1147,27 @@ retired and superseded. They get no row because there is no file. Checked 2026-0
 committed tree, so the next sweep does not re-open them.
 
 ## Retirement list (delete-first; nothing replaces these)
+
+### At the ops upload of 2026-09-07 (tenth package, D-B-1 (c) — Item B's premise) — DELETE THESE FIRST
+
+**No version bump.** v5.65 remains current. **Nothing is built** — this corrects a premise.
+
+| Delete from the POOL | Because |
+|---|---|
+| `PROJECT_KNOWLEDGE_INDEX.md` | replaced — this file; `CHANGELOG.md`'s row rolled |
+| `CHANGELOG.md` | replaced — the ops entry for this package |
+| `SCOPE_HOUSEKEEPING_THREE.md` | replaced — Item B's premise corrected: **nine tools, not three** |
+
+**No deletion from the repo.**
+
+> ⚠ **`CHANGELOG.md`'S ROW IS ROLLED, AND THIS IS THE FIRST PACKAGE THAT HAD TO.** The ninth package
+> added that row and recorded the obligation in this file *"so the first package to face it would not
+> miss it."* This is that package. The hash is computed **after** the CHANGELOG entry is final,
+> because the row lives in a different file and any later edit to the entry silently invalidates it.
+>
+> ⚠ **`SCOPE_HOUSEKEEPING_THREE.md` carries no row and gets none** (D-3 excludes scope documents),
+> and it **stays on the I-2 OPEN allowlist** — Item B is unbuilt.
+
 
 ### At the ops upload of 2026-09-07 (ninth package, Items A and C) — DELETE THESE FIRST
 

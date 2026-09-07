@@ -1,5 +1,91 @@
 # Changelog
 
+## ops 2026-09-07 (tenth package) — D-B-1: Item B's premise said three tools; it is nine, and six are unreachable
+
+**No version bump. v5.65 remains the current build**, source `7604fac5dab891bb31905544d11072f8`,
+artifact `b4ea0bd1d6993aadd0b7fedcfe47e580`, repo HEAD `5ee19aa` at the start of this work. No app
+source, no `t*.mjs`, no fixture, no `qa/tools/` change, no `index.html`. **Nothing is built here** —
+this corrects a premise so that the build, when it happens, is scoped against true numbers.
+
+### What was wrong
+
+`SCOPE_HOUSEKEEPING_THREE.md` §2 says **"the three tools added at v5.58."** Measured from a
+**full-history clone (750 commits)** rather than the shallow one earlier sessions used, and by a
+crisp definition — tools that parse with `acorn`, the class §B1's warrant actually covers — **`t21`
+fails to reach NINE:**
+
+| Not covered by `t21` | First committed | |
+|---|---|---|
+| `copylock.cjs`, `lits.cjs`, `notes_probe.cjs`, `vergates.cjs` | 2026-08-31 | pool |
+| `f6_probe.cjs`, `suite_regex_probe.cjs`, `vercensus.cjs`, `vercensus_list.cjs` | 2026-09-01 | mixed |
+| `state_rows.cjs` | 2026-09-04 | repo-only |
+
+⚠ **The dating was wrong in both directions, which is why the count could not be right.** Four of the
+nine **predate** v5.58 — they arrived 2026-08-31, around v5.57 — and one **postdates** it by three
+days. §2 named a three-shaped slice of a nine-file set and dated all of it to one release.
+
+⚠ **A shallow clone is what hid this.** Two sessions could not date `qa/tools/` because
+`--depth 1` carries no history, and both recorded the number as unknown rather than guessing — which
+was right. **The answer cost one full clone.** When a question is "when did this arrive," the shallow
+clone §A2 recommends for freshness is the wrong instrument.
+
+### The harder half, and why nothing was built
+
+§2 already warned that `f6_probe` and `suite_regex_probe` *"do not take `DangerClose.jsx` as their
+subject."* **That is true of SIX of the nine**, read from their own usage lines: `copylock` takes two
+sources plus suite directories, `lits` takes numbers and directories, `suite_regex_probe` takes two
+text files and directories, `vercensus` and `vercensus_list` take a version tag and directories.
+**`f6_probe` is the only clean fit for a `.jsx` fixture.**
+
+`qa/tools/fixture/fixture.jsx` is one `.jsx` file. Extending it does not reach six of the nine: they
+need a purpose-built **directory** fixture, and a shared one would have to satisfy a suite-walker, a
+text-differ and a version-tag census simultaneously. That is a second fixture **kind**, with its own
+negative controls, plus an unanswered question about whether repo-only tools belong in a pool-facing
+suite at all.
+
+**This is the stop condition D-2 named** — *"if the fixture work turns out to need its own design,
+STOP and report rather than writing thin cases to reach a number."* It was reported, not worked
+around. Writing nine thin cases to reach a count is the §B2 failure this suite exists to prevent.
+
+### D-B-1, resolved as (c) then (a)
+
+Correct the premise first — this package — then build coverage **only for the tools the existing
+fixture can actually reach**, and **disclose the rest in `TESTING.md` by name** rather than covering
+them thinly. The directory-fixture work becomes its own scope if it is ever wanted.
+
+⚠ **So `t21`'s check count will rise by less than §2 implies**, and `TESTING.md` will carry a named
+list of uncovered tools instead of silence. **A suite that says what it does not cover is worth more
+than one that appears to cover everything** — which is §B2 stated the other way round.
+
+### The obligation from the ninth package, honoured on its first outing
+
+`CHANGELOG.md` gained an md5 row yesterday, and it changes in **every** package by definition. **Its
+row is rolled here**, computed into place after this entry was final. That obligation was recorded in
+the manifest precisely so the first package to face it would not miss it; this is that package.
+
+### Verification
+
+**No suite was run and none applies** — no source, no `t*.mjs`, no fixture, no tooling.
+
+- OPERATIONS §A freshness check against a fresh clone at `5ee19aa`; source and artifact unchanged.
+- **Full clone (750 commits)**, `git log --diff-filter=A` for every `qa/tools/*.cjs` and `*.mjs`.
+- Tool subjects read from each file's own usage line, not inferred.
+- `t21` coverage measured by reference count per tool, not by reading it for intent.
+- `package_check` run on this package from the committed tool, with `CHANGELOG.md`'s rolled row.
+
+### Still open
+
+- **Item B**, on the corrected premise: route (a), two tools not nine, with the rest disclosed.
+- **D-NM-1** — the guarded-set decision blocking New Mexico. **This is the item that changes a
+  user's number**, in the conservative direction, and it should go first.
+- **K-10**, proposed and not built.
+- ⚠ **P1–P28 still not re-validated.** NM's package will be the first that can settle whether their
+  six NOT CAUGHT reports are an input artefact or a real defect. **It must not be assumed.**
+
+**Provenance.** No source or artifact change: v5.65 remains `7604fac5dab891bb31905544d11072f8` /
+`b4ea0bd1d6993aadd0b7fedcfe47e580`.
+
+
 ## ops 2026-09-07 (ninth package) — Items A and C: a register row stale for twelve releases, and six files the freshness check could not see
 
 **No version bump. v5.65 remains the current build**, source `7604fac5dab891bb31905544d11072f8`,
