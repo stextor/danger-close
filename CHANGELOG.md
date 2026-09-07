@@ -1,5 +1,70 @@
 # Changelog
 
+## ops 2026-09-07 — the manifest catches up with the pool (H-2's third place)
+
+**No version bump. v5.65 remains the current build**, source `7604fac5dab891bb31905544d11072f8`,
+artifact `b4ea0bd1d6993aadd0b7fedcfe47e580`, repo HEAD `8486494` at the start of this work. **No app
+source, no `t*.mjs`, no fixture and no `index.html` was touched**, so no app suite applies and no
+check total is quoted — per `SCOPE_TREE_AND_POOL_HOUSEKEEPING.md` §7, a green reading from an
+unrelated suite is not evidence about a documentation change.
+
+### What was wrong
+
+§G makes a deletion a **three-place operation**: repo, pool, and the manifest row. H-2 moved two of
+them. The maintainer deleted 18 completed-history documents from the pool on 2026-09-05; every one
+of them is still in `docs/`, so nothing was lost. **The manifest was not rewritten in the same
+pass**, so from 2026-09-05 to 2026-09-07 `package_check` **K-8** was red, naming
+`STATUS_v5_42_shipped.md` and `AUDIT_STATE_EXCL65_NOTES.md` as hashed rows for files not in the pool.
+
+### What changed
+
+- **24 manifest rows rewritten as repo-only**, each naming `docs/<name>`. Two carried an md5 and the
+  hash came off — those two are what K-8 was reporting. The other 22 were unhashed. ⚠ **No row was
+  deleted.** §G prefers retiring to deleting, and a row that names a file is what makes K-9 pass and
+  what tells a future session the document exists.
+- **The manifest's own 2026-09-04 note** — *"This package does NOT execute H-2… the 24 completed
+  history files stay in the pool"* — is marked superseded, with its two wrong numbers corrected in
+  place rather than removed.
+- **Two `package_check` I-2 allowlist reasons corrected.** Neither entry was wrong; both *reasons*
+  had gone stale, which I-3 structurally cannot see — it fires only on an entry naming a file that is
+  gone. `SCOPE_INCOME_CONDITIONING.md` read *approved, unbuilt*; v5.65 built the Connecticut half, so
+  it now reads **partially built** and its expiry is restated as a count — **when the last of the
+  five converts** — instead of a single shipping moment it had already passed.
+  `SCOPE_TREE_AND_POOL_HOUSEKEEPING.md`'s reason now names H-3 and the sweep rather than H-2.
+- **`SCOPE_TREE_AND_POOL_HOUSEKEEPING.md` §9** carries the H-2 build record, three corrections to
+  the scope's own counts, and two new open decisions (H-4, H-5).
+
+### ⚠ The finding worth more than the fix: K-8 saw two of twenty-four
+
+K-8's row regex requires a 32-hex md5, so it checks **hashed rows only**. Twenty-two of the twenty-
+four stale rows carried no hash and were invisible to every check in the file — K-9 runs pool →
+manifest and is satisfied by a row whose file has gone. **The gate did not measure the problem; it
+happened to touch 8% of it**, and the 8% was enough to make the repair look complete.
+
+The 2026-09-04 manifest note said, as reassurance, *"K-8 does not object to an unhashed row."* That
+sentence was true, and it is precisely why the drift was undetectable. **A property relied on to
+make a change safe is also the property that hides the change going wrong.**
+
+A **K-10** for the manifest → pool direction is proposed and **deliberately not built**. The naive
+form (*every row names a pool file*) is wrong: the manifest carries legitimate repo-only rows for
+`qa/tools/*`, for retired documents, and now for these 24. The correct form makes the repo-only
+marker load-bearing and needs a fixed spelling plus its own §B2 negative control. Bolting that onto
+the end of a repair package is how a gate starts lying.
+
+### Limitations and what this package deliberately does NOT do
+
+- **H-3 is not executed and `docs/qa-baseline-README.md` is NOT deleted.** The E-1b fix it needs
+  (§3a route (a)) is **not in this package** — see the handoff notes shipped alongside. Shipping the
+  fix and the deletion together would mean the check that passed is not the check that was in force.
+- **The third scope-status sweep is not run.**
+- **H-4** (`STOP-REPORT-v5_63-fica-workbench.md`, still in the pool and not a named carve-out) and
+  **H-5** (six history documents named only in prose, with no table row) are **open decisions**, not
+  built outcomes. Both are recorded in the scope's new §4a with a recommendation.
+- **This package's `package_check.mjs` was validated by the COMMITTED tool, not by itself.** That is
+  deliberate: a tool checked by its own new copy is not checked. The I-2 edits are comment and
+  reason text only — no predicate changed — so no new negative control was owed.
+
+
 ## v5.65 — Connecticut's pension exemption is now income-conditioned (the first state to move)
 
 **Source `7604fac5dab891bb31905544d11072f8` · artifact `b4ea0bd1d6993aadd0b7fedcfe47e580` · built
