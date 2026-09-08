@@ -570,8 +570,66 @@ fulfilled `SCOPE_*.md` · if this release fixed a defect that was invisible in t
 boundary that hid it to the census (**§K1** — the rule lives there, deliberately not repeated here) · publish on GitHub (a normal commit — no tag; see §G) · end the CHANGELOG
 entry with the source and built md5s (the provenance line, §G — this replaces what a tag would
 have given us) · **re-read every document this release CREATES or TOUCHES against what actually
-shipped** (see below) · **package per §L — one zip, two destinations, with the suite re-run from the
-packaged copies before the zip is cut.**
+shipped** (see below) · **roll a per-file md5 row for every pooled file this package changes, adds
+or removes** (see *The hash rows are a per-release obligation* below) · **package per §L — one zip,
+two destinations, with the suite re-run from the packaged copies before the zip is cut** ·
+**after uploading, re-run `package_check` with ALL FOUR arguments** (see the same section).
+
+### The hash rows are a per-release obligation (added 2026-09-08)
+
+**If a package changes, adds or removes a pooled file, it rolls that file's row in the manifest's
+§A2 fallback hash table — in the same edit, computed from the copy the package is shipping.** A file
+gaining its first pool copy gets a row or an explicit reason it does not have one (the D-3 note in
+the manifest states the classes that are deliberately unrowed); a file leaving the pool by rotation
+has its row deleted in the same pass, which §G already requires for `dom_entry_*` and which is the
+same rule generalised.
+
+⚠ **This step is stated here because nothing connected the two halves that already existed.** §L
+names `PROJECT_KNOWLEDGE_INDEX.md` as a mandatory deliverable and `package_check` **K-8** checks the
+rows — but no line in the release path told a session to *roll* them, so the obligation lived only
+inside the manifest's own D-3 note, which is read by people editing the manifest and not by people
+shipping a release. **It shipped twice for exactly that reason.** At v5.61 the table carried 21
+wrong hashes and 12 pool files had no row; on 2026-09-01 it carried 10 rows naming files that had
+left the pool alongside 19 whose hash no longer matched; at v5.66 it was 25 stale rows, 1 ghost row
+and 4 unrowed files — the third and worst occurrence, produced by a session that was editing that
+very document. **A stale row is worse than no row**, because §A's fallback then returns a confident
+MATCH on a file that has drifted.
+
+⚠ **Roll `CHANGELOG.md`'s row last, after the entry is final**, and roll the row of any tool the
+package itself edits — including `package_check.mjs`. Editing a file after computing its row pins
+the pre-edit hash, which is a one-row version of this whole defect.
+
+⚠ **`package_check` takes FOUR positionals, and the pool is the FOURTH.**
+
+```bash
+node qa/tools/package_check.mjs <zip-or-dir> <clone-dir> <workspace-dir> <pool-dir>
+```
+
+**Run it again after the upload, with all four.** Passing the pool third binds it to the workspace
+slot and leaves `POOL` null, at which point **K-4**, **K-5**, **K-6**, **K-8** and **K-9** print
+*"no pool given — this is the POST-SHIP half"* — which reads like a benign skip and is in fact the
+entire post-ship half of section K not running. The v5.66 session read that line and came within one
+step of recording a false green. The tool's *printed* usage named only two of the four positionals
+until 2026-09-08 while its header comment named all four; both now agree, which is the fix for the
+cause rather than the symptom.
+
+⚠ **Expect `K-1`–`K-3` to be RED pre-ship on a correct release manifest, and GREEN on a stale one.**
+They anchor the Current-build table to the *committed* tree, and a release package by construction
+carries a manifest that has rolled ahead of the commit. So this class of defect is **invisible until
+after the upload, by construction** — which is why the post-ship run is a checklist step and not a
+suggestion. Never soften a K check to make a pre-ship run look clean; the diagnosis of that split is
+real and unscoped, and softening it would delete the only gate that has ever caught this. *(An ops
+package that changes no version and no source is the exception: its Current table already matches
+the tree, so `K-1`–`K-3` are green in both runs, and `D-1` goes red post-ship instead — that is the
+expected complement, not a defect.)*
+
+⚠ **This is also why `P29` looked broken, and the received diagnosis was wrong.** `P29` mutates the
+manifest stale and asks `K-1` to notice — but on an app-release package `K-1` is *already* red
+pre-ship, so the control could not distinguish its own mutation from the baseline. It was recorded
+as not firing *"against an ops package"*; run against one on 2026-09-08 it **fired**. The real
+boundary is **"packages whose `K-1` is already red"**, which is the same root cause one level over.
+A control that cannot fire because the check it targets is already failing has stopped being a
+control, and nothing in the harness can see that from the inside.
 
 **Re-read the documents the release itself authored.** The checklist above already retires fulfilled
 scopes; this is the wider case, and it is the one that has bitten twice. v5.50 fixed the app and left
@@ -796,6 +854,10 @@ from the zip entirely. Both build tables were left describing the previous relea
 hash table carried **21 wrong hashes**, and **12 pool files had no row at all**. Nothing caught it;
 post-ship verification did. **Every release package that changes any pooled file ships an updated
 manifest**, and `package_check` **section K** now asserts it against the clone and the pool.
+⚠ **Shipping the manifest is not the same as rolling its per-file hash rows, and the second is where
+this has failed three times — see §I, *The hash rows are a per-release obligation*, which also
+carries the four-argument `package_check` invocation.** Not restated here on purpose: two copies of
+this answer is the drift this project keeps recording.
 
 Rules: versioned outer folder · loose files at the top of `github/`, no `root/` wrapper · **changed files
 only** (for the repo, differs from what's committed; for knowledge, differs from *or is absent from* the
