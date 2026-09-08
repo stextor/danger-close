@@ -1,5 +1,68 @@
 # Changelog
 
+## ops 2026-09-08 (second package) — a scope for K-8's blind spot, and a correction to the package that found it
+
+**KIND: ops. No version bump, no source change, no figure moves, no test changes, and no gate
+change.** v5.66 remains the current build: source `31b43e094307ef5f996570c090478e13`, artifact
+`af4612323092c3c2aa6f0b408185f01f`, repo HEAD `b822d3e` at the start of this work. **This package
+ships a scope and a correction. It builds nothing.**
+
+### The correction, first, because it is mine
+
+The package earlier today stated in three places that `SCOPE_STATE_SET_SELECTOR.md` was **not** on
+`package_check`'s I-2 OPEN allowlist. **It was, and had been since the scope was written on
+2026-09-07**, at `package_check.mjs:535`, carrying its own expiry. The claim was asserted from
+reading the manifest rather than from running anything, and it shipped to the repo and the pool in
+the package whose *entire subject* was stale claims in that file.
+
+**This is §A0 committed by the session enforcing §A0**, and the cheapest possible test would have
+caught it: the sentence named a state, and no command had printed it. The manifest row is corrected;
+the CHANGELOG entry keeps its original wording with the correction beneath it, because a release
+entry records what was believed at the ship.
+
+### The scope
+
+`docs/SCOPE_K8_ROW_MATCHER_PY.md` — **written, not built. Five decisions are open in its §6.**
+
+`K-8`'s row matcher recognises `mjs cjs jsx js sh md html json txt` and **not `py`**, so a stale
+hash row on any of the pool's three Python files is invisible. Verified by execution rather than
+argued: a scratch manifest given a deliberately stale `oracle_nm.py` row leaves `K-8` **green**
+under the current matcher and makes it **fire and name the file** under a widened one.
+
+Two findings make it a scope rather than a one-token edit.
+
+**An AST census found FOUR live copies of that expression**, plus a fifth that has already drifted.
+The gate; this manifest's own D-5 count block; `controls_manifest_rows.py`'s target selector; and
+`P32`'s deliberately narrower one — with `SCOPE_HOUSEKEEPING_THREE.md` carrying the **pre-`D-C-1`**
+loose form, disagreeing with the gate today, noticed by nothing. The manifest introduces its D-5
+block with the claim that it *"is `package_check` K-8's own expression so it cannot drift away from
+the gate."* **That is true only while both are edited together** — and widening one and not the
+other would falsify a sentence this project's index makes about itself. `controls_manifest_rows.py`
+is worse than cosmetic: it selects its control target with its own copy, so a gate widened without
+it ships new behaviour with a control that **structurally cannot exercise it.**
+
+**The change is inert on today's manifest, and that is the trap.** All three candidate matchers see
+**exactly the same 78 rows** against the live pool. So a check written against the tree as it stands
+is green before and after and proves nothing — the **endpoint-only table-test class**, found three
+times across two sessions and every time by a control rather than by review. The scope's §4 requires
+every control to inject a `.py` row into a scratch copy, and says so at the top so it does not get
+simplified away later.
+
+The census instrument is `row_census.cjs`, which admits a site only if its pattern, **executed**,
+matches a canonical hash row — a grep cannot tell a definition from a mention and cannot run a
+regex. It is session-only for now and ships only if the build proceeds.
+
+### Limitations, disclosed rather than implied
+
+- **Nothing is fixed.** `K-8` is still blind to `.py` and the four copies still have to be kept in
+  step by hand. This package makes the problem legible and decided-upon; it does not close it.
+- **The new scope is NOT on the I-2 allowlist** — verified by command this time, in tree `b822d3e`.
+  It will fail `I-2` in the next package unless it is allowlisted or retired, which is correct
+  behaviour and is stated in its manifest row so the failure is expected rather than surprising.
+- The `K-1`–`K-3` pre-ship/post-ship split, and `P29`'s blindness on any package whose `K-1` is
+  already red, remain diagnosed and unscoped. Named in §I on 2026-09-08; deliberately not folded in.
+- `t10_taxcases.mjs:1133` still names its oracle at the wrong path. Suite edit; still out of lane.
+
 ## ops 2026-09-08 — the manifest's hash rows went stale for the third time, and nothing in the release path had ever told anyone to roll them
 
 **KIND: ops. No version bump, no source change, no figure moves, no test changes.** v5.66 remains
@@ -116,6 +179,11 @@ unmoved from v5.66's provenance line. What was run instead:
   outside an ops package's lane. `TESTING.md` has the path right.
 - **`SCOPE_STATE_SET_SELECTOR.md` is not on `package_check`'s I-2 OPEN allowlist.** Adding it edits
   the gate; that is a scope's decision.
+  > ⚠ **WRONG, and corrected by the next package the same day. It WAS on the allowlist** — at
+  > `package_check.mjs:535`, since the scope was written on 2026-09-07. The claim was asserted from
+  > reading and no command ever printed it. It is left standing with this correction beneath it
+  > rather than edited away, because a release entry is a record of what was believed at the ship.
+  > **§A0, committed by the package whose subject was stale claims in the manifest.**
 - The three-place deletion rule of §G is still **unenforced by any check** for the *departure* half.
   This package's ghost row is exactly what that gap produces, and K-8 caught it only after upload.
 
