@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **OPEN — written 2026-09-08, not built. Decisions in §6 are unresolved; do not build.** |
+| Status | ☑ **RETIRED — FULFILLED 2026-09-08.** All five decisions answered and built the same day: **D-1 (a)**, **D-2 (c)**, **D-3 (a)**, **D-4 (a)**, **D-5 (a)**. §7 is the build record. *(Prior: OPEN — written 2026-09-08, not built.)* |
 | Premise verified against | v5.66 source `31b43e094307ef5f996570c090478e13`, tree `b822d3e`, pool 117 files |
 | Owed by | The 2026-09-08 manifest hash-row repair, which raised it and declined to fold it in |
 | Direction | **No user-visible figure moves, and no app source is touched.** Gate infrastructure |
@@ -206,4 +206,69 @@ evidence that the matcher was once loose, which is the thing that makes the `D-C
 
 ## 7 · Build record
 
-*(empty — nothing built. Fill this at the ship, per §I.)*
+**Built 2026-09-08 against tree `9762851`, pool 118 files. No version bump, no app source change,
+no figure moves.** All five decisions were answered as recommended.
+
+**D-1 (a) — `py` added to the alternation.** `qa/tools/package_check.mjs`. The set stays an explicit
+allowlist. Nothing else about `K-8`'s predicate changed; no check was added, removed or softened.
+
+**D-2 (c) — `oracle_nm.py` rowed, the two control scripts not.** The first `.py` row this table has
+ever carried. `controls_v566_nm.py` and `controls_manifest_rows.py` stay unrowed under D-3's *"a row
+on a file that never changes protects nothing."* The manifest note that had called all three
+deliberately unrowed is **rewritten rather than replaced**, because half its reasoning expired and
+half did not, and the expired half is the argument for this release.
+
+**D-3 (a) — both copies widened, in the same edit.** The manifest's D-5 block stays pasteable.
+⚠ **This was recommended ON CONDITION that the drift check ship with it**, and it does:
+`qa/tools/row_census.cjs`.
+
+**D-4 (a) — `P32`'s narrower selector left alone**, with a comment at the site saying the narrowness
+is deliberate, and `row_census.cjs` excluding it by name so a future census reports it as a decision
+rather than as drift.
+
+**D-5 (a) — the stale copy in `SCOPE_HOUSEKEEPING_THREE.md` annotated, not rewritten.** It is two
+generations behind — pre-`D-C-1` loose form, and missing `py` — and it is kept exactly as written
+because it is the only readable record that the matcher was once loose. The annotation says so and
+says not to paste and run it.
+
+### What was measured, not asserted
+
+| | result |
+|---|---|
+| `row_census.cjs` on the built tree | **3 copies, one set, exit 0** |
+| drift control · D-5 block reverted to the old set | **exit 1, names the drift** |
+| drift control · control ROW selector reverted | **exit 1, names the drift** |
+| `P44` (stale `.py` row) against the **OLD** gate | ***NOT CAUGHT*** — the blind spot, reproduced |
+| `P44` against the **NEW** gate | **CAUGHT by `K-8`, names the file** |
+| `P45` (correct `.py` row) | **silent** on both gates |
+
+⚠ **`P44` is the witness; `P45` is not.** `P45` is silent under the old matcher too — it cannot be
+otherwise, because the old matcher does not see the row at all. Its job is to stop a future
+widening from matching too much, not to witness this one. Recorded because a reader scanning the
+table would otherwise count two pieces of evidence where there is one.
+
+⚠ **`P45` was WRONG TWICE on its first runs, and both errors were caught by running it against the
+real package rather than by review.** Recorded because the shapes are already in this project's
+history and both recurred anyway.
+
+1. **It hashed the POOL copy of a file the package was REPLACING.** `K-8` resolves a row against the
+   package's own `knowledge/` copy first — fixed 2026-09-07, *"as this package will leave the
+   pool"* — so the injected row was correct against the old bytes and stale against the new ones,
+   and `K-8` fired exactly as designed while `P45` reported it as the matcher *"matching too much."*
+   **Fourth occurrence of that shape.**
+2. **It asserted GLOBAL `K-8` silence and so had no needle.** The package carried a genuinely stale
+   row — for `package_check_controls.sh`, which this session had edited *after* rolling its row,
+   which is precisely the trap §I names — and `P45` reported a FINDING while pointing at something
+   else entirely. A silence assertion needs a needle as much as a firing one: it now requires that
+   `K-8`'s failure line, if there is one, **does not name P45's own file.**
+
+⚠ **Both controls INJECT a `.py` row that is not in the tree**, per §4. Against the live manifest
+all three candidate matchers see the same 78 rows, so a control using an existing row would be green
+before and after and would prove nothing.
+
+### Left open, deliberately
+
+- The `K-1`–`K-3` pre-ship/post-ship split, and `P29`'s blindness on any package whose `K-1` is
+  already red. Diagnosed in `OPERATIONS.md` §I; still unscoped.
+- `t10_taxcases.mjs:1133` still names its oracle `qa/oracle_nm.py`; it is at `qa/tools/oracle_nm.py`.
+  A suite edit, owed to a release already touching the suite.

@@ -595,6 +595,15 @@ and 4 unrowed files — the third and worst occurrence, produced by a session th
 very document. **A stale row is worse than no row**, because §A's fallback then returns a confident
 MATCH on a file that has drifted.
 
+⚠ **`K-8`'s row expression exists in THREE places and they must agree** (added 2026-09-08): the
+gate at `qa/tools/package_check.mjs`, the manifest's D-5 count block, and
+`controls_manifest_rows.py`'s target selector. The third is load-bearing — it picks the control's
+target, so a gate widened without it ships new behaviour with a control that structurally cannot
+exercise it. **`qa/tools/row_census.cjs` checks that the three agree; run it after touching any of
+them.** It is a parser, not a grep, because a grep cannot tell a regex definition from a mention of
+one and cannot execute a pattern. A fourth copy in `package_check_controls.sh` is narrower on
+purpose and is excluded by name.
+
 ⚠ **Roll `CHANGELOG.md`'s row last, after the entry is final**, and roll the row of any tool the
 package itself edits — including `package_check.mjs`. Editing a file after computing its row pins
 the pre-edit hash, which is a one-row version of this whole defect.

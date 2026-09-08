@@ -197,6 +197,13 @@ which is the §B2 failure this suite was written to prevent.
 > import {readFileSync,readdirSync,existsSync} from "fs"; import {join} from "path";
 > const POOL=process.argv[1];
 > const M=readFileSync(join(POOL,"PROJECT_KNOWLEDGE_INDEX.md"),"utf8");
+>
+> ⚠ **ANNOTATED 2026-09-08 (D-5), NOT CORRECTED. The expression below is TWO generations stale, and it is kept exactly as written because it is the evidence.**
+> 
+> It is the **pre-`D-C-1`** loose matcher: `[^|]*\|?\s*` between the filename and the hash let ANY prose sit in the gap, so a hash merely QUOTED in a description was read as that file's live row. That is the defect the eighth package of 2026-09-07 fixed, and rewriting this block would erase the only readable record that the matcher was once loose. It is also missing `py`, added 2026-09-08.
+> 
+> **The live expression is `package_check.mjs`'s K-8 and the manifest's D-5 block.** `qa/tools/row_census.cjs` checks those against each other and **excludes this block by name** as history. Do not paste and run what follows.
+>
 > const rows=[...M.matchAll(/\|\s*`?([A-Za-z0-9_.-]+\.(?:mjs|cjs|jsx|js|sh|md|html|json|txt))`?\s*\|[^|]*\|?\s*`?([0-9a-f]{32})`?/g)];
 > const hashed=new Set(rows.map(r=>r[1])); const pool=readdirSync(POOL);
 > console.log(pool.length,"files ·",hashed.size,"hashed rows ·",pool.filter(f=>!hashed.has(f)).length,"with no row");
