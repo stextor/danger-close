@@ -1,5 +1,124 @@
 # Changelog
 
+## ops 2026-09-08 — the manifest's hash rows went stale for the third time, and nothing in the release path had ever told anyone to roll them
+
+**KIND: ops. No version bump, no source change, no figure moves, no test changes.** v5.66 remains
+the current build: source `31b43e094307ef5f996570c090478e13`, artifact
+`af4612323092c3c2aa6f0b408185f01f`, repo HEAD `9157042` at the start of this work. **The app is
+untouched — this repairs the map, not the territory.**
+
+### What was wrong
+
+`package_check`'s **K-8** and **K-9**, run against the pool for the first time after the v5.66
+upload, found the §A2 fallback hash table describing a build that no longer existed:
+
+- **25 stale hash rows** — every pooled file v5.66 changed still carried its pre-v5.66 hash
+  (`TESTING.md`, `METHODOLOGY.md`, `MissingFeatures.md`, `SCOPE_STATE_FIXTURES.md`,
+  `package_check.mjs`, `domdiff_withdrawal.mjs`, and `t1`, `t3`–`t6`, `t10`, `t23`–`t35`).
+- **1 ghost row** — `dom_entry_v564.jsx`, whose file v5.66's rotation had removed from the pool.
+- **4 files with no row at all** — `SCOPE_STATE_SET_SELECTOR.md`, `oracle_nm.py`,
+  `controls_v566_nm.py`, `sel_census.cjs`, all new at v5.66.
+- **1 further gap the gates could not see**, found while repairing the above: `dom_entry_v566.jsx`
+  had **no md5 row**, while both its predecessors had one. K-9 is satisfied by a bare mention
+  anywhere in the file and the rotation note mentions it; K-8 cannot see a row that was never
+  written. So the rotation pair was recorded backwards — the table named the leg that had **left**
+  and not the leg that had **arrived**.
+
+**A stale row is worse than no row.** §A's offline fallback compares a pool file to its recorded
+hash; a stale file and a stale row agree with each other and return a confident MATCH.
+
+### Why it shipped, which is the part worth fixing
+
+**This is the third occurrence of one defect class.** At v5.61 the table carried 21 wrong hashes and
+12 pool files had no row; on 2026-09-01 it carried 10 rows naming files that had already left the
+pool alongside 19 whose hash no longer matched; now 25/1/4 — produced, this time, by a session that
+was editing that very document.
+
+Two failures made it repeatable, and both are now closed:
+
+1. **No checklist step connected the halves that already existed.** §L named the manifest a
+   mandatory deliverable and K-8 checked the rows, but nothing in the release path said to *roll*
+   them. The obligation lived only inside the manifest's own D-3 note — read by people editing the
+   manifest, not by people shipping a release. §I now carries **The hash rows are a per-release
+   obligation**, with §L pointing at it rather than restating it.
+2. **`package_check`'s printed usage line named two of its four positionals.** The header comment
+   had all four; the line anyone actually reads did not. A session passing the pool third binds it
+   to the workspace slot, leaving `POOL` null, at which point K-4, K-5, K-6, K-8 and K-9 print
+   *"no pool given — this is the POST-SHIP half"* — which reads as a benign skip and is in fact the
+   whole post-ship half of section K not running. The v5.66 session read that line and came within
+   one step of recording a false green. Both lines now agree, and the checklist names the
+   four-argument invocation as a post-upload step.
+
+**The checks worked; the process around them did not.** K-8 and K-9 exist *because of* v5.61, were
+skipped pre-ship for want of the pool argument, and caught this the moment they could run.
+
+### Also corrected
+
+Three manifest rows whose **prose** had frozen mid-build and now read as live instructions. The
+`STOP-REPORT-v5_66-nm-session2.md` row still called itself *"the entry point for the New Mexico
+session"* and ended *"the v5.66 source is NOT in the repo or the pool"* — false since the ship, and
+in the one document a session reads first. The `STOP-REPORT-v5_66-NM-note-guarded-set.md` row still
+said the selector scope was unwritten; it was written 2026-09-07. Both bodies are kept as the record
+of the stop and marked as history. This is the shape §G recorded on 2026-09-01: **a row freezes when
+written and nothing re-reads it.**
+
+### How this was verified
+
+No app suite applies — no source, suite or fixture changed, and the current-build hashes above are
+unmoved from v5.66's provenance line. What was run instead:
+
+- **§A freshness check, in full.** Pool source, prior source and `src/index.html` hashed against a
+  fresh clone; all 116 pool files compared by content in **both** directions. Every one is
+  byte-identical to its repo counterpart except `DangerClose-v5_65.jsx`, which is the prior leg and
+  pool-only by design. The repo-only set is the expected categories only.
+- **`package_check` with all four arguments**, before and after the repair — the invocation this
+  package exists to make unskippable.
+- **`package_check_controls.sh`**, because this package edits `package_check.mjs`.
+- **Negative controls on the repaired rows** — `qa/tools/controls_manifest_rows.py`, new here and
+  shipped to both destinations, because a control script is evidence and a release input, not
+  scaffolding. Built from a pristine copy rather than by mutate-then-restore: corrupting one real
+  hash row must turn K-8 red, removing a pool file's only manifest mention must turn K-9 red, and
+  suppressing both mutations must leave them green. All four behaved, the package's md5 was
+  unchanged across the run, and **every control carries a needle** so it cannot pass on someone
+  else's failure. **A control that does not fire is the finding.** ⚠ Its fifth case, `B1`, is
+  deliberately **not** a control: it removes `dom_entry_v566.jsx`'s row and asserts K-9 stays
+  **green**, which is the demonstration that the fifth gap above was invisible to both gates.
+
+### Limitations, disclosed rather than implied
+
+- **`K-8`'s row matcher does not recognise `.py`.** Its extension set is
+  `mjs|cjs|jsx|js|sh|md|html|json|txt`, so `oracle_nm.py` and `controls_v566_nm.py` could carry an
+  md5 row that no gate would ever check. They are given index rows and no hash row, with the reason
+  stated in place. **Widening the matcher is a real option and was not taken here** — it changes
+  what a check asserts, which belongs in a scope with its own controls, not in a package repairing
+  the rows that gate reads.
+- **The `K-1`–`K-3` pre-ship/post-ship split is diagnosed and NOT fixed.** Those three anchor the
+  Current-build table to the committed tree, so on a release package they are red pre-ship on a
+  *correct* manifest and green on a *stale* one — the class is invisible until after upload, by
+  construction. Named in §I so it is not mistaken for repaired. **No K check was softened to make a
+  run look clean.**
+- **`P29` DID fire against this package, and the received diagnosis was wrong.** It has been
+  recorded as not firing "against an ops package"; run here, it fires. The real shape is narrower
+  and worth having: P29 mutates the manifest stale and wants **K-1** to notice. On an *app-release*
+  package K-1 is **already red pre-ship** — a release manifest has rolled ahead of the commit by
+  construction — so P29 could not tell its mutation from the baseline. This package changes no
+  version, so K-1 is green at baseline and the mutation is visible. **The blind spot was never
+  "ops packages"; it is "packages whose K-1 is already red"**, which is the same root cause as the
+  pre-ship/post-ship split above and belongs in the same scope. Only **`P13` and `P14`** now fail
+  to fire, and both are correct by construction: they mutate `C-5`/`C-6`'s app-release form, which
+  an ops package does not carry. ⚠ **An earlier draft of this entry said P1, P2 and P3 did not fire
+  either. That was measured against an incomplete package** — `MANIFEST.txt` had not yet been
+  written, so `KIND` read as `app-release` and five controls failed for that reason alone. All
+  three fire against the finished package. Recorded rather than quietly corrected: it is §A0 in
+  miniature, and the harness is what caught it.
+- **`t10_taxcases.mjs` L1133 names its oracle `qa/oracle_nm.py`; the file is at
+  `qa/tools/oracle_nm.py`.** Recorded in the manifest row and **not fixed** — editing a suite is
+  outside an ops package's lane. `TESTING.md` has the path right.
+- **`SCOPE_STATE_SET_SELECTOR.md` is not on `package_check`'s I-2 OPEN allowlist.** Adding it edits
+  the gate; that is a scope's decision.
+- The three-place deletion rule of §G is still **unenforced by any check** for the *departure* half.
+  This package's ghost row is exactly what that gap produces, and K-8 caught it only after upload.
+
 ## v5.66 — New Mexico's 65+ exemption becomes income-conditioned, 2026-09-07
 
 **Figures MOVE, in the conservative direction.** Source `31b43e094307ef5f996570c090478e13`,
