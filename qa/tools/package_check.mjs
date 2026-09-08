@@ -54,7 +54,15 @@ const CLONE = process.argv[3] || null;
 const WORK = process.argv[4] || null;
 const POOL = process.argv[5] || null;
 if (!ARG) {
-  console.log("usage: node package_check.mjs <zip-or-unpacked-dir> [clone-dir]");
+  // ⚠ THIS LINE NAMED ONLY TWO OF THE FOUR POSITIONALS UNTIL 2026-09-08, AND THAT SHIPPED A DEFECT.
+  // The header comment above has been correct since the pool argument was added; this line, which is
+  // the one anyone actually reads, was not. A session passing the pool THIRD gets it bound to WORK,
+  // leaving POOL null — so K-4..K-6, K-8 and K-9 report "no pool given — this is the POST-SHIP half,"
+  // which reads as a benign skip and is the whole post-ship half of section K going unrun. The v5.66
+  // session read exactly that and came within one step of recording a false green; the manifest
+  // shipped with 25 stale hash rows, 1 ghost row and 4 files unrowed. Keep all four names here.
+  console.log("usage: node package_check.mjs <zip-or-unpacked-dir> [clone-dir] [workspace-dir] [pool-dir]");
+  console.log("  the POOL is the FOURTH positional, and it is the POST-SHIP half: pass all four after upload.");
   process.exit(2);
 }
 let ROOT;
