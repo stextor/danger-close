@@ -1,5 +1,84 @@
 # Changelog
 
+## ops 2026-09-08 (third package) — K-8 can see a .py row, and the three copies of its expression are now checked against each other
+
+**KIND: ops. No version bump, no source change, no figure moves, no test changes.** v5.66 remains
+the current build: source `31b43e094307ef5f996570c090478e13`, artifact
+`af4612323092c3c2aa6f0b408185f01f`, repo HEAD `9762851` at the start of this work. **Builds
+`SCOPE_K8_ROW_MATCHER_PY.md`, which is retired in the same package.**
+
+### What changed
+
+`package_check` **K-8**'s row matcher recognised `mjs cjs jsx js sh md html json txt` and not `py`,
+so a stale hash row on any of the pool's three Python files was invisible — not a wrong answer, no
+answer. **`py` is added** (D-1 (a)); the set stays an explicit allowlist because it documents which
+files the table is for. No check was added, removed or softened, and `K-8`'s predicate is unchanged
+in every other respect.
+
+**`oracle_nm.py` is now rowed** (D-2 (c)) — the first `.py` row this table has carried. It earns the
+obligation where the two control scripts do not: it is the independent transcription of NMSA 1978
+§ 7-2-5.2 that `t10` prices every New Mexico band against, so a silent change to it is the one
+change in this set that could move a user's number. ⚠ **Its row is rolled only after re-reading the
+statute, never to make a check go green** — a disagreement there means the oracle moved, and the
+oracle is the thing that is supposed to be independent.
+
+### The finding that made this a scope rather than a one-token edit
+
+**That expression exists in three places that must agree**, and a fourth and fifth that must not.
+The gate; this manifest's D-5 count block; and `controls_manifest_rows.py`'s target selector — which
+is load-bearing, because it picks the control's target, so a gate widened without it would ship new
+behaviour with a control that **structurally cannot exercise it**. All three are widened in one
+edit (D-3 (a)), and **`qa/tools/row_census.cjs` now checks that they still agree.** That check was
+the stated condition for keeping the manifest's block pasteable rather than replacing it with a
+pointer; without it, the pointer was the right answer.
+
+`P32`'s selector is narrower **on purpose** and is left alone with a comment saying so (D-4 (a)).
+`SCOPE_HOUSEKEEPING_THREE.md` carries a copy that is two generations stale — the pre-`D-C-1` loose
+form — and it is **annotated, not corrected** (D-5 (a)), because rewriting it would erase the only
+readable record that the matcher was once loose.
+
+### How this was verified
+
+| | result |
+|---|---|
+| `row_census.cjs` on the built tree | 3 copies, one set, **exit 0** |
+| drift control · either of the two other copies reverted | **exit 1**, names the drift |
+| `P44` (stale `.py` row) against the **OLD** gate | ***NOT CAUGHT*** — the blind spot, reproduced |
+| `P44` against the **NEW** gate | **CAUGHT by K-8**, and names the file |
+| `P45` (correct `.py` row) | **silent** on both gates |
+
+⚠ **Both new controls INJECT a `.py` row that is not in the tree, and that is the design.** Measured
+before building: the old matcher, the widened one and an accept-anything one all see **exactly the
+same 78 rows** against the live manifest, because it carried no `.py` row. A control written against
+the manifest as it stands would be green before and after and prove nothing — the **endpoint-only
+table-test class**, found three times across two sessions and every time by a control rather than by
+review.
+
+### Limitations, disclosed rather than implied
+
+- **`P45` was wrong twice on its first runs, and the controls caught both.** It hashed the *pool*
+  copy of a file this package was replacing, when `K-8` resolves against the package's own
+  `knowledge/` copy first — the fourth occurrence of that shape. And it asserted *global* `K-8`
+  silence with no needle, so it reported a FINDING while pointing at an unrelated stale row: the row
+  for `package_check_controls.sh`, which this session had edited **after** rolling its row, which is
+  exactly the trap §I names. Both corrected; a silence assertion now needs a needle too.
+- **`P45` is not a second witness.** It is silent under the old matcher too, and cannot be
+  otherwise, because that matcher does not see the row at all. Its job is to stop a future widening
+  from matching too much. **`P44` is the only control that witnesses this change.**
+- **`row_census.cjs` checks that the three copies AGREE. It does not check that they are RIGHT.**
+  Three identically-wrong copies pass it. What makes them right is `P44`/`P45`, and those exercise
+  the gate only — the other two copies have no test of their own.
+- **The parity check is a list of three paths in `SITES`.** A fourth copy written tomorrow is
+  invisible to it until someone adds it. It exits **2** rather than 0 when a site cannot be found,
+  so a moved expression fails loudly instead of silently shrinking the set — but a *new* one is not
+  something it can discover.
+- **The `.py` row count is one.** The other two Python files remain unrowed by decision, so most of
+  the widened matcher's new reach is still unused.
+- The `K-1`–`K-3` pre-ship/post-ship split, and `P29`'s blindness on any package whose `K-1` is
+  already red, remain diagnosed in §I and unscoped.
+- `t10_taxcases.mjs:1133` still names its oracle `qa/oracle_nm.py`; it is at
+  `qa/tools/oracle_nm.py`. Suite edit, still outside an ops package's lane.
+
 ## ops 2026-09-08 (second package) — a scope for K-8's blind spot, and a correction to the package that found it
 
 **KIND: ops. No version bump, no source change, no figure moves, no test changes, and no gate
