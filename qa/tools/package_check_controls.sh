@@ -437,6 +437,14 @@ wr(s[:a]+s[a:b].replace(m.group(1),'0'*28+'beef',1)+s[b:])
 
 # ⚠ P32 CARRIES A NEEDLE. Its predecessor reported CAUGHT while K-8 was firing on an unrelated
 # genuinely-stale row. The needle is the filename this control itself corrupted.
+#
+# ⚠ ITS EXTENSION SET (mjs|cjs|sh) IS NARROWER THAN K-8's ON PURPOSE — decision D-4, 2026-09-08.
+# This selector does not need the widest set; it needs SOME row it can corrupt, and it must find
+# one that is really in the pool. Widening it "for consistency" would buy nothing and would add a
+# fourth copy of the gate's expression to keep in step. `qa/tools/row_census.cjs` checks the three
+# copies that MUST agree and EXCLUDES this one by name, so a future census reports it as
+# deliberate rather than as drift. Do not delete this comment; it is the reason the census is
+# allowed to ignore this line.
 P32F=$(node -e '
   const {readFileSync,existsSync}=require("fs");const d=process.argv[1];
   const M=readFileSync(d+"/PROJECT_KNOWLEDGE_INDEX.md","utf8");
@@ -533,6 +541,89 @@ m=re.search(r'^\|\s*\`?(t1_units\.mjs)\`?\s*\|\s*\`?([0-9a-f]{32})\`?\s*\|', s, 
 assert m, 'no real hash row for t1_units.mjs - control is INVALID'
 wr(s[:m.start(2)]+'deadbeef'+m.group(2)[8:]+s[m.end(2):])
 " "t1_units.mjs"
+
+# ── P44 / P45 · D-1 (a): K-8 must now SEE a .py row ─────────────────────────────────────────────
+# ⚠ BOTH CONTROLS INJECT A ROW THAT IS NOT IN THE TREE, AND THAT IS THE WHOLE DESIGN. Measured
+# 2026-09-08: the old matcher, the widened one and an accept-anything one all see EXACTLY THE SAME
+# 78 rows against the live manifest, because it carries no .py row. So a control written against
+# the manifest as it stands is GREEN BEFORE AND AFTER THE WIDENING and proves nothing. That is the
+# endpoint-only table-test class, found three times across two sessions and every time by a
+# control rather than by review. Do not "simplify" these to use an existing row.
+#
+# ⚠ THE PAIR IS THE POINT (the H-6 lesson, and P42/P43's). P44 alone would pass if the matcher were
+# widened to match EVERYTHING including rows it should leave alone; P45 is what shows the widened
+# matcher still distinguishes a correct row from a stale one. Neither is evidence without the other.
+#
+# The target is DERIVED: the first .py file that is really in the pool. Nothing here names a file
+# that can be renamed away, which is the defect that had package_check_controls.sh printing
+# NOT CAUGHT for every control from a dead session's absolute paths.
+PYF=$(node -e '
+  const {readdirSync}=require("fs");
+  const f=readdirSync(process.argv[1]).filter(x=>x.endsWith(".py")).sort()[0];
+  if(f) console.log(f);' "$POOLARG")
+if [ -z "$PYF" ]; then
+  SKIP=$((SKIP+1)); echo "  - SKIPPED: P44/P45 - no .py file in the pool to build a row from"
+else
+  runk "P44 a .py hash row goes STALE - the case the old matcher could not see ($PYF)" "K-8" "" "
+import hashlib, os, re
+s = rd()
+pool = os.path.dirname(MANPATHS[-1]) if MANPATHS[-1].startswith('/tmp/pkpool') else '/tmp/pkpool'
+f = '$PYF'
+assert os.path.exists(os.path.join(pool, f)), 'target .py not in the mutated pool - control is INVALID'
+# a row for a real pool file, carrying a hash that is deliberately NOT its hash
+m = re.search(r'^\| \`hand_86\.mjs\` \|', s, re.M)
+assert m, 'anchor row not found - control is INVALID'
+row = '| \`' + f + '\` | \`' + '0'*32 + '\` | qa/tools/' + f + ' |\n'
+wr(s[:m.start()] + row + s[m.start():])
+" "$PYF"
+
+  # ⚠ P45 asserts K-8 stays SILENT, so it cannot use runk, which asserts that a check FIRES.
+  # Same shape as P42, and for the same reason.
+  rm -rf /tmp/pkpool /tmp/pkpkg
+  cp -r "$POOLARG" /tmp/pkpool; cp -r "$APP" /tmp/pkpkg
+  if python3 -c "
+import hashlib, os, re
+MANPATHS=[q for q in ['/tmp/pkpkg/github/PROJECT_KNOWLEDGE_INDEX.md',
+                      '/tmp/pkpkg/knowledge/PROJECT_KNOWLEDGE_INDEX.md',
+                      '/tmp/pkpool/PROJECT_KNOWLEDGE_INDEX.md'] if os.path.exists(q)]
+assert MANPATHS, 'no manifest anywhere - control is INVALID'
+s=open(MANPATHS[0]).read()
+f='$PYF'
+# ⚠ HASH THE COPY K-8 WILL ACTUALLY COMPARE AGAINST, WHICH IS THE PACKAGE'S OWN knowledge/
+# COPY IF IT SHIPS ONE, AND THE POOL OTHERWISE. K-8 resolves in that order deliberately (fixed
+# 2026-09-07, 'AS THIS PACKAGE WILL LEAVE THE POOL'), and a control that hashes the pool copy of a
+# file the package is REPLACING injects a row that is correct against the old bytes and stale
+# against the new ones -- so K-8 fires and P45 reports a FINDING against a gate behaving exactly
+# as designed. That happened on this control's first run, against a package shipping a new
+# controls_manifest_rows.py. FOURTH occurrence of this shape in this project; see K-8's own note.
+_shipped=os.path.join('/tmp/pkpkg/knowledge',f)
+_src=_shipped if os.path.exists(_shipped) else os.path.join('/tmp/pkpool',f)
+h=hashlib.md5(open(_src,'rb').read()).hexdigest()
+m=re.search(r'^\| \`hand_86\.mjs\` \|', s, re.M)
+assert m, 'anchor row not found - control is INVALID'
+row='| \`'+f+'\` | \`'+h+'\` | qa/tools/'+f+' |\n'
+out=s[:m.start()]+row+s[m.start():]
+for q in MANPATHS: open(q,'w').write(out)
+" >/dev/null 2>&1; then
+    OUT45=$(node "$PKG_CHECK" /tmp/pkpkg "$CLONE" "" /tmp/pkpool 2>&1)
+    # ⚠ A NEEDLE FOR A SILENCE ASSERTION. P45 claims K-8 does not fire ON ITS OWN ROW; it must not
+    # claim K-8 is globally silent, or any unrelated stale row in the package turns this control
+    # into a FINDING about a gate that is behaving correctly. That happened on its first run: the
+    # package carried a genuinely stale row for a file it was itself editing, and P45 reported the
+    # widened matcher as "matching too much" while pointing at something else entirely. Same shape
+    # as P32's spurious pass and P42's first draft — a control that cannot tell its own effect from
+    # the background has measured nothing, in either direction.
+    if echo "$OUT45" | grep "✗" | grep "K-8" | grep -qF -- "$PYF"; then
+      MISS=$((MISS+1)); printf "  *** FINDING *** P45 K-8 fired on a CORRECT .py row (%s) - the widened matcher is matching too much\n" "$PYF"
+      echo "$OUT45" | grep "✗" | grep "K-8" | head -1
+    else
+      PASS=$((PASS+1)); printf "  CORRECTLY SILENT   P45 a CORRECT .py row leaves K-8 green (the pair for P44)\n"
+    fi
+  else
+    MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** P45 mutation did not apply - control is INVALID\n"
+  fi
+  rm -rf /tmp/pkpool /tmp/pkpkg
+fi
 
 [ "$SKIP" -gt 0 ] && echo "  ⚠ A SKIPPED control is not a passing one."
 fi

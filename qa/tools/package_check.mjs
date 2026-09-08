@@ -753,7 +753,18 @@ console.log("\nK. Manifest — PROJECT_KNOWLEDGE_INDEX.md vs the clone and the p
         // start of a line, with the hash cell holding NOTHING BUT the hash. Measured against the
         // live manifest before and after: 73 -> 72 rows, the single dropped entry being the false
         // one, no legitimate row lost and no hash disagreement.
-        const rows = [...M.matchAll(/^\|\s*`?([A-Za-z0-9_.-]+\.(?:mjs|cjs|jsx|js|sh|md|html|json|txt))`?\s*\|\s*`?([0-9a-f]{32})`?\s*\|/gm)];
+        // ⚠ WIDENED 2026-09-08 (D-1 (a)) — `py` ADDED. THE INSTANCE: the pool holds three Python
+        // files and NONE could carry a checkable hash row, so a stale row on any of them was
+        // invisible. Measured rather than argued: a scratch manifest given a deliberately stale
+        // `oracle_nm.py` row left this check GREEN under the old set and fires under this one.
+        // ⚠ THE SET STAYS AN EXPLICIT ALLOWLIST, deliberately (D-1 (a) over (b)). It documents
+        // which files the table is FOR; `[A-Za-z0-9]+` would have measured identically — all
+        // three candidates see the same 78 rows on the live manifest — and said nothing.
+        // ⚠ THIS EXPRESSION EXISTS IN THREE PLACES and they must agree: here, the manifest's D-5
+        // count block, and `controls_manifest_rows.py`'s ROW. `qa/tools/row_census.cjs` is the
+        // check that they do — run it, do not trust that they were edited together. A fourth copy
+        // in `package_check_controls.sh` (P32) is narrower ON PURPOSE and is excluded there.
+        const rows = [...M.matchAll(/^\|\s*`?([A-Za-z0-9_.-]+\.(?:mjs|cjs|jsx|js|sh|md|html|json|txt|py))`?\s*\|\s*`?([0-9a-f]{32})`?\s*\|/gm)];
         const seen = new Set(), badHash = [], ghostRow = [];
         // ⚠ FIXED 2026-09-07 — AS THIS PACKAGE WILL LEAVE THE POOL, not as it finds it. THE
         // INSTANCE: the 2026-09-07 manifest-repair package changed `package_check.mjs` and did

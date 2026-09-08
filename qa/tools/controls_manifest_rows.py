@@ -100,7 +100,11 @@ def control(name, cid, needle, mutate, expect_fire):
 
 
 # ── targets DERIVED from the manifest, so this file names no hash and no row that can move ──
-ROW = re.compile(r"^\|\s*`?([A-Za-z0-9_.-]+\.(?:mjs|cjs|jsx|js|sh|md|html|json|txt))`?\s*\|\s*`?([0-9a-f]{32})`?\s*\|", re.M)
+# ⚠ WIDENED 2026-09-08 with the gate (D-1 (a)). This copy is LOAD-BEARING: C1 picks its target
+# by scanning rows with it, so a gate widened without this line would ship new behaviour with a
+# control that STRUCTURALLY CANNOT select a .py row - a control passing while measuring
+# nothing, which is the P32/P42 defect. Kept in step by qa/tools/row_census.cjs.
+ROW = re.compile(r"^\|\s*`?([A-Za-z0-9_.-]+\.(?:mjs|cjs|jsx|js|sh|md|html|json|txt|py))`?\s*\|\s*`?([0-9a-f]{32})`?\s*\|", re.M)
 
 def _first_row_in_pool():
     """The first hash row naming a file that is actually in the pool. Derived, not named."""
