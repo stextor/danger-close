@@ -1,5 +1,96 @@
 # Changelog
 
+## v5.67 — New Jersey's pension exclusion becomes income-conditioned, and its 62 floor is modelled, 2026-09-08
+
+Source `ca05b2ece1af9dac3851837a0e96fbfa` · built `index.html` `35fcca203418e3e10b11765e2c6ade93`.
+
+**Suite: 3,459 checks passing, 0 failing, 0 dead, across both the v5.66 and v5.67 legs.** Per suite,
+computed from the runner's own output rather than restated: t1 185, t2 35, t3 36, t4 252, t5 58,
+t6 21, t10 309, MC parity 10, t7 41, t9 14, t11 40, t12 23, t13 42, t14 44, t15 11, t16 24, t17 74,
+t18 67, t19 24, t20 100, t22 26, t23 27, t24 38, t25 45, t26 25, t27 18, t28 34, t29 63, t30 12,
+t31 31, t32 12, t33 32, t34 67, t35 94, plus tooling t21 50 and domdiff 32 (not counted in the app
+total). Both legs run green; nothing is skipped.
+
+### What changed for a user
+
+The model granted New Jersey's pension exclusion at **$75,000 per person, unconditionally, from age
+65**. N.J.S.A. § 54A:6-10 grants a **household** exclusion conditioned on New Jersey gross income:
+the full amount (up to $100,000 joint, $75,000 single) at or below $100,000, then **50%** of the
+payments received up to $125,000, **25%** up to $150,000, and **nothing** above $150,000.
+
+**An MFJ household above $150,000 excluded $150,000 where the statute allows none — $8,250 a year of
+understated New Jersey tax, the largest single-state error this module carried.** That household now
+pays the statutory figure. Tier tops are inclusive; the percentages are of the payments received,
+not of income and not of the tier-1 cap.
+
+### ⚠ One figure moves the OPTIMISTIC way, and it is the first time a populate release has done that
+
+The statute's age floor is **62**, and the model refused to apply it. The shipped reason was that
+with a per-person $75,000 amount, granting it at 62 would hand a 62–64 couple $150,000 against a
+$100,000 statutory cap — worse, not better. **That was an argument about the broken cap, and it
+expired with this table.** The floor is now modelled, so a household aged 62–64 receives an
+exclusion this model previously denied them and their estimated New Jersey tax **falls**.
+
+Recorded here, in METHODOLOGY and in the Field Manual rather than left as a side effect: a release
+reporting only the half that looks rigorous would be describing itself inaccurately.
+
+### Six errors this build made, every one caught by running rather than reading
+
+Listed because the project's standard is that hand-verified means computed independently and
+compared, and because five of the six were caught by a check rather than by review.
+
+1. **A test's expected value was wrong and the engine was right.** The clamp cell asserted
+   `0.055 × 60,000`, double-counting $5,000 of pension that tier 1 fully excludes. `3,025` is the
+   answer.
+2. **The new test block stole the New Mexico `else` branch**, silently breaking the *prior* leg —
+   288/4 where the shipped suite gives 288/0. Visible only because both legs were run.
+3. **A blanket version-ladder edit corrupted a version-STRING map.** `VER === "v566" ? "v5.66"` is a
+   value map, not a carry-forward ladder; widening its condition made t4's badge assert v5.66
+   against a v5.67 build.
+4. **The v5.54 New Jersey defect was nearly reproduced by the release fixing New Jersey.** The
+   rewritten note first said *"income-conditioned"* and dropped the phrase the guarded-set selector
+   matches, so NJ would have left that set by **rewording** as well as converting — and a reword
+   alone empties it silently. `t35` D-7a caught it by shape. The phrase is restored and NJ now has
+   its own **D-7b**.
+5. **`F-6`'s guarded set was left standing on one member.** Setting `excl65: 0` correctly drops NJ
+   from a filter keyed on `excl65 > 0`, leaving `{VA}` — and **Virginia is the next state to
+   populate**, which would empty it. Pinned as **F-6a/F-6b** with instructions not to fix the coming
+   red by weakening F-6 or keeping a scalar alive to satisfy a filter.
+6. **The `stateExclCliff` fixture had gone vacuous.** It stood on New Jersey since v5.54 and turned
+   the D-3c row ON; this release made that unreachable, so the fixture would have passed by having
+   nothing left to catch. **Re-founded on Virginia**, with a note that Virginia is the last state it
+   can stand on.
+
+### Limitations, disclosed rather than implied
+
+- **Married-filing-separately has its own lower column** ($50,000 / 25% / 12.5%) and is not
+  modelled; the app models single and joint only. Do not assume MFS tracks single.
+- **Disability-based eligibility at any age** is a separate statutory route with no input to express
+  it, so a disabled New Jersey claimant under 62 is modelled as receiving nothing — overstating
+  their state tax.
+- **The income measure carries no dividend or interest income**, so a household whose income is
+  materially dividend-driven sits lower on the tier table than the statute would put it. Optimistic.
+- **The residual New Jersey error is now the flat-rate approximation alone**, and its sign has
+  FLIPPED: against NJ's graduated Table B the model now *overstates* by $2,250 / $2,748.75 /
+  $2,302.50 at the three pinned incomes. Conservative, and pinned as an extinction invariant.
+- **Rhode Island and Virginia remain unconditional and optimistic.** VA converts next; RI is
+  deliberately last, because its TY2026 figures are unpublished until November 2026 and its
+  exclusion carries a second, separate defect.
+- **The run-folder repairs this build needed are session scaffolding, not repo changes** — the
+  baseline suites, `app_testable.mjs`, `dom_bundle.cjs`, an untagged source at the run root, and the
+  dependency set. The ten `0 passed, 0 failed` suites the v5.66 stop report diagnosed have the same
+  root cause, and it is **still undocumented anywhere durable**. Worth its own ops note.
+
+### Also in this release
+
+`docs/SCOPE_NJ_POPULATE.md`, written and retired the same day, carrying the build record. It was
+never shipped as a standalone package — folding it in avoided a CHANGELOG entry for a package that
+would have been superseded within the hour. **D-NJ-3 repaired a live three-way status disagreement**
+about `SCOPE_INCOME_CONDITIONING.md`: the scope said *"Not yet built"*, the gate said *"PARTIALLY
+BUILT: CT v5.65, NM v5.66"*, the manifest row said *"at v5.64."* The gate was right. That scope's own
+header already logs this failure once, as the fifth instance of the class; this was the sixth, in the
+same document.
+
 ## ops 2026-09-08 (third package) — K-8 can see a .py row, and the three copies of its expression are now checked against each other
 
 **KIND: ops. No version bump, no source change, no figure moves, no test changes.** v5.66 remains
