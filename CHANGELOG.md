@@ -4,12 +4,21 @@
 
 Source `ca05b2ece1af9dac3851837a0e96fbfa` · built `index.html` `35fcca203418e3e10b11765e2c6ade93`.
 
-**Suite: 3,459 checks passing, 0 failing, 0 dead, across both the v5.66 and v5.67 legs.** Per suite,
-computed from the runner's own output rather than restated: t1 185, t2 35, t3 36, t4 252, t5 58,
-t6 21, t10 309, MC parity 10, t7 41, t9 14, t11 40, t12 23, t13 42, t14 44, t15 11, t16 24, t17 74,
-t18 67, t19 24, t20 100, t22 26, t23 27, t24 38, t25 45, t26 25, t27 18, t28 34, t29 63, t30 12,
-t31 31, t32 12, t33 32, t34 67, t35 94, plus tooling t21 50 and domdiff 32 (not counted in the app
-total). Both legs run green; nothing is skipped.
+**Suite: 3,377 app checks passing, 0 failing, 0 dead, across both the v5.66 and v5.67 legs**
+(`t21` 50 and `domdiff` 32 are tooling and counted separately, which brings the runner's GRAND line
+to 3,459). Per suite, current leg, parsed from `runsuite.sh` output rather than restated: t1 185,
+t2 35, t3 36, t4 252, t5 58, t6 21, t7 41, t8 42, t9 14, **t10 309**, t11 40, t12 23, t13 42, t14 44,
+t15 11, t16 24, t17 74, t18 67, t19 65, t20 100, t22 85, t23 25, t24 38, t25 45, t26 25, t27 18,
+t28 34, **t29 63**, t30 12, t31 31, t32 12, t33 32, t34 67, **t35 94**. MC parity 10/10. Both legs
+run green; nothing is skipped.
+
+> ⚠ **This entry first said "3,459 checks" and called that the suite figure. It is the GRAND total
+> INCLUDING tooling**, which this project counts separately — an inflation of 82. Several per-suite
+> figures were wrong too (`t19` as 24 against an actual 65, `t22` as 26 against 85, `t23` as 27
+> against 25, and `t8` omitted). **Caught by a reader asking why `TESTING.md` had not been updated
+> with this release — which it had not been, and that was the real miss.** Both are corrected here
+> and in `TESTING.md`, `MANIFEST.txt`, `README-FIRST.md` and the commit message. Totals are supposed
+> to be computed from suite output, and these were assembled by hand from a partial run.
 
 ### What changed for a user
 
