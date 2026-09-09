@@ -17,7 +17,24 @@ There is no permanent floor: the MC-parity guardrail (`t2 compare`, 9/9 since th
 release that the engines haven't drifted across each boundary, which is what a fixed old
 baseline would otherwise be guarding.
 
-## Setup (from a folder containing v5101.jsx, v5102.jsx and DangerClose.jsx next to qa/)
+## Setup
+
+> ⚠ **DO NOT DO THIS BY HAND. Run `./qa/mk_runfolder.sh <prior-tag> <cur-tag> <prior-source.jsx>
+> [outdir]` from a clone** (added v5.68). Everything in this section and in the checklist further
+> down is what that script does; it stays written out because it documents the mechanism, but the
+> script is the thing to run and is what was last measured. **This prose existed in full at v5.66
+> and at v5.67 and the recipe was still diagnosed from scratch both times** — ten suites reporting
+> `0 passed, 0 failed` at v5.66, six reporting `DIED` at v5.67. A rule with no way to execute it is
+> how §I's hash-row obligation rotted for eleven releases.
+>
+> Three inputs this section has never named, all of which the script checks: the **prior leg's
+> `.jsx` is not in the repo** (the tree holds one source, the current build — and this repo has no
+> tags), the dependency line needs **`d3 xlsx mammoth`** because the app imports them, and `t29`
+> resolves fixtures from `tools/fixture/` **in preference to** a flat copy, so a flat copy looks
+> applied and is not. Its negative controls are `qa/tools/controls_v568_runfolder.sh` — 22 checks,
+> every one shown to fire, counted in no release's total.
+
+### The shape, by hand (from a folder containing v5101.jsx, v5102.jsx and DangerClose.jsx next to qa/)
 `DangerClose.jsx` is the canonical current source (t8 reads it directly); `v5102.jsx` is a
 copy of it, and `v5101.jsx` is the prior release, recoverable from its git tag.
 
