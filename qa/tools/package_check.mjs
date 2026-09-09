@@ -539,7 +539,15 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
       // is GONE, and this file will still be there. A person removes it, in the release that
       // converts the fifth state — the same mechanism, and the same warning shape, as the
       // SCOPE_ROTH_FICA_OTHERORD entry removed below.
-      "SCOPE_INCOME_CONDITIONING.md",             // PARTIALLY BUILT: CT v5.65, NM v5.66; RI/VA/NJ open — THREE left
+      // ⚠ REASON ROLLED 2026-09-09: NEW JERSEY SHIPPED AT v5.67, so this read "THREE left" while
+      // two remain. That is the FOURTH reason in this block to rot while its entry stayed correct,
+      // exactly as the comments above predict, and it is rolled here rather than left to the fifth.
+      "SCOPE_INCOME_CONDITIONING.md",             // PARTIALLY BUILT: CT v5.65, NM v5.66, NJ v5.67; RI/VA open — TWO left
+      // Added 2026-09-09. OPEN and explicitly NOT BUILDABLE: its §6 carries two decisions that
+      // measurement REOPENED after the handover had recorded them resolved (D-VA-2, the scalar;
+      // D-VA-3, the guards). ⚠ Expires when Virginia is built — at which point the entry above
+      // drops to ONE left, and both edits belong in that release.
+      "SCOPE_VA_POPULATE.md",
       "SCOPE_STATE_SET_SELECTOR.md",              // OPEN, written v5.66 (D-NM-1 (c) second half); expires when the structural field ships
       // ⚠ The comment that used to sit here described SCOPE_TREE_AND_POOL_HOUSEKEEPING.md and was
       // orphaned when that entry was removed on 2026-09-07; it is folded into the removal note
