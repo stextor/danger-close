@@ -131,8 +131,8 @@ full retirement-income exemptions (IL, MS, PA, IA 55+, MI post-phase-in, plus th
 no-income-tax states); and major 65+ retirement-income exclusions where they exist (e.g., GA
 $65K/person, KY $31,110, NY $20K, NJ a $100K HOUSEHOLD cap at 62+ (not per-person), VA $12K, SC $15K, DE $12.5K). **Which of these have been checked against a primary source, and what was found, is recorded in `AUDIT_STATE_EXCL65_NOTES.md` — this section routes there rather than restating it, because a verification claim expires and a dated audit does not.**
 
-**Income conditioning: the machinery exists as of v5.64, Connecticut was the first state to use it
-(v5.65), and New Mexico is the second (v5.66).** Five states condition their exclusion on income in
+**Income conditioning: the machinery exists as of v5.64, and three of the five states are populated —
+Connecticut (v5.65), New Mexico (v5.66) and New Jersey (v5.67).** Five states condition their exclusion on income in
 law — New Mexico, Rhode Island,
 Virginia, New Jersey and Connecticut. v5.64 added the mechanism: an income measure computed inside
 the state engine, two bases (`agi`, and `agiExSS` — which is Virginia's AFAGI exactly and
@@ -171,9 +171,40 @@ And the statute also grants the exemption to **blind individuals at any age**, w
 no way to express — a blind New Mexico claimant under 65 is modelled as receiving nothing, which
 overstates their state tax.
 
-**Two of the five remain unconditional and remain optimistic.** Rhode Island, Virginia and
-New Jersey still grant their exclusions to households the statutes exclude. That is the largest known
-error left in this module.
+**New Jersey is populated as of v5.67. It moves in the CONSERVATIVE direction for the households
+that were most wrong, and it is the first populate release to ALSO move one figure the other way.**
+
+The model granted **$75,000 per person, unconditionally, from age 65**. N.J.S.A. § 54A:6-10 grants a
+**household** exclusion, not a per-person one, and conditions it on New Jersey gross income: the full
+amount (up to $100,000 joint, $75,000 single) at or below $100,000, then **50%** of the payments
+received up to $125,000, **25%** up to $150,000, and **nothing above $150,000**. A retired couple
+above $150,000 was excluding $150,000 where the statute allows none — under-taxed by this model by
+**$8,250 a year**, the largest single-state error the module has carried. Tier tops are **inclusive**:
+at exactly $125,000 of gross income the 50% tier still applies. The percentages are of the **payments
+received**, not of income and not of the tier-1 cap.
+
+**The optimistic half, stated rather than buried.** The statute's age floor is **62**, and this model
+had refused to apply it — because with a per-person $75,000 amount, granting it at 62 would have
+handed a 62–64 couple $150,000 against a $100,000 statutory cap, making the estimate worse rather
+than better. That reasoning was about the broken cap, and it expired with this table. The floor is
+now modelled, so a household aged 62–64 receives an exclusion this model previously denied them and
+their estimated New Jersey tax **falls**. This is the first income-conditioning release to make any
+figure look better rather than worse, and it is recorded here because a release that reported only
+the half that looks rigorous would be describing itself inaccurately.
+
+Three limitations are disclosed rather than buried. **Married-filing-separately has its own lower
+column** ($50,000 / 25% / 12.5%) which this model cannot express, because it models single and joint
+only. **Eligibility on the basis of disability at any age** is a separate statutory route with no
+input to express it, so a disabled New Jersey claimant under 62 is modelled as receiving nothing,
+which overstates their state tax. And New Jersey's income measure here **excludes Social Security**,
+which New Jersey does not tax — correct — but like every measure in this module it carries no
+dividend or interest income, so a household whose income is materially dividend-driven sits lower on
+the tier table than the statute would put it, which is optimistic.
+
+**Two of the five remain unconditional and remain optimistic.** Rhode Island and Virginia still grant
+their exclusions to households the statutes exclude. That is the largest known error left in this
+module. Virginia converts next; Rhode Island is deliberately last, because its TY2026 figures are not
+published until November 2026 and its exclusion carries a second, separate defect.
 
 Two properties of the measure are stated here rather than discovered later. **It carries no dividend
 or interest income**, because the state engine is never passed either — so a household whose state
