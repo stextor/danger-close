@@ -668,9 +668,9 @@ console.log(pool.length,"files ·",hashed.size,"hashed rows ·",pool.filter(f=>!
 | Pool file | md5 | Repo path |
 |---|---|---|
 | `OPERATIONS.md` | `f33c2e0cfd95fcdb8308b2cde0247d3f` | `docs/OPERATIONS.md` |
-| `TESTING.md` | `a05fc81c4f7662565f1700f0e737fb4b` | `TESTING.md` |
+| `TESTING.md` | `79e128f19689878a6a9496700cef3094` | `TESTING.md` |
 | `METHODOLOGY.md` | `ff962a0105465836a03abd93b380303d` | `METHODOLOGY.md` |
-| `CHANGELOG.md` | `35e354fd8855cd3d26c8c44caa8cb425` | `CHANGELOG.md` — ⚠ **rolled 2026-09-07 (v5.66 ship), the SECOND outing of the obligation this row created.** *(Previously `ef3866f6d9…`, rolled the same day at the tenth package.)* It changes in every package by definition, so its row is rolled in every package, computed into place **after** the entry is final |
+| `CHANGELOG.md` | `d9210a41ef4a7161a7bb7292085bc6c4` | `CHANGELOG.md` — ⚠ **rolled 2026-09-07 (v5.66 ship), the SECOND outing of the obligation this row created.** *(Previously `ef3866f6d9…`, rolled the same day at the tenth package.)* It changes in every package by definition, so its row is rolled in every package, computed into place **after** the entry is final |
 | `MissingFeatures.md` | `7cc6f6ee826e3b2c15585eca47ea28b2` | `docs/MissingFeatures.md` |
 | `README.md` | `eec58396f932b3209de79c2400dbfb88` | `README.md` |
 
