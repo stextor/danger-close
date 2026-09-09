@@ -29,7 +29,7 @@ let _s = 42; Math.random = () => { _s = (_s * 1103515245 + 12345) & 0x7fffffff; 
 
 const VER = process.argv[2] || "v565";
 const _vt = Number(String(VER).replace(/[^0-9]/g, "")) || 0;
-const KNOWN_VERSIONS = ["v564", "v565", "v566"];
+const KNOWN_VERSIONS = ["v564", "v565", "v566", "v567"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -287,13 +287,22 @@ const ctTax = (args) => ST({
   // ⚠ THE SET SHRINKS BY ONE PER CONVERSION AND MUST REACH ZERO. When the last of NJ, RI and VA
   // converts, D-8's non-empty guard below INVERTS and both must be gated together in that release.
   if (_vt >= 566) {
-    T(`D-7 [v5.66]: the income-limited-but-unconditional set is exactly NJ, RI, VA — THREE states still to convert, NM having converted (found: ${offenders.sort().join(",") || "none"})`,
-      offenders.sort().join(",") === "NJ,RI,VA");
+    const _expOff = _vt >= 567 ? "RI,VA" : "NJ,RI,VA";
+    T(`D-7 [v5.67]: the income-limited-but-unconditional set is exactly ${_expOff} — ${_expOff.split(",").length} states still to convert (found: ${offenders.sort().join(",") || "none"})`,
+      offenders.sort().join(",") === _expOff);
     // ⚠ EXTINCTION INVARIANT: NM must be OUT of this set for the right reason — because it carries
     // a table, not because its note stopped saying "income-limited". Rewording the note out of the
     // guarded set would ALSO empty it here, silently, and that is the v5.54 New Jersey defect.
     T("D-7a [v5.66]: NM left the set by CONVERTING, not by rewording — its note still matches the income-limited selector AND it now carries an `exclTest`",
       /income[- ]limited|income limit/i.test(R.NM.note || "") && R.NM.exclTest !== undefined);
+    // ⚠ D-7b — THE SAME PIN FOR NEW JERSEY, AND THE v5.67 BUILD NEEDED IT. The first draft of NJ's
+    //   rewritten note said "income-conditioned" and dropped the phrase the selector matches, so NJ
+    //   would have left this set by BOTH converting AND rewording — and the reword alone would have
+    //   emptied it silently, which is the v5.54 New Jersey defect reproduced by the release fixing
+    //   New Jersey. Caught by D-7a's shape, not by review. The phrase is back in the note.
+    if (_vt >= 567)
+      T("D-7b [v5.67]: NJ left the set by CONVERTING, not by rewording — its note still matches the income-limited selector AND it now carries an `exclTest`",
+        /income[- ]limited|income limit/i.test(R.NJ.note || "") && R.NJ.exclTest !== undefined);
   } else {
     T(`D-7: the income-limited-but-unconditional set is exactly NM, NJ, RI, VA — four states still to convert (found: ${offenders.sort().join(",") || "none"})`,
       offenders.sort().join(",") === "NJ,NM,RI,VA");

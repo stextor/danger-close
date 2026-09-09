@@ -554,10 +554,23 @@ const pass2E = pass, fail2E = fail;
     const NJ = inc => S({ code: "NJ", fallbackRate: 0, retIncome: inc, pen: 0, work: 0,
                           capGains: 0, ssTaxableFed: 0, persons65: 2 });
 
+    // ⚠ GATED AT v5.67, WHICH IS THE GATE THE KNOWN-DEFECT BLOCK BELOW SAID WAS OWED "in the same
+    //   release as the fix, not later." The frozen prior leg legitimately carries the unconditional
+    //   behaviour; asserting the fix against it is the v5.27 mistake §B2 exists to prevent.
     T("2E D-3c (NJ, MFJ 65+): $90,000 — below the limit, model and statute agree",  NJ(90000),  0);
-    T("2E D-3c (NJ, MFJ 65+): $120,000 — model shields everything",                 NJ(120000), 0);
-    T("2E D-3c (NJ, MFJ 65+): $140,000 — model still shields everything",           NJ(140000), 0);
-    T("2E D-3c (NJ, MFJ 65+): $200,000 — model taxes only income above $150,000",   NJ(200000), 2750);
+    if (_v >= 567) {
+      // FIXED v5.67 — the exclusion is income-conditioned. 50% / 25% / 0% of the payments received.
+      T("[FIXED v5.67] 2E D-3c (NJ, MFJ 65+): $120,000 — tier 2 excludes 50%, so 0.055 x 60,000",
+        NJ(120000), 3300);
+      T("[FIXED v5.67] 2E D-3c (NJ, MFJ 65+): $140,000 — tier 3 excludes 25%, so 0.055 x 105,000",
+        NJ(140000), 5775);
+      T("[FIXED v5.67] 2E D-3c (NJ, MFJ 65+): $200,000 — tier 4 excludes nothing, so 0.055 x 200,000",
+        NJ(200000), 11000);
+    } else {
+      T("2E D-3c (NJ, MFJ 65+): $120,000 — model shields everything",                 NJ(120000), 0);
+      T("2E D-3c (NJ, MFJ 65+): $140,000 — model still shields everything",           NJ(140000), 0);
+      T("2E D-3c (NJ, MFJ 65+): $200,000 — model taxes only income above $150,000",   NJ(200000), 2750);
+    }
 
     // NOT VACUOUS. $90,000 is the AGREEMENT point: below NJ's threshold the statute also shields
     // everything, so this case set cannot be read as "the model is simply always wrong". Without
@@ -580,12 +593,35 @@ const pass2E = pass, fail2E = fail;
     // legitimately carry the unconditional behaviour, and asserting the fix against it is exactly
     // the v5.27 mistake §B2 exists to prevent. §2E already has the `_v` variable for that purpose,
     // used by the Montana pin above. Write the gate in the same release as the fix, not later.
-    T("[KNOWN DEFECT 2026-08-29] NJ $120,000: model understates by the full statutory tax",
-      Number((1050.00 - NJ(120000)).toFixed(2)), 1050.00);
-    T("[KNOWN DEFECT 2026-08-29] NJ $140,000: model understates by the full statutory tax",
-      Number((3026.25 - NJ(140000)).toFixed(2)), 3026.25);
-    T("[KNOWN DEFECT 2026-08-29] NJ $200,000: model understates by $5,947.50",
-      Number((8697.50 - NJ(200000)).toFixed(2)), 5947.50);
+    if (_v >= 567) {
+      // ⚠ [FIXED v5.67, was KNOWN DEFECT 2026-08-29] THE EXCLUSION ERROR IS GONE AND THE SIGN OF
+      //   WHAT REMAINS HAS FLIPPED. The pins are kept rather than deleted, because the residual is
+      //   still a real approximation and its DIRECTION is the thing worth asserting.
+      //
+      //   At $200,000, decomposed one term at a time (the same decomposition as before, re-read):
+      //     model at v5.67, correct exclusion, flat 5.5%        $11,000.00
+      //     NJ Table B graduated schedule                       $ 8,697.50   rate: -$2,302.50
+      //   The exclusion term is now ZERO. What is left is the flat-rate approximation ALONE, and it
+      //   is CONSERVATIVE at all three incomes — the model overstates New Jersey tax. That is the
+      //   direction the design default asks for, and it is the opposite of what shipped before.
+      const _gap = i => Number((S({ code: "NJ", fallbackRate: 0, retIncome: i, pen: 0, work: 0,
+                                    capGains: 0, ssTaxableFed: 0, persons65: 2 }) - i * 0).toFixed(2));
+      T("[FIXED v5.67] NJ $120,000: the residual is the FLAT-RATE error alone, and it OVERSTATES — model $3,300.00 vs graduated $1,050.00",
+        Number((NJ(120000) - 1050.00).toFixed(2)), 2250.00);
+      T("[FIXED v5.67] NJ $140,000: same, overstating — model $5,775.00 vs graduated $3,026.25",
+        Number((NJ(140000) - 3026.25).toFixed(2)), 2748.75);
+      T("[FIXED v5.67] NJ $200,000: same, overstating — model $11,000.00 vs graduated $8,697.50",
+        Number((NJ(200000) - 8697.50).toFixed(2)), 2302.50);
+      T("[EXTINCTION v5.67] NJ never understates against the graduated schedule at any of the three pinned incomes — the optimistic direction is extinct",
+        (NJ(120000) >= 1050 && NJ(140000) >= 3026.25 && NJ(200000) >= 8697.50) ? 1 : 0, 1);
+    } else {
+      T("[KNOWN DEFECT 2026-08-29] NJ $120,000: model understates by the full statutory tax",
+        Number((1050.00 - NJ(120000)).toFixed(2)), 1050.00);
+      T("[KNOWN DEFECT 2026-08-29] NJ $140,000: model understates by the full statutory tax",
+        Number((3026.25 - NJ(140000)).toFixed(2)), 3026.25);
+      T("[KNOWN DEFECT 2026-08-29] NJ $200,000: model understates by $5,947.50",
+        Number((8697.50 - NJ(200000)).toFixed(2)), 5947.50);
+    }
 
     // THE TWO ERRORS HAVE OPPOSITE SIGNS, which is why a single wrong figure cannot be blamed on
     // either alone. Decomposed at $200,000, one term at a time:
@@ -647,7 +683,15 @@ const pass2E = pass, fail2E = fail;
       // income-conditioned exemption REQUIRES `exclAge: 0`, because Connecticut conditions on
       // income alone and the engine's default floor is 65. v5.64 and earlier legitimately carry
       // four, so the five-member expectation must not be asserted against them.
-      if (_v >= 565) {
+      // ⚠ GATED AGAIN AT v567. New Jersey joins the set: its statutory floor is 62, modelled from
+      // v5.67 (D-NJ-1). It was withheld while NJ's cap was wrong — 62 alone would have granted a
+      // 62-64 couple $150K against a $100K household cap — and that reason expired with the table.
+      if (_v >= 567) {
+        T("2E age control: exactly six states carry an exclAge",
+          Object.keys(R).filter(c => R[c].exclAge !== undefined).length, 6);
+        T("2E age control: and they are CT, DE, KY, NJ, RI and WI",
+          Object.keys(R).filter(c => R[c].exclAge !== undefined).sort().join(",") === "CT,DE,KY,NJ,RI,WI" ? 1 : 0, 1);
+      } else if (_v >= 565) {
         T("2E age control: exactly five states carry an exclAge",
           Object.keys(R).filter(c => R[c].exclAge !== undefined).length, 5);
         T("2E age control: and they are CT, DE, KY, RI and WI",
@@ -669,8 +713,10 @@ const pass2E = pass, fail2E = fail;
       //     NJ's cap is a HOUSEHOLD amount, so applying its 62 floor alone would grant a 62-64 couple
       //     $150,000 against a $100,000 statutory cap — worse, not better. SC's under-65 rule is a
       //     second AMOUNT, not an earlier start, and exclAge cannot express it.
-      T("[BY DECISION v5.55] NJ carries no exclAge — its 62 floor is disclosed, not modelled",
-        R.NJ.exclAge === undefined ? 1 : 0, 1);
+      T(_v >= 567
+          ? "[REVERSED v5.67, was BY DECISION v5.55] NJ NOW carries exclAge 62 — the statute's floor. It was withheld only because the cap was wrong, and that reason expired with the income-conditioned table (D-NJ-1)"
+          : "[BY DECISION v5.55] NJ carries no exclAge — its 62 floor is disclosed, not modelled",
+        (_v >= 567 ? R.NJ.exclAge === 62 : R.NJ.exclAge === undefined) ? 1 : 0, 1);
       T("[BY DECISION v5.55] SC carries no exclAge — its under-65 tier is a second amount, not a floor",
         R.SC.exclAge === undefined ? 1 : 0, 1);
       // [2] A state that claims an age in its note must not silently keep the 65 default. This is the
@@ -709,9 +755,9 @@ const pass2E = pass, fail2E = fail;
           _ageNoteOffenders(_AGE_NOTE).includes("RI") ? 1 : 0, 0);
       }
       // [3] The D-3c pins above measure a 65+ household. This release must not move them.
-      T("2E age: the D-3c NJ case set is untouched by the age work (65+ household)",
+      T("2E age: the D-3c NJ case set still reads the same through the AGE path as through persons65",
         S({ code: "NJ", fallbackRate: 0, retIncome: 200000, pen: 0, work: 0, capGains: 0,
-            ssTaxableFed: 0, ageA: 65, ageB: 65 }), 2750);
+            ssTaxableFed: 0, ageA: 65, ageB: 65 }), _v >= 567 ? 11000 : 2750);
       // [4] The legacy count path must still work for a caller that supplies no ages, or a partial
       //     caller would silently receive NO exclusion instead of the old behaviour.
       T("2E age: a caller supplying persons65 and no ages still gets the old behaviour",
@@ -801,9 +847,12 @@ const pass2E = pass, fail2E = fail;
       T("2E ssOffset (MD): the modelled cap is the current statutory figure", R.MD.excl65, 40600);
       T("2E ssOffset (ME): the modelled cap is the current statutory figure", R.ME.excl65, 48216);
       // AND THE OTHER TWO MECHANISMS MUST NOT MOVE.
-      T("2E ssOffset: the D-3c NJ pins are untouched (NJ has no ssOffset)",
+      // ⚠ AND — added v5.67 — this cell now also proves the MEASURE. NJ's base is `agiExSS`, so the
+      // $80,000 of gross Social Security here must not move the household up a tier or change the
+      // answer at all. Under `base: "agi"` it could not stay equal to the cell above.
+      T("2E ssOffset: NJ has no ssOffset, and its agiExSS measure ignores Social Security entirely",
         S({ code: "NJ", fallbackRate: 0, retIncome: 200000, pen: 0, work: 0, capGains: 0,
-            ssTaxableFed: 0, ssGrossA: 40000, ssGrossB: 40000, ageA: 65, ageB: 65 }), 2750);
+            ssTaxableFed: 0, ssGrossA: 40000, ssGrossB: 40000, ageA: 65, ageB: 65 }), _v >= 567 ? 11000 : 2750);
       // KY carries no ssOffset, so Social Security must not touch its exclusion on EITHER build.
       // The figure moves at v5.57 for the RATE alone — same gate, same reason.
       T("2E ssOffset: the v5.55 age floors are untouched (KY has no ssOffset)",
@@ -1221,6 +1270,107 @@ const pass2E = pass, fail2E = fail;
           NM({ retIncome: 60000, ageA: 70, ageB: 68 }) - NM({ retIncome: 30000, ageA: 70, ageB: 68 }), 1470.00);
         T("[KNOWN DEFECT pre-v5.66] NM carried no exclTest at all",
           R.NM.exclTest === undefined ? 1 : 0, 1);
+      }
+
+      // ── NEW JERSEY — N.J.S.A. § 54A:6-10, populated v5.67 ──────────────────────────────────────
+      // Transcribed from FINDINGS-v5_63-state-statutes.md §4, never re-derived and never read off
+      // STATE_RULES. Expected values come from an INDEPENDENT hand oracle run BEFORE the engine was
+      // (10/10 agreed to the cent). Formula, read from stateTaxAnnual:
+      //   m       = retIncome + pen + work + capGains                     [base "agiExSS" — SS out]
+      //   qual    = #{ age >= 62 }                                        [exclAge 62]
+      //   row     = first row with m <= row.upTo                          [cmp lte, the default]
+      //   exclFin = row.pct !== undefined ? row.pct * (retIncome+pen)     [unit "household":
+      //                                   : row.amount                     applied ONCE, not x qual]
+      //   tax     = 0.055 x (max(0, retIncome+pen-exclFin) + work + capGains)      [ss: 0 in NJ]
+      //
+      // DIRECTION — ⚠ THIS RELEASE MOVES TWO FIGURES IN OPPOSITE DIRECTIONS, and both are asserted.
+      //   PESSIMISTIC: v5.66 granted $75,000 PER PERSON at every income level. Above $150,000 the
+      //     statute grants nothing, so tax RISES for those households — the point of the release.
+      //   OPTIMISTIC:  the 62 floor is modelled from v5.67, so a 62-64 household now receives an
+      //     exclusion it was denied. Tax FALLS for them. That is asserted too (the 62-64 cell), not
+      //     left as an unexamined side effect.
+      const NJ = (a) => S({ code: "NJ", fallbackRate: 0, retIncome: 0, pen: 0, work: 0, capGains: 0,
+                            ssTaxableFed: 0, ageA: null, ageB: null, ...a });
+      if (_v >= 567) {
+        // — EVERY TIER, BOTH STATUSES, PRICED TO THE DOLLAR. The oracle's §5 requires a case in each
+        //   tier because a cap-then-percentage misreading PASSES A TIER-1 TEST (E-NJ-1 below).
+        T("[HAND v5.67] NJ joint tier 1, gross $90,000 all pension: fully excluded — $0.00",
+          NJ({ retIncome: 90000, ageA: 66, ageB: 66 }), 0.00);
+        T("[HAND v5.67] NJ joint tier 2, gross $120,000, pension $60,000: 50% of PAYMENTS = $30,000 — 0.055 x 30,000 = $1,650.00",
+          NJ({ retIncome: 60000, work: 60000, ageA: 66, ageB: 66 }), 0.055 * (30000 + 60000));
+        T("[HAND v5.67] NJ joint tier 3, gross $140,000, pension $80,000: 25% of PAYMENTS = $20,000 — 0.055 x (60,000 + 60,000) = $6,600.00",
+          NJ({ retIncome: 80000, work: 60000, ageA: 66, ageB: 66 }), 0.055 * (60000 + 60000));
+        T("[HAND v5.67] NJ joint tier 4, gross $175,000, pension $90,000: NOTHING excluded — 0.055 x 175,000 = $9,625.00",
+          NJ({ retIncome: 90000, work: 85000, ageA: 66, ageB: 66 }), 9625.00);
+        T("[HAND v5.67] NJ single tier 2, gross $120,000, pension $60,000: 37.5% of PAYMENTS = $22,500 — 0.055 x (37,500 + 60,000) = $5,362.50",
+          NJ({ retIncome: 60000, work: 60000, ageA: 66, single: true }), 5362.50);
+        // — THE TIER TOPS ARE INCLUSIVE ("not more than $125,000"). Each belongs to the tier BELOW.
+        //   An `lt` comparator fails all three. Same class as NM's step cells above.
+        T("[HAND v5.67] NJ joint at EXACTLY $100,000 gross: still tier 1, fully excluded — $0.00",
+          NJ({ retIncome: 100000, ageA: 66, ageB: 66 }), 0.00);
+        T("[HAND v5.67] NJ joint at EXACTLY $125,000 gross, pension $70,000: still tier 2 at 50% — 0.055 x (35,000 + 55,000) = $4,950.00",
+          NJ({ retIncome: 70000, work: 55000, ageA: 66, ageB: 66 }), 4950.00);
+        T("[HAND v5.67] NJ joint at EXACTLY $150,000 gross, pension $70,000: still tier 3 at 25% — 0.055 x (52,500 + 80,000) = $7,287.50",
+          NJ({ retIncome: 70000, work: 80000, ageA: 66, ageB: 66 }), 7287.50);
+        T("[HAND v5.67] NJ joint ONE DOLLAR past $150,000: tier 4, nothing excluded — 0.055 x 150,001 = $8,250.06",
+          NJ({ retIncome: 70000, work: 80001, ageA: 66, ageB: 66 }), 0.055 * 150001);
+
+        // — ⚠ E-NJ-1 · EXTINCTION (OPERATIONS §D). The defect class is "the percentage is taken of
+        //   the CAP instead of the PAYMENTS." A `pct x cap` reading returns 0.50 x $100,000 =
+        //   $50,000 for EVERY tier-2 household regardless of what it receives, and it passes every
+        //   tier-1 cell above, because in tier 1 the amount row is the cap. This is the only cell
+        //   that separates the two readings, which is why the tier-2 case uses payments != $100,000.
+        T("[EXTINCTION v5.67] NJ tier 2 takes 50% of the PAYMENTS, not of the $100,000 cap: $60,000 of pension excludes $30,000, not $50,000",
+          NJ({ retIncome: 60000, work: 60000, ageA: 66, ageB: 66 })
+            - NJ({ retIncome: 60000, work: 60000, ageA: 50, ageB: 50 }), -0.055 * 30000);
+        // — ⚠ E-NJ-2 · EXTINCTION. The defect class is "a household exclusion applied per person."
+        //   A per-person reading doubles it for a couple. Two people and one person in the SAME tier
+        //   with the SAME payments must exclude the SAME amount.
+        T("[EXTINCTION v5.67] NJ's exclusion is per HOUSEHOLD: a couple both 66 excludes exactly what one 66-year-old does, not twice",
+          NJ({ retIncome: 60000, work: 60000, ageA: 66, ageB: 66 })
+            - NJ({ retIncome: 60000, work: 60000, ageA: 66, ageB: 50 }), 0.00);
+
+        // — THE AGE FLOOR. 62 is the statute's, modelled from v5.67 (D-NJ-1). Both sides asserted:
+        //   the household that now qualifies, and the one that still does not.
+        T("[HAND v5.67] NJ joint aged 62-64 NOW qualifies — gross $90,000 all pension, fully excluded — $0.00",
+          NJ({ retIncome: 90000, ageA: 63, ageB: 62 }), 0.00);
+        T("[HAND v5.67] NJ joint BELOW 62 still does not — 0.055 x 90,000 = $4,950.00",
+          NJ({ retIncome: 90000, ageA: 61, ageB: 61 }), 4950.00);
+        T("[HAND v5.67] NJ at EXACTLY 62 qualifies — the floor is inclusive",
+          NJ({ retIncome: 90000, ageA: 62, ageB: 50 }), 0.00);
+
+        // — THE MEASURE. `base: "agiExSS"` — New Jersey does not tax Social Security and its gross
+        //   income excludes it, so taxable SS must NOT push a household up a tier. This is the cell
+        //   a wrong base fails: under `base: "agi"` the household below lands in tier 2 and pays.
+        T("[HAND v5.67] NJ: taxable SS does NOT ride the measure — $95,000 pension + $40,000 taxable SS stays in tier 1 — $0.00",
+          NJ({ retIncome: 95000, ssTaxableFed: 40000, ageA: 66, ageB: 66 }), 0.00);
+        // — but wages and realized gains DO ride it, and are themselves taxed.
+        T("[HAND v5.67] NJ: wages and realized gains ride the measure — $60K pension + $50K wages + $45K gains = $155,000, tier 4 — 0.055 x 155,000 = $8,525.00",
+          NJ({ retIncome: 60000, work: 50000, capGains: 45000, ageA: 66, ageB: 66 }), 8525.00);
+        // — the clamp: an exclusion larger than the payments it applies to must not shelter wages.
+        // ⚠ THIS CELL'S EXPECTED VALUE WAS WRONG IN ITS FIRST DRAFT AND THE ENGINE CAUGHT IT. The
+        //   draft asserted 0.055 x 60,000, double-counting the $5,000 of pension that tier 1 fully
+        //   excludes. The clamp works in BOTH directions: the exclusion cannot spill onto wages,
+        //   and the sheltered pension does not reappear in the base. 0.055 x 55,000 is the answer.
+        T("[HAND v5.67] NJ: the exclusion cannot shelter wages — $5,000 pension is fully excluded, the $55,000 of wages is not — 0.055 x 55,000 = $3,025.00",
+          NJ({ retIncome: 5000, work: 55000, ageA: 66, ageB: 66 }), 3025.00);
+
+        // — ⚠ EXTINCTION. The defect the release exists to kill: the exclusion was INCOME-BLIND.
+        //   Under v5.66, stepping from $90,000 to $175,000 of gross cost only the rate on the extra
+        //   income, because $150,000 of exclusion was granted at both ends.
+        T("[EXTINCTION v5.67] NJ's exclusion is no longer income-blind: a step from $90K to $175K gross costs MORE than the rate on the extra income alone",
+          (NJ({ retIncome: 90000, work: 85000, ageA: 66, ageB: 66 })
+            - NJ({ retIncome: 90000, ageA: 66, ageB: 66 })) > 0.055 * 85000 + EPS ? 1 : 0, 1);
+
+        // — the scalar beside the table (D-NJ-4). NJ's table is `unit: "household"` and its rows are
+        //   a household amount, so NO per-person scalar can agree with it. 0 is the only honest
+        //   value, and it is Connecticut's pattern. ⚠ This DROPS NJ out of the two whole-table
+        //   guards keyed on `excl65 > 0` (here L467, t29 F-6) — see t29 F-6a, which pins what that
+        //   left behind rather than letting the next release discover it.
+        T("[INVARIANT v5.67] NJ's excl65 scalar is 0 — a household table has no per-person value that could agree with it",
+          R.NJ.excl65, 0);
+        T("[INVARIANT v5.67] NJ carries exclAge 62 — the statute's floor, not the engine's 65 default",
+          R.NJ.exclAge, 62);
       }
     }
   }

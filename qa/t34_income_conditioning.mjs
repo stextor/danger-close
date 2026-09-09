@@ -26,7 +26,7 @@ import "./env_dom.mjs";
 let _s = 42; Math.random = () => { _s = (_s * 1103515245 + 12345) & 0x7fffffff; return _s / 0x7fffffff; };
 
 const VER = process.argv[2] || "v564";
-const KNOWN_VERSIONS = ["v564", "v565", "v566"];
+const KNOWN_VERSIONS = ["v564", "v565", "v566", "v567"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -59,11 +59,16 @@ console.log(`t34 — INCOME CONDITIONING (${VER})`);
   // it in place would have made the frozen legs assert a state of the world they never shipped in,
   // which is the v5.27 defect this rule exists to prevent.
   if (_v >= 566) {
-    T("A-1 [v5.66]: EXACTLY TWO states carry `exclTest` — Connecticut and New Mexico, in conversion order",
-      withTest.join(",") === "CT,NM");
-    if (withTest.join(",") !== "CT,NM") console.log(`        populated: ${withTest.join(", ") || "(none)"}`);
-    T("A-3 [v5.66]: the remaining THREE income-conditioned states are still present and still UNPOPULATED — they remain optimistic and convert one release at a time",
-      ["RI", "VA", "NJ"].every((c) => RULES[c] && RULES[c].exclTest === undefined));
+    // ⚠ THE ROSTER MOVES WITH EVERY POPULATE RELEASE, AND THAT IS ITS JOB. It is asserted as an
+    //   EXACT SET, not a count and not a floor, so a release cannot populate a state and leave the
+    //   map behind — which is the defect class this project has recorded six times in documents.
+    const _expTest = _v >= 567 ? "CT,NJ,NM" : "CT,NM";
+    const _expOpen = _v >= 567 ? ["RI", "VA"] : ["RI", "VA", "NJ"];
+    T(`A-1 [v5.67]: EXACTLY ${_expTest.split(",").length} states carry \`exclTest\` — ${_expTest} (New Jersey joined at v5.67)`,
+      withTest.join(",") === _expTest);
+    if (withTest.join(",") !== _expTest) console.log(`        populated: ${withTest.join(", ") || "(none)"}`);
+    T(`A-3 [v5.67]: the remaining ${_expOpen.length} income-conditioned states (${_expOpen.join(", ")}) are still present and still UNPOPULATED — they remain optimistic and convert one release at a time`,
+      _expOpen.every((c) => RULES[c] && RULES[c].exclTest === undefined));
     // ⚠ EXTINCTION INVARIANT for the defect this release fixes: NM's exemption must NOT be a flat
     // scalar at every income. A future edit that drops `exclTest` from NM reinstates the optimism.
     T("A-7 [v5.66]: NM's table is a `bands` test on `agi`, PER PERSON, with the INCLUSIVE comparator — the statute reads \"not over\", so `cmp` is absent and defaults to `lte` (B-2)",
