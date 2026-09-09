@@ -127,6 +127,28 @@ the older, separate public-constants suite (kept; different purpose). **It is NO
 **flat working folder** — sources at the root, every test + harness file together in a single `qa/`.
 Copying the repo layout verbatim and running it fails. The qa-baseline README carries the exact shape.
 
+⚠ **DO NOT ASSEMBLE THAT FOLDER BY HAND. Run `./qa/mk_runfolder.sh <prior-tag> <cur-tag>
+<prior-source.jsx> [outdir]` from a clone** (added v5.68). Steps 1–4 above are what the script does,
+and they are kept here because they document the mechanism — but the script is the thing to run, and
+where the two disagree the script is what was last measured. It also carries the three inputs this
+prose has never named: the **prior leg's `.jsx` is not in the repo** (the tree holds one source, the
+current build, and this repo has no tags), the dependency line needs **`d3 xlsx mammoth`** because the
+app imports them, and `t29` resolves its fixtures from `tools/fixture/` **in preference to** a flat
+copy, so a flat copy looks applied and is not.
+
+**Why a script and not another paragraph.** The shape above was already written down in two places
+and was still diagnosed from scratch twice: at v5.66 ten feature suites reported `0 passed, 0 failed`
+— an empty set that reads as green (§B2) — and at v5.67 six suites reported `DIED`. Each cost a large
+share of a session. **A rule with no way to execute it is how §I's hash-row obligation rotted for
+eleven releases**; prose alone would have repeated that. The script fails loudly on every missing
+input rather than producing a folder that runs most of the suite, and it self-checks sixteen required
+inputs before it reports ready. Its negative controls are `qa/tools/controls_v568_runfolder.sh`
+(22 checks, every one shown to fire), which asserts nothing in the app and is counted in no release's
+total.
+
+⚠ **One `npm install`, not several.** A later `npm install <one-package> --no-save` PRUNED `jsdom`
+mid-session at v5.67 and killed six suites a second time in the same day.
+
 ### B1. Census and site-count questions go through `qa/tools/`, never greps
 
 **A grep is not an answer to "how many sites?" or "where is this used?"** Grep line-number and identifier
@@ -362,6 +384,68 @@ behavior** — so the defect stays visible and the suite stays honest (green des
 hide the bug). Each pin names, in a comment: what's wrong, whether it's pre-existing or a regression, the
 date found, and the instruction to flip the expectation when fixed. Fixing a defect then means: change the
 code, flip its pin to a positive assertion, and the fix is self-verifying.
+
+### D1. NAMED CLASS — the existence-only assertion (added v5.68)
+
+**The class:** *a check that asserts a table, list or set EXISTS is not asserting that it is RIGHT.*
+Its tell is uniform and mechanical: **mutate an interior member and the suite stays green.** An
+endpoint-only table test is the common shape — assert the first row and the last row, and every row
+between them is unpinned — but the class is wider than tables, and the two families found so far
+share only the tell.
+
+**Why this is a pin and not a habit.** It is at **seven recorded instances across four sessions**, and
+**every single one was found by a negative control, never by review.** No other class here has that
+record, and that asymmetry is the whole argument: review does not catch it, because the check reads
+correctly. Only a mutant does.
+
+| family | instances | how it failed |
+|---|---|---|
+| endpoint-only table test | `t34` A-9's first draft; `t10`'s New Mexico draft, twice; twice more during the v5.67 build | the interior rows of a band table were never priced |
+| assertion written with a truthiness helper as though it were an equality helper | `t29` F-6a and F-6b (found 2026-09-09, **unfixed** — pinned below) | `T(n, ok, d)` compares `ok` only; the "expected" value is the display string and is never compared |
+
+**The remedy is the same for both: price every row, and make the check fail on an interior change.**
+Where the assertion would be inert against current data — as `K-8`'s `.py` widening was — **inject**
+the data the assertion needs rather than reusing what happens to be there. And where a suite offers
+both a truthiness helper and an equality helper, **an assertion with an expected value must use the
+equality helper**; `T(label, actual, expected)` against a `T(n, ok, d)` signature is silently vacuous.
+
+### D2. `[KNOWN DEFECT 2026-09-09]` — `t29` F-6a / F-6b are vacuous, and their measurement is wrong
+
+**Not fixed. Belongs to the Virginia release, which is already touching the suite.**
+
+`t29`'s helper is `const T = (n, ok, d = "") => { if (ok) pass++; … }`. F-6a is written
+`T("…exactly the one member…", limited.length, 1)` and F-6b `T("…that member is Virginia",
+limited.join(","), "VA")`. The `1` and the `"VA"` are the **display string**, never compared. Both
+pass on any non-empty set of any size and any membership — they are duplicates of F-6 and carry no
+information beyond it.
+
+**What that concealed.** The set they describe is selected on `(r.excl65 || 0) > 0` **and** a regex
+against the note's prose. Measured live against v5.67 it is **`{NM, RI, VA}`** — three members, not
+the one both checks and their comments assert:
+
+- **Rhode Island** *does* carry the selector phrase (*"…are income-limited in law by a hard AGI
+  cliff…"*) and its scalar is `50000`. The comments at `t29` F-6a and at
+  `qa/tools/fixture/households.mjs:72` both state it is outside the set. Both are wrong.
+- **New Mexico** was **populated at v5.66**, correctly kept `excl65: 8000` (its table's per-person
+  amount at zero income), and its note still says `income-limited`. So it has sat for two releases
+  inside a set whose stated meaning is *"income-limited in law, **unconditional in the model**"*
+  while being conditioned in the model.
+
+**Controlled, not argued.** From a pristine copy, dropping the selector phrase from Virginia's note
+alone (set → `{NM, RI}`) gives `t29 61 passed, 2 failed`: `C-stateExclCliff` and `F-7` fire; **F-6a
+and F-6b do not.** The census/fixture guard works; the two checks written to make the Virginia
+session meet the decision deliberately cannot.
+
+⚠ **The consequence for Virginia is the OPPOSITE of what F-6a's own comment predicts, and worse.**
+Populating VA does **not** empty the set or turn F-6/F-7 red — `{NM, RI}` keeps it non-empty and the
+fixture keeps reading ON, while the row's stated meaning quietly stops being true. That is green from
+a set that no longer means what it says, which is the failure mode this project keeps recording.
+
+**When fixed:** flip F-6a/F-6b to the equality helper, and re-found the selector on **data, not
+prose**. `qa/tools/boundaries.mjs:128–132` already records that lesson for the `ssOffset` row — *"A
+flag is data; prose is not"*, learned when NJ's note was reworded at v5.54 — and the
+`state_excl_limited` row above it was never brought along. `!r.exclTest` is the missing term: the row
+means *unconditional in the model*, and `exclTest` is exactly what makes a state conditional.
 
 ## E. The MC-parity guardrail (the hard line for "engines unchanged")
 
