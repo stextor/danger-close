@@ -26,7 +26,7 @@ import "./env_dom.mjs";
 let _s = 42; Math.random = () => { _s = (_s * 1103515245 + 12345) & 0x7fffffff; return _s / 0x7fffffff; };
 
 const VER = process.argv[2] || "v564";
-const KNOWN_VERSIONS = ["v564", "v565", "v566", "v567"];
+const KNOWN_VERSIONS = ["v564", "v565", "v566", "v567", "v568"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -62,9 +62,9 @@ console.log(`t34 — INCOME CONDITIONING (${VER})`);
     // ⚠ THE ROSTER MOVES WITH EVERY POPULATE RELEASE, AND THAT IS ITS JOB. It is asserted as an
     //   EXACT SET, not a count and not a floor, so a release cannot populate a state and leave the
     //   map behind — which is the defect class this project has recorded six times in documents.
-    const _expTest = _v >= 567 ? "CT,NJ,NM" : "CT,NM";
-    const _expOpen = _v >= 567 ? ["RI", "VA"] : ["RI", "VA", "NJ"];
-    T(`A-1 [v5.67]: EXACTLY ${_expTest.split(",").length} states carry \`exclTest\` — ${_expTest} (New Jersey joined at v5.67)`,
+    const _expTest = _v >= 568 ? "CT,NJ,NM,VA" : _v >= 567 ? "CT,NJ,NM" : "CT,NM";
+    const _expOpen = _v >= 568 ? ["RI"] : _v >= 567 ? ["RI", "VA"] : ["RI", "VA", "NJ"];
+    T(`A-1 [v5.67]: EXACTLY ${_expTest.split(",").length} states carry \`exclTest\` — ${_expTest} (New Jersey joined at v5.67, Virginia at v5.68)`,
       withTest.join(",") === _expTest);
     if (withTest.join(",") !== _expTest) console.log(`        populated: ${withTest.join(", ") || "(none)"}`);
     T(`A-3 [v5.67]: the remaining ${_expOpen.length} income-conditioned states (${_expOpen.join(", ")}) are still present and still UNPOPULATED — they remain optimistic and convert one release at a time`,
@@ -91,6 +91,21 @@ console.log(`t34 — INCOME CONDITIONING (${VER})`);
     T("A-10 [v5.66]: NM's band tops match NMSA 1978 § 7-2-5.2 exactly — transcribed from the statutory oracle, not re-derived",
       JSON.stringify((RULES.NM.exclTest?.rows?.joint || []).map((r) => r.upTo).slice(0, 8)) === JSON.stringify([30000, 33000, 36000, 39000, 42000, 45000, 48000, 51000]) &&
       JSON.stringify((RULES.NM.exclTest?.rows?.single || []).map((r) => r.upTo).slice(0, 8)) === JSON.stringify([18000, 19500, 21000, 22500, 24000, 25500, 27000, 28500]));
+    // ⚠ A-11 — VIRGINIA, the first REAL `taper` (v5.68). Structural, and deliberately so: t10's VA
+    //   block prices households, which proves the wiring; this pins the table's literal shape against
+    //   FINDINGS §5, so a wrong threshold that happens to price plausibly still fails somewhere.
+    //   ⚠ No `cmp`, no `rows`, no `unit`: `_fromTest` reads none of them on the taper branch, and a
+    //   key that is present but unread is a second answer nobody checks.
+    if (_v >= 568) {
+      const _t = RULES.VA.exclTest || {};
+      T("A-11 [v5.68]: VA's table is a `taper` on `agiExSS` at $12,000 per person, thresholds $50,000 single / $75,000 joint — Va. Code § 58.1-322.03(5)(b)",
+        _t.kind === "taper" && _t.base === "agiExSS" && _t.perPerson === 12000 &&
+        _t.threshold?.single === 50000 && _t.threshold?.joint === 75000);
+      T("A-11a [v5.68]: and it carries no `cmp`, `rows` or `unit` — a taper is continuous and reads none of them",
+        _t.cmp === undefined && _t.rows === undefined && _t.unit === undefined);
+      T("A-11b [v5.68]: VA carries NO `exclAge` — the statute's floor IS 65, `_floor`'s default (as NM)",
+        RULES.VA.exclAge === undefined);
+    }
     // ⚠ A-4..A-6 are REPEATED in this branch deliberately. They are still true at v5.66 and
     // dropping them here would be silent coverage loss — the shape §B2 exists to catch, and the
     // reason this block was re-read after gating rather than assumed correct.

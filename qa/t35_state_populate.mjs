@@ -29,7 +29,7 @@ let _s = 42; Math.random = () => { _s = (_s * 1103515245 + 12345) & 0x7fffffff; 
 
 const VER = process.argv[2] || "v565";
 const _vt = Number(String(VER).replace(/[^0-9]/g, "")) || 0;
-const KNOWN_VERSIONS = ["v564", "v565", "v566", "v567"];
+const KNOWN_VERSIONS = ["v564", "v565", "v566", "v567", "v568"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -287,7 +287,7 @@ const ctTax = (args) => ST({
   // ⚠ THE SET SHRINKS BY ONE PER CONVERSION AND MUST REACH ZERO. When the last of NJ, RI and VA
   // converts, D-8's non-empty guard below INVERTS and both must be gated together in that release.
   if (_vt >= 566) {
-    const _expOff = _vt >= 567 ? "RI,VA" : "NJ,RI,VA";
+    const _expOff = _vt >= 568 ? "RI" : _vt >= 567 ? "RI,VA" : "NJ,RI,VA";
     T(`D-7 [v5.67]: the income-limited-but-unconditional set is exactly ${_expOff} — ${_expOff.split(",").length} states still to convert (found: ${offenders.sort().join(",") || "none"})`,
       offenders.sort().join(",") === _expOff);
     // ⚠ EXTINCTION INVARIANT: NM must be OUT of this set for the right reason — because it carries
@@ -303,6 +303,22 @@ const ctTax = (args) => ST({
     if (_vt >= 567)
       T("D-7b [v5.67]: NJ left the set by CONVERTING, not by rewording — its note still matches the income-limited selector AND it now carries an `exclTest`",
         /income[- ]limited|income limit/i.test(R.NJ.note || "") && R.NJ.exclTest !== undefined);
+    // ⚠ D-7c — VIRGINIA (v5.68), the same pin a third time. Its note keeps "income-limited" on purpose.
+    if (_vt >= 568) {
+      T("D-7c [v5.68]: VA left the set by CONVERTING, not by rewording — its note still matches the income-limited selector AND it now carries an `exclTest`",
+        /income[- ]limited|income limit/i.test(R.VA.note || "") && R.VA.exclTest !== undefined);
+      // VA's note owes three disclosures. Each is asserted as a CLAIM, not as the presence of a noun
+      // (the v5.65 D-2 lesson): a note saying the measure DOES carry dividends must fail D-10.
+      const _van = R.VA.note || "";
+      T("D-10 [v5.68]: VA's note discloses that the measure carries NO dividend or interest income — asserted as a negation within ~40 characters",
+        /\b(omits?|not|no|never|without|excluding)\b[^.]{0,40}\bdividend/i.test(_van) && /interest/i.test(_van));
+      T("D-11 [v5.68]: and names the DIRECTION of that error — the deduction is overstated",
+        /overstat/i.test(_van));
+      T("D-12 [v5.68]: and states the reduction is taken ONCE, not once per spouse — the mechanic this release exists to get right",
+        /\bonce\b/i.test(_van) && /not once per spouse|not per spouse/i.test(_van));
+      T("D-13 [v5.68]: and no longer claims the deduction is applied unconditionally — the pre-v5.68 disclosure is now false (OPERATIONS §B2 lock)",
+        !/unconditional/i.test(_van));
+    }
   } else {
     T(`D-7: the income-limited-but-unconditional set is exactly NM, NJ, RI, VA — four states still to convert (found: ${offenders.sort().join(",") || "none"})`,
       offenders.sort().join(",") === "NJ,NM,RI,VA");

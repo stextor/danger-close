@@ -1179,7 +1179,7 @@ const pass2E = pass, fail2E = fail;
         //   checks its endpoints is checking that a table exists, not that it is right) — found
         //   twice, in two suites, in one release. Pricing every row is the form that cannot recur.
         //
-        //   Expected values come from `qa/oracle_nm.py`, an INDEPENDENT implementation of the
+        //   Expected values come from `qa/tools/oracle_nm.py`, an INDEPENDENT implementation of the
         //   statutory table typed from FINDINGS-v5_63-state-statutes.md §2, never from STATE_RULES.
         //   Each cell: all income is retirement income, so AGI == retIncome and the row is exact.
         const _NM_JOINT = [[30000, 686.00], [33000, 931.00], [36000, 1176.00], [39000, 1421.00],
@@ -1371,6 +1371,108 @@ const pass2E = pass, fail2E = fail;
           R.NJ.excl65, 0);
         T("[INVARIANT v5.67] NJ carries exclAge 62 — the statute's floor, not the engine's 65 default",
           R.NJ.exclAge, 62);
+      }
+
+      // ── VIRGINIA — Va. Code § 58.1-322.03(5)(b), populated v5.68 ───────────────────────────────
+      // Transcribed from FINDINGS-v5_63-state-statutes.md §5, never re-derived and never read off
+      // STATE_RULES. Every expected value below was printed by `qa/tools/oracle_va.py` — an
+      // INDEPENDENT implementation of the statute and the Form 760 Age Deduction Worksheet — BEFORE
+      // the engine priced any of them (15 of 15 oracle cells then agreed with the engine, plus two).
+      // Formula, read from stateTaxAnnual:
+      //   m       = retIncome + pen + work + capGains                    [base "agiExSS" — SS out]
+      //   qual    = #{ age >= 65 }                                       [no exclAge; floor 65]
+      //   exclFin = max(0, 12,000 x qual - max(0, m - thr))              [taper; thr 50K / 75K]
+      //   tax     = 0.0575 x (max(0, retIncome+pen-exclFin) + work + capGains)     [ss: 0 in VA]
+      //
+      // ⚠ VIRGINIA IS THE FIRST REAL `taper`. t34 §D proves the evaluator against a synthetic
+      //   jurisdiction; only these cells prove the WIRING — threshold pair, base, per-person amount.
+      //
+      // ⚠ WHICH CELLS CAN CATCH A PER-SPOUSE DEFECT, MEASURED RATHER THAN ASSUMED. `oracle_va.py`
+      //   carries both readings. With ONE qualifying person, `12,000 x 1 - excess` and
+      //   `(12,000 - excess) x 1` are the same expression — so EVERY single-filer cell and EVERY
+      //   one-spouse cell below is structurally INCAPABLE of catching it. Those cells pin the table;
+      //   they prove nothing about once-not-twice. The discriminating set is BOTH SPOUSES QUALIFYING,
+      //   STRICTLY INSIDE THE TAPER, and it is marked [DISC] in each label. Its separation is five
+      //   cents at the $1 boundaries and $517.50 at $90,000, where the per-spouse reading is already
+      //   extinguished (at $87,000) and the statute's is not. The $1 cells are kept for the clamp;
+      //   the mid-taper cells carry the proof.
+      //
+      // DIRECTION: CONSERVATIVE ONLY (D-VA-5). Swept at the build, v5.67 against v5.68, 20,050
+      //   households: tax fell in none, and the largest rise is $1,380.00 (both 65+, AFAGI $99,000+).
+      const VA = (a) => S({ code: "VA", fallbackRate: 0, retIncome: 0, pen: 0, work: 0, capGains: 0,
+                            ssTaxableFed: 0, ageA: null, ageB: null, ...a });
+      if (_v >= 568) {
+        // — JOINT, BOTH 65+: every region of the taper. [DISC] = separates the per-spouse reading.
+        const _VA_JOINT2 = [[60000, 2070.00, "below the threshold"], [75000, 2932.50, "EXACTLY at the threshold — the clamp, not a comparator"],
+                            [75001, 2932.615, "$1 over [DISC, 5 cents]"], [80000, 3507.50, "mid taper [DISC $287.50]"],
+                            [85000, 4082.50, "mid taper [DISC $575.00]"], [90000, 4657.50, "past the per-spouse extinction at $87K [DISC $517.50]"],
+                            [98999, 5692.385, "$1 under extinction [DISC, 5 cents]"], [99000, 5692.50, "EXACTLY extinguished"],
+                            [110000, 6325.00, "past extinction"]];
+        for (const [m, exp, why] of _VA_JOINT2)
+          T(`[HAND v5.68] VA joint, both 70, AFAGI $${m.toLocaleString()} — ${why} -> $${exp.toFixed(2)}`,
+            VA({ retIncome: m, ageA: 70, ageB: 70 }), exp);
+        // — JOINT, ONE 65+: pins the $12,000 maximum and the joint threshold. NOT a discriminator.
+        const _VA_JOINT1 = [[60000, 2760.00, "below"], [80000, 4197.50, "mid taper"], [87000, 5002.50, "EXACTLY extinguished"]];
+        for (const [m, exp, why] of _VA_JOINT1)
+          T(`[HAND v5.68] VA joint, one spouse 70 and one 62, AFAGI $${m.toLocaleString()} — ${why} -> $${exp.toFixed(2)}`,
+            VA({ retIncome: m, ageA: 70, ageB: 62 }), exp);
+        // — SINGLE: pins the single threshold ($50,000) and its extinction ($62,000). NOT a discriminator.
+        const _VA_SINGLE = [[40000, 1610.00, "below"], [50000, 2185.00, "EXACTLY at the threshold"],
+                            [55000, 2760.00, "mid taper"], [62000, 3565.00, "EXACTLY extinguished"], [70000, 4025.00, "past extinction"]];
+        for (const [m, exp, why] of _VA_SINGLE)
+          T(`[HAND v5.68] VA single, 70, AFAGI $${m.toLocaleString()} — ${why} -> $${exp.toFixed(2)}`,
+            VA({ retIncome: m, ageA: 70, single: true }), exp);
+        // — THE AGE FLOOR is 65 per person (no exclAge). Both sides of it.
+        T("[HAND v5.68] VA joint, both 64: nobody qualifies, no deduction at any income — 0.0575 x 80,000 = $4,600.00",
+          VA({ retIncome: 80000, ageA: 64, ageB: 64 }), 4600.00);
+        T("[HAND v5.68] VA joint, both EXACTLY 65 inside the taper: the floor is inclusive [DISC] — $3,507.50",
+          VA({ retIncome: 80000, ageA: 65, ageB: 65 }), 3507.50);
+        // — THE MEASURE. `base: "agiExSS"` is Virginia's AFAGI exactly. Taxable SS must NOT ride it:
+        //   under `base: "agi"` the household below sits at $110,000, is extinguished, and pays $4,600.00.
+        T("[HAND v5.68] VA: taxable SS does NOT ride AFAGI — $80K retirement + $30K taxable SS still takes $19,000 [DISC] — $3,507.50",
+          VA({ retIncome: 80000, ssTaxableFed: 30000, ageA: 70, ageB: 70 }), 3507.50);
+        T("[HAND v5.68] VA: wages/other ordinary ride AFAGI and are taxed — $60K + $25K = $85,000, deduction $14,000 [DISC] — $4,082.50",
+          VA({ retIncome: 60000, work: 25000, ageA: 70, ageB: 70 }), 4082.50);
+        T("[HAND v5.68] VA: realized gains ride AFAGI and are taxed — $60K + $20K = $80,000, deduction $19,000 [DISC] — $3,507.50",
+          VA({ retIncome: 60000, capGains: 20000, ageA: 70, ageB: 70 }), 3507.50);
+        // — the clamp: a deduction larger than the retirement income cannot shelter wages.
+        T("[HAND v5.68] VA: the deduction cannot shelter wages — $5,000 retirement against $24,000 clamps at zero — 0.0575 x 60,000 = $3,450.00",
+          VA({ retIncome: 5000, work: 60000, ageA: 70, ageB: 70 }), 3450.00);
+
+        // — ⚠ E-VA-1 · ONCE, NOT TWICE, AT HOUSEHOLD LEVEL (scope §5). t34 D-3 proves this for the
+        //   synthetic jurisdiction only; a correct evaluator wired to a per-person call site passes D-3.
+        //   Inside the taper the excess has ALREADY been taken once, so a SECOND qualifying spouse adds
+        //   a FULL $12,000 to the maximum: -0.0575 x 12,000 = -$690.00. The per-spouse reading gives
+        //   -$402.50 here, because it takes the $5,000 excess from the second spouse's $12,000 again.
+        T("[EXTINCTION v5.68] VA once-not-twice: inside the taper a second qualifying spouse adds a FULL $12,000 — the excess is not taken again",
+          VA({ retIncome: 80000, ageA: 70, ageB: 70 }) - VA({ retIncome: 80000, ageA: 70, ageB: 62 }), -0.0575 * 12000);
+        // — E-VA-2 · the same class where the two readings are furthest apart: at $90,000 the
+        //   per-spouse reading has extinguished both deductions (gap $0.00); the statute leaves $9,000.
+        T("[EXTINCTION v5.68] VA once-not-twice: at $90,000 a both-65+ couple still keeps $9,000 that a per-spouse taper would have extinguished at $87,000",
+          VA({ retIncome: 90000, ageA: 70, ageB: 70 }) - VA({ retIncome: 90000, ageA: 64, ageB: 64 }), -0.0575 * 9000);
+        // — ⚠ EXTINCTION. The defect the release kills: the deduction was INCOME-BLIND. Under v5.67
+        //   a step from $75,000 to $99,000 cost exactly the rate on the income, 0.0575 x 24,000 =
+        //   $1,380.00, because $24,000 was granted at both ends. It must cost MORE than that.
+        T("[EXTINCTION v5.68] VA's deduction is no longer income-blind: a step from $75K to $99K AFAGI costs MORE than the rate on the income alone",
+          (VA({ retIncome: 99000, ageA: 70, ageB: 70 }) - VA({ retIncome: 75000, ageA: 70, ageB: 70 })) > 0.0575 * 24000 + EPS ? 1 : 0, 1);
+        // — the scalar beside the table (D-VA-2, CLOSED: keep 12000). The taper is per person, like
+        //   New Mexico's table, and at zero income it yields perPerson x qual — $12,000 per person.
+        //   Asserted in NM's shape so a later session cannot set it to 0 and stay green.
+        T("[INVARIANT v5.68] VA's excl65 scalar still equals its taper's per-person value at zero income — $12,000",
+          R.VA.excl65, 12000);
+        T("[INVARIANT v5.68] and that value is the taper's own perPerson, not a coincidence of two literals",
+          R.VA.excl65 === (R.VA.exclTest && R.VA.exclTest.perPerson) ? 1 : 0, 1);
+        T("[INVARIANT v5.68] VA carries no exclAge — the statute's floor IS 65, the engine default (as NM)",
+          R.VA.exclAge === undefined ? 1 : 0, 1);
+      } else {
+        // Pre-fix state: $12,000 per person 65+ granted at EVERY income — OPTIMISTIC above the
+        // threshold. Pinned on the frozen leg so the pre-v5.68 behaviour is visible, not an absence.
+        T("[KNOWN DEFECT pre-v5.68] VA granted the full $24,000 to a both-70 couple at $80,000 AFAGI, which § 58.1-322.03(5)(b) reduces to $19,000 — $3,220.00",
+          VA({ retIncome: 80000, ageA: 70, ageB: 70 }), 0.0575 * (80000 - 24000));
+        T("[KNOWN DEFECT pre-v5.68] the deduction was income-BLIND: a step from $75K to $99K cost exactly the rate on the income, 0.0575 x 24,000",
+          VA({ retIncome: 99000, ageA: 70, ageB: 70 }) - VA({ retIncome: 75000, ageA: 70, ageB: 70 }), 0.0575 * 24000);
+        T("[KNOWN DEFECT pre-v5.68] VA carried no exclTest at all",
+          R.VA.exclTest === undefined ? 1 : 0, 1);
       }
     }
   }

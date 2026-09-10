@@ -29,7 +29,7 @@ let _s = 42; Math.random = () => { _s = (_s * 1103515245 + 12345) & 0x7fffffff; 
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v546";
-const KNOWN_VERSIONS = ["v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567"];
+const KNOWN_VERSIONS = ["v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -51,6 +51,11 @@ const G = (await import(pathToFileURL(join(HERE, `app_${VER}.mjs`)).href)).__g;
 
 let pass = 0, fail = 0;
 const T = (n, ok, d = "") => { if (ok) pass++; else { fail++; console.log(`  \u2717 ${n}${d ? " \u2014 " + d : ""}`); } };
+// ⚠ EQ ADDED v5.68 (OPERATIONS §D1/§D2). Until then this suite had ONLY the truthiness helper above,
+// and F-6a/F-6b were written `T(label, actual, expected)` as though `T` compared — its third argument
+// is a display string, so both passed on any non-empty set. Any assertion with an EXPECTED VALUE uses
+// EQ. Strict equality, and the got/want pair is printed on failure.
+const EQ = (n, got, want) => T(n, got === want, `got ${JSON.stringify(got)}, want ${JSON.stringify(want)}`);
 
 console.log(`t29 \u2014 BOUNDARY CENSUS (${VER})`);
 console.log(`     tool:     ${TOOL}`);
@@ -229,29 +234,36 @@ T("C-reverse: 'ladder_windows' goes from clear to ON when both spouses share a b
   // in STATE_RULES matches the income-limit pattern, `state_excl_limited` can never read ON and
   // every assertion about it passes vacuously \u2014 green from an empty set (OPERATIONS \u00a7B2).
   // This release found that exact defect twice in its own tooling, so it is pinned here.
+  // ⚠ v5.68: the selector carries `!r.exclTest`, MATCHING `boundaries.mjs` (D-VA-3). The row means
+  // "income-limited in law, UNCONDITIONAL IN THE MODEL", and `exclTest` is exactly what makes a state
+  // conditional. This copy and the census's copy must agree; F-6c asserts they do.
   const limited = Object.entries(RULES)
-    .filter(([, r]) => (r.excl65 || 0) > 0 && /income[- ]limited|income limit/i.test(r.note || ""));
-  T("F-6: at least one STATE_RULES entry carries an income-limited 65+ exclusion \u2014 otherwise the D-3c row is vacuous",
+    .filter(([, r]) => (r.excl65 || 0) > 0 && !r.exclTest && /income[- ]limited|income limit/i.test(r.note || ""))
+    .map(([c]) => c).sort();
+  T("F-6: at least one STATE_RULES entry carries an income-limited 65+ exclusion the model applies unconditionally \u2014 otherwise the D-3c row is vacuous",
     limited.length > 0, `${limited.length} found`);
 
-  // \u26a0 F-6a \u2014 THE SET IS DOWN TO ONE MEMBER, AND THE NEXT RELEASE EMPTIES IT (added v5.67).
-  // Measured at the v5.67 build: the set was {NJ, VA} at v5.66 and is {VA} now, because populating
-  // New Jersey moved it onto `exclTest` and set its `excl65` scalar to 0 \u2014 which is CORRECT (a
-  // household table has no per-person scalar that could agree with it) and drops it out of a filter
-  // keyed on `excl65 > 0`. F-6 still passes, on one state.
-  //
-  // VIRGINIA IS THE NEXT STATE TO BE POPULATED. The moment it is, this set is EMPTY and F-6 fails \u2014
-  // which is F-6 working, not F-6 breaking. \u26a0 DO NOT FIX THAT BY WEAKENING F-6 OR BY LEAVING A
-  // SCALAR BEHIND SOLELY TO KEEP IT GREEN: a scalar kept alive to satisfy a filter is a second
-  // source of truth, which is the defect D-NJ-4 avoided. Re-found the guard on `exclTest` instead \u2014
-  // the populated states are exactly the ones it should now be selecting on.
-  //
-  // This assertion exists so the VA session meets the decision deliberately rather than discovering
-  // a red F-6 and reaching for the quickest green. It is a COUNT, so it fires on the way down.
-  T("F-6a: the income-limited scalar set has exactly the one member this release left it \u2014 populating VA empties it, and F-6 must be RE-FOUNDED on exclTest, not weakened",
-    limited.length, 1);
-  T("F-6b: and that member is Virginia \u2014 if this name changes, the release that changed it owns F-6",
-    limited.join(","), "VA");
+  // \u26a0 F-6a / F-6b \u2014 REPAIRED AT v5.68 (OPERATIONS §D2, flipped). Their v5.67 form was
+  // `T(label, limited.length, 1)` and `T(label, limited.join(","), "VA")`: the expected value sat in
+  // the display-string slot and was never compared, so both passed on ANY non-empty set. They also
+  // measured the wrong thing — the comment here said the set was {VA} when it was {NM, RI, VA}.
+  // Both now use EQ, and both are GATED PER LEG (§B2) because the set legitimately differs by build:
+  //   v5.68  {RI}       Virginia populated
+  //   v5.67  {RI, VA}   New Mexico excluded by `!r.exclTest`, as it should have been since v5.66
+  // ⚠ A negative control that changes an INTERIOR member (a set that stays non-empty) must turn
+  //   these red while F-6 stays green. That is the whole of §D1's record, and qa/tools/controls_v568_va.py
+  //   runs it. When RHODE ISLAND is populated this set EMPTIES: F-6 must then INVERT, deliberately,
+  //   with the census row retired in the same release — never weakened to stay green.
+  const _v6 = Number(VER.replace(/[^0-9]/g, ""));
+  const _exp6 = _v6 >= 568 ? ["RI"] : ["RI", "VA"];
+  EQ(`F-6a: the income-limited-but-unconditional set has exactly ${_exp6.length} member(s) on this leg`,
+    limited.length, _exp6.length);
+  EQ(`F-6b: and they are exactly ${_exp6.join(", ")} \u2014 if this changes, the release that changed it owns F-6`,
+    limited.join(","), _exp6.join(","));
+  // F-6c: the census row reports the SAME set — two copies of one selector are how this drifted.
+  const _row6 = by(at("stateExclCliff"), "state_excl_limited");
+  EQ("F-6c: and boundaries.mjs's state_excl_limited row names that same set \u2014 the tool and this check select alike",
+    _row6 ? _row6.boundary : "row missing", `state in {${limited.join(",")}}`);
 
   // F-7: and the row must actually be reachable from a shipped fixture, not merely definable.
   // A boundary nothing can cross is a boundary the census cannot help with.
