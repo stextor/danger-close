@@ -1,5 +1,71 @@
 # Changelog
 
+## ops 2026-09-10 — Rhode Island is scoped: the last of the five, its comparator corrected, its IRA gap measured
+
+**KIND: ops. No version bump, no source change, no figure moves, no test changes.** v5.68 remains the
+current build: source `561fc39b5bdae7c6d83698f352c436b3`, artifact `f7f0e3dd338804b2a09a6ca53318ac26`,
+repo HEAD `f2f4c20` at the start of this work. Six files change: `docs/SCOPE_RI_POPULATE.md` (new),
+`docs/FINDINGS-v5_63-state-statutes.md`, `docs/SCOPE_INCOME_CONDITIONING.md`, `qa/tools/package_check.mjs`,
+this file and the manifest.
+
+### What changed
+
+- **`docs/SCOPE_RI_POPULATE.md` is new, and BUILDABLE.** It scopes Rhode Island's $50,000 pension/401(k)
+  modification into `exclTest` as a two-row `bands` cliff on `agi`, per person, on the dated TY2025 pair
+  (parent B-3, not reopened). **All six of its decisions were approved by the maintainer on 2026-09-10**:
+  cliff only, with the IRA distinction disclosed and given its own input scope (D-RI-1); `cmp: "lt"`
+  (D-RI-2); the own-income cap and per-spouse FRA disclosed, not modelled (D-RI-3); the guards the
+  conversion empties inverted and the `stateExclCliff` fixture and `state_excl_limited` row retired
+  together (D-RI-4); the Field Manual rewritten with a lock (D-RI-5); an independent `oracle_ri.py`
+  (D-RI-6). **Social Security stays out of scope**, per the parent's §4.
+- **`FINDINGS-v5_63-state-statutes.md` §6 and §7c, and the parent's B-2, are CORRECTED IN PLACE: Rhode
+  Island's comparator is EXCLUSIVE.** FINDINGS recorded it as inclusive ("at or below"). R.I. Gen. Laws
+  § 44-30-12(c)(8) and (c)(9) say AGI "less than" the threshold, ADV 2025-22 says "below", and the
+  Division's 22 July 2026 legislative summary says "less than"; only PUB 2026-01's table says "or less" —
+  the table with the $133,500 typo FINDINGS already rejected. The original sentences are kept beside
+  their corrections. B-2's mechanism is unaffected.
+- **`package_check`'s I-2 OPEN allowlist gains `SCOPE_RI_POPULATE.md`**, with an expiry stated as the
+  Rhode Island build — the same release that must remove the `SCOPE_INCOME_CONDITIONING.md` entry.
+
+### What the scope measured, so the build does not rediscover it
+
+- **Direction, over 34,992 grid households priced through `stateTaxAnnual` with the candidate table
+  injected in memory: tax rose for 14,843, fell for none; largest rise $5,000.00/yr.** The comparator
+  changed no grid household — only an exact-threshold cell sees it ($6,687.50 against $1,687.50, joint).
+- **The example household, placed in Rhode Island, crosses the cliff in 10–13 of 25 Engine B rows**, up
+  to $5,000/yr, and the exposure depends on the conversion amount. **Whether the model's best Roth cell
+  changes for a Rhode Island household was NOT measured**; the scope requires the build to measure it.
+- **The model's inputs cannot distinguish an IRA from an employer plan** — every pre-tax account type is
+  `trad`, positions carry no plan type, the pension has no owner. Left disclosed, the IRA gap understates
+  tax by $4,000.00/yr on an $80,000 IRA-only couple, the own-income cap by $2,000.00, per-spouse FRA by
+  $2,500.00.
+- **A test-cell × mutant matrix**: ten hand cells, nine mutants, every mutant caught. Three are caught by
+  exactly one cell, and the comparator only by the two exact-threshold cells.
+- **Converting Rhode Island empties the guarded set**, and the scope's census names what that breaks:
+  `t29` F-6…F-7, the fixture and census row, `t35` D-7/D-8 (whose label miscounts an empty set),
+  `t34` A-3 (whose `[].every` goes vacuous), `controls_state.sh` S2 and S4, two Field Manual sentences
+  **no assertion reads**, and 18 files / 82 judgement points of version registration.
+
+### How it was verified
+
+- **§A freshness, clean**: source and artifact match the manifest, the repo and the pool; all 125 pool
+  files match a committed file by content except `DangerClose-v5_67.jsx`, pool-only by design and equal to
+  the manifest's prior-build hash.
+- **The v5.68 suite re-run this session**: 3,441 app checks, 0 failing, parity 10/10 (tooling 82 separate).
+  No suite or source file changes in this package, so no further app run applies.
+- Every statutory statement in the scope was read from the statute, ADV 2025-22, PUB 2026-01 or the
+  Division's 2026 summary in this session. The scope's draft Rhode Island note holds 16 of 16 executed
+  locks (the twelve existing, four proposed). `package_check` results are in `MANIFEST.txt`.
+
+### Limitations
+
+- **The statute was read from a codification** (current to 1 January 2026) and from its reproduction in
+  PUB 2026-01, not from the General Assembly's own site.
+- **The draft note is a draft**: 63 suite matchers remain candidates that only the build's full run settles.
+- **Two counts of unchecked exclusion states disagree** (the manual's thirteen, the CHANGELOG's nine); the
+  scope records it as F-5 and does not resolve it.
+- This work took three passes in one session; the first two ended at the tool limit with no files written.
+
 ## ops 2026-09-10 — controls_state.sh can run again, and the v5.68 ship's lessons are written where the next session reads
 
 **KIND: ops. No version bump, no source change, no figure moves, no test changes.** v5.68 remains the
