@@ -64,28 +64,30 @@ export const HOUSEHOLDS = {
   },
   // Clears the income-limited-exclusion row (the D-3c class).
   stateExclCliff: {
-    // ⚠ RE-FOUNDED ON VIRGINIA AT v5.67, AND THE RE-FOUNDING IS THE INTERESTING PART.
-    // This fixture stood on NEW JERSEY from v5.54. v5.67 populated New Jersey's exclusion, so the
-    // row it exists to turn ON stopped being reachable through NJ — the fixture went green by
-    // having nothing left to catch, which is the vacuum F-6 and F-7 exist to prevent and is
-    // exactly how a fixture rots. Virginia is now the ONLY state whose 65+ exclusion is both
-    // income-limited in law and applied unconditionally by the model (Rhode Island's note does not
-    // carry the selector phrase, so it is not in the guarded set).
-    // ⚠ WHEN VIRGINIA IS POPULATED THIS FIXTURE HAS NO STATE LEFT. Rhode Island cannot simply
-    // replace it without also settling why its note is outside the selector. Do not delete the
-    // fixture to make t29 green: the row must be retired deliberately, with the census, or the
-    // guard becomes an empty set that passes.
-    why: "Virginia, both spouses 65+ — VA's $12,000-per-person age deduction is reduced dollar-for-" +
-         "dollar above $50K single / $75K joint AFAGI in law and applied UNCONDITIONALLY by " +
-         "stateTaxAnnual, so this is the one remaining household shape from which D-3c is " +
-         "reachable at all. Elsewhere the unconditional subtraction is correct and a fixture " +
-         "there would prove nothing.",
+    // ⚠ RE-FOUNDED ON RHODE ISLAND AT v5.68 — the THIRD state this fixture has stood on.
+    // NEW JERSEY from v5.54 until v5.67 populated it; VIRGINIA for v5.67 only, until v5.68 populated it.
+    // ⚠ THE COMMENT THAT STOOD HERE AT v5.67 WAS WRONG, and is corrected rather than deleted. It said
+    //   Virginia was the ONLY state in the guarded set and that Rhode Island's note did not carry the
+    //   selector phrase. Measured at v5.67 the set was {NM, RI, VA}: RI's note DOES carry it ("…are
+    //   income-limited in law by a hard AGI cliff…", scalar $50,000), and New Mexico, populated at
+    //   v5.66, was still inside it. t29 F-6a/F-6b asserted {VA} with a truthiness helper, so they
+    //   could not see the difference (OPERATIONS §D1/§D2, fixed at v5.68).
+    // With the selector re-founded on `!r.exclTest` (boundaries.mjs, D-VA-3) the set is {RI} at
+    // v5.68 and {RI, VA} at v5.67, so Rhode Island reaches the D-3c row on BOTH legs.
+    // ⚠ WHEN RHODE ISLAND IS POPULATED THIS FIXTURE HAS NO STATE LEFT, and that time it is true:
+    //   RI is the last of the five. That release must retire the row deliberately, with the census,
+    //   and invert F-6 — never delete the fixture to make t29 green.
+    why: "Rhode Island, both spouses 67+ — RI's $50,000-per-person exclusion is cut off by a hard " +
+         "AGI cliff in law and applied UNCONDITIONALLY by stateTaxAnnual, which is what puts it " +
+         "in the D-3c set: income-limited in law, no exclTest in the model. Rhode Island is the " +
+         "last such state after v5.68. Elsewhere the unconditional subtraction is correct and a " +
+         "fixture there would prove nothing.",
     flips: ["state_code", "state_excl_limited"],
     apply: P => {
-      P.stateCode = "VA"; P.stateName = "Virginia";
+      P.stateCode = "RI"; P.stateName = "Rhode Island";
       P.stateTaxRate = 0;
-      // Both spouses over 65, so persons65 = 2 and the per-person deduction is fully engaged.
-      // Without this the row still reads ON but the defect it names is only half-sized.
+      // Both spouses past RI's `exclAge: 67` (71 and 70 in 2026), so both per-person exclusions are
+      // engaged. Without this the row still reads ON but the defect it names is only half-sized.
       P.dobA = "1955-03-10"; P.dobB = "1956-07-22";
     },
   },
