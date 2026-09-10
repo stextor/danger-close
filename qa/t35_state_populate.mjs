@@ -29,7 +29,7 @@ let _s = 42; Math.random = () => { _s = (_s * 1103515245 + 12345) & 0x7fffffff; 
 
 const VER = process.argv[2] || "v565";
 const _vt = Number(String(VER).replace(/[^0-9]/g, "")) || 0;
-const KNOWN_VERSIONS = ["v564", "v565", "v566", "v567", "v568"];
+const KNOWN_VERSIONS = ["v564", "v565", "v566", "v567", "v568", "v569"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -44,6 +44,9 @@ const MOD = await import(`./app_${VER}.mjs`);
 const __g = MOD.__g, __engines = MOD.__engines;
 const ST = __g.stateTaxAnnual;
 const R = __g.STATE_RULES();
+// v5.69: the shipped example household, captured BEFORE any section mutates PORTFOLIO (§E replaces it with a
+// Connecticut fixture). §F prices Rhode Island through the engine on this household, which crosses RI's cliff.
+const __BASE_PORTFOLIO = JSON.parse(JSON.stringify(__g.PORTFOLIO()));
 
 let pass = 0, fail = 0;
 const T = (name, cond) => { if (cond) { pass++; } else { fail++; console.log(`  \u2717 ${name}`); } };
@@ -67,7 +70,8 @@ const ctTax = (args) => ST({
       R.CT.exclTest.rows.joint.length === 10 && R.CT.exclTest.rows.single.length === 10);
     T("A-3: `exclAge: 0` — Connecticut conditions on income ALONE and the engine's default floor is 65",
       R.CT.exclAge === 0);
-    T("A-4: the comparator is EXCLUSIVE (B-2) — CT is the only one of the five that is",
+    T(_v >= 569 ? "A-4: the comparator is EXCLUSIVE (B-2) — CT is one of the two that are (Rhode Island joined at v5.69)"
+              : "A-4: the comparator is EXCLUSIVE (B-2) — CT is the only one of the five that is",
       R.CT.exclTest.cmp === "lt");
     T("A-5: the base is federal AGI, and the unit is the RETURN, not the person",
       R.CT.exclTest.base === "agi" && R.CT.exclTest.unit === "household");
@@ -287,8 +291,8 @@ const ctTax = (args) => ST({
   // ⚠ THE SET SHRINKS BY ONE PER CONVERSION AND MUST REACH ZERO. When the last of NJ, RI and VA
   // converts, D-8's non-empty guard below INVERTS and both must be gated together in that release.
   if (_vt >= 566) {
-    const _expOff = _vt >= 568 ? "RI" : _vt >= 567 ? "RI,VA" : "NJ,RI,VA";
-    T(`D-7 [v5.67]: the income-limited-but-unconditional set is exactly ${_expOff} — ${_expOff.split(",").length} states still to convert (found: ${offenders.sort().join(",") || "none"})`,
+    const _expOff = _vt >= 569 ? "" : _vt >= 568 ? "RI" : _vt >= 567 ? "RI,VA" : "NJ,RI,VA";
+    T(`D-7 [v5.67]: the income-limited-but-unconditional set is exactly ${_expOff || "EMPTY"} — ${_expOff ? _expOff.split(",").length : 0} states still to convert (found: ${offenders.sort().join(",") || "none"})`,
       offenders.sort().join(",") === _expOff);
     // ⚠ EXTINCTION INVARIANT: NM must be OUT of this set for the right reason — because it carries
     // a table, not because its note stopped saying "income-limited". Rewording the note out of the
@@ -319,13 +323,40 @@ const ctTax = (args) => ST({
       T("D-13 [v5.68]: and no longer claims the deduction is applied unconditionally — the pre-v5.68 disclosure is now false (OPERATIONS §B2 lock)",
         !/unconditional/i.test(_van));
     }
+    // ⚠ D-7d — RHODE ISLAND (v5.69), the fourth and last time. Its note keeps "income-limited" on purpose.
+    if (_vt >= 569) {
+      T("D-7d [v5.69]: RI left the set by CONVERTING, not by rewording — its note still matches the income-limited selector AND it now carries an `exclTest`",
+        /income[- ]limited|income limit/i.test(R.RI.note || "") && R.RI.exclTest !== undefined);
+      // RI's note owes its disclosures as CLAIMS, not nouns (the v5.65 D-2 lesson) — SCOPE_RI_POPULATE §6.
+      const _rin = R.RI.note || "";
+      T("D-14 [v5.69]: RI's note no longer claims the model ignores the cliff — the pre-v5.69 disclosure is now false (OPERATIONS §B2 lock)",
+        !/ignores the cliff/i.test(_rin));
+      T("D-15 [v5.69]: and states the cliff is EXCLUSIVE — AGI must be less than the threshold",
+        /less than the threshold/i.test(_rin));
+      T("D-16 [v5.69]: and discloses that IRA distributions are NOT distinguished (D-RI-1) — asserted as the negated claim",
+        /does not distinguish IRA/i.test(_rin));
+      T("D-17 [v5.69]: and that each person's $50,000 is NOT capped at their own income (D-RI-3)",
+        /does not cap each person/i.test(_rin));
+      T("D-18 [v5.69]: and that the measure carries NO dividend or interest income — a negation within ~40 characters",
+        /\b(omits?|not|no|never|without|excluding)\b[^.]{0,40}\bdividend/i.test(_rin) && /interest/i.test(_rin));
+      T("D-19 [v5.69]: and names the DIRECTION of those gaps — the exclusion is overstated",
+        /overstates the exclusion/i.test(_rin));
+      T("D-20 [v5.69]: and dates its thresholds — TY2026 figures expected November 2026 (parent B-3)",
+        /TY2026 expected November 2026/i.test(_rin));
+    }
   } else {
     T(`D-7: the income-limited-but-unconditional set is exactly NM, NJ, RI, VA — four states still to convert (found: ${offenders.sort().join(",") || "none"})`,
       offenders.sort().join(",") === "NJ,NM,RI,VA");
   }
   // and the guard against the set going quiet for the wrong reason (OPERATIONS §B2's empty-set trap)
-  T("D-8: that set is non-empty — an empty one would make D-7 pass vacuously once a note is reworded",
-    offenders.length > 0);
+  // ⚠ v5.69: INVERTED, not weakened (SCOPE_RI_POPULATE D-RI-4). Rhode Island converted, so the set is EMPTY by
+  //   design; D-7a..D-7d pin that each state left by CONVERTING, which is what keeps an empty set honest.
+  if (_vt >= 569)
+    T("D-8 [v5.69]: that set is EMPTY — all five income-limited statutes carry `exclTest`, and each left by converting (D-7a..D-7d)",
+      offenders.length === 0);
+  else
+    T("D-8: that set is non-empty — an empty one would make D-7 pass vacuously once a note is reworded",
+      offenders.length > 0);
   if (POPULATED) {
     T("D-9: and CT is NOT in it — a populated state must never read as an unconverted one",
       !offenders.includes("CT"));
@@ -420,6 +451,63 @@ const ctTax = (args) => ST({
     }
 
     G.applyLoadedData({ portfolio: BASE });   // leave the module as it was found
+  }
+}
+
+
+// ── §F · Rhode Island (assertions RI-0..RI-7 — not F-, which is t29's series), through the ENGINE (v5.69) and the Field Manual lock ───────────────────────────
+// SCOPE_RI_POPULATE §7c. §E proves parity for Connecticut on a fixture with no positions; it cannot show
+// Rhode Island's CLIFF is reached from `computeTaxPlan`, because that fixture never crosses it. This
+// section uses the SHIPPED example household (captured at load, before §E replaced PORTFOLIO), placed in
+// Rhode Island with streams neutralised, which crosses the cliff in real rows (measured at scope time).
+{
+  const G = __g, E = __engines;
+  if (E && E.computeTaxPlan) {
+    const P = JSON.parse(JSON.stringify(__BASE_PORTFOLIO));
+    P.stateCode = "RI"; P.stateName = "Rhode Island";
+    P.incomeStreams = [{ monthly: 0, tax: "ordinary", owner: "A", startYear: 2000, endYear: 9999 }];
+    G.applyLoadedData({ portfolio: P });
+    const plan = E.computeTaxPlan({ retireYear: G.PLAN_TIMELINE().targetRetireYear, rothAmount: 0, qcdAnnual: 0, taxYield: 0 });
+    const rows = (plan && plan.rows) || [];
+    const r0 = R.RI, THR = (r) => (r.filingSingle ? 107000 : 133750);
+    let compared = 0, mismatched = 0, above = 0, belowQual = 0, aboveGranted = 0;
+    for (const r of rows) {
+      if (typeof r.stateTax !== "number") continue;
+      compared++;
+      const ret = (r.rmdTax_y || 0) + (r.conv_y || 0), pen = r.pen_y || 0, work = r.work_y || 0;
+      const cg = (r.capGains_y || 0) + (r.div_y || 0), ss = r.ssTaxable || 0;
+      const direct = ST({ code: "RI", fallbackRate: 0, retIncome: ret, pen, work, capGains: cg, ssTaxableFed: ss,
+                          ssGrossA: r.ssA_y || 0, ssGrossB: r.ssB_y || 0, ageA: r.ageA, ageB: r.ageB, single: !!r.filingSingle });
+      if (Math.abs(direct - r.stateTax) > 0.01) mismatched++;
+      const m = ret + pen + work + cg + ss, qualAges = (r.ageA >= 67) || (!r.filingSingle && r.ageB >= 67);
+      const noExcl = r0.rate * (Math.max(0, ret + pen) + Math.max(0, work) + (r0.ss || 0) * Math.max(0, ss) + Math.max(0, cg));
+      if (m >= THR(r) && qualAges && ret + pen > 0) { above++; if (r.stateTax < noExcl - 0.01) aboveGranted++; }
+      if (m < THR(r) && qualAges && ret + pen > 0) belowQual++;
+    }
+    T(`RI-1: the engine priced Rhode Island rows to compare (compared ${compared})`, compared > 0);
+    T(`RI-2: every engine row re-prices identically through the module (mismatched ${mismatched} of ${compared})`, mismatched === 0);
+    T(`RI-3: the household crosses the cliff \u2014 qualifying rows exist BOTH at/above it (${above}) and below it (${belowQual}), so the section can discriminate`,
+      above > 0 && belowQual > 0);
+    if (_vt >= 569)
+      T(`RI-4 [v5.69]: every qualifying row at or above its cliff is priced with NO exclusion \u2014 the engine reaches the table (granted anyway: ${aboveGranted} of ${above})`,
+        above > 0 && aboveGranted === 0);
+    else
+      T(`RI-4 [KNOWN DEFECT pre-v5.69]: rows at or above the cliff WERE granted the exclusion (${aboveGranted} of ${above})`,
+        aboveGranted > 0);
+    G.applyLoadedData({ portfolio: JSON.parse(JSON.stringify(__BASE_PORTFOLIO)) });
+  } else {
+    T("RI-0: the tax engine is reachable from the shim", false);
+  }
+  // The Field Manual lock (scope F-4): until v5.69 NO assertion read the two sentences this release falsifies.
+  const DOCS = (G => (G.DOCS_HTML ? G.DOCS_HTML() : ""))(__g);
+  if (_vt >= 569) {
+    T("RI-5 [v5.69]: the Field Manual no longer says Rhode Island is not yet conditioned", !DOCS.includes("Rhode Island is not yet"));
+    T("RI-6 [v5.69]: nor that SEVERAL income-limited exclusions are treated as unconditional (OPERATIONS \u00a7B2 lock)",
+      !/several income-limited exclusions (are treated )?as unconditional/i.test(DOCS));
+    T("RI-7 [v5.69]: and names Rhode Island among the conditioned states, with the IRA money it still over-grants",
+      /Rhode Island at v5\.69/.test(DOCS) && /still applied to IRA money/i.test(DOCS));
+  } else {
+    T("RI-5 [pre-v5.69]: the Field Manual said Rhode Island was not yet conditioned — true on this leg", DOCS.includes("Rhode Island is not yet"));
   }
 }
 

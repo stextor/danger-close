@@ -513,7 +513,7 @@ const pass2E = pass, fail2E = fail;
     // wrong in at least three distinct ways, and only the first is what this block measures:
     //   1. INCOME-LIMITED IN LAW, APPLIED UNCONDITIONALLY  — NJ. Measured below.
     //   2. REDUCED BY SOCIAL SECURITY RECEIVED             — MD, ME, CO. Nothing in this project
-    //      models it; `boundaries.mjs`'s state_excl_limited row cannot see it. Disclosed at v5.54,
+    //      models it; `boundaries.mjs`'s state_excl_limited row (retired at v5.69) could not see it. Disclosed at v5.54,
     //      not modelled. See docs/AUDIT_STATE_EXCL65_NOTES.md.
     //   3. AGE THRESHOLD BELOW 65                          — KY has NO age test at all, DE is 60,
     //      NJ itself is 62, SC is tiered. `excl65 * persons65` can only express "65 or over", so
@@ -1473,6 +1473,59 @@ const pass2E = pass, fail2E = fail;
           VA({ retIncome: 99000, ageA: 70, ageB: 70 }) - VA({ retIncome: 75000, ageA: 70, ageB: 70 }), 0.0575 * 24000);
         T("[KNOWN DEFECT pre-v5.68] VA carried no exclTest at all",
           R.VA.exclTest === undefined ? 1 : 0, 1);
+      }
+
+      // ── RHODE ISLAND (v5.69, SCOPE_RI_POPULATE) — the fifth and last income-conditioned state. ──────
+      // § 44-30-12(c)(9): up to $50,000 per person at full retirement age (67), lost ENTIRELY unless
+      // federal AGI is LESS THAN the threshold (TY2025 $133,750 joint / $107,000 single, ADV 2025-22).
+      // The comparator is EXCLUSIVE (scope F-1, D-RI-2), so the cells AT the threshold are the only
+      // ones that can tell `lt` from `lte` — measured at scope time: the two differ on 0 of 34,992 grid
+      // households and only at these two cells. Every figure below was hand-computed and matches
+      // qa/tools/oracle_ri.py, which imports nothing from the app, to the cent.
+      //   rate 0.05; ss 0.5; exclusion 50,000 x qualifying persons, capped at retIncome + pen.
+      //   C3: joint $133,750, both 70 -> NOT below -> no exclusion -> 0.05 x 133,750 = 6,687.50
+      //   C2: joint $133,749         -> below -> 0.05 x (133,749 - 100,000) = 1,687.45
+      //   C8: joint $60,000 + $80,000 taxable SS -> measure 140,000 (the `agi` base carries SS)
+      //       -> no exclusion -> 0.05 x (60,000 + 0.5 x 80,000) = 5,000.00 ; `agiExSS` would give 2,000.00
+      // Which cell catches which defect was measured, not argued (scope §7b): C2 alone catches the
+      // $133,500 typo, C8 alone the wrong base, C10 alone the age floor, C3/C6 alone the comparator.
+      // C9 (one qualifying spouse) catches NO unit defect — with one person, per-person and household agree.
+      // DIRECTION: CONSERVATIVE ONLY (scope §4) — 34,992 households, tax fell in none, largest rise $5,000.00.
+      const RIC = (a) => S({ code: "RI", fallbackRate: 0, retIncome: 0, pen: 0, work: 0, capGains: 0,
+                             ssTaxableFed: 0, ssGrossA: 0, ssGrossB: 0, ageA: 70, ageB: 70, ...a });
+      if (_v >= 569) {
+        const _RI = [
+          ["C1 joint 70/70, $100,000 — below", { retIncome: 100000 }, 0.00],
+          ["C2 joint 70/70, $133,749 — one dollar below", { retIncome: 133749 }, 1687.45],
+          ["C3 joint 70/70, $133,750 — AT the cliff, exclusive [DISC cmp]", { retIncome: 133750 }, 6687.50],
+          ["C4 joint 70/70, $133,751 — one dollar above", { retIncome: 133751 }, 6687.55],
+          ["C5 single 70, $106,999 — one dollar below", { retIncome: 106999, single: true, ageB: null }, 2849.95],
+          ["C6 single 70, $107,000 — AT the cliff, exclusive [DISC cmp]", { retIncome: 107000, single: true, ageB: null }, 5350.00],
+          ["C7 joint 70/70, $110,000 — between the two columns [DISC swapped columns]", { retIncome: 110000 }, 500.00],
+          ["C8 joint 70/70, $60,000 + $80,000 taxable SS — the measure carries SS [DISC base]", { retIncome: 60000, ssTaxableFed: 80000 }, 5000.00],
+          ["C9 joint 70/60, $120,000 — one qualifying (pins the table, NOT the unit)", { retIncome: 120000, ageB: 60 }, 3500.00],
+          ["C10 joint 66/66, $100,000 — under the 67 floor [DISC exclAge]", { retIncome: 100000, ageA: 66, ageB: 66 }, 5000.00],
+          ["X1 joint 70/70, pension $40,000 + RMD $60,000 + SS $20,000 — below; pension qualifies", { retIncome: 60000, pen: 40000, ssTaxableFed: 20000 }, 500.00],
+          ["X2 joint 70/70, pension $40,000 + RMD $80,000 + SS $20,000 — above", { retIncome: 80000, pen: 40000, ssTaxableFed: 20000 }, 6500.00],
+        ];
+        for (const [label, args, exp] of _RI)
+          T(`[HAND v5.69] RI ${label} -> $${exp.toFixed(2)}`, RIC(args), exp);
+        T("[EXTINCTION v5.69] RI's exclusion is no longer income-blind: one dollar across the joint cliff ($133,749 -> $133,750) costs $5,000.05 — the whole $100,000 at 5% plus the rate on $1",
+          RIC({ retIncome: 133750 }) - RIC({ retIncome: 133749 }), 5000.05);
+        T("[INVARIANT v5.69] RI's excl65 scalar still equals its table's per-person amount at zero income — $50,000",
+          R.RI.excl65, 50000);
+        T("[INVARIANT v5.69] and that value is the table's own first-row amount in BOTH columns, not a coincidence of literals",
+          (R.RI.exclTest && R.RI.exclTest.rows.joint[0].amount === R.RI.excl65 && R.RI.exclTest.rows.single[0].amount === R.RI.excl65) ? 1 : 0, 1);
+        T("[INVARIANT v5.69] RI still carries exclAge 67 — the full-retirement-age floor is unchanged by the table",
+          R.RI.exclAge, 67);
+      } else {
+        // Pre-fix state: $50,000 per person from 67 at EVERY income — OPTIMISTIC at and above the cliff.
+        T("[KNOWN DEFECT pre-v5.69] RI granted the full $100,000 to a both-70 couple at EXACTLY $133,750 of AGI, which § 44-30-12(c)(9) denies — $1,687.50",
+          RIC({ retIncome: 133750 }), 1687.50);
+        T("[KNOWN DEFECT pre-v5.69] the exclusion was income-BLIND across the cliff: $133,749 -> $133,750 cost only the rate on $1",
+          RIC({ retIncome: 133750 }) - RIC({ retIncome: 133749 }), 0.05);
+        T("[KNOWN DEFECT pre-v5.69] RI carried no exclTest at all",
+          R.RI.exclTest === undefined ? 1 : 0, 1);
       }
     }
   }

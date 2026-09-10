@@ -26,7 +26,7 @@ import "./env_dom.mjs";
 let _s = 42; Math.random = () => { _s = (_s * 1103515245 + 12345) & 0x7fffffff; return _s / 0x7fffffff; };
 
 const VER = process.argv[2] || "v564";
-const KNOWN_VERSIONS = ["v564", "v565", "v566", "v567", "v568"];
+const KNOWN_VERSIONS = ["v564", "v565", "v566", "v567", "v568", "v569"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -62,12 +62,19 @@ console.log(`t34 — INCOME CONDITIONING (${VER})`);
     // ⚠ THE ROSTER MOVES WITH EVERY POPULATE RELEASE, AND THAT IS ITS JOB. It is asserted as an
     //   EXACT SET, not a count and not a floor, so a release cannot populate a state and leave the
     //   map behind — which is the defect class this project has recorded six times in documents.
-    const _expTest = _v >= 568 ? "CT,NJ,NM,VA" : _v >= 567 ? "CT,NJ,NM" : "CT,NM";
-    const _expOpen = _v >= 568 ? ["RI"] : _v >= 567 ? ["RI", "VA"] : ["RI", "VA", "NJ"];
-    T(`A-1 [v5.67]: EXACTLY ${_expTest.split(",").length} states carry \`exclTest\` — ${_expTest} (New Jersey joined at v5.67, Virginia at v5.68)`,
+    const _expTest = _v >= 569 ? "CT,NJ,NM,RI,VA" : _v >= 568 ? "CT,NJ,NM,VA" : _v >= 567 ? "CT,NJ,NM" : "CT,NM";
+    const _expOpen = _v >= 569 ? [] : _v >= 568 ? ["RI"] : _v >= 567 ? ["RI", "VA"] : ["RI", "VA", "NJ"];
+    T(`A-1 [v5.67]: EXACTLY ${_expTest.split(",").length} states carry \`exclTest\` — ${_expTest} (New Jersey joined at v5.67, Virginia at v5.68${_v >= 569 ? ", Rhode Island at v5.69" : ""})`,
       withTest.join(",") === _expTest);
     if (withTest.join(",") !== _expTest) console.log(`        populated: ${withTest.join(", ") || "(none)"}`);
-    T(`A-3 [v5.67]: the remaining ${_expOpen.length} income-conditioned states (${_expOpen.join(", ")}) are still present and still UNPOPULATED — they remain optimistic and convert one release at a time`,
+    // ⚠ v5.69: the remaining list is EMPTY, and `[].every(...)` is TRUE — the old A-3 would pass on any
+    //   table at all (OPERATIONS §D1-adjacent; SCOPE_RI_POPULATE §6). So from v569 it asserts the five
+    //   statutes BY NAME, each carrying a table, and that nothing remains open.
+    if (_v >= 569)
+      T("A-3 [v5.69]: ALL FIVE income-conditioned states (CT, NJ, NM, RI, VA) carry `exclTest`, asserted by name — none remains unconditional",
+        _expOpen.length === 0 && ["CT", "NJ", "NM", "RI", "VA"].every((c) => RULES[c] && RULES[c].exclTest !== undefined));
+    else
+      T(`A-3 [v5.67]: the remaining ${_expOpen.length} income-conditioned states (${_expOpen.join(", ")}) are still present and still UNPOPULATED — they remain optimistic and convert one release at a time`,
       _expOpen.every((c) => RULES[c] && RULES[c].exclTest === undefined));
     // ⚠ EXTINCTION INVARIANT for the defect this release fixes: NM's exemption must NOT be a flat
     // scalar at every income. A future edit that drops `exclTest` from NM reinstates the optimism.
@@ -105,6 +112,19 @@ console.log(`t34 — INCOME CONDITIONING (${VER})`);
         _t.cmp === undefined && _t.rows === undefined && _t.unit === undefined);
       T("A-11b [v5.68]: VA carries NO `exclAge` — the statute's floor IS 65, `_floor`'s default (as NM)",
         RULES.VA.exclAge === undefined);
+    }
+    // ── v5.69: RHODE ISLAND. Every row PRICED (§D1: an endpoint-only table check is the named class), both
+    //   columns, the Infinity terminator, the exclusive comparator (F-1 / D-RI-2) and the unchanged 67 floor.
+    if (_v >= 569) {
+      const _r = RULES.RI.exclTest || {}, _j = (_r.rows && _r.rows.joint) || [], _s = (_r.rows && _r.rows.single) || [];
+      T("A-12 [v5.69]: RI's table is `bands` on `agi`, PER PERSON, with the EXCLUSIVE comparator — § 44-30-12(c)(9) reads \"less than\"",
+        _r.kind === "bands" && _r.base === "agi" && _r.unit === "person" && _r.cmp === "lt");
+      T("A-12a [v5.69]: exactly two rows per column, every value priced: $50,000 below $133,750 joint / $107,000 single, then $0 to Infinity",
+        _j.length === 2 && _s.length === 2 &&
+        _j[0].upTo === 133750 && _j[0].amount === 50000 && _j[1].upTo === Infinity && _j[1].amount === 0 &&
+        _s[0].upTo === 107000 && _s[0].amount === 50000 && _s[1].upTo === Infinity && _s[1].amount === 0);
+      T("A-12b [v5.69]: RI keeps `exclAge: 67` — the full-retirement-age floor ROUND5 confirmed, untouched by the table",
+        RULES.RI.exclAge === 67);
     }
     // ⚠ A-4..A-6 are REPEATED in this branch deliberately. They are still true at v5.66 and
     // dropping them here would be silent coverage loss — the shape §B2 exists to catch, and the

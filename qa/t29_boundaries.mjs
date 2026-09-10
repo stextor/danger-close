@@ -29,7 +29,7 @@ let _s = 42; Math.random = () => { _s = (_s * 1103515245 + 12345) & 0x7fffffff; 
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v546";
-const KNOWN_VERSIONS = ["v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568"];
+const KNOWN_VERSIONS = ["v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -230,18 +230,27 @@ T("C-reverse: 'ladder_windows' goes from clear to ON when both spouses share a b
   T("F-5: the census source hardcodes NO state code \u2014 the list is read live from STATE_RULES",
     hardcoded.length === 0, hardcoded.join(", "));
 
-  // ⚠ F-6 is the empty-set guard, and it is the one that would have failed quietly. If no state
+  // ⚠ THROUGH v5.68 F-6 WAS the empty-set guard (from v569 it is INVERTED — see below), and it was the one that would have failed quietly. If no state
   // in STATE_RULES matches the income-limit pattern, `state_excl_limited` can never read ON and
   // every assertion about it passes vacuously \u2014 green from an empty set (OPERATIONS \u00a7B2).
   // This release found that exact defect twice in its own tooling, so it is pinned here.
   // ⚠ v5.68: the selector carries `!r.exclTest`, MATCHING `boundaries.mjs` (D-VA-3). The row means
   // "income-limited in law, UNCONDITIONAL IN THE MODEL", and `exclTest` is exactly what makes a state
-  // conditional. This copy and the census's copy must agree; F-6c asserts they do.
+  // conditional. This copy and the census's copy had to agree; F-6c asserted they did until the census row retired at v5.69.
   const limited = Object.entries(RULES)
     .filter(([, r]) => (r.excl65 || 0) > 0 && !r.exclTest && /income[- ]limited|income limit/i.test(r.note || ""))
     .map(([c]) => c).sort();
-  T("F-6: at least one STATE_RULES entry carries an income-limited 65+ exclusion the model applies unconditionally \u2014 otherwise the D-3c row is vacuous",
-    limited.length > 0, `${limited.length} found`);
+  // ⚠ v5.69: INVERTED, NOT WEAKENED (SCOPE_RI_POPULATE D-RI-4). Rhode Island was the last state in this set;
+  //   with it converted the set is EMPTY by design, so from v569 F-6 asserts emptiness and a state that
+  //   re-enters (a new income-limited statute found, or a table dropped) turns it red. Frozen legs keep
+  //   the non-empty guard, which was their truth (OPERATIONS §B2, gate the inversion).
+  const _v6 = Number(VER.replace(/[^0-9]/g, ""));
+  if (_v6 >= 569)
+    T("F-6 [v5.69]: NO STATE_RULES entry carries an income-limited 65+ exclusion the model applies unconditionally \u2014 all five known statutes are conditioned",
+      limited.length === 0, `${limited.length} found: ${limited.join(",")}`);
+  else
+    T("F-6: at least one STATE_RULES entry carries an income-limited 65+ exclusion the model applies unconditionally \u2014 otherwise the D-3c row is vacuous",
+      limited.length > 0, `${limited.length} found`);
 
   // \u26a0 F-6a / F-6b \u2014 REPAIRED AT v5.68 (OPERATIONS §D2, flipped). Their v5.67 form was
   // `T(label, limited.length, 1)` and `T(label, limited.join(","), "VA")`: the expected value sat in
@@ -254,22 +263,18 @@ T("C-reverse: 'ladder_windows' goes from clear to ON when both spouses share a b
   //   these red while F-6 stays green. That is the whole of §D1's record, and qa/tools/controls_v568_va.py
   //   runs it. When RHODE ISLAND is populated this set EMPTIES: F-6 must then INVERT, deliberately,
   //   with the census row retired in the same release — never weakened to stay green.
-  const _v6 = Number(VER.replace(/[^0-9]/g, ""));
-  const _exp6 = _v6 >= 568 ? ["RI"] : ["RI", "VA"];
+  const _exp6 = _v6 >= 569 ? [] : _v6 >= 568 ? ["RI"] : ["RI", "VA"];   // v5.69: EMPTY — Rhode Island converted
   EQ(`F-6a: the income-limited-but-unconditional set has exactly ${_exp6.length} member(s) on this leg`,
     limited.length, _exp6.length);
-  EQ(`F-6b: and they are exactly ${_exp6.join(", ")} \u2014 if this changes, the release that changed it owns F-6`,
+  EQ(`F-6b: and they are exactly ${_exp6.join(", ") || "none (the set is empty)"} \u2014 if this changes, the release that changed it owns F-6`,
     limited.join(","), _exp6.join(","));
-  // F-6c: the census row reports the SAME set — two copies of one selector are how this drifted.
-  const _row6 = by(at("stateExclCliff"), "state_excl_limited");
-  EQ("F-6c: and boundaries.mjs's state_excl_limited row names that same set \u2014 the tool and this check select alike",
-    _row6 ? _row6.boundary : "row missing", `state in {${limited.join(",")}}`);
-
-  // F-7: and the row must actually be reachable from a shipped fixture, not merely definable.
-  // A boundary nothing can cross is a boundary the census cannot help with.
-  T("F-7: a fixture exists that turns the D-3c row ON",
-    by(at("stateExclCliff"), "state_excl_limited").onBoundary === false,
-    "stateExclCliff should read ON");
+  // ── RETIRED at v5.69 (SCOPE_RI_POPULATE D-RI-4): F-6c and F-7. F-6c asserted that boundaries.mjs's
+  //   `state_excl_limited` row named the same set as F-6; F-7 asserted that the `stateExclCliff` fixture
+  //   turned that row ON. With the set empty the row can never read ON and the fixture has no state to
+  //   stand on, so the row, the fixture and both checks retire TOGETHER in the release that emptied the
+  //   set — never the fixture alone to keep t29 green. ⚠ Tools and fixtures are shared by both legs, so
+  //   these leave the v568 leg as well; that leg's t29 count falls for a TOOLING reason, not a build one.
+  //   F-6/F-6a/F-6b above still assert the set per leg, which is the property the pair existed to reach.
 
   // F-8: the module row and the legacy row are genuinely independent \u2014 the whole reason for
   // splitting them. The legacy fixture must NOT light the module row.
