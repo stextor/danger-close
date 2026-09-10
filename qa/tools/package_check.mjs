@@ -542,15 +542,17 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
       // ⚠ REASON ROLLED 2026-09-09: NEW JERSEY SHIPPED AT v5.67, so this read "THREE left" while
       // two remain. That is the FOURTH reason in this block to rot while its entry stayed correct,
       // exactly as the comments above predict, and it is rolled here rather than left to the fifth.
-      "SCOPE_INCOME_CONDITIONING.md",             // PARTIALLY BUILT: CT v5.65, NM v5.66, NJ v5.67; RI/VA open — TWO left
+      // ⚠ REASON ROLLED AT v5.68: VIRGINIA SHIPPED, so ONE left. Expires when Rhode Island converts.
+      "SCOPE_INCOME_CONDITIONING.md",             // PARTIALLY BUILT: CT v5.65, NM v5.66, NJ v5.67, VA v5.68; RI open — ONE left
       // Added 2026-09-09; REASON ROLLED the same day, which is the point. It was added as "OPEN and
       // explicitly NOT BUILDABLE" while its §6 carried two decisions that measurement had REOPENED.
       // Both were settled hours later, so the entry is now OPEN-because-UNBUILT, not OPEN-because-
       // -undecided — a materially different state, and the block above records three earlier reasons
       // that rotted precisely by not being rolled when the underlying fact moved.
-      // ⚠ Expires when Virginia is built — at which point the entry above drops to ONE left, and
-      // both edits belong in that release.
-      "SCOPE_VA_POPULATE.md",
+      // ── REMOVED at the v5.68 ship: "SCOPE_VA_POPULATE.md", added 2026-09-09. Its entry named its
+      // own expiry — "when Virginia is built" — and said both edits belong in that release. Virginia
+      // shipped at v5.68, the scope carries its RETIRED marker in the same package, and the entry
+      // above was rolled to ONE left. The two halves shipped together.
       "SCOPE_STATE_SET_SELECTOR.md",              // OPEN, written v5.66 (D-NM-1 (c) second half); expires when the structural field ships
       // ⚠ The comment that used to sit here described SCOPE_TREE_AND_POOL_HOUSEKEEPING.md and was
       // orphaned when that entry was removed on 2026-09-07; it is folded into the removal note

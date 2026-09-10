@@ -114,9 +114,18 @@ export function census(G) {
   // second answer that drifts, and this census exists because the app and the tool disagreeing
   // is the failure mode. If a state's note stops flagging its income limit, this row goes quiet
   // — which is correct, because the note is where that fact lives today.
+  //
+  // ⚠ v5.68 — RE-FOUNDED ON DATA FOR THE HALF OF THE MEANING THAT DATA CAN CARRY (D-VA-3). The row
+  // means "income-limited in law, UNCONDITIONAL IN THE MODEL". The first half still lives only in
+  // the note. The second half is exactly `exclTest` being ABSENT — a state carrying one is
+  // conditioned — so it is now read from the flag, as the `ssOffset` row below learned at v5.54
+  // ("A flag is data; prose is not"). Without this term New Mexico (populated v5.66) sat inside
+  // this set for two releases and Virginia would have stayed after v5.68, so the row read ON for
+  // households the model had ALREADY fixed. Measured: {NM, RI, VA} at v5.67 without it,
+  // {RI, VA} with it, and {RI} once Virginia is populated.
   const LIMIT_NOTE = /income[- ]limited|income limit/i;
   const limited = Object.entries(RULES)
-    .filter(([, r]) => (r.excl65 || 0) > 0 && LIMIT_NOTE.test(r.note || ""))
+    .filter(([, r]) => (r.excl65 || 0) > 0 && !r.exclTest && LIMIT_NOTE.test(r.note || ""))
     .map(([c]) => c);
   const onLimited = !!(code && limited.includes(code));
   row("state_excl_limited", "income-limited 65+ exclusion",
