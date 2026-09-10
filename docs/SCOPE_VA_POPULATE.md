@@ -1,6 +1,7 @@
 # SCOPE — populate Virginia's age deduction (`STATE_RULES.VA`)
 
-**Status: BUILDABLE. All decisions resolved 2026-09-09.** Two of them — D-VA-2 and D-VA-3 — were
+**Status: ☑ RETIRED — FULFILLED AT v5.68, 2026-09-10.** Built as scoped; §9 is the build record, and it
+records four places where this document was wrong. *(Prior status: BUILDABLE. All decisions resolved 2026-09-09.)* Two of them — D-VA-2 and D-VA-3 — were
 recorded as resolved by the handover brief, **reopened by measurement**, and then re-resolved on the
 re-measured evidence. §6 carries both, with what changed and why. Nothing here is waiting on anyone.
 
@@ -110,6 +111,13 @@ premise — **STOP and report** rather than adapting.
 - **A `t10` case in each region of the taper** — below the threshold, inside it, and fully phased out
   — in **both** filing columns, priced to the dollar through `stateTaxAnnual`, **hand-computed before
   the engine is run**. The four cells above are a starting point, not the set.
+  ⚠ **CORRECTED AT THE v5.68 BUILD.** Read literally this implies the single column contributes to the
+  once-not-twice proof. **It cannot.** With one qualifying person `12,000 × 1 − excess` and
+  `(12,000 − excess) × 1` are the same expression, so every single-filer and every one-spouse cell is
+  structurally incapable of catching a per-spouse defect. Those cells pin the table; only
+  **both-spouses-qualifying cells strictly inside the taper** discriminate. Measured, not argued:
+  `controls_v568_va.py` C8 rewrites the evaluator per-spouse and turns 9 `[HAND v5.68]` lines red,
+  **none** of them single-filer or one-spouse.
 - **The once-not-twice pin, at household level.** `t34` D-3 proves it for the synthetic jurisdiction;
   Virginia needs its own, because a correct evaluator wired to a per-person call site would pass D-3
   and fail nothing. The both-spouses-qualifying case inside the taper range is the discriminating one.
@@ -122,11 +130,19 @@ premise — **STOP and report** rather than adapting.
 - **Negative controls**, drift-safe, each mutant built from a pristine copy, each carrying a needle.
 - **`t10:1133`'s oracle path comment** (D-VA-4): it names `qa/oracle_nm.py`; the file is at
   `qa/tools/oracle_nm.py`. A suite edit, and this release is already touching the suite.
+  ⚠ *Line number stale when written: at v5.67 the comment is at L1182, and the NM scalar invariant
+  this scope calls `t10:1257` is at L1256. Content as described.*
 - **The `t29` F-6a/F-6b repair** (D-VA-3, D-VA-6), and it is a REQUIREMENT of this release rather
   than a nice-to-have: flip both to the suite's equality helper so they can fail at all, re-found the
   selector on `!r.exclTest`, and correct the wrong `{VA}` measurement at **all three** shipped sites
   — `t29` F-6a's comment, `qa/tools/fixture/households.mjs:67–77`, and the census row's own note in
-  `qa/tools/boundaries.mjs`. ⚠ **Correcting one and leaving the others is the two-copies-drift
+  `qa/tools/boundaries.mjs`.
+  ⚠ **TWO CORRECTIONS, both found at the build.** (1) **`t29` had no equality helper to flip to** —
+  `T(n, ok, d)` was its only assertion function, which is how F-6a/F-6b came to be written that way.
+  `EQ(name, got, want)` was added beside it. (2) **`boundaries.mjs` carries no Virginia text.** The
+  third site of the wrong measurement is the `stateExclCliff` fixture's own `why:` string in
+  `households.mjs` (*"the one remaining household shape"*). `boundaries.mjs` still changed — it holds
+  the selector itself, which gained `!r.exclTest` — and `t29` F-6c now asserts the two copies agree. ⚠ **Correcting one and leaving the others is the two-copies-drift
   pattern this project keeps recording.** The OPERATIONS §D2 pin is flipped in the same pass.
 - **A negative control for the repaired F-6a/F-6b themselves.** They were vacuous for a release and
   review did not catch it; only a mutant did. A repair that is not mutation-tested has no more
@@ -242,6 +258,27 @@ and do not keep a scalar alive *solely* to satisfy a filter.
 Not predicted here. The release computes its own totals from suite output.
 
 ---
+
+## 9 · Build record (v5.68, 2026-09-10)
+
+Built against v5.67 (`ca05b2ec…`), baseline re-run first from a clean run folder: 3,377 app checks,
+0 failing. Source edit transcribed from the session brief, **re-verified 15 of 15 to the cent against
+`oracle_va.py` before anything was built on it**, plus two added cells. D-VA-5 swept v5.67 against
+v5.68 over 20,050 Virginia households: tax fell in none; the largest rise is $1,380.00.
+
+Shipped exactly as §5 required: `t10` Virginia block (every taper region, both columns, the age floor,
+the measure, the clamp, two household once-not-twice pins, the extinction invariant, the `excl65`
+agreement and no-`exclAge` invariants, and three pre-fix pins on the v5.67 leg); `t34` A-11; `t35`
+D-7c and D-10–D-13; `t29` F-6a/F-6b repaired and gated per leg, plus F-6c; the selector re-founded in
+**both** copies; the fixture moved to Rhode Island; the oracle path comment; §D2 flipped.
+`qa/tools/controls_v568_va.py`: **17 controls, 17 met expectation**, canonical md5s unchanged —
+including T1 (an interior member joins the set: F-6a and F-6b fire, F-6 does not) and T5 (the same
+mutation against the restored v5.67 form: silent, which is the recorded defect reproduced on purpose).
+
+**Where this scope was wrong** — §5's filing-column wording, the nonexistent equality helper, the
+`boundaries.mjs` "note text", and two stale line numbers. Each is corrected at its site above rather than
+here, so the correction sits beside the error. Per-suite totals are in `CHANGELOG.md` v5.68 and are not
+restated here.
 
 *Destination: **repo `docs/SCOPE_VA_POPULATE.md` AND the knowledge pool** — it is a scope document,
 and §G routes scopes to both. It also needs a manifest row.*

@@ -401,7 +401,7 @@ correctly. Only a mutant does.
 | family | instances | how it failed |
 |---|---|---|
 | endpoint-only table test | `t34` A-9's first draft; `t10`'s New Mexico draft, twice; twice more during the v5.67 build | the interior rows of a band table were never priced |
-| assertion written with a truthiness helper as though it were an equality helper | `t29` F-6a and F-6b (found 2026-09-09, **unfixed** — pinned below) | `T(n, ok, d)` compares `ok` only; the "expected" value is the display string and is never compared |
+| assertion written with a truthiness helper as though it were an equality helper | `t29` F-6a and F-6b (found 2026-09-09, **fixed v5.68** — §D2) | `T(n, ok, d)` compares `ok` only; the "expected" value is the display string and is never compared |
 
 **The remedy is the same for both: price every row, and make the check fail on an interior change.**
 Where the assertion would be inert against current data — as `K-8`'s `.py` widening was — **inject**
@@ -409,9 +409,16 @@ the data the assertion needs rather than reusing what happens to be there. And w
 both a truthiness helper and an equality helper, **an assertion with an expected value must use the
 equality helper**; `T(label, actual, expected)` against a `T(n, ok, d)` signature is silently vacuous.
 
-### D2. `[KNOWN DEFECT 2026-09-09]` — `t29` F-6a / F-6b are vacuous, and their measurement is wrong
+### D2. `[FIXED v5.68 — was KNOWN DEFECT 2026-09-09]` — `t29` F-6a / F-6b were vacuous, and their measurement was wrong
 
-**Not fixed. Belongs to the Virginia release, which is already touching the suite.**
+**FIXED at v5.68.** What shipped: `t29` gained **`EQ(name, got, want)`** — it had no equality helper
+at all, so the scope's instruction to "flip to the suite's equality helper" named nothing, and that
+absence is how the defect was written. F-6a/F-6b use `EQ`, are **gated per leg** (`{RI}` at v5.68,
+`{RI, VA}` at v5.67), and a new **F-6c** asserts `boundaries.mjs`'s row reports the same set. The
+selector gained `!r.exclTest` in **both** copies. `qa/tools/controls_v568_va.py` T1–T5 are the
+evidence: an interior member joining the set turns F-6a and F-6b red while F-6 stays green (T1), and
+the same mutation against the restored v5.67 form stays silent (T5). The record below is kept as
+written — it is what was believed on 2026-09-09.
 
 `t29`'s helper is `const T = (n, ok, d = "") => { if (ok) pass++; … }`. F-6a is written
 `T("…exactly the one member…", limited.length, 1)` and F-6b `T("…that member is Virginia",
@@ -788,6 +795,13 @@ automatically, at every ship. A machine can find candidates; only a person can c
 reading what the release actually shipped. Both sections have negative controls in
 `qa/tools/package_check_controls.sh` (P20–P28), including a false-positive control: a check that
 cries wolf on a clean tree gets ignored, and an ignored gate has stopped being a gate.
+
+⚠ **`controls_state.sh` IS STALE AND CANNOT RUN AS WRITTEN** (found at the v5.68 build, not fixed —
+recorded so it is not mistaken for evidence). It is pinned to the `v553` leg, which no run folder
+built by `mk_runfolder.sh` contains, and its S2 mutation anchors on New Jersey fixture text that has
+not existed since v5.67 — so S2 could not fire even on a leg that ran. **F-6a, F-6b, F-6c and F-7 are
+controlled by `qa/tools/controls_v568_va.py` T1–T6**, which build from the current run folder.
+Repairing or retiring `controls_state.sh` is unscoped.
 
 **The census controls are `qa/tools/controls_state.sh`** (added 2026-08-28), five controls pinning
 `t29`'s `F-5`–`F-8` — the no-hardcoded-state-code property, the empty-set guard, D-3c reachability,
