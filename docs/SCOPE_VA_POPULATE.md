@@ -1,8 +1,12 @@
 # SCOPE — populate Virginia's age deduction (`STATE_RULES.VA`)
 
-**Status: WRITTEN, NOT BUILDABLE YET.** Two decisions the handover brief recorded as resolved were
-reopened by measurement in this session (§6). **Build only after §6 is settled**, per the standing
-rule that a scope's decisions are resolved before a build starts.
+**Status: BUILDABLE. All decisions resolved 2026-09-09.** Two of them — D-VA-2 and D-VA-3 — were
+recorded as resolved by the handover brief, **reopened by measurement**, and then re-resolved on the
+re-measured evidence. §6 carries both, with what changed and why. Nothing here is waiting on anyone.
+
+⚠ **The premise is measured against v5.67 and must be RE-MEASURED against whatever is shipped when
+the build starts.** If any figure in §1, §4 or §6 fails to reproduce, that contradicts the premise:
+**STOP and report** rather than adapting the scope.
 
 **Measured against v5.67** — source md5 `ca05b2ece1af9dac3851837a0e96fbfa`, built `index.html`
 `35fcca203418e3e10b11765e2c6ade93`, repo HEAD `8dc9160`. Suite at that build re-run in full this
@@ -118,12 +122,26 @@ premise — **STOP and report** rather than adapting.
 - **Negative controls**, drift-safe, each mutant built from a pristine copy, each carrying a needle.
 - **`t10:1133`'s oracle path comment** (D-VA-4): it names `qa/oracle_nm.py`; the file is at
   `qa/tools/oracle_nm.py`. A suite edit, and this release is already touching the suite.
+- **The `t29` F-6a/F-6b repair** (D-VA-3, D-VA-6), and it is a REQUIREMENT of this release rather
+  than a nice-to-have: flip both to the suite's equality helper so they can fail at all, re-found the
+  selector on `!r.exclTest`, and correct the wrong `{VA}` measurement at **all three** shipped sites
+  — `t29` F-6a's comment, `qa/tools/fixture/households.mjs:67–77`, and the census row's own note in
+  `qa/tools/boundaries.mjs`. ⚠ **Correcting one and leaving the others is the two-copies-drift
+  pattern this project keeps recording.** The OPERATIONS §D2 pin is flipped in the same pass.
+- **A negative control for the repaired F-6a/F-6b themselves.** They were vacuous for a release and
+  review did not catch it; only a mutant did. A repair that is not mutation-tested has no more
+  standing than what it replaced — this is OPERATIONS §D1's named class, and its whole record is that
+  controls find it and review does not.
 - **Version bump across the four in-app sites** and the usual `METHODOLOGY` update — this release
   changes modelling.
 
-## 6 · ⚠ OPEN DECISIONS — reopened by measurement, must be settled before the build
+## 6 · DECISIONS THAT WERE REOPENED, AND HOW THEY WERE SETTLED
 
-### D-VA-2 · the scalar — **REOPENED. Recommendation: `excl65: 12000` (keep it).**
+Both were recorded as resolved by the handover, contradicted by measurement, and re-decided
+2026-09-09 on the re-measured evidence. **They are closed. Do not re-open them in the build** — if
+evidence contradicts one, that is a STOP-and-report, not a licence to choose again.
+
+### D-VA-2 · the scalar — **RESOLVED 2026-09-09: `excl65: 12000`. KEEP IT.**
 
 The handover resolved `excl65: 0` on the rationale that *"a taper has no single per-person value that
 agrees with the table at zero income."* **Measured against L1311, that rationale is false.** At zero
@@ -145,10 +163,16 @@ Virginia's taper is per-person, like New Mexico's table. **The New Mexico preced
 SOLELY to satisfy a filter"* does not bite: the scalar would be kept because D-3(b) demands it, and
 any filter staying green is a side effect, not the motive.
 
-**If Steve prefers `0` anyway**, the build must say why the NM precedent does not apply and must
-change `t10:1257`'s stated rule, because the two cannot both stand.
+**Resolved as `12000`**, on the New Mexico precedent and the invariant that states it. ⚠ **The build
+must ASSERT this**, in the shape `t10:1257` uses for New Mexico — *VA's `excl65` scalar still equals
+its taper's value at zero income* — so a later session cannot quietly set it to `0` and stay green.
+⚠ **Neither value moves a user's number**: `excl65` is unread once `exclTest` is present. The whole
+stake is whether Virginia's scalar agrees with Virginia's own table, and `0` would have required
+amending `t10:1257`'s rule to accommodate a single state.
 
-### D-VA-3 · the guards — **REOPENED. The handover's premise is measurably wrong, and the truth is worse.**
+### D-VA-3 · the guards — **RESOLVED 2026-09-09: repair the checks FIRST, then re-found on `!r.exclTest`.**
+
+The handover's premise here is measurably wrong, and the truth is worse than it expected.
 
 The handover says the income-limited scalar set is `{VA}`, that populating Virginia empties it, and
 that `t29` F-6/F-6a/F-6b therefore turn **RED** — *"them working, not breaking."*
@@ -170,8 +194,8 @@ and `F-7` fire, **F-6a and F-6b do not.**
 **unconditional in the model**"* — quietly stops being true. **Green from a set that no longer means
 what it says**, which is silent where the handover expected loud.
 
-**Recommendation, and it replaces "re-found on `exclTest`" with something narrower and better
-grounded:**
+**RESOLVED. This replaces the handover's "re-found on `exclTest`" with something narrower and better
+grounded, and THE ORDER IS PART OF THE DECISION, not a suggestion:**
 
 1. **Fix F-6a/F-6b first** — flip them to the suite's equality helper so they can fail at all. Until
    that lands, nothing about this set is under test beyond "non-empty".
@@ -199,6 +223,7 @@ and do not keep a scalar alive *solely* to satisfy a filter.
 | **D-VA-1** · age floor | **65** — the statute's own and the engine's default (`_floor` at L1217 defaults to 65 when `exclAge` is absent), so **no `exclAge` key**, matching NM. Verified: VA carries none today. |
 | **D-VA-4** · `t10:1133` | **Fix the oracle path comment** in this release, since it is already touching the suite. |
 | **D-VA-5** · direction | **CONSERVATIVE only.** Corroborated at all five measured points (§4). A downward move contradicts the premise: STOP and report. |
+| **D-VA-6** · sequencing | **RESOLVED 2026-09-09: the `t29` F-6a/F-6b repair ships WITH this release**, not as a separate ops package. It is a suite edit and this release already opens the suite; splitting it means a second package touching the same file for no gain. ⚠ The counter-argument was heard and rejected on that ground alone: a vacuous check is misleading in the meantime, so **if Virginia slips more than a release or two, revisit this** — the pin in OPERATIONS §D2 is what keeps it visible until then |
 
 ## 7 · Out of scope
 
