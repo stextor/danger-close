@@ -371,6 +371,24 @@ zero of 232 tracked files become ignored, every artifact is caught, and a seeded
 staged **8 files** before the rules stages **none** after. ⚠ **The leading slashes are load-bearing**
 — `/DangerClose.jsx` must not become `DangerClose.jsx`, which would also ignore `src/`.
 
+⚠ **SECOND INSTANCE, by a different path — the v5.68 upload (recorded 2026-09-10).** Six
+`qa/qa-baseline/` files — `t1_units.mjs`, `t3_roth.mjs`, `t4_dom.mjs`, `t5_storage.mjs`,
+`t6_single.mjs` and `dom_entry_v568.jsx` — were committed **at the repo root as well as at their real
+paths**, byte-identical to them. Not a run folder this time: the web upload, which does not carry a
+folder unless it is given one. Caught the same way as v5.52 and only that way: the §F clone diff found
+**39 changed paths where the package held 33**. Removed in six commits ending `e684106`.
+**Its cost was different, and quieter.** No suite read the copies (`mk_runfolder.sh` assembles from
+`qa/` and `qa/qa-baseline/` only), so nothing went stale-green. But `package_check` **E-1b** matches
+knowledge files to the repo by BASENAME and skips any name with more than one candidate
+(`if (cands.length !== 1) continue;`), so **for as long as the copies stood, E-1b was silently blind
+to all six** — a gate switched off by a duplicate, with nothing printed. `.gitignore` cannot help: the
+upload path is not the run folder, and the rule below forbids ignoring these names anyway.
+⚠ **`package_check` has no check for committed paths OUTSIDE the package** — it verifies the package's
+own files, and the clone diff is the only thing in the release path that sees an extra one. Unscoped.
+Two basenames are multi-path by design and long-standing, so E-1b cannot see them either:
+`index.html` (root artifact + `src/` template, §N) and `README.md` (root, `qa/qa-baseline/`,
+`validation/`).
+
 ⚠ **The baseline files are NOT in this set and must never be added to it.** `qa/t1_units.mjs`,
 `qa/env_dom.mjs`, `qa/shim.txt`, `qa/dom_entry_*.jsx` and the rest look like run-folder artifacts
 because the run folder is flat — but they are real repo files at `qa/qa-baseline/`. A rule matching
@@ -723,6 +741,18 @@ package that changes no version and no source is the exception: its Current tabl
 the tree, so `K-1`–`K-3` are green in both runs, and `D-1` goes red post-ship instead — that is the
 expected complement, not a defect.)*
 
+⚠ **`K-1`–`K-3` are not the whole pre-ship red set when the pool is passed — measured at the v5.68 ship
+(added 2026-09-10).** With all four arguments, an **app release** ran **39 passed, 7 failed** pre-ship:
+`K-1`, `K-2`, `K-3`, **and `J-1`, `J-2`, `K-4`, `K-6`**. The last four read the POOL against the
+package and its rolled manifest, and a pool that has not yet received the upload cannot agree with
+either; all four went green post-ship with nothing changed but the upload. Post-ship the same package
+ran **45 passed, 1 failed — `D-1`**, because every `github/` file now equals the committed tree. So
+**`D-1` red post-ship is the expected complement for an app release too**, not only for an ops package.
+Read a pre-ship run as: *every red is in that named set, and nothing else is red.* A red outside it
+is a finding; a red inside it is construction. ⚠ This is a measurement of one package, not a proof
+over all of them — which is exactly why the split still wants a scope, and why nothing here softens a
+check.
+
 ⚠ **This is also why `P29` looked broken, and the received diagnosis was wrong.** `P29` mutates the
 manifest stale and asks `K-1` to notice — but on an app-release package `K-1` is *already* red
 pre-ship, so the control could not distinguish its own mutation from the baseline. It was recorded
@@ -796,7 +826,18 @@ reading what the release actually shipped. Both sections have negative controls 
 `qa/tools/package_check_controls.sh` (P20–P28), including a false-positive control: a check that
 cries wolf on a clean tree gets ignored, and an ignored gate has stopped being a gate.
 
-⚠ **`controls_state.sh` IS STALE AND CANNOT RUN AS WRITTEN** (found at the v5.68 build, not fixed —
+☑ **`controls_state.sh` REPAIRED 2026-09-10** (ops package). Usage is now
+`bash qa/tools/controls_state.sh <run-folder> <version-tag>` — the tag is required, with no default.
+S2 reads the fixture's state from the file instead of naming one; every mutation is checked to have
+actually changed its target, so a drifted anchor reports **MUTATION DID NOT APPLY** rather than a
+check that failed to fire; and a null control **S0** requires a green baseline first. Against v5.68:
+**6 of 6** (S0 silent, S1–S5 fired), run folder unchanged. The guard was itself controlled: with S3's
+anchor drifted on purpose it reported the drift and exited 1. ⚠ **Do not retire it as redundant:**
+`controls_v568_va.py` duplicates only S2 (as T6); **S1 (F-5), S3 (F-8), S4 (F-6's empty-set guard) and
+S5 (§C's flip re-derivation) exist nowhere else.** *(The stale note that stood here at v5.68 follows,
+retained.)*
+
+⚠ ~~**`controls_state.sh` IS STALE AND CANNOT RUN AS WRITTEN**~~ (found at the v5.68 build, not fixed —
 recorded so it is not mistaken for evidence). It is pinned to the `v553` leg, which no run folder
 built by `mk_runfolder.sh` contains, and its S2 mutation anchors on New Jersey fixture text that has
 not existed since v5.67 — so S2 could not fire even on a leg that ran. **F-6a, F-6b, F-6c and F-7 are
@@ -805,7 +846,7 @@ Repairing or retiring `controls_state.sh` is unscoped.
 
 **The census controls are `qa/tools/controls_state.sh`** (added 2026-08-28), five controls pinning
 `t29`'s `F-5`–`F-8` — the no-hardcoded-state-code property, the empty-set guard, D-3c reachability,
-and legacy/module independence. Run it with the flat working folder as its argument. ⚠ **It was left
+and legacy/module independence. Run it with the flat working folder AND the version tag as its arguments (since 2026-09-10). ⚠ **It was left
 out of the release that added those assertions**, on the reasoning that `t29` §C already re-derives
 the flip assertions — which covers **S5 only**. F-5 through F-8 are property pins and nothing
 re-derives them, so for one release four of seven new assertions had no evidence they could fail.
@@ -992,6 +1033,13 @@ to `app-release` and reports failures that are artifacts of the mis-declaration 
 defects. An ops package also takes an **unversioned** outer folder name, `danger-close-<slug>`, so it
 cannot be mistaken for a release, and its manifest still has to record how it *was* verified — the
 standard does not lapse just because no app suite applies.
+
+**An ops package carries a `CHANGELOG.md` entry (written down 2026-09-10).** Headed
+`## ops YYYY-MM-DD — <what>`, newest first like any entry, opening with `KIND: ops`, the build it
+leaves current, and how the package was verified. This was the practice — every 2026-09-08 ops package
+has one — but it was never written here, and **the three 2026-09-09 ops packages shipped without
+one**. Their record lives in the manifest's retirement list. They are **not back-filled**: an entry
+written after the fact would carry a date it was not written on, and the gap is recorded instead.
 
 ⚠ **Upload by editing in place, not by drag-and-drop (added 2026-08-28).** §L has always described
 what goes in the zip and never how the files reach the repo, and that gap has now cost two commits
