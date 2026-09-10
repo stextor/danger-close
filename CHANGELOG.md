@@ -1,5 +1,109 @@
 # Changelog
 
+## v5.68 — Virginia's age deduction becomes income-conditioned, and is taken once per couple, 2026-09-10
+
+Source `561fc39b5bdae7c6d83698f352c436b3` · built `index.html` `f7f0e3dd338804b2a09a6ca53318ac26`.
+
+**Suite: 3,441 app checks passing, 0 failing, 0 dead, across both the v5.67 and v5.68 legs**
+(`t21` 50 and `domdiff` 32 are tooling and counted separately, which brings the
+runner's GRAND line to 3,523). Run from the **packaged copies** — a fresh clone with this release's
+`github/` files laid over it and the prior leg taken from the pool — and parsed from `runsuite.sh`
+output by script, not assembled by hand. Per suite, current leg: t1 185, t2 35, t3 36, t4 252, t5 58, t6 21, t7 41, t8 42, t9 14, **t10 338**, t11 40, t12 23, t13 42, t14 44, t15 11, t16 24, t17 74, t18 67, t19 65, t20 100, t22 85, t23 25, t24 38, t25 45, t26 25, t27 18, t28 34, **t29 64**, t30 12, t31 31, t32 12, t33 32, **t34 70**, **t35 99**. On the v5.67 leg `t10` is
+312, `t29` 64 and `t35` 94. MC parity 10/10.
+
+### What changed for a user
+
+The model granted Virginia's age deduction at **$12,000 per person 65 or older, at every income**.
+Va. Code § 58.1-322.03(5)(b) reduces it **$1 for every $1** of adjusted federal AGI above **$50,000
+single / $75,000 married**, so it is gone at $62,000 single, $87,000 for a couple with one qualifying
+spouse and $99,000 with two. A couple both 65+ at $80,000 of retirement income now pays **$287.50 a
+year** more Virginia tax, and one at $99,000 or above **$1,380.00** more — the statutory figures.
+
+**Conservative only.** Swept v5.67 against v5.68 over 20,050 Virginia households: estimated tax fell in
+none. Households below the threshold, or with no one 65+, are unchanged.
+
+**The reduction is taken ONCE for a couple, against their combined maximum** — Form 760's Age
+Deduction Worksheet settles what the statute's text does not. A per-spouse reading agrees with the
+statute below the threshold and once extinguished, and is wrong only inside the phase-out with both
+spouses qualifying — by up to $690.00 a year, at $87,000. Virginia is the first state in the module expressed as
+a continuous taper rather than a band table.
+
+### How the once-not-twice proof was chosen, and why most cells cannot carry it
+
+With one qualifying person, `12,000 × 1 − excess` and `(12,000 − excess) × 1` are the same expression.
+So **every single-filer cell and every one-spouse cell is structurally incapable of catching a
+per-spouse defect**; only both-spouses cells strictly inside the taper can. `t10` marks those cells
+`[DISC]`, and the proof rests on two household pins rather than on the table cells. **Measured, not
+argued:** `controls_v568_va.py` C8 rewrites the evaluator per-spouse and turns 9 `[HAND v5.68]` lines
+red — none of them single-filer or one-spouse. The scope's own §5 read as though the single column
+contributed; it is corrected at the site.
+
+### `t29` F-6a / F-6b could not fail, and now can (OPERATIONS §D2, flipped)
+
+Both were written `T(label, actual, expected)` against a helper whose third argument is a display
+string, so they passed on any non-empty set. **`t29` had no equality helper at all** — `EQ` is added.
+The set they described was also mis-measured: their comments said `{VA}` while it was `{NM, RI, VA}`,
+because the selector read note prose for a meaning that lives in data. It now carries `!r.exclTest` in
+**both** copies (`t29` and `boundaries.mjs`), F-6c asserts the copies agree, and the checks are gated
+per leg: `{RI}` at v5.68, `{RI, VA}` at v5.67. The `stateExclCliff` fixture moves to **Rhode Island**, its
+third state. **Controlled:** an interior member joining the set turns F-6a and F-6b red while F-6 stays
+green (T1); the identical mutation against the restored v5.67 form stays silent (T5) — the recorded
+defect, reproduced on purpose. `controls_v568_va.py`: **17 controls, 17 met expectation**, canonical md5s
+unchanged.
+
+### Four errors this build made, every one caught by running rather than reading
+
+1. **A comparison script reported the source edit as "0 of 15" against the oracle.** It was slicing the
+   oracle's printed columns wrongly; re-compared against the oracle's unrounded values it is **15 of
+   15**, plus two added cells. Recorded because the wrong reading was a STOP-shaped result and was
+   not accepted by eye in either direction.
+2. **The METHODOLOGY rewrite deleted the only creator-side copy of "$50K single/$75K married".** `t31`'s
+   parity lock fired on both legs. The figures were restored in present-tense form; the lock was not
+   touched.
+3. **Version registration missed an object-keyed registry.** The AST transform covered arrays, `||`
+   chains and value maps; `t33`'s `PINS` is keyed by tag. `t33` failed CLOSED and the first full run
+   reported it **DIED** — so that run's GRAND line was discarded, not quoted. The v5.68 pins carry
+   v5.67's values because `t33`'s household is in Georgia, which makes them an assertion that the
+   Virginia change leaked nowhere.
+4. **The control script first carried a hardcoded count no command had printed.** Unused, and removed
+   before the first run.
+
+### Where the scope and the documents were wrong
+
+- `SCOPE_VA_POPULATE.md`: §5's filing-column wording (above); "flip to the suite's equality helper"
+  named a helper `t29` did not have; the third site of the wrong `{VA}` measurement was the fixture's
+  `why:` string, not text in `boundaries.mjs`, which has none; and two line citations were stale
+  (`t10:1133` is L1182, `t10:1257` is L1256). Corrected at each site.
+- **`SCOPE_INCOME_CONDITIONING.md` still read "Not yet built." after three populate releases.** The
+  v5.67 entry below records D-NJ-3 as repairing exactly that disagreement; the repair reached
+  `package_check`'s allowlist and not the scope. Corrected, with the prior line retained.
+- **METHODOLOGY contradicted itself about New Jersey's 62 floor for one release** — two passages still
+  called it unapplied after v5.67 applied it. Corrected in place with annotations.
+- **`qa/tools/controls_state.sh` cannot run as written**: pinned to `v553`, and its S2 anchor is New
+  Jersey fixture text gone since v5.67. Not fixed; recorded in OPERATIONS §I, and F-6a–F-7 are now
+  controlled by `controls_v568_va.py` T1–T6.
+
+### Limitations, disclosed rather than implied
+
+- **The income measure carries no dividend or interest income**, so the deduction is slightly
+  overstated for households with taxable investment income. Optimistic; in the note.
+- **Born on or before 1 January 1939** (age 87+ in 2026) the $12,000 has no income test; not modelled,
+  outside the frame. **The deduction cannot be combined with Virginia's Disability Income subtraction**;
+  not modelled.
+- **The flat-rate approximation for Virginia is unchanged** by this release.
+- **Rhode Island remains unconditional** above its AGI cliff, and still does not distinguish IRA
+  distributions. It is the last of the five, scoped next with both defects together.
+- **The Field Manual still says the module treats "several" income-limited exclusions as
+  unconditional.** Rhode Island is the only one of the five known statutes left; the word was kept
+  because nine of nineteen exclusion states remain unchecked. A wording decision for the maintainer.
+
+### Also in this release
+
+`docs/SCOPE_VA_POPULATE.md` retired as fulfilled, with its build record in §9, and its `package_check`
+OPEN-allowlist entry removed in the same package; the `SCOPE_INCOME_CONDITIONING.md` entry rolled to
+ONE left. `qa/qa-baseline/dom_entry_v568.jsx` added. `t10`'s oracle path comment corrected to
+`qa/tools/oracle_nm.py`.
+
 ## v5.67 — New Jersey's pension exclusion becomes income-conditioned, and its 62 floor is modelled, 2026-09-08
 
 Source `ca05b2ece1af9dac3851837a0e96fbfa` · built `index.html` `35fcca203418e3e10b11765e2c6ade93`.
