@@ -553,6 +553,12 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
       // own expiry — "when Virginia is built" — and said both edits belong in that release. Virginia
       // shipped at v5.68, the scope carries its RETIRED marker in the same package, and the entry
       // above was rolled to ONE left. The two halves shipped together.
+      // Added 2026-09-10 (ops package). The Rhode Island populate scope, the fifth and last under
+      // SCOPE_INCOME_CONDITIONING. All six of its decisions were approved the day it was written, so it is
+      // OPEN-because-UNBUILT, not OPEN-because-undecided. ⚠ EXPIRES AT THE RHODE ISLAND BUILD, TOGETHER WITH
+      // THE SCOPE_INCOME_CONDITIONING ENTRY ABOVE: that release retires BOTH scopes and must remove BOTH
+      // entries in the same package — the two-halves rule recorded in the removal notes below.
+      "SCOPE_RI_POPULATE.md",                     // OPEN — approved 2026-09-10, not built; expires when Rhode Island converts
       "SCOPE_STATE_SET_SELECTOR.md",              // OPEN, written v5.66 (D-NM-1 (c) second half); expires when the structural field ships
       // ⚠ The comment that used to sit here described SCOPE_TREE_AND_POOL_HOUSEKEEPING.md and was
       // orphaned when that entry was removed on 2026-09-07; it is folded into the removal note
