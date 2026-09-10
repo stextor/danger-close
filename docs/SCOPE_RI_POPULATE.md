@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **BUILDABLE — all six decisions APPROVED 2026-09-10 (§5). Not yet built.** |
+| Status | **☑ RETIRED — FULFILLED AT v5.69, 2026-09-10.** §10 is the build record, including where this scope was wrong. *(Prior status: BUILDABLE — all six decisions APPROVED 2026-09-10.)* |
 | Measured against | **v5.68**, source `561fc39b5bdae7c6d83698f352c436b3`, built `index.html` `f7f0e3dd338804b2a09a6ca53318ac26`, repo HEAD `f2f4c20`, pool 125 files. Suite re-run in full this session from a run folder built by `qa/mk_runfolder.sh v567 v568`: **3,441 app checks, 0 failing**, parity 10/10 (tooling `t21` 50 + `domdiff` 32 counted separately; GRAND 3,523, exit 0). |
 | Parent scope | `docs/SCOPE_INCOME_CONDITIONING.md` — this is its **B-3** state, and the release that builds this retires the parent |
 | Statutory oracle | `docs/FINDINGS-v5_63-state-statutes.md` **§6**, transcribed — ⚠ **with one correction (§2)**: the comparator is exclusive, not inclusive |
@@ -406,9 +406,39 @@ the `t10` cells in §7b and `t34` A-12; plus:
   this session lost one run that way before reading its totals.
 - **Upload into folders**, and check each folder afterwards (OPERATIONS §C3).
 
-## 10 · Build record
+## 10 · Build record (v5.69, 2026-09-10)
 
-*(not yet built)*
+Built against v5.68 (`561fc39b…`, repo HEAD `8768394` after this scope's ops package was verified post-ship: `package_check`
+44 passed, 1 failed — `D-1`, the expected complement). Source `76a35ba283ed5153ff257106e7ccfc10`, built `index.html` `86703918db247e3284752f0f1cc1f6d5`.
+
+**The premise reproduced before any suite was changed.** With only the source edit and version registration applied, the
+unmodified suite failed on **exactly the ten assertions §6 predicted** — `t29` C-stateExclCliff, F-6, F-6a, F-6b, F-6c, F-7;
+`t34` A-1, A-3; `t35` D-7, D-8 — and nothing else, including every `t10` Rhode Island note lock against the new note.
+
+**Shipped as §3, §6 and §7 required.** `qa/tools/oracle_ri.py` reproduced all ten §7a cells to the cent before the `t10`
+block was written. Suite: **3,506 app checks, 0 failing** on both legs, parity 10/10 (tooling 82 separate). `t10` +16 current /
++3 frozen; `t34` A-12…A-12b; `t35` D-7d, D-14…D-20 and §F (RI-1…RI-7); `t29` F-6 inverted, F-6c/F-7 retired. Version registration:
+83 AST edits across 18 files — the 82 judgement points `vercensus.cjs` counts plus `t33`'s per-version figures object, whose
+copied values the suite confirmed. `qa/tools/controls_v569_ri.py`: **16 controls, 16 met expectation**, canonical md5s unchanged
+(G5, the vacuity reproduced on purpose, stayed silent). Revised `controls_state.sh` against v569: **5 of 5**. Direction on the
+built modules: 34,992 households, **tax fell in none**, largest rise $5,000.00; on a common household Rhode Island is the only
+state whose tax moved. §N3a scaffold check: v5.68 rebuilt byte-identically to `f7f0e3dd…`; `smoke_built` 16/16 on v5.69.
+
+**The Roth-cell measurement §7c required, and it MOVED.** Four Rhode Island households through `runRothStrategies`, v5.68 against
+v5.69: the best cell was unchanged for three and **changed for one** ($2M traditional: `fill12` → `current`); a fourth household's
+second and third places swapped. Disclosed in METHODOLOGY and the CHANGELOG. ⚠ §7c said "not an assertion, unless it moves" — it
+moved and **no assertion was added**: pinning a best-cell identity would lock unrelated engine behaviour, and that judgement is
+the maintainer's. Recorded here rather than decided silently.
+
+**Where this scope was wrong.**
+- **§6's `controls_state.sh` row missed S1.** S1 was anchored on `const LIMIT_NOTE =`, which retired with the census row; it would
+  have reported *MUTATION DID NOT APPLY*. Re-anchored on the `ssOffset` selector.
+- **§7c placed the Field Manual lock and the engine section in `t35` under IDs `F-…`**, which collide with `t29`'s F-series. They
+  ship as `RI-0…RI-7`.
+- **§6 predicted `t29`'s count change as "measure, don't predict" and it was −4 on BOTH legs**, the frozen leg included: two
+  retired checks plus the fixture's two declared §C flips, all shared tooling.
+- **F-5 was not resolved; it was avoided.** The rewritten Field Manual sentences state no count of unchecked states.
+
 
 ---
 

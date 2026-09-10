@@ -7,6 +7,13 @@
 | Owed by | `STOP-REPORT-v5_66-nm-session2.md` §4 and `STOP-REPORT-v5_66-NM-note-guarded-set.md` §3 |
 | Direction | No user-visible figure moves. This is a **test-infrastructure** change |
 
+> ⚠ **PREMISE ANNOTATED AT v5.69 (2026-09-10).** Rhode Island converted, so the second set §2 describes — *income-limited
+> but still modelled unconditionally* — is now **EMPTY** and is asserted empty (`t29` F-6 inverted, `t35` D-8 inverted, each
+> state pinned as converted-not-reworded by D-7a…D-7d). The first set — *income-limited in law* — is unchanged, and it is
+> still selected by executing a regex against note prose, now at **nine** sites (`sel_census.cjs`, v5.68) less the census row
+> that retired at v5.69. This scope therefore stays OPEN and its defect class stands: a reworded note can still leave the
+> in-law set silently. Its §4 test 2 (derive the unconverted set) is now the trivial empty set. SCOPE_RI_POPULATE D-RI-4.
+
 ## 1 · The premise, verified
 
 **D-NM-1 was answered (c): ship New Mexico on a safe note AND scope the selector fix in the same

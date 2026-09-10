@@ -826,6 +826,12 @@ reading what the release actually shipped. Both sections have negative controls 
 `qa/tools/package_check_controls.sh` (P20–P28), including a false-positive control: a check that
 cries wolf on a clean tree gets ignored, and an ignored gate has stopped being a gate.
 
+☑ **`controls_state.sh` REVISED AT v5.69** (Rhode Island emptied the guarded set; `SCOPE_RI_POPULATE` D-RI-4). **S2 retired**
+with the `stateExclCliff` fixture; **S4 inverts by tag** — from v569 it RE-FILLS the set and the inverted F-6 must fire; and
+**S1 was re-anchored**, because its anchor `const LIMIT_NOTE =` retired with the census row — the scope's census named S2 and
+S4 and missed S1. Against v569 it runs S0, S1, S3, S4, S5. The v5.69 release's own controls are
+`qa/tools/controls_v569_ri.py`. *(The 2026-09-10 repair note follows.)*
+
 ☑ **`controls_state.sh` REPAIRED 2026-09-10** (ops package). Usage is now
 `bash qa/tools/controls_state.sh <run-folder> <version-tag>` — the tag is required, with no default.
 S2 reads the fixture's state from the file instead of naming one; every mutation is checked to have
