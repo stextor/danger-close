@@ -131,8 +131,8 @@ full retirement-income exemptions (IL, MS, PA, IA 55+, MI post-phase-in, plus th
 no-income-tax states); and major 65+ retirement-income exclusions where they exist (e.g., GA
 $65K/person, KY $31,110, NY $20K, NJ a $100K HOUSEHOLD cap at 62+ (not per-person), VA $12K, SC $15K, DE $12.5K). **Which of these have been checked against a primary source, and what was found, is recorded in `AUDIT_STATE_EXCL65_NOTES.md` — this section routes there rather than restating it, because a verification claim expires and a dated audit does not.**
 
-**Income conditioning: the machinery exists as of v5.64, and four of the five states are populated —
-Connecticut (v5.65), New Mexico (v5.66), New Jersey (v5.67) and Virginia (v5.68).** Five states condition their exclusion on income in
+**Income conditioning: the machinery exists as of v5.64, and all five states are populated —
+Connecticut (v5.65), New Mexico (v5.66), New Jersey (v5.67), Virginia (v5.68) and Rhode Island (v5.69).** Five states condition their exclusion on income in
 law — New Mexico, Rhode Island,
 Virginia, New Jersey and Connecticut. v5.64 added the mechanism: an income measure computed inside
 the state engine, two bases (`agi`, and `agiExSS` — which is Virginia's AFAGI exactly and
@@ -225,11 +225,26 @@ rather than dropped: taxpayers born on or before 1 January 1939 take the $12,000
 (age 87 or older in 2026, outside this model's frame), and the deduction cannot be combined with
 Virginia's Disability Income subtraction.
 
-**One of the five remains unconditional and remains optimistic above its cliff.** Rhode Island still
-grants its exclusion to households its statute excludes by a hard AGI cliff, and it does not
-distinguish IRA distributions, which the statute does not cover. That is the largest known error left
-in this module. Rhode Island is deliberately last, because its TY2026 figures are not published until
-November 2026 and its exclusion carries that second, separate defect.
+**All five are conditioned as of v5.69 — Rhode Island, the last, is a cliff.** Rhode Island's $50,000 pension/401k
+exclusion per person (R.I. Gen. Laws § 44-30-12(c)(9), from full retirement age, 67) is now a two-row `bands` table on federal
+AGI: the full amount while AGI is **less than** $133,750 joint / $107,000 single, and nothing at or above it. **The comparator is
+exclusive** — the statute and ADV 2025-22 say *less than* / *below*; only the Division's retirement guide says "or less", in
+the same table that misprints $133,500 — so a couple at exactly $133,750 loses the exclusion. The thresholds are the **TY2025**
+pair; Rhode Island publishes a year in arrears and the TY2026 pair is expected in November 2026, which will be a constants
+refresh. **Measured before shipping over 34,992 households, tax rose for 14,843 and fell for none; the largest rise is
+$5,000.00 a year**, a both-67+ couple with $100,000 of qualifying income at or above the cliff. Four things remain unmodelled
+and are stated in the state's note, **each of which overstates the exclusion**: IRA distributions, which the statute excludes
+and the model cannot tell from 401(k) money (no input carries account type — `MissingFeatures.md` D-12); the cap of each
+person's $50,000 at that person's own pension income, and the rule that only a spouse at full retirement age counts (the engine
+sees household totals only); and dividend and interest income, which the measure does not carry. Separately, the model still
+taxes half of federally taxable Social Security at every income, which overstates Rhode Island tax under the cliff and
+understates it above — the Social Security modification is part of the eight-state partial-SS approximation, a release of its own.
+
+**The cliff reaches the Roth comparison.** Because a conversion can push federal AGI across Rhode Island's cliff, the
+conversion strategy the model scores best can change. Measured at the v5.69 build on four Rhode Island households: the best
+cell was unchanged for three and **changed for one** — with $2M of traditional money the model's best cell moved from
+*fill the 12% bracket* to the *current slider* strategy, with modelled lifetime tax $107,757 higher on the v5.68 winner. That is
+the model's best cell under its own assumptions, not a recommendation.
 
 Two properties of the measure are stated here rather than discovered later. **It carries no dividend
 or interest income**, because the state engine is never passed either — so a household whose state
@@ -295,7 +310,7 @@ behavior exactly (backward compatible with every existing backup).
 
 **This is an approximation layer and is labeled as such in the UI.** Not modeled: progressive
 state brackets (effective rate instead), county/city income taxes (IN, MD partially folded, NYC
-not), income limits on Rhode Island's exclusion (its AGI cliff, approximated as unconditional — Connecticut, New Mexico, New Jersey and Virginia are conditioned as of v5.65, v5.66, v5.67 and v5.68; ⚠ *this clause was stale and is corrected at v5.62: v5.60 DID apply RI's and WI's full-retirement-age (67) floors, as stated above — the contradiction stood within this one document for two releases*; ⚠ *corrected again at v5.68: it listed NJ and VA as unconditional, false from v5.67 and v5.68 respectively* — **Virginia's $12K age deduction tapers $1 for every $1 of adjusted federal AGI above $50K single/$75K married, and is applied that way, once per couple, as of v5.68**), SC's under-65 tier (disclosed, not applied; *NJ's 62 floor stood beside it here as unapplied until v5.68, although v5.67 applied it*), **Colorado's shared $24K cap between Social Security and pension — a cap the two share rather than one reducing the other, which overstates Colorado's exclusion and understates its state tax**. Maryland's and Maine's exclusions, which are reduced by Social Security received dollar-for-dollar, ARE applied as of v5.56 (§12), state
+not), Rhode Island's IRA distinction and per-person cap (**its AGI cliff is applied as of v5.69**, exclusive, on the TY2025 thresholds — Connecticut, New Mexico, New Jersey, Virginia and Rhode Island are conditioned as of v5.65, v5.66, v5.67, v5.68 and v5.69; ⚠ *corrected at v5.69: this clause listed Rhode Island's cliff as approximated as unconditional*; ⚠ *this clause was stale and is corrected at v5.62: v5.60 DID apply RI's and WI's full-retirement-age (67) floors, as stated above — the contradiction stood within this one document for two releases*; ⚠ *corrected again at v5.68: it listed NJ and VA as unconditional, false from v5.67 and v5.68 respectively* — **Virginia's $12K age deduction tapers $1 for every $1 of adjusted federal AGI above $50K single/$75K married, and is applied that way, once per couple, as of v5.68**), SC's under-65 tier (disclosed, not applied; *NJ's 62 floor stood beside it here as unapplied until v5.68, although v5.67 applied it*), **Colorado's shared $24K cap between Social Security and pension — a cap the two share rather than one reducing the other, which overstates Colorado's exclusion and understates its state tax**. Maryland's and Maine's exclusions, which are reduced by Social Security received dollar-for-dollar, ARE applied as of v5.56 (§12), state
 standard deductions/credits, pension-source distinctions (AL/HI DB exemptions), and WA's
 capital-gains excise. Verify your state.
 
@@ -1551,7 +1566,7 @@ rather than on the statute alone, so no dollar figure is asserted for the couple
 Four statutory conditions were unmodelled at v5.59 and are named in the state's note. **The first
 of them — the requirement of full retirement age, 67 for anyone born 1960 or later — is modelled as
 of v5.60** (see below). The rest remain: it is gated by a **hard AGI cliff** (TY2025: **$133,750 MFJ / $107,000 single**, indexed annually
-— TY2026 is not published until November 2026) which the model ignores; **IRA distributions do not qualify** (only Form 1040
+— TY2026 is not published until November 2026) which the model ignored until **v5.69, when it became modelled as an exclusive cliff**; **IRA distributions do not qualify** (only Form 1040
 line 5b income does) and the model has no IRA-vs-employer-plan distinction; and the Social Security
 modification carries the same two gates and removes all federally-taxable SS where it applies, while
 the model taxes half.
@@ -1615,7 +1630,8 @@ $60,000 rises from $636 to $3,180. Households where both spouses have reached 67
 v5.55 for Kentucky and Delaware — and is read in exactly one place, so this is two properties in the
 rule table. What it does *not* fix is everything else Rhode Island's statute conditions on: the AGI
 cliff and the IRA-versus-employer-plan distinction both need a data-model field the engines do not
-carry, and `MissingFeatures.md` **D-11 (c)** scopes those once across states rather than per state.
+carry, and `MissingFeatures.md` **D-11 (c)** scopes those once across states rather than per state. *(v5.69: the cliff is
+modelled through `exclTest`; the IRA distinction still needs an input and is `MissingFeatures.md` **D-12**.)*
 
 ### What did not move, and why
 
