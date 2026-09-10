@@ -393,6 +393,12 @@ return figure**, so they do not agree in general. The alternatives were rounding
 invents a rule no statute states) or picking one comparator for all five (which silently misprices
 whichever state loses). One extra key, and it is what gives the §5 boundary pins something to catch.
 
+> ⚠ **CORRECTED 2026-09-10 — Rhode Island is EXCLUSIVE too.** "Four statutes are inclusive" is wrong by
+> one: § 44-30-12(c)(8)/(9) say AGI *"less than"* the threshold, and ADV 2025-22 says *"below"*; the "at or
+> below" in `FINDINGS` came from PUB 2026-01's table. **B-2 itself stands** — a per-table `cmp` is exactly
+> what makes this a one-key fix. Rhode Island takes `cmp: "lt"` under `SCOPE_RI_POPULATE.md` **D-RI-2**,
+> approved 2026-09-10; the same statement in §5's comparator bullet is covered by this note.
+
 ### B-3 · Populate Rhode Island on TY2025 figures, or wait for November 2026? — **TY2025, dated, APPROVED**
 
 RI publishes a year in arrears; the TY2026 pair is expected in the November 2026 advisory and did not

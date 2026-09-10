@@ -180,6 +180,15 @@ source rather than from the CHANGELOG.
 **$50,000 per qualifying individual**, each capped at that individual's own qualifying income, and
 **no IRA of any kind qualifies**. Comparator **inclusive** ("at or below").
 
+> ⚠ **CORRECTED 2026-09-10 — the comparator is EXCLUSIVE, not inclusive.** The sentence above is kept as
+> written. R.I. Gen. Laws § 44-30-12(c)(8)(i) and (c)(9)(i) both condition on federal AGI **"less than"** the
+> threshold; ADV 2025-22 says AGI **"below"** it; the Division's *Summary of Legislative Changes* (22 July
+> 2026) says **"less than"**. Only PUB 2026-01's threshold table reads *"$107,000 or less"* — the same table
+> that prints the $133,500 typo this section rejects. At whole-dollar AGI the two readings differ only AT the
+> threshold, which is exactly the cell a boundary pin exists for. Encoded as `cmp: "lt"` by
+> `SCOPE_RI_POPULATE.md` **D-RI-2** (approved 2026-09-10). Also re-read that day: the 2026 session did not
+> amend (c)(9); it removed the SS modification's age test for TY2027+ only.
+
 ---
 
 ## 7 · The two open items, and one new design point
@@ -221,6 +230,12 @@ floats, not a rounded return figure.
 the field — `cmp: 'lte'` by default, `'lt'` for Connecticut** — rather than rounding the measure or
 picking one comparator for all five. It is one extra key, it makes every §5 boundary pin meaningful,
 and the alternative silently misprices whichever state loses the coin-toss.
+
+> ⚠ **CORRECTED 2026-09-10 — three inclusive, two exclusive.** The count above is wrong for Rhode Island,
+> whose statute says *"less than"* (see the §6 correction); the phrase "at or below" came from PUB 2026-01's
+> table, not the statute. **Connecticut and Rhode Island are exclusive** and take `lt`; New Mexico and New
+> Jersey are inclusive; Virginia's taper is inclusive by construction and carries no `cmp` at all. B-2's
+> mechanism is unaffected — only Rhode Island's classification moves.
 
 ⚠ **The pin that matters is the one AT the threshold.** One-below and one-above pass with the
 comparator inverted on every state; only the exact-threshold case discriminates `lte` from `lt`.
