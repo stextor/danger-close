@@ -1,5 +1,70 @@
 # Changelog
 
+## v5.69 — Rhode Island's exclusion becomes a cliff, the last of the five income-limited statutes, 2026-09-10
+
+Source `76a35ba283ed5153ff257106e7ccfc10` · built `index.html` `86703918db247e3284752f0f1cc1f6d5`.
+
+**Suite: 3,506 app checks passing, 0 failing, 0 dead, across both the v5.68 and v5.69 legs** (`t21` 50 and `domdiff` 32 are
+tooling and counted separately; GRAND 3,588). Parsed from `runsuite.sh` output by script. Per suite, current leg: t1 185, t2 35,
+t3 36, t4 252, t5 58, t6 21, t7 41, t8 42, t9 14, **t10 354**, t11 40, t12 23, t13 42, t14 44, t15 11, t16 24, t17 74, t18 67,
+t19 65, t20 100, t22 85, t23 25, t24 38, t25 45, t26 25, t27 18, t28 34, **t29 60**, t30 12, t31 31, t32 12, t33 32, **t34 73**,
+**t35 114**. On the v5.68 leg `t10` is 341, `t29` 60 and `t35` 104. MC parity 10/10.
+
+### What changed, and why
+
+- **Rhode Island's $50,000 pension/401k exclusion per person is now lost entirely at its AGI cliff.** R.I. Gen. Laws
+  § 44-30-12(c)(9) grants it from full retirement age (67) only while federal AGI is **less than** $133,750 joint / $107,000
+  single (TY2025, ADV 2025-22). Until this release the model granted it at every income. It is a two-row `bands` table on
+  `agi`, per person. **This CHANGES A USER'S NUMBER, in the CONSERVATIVE direction only**: over 34,992 households priced on the
+  built v5.68 and v5.69 modules, tax rose for 14,843 and **fell for none**; the largest rise is **$5,000.00/yr**, a both-67+
+  couple with $100,000 of qualifying income at or above the cliff. On a common household no other state's tax moved.
+- **The comparator is EXCLUSIVE.** The statute says "less than" and ADV 2025-22 says "below"; only the Division's retirement
+  guide says "or less", in the table that misprints $133,500. A couple at exactly $133,750 loses the exclusion. The project's
+  statutory oracle had recorded this as inclusive and was corrected in the ops package that scoped this release.
+- **⚠ The model's best Roth cell can change for a Rhode Island household.** Measured on four households through the Roth
+  engine: unchanged for three; for a couple with $2M of traditional money the best cell moved from *fill the 12% bracket* to the
+  *current slider* strategy, with modelled lifetime tax $107,757 higher on the old winner; a fourth household's second and third
+  places swapped. A conversion that pushes AGI across the cliff costs the whole exclusion that year, and the ranking now sees it.
+- **All five income-limited state exclusions are now conditioned** (CT v5.65, NM v5.66, NJ v5.67, VA v5.68, RI v5.69), so the
+  suite's "income-limited but unconditional" guards are **inverted to assert the set is EMPTY** rather than weakened: `t29`
+  F-6/F-6a/F-6b and `t35` D-8, gated so the v5.68 leg keeps its own truth. `t29` F-6c and F-7, the `stateExclCliff` fixture and
+  the `state_excl_limited` census row **retire together**. `t34` A-3 is rewritten because its `[].every` over an empty list
+  would have passed vacuously.
+- **The Field Manual** no longer says Rhode Island is "not yet" conditioned or that "several" income-limited exclusions are
+  treated as unconditional; a lock now asserts it (no assertion read those sentences before).
+
+### Tests and controls
+
+- `t10`: twelve Rhode Island hand cells through `stateTaxAnnual` (both columns, both sides of the cliff, **the two AT-threshold
+  cells that alone detect the comparator**, the SS-carrying base, the age floor), an extinction invariant ($1 across the cliff costs
+  $5,000.05), the scalar/table and `exclAge` invariants, and three pre-fix pins on the v5.68 leg. Every cell matches
+  `qa/tools/oracle_ri.py`, which imports nothing from the app, to the cent.
+- `t34` A-12…A-12b price every row of the table; `t35` D-7d (converted, not reworded), D-14…D-20 (the note's disclosures, as
+  claims), RI-1…RI-4 (the cliff reached from `computeTaxPlan` on the example household) and RI-5…RI-7 (the Field Manual lock).
+- `qa/tools/controls_v569_ri.py`: **16 controls, 16 met expectation**, canonical inputs unchanged — nine table mutants, each caught
+  by the cells the scope predicted; the guard, note and manual controls; and G5, which reproduces the `[].every` vacuity on purpose
+  and stays silent. `qa/tools/controls_state.sh` revised (S2 retired, S4 inverted by tag, **S1 re-anchored — the scope missed it**):
+  5 of 5 against v5.69.
+- Version registration: 83 AST edits across 18 suites, then `vercensus.cjs` on the new tag (82 judgement points, as on v568).
+- Built per OPERATIONS §N3a: v5.68 rebuilt byte-identically to `f7f0e3dd…` first; `smoke_built` 16/16 on v5.69.
+
+### Limitations — disclosed, not modelled
+
+- **IRA distributions are not distinguished.** The statute excludes every IRA; the model cannot tell an IRA from a 401(k), so it
+  still grants the exclusion to IRA money below the cliff — optimistic, up to $4,000/yr for an $80,000 IRA-only couple.
+  `MissingFeatures.md` **D-12**.
+- **Each person's $50,000 is not capped at their own income, and FRA is not applied per spouse's income** — the engine sees household
+  totals. Optimistic, $2,000–$2,500/yr on the households priced.
+- **The AGI measure omits dividend and interest income** — optimistic near the cliff.
+- **Half of federally taxable Social Security is still taxed at every income**; Rhode Island's SS modification is part of the
+  eight-state partial-SS approximation. Overstates tax under the cliff, understates it above. Its TY2027 age-test removal is not
+  modelled.
+- **TY2025 thresholds**, dated in the note; the TY2026 pair is expected in November 2026. Flat 5% rate, no MFS or head-of-household.
+- **No assertion pins the Roth best-cell change**; it is measured and disclosed. Whether to pin it is an open question for the maintainer.
+- `t29` falls from 64 to 60 **on the frozen leg too**, because the retired checks were shared tooling, not build behaviour.
+
+Provenance: source `76a35ba283ed5153ff257106e7ccfc10` · built `index.html` `86703918db247e3284752f0f1cc1f6d5`.
+
 ## ops 2026-09-10 — Rhode Island is scoped: the last of the five, its comparator corrected, its IRA gap measured
 
 **KIND: ops. No version bump, no source change, no figure moves, no test changes.** v5.68 remains the
