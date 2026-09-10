@@ -28,6 +28,13 @@
 #   silently does not apply reads exactly like a check that fails to fire. S0, a null control, proves
 #   the baseline is green first — a control run against an already-red suite measures nothing
 #   (the P29 lesson, OPERATIONS §I).
+# ⚠ REVISED AT v5.69 (SCOPE_RI_POPULATE D-RI-4) — RHODE ISLAND EMPTIED THE GUARDED SET. Three controls moved:
+#   S1 was anchored on boundaries.mjs's `const LIMIT_NOTE =`, which retired with the `state_excl_limited`
+#   row; it is re-anchored on the ssOffset row's selector, which F-5 guards just the same. (The scope's
+#   census named S2 and S4 and MISSED S1 — found when the row was removed.) S2 RETIRED with the
+#   `stateExclCliff` fixture it mutated. S4 INVERTS by tag: from v569 F-6 asserts the set is EMPTY, so
+#   the mutation RE-FILLS it (a state with excl65 > 0 and no exclTest gains the phrase); earlier tags
+#   keep the original empty-the-set mutation, which was their truth. Against v569: S0, S1, S3, S4, S5.
 #
 # ⚠ COVERAGE, so nobody retires this as redundant: F-6a/F-6b/F-6c and F-7 are ALSO controlled by
 #   qa/tools/controls_v568_va.py (T1–T6). S1 (F-5), S3 (F-8), S4 (F-6's empty-set guard) and S5
@@ -35,7 +42,8 @@
 #
 # ⚠ S4 REBUILDS THE APP from a patched copy of <tag>.jsx. It is the slowest control and the one
 # most worth keeping: without F-6, `state_excl_limited` could match zero states and every
-# assertion about it would pass vacuously. Whenever a check passes, ask what it would have taken to fail.
+# assertion about it would pass vacuously. (That was S4's role through v5.68; from v569 it RE-FILLS the set the inverted
+# F-6 asserts empty, and the row retired — see the v5.69 note above.) Whenever a check passes, ask what it would have taken to fail.
 set -u
 RUN="${1:?usage: controls_state.sh <run-folder> <version-tag>}"
 VER="${2:?usage: controls_state.sh <run-folder> <version-tag>   (e.g. v568 — no default, on purpose)}"
@@ -71,22 +79,11 @@ else PASS=$((PASS+1)); echo "  ✓ SILENT   S0 no mutation — t29 green, as req
 prep
 # S1: hardcode a state code in the census, the exact drift F-5 exists to stop.
 b=$(sum "$SCRATCH"/qa/tools/boundaries.mjs)
-sed -i 's|const LIMIT_NOTE = |const _HARDCODED = ["NJ"]; const LIMIT_NOTE = |' "$SCRATCH"/qa/tools/boundaries.mjs
+sed -i 's|  const ssOff = Object.entries(RULES)|  const _HARDCODED = ["NJ"]; const ssOff = Object.entries(RULES)|' "$SCRATCH"/qa/tools/boundaries.mjs
 applied "S1" "$SCRATCH"/qa/tools/boundaries.mjs "$b" && want "S1 a state code is written into the census source" "F-5"
 
-prep
-# S2: the D-3c fixture loses its state code, so the row it exists to light goes dark. The state is
-# READ from the stateExclCliff block, never named here — naming it is what broke this control twice.
-b=$(sum "$HH")
-HH="$HH" python3 - <<'PY'
-import io, os, re, sys
-p = os.environ["HH"]; t = io.open(p, encoding="utf-8").read()
-i = t.index("stateExclCliff:"); j = t.find("\n  },", i)
-blk = t[i:j]; m = re.findall(r'P\.stateCode = "[A-Z]{2}"; ', blk)
-if len(m) != 1: sys.exit(0)          # leave the file unchanged; `applied` reports the drift
-io.open(p, "w", encoding="utf-8").write(t[:i] + blk.replace(m[0], "", 1) + t[j:])
-PY
-applied "S2" "$HH" "$b" && want "S2 stateExclCliff loses its stateCode" "F-7"
+# S2: RETIRED at v5.69 with the `stateExclCliff` fixture it mutated (SCOPE_RI_POPULATE D-RI-4). t29 F-7, the
+# assertion it fired, retired in the same release. Recover it from git history if the fixture ever returns.
 
 prep
 # S3: the legacy fixture is given a REAL state code, collapsing the distinction the split makes.
@@ -95,14 +92,29 @@ sed -i 's|P.stateTaxRate = 0.05; P.stateName = "Test State"; P.stateCode = "TS";
 applied "S3" "$HH" "$b" && want "S3 the legacy fixture uses a real STATE_RULES key" "F-8"
 
 prep
-# S4: THE EMPTY-SET CONTROL. Strip every income-limit note from STATE_RULES and rebuild, so no
-# state matches and `state_excl_limited` can never read ON. Without F-6 every assertion about
-# that row would pass vacuously — green from an empty set.
+# S4: THE EMPTY-SET CONTROL, gated by tag. Before v569 F-6 guards a NON-EMPTY set: strip every income-limit
+# note and it must fire. From v569 the set is EMPTY by design and F-6 asserts that: RE-FILL it — a state
+# with excl65 > 0, no exclTest and no selector phrase gains the phrase — and it must fire. Chosen live.
+VN="${VER//[!0-9]/}"
 b=$(sum "$SCRATCH/$VER.jsx")
-sed -i 's/INCOME-LIMITED/UNCONDITIONAL/g; s/income-limited/unconditional/g; s/income limit/no limit/g' "$SCRATCH/$VER.jsx"
+if [ "$VN" -ge 569 ]; then
+  SRCF="$SCRATCH/$VER.jsx" python3 - <<'PY'
+import io, os, re
+p = os.environ["SRCF"]; t = io.open(p, encoding="utf-8").read()
+for m in re.finditer(r'^  ([A-Z]{2}): \{ name: "[^"]+",[^\n]*?excl65: ([1-9]\d*),[^\n]*?note: "', t, re.M):
+    line = t[m.start():t.index("\n", m.start())]
+    if "exclTest" in line or re.search(r"income[- ]limited|income limit", line, re.I):
+        continue
+    io.open(p, "w", encoding="utf-8").write(t[:m.end()] + "income-limited (CONTROL) — " + t[m.end():]); break
+PY
+  S4LABEL="S4 a state re-enters the income-limited-but-unconditional set (inverted empty-set guard, v569+)"
+else
+  sed -i 's/INCOME-LIMITED/UNCONDITIONAL/g; s/income-limited/unconditional/g; s/income limit/no limit/g' "$SCRATCH/$VER.jsx"
+  S4LABEL="S4 no STATE_RULES entry flags an income limit (empty-set guard)"
+fi
 if applied "S4" "$SCRATCH/$VER.jsx" "$b"; then
   ( cd "$SCRATCH" && bash qa/mk_testable.sh "$VER" >/dev/null 2>&1 ) || { MISS=$((MISS+1)); echo "  ✗ S4 REBUILD FAILED"; }
-  want "S4 no STATE_RULES entry flags an income limit (empty-set guard)" "F-6"
+  want "$S4LABEL" "F-6"
 fi
 
 prep

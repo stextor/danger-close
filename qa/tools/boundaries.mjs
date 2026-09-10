@@ -104,35 +104,12 @@ export function census(G) {
     rule ? `exercises the ${Object.keys(RULES).length}-jurisdiction module (${rule.name})`
          : "UNSET — the state module is unexercised; only the legacy path can run");
 
-  // D-3c: `stateTaxAnnual` subtracts `excl65` unconditionally, but several states cap the
-  // exclusion by income and cut it off at a hard cliff. The defect is only REACHABLE from a
-  // household whose state has such an exclusion — elsewhere the unconditional subtraction is
-  // correct and a fixture there proves nothing.
-  //
-  // ⚠ The state list is read LIVE from `STATE_RULES` and matched on the rule's own note text.
-  // No state code is written down here. §K1: a tool that keeps its own copy of a threshold is a
-  // second answer that drifts, and this census exists because the app and the tool disagreeing
-  // is the failure mode. If a state's note stops flagging its income limit, this row goes quiet
-  // — which is correct, because the note is where that fact lives today.
-  //
-  // ⚠ v5.68 — RE-FOUNDED ON DATA FOR THE HALF OF THE MEANING THAT DATA CAN CARRY (D-VA-3). The row
-  // means "income-limited in law, UNCONDITIONAL IN THE MODEL". The first half still lives only in
-  // the note. The second half is exactly `exclTest` being ABSENT — a state carrying one is
-  // conditioned — so it is now read from the flag, as the `ssOffset` row below learned at v5.54
-  // ("A flag is data; prose is not"). Without this term New Mexico (populated v5.66) sat inside
-  // this set for two releases and Virginia would have stayed after v5.68, so the row read ON for
-  // households the model had ALREADY fixed. Measured: {NM, RI, VA} at v5.67 without it,
-  // {RI, VA} with it, and {RI} once Virginia is populated.
-  const LIMIT_NOTE = /income[- ]limited|income limit/i;
-  const limited = Object.entries(RULES)
-    .filter(([, r]) => (r.excl65 || 0) > 0 && !r.exclTest && LIMIT_NOTE.test(r.note || ""))
-    .map(([c]) => c);
-  const onLimited = !!(code && limited.includes(code));
-  row("state_excl_limited", "income-limited 65+ exclusion",
-    onLimited ? `${code} (excl65 $${(rule.excl65 || 0).toLocaleString()})` : (code || "unset"),
-    `state in {${limited.join(",") || "none found"}}`, !onLimited,
-    onLimited ? "exercises the D-3c class — the exclusion is income-limited in law, unconditional in the model"
-              : `OUT — D-3c is unreachable; ${limited.length} state(s) in the module carry an income-limited exclusion`);
+  // ── RETIRED at v5.69: the `state_excl_limited` row (D-3c, "income-limited in law, unconditional in
+  //   the model"). SCOPE_RI_POPULATE D-RI-4. From v5.69 every exclusion known to be income-limited in law
+  //   carries `exclTest`, so the row could only ever read OUT — a boundary nothing can cross, which this
+  //   census exists to avoid. Its fixture retired with it; t29 F-6 now asserts the set is EMPTY, and
+  //   t35 D-7/D-8 assert the same from the note-and-flag side. The v5.68 lesson it carried — select on
+  //   DATA (`!r.exclTest`), not prose — stays recorded at the ssOffset row below and in OPERATIONS §D2.
 
   // v5.56 — the SS-offset class. ⚠ KEYED ON THE `ssOffset` FLAG, NOT ON NOTE PROSE. The row above
   // keys on a note "flagging an income limit", and that is exactly what broke when NJ's note was

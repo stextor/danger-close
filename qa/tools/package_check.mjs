@@ -543,7 +543,9 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
       // two remain. That is the FOURTH reason in this block to rot while its entry stayed correct,
       // exactly as the comments above predict, and it is rolled here rather than left to the fifth.
       // ⚠ REASON ROLLED AT v5.68: VIRGINIA SHIPPED, so ONE left. Expires when Rhode Island converts.
-      "SCOPE_INCOME_CONDITIONING.md",             // PARTIALLY BUILT: CT v5.65, NM v5.66, NJ v5.67, VA v5.68; RI open — ONE left
+      // ── REMOVED at the v5.69 ship: "SCOPE_INCOME_CONDITIONING.md". Rhode Island converted, the last of the five;
+      //    the scope carries its RETIRED marker in the same package. Its expiry was stated as a COUNT — "ONE left" —
+      //    and the count reached zero here. Removed together with SCOPE_RI_POPULATE.md below, as both entries required.
       // Added 2026-09-09; REASON ROLLED the same day, which is the point. It was added as "OPEN and
       // explicitly NOT BUILDABLE" while its §6 carried two decisions that measurement had REOPENED.
       // Both were settled hours later, so the entry is now OPEN-because-UNBUILT, not OPEN-because-
@@ -558,7 +560,8 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
       // OPEN-because-UNBUILT, not OPEN-because-undecided. ⚠ EXPIRES AT THE RHODE ISLAND BUILD, TOGETHER WITH
       // THE SCOPE_INCOME_CONDITIONING ENTRY ABOVE: that release retires BOTH scopes and must remove BOTH
       // entries in the same package — the two-halves rule recorded in the removal notes below.
-      "SCOPE_RI_POPULATE.md",                     // OPEN — approved 2026-09-10, not built; expires when Rhode Island converts
+      // ── REMOVED at the v5.69 ship: "SCOPE_RI_POPULATE.md", added 2026-09-10. Its entry named its own expiry — the
+      //    Rhode Island build — and the scope is RETIRED with a §10 build record in the same package.
       "SCOPE_STATE_SET_SELECTOR.md",              // OPEN, written v5.66 (D-NM-1 (c) second half); expires when the structural field ships
       // ⚠ The comment that used to sit here described SCOPE_TREE_AND_POOL_HOUSEKEEPING.md and was
       // orphaned when that entry was removed on 2026-09-07; it is folded into the removal note
