@@ -1,5 +1,52 @@
 # Changelog
 
+## ops 2026-09-10 — controls_state.sh can run again, and the v5.68 ship's lessons are written where the next session reads
+
+**KIND: ops. No version bump, no source change, no figure moves, no test changes.** v5.68 remains the
+current build: source `561fc39b5bdae7c6d83698f352c436b3`, artifact `f7f0e3dd338804b2a09a6ca53318ac26`,
+repo HEAD `e684106` at the start of this work. Four files change: `qa/tools/controls_state.sh`,
+`docs/OPERATIONS.md`, this file and the manifest.
+
+### What changed
+
+- **`qa/tools/controls_state.sh` is repaired, not retired.** It had been pinned to the `v553` leg, which
+  no current run folder contains, and its S2 mutation anchored on New Jersey fixture text that has not
+  existed since v5.67 — so S2 would have run an unmutated `t29`. Retiring it was considered and
+  rejected on coverage: `controls_v568_va.py` duplicates only S2; **S1 (F-5), S3 (F-8), S4 (F-6's
+  empty-set guard) and S5 (section C's flip re-derivation) exist nowhere else.** Now: the version tag is a
+  required argument; S2 reads the fixture's state from the file; **every mutation is checked to have
+  changed its target**, so a drifted anchor is reported as *MUTATION DID NOT APPLY* instead of reading
+  like a check that failed to fire; and a null control **S0** requires a green baseline first.
+- **OPERATIONS §I** now names the whole pre-ship red set measured at the v5.68 ship — `K-1`–`K-3` **and
+  `J-1`, `J-2`, `K-4`, `K-6`** (39 passed, 7 failed with all four arguments) — and records that `D-1` is
+  red post-ship on an app release too (45 passed, 1 failed), not only on an ops package. No check was
+  changed.
+- **OPERATIONS §C3** records the second instance of committed stray files: the v5.68 web upload put six
+  `qa/qa-baseline/` files at the repo root as well, caught only by the clone diff (39 changed paths
+  against a 33-file package). No suite read them, but **`package_check` E-1b matches by basename and
+  skips any name with more than one repo path, so it was silently blind to all six** until they were
+  deleted. Nothing in `package_check` checks for committed paths outside the package; that is unscoped.
+- **OPERATIONS §L** writes down that an ops package carries a CHANGELOG entry. Every 2026-09-08 ops
+  package has one; **the three 2026-09-09 ops packages do not**, and are recorded rather than back-filled,
+  because a back-filled entry would carry a date it was not written on.
+
+### How it was verified
+
+- `controls_state.sh v568` against a run folder built from the committed tree (its inputs hash-equal to
+  HEAD): **6 of 6** — S0 silent, S1–S5 fired — in 15 s, with the run folder's inputs unchanged afterwards.
+- **The new guard was itself controlled.** In a copy whose legacy-fixture name was altered (`t29` still
+  64/0), S3 reported *MUTATION DID NOT APPLY … a FINDING* and the script exited 1, with S0–S2, S4 and S5
+  unaffected.
+- No app, suite or build-input file changes, so the app suite does not apply; the v5.68 figure stands
+  (3,441 app checks, verified post-ship from a clean clone). `package_check` results are in `MANIFEST.txt`.
+
+### Limitations
+
+- The §I red set is **one package's measurement**, stated as such; it does not diagnose the split, which
+  still wants a scope.
+- `README.md` and `index.html` remain multi-path basenames that E-1b cannot see. Long-standing and by
+  design; recorded, not changed.
+
 ## v5.68 — Virginia's age deduction becomes income-conditioned, and is taken once per couple, 2026-09-10
 
 Source `561fc39b5bdae7c6d83698f352c436b3` · built `index.html` `f7f0e3dd338804b2a09a6ca53318ac26`.
