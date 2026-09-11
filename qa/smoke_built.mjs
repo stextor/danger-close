@@ -40,7 +40,10 @@ const dom = new JSDOM(html, {
   // jsdom build ships no fetch — so without a stub installed before the inline scripts parse,
   // the bootstrap throws and the app never mounts. beforeParse is the only hook early enough.
   beforeParse(w) {
-    if (!w.fetch) w.fetch = () => Promise.reject(new Error("fetch not available in jsdom"));
+    // v5.70: RECORD every request the page makes (the B-3 check below reads it). Still rejects, as before, and never
+    // calls a real fetch even if a future jsdom ships one.
+    w.__smokeFetches = [];
+    w.fetch = (u) => { w.__smokeFetches.push(String((u && u.url) || u)); return Promise.reject(new Error("fetch not available in jsdom")); };
   },
 });
 const { window } = dom;
@@ -118,6 +121,38 @@ if (ex) {
     ck("Taxes schedule renders an RMD column", /RMD/.test(t));
     ck("survivor disclosure text is present in the shipped build",
       /RIB-LIM widow's limit/.test(t) || /larger of the two/.test(t) || /Survivor year/.test(t));
+  }
+}
+
+// ── B-3 (added v5.70, SCOPE_B3_KEYLESS_AI_ROUTE). On a self-hosted page with no saved key and no Local Model, Ask AI must
+// send NOTHING. This is the only check that sees the app AND the real bootstrap together: through v5.69 the app sent a
+// keyless request that src/main.jsx rewrote to this page's own host. It fails on any pre-v5.70 build BY DESIGN — that
+// failure is its negative control. Not vacuous: the refusal notice must appear, which proves askAI got past its
+// empty-question and simulation checks; zero requests alone could mean it never ran. ──
+{
+  const aiTab = [...window.document.body.querySelectorAll("button.tab")].find(b => (b.textContent || "").trim() === "ask AI");
+  ck("B-3: Ask AI tab reachable in the built app", !!aiTab);
+  if (aiTab) {
+    aiTab.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await wait(1500);
+    const before = window.__smokeFetches.length;
+    let noticed = false;
+    for (let i = 0; i < 20 && !noticed; i++) {
+      const ta = window.document.querySelector("textarea.ai-in");
+      if (ta && !ta.value) {
+        Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set.call(ta, "How does my plan look?");
+        ta.dispatchEvent(new window.Event("input", { bubbles: true }));
+        await wait(150);
+      }
+      if (ta) ta.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+      await wait(1000);
+      noticed = /Nothing was sent/.test(txt());
+    }
+    const sent = window.__smokeFetches.slice(before);
+    ck("B-3: with no key and no Local Model, Ask AI refuses (notice shown)", noticed);
+    ck("B-3: ...and the page makes NO request at all", sent.length === 0, JSON.stringify(sent));
+    const keyBtn = [...window.document.querySelectorAll("button.ai-btn")].find(b => /Add your API key/.test(b.textContent || ""));
+    ck("B-3: the send button is disabled and relabelled", !!keyBtn && keyBtn.disabled);
   }
 }
 

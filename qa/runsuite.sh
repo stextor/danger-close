@@ -82,6 +82,9 @@ tally "t34-$CUR"   node t34_income_conditioning.mjs "$CUR"
 # could not show that anything moved, which is the whole claim of a populate release.
 tally "t35-$PRIOR" node t35_state_populate.mjs "$PRIOR"
 tally "t35-$CUR"   node t35_state_populate.mjs "$CUR"
+# t36 (v5.70) runs on BOTH legs: the prior leg pins B-3's keyless send, the current leg asserts it extinct.
+tally "t36-$PRIOR" node t36_ai_route.mjs "$PRIOR"
+tally "t36-$CUR"   node t36_ai_route.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
