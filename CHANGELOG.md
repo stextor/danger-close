@@ -1,5 +1,40 @@
 # Changelog
 
+## ops 2026-09-11 (second package) — B-3 is scoped and approved: Ask AI will send nothing without a key or a local model
+
+KIND: ops. Leaves **v5.69** current — source `76a35ba283ed5153ff257106e7ccfc10`, built `index.html` `86703918db247e3284752f0f1cc1f6d5`.
+**No app source, suite or harness file changes.** Nothing is built yet.
+
+### What this package adds, and why
+
+- **`docs/SCOPE_B3_KEYLESS_AI_ROUTE.md` — BUILDABLE, target v5.70.** The fix for the Phase 1 audit's B-3: on a self-hosted
+  copy with no saved API key, Ask AI sent the plan context to the page's own host. All three decisions were approved on
+  2026-09-11:
+  - **D-B3-1 (a)** — the fix lives in the app, as a refusal inside `askAI`; `src/main.jsx`'s `/anthropic` rewrite is left
+    for its own later release.
+  - **D-B3-2 (a)** — with neither a key nor a local model, the button is disabled and relabelled, and Enter shows
+    "Nothing was sent".
+  - **D-B3-3 (b)** — the v5.70 CHANGELOG discloses what earlier builds did, the Field Manual gains one sentence, and a
+    short public note follows once v5.70 is live, all within the scope's wording constraints.
+- **What the scope measured.** On a scratch copy that never ships, one guard took the no-key case from one request to
+  the site's host to zero, while a saved key still reached `api.anthropic.com` and a local model still reached its own
+  endpoint. A keyless request to Anthropic returns 401, so the rewrite cannot succeed anywhere. The Field Manual's
+  "complete list" of Ask AI destinations had been contradicted by the defect, and both the send path and the rewrite are
+  in the repository's first commit.
+- **`qa/tools/package_check.mjs`** — the I-2 OPEN allowlist gains the scope, with its expiry: the entry is removed in
+  the v5.70 package that closes it.
+- **`docs/FlawsToFix-v5_69-Phase1.md`** — one annotation (the scope's F-8): OPERATIONS §N3a records `jsdom`'s absence
+  from `package.json` as deliberate, and the audit's Section E note should have cited it.
+- **The Phase 1 audit package was verified after upload:** `package_check` 44 passed, 1 failed — `D-1` only, the
+  expected complement.
+
+### How it was verified
+
+`row_census.cjs`: all three copies of K-8's row expression still agree after the allowlist edit. `package_check` — the
+packaged copy, with all four arguments — ran before the zip was cut; its result is in the package's `MANIFEST.txt`.
+`package_check_controls.sh` was not re-run: the change adds one allowlist entry and alters no check logic. The
+regression suite was not re-run: no app, suite or harness file changed.
+
 ## ops 2026-09-11 — Standing audit Phase 1 re-run at v5.69: the import and storage path
 
 KIND: ops. Leaves **v5.69** current — source `76a35ba283ed5153ff257106e7ccfc10`, built `index.html` `86703918db247e3284752f0f1cc1f6d5`.
