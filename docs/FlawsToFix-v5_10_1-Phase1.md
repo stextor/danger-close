@@ -1,5 +1,11 @@
 # FlawsToFix.md — Standing Code Audit, Phase 1 (Sections A + B)
 
+> **⚠ Re-verified at v5.69 on 2026-09-11 — read `FlawsToFix-v5_69-Phase1.md` first.** A-1 and B-2 hold; **A-2 is still
+> open**, now reproduced; positive findings 1, 2, 4 and 5 hold, and 3 is confirmed at runtime on the import side. The
+> re-run adds two MEDIUM findings, both undisclosed — **A-3** (the My Data draft autosave never saves) and **B-3** (keyless
+> Ask AI on a self-hosted copy sends the plan to the page's own host) — and three LOW (A-4…A-6). *This record is
+> annotated, not rewritten: everything below is as written at v5.10.1, and its line numbers are v5.10.1 addresses.*
+
 **Build under audit:** v5.10.1
 **Source:** `src/DangerClose.jsx` · md5 `2ee4d1e5d0f06fa89ee6980fd97984bc`
 **Date:** 2026-08-07

@@ -12,6 +12,10 @@
 
 ---
 
+> **⚠ 2026-09-11 — Phase 1 was re-run at v5.69** (`FlawsToFix-v5_69-Phase1.md`, repo-only). The Phase 1 row in the
+> table below is superseded: A-2 is still open, and the re-run adds **A-3** and **B-3** (MEDIUM, undisclosed) and
+> A-4…A-6 (LOW). Nothing else in this box was re-checked. *(Annotation only.)*
+
 > ## ⚠ RE-PINNED TO v5.49 — 2026-08-25 · READ THIS BOX FIRST; §5's PLAN TABLE WAS WRONG ABOUT HALF THE AUDIT
 >
 > Source `2ccc62b669f6ee52c6a0be1709c967a5`, built `index.html` `a976bf66307ca07464e15ae911468365`,
