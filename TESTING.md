@@ -22,6 +22,9 @@ This project's premise is *verify, don't trust* — so this page explains what v
 
 *Per-suite at the **v5.47** ship (historical — the 29 suites that existed then, parsed 2026-08-23):* `t1` 155 · `t2` 27 · `t3` 36 · `t4` 228 · `t5` 58 · `t6` 21 · `t7` 41 · `t8` 38 · `t9` 14 · `t10` 163 · `t11` 40 · `t12` 23 · `t13` 42 · `t14` 44 · `t15` 11 · `t16` 24 · `t17` 74 · `t18` 67 · `t19` 65 · `t20` 100 · `t21` 50 · `t22` 85 · `t23` 25 · `t24` 38 · `t25` 35 · `t26` 25 · `t27` 18 · `t28` 34 · `t29` 43.
 
+*Per-suite at **v5.70**, current leg, parsed from `runsuite.sh` output 2026-09-11, run from the packaged copies — **36 suites**:* `t1` 185 · `t2` 35 · `t3` 36 · `t4` 252 · `t5` 58 · `t6` 21 · `t7` 41 · `t8` 42 · `t9` 14 · `t10` 354 · `t11` 40 · `t12` 23 · `t13` 42 · `t14` 44 · `t15` 11 · `t16` 24 · `t17` 74 · `t18` 67 · `t19` 65 · `t20` 100 · `t22` 85 · `t23` 25 · `t24` 38 · `t25` 45 · `t26` 25 · `t27` 18 · `t28` 34 · `t29` 60 · `t30` 12 · `t31` 31 · `t32` 12 · `t33` 32 · `t34` 73 · `t35` 114 · **`t36` 24**. MC parity 10/10; `t21` 50 and `domdiff` 32 are tooling.
+⚠ **`t36` is new and runs on BOTH legs** (23 on v5.69, 24 on v5.70): Ask AI's routes (`SCOPE_B3_KEYLESS_AI_ROUTE`). It is the first DOM suite to run the **self-hosted branch**. Every other DOM suite runs the claude.ai branch, because the shared jsdom exposes no `location` and `IS_CLAUDE_ARTIFACT` fails closed; each of `t36`'s self-hosted cases therefore asserts the LOCAL API KEY panel is on screen, so its zeros cannot be vacuous, and its claude.ai case runs in a child process. `smoke_built` is 20 checks from v5.70.
+
 *Per-suite at **v5.69**, current leg, parsed from `runsuite.sh` output 2026-09-10 — **35 suites**:* `t1` 185 · `t2` 35 · `t3` 36 · `t4` 252 · `t5` 58 · `t6` 21 · `t7` 41 · `t8` 42 · `t9` 14 · `t10` **354** · `t11` 40 · `t12` 23 · `t13` 42 · `t14` 44 · `t15` 11 · `t16` 24 · `t17` 74 · `t18` 67 · `t19` 65 · `t20` 100 · `t22` 85 · `t23` 25 · `t24` 38 · `t25` 45 · `t26` 25 · `t27` 18 · `t28` 34 · `t29` **60** · `t30` 12 · `t31` 31 · `t32` 12 · `t33` 32 · `t34` **73** · `t35` **114** · `t21` 50 (tooling) · `domdiff` 32 (tooling). **3,506 app checks, 0 failing**, parity 10/10. ⚠ **`t29` is 60 on BOTH legs** (was 64): F-6c, F-7 and the retired `stateExclCliff` fixture's two §C flip checks left the shared tooling, so the frozen v5.68 leg moves too. Frozen v5.68 leg: `t10` 341, `t35` 104.
 
 *Per-suite at **v5.68**, current leg, parsed from `runsuite.sh` output 2026-09-10, run from the packaged copies — **35 suites**:* `t1` 185 · `t2` 35 · `t3` 36 · `t4` 252 · `t5` 58 · `t6` 21 · `t7` 41 · `t8` 42 · `t9` 14 · `t10` **338** · `t11` 40 · `t12` 23 · `t13` 42 · `t14` 44 · `t15` 11 · `t16` 24 · `t17` 74 · `t18` 67 · `t19` 65 · `t20` 100 · `t21` 50 · `t22` 85 · `t23` 25 · `t24` 38 · `t25` 45 · `t26` 25 · `t27` 18 · `t28` 34 · `t29` **64** · `t30` 12 · `t31` 31 · `t32` 12 · `t33` 32 · `t34` **70** · `t35` **99**. **3,441 app checks across both legs**, `t21` and `domdiff` (32) counted separately. `t22` is run with the PRIOR tag (`v567`). ⚠ **`t10` 312 on the frozen v5.67 leg and 338 current** — Virginia's block, with three pre-fix pins on the frozen leg. **`t29` 64 on both legs** (F-6c added; F-6a/F-6b repaired and gated per leg). **`t34` 70** (A-11). **`t35` 94 frozen, 99 current** (D-7c, D-10–D-13). Negative controls: `qa/tools/controls_v568_va.py`, 17 of 17.
@@ -418,6 +421,12 @@ its `since ===` branch), which is why it is re-derived every time rather than co
 
 `t4_dom.mjs` alone carries **21** gated expressions and is where to start, because they are the ones
 most likely to cover changed copy.
+
+⚠ **Added v5.70 — `vercensus.cjs` cannot see every registry.** It counts STRING-literal tags. `t33`'s `PINS` is keyed by
+identifiers (`v569: {…}`) and is invisible to it: it was missed at v5.66 and again at v5.70, and both times `t33` failed
+closed with FATAL, exactly as its comment says it will. v5.70's registration was 80 AST edits and 2 hand edits (`t1`
+`verStr`, `t4` `_badge`), **plus that `PINS` entry**. A `DIED` line in `runsuite.sh` output is a failure even when the
+GRAND line reads "0 failed".
 
 **The registries are fail-closed**, which is them working. An unregistered tag halts the suite:
 
