@@ -700,7 +700,7 @@ console.log(pool.length,"files ·",hashed.size,"hashed rows ·",pool.filter(f=>!
 | `OPERATIONS.md` | `c6c243df047c2e0d835fcb3de73090a2` | **rolled at v5.69** (was `76a6c6df46…`). `docs/OPERATIONS.md` — **rolled 2026-09-09** at the run-folder ops package: §B gained the `mk_runfolder.sh` pointer, and §D gained **D1** (the named existence-only assertion class) and **D2** (the `t29` F-6a/F-6b defect pin). *(Previously `f33c2e0cfd…`.)* |
 | `TESTING.md` | `650109b0a894632fe5663979dede2f05` | **rolled at v5.69** (was `7aad8d0368…`). `TESTING.md` |
 | `METHODOLOGY.md` | `952c0ad84e3cb39ad5b41fbe375bb974` | **rolled at v5.69** (was `a96a146a8f…`). `METHODOLOGY.md` |
-| `CHANGELOG.md` | `6daca066838c68d81a34ad43e2d03fe1` | **rolled at v5.69**, computed after the entry was final (was `79f9ff0280…`). `CHANGELOG.md` — **rolled 2026-09-10 (the Rhode Island scope ops package)**, computed after the entry was final (was `0c79bf40bb…`). ⚠ **rolled 2026-09-07 (v5.66 ship), the SECOND outing of the obligation this row created.** *(Previously `ef3866f6d9…`, rolled the same day at the tenth package.)* It changes in every package by definition, so its row is rolled in every package, computed into place **after** the entry is final |
+| `CHANGELOG.md` | `307ac821eda849fbb41a6e53f9ba87ef` | **rolled at the ops package of 2026-09-11 (Phase 1 re-run at v5.69)**, computed after the entry was final (was `6daca06683…`). **rolled at v5.69**, computed after the entry was final (was `79f9ff0280…`). `CHANGELOG.md` — **rolled 2026-09-10 (the Rhode Island scope ops package)**, computed after the entry was final (was `0c79bf40bb…`). ⚠ **rolled 2026-09-07 (v5.66 ship), the SECOND outing of the obligation this row created.** *(Previously `ef3866f6d9…`, rolled the same day at the tenth package.)* It changes in every package by definition, so its row is rolled in every package, computed into place **after** the entry is final |
 | `MissingFeatures.md` | `3cb825e792eb24000395575cd758e901` | **rolled at v5.69** (was `7cc6f6ee82…`). `docs/MissingFeatures.md` |
 | `README.md` | `eec58396f932b3209de79c2400dbfb88` | `README.md` |
 
@@ -866,6 +866,11 @@ should clone. ⚠ **Seven of the original eight still are; `hand_86.mjs` is not*
 | `qa/tools/ladder_hand.mjs` | `590234628df6a96e84dd3223a54fe2f3` | Hand replication of the ladder loop; one of the two independent scripts agreeing on $167,131 |
 | `qa/tools/render_check.mjs` | `88711e45ca98e8e63599488699ceeca3` | Reads the RENDERED ladder table out of jsdom. ⚠ Its imports are written for the RUN-FOLDER ROOT, not `qa/tools/` — copy it up a level to run it |
 | `qa/tools/slider_rerun.mjs` | `4fbbbdb5bc83505cdf994bb5a9b9027f` | Re-runs the ladder across slider positions; produced the direction-flip table in the measurement |
+| `qa/tools/probe_mydata_draft.mjs` | `f14e211de9ae21ebc0de641a4d2c2d96` | **Added 2026-09-11 (Phase 1 re-run at v5.69).** Runtime reproduction of `FlawsToFix-v5_69-Phase1.md` **A-3** (the draft autosave never saves): `contract`, `traced` and `control` modes. The control is a scratch shim with sync methods and must stay inside this file — never in a suite shim |
+| `qa/tools/probe_import_hostile.mjs` | `91537a1dc38f12acdeca1c3ca1c67e6b` | **Added 2026-09-11.** Drives hostile and malformed backups through BOTH real import paths (My Data, landing restore); `valid` is its positive control. Evidence for A-2, A-4, A-5, A-6. Sets `globalThis.FileReader` — the DOM harness has none |
+| `qa/tools/probe_ai_route.mjs` | `fd1e5a3900403b06fdbcb8337c1472e1` | **Added 2026-09-11.** Ask AI routing on a self-hosted origin with `src/main.jsx` L52–69 transcribed over a recording stub; `key` is its positive control. Evidence for **B-3**. Never touches the network |
+| `qa/tools/census_p1.cjs` | `8682c0dd7ce3234bb1fbbc0021729b0c` | **Added 2026-09-11.** The widened Phase 1 surface census — storage, network, sinks, iframe, download, clipboard, URL, JSX attributes, `JSON.parse`, merges. Walks every node key; self-checks four known sites |
+| `qa/tools/lits_p1.cjs` | `57f4b0ae07d18cf1b20347778b82b954` | **Added 2026-09-11.** Literal walk: the Field Manual's text value, app copy, and every suite string and regex literal, with each regex EXECUTED against the draft copy (§B1a) |
 | `mk_testable.sh` | `216722604a4a08faaee512d483219ca5` | `qa/qa-baseline/mk_testable.sh` — Splices `shim.txt` onto a source and builds `qa/app_<tag>.mjs`. **Named as a harness file in OPERATIONS §B and row-less until 2026-08-23.** Portability was fixed at v5.10.1 — it resolves relative to its own location, so the suite runs from a clean clone |
 | `run_all.sh` | `71bf342fbc7221340d40a93a154b29ee` | `qa/qa-baseline/run_all.sh` — The baseline driver: t1–t6 plus t10 for one leg, or `parity` for the compare. **Row-less until 2026-08-23** |
 | `mk_runfolder.sh` | `a397cbb376d159c76064720083498b9a` | `qa/mk_runfolder.sh` — **NEW 2026-09-09.** Builds the whole run folder from a clone: flattens `qa/qa-baseline/` onto `qa/`, derives both legs, and creates the two untagged aliases. **Rowed because it is a harness file** (§G), on the same footing as `mk_testable.sh` and `run_all.sh` above — and unlike a control script, it changes when the run layout changes, so a row protects something. ⚠ **It lives at `qa/`, not `qa/qa-baseline/`**, because it reads from both. ⚠ **It landed at `100644`** — see the ops-upload block below |
@@ -1161,7 +1166,8 @@ the current source unless it says so.
 
 | File | What it is | Status |
 |---|---|---|
-| `FlawsToFix-v5_10_1-Phase1.md` | Phase 1 audit (Sections A+B) against v5.10.1 | B-2 fixed at v5.10.2; B-1 closed as disclosed limitation; **A-2 open**, LOW, needs its own scope |
+| `FlawsToFix-v5_10_1-Phase1.md` | Phase 1 audit (Sections A+B) against v5.10.1 | B-2 fixed at v5.10.2; B-1 closed as disclosed limitation; **A-2 open**, LOW, needs its own scope · **re-run at v5.69 on 2026-09-11 — `FlawsToFix-v5_69-Phase1.md`** |
+| `FlawsToFix-v5_69-Phase1.md` | Phase 1 re-run (Sections A+B — the import and storage path) against v5.69 · **REPO-ONLY** (`docs/`), not in the pool (§G / H-2; its decision 4) | **A-3 MEDIUM** (the draft autosave never saves) and **B-3 MEDIUM** (keyless Ask AI posts the plan to the page's host) — both undisclosed and unscoped; A-4…A-6 LOW; A-2 still open |
 | `FlawsToFix-v5_15-Phase2D.md` | Sub-phase 2D findings, **REVISION 3**. Completeness half done to the Section C standard, verified **per engine**. Revisions 1 and 2 both stated mechanisms wrongly — §1 records both errors and the single cause, and is still worth reading for that. ⚠ **§6 IS SUPERSEDED** by `AUDIT_2D_BREAKEVEN_v5_28.md`, which says so in its own header | **2D COMPLETE at v5.28 — this row said "IN PROGRESS" through eleven releases and cost a session.** §6's three owed items (crossover hand-verified on two households, discounting-equivalence, `t10` cases) are all discharged. **Read the v5.28 audit, not §6** |
 | `SCOPE_FIX_otherAccounts_tax_treatment_v5_21.md` | **REVISION 2 — supersedes the v5.15 scope, which is retired.** Re-verified against v5.21 with AST resolution. Corrects three premise claims: Engine D applies **zero** tax to these draws (not capital-gains — `magi` L7686 omits `drawFromTaxable`); the treatment is **mischaracterized, not undisclosed** (MyData L11211 discloses it, Withdrawal L7822 and the Field Manual contradict it); and the census grew by **nine sites**. Structural trap **EXECUTED**: $147K → $0, silent, plus $21K of genuine brokerage leaving the tab's accounting. `total401k` has **three** derivations, so Option B is path-dependent | **active — §7 DECISIONS RESOLVED 2026-08-10.** Governs releases (b) and (c) |
 | `SCOPE_CONSOLIDATE_taxable_residual_v5_22.md` | Release **(a)** of the three-release plan (D-6/D-7). Consolidates the taxable residual, verified at **seven** identical sites by normalized AST fingerprint (one distinct form). Two binding constraints: the helper must **not** live in `retireStartBalances` (documented decision, L1509–1511, whose comment must be amended in the same edit), and **L8384 is a variant** — positions residual **plus** `otherAccounts` — so only its positions half is replaced | **active — no open decisions. Next build.** Pure refactor: 8/8 strict parity, all 751 checks **identical** |
@@ -1269,6 +1275,17 @@ retired and superseded. They get no row because there is no file. Checked 2026-0
 committed tree, so the next sweep does not re-open them.
 
 ## Retirement list (delete-first; nothing replaces these)
+
+### At the ops upload of 2026-09-11 (Phase 1 re-run at v5.69 — the import and storage path) — DELETE THESE FIRST
+
+**KIND: ops — v5.69 stays current.** No rotation. **Pool goes 128 → 128** (two files replaced, none arrive).
+
+| Delete | Because |
+|---|---|
+| `CHANGELOG.md` | replaced — the ops entry for this package |
+| `PROJECT_KNOWLEDGE_INDEX.md` | replaced — five repo-only tool rows, one audit row added and one annotated, `CHANGELOG.md`'s row rolled, an orientation note, this section. ⚠ **The pool copy this replaces was the v5.68 manifest**: when the audit began its Current-build table named v5.68 and no line mentioned v5.69, while source, suites, OPERATIONS.md and CHANGELOG all matched the clone. The v5.69 package's manifest never reached the pool |
+
+⚠ `docs/FlawsToFix-v5_69-Phase1.md` and the five `qa/tools/` files are **repo-only** — nothing arrives in the pool. **The pool is ADD-ONLY (§L F-1)**: delete each `replaced` file before uploading its new copy.
 
 ### At the v5.69 upload (2026-09-10) — DELETE THESE FIRST
 
@@ -2008,6 +2025,10 @@ they need a small docs release, and the delta sweep's §6 recommends shipping th
 extinction assertion tying the IRMAA sentence to Engine C's `magi` expression.
 
 ## Open items a session should know about (not a task list — orientation)
+
+> **⚠ 2026-09-11 — the standing audit's Phase 1 was re-run at v5.69** (`docs/FlawsToFix-v5_69-Phase1.md`, repo-only).
+> Two MEDIUM findings, both undisclosed and unscoped, with decisions put to Steve: **A-3**, the My Data draft autosave has
+> never saved; **B-3**, keyless Ask AI on a self-hosted copy sends the plan to the page's own host. A-4…A-6 LOW; A-2 still open.
 
 1. **The first-death class IS closed, as of v5.14.** C-2C-3 (v5.11), C-2C-4 (v5.12), C-2C-5 (v5.13)
    and C-2C-6 (v5.14) are all fixed: every engine models the first death in Social Security *and*

@@ -1,5 +1,53 @@
 # Changelog
 
+## ops 2026-09-11 — Standing audit Phase 1 re-run at v5.69: the import and storage path
+
+KIND: ops. Leaves **v5.69** current — source `76a35ba283ed5153ff257106e7ccfc10`, built `index.html` `86703918db247e3284752f0f1cc1f6d5`.
+**No app source, suite or harness file changes.** Findings only; nothing is fixed.
+
+### What this package adds, and why
+
+- **`docs/FlawsToFix-v5_69-Phase1.md`** — Sections A + B of the standing audit re-run at v5.69 over the ground the v5.10.1
+  Phase 1 named as not cleared: the import/apply path line by line, and the storage path.
+  - **A-3 · MEDIUM · undisclosed — the My Data draft autosave has never saved.** The draft code calls `getItem`/`setItem`/
+    `removeItem`; the storage the app runs on exposes only async `get`/`set`/`delete`/`list`, and each call's error is
+    swallowed. The dirty chip promises an auto-saved draft and the leave dialog says discarding keeps it. Reproduced on v5.68
+    and v5.69 with a positive control; source-traced to v5.9.1, the release that introduced it. A fix must move all eight
+    calls together, including Clear All Data's.
+  - **B-3 · MEDIUM · undisclosed — keyless Ask AI on a self-hosted copy sends the plan to the page's own host.** With no saved
+    key, EXECUTE stays enabled and `src/main.jsx`'s dev-proxy rewrite sends the full AI context to `/anthropic/v1/messages`
+    on the page's origin — `stextor.github.io` on the live site. Reproduced in the harness with the wrapper transcribed and a
+    keyed control; nothing was sent to any network.
+  - **A-4, A-5, A-6 · LOW** — a malformed backup imported from My Data fails silently and half-applied; an inherited skin name
+    (`"constructor"`) blanks the app until reload; an imported `masterPrompt` persists and heads every Ask AI prompt until the
+    next Save & Apply.
+  - **A-2 still open**, now reproduced: no row-count bound (20,000 holdings exhausted the harness heap on both import paths —
+    a jsdom measurement, not a browser one). A-1 and B-2 hold; positive findings 1, 2, 4 and 5 hold; 3 is confirmed at runtime
+    on the import side.
+- **Five repo-only tools in `qa/tools/`**, which assert nothing and count toward no release total: `probe_mydata_draft.mjs`,
+  `probe_import_hostile.mjs`, `probe_ai_route.mjs`, `census_p1.cjs`, `lits_p1.cjs`.
+- **`FlawsToFix-v5_10_1-Phase1.md` and `AUDIT_PHASE3_ROLLUP.md` are annotated** to point at the re-run; neither is rewritten.
+- **The knowledge pool's `PROJECT_KNOWLEDGE_INDEX.md` was the v5.68 manifest** when this audit began — its Current-build
+  table named v5.68 and no line mentioned v5.69 — while every other pooled file matched the clone. This package's manifest
+  replaces it.
+
+### How it was verified
+
+`t21` 50 passed, 0 failed, so the parser tools are trusted (OPERATIONS §B1). Every probe carries a positive control, and every
+control fired: sync methods added to a scratch shim make the draft appear and restore; a valid backup imports on both paths; a
+saved key reaches `api.anthropic.com` with `x-api-key`. Two controls first failed because the probes were wrong — the DOM
+harness has no `FileReader` global, and the first Ask AI button is ATTACH FILE — and both are recorded in the document.
+`census_p1.cjs` self-checks 4/4; `lits_p1.cjs` parsed 152 files with 0 failures. The packaged tools are byte-identical to the
+copies that produced the results. The regression suite was not re-run: this package changes no file a suite reads (by AST,
+no suite reads `CHANGELOG.md` or the manifest). `package_check` ran with all four arguments before the zip was cut; its
+result is recorded in the package's `MANIFEST.txt`.
+
+### Limitations — disclosed
+
+Nothing was measured in a real browser. What GitHub Pages does with the keyless POST was deliberately not tested.
+claude.ai's native storage method list is corroborated, not primary-sourced. The document's scope statement lists
+everything that was not examined, including the export payload, the wizard's save path and the regression suite.
+
 ## v5.69 — Rhode Island's exclusion becomes a cliff, the last of the five income-limited statutes, 2026-09-10
 
 Source `76a35ba283ed5153ff257106e7ccfc10` · built `index.html` `86703918db247e3284752f0f1cc1f6d5`.
