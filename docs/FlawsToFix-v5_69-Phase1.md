@@ -375,6 +375,9 @@ callers.
   reports both files for any package verified in such a folder (it did for this one; the two setup files were restored
   from the clone before the re-run, and neither ships). OPERATIONS §B's warning that a second `--no-save` install pruned
   `jsdom` means the remedy needs a scope, not a flag.
+  ⚠ **Annotated 2026-09-11 (`SCOPE_B3_KEYLESS_AI_ROUTE.md` F-8).** OPERATIONS §N3a records `jsdom`'s absence from
+  `package.json` as **deliberate** — it is installed `--no-save` in the build folder. The description above of what
+  `qa/mk_runfolder.sh` does to a run folder stands; this note should have cited §N3a.
 
 ---
 
