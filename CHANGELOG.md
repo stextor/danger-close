@@ -1,5 +1,80 @@
 # Changelog
 
+## v5.70 — Ask AI sends nothing without a key or a Local Model (the audit's B-3), 2026-09-11
+
+Source `df3e5d7599277ae1bb1afc216d318baf` · built `index.html` `372d066cf4fc7115ebdae9fc9d6f35d1`.
+
+**Suite: 3,576 app checks passing, 0 failing, 0 dead, across both the v5.69 and v5.70 legs** (`t21` 50 and `domdiff` 32 are
+tooling and counted separately; GRAND 3,658). Parsed from `runsuite.sh` output by script. Per suite, current leg: `t1` 185 · `t2` 35 · `t3` 36 · `t4` 252 · `t5` 58 · `t6` 21 · `t7` 41 · `t8` 42 · `t9` 14 · `t10` 354 · `t11` 40 · `t12` 23 · `t13` 42 · `t14` 44 · `t15` 11 · `t16` 24 · `t17` 74 · `t18` 67 · `t19` 65 · `t20` 100 · `t22` 85 · `t23` 25 · `t24` 38 · `t25` 45 · `t26` 25 · `t27` 18 · `t28` 34 · `t29` 60 · `t30` 12 · `t31` 31 · `t32` 12 · `t33` 32 · `t34` 73 · `t35` 114 · **`t36` 24**. On the v5.69
+leg `t36` is 23. MC parity 10/10. `smoke_built` 20/20 against the packaged `index.html`.
+
+### What changed, and why
+
+- **On a self-hosted copy with neither a saved API key nor a Local Model, Ask AI now sends nothing.** Through v5.69,
+  pressing ▶ EXECUTE (or Enter) in that state sent the Anthropic request without a key, and `src/main.jsx` rewrites any
+  keyless Anthropic request to the page's own address. On the live site, the full Ask AI context therefore went to the
+  site's GitHub Pages host: the plan summary (names, balances, income, Social Security and simulation results), the
+  question, and any attachments. Found by the 2026-09-11 Phase 1 audit (B-3); the Field Manual's list of where Ask AI
+  data goes did not include that destination.
+- **How.** One definition, `_aiNoRoute`, read by four sites:
+  - a refusal inside `askAI`, before any request is built — Enter reaches it even with the button disabled;
+  - the send button's disabled state;
+  - its label, **"🔑 Add your API key to use Ask AI"**;
+  - the network-error hint, whose condition now also excludes the Local Model route.
+
+  The refusal shows *"Nothing was sent — add your API key above, or set up a Local Model."* and the typed question stays
+  in the box.
+- **The Field Manual** — §10's complete list of what an Ask AI call transmits — gains: *"With neither a key nor a Local
+  Model set, Ask AI sends nothing."*
+- **Unchanged:** the claude.ai branch; keyed requests, which still go only to api.anthropic.com; Local Model requests;
+  offline mode; and every figure (MC parity 10/10). `src/main.jsx` is not touched.
+
+### What earlier versions did — disclosed
+
+- **The verified case is the live site.** Every standalone build published from this repository carried the keyless send
+  and the rewrite; both are in its first commit (2026-08-01). When the live site first served such a build was not
+  established.
+- **What GitHub Pages returned for such a request, or keeps from it, was not measured and is not known.** No API key was
+  involved.
+- **A copy opened as a downloaded file takes a different path:** a `file:` page gets no rewrite, so the keyless request
+  heads for api.anthropic.com, which refuses it without a key. That path was traced in the source, not tested, and no
+  claim is made about it. A copy hosted at some other address would have sent to that address.
+
+### Tests and controls
+
+- **`t36_ai_route.mjs` (new, both legs).**
+  - R-1 is the extinction invariant: zero requests, the refusal notice, the question kept, and the button disabled and
+    relabelled. The v5.69 leg carries a dated pre-fix pin instead: exactly one keyless request to the Anthropic URL, from
+    an enabled EXECUTE.
+  - Controls: R-2 a saved key, R-3 a Local Model, R-4 the claude.ai branch (in a child process), and R-5 offline mode;
+    plus the Field Manual sentence.
+  - Each self-hosted case asserts the LOCAL API KEY panel is on screen, because the shared jsdom environment runs every
+    other DOM suite on the claude.ai branch.
+- **`qa/tools/controls_v570_b3.sh`: 4 of 4 met expectation.** Unmutated stays green; deleting the refusal fires R-1;
+  narrowing the guard to "no key" fires R-3; dropping its claude.ai term fires R-4.
+- **`smoke_built.mjs` gains a B-3 behaviour check**: the built artifact, with the real bootstrap, sends nothing. 20/20 on
+  v5.70. Against the v5.69 rebuild it fails exactly its three B-3 checks, and every Enter sends a keyless request to
+  `/anthropic/v1/messages` — the defect reproduced in the shipped composition, not a transcription.
+- **Version registration:** `v570` in 18 suites — 80 AST edits and 2 hand edits — then `vercensus.cjs` on the new tag
+  (82 judgement points, as on v569). **⚠ The build's own error:** that pass missed `t33`'s `PINS` entry, an
+  identifier-keyed registry `vercensus.cjs` cannot see. The first full run showed `t33` DIED on the v5.70 leg while the
+  runner's GRAND line still read "0 failed". The entry carries v5.69's figures forward, and the suite was re-run in
+  full.
+- **§B1a:** every suite regex was executed against the old and new copy; no matcher's meaning changes.
+- **Built per OPERATIONS §N3a:** v5.69 rebuilt byte-identically to `86703918db247e3284752f0f1cc1f6d5` first.
+
+### Limitations — disclosed, not modelled
+
+- **`src/main.jsx` still rewrites keyless Anthropic requests to the page's origin.** The app no longer makes one outside
+  claude.ai, except in the fail-closed case — a non-file page with no hostname, which the app treats as claude.ai.
+  Removing the rewrite is a separate, later release.
+- **The network-error hint that tells users to put a key in `.env` for the dev proxy is now unreachable.** The dev proxy
+  injects no key, so that text was never accurate; it goes with the rewrite.
+- **Nothing was measured in a real browser.** The DOM suites and `smoke_built` run in jsdom.
+- **A short public note about the earlier behaviour follows once v5.70 is live.**
+
+Provenance: source `df3e5d7599277ae1bb1afc216d318baf` · built `index.html` `372d066cf4fc7115ebdae9fc9d6f35d1`.
+
 ## ops 2026-09-11 (second package) — B-3 is scoped and approved: Ask AI will send nothing without a key or a local model
 
 KIND: ops. Leaves **v5.69** current — source `76a35ba283ed5153ff257106e7ccfc10`, built `index.html` `86703918db247e3284752f0f1cc1f6d5`.
