@@ -526,6 +526,10 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
     const OPEN = new Set([
       "SCOPE_STANDING_AUDIT.md",                  // not a build scope at all (OPERATIONS §K)
       "SCOPE_HOUSEKEEPING_THREE.md",              // awaiting decisions in its §5
+      // Added 2026-09-11 (the B-3 scope's ops package). APPROVED, UNBUILT. ⚠ EXPIRES AT THE v5.70 SHIP: the release
+      // that builds it adds a retirement marker to the scope's head and removes this entry in the same package. Nothing
+      // detects that expiry (I-3 fires only on a vanished file) — a person removes it, as with every entry in this block.
+      "SCOPE_B3_KEYLESS_AI_ROUTE.md",
       // Added v5.61, REWRITTEN 2026-09-04, REASON CORRECTED 2026-09-07. The entry is right and
       // its reason has now gone stale TWICE, which is the point of this comment.
       //   2026-09-04: reason changed from "awaiting D-2 and D-3" to "approved, unbuilt", and the
