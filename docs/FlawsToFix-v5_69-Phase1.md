@@ -197,6 +197,9 @@ reputational.** **Undisclosed.**
 
 ## FINDING B-3 — Keyless Ask AI on a self-hosted copy sends the plan to the page's own host (MEDIUM · user-side PII · CONFIRMED in harness · undisclosed)
 
+> **⚠ FIXED at v5.70 (2026-09-11)** — `docs/SCOPE_B3_KEYLESS_AI_ROUTE.md`, retired with its build record. *Annotation only;
+> the finding below is as written at v5.69.*
+
 **What.** Outside claude.ai with no saved API key and no local model, Ask AI's ▶ EXECUTE button is **enabled**, and
 pressing it sends the Anthropic request **with no key header**. `src/main.jsx` (L52–69) rewrites any
 `https://api.anthropic.com` request that lacks `x-api-key` to the same-origin path `/anthropic`. That rewrite exists

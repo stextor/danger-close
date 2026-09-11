@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **BUILDABLE — all three decisions APPROVED 2026-09-11 (§5):** D-B3-1 (a) the app only · D-B3-2 (a) a disabled, relabelled button · D-B3-3 (b) CHANGELOG, a Field Manual sentence and a short public note after v5.70 is live. *(Prior status: DRAFT, awaiting decisions.)* |
+| Status | **☑ RETIRED — FULFILLED AT v5.70, 2026-09-11.** §7 is the build record, including where this scope and its build were wrong. *(Prior status: BUILDABLE — all three decisions APPROVED 2026-09-11.)* |
 | Measured against | **v5.69**, source `76a35ba283ed5153ff257106e7ccfc10`, built `index.html` `86703918db247e3284752f0f1cc1f6d5`, `src/main.jsx` `d9eca7b469a3fb7ec1c5325fd4bf8145`, repo HEAD `4bbf89e` (the Phase 1 audit package — verified after upload: `package_check` 44 passed, 1 failed, `D-1` only), pool 128 files, no duplicate names |
 | Parent finding | `docs/FlawsToFix-v5_69-Phase1.md` **B-3** (MEDIUM, undisclosed) |
 | Target release | **v5.70** |
@@ -218,3 +218,31 @@ Both keep the refusal inside `askAI`.
 
 ---
 
+---
+
+## 7 · Build record — v5.70, 2026-09-11
+
+Built from repo HEAD `1901e88`. Source `df3e5d7599277ae1bb1afc216d318baf`, built `index.html` `372d066cf4fc7115ebdae9fc9d6f35d1`.
+
+- **§1 re-measured before building.** The v5.69 leg still sent exactly one keyless request, from an enabled EXECUTE
+  (`t36` R-1 pin).
+- **Built as scoped** (D-B3-1 (a), D-B3-2 (a)): one definition, `_aiNoRoute`, read by the refusal in `askAI`, the error
+  hint, the button's `disabled` and its label. **One deliberate refinement:** the refusal sits *after* the
+  empty-question and simulation checks, not before `_validFiles` as in the scratch experiment, so an empty Enter stays
+  silent. **One consequence the scope did not state:** the error hint's new condition is exactly the state the refusal
+  intercepts before any request, so that hint — including its inaccurate `.env` sentence (F-2) — is now unreachable. It
+  goes with the `main.jsx` release.
+- **Field Manual (D-B3-3):** the sentence is in §10's destination row; the four version sites read v5.70.
+- **Tests:** `t36` 23 on the v5.69 leg and 24 on the v5.70 leg. `controls_v570_b3.sh` 4 of 4 met
+  expectation. `smoke_built` 20/20 on v5.70; against the v5.69 rebuild it failed exactly its three B-3 checks, with every
+  Enter sending a keyless request to `/anthropic/v1/messages` — the defect reproduced in the real bootstrap. Full suite:
+  **3576 app checks, 0 failing, 0 dead**, MC parity 10/10.
+- **⚠ Where the build was wrong.** Version registration followed `vercensus.cjs` (80 AST edits + 2 hand edits) and
+  **missed `t33`'s `PINS` entry**, an identifier-keyed registry that `vercensus` cannot see. The first full run showed
+  `t33` DIED on the v5.70 leg while the runner's GRAND line read "0 failed". `t33`'s own FATAL message and a v5.66
+  comment already named the trap. The entry carries v5.69's figures forward, and the full suite was re-run.
+- **⚠ Where this scope was wrong.** §3 said `t36` would expose `location` *"on a self-hosted URL"* and left the
+  claude.ai branch to *"no `location`"*. Because `IS_CLAUDE_ARTIFACT` is computed when the bundle loads, the claude.ai
+  case had to run in a **child process** — one suite file, two processes.
+- **The error hint's `.env` text, the dev proxy and `main.jsx`'s rewrite remain**, as decided; the CHANGELOG discloses
+  them. The public note waits until v5.70 is live.

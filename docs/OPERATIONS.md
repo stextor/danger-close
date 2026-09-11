@@ -1209,7 +1209,8 @@ Run all four against `dist/index.html`:
 3. **Provenance:** built from the canonical md5 the suite ran against; record source **and** built md5s in
    the CHANGELOG and commit message.
 4. **Behavior:** run `qa/smoke_built.mjs` — boots, gate renders and dismisses, React mounts, example
-   household loads, a data tab renders, and **the `window.storage` shim round-trips** (set/get/list/delete,
+   household loads, a data tab renders, **Ask AI sends nothing without a key or a Local Model** (added v5.70 — the
+   only check that sees the app and the real bootstrap together), and **the `window.storage` shim round-trips** (set/get/list/delete,
    the `dc:`-prefixed localStorage write-through, and get-throws-on-missing).
 
 **Check 4 is the one that catches a wrong bootstrap; 1–3 all pass on a broken build.**
@@ -1224,7 +1225,7 @@ npm ci                          # NOT `npm install` — see the lockfile note be
 npm install --no-save jsdom     # harness dep, deliberately NOT in package.json; --no-save
                                 # keeps the scaffold package.json byte-identical to knowledge
 npx vite build                  # -> dist/index.html, the ONLY output
-node qa/smoke_built.mjs         # -> 16 checks. An optional first argument overrides the
+node qa/smoke_built.mjs         # -> 20 checks at v5.70. An optional first argument overrides the
                                 # input path: `node qa/smoke_built.mjs some/other.html`
 ```
 
@@ -1284,7 +1285,7 @@ and react-dom 18.3.1, node 22.22.2, jsdom 30.
 **What this means in practice.** A matching built md5 is strong confirmation the scaffold is
 complete, and after v5.31 a mismatch against the *immediately-prior* release is worth investigating
 rather than shrugging at — but a mismatch against an *older* release is expected and means little.
-**The binding check on a built artifact is `smoke_built.mjs` at 16/16 plus the §N3 checks — not the
+**The binding check on a built artifact is `smoke_built.mjs` at 20/20 (v5.70) plus the §N3 checks — not the
 hash.** Record the built md5 for provenance, and do not hold a release for it. ⚠ **The last sentence
 of this paragraph used to read "If byte-identical rebuilds are ever wanted back, the fix is a
 committed lockfile, not a longer list here." That fix landed at v5.62 and this section did not
