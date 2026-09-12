@@ -1,5 +1,50 @@
 # Changelog
 
+## ops 2026-09-12 — the A-3 scope (with A-6 and F-3), decided and buildable; the B-3 browser check recorded
+
+KIND: ops. Leaves **v5.70** current — source `df3e5d7599277ae1bb1afc216d318baf`, built `index.html` `372d066cf4fc7115ebdae9fc9d6f35d1`.
+**No app source change, no suite or harness change.** Nothing is built. The one code file here is a QA tool's allowlist.
+
+### What this package adds, and why
+
+- **`docs/SCOPE_A3_DRAFT_AUTOSAVE.md` — the scope for v5.71.** A-3 (the My Data draft autosave has never saved) with
+  A-6 (an imported `masterPrompt` heads every Ask AI system prompt unchecked) and F-3 (the first-open gate claims
+  unconditionally that nothing is uploaded) folded in, since all three need one version bump and one rebuild between
+  them. Measured against v5.70 and `d8c6aaa`; the Phase 1 finding's line numbers were all twelve lines stale and are
+  re-resolved here by parser.
+- **Three things the scope records that were not previously written down.** First, and the reason the fix is not
+  mechanical: `clearStorage` deletes only the fourteen keys in `STORAGE_KEYS`, and the draft key is not one of them.
+  The v5.9.1 leak review found exactly this and put a draft deletion inside `performClearAll` — one of the eight dead
+  call sites. It is harmless only because no draft has ever been written, so **repairing A-3 without the wipe path
+  would ship the leak that review existed to prevent**. Second, the suite has **zero** coverage of the draft feature:
+  an AST walk over every `t*.mjs` collecting string **and regex** literals finds no assertion naming the draft key or
+  the storage methods, and `VERIFICATION_REPORT.md`'s claim that the v5.9.1 fix was guarded by a `t1` assertion does
+  not hold today. (The first pass of that census was string-only and would have missed a regex outright; the re-run is
+  what is quoted.) Third, `restoreDraft`, `discardDraft` and the recovery banner have **never executed** — this is
+  unexercised code being switched on, not repaired.
+- **All six of the scope's decisions were approved the day it was written**, each as recommended: the draft key joins
+  `STORAGE_KEYS` so the wipe and `t5`'s key-map loop cover it by construction; a flag set on a successful write drives
+  the dirty chip, so the app cannot promise a draft it did not observe; the leave dialog's restore sentence becomes
+  conditional on that flag; an imported `masterPrompt` is string-only and truncated at 20,000 characters; the gate
+  gains the Ask AI exception. ⚠ **The 20,000 figure is a judgement, not a measurement** — reasoned from token
+  arithmetic with no sample of real prompt lengths behind it, recorded as such in the scope, and cheap to revise.
+- **`qa/tools/package_check.mjs`:** the I-2 OPEN allowlist gains `SCOPE_A3_DRAFT_AUTOSAVE.md`. I-2 reads the tree as
+  the package leaves it, so the scope and its entry must ship together; the entry names its own expiry (the v5.71
+  build, which must remove it in the same package).
+- **`docs/STATUS_2026_09_11_b3_live_verification.md`:** §4's reserved line is filled. The maintainer observed the
+  refusal notice on the live site on 2026-09-12; the Network panel was not opened, so this confirms the user-visible
+  half only and the zero-request half still rests on that record's §2 measurements. Recorded second-hand and marked as
+  such. It landed here rather than in its own zip because a package was shipping anyway.
+
+### How it was verified
+
+`package_check` ran on the packaged copies with all four arguments before the zip was cut, using **this package's own
+copy of `package_check.mjs`** rather than the clone's — I-2's allowlist lives inside the tool, so the clone's copy
+cannot see an entry this package adds, and the packaged copy is what the post-ship tree will hold. Both runs are
+recorded in `MANIFEST.txt`, including the clone-copy run and why it differs. `package_check_controls.sh` was not
+re-run: no check logic changed, only a data entry in a list. The regression suite was not re-run: no app, suite or
+harness file is in this package.
+
 ## ops 2026-09-11 (third package) — B-3 verified on the live site: GitHub Pages serves the tested v5.70 build, and it sends nothing without a key
 
 KIND: ops. Leaves **v5.70** current — source `df3e5d7599277ae1bb1afc216d318baf`, built `index.html` `372d066cf4fc7115ebdae9fc9d6f35d1`.
