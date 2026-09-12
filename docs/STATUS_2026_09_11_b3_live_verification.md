@@ -12,8 +12,9 @@ changed since the packaged-copies run in CHANGELOG v5.70); D-4 — `TESTING.md`'
 in the same package (F-5); D-5 — OPERATIONS §I's false "cannot reach the live host" paragraph corrected in the same
 package (F-7).
 
-**Steve's real-browser check: not yet received when this record was packaged** — see §4; add the result here when it
-arrives, in one line, dated.
+**Steve's real-browser check: RECEIVED 2026-09-12 and recorded in §4** — the refusal notice was observed on the live
+site; the Network panel was not opened, so the zero-request half still rests on §2's measurements, not on it. Added by
+the ops package of 2026-09-12 (the A-3 scope), which was the next package to ship — no zip was cut to edit one line.
 
 ---
 
@@ -120,7 +121,13 @@ entry and the package's `MANIFEST.txt`); §1's K/J replicas are the pool-side re
   live site → accept the notice → *use example data* → **ask AI** → F12 → Network (Fetch/XHR) → type a question →
   Enter → try the button. Expected: footer **v5.70**; button **🔑 Add your API key to use Ask AI**, grey; *"Nothing
   was sent — add your API key above, or set up a Local Model."*; **no new row** in the Network tab. Hard-refresh first.
-  **Result: (not yet received — record it here, dated.)**
+  **Result (2026-09-12, maintainer, real browser):** the refusal notice — *"Nothing was sent — add your API key
+  above, or set up a Local Model."* — **was observed on the live site.** The Network panel was **not** opened (the
+  DevTools step was judged not worth the hassle, which is a fair call), so this confirms the guard's **user-visible
+  half only**: a real browser engine takes the same path jsdom did, and the no-key branch ran — had a key been saved
+  in that profile the notice would not have appeared at all, so its appearance is itself the evidence. The
+  **zero-request half rests entirely on §2's three measurements against the live download**, not on this. Recorded
+  second-hand from the maintainer's report; nothing about the browser or the page state was measured by a session.
 - The public note (Steve's; draft and wording constraints in the retired scope's §5) — the live confirmation it was
   waiting for is in hand.
 - Removing `main.jsx`'s rewrite (D-B3-1 (b)); A-3; pool pruning — unchanged from the queue.

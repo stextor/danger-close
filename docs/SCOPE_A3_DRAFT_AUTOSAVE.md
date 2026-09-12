@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **OPEN — NOT BUILDABLE until §5's decisions are answered.** Written 2026-09-12. |
+| Status | **OPEN — DECIDED AND BUILDABLE.** Written 2026-09-12; all six §5 decisions approved the same day (the recommendation in each case — see §5). Nothing here is built. |
 | Measured against | **v5.70**, source `df3e5d7599277ae1bb1afc216d318baf`, built `index.html` `372d066cf4fc7115ebdae9fc9d6f35d1`, `src/main.jsx` `d9eca7b469a3fb7ec1c5325fd4bf8145`, `src/index.html` `52ef2be3080352df6198ee3b8c3507ad`, repo HEAD `d8c6aaa`, pool 130 files, no duplicate names |
 | Parent findings | `docs/FlawsToFix-v5_69-Phase1.md` **A-3** (MEDIUM, undisclosed) and **A-6** (LOW); `docs/STATUS_2026_09_11_b3_live_verification.md` **F-3** (the first-open notice) and **F-1** (two vacuous `smoke_built` checks, riding as D-2 of that record) |
 | Target release | **v5.71** |
@@ -153,9 +153,13 @@ wording reverted. **A control that does not fire is the finding, not something t
 - Any change to `METHODOLOGY.md`. Nothing here touches modelling.
 - The public note about B-3, which is Steve's and independent of this release.
 
-## 5 · Decisions for Steve
+## 5 · Decisions — ANSWERED 2026-09-12
 
-**D-A3-1 · How the wipe covers the draft (§0 (a)) — the one that must not be got wrong.**
+**All six were approved as recommended.** The recommendation text is left exactly as written so that what was approved
+is legible, and the alternatives are kept so a later reader can see what was weighed rather than only what won.
+
+
+✅ **D-A3-1 · How the wipe covers the draft (§0 (a)) — the one that must not be got wrong.**
 - **(a) RECOMMENDED: add the draft key to `STORAGE_KEYS`** and delete the now-redundant call at site 7. `clearStorage`
   then covers it by construction, and `t5`'s existing loop over the key map covers *that* — so the guard comes free and
   a future key cannot drift out of the wipe, which is the failure mode the v5.10.2 comment at `clearStorage` was
@@ -165,7 +169,7 @@ wording reverted. **A control that does not fire is the finding, not something t
 - **(b)** Keep the key separate and repair site 7. Smaller diff, but it leaves the wipe's correctness resting on one
   hand-written call that has already been wrong once — for five releases, silently.
 
-**D-A3-2 · How loud is a failed draft write?** The whole finding is that an empty `catch` hid a dead feature for
+✅ **D-A3-2 · How loud is a failed draft write?** The whole finding is that an empty `catch` hid a dead feature for
 five releases, so "silent" is the thing on trial.
 - **(a) RECOMMENDED: the UI stops promising what it has not observed.** A successful write sets a flag; the chip reads
   *"● Unsaved changes (draft saved HH:MM)"* when the flag is set and *"● Unsaved changes"* alone when it is not. No
@@ -176,24 +180,26 @@ five releases, so "silent" is the thing on trial.
 - **(c)** Surface a visible warning when a write fails. Loudest, and most likely to alarm a user about something they
   cannot act on.
 
-**D-A3-3 · The leave dialog (L6304).** With (a) above, the sentence can be conditional on the flag. Without it, it
+✅ **D-A3-3 · The leave dialog (L6304).** With (a) above, the sentence can be conditional on the flag. Without it, it
 must be unconditional and weaker.
 - **(a) RECOMMENDED, pairs with D-A3-2 (a):** *"Discarding keeps the auto-saved draft, so you can still restore this
   work on your next visit."* shown only when a draft is confirmed saved; otherwise *"Discarding loses these edits."*
 - **(b)** One unconditional sentence that promises nothing: *"Discarding loses these edits unless a draft was saved."*
   Honest, and vaguer than a user deciding in that moment deserves.
 
-**D-A3-4 · A-6's guard.** Recommendation: reject a non-string, and cap the length.
+✅ **D-A3-4 · A-6's guard.** Recommendation: reject a non-string, and cap the length.
 - **(a) RECOMMENDED:** accept only a string, cap at **20,000 characters** (roughly 5,000 tokens — comfortably above
   any real customisation, far below a payload that would dominate a context window), truncate rather than reject so a
-  legitimate long prompt is not silently lost, and note the cap in the Field Manual's §10 table. **The number is
-  yours** — I have no measurement of what a real user's prompt length is, and I am not going to present a round guess
-  as a derived figure.
+  legitimate long prompt is not silently lost, and note the cap in the Field Manual's §10 table. **APPROVED 2026-09-12 at 20,000.** ⚠ Recorded
+  plainly: that number is a judgement, not a measurement. No real user's prompt length was sampled, and it is a round
+  figure reasoned from token arithmetic alone. It is cheap to change — one constant and one test — and it should be
+  revised the moment anyone has a real distribution to point at. Do not let a later reader mistake it for a derived
+  value.
 - **(b)** Do not import `masterPrompt` from a backup at all; always regenerate. Closes the finding completely and
   loses the user's own customisation on restore of their own file.
 - **(c)** Disclose only. Cheapest; leaves a shared file steering the assistant.
 
-**D-A3-5 · The F-3 wording.** Yours; the gate is the first thing a user reads and the sentence should survive
+✅ **D-A3-5 · The F-3 wording.** Yours; the gate is the first thing a user reads and the sentence should survive
 scrutiny.
 - **(a) RECOMMENDED:** *"Your inputs stay in **your own browser** — nothing is uploaded, except what you deliberately
   send from the Ask AI tab."* One clause added; matches the Field Manual's intro almost word for word.
@@ -202,14 +208,24 @@ scrutiny.
 - **(c)** Leave it and rely on the Field Manual. Not recommended: the gate is read by everyone, §10 by few, and the
   gate's sentence is the one that is wrong.
 
-**D-A3-6 · Release shape.** *Recommendation: one release, v5.71.* A-3, A-6 and F-3 all change user-facing behaviour or
+✅ **D-A3-6 · Release shape.** *Recommendation: one release, v5.71.* A-3, A-6 and F-3 all change user-facing behaviour or
 copy and all need one version bump and one rebuild between them; splitting costs three ship cycles for one diff. If
 you would rather see A-3 alone, say so and A-6 and F-3 move to v5.72 — the scope is written so either works.
 
+### Decisions as taken (2026-09-12)
+
+| | Decision | Taken |
+|---|---|---|
+| D-A3-1 | how the wipe covers the draft | **(a)** the draft key joins `STORAGE_KEYS`; site 7's hand-written call is deleted as redundant |
+| D-A3-2 | how loud a failed draft write is | **(a)** a flag set on a successful write drives the chip |
+| D-A3-3 | the leave dialog's sentence | **(a)** conditional on that same flag |
+| D-A3-4 | A-6's guard | **(a)** string-only, truncate at **20,000 characters** — ⚠ a judgement, not a measurement |
+| D-A3-5 | the first-open gate wording | **(a)** *"Your inputs stay in **your own browser** — nothing is uploaded, except what you deliberately send from the Ask AI tab."* |
+| D-A3-6 | release shape | **one release, v5.71** |
+
 ## 6 · Status and what happens next
 
-**Not buildable until §5 is answered**, D-A3-1 and D-A3-2 in particular, because they determine the fix's shape rather
-than its wording. On approval, the build order is: re-measure §1 and §2 against whatever is current → write `t37` and
+**Buildable.** All six decisions were answered on 2026-09-12, the day the scope was written. The build order is: re-measure §1 and §2 against whatever is current → write `t37` and
 watch it **fail on the v5.70 leg in the right way** → fix the eight sites and the wipe path → A-6 → F-3 → the four
 version sites → `vercensus.cjs`, **plus `t33`'s `PINS` entry by hand** (identifier-keyed; invisible to `vercensus`,
 and missed at both v5.66 and v5.70 — OPERATIONS §I) → full suite → rebuild and `smoke_built` → package per §L.
