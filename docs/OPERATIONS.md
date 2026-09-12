@@ -804,10 +804,18 @@ gate nothing cross-references is the failure this section already records four t
   marker nor a place on the OPEN allowlist held inside the check itself. It **reports; it does not
   decide** — see the warning below.
 
-⚠ **§H proves what the REPO holds, not what Pages SERVES.** A session cannot reach
-`stextor.github.io` (HTTP 403 — not in the egress allowlist), and Pages can trail a commit by
-minutes. The only thing that verifies the served bytes is the maintainer running this after a
-publish, and comparing the two lines it prints to the CHANGELOG's provenance line for that release:
+⚠ **§H proves what the REPO holds, not what Pages SERVES.** Pages can trail a commit by minutes,
+and §H's fetch goes to `raw.githubusercontent.com`, never to Pages. **A session CAN reach
+`stextor.github.io` since 2026-09-11** (corrected 2026-09-11): the maintainer added the host to the
+sandbox's egress allowlist that day, and because a sandbox's list is issued at chat start, the first
+chat opened after the change was the first to see it. Until then this paragraph read *"a session
+cannot reach `stextor.github.io` (HTTP 403 — not in the egress allowlist)"*, and `package_check.mjs`'s
+§H code comment still says so — leave that comment for the change that next touches the tool. The
+served bytes were verified from a session for the first time at v5.70:
+`docs/STATUS_2026_09_11_b3_live_verification.md` (200, md5 equal to the committed and rebuilt
+artifact, `smoke_built` 20/20 on the download). It is still not a gate: nothing runs it
+automatically, so run this after every publish — from the sandbox or by hand — and compare the two
+lines it prints to the CHANGELOG's provenance line for that release:
 
 ```bash
 curl -fsSL https://stextor.github.io/danger-close/ | md5sum          # what visitors actually get
