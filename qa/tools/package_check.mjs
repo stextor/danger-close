@@ -565,6 +565,15 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
       // ── REMOVED at the v5.69 ship: "SCOPE_RI_POPULATE.md", added 2026-09-10. Its entry named its own expiry — the
       //    Rhode Island build — and the scope is RETIRED with a §10 build record in the same package.
       "SCOPE_STATE_SET_SELECTOR.md",              // OPEN, written v5.66 (D-NM-1 (c) second half); expires when the structural field ships
+      // Added 2026-09-12 (ops package), with the scope itself, as I-2 requires: I-2 reads the tree AS THIS
+      // PACKAGE LEAVES IT, so a scope arriving without its entry fires red in the same run that ships it.
+      // All six of its §5 decisions were approved the day it was written, so this is OPEN-because-UNBUILT,
+      // not OPEN-because-undecided — the distinction the SCOPE_RI_POPULATE note above was added to make.
+      // ⚠ EXPIRES AT THE v5.71 BUILD, which retires it with a build record. That release must remove this
+      // entry in the same package, per the two-halves rule recorded in the removal notes below. Nothing
+      // here can detect a missed removal: I-3 fires only on an entry naming a file that is GONE, and this
+      // file will still be there, carrying a RETIRED marker. A person removes it.
+      "SCOPE_A3_DRAFT_AUTOSAVE.md",               // OPEN, written 2026-09-12 (A-3 with A-6 and F-3); decided, unbuilt; expires at v5.71
       // ⚠ The comment that used to sit here described SCOPE_TREE_AND_POOL_HOUSEKEEPING.md and was
       // orphaned when that entry was removed on 2026-09-07; it is folded into the removal note
       // below rather than left pointing at nothing.
