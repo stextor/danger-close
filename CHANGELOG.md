@@ -1,5 +1,54 @@
 # Changelog
 
+## ops 2026-09-11 (third package) — B-3 verified on the live site: GitHub Pages serves the tested v5.70 build, and it sends nothing without a key
+
+KIND: ops. Leaves **v5.70** current — source `df3e5d7599277ae1bb1afc216d318baf`, built `index.html` `372d066cf4fc7115ebdae9fc9d6f35d1`.
+**No app source, suite or harness file changes.** Nothing is built.
+
+### What this package adds, and why
+
+- **`docs/STATUS_2026_09_11_b3_live_verification.md` — the verification record (repo-only).** The v5.70 CHANGELOG entry
+  disclosed that nothing had been measured in a real browser and that GitHub Pages had not been checked; this closes the
+  second. `https://stextor.github.io/danger-close/index.html` returned 200, 1,428,589 bytes, md5 `372d066c…`, an origin
+  fetch one minute after the `1f1e837` commit; the directory URL serves the same bytes. v5.69 rebuilt byte-identically
+  to `86703918…` (the §N3a scaffold check) and v5.70 rebuilt byte-identically to the live download, so pool source =
+  clone source = rebuild = committed artifact = served bytes, all measured in one session. On the live download:
+  `smoke_built` 20/20; through the real bootstrap under jsdom, no key and no Local Model → **0 requests** and the
+  refusal notice, a saved key → 1 request to `api.anthropic.com`, a Local Model → 1 request to its URL; the v5.69
+  rebuild → 1 keyless request resolving to the page's own host. From a clean clone, `t36` 23 on v5.69 / 24 on v5.70 and
+  `controls_v570_b3.sh` 4 of 4. The pool is at 130 and `SCOPE_B3_KEYLESS_AI_ROUTE.md` has left it. **Still not
+  measured: a real browser** — Steve's check, with a line reserved for its result in the record's §4.
+- **Seven findings, recorded there in full.** F-1 (confirmed by demonstration): two `smoke_built.mjs` checks read
+  `body.textContent`, which includes the relocated bundle's *source*, so *"Ask AI refuses (notice shown)"* and *"renders
+  its own declared version"* both pass on a page in which no script ran; B-3 coverage stands on the zero-request and
+  disabled-button checks and on `t36`. Fixed with A-3 (D-2). F-2: the leftover scope file was a fresh instance of the gap
+  OPERATIONS §G already records — `package_check` K-9's "named somewhere" was satisfied by the manifest's own sentence
+  saying the file leaves. F-3 (located): the first-open notice in `src/index.html` L21 states *"Nothing is uploaded or
+  seen by anyone else"* unconditionally, while the Field Manual qualifies it twice; wording is Steve's, and it is a
+  scaffold change with a rebuild. F-4: `qa/tools/controls_v570_b3.sh` is committed `100644` — the only `.sh` without the
+  executable bit; the §L upload hazard for new scripts. F-5 and F-7 are corrected below. F-6: `VERIFICATION_REPORT.md`
+  declares itself frozen after v5.9.2 and had no manifest row, so the record lives in `docs/`, not there.
+- **`TESTING.md` (F-5, D-4):** its only "Current build" sentence read v5.67 with v5.67's hashes and total, three
+  releases stale in the present tense while OPERATIONS §G says the file holds the current md5. Rolled to v5.70
+  (`df3e5d75…` / `372d066c…` / 3,576, GRAND 3,658) with a note recording the stale span.
+- **`OPERATIONS.md` §I (F-7, D-5):** the paragraph saying a session cannot reach `stextor.github.io` (403) is false as
+  of 2026-09-11 — the host was added to the sandbox allowlist and this package's record reached it. Corrected to say
+  so, and to say the served-bytes check is still a habit, not a gate. `package_check.mjs`'s §H comment says the same
+  false thing and is left for the change that next touches the tool.
+- **`PROJECT_KNOWLEDGE_INDEX.md`:** an inventory row for the new record; a REPO-ONLY inventory row for
+  `VERIFICATION_REPORT.md` (F-6); the orientation note gains the live result; hash rows rolled for `TESTING.md`,
+  `OPERATIONS.md` and `CHANGELOG.md` (last); a delete-first section for this upload.
+- **Decisions taken on the session's recommendations:** D-1 (a), D-2 with A-3, D-3 no second full-suite run, D-4 yes,
+  D-5 yes. F-2, F-3, F-4 and the `package_check` §H comment go to a housekeeping scope, not to A-3.
+
+### How it was verified
+
+`package_check` — the packaged copy, with all four arguments (`/tmp/ship` at `1f1e837`, the run folder with its
+`package.json` and `package-lock.json` restored from the clone, the pool) — ran before the zip was cut; its result is in
+the package's `MANIFEST.txt`, and the post-upload run closes section J. `package_check_controls.sh` was not re-run: no
+check logic changed. `row_census.cjs` was not needed: K-8's expression was not touched. The regression suite was not
+re-run: no app, suite or harness file changed.
+
 ## v5.70 — Ask AI sends nothing without a key or a Local Model (the audit's B-3), 2026-09-11
 
 Source `df3e5d7599277ae1bb1afc216d318baf` · built `index.html` `372d066cf4fc7115ebdae9fc9d6f35d1`.
