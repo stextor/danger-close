@@ -1,5 +1,63 @@
 # Changelog
 
+## ops 2026-09-14 (second) — housekeeping after the pool pruning: three ghost rows and one rescued question
+
+KIND: ops. Leaves **v5.71** current — source `9e79b92f9eb91e86489cb6b80caa33c3`. **No app source change,
+no version bump, no rebuild, no suite-affecting change.** Corrective, following the removal of sixteen
+retired scopes from the project-knowledge pool (~348K recovered; the repo copies remain at `docs/`).
+
+### `K-8` — three manifest rows naming files that are no longer pooled
+
+Removing a document from the pool is two of §G's three places. The third — its manifest row — was not
+done, and `K-8` went red post-ship naming `SCOPE_STATE_FIXTURES.md`, `SCOPE_VA_NOTE_CORRECTION.md` and
+`SCOPE_EXCL65_STALE_RI_WI.md`. **Only three of the sixteen carried a hashed row**; the other thirteen are
+described in prose columns that `K-8` does not read, so they never fired. Those three rows now read
+**un-pooled 2026-09-14, repo-only** in place of an md5. `K-9` was unaffected throughout — it asks that
+every *pool* file be named, and these are no longer pool files.
+
+⚠ **Un-pooling is not deleting, and the distinction is what made this safe.** §G's three-place rule and
+its pre-deletion check exist because deletion destroys the only copy of an open decision. Here every
+document remains in the repo at `docs/`, so nothing was destroyed — but see below for what was still lost.
+
+### ⚠ `MissingFeatures.md` D-13 — a question that became invisible without being answered
+
+`SCOPE_INCOME_CONDITIONING.md` retired FULFILLED at v5.69 with all seven decisions resolved. **One §2.4
+item did not close with it**: *"how often any threshold binds"* — whether each state income threshold
+actually binds for the households this app models, which its §6 notes cannot be measured from the
+existing fixtures, because `households.mjs` holds boundary variants of **one** household and the engines
+compute no AGI-like state income at all.
+
+When that scope left the pool, the question left with it. A check afterwards found it **no longer
+reachable from the pool by any path**, and every session works from the pool. It is re-homed here as
+**D-13**, stated in full, with the fixture limitation intact.
+
+⚠ **This is the second instance of a recorded shape and it is named as such.** On 2026-08-26
+`SCOPE_STRUCTURAL_MAGI_EXTINCTION.md` was deleted after confirming what it *built* survived, and took an
+open maintainer decision with it — recovered from git history and re-homed as **D-10**. §G's *"check for
+unresolved DECISIONS, not just built outcomes"* was written from that incident. **The rule was not
+broken here; it was applied late.** The re-homing was identified alongside the file list, but the list
+was the actionable half and was acted on first. **Anything that removes a document from the pool should
+carry its re-homing in the same package.**
+
+*(Virginia's married-couple taper endpoint, the other open question in that set, survives independently
+in `AUDIT_STATE_EXCL65_ROUND3.md` and needed no re-homing. Verified, not assumed.)*
+
+### Disclosed
+
+- **`J-5` was deliberately NOT used.** The deletions had already happened, so a `RETIRE:` declaration
+  would document history rather than verify an action — and the gate's first real use should not be a
+  rubber stamp. It remains available for the next pool removal, which is where it earns its keep.
+- ⚠ **`G-3a` is still RED and this package does not close it.** The four
+  `git update-index --chmod=+x` commands from the preceding package have not been run:
+  `controls_manifest_rows.py`, `controls_v566_nm.py`, `controls_v568_va.py`, `oracle_ri.py`. They are
+  restated in `COMMIT_MESSAGE.txt`. A mode cannot be shipped as a file.
+- **The thirteen prose-column rows were left as they are.** They already describe each scope's status
+  and repo path; rewriting thirteen rows to say "un-pooled" would be churn no gate reads.
+- Still open and untouched: **A-2, A-4, A-5** (in `FlawsToFix-v5_69-Phase1.md`), `E-1b`'s matcher,
+  `SCOPE_STATE_SET_SELECTOR.md`, Item B of `SCOPE_HOUSEKEEPING_THREE.md`, `D-B3-1 (b)`, and the two
+  legacy `controls_v559`/`v560` manifest rows.
+
+
 ## ops 2026-09-14 — the three things `package_check` could not see, because they are not file contents
 
 KIND: ops. Leaves **v5.71** current — source `9e79b92f9eb91e86489cb6b80caa33c3`, built `index.html`
