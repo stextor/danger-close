@@ -43,6 +43,12 @@ export const __g = {
   otherTaxableInit: _g("otherTaxableInit"),
   taxableInitAll: _g("taxableInitAll"),
   STORAGE_KEYS: () => _g("STORAGE_KEYS"), // t5 loops this map for the Clear-All wipe invariant (v5.10.2)
+  // v5.71 (finding A-6) — t37 reads the live master prompt to prove an imported one is accepted
+  // only as a string and truncated. A live GETTER, not a captured value: applyLoadedData reassigns
+  // the binding. MASTER_PROMPT exists on every leg; the cap constant does NOT exist before v5.71,
+  // so both go through _g and a prior leg returns undefined instead of dying at module load.
+  MASTER_PROMPT: () => _g("MASTER_PROMPT"),
+  MASTER_PROMPT_MAX_CHARS: () => _g("MASTER_PROMPT_MAX_CHARS"),
   DangerClose,
 };
 
