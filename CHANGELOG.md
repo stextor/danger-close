@@ -1,5 +1,105 @@
 # Changelog
 
+## ops 2026-09-14 — the release gates that did not fire: D-1's completeness complement, B-2's name match
+
+KIND: ops. Leaves **v5.71** current — source `9e79b92f9eb91e86489cb6b80caa33c3`, built `index.html`
+`e1bd283b638cdab74941804708987bb2`. **No app source change, no version bump, no rebuild.** Verified by the
+full app suite from the packaged copies, both legs: **3,647 app checks, 0 failing** (`t21` 50 and `domdiff`
+32 are tooling; GRAND 3,729) — unmoved, which is what an ops package owes. Builds
+`docs/SCOPE_RELEASE_GATES_AND_HOUSEKEEPING.md`, now RETIRED with a §10 build record.
+
+### D-1 — the gate that watched 17 files not arrive
+
+At the v5.71 ship, 17 files were uploaded to the repo **root** instead of `qa/`, leaving a `qa/` tree that
+could not test its own release. `package_check` scored 44 passed, 2 failed with **both failures documented
+as expected**, and named none of it. D-1 asserted `unchanged.length === 0` — the correct **pre-ship**
+question — while §I told a reader to expect `D-1` red post-ship, so a broken upload produced exactly the
+reading a correct one was supposed to.
+
+D-1 is now **phase-split**. Post-ship it asserts the mirror: every packaged file **landed**
+(`changed.length === 0`, and the count equals `ghFiles.length` so a truncated `github/` cannot pass). The
+number was already computed and already printed as an informational line; it is now a check. Reproduced
+before the fix was written — with the `qa/` paths present but holding prior-release bytes, D-1 and D-2 both
+passed green while 20 files had not landed.
+
+The phase is **inferred, never flagged**: the oracle is `J-1`/`J-2` both green. Not `K-2`, which was the
+first proposal — an ops package changes no source, so `K-2` is true in both phases for one, and this
+package is itself `KIND: ops`. **`PHASE: UNKNOWN` is a real third state and is printed**, never silently
+defaulted: no pool argument, no `knowledge/` half, or an *empty* `knowledge/` whose J checks would be green
+over an empty set.
+
+⚠ **What it does not catch, stated rather than implied.** The completeness check sees a packaged file that
+did **not land at its path**. It does **not** see an **extra** copy committed elsewhere — the v5.68 shape —
+because there every packaged file did land, `changed` is 0, and it passes clean. The §F clone diff remains
+the only thing in the release path that sees an extra path. A gate for that is **deliberately deferred to
+its own scope** (decision D-7): it needs a rule for what "outside the package" legitimately means, and a
+first census of it ran to 68 candidates of which **64 were false positives**. `OPERATIONS.md` §C now records
+the shape **three-deep** (v5.52, v5.68, v5.71) instead of two-deep with the worst one missing.
+
+### B-2 — a false positive that made a correct package read DO NOT SEND
+
+B-2 matched on **filename alone**, so it fired on any package shipping `src/index.html` — the Vite entry
+template, a legitimate build input — to the pool. It landed in v5.71's `DO NOT SEND` list as a known false
+alarm. It now compares **bytes** against the `github/index.html` the package itself ships, falling back to a
+content marker (the built artifact carries an inlined `<script>` bundle) when the package ships none. No size
+threshold: a magic number goes stale as the bundle grows.
+
+### Controls — P46–P49, and a pair that had to stay a pair
+
+`P46` (a packaged file never landed) and `P47` (**the exact v5.71 defect** — `qa/` paths present but stale)
+both fire on the new completeness check. `P48` and `P49` are the B-2 pair: repairing B-2 by **deleting** it
+would make P49 pass and P48 fail, so P48 proves a genuinely built artifact in `knowledge/` is still caught
+while P49 proves the false positive is gone. Each carries a green-baseline assertion so it cannot report
+CAUGHT on ambient state — the `P32` lesson.
+
+### Also in this package
+
+- **§H's comment corrected (D-5).** It said a session *"cannot reach stextor.github.io (403 — not in the
+  egress allowlist)"*. **False**: measured HTTP 200, 1,429,130 bytes, md5 `e1bd283b…`, byte-identical to the
+  shipped artifact. The comment's *conclusion* — H proves what the repo holds, not what Pages serves — is
+  unchanged and still correct; only its reason had expired, which is the more dangerous kind of stale
+  comment. Making H a live-serving check remains **out of scope**.
+- **`OPERATIONS.md` §C** gains the `globalThis`/`FileReader` trap: the app's bare `new FileReader()` resolves
+  on `globalThis`, jsdom installs it on `window` only, and stubbing the wrong global makes a whole group
+  **vacuous** while reading green.
+- **`OPERATIONS.md` §I** gains a version-registry shape table. `vercensus` sweeps `KNOWN_VERSIONS`; three
+  other shapes exist — `t31`'s `ORDER` (whose `indexOf` returns `-1` and silently grades every disclosure
+  key on the wrong rubric), `t33`'s object map, and OR-chains that are a ternary's **test**.
+
+### Deferred, considered, and not oversights
+
+- **F-2** — nothing detects a file that should have **left** the pool. **Deliberately deferred** by decision
+  D-3: it needs a declaration mechanism that does not exist yet, and inventing one inside a package whose
+  headline fix is a one-line assertion risks the headline fix. Recorded here so the omission is not read as
+  an oversight.
+- **The seven `100644` `.py` files** in `qa/tools/` — `controls_manifest_rows.py`, `controls_v566_nm.py`,
+  `controls_v568_va.py`, `controls_v569_ri.py`, `oracle_nm.py`, `oracle_ri.py`, `oracle_va.py` — were
+  **considered and left** (decision D-4). No document claims they are directly executable; they are invoked
+  as `python3 …` throughout, and changing them would invent an obligation. Recorded so this is not re-found
+  as a bug.
+- ⚠ **`controls_v570_b3.sh`'s mode fix could not be delivered as scoped, and is a commit instruction rather
+  than a shipped file.** It is the only `.sh` in `qa/tools/` at `100644`. But `package_check` has **no mode
+  awareness at all** — `md5` is content-only — so shipping the file with unchanged content would make D-1
+  fire on it as `unchanged`; and §L records that replacing an existing tracked file **preserves** its mode,
+  so the upload path cannot fix it either. `COMMIT_MESSAGE.txt` carries
+  `git update-index --chmod=+x qa/tools/controls_v570_b3.sh`. **Nothing verifies that it happened** — the
+  same class as an I-2 allowlist expiry, where a person is the mechanism. Whether `package_check` should gain
+  a mode check is not decided here.
+
+### Corrections to the scope's own text, recorded in its §10
+
+Three. Its §1 presented the v5.71 flattening as the motivating defect **without saying it was the third
+instance** of a shape §C already recorded. Its census claimed §I recorded `t33`'s `PINS` — **it did not**;
+that record was in `TESTING.md`, and the trap was built into §I where a durable mechanic belongs. And it
+named **one** ternary-shaped registry site where an AST census found **three** (`t24` L92 and L254, `t28`
+L61).
+
+⚠ **A reporting error in the build session is recorded in the scope's §10 rather than tidied away.** A
+mid-build handover table stated md5s for two files that **no command had produced**; both were wrong. That
+is the §A0 failure exactly — a claim that felt settled enough not to check — in a table whose only purpose
+was to be trusted across a session boundary. Caught by re-hashing on resumption.
+
+
 ## ops 2026-09-14 — the new scope's I-2 allowlist entry and K-9 manifest naming, one package late
 
 KIND: ops. Leaves **v5.71** current — source `9e79b92f9eb91e86489cb6b80caa33c3`, built `index.html`
