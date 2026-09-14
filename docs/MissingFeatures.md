@@ -966,3 +966,43 @@ traditional position and account, and how each engine sources a distribution —
 passes the product boundary test (a mainstream couple within sight of retirement; it corrects an existing output). ⚠ The
 app's own retirement checklist suggests considering a 401(k)-to-IRA rollover; for a Rhode Island household below the cliff
 that forfeits the modification. **Not a decision here** — recorded so the scope that picks this up weighs it.
+
+---
+
+## D-13 · How often does any state income threshold actually bind? — re-homed 2026-09-14, UNANSWERED
+
+**This is not a new question. It is an old one rescued from a document that left the pool**, and it is
+recorded here because that is the only thing keeping it visible to a session working from the pool.
+
+`SCOPE_INCOME_CONDITIONING.md` retired FULFILLED at v5.69 — all five states (CT, NM, NJ, VA, RI) are
+income-conditioned, and all seven of its decisions were resolved. **One item did not close with it.**
+Its §2.4 list carried *"Still open — how often any threshold binds"*, and its §6 states the question
+in full:
+
+> **How often does each threshold actually bind for the households this app models?**
+
+⚠ **It cannot be measured from the existing fixtures.** `qa/tools/fixture/households.mjs` holds
+boundary-clearing variants of **one** shipped example household, so counting them says nothing about
+a population — and the engines compute no AGI-like state income at all. The measurement needs a
+purpose-built set of households.
+
+### ⚠ Why this entry exists at all — the near-miss, recorded
+
+On 2026-09-14 sixteen retired scopes were removed from the pool to recover space (~348K). The repo
+copies remain, so nothing was destroyed. But this question existed **only** inside
+`SCOPE_INCOME_CONDITIONING.md`, and a check after the fact found it was **no longer reachable from
+the pool at all** — every session works from the pool, so the question had become invisible without
+being resolved.
+
+That is the milder form of what happened on 2026-08-26, when `SCOPE_STRUCTURAL_MAGI_EXTINCTION.md`
+was deleted after confirming what it BUILT survived — and took an open maintainer decision with it,
+recovered from git history and re-homed as **D-10**. §G's rule was written from that incident:
+**check for unresolved DECISIONS, not just built outcomes.** The rule held here only because the
+check was run afterwards; it was not run before.
+
+**The lesson worth keeping is about sequencing, not about the rule.** The un-pooling and the
+re-homing were identified together, but the file list was the actionable half and was acted on first.
+Anything that removes a document from the pool should carry its re-homing in the **same** package.
+
+*(Virginia's married-couple taper endpoint, the other open question in that set, survives
+independently in `AUDIT_STATE_EXCL65_ROUND3.md` and needed no re-homing.)*
