@@ -733,6 +733,125 @@ fi
 [ "$SKIP" -gt 0 ] && echo "  ⚠ A SKIPPED control is not a passing one."
 fi
 
+# ── P50..P55 · the three blind spots (2026-09-14) ───────────────────────────────────────────────
+#
+# ⚠ ALL THREE GATES HAVE A ZERO BASELINE, which is why each ships as a PAIR. A gate that can never
+# fire and a gate that has been deleted are indistinguishable from their green runs alone, and all
+# three of these are green on a healthy tree. The silent halves (P51, P53, P55) are what prove the
+# loud halves are discriminating rather than just quiet. This is the P48/P49 lesson one level up.
+if [ -z "${POOLARG:-}" ] || [ ! -d "${POOLARG:-}" ]; then
+  SKIP=$((SKIP+1)); echo "  - SKIPPED: P50..P55 - no pool dir given"
+else
+
+# runG: mutate the CLONE (not the package) and read one gate. $1 label, $2 want ("" = must be
+# silent), $3 mutation run from the scratch clone, $4 needle.
+# ⚠ The scratch clone is a real git repo: G-3 reads `git ls-files -s`, so a plain `cp -r` would
+# leave it with no index and G-3 would SKIP rather than run — a skip that would read as a pass.
+runG () {
+  local label="$1" want="$2" mut="$3" needle="${4:-}"
+  rm -rf /tmp/pkgc /tmp/pkgclone /tmp/pkgpool
+  cp -r "$APP" /tmp/pkgc
+  git clone -q "$CLONE" /tmp/pkgclone 2>/dev/null || { cp -r "$CLONE" /tmp/pkgclone; }
+  mkdir -p /tmp/pkgpool && cp /tmp/pkgc/knowledge/* /tmp/pkgpool/ 2>/dev/null
+  if [ ! -d /tmp/pkgclone/.git ]; then
+    MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** %s (scratch clone has no git index - control is INVALID)\n" "$label"; return
+  fi
+  local base
+  base=$(node "$PKG_CHECK" /tmp/pkgc /tmp/pkgclone "" /tmp/pkgpool 2>&1)
+  # ⚠ THE GUARD IS PER-NEEDLE, NOT PER-GATE, and that distinction is load-bearing. A first draft
+  # invalidated any control whose target gate was already red — which broke P50..P53 outright,
+  # because G-3a is LEGITIMATELY red until the four .py mode fixes land, and a mode cannot be
+  # shipped as a file. Guarding on the gate would have made four controls unrunnable for exactly
+  # as long as the defect they guard against existed. Guarding on the control's OWN needle asks
+  # the right question: did THIS mutation add THIS name?
+  if [ -n "$needle" ] && echo "$base" | grep "✗" | grep -qF -- "$needle"; then
+    MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** %s (needle already present BEFORE the mutation - control is INVALID)\n" "$label"; return
+  fi
+  ( cd /tmp/pkgclone && eval "$mut" ) >/dev/null 2>&1
+  local out
+  out=$(node "$PKG_CHECK" /tmp/pkgc /tmp/pkgclone "" /tmp/pkgpool 2>&1)
+  if [ -z "$want" ]; then
+    if echo "$out" | grep "✗" | grep -qF -- "$needle"; then
+      MISS=$((MISS+1)); printf "  *** FINDING *** %s - fired when it must NOT\n" "$label"
+      echo "$out" | grep "✗" | grep -F -- "$needle" | head -1
+    else PASS=$((PASS+1)); printf "  CORRECTLY SILENT   %s\n" "$label"; fi
+    return
+  fi
+  local fired
+  fired=$(echo "$out" | grep "✗" | grep -oE '[A-K]-[0-9]+[ab]?' | sort -u | tr '\n' ',')
+  if echo "$fired" | grep -q "$want"; then
+    PASS=$((PASS+1)); printf "  CAUGHT by %-6s %s\n" "$want" "$label"
+  else
+    MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** %s (wanted %s, fired: %s)\n" "$label" "$want" "${fired:-none}"
+  fi
+}
+
+# ── D-3: an EXTRA copy committed elsewhere ──────────────────────────────────────────────────────
+# P50 is the v5.68 shape exactly: a tracked file re-committed BYTE-IDENTICALLY at the repo root.
+# ⚠ Verified before the gate was written: the pre-fix tool passed this clean, because every
+# packaged file DID land and `changed` is 0.
+runG "P50 THE v5.68 SHAPE - a tracked file committed byte-identically at an EXTRA path" "D-3" \
+  "cp qa/qa-baseline/t1_units.mjs ./t1_units.mjs && git add -f t1_units.mjs && git -c user.email=a@b -c user.name=t commit -qm x" \
+  "qa/qa-baseline/t1_units.mjs =="
+# P51 is the pair, and the reason this gate is content-based rather than name-based: README.md is
+# tracked at THREE paths and index.html at TWO, BY DESIGN. A basename census called those false
+# positives (68 candidates, 64 false) and got the gate deferred for a release.
+runG "P51 README.md x3 and index.html x2, multi-path BY DESIGN - must NOT fire" "" \
+  "true" "D-3"
+
+# ── G-3: file modes ─────────────────────────────────────────────────────────────────────────────
+runG "P52 a shebang-carrying file committed 100644" "G-3" \
+  "git update-index --chmod=-x qa/runsuite.sh && git -c user.email=a@b -c user.name=t commit -qm x" \
+  "qa/runsuite.sh (shebang"
+# P53 is the pair: the .mjs/.cjs tools carry NO shebang and are correctly 100644, and three .py
+# files are the same. A rule that fired on those would be unusable.
+# ⚠ THE NEEDLE IS A SPECIFIC SHEBANG-LESS FILE, not the gate name. G-3a is LEGITIMATELY red until
+# the four .py mode fixes land, so "did G-3 fire?" cannot distinguish a false positive from the
+# real defect. "Did G-3 name oracle_nm.py?" can: that file has no shebang, sits at 100644, and is
+# correct exactly as it is. If the rule ever widens to "all .py are executable", this fires.
+# â  THE TRAILING "(" IS NOT COSMETIC. A bare filename needle matched K-8, which lists every pool
+# file by name when the scratch pool is thin - so the control reported INVALID on an unrelated
+# gate's output. That is the P32 shape precisely. G-3 formats its names as "path (shebang, mode)",
+# so the paren scopes the needle to this gate and nothing else.
+runG "P53 oracle_nm.py - no shebang, 100644, CORRECT - must never be named by G-3" "" \
+  "true" "oracle_nm.py ("
+
+# ── J-5: a file that should have LEFT the pool ──────────────────────────────────────────────────
+# ⚠ J-5 reads MANIFEST.txt, not the clone, so these two mutate the PACKAGE. The pool copy is built
+# from knowledge/, so a declared file that is still in the pool post-ship is the defect.
+runJ5 () {
+  local label="$1" want="$2" manline="$3" poolfile="$4" needle="${5:-}"
+  rm -rf /tmp/pkgc /tmp/pkgclone /tmp/pkgpool
+  cp -r "$APP" /tmp/pkgc; cp -r "$CLONE" /tmp/pkgclone
+  mkdir -p /tmp/pkgpool && cp /tmp/pkgc/knowledge/* /tmp/pkgpool/ 2>/dev/null
+  [ -n "$poolfile" ] && echo "stale" > "/tmp/pkgpool/$poolfile"
+  printf '%s\n' "$manline" >> /tmp/pkgc/MANIFEST.txt
+  local out fired
+  out=$(node "$PKG_CHECK" /tmp/pkgc /tmp/pkgclone "" /tmp/pkgpool 2>&1)
+  if [ -z "$want" ]; then
+    if echo "$out" | grep "✗" | grep -qF -- "$needle"; then
+      MISS=$((MISS+1)); printf "  *** FINDING *** %s - fired when it must NOT\n" "$label"
+    else PASS=$((PASS+1)); printf "  CORRECTLY SILENT   %s\n" "$label"; fi
+    return
+  fi
+  fired=$(echo "$out" | grep "✗" | grep -oE '[A-K]-[0-9]+[ab]?' | sort -u | tr '\n' ',')
+  if echo "$fired" | grep -q "$want"; then
+    PASS=$((PASS+1)); printf "  CAUGHT by %-6s %s\n" "$want" "$label"
+  else
+    MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** %s (wanted %s, fired: %s)\n" "$label" "$want" "${fired:-none}"
+  fi
+}
+# post-ship by construction (pool == knowledge/), so J-5 asks the ABSENCE question
+runJ5 "P54 a RETIRE:-declared file still sitting in the pool post-ship" "J-5" \
+  "RETIRE: ZZZ_retired_probe.md" "ZZZ_retired_probe.md" ""
+# P55 is the pair: the same declaration, honoured. Without this, deleting J-5 would still pass P54's
+# absence... no - without this, a J-5 that fires on EVERY declaration would look correct.
+runJ5 "P55 the same RETIRE: declaration, actually honoured - must NOT fire" "" \
+  "RETIRE: ZZZ_retired_probe.md" "" "J-5"
+
+[ "$SKIP" -gt 0 ] && echo "  ⚠ A SKIPPED control is not a passing one."
+fi
+
 [ "$SKIP" -gt 0 ] && echo "  ⚠ A SKIPPED control is not a passing one."
 [ "$MISS" -gt 0 ] && { echo "  A control that does not fire is a FINDING — investigate the check, never soften it."; exit 1; }
 exit 0

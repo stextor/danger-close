@@ -322,6 +322,39 @@ if (!CLONE || !existsSync(CLONE)) {
   ck("D-2: every github/ path is an existing repo path, or is declared BY FULL PATH in README-FIRST (catches a misplaced folder)",
     undeclared.length === 0, undeclared.join(", "));
   console.log(`     (informational: ${changed.length} changed/new files in github/)`);
+
+  // ── D-3 · AN EXTRA COPY COMMITTED SOMEWHERE ELSE (added 2026-09-14) ─────────────────────
+  // D-1 asks whether every packaged file LANDED. It cannot ask whether one landed TWICE: in
+  // that case every packaged file did land, `changed` is 0, and D-1 passes clean. That is the
+  // v5.68 shape — six qa/qa-baseline/ files committed at the repo root AS WELL AS their real
+  // paths, byte-identical — which only the §F clone diff saw, and which also switched E-1b off
+  // for those six names for as long as the copies stood, with nothing printed.
+  //
+  // ⚠ THE QUESTION IS CONTENT, NOT BASENAME, AND THAT IS WHY THIS IS CHEAP. §C deferred this
+  // gate because "a first census ran to 68 candidates of which 64 were false positives" — that
+  // census matched BASENAMES, and index.html and README.md are multi-path BY DESIGN. Asking
+  // instead which tracked paths hold BYTE-IDENTICAL content: measured 0 groups on the clean
+  // tree, and 5 groups when five qa-baseline files were re-committed at the root to simulate
+  // v5.68. Zero false positives, five true ones. The 68/64 problem was a property of the
+  // question, not of the repo, and §C's deferral reason is corrected in the same package.
+  //
+  // ⚠ SCOPE IS THE WHOLE TREE, NOT THE PACKAGE (decision D-2). The defect's defining property is
+  // that the extra path is one nobody is looking at; a gate scoped to what this package touched
+  // cannot see an extra copy of a file this package did not ship, which is how v5.68 survived.
+  //
+  // ⚠ If two tracked paths ever legitimately hold identical bytes, the fix is an explicit
+  // exemption HERE naming the pair and the reason — never widening this back to basenames.
+  {
+    const byHash = new Map();
+    for (const f of repoPaths) {
+      let h; try { h = md5(join(CLONE, f)); } catch { continue; }
+      if (!byHash.has(h)) byHash.set(h, []);
+      byHash.get(h).push(f);
+    }
+    const dupes = [...byHash.values()].filter(v => v.length > 1);
+    ck("D-3: no two committed paths hold byte-identical content (an EXTRA copy elsewhere \u2014 the v5.68 shape)",
+      dupes.length === 0, dupes.map(v => v.join(" == ")).join(" | "));
+  }
 }
 
 // ── E · the two destinations agree with each other ───────────────────────────────────────
@@ -395,13 +428,25 @@ if (CLONE && existsSync(CLONE)) {
   }
   const ghSet = new Set(ghFiles);
   const orphans = [];
+  const ambiguous = [];
   for (const k of knFiles) {
     // The versioned source is renamed across the two destinations by design; E-2 covers it.
     if (/^DangerClose-v5_\d+\.jsx$/.test(k)) continue;
     const cands = byBase.get(k) || [];
     // Unambiguous counterpart only. A basename matching several repo paths cannot be resolved
     // from here, and guessing which one was meant is how a check starts lying.
-    if (cands.length !== 1) continue;
+    //
+    // ⚠ THIS SKIP IS NOW ANNOUNCED (decision D-5, 2026-09-14). It used to be silent, and that
+    // silence has already cost a release: at v5.68 six qa/qa-baseline/ files were committed at
+    // the repo root as well as their real paths, which gave each of those basenames TWO
+    // candidates — so E-1b switched itself off for all six, for as long as the copies stood,
+    // with nothing printed. A gate that is off looks exactly like a gate that is passing.
+    // Today the ambiguous set is `README.md` (3 paths) and `index.html` (2), both multi-path
+    // BY DESIGN, so this list should be short and boring; a NEW name appearing in it is the
+    // early warning that E-1b has gone partly blind. D-3 is what catches the duplicate itself.
+    // Repairing the matcher to disambiguate by content is deliberately left to its own scope —
+    // it is a real change to a gate that has no controls of its own yet.
+    if (cands.length !== 1) { if (cands.length > 1) ambiguous.push(`${k} (${cands.length} paths)`); continue; }
     const repoPath = cands[0];
     // ⚠ The package is REMOVING this path, so there is nothing to ship to it. Checked BEFORE the
     // md5 comparison deliberately: a deletion is owed nothing whether the bytes match or not, and
@@ -413,6 +458,10 @@ if (CLONE && existsSync(CLONE)) {
   }
   ck("E-1b: every knowledge/ file that DIFFERS from its repo counterpart also ships to github/",
     orphans.length === 0, orphans.join(" | "));
+  // Not a check — a disclosure. E-1b did not evaluate these, and saying so is the whole point.
+  console.log(ambiguous.length
+    ? `     \u26a0 E-1b SKIPPED ${ambiguous.length} ambiguous basename(s), NOT evaluated: ${ambiguous.join(", ")}`
+    : "     (E-1b evaluated every knowledge/ file \u2014 no ambiguous basenames)");
 } else {
   skipped("E-1b: knowledge/ files that differ from the repo but are missing from github/",
     "no clone given — this is the check that caught nothing at v5.47");
@@ -519,6 +568,62 @@ if (!WORK || !existsSync(WORK)) {
   }
   ck("G-2: every NEW hand-written file under qa/ is in github/ (the case G-1 skips)",
     orphans.length === 0, orphans.join(" | "));
+}
+
+// ── G-3 · FILE MODES (added 2026-09-14) ──────────────────────────────────────────────────
+// ⚠ THIS GATE EXISTS BECAUSE A GREEN RUN ALREADY OVER-REPORTED A SHIP. The ops package of
+// 2026-09-14 scored 45 passed, 0 failed against a tree in which F-4 — one of the five fixes
+// that package named — had not been applied. package_check was not wrong; `md5` is content-only
+// and `statSync` was used for isDirectory() and .size and nothing else, so a mode was invisible
+// to every check in this file. A green run that over-reports what shipped is the property this
+// project treats as worse than a red one.
+//
+// THE RULE (decision D-1): A TRACKED FILE WITH A SHEBANG CARRIES THE EXECUTABLE BIT. Measured
+// across 340 tracked files at HEAD b2b76cf: the reverse direction holds with ZERO
+// counterexamples — every 100755 file has a shebang — and the forward direction had exactly
+// four violations, all .py, all fixed in the package that added this check.
+//
+// ⚠ THIS SUPERSEDES DECISION D-4 OF THE PRECEDING SCOPE, which left the seven .py files at
+// 100644 because "no document claims the .py files are directly executable". Four of them make
+// exactly that claim in their own first line. D-4 is superseded on measurement, not overruled
+// on taste — three .py files carry no shebang and are correctly left alone.
+//
+// ⚠ A MODE CANNOT BE SHIPPED AS A PACKAGED FILE, which is why this gate is the only thing that
+// can confirm one landed. The content does not change, so D-1 fires on it as `unchanged`; and
+// §L records that replacing an existing tracked file PRESERVES its mode, so the upload path
+// cannot carry it either. Mode fixes are `git update-index --chmod=+x` lines in
+// COMMIT_MESSAGE.txt, and until this check existed nothing verified they were ever run.
+//
+// Reads git's index rather than the filesystem: a `cp -r` or a zip round-trip does not preserve
+// modes reliably, so the filesystem would be measuring the copy, not the commit.
+console.log("\nG-3. File modes in the committed tree");
+if (!CLONE) {
+  skipped("G-3: file modes", "no clone given");
+} else {
+  let idx = null;
+  try {
+    idx = execFileSync("git", ["-C", CLONE, "ls-files", "-s"], { encoding: "utf8" });
+  } catch { idx = null; }
+  if (!idx) {
+    skipped("G-3: file modes", "clone is not a git repo (no index to read) \u2014 modes NOT verified");
+  } else {
+    const fwd = [], rev = [];
+    for (const line of idx.split("\n").filter(Boolean)) {
+      const m = line.match(/^(\d{6})\s+\S+\s+\d+\t(.+)$/);
+      if (!m) continue;
+      const [, mode, path] = m;
+      if (mode === "120000" || mode === "160000") continue;   // symlink / submodule
+      let first = "";
+      try { first = readFileSync(join(CLONE, path), "utf8").split("\n", 1)[0]; } catch { continue; }
+      const hasShebang = first.startsWith("#!");
+      if (hasShebang && mode !== "100755") fwd.push(`${path} (shebang, ${mode})`);
+      if (!hasShebang && mode === "100755") rev.push(`${path} (100755, no shebang)`);
+    }
+    ck("G-3a: every tracked file WITH a shebang is committed executable (100755)",
+      fwd.length === 0, fwd.join(" | "));
+    ck("G-3b: and no file is committed executable WITHOUT one (the rule holds both ways)",
+      rev.length === 0, rev.join(" | "));
+  }
 }
 
 // ── H · PROVENANCE over an INDEPENDENT path (added 2026-08-28, decision D-1 route A1) ────
@@ -797,6 +902,46 @@ if (POOL && existsSync(POOL)) {
     ck("J-3: the pool holds exactly two source legs (a rotation is TWO deletes)",
       legs.length === 2, legs.join(", ") || "none");
     ck("J-4: and exactly two dom entries", doms.length === 2, doms.join(", ") || "none");
+
+    // ── J-5 · A FILE THAT SHOULD HAVE *LEFT* THE POOL (F-2, added 2026-09-14) ─────────────
+    // J-1..J-4 assert PRESENCE and rotation. Nothing asserted ABSENCE, so a document retired
+    // from the repo could sit in the pool indefinitely: §A2's both-direction check reports it
+    // as a pool-only file — drift — and the manifest keeps advertising a file nobody should
+    // open. §G calls deletion a THREE-place operation for exactly this reason, and the third
+    // place had no gate.
+    //
+    // THE DECLARATION (decision D-3): a `RETIRE: <name>` line in MANIFEST.txt, one per line.
+    // ⚠ NOT the README-FIRST delete-first list, which was the other candidate. That list means
+    // "delete, then upload the new copy"; this means "delete and do NOT replace". Two different
+    // meanings in one section is how the index.html name confusion started, and B-2 spent a
+    // release firing on a legitimate file because one name was doing two jobs.
+    // ⚠ NOT derived from "no repo counterpart and no manifest row" either: K-9 already requires
+    // every pool file to carry a row, so a derived rule would let a K-9 repair silently satisfy
+    // this one. An explicit declaration cannot be satisfied by accident.
+    //
+    // ⚠ PHASE-SPLIT, for the same reason D-1 is. Pre-ship the file is still in the pool and
+    // SHOULD be — the assertion is only that the declaration is not a typo, because a RETIRE:
+    // line naming a file that was never there is a no-op that reads exactly like a success.
+    // Post-ship it must be GONE. A gate that only ever ran post-ship would be silent in the
+    // phase where a typo is still cheap to fix.
+    const retires = [..._man0.matchAll(/^\s*RETIRE:\s*(\S+)\s*$/gm)].map(m => m[1]);
+    if (retires.length) {
+      const stillThere = retires.filter(f => existsSync(join(POOL, f)));
+      if (PHASE === "post-ship") {
+        ck(`J-5 (post-ship): every RETIRE: file is GONE from the pool (${retires.length} declared)`,
+          stillThere.length === 0, `still present: ${stillThere.join(", ")}`);
+      } else {
+        ck(`J-5 (pre-ship): every RETIRE: file is currently IN the pool, so the declaration is not a typo (${retires.length} declared)`,
+          stillThere.length === retires.length,
+          `declared but not in the pool \u2014 check the spelling: ${retires.filter(f => !existsSync(join(POOL, f))).join(", ")}`);
+        if (PHASE === "unknown") {
+          console.log("     \u26a0 post-ship complement NOT EVALUATED (phase unknown) \u2014 " +
+            "the retirement is UNVERIFIED until this is re-run after upload.");
+        }
+      }
+    } else {
+      console.log("     (informational: no RETIRE: lines in MANIFEST \u2014 nothing leaves the pool)");
+    }
   }
 }
 
