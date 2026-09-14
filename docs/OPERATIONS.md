@@ -302,6 +302,14 @@ and it is the only thing that would have caught this.
 - **Stub `globalThis.URL.createObjectURL`, not just `window.URL`.** The CJS DOM bundle runs in Node scope,
   so the backup-export handler resolves bare `URL` to Node's global; stub both or the export-capture never
   fires.
+- **Same trap, second instance: stub `globalThis.FileReader`, not `window.FileReader`** (hit at v5.71).
+  The app does a bare `new FileReader()`, which the bundle resolves on **`globalThis`**; jsdom installs
+  `FileReader` on **`window`** only. Stubbing `window.FileReader` leaves the import path unreachable and
+  the whole group **vacuous** — and vacuous in the worst direction, because it "passes" on the prior leg
+  for the wrong reason and so reads as a clean parity result. ⚠ **A stub on the wrong global is
+  indistinguishable from a working one by the test's own output**, which is why `t37`'s IM group carries
+  a **setup check** asserting the stub is reachable before the group runs: it cannot go vacuous silently.
+  Any future stub of a DOM constructor gets the same treatment — `globalThis` first, and a setup check.
 - **`applyLoadedData` takes a WRAPPER object — `applyLoadedData({ portfolio: P })`.** Passing the portfolio
   bare is a **silent no-op**: nothing throws, and the test runs against the previous household while
   appearing to configure a new one. (Cost a full probe cycle at v5.11.)
@@ -384,10 +392,30 @@ knowledge files to the repo by BASENAME and skips any name with more than one ca
 to all six** — a gate switched off by a duplicate, with nothing printed. `.gitignore` cannot help: the
 upload path is not the run folder, and the rule below forbids ignoring these names anyway.
 ⚠ **`package_check` has no check for committed paths OUTSIDE the package** — it verifies the package's
-own files, and the clone diff is the only thing in the release path that sees an extra one. Unscoped.
+own files, and the clone diff is the only thing in the release path that sees an extra one.
+**Still unscoped, now deliberately so** (decision D-7, 2026-09-14): the gate was considered while
+fixing the v5.71 instance below and was left out of that package on purpose, because it needs a rule
+for what "outside the package" legitimately means and the first census of that ran to 68 candidates
+of which 64 were false positives. It wants its own scope with its own census; shipping a
+half-considered path rule into the tool that had just failed to catch a path defect was judged the
+worse risk. **Deferred with a reason, not forgotten.**
 Two basenames are multi-path by design and long-standing, so E-1b cannot see them either:
 `index.html` (root artifact + `src/` template, §N) and `README.md` (root, `qa/qa-baseline/`,
 `validation/`).
+
+⚠ **THIRD INSTANCE — the v5.71 upload (recorded 2026-09-14), and the worst of the three.** Seventeen
+files — `qa/runsuite.sh`, `qa/smoke_built.mjs` and `qa/t23`–`qa/t37` — were committed at the repo root
+**instead of** their real paths, not *as well as* them. `qa/qa-baseline/*` and `qa/tools/*`, one level
+deeper, landed correctly. So the committed `qa/` still held the **v5.70** suite: it could not test its
+own release. `package_check` scored **44 passed, 2 failed with both failures documented as expected**
+and named none of it; the defect was found by diffing the package against the repo by hand.
+**This is the instance that is `instead of` rather than `as well as`**, which is why it was catchable
+where v5.68 was not: the number that would have named all 17 was already computed and already printed
+as an informational line. `D-1` gained its post-ship completeness complement in response (§I).
+⚠ **That fix closes THIS shape and not the v5.68 one above.** `changed.length === 0` asks *did every
+packaged file land at its path*; in the v5.68 case every packaged file did, so `changed` is 0 and the
+new assertion passes clean. The three instances are one shape seen three ways and only two of the
+three are gated.
 
 ⚠ **The baseline files are NOT in this set and must never be added to it.** `qa/t1_units.mjs`,
 `qa/env_dom.mjs`, `qa/shim.txt`, `qa/dom_entry_*.jsx` and the rest look like run-folder artifacts
@@ -644,7 +672,38 @@ will not announce itself.
 A repo clone settles these questions cheaply and settles related ones at the same time — it is also the
 fastest way to check whether project knowledge has drifted from what is actually committed.
 
-### ⚠ Section `J` cannot see a DELETION — the three-place rule is unverified (added 2026-09-01)
+### ⚠ Version registries come in FOUR shapes and a sweep sees only one (added 2026-09-14)
+
+Registering a new version tag is a per-release obligation, and `qa/tools/vercensus.cjs` sweeps for
+it. **It is keyed on `KNOWN_VERSIONS` arrays, and three other shapes exist that it cannot see.**
+All of them fail closed, which is the only reason they have been cheap. Measured by AST across the
+31 suites at v5.71 — **15 carry at least one registry shape**:
+
+| Shape | Where, at v5.71 | Why the sweep misses it |
+|---|---|---|
+| `KNOWN_VERSIONS` array | 15 suites | the one it looks for |
+| **array ladder under another name** | `t31`'s **`ORDER`**, L275, 24 tags | not called `KNOWN_VERSIONS` |
+| **object / value map** | `t33`'s **`PINS`**, L60, 11 tags | keys, not array elements |
+| **OR-chain that IS a ternary's test** | `t24` L92 (`DIV`) and **L254 (`_k`)**, `t28` L61 — 19 tags each | the `?` follows the chain, so a sweep keyed on an assignment skips it |
+
+⚠ **`t31`'s `ORDER` is the dangerous one.** `ORDER.indexOf(VER)` returns **`-1`** for an unregistered
+tag, which scores *every* disclosure key as pre-fix and silently runs the KNOWN-DEFECT branch instead
+of PARITY. It does not throw; it grades the wrong rubric.
+
+⚠ **The ternary shape has THREE sites, not one.** The scope that recorded this trap named only
+`t24`'s `_k`; an AST census run while building it found `t24` L92 and `t28` L61 as well. **A first
+draft of that census reported "none"** — it looked for a `ConditionalExpression` *inside* the
+OR-chain, when the ternary is the chain's **parent**. That is the same wrong answer a naive sweep
+gives, made by the tool written to expose it, and it is recorded here because "I checked with a
+parser" is only worth something if the parser was asked the right question.
+
+⚠ **Extend a LADDER by widening its condition; extend a MAP by giving the new tag its own arm.** A
+blanket `VER === "vNNN"` → `|| VER === "vNNN+1"` edit across all four shapes corrupted `t1`'s
+`verStr` and `t4`'s `_badge` at v5.67, making the badge assert v5.66 against a v5.67 build.
+(`TESTING.md` carries the per-release counts; this table is the durable shape list, and the two
+must not both try to be the record.)
+
+
 
 The rule above is the one part of §G **no check enforces**. `package_check`'s section `J` (`J-1`,
 `J-2`) verifies that everything in a package's `knowledge/` reached the pool and is current. It says
@@ -738,20 +797,55 @@ after the upload, by construction** — which is why the post-ship run is a chec
 suggestion. Never soften a K check to make a pre-ship run look clean; the diagnosis of that split is
 real and unscoped, and softening it would delete the only gate that has ever caught this. *(An ops
 package that changes no version and no source is the exception: its Current table already matches
-the tree, so `K-1`–`K-3` are green in both runs, and `D-1` goes red post-ship instead — that is the
-expected complement, not a defect.)*
+the tree, so `K-1`–`K-3` are green in both runs.* ⚠ *This parenthetical used to end "and `D-1` goes
+red post-ship instead — that is the expected complement, not a defect." **That is no longer true and
+was rewritten in the same package that changed it**, 2026-09-14. `D-1` now asks a DIFFERENT question
+in each phase and is GREEN in both on a correct release — see the D-1 block below.)*
 
 ⚠ **`K-1`–`K-3` are not the whole pre-ship red set when the pool is passed — measured at the v5.68 ship
 (added 2026-09-10).** With all four arguments, an **app release** ran **39 passed, 7 failed** pre-ship:
 `K-1`, `K-2`, `K-3`, **and `J-1`, `J-2`, `K-4`, `K-6`**. The last four read the POOL against the
 package and its rolled manifest, and a pool that has not yet received the upload cannot agree with
 either; all four went green post-ship with nothing changed but the upload. Post-ship the same package
-ran **45 passed, 1 failed — `D-1`**, because every `github/` file now equals the committed tree. So
-**`D-1` red post-ship is the expected complement for an app release too**, not only for an ops package.
+ran **45 passed, 1 failed — `D-1`**, because every `github/` file now equalled the committed tree.
 Read a pre-ship run as: *every red is in that named set, and nothing else is red.* A red outside it
 is a finding; a red inside it is construction. ⚠ This is a measurement of one package, not a proof
 over all of them — which is exactly why the split still wants a scope, and why nothing here softens a
 check.
+
+### ⚠ `D-1` IS PHASE-SPLIT AND IS NO LONGER RED POST-SHIP (changed 2026-09-14)
+
+**The sentence that used to sit here — *"`D-1` red post-ship is the expected complement for an app
+release too"* — was true of the old check and is false of the current one. Read this instead.**
+
+`D-1` asks a different question in each phase, and **a correct release is GREEN in both**:
+
+| Phase | Assertion | Correct release |
+|---|---|---|
+| pre-ship | `unchanged.length === 0` — nothing shipped that did not change | green |
+| post-ship | `changed.length === 0` **and** `unchanged.length === ghFiles.length` — everything LANDED | green |
+
+**So `D-1` red post-ship is now a FINDING, not construction.** It names the files that did not reach
+their committed path. That is the whole point of the change: the old reading told a session to expect
+red exactly where a broken upload also produced red, so 17 flattened files at the v5.71 ship read as
+normal. **Nothing in the post-ship red set is expected any more** — a clean post-ship run is all-green
+apart from whatever that specific package legitimately leaves open.
+
+The phase is **inferred**, never flagged: the oracle is `J-1`/`J-2` both green — every `knowledge/`
+file reached the pool and none landed stale. It is not `K-2`, which was the first proposal: an ops
+package changes no source, so `K-2` is true in both phases for one and every ops package would be
+judged post-ship, firing the complement pre-ship every time.
+
+⚠ **Three states, not two. `PHASE: UNKNOWN` is printed, never silently defaulted** — no pool
+argument, no `knowledge/` half, or an *empty* `knowledge/` (whose J checks would be green over an
+empty set, §B2's forbidden shape). In all three the pre-ship form is asserted and the run prints
+*"post-ship complement NOT EVALUATED"*. **A `PHASE: UNKNOWN` line on a run you believe is post-ship
+means you passed the pool third** — the v5.66 near-miss, now visible instead of silent.
+
+⚠ **What it does NOT catch.** The post-ship form sees a packaged file that did not land at its path.
+It does **not** see an **extra** copy committed elsewhere — the v5.68 shape in §C — because there
+every packaged file *did* land, `changed` is 0, and this passes clean. The §F clone diff remains the
+only thing in the release path that sees an extra path.
 
 ⚠ **This is also why `P29` looked broken, and the received diagnosis was wrong.** `P29` mutates the
 manifest stale and asks `K-1` to notice — but on an app-release package `K-1` is *already* red

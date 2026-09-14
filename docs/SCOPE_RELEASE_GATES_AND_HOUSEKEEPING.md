@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **OPEN — DECIDED AND BUILDABLE.** Written 2026-09-14; all six §5 decisions approved the same day, each as recommended, with one refinement to D-1's mechanism recorded in §5 and in the Decisions-as-taken table below. Nothing here is built. |
+| Status | **RETIRED — BUILT 2026-09-14 as an ops package.** Written 2026-09-14; all six §5 decisions approved the same day, with one refinement to D-1's mechanism recorded in §5 and in the Decisions-as-taken table below. A seventh decision, **D-7**, was taken after this document was written and is recorded in §10. Built as specified except where §10 says otherwise; see §10 for the build record, including **three corrections to this document's own text** and one finding about a fix that could not be delivered as scoped. |
 | Measured against | **v5.71**, source `9e79b92f9eb91e86489cb6b80caa33c3`, built `index.html` `e1bd283b638cdab74941804708987bb2`, repo HEAD `0a028fd`, pool 133 files, no drift |
 | Parent findings | **D-1's completeness gap** and **B-2's name match**, both found at the v5.71 ship (2026-09-14); `docs/STATUS_2026_09_11_b3_live_verification.md` **F-2** and **F-4**; `package_check.mjs`'s stale §H comment; two harness/registry traps hit during the v5.71 build |
 | Target release | An **ops package** (`KIND: ops`) — no app source change, no version bump. See D-6 |
@@ -319,3 +319,132 @@ the run that ships it. The entry names its own expiry — *expires at the build 
 removes the entry and marks the scope RETIRED with a build record, both halves in one package*. Nothing can
 detect a missed removal: I-3 fires only on an entry naming a file that is **gone**, and this file will still be
 there carrying a RETIRED marker. A person removes it.
+
+---
+
+## 10 · Build record — 2026-09-14, ops package
+
+Built against **v5.71** — source `9e79b92f9eb91e86489cb6b80caa33c3`, built `index.html`
+`e1bd283b638cdab74941804708987bb2`, repo HEAD **`063fade`** (this document's §1 says `0a028fd`; the
+2026-09-14 allowlist/manifest ops package moved it). Pool **134** files at build, not 133 — this scope
+itself had landed. §A2 clone-and-diff: 133 of 134 byte-identical to a committed file, the exception
+`DangerClose-v5_70.jsx`, the prior leg, absent from the repo by design. **No drift.**
+
+**App suite: 3,647 app checks, 0 failing, both legs** — computed by subtraction from the runner's own
+output, not restated (`t21` 50 and `domdiff` 32 are tooling; GRAND 3,729). **The total did not move**,
+which is the assertion an ops package owes.
+
+### ⚠ D-7 — a seventh decision, taken after this document was written
+
+**This scope's §1 presents the v5.71 flattening as the motivating defect and does not say that it is
+the THIRD instance of a shape `OPERATIONS.md` §C already records.** That is a defect in this
+document's premise, and it is corrected here rather than quietly built past:
+
+- **v5.52** — run-folder artifacts committed at the root.
+- **v5.68** — six `qa/qa-baseline/` files committed at the root **as well as** their real paths,
+  byte-identical. Caught only by the §F clone diff (39 changed paths where the package held 33).
+  Its quieter cost: `package_check` **E-1b** matches knowledge files to the repo by basename and
+  skips any name with more than one candidate, so **E-1b was silently blind to all six for as long
+  as the copies stood** — a gate switched off by a duplicate, with nothing printed.
+- **v5.71** — 17 files at the root **instead of** their real paths, leaving `qa/` stale.
+
+**⚠ D-1's approved fix closes the v5.71 shape and NOT the v5.68 shape.** `changed.length === 0` asks
+*did every packaged file land at its path*. In the v5.68 case every packaged file **did** land — the
+defect was an *extra* copy elsewhere — so `changed` is 0 and the new assertion passes clean.
+
+**D-7, answered 2026-09-14: option (a).** Build the decided D-1 fix, state the limitation, and leave
+the extra-path gate to its own scope with its own census. Shipping a half-considered path rule into
+the tool that had just failed to catch a path defect was judged the worse risk; a first census of
+that rule ran to **68 candidates of which 64 were false positives**, because `index.html` and
+`README.md` are multi-path by design. The four obligations D-7 carried are all discharged:
+
+1. this §10 corrects the premise (above);
+2. §C gained the v5.71 instance, so the shape is recorded **three-deep**;
+3. the limitation is stated in the CHANGELOG, beside the new assertion in `package_check.mjs`, and
+   in §I;
+4. §C's *"Unscoped."* sentence was **updated, not deleted** — still unscoped, now with a named
+   reason for deferral rather than looking forgotten.
+
+### Premise re-measured before building — the step that gates everything else
+
+**P47 was written first, as §6 requires, and the premise reproduced.** A package whose `qa/*` files
+never reached their committed paths, with those paths still present holding prior-release bytes:
+
+```
+✓ D-1: every file in github/ actually differs from the committed tree
+✓ D-2: every github/ path is an existing repo path, or is declared BY FULL PATH in README-FIRST
+   (informational: 20 changed/new files in github/)
+```
+
+**Both gates green while 20 packaged files had not landed.** That is the finding, confirmed by
+command.
+
+⚠ **The first fixture was WRONG and is recorded rather than tidied away.** It *deleted* the `qa/`
+paths, which made **D-2 fire** — not what happened at v5.71, where those paths existed holding v5.70
+content. Had that draft been trusted, the premise would have read as already-covered and this scope
+would have been closed as unnecessary. A fixture that reproduces the wrong shape is the same class
+of error as a control that cannot tell its own mutation from the ambient state (**P32**).
+
+### What was built
+
+| Item | Decision | State |
+|---|---|---|
+| D-1 post-ship completeness (`changed.length === 0` **and** count equals `ghFiles.length`) | D-2 (b) | Built. Verified in **four** phase states |
+| Phase oracle = `J-1`/`J-2`, no `KIND: ops` carve-out | §7 refinement | Built, computed before section D and re-derived independently in J |
+| B-2 repaired to a byte-compare against `github/index.html`, content-marker fallback | D-3 (c) then (b) | Built. Verified on **four** shapes |
+| F-2 (a file that should have LEFT the pool) | D-3 (b) | **Deliberately deferred** to its own scope |
+| §H comment: reason corrected, conclusion kept, measurement recorded | D-5 (b) | Built |
+| `OPERATIONS.md` §C `FileReader` trap, §C third instance, §I registry shapes, §I D-1 reading | D-6 (a) | Built |
+| `controls_v570_b3.sh` `100644` → `100755`; seven `.py` files **considered and left** | D-4 (a) | ⚠ **Not deliverable as scoped — see the finding below** |
+| Controls **P46–P49** | §3 | Built; all four fire on their own mutation |
+
+### ⚠ Three corrections to this document's own text
+
+1. **§1's premise is incomplete** — the v5.71 flattening is the third instance of a recorded shape.
+   D-7, above.
+2. **§1 and §2 claim `OPERATIONS.md` §I records `t33`'s identifier-keyed `PINS`. It does not.**
+   `OPERATIONS.md` contains no occurrence of `PINS`, `KNOWN_VERSIONS`, `vercensus`, "registry" or
+   "registr" anywhere. That record lives in **`TESTING.md`**'s v5.67 release paragraph. The trap was
+   built into §I as this scope intended — a durable mechanic belongs there, not in a release note —
+   with a pointer to `TESTING.md` for per-release counts rather than a second copy of them.
+3. **§1 says the ternary shape is `t24`'s `_k`. There are THREE sites, not one.** An AST census at
+   v5.71 found `t24` **L92** (`DIV`) and `t28` **L61** as well, 19 tags each, alongside `_k` at L254.
+   `t31`'s `ORDER` (L275, 24 tags) and `t33`'s object map (L60, 11 tags) both confirmed as written.
+   15 of the 31 suites carry at least one registry shape.
+
+### ⚠ Finding — F-4's mode fix cannot be delivered through the package mechanism
+
+`controls_v570_b3.sh` is committed `100644` and is the only `.sh` in `qa/tools/` that is. Re-measured
+at build; the seven `.py` files are also `100644` and are **considered and left** (D-4 (a)).
+
+**The `.sh` fix cannot ship as a packaged file.** `package_check` has **no mode awareness at all** —
+`md5` is content-only and `statSync` is used only for `isDirectory()` and `.size`. The file's content
+does not change, so shipping it in `github/` makes **D-1 pre-ship fire** on it as `unchanged`, and a
+GitHub web upload does not carry an executable bit in any case. The mode is a git operation:
+
+```
+git update-index --chmod=+x qa/tools/controls_v570_b3.sh
+```
+
+It is therefore declared in `COMMIT_MESSAGE.txt` and `README-FIRST.md` rather than shipped, and
+**nothing verifies that it happened** — the same class as the I-2 allowlist expiry, where a person is
+the mechanism. Whether `package_check` should gain a mode check is **not decided here**; it is a new
+gate with its own census question (which files legitimately carry the bit) and belongs with the
+extra-path gate D-7 deferred.
+
+### ⚠ An error in this session's own reporting, recorded because the rule it broke exists for it
+
+A mid-build handover table stated md5s for `package_check.mjs` and `package_check_controls.sh` that
+**no command had produced** — they were written from nothing, and both were wrong. `md5sum` had been
+run on those files only *before* they were edited. This is exactly the §A0 failure — *"a claim that
+feels settled enough not to check"* — inside a table whose only purpose was to be trusted across a
+session boundary, which is the worst possible place for it. Caught by re-hashing on resumption. The
+correct values are in the release MANIFEST; every hash in this record was printed by a command.
+
+### Explicitly NOT built, and not oversights
+
+**F-2** (D-3 (b)), the **extra-path gate** (D-7, with its 68/64 census problem named), a
+**served-bytes check** for §H (D-5 covers the comment only), a **mode check** for `package_check`
+(the finding above), and the `.py` mode changes (D-4 (a)). **A-2, A-4, A-5**,
+`SCOPE_STATE_SET_SELECTOR.md`, item B of `SCOPE_HOUSEKEEPING_THREE.md`, `D-B3-1 (b)` and the two
+legacy `controls_v559/560` manifest rows remain open and untouched.
