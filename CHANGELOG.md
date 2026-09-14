@@ -1,5 +1,59 @@
 # Changelog
 
+## v5.71 — the My Data draft autosave actually saves; an imported master prompt is checked; the first-open gate stops overclaiming
+
+Source `9e79b92f9eb91e86489cb6b80caa33c3` · built `index.html` `e1bd283b638cdab74941804708987bb2` · built from v5.70
+`df3e5d7599277ae1bb1afc216d318baf`. **`src/index.html` changes** (`9d6f7519c01feb8ddd1133e9a6f2a599`), so this is a
+scaffold change as well as a source one. No engine, tax or state-rule change: `METHODOLOGY.md` does not change and MC
+parity stays 10/10.
+
+**Suite: 3,647 app checks, 0 failing, across both legs** — 37 suites, `t21` 50 and `domdiff` 32 counted separately
+(GRAND 3,729). `smoke_built` **22 passed, 0 failed** on the built artifact. Negative controls
+`qa/tools/controls_v571_draft.sh` **7 of 7 met**. Per-suite breakdown: `TESTING.md`.
+
+### What changed, and why
+
+- **The My Data draft autosave had never saved — in any release since it was added.** The draft code called
+  `getItem`, `setItem` and `removeItem`: synchronous methods the storage contract does not have. It exposes
+  `get`/`set`/`delete`/`list`, all async, and `get` throws on a missing key. Every call raised a `TypeError` into an
+  empty catch, so the feature was silently dead for five releases **while the interface promised it in two places** —
+  the dirty chip, and the leave dialog's "discarding keeps the auto-saved draft", which sits next to DISCARD & LEAVE
+  at the moment the user decides. All eight call sites now speak the contract the app actually has.
+- **The wipe path, which is the half that could have gone wrong.** `clearStorage` deletes a hand-enumerated list of
+  keys and the draft key was not among them. Repairing the autosave without the wipe would have shipped a **new
+  privacy defect on top of a closed one**: a plan the user "permanently deleted" would stay recoverable from the
+  restore banner on a shared machine — the exact scenario a v5.9.1 leak review was run to prevent. The key now joins
+  `STORAGE_KEYS`, the delete line was added, and `t5` grew a wipe assertion for it on its own, because it loops that
+  map. This is `t37`'s extinction invariant, driven through the real Clear All Data button.
+- **The interface no longer promises a draft it has not observed.** A flag is set only after a write resolves. The
+  chip reports the time a draft was actually saved, and the leave dialog's restore sentence is conditional on it —
+  with no draft yet, it says plainly that discarding loses the edits.
+- **An imported `masterPrompt` is now checked.** It is persisted, reloaded on every visit and heads every Ask AI
+  system prompt, but was assigned from a backup file with no type check and no length cap, so a shared backup could
+  steer the assistant and a non-string value was template-interpolated. It is now accepted only as a string and
+  truncated. ⚠ **The 20,000-character cap is a judgement, not a measurement** — no distribution of real prompt
+  lengths was sampled; it is reasoned from token arithmetic alone, is deliberately cheap to change, and should be
+  revised when anyone has real data. It is disclosed in the Field Manual rather than applied silently.
+- **The first-open gate no longer claims that nothing is ever uploaded.** Ask AI does upload a plan summary when the
+  user asks it to. The Field Manual qualified this in two places; the gate — which is what every first-time user
+  actually reads — did not.
+- **Three `smoke_built` checks were reading the inlined bundle source.** The built artifact contains the bundle as
+  script *text*, and the harness read `body.textContent`, so the version check, the Ask AI notice check and the
+  survivor-disclosure check could all pass on a page **where no script ran at all**. The harness now reads `#root`.
+
+### Limitations and approximations, stated plainly
+
+- The survivor-disclosure check in `smoke_built` asserts presence in the shipped artifact bytes, **not** that the
+  text renders. Those disclosures appear only when a survivor year is selected in the Taxes detail table, which that
+  smoke test does not drive; `t31` owns disclosure reachability. The check's previous, broader-sounding claim was
+  never actually tested — it was one of the three vacuous checks above.
+- `restoreDraft`, `discardDraft` and the recovery banner had **never executed** on any build. This release switches
+  on unexercised code rather than repairing exercised code, and `t37` gives each its first coverage.
+- The draft holds portfolio and expenses only, and the restore path commits through the same import pipeline every
+  other entry path uses. The export payload is built from named fields, so a draft cannot ride into a backup file.
+- The 20,000-character cap truncates rather than rejects, so an over-long imported prompt is silently shortened at
+  import; the Field Manual states this.
+
 ## ops 2026-09-12 — the A-3 scope (with A-6 and F-3), decided and buildable; the B-3 browser check recorded
 
 KIND: ops. Leaves **v5.70** current — source `df3e5d7599277ae1bb1afc216d318baf`, built `index.html` `372d066cf4fc7115ebdae9fc9d6f35d1`.
