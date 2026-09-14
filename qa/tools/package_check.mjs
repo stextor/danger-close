@@ -565,6 +565,17 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
       // ── REMOVED at the v5.69 ship: "SCOPE_RI_POPULATE.md", added 2026-09-10. Its entry named its own expiry — the
       //    Rhode Island build — and the scope is RETIRED with a §10 build record in the same package.
       "SCOPE_STATE_SET_SELECTOR.md",              // OPEN, written v5.66 (D-NM-1 (c) second half); expires when the structural field ships
+      // Added 2026-09-14, one package LATE. The scope itself shipped in the upload of 2026-09-14 WITHOUT
+      // this entry, and I-2 went red naming it unclassified — which is the gate working exactly as designed.
+      // Its own §7 said the two halves must ship together and they did not; recorded here rather than
+      // tidied away, because the near-identical A-3 entry below is the precedent that got it right.
+      // All six of its §5 decisions were approved the day it was written, so this is OPEN-because-UNBUILT,
+      // not OPEN-because-undecided.
+      // ⚠ EXPIRES AT THE BUILD THAT RETIRES IT — the ops package fixing D-1's completeness gap and B-2's
+      // name match. That package must remove this entry AND mark the scope RETIRED with a build record, both
+      // halves together. Nothing here can detect a missed removal: I-3 fires only on an entry naming a file
+      // that is GONE, and this file will still be there carrying a RETIRED marker. A person removes it.
+      "SCOPE_RELEASE_GATES_AND_HOUSEKEEPING.md",  // OPEN, written 2026-09-14 (D-1, B-2, F-4, traps); decided, unbuilt
       // ── REMOVED at v5.71 (2026-09-13): "SCOPE_A3_DRAFT_AUTOSAVE.md", added 2026-09-12 with the
       // scope itself. Its entry named its own expiry — "EXPIRES AT THE v5.71 BUILD, which retires it
       // with a build record" — and that condition is MET: v5.71 builds A-3, A-6 and F-3, and the
