@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **OPEN — DECISIONS REQUIRED. Nothing here is built.** Six decisions in §5 need answering before any build starts. |
+| Status | **RETIRED — BUILT 2026-09-14 as an ops package.** All six §5 decisions answered as recommended on the day it was written; built the same day. See §7 for the build record, including one correction to this document's own text and the four mode fixes that ship as commit instructions rather than as files. |
 | Measured against | **v5.71**, source `9e79b92f9eb91e86489cb6b80caa33c3`, built `index.html` `e1bd283b638cdab74941804708987bb2`, repo HEAD **`00f8dc4`**, 339 tracked files, pool 134, no drift |
 | Parent findings | **D-7** (the extra-path gate, deferred 2026-09-14 with a named reason), **F-2** (nothing detects a file that should have LEFT the pool), and the **F-4 mode finding** from `SCOPE_RELEASE_GATES_AND_HOUSEKEEPING.md` §10 |
 | Target release | An **ops package** (`KIND: ops`) — no app source change, no version bump. See D-6 |
@@ -253,3 +253,66 @@ entry fires red in the run that ships it. That has now happened once and been re
 happen twice. The entry names its own expiry — *the build that retires this scope, which removes the
 entry and marks the scope RETIRED with a build record, both halves in one package.* Nothing can detect
 a missed removal: I-3 fires only on an entry naming a file that is **gone**. A person removes it.
+
+
+---
+
+## 7 · Build record — 2026-09-14, ops package
+
+Built against **v5.71** — source `9e79b92f9eb91e86489cb6b80caa33c3`, repo HEAD **`b2b76cf`**, 340
+tracked files, pool 135. ⚠ **§1's anchor said HEAD `00f8dc4`, 339 files, pool 134**; the scope was
+filed to the repo and the pool between being written and being built, which is what moved all three.
+Every premise was re-measured at `b2b76cf` before anything was written, and all three held.
+
+### Decisions, as taken
+
+| | Decision | Taken |
+|---|---|---|
+| D-1 | mode rule | **(a) shebang ⇒ executable**, and fix the four `.py` files. Supersedes the preceding scope's D-4 |
+| D-2 | duplicate-content scope | **(a) the whole committed tree** |
+| D-3 | pool-retirement declaration | **(b) a `RETIRE:` line in `MANIFEST.txt`** |
+| D-4 | gate naming | **(c) no new section** — `D-3`, `J-5`, `G-3` |
+| D-5 | `E-1b`'s multi-candidate skip | **(b) make it loud here, repair in its own scope** |
+| D-6 | package split | **(a) one ops package** |
+
+### Premise reproduced before building
+
+The shipped tool (`a257a77e`) was run against a tree with `qa/qa-baseline/t1_units.mjs` re-committed
+byte-identically at the root. **It named the duplicate nowhere — no check produced any output
+mentioning it.** The new `D-3` names it exactly: `qa/qa-baseline/t1_units.mjs == t1_units.mjs`.
+
+### ⚠ Correction to this document's own text
+
+§3 listed **P52** as the pool-orphan control and **P54** as the mode control. They shipped the other
+way round — **P52/P53 are the mode pair, P54/P55 the pool pair** — because the gates were built in
+section order (`D`, `G`, `J`) rather than in the order §3 listed them. The pairs and their assertions
+are otherwise exactly as scoped.
+
+### ⚠ Two control-design faults found by the controls themselves
+
+1. **The baseline guard was per-GATE and had to become per-NEEDLE.** The first draft invalidated any
+   control whose target gate was already red. That broke `P50`–`P53` outright, because **`G-3a` is
+   legitimately red until the four `.py` mode fixes land** — and a mode cannot be shipped as a file.
+   Guarding on the gate would have made four controls unrunnable for exactly as long as the defect
+   they guard against existed. The guard now asks *did THIS mutation add THIS name?*
+2. **`P53`'s needle matched an unrelated gate.** A bare `oracle_nm.py` matched **`K-8`**, which lists
+   every pool file by name when the scratch pool is thin, so the control reported INVALID on output
+   that had nothing to do with it. **That is the `P32` shape precisely.** The needle is now scoped to
+   `G-3`'s output format by a trailing `(`.
+
+Both are recorded rather than tidied because a control that cannot tell its own mutation from the
+ambient state is the failure this project has hit most often.
+
+### ⚠ What ships RED, deliberately
+
+**`G-3a`, naming four `.py` files.** They are `git update-index --chmod=+x` lines in
+`COMMIT_MESSAGE.txt`, not packaged files — content unchanged means `D-1` would fire on them as
+`unchanged`, and §L records that replacing a tracked file preserves its mode. **`G-3` going green
+after those four commands is the first confirmation this project has ever had that a mode landed.**
+§I carries this so the red is not read as a defect.
+
+### Not built, and not oversights
+
+**`E-1b`'s matcher** — made loud per D-5, not repaired; its own scope. **A served-bytes check** for
+§H. **A-2, A-4, A-5**, `SCOPE_STATE_SET_SELECTOR.md`, item B of `SCOPE_HOUSEKEEPING_THREE.md`,
+`D-B3-1 (b)`, and the two legacy `controls_v559`/`v560` manifest rows all remain open and untouched.

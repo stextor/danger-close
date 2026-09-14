@@ -393,12 +393,21 @@ to all six** — a gate switched off by a duplicate, with nothing printed. `.git
 upload path is not the run folder, and the rule below forbids ignoring these names anyway.
 ⚠ **`package_check` has no check for committed paths OUTSIDE the package** — it verifies the package's
 own files, and the clone diff is the only thing in the release path that sees an extra one.
-**Still unscoped, now deliberately so** (decision D-7, 2026-09-14): the gate was considered while
-fixing the v5.71 instance below and was left out of that package on purpose, because it needs a rule
-for what "outside the package" legitimately means and the first census of that ran to 68 candidates
-of which 64 were false positives. It wants its own scope with its own census; shipping a
-half-considered path rule into the tool that had just failed to catch a path defect was judged the
-worse risk. **Deferred with a reason, not forgotten.**
+**✓ SCOPED AND BUILT, 2026-09-14 — as `D-3`.** This paragraph previously read *"still unscoped,
+now deliberately so"*, deferred because *"the first census of that ran to 68 candidates of which 64
+were false positives"*.
+
+⚠ **THAT DEFERRAL REASON WAS AN ARTIFACT OF THE QUESTION, NOT A PROPERTY OF THE REPO, and it cost
+the gate a release.** The 68/64 census matched **BASENAMES**, and `index.html` and `README.md` are
+multi-path by design. Asking instead which tracked paths hold **BYTE-IDENTICAL CONTENT** — which is
+what the v5.68 defect actually was, *"byte-identical to them"* — measures **0 groups** on the clean
+tree and **5** when five `qa-baseline` files are re-committed at the root to simulate it. Zero false
+positives, five true ones.
+
+This is the fourth time in this project a **reason** has rotted while its **entry** stayed correct
+(see §H's egress comment, corrected the same day). The entry said "unscoped" and was right; the
+reason said "expensive" and was wrong, and nobody re-measured it because the entry read as settled.
+**When deferring something, the re-measurement that would overturn it is the thing to write down.**
 Two basenames are multi-path by design and long-standing, so E-1b cannot see them either:
 `index.html` (root artifact + `src/` template, §N) and `README.md` (root, `qa/qa-baseline/`,
 `validation/`).
@@ -671,6 +680,36 @@ will not announce itself.
 
 A repo clone settles these questions cheaply and settles related ones at the same time — it is also the
 fastest way to check whether project knowledge has drifted from what is actually committed.
+
+### ⚠ `G-3a` IS RED UNTIL FOUR MODE FIXES LAND — and it is the only thing that can see them (added 2026-09-14)
+
+`package_check` gained three gates for things that are not file contents: **`D-3`** (a file committed
+at an EXTRA path), **`J-5`** (a file that should have LEFT the pool), and **`G-3`** (file modes).
+
+**`G-3a` ships RED, naming four files**, and that is construction rather than defect:
+
+```
+qa/tools/controls_manifest_rows.py  qa/tools/controls_v566_nm.py
+qa/tools/controls_v568_va.py        qa/tools/oracle_ri.py
+```
+
+⚠ **A MODE CANNOT BE SHIPPED AS A PACKAGED FILE.** The content does not change, so `D-1` fires on it
+as `unchanged`; and §L records that replacing an existing tracked file **preserves** its mode, so the
+upload path cannot carry it either. Mode fixes are `git update-index --chmod=+x` lines in
+`COMMIT_MESSAGE.txt`. **Until `G-3` existed nothing verified they were ever run** — and the ops
+package of 2026-09-14 scored **45 passed, 0 failed** against a tree where exactly that step had been
+missed, over-reporting what shipped. `G-3` goes green when the four are applied, and that green is
+the first confirmation this project has ever had that a mode landed.
+
+**The rule is: a tracked file with a shebang carries the executable bit.** Measured across 340
+tracked files — reverse direction **0 counterexamples**, forward direction **4**. It supersedes the
+earlier decision to leave the seven `.py` files at `100644`, which rested on *"no document claims
+they are directly executable"*; four of them make that claim in their own first line. The three
+without a shebang are correctly left alone, and `P53` exists to keep them that way.
+
+⚠ **`J-5` is phase-split like `D-1`.** Pre-ship it asserts the `RETIRE:` name is still IN the pool,
+so a typo cannot pass as a success; post-ship it asserts the file is GONE. A `RETIRE:` line naming a
+file that was never there is a no-op that reads exactly like a clean retirement.
 
 ### ⚠ Version registries come in FOUR shapes and a sweep sees only one (added 2026-09-14)
 
