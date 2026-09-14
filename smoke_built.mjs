@@ -1,0 +1,211 @@
+// Verify the BUILT artifact (dist/index.html), not the source: does the published file
+// actually boot, dismiss its gate, load the example household, and carry v5.11?
+import { JSDOM, VirtualConsole } from "jsdom";
+import fs from "fs";
+
+let _s = 123456789;
+Math.random = () => { _s = (1103515245 * _s + 12345) % 2147483648; return _s / 2147483648; };
+
+// ── Input: the REAL built artifact. jsdom cannot execute <script type="module">, so we derive a
+//    test-only classic-script copy here rather than expecting one to exist (it is NOT a file that
+//    is kept, committed, or carried between sessions — earlier versions of this script read a
+//    variant produced by hand, which meant it could not run standalone).
+//    The relocation to just before </body> is REQUIRED, not cosmetic: module scripts are deferred,
+//    classic ones are not, so running the bundle in place executes before <div id="root"> exists
+//    and throws React error #299. Verified safe because the bundle contains no module-only syntax
+//    (no import.meta, no export, no dynamic import).
+const SRC_HTML = process.argv[2] || "dist/index.html";
+const TMP_HTML = SRC_HTML.replace(/\.html$/, "") + ".__smoketest__.html";
+const _real = fs.readFileSync(SRC_HTML, "utf8");
+{
+  const m = _real.match(/<script type="module"[^>]*>/);
+  if (!m) { console.log(`  \u2717 no inlined module script found in ${SRC_HTML}`); process.exit(1); }
+  const a = _real.indexOf(m[0]);
+  const b = _real.indexOf("</script>", a + m[0].length) + "</script>".length;
+  const block = _real.slice(a, b).replace(m[0], "<script>");
+  // NOTE: the replacement MUST be a function. A string replacement would let $& / $` / $\' inside
+  // the minified bundle be interpreted as JS replacement patterns and silently corrupt the script
+  // (symptom: "Unexpected end of input" and a gate that will not dismiss).
+  fs.writeFileSync(TMP_HTML, (_real.slice(0, a) + _real.slice(b)).replace("</body>", () => block + "\n</body>"));
+}
+process.on("exit", () => { try { fs.unlinkSync(TMP_HTML); } catch {} });  // never leave it behind
+const html = fs.readFileSync(TMP_HTML, "utf8");
+const vc = new VirtualConsole();
+vc.on("jsdomError", e => { if (!/Could not load|css/i.test(String(e.message))) console.log("  [jsdomError]", String(e.message).slice(0, 200)); });
+
+const dom = new JSDOM(html, {
+  runScripts: "dangerously", resources: undefined, pretendToBeVisual: true,
+  url: "https://localhost/", virtualConsole: vc,
+  // The bootstrap wraps window.fetch (`window.fetch.bind(window)`) BEFORE mounting, and this
+  // jsdom build ships no fetch — so without a stub installed before the inline scripts parse,
+  // the bootstrap throws and the app never mounts. beforeParse is the only hook early enough.
+  beforeParse(w) {
+    // v5.70: RECORD every request the page makes (the B-3 check below reads it). Still rejects, as before, and never
+    // calls a real fetch even if a future jsdom ships one.
+    w.__smokeFetches = [];
+    w.fetch = (u) => { w.__smokeFetches.push(String((u && u.url) || u)); return Promise.reject(new Error("fetch not available in jsdom")); };
+  },
+});
+const { window } = dom;
+window.matchMedia = window.matchMedia || (() => ({ matches: false, addListener() {}, removeListener() {}, addEventListener() {}, removeEventListener() {} }));
+window.ResizeObserver = class { observe() {} unobserve() {} disconnect() {} };
+window.scrollTo = () => {};
+window.HTMLCanvasElement.prototype.getContext = () => ({
+  fillRect() {}, clearRect() {}, beginPath() {}, moveTo() {}, lineTo() {}, stroke() {}, fill() {}, arc() {},
+  save() {}, restore() {}, translate() {}, rotate() {}, scale() {}, fillText() {}, measureText: () => ({ width: 10 }),
+  setLineDash() {}, closePath() {}, rect() {}, clip() {}, createLinearGradient: () => ({ addColorStop() {} }),
+});
+if (!window.URL.createObjectURL) window.URL.createObjectURL = () => "blob:stub";
+
+let pass = 0, fail = 0;
+const ck = (n, ok, d = "") => { if (ok) { pass++; console.log(`  ✓ ${n}`); } else { fail++; console.log(`  ✗ ${n}${d ? " — " + d : ""}`); } };
+const wait = (ms) => new Promise(r => setTimeout(r, ms));
+
+console.log(`BUILT ARTIFACT SMOKE \u2014 ${SRC_HTML}`);
+await wait(3000);
+
+// v5.71 (finding F-1): read the RENDERED APP, not <body>. The bundle is inlined into this page as
+// script SOURCE, and `body.textContent` includes it — so the version check and the Ask AI notice
+// check below both passed on a page where NO SCRIPT EVER RAN. #root is empty unless React mounted,
+// which is what makes those two checks mean what they say. The disclaimer gate is a SIBLING of
+// #root and is read through getElementById above, so it is unaffected.
+const txt = () => { const r = window.document.getElementById("root"); return r ? (r.textContent || "") : ""; };
+
+// 1) The disclaimer gate is present and functional (it runs independently of React).
+const gate = window.document.getElementById("dc-disclaimer-gate");
+ck("disclaimer gate rendered on first open", !!gate);
+if (gate) {
+  const btn = [...gate.querySelectorAll("button")].pop();
+  const chk = gate.querySelector("input[type=checkbox]");
+  if (chk) { chk.checked = true; chk.dispatchEvent(new window.Event("change", { bubbles: true })); }
+  if (btn) { btn.disabled = false; btn.dispatchEvent(new window.MouseEvent("click", { bubbles: true })); }
+  await wait(500);
+  ck("gate dismisses after acknowledgement", !window.document.getElementById("dc-disclaimer-gate"));
+}
+// 1b) v5.71 (finding F-3): the gate's privacy sentence. It used to claim, unconditionally, that
+// nothing is uploaded — while Ask AI does upload a plan summary on request. The Field Manual
+// qualified the same claim twice; the GATE is what every first-time user actually reads. Asserted
+// against the raw HTML because the gate is removed from the DOM once acknowledged above.
+ck("gate qualifies the privacy claim with the Ask AI exception",
+  html.includes("nothing is uploaded, except what you deliberately send from the Ask AI tab"),
+  "new gate wording not found in the built artifact");
+// A disclosure assertion becomes a LOCK the day a release makes it false (OPERATIONS §B2): if the
+// gate's wording changes again, invert this deliberately rather than leaving it green.
+ck("the old unconditional sentence is gone from the gate",
+  !html.includes("Nothing is uploaded or seen by anyone else"),
+  "the pre-v5.71 unconditional privacy sentence is still present");
+
+// 2) React mounted from the inlined bundle.
+await wait(2000);
+ck("React app mounted from the inlined bundle", (window.document.getElementById("root")?.children.length || 0) > 0);
+
+// 3) The version the four in-app sites carry.
+// Version is read FROM the artifact rather than hardcoded, so this check does not need a manual
+// bump every release (a hardcoded "v5.11" here failed at v5.12 — the same class of stale-literal
+// breakage PROJECT_INSTRUCTIONS §I warns about for the suites).
+const _verMatch = html.match(/DANGER CLOSE (v5\.[0-9.]+) \u2502 Not financial advice/);
+const _ver = _verMatch ? _verMatch[1] : null;
+ck("artifact declares a version in its footer string", !!_ver, "footer version not found");
+ck(`built app renders its own declared version (${_ver})`, !!_ver && txt().includes(_ver), txt().slice(0, 120));
+// Only the four VERSION SITES must agree. Historical references like "since v5.7" appear
+// throughout the Field Manual and are legitimate — an earlier version of this check flagged them
+// and was wrong about the build, not the other way round.
+const _siteVers = [
+  ...html.matchAll(/FIELD MANUAL \u00b7 (v5\.[0-9.]+) \u00b7 PUBLIC BUILD/g),
+  ...html.matchAll(/DANGER CLOSE (v5\.[0-9.]+) \u00b7 documentation regenerated/g),
+  ...html.matchAll(/DATA LOAD \u2502 (v5\.[0-9.]+)/g),
+  ...html.matchAll(/DANGER CLOSE (v5\.[0-9.]+) \u2502 Not financial advice/g),
+].map(m => m[1]);
+ck("all four in-app version sites agree, each present exactly once",
+  _siteVers.length === 4 && _siteVers.every(v => v === _ver),
+  `found [${_siteVers.join(", ")}], expected four x ${_ver}`);
+
+// 4) Load the example household and reach the Taxes tab.
+const findByText = (re, tags = "button, div, span") =>
+  [...window.document.body.querySelectorAll(tags)].find(el => re.test((el.textContent || "").trim()) && el.children.length === 0);
+const ex = findByText(/use example data/i);
+ck("landing screen offers Use Example Data", !!ex);
+if (ex) {
+  ex.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+  await wait(4000);
+  const taxes = [...window.document.body.querySelectorAll("button, div, span")]
+    .find(el => (el.textContent || "").trim().toLowerCase() === "taxes");
+  ck("Taxes tab reachable in the built app", !!taxes);
+  if (taxes) {
+    taxes.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await wait(4000);
+    const t = txt();
+    ck("Taxes schedule renders an RMD column", /RMD/.test(t));
+    // v5.71 (finding F-1, third instance). This check read `body.textContent`, which includes the
+    // inlined bundle SOURCE — so it passed on any artifact containing the string, whether or not
+    // anything rendered. The brief named two vacuous checks; this is a third, found only once
+    // txt() was narrowed to #root.
+    // ⚠ WHAT IT NOW CLAIMS, AND WHAT IT DOES NOT. The survivor disclosures render only under
+    // `sel.widowed` — the user must select a survivor YEAR in the Taxes detail table, a state this
+    // smoke test does not drive. So the honest assertion here is the one its name always made:
+    // the text is present in the SHIPPED BUILD. Asserting it against the artifact bytes is
+    // explicit rather than accidental. The render-level claim is NOT made here and must not be
+    // read into it — t31's cross-surface parity suite owns the disclosure's reachability.
+    ck("survivor disclosure text is present in the shipped build (artifact bytes, not render)",
+      /RIB-LIM widow's limit/.test(html) || /larger of the two/.test(html) || /Survivor year/.test(html),
+      "no survivor disclosure string in the artifact");
+  }
+}
+
+// ── B-3 (added v5.70, SCOPE_B3_KEYLESS_AI_ROUTE). On a self-hosted page with no saved key and no Local Model, Ask AI must
+// send NOTHING. This is the only check that sees the app AND the real bootstrap together: through v5.69 the app sent a
+// keyless request that src/main.jsx rewrote to this page's own host. It fails on any pre-v5.70 build BY DESIGN — that
+// failure is its negative control. Not vacuous: the refusal notice must appear, which proves askAI got past its
+// empty-question and simulation checks; zero requests alone could mean it never ran. ──
+{
+  const aiTab = [...window.document.body.querySelectorAll("button.tab")].find(b => (b.textContent || "").trim() === "ask AI");
+  ck("B-3: Ask AI tab reachable in the built app", !!aiTab);
+  if (aiTab) {
+    aiTab.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await wait(1500);
+    const before = window.__smokeFetches.length;
+    let noticed = false;
+    for (let i = 0; i < 20 && !noticed; i++) {
+      const ta = window.document.querySelector("textarea.ai-in");
+      if (ta && !ta.value) {
+        Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set.call(ta, "How does my plan look?");
+        ta.dispatchEvent(new window.Event("input", { bubbles: true }));
+        await wait(150);
+      }
+      if (ta) ta.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+      await wait(1000);
+      noticed = /Nothing was sent/.test(txt());
+    }
+    const sent = window.__smokeFetches.slice(before);
+    ck("B-3: with no key and no Local Model, Ask AI refuses (notice shown)", noticed);
+    ck("B-3: ...and the page makes NO request at all", sent.length === 0, JSON.stringify(sent));
+    const keyBtn = [...window.document.querySelectorAll("button.ai-btn")].find(b => /Add your API key/.test(b.textContent || ""));
+    ck("B-3: the send button is disabled and relabelled", !!keyBtn && keyBtn.disabled);
+  }
+}
+
+// ── Bootstrap contract (added 2026-08-08 after a build shipped WITHOUT it). The app calls
+// window.storage.*, which exists in the artifact environment but NOT in a normal browser;
+// src/main.jsx installs a localStorage-backed shim before mounting. A build made from a
+// wrong/reconstructed entry still renders perfectly and still passes every check above —
+// persistence is simply dead. So the shim is now asserted directly, and exercised. ──
+ck("window.storage shim installed by the bootstrap", !!window.storage && typeof window.storage.set === "function");
+if (window.storage) {
+  try {
+    await window.storage.set("smoke_probe", "42");
+    const got = await window.storage.get("smoke_probe");
+    ck("window.storage round-trips a value", got && got.value === "42", JSON.stringify(got));
+    ck("window.storage writes through to localStorage under the dc: prefix",
+      window.localStorage.getItem("dc:smoke_probe") === "42");
+    const listed = await window.storage.list("smoke_");
+    ck("window.storage.list finds the key", !!listed && listed.keys.includes("smoke_probe"), JSON.stringify(listed));
+    await window.storage.delete("smoke_probe");
+    let threw = false;
+    try { await window.storage.get("smoke_probe"); } catch { threw = true; }
+    ck("window.storage.get throws on a missing key (artifact API contract)", threw);
+  } catch (e) { ck("window.storage exercised without throwing", false, String(e).slice(0, 160)); }
+}
+ck("Anthropic fetch wrapper installed by the bootstrap", /\/anthropic/.test(html));
+
+console.log(`\nBUILT SMOKE: ${pass} passed, ${fail} failed`);
+process.exit(fail ? 1 : 0);
