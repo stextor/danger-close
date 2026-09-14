@@ -1,5 +1,41 @@
 # Changelog
 
+## ops 2026-09-14 — the new scope's I-2 allowlist entry and K-9 manifest naming, one package late
+
+KIND: ops. Leaves **v5.71** current — source `9e79b92f9eb91e86489cb6b80caa33c3`, built `index.html`
+`e1bd283b638cdab74941804708987bb2`. **No app source change, no suite or harness change, no version bump.** The
+app suite is untouched and its total stays **3,647 app checks** across both legs.
+
+### What this fixes, and why it was needed
+
+`docs/SCOPE_RELEASE_GATES_AND_HOUSEKEEPING.md` was uploaded on 2026-09-14 **on its own**, and two gates went red
+as designed:
+
+- **`I-2`** — *unclassified: SCOPE_RELEASE_GATES_AND_HOUSEKEEPING.md*. A scope must be retired, superseded,
+  fulfilled, or on the OPEN allowlist in `qa/tools/package_check.mjs`, and I-2 reads the tree **as a package
+  leaves it**, so a scope arriving without its entry fires in the same run that ships it.
+- **`K-9`** — every pool file must be **named somewhere** in `PROJECT_KNOWLEDGE_INDEX.md` (§G: list every file
+  explicitly). The scope reached the pool and the manifest did not mention it.
+
+Both are now supplied. The allowlist entry names its own expiry — the build that fixes D-1 and B-2 must remove
+it **and** mark the scope RETIRED in the same package — and the manifest entry records that the scope is
+deliberately **unrowed**, consistent with the other open scope and with decision D-3 (an open or retired
+`SCOPE_*` is pending or history, not build state).
+
+⚠ **This was avoidable and is recorded rather than tidied away.** The scope's own §7 said the two halves must
+ship together, and the delivery did not follow it. The near-identical `SCOPE_A3_DRAFT_AUTOSAVE.md` entry at
+v5.71 is the precedent that got it right. Both gates caught it immediately and named the file — which is the
+system working, not failing. The lateness is noted in both the allowlist comment and the manifest row, in the
+same "one package late (K-9)" form already used by `sel_census.cjs` and `SCOPE_STATE_SET_SELECTOR.md`.
+
+### Limitations
+
+- Nothing in `package_check` can detect a **missed removal** of an allowlist entry later: `I-3` fires only on an
+  entry naming a file that is **gone**, and a retired scope is still present, carrying a RETIRED marker. A
+  person removes it. The entry says so.
+- This package does not touch D-1, B-2, F-2, F-4 or the OPERATIONS traps. Those are the scope's own build and
+  remain unbuilt.
+
 ## v5.71 — the My Data draft autosave actually saves; an imported master prompt is checked; the first-open gate stops overclaiming
 
 Source `9e79b92f9eb91e86489cb6b80caa33c3` · built `index.html` `e1bd283b638cdab74941804708987bb2` · built from v5.70
