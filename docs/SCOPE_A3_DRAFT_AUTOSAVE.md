@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **OPEN — DECIDED AND BUILDABLE.** Written 2026-09-12; all six §5 decisions approved the same day (the recommendation in each case — see §5). Nothing here is built. |
+| Status | **RETIRED — BUILT AT v5.71, 2026-09-13.** Written 2026-09-12; all six §5 decisions approved the same day (the recommendation in each case — see §5). Built as specified; see §10 for the build record, including two corrections to this document's own text. |
 | Measured against | **v5.70**, source `df3e5d7599277ae1bb1afc216d318baf`, built `index.html` `372d066cf4fc7115ebdae9fc9d6f35d1`, `src/main.jsx` `d9eca7b469a3fb7ec1c5325fd4bf8145`, `src/index.html` `52ef2be3080352df6198ee3b8c3507ad`, repo HEAD `d8c6aaa`, pool 130 files, no duplicate names |
 | Parent findings | `docs/FlawsToFix-v5_69-Phase1.md` **A-3** (MEDIUM, undisclosed) and **A-6** (LOW); `docs/STATUS_2026_09_11_b3_live_verification.md` **F-3** (the first-open notice) and **F-1** (two vacuous `smoke_built` checks, riding as D-2 of that record) |
 | Target release | **v5.71** |
@@ -232,3 +232,79 @@ and missed at both v5.66 and v5.70 — OPERATIONS §I) → full suite → rebuil
 
 ⚠ **Expect the prior leg to be noisy.** `t37` runs against a v5.70 leg in which the feature is dead, so most of its
 assertions are gated to the current leg and the prior leg's job is to pin the defect. Gate per leg, never soften.
+
+---
+
+## 10 · Build record — v5.71, 2026-09-13
+
+Built to this scope. **A-3, A-6, F-3 and F-1 all shipped in one release**, as D-A3-6 (a) decided.
+
+| | |
+|---|---|
+| Release | **v5.71** |
+| Source | `9e79b92f9eb91e86489cb6b80caa33c3` |
+| `src/index.html` | `9d6f7519c01feb8ddd1133e9a6f2a599` (scaffold change — F-3) |
+| Built `index.html` | `e1bd283b638cdab74941804708987bb2` |
+| Built from | v5.70 source `df3e5d7599277ae1bb1afc216d318baf` |
+| Suite | **3,647 app checks, 0 failing, both legs** (`t21` 50 and `domdiff` 32 are tooling; GRAND 3,729) |
+| `smoke_built` | **22 passed, 0 failed** on the built artifact (20 at v5.70; +2 from F-3) |
+| Negative controls | `qa/tools/controls_v571_draft.sh` — **7/7 met** |
+| §N3a scaffold check | v5.70 rebuilt with **v5.70's** `src/index.html` from git → `372d066cf4fc7115ebdae9fc9d6f35d1`, **byte-identical** to the published artifact |
+
+### The premise reproduced
+
+`probe_mydata_draft.mjs v570 contract` showed the defect exactly as §1 describes: no draft written after the
+debounce, no recovery banner on the next visit, and both UI promises made anyway. The same probe in `control`
+mode wrote and restored a draft, so the negative result was not vacuous. `census.cjs` returned §1's table with
+**no drift** — all eight call sites at the stated lines.
+
+### Two corrections to this document
+
+⚠ **1 · D-A3-1 (a)'s "by construction" was wrong.** This scope says adding the draft key to `STORAGE_KEYS` means
+`clearStorage` "then covers it by construction." It does not: `clearStorage` is a **hand-enumerated list** of
+`window.storage.delete(...)` calls, so the delete line had to be added by hand as well. What membership actually
+buys is the **guard** — `t5` seeds every key from the map and loops it, so a missing delete fails loudly. The
+decision was right and was implemented as written; only the mechanism was described too optimistically. Both
+halves shipped, and `controls_v571_draft.sh` **C2** is the control that proves the wipe half is load-bearing.
+
+⚠ **2 · F-1 was under-counted.** This scope, following the parent record, names **two** vacuous `smoke_built`
+checks. There were **three**. Narrowing `txt()` from `body` to `#root` also broke the survivor-disclosure check,
+which had been passing only because `body.textContent` includes the inlined bundle *source*. The survivor
+disclosures render solely under `sel.widowed` — a state the smoke test does not drive — so that check now asserts
+what its name always claimed (presence in the shipped artifact bytes) and records explicitly that the
+render-level claim is **not** made there. `t31` owns disclosure reachability.
+
+### The fix direction, which this scope left open
+
+The eight sites were moved onto the **async contract the app actually has** (`get`/`set`/`delete`), not given
+sync aliases. §4's out-of-scope list forbids adding `getItem`/`setItem`/`removeItem` to `src/main.jsx` or any real
+shim, because that makes the suite agree with the defect — which is how A-3 survived five releases.
+
+### What the negative controls found
+
+Two of the seven controls **did not fire on their first run**, and both were real gaps in `t37` rather than bad
+controls (OPERATIONS §B2 — the control is never adjusted to match the test):
+
+- **C3** (chip promises unconditionally) missed, because `PR-2` matched only this release's own wording,
+  `draft saved`. v5.70's "a draft auto-saves every few seconds" is the same false promise in different words —
+  precisely the defect class A-3 is. The predicate was widened to the property, then scoped to the **chip
+  element**, because the My Data tab legitimately says "Your plan auto-saves privately in this browser" about the
+  *saved plan*.
+- **C4** (leave dialog promises unconditionally) missed, because nothing in `t37` reached the dialog *before* a
+  draft existed — which is the only case D-A3-3 exists for. A new **LD group** was added for it: dirty form,
+  inside the 2 s window, leave. `t37` grew from 39 to 43 checks on the current leg as a result.
+
+### A harness trap worth recording
+
+The app's bare `new FileReader()` resolves on **`globalThis`**, but jsdom installs `FileReader` on `window` only.
+Stubbing `window.FileReader` leaves the whole import group **vacuous** — it "passes" on the prior leg for the
+wrong reason. `t37`'s IM group stubs `globalThis` and carries a setup check so it cannot go vacuous silently.
+This belongs in OPERATIONS §C with the other harness traps.
+
+### Registration cost, measured
+
+19 files needed the `v571` tag. Two registries are invisible to `vercensus.cjs`'s sweep and were found only by
+failing closed: **`t33`'s `PINS`** (identifier-keyed — this scope warned about it) and **`t31`'s `ORDER`** array,
+which is a version ladder not named `KNOWN_VERSIONS`, where `indexOf` returns `-1` for an unregistered tag and
+silently scores every disclosure key as pre-fix. `t24`'s `_k` helper — an OR-chain terminating in a ternary — was
+also mis-registered on the first pass, the same trap OPERATIONS §L's closing paragraph records from v5.63.
