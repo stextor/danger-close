@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **OPEN — AWAITING DECISIONS IN §5. DO NOT BUILD YET.** Written 2026-09-14. |
+| Status | **OPEN — DECIDED AND BUILDABLE.** Written 2026-09-14; all six §5 decisions approved the same day, each as recommended, with one refinement to D-1's mechanism recorded in §5 and in the Decisions-as-taken table below. Nothing here is built. |
 | Measured against | **v5.71**, source `9e79b92f9eb91e86489cb6b80caa33c3`, built `index.html` `e1bd283b638cdab74941804708987bb2`, repo HEAD `0a028fd`, pool 133 files, no drift |
 | Parent findings | **D-1's completeness gap** and **B-2's name match**, both found at the v5.71 ship (2026-09-14); `docs/STATUS_2026_09_11_b3_live_verification.md` **F-2** and **F-4**; `package_check.mjs`'s stale §H comment; two harness/registry traps hit during the v5.71 build |
 | Target release | An **ops package** (`KIND: ops`) — no app source change, no version bump. See D-6 |
@@ -199,6 +199,10 @@ The tool is invoked identically in both phases, so the complement assertion need
 **Recommendation: (a), with an explicit ops carve-out keyed on `KIND: ops`.** It cannot be forgotten, which is
 the property that matters most here — this defect survived *because* a human had to remember what to expect.
 
+⚠ **ANSWERED — and the mechanism was refined when it was taken. The carve-out is DROPPED and the oracle is
+`J-1`/`J-2`, not `K-2`. See §7, which is authoritative for this decision; the paragraph above is the
+recommendation as first written and is kept only as the record of what was considered.**
+
 ### D-2 · What does the post-ship check assert, exactly?
 
 - **(a) `changed.length === 0`**, listing every file that did not land.
@@ -271,3 +275,47 @@ project instructions call a finding.
 ⚠ **An ops package's expected red set differs from an app release's.** §I records that for an ops package
 `K-1`–`K-3` are green in both phases and **`D-1` goes red post-ship instead**. If D-1 changes, that sentence in
 §I changes with it — step 6 and step 9 are the same obligation seen twice.
+
+---
+
+## 7 · Decisions as taken — 2026-09-14
+
+All six answered as recommended. **Do not re-ask them.**
+
+| # | Taken | Note |
+|---|---|---|
+| D-1 | Infer the phase, do not flag it | ⚠ **Mechanism refined from the written recommendation — see below.** |
+| D-2 | `changed.length === 0` **and** the count equals `ghFiles.length` | (b) |
+| D-3 | B-2 → compare `knowledge/index.html` against `github/index.html`, fail only if identical bytes; **F-2 deferred** to its own scope | (c) then (b). The deferral is stated in the CHANGELOG entry |
+| D-4 | Fix `controls_v570_b3.sh` only; the seven `.py` files are **considered and left** | (a), recorded in the CHANGELOG so it is not re-found as a bug |
+| D-5 | Correct §H's reason, keep its conclusion, and record the v5.71 served-bytes measurement as evidence | (b) |
+| D-6 | **One ops package** | (a) |
+
+### ⚠ D-1's mechanism: `J-1`/`J-2`, not `K-2`
+
+The scope recommended inferring the phase from **K-2** *"with an explicit ops carve-out keyed on `KIND: ops`"*.
+That carve-out is dropped, because a better oracle was found while recording the decision, and the carve-out
+would have been exercised immediately — **this package is itself `KIND: ops`**.
+
+**The phase oracle is `J-1` and `J-2` both green** (`package_check.mjs` L655-663): every `knowledge/` file
+reached the pool, and none landed stale. Measured at the v5.71 ship — pre-ship both **red**, post-ship both
+**green** — identically to K-2, but *without* depending on the app source having changed. An ops package has a
+`knowledge/` half and no source change, so K-2 is true in both phases for one while J-1/J-2 still discriminate.
+
+This preserves the property the decision was taken for — **the phase cannot be forgotten, because nothing has to
+be remembered** — and removes the special case, which is the thing this project keeps watching drift.
+
+⚠ **Residual case, to handle explicitly at build:** a package with **no `knowledge/` half** skips J entirely
+(L651-652), so the oracle is unavailable. Such a package has no pool footprint but still has a `github/` half
+whose post-ship landing matters. Treat "J skipped" as **phase-unknown** and assert D-1's pre-ship form only,
+printing that the post-ship complement was not evaluated — a stated skip, never a silent one. ⚠ If this is
+judged wrong at build, that is a finding: **STOP and report** rather than inventing a second oracle mid-build.
+
+### One thing the build must not forget
+
+**`package_check.mjs` needs an `I-2` OPEN-allowlist entry for this scope, shipped in the SAME package as the
+scope itself.** I-2 reads the tree as the package leaves it, so a scope arriving without its entry fires red in
+the run that ships it. The entry names its own expiry — *expires at the build that retires this scope, which
+removes the entry and marks the scope RETIRED with a build record, both halves in one package*. Nothing can
+detect a missed removal: I-3 fires only on an entry naming a file that is **gone**, and this file will still be
+there carrying a RETIRED marker. A person removes it.
