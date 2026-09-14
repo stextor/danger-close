@@ -85,6 +85,12 @@ tally "t35-$CUR"   node t35_state_populate.mjs "$CUR"
 # t36 (v5.70) runs on BOTH legs: the prior leg pins B-3's keyless send, the current leg asserts it extinct.
 tally "t36-$PRIOR" node t36_ai_route.mjs "$PRIOR"
 tally "t36-$CUR"   node t36_ai_route.mjs "$CUR"
+
+# t37 (v5.71) runs on BOTH legs: the prior leg pins A-3 (the draft autosave has never saved) and
+# A-6 (an imported masterPrompt is assigned unchecked); the current leg asserts both fixed, and
+# carries this release's EXTINCTION INVARIANT — after Clear All Data the draft key is gone.
+tally "t37-$PRIOR" node t37_mydata_draft.mjs "$PRIOR"
+tally "t37-$CUR"   node t37_mydata_draft.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

@@ -64,7 +64,12 @@ const wait = (ms) => new Promise(r => setTimeout(r, ms));
 console.log(`BUILT ARTIFACT SMOKE \u2014 ${SRC_HTML}`);
 await wait(3000);
 
-const txt = () => window.document.body.textContent || "";
+// v5.71 (finding F-1): read the RENDERED APP, not <body>. The bundle is inlined into this page as
+// script SOURCE, and `body.textContent` includes it — so the version check and the Ask AI notice
+// check below both passed on a page where NO SCRIPT EVER RAN. #root is empty unless React mounted,
+// which is what makes those two checks mean what they say. The disclaimer gate is a SIBLING of
+// #root and is read through getElementById above, so it is unaffected.
+const txt = () => { const r = window.document.getElementById("root"); return r ? (r.textContent || "") : ""; };
 
 // 1) The disclaimer gate is present and functional (it runs independently of React).
 const gate = window.document.getElementById("dc-disclaimer-gate");
@@ -77,6 +82,18 @@ if (gate) {
   await wait(500);
   ck("gate dismisses after acknowledgement", !window.document.getElementById("dc-disclaimer-gate"));
 }
+// 1b) v5.71 (finding F-3): the gate's privacy sentence. It used to claim, unconditionally, that
+// nothing is uploaded — while Ask AI does upload a plan summary on request. The Field Manual
+// qualified the same claim twice; the GATE is what every first-time user actually reads. Asserted
+// against the raw HTML because the gate is removed from the DOM once acknowledged above.
+ck("gate qualifies the privacy claim with the Ask AI exception",
+  html.includes("nothing is uploaded, except what you deliberately send from the Ask AI tab"),
+  "new gate wording not found in the built artifact");
+// A disclosure assertion becomes a LOCK the day a release makes it false (OPERATIONS §B2): if the
+// gate's wording changes again, invert this deliberately rather than leaving it green.
+ck("the old unconditional sentence is gone from the gate",
+  !html.includes("Nothing is uploaded or seen by anyone else"),
+  "the pre-v5.71 unconditional privacy sentence is still present");
 
 // 2) React mounted from the inlined bundle.
 await wait(2000);
@@ -119,8 +136,19 @@ if (ex) {
     await wait(4000);
     const t = txt();
     ck("Taxes schedule renders an RMD column", /RMD/.test(t));
-    ck("survivor disclosure text is present in the shipped build",
-      /RIB-LIM widow's limit/.test(t) || /larger of the two/.test(t) || /Survivor year/.test(t));
+    // v5.71 (finding F-1, third instance). This check read `body.textContent`, which includes the
+    // inlined bundle SOURCE — so it passed on any artifact containing the string, whether or not
+    // anything rendered. The brief named two vacuous checks; this is a third, found only once
+    // txt() was narrowed to #root.
+    // ⚠ WHAT IT NOW CLAIMS, AND WHAT IT DOES NOT. The survivor disclosures render only under
+    // `sel.widowed` — the user must select a survivor YEAR in the Taxes detail table, a state this
+    // smoke test does not drive. So the honest assertion here is the one its name always made:
+    // the text is present in the SHIPPED BUILD. Asserting it against the artifact bytes is
+    // explicit rather than accidental. The render-level claim is NOT made here and must not be
+    // read into it — t31's cross-surface parity suite owns the disclosure's reachability.
+    ck("survivor disclosure text is present in the shipped build (artifact bytes, not render)",
+      /RIB-LIM widow's limit/.test(html) || /larger of the two/.test(html) || /Survivor year/.test(html),
+      "no survivor disclosure string in the artifact");
   }
 }
 

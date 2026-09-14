@@ -40,7 +40,7 @@ const VER = process.argv[2] || "v563";
 // pre-fix like v5.62; only the two ABSOLUTE pins differ, because v5.62 raised state tax in the
 // Roth outputs (SCOPE_ENGINE_STATE_PARITY). Everything else here is a DELTA between two streams
 // on one build and is therefore version-independent by construction.
-const KNOWN_VERSIONS = ["v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570"];
+const KNOWN_VERSIONS = ["v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is not registered in this suite.");
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -48,7 +48,7 @@ if (!KNOWN_VERSIONS.includes(VER)) {
   process.exit(1);
 }
 // The fix landed at v5.63. Every later tag is post-fix and must be added here as well.
-const POST_FIX = VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570";
+const POST_FIX = VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571";
 
 // The only two build-specific ABSOLUTE figures in this suite. Kept in one table so a tag added to
 // KNOWN_VERSIONS without its pins fails CLOSED rather than reading someone else's numbers — the
@@ -98,6 +98,13 @@ const PINS = {
   // build, for the reason the v5.66 note above gives: the registration pass followed `vercensus.cjs`, which counts
   // STRING-literal tags and cannot see this identifier-keyed registry. The suite failed closed, as designed.
   v570: { noStream: 174883, acaConv: 1203137 },
+  // v5.71 fixes the My Data draft autosave (A-3), guards an imported masterPrompt (A-6) and
+  // rewords the first-open gate (F-3). It touches storage, the import path and copy — no engine,
+  // no tax rule, no state rule — so neither figure may move. Carrying v5.70's values forward is
+  // the assertion that it did not. ⚠ This entry is written BY HAND: vercensus.cjs sweeps
+  // KNOWN_VERSIONS arrays and cannot see this identifier-keyed registry. It was missed at v5.66
+  // and again at v5.70; the suite failed closed both times, which is the only reason it was cheap.
+  v571: { noStream: 174883, acaConv: 1203137 },
 };
 if (!PINS[VER]) {
   console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is registered but has no PINS entry.");
