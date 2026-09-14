@@ -122,9 +122,42 @@ ck("B-1: knowledge/ is flat (no subdirectories)",
   knFiles.every(f => !f.includes("/")), knFiles.filter(f => f.includes("/")).join(", "));
 // The BUILT index.html is output, not input (§G). Shipping it to the pool is a real error:
 // it would sit beside src/index.html under a name that cannot distinguish them.
+//
+// ⚠ THIS MATCHED ON FILENAME ALONE UNTIL 2026-09-14, AND THAT WAS A FALSE POSITIVE. The pool's
+// `index.html` is `src/index.html`, the VITE ENTRY TEMPLATE — a legitimate build input, whose
+// manifest row records that it was restored to the pool on 2026-08-20 after being found absent
+// for eleven releases. Measured at v5.71: template 5,029 bytes, built artifact 1,428,589 — a
+// factor of ~284. The name-only test fired on any package that shipped the template, which
+// v5.71 had to do, and it landed in that package's DO NOT SEND list as a known false alarm.
+//
+// The real rule is not "no file called index.html" but "THE POOL COPY MUST NOT BE THE BUILT
+// ARTIFACT", so compare bytes against the artifact the package itself is shipping to the repo
+// root. No size threshold: a magic number goes stale as the bundle grows.
+//
+// ⚠ If the package ships no github/index.html there is nothing to compare against, and this
+// falls back to the size-free content marker — the built artifact carries the inlined bundle
+// inside a <script> tag, the ~5 KB Vite template does not. Stated, not silent.
 const knIndex = knFiles.filter(f => f === "index.html");
-ck("B-2: no built index.html in knowledge/ (it is output, not input \u2014 \u00a7G)",
-  knIndex.length === 0);
+let b2bad = [], b2why = "";
+if (knIndex.length) {
+  const ghIndex = join(GH, "index.html");
+  const kIdx = join(KN, "index.html");
+  if (existsSync(ghIndex)) {
+    if (md5(kIdx) === md5(ghIndex)) {
+      b2bad = ["index.html"];
+      b2why = `knowledge/index.html is byte-identical to github/index.html (the BUILT artifact, ${statSync(ghIndex).size} bytes)`;
+    }
+  } else {
+    const txt = readFileSync(kIdx, "utf8");
+    // The bundle is inlined into the artifact; the template only <script src=…>s its entry.
+    if (/<script\b[^>]*>[\s\S]{5000,}<\/script>/.test(txt)) {
+      b2bad = ["index.html"];
+      b2why = `knowledge/index.html carries an inlined <script> bundle (${txt.length} bytes) \u2014 it is the built artifact, not src/index.html`;
+    }
+  }
+}
+ck("B-2: knowledge/index.html is the src/ template, NOT the built artifact (output is not input \u2014 \u00a7G)",
+  b2bad.length === 0, b2why);
 const knSrc = knFiles.filter(f => /^DangerClose-v5_\d+\.jsx$/.test(f));
 if (KIND === "app-release") {
   ck("B-3: exactly one versioned app source in knowledge/ (the incoming half of the two-source rotation)",
@@ -182,8 +215,54 @@ if (!existsSync(manPath)) {
   }
 }
 
+// ── PHASE · which complement of D-1 applies ──────────────────────────────────────────────
+// D-1 has two complements and the tool is invoked IDENTICALLY in both phases, so it has to
+// infer which one it is being asked. Pre-ship the question is "does everything in github/
+// differ from the tree?" (nothing should be shipped that did not change). Post-ship it is the
+// mirror — "did everything in github/ LAND?" — and until 2026-09-14 that was asserted nowhere.
+//
+// THE ORACLE IS J-1/J-2's CONDITION: every knowledge/ file has reached the pool, and none
+// landed stale. False pre-ship (the upload has not happened), true post-ship. It is evaluated
+// HERE rather than read from section J because J runs later in the file; the two must stay in
+// agreement, so J re-derives it from the same walk rather than this value being passed along.
+//
+// ⚠ WHY NOT K-2 (manifest's Current source md5 == the committed source), which was the first
+// recommendation: an OPS package changes no source, so K-2 is true in BOTH phases for one.
+// Every ops package would be judged post-ship and its complement would fire pre-ship, every
+// time. The carve-out that would have patched that was dropped — the package that introduced
+// this check is itself KIND: ops, so the special case would have been exercised immediately.
+// J-1/J-2 discriminate without depending on the source having changed.
+//
+// ⚠ PHASE-UNKNOWN IS A REAL THIRD STATE AND IT IS PRINTED, never silently defaulted. Two ways
+// in: no pool argument at all (the ordinary pre-ship invocation), and a package with no
+// knowledge/ half, which skips J entirely. In both, assert the PRE-SHIP form only and SAY that
+// the post-ship complement was not evaluated. A silent skip here is the same shape as passing
+// the pool THIRD, which came within one step of a false green at v5.66.
+let PHASE = "unknown", phaseWhy = "";
+if (!POOL || !existsSync(POOL)) {
+  phaseWhy = "no pool argument given \u2014 this is the PRE-SHIP invocation";
+} else if (!existsSync(KN)) {
+  phaseWhy = "package has no knowledge/ half, so section J is skipped and the oracle is unavailable";
+} else if (walk(KN).length === 0) {
+  // ⚠ AN EMPTY knowledge/ IS NOT EVIDENCE OF A PHASE. J-1 and J-2 would both assert over an
+  // empty set and both come back green, which reads as post-ship in EVERY phase — a green
+  // reading from an empty set, the exact shape §B2 exists to forbid. Found while testing this
+  // check rather than by reading it: the first draft judged such a package post-ship pre-ship.
+  phaseWhy = "knowledge/ is empty, so J-1/J-2 would be green over an empty set \u2014 not evidence";
+} else {
+  const _absent = [], _stale = [];
+  for (const f of walk(KN)) {
+    const there = join(POOL, f);
+    if (!existsSync(there)) _absent.push(f);
+    else if (md5(join(KN, f)) !== md5(there)) _stale.push(f);
+  }
+  PHASE = (_absent.length === 0 && _stale.length === 0) ? "post-ship" : "pre-ship";
+  phaseWhy = `J-1/J-2 oracle: ${_absent.length} knowledge/ file(s) absent from the pool, ${_stale.length} stale`;
+}
+
 // ── D · changed-files-only, against the committed tree ───────────────────────────────────
 console.log("\nD. github/ \u2014 \u00a7L: 'changed files only'");
+console.log(`     phase: ${PHASE.toUpperCase()} \u2014 ${phaseWhy}`);
 if (!CLONE || !existsSync(CLONE)) {
   skipped("D-1/D-2: github/ contents vs the committed tree",
     "no clone given. git clone --depth 1 https://github.com/stextor/danger-close.git /tmp/ship");
@@ -195,8 +274,38 @@ if (!CLONE || !existsSync(CLONE)) {
   }
   // Shipping an unchanged file is not harmless: it pads the diff the maintainer has to review
   // and invites re-uploading a file that did not need it.
-  ck("D-1: every file in github/ actually differs from the committed tree",
-    unchanged.length === 0, `unchanged: ${unchanged.join(", ")}`);
+  //
+  // ⚠ THE DEFECT THIS SPLIT EXISTS FOR (v5.71, 2026-09-14). 17 files were uploaded to the repo
+  // ROOT instead of qa/, leaving a qa/ tree that could not test its own release. package_check
+  // scored 44 passed, 2 failed with BOTH failures documented as expected, and said nothing. The
+  // number that would have named all 17 was already computed and already printed — as an
+  // informational line, not a check. Reproduced before this was written: with the qa/ paths
+  // present but holding prior-release bytes, D-1 and D-2 BOTH pass green and `changed` is 20.
+  //
+  // ⚠ WHAT THIS CATCHES AND WHAT IT DOES NOT — read this before trusting it. The post-ship form
+  // catches a packaged file that did NOT LAND AT ITS PATH. It does NOT catch an EXTRA copy
+  // committed somewhere else, because in that case every packaged file DID land, `changed` is 0,
+  // and this assertion passes clean. That is the v5.68 shape — six qa/qa-baseline/ files
+  // committed at the repo root AS WELL AS their real paths — and it is still uncovered. The §F
+  // clone diff remains the only thing in the release path that sees an extra path. A gate for
+  // committed paths outside the package is deliberately left to its own scope (OPERATIONS §C):
+  // a first census of it ran to 68 candidates of which 64 were false positives, because
+  // index.html and README.md are legitimately multi-path.
+  if (PHASE === "post-ship") {
+    // The mirror question. `unchanged.length === ghFiles.length` is the D-2 half: it makes a
+    // truncated github/ unable to pass by having nothing left to disagree about. ghFiles is
+    // non-empty here because A-3 requires github/ to exist.
+    ck("D-1 (post-ship): every file in github/ LANDED at its committed path",
+      changed.length === 0 && unchanged.length === ghFiles.length,
+      `${changed.length} of ${ghFiles.length} did NOT land: ${changed.join(", ")}`);
+  } else {
+    ck("D-1: every file in github/ actually differs from the committed tree",
+      unchanged.length === 0, `unchanged: ${unchanged.join(", ")}`);
+    if (PHASE === "unknown") {
+      console.log("     \u26a0 post-ship complement NOT EVALUATED (phase unknown) \u2014 " +
+        "re-run with all four positionals, pool FOURTH, after uploading.");
+    }
+  }
 
   // The other direction is the one that bit at v5.42. A misplaced path is the live risk here:
   // knowledge is flat while the repo is nested, so a file can easily land at github/qa/x.mjs when
@@ -426,11 +535,22 @@ if (!WORK || !existsSync(WORK)) {
 // compare BOTH to the provenance line of the newest CHANGELOG entry. Source alone is not enough;
 // built alone is not enough; the 66db033 shape is precisely the two disagreeing.
 //
-// ⚠ This proves what the REPO holds, not what Pages SERVES. Pages can trail a commit, and a
-// session cannot reach stextor.github.io (403 — not in the egress allowlist). The maintainer-side
-// one-liner in OPERATIONS §I is the only thing that verifies the served bytes, and this check does
-// not replace it. Saying so here is the point: a check that overstates what it proves is worse
-// than no check.
+// ⚠ This proves what the REPO holds, not what Pages SERVES. Pages can trail a commit. The
+// maintainer-side one-liner in OPERATIONS §I is the only thing that verifies the served bytes,
+// and this check does not replace it. Saying so here is the point: a check that overstates what
+// it proves is worse than no check.
+//   ⚠ THE STATED REASON HERE WAS WRONG AND IS CORRECTED (2026-09-14). It read "a session cannot
+//   reach stextor.github.io (403 — not in the egress allowlist)". That is false: a session CAN
+//   reach Pages. Measured twice, on 2026-09-14 and again when this edit was made — HTTP 200,
+//   1,429,130 bytes, md5 e1bd283b638cdab74941804708987bb2, byte-identical to the shipped
+//   artifact, with smoke_built 22/22 against those served bytes. The CONCLUSION above is
+//   unchanged and still correct; only the reason was wrong, which is the more dangerous kind of
+//   stale comment — it justified the limitation with a fact that had expired, so a reader
+//   re-deriving it would have found the justification gone and assumed the limitation gone too.
+//   ⚠ A served-bytes check is therefore now POSSIBLE. Building one is deliberately OUT OF SCOPE:
+//   turning H into a live-serving check is a design change with its own failure modes (Pages
+//   caching, mid-deploy windows). The measurement is recorded here because it is what a future
+//   scope for that check would need as its premise.
 console.log("\nH. Provenance \u2014 what GitHub holds vs what the CHANGELOG claims (independent path)");
 {
   const RAW = "https://raw.githubusercontent.com/stextor/danger-close/main";
@@ -565,17 +685,16 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
       // ── REMOVED at the v5.69 ship: "SCOPE_RI_POPULATE.md", added 2026-09-10. Its entry named its own expiry — the
       //    Rhode Island build — and the scope is RETIRED with a §10 build record in the same package.
       "SCOPE_STATE_SET_SELECTOR.md",              // OPEN, written v5.66 (D-NM-1 (c) second half); expires when the structural field ships
-      // Added 2026-09-14, one package LATE. The scope itself shipped in the upload of 2026-09-14 WITHOUT
-      // this entry, and I-2 went red naming it unclassified — which is the gate working exactly as designed.
-      // Its own §7 said the two halves must ship together and they did not; recorded here rather than
-      // tidied away, because the near-identical A-3 entry below is the precedent that got it right.
-      // All six of its §5 decisions were approved the day it was written, so this is OPEN-because-UNBUILT,
-      // not OPEN-because-undecided.
-      // ⚠ EXPIRES AT THE BUILD THAT RETIRES IT — the ops package fixing D-1's completeness gap and B-2's
-      // name match. That package must remove this entry AND mark the scope RETIRED with a build record, both
-      // halves together. Nothing here can detect a missed removal: I-3 fires only on an entry naming a file
-      // that is GONE, and this file will still be there carrying a RETIRED marker. A person removes it.
-      "SCOPE_RELEASE_GATES_AND_HOUSEKEEPING.md",  // OPEN, written 2026-09-14 (D-1, B-2, F-4, traps); decided, unbuilt
+      // ── REMOVED 2026-09-14 (this package): "SCOPE_RELEASE_GATES_AND_HOUSEKEEPING.md", added earlier
+      // the same day and one package LATE — the scope shipped without its entry and I-2 went red naming
+      // it, which is the gate working as designed. Its entry named its own expiry: "EXPIRES AT THE BUILD
+      // THAT RETIRES IT — the ops package fixing D-1's completeness gap and B-2's name match." That
+      // condition is MET by this package, which builds D-1, D-2, B-2, F-4 and both OPERATIONS traps.
+      //   ⚠ THE TWO HALVES SHIP TOGETHER, as every removal note in this block requires: the entry goes
+      //   and the scope carries its RETIRED marker with a §10 build record in this same package. Nothing
+      //   here could have caught a missed removal — I-3 fires only on an entry naming a file that is
+      //   GONE, and the scope is still present carrying its marker. A person removed it, which the
+      //   entry's own text said was the only mechanism there is.
       // ── REMOVED at v5.71 (2026-09-13): "SCOPE_A3_DRAFT_AUTOSAVE.md", added 2026-09-12 with the
       // scope itself. Its entry named its own expiry — "EXPIRES AT THE v5.71 BUILD, which retires it
       // with a build record" — and that condition is MET: v5.71 builds A-3, A-6 and F-3, and the

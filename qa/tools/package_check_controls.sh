@@ -628,6 +628,111 @@ fi
 [ "$SKIP" -gt 0 ] && echo "  ⚠ A SKIPPED control is not a passing one."
 fi
 
+# ── P46..P49 · D-1's POST-SHIP completeness form, and B-2's repair (2026-09-14) ──────────────────
+#
+# WHY THESE EXIST. At the v5.71 ship 17 files were uploaded to the repo ROOT instead of qa/, and
+# package_check said nothing: D-1 asks the PRE-SHIP question ("does everything in github/ differ
+# from the tree?"), which a never-landed file answers YES to just as loudly as a correctly-changed
+# one. The count that would have named all 17 was already computed and printed as an informational
+# line. D-1 now has a post-ship complement, selected by the J-1/J-2 phase oracle.
+#
+# ⚠ THESE NEED A POOL, like the K controls, because the phase oracle reads it — `run` above passes
+# only two positionals, which lands every package in PHASE=UNKNOWN where the complement is (by
+# design, and out loud) not evaluated. They get their own runner.
+#
+# ⚠ THE RUNNER STARTS FROM "EVERYTHING LANDED" AND BREAKS ONE THING. Building the broken state
+# directly would leave the control unable to tell its own mutation from a package that simply
+# differs from the clone — the P32 defect, where a control reported CAUGHT because K-8 was firing
+# on unrelated ambient staleness. Here the scratch clone is first brought fully up to date FROM the
+# package, which makes the post-ship form green, and only then is one file broken. Each control
+# below asserts the baseline is GREEN before its mutation, so a control that fires on the ambient
+# state is reported as INVALID rather than counted as a pass.
+if [ -z "${POOLARG:-}" ] || [ ! -d "${POOLARG:-}" ]; then
+  SKIP=$((SKIP+1)); echo "  - SKIPPED: P46..P49 - no pool dir given (same argument as P29..P35)"
+else
+
+# rund1: $1 label, $2 expected id ("" = must stay silent), $3 shell mutation run from /tmp/pkd1,
+#        $4 optional needle the failure line must contain
+rund1 () {
+  local label="$1" want="$2" mut="$3" needle="${4:-}"
+  rm -rf /tmp/pkd1 /tmp/pkd1clone /tmp/pkd1pool
+  cp -r "$APP" /tmp/pkd1
+  cp -r "$CLONE" /tmp/pkd1clone && rm -rf /tmp/pkd1clone/.git
+  # POST-SHIP by construction: the scratch pool holds exactly the package's knowledge/ half, so
+  # J-1 and J-2 are both green and the oracle reports post-ship.
+  mkdir -p /tmp/pkd1pool && cp /tmp/pkd1/knowledge/* /tmp/pkd1pool/ 2>/dev/null
+  # "everything landed": copy every github/ file into the scratch clone at its packaged path.
+  ( cd /tmp/pkd1/github && find . -type f | while read -r f; do
+      mkdir -p "/tmp/pkd1clone/$(dirname "$f")" && cp "$f" "/tmp/pkd1clone/$f"; done )
+  # baseline must be GREEN, or the control is measuring the ambient state (the P32 lesson)
+  local base
+  base=$(node "$PKG_CHECK" /tmp/pkd1 /tmp/pkd1clone "" /tmp/pkd1pool 2>&1)
+  if ! echo "$base" | grep -q "phase: POST-SHIP"; then
+    MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** %s (phase oracle did not report POST-SHIP - control is INVALID)\n" "$label"
+    return
+  fi
+  if echo "$base" | grep "✗" | grep -q "D-1 (post-ship)"; then
+    MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** %s (D-1 post-ship already red BEFORE the mutation - control is INVALID)\n" "$label"
+    return
+  fi
+  ( cd /tmp/pkd1 && eval "$mut" ) >/dev/null 2>&1
+  local out fired hit
+  out=$(node "$PKG_CHECK" /tmp/pkd1 /tmp/pkd1clone "" /tmp/pkd1pool 2>&1)
+  fired=$(echo "$out" | grep "✗" | grep -oE '[A-K]-[0-9]+b?' | sort -u | tr '\n' ',')
+  if [ -z "$want" ]; then   # silence assertion (the P49 half of the pair)
+    if echo "$out" | grep "✗" | grep -qF -- "$needle"; then
+      MISS=$((MISS+1)); printf "  *** FINDING *** %s - fired when it must NOT\n" "$label"
+      echo "$out" | grep "✗" | grep -F -- "$needle" | head -1
+    else
+      PASS=$((PASS+1)); printf "  CORRECTLY SILENT   %s\n" "$label"
+    fi
+    return
+  fi
+  if [ -n "$needle" ]; then
+    hit=$(echo "$out" | grep "✗" | grep -F -- "$needle")
+    [ -n "$hit" ] || fired="(no line naming $needle)"
+  fi
+  if echo "$fired" | grep -q "$want"; then
+    PASS=$((PASS+1)); printf "  CAUGHT by %-6s %s\n" "$want" "$label"
+  else
+    MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** %s (wanted %s, fired: %s)\n" "$label" "$want" "${fired:-none}"
+  fi
+}
+
+# P46 — the general case: one packaged file never reached the tree at all.
+D1F=$(cd "$APP/github" && find . -type f | head -1 | sed 's|^\./||')
+rund1 "P46 a packaged github/ file never LANDED in the tree ($D1F)" "D-1" \
+  "rm -f /tmp/pkd1clone/$D1F" "$D1F"
+
+# P47 — THE v5.71 DEFECT, EXACTLY. Not "a file is missing" but "the qa/ paths still exist holding
+# the PRIOR release's bytes", which is what a flattened upload leaves behind. D-2 stays green
+# throughout (the paths DO exist), which is precisely why nothing caught it.
+# ⚠ Verified before the fix was written: with this shape the OLD D-1 and D-2 both passed green and
+# the only trace was `(informational: N changed/new files in github/)`.
+rund1 "P47 THE v5.71 DEFECT - qa/ paths exist but hold PRIOR bytes (flattened upload)" "D-1" \
+  "for f in \$(cd /tmp/pkd1/github && find . -type f -name '*.mjs' | sed 's|^\./||'); do
+     [ -f /tmp/pkd1clone/\$f ] && { printf '// stale prior-release copy\n' > /tmp/_p47; cat /tmp/pkd1clone/\$f >> /tmp/_p47; cp /tmp/_p47 /tmp/pkd1clone/\$f; }
+   done" "did NOT land"
+
+# ── P48 / P49 · B-2's repair ────────────────────────────────────────────────────────────────────
+# B-2 matched on FILENAME alone and fired on any package shipping src/index.html to the pool — a
+# legitimate build input, which v5.71 had to ship. It landed in that package's DO NOT SEND list.
+#
+# ⚠ THE PAIR IS THE POINT (the H-6 lesson, and P42/P43's). Repairing B-2 by DELETING it would make
+# P49 pass and P48 fail. P48 is what forces a repair that still catches a genuinely built artifact
+# in knowledge/; P49 is what shows the false positive is gone. Neither alone proves anything.
+if [ -f "$CLONE/index.html" ] && [ -f "$CLONE/src/index.html" ]; then
+  rund1 "P48 the genuinely BUILT index.html shipped to knowledge/ - must STILL fire" "B-2" \
+    "cp '$CLONE/index.html' knowledge/index.html" "index.html"
+  rund1 "P49 src/index.html (the Vite template) shipped to knowledge/ - the FALSE POSITIVE, must NOT fire" "" \
+    "cp '$CLONE/src/index.html' knowledge/index.html" "B-2"
+else
+  SKIP=$((SKIP+1)); echo "  - SKIPPED: P48/P49 - clone has no index.html + src/index.html pair to build from"
+fi
+
+[ "$SKIP" -gt 0 ] && echo "  ⚠ A SKIPPED control is not a passing one."
+fi
+
 [ "$SKIP" -gt 0 ] && echo "  ⚠ A SKIPPED control is not a passing one."
 [ "$MISS" -gt 0 ] && { echo "  A control that does not fire is a FINDING — investigate the check, never soften it."; exit 1; }
 exit 0
