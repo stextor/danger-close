@@ -1,5 +1,85 @@
 # Changelog
 
+## ops 2026-09-14 — the three things `package_check` could not see, because they are not file contents
+
+KIND: ops. Leaves **v5.71** current — source `9e79b92f9eb91e86489cb6b80caa33c3`, built `index.html`
+`e1bd283b638cdab74941804708987bb2`. **No app source change, no version bump, no rebuild.** Builds
+`docs/SCOPE_PACKAGE_CHECK_BLIND_SPOTS.md`, which ships **RETIRED with a §7 build record** — all six of
+its decisions were answered before building, so it never needed an `I-2` OPEN-allowlist entry.
+
+Three gates, each for a defect that was invisible to every check in the tool for the same structural
+reason: `md5` is content-only, and `statSync` was used for `isDirectory()` and `.size` and nothing else.
+
+### `D-3` — a file committed at an EXTRA path
+
+`D-1` asks whether every packaged file **landed**. It cannot ask whether one landed **twice**: in that
+case every packaged file did land, `changed` is 0, and `D-1` passes clean. That is the v5.68 shape —
+six `qa/qa-baseline/` files committed at the repo root as well as their real paths — which only the §F
+clone diff saw, and which also switched `E-1b` off for those six names for as long as the copies stood.
+
+⚠ **The deferral reason for this gate was wrong, and it cost a release.** §C recorded it as unscoped
+because *"a first census ran to 68 candidates of which 64 were false positives"*. **That census matched
+BASENAMES**, and `index.html` and `README.md` are multi-path by design. Asking instead which tracked
+paths hold **byte-identical content** — which is what the v5.68 defect actually was — measures **0
+groups** on the clean tree and **5** when five `qa-baseline` files are re-committed at the root.
+Zero false positives, five true ones. Verified before building: the shipped tool named the duplicate
+**nowhere**; `D-3` names it exactly. §C is corrected in this package.
+
+### `G-3` — file modes, and the green run that over-reported a ship
+
+The preceding ops package scored **45 passed, 0 failed** against a tree where `F-4` — one of the five
+fixes it named — had **not** been applied. The gate was not wrong; a mode was invisible to it.
+
+**The rule: a tracked file with a shebang carries the executable bit.** Measured across 340 tracked
+files — reverse direction **0 counterexamples**, forward direction **4**. ⚠ This **supersedes** the
+preceding package's decision D-4, which left the seven `.py` files at `100644` on the grounds that *"no
+document claims the `.py` files are directly executable"* — **four of them make that claim in their own
+first line**. Superseded on measurement, not overruled on taste: the three without a shebang are
+correctly left alone, and `P53` exists to keep them that way.
+
+⚠ **`G-3a` SHIPS RED, naming those four files, and that is construction rather than defect.** A mode
+cannot be shipped as a packaged file: the content does not change, so `D-1` would fire on it as
+`unchanged`, and §L records that replacing a tracked file **preserves** its mode. They are
+`git update-index --chmod=+x` lines in `COMMIT_MESSAGE.txt`. **`G-3` turning green after those four
+commands is the first confirmation this project has ever had that a mode landed.** §I carries this.
+
+### `J-5` — a file that should have LEFT the pool (F-2, deferred twice)
+
+`J-1`–`J-4` assert presence and rotation; nothing asserted **absence**, so a document retired from the
+repo could sit in the pool indefinitely. §G calls deletion a three-place operation and the third place
+had no gate. A package now declares a retirement with a **`RETIRE:` line in `MANIFEST.txt`** — not the
+README delete-first list, which means *"delete then re-upload"* where this means *"delete and do not
+replace"*, and one name doing two jobs is how the `index.html` confusion started. `J-5` is phase-split:
+pre-ship it asserts the name is still **in** the pool so a typo cannot pass as a success, post-ship that
+it is **gone**.
+
+### `E-1b`'s silent skip is now loud
+
+`E-1b` skips any basename matching more than one repo path. It was silent, and at v5.68 that silence
+switched the gate off for six files for a whole release with nothing printed. It now prints what it did
+not evaluate — today `README.md` and `index.html`, both multi-path by design. **Repairing the matcher is
+deliberately left to its own scope**: it is a real change to a gate that has no controls of its own.
+
+### Controls — P50–P55, three pairs
+
+⚠ **All three gates have a zero baseline, so each ships as a pair.** A gate that can never fire and a
+gate that has been deleted are indistinguishable from their green runs alone. The silent halves (`P51`
+multi-path by design, `P53` shebang-less files, `P55` a retirement honoured) are what prove the loud
+halves discriminate.
+
+Two control-design faults, both found by the controls themselves and both recorded rather than tidied:
+the baseline guard had to become **per-needle rather than per-gate**, because guarding on the gate made
+four controls unrunnable for exactly as long as the defect they guard existed; and `P53`'s needle
+matched **`K-8`**, an unrelated gate that lists every pool file by name — the `P32` shape precisely.
+
+### Disclosed
+
+Verified by the full app suite from the packaged copies, both legs — figures in the run below. The
+`.github/` issue templates and discussion posts added at `b2b76cf` are untouched. Still open: `E-1b`'s
+matcher, a served-bytes check for §H, **A-2, A-4, A-5**, `SCOPE_STATE_SET_SELECTOR.md`, item B of
+`SCOPE_HOUSEKEEPING_THREE.md`, `D-B3-1 (b)`, and the two legacy `controls_v559`/`v560` manifest rows.
+
+
 ## ops 2026-09-14 — the release gates that did not fire: D-1's completeness complement, B-2's name match
 
 KIND: ops. Leaves **v5.71** current — source `9e79b92f9eb91e86489cb6b80caa33c3`, built `index.html`
