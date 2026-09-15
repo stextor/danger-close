@@ -795,6 +795,11 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
       // ── REMOVED at the v5.69 ship: "SCOPE_RI_POPULATE.md", added 2026-09-10. Its entry named its own expiry — the
       //    Rhode Island build — and the scope is RETIRED with a §10 build record in the same package.
       "SCOPE_STATE_SET_SELECTOR.md",              // OPEN, written v5.66 (D-NM-1 (c) second half); expires when the structural field ships
+      // Added 2026-09-15 (ops package, the scope's own). OPEN-because-UNBUILT: all nine decisions were taken the
+      // day it was written (the maintainer approved every recommendation), so it is not OPEN-because-undecided.
+      // ⚠ EXPIRES AT THE v5.72 SHIP, TOGETHER WITH THE SCOPE_STATE_SET_SELECTOR ENTRY ABOVE if D-7 folds stage 2 in:
+      // that release retires BOTH scopes and must remove BOTH entries in the same package.
+      "SCOPE_IMPORT_HARDENING.md",                // OPEN, written 2026-09-15 (A-2, A-4, A-5 + state-set stage 2); expires at the build that retires it
       // ── REMOVED 2026-09-14 (this package): "SCOPE_RELEASE_GATES_AND_HOUSEKEEPING.md", added earlier
       // the same day and one package LATE — the scope shipped without its entry and I-2 went red naming
       // it, which is the gate working as designed. Its entry named its own expiry: "EXPIRES AT THE BUILD
