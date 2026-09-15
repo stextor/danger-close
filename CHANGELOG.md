@@ -1,5 +1,105 @@
 # Changelog
 
+## ops 2026-09-15 — SCOPE_STATE_SET_SELECTOR stage 1: one shared state set, and a probe that had been reporting the complement of its gate
+
+KIND: ops. Leaves **v5.71** current — source `9e79b92f9eb91e86489cb6b80caa33c3`, built `index.html`
+`e1bd283b638cdab74941804708987bb2`. **No app source change, no version bump, no rebuild, no `smoke_built`
+re-run.** Builds **stage 1** of `docs/SCOPE_STATE_SET_SELECTOR.md` (its §7.6/§7.7, decided 2026-09-14).
+**The scope stays OPEN** and stays on `package_check`'s I-2 allowlist: stage 2, the `incomeLimitedInLaw`
+field on five `STATE_RULES` rows, is owed to the next release that bumps the version for another reason.
+
+**Verified by the full suite, both legs, run from the packaged copies.** **APP total UNCHANGED at 3,647,
+0 failing**, summed from `runsuite.sh` output across 58 lines — although `t10`, `t29` and `t35` were all
+edited, each holds its count on both legs (`t10` 354 · `t29` 60 · `t35` 114). MC parity 10/10. Tooling:
+`t21` 56 · `domdiff` 32 · **`sets` 10 + 10 (new)** — **GRAND 3,755, 0 failing**. The baseline was
+re-run on the unmodified clone first, this session: 3,647 app, `t21` 56, `domdiff` 32.
+
+### What changed, and why
+
+Three places in the suite decided which states are income-limited **in law** by executing a regex against
+each row's user-facing note, and six more kept their own verbatim copy of that regex. A correction to one
+copy left the others wrong — and the scope's own census showed that happening to the instrument built to
+watch for it.
+
+- **`qa/tools/state_sets.cjs` (new)** — the five-state in-law list (CT, NJ, NM, RI, VA, from
+  `FINDINGS-v5_63-state-statutes.md`), the one phrase matcher, one `exclTest` predicate, and the helpers.
+- **`t29` F-6 and `t35` D-7 now take membership from that list**, not from prose. Checked first against
+  every source from **v5.64 to v5.71** (older ones recovered from git history): old and new selectors give
+  identical sets on every leg, so every gated arm in both suites still holds.
+- **The two selectors now share one predicate.** `t29` read `!r.exclTest` and `t35` read
+  `exclTest === undefined`; they agreed only because no row carried `null` or `false`.
+- **The six phrase PINS were not converted** — `t35` D-7a–D-7d and `t10`'s two `[BY DECISION v5.59]`
+  checks. For them, executing the phrase against the note *is* the assertion (a state must not leave the
+  set by being reworded — the v5.54 New Jersey defect). They now execute the shared matcher.
+- ⚠ **`qa/tools/f6_probe.cjs` repaired — it had reported the COMPLEMENT of the gate since v5.68.** Against
+  v5.71 it printed `NM, RI, VA` while `t29` F-6 was empty; reproduced on both legs before the fix. The
+  scope named a missing `!exclTest`. **That was half of it:** the probe's AST reader kept only literal
+  values, so `exclTest` — an object — was never recorded at all, and adding the predicate alone would have
+  changed nothing. The reader now records a non-literal value, and the selection is the shared one.
+
+### Where the new checks went — and a false header they exposed
+
+⚠ **`t29_boundaries.mjs`'s header said "COUNTED IN NO APP TOTAL — this is tooling". That was false.**
+`runsuite.sh` has tallied `t29` in the app section since v5.49, and `TESTING.md` lists it at 60 per leg
+inside 3,647. Corrected here. It is also why §7.7's new checks are not in `t29` or `t35`: there they would
+have moved the app figure. They live in **`qa/state_sets_check.mjs`**, a TOOLING suite under
+`runsuite.sh`'s TOOLING heading — **10 checks per leg, no version ladder** (nothing in it differs by leg,
+so it adds nothing to the 86-point bump cost `vercensus.cjs` measured):
+
+- S-1 to S-3: the list is exactly the five, each is a `STATE_RULES` key, and the derived sets can only
+  name list members.
+- **S-4: the drift guard** — no state outside the list carries a non-zero `excl65` with a note saying
+  "income-limited".
+- **S-5/S-6: `f6_probe` agrees with `t29` F-6 on the same leg's source.** This is the regression test for
+  the inverted probe.
+- S-7: the shared predicate.
+- S-8, by AST: the phrase pattern exists as a literal in exactly one file, and the six pins still execute it.
+
+The scope's test 2 (*the unconverted set is empty, gated per leg*) is carried by `t29` F-6/F-6a/F-6b and
+`t35` D-7/D-8, which were already gated at v5.69 and are now fed by the list. It is not duplicated.
+
+### Negative controls — `qa/tools/controls_state_sets.py`, 38 of 38 as expected on each leg
+
+Run from the packaged run folder; the md5s of every file the controls mutate were printed before and after
+and did not change. Python with no shebang, so no new file needs the executable bit.
+
+- **Each converted site is sabotaged alone** — re-pointed at its own copy of the module with WI added to
+  the list — while the other sites run in the same folder against the pristine module and stay green. C1
+  fires only `t29` F-6/F-6a/F-6b; C2 only `t35` D-7/D-8; C3 only S-5.
+- **C4 restores the probe's literal-only reader, and S-5 fires.**
+- C5 drops RI from the list (S-1 and S-4 fire); C6 restores `t35`'s old predicate (S-7 fires).
+- **C7 makes the matcher never match: the selectors stay GREEN while all four `t35` pins and `t10`'s RI
+  pin fire** — the control that shows the selectors no longer read prose.
+- C8–C12 reword one note each in a throwaway copy of the built module: each fires exactly its own pin
+  (C12, where WI's note gains the phrase, also fires the drift guard), and `t29` F-6 never moves.
+- **Three first-run misses were adjudicated by reading, not by editing until green.** In C1/C2 the
+  sabotaged module is itself a second copy of the pattern, so S-8a fired correctly; the expectation now
+  names it. In C7, S-8a counts copies of the module's *own* pattern and cannot see a changed one; the
+  pattern's content is guarded by the pins, which C7 shows firing.
+
+### Limitations, disclosed
+
+- **The drift guard is phrase-based.** A note describing an income limit in other words is invisible to
+  it. Maine's note mentions an unmodelled phaseout and Montana's says "income-based"; neither is flagged,
+  and **whether either is an in-law income limit was not checked against statute** in this package.
+- **A shrunk list is invisible to the converted sites** while every in-law row is conditioned. S-1 and
+  the drift guard catch NM, RI or VA leaving; **nothing catches CT or NJ leaving**, because both carry
+  `excl65 = 0`.
+- **`sel_census.cjs` counts regex literals, so it now reports 2 sites**, not 10: the shared module and the
+  out-of-scope `t35` Field Manual copy lock. The six pins no longer appear in its output; S-8 witnesses them.
+- The in-law list is still hand-maintained. Stage 2 retires it.
+- An own error, recorded: a modified `t29` was briefly copied into the *baseline* run folder while the
+  baseline suite was running. It was reverted (confirmed with `cmp`) before that suite reached `t29`.
+
+### Files
+
+Repo: `qa/tools/state_sets.cjs` (new), `qa/state_sets_check.mjs` (new), `qa/tools/controls_state_sets.py`
+(new), `qa/t10_taxcases.mjs`, `qa/t29_boundaries.mjs`, `qa/t35_state_populate.mjs`, `qa/runsuite.sh`,
+`qa/tools/f6_probe.cjs`, `docs/OPERATIONS.md` (§B1a), `docs/SCOPE_STATE_SET_SELECTOR.md` (status line and
+§8), `TESTING.md`, `PROJECT_KNOWLEDGE_INDEX.md`, `CHANGELOG.md`. Everything except `f6_probe.cjs` also goes
+to the pool, which goes 120 → 123. Source md5 `9e79b92f9eb91e86489cb6b80caa33c3` · built `index.html` md5
+`e1bd283b638cdab74941804708987bb2` — both unchanged.
+
 ## ops 2026-09-14 (third) — `t21` Section F: Item B closes on disclosure and one pin, because the fixture cannot reach the tools
 
 KIND: ops. Leaves **v5.71** current — source `9e79b92f9eb91e86489cb6b80caa33c3`. **No app source change,
