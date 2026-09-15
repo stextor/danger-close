@@ -244,6 +244,57 @@ ck("the grep OVER-reports \u2014 it cannot exclude comments, substrings or the b
    grepLines > 0 && hits.length > 0, `grep ${grepLines} / ast ${hits.length}`);
 console.log(`     (line-grep: ${grepLines} lines · census: ${hits.length} AST hits · hand-counted source occurrences: 16)`);
 
+// ─────────────────────────────────────────────────────────────────────────────
+// F. census_p1.cjs — A PIN AND A DISCLOSURE GUARD. THIS IS NOT COVERAGE.
+//
+// ⚠ READ THIS BEFORE ADDING TO THIS SECTION. `census_p1.cjs` asks fifteen questions about a
+// source's storage, network, sink, navigation and JSX-attribute surface. `fixture.jsx` answers
+// ZERO to all fifteen — it was built around one target identifier and one residual shape, and it
+// contains no storage call, no network primitive, no HTML sink, no href and no JSON.parse.
+//
+// Measured 2026-09-14: a copy of census_p1.cjs sabotaged in two places (the storage-method list
+// cut to one entry, the whole `spec.any` member-property branch disabled) produces output
+// BYTE-IDENTICAL to the intact tool against this fixture. So no assertion about its fifteen
+// questions can discriminate a working tool from a broken one here, and none is written below.
+// Writing one would be the vacuous pass §B2 exists to prevent — the same trap `notes_probe`
+// falls into, which is why neither tool is covered.
+//
+// What IS assertable is the tool's HEADER, and one line of it pins a real fixed defect.
+//
+// [EXTINCTION 2026-09-11] census_p1 reported split("\n").length where `wc -l` reports one fewer
+// (13,165 against 13,164 on the app source). Corrected in the same pass that removed `key` from
+// the storage-method list. F-2/F-3 below hold that correction: reverting it turns "75 lines" into
+// "76 lines" and both fire. Verified by control 2026-09-14.
+//
+// F-6 is a DISCLOSURE GUARD, not a coverage claim. It asserts the gap itself. If the fixture ever
+// gains surface content — SCOPE-level work, not an append — F-6 goes RED and forces TESTING.md's
+// uncovered-tools disclosure to be rewritten rather than quietly going stale. That is the
+// opposite polarity to §B2's stale-disclosure lock: this one fires when the disclosure becomes
+// false instead of holding it in place.
+//
+// Expectations hand-counted from the fixture FIRST and only then compared to tool output; the
+// hand count and the tool agreed on all fifteen zeros.
+// ─────────────────────────────────────────────────────────────────────────────
+console.log("\nF. census_p1 \u2014 header pin + disclosure guard (NOT coverage of its fifteen questions)");
+let cp1 = "", cp1Threw = "";
+try { cp1 = run("census_p1.cjs", [FIX]); } catch (e) { cp1Threw = String(e && e.message || e); }
+ck("census_p1 RUNS against the fixture and does not bail",
+   cp1Threw === "" && /^# census_p1/m.test(cp1),
+   cp1Threw || "no header line printed");
+// f6_probe and state_rows both exit 1 on this fixture (no STATE_RULES); census_p1 must not, or
+// everything below it is an assertion about a tool that never ran.
+const cp1Lines = (cp1.match(/^# census_p1 .*? (\d+) lines,/m) || [])[1];
+ck("reports 75 lines \u2014 hand-counted, and equal to `wc -l`", cp1Lines === "75", `got ${cp1Lines}`);
+ck("does NOT report 76 \u2014 the naive split(\"\\n\").length, corrected 2026-09-11",
+   cp1Lines !== "76", "the wc -l off-by-one is back");
+ck("self-check reports 0/0 \u2014 inert off DangerClose.jsx, so the zeros below are legible, not a silent bail",
+   /self-check 0\/0/.test(cp1), (cp1.match(/self-check .*/) || [""])[0]);
+const cp1Qs = [...cp1.matchAll(/^## (.+?) \u2014 (\d+)$/gm)].map(m => ({ q: m[1], n: +m[2] }));
+ck("asks fifteen questions", cp1Qs.length === 15, `got ${cp1Qs.length}`);
+ck("DISCLOSURE GUARD: all fifteen answer ZERO on this fixture \u2014 census_p1 is NOT covered by it",
+   cp1Qs.length === 15 && cp1Qs.every(q => q.n === 0),
+   "the fixture now reaches census_p1 \u2014 REWRITE the uncovered-tools disclosure in TESTING.md");
+
 console.log(`\nt21 SUITE: ${pass} passed, ${fail} failed`);
 if (fails.length) { console.log("\nFAILURES:"); fails.forEach(f => console.log(f)); }
 process.exit(fail ? 1 : 0);
