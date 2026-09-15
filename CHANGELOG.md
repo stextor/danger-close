@@ -1,5 +1,103 @@
 # Changelog
 
+## ops 2026-09-14 (third) — `t21` Section F: Item B closes on disclosure and one pin, because the fixture cannot reach the tools
+
+KIND: ops. Leaves **v5.71** current — source `9e79b92f9eb91e86489cb6b80caa33c3`. **No app source change,
+no version bump, no rebuild, no `smoke_built` re-run.** Builds **Item B of
+`SCOPE_HOUSEKEEPING_THREE.md`**, the last of its three items, and **retires the scope** — removing its
+`package_check` **I-2 OPEN allowlist** entry in the same package, as I-2 requires.
+
+**Verified by the full suite, both legs, run from the packaged copies.** `t21` **50 → 56**;
+`domdiff` 32; **GRAND 3,735, 0 failing**; MC parity 10/10. ⚠ **The APP total is UNCHANGED at 3,647,
+and that is the assertion, not a coincidence** — `t21` is tooling and counted separately, so its rise
+must not move the app figure; a moved app figure would mean the package touched more than it claims.
+Both totals summed from `runsuite.sh` output across 58 suite legs, not derived by subtracting tooling
+from GRAND.
+
+### ⚠ What Item B asked for, and why it did not ship
+
+The item asked for `t21` coverage of the parser tools `t21` does not reach. **Re-measured by AST it is
+TWELVE tools, not the three §2 named or the nine its 2026-09-07 banner corrected them to** — three more
+have been added since (`census_p1.cjs`, `lits_p1.cjs`, `sel_census.cjs`). `qa/tools/` holds **sixteen**
+tools that parse with `acorn`; `t21` covers **four**.
+
+**None of the twelve is reachable by `qa/tools/fixture/fixture.jsx`.** Eight need a directory fixture.
+Three need a `STATE_RULES` table — `f6_probe.cjs` and `state_rows.cjs` **exit 1** without one, and
+`notes_probe.cjs` runs, reports `0 regex literals` and `OLD: undefined / NEW: undefined`, which is
+worse because it would pass vacuously.
+
+⚠ **The twelfth is the finding, and it overturned the plan this package started from.**
+`census_p1.cjs` takes a single `.jsx` and walks it generally, so it passes the argument-shape test —
+and it **answers ZERO to all fifteen of its questions** on this fixture, which holds no storage call,
+no network primitive, no HTML sink, no `href` and no `JSON.parse`. A copy sabotaged in two places (the
+storage-method list cut to one entry, the whole `spec.any` member-property branch disabled) produces
+**byte-identical output**. Any case written about those questions would have stayed green on a working
+tool, a broken one, and a tool replaced by `console.log` of fifteen zeros.
+
+⚠ **Sharpest form:** `census_p1`'s own header records a defect corrected 2026-09-11 — `key` sat in the
+storage-method list, so sixteen React `.key` reads were counted as storage calls. The fixture contains
+no `.key` read. **It cannot catch the regression of the defect that tool has already had.**
+
+**So `D-2` was re-asked on the evidence rather than answered a third time from a corrected premise.**
+Its original answer was *build it*, with an explicit escape: *stop and report rather than writing thin
+cases to reach a number.* That escape was reached twice — 2026-09-07 for the directory fixture,
+2026-09-14 for the content gap. **Disclosure plus one honest pin is the answer, and the item closes
+rather than staying open a fourth time.**
+
+### What shipped
+
+**`t21` Section F — six checks (50 → 56), and its own header says it is NOT coverage.** One
+`[EXTINCTION 2026-09-11]` pin on the `wc -l` correction (reverting it turns `75 lines` into
+`76 lines`); three checks that the tool runs rather than bailing and that its self-check is inert off
+`DangerClose.jsx`; and a **disclosure guard** asserting all fifteen questions answer zero. The guard
+is the one that earns its place: if the fixture ever gains surface content it goes **RED** and forces
+the disclosure to be rewritten instead of quietly going stale. That is the opposite polarity to §B2's
+stale-disclosure lock — it fires when the disclosure becomes false rather than holding it in place.
+
+**Negative controls — `qa/tools/controls_t21_censusp1.sh`, 6 fired, 0 silent.** Five mutants; C2 turns
+two checks red. **C5 runs in the opposite direction from the rest**, adding a storage call to the
+fixture and requiring the guard to go red, because a gap-assertion that cannot be falsified is exactly
+the vacuous pass this section exists to avoid. Every mutant is written to a throwaway copy from a
+pristine read and both canonical files are md5-verified byte-identical before and after — the v5.66
+lesson, where a control run died mid-mutation and poisoned the baseline.
+
+**`TESTING.md` names all twelve uncovered tools with the reason each is out**, split into the eight
+needing a directory fixture, the three needing a `STATE_RULES` table, and the one needing surface
+content. The scope's own line is that *"a suite that says what it does not cover is worth more than one
+that appears to cover everything"*; at twelve it is more true than at nine.
+
+⚠ **`package_check.mjs`, `package_check_controls.sh` and `row_census.cjs` appear in `t21` zero times
+and that is CORRECT, not a gap** — none parses with `acorn`, so none falls inside §B1's warrant, and
+`package_check` is verified by its own `P1`–`P55`. Recorded in `TESTING.md` because the zero-mention
+reading is alarming and wrong, and a grep reaches the alarming version first.
+
+### Three documents were wrong, and the third had never been rolled at all
+
+- **`OPERATIONS.md` §B1 said `t21` was 49 checks** where `TESTING.md` said 50 — a **third** copy of a
+  drift `TESTING.md`'s own parenthetical already records (*"this sentence read 49 while the sentence
+  below it read 50, for eleven releases"*). Nobody had ever rolled it. Both now read 56.
+- **`TESTING.md`'s "Current build" sentence went stale AGAIN at the v5.71 ship** — still reading
+  v5.70 / 3,576 / 3,658 on 2026-09-14, the second time in four releases, with the checklist line that
+  is supposed to roll it alongside the tally not doing so. Rolled from suite output.
+- **§B1's warrant was overstated by twelve tools.** It sells an unexpected tool result as a finding on
+  its own provided `t21` is green; that reaches four tools of sixteen. §B1 now says so and points at
+  `TESTING.md`'s list rather than carrying a second copy of it.
+
+### Limitations, stated rather than implied
+
+- **This is not coverage of `census_p1.cjs`.** Fifteen of its questions remain unasserted and the
+  package says so in the suite file, in `TESTING.md`, in `OPERATIONS.md` §B1 and here.
+- **Eleven of the twelve tools gain nothing but a disclosure row.** Their outputs still have no
+  standing under §B1 and remain a reason to hand-check.
+- **The fixture-design work is deferred to its own scope**, with its requirements recorded in the
+  scope's §7 so they are not re-derived: for `f6_probe`, entries satisfying **both** conjuncts of the
+  F-6 predicate, decoys failing **each** conjunct separately, **a key literally named `VA`** (line 40
+  does `R2.VA.note = cand` and throws without it), and the two secondary matchers in both polarities.
+- **`J-5` is not exercised by this package** — it removes nothing from the pool, so there is no
+  `RETIRE:` line, and none was invented to exercise it.
+- ⚠ **`qa/tools/controls_t21_censusp1.sh` is a NEW shell script.** A drag-and-drop upload lands it
+  `100644` and `G-3a` will fire; edit in place and check `git ls-files -s`.
+
 ## ops 2026-09-14 (second) — housekeeping after the pool pruning: three ghost rows and one rescued question
 
 KIND: ops. Leaves **v5.71** current — source `9e79b92f9eb91e86489cb6b80caa33c3`. **No app source change,
