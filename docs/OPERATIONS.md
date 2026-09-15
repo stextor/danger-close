@@ -241,6 +241,16 @@ states with **0** notes missing an SS mention on both builds; and the §13 copy'
 possible thing to get wrong, because there is no output to sanity-check. A zero from a grep is not
 a finding. A zero from a parser is.
 
+**⚠ Since 2026-09-15 the matcher exists ONCE** — `NOTE_MATCHER` in `qa/tools/state_sets.cjs`
+(SCOPE_STATE_SET_SELECTOR stage 1). The two selectors (`t29` F-6, `t35` D-7) now take membership from
+that module's `IN_LAW` list, not from prose; the six phrase PINS (`t35` D-7a–D-7d, `t10`'s two
+`[BY DECISION v5.59]`) still execute the shared matcher, because for them executing it is the assertion.
+**Two consequences for the census above.** `sel_census.cjs` counts regex *literals*, so it now reports
+**2** sites and no longer sees the six pins; `qa/state_sets_check.mjs` S-8 is what witnesses them (by
+AST: exactly one literal copy, and the pins' `NOTE_MATCHER.test(R.XX…)` calls). And **`t29` is in the APP
+total** — its header said otherwise until the same package, which is why that package's new checks went
+to a tooling suite rather than into `t29`.
+
 ### B2. A green suite is not evidence of coverage — measure it, don't infer it
 
 **A suite passing tells you nothing about what it would have caught.** Coverage is a property that has

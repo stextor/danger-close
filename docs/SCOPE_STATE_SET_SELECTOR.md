@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **OPEN — written 2026-09-07, not built. PREMISE RE-MEASURED AND AMENDED 2026-09-14; see §7, which is authoritative over §§1, 2, 4 and 6.** Discharges the second half of **D-NM-1 (c)** |
+| Status | **OPEN — STAGE 1 BUILT 2026-09-15 (ops package, §8); STAGE 2 STILL OWED** (the `incomeLimitedInLaw` field, folded into the next release already bumping the version — §7.6). Written 2026-09-07; premise re-measured and amended 2026-09-14 — §7 is authoritative over §§1, 2, 4 and 6. Discharges the second half of **D-NM-1 (c)** once stage 2 lands |
 | Premise verified against | **v5.71 source `9e79b92f9eb91e86489cb6b80caa33c3`, repo `c3d1cd4`** (re-measured 2026-09-14). *(Superseded: v5.66 source `31b43e094307ef5f996570c090478e13`, repo `7fc8b58`.)* |
 | Owed by | `STOP-REPORT-v5_66-nm-session2.md` §4 and `STOP-REPORT-v5_66-NM-note-guarded-set.md` §3 |
 | Direction | No user-visible figure moves. This is a **test-infrastructure** change |
@@ -317,3 +317,88 @@ list does not fires loudly.
 Stage 1 is a full session: one module, three conversions, six centralisations, one repair, six test
 groups with a control each, a ~13-minute both-leg suite run, four documents, packaging, and post-ship
 verification. **It is not a half-session job, and the honest failure mode is a half-converted suite.**
+
+## 8 · STAGE 1 BUILD RECORD — ops package 2026-09-15. The scope stays OPEN: stage 2 is owed.
+
+**Against v5.71 source `9e79b92f9eb91e86489cb6b80caa33c3`, repo `72297fd`.** §A freshness passed first: 120 pool
+files, 119 byte-identical to a committed file, `DangerClose-v5_70.jsx` the only pool-only file (the prior leg).
+`sel_census.cjs` re-measured **10 sites**, as §7.1. The §7.3 inversion was reproduced on both legs before the fix
+(probe `NM, RI, VA`; `t29` F-6 empty).
+
+**Hand first, tools second.** The five in-law rows and all 18 `excl65 > 0` rows were read in full before any
+tool ran: unconverted set EMPTY, drift set EMPTY, pre-v5.68 probe selector `NM, RI, VA`. The old prose selectors
+and the new list-based helper were then run against every source from **v5.64 to v5.71** (the older ones
+recovered from git history) and gave **identical sets on every leg** — `NJ,NM,RI,VA` (v5.64–65), `NJ,RI,VA`
+(v5.66), `RI,VA` (v5.67), `RI` (v5.68), empty (v5.70–71) — matching every gated arm in `t29` and `t35`.
+
+### What shipped
+
+| Site | Role | Done |
+|---|---|---|
+| `qa/tools/state_sets.cjs` | **new** | `IN_LAW` (CT, NJ, NM, RI, VA), `NOTE_MATCHER`, `isConditioned` (truthy `exclTest` — §7.2's predicate fix), `unconverted()`, `proseSelected()` |
+| `t29:241` | selector | **converted** — `SETS.unconverted(RULES)` |
+| `t35:288` | selector | **converted** — `SETS.unconverted(R)`; its `=== undefined` reading is gone |
+| `f6_probe.cjs` | selector | **converted and repaired** — see below |
+| `t10:970, :972` | pins | **centralised** — execute `NOTE_MATCHER` |
+| `t35:301, 309, 313, 329` | pins | **centralised** — execute `NOTE_MATCHER` |
+| `t35:506` | copy lock | untouched, out of scope |
+
+⚠ **§7.3 was HALF the defect.** `f6_probe`'s AST reader kept only `Literal` values, so `exclTest` — an object —
+was **never recorded at all**; adding `!r.exclTest` alone could not have fixed it. The reader now records a
+non-literal value as a truthy marker, and the selection is the shared `unconverted()`.
+
+### Where §7.7's tests landed — and why not in `t29` / `t35`
+
+**`t29` is IN the app total** (60 per leg). Its header said *"COUNTED IN NO APP TOTAL"* and was false —
+`runsuite.sh` has tallied it in the app section since v5.49. Corrected in this package. New checks in `t29`
+or `t35` would therefore have moved 3,647, so they live in a new **tooling** suite,
+`qa/state_sets_check.mjs`, registered under TOOLING in `runsuite.sh`, **10 checks per leg, no version
+ladder** (nothing in it differs by leg, so it adds nothing to the 86-point bump cost; floor v5.64).
+
+| §7.7 | Where |
+|---|---|
+| 1 set from the list | S-1 (list is exactly the five), S-2 (each is a `STATE_RULES` key), S-3; `t29` `limited` / `t35` `offenders` now derived from it |
+| 2 unconverted EMPTY, per leg | `t29` F-6/F-6a/F-6b and `t35` D-7/D-8 — already gated at v569, now fed by the list. Not duplicated |
+| 3 drift guard | S-4 |
+| 4 `f6_probe` agrees with `t29` | S-5 (F-6 set), S-6 (drift line) — the probe runs as a subprocess on the leg's source |
+| 5 a control per converted site | `qa/tools/controls_state_sets.py` C1–C3 |
+| 6 pins fire on a reworded note | S-8b/S-8c (structural) + controls C8–C12 (behavioural) |
+
+Plus **S-7** (the predicate: `null`/`false` unconditioned, a function conditioned, `excl65 0` out) and
+**S-8a** (the phrase pattern exists as a literal in exactly one file).
+
+### Negative controls — `controls_state_sets.py`, **38 of 38 as expected on each leg**
+
+Each converted site is re-pointed **alone** at its own sabotaged module (the list plus WI); the other sites run in
+the same folder against the pristine module and must stay green — so no single mutation reads as six.
+C1 fires `t29` F-6/F-6a/F-6b only; C2 fires `t35` D-7/D-8 only; C3 fires S-5 only. **C4 restores the probe's
+literal-only reader and S-5 fires — the test that would have caught §7.3 three releases ago.** C5 drops RI from
+the list: S-1 and S-4 fire. C6 restores `t35`'s old predicate: S-7 fires. **C7 makes the matcher never match: the
+selectors (`t29` F-6, `t35` D-7/D-8) stay GREEN while all four `t35` pins and `t10`'s RI pin fire** — the
+discriminating control that shows the selectors no longer read prose. C8–C12 reword one note each in a throwaway
+copy of the built module: each fires exactly its pin (C12, WI's note gaining the phrase, also fires the drift
+guard), and `t29` F-6 never moves. C0 is silent. The run folder's mutated-file md5s are printed before and after
+and were unchanged.
+
+**Three first-run misses, adjudicated by reading, not by editing until green.** C1/C2 expected the tooling suite
+green; S-8a fired, correctly, because the sabotaged module is itself a second copy of the pattern — the
+expectation now names S-8a alone. C7 expected S-8a to fire; it cannot, because S-8a counts copies of the
+module's *own* pattern, and the pattern's content is guarded by the pins, which C7 shows firing.
+
+### Limitations, stated
+
+- **The drift guard is phrase-based.** A note describing an income limit in other words is invisible to it —
+  Maine's note mentions an unmodelled phaseout and Montana's says "income-based"; neither is flagged. Whether
+  either is an in-law income limit was **not** checked against statute here.
+- **A shrunk list is invisible to the converted sites** while every in-law row is conditioned (C5). S-1 and the
+  drift guard catch RI, NM or VA leaving; **nothing catches CT or NJ leaving**, because both carry `excl65 = 0`.
+- **`sel_census.cjs` counts regex literals only.** After this package it reports **2** sites (`state_sets.cjs`
+  and the out-of-scope `t35` copy lock); the six pins execute `NOTE_MATCHER` and drop out of its count. S-8b/S-8c
+  are what now witness them.
+- `IN_LAW` is still hand-maintained. Stage 2 retires it.
+
+### Suite
+
+App total **unchanged at 3,647**, 0 failing, both legs, summed from `runsuite.sh` output; the tooling line now
+carries `t21` 56, `domdiff` 32 and `sets` 10 + 10. Per-suite figures and GRAND are in `CHANGELOG.md` and are not
+restated here.
