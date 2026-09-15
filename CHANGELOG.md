@@ -1,5 +1,75 @@
 # Changelog
 
+## ops 2026-09-15 (second) — the import-hardening scope: A-2, A-4, A-5 still reproduce at v5.71, and Maine is missing from the in-law list
+
+KIND: ops. Leaves **v5.71** current — source `9e79b92f9eb91e86489cb6b80caa33c3`, built `index.html`
+`e1bd283b638cdab74941804708987bb2`. **No app source change, no version bump, no rebuild, no suite change.**
+Writes **`docs/SCOPE_IMPORT_HARDENING.md`** for **v5.72** and registers it on `package_check`'s I-2 OPEN
+allowlist. **Nothing is built.** **All nine decisions were taken the same day: the maintainer approved every
+recommendation**, so the scope is buildable in the two sessions D-6 sets out.
+
+**Verified by** re-running `probe_import_hostile.mjs` against v5.71 on both import paths; `funcmap.cjs`,
+`census.cjs` and `vercensus.cjs` on the v5.71 source and suite; primary-source reads for Maine and Montana;
+`package_check` pre-ship; and a targeted control on the allowlist edit (below). **The app suite was not
+re-run**: no file it reads changed.
+
+### What the scope establishes
+
+- **All three findings still reproduce at v5.71**, and the valid-backup positive control imports on both paths.
+  - **A-4.** On My Data a malformed backup shows no message, leaves an unobserved rejection, and leaves memory
+    holding the bad plan. The landing path shows a raw engine error and also leaves memory replaced.
+  - **A-5.** `skin: "constructor"` empties the page (0 tabs) on both paths.
+  - **A-2.** 20,000 holdings exhaust the harness heap on both paths. This is a jsdom measurement, not a browser one.
+- **Two things the v5.69 audit did not have.**
+  - There are **three** truthy skin gates, not two. The third is the page-load read of the stored skin. `skinVars`'s
+    fallback carries the same defect.
+  - The replace-before-validate ordering sits in `applyLoadedData`, which has **eight** callers, so the fix
+    reaches every load path.
+- **Stage 2 of `SCOPE_STATE_SET_SELECTOR` is folded into the same release.** `vercensus.cjs` still prices the bump
+  at **86 judgement points**. Run with no directory arguments it prints 0, which is a vacuous zero.
+
+### ⚠ Maine is income-limited in law, and the suite's in-law list does not have it
+
+- **The law.** Maine Revenue Services' summary of 2025 enacted legislation: from TY2025 the pension income deduction
+  phases out above federal AGI of $125,000 single / $187,500 HoH / $250,000 MFJ (36 M.R.S. §5122(2)(M-3), P.L. 2025,
+  c. 388, Pt. H).
+- **The model.** v5.71 applies Maine's $48,216 deduction with no income condition. That is optimistic above the
+  threshold, and the in-app note discloses it.
+- **What this makes false.** The stage-1 package shipped earlier today called its list "the five statutes" and
+  its unconverted set empty. Both are true of the list, not of the law. Recorded in `SCOPE_STATE_SET_SELECTOR.md`
+  §9. **The list is not edited here:** adding Maine turns `t29` F-6 and `t35` D-8 red. D-8 decided that Maine joins
+  the list, re-inverting both guards, in the v5.72 release that builds stage 2.
+- **What could not see it.** The stage-1 drift guard missed Maine because its note does not use the phrase. That was
+  a limitation the stage-1 package disclosed; this is its first concrete instance.
+- **Not read:** the phaseout rate.
+- **Montana was checked and is correctly outside the list** (MCA 15-30-2120, no income test). A **secondary**
+  source says its $5,500 subtraction is indexed to $5,660 for 2025. That is recorded as an unverified lead, out of
+  scope.
+
+### An error of mine, recorded
+
+My first tabulation of the probe output read the landing path as leaving memory intact. The script had parsed the
+memory line printed **before** the import. The raw output shows the plan replaced afterwards, as the audit said.
+Corrected before anything was written.
+
+### The allowlist edit, and how it was checked
+
+`package_check.mjs` gains one I-2 entry. `package_check_controls.sh` was **not** run: it needs an app-release package
+directory, which an ops session does not have. A targeted control was run instead:
+- with the entry, `I-2` and `I-3` are green;
+- with the entry removed, `I-2` fires naming `SCOPE_IMPORT_HARDENING.md`.
+
+### Files
+
+Repo: `docs/SCOPE_IMPORT_HARDENING.md` (new), `docs/SCOPE_STATE_SET_SELECTOR.md` (§9),
+`docs/FlawsToFix-v5_69-Phase1.md` (a pointer), `qa/tools/package_check.mjs`, `PROJECT_KNOWLEDGE_INDEX.md`,
+`CHANGELOG.md`. All of them also go to the pool.
+- `FlawsToFix-v5_69-Phase1.md` joins the pool while the scope is open, per that document's own item 4.
+- The pool goes 123 → 125.
+
+Source md5 `9e79b92f9eb91e86489cb6b80caa33c3` · built `index.html` md5 `e1bd283b638cdab74941804708987bb2` — both
+unchanged.
+
 ## ops 2026-09-15 — SCOPE_STATE_SET_SELECTOR stage 1: one shared state set, and a probe that had been reporting the complement of its gate
 
 KIND: ops. Leaves **v5.71** current — source `9e79b92f9eb91e86489cb6b80caa33c3`, built `index.html`
