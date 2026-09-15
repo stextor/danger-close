@@ -20,10 +20,15 @@
 // are load-bearing. This census operates on portfolios, not source text; sharing a suite would
 // mean sharing a fixture, and that fixture must not be touched.
 //
-// COUNTED IN NO APP TOTAL — this is tooling (§B1).
+// ⚠ COUNTED IN THE APP TOTAL. This line read "COUNTED IN NO APP TOTAL — this is tooling (§B1)" until
+// 2026-09-15, and it was false: `runsuite.sh` has tallied t29 in the app section, both legs, since v5.49,
+// and TESTING.md's per-suite line lists it (60/leg at v5.71). Only `t21` and `domdiff` are tooling.
+// A new check added here MOVES the app figure — which is why SCOPE_STATE_SET_SELECTOR's stage-1 checks
+// live in qa/state_sets_check.mjs instead.
 import { existsSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath, pathToFileURL } from "url";
+import { createRequire } from "module";
 import "./env_dom.mjs";
 let _s = 42; Math.random = () => { _s = (_s * 1103515245 + 12345) & 0x7fffffff; return _s / 0x7fffffff; };
 
@@ -41,13 +46,16 @@ if (!KNOWN_VERSIONS.includes(VER)) {
 const pick = (...cands) => cands.find(existsSync);
 const TOOL = pick(join(HERE, "tools", "boundaries.mjs"), join(HERE, "boundaries.mjs"));
 const FIX = pick(join(HERE, "tools", "fixture", "households.mjs"), join(HERE, "households.mjs"));
-if (!TOOL || !FIX) {
-  console.log("t29 SUITE: 0 passed, 1 failed\n  \u2717 census tool or fixtures not found");
+// SCOPE_STATE_SET_SELECTOR §7.6 stage 1: F-6's membership comes from the shared list, not from prose.
+const SETS_PATH = pick(join(HERE, "tools", "state_sets.cjs"), join(HERE, "state_sets.cjs"));
+if (!TOOL || !FIX || !SETS_PATH) {
+  console.log("t29 SUITE: 0 passed, 1 failed\n  \u2717 census tool, fixtures or state_sets.cjs not found");
   process.exit(1);
 }
 const { census, onBoundary, table } = await import(pathToFileURL(TOOL).href);
 const { HOUSEHOLDS, build } = await import(pathToFileURL(FIX).href);
 const G = (await import(pathToFileURL(join(HERE, `app_${VER}.mjs`)).href)).__g;
+const SETS = createRequire(import.meta.url)(SETS_PATH);
 
 let pass = 0, fail = 0;
 const T = (n, ok, d = "") => { if (ok) pass++; else { fail++; console.log(`  \u2717 ${n}${d ? " \u2014 " + d : ""}`); } };
@@ -237,9 +245,12 @@ T("C-reverse: 'ladder_windows' goes from clear to ON when both spouses share a b
   // ⚠ v5.68: the selector carries `!r.exclTest`, MATCHING `boundaries.mjs` (D-VA-3). The row means
   // "income-limited in law, UNCONDITIONAL IN THE MODEL", and `exclTest` is exactly what makes a state
   // conditional. This copy and the census's copy had to agree; F-6c asserted they did until the census row retired at v5.69.
-  const limited = Object.entries(RULES)
-    .filter(([, r]) => (r.excl65 || 0) > 0 && !r.exclTest && /income[- ]limited|income limit/i.test(r.note || ""))
-    .map(([c]) => c).sort();
+  // ⚠ STAGE 1 OF SCOPE_STATE_SET_SELECTOR (2026-09-15): `limited` is no longer selected by executing a regex
+  //   against user-facing notes. Membership is the shared five-state IN_LAW list and the predicate is the
+  //   shared `isConditioned` (truthy `exclTest`, this site's own reading) — tools/state_sets.cjs. Verified
+  //   against v5.64..v5.71 sources to give the prose selector's set on every leg. f6_probe reads the same
+  //   helper; qa/state_sets_check.mjs asserts the two agree and carries the drift guard.
+  const limited = SETS.unconverted(RULES);
   // ⚠ v5.69: INVERTED, NOT WEAKENED (SCOPE_RI_POPULATE D-RI-4). Rhode Island was the last state in this set;
   //   with it converted the set is EMPTY by design, so from v569 F-6 asserts emptiness and a state that
   //   re-enters (a new income-limited statute found, or a table dropped) turns it red. Frozen legs keep

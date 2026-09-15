@@ -94,6 +94,10 @@ tally "t37-$CUR"   node t37_mydata_draft.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
+# state_sets_check (2026-09-15, SCOPE_STATE_SET_SELECTOR stage 1) is TOOLING: it asserts the suite's shared
+# income-limited list, its drift guard, and that f6_probe agrees with t29 F-6. Both legs; no app figure.
+tally "sets-$PRIOR" node state_sets_check.mjs "$PRIOR"
+tally "sets-$CUR"   node state_sets_check.mjs "$CUR"
 echo
 awk '{p+=$1; f+=$2} END {printf "GRAND (incl tooling): %d passed, %d failed\n", p, f}' "$TMP/tally.txt"
 echo "logs: $TMP"

@@ -10,6 +10,15 @@
 //   streams: one {monthly:0} stream => spouseBWorkTaper() suppressed AND $0 added
 //   state 0, no work (no FICA), income below AMT exemption, no MAGI two years prior (no IRMAA),
 //   tradInit 0 => conv 0 for every policy (read strategy "none").
+import { existsSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+import { createRequire } from "module";
+// SCOPE_STATE_SET_SELECTOR §7.6 stage 1: the [BY DECISION v5.59] pins read the ONE shared phrase matcher.
+const _HERE = dirname(fileURLToPath(import.meta.url));
+const _SETS_PATH = [join(_HERE, "tools", "state_sets.cjs"), join(_HERE, "state_sets.cjs")].find(existsSync);
+if (!_SETS_PATH) { console.log("t10 total: 0 passed, 1 failed\n  \u2717 tools/state_sets.cjs not found"); process.exit(1); }
+const NOTE_MATCHER = createRequire(import.meta.url)(_SETS_PATH).NOTE_MATCHER;
 let seed = 1;
 Math.random = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
 const VER = process.argv[2] || "v5102";
@@ -964,12 +973,14 @@ const pass2E = pass, fail2E = fail;
         }
         // Decision D-F (ROUND4 §6): WI LEAVES t29's F-6 income-limited guarded set by wording alone —
         // its $24,000 provision has no income test, so "income-limited" would be false. RI STAYS: its
-        // AGI cliff IS an income limit. Both pinned here with the SAME regex t29 L212 executes, so the
+        // AGI cliff IS an income limit. Both pinned here with the SAME matcher t29's F-6 once executed (since
+        // 2026-09-15 the one copy is NOTE_MATCHER in tools/state_sets.cjs, and F-6 selects from its IN_LAW
+        // list instead — these two pins still EXECUTE the phrase, which is what they assert), so the
         // deliberate 5 -> 4 shrink is asserted rather than left to a `length > 0` guard.
         T("[BY DECISION v5.59] WI's note does not match the F-6 income-limited matcher (not income-tested in law)",
-          /income[- ]limited|income limit/i.test(R.WI.note) ? 1 : 0, 0);
+          NOTE_MATCHER.test(R.WI.note) ? 1 : 0, 0);
         T("[BY DECISION v5.59] RI's note still matches it (the AGI cliff is an income limit)",
-          /income[- ]limited|income limit/i.test(R.RI.note) ? 1 : 0, 1);
+          NOTE_MATCHER.test(R.RI.note) ? 1 : 0, 1);
       } else {
         T("[KNOWN DEFECT pre-v5.59] RI carried the TY2023-24 $20,000 after the statute moved to $50,000",
           R.RI.excl65 === 20000 ? 1 : 0, 1);

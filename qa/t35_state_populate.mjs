@@ -25,6 +25,10 @@
 // threshold discriminates `lt` from `lte`. All nine thresholds are pinned in both filing columns.
 
 import "./env_dom.mjs";
+import { existsSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+import { createRequire } from "module";
 let _s = 42; Math.random = () => { _s = (_s * 1103515245 + 12345) & 0x7fffffff; return _s / 0x7fffffff; };
 
 const VER = process.argv[2] || "v565";
@@ -39,6 +43,18 @@ if (!KNOWN_VERSIONS.includes(VER)) {
 }
 const _v = Number(String(VER).replace(/[^0-9]/g, "")) || 0;
 const POPULATED = _v >= 565;   // v5.65 is the release that populates Connecticut
+
+// SCOPE_STATE_SET_SELECTOR §7.6 stage 1: the in-law set and the ONE phrase matcher come from a shared module.
+// Resolved the way t29 resolves its tools — the pool is flat and the repo is not.
+const HERE = dirname(fileURLToPath(import.meta.url));
+const pick = (...cands) => cands.find(existsSync);
+const SETS_PATH = pick(join(HERE, "tools", "state_sets.cjs"), join(HERE, "state_sets.cjs"));
+if (!SETS_PATH) {
+  console.log("\nt35: 0 passed, 1 failed\n  \u2717 tools/state_sets.cjs not found");
+  process.exit(1);
+}
+const SETS = createRequire(import.meta.url)(SETS_PATH);
+const NOTE_MATCHER = SETS.NOTE_MATCHER;
 
 const MOD = await import(`./app_${VER}.mjs`);
 const __g = MOD.__g, __engines = MOD.__engines;
@@ -282,10 +298,12 @@ const ctTax = (args) => ST({
   // zero — its simplification was to grant NOTHING. That is exactly why CT ran pessimistic while
   // the other four run optimistic, and it is why this count does NOT drop at v5.65. Recording that
   // here stops a later session reading the unchanged count as a failed conversion.
-  const offenders = Object.keys(R).filter((c) =>
-    (R[c].excl65 || 0) > 0 &&
-    R[c].exclTest === undefined &&
-    /income[- ]limited|income limit/i.test(R[c].note || ""));
+  // ⚠ STAGE 1 OF SCOPE_STATE_SET_SELECTOR (2026-09-15): membership is the shared five-state IN_LAW list, not
+  //   a regex over notes, and the predicate is the shared `isConditioned` (truthy `exclTest`). This site used
+  //   to write `exclTest === undefined`, which disagreed with t29's `!exclTest` for `null`/`false` — §7.2.
+  //   Verified against v5.64..v5.71 sources to reproduce every gated arm below. The PINS D-7a..D-7d still
+  //   EXECUTE the phrase matcher against the notes: for them, that is the assertion.
+  const offenders = SETS.unconverted(R);
   // ⚠ GATED AT v566, NOT REWRITTEN — §B2's gate-the-inversion rule. New Mexico converted at v5.66,
   // so it leaves this set. The pre-v5.66 form is kept because it is the truth on the earlier legs.
   // ⚠ THE SET SHRINKS BY ONE PER CONVERSION AND MUST REACH ZERO. When the last of NJ, RI and VA
@@ -298,7 +316,7 @@ const ctTax = (args) => ST({
     // a table, not because its note stopped saying "income-limited". Rewording the note out of the
     // guarded set would ALSO empty it here, silently, and that is the v5.54 New Jersey defect.
     T("D-7a [v5.66]: NM left the set by CONVERTING, not by rewording — its note still matches the income-limited selector AND it now carries an `exclTest`",
-      /income[- ]limited|income limit/i.test(R.NM.note || "") && R.NM.exclTest !== undefined);
+      NOTE_MATCHER.test(R.NM.note || "") && R.NM.exclTest !== undefined);
     // ⚠ D-7b — THE SAME PIN FOR NEW JERSEY, AND THE v5.67 BUILD NEEDED IT. The first draft of NJ's
     //   rewritten note said "income-conditioned" and dropped the phrase the selector matches, so NJ
     //   would have left this set by BOTH converting AND rewording — and the reword alone would have
@@ -306,11 +324,11 @@ const ctTax = (args) => ST({
     //   New Jersey. Caught by D-7a's shape, not by review. The phrase is back in the note.
     if (_vt >= 567)
       T("D-7b [v5.67]: NJ left the set by CONVERTING, not by rewording — its note still matches the income-limited selector AND it now carries an `exclTest`",
-        /income[- ]limited|income limit/i.test(R.NJ.note || "") && R.NJ.exclTest !== undefined);
+        NOTE_MATCHER.test(R.NJ.note || "") && R.NJ.exclTest !== undefined);
     // ⚠ D-7c — VIRGINIA (v5.68), the same pin a third time. Its note keeps "income-limited" on purpose.
     if (_vt >= 568) {
       T("D-7c [v5.68]: VA left the set by CONVERTING, not by rewording — its note still matches the income-limited selector AND it now carries an `exclTest`",
-        /income[- ]limited|income limit/i.test(R.VA.note || "") && R.VA.exclTest !== undefined);
+        NOTE_MATCHER.test(R.VA.note || "") && R.VA.exclTest !== undefined);
       // VA's note owes three disclosures. Each is asserted as a CLAIM, not as the presence of a noun
       // (the v5.65 D-2 lesson): a note saying the measure DOES carry dividends must fail D-10.
       const _van = R.VA.note || "";
@@ -326,7 +344,7 @@ const ctTax = (args) => ST({
     // ⚠ D-7d — RHODE ISLAND (v5.69), the fourth and last time. Its note keeps "income-limited" on purpose.
     if (_vt >= 569) {
       T("D-7d [v5.69]: RI left the set by CONVERTING, not by rewording — its note still matches the income-limited selector AND it now carries an `exclTest`",
-        /income[- ]limited|income limit/i.test(R.RI.note || "") && R.RI.exclTest !== undefined);
+        NOTE_MATCHER.test(R.RI.note || "") && R.RI.exclTest !== undefined);
       // RI's note owes its disclosures as CLAIMS, not nouns (the v5.65 D-2 lesson) — SCOPE_RI_POPULATE §6.
       const _rin = R.RI.note || "";
       T("D-14 [v5.69]: RI's note no longer claims the model ignores the cliff — the pre-v5.69 disclosure is now false (OPERATIONS §B2 lock)",
