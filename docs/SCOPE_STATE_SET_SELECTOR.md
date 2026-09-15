@@ -402,3 +402,23 @@ module's *own* pattern, and the pattern's content is guarded by the pins, which 
 App total **unchanged at 3,647**, 0 failing, both legs, summed from `runsuite.sh` output; the tooling line now
 carries `t21` 56, `domdiff` 32 and `sets` 10 + 10. Per-suite figures and GRAND are in `CHANGELOG.md` and are not
 restated here.
+
+## 9 · ADDENDUM 2026-09-15 — the in-law list is NOT complete: Maine. Stage 2 is now homed in SCOPE_IMPORT_HARDENING
+
+**Maine's pension income deduction is income-limited in law from TY2025.** It phases out above federal AGI of
+$125,000 single / $187,500 HoH / $250,000 MFJ — 36 M.R.S. §5122(2)(M-3), P.L. 2025, c. 388, Pt. H, per Maine
+Revenue Services' summary of 2025 enacted legislation.
+- v5.71 carries Maine at `excl65` $48,216 with no `exclTest`, so Maine is an **unconverted** state that stage 1's
+  five-member list omits.
+- §8's claims that the list is "the five statutes" and that the unconverted set is empty are therefore true **of
+  the list**, not of the law. `state_sets.cjs`'s header says the same and is **not** edited here: changing the list
+  turns `t29` F-6 and `t35` D-8 red, which is a gated decision (`SCOPE_IMPORT_HARDENING.md` **D-8**), not a
+  documentation fix. **D-8 was decided 2026-09-15: Maine joins the list at v5.72**, both guards re-invert to
+  non-empty (gated at v572), and Maine gets its own populate scope later.
+- **The drift guard could not see Maine** because its note does not use the phrase. That is §8's first disclosed
+  limitation, now with a concrete instance.
+
+**Montana was checked and is correctly outside the list** — MCA 15-30-2120(3)(g) carries no income test.
+
+**Stage 2 is scoped in `SCOPE_IMPORT_HARDENING.md` §2–§3 (S-2)**, for the v5.72 release that bumps the version
+for the import fixes. This scope stays OPEN until that release ships.

@@ -424,6 +424,10 @@ v5.9.1 source's history.
    it is undisclosed.
 3. **A-4, A-5, A-6 and A-2.** *Recommend one later import-hardening scope at LOW*, not urgent: no persistent damage was
    observed, and each needs a malformed or doctored file.
+   ⚠ **Scoped 2026-09-15 — `SCOPE_IMPORT_HARDENING.md`.** All three re-run against v5.71 and all three still
+   reproduce, on both paths. The scope also finds a **third** truthy skin gate (the page-load read, L13095 at
+   v5.71) and that the replace-before-validate ordering reaches all **eight** callers of `applyLoadedData`.
+   Per item 4, this document joins the pool while that scope is open.
 4. **Where this document lives.** §G and the 2026-09-04 H-2 decision make a completed audit **repo-only**, with a
    carve-out for an audit a live scope cites. *Recommend repo-only now (`docs/`), and adding it to the pool on the day
    a scope for A-3 or B-3 opens, until that scope retires.*
