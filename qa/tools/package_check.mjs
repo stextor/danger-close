@@ -750,7 +750,12 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
     //   Removed at v5.57.1 after re-verifying every premise by content against v5.57.
     const OPEN = new Set([
       "SCOPE_STANDING_AUDIT.md",                  // not a build scope at all (OPERATIONS §K)
-      "SCOPE_HOUSEKEEPING_THREE.md",              // awaiting decisions in its §5
+      // ── REMOVED by the 2026-09-14 t21 Section F ops package: "SCOPE_HOUSEKEEPING_THREE.md". Its last item, B,
+      //    is answered and closed; the scope carries its RETIRED marker and its build record in this same package.
+      //    ⚠ The answer was NOT the coverage the item asked for. Re-measured by AST, twelve acorn-parsing tools are
+      //    uncovered, and ZERO of them are reachable by `fixture.jsx` — `census_p1.cjs` runs against it but answers
+      //    zero to all fifteen of its questions, so a sabotaged copy produces byte-identical output. Item B closed on
+      //    DISCLOSURE plus a header pin; the fixture-design work it would need is a separate scope if it is ever wanted.
       // ── REMOVED at the v5.70 ship: "SCOPE_B3_KEYLESS_AI_ROUTE.md". The release built it; the scope carries its RETIRED
       //    marker, and its manifest hash row left (D-3), in the same package.
       // Added v5.61, REWRITTEN 2026-09-04, REASON CORRECTED 2026-09-07. The entry is right and
