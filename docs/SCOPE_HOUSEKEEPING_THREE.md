@@ -4,7 +4,8 @@
 |---|---|
 | Premise verified against | **v5.58** · source `6690b2c78953a7a4a1cee413d3523b59` · tree `2c3ebc9` |
 | Written | 2026-09-02 |
-| Status | ◑ **ITEMS A AND C BUILT AND SHIPPED 2026-09-07. ITEM B REMAINS OPEN, on a CORRECTED premise.** All five §5 decisions answered: **D-1 split**, **D-2 build it**, **D-3 six documents rowed and the rest named as deliberately unrowed**, **D-4 no self-row**, **D-5 the command with a dated measurement beside it**. ⚠ **D-B-1 resolved 2026-09-07 as (c) then (a):** §2’s *"three tools added at v5.58"* is wrong — **it is NINE**, four of them predating v5.58 and one postdating it, and **six cannot be reached by a `.jsx` fixture at all.** See the banner in §2. **This scope stays on `package_check`’s I-2 OPEN allowlist** until Item B builds. *(Superseded: "AWAITING DECISIONS in §5 — do not build yet.")* |
+| Status | ✅ **RETIRED 2026-09-14. All three items closed.** Items A and C built and shipped 2026-09-07. **Item B closed 2026-09-14 on DISCLOSURE plus a header pin, not on the coverage it asked for** — re-measured by AST the uncovered set is **TWELVE** acorn-parsing tools, and **ZERO of them are reachable by `fixture.jsx`**. `census_p1.cjs` runs against it and answers **zero to all fifteen** of its questions; a sabotaged copy produces **byte-identical** output, so every case the item contemplated would have been vacuous. `t21` gains Section F — a `[EXTINCTION 2026-09-11]` pin on the `wc -l` correction and a **disclosure guard** that goes red if the fixture ever reaches the tool — and `TESTING.md` names all twelve with reasons. **The fixture-design work is a separate scope if it is ever wanted; see §7.** This scope leaves `package_check`'s **I-2 OPEN allowlist** in the same package. *(Superseded: the ◑ ITEM B REMAINS OPEN line, and before it "AWAITING DECISIONS in §5 — do not build yet.")* |
+| *(prior status, retained)* | ◑ **ITEMS A AND C BUILT AND SHIPPED 2026-09-07. ITEM B REMAINED OPEN, on a CORRECTED premise.** All five §5 decisions answered: **D-1 split**, **D-2 build it**, **D-3 six documents rowed and the rest named as deliberately unrowed**, **D-4 no self-row**, **D-5 the command with a dated measurement beside it**. ⚠ **D-B-1 resolved 2026-09-07 as (c) then (a):** §2’s *"three tools added at v5.58"* is wrong — **it is NINE**, four of them predating v5.58 and one postdating it, and **six cannot be reached by a `.jsx` fixture at all.** See the banner in §2. **This scope stays on `package_check`’s I-2 OPEN allowlist** until Item B builds. *(Superseded: "AWAITING DECISIONS in §5 — do not build yet.")* |
 | Shape | **Item A** documentation · **Item B** a real build with new checks · **Item C** documentation, mechanically generated |
 | Premises re-checked | **2026-09-07** by the third scope-status sweep, against v5.65 `7604fac5dab891bb31905544d11072f8`, repo `2c20873`. **A was TRUE and is worse than stated · B was TRUE · C's numbers were WRONG.** See the banner below |
 
@@ -362,3 +363,102 @@ derivation command, so the figure carries its own expiry.
 **39 entries** and a `--depth 1` clone carries no history to date them. **Whether three is still the
 right number is UNKNOWN.** Settle it with a full-history clone first — coverage for three when five
 need it is the partial green §B2 exists to prevent.
+
+---
+
+## 7 · Build record — Item B, 2026-09-14. The premise moved a THIRD time, and this time to zero.
+
+**Shipped as one `ops` package.** No version bump, no rebuild, no app source change. `t21` is tooling
+and is counted separately, so its rise does not move the app total.
+
+### What was re-measured, and what it overturned
+
+Both required steps ran first. **§A freshness:** manifest, `md5sum` and `CHANGELOG.md` agree on v5.71
+at `9e79b92f9eb91e86489cb6b80caa33c3`; clone-and-diff in both directions shows 118 of 119 pool files
+byte-identical to a committed file, the exception being the prior leg, repo-absent by design.
+
+**The acorn census, by AST and not by grep** — parse every file in `qa/tools/`, resolve its
+`require`/`import` specifiers from the AST, then read `t21_tools.mjs`'s own string literals from
+*its* AST, matching whole tokens so `census` does not match `vercensus` or `sel_census`:
+
+```
+qa/tools entries: 55  (13 are .py/.sh and do not parse as JS)
+ACORN-PARSING TOOLS: 16 — 4 covered (census, diverge, funcmap, residual), 12 not
+```
+
+**Twelve, not nine, not three.** The banner in §2 corrected three to nine on 2026-09-07; three tools
+have been added since (`census_p1.cjs`, `lits_p1.cjs`, `sel_census.cjs`).
+
+⚠ **`package_check.mjs`, `package_check_controls.sh` and `row_census.cjs` appear in `t21` zero times
+and that is CORRECT.** None parses with `acorn`, so none falls inside §B1's warrant; `package_check`
+is verified by its own `P1`–`P55` controls, a different mechanism. Recorded because a grep reaches
+the alarming reading first.
+
+### ⚠ THE FINDING — the last reachable tool fails the CONTENT test
+
+§2's banner named `f6_probe` as *"the only clean fit for a `.jsx` fixture"* and the plan that followed
+rested on `census_p1.cjs` having the same shape. Both are argument-shape judgements. **Neither
+survives contact with the fixture.**
+
+| Tool | Against `fixture.jsx` |
+|---|---|
+| `census_p1` | exit 0, output — **fifteen questions, fifteen zeros, no hit rows** |
+| `f6_probe` | **exit 1** — `STATE_RULES not found as a VariableDeclarator` |
+| `state_rows` | **exit 1** — no `const STATE_RULES = {…}` object literal |
+| `notes_probe` | exit 0, `0 regex literals`, `OLD: undefined / NEW: undefined` — **vacuous** |
+| `lits` | exit 0, **zero bytes of output** — also vacuous |
+| the other 7 | directories or file pairs; `sel_census` and `vergates` throw `ENOTDIR` on a file |
+
+**The decisive test.** A copy of `census_p1.cjs` sabotaged in two places — the storage-method list
+cut to one entry, and the whole `spec.any` member-property branch disabled — produces output
+**byte-identical** to the intact tool on this fixture. Any case written about its fifteen questions
+would stay green on a working tool, a broken one, and a tool replaced by `console.log` of fifteen
+zeros.
+
+⚠ **The sharpest version:** `census_p1`'s own header records a defect corrected 2026-09-11 — `key`
+sat in the storage-method list, so sixteen React `.key` reads were counted as storage calls.
+`fixture.jsx` contains no `.key` read. **The fixture cannot catch the regression of the defect this
+tool has already had.**
+
+### What shipped instead, and why it is not dressed up as coverage
+
+**`t21` Section F — six checks, 50 → 56.** One `[EXTINCTION 2026-09-11]` pin on the `wc -l`
+correction (reverting it turns `75 lines` into `76 lines`), three checks that the tool runs rather
+than bailing and that its self-check is inert off `DangerClose.jsx`, and a **disclosure guard**
+asserting that all fifteen questions answer zero. The guard is the one that earns its place: it
+fires if the fixture ever gains surface content, forcing the disclosure to be rewritten instead of
+quietly going stale. **Section F's own header says, in the file, that it is not coverage.**
+
+**Negative controls: `qa/tools/controls_t21_censusp1.sh`, 6 fired, 0 silent.** C5 runs in the
+opposite direction from the others — it ADDS a storage call to a throwaway copy of the fixture and
+requires the disclosure guard to go RED, because a gap-assertion that cannot be falsified is the
+vacuous pass this section exists to avoid. Both canonical files are md5-verified byte-identical
+before and after the run.
+
+**`TESTING.md` names all twelve uncovered tools with the reason each is uncovered** — the scope's own
+line that *"a suite that says what it does not cover is worth more than one that appears to cover
+everything"*, at twelve rather than nine.
+
+### The decision, restated for the record
+
+**D-2 was re-asked on the evidence rather than answered a third time from a corrected premise.** It
+had been answered *build it*, with the escape *"if the fixture work turns out to need its own design,
+stop and report rather than writing thin cases to reach a number."* That escape was reached twice:
+once on 2026-09-07 for the directory fixture, once on 2026-09-14 for the content gap. **Disclosure
+plus one honest pin is the answer, and the item closes rather than staying open a fourth time.**
+
+⚠ **What a future fixture-design scope needs, recorded here so it is not re-derived.** For
+`census_p1`: surface content with hand-counted known answers across the fifteen questions, and
+decoys in both directions. For `f6_probe`: entries satisfying **both** conjuncts of the F-6
+predicate (`excl65 > 0` **and** a note matching `/income[- ]limited|income limit/i`); decoys failing
+**each** conjunct separately, or the control cannot fire in the over-matching direction (TRAP 10's
+lesson, 2026-08-11); **a key literally named `VA`**, because `f6_probe.cjs` line 40 does
+`R2.VA.note = cand` and throws without it; notes exercising `/\$\d/` and the ss-taxed guard in
+**both** polarities; and a second input artifact for the candidate-note path. Eight further tools
+need a **directory** fixture, still a second fixture KIND.
+
+### An error this session found in a third place
+
+`OPERATIONS.md` §B1 said **49 checks** where `TESTING.md` said 50 — the same drift `TESTING.md`'s own
+parenthetical records (*"this sentence read 49 while the sentence below it read 50, for eleven
+releases"*), in a copy nobody rolled. Both now read 56, from suite output.

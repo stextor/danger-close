@@ -172,12 +172,25 @@ disagree: identifiers in comments, substrings inside strings, template literals,
 member access, object shorthand, shadowed scopes, nested function depths, JSX attributes and children,
 a one-line blob standing in for `DOCS_HTML`, and two decoys the residual matcher must REJECT. Every
 expectation was hand-counted from the fixture first and adjudicated by reading it where tool and hand
-disagreed — never by editing the expectation until it matched. **49 checks, negative-controlled six
-ways** (breaking kind classification, scope attribution, depth tracking, fingerprint normalisation and
-the residual matcher each fire; so does reflowing the fixture by one line).
+disagreed — never by editing the expectation until it matched. **56 checks, negative-controlled eleven
+ways** — the original six (breaking kind classification, scope attribution, depth tracking, fingerprint
+normalisation and the residual matcher each fire; so does reflowing the fixture by one line), plus five
+in `qa/tools/controls_t21_censusp1.sh` for Section F. ⚠ *This figure read **49** until 2026-09-14 while
+`TESTING.md` read 50 — a third uncorrected copy of a drift `TESTING.md`'s own parenthetical already
+records. Rolled from suite output.*
 
 So an unexpected result from these tools IS now a finding on its own — provided `t21` is green. The
 fixture's line numbers are load-bearing; add cases at the END only.
+
+⚠ **THE WARRANT REACHES FOUR TOOLS OF SIXTEEN.** Measured by AST 2026-09-14: `qa/tools/` holds
+**sixteen** tools that parse with `acorn`, `t21` covers **four**, and **none of the other twelve is
+reachable by `fixture.jsx`** — eight need a directory fixture, three need a `STATE_RULES` table, and
+`census_p1.cjs` runs but answers zero to all fifteen of its questions, so a sabotaged copy produces
+byte-identical output. **An unexpected result from one of the twelve is still a reason to hand-check,
+not a finding on its own.** `TESTING.md` carries the named list with a reason per tool; it is not
+repeated here, because two copies of this answer is the drift this project keeps recording. `t21`
+Section F pins `census_p1`'s header and carries a **disclosure guard** that goes red if the fixture
+ever reaches it.
 
 ⚠ **One defect is pinned, not fixed** (`t21` §A4, OPERATIONS §D). `census.cjs` reports a position
 TWICE where two AST nodes share one source range — object shorthand `{ x }` and export specifiers
