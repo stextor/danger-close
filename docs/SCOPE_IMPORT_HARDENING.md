@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **OPEN — written 2026-09-15, NOT BUILT. ALL NINE DECISIONS TAKEN 2026-09-15 (§7): the maintainer approved every recommendation. BUILDABLE**, in the two sessions D-6 sets out. On `package_check`'s I-2 allowlist from the package that adds it |
+| Status | **OPEN — SESSION 1 BUILT AS A WORKBENCH 2026-09-15 (§9), NOT SHIPPED; SESSION 2 OWED.** H-1…H-5 and the stream/claim-age half of H-6 are built, with `t38` and one negative control per fix, **without a version bump** (D-6). ⚠ **One NEW decision is open: D-10 (§7a)** — the birth-year half of H-6 rests on a premise the build found false. On `package_check`'s I-2 allowlist |
 | Premise verified against | **v5.71 source `9e79b92f9eb91e86489cb6b80caa33c3`, repo `1cbf23b`** — every figure below is command output from 2026-09-15 |
 | Owed by | `FlawsToFix-v5_69-Phase1.md` (A-2, A-4, A-5, recommended there as one later import-hardening scope) and `SCOPE_STATE_SET_SELECTOR.md` §7.6 (stage 2 waits for a release that already bumps the version) |
 | Target | **v5.72** — an app release: source change, version bump, rebuild, `smoke_built` |
@@ -117,6 +117,25 @@ income test**. The note's "income-based exemption" refers to Social Security's f
 | **S-2** | **Stage 2**: `incomeLimitedInLaw` on the in-law rows; the suite derives its list from it (D-7, D-8) | `STATE_RULES`; `qa/tools/state_sets.cjs`; `state_sets_check.mjs` |
 | **V** | **v5.72 bump**: four in-app sites, 20 files / 21 ladder entries / 65 gated expressions, new `dom_entry_v572.jsx`, rebuild, `smoke_built`, pool rotation | per `vercensus.cjs` |
 
+### 3a · D-4, measured (2026-09-15, v5.71, jsdom, My Data path)
+
+`probe_import_hostile.mjs <tag> rows mydata` with `ROWS=<n> LIST=<list>`. "Settled" is the probe's own figure
+from dispatch to a quiet page, and **includes about 1.1 s of fixed waits**; the real-size positive control
+(`valid`) settled in 4.6 s under load.
+
+| Rows | positions only | all four lists (positions, other accounts, streams, expenses) | all-four payload |
+|---|---|---|---|
+| 100 | 3,347 ms | 4,620 ms | 49 KB |
+| 500 | 6,016 ms | 15,311 ms | 239 KB |
+| 1,000 | 9,526 ms | 33,958 ms | 476 KB |
+| 2,000 | 15,883 ms | 73,543 ms | 951 KB |
+
+Growth is close to linear with no cliff, and every run rendered all 26 tabs. **Chosen: 500 rows per list and
+5 MB — the starting guess, confirmed.** 500 is far above any real household, and a file with every list at
+500 is a quarter of a megabyte, so 5 MB bounds the parse without ever refusing a real backup. The caps are
+`IMPORT_MAX_ROWS` and `IMPORT_MAX_BYTES`; a file over either is **rejected**, never truncated. ⚠ These are jsdom
+timings; a browser was not measured.
+
 ## 4 · Tests this ships with
 
 A new suite, **`t38_import_hardening.mjs`**, runs on **both legs**. The prior leg pins each defect as
@@ -187,7 +206,44 @@ Two of them still leave work for the build:
 | **D-8** | Does Maine join the in-law list at stage 2? | (a) yes — the unconverted set becomes {ME}, `t29` F-6 and `t35` D-8 **re-invert** to non-empty guards gated at v572, and ME waits for its own populate scope; (b) no — keep five and file ME as a finding | **(a).** The list is meant to be the statutory fact, and Maine is one. An empty set that is empty only because Maine is missing is the vacuous green §B2 warns about. The app's note already discloses the gap, so no user-facing copy has to change |
 | **D-9** | Montana's figure lead | check it in this release / file it | **File it.** It moves a figure, so it belongs in a modelling release with METHODOLOGY, not in a robustness one |
 
+## 7a · A decision the build opened (2026-09-15, session 1)
+
+| # | Question | Options | Recommendation — **OPEN** |
+|---|---|---|---|
+| **D-10** | The v5.9.1 birth-year clamp reads `PORTFOLIO.dobA.year`, but by `census.cjs dobA` the field is only ever **written as a string** (wizard `"YYYY-06"`, My Data `"YYYY-MM-DD"`), so the clamp **can never fire** — and H-6's "delete a non-numeric birth year, like its neighbours" would add an `else` to dead code. `probe_import_hostile`'s `years-absurd` never tested it either (it built `dobA` with `Object.assign({}, <string>, …)`). **Measured on v5.71:** `"9999-01-01"` reaches the timeline as year 9999 (Social Security in 10066); `"9999-01-01"` and `"0001-01-01"` import and render with no hang and no error | (a) clamp the **year inside the string** to 1900–this year, and delete a string `_ymd` cannot parse; (b) leave it and record the limitation; (c) delete the dead clamp only | **(a).** Deleting an unparseable string moves no figure (the timeline already falls back when `_ymd` returns null); the year clamp moves figures only for impossible years, and is reported through the same D-5 notice. **Not built** — the STOP rule forbids adapting a premise silently. `t38` Y-1/Y-2 pin the current behaviour on both legs and must be re-gated, not deleted, when this is decided |
+
 ## 8 · Budget, stated
 
 Two sessions, per D-6. The honest failure mode is a release that bumps the version with half the hardening
 done. D-6's cut avoids that by keeping the bump in the session that ships.
+
+## 9 · Session 1 record (2026-09-15) — workbench, not shipped
+
+**Built against v5.71 `9e79b92f…`; the workbench source is `e8194934…` (§ stop report for every file and md5).**
+No version bump, no `STATE_RULES` change, no rebuild. Session 2 owes S-2, V, D-10's build if taken, and the
+runner line for `t38`.
+
+- **H-1.** `validateLoadedPlan` (shape only) runs before anything is assigned; the body is now
+  `applyLoadedDataUnchecked`, and `applyLoadedData` snapshots every binding it writes and restores all of them
+  on any throw — **in place** when no new plan was passed, so the live object keeps its identity. The page-load
+  path is **run, not assumed**: on v5.71 a stored plan with `positions: [null]` lands on the landing screen with
+  **the rejected plan in memory** and Start Fresh overwriting it **without asking** (`t38` L-1/L-4 pins). Now
+  memory stays at the defaults, the landing screen says why, and Start Fresh asks.
+- **H-2.** The My Data handler awaits `onImport`; both paths use the D-2 wording. ⚠ **Behaviour change beyond
+  the letter of the scope:** an unsaved My Data draft is now dropped only **after** an import succeeds. v5.71
+  dropped it before, so a rejected file cost the user their edits. `t37` IM-1 (a valid import drops the draft)
+  still holds.
+- **H-3.** One predicate, `isSkinKey`, at all three gates and in `skinVars`.
+- **H-4.** `AppErrorBoundary` wraps the root: a message, a **Reload** button, no data control; it still
+  reports to `console.error`. ⚠ jsdom cannot observe the navigation, so `t38` B-6 asserts only that pressing
+  Reload changes no data.
+- **H-5.** §3a.
+- **H-6.** Stream years 1900–9999 (figure-neutral; `t38` C-3); claim age 62–70 with `0`/`""` left alone
+  (the wizard stores 0 for an empty box and every reader treats it as "default"). Every adjustment —
+  **including the old v5.9.1 clamps, which were silent** — is recorded in `_importAdjusted` and shown on My
+  Data. **Birth year: D-10.**
+- **§B1a pass** (AST, regexes executed against the old and new copy): no existing suite asserts the removed
+  wording. The one reader that did, `probe_import_hostile.mjs`'s error matcher, would have printed
+  `importErr=null` for a correct v5.72 rejection; it is updated.
+- **A harness defect caught while writing `t38`:** an `uncaughtException` handler that only recorded errors
+  turned a crashed suite into a silent 0/0 (§B2). `t38` now prints DIED and exits non-zero.
