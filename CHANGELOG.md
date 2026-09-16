@@ -1,5 +1,37 @@
 # Changelog
 
+## ops 2026-09-15 (third) — handover: import hardening session 1, built as a workbench; the birth-year clamp was never live
+
+KIND: handover. Leaves **v5.71** current — source `9e79b92f9eb91e86489cb6b80caa33c3`, built `index.html`
+`e1bd283b638cdab74941804708987bb2`. **No version bump, no rebuild, no rotation, no app change shipped.** The
+workbench source (`e819493421b0283965de7b06f497af43`) travels in the handover zip only.
+
+**What was built** (`SCOPE_IMPORT_HARDENING.md` §9): a malformed plan is checked before it replaces the live
+one, and any failure part-way restores everything (H-1, both halves); the My Data import waits for its result
+and both restore paths say *"That file couldn't be restored. Your saved plan was not changed."* (H-2); skin
+names must be real skins at all three gates and in `skinVars` (H-3); a top-level error boundary replaces the
+blank page, with a Reload button and no data control (H-4); backups over 500 rows in any list or 5 MB are
+rejected, never truncated (H-5, measured — §3a); stream years and Social Security claim ages are clamped, and
+every adjustment, including the old silent ones, is shown on My Data (H-6).
+
+**Found while building.** A stored plan the app cannot load left it on the landing screen with the bad plan in
+memory, and Start Fresh then overwrote the stored copy without asking — the scope had traced this, the build
+ran it. **The v5.9.1 birth-year clamp has never fired** — birth dates are stored as strings and the clamp reads
+`.year` — so that half of H-6 is **stopped, not adapted**, as new decision **D-10**.
+
+**Verified by** `t38` from the packaged copy — **v571 83/0** (every defect pinned) and **v572 184/0**; the full
+suite with the workbench as the current leg and both legs rebuilt with the new shim — **app 3,647 · tooling 108
+· GRAND 3,755 · 0 failing · parity 10/10**, identical to the unmodified baseline; `controls_v572_import.py` —
+**13 of 13 reversions fired**, plus **V1** (a render error with the boundary present still turns `t4` and `t9`
+red); and a §B1a AST pass showing no existing assertion reads the removed wording. The first V1 verdict was
+wrong because of the control's predicate, not the app; that is recorded in the stop report.
+
+**Limitations.** Not a release: nothing here is live. `t38` is not yet in `runsuite.sh`, so no runner total
+includes it. jsdom cannot observe the Reload navigation. D-4 timings are jsdom's. The post-ship
+`package_check` for the scope package was not run (its zip was not in the session). One behaviour change
+goes beyond the scope's letter and is flagged for the maintainer: an unsaved My Data draft now survives a
+rejected import.
+
 ## ops 2026-09-15 (second) — the import-hardening scope: A-2, A-4, A-5 still reproduce at v5.71, and Maine is missing from the in-law list
 
 KIND: ops. Leaves **v5.71** current — source `9e79b92f9eb91e86489cb6b80caa33c3`, built `index.html`
