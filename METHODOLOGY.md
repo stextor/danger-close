@@ -780,6 +780,23 @@ in full**: confirming the wipe deletes every storage key — plan, preferences, 
 (credentials never survive a wipe) — and returns the app to the landing screen; previously the
 button overwrote the plan with a blank one and left the key and preferences in browser storage.
 
+**Input bounds on every load (v5.72).** A plan — restored from a backup, or read back from browser
+storage — is checked for shape before it replaces the one in memory, and a load that fails part-way
+restores everything it touched. A backup with more than **500 rows in any list** or larger than
+**5 MB** is refused whole, never truncated. Values the model cannot sensibly take are pulled into
+range and **listed on My Data**, never silently:
+- **birth year** to 1900 – current year (the stored `YYYY-MM[-DD]` text is rewritten); a birth date
+  that cannot be parsed at all is dropped, and the timeline falls back exactly as before;
+- **Social Security claim age** to 62–70 (a 0 or blank still means "use the default");
+- **income-stream start/end years** to 1900–9999 — a range that cannot change any figure;
+- **retirement year** to 1950 – 60 years out and **life expectancy** to 50–120 (unchanged since
+  v5.9.1, now reported).
+
+*Which figures move:* only those of a plan that carried an impossible value — a birth year of 9999, a
+claim age of 55 or 80. Any plan entered through the app's own forms is unchanged. Through v5.71 the
+birth-year limit never fired: it read a number out of a field stored as text. The limits are
+recorded as limits; this is input validation, not a change to any engine.
+
 ## 12. Validation & known limitations
 
 The `validation/` folder contains: statutory-constant checks (brackets, IRMAA tiers, QCD cap,
