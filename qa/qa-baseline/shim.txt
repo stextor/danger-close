@@ -49,6 +49,15 @@ export const __g = {
   // so both go through _g and a prior leg returns undefined instead of dying at module load.
   MASTER_PROMPT: () => _g("MASTER_PROMPT"),
   MASTER_PROMPT_MAX_CHARS: () => _g("MASTER_PROMPT_MAX_CHARS"),
+  // v5.72 (SCOPE_IMPORT_HARDENING) — t38. skinVars exists on every leg but was never on this surface;
+  // the rest are NEW at v5.72 and go through _g so a prior leg returns undefined instead of dying at
+  // module load (OPERATIONS §C). Live getters for the constants, like MASTER_PROMPT above.
+  skinVars: _g("skinVars"),
+  isSkinKey: _g("isSkinKey"),
+  validateLoadedPlan: _g("validateLoadedPlan"),
+  checkImportBounds: _g("checkImportBounds"),
+  IMPORT_CONSTS: () => ({ FAIL: _g("IMPORT_FAIL_MSG"), NOT_BACKUP: _g("IMPORT_NOT_BACKUP_MSG"), TOO_LARGE: _g("IMPORT_TOO_LARGE_MSG"),
+    UNREADABLE: _g("STORED_PLAN_UNREADABLE_MSG"), MAX_BYTES: _g("IMPORT_MAX_BYTES"), MAX_ROWS: _g("IMPORT_MAX_ROWS") }),
   DangerClose,
 };
 
