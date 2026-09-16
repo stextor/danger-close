@@ -23,7 +23,8 @@ from concurrent.futures import ThreadPoolExecutor
 TAG = sys.argv[1] if len(sys.argv) > 1 else "v572"
 JOBS = int(sys.argv[2]) if len(sys.argv) > 2 and sys.argv[2].isdigit() else 2
 ONLY_V1 = "V1" in sys.argv[2:]          # `… v572 V1` runs the visibility control alone
-BASE_TAG = "v571"                        # t4/t9 are registered up to the last SHIPPED leg; V1 runs under it
+BASE_TAG = TAG                           # t4/t9 register v572 from the bump on. (Session 1, before the bump,
+                                         # had to present the mutant under "v571"; that was the only reason.)
 QA = os.path.abspath(os.getcwd())
 RUN = os.path.dirname(QA)
 SRC = os.path.join(RUN, f"{TAG}.jsx")
@@ -80,6 +81,9 @@ CONTROLS = [
     ("C9", "H-6: claim-age clamp removed",
      [('    if (_isPlainObj(PORTFOLIO.incomeSources)) {\n      _clampField(', '    if (false) {\n      _clampField(')],
      False, ["C-1 claim age A 61", "C-1 claim age A 71", "C-1 claim age B 1e9"]),
+    ("C11", "D-10: birth-date clamp removed",
+     [('    for (const [k, who] of [["dobA", "first person"], ["dobB", "second person"]]) {\n', '    for (const [k, who] of []) {\n')],
+     False, ["Y-1 9999-01-01", "Y-1 'abc'", "Y-3:"]),
     ("C10", "H-6 / D-5: adjustments not recorded",
      [("    PORTFOLIO._importAdjusted = _adj.length ? _adj : null;", "    PORTFOLIO._importAdjusted = null;")],
      True, ["C-2 ", "C-4:", "A-1:"]),
@@ -150,7 +154,7 @@ def visibility():
                          "function MyDataEditor({ onApply, onClearAll, onImport, onLoadSample, checklist, skin }) {\n  throw new Error(\"V1 visibility control\");\n")])
     q = os.path.join(root, "qa")
     # the mutant is built as TAG; t4/t9 only accept a registered leg, so it is presented under BASE_TAG
-    for f in ("dom_bundle.cjs", f"dom_{BASE_TAG}.cjs"):
+    for f in (["dom_bundle.cjs"] + ([f"dom_{BASE_TAG}.cjs"] if BASE_TAG != TAG else [])):
         p = os.path.join(q, f)
         if os.path.lexists(p): os.remove(p)
         shutil.copy2(os.path.join(q, f"dom_{TAG}.cjs"), p)

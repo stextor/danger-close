@@ -18,6 +18,13 @@
 import hashlib, os, re, shutil, subprocess, sys, tempfile
 
 TAG = sys.argv[1] if len(sys.argv) > 1 else "v571"
+# ⚠ STAGE 2 (v5.72): from v572 the in-law list is DATA on STATE_RULES rows and the set is {ME}, so t29 F-6
+#   and t35 D-8 are NON-EMPTY guards again, and a list change is a change to the app module, not to the
+#   helper's literal. Every expectation below that differs by leg reads V572.
+V572 = int(re.sub(r"[^0-9]", "", TAG) or 0) >= 572
+F6 = "F-6 [v5.72]" if V572 else "F-6 [v5.69]"
+D8 = "D-8 [v5.72]" if V572 else "D-8 [v5.69]"
+S1 = "S-1 [v5.72]" if V572 else "S-1:"
 QA = os.path.abspath(os.getcwd())
 RUN = os.path.dirname(QA)
 if not os.path.exists(os.path.join(QA, "tools", "state_sets.cjs")):
@@ -81,9 +88,16 @@ def bad_module(root, name, old, new):
     src = os.path.join(root, "qa", "tools", "state_sets.cjs")
     dst = os.path.join(root, "qa", "tools", name)
     shutil.copy(src, dst); edit(dst, old, new)
+    if old == ADD_WI[0]:
+        edit(dst, *ADD_WI_2)
 
-ADD_WI = ('const IN_LAW = Object.freeze(["CT", "NJ", "NM", "RI", "VA"]);',
-          'const IN_LAW = Object.freeze(["CT", "NJ", "NM", "RI", "VA", "WI"]);')
+# The sabotage goes through inLaw(), which every site reads on every leg (stage 2).
+ADD_WI = ("module.exports = { IN_LAW_PRE_V572, hasField, inLaw,",
+          "const _inLawTrue = inLaw;\nconst inLawBad = (R) => _inLawTrue(R).concat([\"WI\"]).sort();\n"
+          "module.exports = { IN_LAW_PRE_V572, hasField, inLaw: inLawBad,")
+# ⚠ `unconverted` and `proseSelected` close over the module's own inLaw, so the export swap alone would move
+#   nothing. They are re-bound to the bad list too.
+ADD_WI_2 = ("const unconverted = (RULES) =>\n  inLaw(RULES)", "const unconverted = (RULES) =>\n  (typeof inLawBad === 'function' ? inLawBad : inLaw)(RULES)")
 
 # ── C0 · silent: the untouched sandbox is green everywhere ─────────────────────────────────────
 root = sandbox()
@@ -94,25 +108,26 @@ shutil.rmtree(root)
 root = sandbox()
 bad_module(root, "state_sets_bad.cjs", *ADD_WI)
 edit(os.path.join(root, "qa", "t29_boundaries.mjs"), '"state_sets.cjs"', '"state_sets_bad.cjs"', 2)
-expect("C1", root, "t29", ["F-6 [v5.69]", "F-6a:", "F-6b:"])
+# v572: the set becomes {ME, WI} — still non-empty, so F-6 stays GREEN and only the exact-set checks fire.
+expect("C1", root, "t29", (["F-6a:", "F-6b:"] if V572 else ["F-6 [v5.69]", "F-6a:", "F-6b:"]), quiet=([F6] if V572 else []))
 expect("C1", root, "t35", [])     # same folder, pristine module: must stay green
-expect("C1", root, "sets", ["S-8a:"], quiet=["S-1:", "S-3:", "S-4:", "S-5:", "S-6:", "S-7:"])  # the bad copy IS a 2nd pattern copy
+expect("C1", root, "sets", ["S-8a:"], quiet=[S1, "S-3:", "S-4:", "S-5:", "S-6:", "S-7:"])  # the bad copy IS a 2nd pattern copy
 shutil.rmtree(root)
 
 # ── C2 · t35 ALONE reads the same bad list ─────────────────────────────────────────────────────
 root = sandbox()
 bad_module(root, "state_sets_bad.cjs", *ADD_WI)
 edit(os.path.join(root, "qa", "t35_state_populate.mjs"), '"state_sets.cjs"', '"state_sets_bad.cjs"', 2)
-expect("C2", root, "t35", ["D-7 [v5.67]", "D-8 [v5.69]"])
+expect("C2", root, "t35", (["D-7 [v5.67]"] if V572 else ["D-7 [v5.67]", "D-8 [v5.69]"]), quiet=([D8] if V572 else []))
 expect("C2", root, "t29", [])
-expect("C2", root, "sets", ["S-8a:"], quiet=["S-1:", "S-3:", "S-4:", "S-5:", "S-6:", "S-7:"])  # the bad copy IS a 2nd pattern copy
+expect("C2", root, "sets", ["S-8a:"], quiet=[S1, "S-3:", "S-4:", "S-5:", "S-6:", "S-7:"])  # the bad copy IS a 2nd pattern copy
 shutil.rmtree(root)
 
 # ── C3 · f6_probe ALONE reads the bad list → S-5 (probe vs t29) fires ──────────────────────────
 root = sandbox()
 bad_module(root, "state_sets_bad.cjs", *ADD_WI)
 edit(os.path.join(root, "qa", "tools", "f6_probe.cjs"), "'state_sets.cjs'", "'state_sets_bad.cjs'", 2)
-expect("C3", root, "sets", ["S-5:"], quiet=["S-1:", "S-4:", "S-6:"])
+expect("C3", root, "sets", ["S-5:"], quiet=[S1, "S-4:", "S-6:"])
 expect("C3", root, "t29", [])
 shutil.rmtree(root)
 
@@ -127,11 +142,26 @@ shutil.rmtree(root)
 # ⚠ Disclosed blind spot: t29/t35 stay GREEN here — with every in-law row conditioned, a SHRUNK list
 #   cannot move `unconverted()`. Only S-1 and the drift guard see it; that is what they are for.
 root = sandbox()
-edit(os.path.join(root, "qa", "tools", "state_sets.cjs"), '"NM", "RI", "VA"', '"NM", "VA"')
-expect("C5", root, "sets", ["S-1:", "S-4:"])
+if V572:
+    # the list is data: RI loses its field in the built module (the source f6_probe reads is untouched,
+    # and RI is conditioned, so S-5 cannot move — only S-1 and the drift guard see it, as before)
+    edit(os.path.join(root, "qa", f"app_{TAG}.mjs"), 'RI: { name: "Rhode Island", incomeLimitedInLaw: true,', 'RI: { name: "Rhode Island",')
+else:
+    edit(os.path.join(root, "qa", "tools", "state_sets.cjs"), '"NM", "RI", "VA"', '"NM", "VA"')
+expect("C5", root, "sets", [S1, "S-4:"])
 expect("C5", root, "t29", [])
 expect("C5", root, "t35", [])
 shutil.rmtree(root)
+
+# ── C5m · v572 ONLY: MAINE loses its field → the set empties → every non-empty guard fires ──────
+# This is D-8's control: a list that is empty only because Maine is missing is the vacuous green §B2 names.
+if V572:
+    root = sandbox()
+    edit(os.path.join(root, "qa", f"app_{TAG}.mjs"), 'ME: { name: "Maine", incomeLimitedInLaw: true,', 'ME: { name: "Maine",')
+    expect("C5m", root, "t29", [F6, "F-6a:", "F-6b:"])
+    expect("C5m", root, "t35", ["D-7 [v5.67]", D8])
+    expect("C5m", root, "sets", [S1, "S-5:"])   # the probe reads the untouched SOURCE, which still has ME
+    shutil.rmtree(root)
 
 # ── C6 · the predicate: revert to t35's old `=== undefined` reading → S-7 fires ────────────────
 root = sandbox()
@@ -146,7 +176,7 @@ root = sandbox()
 edit(os.path.join(root, "qa", "tools", "state_sets.cjs"),
      "const NOTE_MATCHER = /income[- ]limited|income limit/i;", "const NOTE_MATCHER = /(?!)/;")
 expect("C7", root, "t29", [])
-expect("C7", root, "t35", ["D-7a", "D-7b", "D-7c", "D-7d"], quiet=["D-8 [v5.69]", "D-7 [v5.67]"])
+expect("C7", root, "t35", ["D-7a", "D-7b", "D-7c", "D-7d"], quiet=[D8, "D-7 [v5.67]"])
 expect("C7", root, "t10", ["[BY DECISION v5.59] RI's note"], quiet=["[BY DECISION v5.59] WI's note"])
 # S-8a counts COPIES of the module's own pattern, so a changed-but-single pattern is still one copy.
 # The pattern's CONTENT is guarded by the six pins above, which is where C7 is expected to fire.
@@ -174,7 +204,7 @@ for cid, old, new, fires in REWORD:
     if not any(l == "t35" for l, _ in fires):
         expect(cid, root, "t35", [])
     else:  # the pin fires, but D-7/D-8 (the selectors) must not
-        expect(cid, root, "t35", [f for l, fs in fires if l == "t35" for f in fs], quiet=["D-7 [v5.67]", "D-8 [v5.69]"])
+        expect(cid, root, "t35", [f for l, fs in fires if l == "t35" for f in fs], quiet=["D-7 [v5.67]", D8])
     shutil.rmtree(root)
 
 AFTER = {p: md5(p) for p in WATCH}
