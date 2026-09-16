@@ -1,5 +1,74 @@
 # Changelog
 
+## v5.72 — a bad backup can no longer damage the plan you have; Maine joins the income-limited list
+
+Source `2b88134b4b1f014364262d479fb4e8a3` · built `index.html` `4f035dc5644d91476888a9fb9fdc1f5b` · built from v5.71
+`9e79b92f9eb91e86489cb6b80caa33c3`. `src/index.html` and `src/main.jsx` are unchanged. The v5.71 build was first
+rebuilt from its own source and reproduced `e1bd283b638cdab74941804708987bb2` byte-identically, so the scaffold
+is complete. **No engine, tax or state figure changes for any plan entered through the app's own forms**;
+`METHODOLOGY.md` gains a §11 paragraph because a *restored* plan carrying an impossible value can now come out
+differently (below). MC parity stays 10/10.
+
+**Suite: 3,954 app checks, 0 failing, 0 DIED, across both legs** — 37 app suites plus MC parity 10/10; tooling `t21` 56,
+`domdiff` 32 and `sets` 11 + 12 counted separately (GRAND 4,065), run from the packaged copies. The app total rises
+from 3,647 by **+289** (`t38`, 83 + 206), **+17** and **+1** because the prior leg is now v5.71 (`t37` 43 not 26, `t5`
+59 not 58); every other suite is unchanged on both legs. `smoke_built` **22 passed, 0
+failed** on the built artifact. Negative controls: `controls_v572_import.py` **14 of 14 fired, plus V1** (a render error with the boundary present still turns
+`t4` and `t9` red), watched files unchanged, and
+`controls_state_sets.py v572` **41 of 41**. Per-suite breakdown: `TESTING.md`.
+
+### What changed, and why
+
+- **A malformed backup no longer replaces your plan before anything checks it** (audit finding A-4). Through
+  v5.71 the load routine installed the incoming plan first and threw part-way through its fixes, so memory held a
+  half-applied plan. It now checks the plan's shape first, and if loading still fails it puts back everything it
+  touched. This covers all eight load paths, **page load included** — where a saved plan the app could not use
+  used to leave the bad plan in memory and let *Start Fresh* overwrite the saved copy without asking. Now the
+  landing screen says why it is showing, and Start Fresh asks.
+- **Both restore paths say the same plain thing when a file is refused**: *"That file couldn't be restored. Your
+  saved plan was not changed."* The landing screen used to show a raw engine error; My Data showed nothing,
+  because the import was not awaited. **A refused file no longer costs you unsaved My Data edits** — they used to
+  be discarded before the file was even read.
+- **A skin name such as `constructor` no longer blanks the page** (A-5). The three places a skin name is accepted
+  now require a real skin.
+- **A rendering failure shows a message and a Reload button instead of a blank page.** It offers nothing that
+  deletes data.
+- **Backups are bounded** (A-2): more than 500 rows in any list, or more than 5 MB, and the file is refused whole
+  — never cut down. The caps were chosen by measurement (`SCOPE_IMPORT_HARDENING.md` §3a).
+- **Out-of-range values are pulled into range and listed on My Data**: Social Security claim age (62–70),
+  income-stream years, and birth dates. **The v5.9.1 birth-year limit had never worked** — it read a number out of a
+  field the app stores as text — so a backup could put birth year 9999 into the timeline. The earlier retirement-year
+  and life-expectancy limits were silent; they are now reported too.
+- **The Field Manual says all of this up front**, in a new note, *"What a restore accepts."*
+- **Maine is on the suite's income-limited-in-law list** (`SCOPE_STATE_SET_SELECTOR` stage 2). Six `STATE_RULES`
+  rows now carry `incomeLimitedInLaw`; the suite reads its list from that data. Nothing in the app reads the field,
+  so no figure moves. Maine's phaseout is still not modelled, as its note and METHODOLOGY already say; `t29` F-6 and
+  `t35` D-8 are non-empty guards again until it is.
+- **Two scopes retire**: `SCOPE_IMPORT_HARDENING.md` and `SCOPE_STATE_SET_SELECTOR.md`, both with build records,
+  and both leave `package_check`'s OPEN allowlist in this package.
+
+### Found and fixed in the build itself
+
+- **The suite runner's total read green while a suite was dead.** `runsuite.sh` printed `DIED` for the suite but
+  tallied it as 0 passed / 0 failed, so the GRAND line said "0 failed". Found when `t33` died on v572 (below). A death
+  now counts as a failure and the GRAND line names it; a negative control shows the old form reading green.
+- **`t33`'s version-keyed `PINS` registry was missed for the third time** (v5.66, v5.70, v5.72). `vercensus.cjs`
+  and this release's bump transform both see only string-literal tags, and `PINS` uses identifier keys. The suite
+  failed closed, the entry was added by hand, and an AST sweep found no other registry of that shape. ⚠ **Teaching
+  `vercensus.cjs` to count identifier-keyed registries is not done here** — it is owed.
+- **A first v5.72 candidate was built and quoted before the Field Manual note was added** (source `8a75a392…`,
+  built `740d3e7f…`). It was superseded before anything shipped and must not be confused with this build.
+
+### Limitations and approximations, stated plainly
+
+- The caps and timings were measured in jsdom, not a browser.
+- The test suite cannot observe the Reload button's navigation; it asserts only that pressing it changes no data.
+- The income-limited list is still set **by hand** from the statutes; the phrase-based drift guard cannot see a note
+  that describes an income limit in other words, which is how Maine was missed.
+- Montana's 65+ subtraction may be indexed ($5,660 vs the app's $5,500 for 2025) — an **unverified** lead, filed in
+  `FlawsToFix-v5_69-Phase1.md`, not acted on.
+- `package_check` G-1 does not recognise a `handover/` folder; the session-1 handover recorded that as a tooling gap.
+
 ## ops 2026-09-15 (third) — handover: import hardening session 1, built as a workbench; the birth-year clamp was never live
 
 KIND: handover. Leaves **v5.71** current — source `9e79b92f9eb91e86489cb6b80caa33c3`, built `index.html`
