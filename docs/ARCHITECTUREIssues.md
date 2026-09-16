@@ -826,6 +826,13 @@ pool in-horizon, and outside the full-exhaustion regime `t20` E2's exact invaria
 future fixtures; the trap itself (silent fall-through in `buildPlanTimeline`) is unchanged and
 still only a fixture hazard, not an app defect.
 
+**Update, v5.72 (2026-09-15).** The fall-through is no longer SILENT on the load path. `applyLoadedData`
+now removes a birth date the timeline's parser cannot read — an object-shaped one included — and lists it
+on My Data (`SCOPE_IMPORT_HARDENING` D-10, `t38` group Y). The fallback itself is unchanged, so no figure
+moves. This does not reach a fixture that sets `PORTFOLIO` directly and calls an engine without going
+through `applyLoadedData`, so the §C2 sweep rule still stands. The same work found the v5.9.1 birth-year
+clamp had never fired, because it read `.year` off a string; it is now string-aware.
+
 ## E-18 · Dual-homed files drift, and the fourth recorded block was nearly fatal to a release
 
 Project knowledge and the repo each hold copies of the suite; the pool is flat, add-only, and a

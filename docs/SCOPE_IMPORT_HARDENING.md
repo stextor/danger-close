@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **OPEN — SESSION 1 BUILT AS A WORKBENCH 2026-09-15 (§9), NOT SHIPPED; SESSION 2 OWED.** H-1…H-5 and the stream/claim-age half of H-6 are built, with `t38` and one negative control per fix, **without a version bump** (D-6). ⚠ **One NEW decision is open: D-10 (§7a)** — the birth-year half of H-6 rests on a premise the build found false. On `package_check`'s I-2 allowlist |
+| Status | ☑ **RETIRED — FULFILLED AT v5.72, 2026-09-15.** §10 is the build record. Every decision is taken, D-10 included (§7a). Carried forward, not lost: Maine's populate and Montana's lead are filed in `FlawsToFix-v5_69-Phase1.md`'s header. *(Superseded status, kept:)* **OPEN — SESSION 1 BUILT AS A WORKBENCH 2026-09-15 (§9), NOT SHIPPED; SESSION 2 OWED.** H-1…H-5 and the stream/claim-age half of H-6 are built, with `t38` and one negative control per fix, **without a version bump** (D-6). ⚠ **One NEW decision is open: D-10 (§7a)** — the birth-year half of H-6 rests on a premise the build found false. On `package_check`'s I-2 allowlist |
 | Premise verified against | **v5.71 source `9e79b92f9eb91e86489cb6b80caa33c3`, repo `1cbf23b`** — every figure below is command output from 2026-09-15 |
 | Owed by | `FlawsToFix-v5_69-Phase1.md` (A-2, A-4, A-5, recommended there as one later import-hardening scope) and `SCOPE_STATE_SET_SELECTOR.md` §7.6 (stage 2 waits for a release that already bumps the version) |
 | Target | **v5.72** — an app release: source change, version bump, rebuild, `smoke_built` |
@@ -208,7 +208,9 @@ Two of them still leave work for the build:
 
 ## 7a · A decision the build opened (2026-09-15, session 1)
 
-| # | Question | Options | Recommendation — **OPEN** |
+**D-10 DECIDED 2026-09-15: (a)**, as recommended — the maintainer took every recommendation. Built at v5.72 (§10).
+
+| # | Question | Options | Recommendation — **DECIDED (a)** |
 |---|---|---|---|
 | **D-10** | The v5.9.1 birth-year clamp reads `PORTFOLIO.dobA.year`, but by `census.cjs dobA` the field is only ever **written as a string** (wizard `"YYYY-06"`, My Data `"YYYY-MM-DD"`), so the clamp **can never fire** — and H-6's "delete a non-numeric birth year, like its neighbours" would add an `else` to dead code. `probe_import_hostile`'s `years-absurd` never tested it either (it built `dobA` with `Object.assign({}, <string>, …)`). **Measured on v5.71:** `"9999-01-01"` reaches the timeline as year 9999 (Social Security in 10066); `"9999-01-01"` and `"0001-01-01"` import and render with no hang and no error | (a) clamp the **year inside the string** to 1900–this year, and delete a string `_ymd` cannot parse; (b) leave it and record the limitation; (c) delete the dead clamp only | **(a).** Deleting an unparseable string moves no figure (the timeline already falls back when `_ymd` returns null); the year clamp moves figures only for impossible years, and is reported through the same D-5 notice. **Not built** — the STOP rule forbids adapting a premise silently. `t38` Y-1/Y-2 pin the current behaviour on both legs and must be re-gated, not deleted, when this is decided |
 
@@ -247,3 +249,28 @@ runner line for `t38`.
   `importErr=null` for a correct v5.72 rejection; it is updated.
 - **A harness defect caught while writing `t38`:** an `uncaughtException` handler that only recorded errors
   turned a crashed suite into a silent 0/0 (§B2). `t38` now prints DIED and exits non-zero.
+
+## 10 · Build record — v5.72 (session 2, 2026-09-15)
+
+Built from the session-1 workbench (§9). Decisions taken in this session: **D-10 (a)**, and the H-2 draft
+behaviour (an unsaved My Data draft survives a rejected import) **confirmed**; the new user-facing wording
+was approved as written.
+
+- **D-10.** `dobA`/`dobB` are read with the timeline's own pattern: unreadable → removed and reported;
+  year outside 1900–this year → rewritten `YYYY-MM[-DD]` with the year clamped and reported; in range →
+  untouched. `t38` group Y re-gated (not deleted); control **C11** fires.
+- **S-2.** `incomeLimitedInLaw: true` on CT, ME, NJ, NM, RI, VA (census: six object keys, **no reader in
+  the app**). `state_sets.cjs` derives `inLaw()` from it and keeps the five only as `IN_LAW_PRE_V572`, chosen by
+  data; `state_sets_check` S-1b asserts the field is present from v572, so that fallback cannot be silent.
+  `t29` F-6 and `t35` D-8 **re-invert to non-empty at v572** (D-8); `controls_state_sets.py` is tag-aware and
+  gains **C5m** (Maine loses its field → every non-empty guard fires).
+- **V.** Four in-app sites by AST. `vercensus` priced the bump at **87** (21 files, 22 ladder entries, 65
+  gated); the AST transform's counts matched exactly — 62 `||` gates, 2 version-string ternaries, 1 manual
+  (`t37` `POST_FIX`) — and each was judged to carry: v5.72 changes no behaviour any of them asserts. The full
+  suite on v572 is the evidence. `t38` registered in `runsuite.sh` on both legs.
+- **In-app disclosure.** The Field Manual gains *"What a restore accepts."* — the caps, rejection rather than
+  truncation, and every clamp range. ⚠ **This was added after a first v5.72 candidate had been built and
+  quoted** (source `8a75a392…`, built `740d3e7f…`); that candidate was superseded before anything shipped.
+- **METHODOLOGY** gains *Input bounds on every load (v5.72)* in §11: which figures can move (only a plan that
+  carried an impossible value) and why.
+

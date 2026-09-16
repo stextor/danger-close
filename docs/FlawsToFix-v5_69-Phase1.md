@@ -10,6 +10,7 @@
 | Date | 2026-09-11 (two sittings, one conversation) |
 | Governing document | `SCOPE_STANDING_AUDIT.md` §§A, B and its standing methodology requirements |
 | Previous Phase 1 | `FlawsToFix-v5_10_1-Phase1.md` (v5.10.1, 2026-08-07) — annotated, not rewritten |
+| **Post-audit update, v5.72 (2026-09-15)** | **A-2, A-4 and A-5 are FIXED at v5.72** (`SCOPE_IMPORT_HARDENING.md`, pinned by `t38` on both legs). The findings below are left as written. **Filed here, from that scope's D-9 — an UNVERIFIED lead, not a finding:** a secondary source (a tax-software blog) says Montana's 65+ subtraction (MCA 15-30-2120(3)(g)) is inflation-indexed to **$5,660** for 2025, while the app carries **$5,500**. Not read against a primary source; it would move figures, so it belongs in a modelling release with METHODOLOGY. **Also open, and already disclosed in METHODOLOGY:** Maine's pension-deduction phaseout (36 M.R.S. §5122(2)(M-3)) is not modelled — Maine is on the in-law list from v5.72 and needs its own populate scope |
 | Kind | Audit — **findings only. No source change, no fix, no version bump.** |
 
 Every count, hash, line number and runtime result below was printed by a command in this audit's

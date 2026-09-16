@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **OPEN — STAGE 1 BUILT 2026-09-15 (ops package, §8); STAGE 2 STILL OWED** (the `incomeLimitedInLaw` field, folded into the next release already bumping the version — §7.6). Written 2026-09-07; premise re-measured and amended 2026-09-14 — §7 is authoritative over §§1, 2, 4 and 6. Discharges the second half of **D-NM-1 (c)** once stage 2 lands |
+| Status | ☑ **RETIRED — FULFILLED AT v5.72, 2026-09-15** (stage 2 built in `SCOPE_IMPORT_HARDENING.md` §10 as S-2; Maine joined the list per its D-8). *(Superseded status, kept:)* **OPEN — STAGE 1 BUILT 2026-09-15 (ops package, §8); STAGE 2 STILL OWED** (the `incomeLimitedInLaw` field, folded into the next release already bumping the version — §7.6). Written 2026-09-07; premise re-measured and amended 2026-09-14 — §7 is authoritative over §§1, 2, 4 and 6. Discharges the second half of **D-NM-1 (c)** once stage 2 lands |
 | Premise verified against | **v5.71 source `9e79b92f9eb91e86489cb6b80caa33c3`, repo `c3d1cd4`** (re-measured 2026-09-14). *(Superseded: v5.66 source `31b43e094307ef5f996570c090478e13`, repo `7fc8b58`.)* |
 | Owed by | `STOP-REPORT-v5_66-nm-session2.md` §4 and `STOP-REPORT-v5_66-NM-note-guarded-set.md` §3 |
 | Direction | No user-visible figure moves. This is a **test-infrastructure** change |
@@ -422,3 +422,14 @@ Revenue Services' summary of 2025 enacted legislation.
 
 **Stage 2 is scoped in `SCOPE_IMPORT_HARDENING.md` §2–§3 (S-2)**, for the v5.72 release that bumps the version
 for the import fixes. This scope stays OPEN until that release ships.
+
+## 10 · Stage 2 — built at v5.72 (2026-09-15). This scope is RETIRED.
+
+Stage 2 shipped inside `SCOPE_IMPORT_HARDENING.md` (S-2; its §10 is the build record). Membership is now data
+(`incomeLimitedInLaw` on six `STATE_RULES` rows, Maine included), `state_sets.cjs` derives the list from it, and
+the hand-typed copy survives only as `state_sets_check` S-1's literal and as the frozen fallback for legs before
+v5.72. **§6's decisions:** D-S1's field name was used as recommended; D-S2's standalone release was overridden by
+the §7 amendment and `SCOPE_IMPORT_HARDENING` D-7 (fold into the next bump). ⚠ **The residual risk stands and is
+restated, not closed:** the field is still set by hand from the statutes, and the phrase-based drift guard cannot
+see a note that describes an income limit in other words — which is exactly how Maine was missed.
+
