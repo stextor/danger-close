@@ -22,10 +22,14 @@ tally () {  # $1 label, $2... command
   # as green if you only count failures (OPERATIONS §B2, learned three times). Say DIED.
   if [ "$p" = "0" ] && [ "$f" = "0" ] && [ $rc -ne 0 ]; then
     printf "%-22s DIED (rc=%s) — see %s\n" "$label" "$rc" "$TMP/$label.log"
+    # ⚠ v5.72: a death is COUNTED as a failure. Until then it was tallied "0 0", so the GRAND line below read
+    #   "0 failed" while a suite lay dead above it — found when t33-v572 died on a missing PINS entry and the
+    #   total still read green. The per-line DIED was right; the one line people read was not.
+    echo "0 1 DIED" >> "$TMP/tally.txt"
   else
     printf "%-22s %5s passed %5s failed\n" "$label" "$p" "$f"
+    echo "$p $f" >> "$TMP/tally.txt"
   fi
-  echo "$p $f" >> "$TMP/tally.txt"
 }
 : > "$TMP/tally.txt"
 echo "== BOTH LEGS =="
@@ -91,6 +95,11 @@ tally "t36-$CUR"   node t36_ai_route.mjs "$CUR"
 # carries this release's EXTINCTION INVARIANT — after Clear All Data the draft key is gone.
 tally "t37-$PRIOR" node t37_mydata_draft.mjs "$PRIOR"
 tally "t37-$CUR"   node t37_mydata_draft.mjs "$CUR"
+
+# t38 (v5.72) runs on BOTH legs: the prior leg pins the import defects (A-2, A-4, A-5) and the inert birth-year
+# clamp; the current leg asserts each extinct. It is in the APP total. About two minutes per leg.
+tally "t38-$PRIOR" node t38_import_hardening.mjs "$PRIOR"
+tally "t38-$CUR"   node t38_import_hardening.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
@@ -99,5 +108,5 @@ tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
 tally "sets-$PRIOR" node state_sets_check.mjs "$PRIOR"
 tally "sets-$CUR"   node state_sets_check.mjs "$CUR"
 echo
-awk '{p+=$1; f+=$2} END {printf "GRAND (incl tooling): %d passed, %d failed\n", p, f}' "$TMP/tally.txt"
+awk '{p+=$1; f+=$2; if ($3=="DIED") d++} END {printf "GRAND (incl tooling): %d passed, %d failed%s\n", p, f, (d ? sprintf(" — %d suite(s) DIED, each counted as one failure", d) : "")}' "$TMP/tally.txt"
 echo "logs: $TMP"

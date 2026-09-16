@@ -40,7 +40,7 @@ const VER = process.argv[2] || "v563";
 // pre-fix like v5.62; only the two ABSOLUTE pins differ, because v5.62 raised state tax in the
 // Roth outputs (SCOPE_ENGINE_STATE_PARITY). Everything else here is a DELTA between two streams
 // on one build and is therefore version-independent by construction.
-const KNOWN_VERSIONS = ["v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571"];
+const KNOWN_VERSIONS = ["v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is not registered in this suite.");
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -48,7 +48,7 @@ if (!KNOWN_VERSIONS.includes(VER)) {
   process.exit(1);
 }
 // The fix landed at v5.63. Every later tag is post-fix and must be added here as well.
-const POST_FIX = VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571";
+const POST_FIX = VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572";
 
 // The only two build-specific ABSOLUTE figures in this suite. Kept in one table so a tag added to
 // KNOWN_VERSIONS without its pins fails CLOSED rather than reading someone else's numbers — the
@@ -105,6 +105,12 @@ const PINS = {
   // KNOWN_VERSIONS arrays and cannot see this identifier-keyed registry. It was missed at v5.66
   // and again at v5.70; the suite failed closed both times, which is the only reason it was cheap.
   v571: { noStream: 174883, acaConv: 1203137 },
+  // v5.72 hardens import (H-1…H-6), adds a Field Manual note and marks six STATE_RULES rows
+  // `incomeLimitedInLaw` — a field nothing in the app reads. No engine, tax or state figure moves, so
+  // v5.71's values carry. ⚠ MISSED A THIRD TIME: the v5.72 AST bump transform, like vercensus, sees only
+  // string-literal tags, and this registry's keys are identifiers. The suite failed closed (DIED) on the
+  // first v5.72 run, which is the only reason it was cheap. Added by hand.
+  v572: { noStream: 174883, acaConv: 1203137 },
 };
 if (!PINS[VER]) {
   console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is registered but has no PINS entry.");

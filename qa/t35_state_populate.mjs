@@ -33,7 +33,7 @@ let _s = 42; Math.random = () => { _s = (_s * 1103515245 + 12345) & 0x7fffffff; 
 
 const VER = process.argv[2] || "v565";
 const _vt = Number(String(VER).replace(/[^0-9]/g, "")) || 0;
-const KNOWN_VERSIONS = ["v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571"];
+const KNOWN_VERSIONS = ["v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -309,7 +309,7 @@ const ctTax = (args) => ST({
   // ⚠ THE SET SHRINKS BY ONE PER CONVERSION AND MUST REACH ZERO. When the last of NJ, RI and VA
   // converts, D-8's non-empty guard below INVERTS and both must be gated together in that release.
   if (_vt >= 566) {
-    const _expOff = _vt >= 569 ? "" : _vt >= 568 ? "RI" : _vt >= 567 ? "RI,VA" : "NJ,RI,VA";
+    const _expOff = _vt >= 572 ? "ME" : _vt >= 569 ? "" : _vt >= 568 ? "RI" : _vt >= 567 ? "RI,VA" : "NJ,RI,VA";
     T(`D-7 [v5.67]: the income-limited-but-unconditional set is exactly ${_expOff || "EMPTY"} — ${_expOff ? _expOff.split(",").length : 0} states still to convert (found: ${offenders.sort().join(",") || "none"})`,
       offenders.sort().join(",") === _expOff);
     // ⚠ EXTINCTION INVARIANT: NM must be OUT of this set for the right reason — because it carries
@@ -369,7 +369,12 @@ const ctTax = (args) => ST({
   // and the guard against the set going quiet for the wrong reason (OPERATIONS §B2's empty-set trap)
   // ⚠ v5.69: INVERTED, not weakened (SCOPE_RI_POPULATE D-RI-4). Rhode Island converted, so the set is EMPTY by
   //   design; D-7a..D-7d pin that each state left by CONVERTING, which is what keeps an empty set honest.
-  if (_vt >= 569)
+  // ⚠ v5.72: RE-INVERTED with t29 F-6 (SCOPE_IMPORT_HARDENING D-8) — Maine joined the in-law list as data and
+  //   is not conditioned yet, so the set is {ME}. The non-empty guard is its truth again.
+  if (_vt >= 572)
+    T("D-8 [v5.72]: that set is non-empty — Maine is income-limited in law and not yet conditioned; an empty set here would mean Maine was dropped or populated without this gate moving",
+      offenders.length > 0);
+  else if (_vt >= 569)
     T("D-8 [v5.69]: that set is EMPTY — all five income-limited statutes carry `exclTest`, and each left by converting (D-7a..D-7d)",
       offenders.length === 0);
   else

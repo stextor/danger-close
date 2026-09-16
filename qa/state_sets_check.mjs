@@ -18,9 +18,9 @@
 //   5  a negative control per converted site ........... tools/controls_state_sets.py
 //   6  the six pins still fire on a reworded note ...... S-8 (structural) + controls_state_sets.py (behaviour)
 //
-// NO VERSION LADDER, ON PURPOSE. Nothing below differs by leg, so a KNOWN_VERSIONS registry would be pure
-// bump cost (vercensus prices a bump at 86 judgement points already). The floor is v5.64, the first build
-// with `exclTest`. If a future leg makes any check here leg-dependent, add the ladder in that release.
+// ONE NUMERIC GATE, ADDED AT v5.72 (stage 2). Until then nothing here differed by leg. From v572 the list is
+// DATA (`incomeLimitedInLaw` on STATE_RULES rows) and has six members (Maine joined); before it, it is the
+// frozen hand list of five. S-1 is the only leg-dependent check. The floor is still v5.64 (`exclTest`).
 import "./env_dom.mjs";
 import { existsSync, readFileSync, readdirSync } from "fs";
 import { join, dirname } from "path";
@@ -59,12 +59,24 @@ console.log(`     sets:  ${SETS_PATH}\n     probe: ${PROBE}\n     src:   ${SRC}\
 // ── S-1..S-3 · the list itself ────────────────────────────────────────────────────────────────
 // Hand-typed from docs/FINDINGS-v5_63-state-statutes.md (§§2–6: NM, CT, NJ, VA, RI). A literal here is
 // deliberate: this is the one place a second copy is the assertion, not the defect.
-EQ("S-1: the in-law list is exactly the five statutes FINDINGS-v5_63 reads", SETS.IN_LAW.join(","), "CT,NJ,NM,RI,VA");
-const absent = SETS.IN_LAW.filter(c => !Object.prototype.hasOwnProperty.call(R, c));
+const IN_LAW = SETS.inLaw(R);
+if (_v >= 572) {
+  // Hand-typed from the statutes: FINDINGS-v5_63 §§2–6 (CT, NJ, NM, RI, VA) and 36 M.R.S. §5122(2)(M-3) (ME,
+  // from TY2025 — SCOPE_IMPORT_HARDENING §2). The literal is the assertion; the app's data must equal it.
+  T("S-1b [v5.72]: the list is DATA on this leg — STATE_RULES rows carry `incomeLimitedInLaw` (a leg that lost every field would silently fall back to the five)",
+    SETS.hasField(R));
+  EQ("S-1 [v5.72]: the in-law list read from STATE_RULES is exactly the six statutes (CT, ME, NJ, NM, RI, VA)", IN_LAW.join(","), "CT,ME,NJ,NM,RI,VA");
+  const bad = Object.keys(R).filter(c => Object.prototype.hasOwnProperty.call(R[c], "incomeLimitedInLaw") && R[c].incomeLimitedInLaw !== true);
+  T("S-1c [v5.72]: the field is only ever `true` — a `false` or a string would read as out, silently", bad.length === 0, bad.join(","));
+} else {
+  T("S-1b [pre-v5.72]: no row carries `incomeLimitedInLaw` on this leg, so the frozen hand list applies", !SETS.hasField(R));
+  EQ("S-1: the in-law list is exactly the five statutes FINDINGS-v5_63 reads", IN_LAW.join(","), "CT,NJ,NM,RI,VA");
+}
+const absent = IN_LAW.filter(c => !Object.prototype.hasOwnProperty.call(R, c));
 T("S-2: every in-law state is a STATE_RULES key on this leg \u2014 a typo would make it silently unconvertible",
   absent.length === 0, absent.join(","));
 T("S-3: `unconverted()` can only name in-law states \u2014 t29's `limited` and t35's `offenders` are derived from the list",
-  SETS.unconverted(R).every(c => SETS.IN_LAW.includes(c)), SETS.unconverted(R).join(","));
+  SETS.unconverted(R).every(c => IN_LAW.includes(c)), SETS.unconverted(R).join(","));
 
 // ── S-4 · THE DRIFT GUARD (§7.6) ─────────────────────────────────────────────────────────────
 // The residual risk of stage 1 is a hand-maintained list. A row OUTSIDE the list that the old prose

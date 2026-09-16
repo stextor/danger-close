@@ -25,9 +25,8 @@
 //   `FileReader` to Node's global — so without the line below a VALID backup "fails" and every
 //   rejection assertion passes on a broken importer. Group P (the positive control) is what catches it.
 //
-// ⚠ D-10 IS OPEN. The v5.9.1 birth-year clamp reads `dobA.year`, but dobA is stored as a STRING, so the
-//   clamp can never fire. Group Y pins that on BOTH legs as a known defect; it must be re-gated when
-//   D-10 is decided, not deleted.
+// ⚠ D-10 (decided 2026-09-15). The v5.9.1 birth-year clamp read `dobA.year`, but dobA is a STRING, so it
+//   never fired. Group Y pins that on the prior leg and asserts the string-aware clamp from v5.72.
 import { window } from "./env_dom.mjs";
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
@@ -238,12 +237,44 @@ if (POST_FIX) {
   }
 }
 
-// ═══ Y · BIRTH YEAR — D-10 OPEN. Pinned on BOTH legs; re-gate when D-10 is decided. ═══════════
+// ═══ Y · BIRTH DATE (D-10, decided 2026-09-15 — (a)) ══════════════════════════════════════════
+// dobA/dobB are STRINGS. Through v5.71 the v5.9.1 clamp read `.year` off them and never fired; the prior
+// leg pins that. From v5.72 an unreadable date is removed and an out-of-range year is clamped, and both
+// are reported.
 {
-  const p = good(); p.dobA = "9999-01-01";
-  G.applyLoadedData({ portfolio: p });
-  T("Y-1 [KNOWN DEFECT — D-10 open, both legs]: a birth date of 9999-01-01 reaches the timeline unclamped", G.PLAN_TIMELINE().dobA.year === 9999, J(G.PLAN_TIMELINE().dobA));
-  T("Y-2 [PIN, both legs]: the stored birth date is a STRING, which is why the .year clamp cannot fire", typeof G.PORTFOLIO().dobA === "string");
+  const thisYr = new Date().getFullYear();
+  const run = (v, key = "dobA") => { const p = good(); p[key] = v; G.applyLoadedData({ portfolio: p }); return G.PORTFOLIO(); };
+  if (!POST_FIX) {
+    run("9999-01-01");
+    T("Y-1 [KNOWN DEFECT pre-v5.72]: a birth date of 9999-01-01 reaches the timeline unclamped", G.PLAN_TIMELINE().dobA.year === 9999, J(G.PLAN_TIMELINE().dobA));
+    T("Y-2 [PIN v571]: the stored birth date is a STRING, which is why the .year clamp cannot fire", typeof G.PORTFOLIO().dobA === "string");
+  } else {
+    const cases = [
+      // [label, input, key, expected stored value (undefined = removed), expected note regex or null]
+      ["9999-01-01 clamps to this year", "9999-01-01", "dobA", `${thisYr}-01-01`, /Birth year \(first person\): 9999 → /],
+      ["0001-01-01 clamps to 1900", "0001-01-01", "dobA", "1900-01-01", /Birth year \(first person\): 1 → 1900/],
+      ["1899-06 (wizard shape) clamps to 1900-06", "1899-06", "dobA", "1900-06", /1899 → 1900/],
+      ["99999-01-01 (the parser reads 9999) clamps", "99999-01-01", "dobA", `${thisYr}-01-01`, /9999 → /],
+      ["1900-01-01 (at the bound) is untouched", "1900-01-01", "dobA", "1900-01-01", null],
+      [`${thisYr}-12-31 (at the bound) is untouched`, `${thisYr}-12-31`, "dobA", `${thisYr}-12-31`, null],
+      ["1963-09-01 is untouched", "1963-09-01", "dobA", "1963-09-01", null],
+      ["1963-06 (wizard shape) is untouched", "1963-06", "dobA", "1963-06", null],
+      ["'abc' is removed", "abc", "dobA", undefined, /Birth date \(first person\): "abc" could not be read and was removed/],
+      ["the old object shape is removed", { year: "abc" }, "dobA", undefined, /Birth date \(first person\).*could not be read/],
+      ["second person: 9999-03-01 clamps", "9999-03-01", "dobB", `${thisYr}-03-01`, /Birth year \(second person\)/],
+    ];
+    for (const [label, input, key, want, note] of cases) {
+      const P = run(input, key);
+      const got = P[key];
+      const notes = P._importAdjusted;
+      T(`Y-1 ${label}: stored ${J(want)}`, got === want, `got ${J(got)}`);
+      T(`Y-2 ${label}: ${note ? "reported" : "not reported"}`, note ? (Array.isArray(notes) && notes.length === 1 && note.test(notes[0])) : notes === null, J(notes));
+    }
+    run("9999-01-01");
+    T("Y-3: the timeline no longer sees year 9999", G.PLAN_TIMELINE().dobA.year === thisYr, J(G.PLAN_TIMELINE().dobA));
+    const bd = run("abc");
+    T("Y-4: an unreadable date falls back exactly as v5.71 did (the prompt, or the default)", bd.dobA === undefined && G.PLAN_TIMELINE().dobA && Number.isFinite(G.PLAN_TIMELINE().dobA.year));
+  }
 }
 
 // ═══ N · BOUNDS (H-5 / D-4), unit level — every list at the cap and one over ═════════════════
