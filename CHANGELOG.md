@@ -1,5 +1,37 @@
 # Changelog
 
+## ops 2026-09-15 (fifth) — standing audit Phase 2 (Section C) at v5.73: findings, and the probes that reproduce them
+
+KIND: ops. **v5.73 stays current** — source `3bf1e15f1b28659aae9a78e3186d2ae8`, built `index.html`
+`345ccbceb58bf74f9fbdde5db0646d1d`. No app source changes, no version bump. **Findings only — nothing is fixed here.**
+
+**What this adds.** `docs/FlawsToFix-v5_73-Phase2.md`, the numerical-validation phase of `SCOPE_STANDING_AUDIT.md`, run
+against v5.73 across six working sessions; and `qa/tools/audit_phase2_v573/`, the 18 probes every executed figure in it
+came from. The probes assert nothing and are counted in no total; each was rerun from its shipped location and
+reproduces the document.
+
+**What it found** (details, figures and causes in the document's §0 and §2):
+- **C-8 (high):** the Taxes tab never taxes spending withdrawals from Traditional accounts, and runs RMDs on a balance
+  that was never drawn — on the shipped example household it shows $0 federal tax in 2032–2038 while the Withdrawal plan
+  draws about $238,000 of Traditional money, and its lifetime RMDs are $1.63M against the plan's $1.02M. The tab
+  describes itself as "your projected tax life as-is".
+- **Medium:** C-3 (a surviving spouse under 65 gets the 65+ deductions through the deceased spouse's age) and C-6 (unused
+  standard deduction is not applied against qualified dividends and capital gains).
+- **Low to medium:** C-4 (the Roth comparator keeps the §86 error v5.45 fixed elsewhere), C-7 (a single household is paid
+  spouse B's Social Security in the Withdrawal plan), C-10 (a Roth IRA under Other accounts realizes taxable gains).
+- **Low:** C-1 (IRMAA top-tier comparator), C-5 (the Withdrawal tab's bracket column), C-9 (annuity RMD exclusion drifts),
+  C-11 (the break-even card mislabels its measure), D-1 (METHODOLOGY's §86 passage contradicts itself).
+- C-2 (IRMAA surcharges rounded to $10) is a documented limitation, not a defect.
+
+**What passed.** Every statutory constant against its primary source; every federal bracket, LTCG, NIIT and §86 border in
+the engines that compute tax; the senior bonus; IRMAA tiers and the top-tier freeze; indexation; first-spouse death;
+the state module's conditioned branches. The document's §4 lists what was **not** covered.
+
+**Limitations.** C-8's lifetime effect is estimated, not computed to the dollar. Several probes needed correcting during
+the audit (a reference that omitted an RMD; a probe that did not maintain the household total; a non-discriminating
+case) — each is recorded in the document, and in every case the engine was right. The standalone top-five summary the
+scope requires is written only after Phase 4.
+
 ## v5.73 — Maine's pension deduction phases out as the law says; Montana taxes Social Security as it now does
 
 Source `3bf1e15f1b28659aae9a78e3186d2ae8` · built `index.html` `345ccbceb58bf74f9fbdde5db0646d1d` · built from v5.72

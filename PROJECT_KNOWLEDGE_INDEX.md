@@ -31,6 +31,13 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 | Built `index.html` md5 | `345ccbceb58bf74f9fbdde5db0646d1d` |
 | Shipped | 2026-09-15 |
 
+> ⚠ **OPS PACKAGE 2026-09-15 (fifth) — standing audit Phase 2 (Section C) at v5.73 is COMPLETE; findings only.**
+> `FlawsToFix-v5_73-Phase2.md` arrives (pool **132 → 133**); its probes go to the repo only (`qa/tools/audit_phase2_v573/`).
+> **Read its §0 first.** C-8 (high) — the Taxes tab never taxes spending withdrawals from Traditional accounts — is the
+> most material open defect in the app. Phases 3 (D + E) and 4 (F) of the audit remain. v5.73 stays current.
+>
+> *(Superseded, retained: the v5.73 ship note follows.)*
+
 > **Rolled 2026-09-15 at the v5.73 ship.** Rotation removes `DangerClose-v5_71.jsx` and `dom_entry_v571.jsx` from the POOL;
 > the pool holds exactly `DangerClose-v5_72.jsx` and `DangerClose-v5_73.jsx`, and `dom_entry_v572.jsx` and `dom_entry_v573.jsx`.
 > **v5.73 models Maine's pension-deduction phaseout and corrects Montana ($5,660; Social Security taxed as federally).**
@@ -821,7 +828,7 @@ console.log(pool.length,"files ·",hashed.size,"hashed rows ·",pool.filter(f=>!
 | `OPERATIONS.md` | `62383245836df3ae2b10a7bb7639b2b3` | **rolled at ops 2026-09-15 (fourth)** (was `3771d8743b…`). **rolled at the ops package of 2026-09-15 (state-set stage 1)** — §B1a: the matcher exists once; `sel_census` now reports 2; `t29` is in the app total (was `2ebfa41128…`). **rolled at the ops package of 2026-09-14 (t21 Section F)** — §B1's `t21` figure read **49** while `TESTING.md` read 50, a THIRD copy of that drift which had never been rolled at all; now 56. §B1 also gains the warrant's true reach: sixteen acorn-parsing tools, four covered, and none of the twelve reachable by the fixture — pointing at `TESTING.md`'s list rather than carrying a second copy (was `21d6f4030c`). **rolled at the ops package of 2026-09-14 (the three blind spots)** — §C's stale 68/64 deferral reason **corrected** (that census matched basenames; a content census measures 0 on a clean tree), and §I gains the `G-3a`-ships-red block (was `2df9183961`). **rolled at the ops package of 2026-09-14 (the release gates that did not fire)** — §C gains the `globalThis`/`FileReader` trap and the **v5.71 third instance** of the committed-paths shape, with its "Unscoped." sentence updated rather than deleted; §I gains the version-registry shape table and the rewritten **`D-1` is phase-split and is NO LONGER red post-ship** block (was `44cfe9dbfc…`).  **rolled at the ops package of 2026-09-11 (B-3 live verification)** — §I's live-host paragraph corrected, F-7 (was `85269e6416…`). **rolled at v5.70** (was `c6c243df04…`). **rolled at v5.69** (was `76a6c6df46…`). `docs/OPERATIONS.md` — **rolled 2026-09-09** at the run-folder ops package: §B gained the `mk_runfolder.sh` pointer, and §D gained **D1** (the named existence-only assertion class) and **D2** (the `t29` F-6a/F-6b defect pin). *(Previously `f33c2e0cfd…`.)* |
 | `TESTING.md` | `e23222db94f2212c0b2c9b9a15eef111` | **rolled at v5.73** (was `c276091f09…`). **rolled at ops 2026-09-15 (fourth)** (was `57f09614ab…`). **rolled at v5.72** (was `8f32fd9091…`). **rolled at the ops package of 2026-09-15 (state-set stage 1)** — the `sets` tooling suite, GRAND 3,755, the `t29` app-total correction, `f6_probe`'s coverage note (was `3c6869e26f…`). **rolled at the ops package of 2026-09-14 (t21 Section F)** — gains the named list of all TWELVE uncovered parser tools with a reason each; `t21` 50 → 56 and GRAND 3,729 → 3,735 from suite output, APP total unchanged at 3,647. ⚠ Its **"Current build" sentence had gone stale AGAIN**, still reading v5.70 / 3,576 / 3,658 four releases on; rolled here (was `cfa6e8f38a`). **rolled at v5.71** (was `bbb3ca320d…`). **rolled at the ops package of 2026-09-11 (B-3 live verification)** — the L5 "Current build" sentence rolled v5.67 → v5.70, F-5 (was `22fb702da7…`). **rolled at v5.70** (was `650109b0a8…`). **rolled at v5.69** (was `7aad8d0368…`). `TESTING.md` |
 | `METHODOLOGY.md` | `f209474addfa8f209b598f8844eadda5` | **rolled at v5.73** (was `1c7c7a3959…`). **rolled at v5.72** (was `952c0ad84e…`). **rolled at v5.69** (was `a96a146a8f…`). `METHODOLOGY.md` |
-| `CHANGELOG.md` | `b074a669f7b79806e447f29dd1059a86` | **rolled at v5.73** (was `fbe3009d8a…`). **rolled at ops 2026-09-15 (fourth)** (was `aad0c5b5bd…`). **rolled at v5.72** (was `aeaf3333fb…`). **rolled at the handover upload of 2026-09-15 (import hardening, session 1)** (was `a47df69675…`) — the handover entry. `CHANGELOG.md` |
+| `CHANGELOG.md` | `6603648c39b2e3f6cd79dbaa2b6e29cc` | **rolled at ops 2026-09-15 (fifth)** (was `b074a669f7…`). **rolled at ops 2026-09-15 (fourth)** (was `aad0c5b5bd…`). **rolled at v5.72** (was `aeaf3333fb…`). **rolled at the handover upload of 2026-09-15 (import hardening, session 1)** (was `a47df69675…`) — the handover entry. `CHANGELOG.md` |
 | `MissingFeatures.md` | `cac313b838411f77b0475af8acfeef6f` | **rolled at the second ops package of 2026-09-14** — gains **D-13**, the "how often any threshold binds" question re-homed from `SCOPE_INCOME_CONDITIONING.md` when that scope left the pool (was `3cb825e792…`). **rolled at v5.69** (was `7cc6f6ee82…`). `docs/MissingFeatures.md` |
 | `README.md` | `eec58396f932b3209de79c2400dbfb88` | `README.md` |
 
@@ -1316,6 +1323,7 @@ the current source unless it says so.
 |---|---|---|
 | `FlawsToFix-v5_10_1-Phase1.md` | Phase 1 audit (Sections A+B) against v5.10.1 | B-2 fixed at v5.10.2; B-1 closed as disclosed limitation; **A-2 open**, LOW, needs its own scope · **re-run at v5.69 on 2026-09-11 — `FlawsToFix-v5_69-Phase1.md`** |
 | `FlawsToFix-v5_69-Phase1.md` | ⚠ **v5.72: A-2, A-4, A-5 FIXED; its header now files the Montana lead and Maine's open populate — it stays pooled for that.** Phase 1 re-run (Sections A+B — the import and storage path) against v5.69 · ⚠ **POOLED 2026-09-15 while `SCOPE_IMPORT_HARDENING.md` is open** (its item 4 carve-out: an audit a live scope cites); returns to repo-only when that scope retires. *(Was:)* **REPO-ONLY** (`docs/`), not in the pool (§G / H-2; its decision 4) | **A-3 MEDIUM** (the draft autosave never saves) and **B-3 MEDIUM** (keyless Ask AI posts the plan to the page's host) — both undisclosed; **B-3 FIXED at v5.70** (2026-09-11; `SCOPE_B3_KEYLESS_AI_ROUTE.md` retired), A-3 unscoped; A-4…A-6 LOW; A-2 still open |
+| `FlawsToFix-v5_73-Phase2.md` | **The live audit register for numerical validation (standing audit Phase 2, v5.73, 2026-09-15).** Section C complete: eleven findings (C-8 high; C-3, C-6 medium) with causes, executed figures and hand arithmetic; §0 is the summary, §4 what was not covered, §5 how to reproduce (`qa/tools/audit_phase2_v573/`, repo only). `docs/` **and** the pool; no md5 row (D-3). Stays pooled until its findings are scoped and fixed |
 | `FlawsToFix-v5_15-Phase2D.md` | Sub-phase 2D findings, **REVISION 3**. Completeness half done to the Section C standard, verified **per engine**. Revisions 1 and 2 both stated mechanisms wrongly — §1 records both errors and the single cause, and is still worth reading for that. ⚠ **§6 IS SUPERSEDED** by `AUDIT_2D_BREAKEVEN_v5_28.md`, which says so in its own header | **2D COMPLETE at v5.28 — this row said "IN PROGRESS" through eleven releases and cost a session.** §6's three owed items (crossover hand-verified on two households, discounting-equivalence, `t10` cases) are all discharged. **Read the v5.28 audit, not §6** |
 | `SCOPE_FIX_otherAccounts_tax_treatment_v5_21.md` | **REVISION 2 — supersedes the v5.15 scope, which is retired.** Re-verified against v5.21 with AST resolution. Corrects three premise claims: Engine D applies **zero** tax to these draws (not capital-gains — `magi` L7686 omits `drawFromTaxable`); the treatment is **mischaracterized, not undisclosed** (MyData L11211 discloses it, Withdrawal L7822 and the Field Manual contradict it); and the census grew by **nine sites**. Structural trap **EXECUTED**: $147K → $0, silent, plus $21K of genuine brokerage leaving the tab's accounting. `total401k` has **three** derivations, so Option B is path-dependent | **active — §7 DECISIONS RESOLVED 2026-08-10.** Governs releases (b) and (c) |
 | `SCOPE_CONSOLIDATE_taxable_residual_v5_22.md` | Release **(a)** of the three-release plan (D-6/D-7). Consolidates the taxable residual, verified at **seven** identical sites by normalized AST fingerprint (one distinct form). Two binding constraints: the helper must **not** live in `retireStartBalances` (documented decision, L1509–1511, whose comment must be amended in the same edit), and **L8384 is a variant** — positions residual **plus** `otherAccounts` — so only its positions half is replaced | **active — no open decisions. Next build.** Pure refactor: 8/8 strict parity, all 751 checks **identical** |
@@ -1431,6 +1439,17 @@ retired and superseded. They get no row because there is no file. Checked 2026-0
 committed tree, so the next sweep does not re-open them.
 
 ## Retirement list (delete-first; nothing replaces these)
+
+### At the ops upload of 2026-09-15 (fifth — audit Phase 2) — DELETE THESE FIRST
+
+**KIND: ops — v5.73 stays current.** No rotation. **Pool goes 132 → 133**: `FlawsToFix-v5_73-Phase2.md` ARRIVES.
+
+| Delete | Because |
+|---|---|
+| `CHANGELOG.md` | replaced — the ops entry, hash row rolled last |
+| `PROJECT_KNOWLEDGE_INDEX.md` | replaced — this note, the new row, this section |
+
+**Repo only:** `qa/tools/audit_phase2_v573/` (18 probe scripts, never pooled). **The pool is ADD-ONLY (§L F-1).**
 
 ### At the v5.73 ship (2026-09-15) — DELETE THESE FIRST
 
