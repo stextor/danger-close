@@ -105,6 +105,20 @@ for m in jsdom acorn acorn-jsx acorn-walk esbuild react react-dom d3 xlsx mammot
     'npm install <pkg> --no-save' — that is what pruned jsdom and killed six suites at v5.67."
 done
 
+# ⚠ ADDED 2026-09-15 (SCOPE_TOOLING_GAPS_V572 item 4). The install above has no --no-save (see the
+#   header: a --no-save install pruned jsdom), so npm REWRITES package.json and writes its own
+#   package-lock.json. The run folder then differs from the committed scaffold, and package_check G-1
+#   correctly names both files — it did at both v5.72 checks, and they were reverted by hand. Put the
+#   committed copies back AFTER the one install. node_modules is not touched, so nothing is pruned.
+cp "$REPO/package.json" "$OUT/package.json"
+if [ -f "$REPO/package-lock.json" ]; then cp "$REPO/package-lock.json" "$OUT/package-lock.json"; else rm -f "$OUT/package-lock.json"; fi
+for f in package.json package-lock.json; do
+  if [ -f "$REPO/$f" ]; then
+    cmp -s "$REPO/$f" "$OUT/$f" || die "$f in the run folder still differs from the repo's after the copy-back."
+  fi
+done
+say "restored the committed package.json and package-lock.json over npm's rewrite"
+
 # ── build both legs ──────────────────────────────────────────────────────────────────────────
 cd "$OUT"
 for t in "$PRIOR" "$CUR"; do

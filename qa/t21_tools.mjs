@@ -295,6 +295,55 @@ ck("DISCLOSURE GUARD: all fifteen answer ZERO on this fixture \u2014 census_p1 i
    cp1Qs.length === 15 && cp1Qs.every(q => q.n === 0),
    "the fixture now reaches census_p1 \u2014 REWRITE the uncovered-tools disclosure in TESTING.md");
 
+// ─────────────────────────────────────────────────────────────────────────────
+// vercensus — every registry SHAPE, with known answers (added 2026-09-15,
+// SCOPE_TOOLING_GAPS_V572 item 1). The fixture above has no version tags, so this
+// section writes its own: one file per shape in a temporary directory. The tag is
+// "v5999" (the tool accepts only v5-tags), which no real suite uses, so a real file can never leak into the counts.
+//   ⚠ The two MAP cases are the reason this exists: until 2026-09-15 vercensus could not
+//   see `t33`'s `PINS = { v571: … }`, and t33 DIED on it at three bumps.
+// ─────────────────────────────────────────────────────────────────────────────
+console.log("\nvercensus — the registry shapes");
+{
+  const { mkdtempSync, writeFileSync, rmSync } = await import("fs");
+  const { tmpdir } = await import("os");
+  const D = mkdtempSync(join(tmpdir(), "t21-vercensus-"));
+  const files = {
+    "a_ladder.mjs": 'const KNOWN_VERSIONS = ["v5998", "v5999"];\nconst ORDER = ["v5997", "v5999"];\n',
+    "b_gate.mjs": 'const VER = process.argv[2];\nconst POST = VER === "v5998" || VER === "v5999";\n',
+    "c_ternary.mjs": 'const VER = process.argv[2];\nconst k = VER === "v5998" || VER === "v5999" ? 1 : 0;\n',
+    "d_map_ident.mjs": 'const PINS = {\n  v5998: { a: 1 },\n  v5999: { a: 1 },\n};\n',
+    "e_map_string.mjs": 'const PINS2 = { "v5998": 1, "v5999": 2 };\n',
+    "f_decoys.mjs": '// v5999 in a comment is not a site\nconst t = `built for v5999`;\nconst o = { v59990: 1, ["v5" + "999"]: 2 };\nconst s = "v59999";\n',
+  };
+  for (const [f, src] of Object.entries(files)) writeFileSync(join(D, f), src);
+  let out = "", threw = "";
+  try { out = run("vercensus.cjs", ["v5999", D]); } catch (e) { threw = String(e && e.message || e); }
+  rmSync(D, { recursive: true, force: true });
+  ck("vercensus RUNS on the shape directory", threw === "" && /VERSION-BUMP COST/.test(out), threw);
+  const row = (f) => {
+    const m = out.match(new RegExp("^\\s*" + f.replace(".", "\\.") + "\\s+ladder:\\s*(\\d+)\\s+gated:\\s*(\\d+)(?:\\s+keyed:\\s*(\\d+))?", "m"));
+    return m ? { ladder: +m[1], gated: +m[2], keyed: +(m[3] || 0) } : null;
+  };
+  const eq = (f, want) => { const r = row(f); return r && r.ladder === want[0] && r.gated === want[1] && r.keyed === want[2]; };
+  const show = (f) => JSON.stringify(row(f));
+  ck("array ladders, under any name: 2 ladder", eq("a_ladder.mjs", [2, 0, 0]), show("a_ladder.mjs"));
+  ck("an OR-chain gate: 1 gated", eq("b_gate.mjs", [0, 1, 0]), show("b_gate.mjs"));
+  ck("an OR-chain that is a TERNARY's test: 1 gated (OPERATIONS' table once said this shape was missed; it is not)",
+     eq("c_ternary.mjs", [0, 1, 0]), show("c_ternary.mjs"));
+  ck("MAP, identifier key (`v5999: {…}`): 1 keyed — the t33 PINS shape",
+     eq("d_map_ident.mjs", [0, 0, 1]), show("d_map_ident.mjs"));
+  ck("MAP, string key (`\"v5999\": 2`): 1 keyed, and NOT also counted as a ladder",
+     eq("e_map_string.mjs", [0, 0, 1]), show("e_map_string.mjs"));
+  ck("decoys — a comment, a template literal, a longer key, a computed key, a longer string — count nothing",
+     row("f_decoys.mjs") === null, show("f_decoys.mjs"));
+  const num = (label) => +((out.match(new RegExp(label + ".*:\\s*(\\d+)\\s*$", "m")) || [])[1]);  // the LAST colon: the keyed label has one of its own
+  ck("summary: 5 files, 2 ladder, 2 gated, 2 keyed, total 6",
+     num("FILES to register") === 5 && num("ladder entries") === 2 && num("GATED expressions") === 2 &&
+     num("keyed registry entries") === 2 && num("total judgement points") === 6,
+     ["FILES to register", "ladder entries", "GATED expressions", "keyed registry entries", "total judgement points"].map(num).join("/"));
+}
+
 console.log(`\nt21 SUITE: ${pass} passed, ${fail} failed`);
 if (fails.length) { console.log("\nFAILURES:"); fails.forEach(f => console.log(f)); }
 process.exit(fail ? 1 : 0);
