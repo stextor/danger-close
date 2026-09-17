@@ -1,5 +1,55 @@
 # Changelog
 
+## v5.73 — Maine's pension deduction phases out as the law says; Montana taxes Social Security as it now does
+
+Source `3bf1e15f1b28659aae9a78e3186d2ae8` · built `index.html` `345ccbceb58bf74f9fbdde5db0646d1d` · built from v5.72
+`2b88134b4b1f014364262d479fb4e8a3`. `src/index.html` and `src/main.jsx` are unchanged. **Figures move for Maine and
+Montana households only**; `METHODOLOGY.md` §11 gains *Maine's phaseout and Montana's corrections (v5.73)*.
+
+**Suite: 4,115 app checks, 0 failed, 0 DIED, across both legs** — 38 app suites plus MC parity 10/10; tooling `t21` 64,
+`domdiff` 32, `sets` 12 + 12 (GRAND 4,235), run from the packaged copies. From 3,954: `t39` +35, `t38`'s prior leg
++123 (v5.72 runs 206 checks where v5.71 ran 83), `t10` +3. `smoke_built` **22 passed, 0 failed**. Negative controls: `controls_v573_me_mt.py` **4 of 4**,
+`controls_state_sets.py v573` **41 of 41**. Per-suite breakdown: `TESTING.md`.
+
+### What changed, and why (every legal fact read from a primary source on 2026-09-15)
+
+- **Maine's pension deduction now phases out above $125,000 single / $250,000 joint**, as 36 M.R.S. §5122(2)(M-3)
+  requires from 2025. The deduction left after the Social Security offset shrinks in proportion to federal AGI
+  and is gone at $225,000 / $350,000. Maine households above the thresholds see **more** Maine tax. The order
+  is the statute's — offset first — and a test proves it: at $300,000 joint with $30,000 and $20,000 of Social
+  Security the deduction is $23,216, where the reverse order would leave $4,108.
+- **Montana taxes Social Security exactly as the federal return does.** Since 2024 Montana starts from federal
+  taxable income (DOR Tax Simplification Hub). The model had taxed half of the federally taxable amount — the
+  pre-2024 law — so it **understated** Montana tax for every household with Social Security.
+- **Montana's 65+ subtraction is $5,660 for 2025** (DOR 2025 Form 2, line 6), not $5,500 — about **$9 a year less**
+  tax per person 65+.
+- **The Field Manual says so**, and now also says what is still approximate (below).
+- **Engine:** a third condition shape, `phaseout`, which is the only one allowed to combine with a Social
+  Security offset; the code now says exactly why.
+- **Tests:** `t39_me_mt.mjs` (new, both legs, every cell hand-computed); `t10`'s half-rate example moves from
+  Montana to Colorado; `t29` F-6 and `t35` D-7/D-8 return to "empty" now that Maine is conditioned.
+- **Retired:** `SCOPE_ME_PHASEOUT_MT_CORRECTIONS.md`, written and built in this one release.
+
+### Limitations and approximations, stated plainly
+
+- **2025 figures throughout** — Maine's $48,216 and both thresholds, Montana's $5,660. Both states index them.
+- **Maine's deduction has no age-65 test in law**, but the model applies it from 65 — pessimistic before 65.
+- **Montana has two brackets**; the model keeps one flat rate. Its subtraction reduces all income in law but only
+  retirement income here. The federal senior deduction (2025–2028), which lowers Montana's base, is not reflected.
+- Maine's head-of-household and separate-filer thresholds, military pay and Railroad Retirement are not modelled.
+- The seven remaining half-rate Social Security states have not been re-checked against current law.
+- These three leads — Maine's age test, Montana's brackets, the half-rate audit — are filed in
+  `FlawsToFix-v5_69-Phase1.md`.
+- **A first v5.73 candidate** (source `5e5dfa81…`, built `4e013a30…`) was built before the Field Manual edit and
+  was superseded before anything shipped.
+- **One intermediate full run was red (4,233 passed, 2 failed)**: `t34` A-1 and A-6 asserted the v5.72 world — five
+  conditioned states, and no offset row with any condition. Both now carry v573 branches that keep their strength
+  (exactly six by name; only `phaseout` may sit on an offset row), and A-3 names all six. The run above is the
+  clean one. `controls_state_sets.py` also needed a fix: Maine's row is multi-line in the built code, and C5m
+  stopped loudly until it accepted either layout.
+- The bump was priced at 90 by `vercensus`, which now counts `t33`'s `PINS` map — the entry that was missed at
+  three earlier bumps was counted this time, not found by a dying suite.
+
 ## ops 2026-09-15 (fourth) — four tooling gaps from the v5.72 ship, fixed and retired in one package
 
 KIND: ops. **v5.72 stays current** — source `2b88134b4b1f014364262d479fb4e8a3`, built `index.html`
