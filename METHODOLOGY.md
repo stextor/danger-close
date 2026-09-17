@@ -238,7 +238,7 @@ and the model cannot tell from 401(k) money (no input carries account type — `
 person's $50,000 at that person's own pension income, and the rule that only a spouse at full retirement age counts (the engine
 sees household totals only); and dividend and interest income, which the measure does not carry. Separately, the model still
 taxes half of federally taxable Social Security at every income, which overstates Rhode Island tax under the cliff and
-understates it above — the Social Security modification is part of the eight-state partial-SS approximation, a release of its own.
+understates it above — the Social Security modification is part of the eight-state partial-SS approximation, a release of its own. *(From v5.73 that approximation covers seven states: Montana taxes Social Security exactly as the federal return does — below.)*
 
 **The cliff reaches the Roth comparison.** Because a conversion can push federal AGI across Rhode Island's cliff, the
 conversion strategy the model scores best can change. Measured at the v5.69 build on four Rhode Island households: the best
@@ -796,6 +796,43 @@ range and **listed on My Data**, never silently:
 claim age of 55 or 80. Any plan entered through the app's own forms is unchanged. Through v5.71 the
 birth-year limit never fired: it read a number out of a field stored as text. The limits are
 recorded as limits; this is input validation, not a change to any engine.
+
+
+### Maine's phaseout and Montana's corrections (v5.73)
+
+**Maine — the pension-deduction phaseout is modelled.** 36 M.R.S. §5122(2)(M-3), from TY2025: each
+person's deduction under M-2(1)(a) — $48,216, already reduced dollar-for-dollar by the Social Security
+that person received — is reduced by itself times *(federal AGI − applicable amount) ÷ $100,000*, the
+fraction floored at 0 and capped at 1. Applicable amounts are **$250,000 joint** and **$125,000 single**, so
+the deduction is gone at **$350,000** and **$225,000**. The order matters and is the statute's: offset
+first, then phaseout. A household at $300,000 joint with $30,000 and $20,000 of Social Security keeps
+**$23,216** (half of $18,216 + $28,216); applying the phaseout first would leave $4,108.
+- *Measure:* the model's state AGI — retirement, pension, other ordinary income, gains and federally
+  taxable Social Security. It carries **no dividends or interest**, so a household whose income is
+  materially dividend- or interest-driven sits lower on the phaseout than the statute puts it
+  (**optimistic**, as for every conditioned state).
+- *Figures:* TY2025 throughout ($48,216 and both thresholds). Maine indexes the thresholds after 2025.
+- *Still not modelled:* head-of-household and separate-filer thresholds (the model files joint or single),
+  military retirement pay (which the statute does not phase out), Railroad Retirement, and **the absence of
+  an age-65 test** — Maine's deduction is not limited to people 65 and over, but the model applies it from
+  65, which **understates** it for a Maine retiree drawing retirement income earlier.
+
+**Montana — two corrections.** Since TY2024 Montana starts from federal taxable income, so:
+- **Social Security is taxed exactly as it is federally.** The model had taxed half of the federally
+  taxable amount, a description of the pre-2024 law. That **understated** Montana tax for any household
+  with Social Security; it now taxes the whole federally taxable amount (`ss` 0.5 → 1).
+- **The 65+ subtraction is $5,660 per person for TY2025** (Montana DOR, 2025 Form 2, line 6), not the
+  statutory base of $5,500. That lowers Montana tax by about **$9 a year per person 65+**.
+- *Still approximate:* Montana has **two ordinary-income brackets**; the model uses one flat rate
+  (a filed lead, not verified in this release). The subtraction reduces **all** income in law, but only
+  retirement income in the model, which is pessimistic for a household with little retirement income.
+  Montana's base also reflects the temporary federal senior deduction (2025–2028); the model does not start
+  from federal taxable income, so it does not reflect that deduction.
+
+*Which figures move:* Maine households above the thresholds pay **more** Maine tax; Montana households with
+Social Security pay **more** Montana tax; Montana households with anyone 65+ pay about $9 a person **less**.
+No other state changes. The seven remaining partial-SS states (CO, CT, MN, NM, RI, UT, VT) keep the
+half-rate approximation, and whether each still matches its post-reform law is a filed lead.
 
 ## 12. Validation & known limitations
 
@@ -1505,7 +1542,8 @@ of both changes, not of the offset alone.
 
 - **Railroad Retirement**, which both statutes name alongside Social Security. The model has no
   Railroad Retirement concept at all.
-- **Maine's income phaseout** above $125,000 single / $250,000 MFJ.
+- **Maine's income phaseout** above $125,000 single / $250,000 MFJ. ✓ **Modelled from v5.73** — see
+  *Maine's phaseout and Montana's corrections (v5.73)* below.
 - **Colorado's shared $24,000 cap**, which covers Social Security and pension together rather than
   reducing one by the other. It is a different mechanism and is deliberately out of scope; Colorado
   carries no offset flag.

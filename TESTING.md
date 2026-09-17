@@ -18,6 +18,14 @@ This project's premise is *verify, don't trust* — so this page explains what v
 
 **v5.40 corrects four disclosures that had drifted off their engines, and fixes two small-screen mechanics classes — and moves no figure.** Nothing here changes a computed result: three items rewrite prose about behaviour that is already right, and two change presentation and keyboard type. `t1` gains **8 extinction invariants** (+94 → **102**) pinning the three fixed classes, and **every one was proven to fail against a deliberately reverted build before being accepted** — reverting the S-1 sentence fails 4, removing a single `overflowX` wrapper fails 1, stripping five `inputMode` attributes fails 1. That step is not ceremony: this suite has recorded probes that died silently and read as green, and a green run cannot distinguish a passing check from a dead one. **App total 1,344 across 22 suites, 0 failed**, plus **16 built-artifact smoke checks** against `dist/index.html`.
 
+*Per-suite at **v5.73**, current leg, parsed from `runsuite.sh` output 2026-09-15, run from the packaged copies — **38 app suites**:* `t1` 185 · `t2` 35 · `t3` 36 · `t4` 252 · `t5` 59 · `t6` 21 · `t7` 41 · `t8` 42 · `t9` 14 · `t10` 357 · `t11` 40 · `t12` 23 · `t13` 42 · `t14` 44 · `t15` 11 · `t16` 24 · `t17` 74 · `t18` 67 · `t19` 65 · `t20` 100 · `t22` 85 · `t23` 25 · `t24` 38 · `t25` 45 · `t26` 25 · `t27` 18 · `t28` 34 · `t29` 60 · `t30` 12 · `t31` 31 · `t32` 12 · `t33` 32 · `t34` 73 · `t35` 114 · `t36` 24 · `t37` 43 · `t38` 206 · `t39` 22. **4,115 app checks, 0 failed, 0 DIED, across both legs**; MC parity 10/10; tooling `t21` 64, `domdiff` 32, `sets` 12 + 12 (GRAND **4,235**). The rise from 3,954: `t39` +35, `t38`'s prior leg +123 (v5.72 runs 206, v5.71 ran 83), `t10` +3 on v5.73.
+⚠ **`t39` is new at v5.73 and runs on BOTH legs** (13 on v5.72, 22 on v5.73): Maine's pension-deduction phaseout
+and Montana's $5,660 and full-rate Social Security (`SCOPE_ME_PHASEOUT_MT_CORRECTIONS`). Every cell is worked by
+hand in the file; **M-7 is the ordering cell** — the phaseout must apply after the Social Security offset.
+Controls: `qa/tools/controls_v573_me_mt.py`. **`t10`**'s half-rate archetype is Colorado from v5.73; **`t29` F-6,
+`t35` D-7/D-8 and `t34` A-1/A-3/A-6** carry v573 branches (Maine conditioned; `phaseout` the one shape allowed on an
+offset row). **`sets` is 12 on both legs.**
+
 ⚠ **`t21` is 64 from the ops package of 2026-09-15 (fourth)** — it was 56 at the v5.72 ship. Its new section runs
 `vercensus` on a directory of every registry shape (arrays, gates, ternary-test chains, identifier- and string-keyed
 maps, decoys) with exact counts; the map cases are the ones `vercensus` could not see before. Full suite at that point, v5.71/v5.72 legs: **3,954 app checks, 0 failed, 0 DIED; tooling 56 → 64 at `t21`; GRAND 4,073.**
