@@ -21,9 +21,14 @@ TAG = sys.argv[1] if len(sys.argv) > 1 else "v571"
 # ⚠ STAGE 2 (v5.72): from v572 the in-law list is DATA on STATE_RULES rows and the set is {ME}, so t29 F-6
 #   and t35 D-8 are NON-EMPTY guards again, and a list change is a change to the app module, not to the
 #   helper's literal. Every expectation below that differs by leg reads V572.
-V572 = int(re.sub(r"[^0-9]", "", TAG) or 0) >= 572
-F6 = "F-6 [v5.72]" if V572 else "F-6 [v5.69]"
-D8 = "D-8 [v5.72]" if V572 else "D-8 [v5.69]"
+_N = int(re.sub(r"[^0-9]", "", TAG) or 0)
+V572 = _N >= 572
+# ⚠ v5.73: Maine is conditioned, so the set is EMPTY again and the guards are the "empty" kind once more.
+#   ONLY v572 has the non-empty shape; NONEMPTY is what the expectations below branch on.
+V573 = _N >= 573
+NONEMPTY = V572 and not V573
+F6 = "F-6 [v5.73]" if V573 else "F-6 [v5.72]" if V572 else "F-6 [v5.69]"
+D8 = "D-8 [v5.73]" if V573 else "D-8 [v5.72]" if V572 else "D-8 [v5.69]"
 S1 = "S-1 [v5.72]" if V572 else "S-1:"
 QA = os.path.abspath(os.getcwd())
 RUN = os.path.dirname(QA)
@@ -109,7 +114,7 @@ root = sandbox()
 bad_module(root, "state_sets_bad.cjs", *ADD_WI)
 edit(os.path.join(root, "qa", "t29_boundaries.mjs"), '"state_sets.cjs"', '"state_sets_bad.cjs"', 2)
 # v572: the set becomes {ME, WI} — still non-empty, so F-6 stays GREEN and only the exact-set checks fire.
-expect("C1", root, "t29", (["F-6a:", "F-6b:"] if V572 else ["F-6 [v5.69]", "F-6a:", "F-6b:"]), quiet=([F6] if V572 else []))
+expect("C1", root, "t29", (["F-6a:", "F-6b:"] if NONEMPTY else [F6, "F-6a:", "F-6b:"]), quiet=([F6] if NONEMPTY else []))
 expect("C1", root, "t35", [])     # same folder, pristine module: must stay green
 expect("C1", root, "sets", ["S-8a:"], quiet=[S1, "S-3:", "S-4:", "S-5:", "S-6:", "S-7:"])  # the bad copy IS a 2nd pattern copy
 shutil.rmtree(root)
@@ -118,7 +123,7 @@ shutil.rmtree(root)
 root = sandbox()
 bad_module(root, "state_sets_bad.cjs", *ADD_WI)
 edit(os.path.join(root, "qa", "t35_state_populate.mjs"), '"state_sets.cjs"', '"state_sets_bad.cjs"', 2)
-expect("C2", root, "t35", (["D-7 [v5.67]"] if V572 else ["D-7 [v5.67]", "D-8 [v5.69]"]), quiet=([D8] if V572 else []))
+expect("C2", root, "t35", (["D-7 [v5.67]"] if NONEMPTY else ["D-7 [v5.67]", D8]), quiet=([D8] if NONEMPTY else []))
 expect("C2", root, "t29", [])
 expect("C2", root, "sets", ["S-8a:"], quiet=[S1, "S-3:", "S-4:", "S-5:", "S-6:", "S-7:"])  # the bad copy IS a 2nd pattern copy
 shutil.rmtree(root)
@@ -157,10 +162,24 @@ shutil.rmtree(root)
 # This is D-8's control: a list that is empty only because Maine is missing is the vacuous green §B2 names.
 if V572:
     root = sandbox()
-    edit(os.path.join(root, "qa", f"app_{TAG}.mjs"), 'ME: { name: "Maine", incomeLimitedInLaw: true,', 'ME: { name: "Maine",')
-    expect("C5m", root, "t29", [F6, "F-6a:", "F-6b:"])
-    expect("C5m", root, "t35", ["D-7 [v5.67]", D8])
-    expect("C5m", root, "sets", [S1, "S-5:"])   # the probe reads the untouched SOURCE, which still has ME
+    # esbuild keeps a short row on one line and reflows a long one (Maine's, from v5.73) — take whichever
+    # form is present; edit() still requires exactly one match.
+    _app = os.path.join(root, "qa", f"app_{TAG}.mjs")
+    _one_line = 'ME: { name: "Maine", incomeLimitedInLaw: true,'
+    if _one_line in open(_app, encoding="utf8").read():
+        edit(_app, _one_line, 'ME: { name: "Maine",')
+    else:
+        edit(_app, 'name: "Maine",\n    incomeLimitedInLaw: true,\n', 'name: "Maine",\n')
+    if NONEMPTY:
+        expect("C5m", root, "t29", [F6, "F-6a:", "F-6b:"])
+        expect("C5m", root, "t35", ["D-7 [v5.67]", D8])
+        expect("C5m", root, "sets", [S1, "S-5:"])   # the probe reads the untouched SOURCE, which still has ME
+    else:
+        # v5.73: Maine is conditioned, so dropping its in-law mark moves ONLY the list — the guarded set
+        # was empty and stays empty. S-1 is the one check that must see it.
+        expect("C5m", root, "t29", [])
+        expect("C5m", root, "t35", [])
+        expect("C5m", root, "sets", [S1])
     shutil.rmtree(root)
 
 # ── C6 · the predicate: revert to t35's old `=== undefined` reading → S-7 fires ────────────────
