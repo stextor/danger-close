@@ -1,5 +1,40 @@
 # Changelog
 
+## ops 2026-09-15 (fourth) — four tooling gaps from the v5.72 ship, fixed and retired in one package
+
+KIND: ops. **v5.72 stays current** — source `2b88134b4b1f014364262d479fb4e8a3`, built `index.html`
+`4f035dc5644d91476888a9fb9fdc1f5b`. No app source changes, no version bump. `SCOPE_TOOLING_GAPS_V572.md` is
+written, built and retired here (its D-6); §7 is the build record.
+
+**What changed, and why**
+- **`vercensus` now counts version MAPS** (`t33`'s `PINS`), on a new "keyed registry entries (a judgement)"
+  line. `t33` died on a missing map entry at v5.66, v5.70 and v5.72 because the census could not see it.
+  At v5.72 the census total reads 89, not 88. `vercensus_list` shows the same sites.
+- **`package_check` K-1…K-3 read the tree as the package leaves it.** A correct app-release manifest is no
+  longer red before upload by construction, a stale one still is, and control P29's mutation now fires
+  before upload (P57). Nothing was softened; post-upload behaviour is unchanged.
+- **`package_check` G-1 accepts a handover's unshipped source** — only under `KIND: handover`, and only
+  when a file in `handover/` has the same content.
+- **`mk_runfolder.sh` restores the committed `package.json` and `package-lock.json`** after its single
+  `npm install`, and stops if they still differ. G-1 had flagged npm's rewrite at both v5.72 checks.
+- **`OPERATIONS.md`**: the registry-shapes table said the census missed three shapes; measured, it missed
+  one (the map). Corrected. The K-1…K-3 paragraphs describe the new behaviour.
+
+**Verified by** the full suite on a run folder built by the new `mk_runfolder.sh` — **3,954 app checks, 0 failed, 0
+DIED, parity 10/10; tooling `t21` 64 (was 56), `domdiff` 32, `sets` 11 + 12; GRAND 4,073** — and one negative
+control per fix: the old `vercensus` turns `t21` red on both map cases and the summary (61/3); the old
+`package_check` reds K-1…K-3 on the correct v5.72 package against the prior clone, and `P57` catches a stale
+manifest there; `P59`/`P60` catch a drifted workbench and a non-handover kind; `mk_runfolder.sh` without its
+copy-back leaves both files different from the repo. `package_check_controls.sh`, run in both phases: 54
+controls behaved as designed in each, and each run's single miss was the other phase's control.
+
+**Found, and recorded rather than fixed.** `package_check_controls.sh` is phase-bound: `P17` fires only
+against the pre-upload tree and `P48` only against the post-upload one, so every single run reports one
+miss. Run in both phases, every control fired in at least one. `OPERATIONS.md` now says to run it twice.
+
+**Limitations.** The census still decides nothing — every counted site, including each map entry, is a
+judgement. `P56`–`P61` skip unless `PRIOR_CLONE` and `HANDOVER_PKG` are set.
+
 ## v5.72 — a bad backup can no longer damage the plan you have; Maine joins the income-limited list
 
 Source `2b88134b4b1f014364262d479fb4e8a3` · built `index.html` `4f035dc5644d91476888a9fb9fdc1f5b` · built from v5.71
