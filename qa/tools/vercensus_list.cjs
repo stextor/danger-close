@@ -23,15 +23,22 @@ for(const d of DIRS){
     const p=path.join(d,f); let src,ast;
     try{src=fs.readFileSync(p,"utf8");ast=P.parse(src,{ecmaVersion:"latest",sourceType:"module",locations:true});}catch{continue;}
     const lines=src.split("\n"); const hits=[];
-    walk.simple(ast,{Literal(n){
+    walk.simple(ast,{
+    // ADDED 2026-09-15: version MAP entries (`PINS = { v572: … }`) — see vercensus.cjs.
+    Property(n){
+      if(n.computed||!n.key)return;
+      const k=n.key.type==="Identifier"?n.key.name:n.key.type==="Literal"?n.key.value:null;
+      if(k===CUR)hits.push({line:n.loc.start.line,kind:"KEYED ",txt:(lines[n.loc.start.line-1]||"").trim()});
+    },
+    Literal(n){
       if(n.value!==CUR)return;
       const L=lines[n.loc.start.line-1]||"";
       const gated=new RegExp('===\\s*"'+CUR+'"').test(L)||new RegExp('"'+CUR+'"\\s*===').test(L);
-      hits.push({line:n.loc.start.line,gated,txt:L.trim()});
+      hits.push({line:n.loc.start.line,kind:gated?"GATE  ":"ladder",txt:L.trim()});
     }},B);
     if(!hits.length)continue;
     console.log(`\n### ${f}`);
     for(const h of hits.sort((a,b)=>a.line-b.line))
-      console.log(`  ${h.gated?"GATE  ":"ladder"} L${String(h.line).padStart(4)}  ${h.txt.slice(0,150)}`);
+      console.log(`  ${h.kind} L${String(h.line).padStart(4)}  ${h.txt.slice(0,150)}`);
   }
 }

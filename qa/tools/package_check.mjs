@@ -527,16 +527,27 @@ if (!WORK || !existsSync(WORK)) {
     return [w];
   };
   const ghSet = new Set(ghFiles);
-  const missing = [];
+  // ⚠ ADDED 2026-09-15 (SCOPE_TOOLING_GAPS_V572 item 3, D-4). A `KIND: handover` package carries its
+  //   unshipped workbench source in handover/, deliberately NOT in github/src/ — so G-1 used to name it as
+  //   missing. It is accepted only BY CONTENT (a file under handover/ with the same md5) and only for this
+  //   kind; a name-based allowance would let any file called *WORKBENCH* through.
+  const HO = join(ROOT, "handover");
+  const hoHashes = (KIND === "handover" && existsSync(HO)) ? new Set(walk(HO).map(f => md5(join(HO, f)))) : new Set();
+  const missing = [], viaHandover = [];
   for (const w of walk(WORK)) {
     if (w.startsWith("node_modules/") || w.includes("/node_modules/")) continue;
     for (const r of candidates(w)) {
       if (!repoAll.has(r)) continue;
-      if (md5(join(WORK, w)) === md5(join(CLONE, r))) break;   // unchanged: nothing owed
-      if (!ghSet.has(r)) missing.push(`${w} -> ${r}`);
+      const wm = md5(join(WORK, w));
+      if (wm === md5(join(CLONE, r))) break;   // unchanged: nothing owed
+      if (!ghSet.has(r)) {
+        if (hoHashes.has(wm)) viaHandover.push(`${w} (in handover/, by content)`);
+        else missing.push(`${w} -> ${r}`);
+      }
       break;
     }
   }
+  if (viaHandover.length) console.log(`     (G-1 accepted under KIND: handover — ${viaHandover.join(" | ")})`);
   ck("G-1: every workspace file that differs from the committed tree is in github/",
     missing.length === 0, missing.join(" | "));
 
@@ -1013,17 +1024,31 @@ console.log("\nK. Manifest — PROJECT_KNOWLEDGE_INDEX.md vs the clone and the p
 
       // K-1..K-3 anchor the CURRENT table to the committed tree. These are the three that catch
       // a manifest which simply was not updated.
+      // ⚠ CHANGED 2026-09-15 (SCOPE_TOOLING_GAPS_V572 item 2, D-3). K-1..K-3 now read the tree AS THIS
+      //   PACKAGE LEAVES IT: the package's github/ copy of each file if it ships one, else the clone. Until
+      //   then they read the clone only, so a CORRECT app-release manifest was red pre-upload by construction
+      //   (OPERATIONS §I recorded the split as "real and unscoped"), and control P29 — a stale manifest —
+      //   could not fire against an app release because K-1 was already red. NOTHING IS SOFTENED: a manifest
+      //   that was not rolled still disagrees with the package's own new source and is red pre-upload;
+      //   post-upload the two copies are identical, so behaviour there is unchanged; an ops package ships
+      //   none of the three and still reads the clone. The detail line names which copy was read.
       if (CLONE && existsSync(CLONE)) {
-        const clV = (readFileSync(join(CLONE, "CHANGELOG.md"), "utf8").match(/^## (v[\d._]+)/m) || [])[1];
-        ck("K-1: manifest's Current version == the newest CHANGELOG entry",
-          C.Version === clV, `manifest ${C.Version}, CHANGELOG ${clV}`);
-        const srcP = join(CLONE, "src/DangerClose.jsx"), artP = join(CLONE, "index.html");
-        ck("K-2: manifest's Current source md5 == the committed src/DangerClose.jsx",
+        const asLeft = (rel) => {
+          const g = join(GH, rel);
+          return existsSync(g) ? { p: g, from: "package" } : { p: join(CLONE, rel), from: "clone" };
+        };
+        const chg = asLeft("CHANGELOG.md");
+        const clV = (readFileSync(chg.p, "utf8").match(/^## (v[\d._]+)/m) || [])[1];
+        ck("K-1: manifest's Current version == the newest CHANGELOG entry (the tree as this package leaves it)",
+          C.Version === clV, `manifest ${C.Version}, CHANGELOG ${clV} (read from the ${chg.from})`);
+        const srcA = asLeft("src/DangerClose.jsx"), artA = asLeft("index.html");
+        const srcP = srcA.p, artP = artA.p;
+        ck("K-2: manifest's Current source md5 == src/DangerClose.jsx (the tree as this package leaves it)",
           existsSync(srcP) && C["Source md5"] === md5(srcP),
-          `manifest ${C["Source md5"]}, tree ${existsSync(srcP) ? md5(srcP) : "absent"}`);
-        ck("K-3: manifest's Current built md5 == the committed index.html",
+          `manifest ${C["Source md5"]}, tree ${existsSync(srcP) ? md5(srcP) : "absent"} (read from the ${srcA.from})`);
+        ck("K-3: manifest's Current built md5 == index.html (the tree as this package leaves it)",
           existsSync(artP) && C["Built index.html md5"] === md5(artP),
-          `manifest ${C["Built index.html md5"]}, tree ${existsSync(artP) ? md5(artP) : "absent"}`);
+          `manifest ${C["Built index.html md5"]}, tree ${existsSync(artP) ? md5(artP) : "absent"} (read from the ${artA.from})`);
       } else {
         skipped("K-1..K-3: Current table vs the committed tree", "no clone given");
       }

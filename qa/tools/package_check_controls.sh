@@ -852,6 +852,81 @@ runJ5 "P55 the same RETIRE: declaration, actually honoured - must NOT fire" "" \
 [ "$SKIP" -gt 0 ] && echo "  ⚠ A SKIPPED control is not a passing one."
 fi
 
+# ── P56..P61 · SCOPE_TOOLING_GAPS_V572 (2026-09-15): K-1..K-3 pre-upload, and G-1 under handover ──────
+# These need two inputs the positional arguments do not carry, so they come from the environment and
+# SKIP LOUDLY without them:
+#   PRIOR_CLONE=<dir>   a clone of the repo BEFORE this release (the pre-upload shape of the tree)
+#   HANDOVER_PKG=<dir>  an unpacked KIND: handover package with its workbench under handover/
+# ⚠ P56 is the FALSE-POSITIVE control and the reason for the change: until 2026-09-15 a CORRECT app-release
+#   manifest was red on K-1..K-3 pre-upload, so P57 (P29's mutation, pre-upload) could not be told apart
+#   from the baseline — OPERATIONS §I recorded that P29 "cannot fire against an app release".
+if [ -z "${PRIOR_CLONE:-}" ] || [ ! -d "${PRIOR_CLONE:-/nonexistent}" ]; then
+  SKIP=$((SKIP+1)); echo "  - SKIPPED: P56/P57 (K pre-upload) - set PRIOR_CLONE to a clone at the prior release"
+elif ! grep -q '^## v5' "$APP/github/CHANGELOG.md" 2>/dev/null || [ ! -f "$APP/github/src/DangerClose.jsx" ]; then
+  SKIP=$((SKIP+1)); echo "  - SKIPPED: P56/P57 - '$APP' is not an app release (it ships no source), so K reads the clone either way"
+else
+  out=$(node "$PKG_CHECK" "$APP" "$PRIOR_CLONE" 2>&1)
+  if echo "$out" | grep "✗" | grep -qE 'K-[123]:'; then
+    MISS=$((MISS+1)); printf "  *** FALSE POSITIVE *** P56 K-1..K-3 red on a CORRECT app release pre-upload: %s\n" "$(echo "$out" | grep '✗' | grep -E 'K-[123]:' | head -1)"
+  else
+    PASS=$((PASS+1)); printf "  NOT fired        P56 K-1..K-3 green on a correct app release pre-upload (read from the package)\n"
+  fi
+  rm -rf /tmp/pkk && cp -r "$APP" /tmp/pkk
+  python3 - <<'PY'
+import re, os
+for q in ['/tmp/pkk/github/PROJECT_KNOWLEDGE_INDEX.md', '/tmp/pkk/knowledge/PROJECT_KNOWLEDGE_INDEX.md']:
+    if not os.path.exists(q): continue
+    s = open(q).read()
+    a = s.index('## Current build'); b = s.index('## Prior build')
+    m = re.search(r'\| Version \| \*\*(v5\.(\d+))\*\* \|', s[a:b]); assert m
+    s = s[:a] + s[a:b].replace(m.group(1), 'v5.%d' % (int(m.group(2)) - 1), 1) + s[b:]
+    open(q, 'w').write(s)
+PY
+  # keep MANIFEST.txt honest about the mutated copies, so only K can object
+  ( cd /tmp/pkk && for f in github/PROJECT_KNOWLEDGE_INDEX.md knowledge/PROJECT_KNOWLEDGE_INDEX.md; do
+      [ -f "$f" ] || continue; r=${f#github/}; r=${r#knowledge/}
+      sed -i "s|^[0-9a-f]\{32\}  $r\$|$(md5sum "$f" | cut -d' ' -f1)  $r|" MANIFEST.txt; done )
+  out=$(node "$PKG_CHECK" /tmp/pkk "$PRIOR_CLONE" 2>&1)
+  if echo "$out" | grep "✗" | grep -q 'K-1:'; then
+    PASS=$((PASS+1)); printf "  CAUGHT by K-1    P57 a manifest NOT rolled, pre-upload, on an app release (P29's teeth)\n"
+  else
+    MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** P57 stale manifest pre-upload (fired: %s)\n" "$(echo "$out" | grep '✗' | grep -oE '[A-K]-[0-9]+' | sort -u | tr '\n' ',')"
+  fi
+  rm -rf /tmp/pkk
+fi
+
+if [ -z "${HANDOVER_PKG:-}" ] || [ ! -d "${HANDOVER_PKG:-/nonexistent}/handover" ]; then
+  SKIP=$((SKIP+1)); echo "  - SKIPPED: P58..P61 (G-1 handover) - set HANDOVER_PKG to an unpacked KIND: handover package"
+else
+  WB=$(find "$HANDOVER_PKG/handover" -type f -name '*.jsx' | head -1)
+  g1 () {  # $1 = package dir, $2 = workspace; prints "fired" or "quiet"
+    node "$PKG_CHECK" "$1" "$CLONE" "$2" 2>&1 | grep -q "✗ G-1" && echo fired || echo quiet
+  }
+  WS=/tmp/pkho_ws; rm -rf "$WS"; mkdir -p "$WS"; cp "$WB" "$WS/DangerClose.jsx"
+  if cmp -s "$WS/DangerClose.jsx" "$CLONE/src/DangerClose.jsx"; then
+    SKIP=$((SKIP+1)); echo "  - SKIPPED: P58..P61 - the workbench equals the clone's source, so G-1 has nothing to judge"
+  else
+    [ "$(g1 "$HANDOVER_PKG" "$WS")" = quiet ] \
+      && { PASS=$((PASS+1)); printf "  NOT fired        P58 G-1 accepts the workbench carried in handover/ (by content)\n"; } \
+      || { MISS=$((MISS+1)); printf "  *** FALSE POSITIVE *** P58 G-1 names the handover workbench\n"; }
+    printf '\n// one byte of drift\n' >> "$WS/DangerClose.jsx"
+    [ "$(g1 "$HANDOVER_PKG" "$WS")" = fired ] \
+      && { PASS=$((PASS+1)); printf "  CAUGHT by G-1    P59 a workspace source that is NOT the packaged workbench\n"; } \
+      || { MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** P59 a drifted workbench passed as if packaged\n"; }
+    cp "$WB" "$WS/DangerClose.jsx"
+    rm -rf /tmp/pkho && cp -r "$HANDOVER_PKG" /tmp/pkho && sed -i 's/^KIND:[[:space:]]*handover[[:space:]]*$/KIND: ops/' /tmp/pkho/MANIFEST.txt
+    [ "$(g1 /tmp/pkho "$WS")" = fired ] \
+      && { PASS=$((PASS+1)); printf "  CAUGHT by G-1    P60 the same package as KIND: ops — the allowance is handover-only\n"; } \
+      || { MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** P60 the handover allowance leaked into another KIND\n"; }
+    rm -rf /tmp/pkho && cp -r "$HANDOVER_PKG" /tmp/pkho && mv "/tmp/pkho/handover/$(basename "$WB")" /tmp/pkho/handover/RENAMED.jsx
+    [ "$(g1 /tmp/pkho "$WS")" = quiet ] \
+      && { PASS=$((PASS+1)); printf "  NOT fired        P61 the match is by CONTENT, not name (renamed workbench still accepted)\n"; } \
+      || { MISS=$((MISS+1)); printf "  *** FINDING *** P61 G-1 depends on the workbench's file name\n"; }
+    rm -rf /tmp/pkho
+  fi
+  rm -rf "$WS"
+fi
+
 [ "$SKIP" -gt 0 ] && echo "  ⚠ A SKIPPED control is not a passing one."
 [ "$MISS" -gt 0 ] && { echo "  A control that does not fire is a FINDING — investigate the check, never soften it."; exit 1; }
 exit 0

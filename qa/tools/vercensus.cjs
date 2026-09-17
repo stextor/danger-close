@@ -49,9 +49,20 @@ for (const d of DIRS) {
     let src, ast;
     try { src = fs.readFileSync(p, "utf8"); ast = P.parse(src, {ecmaVersion:"latest", sourceType:"module", locations:true}); }
     catch { continue; }
-    let ladder = 0, gated = 0;
+    let ladder = 0, gated = 0, keyed = 0;
     const lines = src.split("\n");
-    walk.simple(ast, { Literal(n) {
+    walk.simple(ast, {
+    // ⚠ ADDED 2026-09-15 (SCOPE_TOOLING_GAPS_V572 item 1). A version MAP — `t33`'s `PINS = { v571: {…} }` —
+    //   keys its entries by the tag, and acorn-walk never visits a non-computed key: an identifier key is
+    //   not a Literal, and a string key is skipped by the walker. So the map shape was invisible here, and
+    //   `t33` DIED on it at v5.66, v5.70 and v5.72. A map entry is a JUDGEMENT (its values must be decided),
+    //   so it gets its own line and counts in the total.
+    Property(n) {
+      if (n.computed || !n.key) return;
+      const k = n.key.type === "Identifier" ? n.key.name : n.key.type === "Literal" ? n.key.value : null;
+      if (k === CUR) keyed++;
+    },
+    Literal(n) {
       if (n.value !== CUR) return;
       // A gated expression compares the tag; a ladder entry merely lists it. The line is a safe
       // discriminator here because both forms are written on one line throughout this suite.
@@ -59,22 +70,23 @@ for (const d of DIRS) {
       if (new RegExp('===\\s*"' + CUR + '"').test(L) || new RegExp('"' + CUR + '"\\s*===').test(L)) gated++;
       else ladder++;
     }}, B);
-    if (ladder || gated) files[path.join(d, f)] = { ladder, gated };
+    if (ladder || gated || keyed) files[path.join(d, f)] = { ladder, gated, keyed };
   }
 }
 
 const names = Object.keys(files).sort();
-let L = 0, G = 0;
+let L = 0, G = 0, KY = 0;
 console.log(`\nVERSION-BUMP COST from ${CUR} — every site a successor tag must be judged against\n`);
 for (const n of names) {
-  const { ladder, gated } = files[n];
-  L += ladder; G += gated;
-  console.log(`  ${path.basename(n).padEnd(28)} ladder:${String(ladder).padStart(3)}   gated:${String(gated).padStart(3)}`);
+  const { ladder, gated, keyed } = files[n];
+  L += ladder; G += gated; KY += keyed;
+  console.log(`  ${path.basename(n).padEnd(28)} ladder:${String(ladder).padStart(3)}   gated:${String(gated).padStart(3)}${keyed ? `   keyed:${String(keyed).padStart(3)}` : ""}`);
 }
 console.log(`\n  FILES to register the new tag in : ${names.length}`);
 console.log(`  ladder entries (mechanical)      : ${L}`);
 console.log(`  GATED expressions (a judgement)  : ${G}`);
-console.log(`  total judgement points           : ${L + G}\n`);
+console.log(`  keyed registry entries (a judgement: decide the VALUES) : ${KY}`);
+console.log(`  total judgement points           : ${L + G + KY}\n`);
 console.log("  ⚠ The gated ones are NOT a script. Each asks whether the new build makes that");
 console.log("    assertion false; extending them blindly is the v5.27 defect §B2 exists to prevent,");
 console.log("    applied once per gate. The registries are fail-closed and print FATAL if missed.\n");
