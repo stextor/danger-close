@@ -737,16 +737,21 @@ file that was never there is a no-op that reads exactly like a clean retirement.
 ### ⚠ Version registries come in FOUR shapes and a sweep sees only one (added 2026-09-14)
 
 Registering a new version tag is a per-release obligation, and `qa/tools/vercensus.cjs` sweeps for
-it. **It is keyed on `KNOWN_VERSIONS` arrays, and three other shapes exist that it cannot see.**
-All of them fail closed, which is the only reason they have been cheap. Measured by AST across the
-31 suites at v5.71 — **15 carry at least one registry shape**:
+it. Four registry shapes exist. All of them fail closed, which is the only reason they have been cheap.
+Measured by AST across the 31 suites at v5.71 — **15 carry at least one registry shape**:
 
-| Shape | Where, at v5.71 | Why the sweep misses it |
+| Shape | Where, at v5.71 | Does `vercensus` count it? |
 |---|---|---|
-| `KNOWN_VERSIONS` array | 15 suites | the one it looks for |
-| **array ladder under another name** | `t31`'s **`ORDER`**, L275, 24 tags | not called `KNOWN_VERSIONS` |
-| **object / value map** | `t33`'s **`PINS`**, L60, 11 tags | keys, not array elements |
-| **OR-chain that IS a ternary's test** | `t24` L92 (`DIV`) and **L254 (`_k`)**, `t28` L61 — 19 tags each | the `?` follows the chain, so a sweep keyed on an assignment skips it |
+| `KNOWN_VERSIONS` array | 15 suites | **yes** — "ladder" |
+| **array ladder under another name** | `t31`'s **`ORDER`**, L275, 24 tags | **yes** — "ladder" (it counts every literal equal to the tag, whatever the array is called) |
+| **object / value map** | `t33`'s **`PINS`**, L60, 11 tags | **yes, from 2026-09-15** — "keyed registry entries (a judgement)". Before then **no**: a map key is never a visited `Literal`, and `t33` DIED on it at v5.66, v5.70 and v5.72 |
+| **OR-chain that IS a ternary's test** | `t24` L92 (`DIV`) and **L254 (`_k`)**, `t28` L61 — 19 tags each | **yes** — "gated" |
+
+⚠ **Corrected 2026-09-15 (`SCOPE_TOOLING_GAPS_V572`, D-5).** This table used to say the sweep misses the
+last three shapes. **Measured at v5.72, it missed only the map:** `t31` counted 2 ladder + 4 gated = its
+six `"v572"` literals, `t24` 1 + 3 = 4, `t28` 1 + 2 = 3. The map shape is now counted as a **judgement**,
+not a mechanical entry, because a new map entry needs its VALUES decided. `t21` asserts every shape
+against a fixture with known answers. The cautions below about *how to extend* each shape are unchanged.
 
 ⚠ **`t31`'s `ORDER` is the dangerous one.** `ORDER.indexOf(VER)` returns **`-1`** for an unregistered
 tag, which scores *every* disclosure key as pre-fix and silently runs the KNOWN-DEFECT branch instead
@@ -852,20 +857,22 @@ step of recording a false green. The tool's *printed* usage named only two of th
 until 2026-09-08 while its header comment named all four; both now agree, which is the fix for the
 cause rather than the symptom.
 
-⚠ **Expect `K-1`–`K-3` to be RED pre-ship on a correct release manifest, and GREEN on a stale one.**
-They anchor the Current-build table to the *committed* tree, and a release package by construction
-carries a manifest that has rolled ahead of the commit. So this class of defect is **invisible until
-after the upload, by construction** — which is why the post-ship run is a checklist step and not a
-suggestion. Never soften a K check to make a pre-ship run look clean; the diagnosis of that split is
-real and unscoped, and softening it would delete the only gate that has ever caught this. *(An ops
+✓ **`K-1`–`K-3` read the tree AS THE PACKAGE LEAVES IT (from 2026-09-15, `SCOPE_TOOLING_GAPS_V572`).**
+For `CHANGELOG.md`, `src/DangerClose.jsx` and `index.html` they read the package's `github/` copy when it
+ships one, else the clone, and each detail line says which. **So they are GREEN pre-ship on a correct
+release manifest and RED on a stale one**, and post-ship they behave exactly as before. *Until then* they
+read the committed tree only, and were red pre-ship on every correct app release by construction — the
+split this paragraph used to call "real and unscoped". Nothing was softened: control **P57** (P29's
+mutation, pre-upload) fires, and **P56** is its false-positive pair. The post-ship run is still a
+checklist step — J and K-4…K-9 read the pool, and only a post-upload pool can answer them. *(An ops
 package that changes no version and no source is the exception: its Current table already matches
 the tree, so `K-1`–`K-3` are green in both runs.* ⚠ *This parenthetical used to end "and `D-1` goes
 red post-ship instead — that is the expected complement, not a defect." **That is no longer true and
 was rewritten in the same package that changed it**, 2026-09-14. `D-1` now asks a DIFFERENT question
 in each phase and is GREEN in both on a correct release — see the D-1 block below.)*
 
-⚠ **`K-1`–`K-3` are not the whole pre-ship red set when the pool is passed — measured at the v5.68 ship
-(added 2026-09-10).** With all four arguments, an **app release** ran **39 passed, 7 failed** pre-ship:
+⚠ **`K-1`–`K-3` WERE not the whole pre-ship red set when the pool is passed — measured at the v5.68 ship
+(added 2026-09-10; from 2026-09-15 `K-1`–`K-3` leave that set, the four pool checks remain).** With all four arguments, an **app release** ran **39 passed, 7 failed** pre-ship:
 `K-1`, `K-2`, `K-3`, **and `J-1`, `J-2`, `K-4`, `K-6`**. The last four read the POOL against the
 package and its rolled manifest, and a pool that has not yet received the upload cannot agree with
 either; all four went green post-ship with nothing changed but the upload. Post-ship the same package
@@ -909,7 +916,13 @@ It does **not** see an **extra** copy committed elsewhere — the v5.68 shape in
 every packaged file *did* land, `changed` is 0, and this passes clean. The §F clone diff remains the
 only thing in the release path that sees an extra path.
 
-⚠ **This is also why `P29` looked broken, and the received diagnosis was wrong.** `P29` mutates the
+⚠ **Run `package_check_controls.sh` TWICE — once with the PRIOR clone, once with the post-upload clone
+(measured 2026-09-15).** Its controls are phase-bound: `P17` (E-1b) can only fire against the pre-upload
+tree, and `P48` (B-2) only against the post-upload one, so any single invocation reports exactly one miss.
+Read the two runs together: every control must fire in at least one, and nothing else may miss.
+Set `PRIOR_CLONE` and `HANDOVER_PKG` for `P56`–`P61`, which otherwise SKIP.
+
+⚠ **HISTORY (resolved 2026-09-15 — P57 now fires pre-upload on an app release).** **This is also why `P29` looked broken, and the received diagnosis was wrong.** `P29` mutates the
 manifest stale and asks `K-1` to notice — but on an app-release package `K-1` is *already* red
 pre-ship, so the control could not distinguish its own mutation from the baseline. It was recorded
 as not firing *"against an ops package"*; run against one on 2026-09-08 it **fired**. The real
