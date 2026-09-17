@@ -21,13 +21,13 @@ const require = createRequire(import.meta.url);
 
 const VER = process.argv[2];
 const ARTIFACT = process.argv.includes("--artifact");
-const KNOWN_VERSIONS = ["v569", "v570", "v571", "v572"];
+const KNOWN_VERSIONS = ["v569", "v570", "v571", "v572", "v573"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log(`    Registered: ${KNOWN_VERSIONS.join(", ")}`);
   process.exit(1);
 }
-const POST_FIX = VER === "v570" || VER === "v571" || VER === "v572"; // B-3 fixed at v5.70
+const POST_FIX = VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573"; // B-3 fixed at v5.70
 
 if (!ARTIFACT) {
   dom.reconfigure({ url: "https://stextor.github.io/danger-close/" });

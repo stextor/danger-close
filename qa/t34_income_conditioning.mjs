@@ -26,7 +26,7 @@ import "./env_dom.mjs";
 let _s = 42; Math.random = () => { _s = (_s * 1103515245 + 12345) & 0x7fffffff; return _s / 0x7fffffff; };
 
 const VER = process.argv[2] || "v564";
-const KNOWN_VERSIONS = ["v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572"];
+const KNOWN_VERSIONS = ["v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -62,15 +62,19 @@ console.log(`t34 — INCOME CONDITIONING (${VER})`);
     // ⚠ THE ROSTER MOVES WITH EVERY POPULATE RELEASE, AND THAT IS ITS JOB. It is asserted as an
     //   EXACT SET, not a count and not a floor, so a release cannot populate a state and leave the
     //   map behind — which is the defect class this project has recorded six times in documents.
-    const _expTest = _v >= 569 ? "CT,NJ,NM,RI,VA" : _v >= 568 ? "CT,NJ,NM,VA" : _v >= 567 ? "CT,NJ,NM" : "CT,NM";
+    // v5.73: MAINE joins — its pension-deduction phaseout (SCOPE_ME_PHASEOUT_MT_CORRECTIONS).
+    const _expTest = _v >= 573 ? "CT,ME,NJ,NM,RI,VA" : _v >= 569 ? "CT,NJ,NM,RI,VA" : _v >= 568 ? "CT,NJ,NM,VA" : _v >= 567 ? "CT,NJ,NM" : "CT,NM";
     const _expOpen = _v >= 569 ? [] : _v >= 568 ? ["RI"] : _v >= 567 ? ["RI", "VA"] : ["RI", "VA", "NJ"];
-    T(`A-1 [v5.67]: EXACTLY ${_expTest.split(",").length} states carry \`exclTest\` — ${_expTest} (New Jersey joined at v5.67, Virginia at v5.68${_v >= 569 ? ", Rhode Island at v5.69" : ""})`,
+    T(`A-1 [v5.67]: EXACTLY ${_expTest.split(",").length} states carry \`exclTest\` — ${_expTest} (New Jersey joined at v5.67, Virginia at v5.68${_v >= 569 ? ", Rhode Island at v5.69" : ""}${_v >= 573 ? ", Maine at v5.73" : ""})`,
       withTest.join(",") === _expTest);
     if (withTest.join(",") !== _expTest) console.log(`        populated: ${withTest.join(", ") || "(none)"}`);
     // ⚠ v5.69: the remaining list is EMPTY, and `[].every(...)` is TRUE — the old A-3 would pass on any
     //   table at all (OPERATIONS §D1-adjacent; SCOPE_RI_POPULATE §6). So from v569 it asserts the five
     //   statutes BY NAME, each carrying a table, and that nothing remains open.
-    if (_v >= 569)
+    if (_v >= 573)
+      T("A-3 [v5.73]: ALL SIX income-conditioned states (CT, ME, NJ, NM, RI, VA) carry `exclTest`, asserted by name — none remains unconditional",
+        _expOpen.length === 0 && ["CT", "ME", "NJ", "NM", "RI", "VA"].every((c) => RULES[c] && RULES[c].exclTest !== undefined));
+    else if (_v >= 569)
       T("A-3 [v5.69]: ALL FIVE income-conditioned states (CT, NJ, NM, RI, VA) carry `exclTest`, asserted by name — none remains unconditional",
         _expOpen.length === 0 && ["CT", "NJ", "NM", "RI", "VA"].every((c) => RULES[c] && RULES[c].exclTest !== undefined));
     else
@@ -134,8 +138,16 @@ console.log(`t34 — INCOME CONDITIONING (${VER})`);
       RULES.CT.exclTest.cmp === "lt" && RULES.CT.exclTest.unit === "household");
     T("A-5 [v5.66]: CT still carries `exclAge: 0` — without it `_floor` defaults to 65 and every under-65 household is silently denied the exemption Connecticut grants on income alone",
       RULES.CT.exclAge === 0);
-    T("A-6 [v5.66]: `exclTest` and `ssOffset` remain mutually exclusive — no state carries both",
-      Object.values(RULES).every((r) => !(r.exclTest !== undefined && r.ssOffset)));
+    // ⚠ v5.73: RE-GATED, NOT WEAKENED (SCOPE_ME_PHASEOUT_MT_CORRECTIONS D-1). `phaseout` is the ONE shape whose
+    //   composition with `ssOffset` was decided (it scales the post-offset exclusion), and Maine carries both.
+    //   `bands` and `taper` still replace `_one` and still may not sit on an offset row.
+    if (_v >= 573)
+      T("A-6 [v5.73]: an `ssOffset` row may carry ONLY a `phaseout` test — and exactly one row (ME) carries both",
+        Object.values(RULES).every((r) => !(r.exclTest !== undefined && r.ssOffset && r.exclTest.kind !== "phaseout")) &&
+        Object.keys(RULES).filter((c) => RULES[c].exclTest !== undefined && RULES[c].ssOffset).join(",") === "ME");
+    else
+      T("A-6 [v5.66]: `exclTest` and `ssOffset` remain mutually exclusive — no state carries both",
+        Object.values(RULES).every((r) => !(r.exclTest !== undefined && r.ssOffset)));
   } else if (_v >= 565) {
     T("A-1 [v5.65]: EXACTLY ONE state carries `exclTest` — Connecticut, the first populated state",
       withTest.join(",") === "CT");

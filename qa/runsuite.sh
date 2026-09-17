@@ -100,6 +100,11 @@ tally "t37-$CUR"   node t37_mydata_draft.mjs "$CUR"
 # clamp; the current leg asserts each extinct. It is in the APP total. About two minutes per leg.
 tally "t38-$PRIOR" node t38_import_hardening.mjs "$PRIOR"
 tally "t38-$CUR"   node t38_import_hardening.mjs "$CUR"
+
+# t39 (v5.73) runs on BOTH legs: the prior leg pins Maine's unphased deduction and Montana's $5,500 and
+# half-taxed SS; the current leg carries the hand-computed cells. It is in the APP total.
+tally "t39-$PRIOR" node t39_me_mt.mjs "$PRIOR"
+tally "t39-$CUR"   node t39_me_mt.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

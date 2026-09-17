@@ -34,7 +34,7 @@ let _s = 42; Math.random = () => { _s = (_s * 1103515245 + 12345) & 0x7fffffff; 
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v546";
-const KNOWN_VERSIONS = ["v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572"];
+const KNOWN_VERSIONS = ["v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -260,7 +260,12 @@ T("C-reverse: 'ladder_windows' goes from clear to ON when both spouses share a b
   //   TY2025 and was missing from the list; stage 2 adds it as data, and the model does not condition it yet.
   //   So the set is {ME} by design and F-6 is again the non-empty guard. When Maine is populated it empties
   //   and F-6 inverts again — in that release, with its own gate.
-  if (_v6 >= 572)
+  // ⚠ v5.73: INVERTED AGAIN, as the v5.72 note above said it would be — Maine is conditioned (its phaseout,
+  //   SCOPE_ME_PHASEOUT_MT_CORRECTIONS), so all six in-law statutes carry `exclTest` and the set is empty.
+  if (_v6 >= 573)
+    T("F-6 [v5.73]: NO STATE_RULES entry carries an income-limited 65+ exclusion the model applies unconditionally \u2014 all six known statutes are conditioned, Maine included",
+      limited.length === 0, `${limited.length} found: ${limited.join(",")}`);
+  else if (_v6 >= 572)
     T("F-6 [v5.72]: at least one STATE_RULES entry carries an income-limited 65+ exclusion the model applies unconditionally — Maine, until it is populated",
       limited.length > 0, `${limited.length} found`);
   else if (_v6 >= 569)
@@ -281,7 +286,7 @@ T("C-reverse: 'ladder_windows' goes from clear to ON when both spouses share a b
   //   these red while F-6 stays green. That is the whole of §D1's record, and qa/tools/controls_v568_va.py
   //   runs it. When RHODE ISLAND is populated this set EMPTIES: F-6 must then INVERT, deliberately,
   //   with the census row retired in the same release — never weakened to stay green.
-  const _exp6 = _v6 >= 572 ? ["ME"] : _v6 >= 569 ? [] : _v6 >= 568 ? ["RI"] : ["RI", "VA"];   // v5.69: EMPTY — Rhode Island converted
+  const _exp6 = _v6 >= 573 ? [] : _v6 >= 572 ? ["ME"] : _v6 >= 569 ? [] : _v6 >= 568 ? ["RI"] : ["RI", "VA"];   // v5.69: EMPTY — Rhode Island converted
   EQ(`F-6a: the income-limited-but-unconditional set has exactly ${_exp6.length} member(s) on this leg`,
     limited.length, _exp6.length);
   EQ(`F-6b: and they are exactly ${_exp6.join(", ") || "none (the set is empty)"} \u2014 if this changes, the release that changed it owns F-6`,

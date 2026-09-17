@@ -434,8 +434,24 @@ const pass2E = pass, fail2E = fail;
     // exercises two branches at once.
     // hand MFJ:    0.0565 x ((60,000 - 11,000) + 10,000 + 15,000 + 5,000) = 0.0565 x 79,000 = 4,463.50
     // hand single: 0.0565 x ((60,000 -  5,500) + 10,000 + 15,000 + 5,000) = 0.0565 x 84,500 = 4,774.25
-    T("2E partial-SS (MT 5.65%, MFJ): half of federally-taxable SS enters the base", run("MT", 2), 4463.5);
-    T("2E partial-SS (MT 5.65%, single)", run("MT", 1), 4774.25);
+    // ⚠ v5.73 (SCOPE_ME_PHASEOUT_MT_CORRECTIONS D-4/D-5): Montana is NO LONGER a partial-SS state. Since TY2024
+    //   it starts from federal taxable income, so taxable SS is taxed in full, and its 65+ subtraction is the
+    //   TY2025 indexed $5,660. The archetype moves to COLORADO (4.4%, ss 0.5, $24,000 each, no condition), and
+    //   Montana keeps its own pair as the full-SS case.
+    // hand v573 MT MFJ:    0.0565 x ((60,000 - 11,320) + 10,000 + 30,000 + 5,000) = 0.0565 x 93,680 = 5,292.92
+    // hand v573 MT single: 0.0565 x ((60,000 -  5,660) + 10,000 + 30,000 + 5,000) = 0.0565 x 99,340 = 5,612.71
+    // hand CO MFJ:         0.044  x ((60,000 - 48,000) + 10,000 + 15,000 + 5,000) = 0.044  x 42,000 = 1,848
+    // hand CO single:      0.044  x ((60,000 - 24,000) + 10,000 + 15,000 + 5,000) = 0.044  x 66,000 = 2,904
+    const _v5 = Number(String(VER).replace(/[^0-9]/g, "")) || 0;
+    if (_v5 >= 573) {
+      T("2E partial-SS (CO 4.4%, MFJ): half of federally-taxable SS enters the base", run("CO", 2), 1848);
+      T("2E partial-SS (CO 4.4%, single)", run("CO", 1), 2904);
+      T("2E full-SS (MT 5.65%, MFJ) [v5.73]: ALL federally-taxable SS enters the base, $5,660 each", run("MT", 2), 5292.92);
+      T("2E full-SS (MT 5.65%, single) [v5.73]", run("MT", 1), 5612.71);
+    } else {
+      T("2E partial-SS (MT 5.65%, MFJ): half of federally-taxable SS enters the base", run("MT", 2), 4463.5);
+      T("2E partial-SS (MT 5.65%, single)", run("MT", 1), 4774.25);
+    }
     // NOT VACUOUS: a state with ss=0 on the same inputs must exclude SS entirely, or the assertion
     // above would pass on any implementation that simply ignored the flag.
     T("2E control: an ss=0 state excludes SS from the base",
@@ -504,8 +520,13 @@ const pass2E = pass, fail2E = fail;
       T("[KNOWN DEFECT 2026-08-12, pre-v5.29] MT taxes SS and its note does not say so",
         /social security|\bss\b/i.test(R.MT.note || "") ? 1 : 0, 0);
     }
-    T("2E control: there really are eight partial-SS states (not vacuous)",
+    T("2E control: there really are eight states that tax some SS (not vacuous)",
       Object.keys(R).filter(c => R[c].ss > 0).length, 8);
+    // v5.73: of the eight, Montana alone taxes the FULL federally-taxable amount; seven remain at half.
+    if (_v >= 573) {
+      T("2E [v5.73]: exactly seven partial-SS states (ss 0.5), and Montana at ss 1",
+        (Object.keys(R).filter(c => R[c].ss === 0.5).sort().join(",") === "CO,CT,MN,NM,RI,UT,VT" && R.MT.ss === 1) ? 1 : 0, 1);
+    }
     T("2E: and no state claims SS treatment it does not model",
       Object.keys(R).filter(c => !R[c].ss && /\bss (is )?taxed|taxes social security/i.test(R[c].note || "")).length, 0);
 
