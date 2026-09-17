@@ -1,5 +1,32 @@
 # Changelog
 
+## ops 2026-09-15 (sixth) — standing audit Phases 3 and 4 (Sections D, E, F) at v5.73, and the top-five summary
+
+KIND: ops. **v5.73 stays current**; no app source changes. **Findings only.** With the Phase 2 package, this completes a
+full run of `SCOPE_STANDING_AUDIT.md` against v5.73.
+
+- **Section D** — `MissingFeatures.md` gains a v5.73 re-pin block (every earlier item's status; D-3c and D-11's NM/RI halves
+  closed) and **D-14 to D-20**: the Taxes tab's missing drawdown (priority 1, with Phase 2's C-8), Maine's age test, filing
+  statuses beyond single and joint, the Additional Medicare Tax, tax-year refresh of state figures, the seven half-rate
+  Social Security states, and Montana's federal-deduction base.
+- **Section E** — `ARCHITECTUREIssues.md` gains **E-21 to E-28**: the Taxes and Withdrawal engines as parallel projections
+  (high); the same statute implemented up to five times with fixes landing in some copies; statutory rates repeated inline
+  (sites read one by one after a census that over-counted by value); tax-only border tests that cannot see a $1 edge
+  error; eight missing test classes, each of which would have caught a Phase 2 finding; the version requirement only
+  partly met (**the backup export carries a file-format number, not the build, and no hash appears in the app**); the
+  phase-bound control harness; and stale prose.
+- **Section F** — `UsabilityFlaws.md` gains a v5.73 re-pin block measured in real Chromium at three sizes across all 26
+  tabs: **F-11 (high)** — every tab scrolls sideways on a 390 px phone, because the retirement selector's
+  `repeat(3, 1fr)` grid cannot shrink below ≈566 px; **F-12** — on a phone the header and tab grid fill the first screen.
+  F-1, F-3 and F-4 hold; **F-10 is closed** (the Field Manual now points to the UI SIZE control). The harness ships as
+  `qa/tools/audit_phase4_v573/probe_ux.py` and reproduced every figure from that path.
+- **Top five** — `AUDIT_TOP_FIVE_SUMMARY.md` (repo only) gains the v5.73 two-paragraph summary: C-8; phone layout;
+  duplicated tax rules with partial fixes; C-3 and C-6; micro-typography.
+
+**Limitations.** Several earlier items are marked *not re-verified* rather than assumed. The usability pass measures
+layout, target size and type size; it cannot judge comprehension. One draft statement (that the manual never mentions UI
+SIZE) was checked against the raw Field Manual before shipping and found false; it was corrected.
+
 ## ops 2026-09-15 (fifth) — standing audit Phase 2 (Section C) at v5.73: findings, and the probes that reproduce them
 
 KIND: ops. **v5.73 stays current** — source `3bf1e15f1b28659aae9a78e3186d2ae8`, built `index.html`
