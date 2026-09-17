@@ -9,6 +9,34 @@
 
 ---
 
+> ### ☑ REWRITTEN FOR v5.73 — 2026-09-15 · THE STANDING AUDIT RAN AGAIN, ALL FOUR PHASES · READ THIS BOX FIRST
+>
+> Build v5.73 · source `3bf1e15f1b28659aae9a78e3186d2ae8` · built `index.html` `345ccbceb58bf74f9fbdde5db0646d1d`. Drawn from
+> `FlawsToFix-v5_73-Phase2.md` (Section C) and the v5.73 blocks of `MissingFeatures.md`, `ARCHITECTUREIssues.md` and
+> `UsabilityFlaws.md` (Sections D–F). Phase 1 (Sections A–B) is `FlawsToFix-v5_69-Phase1.md` and its v5.72–v5.73 header
+> notes. **The five below supersede the older lists in this document.**
+>
+> **The two paragraphs.** The most important problem is that **the Taxes tab and the Withdrawal plan project the same
+> household separately, and the Taxes tab never taxes the Traditional money the plan spends**: on the shipped example it
+> shows $0 federal tax in 2032–2038 while the plan draws about $238,000 from Traditional accounts, and it projects $1.63
+> million of lifetime RMDs against the plan's $1.02 million — under a heading that calls itself "your projected tax life
+> as-is" (C-8, E-21, D-14). Second, **on a phone the app does not fit**: one shell control forces every tab to about 566 px,
+> so all 26 tabs scroll sideways at 390 px, and the header and tab grid fill the first screen so a tapped tab's content
+> starts at its bottom edge (F-11, F-12, with F-1's absence of any breakpoint behind both). Third, **the same tax rule is
+> implemented in several engines and fixes land in some copies only** — five §86 implementations (Engine A still carries
+> the error v5.45 fixed elsewhere, C-4), two LTCG stackers that share a defect (C-6), four IRMAA tier comparisons that
+> share an off-by-one at the top tier (C-1) — and no suite compares engines with each other or covers the households that
+> expose these (E-22, E-25).
+>
+> Fourth, **two undisclosed tax errors reach mainstream households**: a surviving spouse under 65 is given the 65+
+> deductions through the deceased spouse's age (about $976 of tax understated in the first survivor year of the worked
+> case, C-3), and leftover standard deduction is not applied to dividends and capital gains, which overstates tax for an
+> early retiree living off a brokerage account by up to 15% of the unused deduction (C-6). Fifth, **the default
+> presentation is small for a 55-and-over audience**: visible text under 12 px on every tab at every size, 7–9 px on the
+> Trajectory chart, and touch targets under 44 px for 27 of 30 controls on a typical tab (F-4 and F-3, unchanged since
+> v5.38; the UI SIZE control mitigates, and since the v5.38 audit the Field Manual does point to it — F-10 is closed). Everything else the audit found is
+> smaller, disclosed, or both — and every statutory constant in the app matched its primary source (Section C §1).
+
 > ### ⚠ RE-PINNED TO v5.48 — 2026-08-25 · ITEM 1 IS LARGELY DISCHARGED, AND ITEM 5 JUST HAPPENED AGAIN
 >
 > Source `30ab12fba362b8ce538f66adea9a104b`, tree `ba6d598`. Nine releases since this summary was

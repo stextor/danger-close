@@ -9,6 +9,49 @@
 | Date | 2026-08-12 |
 | Status | **Re-pinned to v5.48 (2026-08-25) — read that block FIRST; it supersedes the v5.39 one.** ⚠ **D-6 has since CLOSED at v5.49 (2026-08-25)** — see its entry; the v5.48 block's HALF-CLOSED verdict is superseded for that item only, and every other item in that block still stands. Original v5.29 status: partial — D-1 verified to source, D-2 onward assessed. |
 
+> ## RE-PINNED TO v5.73 — 2026-09-15 · STANDING AUDIT PHASE 3 (SECTION D) · READ THIS BLOCK FIRST
+>
+> Source `3bf1e15f1b28659aae9a78e3186d2ae8`, built `index.html` `345ccbceb58bf74f9fbdde5db0646d1d`, repo `a06f41c`.
+> Twenty-five releases since the v5.48 re-pin. Written straight after Phase 2 (`FlawsToFix-v5_73-Phase2.md`), whose findings
+> feed the new items below. **Findings only; no fix was made.**
+>
+> **Method and its limits.** Items D-1 to D-13 were re-checked **by content** where this session's work touched them; the
+> rest are marked *not re-verified*. `L####` citations in the older blocks predate v5.73 and must not be used as addresses.
+>
+> ### Status of the existing items at v5.73
+>
+> | # | Status at v5.48 (or when opened) | **Status at v5.73** |
+> |---|---|---|
+> | D-1 | CLOSED | **CLOSED — confirmed.** Engine B applies the senior bonus per person exactly as Schedule 1-A Part V does (Phase 2, 12 border points); Engine A still omits it, as disclosed |
+> | D-2 | CLOSED | **CLOSED — confirmed.** Engine B's `capGains_y` comes from Engine D's gain series. ⚠ Its bridge is the *only* bridge between the two engines — see **D-14** |
+> | D-3 | holds (flat rates) | **HOLDS.** New evidence: Montana's DOR confirms two ordinary-income brackets; the model's one flat rate stands (a filed lead, `FlawsToFix-v5_69-Phase1.md` header). **D-3c (NJ, VA) is CLOSED** — both are income-conditioned since v5.67 / v5.68, and Maine, found to belong to the same class, since v5.73 |
+> | D-4 | holds (itemized deductions) | **HOLDS** — METHODOLOGY L120 still states "itemized deductions are not modeled" |
+> | D-5 | holds, decline | **HOLDS** — the QCD comment in `TAX_CONSTS` still says the one-time CRT/CGA election is not modeled |
+> | D-6 | CLOSED at v5.49 | *not re-verified* |
+> | D-7 | disclosure half closed at v5.50 | *not re-verified*; Phase 2 read the estate ranking's `HEIR_RATE` path (C-11) and found it as described |
+> | D-8b | accurate | **ACCURATE** — the ACA floor and cliff comparators were read in Phase 2 and match Rev. Proc. 2025-25 at 100% and 400% |
+> | D-11 | open (NM, RI, WI) | **NM and RI halves CLOSED** (populated at v5.66 / v5.69; Phase 2 executed NM's bands at the 42,000 edge). **WI half not re-verified** |
+> | D-12 | open (account type) | **HOLDS** — `OTHER_TAX_TYPES` is still `taxable, trad, roth, hsa, annuity`; no plan-type field |
+> | D-13 | open, unanswered | **HOLDS, unanswered** — no population fixture exists |
+>
+> ### New items at v5.73 (D-14 onward, below the existing entries)
+>
+> **D-14** Traditional spending withdrawals never reach the Taxes tab · **D-15** Maine's pension deduction has no
+> age-65 test · **D-16** filing statuses beyond single and joint · **D-17** the Additional Medicare Tax ·
+> **D-18** tax-year refresh of indexed state figures · **D-19** the seven half-rate Social Security states ·
+> **D-20** Montana's base should reflect federal deductions (the senior bonus).
+>
+> ### Priority order at v5.73 — for a mainstream couple within sight of retirement
+>
+> 1. **D-14** — wrong tax in ordinary drawdown years on the shipped example household (the fix belongs with Phase 2's C-8).
+> 2. **D-19** — the half-rate Social Security approximation was stale for Montana for two years; seven states remain.
+> 3. **D-12** — account type (Rhode Island's $2,000–$4,000/yr), then **D-11**'s WI half.
+> 4. **D-16** — head of household and the qualifying-surviving-spouse years (a widow(er) with a dependent).
+> 5. **D-18**, **D-20**, **D-15** — small, bounded, each already disclosed or filed.
+> 6. **D-3** (progressive state schedules), **D-4** (itemized), **D-17** (Additional Medicare) — disclosed or rarely
+>    reached by retirees; **D-5** stays declined.
+> 7. **D-13** is a research question, not a feature.
+
 > ## RE-PINNED TO v5.48 — 2026-08-25 · THIS BLOCK SUPERSEDES THE v5.39 ONE BELOW
 >
 > Source `30ab12fba362b8ce538f66adea9a104b`, built `index.html` `8895b249af1313920c0c762a7a22776c`,
@@ -1006,3 +1049,58 @@ Anything that removes a document from the pool should carry its re-homing in the
 
 *(Virginia's married-couple taper endpoint, the other open question in that set, survives
 independently in `AUDIT_STATE_EXCL65_ROUND3.md` and needed no re-homing.)*
+
+---
+
+# New at v5.73 — standing audit Phase 3 (2026-09-15)
+
+## D-14 · Traditional spending withdrawals never reach the Taxes tab
+
+**The feature that is missing is a single drawdown shared by the Taxes and Withdrawal tabs.** Engine B (Taxes) and
+Engine D (Withdrawal) are independent projections joined only by the realized-gains series (v5.32 D-4). Engine D funds
+spending from Traditional money before RMD age; Engine B never sees those draws and computes RMDs on a balance that was
+never drawn. On the shipped example household the Taxes tab shows **$0 federal tax in 2032–2038** while the plan draws
+≈$238,000 of Traditional money, and projects **$1.63M** of lifetime RMDs against the plan's **$1.02M**. The defect, its
+figures and its cause are **C-8** in `FlawsToFix-v5_73-Phase2.md`; it is listed here because fixing it is a feature — an
+engine relationship — rather than a line edit. **Priority 1.** Passes the product boundary test (it corrects an existing
+output).
+
+## D-15 · Maine's pension deduction has no age-65 test in law
+
+36 M.R.S. §5122(2)(M-2) limits the deduction by the §72(t) rule (and a 55-or-series rule for employer plans), not by age
+65; the model applies Maine's deduction from 65 (the default age floor). Pessimistic for a Maine retiree drawing
+retirement income before 65. Disclosed in Maine's note and METHODOLOGY at v5.73. Doing it right needs the 59½ rule per
+account, which touches D-12. **Low.**
+
+## D-16 · Filing statuses beyond single and joint
+
+The model files joint, or single after a death. It has no head-of-household status (which several state thresholds and
+the federal tables distinguish) and no qualifying-surviving-spouse years (joint brackets for two years after a death, for
+a survivor with a dependent child — METHODOLOGY L1077 notes the rule). Married-filing-separately is out of scope by the
+product boundary. **Low–medium**: a widow(er) with a dependent is uncommon but not rare in the app's population.
+
+## D-17 · The Additional Medicare Tax (0.9%) is not modelled
+
+The additional 0.9% Medicare tax on earned income above $200,000 / $250,000 joint (as stated in SSA's 2026 COLA fact sheet) appears nowhere in the
+source (a parser census of numeric literals finds no `0.009`), and METHODOLOGY does not mention it. It reaches only
+households still earning above those thresholds, which the app models in pre-retirement years. **Low.** Disclosure is the
+cheap half.
+
+## D-18 · Indexed state figures need a tax-year refresh
+
+Maine's $48,216 and both phaseout thresholds, and Montana's $5,660, are TY2025 figures, disclosed as such (v5.73 D-2);
+both states index them. Several other rows carry dated figures of their own. A small, recurring populate release, akin to
+the federal `TAX_CONSTANTS_YEAR` cycle but with no staleness banner of its own. **Low**, recurring.
+
+## D-19 · The seven half-rate Social Security states need re-checking against current law
+
+`ss: 0.5` stands for "income thresholds that exempt most retirees" (`stateTaxAnnual`, the ss-factor comment). Montana's
+0.5 had described pre-2024 law for two years before v5.73 corrected it. CO, CT, MN, NM, RI, UT and VT keep 0.5; each should
+be read against its current statute. Filed as a lead in `FlawsToFix-v5_69-Phase1.md`. **Medium** — the error is
+directional per state and large relative to the other state items.
+
+## D-20 · Montana's base should reflect federal deductions
+
+Montana starts from federal taxable income, so the federal senior bonus (2025–2028) and the age-65 extra lower Montana's
+base. The model's state measure is AGI-like and does not subtract them. Disclosed in METHODOLOGY at v5.73. **Low.**
+

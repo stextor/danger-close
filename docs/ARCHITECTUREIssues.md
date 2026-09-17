@@ -872,3 +872,111 @@ to figures-only regions (year tables, past all changed copy); the control now fa
 witness checks. Standing rule, both halves: the discriminating fixture is the heterogeneous one, and
 a divergence witness must be anchored to a region only the claimed mechanism can move.
 Severity: Medium (test-integrity).
+
+---
+
+# Standing audit at v5.73 — Phase 3, Section E (2026-09-15)
+
+**Build:** v5.73 · source `3bf1e15f1b28659aae9a78e3186d2ae8` · built `index.html` `345ccbceb58bf74f9fbdde5db0646d1d` · repo
+`a06f41c`. Written after Phase 2 (`FlawsToFix-v5_73-Phase2.md`), whose defects are the evidence for most items here.
+**Findings only.** Earlier E-items were not re-verified in this pass except where named. ⚠ **Numbering note:** `E-15` is
+used twice above (the MC-parity household, and `taxOrd` growth); left as is so existing references stay valid, and new
+items start at E-21.
+
+## E-21 · The Taxes and Withdrawal engines are parallel projections of one household
+
+Engine B and Engine D each project the same household's income, balances and RMDs, and share only Engine D's realized-gains
+series (v5.32 D-4 chose this, noting it "warrants an ARCHITECTUREIssues note when it lands" — this is that note, late). The
+consequence is Phase 2's **C-8**: the Taxes tab never taxes Traditional spending draws, and its RMDs run on a never-drawn
+balance ($1.63M against $1.02M on the example household). **No suite compares the two tabs:** `t17`/`t18` drive Engine B
+on draw-free households, and `domdiff` asserts byte identity across builds, not agreement between tabs. **Severity: high.**
+The fix is a design decision (one drawdown owner, as v5.32 chose for gains), not a line edit.
+
+## E-22 · The same statute is implemented many times, and fixes land in some copies only
+
+Measured at v5.73:
+
+| Rule | Sites | What drifted |
+|---|---|---|
+| IRC §86 taxable Social Security | **5** — Engine A L4161–4166, Engine C L4908–4910, Engine D L5360 (flat 85%), Engine B L5502–5517, Roth tab L9457 | v5.45 fixed "two places"; Engine A kept the error (**C-4**); Engine D never implemented §86 (**C-5**) |
+| LTCG / qualified-dividend stacking | **2** — `ltcgF` (A), `ltcgTax` (B) | both lose unused deduction the same way (**C-6**) |
+| IRMAA tier selection | **4** comparisons (A ×3, C ×1) around one shared threshold helper | the helper fixed the *year*; the comparator stayed `<=` everywhere (**C-1**) |
+| Age-65 extra, single filer | 1 shared helper, 3 callers, none passing liveness | **C-3** — the helper cannot know who died |
+| Federal ordinary brackets | `fedTaxF` (A), `fedOrdinaryTax` (B), `projectBrackets` (Roth tab), Engine D's display bracket | Engine D's display uses the joint table for everyone (**C-5**) |
+
+This is the pattern `E-9` and the v5.16 `taxFactsFor` extraction already named; it continues. **Severity: medium** —
+the cost is not the duplication but that a correction to one copy reads as closed. Suggested direction: shared pure
+functions for §86, LTCG stacking and tier selection, each with its own dollar-exact test, as `stateTaxAnnual` already is.
+
+## E-23 · Law-dependent constants that live outside the constant blocks
+
+`TAX_CONSTS`, `OBBBA_CONSTS`, `IRMAA_CONSTS`, `ACA_CONSTS` and `STATE_RULES` are the sanctioned homes and were verified
+against primary sources in Phase 2 §1. A parser census of numeric literals (v5.73) finds statutory rates repeated **inline**:
+
+| Literal | What it is | Inline sites |
+|---|---|---|
+| `0.038` | NIIT rate | **3** (L4399, 4519, 5659) — the census also hit L727/730/743 (historical-returns data) and L1087 (Iowa's 3.8% state rate), which are not NIIT |
+| `0.26`, `0.28` | AMT rates | 3 each (L4403, 4523, 5671) |
+| `0.062` | OASDI rate | 3 (L4417, 4536, 5676) |
+| `0.0145` | Medicare HI rate | **3** (L4417, 4536, 5676) — plus one historical-returns value at L727 |
+| `0.85` | §86 cap | at the §86 sites in E-22 (the census also counts unrelated `0.85`s in state tables and UI grading) |
+| `73`, `75` | SECURE 2.0 RMD ages | 3 and 15 literals, some unrelated (the census cannot tell an RMD age from another 75) |
+
+*Sites read one by one after the census, which had over-counted by value (corrected before shipping).* None is wrong today. Each is a place that must change in lock-step if the law changes, and none is covered by the
+Verify tab. **Severity: low–medium.** ⚠ The census is by literal value; distinguishing a statutory 75 from any other 75
+needs reading each site, which this pass did not do.
+
+## E-24 · Tests that pass on amounts cannot see a $1 bracket-edge error
+
+Found while building Phase 2's border harness: moving one bracket top by $1 changes tax by (upper rate − lower rate) × $1,
+which is always under $1, so a dollar-tolerance **tax** assertion cannot detect it. Phase 2 added a marginal-bracket check
+(Engine B reports its bracket); **Engine A reports none**, so its edges are covered only within the tolerance. Suites that
+assert tax at bracket edges (`t10`, `t15`, `t17`, `t18`) inherit the same blindness unless they also assert the rate.
+**Severity: low.** Suggested direction: every border test pairs the amount with the rate, and Engine A exposes its bracket.
+
+## E-25 · Missing test classes, each of which would have caught a Phase 2 finding
+
+| Class | Would have caught | Nearest existing test |
+|---|---|---|
+| Cross-tab agreement: Taxes tab vs Withdrawal plan, same year, same household | C-8, C-5 | none |
+| Ordinary income below the deduction, with gains or dividends | C-6 | `t18`/`t17` households all have ordinary income above the deduction |
+| Survivor under 65, older spouse deceased | C-3 | `t15` uses equal birth years |
+| MAGI exactly on an IRMAA threshold (not ±1) | C-1 | `t13` checks transitions, not the exact edge |
+| Single household with stored spouse-B data, in every engine | C-7 | the Roth tab's guard is tested; Engine D's absence is not |
+| Every Other-account type through every engine, with realized gains on | C-10 | `t20` covers tax type, not gains |
+| Annuity share over a long horizon | C-9 | opening-balance checks only |
+| A §86 case with benefits under $9,000 / $12,000, per engine | C-4 | `t27` covers the Roth tab and Engine B, not Engine A |
+
+**Severity: medium** as a class. Phase 2's probes (`qa/tools/audit_phase2_v573/`) reproduce each case and are the natural
+seed for suites, but they assert nothing today.
+
+## E-26 · The standing version requirement is only partly met
+
+`SCOPE_STANDING_AUDIT.md` requires the version to be visible in the app, in every artifact a user might quote, in every
+exported data file, with a recorded source hash and a copyable bug-report line. At v5.73:
+
+| Requirement | Status |
+|---|---|
+| Visible in the running app | ✓ — footer "DANGER CLOSE v5.73 │ …" (L11944), DATA LOAD header, Field Manual callsign and footer |
+| In quotable artifacts | ✓ — Field Manual; CHANGELOG |
+| **In the exported backup** | **✗** — the export object is `{ app: "DangerClose", version: 5, exportedAt, … }` (L12440). `version: 5` is a **file-format** number; the build (5.73) and hash are absent, and the embedded AI context does not carry the version either (the version string occurs only at the four UI sites) |
+| Source hash recorded per release | ✓ — CHANGELOG and the manifest |
+| **Copyable bug-report line (version + hash)** | **✗** — no hash appears anywhere in the app |
+
+**Severity: low–medium.** User reports quoting a backup cannot be pinned to a build; the fix is small (add the build
+string, and a build hash if the build can inject one, to the export and the footer).
+
+## E-27 · The control harness is phase-bound, and one run always reports a miss
+
+`package_check_controls.sh`'s P17 fires only against the pre-upload tree and P48 only against the post-upload one, so any
+single invocation reports one miss (measured twice on 2026-09-15). `OPERATIONS.md` now says to run it in both phases.
+**Severity: low**; recorded here because a harness that always shows one red teaches its readers to ignore red.
+
+## E-28 · Documents that describe the code have gone stale in two measured places
+
+- METHODOLOGY's §86 passage says the half-benefits cap "is applied in both places as of v5.45" and, in the next
+  paragraph, that the same fixes "remain uncorrected" (Phase 2 **D-1**); neither mentions Engine A.
+- `OPERATIONS.md`'s registry-shapes table said `vercensus` missed three shapes; measured, it missed one (corrected in the
+  tooling ops package, 2026-09-15).
+**Severity: low.** The pattern — prose that records a fix but not its scope — is the documentary twin of E-22.
+

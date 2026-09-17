@@ -42,6 +42,57 @@
 > F-2 "correction" that was a harness artifact. Both were inference stated with more confidence than
 > it had earned, which is this document's recurring failure mode rather than carelessness.
 
+
+> ## RE-PINNED TO v5.73 — 2026-09-15 · STANDING AUDIT PHASE 4 (SECTION F) · READ THIS BLOCK FIRST
+>
+> Source `3bf1e15f1b28659aae9a78e3186d2ae8`, built `index.html` `345ccbceb58bf74f9fbdde5db0646d1d` (the **built** page was
+> tested, not the source), repo `a06f41c`. **Findings only.**
+>
+> **Method.** Real Chromium 141 via Playwright (not jsdom, which does no layout): the disclaimer gate accepted, "Use
+> example data", then **all 26 tabs** visited at **desktop 1440×900**, **tablet 820×1180 (touch)** and **phone 390×844
+> (mobile, touch)**. Per tab: document `scrollWidth` against the viewport, elements whose right edge passes the viewport,
+> interactive elements under 44 px in either dimension, and visible text under 12 px. Screenshots were read for the
+> dashboard and Taxes tabs at phone size. The harness ships as `qa/tools/audit_phase4_v573/probe_ux.py` (asserts nothing)
+> and reproduced every figure below when rerun from that path. ⚠ Automated measures cannot judge comprehension or flow;
+> the flow observations come from the screenshots.
+>
+> ### What changed since v5.38
+>
+> | # | v5.38 | **v5.73** |
+> |---|---|---|
+> | F-1 no breakpoints | HIGH (phone) | **HOLDS** — `@media` occurs exactly **once** in the source, inside `DOCS_HTML` |
+> | F-2 unwrapped grids overflow | HIGH (phone) — measured on the IRMAA tab | **WORSE — now every tab; see F-11** |
+> | F-3 tab strip | MED | **HOLDS exactly** — 26 buttons, **27 px tall** at every size; "SHOW FEWER TABS" (Simple Mode) still present |
+> | F-4 micro-typography | HIGH | **HOLDS** — visible text under 12 px on every tab at every size (33–113 nodes per tab; 10–11 px throughout, **7–9 px** on Trajectory) |
+> | F-5 … F-9 | — | *not re-verified in this pass* |
+> | F-10 UI SIZE undocumented | MED (docs) | **CLOSED** — the Field Manual's skins entry now says the UI SIZE control (100 / 115 / 130 / 150%) "enlarges everything — useful on high-DPI displays and for aging eyes" (read from the raw `DOCS_HTML` string) |
+> | F-11, F-12 | — | **NEW** (below) |
+>
+> ### F-11 · NEW · Every tab scrolls sideways on a phone, because of one shell control — **HIGH (phone)**
+>
+> **Measured (390 px):** the document is **566 px** wide on 19 of the 26 tabs and wider on the rest — Guardrails 680,
+> Expenses 638, Monte Carlo 624, Social Security 621, Income 611, Stress 608, Positions 571. Desktop and tablet: **no**
+> sideways scroll on any tab. The disclaimer gate and the landing screen fit (390).
+> **Cause:** the retirement selector (L6400) is `display: grid; gridTemplateColumns: "repeat(3, 1fr)"` over three `.rbtn`
+> date cards. A `1fr` track cannot shrink below its content's minimum width, so the row claims ≈566 px whatever the
+> screen — the screenshot shows the third card and the allocation strip ("HEDG…") cut off at the right. Because the
+> selector sits in the shell, **no tab can fit**, which subsumes F-2's per-table cases on a phone.
+> **Fix shape:** `repeat(3, minmax(0, 1fr))` or an auto-fit column rule for the selector; F-2's per-table wrappers for the
+> tabs that are wider still.
+>
+> ### F-12 · NEW · On a phone the first screen is all chrome — **MED (phone)**
+>
+> **Measured (390×844):** the header, the three retirement cards, the allocation strip, the example-data banner and the
+> wrapped 26-tab grid end at **y = 824 px** of an 844 px screen, so the selected tab's content begins at the bottom edge on
+> every tab (desktop: content starts at y = 406 of 900). A phone user who taps a tab sees no change above the fold.
+> **Mitigation that exists:** Simple Mode shrinks the tab grid. **Fix shape:** collapse the header and the tab strip on
+> narrow screens (the app has no breakpoint to hang that on — F-1).
+>
+> ### Touch targets, remeasured
+>
+> Under 44 px in either dimension, counted per tab at 390 px: typically **27 of 30** interactive elements; My Data **443 of
+> 447**. This is F-3 and F-6's ground, now measured across every tab rather than the tab strip alone.
+
 ## A. Method — and its honest limits
 
 Everything below was established by **direct inspection of the v5.38 source and byte-level checks of the runtime HTML the source produces** (the `DOCS_HTML` string was decoded from its JS literal to the exact bytes the iframe receives; CSS/grid arithmetic and WCAG contrast ratios were computed, not eyeballed).
