@@ -643,6 +643,20 @@ carries the full entry for what it built and four suites still assert the invari
 decision record was lost. That check is the precondition, not a formality — this project has already
 deleted a manifest section rather than repairing it once.
 
+### The pooled CHANGELOG is the recent part (added 2026-09-15)
+
+**`CHANGELOG.md` in the pool holds v5.60 onward; everything older is `docs/CHANGELOG_ARCHIVE_pre_v5_60.md`, repo
+only.** The split recovered space when the pool reached 98% of capacity. The rules that make it safe: the archive is
+**verbatim** (provenance lines included) and never edited; new entries still go at the top of `CHANGELOG.md`; nothing
+may be written that needs the archive to be pooled — the suites mention the CHANGELOG only in comments, and
+`package_check` reads only the newest release entries (H-1, H-2, K-1–K-3). If space runs short again, move the next
+block of oldest entries into a **new** archive file (never append to an old one), and say so in the pooled file's
+closing pointer and in this paragraph.
+
+**Un-pooling a retired document** follows the three-place rule above with one difference: the repo copy **stays**.
+The manifest row is marked *un-pooled, repo-only*, and §G's decision check is run line by line first — anything still
+open is re-homed into a pooled register **in the same package** (the 2026-09-14 near-miss, `MissingFeatures.md` D-13).
+
 ### Project knowledge is flat, add-only — so delete-first
 
 Uploading a file whose name already exists creates a **second copy** rather than replacing the first. Two
