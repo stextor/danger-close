@@ -1,5 +1,32 @@
 # Changelog
 
+## ops 2026-09-18 (second) — the pool half of the probe package, which shipped repo-only
+
+`KIND: ops`. Leaves **v5.73** current. No app source, no version change, no suite total change.
+
+**The defect, plainly.** The ops package earlier today edited `qa/tools/package_check.mjs` (the I-2 OPEN
+allowlist entry for `SCOPE_TAXES_DRAWDOWN.md`), rolled its hash row in the manifest to
+`bbb9fac0478a9e3f45af6868961b2153`, and shipped **only the repo copy**. `package_check.mjs` is a **pooled**
+file, so the pool kept `2554d811fe…` while the manifest asserted the new hash — a row claiming a hash the
+pool does not hold, which is the exact failure §I calls worse than no row at all, because §A's fallback then
+returns a confident MATCH on a file that has drifted. Caught post-ship by **`package_check` K-8** against the
+uploaded pool. The gate worked; the packaging session did not.
+
+**Why it happened, for the next session.** The package was assembled as "probes go to `qa/tools/`, repo
+only" — true of the probes, and carried across to `package_check.mjs` because it lives in the same
+directory. Directory is not destination: the manifest's own §A2 note records this file being uploaded to the
+pool at the v5.42 refresh and its row being missed for a day, and the same manifest says adding a file and
+adding its row are two acts. This is the third act nobody names — **changing a pooled file means shipping
+BOTH copies**, and the repo path is not the test of whether a file is pooled.
+
+**What this package does.** Ships `package_check.mjs` to the pool, so the pool matches the repo and the row.
+`PROJECT_KNOWLEDGE_INDEX.md` gains a note recording the miss; the `package_check.mjs` row is **not** rolled —
+it was already correct and the pool is what was wrong. `CHANGELOG.md`'s row is rolled last, as always.
+
+**Verified.** `package_check` re-run with all four positionals against the uploaded pool: the earlier package
+scored 47 passed, 1 failed, K-8 the only failure and this its cause. Nothing else in that package was
+affected — J-1 and J-2 passed, so both knowledge files it did ship landed and none landed stale.
+
 ## ops 2026-09-18 — the C-8 scope's probes, and the allowlist entry that scope shipped without
 
 `KIND: ops`. Leaves **v5.73** current (source `3bf1e15f1b28659aae9a78e3186d2ae8`, built `index.html`
