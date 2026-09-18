@@ -1,7 +1,10 @@
 # SCOPE — the Taxes tab and the drawdown (C-8 / E-21 / D-14)
 
-**STATUS: AWAITING DECISIONS — DO NOT BUILD.** Eight decisions are open (§6). Nothing is built, no source line is
-changed, and no version is claimed until Steve has answered them.
+**STATUS (2026-09-18): DECISIONS RESOLVED — BUILDABLE. NOT BUILT as of this line.** All eight decisions were resolved
+on 2026-09-18 by Steve adopting the scope's recommendations (§6). No source line has been changed and no version is
+claimed. ⚠ Per OPERATIONS §I, this line is evidence of what was true when it was written and nothing makes it expire —
+**a later session confirms against `CHANGELOG.md` and the source before believing it**, and retires this document at
+the ship of the release that fulfils it.
 
 **Build this scope was written against:** v5.73 · source md5 `3bf1e15f1b28659aae9a78e3186d2ae8` · built `index.html`
 `345ccbceb58bf74f9fbdde5db0646d1d` · repo clone HEAD `a9484d2`. Freshness check (OPERATIONS §A, §A2) run at the top of
@@ -220,6 +223,9 @@ By AST over `qa/` (§B1a — identifiers, member-expression properties, and stri
 
 ## 5 · The design space
 
+**Resolved 2026-09-18 → Shape A2** (Engine D owns the drawdown; Engines B and C consume both the draw series and the
+balance path). The rejected shapes are kept below because a scope that records only the winner cannot be audited.
+
 Three shapes, in increasing order of cost. Each is stated with what it fixes and what it leaves broken.
 
 **Shape A — Engine D owns the drawdown; Engine B (and optionally C) consume it.** v5.32's D-4, extended from gains to
@@ -247,61 +253,65 @@ of the shapes above still ships the disclosure**, because even A2 leaves approxi
 
 ---
 
-## 6 · Open decisions — Steve's call
+## 6 · Decisions — RESOLVED 2026-09-18
 
-### D-1 · Who owns the drawdown?
-**Recommendation: Shape A (Engine D owns it; Engine B consumes).** It is the precedent the file already set at v5.32,
+All eight were resolved in one step: Steve adopted the scope's recommendations as written. The recommendation text is
+left intact under each heading so the reasoning and the rejected alternatives travel with the decision.
+
+### ✅ D-1 · Who owns the drawdown? → **Engine D owns it; Engine B consumes**
+**Recommendation (adopted): Shape A (Engine D owns it; Engine B consumes).** It is the precedent the file already set at v5.32,
 it keeps one drawdown in the codebase, and it is the only option that leaves the Withdrawal tab as the single answer
 to "what does this plan actually do." *Rejected:* Shape B (a second copy — E-22); Shape C alone (the tab's own
 sentence would have to be un-written rather than qualified, and a "high" finding would stay open).
 
-### D-2 · Draws only (A1), or draws plus the balance path (A2)?
-**Recommendation: A2.** A1 is measurably half a fix that makes one half worse: it adds the early tax (+$16,160 on the
+### ✅ D-2 · Draws only, or draws plus the balance path? → **the balance path (A2)**
+**Recommendation (adopted): A2.** A1 is measurably half a fix that makes one half worse: it adds the early tax (+$16,160 on the
 example household, §3.4) while leaving lifetime RMDs 59% above the plan's, so the tab would overstate the late years
-*more* confidently than it does now. If the budget only stretches to A1, then **A1 must ship with the RMD divergence
-disclosed in the same release**, and the scope should say so explicitly rather than treating A1 as a milestone toward
-A2. ⚠ *This is the decision that sets the size of the build; everything below is contingent on it.*
+*more* confidently than it does now. The A1 fallback (draws only, with the RMD divergence disclosed in the
+same release) was offered and **not taken**; it is recorded here so that a later session which finds the build running
+long knows the fallback exists and knows its condition — A1 ships only with that disclosure, never as a silent
+milestone toward A2. ⚠ *This is the decision that set the size of the build; everything else is contingent on it.*
 
-### D-3 · Units — nominal draws into a today's-dollars engine
-**Recommendation: deflate the draw series to the engine's convention at the call site**, i.e. divide Engine D's
+### ✅ D-3 · Units → **deflate at the call site, and disclose it**
+**Recommendation (adopted): deflate the draw series to the engine's convention at the call site**, i.e. divide Engine D's
 nominal draw by its own cumulative inflator before handing it to Engine B, so the imported term sits in the same units
 as the pension and Social Security beside it — and **disclose the choice in METHODOLOGY**, naming the direction.
 *Alternative:* import nominal and accept a growing pessimism in the back half. *Do not:* leave it undecided — that is
 how the same boundary got crossed silently at v5.36, and the same question should be answered for `gainByYr` in this
 release. **The counterfactual in §3.4 was computed nominal**, so the lifetime figure will move once this is settled.
 
-### D-4 · Roth conversions
+### ✅ D-4 · Roth conversions → **unchanged this release; cap divergence recorded**
 The two engines already agree on the conversion *input* (`rothAmount`) but cap it differently: Engine B at
 `tradBal − max(rmd, qcd)` (L5610), Engine D at `tradNotional_boy − rmd` (L5155), and only Engine B knows about QCDs.
-**Recommendation: leave the conversion arithmetic alone in this release** and record the cap divergence as a
+**Recommendation (adopted): leave the conversion arithmetic alone in this release** and record the cap divergence as a
 follow-up finding. Under A2 the caps converge on their own, because both would then be measured on one balance path;
 under A1 they do not, and that is another reason to prefer A2.
 
-### D-5 · QCDs
+### ✅ D-5 · QCDs → **out of scope, disclosed**
 The QCD lever is Engine B's alone: Engine D has no QCD concept, so gifted dollars never leave the drawdown's portfolio
-and a QCD makes the two balance paths disagree by construction. **Recommendation: out of scope for this release, and
+and a QCD makes the two balance paths disagree by construction. **Recommendation (adopted): out of scope for this release, and
 disclosed** — the QCD modeler is explicitly a what-if, so the honest statement is that setting it above $0 makes the
 Taxes tab diverge from the Withdrawal plan by the gifted amount. *Alternative (more work, cleaner):* Engine D takes
 `qcdAnnual` and gifts the money out of its own Traditional pool, which would make the modeler consistent everywhere.
 
-### D-6 · Engine C (IRMAA)
+### ✅ D-6 · Engine C (IRMAA) → **included in the same release**
 Engine C's MAGI (L4911) has the identical gap and the identical existing bridge (it already takes `gainByYr` at
-L4759 and the IRMAA tab already calls Engine D at L10401). **Recommendation: include Engine C in the same release.**
+L4759 and the IRMAA tab already calls Engine D at L10401). **Recommendation (adopted): include Engine C in the same release.**
 Leaving it out would ship a build where the Taxes tab taxes the draws and the IRMAA tab does not — a new cross-tab
 contradiction, created by fixing one. The marginal cost is one call-site loop and one MAGI term; the marginal test
 cost is `t17`/`t25`/`t32` re-baselined and one more cross-tab case.
 
-### D-7 · Engine A (the Roth comparator)
-**Recommendation: explicitly out of scope, and say so in METHODOLOGY.** Engine A's ordinary base (L4304) is
+### ✅ D-7 · Engine A (the Roth comparator) → **out of scope, recorded as an open finding**
+**Recommendation (adopted): explicitly out of scope, and say so in METHODOLOGY.** Engine A's ordinary base (L4304) is
 `pen + work + otherOrd + rmd` — the same gap — but its taxable pool is sold only to fund taxes and ACA losses, and its
 output is a *differential* between conversion strategies, where a spending draw common to both paths largely cancels.
 "Largely" is doing work in that sentence, so this should be recorded as an open finding with its size unmeasured,
 not as a clean exclusion.
 
-### D-8 · Scenario coupling
+### ✅ D-8 · Scenario coupling → **follow the selected scenario**
 Engine D's schedule depends on the Monte Carlo scenario, and the draw series moves a long way with it — lifetime
 ordinary draw is **$352,485 base, $660,662 bear, $352,386 bull**. The gains bridge already follows the selected
-scenario, and the Taxes tab already tells the user so (L10140). **Recommendation: follow the same scenario**, and
+scenario, and the Taxes tab already tells the user so (L10140). **Recommendation (adopted): follow the same scenario**, and
 extend the existing sentence so it names draws as well as gains. The consequence Steve should weigh: **the Taxes
 tab's headline lifetime figure will start moving when the scenario picker moves**, which is correct but new.
 
@@ -329,8 +339,8 @@ tab's headline lifetime figure will start moving when the scenario picker moves*
 
 1. Same household, same year, both engines driven at module level: the Taxes tab's ordinary income equals the
    Withdrawal plan's ordinary income, to the dollar, for every common year.
-2. Lifetime RMDs agree between Engine B and Engine D (A2 only; under A1 this becomes a **pinned known divergence**
-   with today's figures, so the gap is a checked fact rather than an omission).
+2. Lifetime RMDs agree between Engine B and Engine D — live, since A2 was chosen. (Had A1 shipped instead, this
+   would have been a **pinned known divergence** carrying today's figures, so the gap stayed a checked fact.)
 3. The example household exactly as shipped, because that is where the defect is user-visible — asserting the seven
    years 2032–2038 are no longer $0 federal tax, with the post-decision counterfactual figures hand-verified.
 4. A no-portfolio household: the bridge contributes $0 and every figure is byte-identical to the pre-fix build. This
@@ -387,7 +397,7 @@ re-run it is how a scope goes stale.
 
 ## 11 · Sequencing
 
-1. Steve answers D-1 … D-8.
+1. ~~Steve answers D-1 … D-8.~~ **Done 2026-09-18** — all eight adopted as recommended (§6).
 2. The build session re-runs the §A freshness check, computes the **to-the-dollar lifetime counterfactual** under the
    chosen design (this is the first build task, not the last — if it comes out materially different from §3.4, the
    premise has changed and the rule is to stop and report, not to adapt).
