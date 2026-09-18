@@ -1,5 +1,46 @@
 # Changelog
 
+## ops 2026-09-18 — the C-8 scope's probes, and the allowlist entry that scope shipped without
+
+`KIND: ops`. Leaves **v5.73** current (source `3bf1e15f1b28659aae9a78e3186d2ae8`, built `index.html`
+`345ccbceb58bf74f9fbdde5db0646d1d`). No app source, no version change, no suite total change.
+
+**What this package carries.**
+
+- **Three probes for `SCOPE_TAXES_DRAWDOWN.md` §3**, repo only, at `qa/tools/audit_phase2_v573/` beside
+  `audit_c8.mjs`. They assert nothing and are counted in no total. `scope_c8_probe.mjs` recovers the
+  quantity a C-8 fix must bridge — Engine D's own ordinary-draw recognition, **$352,485** lifetime on base
+  against the audit's narrower $238,144 — and prints the two engine disagreements the audit did not record:
+  growth (D 3.518% weighted vs B's flat 4.500%) and units (2034 Social Security, D 45,331 COLA'd vs B 39,600
+  flat). `scope_c8_probe2.mjs` prints the scenario and conversion sensitivity (draw $352,485 base /
+  **$660,662 bear** / $352,386 bull). `scope_c8_probe3.mjs` is the partial counterfactual — Engine B taxing
+  those draws with its balance path unchanged — at **+$16,160** of federal tax across 2032–2038.
+- **`qa/tools/package_check.mjs`** gains the I-2 OPEN-allowlist entry for `SCOPE_TAXES_DRAWDOWN.md`. The
+  scope shipped one package earlier **without** it, which would have turned I-2 red naming it — the same
+  shape as 2026-09-14's `SCOPE_RELEASE_GATES_AND_HOUSEKEEPING.md`, and the gate working as designed. The
+  entry records that all eight of the scope's decisions were resolved on 2026-09-18, so it is
+  OPEN-because-UNBUILT, and names its expiry as the build that fulfils it.
+- **`PROJECT_KNOWLEDGE_INDEX.md`** gains the pool row for `SCOPE_TAXES_DRAWDOWN.md` — **the third place a
+  document has to land, and the one that was missed**: the scope was committed to `docs/` and uploaded to
+  the pool on 2026-09-18 with no manifest row at all. Pool **121 → 122**.
+
+**Limitations, stated rather than implied.** The probes recover Engine D's draw terms as a *residual* of its
+published MAGI identity, because `tradDraw` (L5302) and `othOrdDraw` (L5241) are computed and never
+published; that recovery is exact only on a household with no ordinary income streams, and each probe's
+header says so. `scope_c8_probe3.mjs`'s 2029–2031 rows are **contaminated and labelled as such in its own
+output** — any real income stream suppresses the demo spouse-B work taper (measured: `work_y` 20,000 → 0 in
+2029) — and its state/total-tax column is not usable, because the fixture routes the draw through the state
+module's work base. Only the federal figure on the clean years is quotable, and the probe prints both
+totalling bases so the scope's $16,160 is reproducible rather than approximately so.
+
+**Verified.** All three probes run from the packaged copies before the zip was cut, reproducing the scope's
+figures; `scope_c8_probe3.mjs`'s negative control (the `applyLoadedData` round-trip with no streams) moves
+Engine B by $0 in both federal and state tax, so its deltas are the draws' and not the fixture's. The §A
+freshness check was run at the start of the session: pool source, repo `src/DangerClose.jsx` and the
+manifest all hash to `3bf1e15f…`, and 120 of the pool's 121 files content-matched a committed file, the
+exception being the prior-build source, which is pool-only by design. No app suite applies to this package;
+`package_check` was run against the zip.
+
 ## ops 2026-09-15 (seventh) — project-knowledge space: twelve retired documents leave the pool; the CHANGELOG is split
 
 KIND: ops. **v5.73 stays current**; no app source, suite or harness changes. The pool was at 98% of capacity.
