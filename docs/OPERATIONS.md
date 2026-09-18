@@ -1214,6 +1214,30 @@ the suite from the packaged copies; not green → no zip) · the manifest is the
 and never ships · **`qa/smoke_built.mjs` runs after the build and before the zip is cut** — a release is
 not verified until the built artifact has been *exercised*, not merely inspected.
 
+⚠ **A file's POOL MEMBERSHIP is answered by the manifest, not by its repo path (added 2026-09-18).**
+"Changed files only" above says which files ship; it does not say which *destinations* each one ships to,
+and a file that lives in the pool **and** the repo has to ship to both or the two drift apart. The test is
+the manifest's inventory — never the directory the file sits in.
+
+**The instance.** The 2026-09-18 probe package edited `qa/tools/package_check.mjs`, rolled its §A2 hash row
+to the new value, and shipped only the `github/` copy. `package_check.mjs` is pooled, so the pool kept the
+old bytes while the manifest asserted the new hash — the false-MATCH shape §I calls worse than no row,
+because §A's fallback then returns a confident MATCH on a file that has drifted. It was caught post-ship by
+`package_check` **K-8** and corrected by a second package the same day.
+
+**Why the mistake was available.** The package's other new files were probes under
+`qa/tools/audit_phase2_v573/`, which are correctly repo-only, and `package_check.mjs` sits one directory up.
+The package was assembled as *"`qa/tools/` is repo-only"* — true of the probes, false of the tool, and the
+directory is what carried the error across. The manifest's own §A2 note already records this same file being
+uploaded to the pool and going a day without a row, so this is the second time `package_check.mjs`
+specifically has been caught by the gap between "where it lives" and "where it belongs."
+
+**The check to run, in one line:** for every file in `github/`, ask whether the manifest names it as pooled;
+if it does, there must be a `knowledge/` copy and a delete-first entry for it. `package_check` K-8 catches
+the manifest half post-ship, which is a gate and not a plan — the plan is to answer the question while
+packaging.
+
+
 **The shape of the zip is CHECKED, not remembered** (added 2026-08-21). `qa/tools/package_check.mjs`
 takes the built zip and a fresh clone and verifies what this section requires: the three index files
 are present; every `MANIFEST.txt` md5 matches the file it names; `github/` holds **exactly** the
