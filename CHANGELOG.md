@@ -1,5 +1,30 @@
 # Changelog
 
+## ops 2026-09-18 (third) — OPERATIONS §L gains the pool-membership test that today's miss needed
+
+`KIND: ops`. Leaves **v5.73** current. Documentation only: no source, no version, no suite total change.
+
+**What changed.** §L now states, in one block, that **a file's pool membership is answered by the manifest,
+not by its repo path** — with the instance that earned it (this morning's `package_check.mjs` miss, where
+the file's `qa/tools/` location made a pooled file look repo-only), the reason the mistake was available,
+and the check to run while packaging: for every `github/` file, ask whether the manifest names it as pooled;
+if it does, there must be a `knowledge/` copy and a delete-first entry.
+
+**Why write it down at all.** The miss was caught by `package_check` K-8 post-ship and corrected the same
+day, so nothing shipped broken — but K-8 is a gate, not a plan, and §L is the section a session packages
+*from*. The manifest's §A2 note already recorded `package_check.mjs` going a day without a row in August;
+that is twice for one file, from the same gap between where a file lives and where it belongs. A second
+occurrence is the project's own standard for writing a rule rather than remembering one.
+
+⚠ **Deliberately NOT a second copy of an existing answer.** The block adds the destination test and points
+at §I's hash-row obligation rather than restating it — the same discipline §L's own four-argument paragraph
+follows, and the failure mode (two documents that disagree and never notice) this project has now recorded
+against §A2, the manifest's rotation section, and `TESTING.md`'s build sentence.
+
+**Verified.** `package_check` against a fresh clone before the zip was cut; the post-ship run closes section
+J and K-8. The §A2 clone-and-diff was re-run this session after the two earlier packages: 121 of 122 pool
+files content-match a committed file, the exception being the prior-build source, pool-only by design.
+
 ## ops 2026-09-18 (second) — the pool half of the probe package, which shipped repo-only
 
 `KIND: ops`. Leaves **v5.73** current. No app source, no version change, no suite total change.
