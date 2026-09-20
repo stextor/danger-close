@@ -1,10 +1,12 @@
 # SCOPE — the Taxes tab and the drawdown (C-8 / E-21 / D-14)
 
-**STATUS (2026-09-18, amended the same day): ONE DECISION OPEN — D-9. NOT BUILT.** Eight decisions were resolved on
-2026-09-18 by Steve adopting the scope's recommendations (§6). **§11 step 2's counterfactual was then measured, and it
-sent two of them back** (§3.5): **D-3 is NARROWED** — it deflates the draw term only, not the RMD term — and a ninth
-decision, **D-9 (does the Taxes tab adopt Engine D's growth?), is OPEN** because the measurement showed A2 as written
-bundled a modeling change nobody had decided. The scope is **not buildable until D-9 is answered**; everything else stands. No source line has been changed and no version is
+**STATUS (2026-09-18, third revision): ALL NINE DECISIONS RESOLVED — BUILDABLE. NOT BUILT as of this line.** Eight were
+resolved on 2026-09-18 by Steve adopting the scope's recommendations (§6). **§11 step 2's counterfactual was then
+measured before any source change, and it sent two of them back** (§3.5): **D-3 was NARROWED** — it deflates the draw
+term only, not the RMD term — and **D-9 was raised** because the measurement showed A2 as written bundled a modeling
+change nobody had decided. **D-9 was resolved the same day: keep `BASE_GROWTH` in Engine B.** ⚠ Per OPERATIONS §I this
+line is evidence of what was true when written and nothing makes it expire — confirm against `CHANGELOG.md` and the
+source before believing it. No source line has been changed and no version is
 claimed. ⚠ Per OPERATIONS §I, this line is evidence of what was true when it was written and nothing makes it expire —
 **a later session confirms against `CHANGELOG.md` and the source before believing it**, and retires this document at
 the ship of the release that fulfils it.
@@ -359,14 +361,14 @@ scenario, and the Taxes tab already tells the user so (L10140). **Recommendation
 extend the existing sentence so it names draws as well as gains. The consequence Steve should weigh: **the Taxes
 tab's headline lifetime figure will start moving when the scenario picker moves**, which is correct but new.
 
-### ⬜ D-9 · Does the Taxes tab adopt Engine D's growth assumption? → **OPEN**
+### ✅ D-9 · Does the Taxes tab adopt Engine D's growth assumption? → **NO — keep `BASE_GROWTH`**
 **Raised 2026-09-18 by the §3.5 measurement, which found A2 had been bundling it invisibly.** Engine B grows
 Traditional at a flat `BASE_GROWTH` 4.500% (L5546 / L993); Engine D uses scenario-derived per-bucket returns, weighting
 to **3.518%** on base. If Engine B consumes Engine D's *balance path* (D-2), it inherits D's growth whether or not
 anyone chose it — worth **$42,146** of lifetime federal tax on the example household, on top of the $35,624 the defect
 itself is worth.
 
-**Recommendation: keep `BASE_GROWTH` in Engine B for this release.** Engine B consumes Engine D's *draws* and recomputes
+**Recommendation (adopted 2026-09-18): keep `BASE_GROWTH` in Engine B for this release.** Engine B consumes Engine D's *draws* and recomputes
 the balance path with its own growth, so the release changes exactly one thing and the Taxes tab's headline moves 15%
 rather than 62%. A user told "we fixed a defect, your projected lifetime tax fell 15%" can follow that; the same user
 told it fell 62% will reasonably ask which figure was the lie.
@@ -376,7 +378,17 @@ returns are more considered than a flat rate and that two growth rates for one b
 so it wants its own release, its own disclosure, and a look at the other three projections on `BASE_GROWTH`
 (L4146 Engine A, L8264 and L9360 the component-inline ones), because fixing one of five is how the file got here.
 
-⚠ **This decision gates the build.** It is a fork in what the release *means*, not a parameter.
+⚠ **This decision gated the build and no longer does.** It was a fork in what the release *means*, not a parameter,
+which is why it was raised rather than absorbed. **Reversing it is a one-line change here plus a re-measurement** —
+§3.5's third row is what the adopted alternative costs ($166,270 lifetime, −$77,770 against shipped), so the price of
+changing your mind is known rather than guessed.
+
+⚠ **What this decision OBLIGES the build to do.** Engine B consumes Engine D's *draws*; it does **not** inherit Engine
+D's balance path wholesale, because that path carries D's growth. B recomputes the Traditional balance with its own
+`BASE_GROWTH`, minus the imported draws. That is the variant §3.5 measured at **$208,416** and it is the figure the
+build must reproduce. ⚠ **This qualifies D-2**: "draws plus the balance path" now means *the path recomputed from the
+draws*, not the path copied. A build that copies D's balance path will land on $166,270 and be $42,146 wrong against
+the decision, while looking like a successful A2.
 
 ---
 
@@ -468,8 +480,9 @@ re-run it is how a scope goes stale.
 1. ~~Steve answers D-1 … D-8.~~ **Done 2026-09-18** — all eight adopted as recommended (§6).
 2. ~~The build session computes the to-the-dollar lifetime counterfactual.~~ **Done 2026-09-18, BEFORE any source
    change — see §3.5.** It came out materially different, the session stopped and reported rather than adapting, and
-   the result was D-3 narrowed and D-9 raised. **Steve answers D-9.** The build re-runs the §A freshness check and
-   re-measures under whatever D-9 settles, since the figures in §3.5 assume the recommendation.
+   the result was D-3 narrowed and D-9 raised. **D-9 was answered the same day** (keep `BASE_GROWTH`), so §3.5's
+   second row, **$208,416**, is the figure this build must reproduce. The build re-runs the §A freshness check and
+   re-measures; a result near $166,270 means D's balance path was copied rather than recomputed (see D-9).
 3. Publish Engine D's terms; verify `t19` and MC parity are unmoved **before** touching Engine B.
 4. Engine B, then Engine C (if D-6 is yes).
 5. New suite, negative controls, full suite from the packaged copies, disclosure sweep, §L packaging.
