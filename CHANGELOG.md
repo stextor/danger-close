@@ -1,5 +1,28 @@
 # Changelog
 
+## ops 2026-09-18 (fifth) — D-9 resolved: the Taxes tab keeps `BASE_GROWTH`; the C-8 scope is buildable
+
+`KIND: ops`. Leaves **v5.73** current. No app source, no version, no suite total change.
+
+**The decision.** Engine B keeps its own `BASE_GROWTH` (4.500%, L5546 / L993) rather than inheriting Engine D's
+scenario-derived 3.518%. So the C-8 release changes exactly one thing — the Taxes tab stops projecting RMDs on money
+the plan has already spent — and its headline moves **−$35,624 (15%)** on the example household rather than −$77,770
+(32%) or −$152,311 (62%). A 15% correction is explainable to a user in one sentence; the larger figures would have
+bundled a modeling change nobody asked for into a defect fix.
+
+**What it obliges the build to do, recorded in the scope because it is easy to get wrong.** "Engine B consumes Engine
+D's balance path" (D-2) now means **the path RECOMPUTED from D's draws at B's own growth**, not D's path copied. A
+build that copies the path inherits D's growth silently and lands at $166,270 — **$42,146 away from the decision while
+looking like a successful A2**. The figure the build must reproduce is **$208,416**, and §3.5's table is the check.
+
+**Reversal is priced, not guessed.** Adopting D's growth later costs one line in §6 plus a re-measurement, and §3.5's
+third row already says what it comes to. The wider question — five projections in the file grow Traditional at
+`BASE_GROWTH` (Engine A L4146, Engine B L5546, the component-inline pair at L8264 and L9360) — belongs to E-22 and to
+a release where all of them can be looked at together, not to this one.
+
+**Verified.** Documentation only; no code, no probes, no figures re-derived. `package_check` against a fresh clone
+before the zip was cut; canonical source is still `3bf1e15f1b28659aae9a78e3186d2ae8`.
+
 ## ops 2026-09-18 (fourth) — the C-8 counterfactual, measured before the build, and what it sent back
 
 `KIND: ops`. Leaves **v5.73** current. No app source, no version, no suite total change.
