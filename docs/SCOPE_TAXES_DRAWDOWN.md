@@ -1,7 +1,10 @@
 # SCOPE — the Taxes tab and the drawdown (C-8 / E-21 / D-14)
 
-**STATUS (2026-09-18): DECISIONS RESOLVED — BUILDABLE. NOT BUILT as of this line.** All eight decisions were resolved
-on 2026-09-18 by Steve adopting the scope's recommendations (§6). No source line has been changed and no version is
+**STATUS (2026-09-18, amended the same day): ONE DECISION OPEN — D-9. NOT BUILT.** Eight decisions were resolved on
+2026-09-18 by Steve adopting the scope's recommendations (§6). **§11 step 2's counterfactual was then measured, and it
+sent two of them back** (§3.5): **D-3 is NARROWED** — it deflates the draw term only, not the RMD term — and a ninth
+decision, **D-9 (does the Taxes tab adopt Engine D's growth?), is OPEN** because the measurement showed A2 as written
+bundled a modeling change nobody had decided. The scope is **not buildable until D-9 is answered**; everything else stands. No source line has been changed and no version is
 claimed. ⚠ Per OPERATIONS §I, this line is evidence of what was true when it was written and nothing makes it expire —
 **a later session confirms against `CHANGELOG.md` and the source before believing it**, and retires this document at
 the ship of the release that fulfils it.
@@ -169,6 +172,40 @@ This is still only half the story — it is the *early* half, and it does not in
 overstatement. **The to-the-dollar lifetime counterfactual is a deliverable of the build, not of this scope**, because
 its value depends on which design is chosen (§6, D-2 especially).
 
+### 3.5 · The lifetime counterfactual (§11 step 2, measured 2026-09-18) — and the two decisions it sent back
+
+§11 said the build's FIRST task is the to-the-dollar counterfactual, and that a materially different figure means stop
+and report rather than adapt. It was measured before any source change, and it is materially different.
+
+**Method.** Engine B does all the tax arithmetic; the fixture changes only WHAT INCOME reaches it, which is what A2
+changes. For the split, Engine B's Traditional balance loop (L5590-5601, L5698-5702) was reimplemented outside the
+engine and **validated by reproducing the shipped RMD series to the dollar — worst-year error $0.00, lifetime
+$1,625,926 against $1,625,926** — before any draw term was added. Six fixture checks pass in the tax leg (B's own RMD
+zeroed, work income $53,000 and FICA $4,055 preserved, SS $1,144,800 and pension $120,000 unchanged, 25 rows both
+sides). Probes: `cf_growth_split.mjs` (the split, self-validating), `cf_a2.mjs` and `cf_a2_decomp.mjs` (the variants).
+
+| Variant | Lifetime RMD | Lifetime federal | vs shipped |
+|---|---|---|---|
+| As shipped (C-8 live) | $1,625,926 | **$244,040** | — |
+| **The C-8 fix alone** — draws leave the balance, Engine B keeps its own 4.5% | $1,321,030 | **$208,416** | **−$35,624** |
+| + Engine D's growth adopted (3.518%) | $1,078,121 | **$166,270** | −$77,770 |
+| + Engine D's RMD series imported and deflated (D-3 as first written) | — | **$91,729** | −$152,311 |
+
+**What this changes.**
+
+1. **The defect is worth −$35,624, about 15% — not the 62% that A2 as first written produced.** §3.4's early-year
+   +$16,160 was real and is unaffected; the late-year RMD correction is larger and runs the other way, so the lifetime
+   net is a reduction. The scope's "mis-timed rather than simply low" holds in direction.
+2. **D-3 as first written was carrying $74,541 of the movement.** "Deflate the imported series" applied to the RMD term
+   replaces a term derived from a nominally-compounding balance with a deflated one. That is not a units correction; it
+   is a second and larger change wearing one's clothes. **D-3 is narrowed to the draw term only.**
+3. **A2 silently adopted Engine D's growth assumption, worth a further $42,146.** That is a modeling change to the Taxes
+   tab, not a fix to C-8, and it was never a decision. **It is now D-9.**
+
+⚠ **The direction matters to the product, not just the arithmetic.** This is a deliberately pessimistic stress-tester,
+and the most severe open defect is one whose correction LOWERS the headline. A 15% reduction is explainable in a
+sentence; a 62% reduction is a different conversation, and the difference between them was two under-specified words.
+
 ---
 
 ## 4 · Site census
@@ -272,8 +309,15 @@ same release) was offered and **not taken**; it is recorded here so that a later
 long knows the fallback exists and knows its condition — A1 ships only with that disclosure, never as a silent
 milestone toward A2. ⚠ *This is the decision that set the size of the build; everything else is contingent on it.*
 
-### ✅ D-3 · Units → **deflate at the call site, and disclose it**
-**Recommendation (adopted): deflate the draw series to the engine's convention at the call site**, i.e. divide Engine D's
+### ✅ D-3 · Units → **deflate the DRAW term only, at the call site, and disclose it**
+⚠ **NARROWED 2026-09-18 by measurement (§3.5), after being adopted the same day in its original wording.** As first
+written this said "deflate the imported series", which read across to the RMD term and was worth **$74,541** of lifetime
+tax on its own — more than the defect being fixed. Engine B's own RMD term is derived from a balance compounding at a
+nominal 4.5%, so it is not in today's dollars either; deflating the imported replacement makes it *more* real than the
+term it replaces. **The draw term is deflated. The RMD term is imported as Engine D computes it.** The original
+recommendation, preserved: 
+
+**Recommendation (adopted, now narrowed): deflate the draw series to the engine's convention at the call site**, i.e. divide Engine D's
 nominal draw by its own cumulative inflator before handing it to Engine B, so the imported term sits in the same units
 as the pension and Social Security beside it — and **disclose the choice in METHODOLOGY**, naming the direction.
 *Alternative:* import nominal and accept a growing pessimism in the back half. *Do not:* leave it undecided — that is
@@ -314,6 +358,25 @@ ordinary draw is **$352,485 base, $660,662 bear, $352,386 bull**. The gains brid
 scenario, and the Taxes tab already tells the user so (L10140). **Recommendation (adopted): follow the same scenario**, and
 extend the existing sentence so it names draws as well as gains. The consequence Steve should weigh: **the Taxes
 tab's headline lifetime figure will start moving when the scenario picker moves**, which is correct but new.
+
+### ⬜ D-9 · Does the Taxes tab adopt Engine D's growth assumption? → **OPEN**
+**Raised 2026-09-18 by the §3.5 measurement, which found A2 had been bundling it invisibly.** Engine B grows
+Traditional at a flat `BASE_GROWTH` 4.500% (L5546 / L993); Engine D uses scenario-derived per-bucket returns, weighting
+to **3.518%** on base. If Engine B consumes Engine D's *balance path* (D-2), it inherits D's growth whether or not
+anyone chose it — worth **$42,146** of lifetime federal tax on the example household, on top of the $35,624 the defect
+itself is worth.
+
+**Recommendation: keep `BASE_GROWTH` in Engine B for this release.** Engine B consumes Engine D's *draws* and recomputes
+the balance path with its own growth, so the release changes exactly one thing and the Taxes tab's headline moves 15%
+rather than 62%. A user told "we fixed a defect, your projected lifetime tax fell 15%" can follow that; the same user
+told it fell 62% will reasonably ask which figure was the lie.
+
+*Alternative (defensible, and probably right eventually):* adopt D's growth, on the grounds that per-bucket expected
+returns are more considered than a flat rate and that two growth rates for one balance is E-22's duplication again. If
+so it wants its own release, its own disclosure, and a look at the other three projections on `BASE_GROWTH`
+(L4146 Engine A, L8264 and L9360 the component-inline ones), because fixing one of five is how the file got here.
+
+⚠ **This decision gates the build.** It is a fork in what the release *means*, not a parameter.
 
 ---
 
@@ -387,6 +450,11 @@ From a clone, per OPERATIONS §B:
 cd <dir>/qa/tools/audit_phase2_v573 && node audit_c8.mjs
 ```
 
+The §3.5 probes — `cf_growth_split.mjs` (the split; it validates its own reimplementation of Engine B's balance loop
+against the shipped RMD series before reporting anything), `cf_a2.mjs` and `cf_a2_decomp.mjs` (the A2 variants) — are in
+the same folder and are run the same way. **`cf_growth_split.mjs` exits non-zero if its validation fails**, so a future
+build that changes Engine B's balance loop will be told rather than quietly given wrong figures.
+
 The three probes written for this scope (`scope_c8_probe.mjs` — the ordinary-draw series and the growth/units
 comparison; `scope_c8_probe2.mjs` — scenario and conversion sensitivity; `scope_c8_probe3.mjs` — the partial
 counterfactual and its negative control) assert nothing and are counted in no total. **They belong in
@@ -398,9 +466,10 @@ re-run it is how a scope goes stale.
 ## 11 · Sequencing
 
 1. ~~Steve answers D-1 … D-8.~~ **Done 2026-09-18** — all eight adopted as recommended (§6).
-2. The build session re-runs the §A freshness check, computes the **to-the-dollar lifetime counterfactual** under the
-   chosen design (this is the first build task, not the last — if it comes out materially different from §3.4, the
-   premise has changed and the rule is to stop and report, not to adapt).
+2. ~~The build session computes the to-the-dollar lifetime counterfactual.~~ **Done 2026-09-18, BEFORE any source
+   change — see §3.5.** It came out materially different, the session stopped and reported rather than adapting, and
+   the result was D-3 narrowed and D-9 raised. **Steve answers D-9.** The build re-runs the §A freshness check and
+   re-measures under whatever D-9 settles, since the figures in §3.5 assume the recommendation.
 3. Publish Engine D's terms; verify `t19` and MC parity are unmoved **before** touching Engine B.
 4. Engine B, then Engine C (if D-6 is yes).
 5. New suite, negative controls, full suite from the packaged copies, disclosure sweep, §L packaging.
