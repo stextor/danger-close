@@ -1,5 +1,90 @@
 # Changelog
 
+## ops 2026-09-18 (fourth) — the C-8 counterfactual, measured before the build, and what it sent back
+
+`KIND: ops`. Leaves **v5.73** current. No app source, no version, no suite total change.
+
+**`SCOPE_TAXES_DRAWDOWN.md` §11 step 2 was executed** — the to-the-dollar lifetime counterfactual, which that section
+names as the build's FIRST task precisely so a wrong premise is caught before code moves. It came out materially
+different, so the session **stopped and reported rather than adapting**, which is the rule that step exists to trigger.
+
+**The figures** (Engine B's own arithmetic throughout; the balance-loop reimplementation used for the split reproduces
+the shipped RMD series to the dollar — worst year $0.00 — before any draw term is added):
+
+| Variant | Lifetime federal | vs shipped |
+|---|---|---|
+| As shipped (C-8 live) | $244,040 | — |
+| **The C-8 fix alone** — draws leave the balance, Engine B keeps its 4.5% | **$208,416** | **−$35,624** |
+| + Engine D's growth adopted (3.518%) | $166,270 | −$77,770 |
+| + Engine D's RMD series imported and deflated (D-3 as first written) | $91,729 | −$152,311 |
+
+**What it sent back.** **D-3 is narrowed**: "deflate the imported series" read across to the RMD term and was worth
+$74,541 on its own — more than the defect being fixed — because Engine B's own RMD comes off a nominally-compounding
+balance, so deflating the replacement makes it *more* real than the term it replaces. The draw term is deflated; the
+RMD term is not. **D-9 is raised and is OPEN**: A2 silently adopted Engine D's growth assumption, worth a further
+$42,146, which is a modeling change to the Taxes tab rather than a fix to C-8. The scope is **not buildable until D-9
+is answered**, and its status line says so.
+
+**Why this is in the CHANGELOG at all, with nothing shipped.** The figure a release will quote moved from a 62%
+reduction to a 15% one, and the reason was two under-specified words in a decision that had already been adopted. The
+next session reads the scope, not this chat.
+
+**Verified.** Three probes ship to `qa/tools/audit_phase2_v573/`, repo only. `cf_growth_split.mjs` exits non-zero if its
+reimplementation stops matching Engine B, so it cannot silently rot. No source was touched: canonical is still
+`3bf1e15f1b28659aae9a78e3186d2ae8`.
+
+## ops 2026-09-18 (third) — OPERATIONS §L gains the pool-membership test that today's miss needed
+
+`KIND: ops`. Leaves **v5.73** current. Documentation only: no source, no version, no suite total change.
+
+**What changed.** §L now states, in one block, that **a file's pool membership is answered by the manifest,
+not by its repo path** — with the instance that earned it (this morning's `package_check.mjs` miss, where
+the file's `qa/tools/` location made a pooled file look repo-only), the reason the mistake was available,
+and the check to run while packaging: for every `github/` file, ask whether the manifest names it as pooled;
+if it does, there must be a `knowledge/` copy and a delete-first entry.
+
+**Why write it down at all.** The miss was caught by `package_check` K-8 post-ship and corrected the same
+day, so nothing shipped broken — but K-8 is a gate, not a plan, and §L is the section a session packages
+*from*. The manifest's §A2 note already recorded `package_check.mjs` going a day without a row in August;
+that is twice for one file, from the same gap between where a file lives and where it belongs. A second
+occurrence is the project's own standard for writing a rule rather than remembering one.
+
+⚠ **Deliberately NOT a second copy of an existing answer.** The block adds the destination test and points
+at §I's hash-row obligation rather than restating it — the same discipline §L's own four-argument paragraph
+follows, and the failure mode (two documents that disagree and never notice) this project has now recorded
+against §A2, the manifest's rotation section, and `TESTING.md`'s build sentence.
+
+**Verified.** `package_check` against a fresh clone before the zip was cut; the post-ship run closes section
+J and K-8. The §A2 clone-and-diff was re-run this session after the two earlier packages: 121 of 122 pool
+files content-match a committed file, the exception being the prior-build source, pool-only by design.
+
+## ops 2026-09-18 (second) — the pool half of the probe package, which shipped repo-only
+
+`KIND: ops`. Leaves **v5.73** current. No app source, no version change, no suite total change.
+
+**The defect, plainly.** The ops package earlier today edited `qa/tools/package_check.mjs` (the I-2 OPEN
+allowlist entry for `SCOPE_TAXES_DRAWDOWN.md`), rolled its hash row in the manifest to
+`bbb9fac0478a9e3f45af6868961b2153`, and shipped **only the repo copy**. `package_check.mjs` is a **pooled**
+file, so the pool kept `2554d811fe…` while the manifest asserted the new hash — a row claiming a hash the
+pool does not hold, which is the exact failure §I calls worse than no row at all, because §A's fallback then
+returns a confident MATCH on a file that has drifted. Caught post-ship by **`package_check` K-8** against the
+uploaded pool. The gate worked; the packaging session did not.
+
+**Why it happened, for the next session.** The package was assembled as "probes go to `qa/tools/`, repo
+only" — true of the probes, and carried across to `package_check.mjs` because it lives in the same
+directory. Directory is not destination: the manifest's own §A2 note records this file being uploaded to the
+pool at the v5.42 refresh and its row being missed for a day, and the same manifest says adding a file and
+adding its row are two acts. This is the third act nobody names — **changing a pooled file means shipping
+BOTH copies**, and the repo path is not the test of whether a file is pooled.
+
+**What this package does.** Ships `package_check.mjs` to the pool, so the pool matches the repo and the row.
+`PROJECT_KNOWLEDGE_INDEX.md` gains a note recording the miss; the `package_check.mjs` row is **not** rolled —
+it was already correct and the pool is what was wrong. `CHANGELOG.md`'s row is rolled last, as always.
+
+**Verified.** `package_check` re-run with all four positionals against the uploaded pool: the earlier package
+scored 47 passed, 1 failed, K-8 the only failure and this its cause. Nothing else in that package was
+affected — J-1 and J-2 passed, so both knowledge files it did ship landed and none landed stale.
+
 ## ops 2026-09-18 — the C-8 scope's probes, and the allowlist entry that scope shipped without
 
 `KIND: ops`. Leaves **v5.73** current (source `3bf1e15f1b28659aae9a78e3186d2ae8`, built `index.html`
