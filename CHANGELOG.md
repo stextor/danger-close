@@ -1,5 +1,31 @@
 # Changelog
 
+## ops 2026-09-22 — package_check checks the two declarations a package relies on
+
+KIND: ops. **v5.74 stays current** — source `1ff04dee1b43b20880a8500ab9645f02`, built `index.html`
+`4e7532a4670f667d3ad53c580f278d7f`. No app source changes, no version bump. `SCOPE_PACKAGE_CHECK_DECLARATIONS.md` is
+written, built and retired here (its D-5), repo-only.
+
+**What changed, and why**
+- **`C-7`, before upload:** every file a package's new retirement block removes without a replacement must be declared
+  `RETIRE:` in `MANIFEST.txt` — the line `J-5` needs to confirm the file left project knowledge. At the v5.74 ship the
+  line was missing, `J-5` had nothing to check, and the retired scope stayed in the pool until files were counted by hand.
+- **`G-3c`, before upload:** every new packaged file with a shebang must have its `git update-index --chmod=+x` line in
+  `COMMIT_MESSAGE.txt`. At the v5.74 ship a new script arrived non-executable; `G-3a` caught it only after upload.
+- **`package_check_controls.sh`** gains `P62`–`P65` and prints its totals; **OPERATIONS §L** names both checks.
+
+**Verified by** the historical witness — against the v5.74 package and its prior clone both checks name the real
+misses, and against the post-upload clone both stay quiet — and by the control harness in both phases: after the upload, 55 behaved as designed, 1 did not (`P17`),
+1 skipped (`P58`–`P61`); against the prior clone, 55, 1 (`P48`), 1. Each phase's one miss is the other phase's control,
+as §I records, and `P62`–`P65` behaved in both. **One real finding on the way:** `C-7`'s first failure text contained
+`J-5`, which `P55` judges by substring, so `P55` fired against the prior clone. The wording changed; the check did not.
+
+**Found, and recorded rather than fixed.** The harness's shared check-id pattern (`[A-K]-[0-9]+[ab]?`) cannot read a
+`c` suffix; `P62`–`P65` judge by id and planted name instead. `P58`–`P61` still need an unpacked `KIND: handover` package.
+
+**Limitations.** `C-7` trusts the retirement block: a file retired but never listed there is invisible to it, as it is
+to `J-5`. `G-3c` judges only a new file's first line.
+
 ## v5.74 — the Taxes and IRMAA tabs now see the plan's spending withdrawals
 
 Source `1ff04dee1b43b20880a8500ab9645f02` · built `index.html` `4e7532a4670f667d3ad53c580f278d7f` · built from v5.73
