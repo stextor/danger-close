@@ -761,21 +761,13 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
     //   Removed at v5.57.1 after re-verifying every premise by content against v5.57.
     const OPEN = new Set([
       "SCOPE_STANDING_AUDIT.md",                  // not a build scope at all (OPERATIONS §K)
-      "SCOPE_TAXES_DRAWDOWN.md",                  // OPEN because UNBUILT — C-8 / E-21 / D-14
-      // Added 2026-09-18 with the scope's probe package, ONE package after the scope itself landed.
-      // The scope shipped on 2026-09-18 without this entry, exactly as SCOPE_RELEASE_GATES_AND_HOUSEKEEPING
-      // did on 2026-09-14; I-2 would have gone red naming it, which is the gate working. Added here rather
-      // than left to the build.
-      // STATE: all eight decisions in its §6 were RESOLVED 2026-09-18 (Steve adopted the recommendations),
-      // so this is OPEN-because-UNBUILT, not OPEN-because-undecided. Its status line says so and is dated.
-      // ⚠ EXPIRES AT THE BUILD THAT FULFILS IT — the release that makes Engine B (and Engine C, decision D-6)
-      // consume Engine D's draw series and balance path. That release retires the scope with a build record
-      // and removes this entry IN THE SAME PACKAGE: the two halves ship together, as every removal note in
-      // this block requires. Nothing here can catch a missed removal — I-3 fires only on an entry naming a
-      // file that is GONE, and a retired scope is still present. A person removes it.
-      // ⚠ WATCH THE REASON, not just the entry. The A1 fallback (draws only, RMD divergence disclosed) is
-      // recorded in §6 D-2 as offered and NOT taken. If a build session ships A1 instead, this reason is
-      // stale the moment it does, and this block records four earlier reasons that rotted exactly that way.
+      // ── REMOVED at the v5.74 ship: "SCOPE_TAXES_DRAWDOWN.md". The release built it: Engines B and C consume
+      //    Engine D's spending draws through ONE shared bridge, `withdrawalPlanSeries`, and recompute the Traditional
+      //    balance from those draws at their OWN growth. That is D-2 as QUALIFIED by D-9 — "the path recomputed from
+      //    the draws", not D's path copied — and it is NOT the A1 fallback this entry warned about. The entry's own
+      //    expiry text ("consume Engine D's draw series and balance path") predates D-9, which is the stale-reason
+      //    shape this block keeps recording, caught this time at removal. The scope carries its FULFILLED marker in its
+      //    first 12 lines and its build record (§12), leaves the pool, and stays in docs/ — all in this same package.
       // ── REMOVED by the 2026-09-14 t21 Section F ops package: "SCOPE_HOUSEKEEPING_THREE.md". Its last item, B,
       //    is answered and closed; the scope carries its RETIRED marker and its build record in this same package.
       //    ⚠ The answer was NOT the coverage the item asked for. Re-measured by AST, twelve acorn-parsing tools are
