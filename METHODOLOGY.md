@@ -1245,6 +1245,88 @@ from the per-paycheck entry machinery (v5.9.1), so a plan holding only a monthly
 per-paycheck detail shows $0 in that rollup until the paycheck fields are entered — true in
 v5.9.2, true now, and now visible in the accrual readout rather than silent.
 
+## The Taxes tab and the drawdown (v5.74)
+
+Through v5.73 the Taxes tab and the IRMAA tab projected a household that never spent any of its
+pre-tax money. Engine B's `ordinaryIncome` had no spending-draw term, and its Traditional balance
+moved only for RMDs, QCD excess and conversions — so the balance compounded at a flat 4.5% through
+the whole pre-RMD period while the Withdrawal plan was drawing that same money down to pay for
+groceries. The tab's own summary sentence said the opposite, calling itself "your projected tax
+life as-is". This was recorded as C-8 (defect), E-21 (two parallel projections of one household)
+and D-14 (the missing feature is a shared drawdown).
+
+**What v5.74 changes.** Engine D owns the drawdown and now publishes the two ordinary-income terms
+a spending withdrawal creates — `tradDraw` (pre-tax bucket draws) and `othOrdDraw` (the ordinary
+share of a taxable-sleeve sale) — plus their sum as `ordDraw_y`. The Taxes and IRMAA tabs build a
+year-keyed series from the selected scenario's schedule, exactly as they already did for realized
+capital gains since v5.36, and hand it to Engines B and C. Both tabs build it through ONE shared
+function, `withdrawalPlanSeries`, rather than each walking the schedule itself, so the units
+conversion below exists in exactly one place and the two tabs cannot come to read different households. Both tabs now tell the user in their
+own words that realized capital gains and the ordinary income your spending withdrawals create
+both arrive from the Withdrawal plan rather than from anything set on the tab itself. Each engine uses it twice: as ordinary
+income, and as an outflow that leaves the Traditional balance so later RMDs are not computed on
+money the plan has already spent. **One drawdown, three consumers** — the precedent v5.32 set for
+gains, extended to draws, and the reason a second drawdown was not written into Engine B.
+
+**Measured on the shipped example household** (joint, retire 2029, horizon 2053, base scenario), on
+the tab's own *as-is* reading — the one its explainer describes: no Roth conversions, no QCDs, and the
+taxable yield at its 2.0% default: lifetime federal tax falls from **$244,040 to $208,730**, a
+**−$35,309 (−14.5%)** correction, and lifetime RMDs in the Taxes tab fall from **$1,625,926 to
+$1,321,030** against the Withdrawal plan's own $1,021,349. **As the tab first opens** — with the Roth
+slider's default $70,000 a year of conversions — the same correction *raises* lifetime federal tax, from
+**$210,051 to $211,591 (+$1,540, +0.7%)**: the conversions already drain most of the Traditional balance
+the old tab over-counted RMDs on, so taxing the spending draws slightly outweighs the smaller RMD
+correction. So the direction depends on the conversion setting, and neither reading is the whole story:
+the defect was **mis-timing**. On the as-is reading the tab taxed nothing in the seven gap years
+2032–2038 (now $9,575 of federal tax between them) and then overstated the late-year RMDs by more than
+that. *Two further bases are pinned in `t40` and are not views a user meets:* the scope's acceptance
+figure, with no realized gains passed ($244,040 → **$208,416**), and every input at zero, the yield too
+($244,040 → $208,445). ⚠ *Corrected before v5.74 shipped:* a draft of this section called the
+$208,445 figure "as the Taxes tab renders it". It is not; `t40` section E now pins both real views and
+ties "first open" to the source's own defaults. The seven gap years are hand-verified to the cent
+against an independent Rev. Proc. 2025-32 / §86 computation on the scope's basis ($9,316). On the IRMAA
+tab the same draws move MAGI in every one of the 25 projected years, up in the drawing years and down in
+the RMD years, with peak MAGI falling from $175,224 to $149,657 on the as-is reading (and from $165,803
+to $161,948 at first open); on this household no IRMAA tier is crossed either way, so the lifetime
+surcharge stays $0, but a higher-income household will see the tier assignment move.
+
+**The detail panel now adds up.** The Taxes tab's per-year breakdown lists "Gross taxable income by
+source" above its "Gross taxable" total. It had never listed every term of that total: dividends and
+interest (the taxable-yield estimate) and other ordinary income were counted but not shown, and v5.74's
+spending draw would have joined them — on the example household the 2029 sources summed to $108K under a
+$152K total. From v5.74 the list itemizes all nine terms, and `t40` section D derives the term set from
+the engine itself, so a term added to the total later cannot go unlisted without failing a test.
+
+### The five approximations this release ships with, each with its direction
+
+1. **Units — the draw is restated in today's dollars; the RMD is not.** Engine D is nominal (it
+   COLAs Social Security and inflates expenses); Engine B deliberately holds Social Security and
+   pension flat in today's dollars while inflating brackets 2%/yr, which its own comment calls its
+   bracket-creep conservatism. The imported draw is therefore divided by the cumulative inflator at
+   the call site, so it sits in the same units as the income beside it. **The RMD term is imported
+   as Engine D computes it.** Deflating that as well was measured at $74,541 of lifetime tax — more
+   than the whole defect — because Engine B's RMD comes off a balance compounding at a nominal 4.5%,
+   so deflating its replacement would make it *more* real than the term it replaces. Direction:
+   mixing conventions at all is a known approximation; the back half runs slightly pessimistic.
+2. **Growth — the Taxes tab keeps its own 4.5%.** Engine B recomputes the Traditional balance from
+   Engine D's draws at `BASE_GROWTH`, rather than adopting Engine D's scenario-derived per-bucket
+   weighting (3.518% on base). Importing Engine D's balance path wholesale would have inherited its
+   growth assumption silently — a further $42,146 of lifetime federal tax, and a modeling change
+   nobody asked for bundled into a defect fix. Five projections in the file grow Traditional money
+   at a flat rate; reconciling all five is a separate question (E-22), not this release's.
+3. **QCDs diverge, by construction.** The QCD lever is Engine B's alone — Engine D has no QCD
+   concept — so gifted dollars never leave the Withdrawal plan's portfolio. Setting the QCD slider
+   above $0 makes the Taxes tab and the Withdrawal plan disagree by the gifted amount. Disclosed
+   in-app rather than modeled.
+4. **Engine A (the Roth comparator) is excluded, and its size is unmeasured.** Its ordinary base
+   has the same gap, but its taxable pool is sold only to fund taxes and ACA losses and its output
+   is a *differential* between conversion strategies, where a spending draw common to both paths
+   largely cancels. "Largely" is doing real work in that sentence: this is recorded as an open
+   finding, not a clean exclusion.
+5. **The draws follow the selected Monte Carlo scenario**, as the gains already did. Lifetime
+   ordinary draw on the example household is $352,485 base, $660,662 bear, $352,386 bull — so the
+   Taxes tab's headline figure now moves when the scenario picker moves. That is correct, and new.
+
 ## Capital gains in the drawdown, and where they are taxed (v5.36)
 
 **What changed.** Through v5.35 the model recorded an embedded-gain share (My Data, added v5.33) and
