@@ -10,6 +10,10 @@
 ---
 
 > ### ☑ REWRITTEN FOR v5.73 — 2026-09-15 · THE STANDING AUDIT RAN AGAIN, ALL FOUR PHASES · READ THIS BOX FIRST
+> **✅ Post-audit update, v5.74 (2026-09-21):** the first issue below (C-8, E-21, D-14) is **fixed at v5.74** — the Taxes
+> and IRMAA tabs now see the plan's spending withdrawals. E-21 is narrowed, not closed (see `ARCHITECTUREIssues.md`). The
+> summary below is left as written.
+>
 >
 > Build v5.73 · source `3bf1e15f1b28659aae9a78e3186d2ae8` · built `index.html` `345ccbceb58bf74f9fbdde5db0646d1d`. Drawn from
 > `FlawsToFix-v5_73-Phase2.md` (Section C) and the v5.73 blocks of `MissingFeatures.md`, `ARCHITECTUREIssues.md` and

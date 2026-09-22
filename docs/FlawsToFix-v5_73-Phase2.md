@@ -10,6 +10,18 @@ and the scope's standalone top-five summary is written only after Phase 4.
 **Destination of this file:** session workbench until Phase 2 closes; then `docs/` **and** the pool, as
 `FlawsToFix-v5_73-Phase2.md`, with a manifest row.
 
+**Post-audit update, v5.74 (2026-09-21).** **C-8 is FIXED at v5.74** (`docs/SCOPE_TAXES_DRAWDOWN.md`, retired with its
+build record in §12; pinned by `t40` on both legs). The findings below are left as written. **Filed here — two open
+follow-ups whose only pooled record was that scope, which leaves the pool at this ship:** (1) **D-4 · the conversion caps
+still differ.** Engine B caps a conversion at `tradBal − max(rmd_y, qcd_y)`, Engine D at `tradNotional_boy − rmd_y`
+(both read in the v5.74 source). The scope expected them to converge once the engines shared one balance path, but D-9
+kept Engine B on its own 4.5% growth, so the caps are still measured on different balances. Whether that ever binds is
+unmeasured. (2) **D-7 · Engine A (the Roth comparator) has the gap C-8 closed in B and C:** its ordinary base is
+`pen + work + otherOrd + rmd`, with no spending draw. Its output is a difference between conversion strategies, where a
+draw common to both sides largely cancels — "largely" is unmeasured, so this is an open finding, not a clean exclusion.
+**Also fixed at v5.74, found during its build:** the Taxes tab's detail panel never itemized dividends/interest or other
+ordinary income, though both were in its "Gross taxable" total; it now lists every term (`t40` section D).
+
 ---
 
 ## 0 · Findings at a glance
@@ -185,6 +197,10 @@ would otherwise still reach the ladder" and that the Roth tab added an explicit 
 the same guard.** Executed: the example household (which carries a spouse-B benefit) with `single: true` — Engine B's rows
 show `ssB_y` 0; Engine D's show **`ssB_y` 15,600 in 2029 and 16,918 in 2032**. Reachable by any user who switches a
 household to single, or restores a backup, while spouse-B data is still stored.
+
+> **⚠ FIXED at v5.74 (2026-09-21)** — `docs/SCOPE_TAXES_DRAWDOWN.md`, retired with its build record. *Annotation only;
+> the finding below is as written at v5.73.* On the tab's as-is reading the correction is −$35,309 (−14.5%); at the tab's
+> first-open defaults ($70,000/yr of conversions) it is +$1,540 — see METHODOLOGY, "The Taxes tab and the drawdown".
 
 **C-8 · CONFIRMED (Engines B and D, executed) — the Taxes tab never taxes spending withdrawals from Traditional
 accounts, and computes RMDs on a balance that was never drawn down.** *Severity: **high** — user-visible on the shipped

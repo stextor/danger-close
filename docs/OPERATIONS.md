@@ -149,6 +149,17 @@ total.
 ⚠ **One `npm install`, not several.** A later `npm install <one-package> --no-save` PRUNED `jsdom`
 mid-session at v5.67 and killed six suites a second time in the same day.
 
+⚠ **Run the suite in ONE turn, detached, one run at a time, and trust only a fresh sentinel (added 2026-09-21, at the
+v5.74 build).** Measured in the sandbox: a job started with plain `nohup … &` is killed when the tool call that started it
+returns (control: a `setsid` twin of the same probe kept running). A `setsid nohup … < /dev/null &` job survives the call,
+but **what happens across a turn boundary is not reliable**: after an hour-long gap between turns the job was gone; after a
+gap of about a minute an earlier run was still alive and resumed — and because the new run was being built in the same
+folder, the old run's negative controls ran against the half-built new folder, reported 3 of 9, left mutant files in it,
+and wrote the sentinel the new run was waiting for. So: start a full run (~14 minutes) and wait for it inside one turn;
+before starting one, check `ps` that no earlier run is alive and stop it; give each run its own folder, logs and sentinel;
+and never read a sentinel or log older than the run you started. `pgrep` is no substitute — its pattern can match the
+checking command itself. The first v5.74 session recorded a lost run as a `pgrep` self-match; these facts explain it better.
+
 ### B1. Census and site-count questions go through `qa/tools/`, never greps
 
 **A grep is not an answer to "how many sites?" or "where is this used?"** Grep line-number and identifier

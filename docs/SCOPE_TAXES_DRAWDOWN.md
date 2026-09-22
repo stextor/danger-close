@@ -1,6 +1,12 @@
 # SCOPE — the Taxes tab and the drawdown (C-8 / E-21 / D-14)
 
-**STATUS (2026-09-18, third revision): ALL NINE DECISIONS RESOLVED — BUILDABLE. NOT BUILT as of this line.** Eight were
+**STATUS (v5.74): FULFILLED — BUILT AND SHIPPED IN v5.74. This scope is RETIRED; §12 is its build record.**
+Engines B and C consume Engine D's spending draws through one shared bridge (`withdrawalPlanSeries`) and recompute the
+Traditional balance at their own `BASE_GROWTH` (D-9). The acceptance figure reproduced exactly: **$208,416** lifetime
+federal on this scope's basis, **$208,445** as the Taxes tab renders it. Two departures, both in §12 and both decided on
+recommendation: §8 items 1–2 restated, and the series walk hoisted beyond §4's census.
+
+*Prior status, superseded by the line above and kept as history:* STATUS (2026-09-18, third revision): ALL NINE DECISIONS RESOLVED — BUILDABLE. NOT BUILT as of this line. Eight were
 resolved on 2026-09-18 by Steve adopting the scope's recommendations (§6). **§11 step 2's counterfactual was then
 measured before any source change, and it sent two of them back** (§3.5): **D-3 was NARROWED** — it deflates the draw
 term only, not the RMD term — and **D-9 was raised** because the measurement showed A2 as written bundled a modeling
@@ -489,3 +495,85 @@ re-run it is how a scope goes stale.
 
 ⚠ **Workspace drift.** Phantom edits have appeared twice in this project. Before building, hash the workspace source
 against the shipped hash; if it differs, quarantine and revert rather than assuming the diff is this session's.
+
+---
+
+## 12 · Build record (v5.74)
+
+**Shipped in v5.74.** Everything below was measured in the build session from command output; nothing is restated.
+
+**Before any edit (§11 step 2).** `cf_growth_split.mjs` on a v5.73 run folder: validation worst-year $0.00; shipped
+$244,040; the C-8 fix alone $208,416; the D-9 trap $166,270. The premise held, so the build proceeded.
+
+**The build.** Engine D publishes `tradDraw`, `othOrdDraw` and their sum `ordDraw_y` — a no-op on its own numbers
+(825 published values across 25 rows compared to v5.73, 0 differ; `t19` 65/65; MC parity 10/10). Engines B and C take
+`ordDrawByYr`, add it to ordinary income (Engine C: to `_prov86` and `magi` both) and to the pooled outflow that leaves the
+Traditional balance, and publish it per row. Lifetime RMD in the Taxes tab $1,625,926 → **$1,321,030**, matching §3.5 to
+the dollar; Engines B and C agree on draw and RMD to $0.00 every year.
+
+**Figures, both bases.** As rendered (gains passed): $244,040 → **$208,445** (−$35,595, −14.6%); gap years 2032–2038 $0 →
+$9,325. On this scope's basis (no gains): → **$208,416** (−$35,624); gap years $9,315. The $29 between the bases is the
+realized gains reaching Social Security taxability once the draws lift gap-year income. The gap years are hand-verified to
+the cent against an independent Rev. Proc. 2025-32 / §86 oracle in `t40`. The §3.4 cross-check figure (+$16,160) is on
+UNDEFLATED draws — it predates D-3's narrowing — and the new engine reproduces it at +$16,159 on that basis.
+> ⚠ **CORRECTED 2026-09-21 (second build session).** *"As rendered"* above is wrong. The Taxes tab opens with the Roth
+> slider's default $70,000/yr of conversions and a 2.0% taxable yield (`useState(70000)`, `useState(2.0)`; a parser census
+> finds no other setter call), and the $208,445 basis holds both at zero. The views a user meets, measured on this build
+> through each build's own call path: **as-is** (no conversions, no QCD, 2% yield) $244,040 → **$208,730** (−$35,309,
+> −14.5%), gap years $0 → $9,575; **first open** $210,051 → **$211,591 (+$1,540)** — the correction raises the figure
+> there. The $9,325 / $9,315 gap-year totals above sum per-year ROUNDED values; rounded once at the end they are $9,325 /
+> **$9,316**. The text above is left as written.
+
+**Departure 1 — §8 items 1–2 restated (decided on recommendation, reversible).** As written they ask Engines B and D to
+agree on ordinary income "to the dollar" and on lifetime RMD "live". Under D-3 and D-9 no correct build can: D-3 deflates
+only B's draw term and D-9 keeps B on 4.5% against D's 3.518% (B $1,321,030, D $1,021,349). `t40` asserts instead that the
+DRAW agrees to the cent, and pins the RMD gap as a known divergence — the remedy item 2's own parenthetical prescribes.
+
+**Departure 2 — the walk is one function (decided on recommendation, reversible).** §4 listed two call sites; both now call
+`withdrawalPlanSeries`, exported to the harness through a guarded shim entry. Without it, §8's first negative control
+("zero the draw series at the call site") could never fire: the call sites sit inside the React component, and a
+module-level test would rebuild the series itself and pass straight through a broken one. Parser census: one definition,
+exactly two call sites. Behaviour-preserving, re-proven after the hoist ($208,416, $1,321,030, Engine D unmoved).
+
+**Negative controls** (`qa/tools/controls_v574_c8.py`): M0 unmutated passes; M1 zero the series fires 9; M2 balance without
+income fires 4 and lands at $187,232 — a half-built fix reads as a BIGGER improvement; M3 Engine C left alone fires 4; M4
+Engine D growth +10% fires 8 (D's RMD moves $65,524, B's only $27 — D-9's insulation, measured); M5, added beyond §8's four,
+Engine B adopting D's 3.518% fires 4 and lands on exactly $166,270, the brief's trap figure, by a second route.
+
+**What the build found that this scope did not know.** (1) The six probes print byte-identical output bound to v5.73 or
+v5.74: Engine B's change engages only when the series is passed, so they reproduce every figure here on either build and
+confirm the fix on neither — `cf_growth_split.mjs` now ends with a build check that drives the real bridge. (2) A
+"no-portfolio" fixture is not empty to Engine D: its taxable sleeve is `household − total401k`, which stripping positions
+does not zero; $4,414.03 of gains remain, pinned in `t40`. (3) Three suite version gates are ternaries (`t1` `verStr`, `t4`
+`_badge`, `t24` `_k`); a regex roll misses all three. The completed roll was verified by AST in both classes — no
+`"v573"` literal line lacks `"v574"`, and the one identifier-keyed registry (`t33` PINS) carries it.
+
+**Second build session (2026-09-21) — the zip was verified (md5 and all 38 files) before anything was built from it.**
+- **The first complete full run** on the handover build: 4,162 app checks, 0 failed, 0 DIED; MC parity 10/10; `t19` 65/65.
+  `domdiff` was 30 passed, 2 failed: its Taxes and IRMAA identity checks predate this release, which moves both tables by
+  design. It gained a bounded `v573→v574` branch in the v5.43/v5.47 idiom — the figures must DIFFER, so a dead call site
+  still fails — and a first bound on the count of $-figures was **measured false** (134 vs 140: exact-$0 cells fill in) and
+  replaced by rows. Controlled: a v5.74 leg rendering v5.73's bundle fails exactly the two DIFFER checks.
+- **Departure 3 — the detail panel (beyond §4's census; decided by Steve 2026-09-21).** Working that bound exposed it: the
+  Taxes tab's "Gross taxable income by source" listed six of the nine terms of `grossTaxableAll`. v5.73 already omitted
+  dividends/interest and other ordinary income; the handover build added the draw to the total and not the list (2029:
+  $108K of sources under $152K). The fix lists all nine and publishes `otherOrd_y` on Engine B's row. Display-only — no
+  engine figure moves. Source `2f8a22c8…` (the handover's) is **superseded, unshipped**; the build is `1ff04dee…`.
+- **Decision 3 is replaced (Steve, 2026-09-21).** The release headlines the as-is reading above and states first open
+  beside it; the scope basis stays the pinned acceptance figure. METHODOLOGY, `t40`'s header and A5 are corrected.
+- **`t40` sections D and E.** D derives the term set of `grossTaxableAll` from the engine by AST and asserts the panel lists
+  it exactly, then that the listed fields sum to the total to the cent on both views; E pins both views and **E0** ties
+  "first open" to the source's `useState` defaults. v5.73 leg 27, v5.74 leg 34.
+- **Controls M6–M8** (same script): drop the draw line — 2 fired (D1, D2); drop the dividends line — 2 fired (D1, D2);
+  change the conversion default — 1 fired (E0). M0–M5 re-run on the new source: M0 passes; M1 13, M2 9, M3 5, M4 12,
+  M5 6 fired. **9 of 9 behaved as required.**
+- **A session fact for OPERATIONS §B:** a background job dies when the tool call that started it returns unless it is
+  `setsid`-detached; across a turn boundary it is unreliable — gone after an hour's gap, still alive after a minute's, when
+  a resumed earlier run wrote into the new run's folder and sentinel. So one run at a time, started and finished in one
+  turn, with a fresh sentinel. The first session's run, "killed at `t35-v574`", fits this better than the `pgrep`
+  explanation it recorded.
+
+**Still open, recorded rather than fixed:** D-4's conversion-cap divergence, D-7's Engine A gap (unmeasured), D-5's QCD
+divergence (disclosed in-app), and E-22's other `BASE_GROWTH` projections — including Engine C's hardcoded `1.045`.
+D-4 and D-7 are **re-homed** in `FlawsToFix-v5_73-Phase2.md`'s post-audit update, because this file leaves the pool at
+the v5.74 ship and was their only pooled record.

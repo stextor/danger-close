@@ -885,6 +885,12 @@ items start at E-21.
 
 ## E-21 · The Taxes and Withdrawal engines are parallel projections of one household
 
+> **⚠ NARROWED at v5.74 (2026-09-21), not closed.** C-8 is fixed: Engines B and C now also consume Engine D's spending
+> draws, through one bridge (`withdrawalPlanSeries`), and `t40` compares the tabs — the draw agrees to the cent every
+> year. The engines remain parallel projections **by decision**: under the scope's D-9 the Taxes tab keeps its own 4.5%
+> growth, so lifetime RMDs still differ ($1,321,030 against the Withdrawal plan's $1,021,349 on the example household),
+> and `t40` pins that gap as a known divergence. *Annotation only; the entry below is as written.*
+
 Engine B and Engine D each project the same household's income, balances and RMDs, and share only Engine D's realized-gains
 series (v5.32 D-4 chose this, noting it "warrants an ARCHITECTUREIssues note when it lands" — this is that note, late). The
 consequence is Phase 2's **C-8**: the Taxes tab never taxes Traditional spending draws, and its RMDs run on a never-drawn

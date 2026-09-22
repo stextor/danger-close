@@ -43,7 +43,7 @@
 >
 > ### Priority order at v5.73 — for a mainstream couple within sight of retirement
 >
-> 1. **D-14** — wrong tax in ordinary drawdown years on the shipped example household (the fix belongs with Phase 2's C-8).
+> 1. **D-14** — wrong tax in ordinary drawdown years on the shipped example household (the fix belongs with Phase 2's C-8). ✅ *Fixed at v5.74.*
 > 2. **D-19** — the half-rate Social Security approximation was stale for Montana for two years; seven states remain.
 > 3. **D-12** — account type (Rhode Island's $2,000–$4,000/yr), then **D-11**'s WI half.
 > 4. **D-16** — head of household and the qualifying-surviving-spouse years (a widow(er) with a dependent).
@@ -1055,6 +1055,10 @@ independently in `AUDIT_STATE_EXCL65_ROUND3.md` and needed no re-homing.)*
 # New at v5.73 — standing audit Phase 3 (2026-09-15)
 
 ## D-14 · Traditional spending withdrawals never reach the Taxes tab
+
+> **⚠ FIXED at v5.74 (2026-09-21)** — the Taxes and IRMAA tabs now take the plan's spending draws from the Withdrawal plan
+> through one shared bridge (`docs/SCOPE_TAXES_DRAWDOWN.md`, retired with its build record; C-8 in
+> `FlawsToFix-v5_73-Phase2.md`). *Annotation only; the entry below is as written at v5.73.*
 
 **The feature that is missing is a single drawdown shared by the Taxes and Withdrawal tabs.** Engine B (Taxes) and
 Engine D (Withdrawal) are independent projections joined only by the realized-gains series (v5.32 D-4). Engine D funds
