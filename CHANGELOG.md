@@ -1,5 +1,64 @@
 # Changelog
 
+## v5.74 — the Taxes and IRMAA tabs now see the plan's spending withdrawals
+
+Source `1ff04dee1b43b20880a8500ab9645f02` · built `index.html` `4e7532a4670f667d3ad53c580f278d7f` · built from v5.73
+`3bf1e15f1b28659aae9a78e3186d2ae8`. `src/index.html` and `src/main.jsx` are unchanged. **Figures move on the Taxes and
+IRMAA tabs for every household whose plan spends pre-tax money**; `METHODOLOGY.md` gains *The Taxes tab and the
+drawdown (v5.74)*.
+
+**Suite: 4,181 app checks, 0 failed, 0 DIED, across both legs** — 39 app suites plus MC parity 10/10; tooling `t21`
+64, `domdiff` 36, `sets` 12 + 12 (GRAND 4,315), run from the packaged copies. `t40` is new on both legs (27 on v5.73,
+34 on v5.74). `smoke_built` **22 passed, 0 failed**. Negative controls: `controls_v574_c8.py` **9 of 9** as required, and
+`domdiff`'s new branch fails exactly its two DIFFER checks when the v5.74 leg renders v5.73's tables. Per-suite: `TESTING.md`.
+
+### What changed, and why
+
+- **The Taxes tab taxes what the plan spends.** Through v5.73 it never saw the plan's spending withdrawals: on the example
+  household it showed **$0 federal tax in 2032–2038**, although the plan's withdrawals create $352,485 of ordinary income
+  over its life, and it ran RMDs on a balance nothing had been drawn from — $1,625,926 against the plan's own $1,021,349. The Withdrawal plan now
+  publishes the ordinary income each spending draw creates, and one shared function hands it to the Taxes and IRMAA
+  tabs, which count it as income **and** take it out of the Traditional balance.
+- **The headline, on the tab's own as-is reading** (no conversions, no QCDs, the 2% default yield — the reading its
+  explainer describes): lifetime federal tax **$244,040 → $208,730 (−$35,309, −14.5%)**. **As the tab first opens**, with
+  the Roth slider's default $70,000 a year of conversions, the same correction **raises** it: **$210,051 → $211,591
+  (+$1,540)** — the conversions already drain most of the balance the old tab over-counted RMDs on. The defect was
+  mis-timing, not simple overstatement, and its direction depends on the conversion setting.
+- **The IRMAA tab moves with it, in the same release** (so the two tabs cannot contradict each other): MAGI changes in all
+  25 years; peak MAGI $175,224 → $149,657 on the as-is reading. No IRMAA tier is crossed on the example household.
+- **The Taxes tab's detail panel now adds up.** "Gross taxable income by source" listed six of the nine terms of its own
+  total: dividends/interest and other ordinary income were counted but never shown, and the new draw would have joined
+  them (2029: $108K of sources under a $152K total). It now lists all nine. Display only.
+- **Tests:** `t40_cross_tab_agreement.mjs` (new, both legs) — the draw agrees to the cent across the three engines; the
+  growth-driven RMD gap is pinned as a known divergence; the gap years are checked against an independent Rev. Proc.
+  2025-32 / §86 calculation; the panel's list is checked against the engine's own term set by parsing; both headline
+  views are pinned, and "first open" is tied to the source's defaults. `domdiff` gains a bounded branch for this pair.
+- **Disclosures:** the Taxes tab and the Field Manual say that two inputs now arrive from the Withdrawal plan, and what
+  remains approximate (below). `OPERATIONS.md` §B records why two build sessions lost full test runs (one run at a time,
+  started and finished within one turn, trusting only a fresh sentinel).
+- **Retired:** `SCOPE_TAXES_DRAWDOWN.md`, with its build record (§12). Its two open items (D-4, D-7) now live in
+  `FlawsToFix-v5_73-Phase2.md`; `MissingFeatures.md` D-14 and `ARCHITECTUREIssues.md` E-21 are annotated.
+
+### Limitations and approximations, stated plainly
+
+- **Units:** the imported draw is restated in today's dollars to match the tab; its RMD term is not. Mixing conventions is
+  an approximation; the back half runs slightly pessimistic.
+- **Growth:** the Taxes tab keeps its own 4.5% on Traditional money, where the Withdrawal plan uses 3.518% on the base
+  scenario, so lifetime RMDs still differ ($1,321,030 against $1,021,349). Pinned in `t40`; adopting one growth
+  assumption everywhere is a separate question.
+- **QCDs:** above $0 the QCD slider gifts money the Withdrawal plan still spends, so the tabs diverge by the gifted amount.
+  Disclosed in the tab.
+- **Still open, unmeasured:** the Roth comparator has no spending-draw term; the two engines cap conversions on
+  different balances; the IRMAA engine's balance loop grows at a hardcoded 4.5%. All filed.
+- **A first v5.74 candidate** (source `2f8a22c8…`) was superseded before anything shipped: its detail panel added the
+  draw to the total but not to the list.
+- **The headline basis was corrected before ship.** That candidate's documents called a figure with every input at
+  zero — the taxable yield too — "what the tab renders" ($208,445). The tab opens with $70,000/yr of conversions and a
+  2% yield; `t40` now pins both real views and ties "first open" to the source's defaults.
+- **On the first candidate, `domdiff` read 30 passed, 2 failed:** its identity checks for these two tables predate this
+  release. They were replaced by a bounded branch; a first bound (the count of dollar figures) was measured false and
+  replaced by rows.
+
 ## ops 2026-09-18 (fifth) — D-9 resolved: the Taxes tab keeps `BASE_GROWTH`; the C-8 scope is buildable
 
 `KIND: ops`. Leaves **v5.73** current. No app source, no version, no suite total change.
