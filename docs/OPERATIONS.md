@@ -759,6 +759,12 @@ without a shebang are correctly left alone, and `P53` exists to keep them that w
 so a typo cannot pass as a success; post-ship it asserts the file is GONE. A `RETIRE:` line naming a
 file that was never there is a no-op that reads exactly like a clean retirement.
 
+✓ **`C-7` checks the declaration `J-5` depends on (added 2026-09-22, `SCOPE_PACKAGE_CHECK_DECLARATIONS`).** `J-5` can
+confirm only a retirement that `MANIFEST.txt` declares with a `RETIRE:` line. At the v5.74 ship that line was never
+written, `J-5` reported nothing to check, and the retired scope stayed in the pool until files were counted by hand.
+`C-7` compares the package's own new retirement block(s) with the `RETIRE:` lines: every row that leaves **without a
+replacement** (no `knowledge/` copy; rotation legs excluded — `J-3`/`J-4` own those) must be declared. Controls `P62`/`P63`.
+
 ### ⚠ Version registries come in FOUR shapes and a sweep sees only one (added 2026-09-14)
 
 Registering a new version tag is a per-release obligation, and `qa/tools/vercensus.cjs` sweeps for
@@ -945,7 +951,7 @@ only thing in the release path that sees an extra path.
 (measured 2026-09-15).** Its controls are phase-bound: `P17` (E-1b) can only fire against the pre-upload
 tree, and `P48` (B-2) only against the post-upload one, so any single invocation reports exactly one miss.
 Read the two runs together: every control must fire in at least one, and nothing else may miss.
-Set `PRIOR_CLONE` and `HANDOVER_PKG` for `P56`–`P61`, which otherwise SKIP.
+Set `PRIOR_CLONE` and `HANDOVER_PKG` for `P56`–`P61`, which otherwise SKIP. `P62`–`P65` need neither.
 
 ⚠ **HISTORY (resolved 2026-09-15 — P57 now fires pre-upload on an app release).** **This is also why `P29` looked broken, and the received diagnosis was wrong.** `P29` mutates the
 manifest stale and asks `K-1` to notice — but on an app-release package `K-1` is *already* red
@@ -1281,7 +1287,10 @@ executable bit on any NEW shell script**, which lands as `100644` and cannot be 
 `./script.sh`; replacing an *existing* tracked file preserves its mode, which is why
 `qa/runsuite.sh` survived the v5.53 upload at `100755` while a new script would not have. Edit in
 place for dotfiles and for any new `.sh`, and check `git ls-files -s` afterwards — the repo's shell
-scripts are all `100755` and a `100644` among them is the tell.
+scripts are all `100755` and a `100644` among them is the tell. **Since 2026-09-22 `G-3c` asks this before
+the upload:** every NEW packaged file with a shebang must have its `git update-index --chmod=+x <path>` line in
+`COMMIT_MESSAGE.txt`. At the v5.74 ship a new `.py` with a shebang arrived `100644` without one and took a follow-up
+commit. Controls `P64`/`P65`.
 
 ⚠ **`F-1` runs in BOTH modes and is not a formality: the pool is ADD-ONLY.** A same-name upload
 creates a *second* copy rather than replacing the first, so every package — release or ops — must
