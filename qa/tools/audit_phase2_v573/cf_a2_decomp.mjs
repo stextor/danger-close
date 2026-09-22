@@ -1,5 +1,12 @@
 // cf_a2_decomp.mjs — SCOPE_TAXES_DRAWDOWN §3.5: which half of A2 moves the lifetime number. ASSERTS NOTHING.
-const mod = await import("../../app_v573.mjs"); const g = mod.__g, E = mod.__engines;
+// ⚠ v5.74: BOUND BY ARGUMENT — `node <this> [tag]`, default v574 — and the binding is printed first.
+// Verified at the v5.74 build: this probe's output is BYTE-IDENTICAL bound to v5.73 or v5.74, because
+// every figure below comes from Engine B called WITHOUT the drawdown bridge, which is the v5.73 code
+// path exactly. So it REPRODUCES the scope's measurements on either build — and it CANNOT confirm the
+// fix on either. t40_cross_tab_agreement.mjs does that (and cf_growth_split.mjs's closing build check).
+const TAG = process.argv[2] || "v574";
+const mod = await import(`../../app_${TAG}.mjs`); const g = mod.__g, E = mod.__engines;
+console.log(`[bound to app_${TAG}.mjs \u2014 ${typeof g.withdrawalPlanSeries === "function" ? "post-fix build: the drawdown bridge is present" : "pre-fix build: no drawdown bridge"}]`);
 const tl = g.PLAN_TIMELINE(); const retire = tl.targetRetireYear;
 const args = { retireYear: retire, rothAmount: 0, qcdAnnual: 0, taxYield: 0 };
 const B0 = E.computeTaxPlan(args);

@@ -23,7 +23,14 @@
 //
 // RUN: from a folder built by qa/mk_runfolder.sh, in qa/tools/audit_phase2_v573/:
 //   node scope_c8_probe.mjs
-const mod = await import("../../app_v573.mjs"); const g = mod.__g, E = mod.__engines;
+// ⚠ v5.74: BOUND BY ARGUMENT — `node <this> [tag]`, default v574 — and the binding is printed first.
+// Verified at the v5.74 build: this probe's output is BYTE-IDENTICAL bound to v5.73 or v5.74, because
+// every figure below comes from Engine B called WITHOUT the drawdown bridge, which is the v5.73 code
+// path exactly. So it REPRODUCES the scope's measurements on either build — and it CANNOT confirm the
+// fix on either. t40_cross_tab_agreement.mjs does that (and cf_growth_split.mjs's closing build check).
+const TAG = process.argv[2] || "v574";
+const mod = await import(`../../app_${TAG}.mjs`); const g = mod.__g, E = mod.__engines;
+console.log(`[bound to app_${TAG}.mjs \u2014 ${typeof g.withdrawalPlanSeries === "function" ? "post-fix build: the drawdown bridge is present" : "pre-fix build: no drawdown bridge"}]`);
 const tl = g.PLAN_TIMELINE();
 const src = g.PORTFOLIO().incomeSources || {};
 console.log("incomeSources on the example household (no streams → the residual below is exact):");
