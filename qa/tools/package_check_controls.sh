@@ -927,6 +927,48 @@ else
   rm -rf "$WS"
 fi
 
+# ── P62..P65 · SCOPE_PACKAGE_CHECK_DECLARATIONS (2026-09-22): C-7 and G-3c ─────────────────────────────────
+# Each plants ONE named file into a scratch copy of the app package and is judged by the check id AND that
+# name, so the four stay valid against any package and either clone: a package that already carries an
+# undeclared retirement of its own (v5.74 against its prior clone does) cannot make a silent half look green.
+# ⚠ Judged here, not by the shared `[A-K]-[0-9]+[ab]?` pattern, which cannot read `G-3c`.
+# ⚠ A silent half must also show the check JUDGED something ("(N judged)" / "(N new)"); an informational
+#   skip is reported as VACUOUS, never as silence (§B2).
+plant_retire_block () {   # one synthetic "delete, do not re-upload" row, in every manifest copy under $1
+  for m in "$1/github/PROJECT_KNOWLEDGE_INDEX.md" "$1/knowledge/PROJECT_KNOWLEDGE_INDEX.md"; do
+    [ -f "$m" ] || continue
+    python3 - "$m" <<'PY'
+import sys
+p = sys.argv[1]; t = open(p, encoding="utf-8").read(); i = t.find("\n## Retirement list"); j = t.find("\n", i + 1) + 1
+blk = "\n### At the control upload (P62) \u2014 DELETE THESE FIRST\n\n| Delete | Because |\n|---|---|\n| `P62_retired_doc.md` | **un-pooled** \u2014 delete, do not re-upload |\n"
+open(p, "w", encoding="utf-8").write(t[:j] + blk + t[j:])
+PY
+  done
+}
+runDecl () {   # $1 label, $2 FIRE|QUIET, $3 check id, $4 needle, $5 mutation (run inside the scratch copy)
+  local label="$1" want="$2" id="$3" needle="$4" mut="$5" out hit=0
+  rm -rf /tmp/pkgd && cp -r "$APP" /tmp/pkgd && ( cd /tmp/pkgd && eval "$mut" )
+  out=$(node "$PKG_CHECK" /tmp/pkgd "$CLONE" "" 2>&1)
+  echo "$out" | grep "✗ $id:" | grep -qF -- "$needle" && hit=1
+  if [ "$want" = FIRE ]; then
+    if [ $hit = 1 ]; then PASS=$((PASS+1)); printf "  CAUGHT by %-6s %s\n" "$id" "$label"
+    else MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** %s (wanted %s naming %s)\n" "$label" "$id" "$needle"; fi
+  elif [ $hit = 1 ]; then MISS=$((MISS+1)); printf "  *** FINDING *** %s - fired when it must NOT\n" "$label"
+  elif echo "$out" | grep -qE "(✓|✗) $id:.*\([0-9]+ (judged|new)\)"; then PASS=$((PASS+1)); printf "  CORRECTLY SILENT   %s\n" "$label"
+  else MISS=$((MISS+1)); printf "  *** VACUOUS *** %s - %s never judged the planted file\n" "$label" "$id"; fi
+  rm -rf /tmp/pkgd
+}
+echo ""; echo "P62..P65 · declarations C-7 and G-3c (SCOPE_PACKAGE_CHECK_DECLARATIONS)"
+runDecl "P62 a retired-without-replacement file with NO RETIRE: line" FIRE "C-7" "P62_retired_doc.md" \
+  'plant_retire_block .'
+runDecl "P63 the same file, declared RETIRE:" QUIET "C-7" "P62_retired_doc.md" \
+  'plant_retire_block . && echo "RETIRE: P62_retired_doc.md" >> MANIFEST.txt'
+runDecl "P64 a NEW packaged file with a shebang and no chmod line" FIRE "G-3c" "qa/tools/p64_new_tool.sh" \
+  'mkdir -p github/qa/tools && printf "#!/bin/bash\necho p64\n" > github/qa/tools/p64_new_tool.sh'
+runDecl "P65 the same file, with its chmod line in COMMIT_MESSAGE.txt" QUIET "G-3c" "qa/tools/p64_new_tool.sh" \
+  'mkdir -p github/qa/tools && printf "#!/bin/bash\necho p64\n" > github/qa/tools/p64_new_tool.sh && echo "git update-index --chmod=+x qa/tools/p64_new_tool.sh" >> COMMIT_MESSAGE.txt'
+printf "\n  controls: %d behaved as designed, %d did not, %d skipped\n" "$PASS" "$MISS" "$SKIP"
+
 [ "$SKIP" -gt 0 ] && echo "  ⚠ A SKIPPED control is not a passing one."
 [ "$MISS" -gt 0 ] && { echo "  A control that does not fire is a FINDING — investigate the check, never soften it."; exit 1; }
 exit 0

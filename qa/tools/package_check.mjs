@@ -213,6 +213,42 @@ if (!existsSync(manPath)) {
     ck("C-6 (ops): no built index.html ships from an ops package",
       !ghFiles.includes("index.html"), "index.html present in github/");
   }
+
+  // ── C-7 · a file this package RETIRES must be DECLARED (added 2026-09-22, SCOPE_PACKAGE_CHECK_DECLARATIONS) ──
+  // J-5 confirms that a RETIRE: file left the pool, but only for a file DECLARED with a `RETIRE:` line, and
+  // nothing checked that the declaration was made. At the v5.74 ship the package's own manifest said
+  // `SCOPE_TAXES_DRAWDOWN.md | un-pooled — delete, do not re-upload`, MANIFEST.txt carried no RETIRE: line,
+  // J-5 printed "nothing leaves the pool", and the scope stayed in the pool until files were counted by hand.
+  // This compares two things every package already writes: the retirement block(s) NEW to this package
+  // (headings absent from the committed manifest) and MANIFEST.txt's RETIRE: lines. A row leaves WITHOUT a
+  // replacement when knowledge/ carries no copy of it. Rotation legs are excluded — J-3/J-4 own them, and two
+  // gates doing one job is how their reasons drift apart (decision D-1).
+  // PHASE: pre-ship the block is new and is judged. Post-ship the committed manifest IS the package's, so no
+  // block is new and C-7 says so; J-5 then does the post-ship half for every declared name (decision D-2).
+  {
+    const pkgMan = [join(GH, "PROJECT_KNOWLEDGE_INDEX.md"), join(KN, "PROJECT_KNOWLEDGE_INDEX.md")].find(existsSync);
+    const cloneMan = CLONE ? join(CLONE, "PROJECT_KNOWLEDGE_INDEX.md") : null;
+    if (!pkgMan) {
+      console.log("     (informational: C-7 \u2014 the package ships no manifest, so it retires nothing)");
+    } else if (!cloneMan || !existsSync(cloneMan)) {
+      skipped("C-7: retirements are declared", "no committed manifest to tell which retirement block is this package's");
+    } else {
+      const committed = new Set(readFileSync(cloneMan, "utf8").split("\n"));
+      const mtext = readFileSync(pkgMan, "utf8"), at = mtext.indexOf("\n## Retirement list");
+      const leaving = []; let inNew = false;
+      for (const l of (at < 0 ? [] : mtext.slice(at + 1).split("\n").slice(1))) {
+        if (/^## /.test(l)) break;
+        if (/^### /.test(l)) { inNew = !committed.has(l); continue; }
+        const r = inNew && /^\|\s*`([^`]+)`\s*\|/.exec(l);
+        if (r && !existsSync(join(KN, r[1])) && !/^DangerClose-v5_\d+\.jsx$|^dom_entry_v5\d+\.jsx$/.test(r[1])) leaving.push(r[1]);
+      }
+      const declared = new Set([..._man0.matchAll(/^\s*RETIRE:\s*(\S+)\s*$/gm)].map(x => x[1]));
+      const judged = [...new Set(leaving)], undeclared = judged.filter(x => !declared.has(x));
+      if (!judged.length) console.log("     (informational: C-7 \u2014 no retirement block new to this package removes a file without a replacement)");
+      else ck(`C-7: every file this package's new retirement block removes without a replacement is declared RETIRE: in MANIFEST.txt (${judged.length} judged)`,
+        undeclared.length === 0, `undeclared, so nothing after upload can confirm they left: ${undeclared.join(", ")}` /* no check id in this text: P55 judges by substring */);
+    }
+  }
 }
 
 // ── PHASE · which complement of D-1 applies ──────────────────────────────────────────────
@@ -634,6 +670,26 @@ if (!CLONE) {
       fwd.length === 0, fwd.join(" | "));
     ck("G-3b: and no file is committed executable WITHOUT one (the rule holds both ways)",
       rev.length === 0, rev.join(" | "));
+
+    // ── G-3c · a NEW packaged file with a shebang carries its chmod line (added 2026-09-22, same scope) ──
+    // G-3a judges TRACKED files only, so before the upload it cannot see a new one — and a new file lands
+    // 100644 through the web upload (§L). The fix is a `git update-index --chmod=+x <path>` line in
+    // COMMIT_MESSAGE.txt, the convention recorded above. At the v5.74 ship `qa/tools/controls_v574_c8.py`
+    // arrived with a shebang and no such line; G-3a caught it post-ship and it cost a follow-up commit
+    // (d0b9305). This asks while it is still cheap. Post-ship the file is tracked, so it is not new, and
+    // G-3a is the check that applies (decision D-3).
+    if (existsSync(GH)) {
+      const tracked = new Set(idx.split("\n").map(l => (l.match(/\t(.+)$/) || [])[1]).filter(Boolean));
+      const fresh = walk(GH).filter(p => !tracked.has(p)).filter(p => {
+        try { return readFileSync(join(GH, p), "utf8").split("\n", 1)[0].startsWith("#!"); } catch { return false; } });
+      const cmPath = join(ROOT, "COMMIT_MESSAGE.txt");
+      const cm = existsSync(cmPath) ? readFileSync(cmPath, "utf8") : "";
+      const chmodded = new Set([...cm.matchAll(/git update-index --chmod=\+x\s+([^\n]+)/g)].flatMap(x => x[1].trim().split(/\s+/)));
+      const bare = fresh.filter(p => !chmodded.has(p));
+      if (!fresh.length) console.log("     (informational: G-3c \u2014 no NEW packaged file carries a shebang)");
+      else ck(`G-3c: every NEW packaged file with a shebang has its chmod line in COMMIT_MESSAGE.txt (${fresh.length} new)`,
+        bare.length === 0, `no \`git update-index --chmod=+x\` line for: ${bare.join(" | ")}`);
+    }
   }
 }
 
