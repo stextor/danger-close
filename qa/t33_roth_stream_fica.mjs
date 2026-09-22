@@ -40,7 +40,7 @@ const VER = process.argv[2] || "v563";
 // pre-fix like v5.62; only the two ABSOLUTE pins differ, because v5.62 raised state tax in the
 // Roth outputs (SCOPE_ENGINE_STATE_PARITY). Everything else here is a DELTA between two streams
 // on one build and is therefore version-independent by construction.
-const KNOWN_VERSIONS = ["v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573"];
+const KNOWN_VERSIONS = ["v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is not registered in this suite.");
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -48,7 +48,7 @@ if (!KNOWN_VERSIONS.includes(VER)) {
   process.exit(1);
 }
 // The fix landed at v5.63. Every later tag is post-fix and must be added here as well.
-const POST_FIX = VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573";
+const POST_FIX = VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || VER === "v574";
 
 // The only two build-specific ABSOLUTE figures in this suite. Kept in one table so a tag added to
 // KNOWN_VERSIONS without its pins fails CLOSED rather than reading someone else's numbers — the
@@ -114,6 +114,16 @@ const PINS = {
   // v5.73 changes Maine's and Montana's state rules only. This household is in GEORGIA, so neither figure
   // moves. Counted this time by vercensus's keyed-registry line (SCOPE_TOOLING_GAPS_V572) — not missed.
   v573: { noStream: 174883, acaConv: 1203137 },
+  // v5.74 shares the drawdown: Engine D publishes its spending-draw terms and ENGINES B AND C
+  // consume them (C-8). Engine A — the Roth comparator this suite drives — is explicitly OUT OF
+  // SCOPE (SCOPE_TAXES_DRAWDOWN D-7), so neither figure may move, and carrying v5.73's values
+  // forward is the assertion that the release stayed inside its own scope rather than a copy.
+  // If either number has moved, the draw bridge has leaked into Engine A and D-7 is no longer a
+  // clean exclusion — read that as a finding, not as a pin to update.
+  // ⚠ FOURTH consecutive release at which this registry had to be written BY HAND: its keys are
+  // IDENTIFIERS, so neither vercensus nor the AST version-bump transform can see them. The suite
+  // failed closed (DIED) again on the first v5.74 run, which is the only reason it was cheap.
+  v574: { noStream: 174883, acaConv: 1203137 },
 };
 if (!PINS[VER]) {
   console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is registered but has no PINS entry.");

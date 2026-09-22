@@ -277,9 +277,22 @@ try {
     // RMD must be materially ABOVE the deceased-keyed figure. Pre-fix 2044 read ~$48K
     // (understated); the survivor-based figure is ~$51-52K.
     ck("case 2 [EXTINCTION]: survivor-year RMD is NOT keyed to the deceased (younger) spouse's age",
-      !!y44 && y44.rmdK > 49, `2044 RMD $${y44 && y44.rmdK}K — pre-fix ageA-keyed value was ~$48K (understated)`);
+    // RE-DERIVED AT v5.74 (C-8). The INVARIANT is unchanged - the survivor-year RMD must sit
+    // materially ABOVE the decedent-keyed figure - but the LEVEL it is measured at moved, because
+    // the Taxes tab now subtracts the plan's spending withdrawals from the Traditional balance
+    // (SCOPE_TAXES_DRAWDOWN D-2/D-9). Lifetime RMDs on the shipped household fall 1,625,926 ->
+    // 1,321,030 and this fixture falls with them, so thresholds pinned to the OLD level stop
+    // discriminating: they go red against CORRECT code, which is what happened on the first run.
+    // RE-DERIVED FROM THE DIVISOR RATIO, NOT FROM THE NEW READING. Survivor is B (older, SMALLER
+    // divisor); keying to the deceased younger A divides by the LARGER one:
+    //   2044  survivor B age 80 -> 20.2 ; decedent A age 78 -> 22.0 ; wrong = 36 x 20.2/22.0 ~ 33.1K
+    //   2045  survivor B age 81 -> 19.4 ; decedent A age 79 -> 21.1 ; wrong = 37 x 19.4/21.1 ~ 34.0K
+    // Each threshold sits at the MIDPOINT of the two, so a regression to ageA-keying still fails by
+    // a clear margin. Setting them just under the observed reading would make the check track the
+    // code instead of testing it.
+      !!y44 && y44.rmdK > 34, `2044 RMD $${y44 && y44.rmdK}K — pre-fix ageA-keyed value was ~$48K (understated)`);
     ck("case 2 [EXTINCTION]: the correction persists a year later (2045)",
-      !!y45 && y45.rmdK > 51, `2045 RMD $${y45 && y45.rmdK}K — pre-fix ageA-keyed value was ~$50K (understated)`);
+      !!y45 && y45.rmdK > 35, `2045 RMD $${y45 && y45.rmdK}K — pre-fix ageA-keyed value was ~$50K (understated)`);
     // Direction check: the older survivor's smaller divisor must push the RMD UP.
     ck("case 2: RMD rises across the death boundary (older survivor, smaller divisor)",
       !!y43 && !!y44 && y44.rmdK > y43.rmdK, `2043 $${y43 && y43.rmdK}K → 2044 $${y44 && y44.rmdK}K`);
@@ -318,7 +331,10 @@ try {
     // pooled balance in B's leg and divide by the deceased spouse's larger divisor, producing a
     // materially LOWER figure. Observed correct value ~$44K; the wrong-direction value is lower.
     ck("case 3 [EXTINCTION]: survivor-year RMD follows the SURVIVING spouse A, not the deceased B",
-      !!y42 && y42.rmdK >= 43, `2042 RMD $${y42 && y42.rmdK}K`);
+    // RE-DERIVED AT v5.74 (C-8), same reason and method as case 2 above. Survivor is A (age 78 ->
+    // divisor 22.0); keying to the deceased B (age 76 -> 23.7) divides by the larger divisor and
+    // gives ~35 x 22.0/23.7 ~ 32.5K. Threshold at the midpoint of 32.5 and 35.
+      !!y42 && y42.rmdK >= 34, `2042 RMD $${y42 && y42.rmdK}K`);
     // The rollover must PRESERVE the decedent's balance, not drop it. If tradB were zeroed
     // without being added to tradA, the RMD would fall across the boundary instead of rising.
     ck("case 3: the decedent's balance is preserved by the rollover (RMD does not fall at death)",

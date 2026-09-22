@@ -47,7 +47,7 @@ import { dirname, join } from "path";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v549";
-const KNOWN_VERSIONS = ["v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573"];
+const KNOWN_VERSIONS = ["v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   process.exit(1);
@@ -151,6 +151,18 @@ T(`B-3 [NEGATIVE CONTROL]: "${CTRL_NONE}" is named creator-side and reachable on
 // ── §C · the declared key set ────────────────────────────────────────────────────────────
 // Each key is a string a user would plausibly search for, kept short and markup-free.
 const KEYS = [
+  // Added v5.74 (C-8 / E-21 / D-14). Through v5.73 the Taxes and IRMAA tabs never taxed a spending
+  // withdrawal and ran RMDs on a balance nothing was ever drawn from - one household projected two
+  // ways, with the tab's own summary sentence asserting the opposite. Engine D now publishes the
+  // draw and both tabs consume it. Direction: the correction LOWERS the headline (-$35,624, ~15%
+  // on the example household), which is unusual in this project and is why it needs saying aloud.
+  // WHY THIS KEY. "spending withdrawal", "drawdown", "RMD" and "capital gains" are each already on
+  // one or both surfaces, so a key on the SUBJECT would pass before the fix existed - the vacuity
+  // the v5.51, v5.52 and v5.54 controls each caught in turn. Measured against the PRISTINE v5.73
+  // source and METHODOLOGY.md before any copy was written: this phrase returned 0 hits in both.
+  // It names what CHANGED - that the tab carries the draw term at all.
+  { key: "ordinary income your spending withdrawals create", since: "v574",
+    why: "the Taxes and IRMAA tabs had no spending-draw term; both now import Engine D's" },
   { key: "SSA-44", since: "v549",
     why: "the form number is the only searchable handle a household has for IRMAA relief" },
   { key: "work stoppage", since: "v549",
@@ -264,7 +276,7 @@ T("C-0: every declared key is named in METHODOLOGY.md \u2014 parity is only owed
   KEYS.every(k => inMeth(k.key)),
   KEYS.filter(k => !inMeth(k.key)).map(k => k.key).join(", "));
 
-const POST = VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573";
+const POST = VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || VER === "v574";
 // EACH KEY IS GATED TO THE RELEASE THAT LANDED IT, not to the shared POST flag above.
 // Found at the v5.50 build. Under one shared gate the v549 leg went GREEN on v5.50's expectation
 // for the wrong reason twice over - METHODOLOGY.md is ONE shared file at the run-folder root, so a
@@ -272,7 +284,7 @@ const POST = VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552
 // see JSX gating, so v5.49's single-household-gated estate card satisfied it even though a COUPLE
 // never rendered a word of it - while the v548 leg FAILED outright, invisibly, because runsuite.sh
 // only runs t31 for the prior and current tags.
-const ORDER = ["v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573"];
+const ORDER = ["v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574"];
 // ⚠ THIS IS THE THIRD OF THREE VERSION LISTS in this file — KNOWN_VERSIONS (L50), POST (L218)
 // and ORDER. `post()` uses ORDER.indexOf(VER), so an unrolled tag scores -1 and EVERY key
 // silently takes its pre-fix branch. Rolling two of the three fails 6 checks with no hint
@@ -372,7 +384,7 @@ if (POST) {
   // approved copy is correct; weakening it to something both a conservative and a non-conservative
   // sentence would satisfy is not.
   const DIRECTION = "charges every surcharge in full";
-  if (VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573") {
+  if (VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || VER === "v574") {
     // The C predicate is an OR, and for this key the app arm was ALREADY satisfied before the fix
     // by single-gated text. Asserting the manual arm separately is what makes the key mean anything.
     T("D-5: the FIELD MANUAL names estate tax - the arm that was empty before v5.50",
@@ -383,7 +395,7 @@ if (POST) {
       inDocs("optimistic") && inApp("optimistic"),
       `docs=${inDocs("optimistic")} app=${inApp("optimistic")}`);
   }
-  if (VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573") {
+  if (VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || VER === "v574") {
     // E · CREATOR-SIDE LABEL DRIFT. Added after the v5.50 ship, when a sweep found METHODOLOGY.md
     // still describing the objective list as "max after-tax estate" in three places while its own
     // new section 12 explained why that phrase was wrong. The document contradicted itself, and
@@ -406,7 +418,7 @@ if (POST) {
     T("D-9: the FIELD MANUAL names it - the §13 limitations register",
       inDocs("omits dividends and realized capital gains"));
   }
-  if (VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573") {
+  if (VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || VER === "v574") {
     T("D-10: the RENDER TREE says the column now counts dividends",
       inApp("counts the taxable sleeve's dividends"));
     T("D-11: the FIELD MANUAL does too",

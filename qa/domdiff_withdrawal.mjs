@@ -195,7 +195,23 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   // suppressed check and not a softened one. Item 5 held the HSA out of the dividend base in
   // Engines A, B and C, so the Taxes table's MAGI column moves by design at this pair.
   const ENGINE_B_CHANGED = (VA === "v546" && VB === "v547");
-  if (!ENGINE_B_CHANGED) {
+  // v5.74 (C-8) joins the precedent at v573\u2192v574: Engines B and C now consume Engine D's spending draws, so the
+  // Taxes and IRMAA year tables move BY DESIGN. Identity is false for this pair and a softened check is not the
+  // answer. The bound kept is the one identity existed for: an UNWIRED v5.74 call site renders v5.73's table
+  // byte-for-byte, so "the figures DIFFER" still fails on a dead call site. Dollar-level bounds are pinned to the
+  // dollar in t40 (A\u2013E), not re-derived from rounded DOM text.
+  // \u26a0 The bound is ROWS, not a count of $-figures. Measured 2026-09-21: v5.74 renders more $-figures than
+  // v5.73 \u2014 cells that were exactly $0 ("\u2014") now carry a sub-$1K amount, and the detail panel gains lines
+  // \u2014 so "same number of figures" is false about the model. What the draws cannot change is the rows.
+  const C8_PAIR = (VA === "v573" && VB === "v574");
+  if (C8_PAIR) {
+    const rowsOf = s => (s.match(/20[2-6]\d(?=\d{2}\/\d{2})/g) || []).length;       // "2029" + ages "65/63"
+    ck("TAXES: both legs still render the year table", figA.length > 0 && figB.length > 0);
+    ck("TAXES (v573\u2192v574): the figures DIFFER \u2014 the plan's spending draws now reach Engine B (a dead v5.74 call site renders v5.73's table and fails here)",
+       figA !== figB);
+    ck("TAXES (v573\u2192v574): the same year rows render on both legs \u2014 the draws move values, never rows",
+       rowsOf(figA) > 0 && rowsOf(figA) === rowsOf(figB), `${rowsOf(figA)} vs ${rowsOf(figB)}`);
+  } else if (!ENGINE_B_CHANGED) {
     ck("TAXES: the year-table FIGURES are IDENTICAL across the pair (v5.40 does not move Engine B\u2019s inputs; a dead call site on either leg fails this)",
        figA.length > 0 && figA === figB, figA.length ? firstDiff(figA, figB) : "region not found");
   } else {
@@ -257,7 +273,16 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   // v5.47 joins v5.43 here: item 5 moves Engine C's dividend term, so the MAGI column differs by
   // design at the v546\u2192v547 pair too. Bounded below rather than suppressed.
   const ENGINE_C_CHANGED = (VA === "v542" && VB === "v543") || (VA === "v546" && VB === "v547");
-  if (!ENGINE_C_CHANGED) {
+  // v5.74 (C-8, decision D-6): Engine C takes the same draw series in the same release \u2014 see the Taxes note above.
+  const C8_PAIR_I = (VA === "v573" && VB === "v574");
+  if (C8_PAIR_I) {
+    ck("IRMAA: both legs still render the MAGI table", magA.length > 0 && magB.length > 0);
+    ck("IRMAA (v573\u2192v574): the MAGI figures DIFFER \u2014 the spending draws now reach Engine C (a dead v5.74 call site renders v5.73's table and fails here)",
+       magA !== magB);
+    const cA = (magA.match(/\$[\d,]+K?/g) || []).length, cB = (magB.match(/\$[\d,]+K?/g) || []).length;
+    ck("IRMAA (v573\u2192v574): same SHAPE \u2014 same number of figures (measured: this table has no exact-zero cells to fill)",
+       cA > 0 && cA === cB, `${cA} vs ${cB}`);
+  } else if (!ENGINE_C_CHANGED) {
     ck("IRMAA: the MAGI-table FIGURES are IDENTICAL across the pair (no release in this span touches Engine C's arithmetic \u2014 a dead call site on either leg fails this)",
        magA.length > 0 && magA === magB, magA.length ? firstDiff(magA, magB) : "region not found");
   } else {

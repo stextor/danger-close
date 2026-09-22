@@ -105,6 +105,13 @@ tally "t38-$CUR"   node t38_import_hardening.mjs "$CUR"
 # half-taxed SS; the current leg carries the hand-computed cells. It is in the APP total.
 tally "t39-$PRIOR" node t39_me_mt.mjs "$PRIOR"
 tally "t39-$CUR"   node t39_me_mt.mjs "$CUR"
+
+# t40 (v5.74) runs on BOTH legs: the prior leg pins C-8 (the Taxes and IRMAA tabs never saw the drawdown —
+# $0 federal tax in 2032-2038, lifetime RMD $1,625,926); the current leg asserts the draw agreement, the D-9
+# pinned divergence and the hand-verified gap years. It is the suite's FIRST cross-tab test (E-25): every
+# other suite drives one engine. It is in the APP total. Its negative controls are qa/tools/controls_v574_c8.py.
+tally "t40-$PRIOR" node t40_cross_tab_agreement.mjs "$PRIOR"
+tally "t40-$CUR"   node t40_cross_tab_agreement.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
