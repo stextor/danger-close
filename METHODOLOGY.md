@@ -109,7 +109,8 @@ Two models, user-selectable on the Monte Carlo tab:
 
 Annual projection applying, per year: 2026 brackets and standard deductions (Rev. Proc. 2025-32,
 incl. OBBBA changes) inflated ~2%/yr; Social Security taxation via the provisional-income test
-(85%-cap tiers); LTCG/qualified-dividend stacking on top of ordinary income; NIIT (3.8%,
+(85%-cap tiers); LTCG/qualified-dividend stacking on top of ordinary income, **capped at taxable
+income (v5.75)**; NIIT (3.8%,
 statutorily unindexed thresholds); a simplified AMT check (standard-deduction add-back method);
 FICA on earned income only; RMDs from the Uniform Lifetime Table at the SECURE 2.0 start age;
 Roth conversions with bracket/IRMAA interaction; and QCDs (2026 cap $111,000/person, indexed —
@@ -315,6 +316,36 @@ standard deductions/credits, pension-source distinctions (AL/HI DB exemptions), 
 capital-gains excise. Verify your state.
 
 ## 7. Roth conversion modeling
+
+**Who the age-65 deductions belong to, and an unused deduction against gains (v5.75).** Two
+corrections, both in the taxpayer-unfavourable direction — the model now reports MORE tax in the
+first case and LESS in the second, and both match the statute.
+
+*The survivor's age.* The §63(f) additional standard deduction and the OBBBA senior bonus belong to
+the individuals **on the return**. On a joint return each spouse is counted by their own age; on a
+single return only the **filer** counts. Through v5.74 a single return took the older of the two
+stored birth dates, so a surviving spouse under 65 received the 65+ deductions through the deceased
+spouse's age, and a single household whose spouse-B birth date was still on file could receive them
+through a person not on the return. On a household whose first death leaves a survivor aged 62, the
+understatement was $976 in that year and roughly $260/yr after it, on $50,000 of pension income.
+Sources: 26 U.S.C. §63(f); IRS Pub. 501 (2025), "Death of spouse"; and the 2025 Form 1040
+instructions, Schedule 1-A Part V, "Death of a taxpayer in 2025", which gives the bonus the same
+rule. **Disclosed approximation (unchanged by this release):** the model holds birth *years*, not
+death dates, and treats the death year as a joint return in which the decedent is counted by
+calendar-year age. The statute counts a decedent as 65 only if they reached 65 *on or before the
+date of death*, so for a decedent whose birthday falls after their death date in the death year,
+the model grants one deduction the return is not entitled to — a single-year, one-deduction
+overstatement of the deduction, in the optimistic direction, in the death year only.
+
+*An unused deduction against preferential income.* 26 U.S.C. §1(h)(1) applies the preferential
+rates to net capital gain **"or, if less, taxable income"**, and the IRS's Qualified Dividends and
+Capital Gain Tax Worksheet implements that by measuring the gains against taxable income *after*
+the deduction. Through v5.74 the model stacked gains on ordinary income floored at zero, so a
+deduction that ordinary income did not use was simply lost rather than absorbing the gains. A single
+filer with no ordinary income and $60,000 of qualified dividends was charged $1,583; the correct
+figure is $0. The correction is applied on the regular **and** the AMT path: applying it to only one
+does not remove the overcharge, it re-routes it into AMT (measured at build: $1,583 of pure AMT on
+the same case).
 
 **Standard deduction on the Roth tab (v5.20).** The conversion-ladder projection now applies the
 §63(f) age-65 additional standard deduction — $1,650 per spouse MFJ, $2,050 single for 2026, indexed
