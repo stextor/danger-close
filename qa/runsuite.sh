@@ -112,6 +112,13 @@ tally "t39-$CUR"   node t39_me_mt.mjs "$CUR"
 # other suite drives one engine. It is in the APP total. Its negative controls are qa/tools/controls_v574_c8.py.
 tally "t40-$PRIOR" node t40_cross_tab_agreement.mjs "$PRIOR"
 tally "t40-$CUR"   node t40_cross_tab_agreement.mjs "$CUR"
+# t41 (v5.75) runs on BOTH legs by construction: the prior leg PINS the survivor-age and unused-
+# deduction defects as dated known defects, the current leg asserts the statutory figures. A
+# current-leg-only run could not show that anything moved. ⚠ It was written and left UNWIRED at the
+# v5.75 build — the full suite reported 4,320 green with 39 checks that never executed. Nothing in
+# the runner fails when a suite file exists but is not listed here; only this line makes it run.
+tally "t41-$PRIOR" node t41_survivor_age_gains.mjs "$PRIOR"
+tally "t41-$CUR"   node t41_survivor_age_gains.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

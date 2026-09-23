@@ -251,8 +251,16 @@ try {
     if (ladder) {
       ck("case 3 [EXTINCTION]: the ladder holds NO private IRMAA inflator (was Math.pow(1.03, ...))",
         !/Math\.pow\(1\.03/.test(ladder), "a 1.03 inflator is still present in the ladder block");
+      // ⚠ v5.75 (D-7): the ladder's bracket projection was HOISTED out of the tab to module level as
+      // `projectBracketsAt`, so one of the two call sites now sits OUTSIDE the `ladder` slice. The
+      // assertion is unchanged in substance — both sites must still call the shared helper and hold
+      // no private copy — so the region searched is widened to follow the code, rather than the
+      // count being lowered to 1, which would have retired half the check silently.
+      const _pbAt = src.indexOf("function projectBracketsAt(");
+      ck("case 3: the hoisted projection is present in canonical source (v5.75, D-7)", _pbAt >= 0);
+      const region = ladder + (_pbAt >= 0 ? src.slice(_pbAt, src.indexOf("\n}", _pbAt)) : "");
       ck("case 3 [EXTINCTION]: the ladder calls the shared irmaaThresholdFor helper",
-        (ladder.match(/irmaaThresholdFor\(/g) || []).length >= 2,
+        (region.match(/irmaaThresholdFor\(/g) || []).length >= 2,
         "expected both the projection and the lookback site to use the shared helper");
       ck("case 3 [EXTINCTION]: the ladder no longer hardcodes the married SS provisional literals",
         !/provisional > 44000/.test(ladder) && !/provisional > 32000/.test(ladder),
