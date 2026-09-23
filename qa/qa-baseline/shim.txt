@@ -72,6 +72,17 @@ export const __test = {
   get PORTFOLIO() { return PORTFOLIO; },
   get PLAN_TIMELINE() { return PLAN_TIMELINE; },
   applyLoadedData, buildVerificationChecks, runRothStrategies,
+  // v5.75 (D-7): the Roth tab's bracket projection, hoisted to module level this release. The
+  // hoist alone does not reach the harness — the ladder's figures are otherwise readable only
+  // through the DOM, where Math.round(x/1000) puts a ±$500 floor under any invariant
+  // (OPERATIONS §M). t41 calls this directly and compares the senior deduction to the dollar.
+  // ⚠ CONDITIONAL BY NECESSITY: this ONE shim is appended to EVERY leg, and `projectBracketsAt`
+  // does not exist before v5.75. A bare `projectBracketsAt,` here is a ReferenceError at module
+  // load on every prior leg — it killed t37/t38/t39/t40 on the v574 leg at the v5.75 build, and
+  // only the run from the PACKAGED copies caught it, because the earlier run folder still held
+  // v574 bundles built with the pre-edit shim. Any future export of a NEW identifier needs this
+  // same guard. (t41 asserts the absence on the prior leg, so the guard is itself covered.)
+  ...(typeof projectBracketsAt !== "undefined" ? { projectBracketsAt } : {}),
   contribAccrual: _g("contribAccrual"),
   retireStartBalances: _g("retireStartBalances"),
   otherTaxableInit: _g("otherTaxableInit"),
