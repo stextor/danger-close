@@ -1,5 +1,81 @@
 # Changelog
 
+## v5.75 — the survivor's age deductions, and a deduction ordinary income never used
+
+Source `4453cf274ef8c59f5ea610528eed97ab` · built `index.html` `fac9dd22a686bfe40f9a3cc2962dcc21` · built from v5.74
+`1ff04dee1b43b20880a8500ab9645f02`. `src/index.html` and `src/main.jsx` are unchanged. **Figures move for two
+households: one whose first death leaves a survivor under 65 (tax goes UP — the deduction was not theirs), and one
+whose ordinary income is below the standard deduction while it holds gains or qualified dividends above the 0% band
+(tax goes DOWN).** The example household is unaffected — on screen the Taxes and IRMAA tables are byte-identical
+across the pair (`domdiff` 32/32). `METHODOLOGY.md` gains *Who the age-65 deductions belong to, and an unused
+deduction against gains (v5.75)*.
+
+**Suite: 4,265 app checks, 0 failed, 0 DIED, across both legs** — 40 app suites plus MC parity 10/10; tooling `t21`
+64, `domdiff` 32, `sets` 12 + 12 (GRAND 4,395), run from the packaged copies. `t41` is new on both legs (36 on
+v5.74, 39 on v5.75). `smoke_built` **22 passed, 0 failed**. Negative controls: `controls_v575_c3c6.py` **8 of 8** as
+required, including `M4`, which floors only the AMT stack and must fire the phantom-AMT check while every total stays
+correct. Per-suite: `TESTING.md`.
+
+### What changed, and why
+
+- **The age-65 deductions belong to the people on the return.** §63(f)'s additional standard deduction and the OBBBA
+  senior bonus are per individual *on the return*; on a single return that is the filer alone. Through v5.74 a single
+  return took `Math.max(ageA, ageB)`, so a **surviving spouse under 65 received both deductions through the deceased
+  spouse's age**, and a single household with a stale spouse-B birth date on file could receive them through someone
+  not on the return at all. On a household whose first death leaves a survivor aged 62 with $50,000 of pension income,
+  federal tax was understated by **$975.96** in the first widowed year (2028: $2,756.02 against $3,731.98, the bonus
+  still in force) and by **$261.00** and **$266.28** in the two years after. The stale-date case understated by
+  **$246/yr** — measured on Engine A, where it was live; it was not live on Engine B. Both engines and the Roth tab's
+  bracket projection now decide it through one shared helper, `persons65OnReturn`. Sources: IRS Pub. 501 (2025),
+  *Death of spouse*; 2025 Form 1040 instructions, Schedule 1-A Part V, *Death of a taxpayer in 2025* (added by the IRS
+  after first print, and it gives the bonus the same rule and the same example).
+- **A deduction ordinary income does not use now reaches the gains.** 26 U.S.C. §1(h)(1) applies the preferential rates
+  to net capital gain *"or, if less, taxable income"*, and the IRS's Qualified Dividends and Capital Gain Tax Worksheet
+  measures the gains against taxable income **after** the deduction. Through v5.74 the model stacked gains on ordinary
+  income floored at zero, so the unused deduction was simply lost. A single filer with no ordinary income and $60,000
+  of qualified dividends was charged **$1,583 instead of $0**; with $8,000 of ordinary income and $70,000 of dividends,
+  $3,083 instead of $1,868. Corrected on the regular **and** the AMT path in both engines, in all thirteen stacking
+  call sites.
+- **Fixing only half the second defect re-routes the overcharge into AMT rather than removing it** — $1,583.00,
+  $1,215.00 and $82.00 of pure AMT on the cases above, measured on both engines during the build. This is why `t41`
+  asserts `amt == 0` per case and not only the total, and why control `M4` exists.
+- **The Roth tab's bracket projection is hoisted** to module level as `projectBracketsAt` and exposed through the test
+  shim, so `t41` checks its deduction to the dollar. Its figures were previously readable only through the DOM, where
+  rendering rounds to the nearest $1,000 — a $500 floor under any invariant, larger than the $2,050 deduction at 12%.
+
+### Limitations and approximations, stated plainly
+
+- **The death year is still approximated, and in the optimistic direction.** The model holds birth *years*, not death
+  dates, and treats the death year as a joint return counting the decedent by calendar-year age. The statute counts a
+  decedent as 65 only if they reached 65 **on or before the date of death**. For a decedent whose birthday falls after
+  their death date in that year, the model grants one deduction the return is not entitled to — one year, one
+  deduction, disclosed in `METHODOLOGY.md` and unchanged by this release.
+- **Engine A still does not model the $6,000 bonus at all** (a pre-existing, disclosed simplification), so its widowed
+  figure is $3,732 where Engine B's is $3,731.98 plus the bonus effect. The Form 6251 add-back question therefore
+  cannot arise there; Engine B's AMT already starts from gross ordinary income and subtracts no deduction.
+- **Two longhand copies of the survivor rule remain** on the Roth tab, outside this scope. They behave identically
+  today; they are the same duplicate-copy shape that produced this release's bonus defect and are recorded, not fixed.
+- The sale gross-up sites are reachable only when a **state** bill funds the sale while the federal deduction is
+  unused; `t41` D-4/D-5 pin that case and control `M6` proves nothing else covers those four sites.
+
+### Found while building, and worth recording
+
+- **`t41` was written, green, and never ran.** A suite file that is not listed in `qa/runsuite.sh` executes nowhere and
+  nothing fails; the first full pass reported 4,320 green with 39 checks that had not run. Caught by reading the
+  per-suite breakdown for a `t41` line. The runner now carries the warning beside the entry.
+- **The test shim is shared by every leg.** Exporting the newly hoisted function unconditionally was a `ReferenceError`
+  at module load on the v5.74 leg and killed four suites there. It was invisible in the working run folder, whose prior
+  leg still held bundles built before the edit, and was caught only by the run from the **packaged** copies. The export
+  is now guarded, and `t41` asserts its absence on the prior leg.
+- **The scope's own example-household sentence was off by a year** (the survivor is 79 in the first single-filing year,
+  not at the death); corrected in the shipped scope. Its conclusion was unaffected.
+- `t24`'s pinned figures appeared to move and had not: its version gate is a ternary, the shape a version-roll sweep
+  keeps missing. `t16`'s structural check needed its search region widened to follow the hoisted code rather than its
+  expected count lowered.
+- The boundary census (`t29`) gains the two conditions the example data hides, and reports them for that household:
+  survivor already 79 at the first single-filing year, and ordinary income ($4,800) below the deduction ($32,200) but
+  preferential income never above the 0% top ($98,900) — both halves are required, which is why this was $0 there.
+
 ## ops 2026-09-22 — package_check checks the two declarations a package relies on
 
 KIND: ops. **v5.74 stays current** — source `1ff04dee1b43b20880a8500ab9645f02`, built `index.html`
