@@ -153,6 +153,54 @@ export function census(G) {
            : (wA === wB ? "identical — the per-spouse window split is unexercised"
                         : "differ — the per-spouse window split is exercised"));
 
+  // ── v5.75 (SCOPE_SURVIVOR_AGE_AND_GAINS_DEDUCTION) · two conditions the example data hides ────
+  // Both defects this release fixed were $0 on the example household, for two different reasons,
+  // and neither reason was visible in any row above.
+  //
+  // 1. THE SURVIVOR'S AGE. The §63(f) extra and the OBBBA bonus belong to the people ON the return;
+  //    on a single return that is the FILER alone. The defect only shows when the first death
+  //    leaves a survivor UNDER 65. The example household's first death leaves a survivor already
+  //    past 65, so every widowed year takes the deduction legitimately and the defect is invisible.
+  const firstDeathYr = single ? null : Math.min(tl.dobA.year + tl.lifeExpA, tl.dobB.year + tl.lifeExpB);
+  if (single) {
+    row("survivor_u65", "survivor age at first death", "n/a", "under 65 in a single-filing year", false,
+      "single filer — no survivor transition");
+  } else {
+    // the survivor is whoever lives longer; ages are the model's own calendar-year arithmetic
+    const survIsA = (tl.dobA.year + tl.lifeExpA) >= (tl.dobB.year + tl.lifeExpB);
+    const survDobYr = survIsA ? tl.dobA.year : tl.dobB.year;
+    // filing turns single the year AFTER the death (Pub. 501), so that is the first exposed year
+    const ageFirstSingleYr = (firstDeathYr + 1) - survDobYr;
+    const exposed = ageFirstSingleYr < 65;
+    row("survivor_u65", "survivor age, first single-filing year", `${ageFirstSingleYr} (in ${firstDeathYr + 1})`,
+      "under 65", !exposed,
+      exposed ? "exercises the survivor's own-age rule"
+              : "DEGENERATE — the survivor is already 65+, so the filer-only rule cannot change any figure here");
+  }
+
+  // 2. AN UNUSED DEDUCTION AGAINST PREFERENTIAL INCOME. §1(h)(1) taxes gains at the preferential
+  //    rates on gains "or, if less, taxable income", so a deduction ordinary income does not use
+  //    absorbs the gains first. That can only change a figure when BOTH hold: ordinary income is
+  //    below the deduction, AND preferential income reaches past the top of the 0% band (below it
+  //    the rate is 0% either way, so a floored stack and a signed one agree).
+  const stdNow = single ? T.SGL_STD : T.MFJ_STD;
+  const seniorNow = (single ? T.SENIOR_EXTRA_SGL : T.SENIOR_EXTRA_MFJ) *
+    ((tl.asOfYear - tl.dobA.year >= 65 ? 1 : 0) + (!single && tl.asOfYear - tl.dobB.year >= 65 ? 1 : 0));
+  const dedNow = stdNow + seniorNow;
+  const zeroTop = (single ? T.SGL_LTCG : T.MFJ_LTCG)[0].upper;
+  // ordinary income as the plan states it today: Social Security is excluded (it has its own
+  // inclusion rule), so this is pension + earned/other streams, read live through the shim.
+  const ordNow = G.getPension() * 12 + G.streamsAnnualAt(tl.asOfYear);
+  const belowDed = ordNow < dedNow;
+  row("unused_ded_ord", "ordinary income vs deduction", `$${Math.round(ordNow).toLocaleString()} vs $${dedNow.toLocaleString()}`,
+    "ordinary below the deduction", !belowDed,
+    belowDed ? "leaves deduction unused — reachable"
+             : "DEGENERATE — ordinary income covers the deduction, so nothing is left to absorb gains");
+  row("unused_ded_pref", "0% band top (the other half of the condition)", `$${zeroTop.toLocaleString()}`,
+    "preferential income above the 0% top", false,
+    "BOTH halves are required: below the 0% top the rate is 0% either way. The example household's "
+    + "preferential income is dividends on the taxable sleeve; pair this row with the one above when scoping.");
+
   return rows;
 }
 
