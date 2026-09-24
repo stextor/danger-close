@@ -1,5 +1,65 @@
 # Changelog
 
+## v5.76 — a single household is no longer paid spouse B's Social Security
+
+Source `66b0dd944333a53f4cc00a54b9e3d618` · built `index.html` `1254aa00d608a98e0f29e22f974ab96d` · built from v5.75 `4453cf274ef8c59f5ea610528eed97ab`.
+`src/index.html` and `src/main.jsx` are unchanged. **Figures move only for a single household whose plan was loaded
+from a file — all toward lower balances and more tax.** Married households are untouched: on screen the Taxes and IRMAA
+tables are byte-identical across the pair (`domdiff` 32/32). `METHODOLOGY.md` gains *A single household is never paid
+spouse B's Social Security (v5.76)*; finding C-7 in `docs/FlawsToFix-v5_73-Phase2.md` is annotated re-measured and fixed.
+
+**Suite: 4,319 app checks, 0 failed, 0 DIED, across both legs** — 41 app suites plus MC parity 10/10; tooling `t21` 64,
+`domdiff` 32, `sets` 12 + 12 (GRAND 4,449), run from the packaged copies. `t42` is new on both legs (17 on v5.75, 34 on
+v5.76). `smoke_built` **22 passed, 0 failed**. Negative controls: `controls_v576_c7.py` **6 of 6** as required, including
+`M3`, which re-adds a read of spouse B's benefit that bypasses `getSSB()` entirely and must be caught by the sweep.
+Per-suite: `TESTING.md`.
+
+### What changed, and why
+
+- **A single household has no spouse B, so it has no spouse-B benefit.** Social Security retirement benefits belong to
+  the worker who earned them (42 U.S.C. §402(a)). Twelve of the 25 reads of spouse B's benefit already tested for a
+  single household; thirteen did not — the Withdrawal plan, both Monte Carlo loops, what Ask AI is told about the
+  household's income, and several tab figures. Since v5.74 the Withdrawal plan's draws feed the Taxes tab, so its
+  error became a tax error too. The rule now lives once, in `getSSB()`, which returns zero for a single household.
+- **The loader no longer invents one.** A single household's plan file with no spouse-B section — the natural shape of
+  such a file — was given the example household's $1,300/month by default, and `getSSB()` had a second fallback to the
+  same figure. It now loads with zero.
+- **A stored figure is left alone, and the app says so.** If a single household's file carries a spouse-B benefit, it
+  stays in the file — switching back to married restores it — but no calculation uses it, and one line under the header
+  says so while it is present. Checked live at render, so it cannot outlast a My Data save that clears the figure.
+
+**Size, on the example household made single** (retirement 2029, base preset, no conversions): the plan paid **$308,076**
+of spouse-B benefits that do not exist; the ending portfolio read **$427,269** high, spending draws $301,146 low,
+lifetime federal tax **$38,916** low, and the Monte Carlo median ending balance **$61,158** high. Every error ran
+optimistic. Each is zero on v5.76 against the zeroed-benefit case, to the dollar.
+
+### Limitations, stated plainly
+
+- **The route is loading a plan file.** Both in-app ways of making a household single already cleared the figure on
+  save, which narrows the audit's original description of who was exposed. A hand-edited file, a converted document or a
+  backup from before the save paths cleared the figure are the realistic cases.
+- **The Monte Carlo success rate did not move on the example household** — 100% either way; the plan is very safe — so
+  this release shows its Monte Carlo effect through the median balance. A tighter single household's success rate would
+  move, and was not separately measured.
+- The twelve pre-existing inline single tests are now redundant and were left in place deliberately; removing them is
+  churn with no behaviour change.
+
+### Found while building, and worth recording
+
+- **The audit's severity no longer fitted.** C-7 was rated low–medium at v5.73 as one site in one engine. Re-verified on
+  v5.75 it had a narrower route (file load, not the in-app toggle), a second and larger route (the loader default), and a
+  wider reach (the Taxes tab via v5.74's bridge, and Monte Carlo).
+- **A Monte Carlo seeding trap.** The simulation's market noise comes from `d3.randomNormal`, and d3 captures its own
+  reference to `Math.random` when the library loads. Replacing `Math.random` after import seeds only half the randomness:
+  identical runs then differ by ~$3,000, and a first measurement for this scope ($70,110) was contaminated by exactly
+  that. `t42` installs its seeded source before the import and asserts the harness is deterministic (`M-0`) before
+  trusting any Monte Carlo comparison.
+- **`t42`'s rendered check first failed on a stale screen.** Clicking the tab that is already showing changes no state,
+  so React skips the render and the previous note stays visible. The check now switches between two different tabs.
+- **Registration was clean on the first pass.** The project's sweep (`vercensus.cjs`, given its directory arguments) sized
+  the work before any edit, and the three shapes it cannot see — `t31`'s `ORDER`, the ternary chains and the
+  display-string maps — were handled explicitly. v5.75 needed two rounds of fixes for the same work.
+
 ## v5.75 — the survivor's age deductions, and a deduction ordinary income never used
 
 Source `4453cf274ef8c59f5ea610528eed97ab` · built `index.html` `fac9dd22a686bfe40f9a3cc2962dcc21` · built from v5.74
