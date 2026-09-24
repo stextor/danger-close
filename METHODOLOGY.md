@@ -414,6 +414,25 @@ than by inference from missing data: the claim date is constructed for both spou
 a second spouse exists, so a stored spouse-B benefit surviving in a restored backup would otherwise
 still reach the ladder.
 
+**A single household is never paid spouse B's Social Security (v5.76).** Social Security retirement
+benefits belong to the worker who earned them, and a single household has no spouse B. The ladder's
+explicit test above was one of twelve such tests; thirteen other reads of spouse B's benefit had
+none. The one that mattered most was the Withdrawal plan, which paid the stored benefit as income.
+Through v5.74's draw bridge that understated the Taxes tab's tax too, and both Monte Carlo loops
+paid it as well. Worse, when a single household's plan file had **no** spouse-B section — the natural
+shape of such a file — the loader filled in the example household's $1,300/month as a default. On
+the example household made single, the plan paid **$308,076** of spouse-B benefits that do not exist:
+the ending portfolio read $427,269 high, lifetime federal tax $38,916 low, and the Monte Carlo median
+ending balance $61,158 high. **Every error ran optimistic.**
+
+Since v5.76 the rule lives in one place, `getSSB()`, which returns zero for a single household, and a
+single household's plan with no spouse-B section loads with zero. A spouse-B figure that is **stored**
+in a single household's file is left in the file, because switching the plan back to married should
+restore it, but no calculation uses it, and the app says so in one line while it is present. Both
+in-app ways of making a household single already cleared the figure on save; the route was loading a
+plan file. The stress tests were never affected: their one unguarded read is tested for single where
+it is used.
+
 **This correction lowers the figures the tab reports**, which is unusual here and worth stating
 plainly: removing income the household does not yet have reduces provisional income, taxable Social
 Security, MAGI, tax and marginal rate, and widens apparent conversion headroom. It is not a
