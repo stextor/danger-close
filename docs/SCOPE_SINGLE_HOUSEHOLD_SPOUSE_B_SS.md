@@ -1,6 +1,9 @@
 # SCOPE — a single household is paid spouse B's Social Security (C-7)
 
-**Decisions RESOLVED 2026-09-24 — all five adopted as recommended (§7). Buildable.** Built against **v5.75**, source
+**FULFILLED — built and shipped at v5.76.** All seven build-order steps executed; every §1 figure reproduced on
+v5.75 before any code changed, and every error measured there is zero on v5.76 against the zeroed-benefit case.
+`t42` (34 checks on v5.76, 17 pinning the defect on v5.75) and `controls_v576_c7.py` (6 of 6) pin it.
+Decisions resolved 2026-09-24 — all five adopted as recommended (§7). Built against **v5.75**, source
 `4453cf274ef8c59f5ea610528eed97ab`. Finding C-7 in `FlawsToFix-v5_73-Phase2.md`.
 
 ## 1 · Premise — verified on v5.75 by execution, not recalled

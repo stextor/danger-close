@@ -32,7 +32,7 @@ ordinary income, though both were in its "Gross taxable" total; it now lists eve
 | **C-3** | A surviving spouse under 65 gets the 65+ deductions via the deceased's age ($975.96 in 2028 in the worked case) | B, A (executed); Roth-tab projection (read) | Medium | optimistic | No |
 | **C-6** | Unused standard deduction is not applied to qualified dividends / capital gains (up to 15% of the unused deduction; $1,582.50 on $60K of gains with no ordinary income) | A, B | Medium | pessimistic | No |
 | **C-4** | Engine A keeps the §86 upper-tier error v5.45 fixed in B (+$150 in the worked case); v5.45's census named 2 of 5 §86 sites | A | Low–medium | pessimistic | No |
-| **C-7** | A single household is paid spouse B's Social Security in the Withdrawal plan | D | Low–medium | optimistic | No |
+| **C-7** | A single household is paid spouse B's Social Security in the Withdrawal plan | D | Low–medium → **re-measured larger at v5.75; FIXED v5.76** | optimistic | No |
 | **C-10** | A Roth IRA under Other accounts is sold as brokerage and realizes taxable gains (when a gain share is set) | D → B, C | Low–medium | pessimistic | No |
 | **C-1** | At exactly the IRMAA top-tier threshold the household is billed one tier low | A, C | Low | optimistic | No |
 | **C-5** | The Withdrawal tab's bracket column uses the joint table for every household, unindexed, with a flat 85% of SS | D (display) | Low | varies | No |
@@ -190,6 +190,16 @@ the 22% band. Across 31 common years Engine D's bracket differs from Engine B's 
 of that is C-5: C-7 and C-8 feed the same column.
 
 **C-7 · CONFIRMED (Engine D, executed) — a single household is paid spouse B's Social Security in the Withdrawal plan.**
+
+> **Re-measured on v5.75 and FIXED at v5.76** (`SCOPE_SINGLE_HOUSEHOLD_SPOUSE_B_SS.md`). Re-verification changed
+> this finding in three ways. **Narrower route:** switching to single inside the app already cleared the stored
+> benefit on both save paths, so the route is loading a plan file, not the toggle. **A second, larger route:** a
+> single household's plan with no spouse-B section had the example household's $1,300/month filled in by the
+> loader. **Wider reach:** thirteen of 25 reads lacked the single test — Engine D, both Monte Carlo loops, Ask AI's
+> context and several tab figures — and since v5.74 Engine D's draws feed the Taxes tab. On the example household
+> made single: $308,076 of phantom benefits, ending portfolio +$427,269, lifetime federal tax −$38,916, Monte Carlo
+> median +$61,158. The severity above no longer fitted. Fixed at the source (`getSSB()` returns zero for a single
+> household) with `t42` and six negative controls; figures below this note are the original v5.73 record.
 *Severity: low–medium. User-side. Optimistic (guaranteed income overstated, so draws understated). Not disclosed.*
 L4971 reads `const _ssB = getSSB();` with no single test; Engine B uses `_tlT.single ? 0 : getSSB()` (L5418).
 METHODOLOGY (§ on the v5.4x Roth-tab fixes) already records that "a stored spouse-B benefit surviving in a restored backup
