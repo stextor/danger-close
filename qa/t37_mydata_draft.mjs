@@ -33,13 +33,13 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
 const VER = process.argv[2];
-const KNOWN_VERSIONS = ["v570", "v571", "v572", "v573", "v574", "v575"];
+const KNOWN_VERSIONS = ["v570", "v571", "v572", "v573", "v574", "v575", "v576"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log(`    Registered: ${KNOWN_VERSIONS.join(", ")}`);
   process.exit(1);
 }
-const POST_FIX = VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || VER === "v575"); // A-3 / A-6 fixed at v5.71 (v5.72 keeps both; it only moves the draft drop after a SUCCESSFUL import — t38 I-5)
+const POST_FIX = VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576")); // A-3 / A-6 fixed at v5.71 (v5.72 keeps both; it only moves the draft drop after a SUCCESSFUL import — t38 I-5)
 
 // ── storage: the real contract (== src/main.jsx L19-43). Async; `get` REJECTS on a missing key. ──
 const PREFIX = "dc:";

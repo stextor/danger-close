@@ -119,6 +119,11 @@ tally "t40-$CUR"   node t40_cross_tab_agreement.mjs "$CUR"
 # the runner fails when a suite file exists but is not listed here; only this line makes it run.
 tally "t41-$PRIOR" node t41_survivor_age_gains.mjs "$PRIOR"
 tally "t41-$CUR"   node t41_survivor_age_gains.mjs "$CUR"
+# t42 (v5.76) runs on BOTH legs: the v5.75 leg pins C-7 (a single household paid spouse B's Social
+# Security) as a dated known defect; the current leg asserts every output equals the zeroed-benefit
+# case to the dollar, sweeps the stored figure, and renders the D-2 note. Wired AT BUILD this time.
+tally "t42-$PRIOR" node t42_single_spouse_b_ss.mjs "$PRIOR"
+tally "t42-$CUR"   node t42_single_spouse_b_ss.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

@@ -35,12 +35,12 @@
 import { createRequire } from "module";
 
 const VER = process.argv[2];
-const KNOWN_VERSIONS = ["v574", "v575"];
+const KNOWN_VERSIONS = ["v574", "v575", "v576"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.\n    Registered: ${KNOWN_VERSIONS.join(", ")}`);
   process.exit(1);
 }
-const POST = VER === "v575";
+const POST = (VER === "v575" || VER === "v576");
 
 // argv[3] (optional) is a module path, so the negative controls can point this suite at a mutated
 // build while still gating its expectations by leg — the convention t40 uses.
