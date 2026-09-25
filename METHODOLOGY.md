@@ -495,26 +495,32 @@ $483/yr on the example household. Left standing deliberately: correcting one sit
 would put the tab's two RMD projections on disagreeing bases, the defect v5.41 was built to remove,
 so both sites are scheduled together.
 
-**§86(a)(1)'s half-benefits cap is applied in both places as of v5.45.** The statute caps the
-includible amount at half the benefits; the taxable-income engine dropped that cap in its upper tier
-and the Roth tab capped at 85% in its middle tier — mirror images, each correct where the other was
-wrong. Both overstated, bounded at $2,463 and $2,468 joint ($1,838 / $1,850 single), and both were
-confined to households with benefits under $12,000 joint or $9,000 single, above which the overall
-85% cap binds first. **The two bands were contiguous at the adjusted base amount**, so a household
-with small benefits and rising income crossed from one defect straight into the other; fixing either
-alone would have left a discontinuity at that threshold, which is why they shipped together.
+**§86 is one rule, in one place, for every engine (v5.77).** Taxable Social Security is computed by a
+single function written line for line from the IRS Social Security Benefits Worksheet (2025 Form 1040
+instructions, lines 6a and 6b), and every engine calls it: the Roth-strategy comparator, the Taxes
+tab, the IRMAA tab and the Roth tab's year table. Each passes the filing status for the year it is
+taxing — joint, or single once a survivor files alone — and the function chooses the §86(c) amounts
+from that. The worksheet's **line 14** is the half-benefits limb of §86(a)(2)(A): above the adjusted
+base amount, the portion carried up from the lower tier is the smaller of half the benefits and half
+of the capped excess. Adjustments to income (worksheet line 6) and tax-exempt interest (line 4) are
+not modelled, and neither are lump-sum elections or repayments (§86(d)–(e)).
 
-The remaining tidy-up items are narrow, both overstating, and both scheduled to ship together rather
-than piecemeal, because they are one defect in two places: the taxable-income engine omits the
-½-benefits cap in its own phase-in, and the **middle** §86 tier on this tab also remains uncorrected, and was found during the v5.42 work
-rather than being previously known. Between the base and adjusted base amounts the statute caps the
-includible amount at ½ of benefits; this tab caps it at 85%. It can only bite where provisional
-income falls inside that band *and* total benefits are small — under $12,000 joint, under $9,000
-single — because above that the overall 85% cap binds first. Swept across the whole band the
-overstatement is bounded at **$2,468** joint and **$1,850** single, and it is $0 on the example
-household. It is the same defect class as the omitted ½-benefits cap in the taxable-income engine and
-is scheduled with it. All three of these simplifications run in the conservative direction — they
-overstate income — and all are recorded here rather than corrected silently.
+Through v5.76 the same rule was written out four times, and the duplication is how two defects
+survived. v5.45 fixed a pair of mirror-image errors in two of the copies — the Taxes tab dropped line
+14 in its upper tier, and the Roth tab capped its middle tier at 85% rather than half of benefits
+(bounded at $2,463 and $2,468 joint, $1,838 and $1,850 single) — but the Roth-strategy comparator
+carried its own copy of the Taxes tab's error, and v5.45 did not reach it. v5.77 corrects it. It
+**overstated** taxable Social Security, so it ran in the **conservative** direction, and only for a
+year with small benefits (under $12,000 joint, $9,000 single) and provisional income above the
+adjusted base: on a single retiree born 1958 with $6,000 of benefits and a $32,000 pension in 2026,
+$150 of federal tax. The same release corrects the IRMAA engine, whose formula was right but which
+took the **joint** amounts for a household single from the start — it keyed them on the flag that
+marks a married household's widowed years. That ran in the **optimistic** direction: on a single
+retiree with $60,000 of benefits and a $62,500 pension it understated MAGI by $3,775 and hid a $1,150
+IRMAA surcharge. Neither correction moves the shipped example household, which is married and has no
+year of benefits small enough for line 14 to bind; that was measured across all seven Roth
+strategies, not inferred. Until v5.77 this document also said the half-benefits cap was still
+"scheduled" in the Taxes tab and in the Roth tab's middle tier; both had shipped at v5.45.
 
 - **Strategy comparator:** six named policies (none / fill-12% / fill-22% / fill-24% / stay-under-
   IRMAA / current plan) run through the full deterministic projection; reports lifetime tax,
