@@ -1,7 +1,8 @@
 # SCOPE — Engine A's §86 upper tier (C-4), one §86 rule for every engine, and METHODOLOGY's §86 passage (D-1)
 
-**⚠ BUILD PAUSED at step 1 (2026-09-24): execution contradicted §3's premise — see §1e–1f and decision D-5.** Decisions
-D-1 to D-4 resolved 2026-09-24, all adopted as recommended. Built against **v5.76**, source `66b0dd944333a53f4cc00a54b9e3d618`. Findings C-4 and
+**FULFILLED — shipped in v5.77 (2026-09-25).** Every item in §4–§5 and all five decisions were built; see §9 for what the
+build found that this document did not say. Retained in the repo as the record. **Decisions RESOLVED 2026-09-24 — D-1 to D-5 all adopted as recommended (§7). Buildable.** Step 1 found two things §3
+did not expect (§1e, §1f); D-5 brings §1f into this release. **Resume at step 2** — see §8's step-1 status note. Built against **v5.76**, source `66b0dd944333a53f4cc00a54b9e3d618`. Findings C-4 and
 D-1 in `docs/FlawsToFix-v5_73-Phase2.md`.
 
 ## 1 · Premise — verified on v5.76 by execution, not recalled
@@ -77,9 +78,9 @@ The §86 thresholds reach code only through `taxFactsFor` (`ssThr1`/`ssThr2`, L9
 | Site | Line | Form | Status |
 |---|---|---|---|
 | Engine A `ssTaxF` | L4195 (reads t1/t2 at L4298); called L4359, L4369, L4426 | drops the ½-benefits limb | **C-4** |
-| Engine C, inline | L4952–4954 | correct (`_para1`) | read by the audit; to execute at build |
+| Engine C, inline | L4952–4954 (thresholds L4942) | formula correct (`_para1`); **thresholds wrong for a single household** | executed at step 1 — **§1f, fixed by D-5** |
 | Engine B `taxableSSPortion` | L5630 (thresholds L5580, L5692) | correct since v5.45 | executed |
-| Roth tab display | L9606 | correct per the audit's reading | to execute at build |
+| Roth tab display | L9606 | correct since v5.45 (both tiers); stale "KNOWN DEFECT" comment above it | reachable only via the DOM until it calls the helper — **§1e** |
 
 Engine D's flat 85% (L5360-area) is finding **C-5** — a display column — and is out of scope. **Four copies of one rule is
 why C-4 survived:** v5.45's census named two places, and its fix reached the copies it named.
@@ -99,6 +100,12 @@ why C-4 survived:** v5.45's census named two places, and its fix reached the cop
 - **Oracle sweep:** an independent implementation of the IRS worksheet (lines 1–18, written in the test) against the
   helper over a grid of benefits × other income × filing status, crossing every border (base, adjusted base, the
   $9,000/$12,000 cap, the 85% cap) — to the cent.
+- **Engine C, single household (D-5):** Engine C's taxable SS (MAGI minus the household's other income, in a household
+  whose only other income is pension) must equal the worksheet on every cell of the grid, single **and** joint; the v5.76
+  leg pins the 55-cell divergence as a dated known defect; one IRMAA case pinned to the dollar ($60,000 SS / $62,500
+  pension: tier 1, $1,150 lifetime on v5.77; tier 0, $0 on v5.76).
+- **`t24` §D rewritten (§1e):** test the shared helper, not the `midApp` transcription; flip its pins to the statutory
+  behaviour as its own header instructs, and delete the stale "KNOWN DEFECT" comment in the Roth tab's source.
 - **Four-site agreement:** Engine A, Engine B and Engine C each compute taxable SS for the same household-years and must
   agree with each other and with the oracle; the Roth tab's figure is checked where the harness reaches it.
 - **Extinction (structural, by parser):** no function other than the helper reads `ssThr1`/`ssThr2` — run through the
@@ -106,7 +113,8 @@ why C-4 survived:** v5.45's census named two places, and its fix reached the cop
 - **Example household unchanged:** the full suite's Roth-tab pins (`t3`, `t16`, `t23`–`t28`) must not move; `domdiff`
   identical.
 - **Negative controls:** drop the ½-benefits limb from the helper (sweep and worked cases fire); give Engine C a private
-  defective copy (agreement and the structural check fire); remove the 85% cap (the cap-binding control fires).
+  defective copy (agreement and the structural check fire); remove the 85% cap (the cap-binding control fires); **restore
+  Engine C's `taxFactsFor(filingSingleI)` (the D-5 single-household cells and the IRMAA pin fire).**
 
 ## 6 · Out of scope
 
@@ -126,7 +134,7 @@ review).
 - ✅ **D-4 · Disclosure.** CHANGELOG states plainly that the example household does not move and who does.
   *Recommended: yes.*
 
-- **D-5 · The Engine C finding (§1f) — OPEN.** (a) Fix it in v5.77: pass the household's actual filing status
+- ✅ **D-5 · The Engine C finding (§1f) — ADOPTED (a), 2026-09-24.** (a) Fix it in v5.77: pass the household's actual filing status
   (`_singleI || filingSingleI`) where Engine C calls the shared helper, pin it with `t43`'s grid (Engine C must agree with
   the worksheet on every cell) and a control, and record it as a new audit finding; (b) leave Engine C's thresholds as they
   are, keep v5.77 to C-4/D-1 as scoped, and scope §1f separately. *Recommended: (a).* It is one expression at a site this
@@ -136,9 +144,51 @@ review).
 
 ## 8 · Build order (once §7 is resolved)
 
-1. Reproduce §1 on v5.76; execute Engine C's and the Roth tab's §86 on the oracle grid (the audit only read them).
+1. ~~Reproduce §1 on v5.76; execute Engine C's and the Roth tab's §86 on the oracle grid.~~ **DONE 2026-09-24**, with
+   `qa/tools/scope_ss86/ss86_worksheet_grid.mjs`: C-4 reproduced (+$150/+$60, hand-checked from the statute); example
+   household unaffected in all seven strategies (captured Roth-tab input, `rothP_example_v576.json`); Engine B 160/160
+   agree; Engine C 55/160 disagree (§1f); `t24` §D found testing a transcription (§1e). *Not yet done:* the Roth tab's
+   §86 was **read** (correct since v5.45), not executed — it becomes directly testable at step 2, once it calls the
+   helper. A session-only corrected copy of Engine C matched the worksheet in five spot cases and the IRMAA search;
+   **the full 160-cell grid on a fixed Engine C is step 2's first check.**
 2. The helper; route all four sites through it; re-run §1 (Engine A must reach the law, the others must not move).
 3. `t43`, the oracle sweep, the structural check, the controls; hand checks.
 4. Registration (the sweep tool first, plus the three shapes it cannot see); full suite; `domdiff` identical.
 5. METHODOLOGY, CHANGELOG, audit annotations.
 6. Version bump to v5.77, build, suite and controls from the packaged copies, package check.
+7. Record §1f as a new audit finding (next free ID in `docs/FlawsToFix-v5_73-Phase2.md`) alongside the C-4/D-1 annotations.
+
+## 9 · Build record (v5.77) — where the build departed from this document, and why
+
+- **The helper takes the filing status, not the thresholds** — `taxableSS86(ssBenefits, otherIncome, filingSingle)`,
+  reading `ssThr1`/`ssThr2` from `taxFactsFor` itself. §4's signature `(ss, other, t1, t2)` and §5's extinction check
+  ("no function other than the helper reads `ssThr1`/`ssThr2`") could not both hold: with §4's signature every caller
+  reads the thresholds to pass them. D-5's adopted wording already said "pass the household's actual filing status";
+  each caller still chooses the status for its own year, which is the property the handover asked to keep.
+- **§3 under-counted Engine A.** `ssTaxF` had **five** call sites, not three: L4526 (a conversion solver) and L4546 —
+  the line that actually taxes the year. The fix was at the definition, so nothing changed; the census is corrected here.
+- **§5 "the Roth tab's figure is checked where the harness reaches it"** is met by `t24` (DOM-driven, five slider
+  positions × twelve years against `statute86`) plus `t43` E-2 (the tab calls the helper) and `t1` STRUCT S-3.
+- **`t1` carried 16 source-text assertions on the deleted per-site §86 text** (STRUCT S-3, S-4, S-6), found by an AST
+  census of every string and regex literal in the suite executed against both builds. Gated per leg; each block gains a
+  v5.77 arm on the helper call, and S-6 gains the Engine A C-4 pin `t1` never had.
+- **Engine A's line-14 region is narrow** — from the adjusted base to where the 85% cap takes over, about 0.41 × benefits
+  wide in provisional income. A pension grid in round steps reached it in two cells; `t43` C-5 places 70 cells inside it.
+  66 of the 70 are wrong on v5.76; the other four overstate taxable SS by exactly $5.00, which rounds away in the tax.
+- **§1f reaches the shipped example made single**: Engine C's MAGI rises in eight years (exactly $7,000 in 2032–2038,
+  hand-derived as 0.85 × 10,000 − 1,500), with no surcharge change — and `t6` and `t42`, which both run that household,
+  stayed green on both legs. `t43` §F pins it.
+- **Floating point.** The helper evaluates the same operations in the same order as Engines B and C and the tab, so the
+  consolidation is byte-identical wherever line 14 does not bind: MC parity 10/10, `domdiff` 32/32, the example household
+  identical in all seven Roth strategies.
+- **The `t24` §D rewrite was first lost, and a control found it.** It was copied into the run folder in a command line
+  `/bin/sh` rejected, so the copy never ran and the original §D was registered, packaged into the build tree and run.
+  Control M5 (the helper's middle tier re-capped at 85%) fired nothing in `t24`; the cause was the missing file, not the
+  suite. §D is now gated on the version, not on the helper's presence, so a v5.77+ build without it fails loudly.
+- **Negative controls** (`qa/tools/controls_v577_ss86.py`): M1 line 14 dropped; M2 a private copy in Engine C; M3 the 85%
+  cap removed; M4 Engine C back on the widowed-years flag; M5 the pre-v5.45 middle-tier cap — each fires its named checks
+  (M5 reproduces the historical $2,468 / $1,850 bounds exactly); M0 unmutated passes.
+- **§K1 boundary census: no new row needed.** Run on the example household, `filing` reads "the single path is unexercised"
+  (C-12) and `ssA_band` / `ssB_band` read OUTSIDE the THR2 − THR1 band (C-4's line 14 binds only inside it). Both blind
+  spots were already in the census; the band row, written for v5.45's middle tier, covers the upper tier's line 14 too.
+

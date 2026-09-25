@@ -982,6 +982,7 @@ single invocation reports one miss (measured twice on 2026-09-15). `OPERATIONS.m
 
 - METHODOLOGY's §86 passage says the half-benefits cap "is applied in both places as of v5.45" and, in the next
   paragraph, that the same fixes "remain uncorrected" (Phase 2 **D-1**); neither mentions Engine A.
+  **[FIXED v5.77]** — replaced by one account of the single shared §86 helper and every engine that calls it.
 - `OPERATIONS.md`'s registry-shapes table said `vercensus` missed three shapes; measured, it missed one (corrected in the
   tooling ops package, 2026-09-15).
 **Severity: low.** The pattern — prose that records a fix but not its scope — is the documentary twin of E-22.

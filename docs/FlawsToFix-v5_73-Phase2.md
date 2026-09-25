@@ -31,14 +31,15 @@ ordinary income, though both were in its "Gross taxable" total; it now lists eve
 | **C-8** | Taxes tab never taxes spending withdrawals from Traditional accounts; its RMDs run on a never-drawn balance (example household: $0 tax 2032–2038 on ≈$238K of draws; lifetime RMDs $1.63M vs $1.02M) | B vs D | **High** | mis-timed: low early, likely high late | **No** — the tab says it is "your projected tax life as-is" |
 | **C-3** | A surviving spouse under 65 gets the 65+ deductions via the deceased's age ($975.96 in 2028 in the worked case) | B, A (executed); Roth-tab projection (read) | Medium | optimistic | No |
 | **C-6** | Unused standard deduction is not applied to qualified dividends / capital gains (up to 15% of the unused deduction; $1,582.50 on $60K of gains with no ordinary income) | A, B | Medium | pessimistic | No |
-| **C-4** | Engine A keeps the §86 upper-tier error v5.45 fixed in B (+$150 in the worked case); v5.45's census named 2 of 5 §86 sites | A | Low–medium | pessimistic | No |
+| **C-4** | Engine A keeps the §86 upper-tier error v5.45 fixed in B (+$150 in the worked case); v5.45's census named 2 of 5 §86 sites | A | Low–medium · **FIXED v5.77** | pessimistic | No |
 | **C-7** | A single household is paid spouse B's Social Security in the Withdrawal plan | D | Low–medium → **re-measured larger at v5.75; FIXED v5.76** | optimistic | No |
 | **C-10** | A Roth IRA under Other accounts is sold as brokerage and realizes taxable gains (when a gain share is set) | D → B, C | Low–medium | pessimistic | No |
 | **C-1** | At exactly the IRMAA top-tier threshold the household is billed one tier low | A, C | Low | optimistic | No |
 | **C-5** | The Withdrawal tab's bracket column uses the joint table for every household, unindexed, with a flat 85% of SS | D (display) | Low | varies | No |
 | **C-9** | The annuity RMD exclusion is a fixed share, so RMDs creep up as the pool drains (+$4,547 by 2050) | B (and C by the same code) | Low | pessimistic | No |
 | **C-11** | The break-even card calls a face-value cash measure "after-tax wealth" | Roth tab | Low | — | — |
-| **D-1** | METHODOLOGY's §86 passage contradicts itself and omits Engine A | doc | Low | — | — |
+| **C-12** | Engine C taxes a household SINGLE from the start on the joint §86 thresholds (hid a $1,150 IRMAA surcharge in the measured case) — found at the v5.77 build | C | Low–medium · **FIXED v5.77** | optimistic | No |
+| **D-1** | METHODOLOGY's §86 passage contradicts itself and omits Engine A | doc | Low · **FIXED v5.77** | — | — |
 | C-2 | IRMAA surcharges rounded to $10 | — | — | — | **Yes** — documented limitation, not a defect |
 
 **What passed** (all executed, references typed from primary sources): every statutory constant (§1); ordinary tax at
@@ -179,6 +180,14 @@ tab's display block). The source has **five** places that compute taxable SS tod
 L5360 Engine D, L5515 Engine B, L9457 Roth tab); Engine A's was not among the two. Engines B and C and the Roth tab use
 the correct form (B executed above; C and the tab read).
 
+> **FIXED at v5.77** (`SCOPE_SS86_ONE_RULE.md`). All four copies of the rule — Engines A, B, C and the Roth tab —
+> now call one module-level `taxableSS86`, written line for line from the IRS worksheet; Engine A reaches **1,876 /
+> 1,876** on the worked cases, controls unchanged. Executing the rule, rather than reading it, also found **C-12**
+> below: "C and the tab read" was right about Engine C's *formula* and wrong about the thresholds it was handed. The
+> census above counts five sites including Engine D's flat 85% column (C-5, out of scope); the build also found that
+> Engine A called its private copy from **five** places, not the three the scope listed. `t43` pins the fix, runs an
+> oracle sweep on the helper, and fails if any function but the helper reads the §86 thresholds.
+
 **C-5 · CONFIRMED (Engine D, executed) — the Withdrawal tab's "bracket" column is read from the joint table for every
 household.** *Severity: low. User-side. Direction depends on the household (optimistic for single filers). Not disclosed.*
 L5360–5368: taxable SS is a flat `0.85 ×` benefits; the bracket is chosen against **MFJ** thresholds
@@ -275,6 +284,19 @@ technique?": yes, with this labelling defect.**
 cap "is applied in both places as of v5.45"; the next paragraph (L457–467) still says the engine's cap and the Roth
 tab's middle tier "remain uncorrected… scheduled to ship together" — text written before v5.45 and never removed. Neither
 paragraph mentions Engine A (C-4). *Section E-type finding, recorded here because it is where the §86 work found it.*
+
+> **FIXED at v5.77.** The passage is replaced by one account: one rule, one helper, every engine, the v5.45 history,
+> and both v5.77 corrections with their directions.
+
+**C-12 · CONFIRMED (Engine C, executed at the v5.77 build) — a household single from the start is taxed on the JOINT
+§86 thresholds.** *Severity: low–medium. User-side. Optimistic (MAGI understated; can hide an IRMAA surcharge). Not
+disclosed.* Engine C took its §86 amounts from `taxFactsFor(filingSingleI)`, and `filingSingleI` is true only in a
+*married* household's widowed years, so a single household got $32,000 / $44,000 instead of $25,000 / $34,000. Its IRMAA
+tier table was right; only the §86 thresholds were wrong. Executed on a 160-cell grid against the IRS worksheet: Engine B
+agreed on all 160 to the cent, Engine C disagreed on **55**, all of them single households, by up to **$7,000** of
+taxable SS. Worked case: single, $60,000 SS, $62,500 pension, 2026 → MAGI $109,725 (tier 0, no surcharge) against the
+worksheet's **$113,500** (tier 1, **$1,150** lifetime). Married households were unaffected. **FIXED at v5.77** in the same
+release as C-4 (decision D-5): Engine C passes `_singleI || filingSingleI` to the shared helper. `t43` C-3 and D-1–D-3.
 
 **Session 4 — the systematic federal borders (executed, all PASS).** Harnesses `audit_fed.mjs` and `audit_fed2.mjs`,
 2026, references typed from the primary sources (never read from the app):
