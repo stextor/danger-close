@@ -1,5 +1,83 @@
 # Changelog
 
+## v5.77 — one Social Security tax rule for every engine
+
+Source `9cdd345d488443a8ca146e8cbb7da332` · built `index.html` `a2bc67451b11cad440709e3c342834d5` · built from v5.76 `66b0dd944333a53f4cc00a54b9e3d618`.
+`src/index.html` and `src/main.jsx` are unchanged. **The example household does not move**: all seven Roth strategies'
+lifetime and widow-years tax are identical, MC parity is 10/10, and the Taxes and IRMAA tables are byte-identical on screen
+(`domdiff` 32/32). Figures move for two kinds of household, in opposite directions — see *Who moves*. `METHODOLOGY.md`'s §86
+passage is replaced by one account; `docs/FlawsToFix-v5_73-Phase2.md` annotates C-4 and D-1 fixed and adds **C-12**.
+
+**Suite: 4,399 app checks, 0 failed, 0 DIED, across both legs** — 42 app suites plus MC parity 10/10; tooling `t21` 64,
+`domdiff` 32, `sets` 12 + 12 (GRAND 4,529), run from the packaged copies. `t43` is new on both legs (32 on v5.76, 37 on
+v5.77). `smoke_built` **22 passed, 0 failed**. Negative controls: `controls_v577_ss86.py` **6 of 6** as required. Per-suite:
+`TESTING.md`.
+
+### What changed, and why
+
+- **Taxable Social Security is now computed in one place.** 26 U.S.C. §86 decides how much of a household's benefits is
+  taxable, and through v5.76 the app wrote that rule out four times — in the Roth-strategy comparator, the Taxes tab, the
+  IRMAA tab and the Roth tab's year table. v5.77 replaces all four with one function written line for line from the IRS
+  Social Security Benefits Worksheet (2025 Form 1040 instructions, re-read from irs.gov at this build). Each tab passes the
+  filing status for the year it is taxing — joint, or single once a survivor files alone.
+- **The Roth-strategy comparator overstated taxable benefits in a narrow case (C-4).** Above the adjusted base amount the
+  worksheet carries up the smaller of half the benefits and half of the capped excess (line 14). The comparator dropped
+  the half-benefits limb — the same error v5.45 fixed in the Taxes tab, whose fix never reached this copy. Worked case: a
+  single retiree born 1958 with $6,000 of benefits and a $32,000 pension in 2026 was charged **$2,026** of federal tax
+  against **$1,876** by the worksheet (+$150; +$60 at $8,000 / $31,000). Pessimistic, and only in years with benefits
+  under $9,000 single / $12,000 joint and provisional income above the adjusted base.
+- **The IRMAA tab taxed a single household's benefits on the married thresholds (C-12).** Its formula was right, but it took
+  the §86 amounts from the flag that marks a married household's widowed years, so a household single from the start got
+  $32,000 / $44,000 instead of $25,000 / $34,000. Optimistic: a single retiree with $60,000 of benefits and a $62,500
+  pension read MAGI **$109,725** (no surcharge) against **$113,500** — tier 1, **$1,150** of lifetime IRMAA. Found at this
+  build by executing the rule on a grid (55 of 160 cells wrong, all single, by up to $7,000 of taxable benefits); the
+  audit had read that engine and not run it. Fixed in this release by decision (D-5).
+- **METHODOLOGY's §86 passage said two contradictory things** — that the half-benefits cap "is applied in both places as
+  of v5.45", then that it "remains uncorrected" — and named neither the comparator nor the IRMAA tab. It is now one account
+  of the shared rule, its history and both corrections (D-1).
+
+### Who moves
+
+- **A household with small benefits** — a low-earning single retiree, or a year with only one small benefit in payment, or
+  a late claim's pro-rated first year — in the Roth tab's comparisons: taxable benefits fall by up to $1,838 (single) /
+  $2,463 (joint) a year, and tax with them. Conservative before; correct now.
+- **A single household** on the IRMAA tab: MAGI rises wherever the single thresholds bite and the 85% cap does not. On the
+  example household made single, **eight years rise** — exactly $7,000 in 2032–2038, $5,644 in 2031 — with no change in
+  surcharge. Optimistic before; correct now.
+- **Married households do not move** in either place: they file jointly until the year after a death, when the IRMAA tab
+  already used the single figures, and their benefits are far above the line-14 region.
+
+### Limitations, stated plainly
+
+- **The worksheet's adjustments (line 6) and tax-exempt interest (line 4) are not modelled**, and neither are lump-sum
+  elections or repayments (§86(d)–(e)). Unchanged by this release; now stated in one place.
+- **The comparator's tax is resolved to the dollar, not the cent.** It reports totals only, so `t43` measures it through a
+  one-year household's tax: about $10 of taxable benefits at the 10% rate. Four of `t43`'s 70 line-14 cells overstate by
+  exactly $5.00 on v5.76 and are invisible in the tax for that reason; the suite says so and pins 66.
+- **Withdrawal-tab bracket column (C-5) is untouched.** Engine D's flat 85% there is a display figure and out of scope.
+
+### Found while building, and worth recording
+
+- **The scope's census missed two of Engine A's five call sites**, including the line that actually taxes the year. The fix
+  was at the definition, so nothing changed; the scope's build record corrects the census.
+- **Sixteen `t1` assertions pinned the deleted per-site text.** Found by executing every string and regex literal in the
+  suite against both builds (an AST census, OPERATIONS §B1a), not by searching for names; gated per leg.
+- **Two existing suites run the single example household and stayed green on both legs** while its IRMAA MAGI moved in
+  eight years. Neither was wrong — they compare cases or pin other figures — but neither witnessed C-12. `t43` §F now does.
+- **`t24` §D had tested dead code since v5.45.** Written at v5.42 against a transcription of the app's middle
+  tier, it passed on every build after v5.45 fixed the app and could never flip. It now tests the shared function, gated on
+  the version so a build missing it fails loudly.
+- **The rewrite of that section was itself lost once, and a negative control found it.** The copy into the run folder was
+  on a command line the sandbox shell rejected, so the original file was registered and run in its place. Control `M5`
+  fired nothing; the investigation found the missing file. With the rewrite in place, `M5` fires and reproduces the
+  historical $2,468 / $1,850 bounds exactly.
+- **The v5.75 and v5.76 ships left no ship note or retirement entry in `PROJECT_KNOWLEDGE_INDEX.md`.** Recorded there, not
+  back-filled.
+- **The boundary census already covered both blind spots (OPERATIONS §K1), so no row was added.** Run on the example
+  household at this build, `boundaries.mjs` reports `filing` as "the single path is unexercised" — the gap C-12 hid in — and
+  both `ss*_band` rows as outside the THR2 − THR1 band (under $12,000 joint), which is where worksheet line 14 binds and C-4
+  lives. The band row was written for v5.45's middle-tier cap; it is the same band.
+
 ## v5.76 — a single household is no longer paid spouse B's Social Security
 
 Source `66b0dd944333a53f4cc00a54b9e3d618` · built `index.html` `1254aa00d608a98e0f29e22f974ab96d` · built from v5.75 `4453cf274ef8c59f5ea610528eed97ab`.
