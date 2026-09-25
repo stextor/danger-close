@@ -124,6 +124,12 @@ tally "t41-$CUR"   node t41_survivor_age_gains.mjs "$CUR"
 # case to the dollar, sweeps the stored figure, and renders the D-2 note. Wired AT BUILD this time.
 tally "t42-$PRIOR" node t42_single_spouse_b_ss.mjs "$PRIOR"
 tally "t42-$CUR"   node t42_single_spouse_b_ss.mjs "$CUR"
+# t43 (v5.77) runs on BOTH legs: the v5.76 leg pins C-4 (Engine A drops worksheet line 14) and §1f (Engine C
+# taxes a single household on the joint thresholds) as dated known defects, and the four private copies of
+# §86; the current leg asserts the shared helper against two independent oracles, Engines A, B and C
+# against the worksheet, the IRMAA consequence, and the parser-level extinction check. Wired AT BUILD.
+tally "t43-$PRIOR" node t43_ss86_one_rule.mjs "$PRIOR"
+tally "t43-$CUR"   node t43_ss86_one_rule.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

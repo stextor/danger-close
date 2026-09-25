@@ -43,13 +43,13 @@ import { fileURLToPath, pathToFileURL } from "url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v545";
-const KNOWN_VERSIONS = ["v543", "v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576"];
+const KNOWN_VERSIONS = ["v543", "v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST_FIX = VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576")));
+const POST_FIX = VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577")));
 const CAND = [join(HERE, "hand_86.mjs"), join(HERE, "tools", "hand_86.mjs")];
 const ORACLE = CAND.find(existsSync);
 if (!ORACLE) { console.log("t27 SUITE: 0 passed, 1 failed\n  \u2717 \u00a786 oracle not found"); process.exit(1); }
@@ -116,6 +116,8 @@ T("A-3: at the example household's benefits the two formulas agree, so it can pr
     // the two defects outright, passed this suite. A false green, caught only because the
     // controls fired t1 and not t27 and that gap was investigated rather than shrugged at.
     // The call site is `taxableSSPortion(ssTotal, ordinaryIncome + qdcg_y)`, so this mirrors it.
+    // (v5.77: it is now `taxableSS86(ssTotal, ordinaryIncome + qdcg_y, effSingle)` — the same two income
+    // arguments, so this reconstruction is unchanged; t43 sweeps the shared helper itself.)
     const other = (r.ordinaryIncome ?? 0) + (r.capGains_y ?? 0) + (r.div_y ?? 0);
     const prov = other + 0.5 * r.ssTotal;
     if (prov <= T2) continue;                                 // item 4's band only

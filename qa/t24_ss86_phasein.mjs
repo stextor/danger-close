@@ -55,13 +55,13 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true; window.IS_REACT_ACT_ENVIRONMENT = tr
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v542";
-const KNOWN_VERSIONS = ["v540", "v541", "v542", "v543", "v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576"];
+const KNOWN_VERSIONS = ["v540", "v541", "v542", "v543", "v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST_FIX = VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576")));
+const POST_FIX = VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577")));
 
 // The repo keeps the oracle at qa/tools/hand_86.mjs; PROJECT KNOWLEDGE IS FLAT and holds it
 // beside the suites. Resolve rather than assume, and say which copy was used, so a stale
@@ -89,7 +89,7 @@ const T = (name, ok, detail = "") => {
 const _appMod = await import(`./app_${VER}.mjs`);
 const _app = _appMod.__g;
 const _tlD = typeof _app.PLAN_TIMELINE === "function" ? _app.PLAN_TIMELINE() : _app.PLAN_TIMELINE;
-const DIV = (VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576")))
+const DIV = (VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577")))
   ? Math.round(Math.max(0, _app.taxableInitAll()
       - (_app.retireStartBalances(_tlD.rothLadderStart).othHsa || 0)) * (2.0 / 100))
   : 0;
@@ -251,7 +251,7 @@ if (POST_FIX) {
   // a K boundary — a rendered figure moving by exactly the term that was added, not a regression.
   // The oracle, not this list, is the independent derivation; these are spot pins on its rows.
   // Gated per leg: v5.52 and earlier legitimately read the lower figure (OPERATIONS §B2).
-  const _k = (v553, older) => (VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576")) ? v553 : older);
+  const _k = (v553, older) => (VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577")) ? v553 : older);
   // ⚠ v5.74: this chain is a TERNARY, and that is why it was missed. The version-roll sweep for
   // this release matched chains ending in ";", ")" or "||" and silently left `? :` alone, so
   // `_k` returned the PRE-v5.53 figure while the DOM correctly rendered the current one — the
@@ -283,50 +283,57 @@ if (POST_FIX) {
     new Set([2032, 2033, 2034, 2035, 2036, 2037, 2038].map(y => by[y])).size === 1);
 }
 
-// ── §D · the MIDDLE tier — [KNOWN DEFECT], found 2026-08-21, pinned NOT fixed ────────────
-// The v5.42 build brief asserted the middle tier was correct. It is not. §86(a)(1) caps the
-// includible amount at ½ of benefits; the app caps it at 85%:
-//     app     Math.min((provisional - _ssT1) * 0.5, totalSS * 0.85)
-//     statute Math.min( ½(prov − base),             totalSS * 0.5 )
-// It therefore overstates for households whose provisional income lands BETWEEN the two
-// thresholds AND whose benefits are small. This is the same defect class as Engine B's
-// omitted ½-benefits cap (tidy-up item 4) and was not on that list.
+// ── D · the MIDDLE tier — [FIXED v5.45 · pin REWRITTEN v5.77 (SCOPE_SS86_ONE_RULE §1e)] ─────────────
+// HISTORY. Found 2026-08-21 and pinned here as a KNOWN DEFECT: the Roth tab's middle tier capped the
+// §86(a)(1) amount at 85% of benefits where the statute caps it at ½ (joint overstatement bounded at
+// $2,468, single $1,850, needing benefits under $12,000 / $9,000). v5.45 fixed the APP. This section
+// did not follow: it asserted the defect against `midApp`, a formula transcribed from v5.41/v5.42
+// source, so from v5.45 to v5.76 it passed on every build while testing nothing the app ran, and its
+// own "FLIP THIS PIN WHEN FIXED" could never trigger. (The source comment above the fixed code kept
+// saying KNOWN DEFECT for the same reason.) Found at the v5.77 scope's build step 1.
 //
-// It is $0 on the example household — total benefits are $15,600 then $55,200, both outside
-// the affected band — which is why no figure above moves. Pinned here with its measured
-// bounds so it stays visible and cannot be mistaken for correct. FLIP THIS PIN WHEN FIXED.
+// NOW. v5.77 routes the tab through the module-level `taxableSS86`, which the harness can call, so §D
+// tests the function the app runs and its pins are flipped to the statute. On the v576 leg there is no
+// helper and the tab's middle tier is reachable only through the DOM — its v5.45 text is pinned by t1
+// STRUCT S-6 — so §D asserts only that. A transcription of app code is not a test of app code.
 {
-  const midApp = (ss, nonSS) => {                       // transcribed from v5.41/v5.42 source
-    const prov = nonSS + ss * 0.5;
-    if (prov > T2 || prov <= T1) return null;           // middle tier only
-    return Math.round(Math.min((prov - T1) * 0.5, ss * 0.85));
-  };
-  let worstJ = 0, worstS = 0, diverged = 0;
-  for (const joint of [true, false]) {
-    const t1 = joint ? 32000 : 25000, t2 = joint ? 44000 : 34000;
-    for (let ss = 0; ss <= 30000; ss += 25) {
-      for (let other = 0; other <= 60000; other += 25) {
-        const prov = other + ss * 0.5;
-        if (prov <= t1 || prov > t2) continue;
-        const app = Math.round(Math.min((prov - t1) * 0.5, ss * 0.85));
-        const law = Math.round(statute86(ss, other, joint));
-        if (app !== law) diverged++;
-        if (joint) worstJ = Math.max(worstJ, app - law); else worstS = Math.max(worstS, app - law);
+  // Gated on the VERSION, not on whether the helper is present: feature detection would let a v5.77+ build
+  // without the helper take the "no helper" branch and pass — the silent-vacuity class §D itself once was.
+  const H = _app.taxableSS86;
+  const V577 = VER === "v577";   // a LADDER — widen it each release
+  if (V577) {
+    T("D-0 (V577): the shared §86 helper is exported by this build", typeof H === "function", typeof H);
+    let diverged = 0, worstJ = 0, worstS = 0, cells = 0, halfBinds = 0;
+    for (const joint of [true, false]) {
+      const t1 = joint ? 32000 : 25000, t2 = joint ? 44000 : 34000;
+      for (let ss = 0; ss <= 30000; ss += 25) {
+        for (let other = 0; other <= 60000; other += 25) {
+          const prov = other + ss * 0.5;
+          if (prov <= t1 || prov > t2) continue;          // the middle tier only
+          cells++; if (ss * 0.5 < (prov - t1) * 0.5) halfBinds++;
+          const app = Math.round(H(ss, other, !joint)), law = Math.round(statute86(ss, other, joint));
+          if (app !== law) diverged++;
+          if (joint) worstJ = Math.max(worstJ, app - law); else worstS = Math.max(worstS, app - law);
+        }
       }
     }
+    T("D-1 [FIXED v5.45 · flipped v5.77]: the app's middle tier matches §86(a)(1) on every cell of the band",
+      cells > 0 && diverged === 0, `${diverged} of ${cells} cells`);
+    T("D-1a: the band exercises the ½-of-benefits cap, so D-1 is not vacuous", halfBinds > 1000, `${halfBinds} cells`);
+    T("D-2 [flipped]: no joint overstatement (pre-v5.45 bound $2,468)", worstJ === 0, `$${worstJ}`);
+    T("D-3 [flipped]: no single overstatement (pre-v5.45 bound $1,850)", worstS === 0, `$${worstS}`);
+    // Hand check: joint, benefits 6,000, other 38,000 → provisional 41,000 (in the band);
+    // ½ × (41,000 − 32,000) = 4,500 vs ½ × 6,000 = 3,000 → 3,000. The retired 85% cap gave 4,500.
+    T("D-4: under $12,000 of joint benefits the ½ cap binds — $3,000, not the retired cap's $4,500",
+      Math.round(H(6000, 38000, false)) === 3000, String(H(6000, 38000, false)));
+    T("D-5: the example household's middle-tier figure is unchanged (benefits $15,600, other $30,000 → $2,900)",
+      Math.round(H(15600, 30000, false)) === 2900 && Math.round(statute86(15600, 30000, true)) === 2900);
+  } else {
+    T("D-0 [pre-v5.77]: no shared §86 helper on this build — the middle tier is reachable only through the DOM (t1 STRUCT S-6 pins its text)",
+      typeof H === "undefined");
   }
-  T("D-1 [KNOWN DEFECT 2026-08-21]: the middle tier diverges from \u00a786(a)(1) \u2014 it caps at 85%, not \u00bd, of benefits",
-    diverged > 0, `${diverged} cells`);
-  T("D-2 [KNOWN DEFECT]: joint overstatement is bounded at $2,468", worstJ === 2468, `$${worstJ}`);
-  T("D-3 [KNOWN DEFECT]: single overstatement is bounded at $1,850", worstS === 1850, `$${worstS}`);
-  T("D-4 [KNOWN DEFECT]: it needs joint benefits under $12,000 \u2014 above that the 85% cap binds first",
-    midApp(12500, 34000) === Math.round(statute86(12500, 34000, true)));
-  T("D-5: it is $0 on the example household (benefits $15,600 / $55,200, both outside the band)",
-    midApp(15600, 30000) === Math.round(statute86(15600, 30000, true)));
-  // The finding is BOUNDED to the middle tier: every diverging cell sits at or below the
-  // adjusted base amount. The upper tier's own para1 uses the statutory ½ cap (pinned
-  // structurally in t1 STRUCT S-3), so the two tiers of the same function disagree — which
-  // is the inconsistency this pin records.
+  // D-6 and D-7 are facts about the statute oracle itself, unchanged from v5.42; they hold on every leg.
+
   {
     let leaked = 0;
     for (let ss = 0; ss <= 30000; ss += 25) {
@@ -361,12 +368,12 @@ if (POST_FIX) {
   // ½-benefits cap can only change that when ½ × benefits < $6,000 — the SAME "benefits
   // under $12,000" condition as the D-1 middle-tier defect. The example household's benefits
   // are $15,600 then $55,200, so the perturbation cannot move any figure it renders.
-  // The structural pin in t1 is the coverage for that term. Asserted so the reasoning is
+  // From v5.77 that term is tested directly: t43 B-2 sweeps taxableSS86's line 14 against the worksheet. Asserted so the reasoning is
   // checked rather than remembered.
   T("D-7: para1's ½-benefits cap is unobservable on the example household (swallowed by the $6,000 term)",
     Math.min(15600 * 0.5, 6000) === Math.min(15600 * 0.85, 6000) &&
     Math.min(55200 * 0.5, 6000) === Math.min(55200 * 0.85, 6000));
-  T("D-7: it IS observable below $12,000 of benefits — where t1 STRUCT S-3 carries the coverage",
+  T("D-7: it IS observable below $12,000 of benefits — where t43 B-2 (v5.77+) and t1 STRUCT S-3/S-6 carry the coverage",
     Math.min(11000 * 0.5, 6000) !== Math.min(11000 * 0.85, 6000));
 }
 
