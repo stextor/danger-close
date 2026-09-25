@@ -25,6 +25,10 @@ export const __g = {
   // earlier legs still LOAD (it does not exist there, and a direct closure would throw at module
   // load); t40 reads `undefined` on those legs and asserts the pre-fix state instead.
   withdrawalPlanSeries: _g("withdrawalPlanSeries"),
+  // v5.77 — THE §86 rule, shared by Engines A, B, C and the Roth tab. GUARDED so the v5.76 and
+  // earlier legs still LOAD (it does not exist there); t43 reads `undefined` on those legs and
+  // asserts the four-private-copies state instead.
+  taxableSS86: _g("taxableSS86"),
   rmdDivisor, rmdStartAge, ssDepletionFactor, stateTaxAnnual,
   rothCrossover: _g("rothCrossover"),   // v5.29 — GUARDED so pre-v5.29 legs still load
   genSSTable, getSSA, getSSB, getPension, getIncomeStreams,
