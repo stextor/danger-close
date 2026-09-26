@@ -28,17 +28,18 @@ ordinary income, though both were in its "Gross taxable" total; it now lists eve
 
 | ID | What | Engines | Severity | Direction | Disclosed? |
 |---|---|---|---|---|---|
-| **C-8** | Taxes tab never taxes spending withdrawals from Traditional accounts; its RMDs run on a never-drawn balance (example household: $0 tax 2032–2038 on ≈$238K of draws; lifetime RMDs $1.63M vs $1.02M) | B vs D | **High** | mis-timed: low early, likely high late | **No** — the tab says it is "your projected tax life as-is" |
-| **C-3** | A surviving spouse under 65 gets the 65+ deductions via the deceased's age ($975.96 in 2028 in the worked case) | B, A (executed); Roth-tab projection (read) | Medium | optimistic | No |
-| **C-6** | Unused standard deduction is not applied to qualified dividends / capital gains (up to 15% of the unused deduction; $1,582.50 on $60K of gains with no ordinary income) | A, B | Medium | pessimistic | No |
+| **C-8** | Taxes tab never taxes spending withdrawals from Traditional accounts; its RMDs run on a never-drawn balance (example household: $0 tax 2032–2038 on ≈$238K of draws; lifetime RMDs $1.63M vs $1.02M) | B vs D | **High** · **FIXED v5.74** | mis-timed: low early, likely high late | **No** — the tab says it is "your projected tax life as-is" |
+| **C-3** | A surviving spouse under 65 gets the 65+ deductions via the deceased's age ($975.96 in 2028 in the worked case) | B, A (executed); Roth-tab projection (read) | Medium · **FIXED v5.75** | optimistic | No |
+| **C-6** | Unused standard deduction is not applied to qualified dividends / capital gains (up to 15% of the unused deduction; $1,582.50 on $60K of gains with no ordinary income) | A, B | Medium · **FIXED v5.75** | pessimistic | No |
 | **C-4** | Engine A keeps the §86 upper-tier error v5.45 fixed in B (+$150 in the worked case); v5.45's census named 2 of 5 §86 sites | A | Low–medium · **FIXED v5.77** | pessimistic | No |
 | **C-7** | A single household is paid spouse B's Social Security in the Withdrawal plan | D | Low–medium → **re-measured larger at v5.75; FIXED v5.76** | optimistic | No |
 | **C-10** | A Roth IRA under Other accounts is sold as brokerage and realizes taxable gains (when a gain share is set) | D → B, C | Low–medium | pessimistic | No |
-| **C-1** | At exactly the IRMAA top-tier threshold the household is billed one tier low | A, C | Low | optimistic | No |
+| **C-1** | At exactly the IRMAA top-tier threshold the household is billed one tier low | A, C | Low · **FIXED v5.78** | optimistic | No |
 | **C-5** | The Withdrawal tab's bracket column uses the joint table for every household, unindexed, with a flat 85% of SS | D (display) | Low | varies | No |
 | **C-9** | The annuity RMD exclusion is a fixed share, so RMDs creep up as the pool drains (+$4,547 by 2050) | B (and C by the same code) | Low | pessimistic | No |
 | **C-11** | The break-even card calls a face-value cash measure "after-tax wealth" | Roth tab | Low | — | — |
 | **C-12** | Engine C taxes a household SINGLE from the start on the joint §86 thresholds (hid a $1,150 IRMAA surcharge in the measured case) — found at the v5.77 build | C | Low–medium · **FIXED v5.77** | optimistic | No |
+| **C-13** | Projected IRMAA thresholds are not rounded to the nearest $1,000 as §1395r(i)(5)(B) rounds the published figures (2028 tier 1: $113,403.60) — recorded at the v5.78 scope, not fixed (decision D-2) | shared helper | Low | either | Partly — the 2%/yr proxy is disclosed; the missing rounding is not |
 | **D-1** | METHODOLOGY's §86 passage contradicts itself and omits Engine A | doc | Low · **FIXED v5.77** | — | — |
 | C-2 | IRMAA surcharges rounded to $10 | — | — | — | **Yes** — documented limitation, not a defect |
 
@@ -118,6 +119,20 @@ Under-charge at the exact threshold: $580 per person per year in the app's table
 is one dollar wide for a float MAGI, so this matters only to a user who targets the threshold. **Engine C is now also
 EXECUTED (session 5):** MAGI exactly 510,000 (single) and 765,000 (joint), premium year 2028, return tier 4 and surcharges
 6,360 / 12,720. Fix direction: `<` for the top numeric tier only.
+
+> **FIXED at v5.78** (`docs/SCOPE_IRMAA_TOP_TIER.md`). The statute was re-read at the source: 42 U.S.C. §1395r(i)(3)(C)(i)(III)
+> makes tiers 1–4 "not more than" and the top tier "at least". Tier selection is one shared `irmaaTierFor`; Engines A and C
+> call it, and the IRMAA tab's label reads `≥`. The census found **three** selection loops (Engine A ×2, Engine C ×1) — the
+> "A ×3" above counted Engine A's IRMAA-avoidance cap, which targets tier 1 and cannot reach the top. `t44` places every
+> engine bit-for-bit on the threshold: a naive joint case lands a hair under or over it and would have passed on the broken
+> build. `t10`'s own reference oracle carried the same `<=` and is corrected.
+
+**C-13 · RECORDED at the v5.78 scope — projected IRMAA thresholds are not rounded to the nearest $1,000.** *Severity: low.
+User-side. Either direction (up to $500 per edge). Partly disclosed.* §1395r(i)(5)(B) rounds each indexed amount to the
+nearest $1,000; `irmaaThresholdFor` does not (premium year 2028, single tier 1: $113,403.60). The projection rests on a
+disclosed 2%/yr CPI-U proxy whose error is far larger. **Not fixed, by decision (D-2):** rounding moves every projected edge
+and would reach far more households than C-1 did, so it wants its own measurement — alongside the brackets, which pose the
+same question at $50.
 
 **C-2 · CLOSED — a DOCUMENTED LIMITATION, not a defect (methodology rule 5).** `SUR` is rounded to the nearest $10.
 METHODOLOGY L615–616 discloses exactly that ("rounded to the nearest $10 — within $5/person/year of the CMS-exact

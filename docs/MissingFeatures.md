@@ -1,5 +1,10 @@
 # MISSING TAXATION FEATURES — Section D of the standing code audit
 
+> **CURRENT PIN: v5.73 (2026-09-15) — the standing audit's full run, all four phases, is COMPLETE.** Read the **RE-PINNED TO v5.73** block directly below this table (items D-14–D-20 at the end of the file) first.
+> The table below records the ORIGINAL v5.29 audit and is kept as history. *(Added 2026-09-26: this header read as "build
+> under audit: v5.29", and it misled the v5.77 handover — and a recommendation made from it — into proposing a Phase 3 that
+> had already run. Items fixed since v5.73 are annotated at their entries.)*
+
 | Field | Value |
 |---|---|
 | Build under audit | **v5.29** |

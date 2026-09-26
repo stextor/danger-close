@@ -14,6 +14,10 @@
 > and IRMAA tabs now see the plan's spending withdrawals. E-21 is narrowed, not closed (see `ARCHITECTUREIssues.md`). The
 > summary below is left as written.
 >
+> **✅ Further fixes (annotated 2026-09-26):** the fourth issue (C-3, C-6) was **fixed at v5.75**; within the third, the §86
+> duplication was consolidated and C-4 **fixed at v5.77**, and C-1 **fixed at v5.78** (one tier-selection helper). Still open
+> from the five: the second (phone layout, F-11/F-12) and the fifth (text size and touch targets, F-3/F-4).
+>
 >
 > Build v5.73 · source `3bf1e15f1b28659aae9a78e3186d2ae8` · built `index.html` `345ccbceb58bf74f9fbdde5db0646d1d`. Drawn from
 > `FlawsToFix-v5_73-Phase2.md` (Section C) and the v5.73 blocks of `MissingFeatures.md`, `ARCHITECTUREIssues.md` and

@@ -1,5 +1,10 @@
 # ARCHITECTURE ISSUES — Section E of the standing code audit
 
+> **CURRENT PIN: v5.73 (2026-09-15) — the standing audit's full run, all four phases, is COMPLETE.** Read **§ Standing audit at v5.73 — Phase 3, Section E**, near the end of the file (items E-21–E-28) first.
+> The table below records the ORIGINAL v5.29 audit and is kept as history. *(Added 2026-09-26: this header read as "build
+> under audit: v5.29", and it misled the v5.77 handover — and a recommendation made from it — into proposing a Phase 3 that
+> had already run. Items fixed since v5.73 are annotated at their entries.)*
+
 | Field | Value |
 |---|---|
 | Build under audit | **v5.29** (findings as audited) |

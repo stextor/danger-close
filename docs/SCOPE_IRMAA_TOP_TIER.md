@@ -1,6 +1,7 @@
 # SCOPE — the IRMAA top tier starts AT its threshold (C-1), one tier rule for every engine, and the audit tidy-up
 
-**Status: SCOPED 2026-09-25 — awaiting decisions D-1 to D-3 (§7). No code written.** Target release **v5.78**, built
+**FULFILLED — shipped in v5.78 (2026-09-26).** Decisions D-1 (a), D-2 (a), D-3 yes — all as recommended (§7). See §10 for
+what the build found that this document did not say. Retained in the repo as the record. Target release **v5.78**, built
 from **v5.77** (source `9cdd345d488443a8ca146e8cbb7da332`, built `index.html` `a2bc67451b11cad440709e3c342834d5`, repo
 `4485505`; verified live and against a fresh clone on 2026-09-25). Every line number below is a v5.77 address.
 
@@ -160,3 +161,25 @@ v5.77 — its v5.78 checks must fail there. 3. The helper and the three call sit
 `t41`–`t43` chains); wire `t44` into `runsuite.sh`. 5. Full suite, parity, `domdiff`; negative controls. 6. T-1, T-2,
 T-3 with P66/P67. 7. METHODOLOGY, CHANGELOG, TESTING, manifest; version bump; build; `smoke_built`; package per §L;
 `package_check` pre-ship.
+
+## 10 · Build record (v5.78) — where the build departed from this document, and why
+
+- **`t44` was written first and run against unchanged code:** exactly its 18 v5.78 assertions failed and its 14 controls passed.
+  Its first draft crashed on the v5.77 leg instead of failing (it called the absent helper after asserting its absence); the
+  sweep is now skipped when the helper is missing, so A-0 carries the failure.
+- **Exact placement is not always possible.** §5 said "every engine at the exact top threshold". Some thresholds cannot be
+  reproduced as monthly × 12: the joint top in 2029 and 2031, and two of eight lower thresholds in 2031, had no such figure,
+  and a naive case landed a hair under or over — passing on the broken build. `t44` searches forward for a placeable year and
+  asserts it found one; the years it uses (e.g. joint 2030, 2034) are chosen by that search, not by this document.
+- **E-1's first form saw only direct comparisons** against an `irmaaThresholdFor(...)` call, so on the fixed code — whose
+  helper stores the threshold in `thr` first — it found none and failed. It now also counts comparisons against a variable
+  initialised from that call in the same function, which is also the shape a future private loop would most likely take.
+- **`t10` has TWO reference tier functions** (`tierR`, `tierRefY`), both `<=` at every tier; §2 named one. Both corrected.
+  Because `t10` prints neither passes nor results, a green run could not show the exact case was reached; forcing the fixed
+  rule onto the v5.77 leg fired exactly the two exact-top cases (−$580, −$1,160). That check is control M6.
+- **The example household, measured** (not only via parity): lifetime tax, widow-years tax and lifetime IRMAA identical in all
+  seven Roth strategies, v5.77 against v5.78.
+- **K-10 / K-11 controls are FIRE-only** (P66, P67): neither check prints a judged count, so a QUIET half would be vacuous; the
+  real package's own green K-10/K-11 is the quiet half.
+- **The first full suite run was interrupted** between turns (green through `t28`, no GRAND line) and re-run in full.
+
