@@ -1214,6 +1214,22 @@ console.log("\nK. Manifest — PROJECT_KNOWLEDGE_INDEX.md vs the clone and the p
   }
 }
 
+// ── K-10, K-11 · the two present-tense lines that kept going stale (added at v5.78, SCOPE_IRMAA_TOP_TIER T-3) ──────
+// Neither reads the pool, so both run PRE-SHIP. App releases only: an ops package does not move either line.
+// K-10: TESTING.md's "Current build" sentence outlived its release FOUR times (v5.71; v5.73–v5.74; v5.75–v5.76) — each
+//   caught by eye at a later build, never by a check.
+// K-11: the manifest's lead ship note was skipped by BOTH v5.75 and v5.76; the block kept leading with a v5.74-era note.
+if (KIND === "app-release") {
+  const pkgVer = (/^danger-close-v(\d+\.\d+)/.exec(basename(ROOT)) || [])[1];
+  const tst = join(GH, "TESTING.md"), idx = join(GH, "PROJECT_KNOWLEDGE_INDEX.md");
+  const tVer = existsSync(tst) ? (/\*\*Current build: v(\d+\.\d+)\*\*/.exec(readFileSync(tst, "utf8")) || [])[1] : undefined;
+  ck("K-10: TESTING.md ships, and its \"Current build\" line names this package's version",
+    !!pkgVer && tVer === pkgVer, existsSync(tst) ? `TESTING says v${tVer}, package is v${pkgVer}` : "TESTING.md is not in github/ — an app release changes its counts");
+  const iVer = existsSync(idx) ? (/\*\*v(\d+\.\d+) SHIPPED/.exec(readFileSync(idx, "utf8")) || [])[1] : undefined;
+  ck("K-11: the manifest's newest ship note names this package's version",
+    !!pkgVer && iVer === pkgVer, existsSync(idx) ? `newest ship note is v${iVer}, package is v${pkgVer}` : "PROJECT_KNOWLEDGE_INDEX.md is not in github/");
+}
+
 console.log(`\npackage_check: ${pass} passed, ${fail} failed, ${skip} skipped`);
 if (skip) console.log("  \u26a0 A SKIPPED check is not a passed one. Re-run with a clone to close the gap.");
 if (fail) { console.log("\nDO NOT SEND THIS ZIP:"); fails.forEach(f => console.log(f)); }

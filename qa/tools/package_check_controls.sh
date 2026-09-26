@@ -967,6 +967,27 @@ runDecl "P64 a NEW packaged file with a shebang and no chmod line" FIRE "G-3c" "
   'mkdir -p github/qa/tools && printf "#!/bin/bash\necho p64\n" > github/qa/tools/p64_new_tool.sh'
 runDecl "P65 the same file, with its chmod line in COMMIT_MESSAGE.txt" QUIET "G-3c" "qa/tools/p64_new_tool.sh" \
   'mkdir -p github/qa/tools && printf "#!/bin/bash\necho p64\n" > github/qa/tools/p64_new_tool.sh && echo "git update-index --chmod=+x qa/tools/p64_new_tool.sh" >> COMMIT_MESSAGE.txt'
+
+# ── P66, P67  K-10 and K-11 (v5.78, SCOPE_IRMAA_TOP_TIER T-3) ────────────────────────────────────────────────────────
+# Each stamps v0.0 into the first version the check reads, in every copy of the file, so the pair stays valid against any
+# app package. FIRE-only: neither check prints a "(N judged)" count, and a QUIET half would be vacuous by construction —
+# the unmutated package's own green K-10/K-11 is the quiet half.
+stamp_v00 () {   # $1 = file basename, $2 = regex whose FIRST match's version becomes 0.0
+  for m in "github/$1" "knowledge/$1"; do
+    [ -f "$m" ] || continue
+    python3 - "$m" "$2" <<'PY'
+import re, sys
+p, rx = sys.argv[1], sys.argv[2]; t = open(p, encoding="utf-8").read()
+t2 = re.sub(rx, lambda m: m.group(0).replace(m.group(1), "0.0"), t, count=1)
+open(p, "w", encoding="utf-8").write(t2)
+PY
+  done
+}
+echo ""; echo "P66..P67  stale present-tense lines K-10 and K-11"
+runDecl "P66 TESTING.md's Current build line names an older version" FIRE "K-10" "TESTING says v0.0" \
+  'stamp_v00 TESTING.md "\*\*Current build: v(\d+\.\d+)\*\*"'
+runDecl "P67 the manifest's newest ship note names an older version" FIRE "K-11" "newest ship note is v0.0" \
+  'stamp_v00 PROJECT_KNOWLEDGE_INDEX.md "\*\*v(\d+\.\d+) SHIPPED"'
 printf "\n  controls: %d behaved as designed, %d did not, %d skipped\n" "$PASS" "$MISS" "$SKIP"
 
 [ "$SKIP" -gt 0 ] && echo "  ⚠ A SKIPPED control is not a passing one."
