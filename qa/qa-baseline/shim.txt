@@ -29,6 +29,8 @@ export const __g = {
   // earlier legs still LOAD (it does not exist there); t43 reads `undefined` on those legs and
   // asserts the four-private-copies state instead.
   taxableSS86: _g("taxableSS86"),
+  // v5.78 — THE IRMAA tier rule (C-1: the top tier begins AT its threshold). GUARDED: absent on v5.77 and earlier.
+  irmaaTierFor: _g("irmaaTierFor"),
   rmdDivisor, rmdStartAge, ssDepletionFactor, stateTaxAnnual,
   rothCrossover: _g("rothCrossover"),   // v5.29 — GUARDED so pre-v5.29 legs still load
   genSSTable, getSSA, getSSB, getPension, getIncomeStreams,
