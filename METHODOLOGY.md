@@ -691,6 +691,15 @@ were wrong before v5.14:
   through **2027**, indexing it by CPI-U only from **2028**, off that frozen base. Through v5.13 the
   engines inflated it every year like the others. The Verify tab had labelled it "top tier fixed by
   law" since v5.7 — a claim the arithmetic contradicted; it is now asserted rather than printed.
+- **The top tier begins AT its threshold (v5.78).** 42 U.S.C. §1395r(i)(3)(C) makes tiers 1–4 "not
+  more than" their upper amount but the top tier "at least" $500,000 ($750,000 joint), so a MAGI of
+  exactly that threshold pays the top surcharge. Through v5.77 every engine used "not more than" for
+  the top tier too and billed that MAGI one tier low — **$580 per person per year optimistic**, for a
+  household sitting exactly on the line (finding C-1). Tier selection is now one shared helper, as
+  threshold computation already was, and the IRMAA tab's headroom from tier 4 is one dollar less than
+  the gap, because adding the full gap reaches the top tier. Projected thresholds are **not** rounded
+  to the nearest $1,000 as the statute rounds CMS's published figures; the 2%/yr CPI proxy they rest
+  on is a far larger approximation (recorded as C-13).
 
 Both rules now live in **one shared module-level helper**, called by every site that needs an IRMAA
 threshold. They were previously copied into four separate loops across two engines, which is how
