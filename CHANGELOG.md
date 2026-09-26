@@ -1,5 +1,66 @@
 # Changelog
 
+## v5.78 — the IRMAA top tier starts at its threshold
+
+Source `536597644ae036a66f9a441e6311ad5c` · built `index.html` `a11c46dca503a433eaaf6665427769f9` · built from v5.77 `9cdd345d488443a8ca146e8cbb7da332`. `src/index.html` and
+`src/main.jsx` are unchanged. **The example household does not move**: all seven Roth strategies' lifetime tax, widow-years
+tax and lifetime IRMAA are identical to v5.77 (measured), MC parity is 10/10, and its IRMAA-tab MAGI never comes within half
+of the joint top threshold. `METHODOLOGY.md` gains the top-tier rule; `docs/FlawsToFix-v5_73-Phase2.md` marks C-1 fixed and
+records **C-13**.
+
+**Suite: 4,469 app checks, 0 failed, 0 DIED, across both legs** — 43 app suites plus MC parity 10/10; tooling `t21` 64,
+`domdiff` 32, `sets` 12 + 12 (GRAND 4,599), run from the packaged copies. `t44` is new on both legs (29 on v5.77,
+36 on v5.78). `smoke_built` **22 passed, 0 failed**. Negative controls: `controls_v578_irmaa.py` **7 of 7**; `package_check_controls.sh`
+in the pre-upload phase (pool given) **56 behaved as designed**, including **P66/P67**; its one miss is `P48`, which by
+design fires only after the upload (OPERATIONS §I — run it again then), and `P15` and `P58`–`P61` skip (no ops or handover package). Per-suite: `TESTING.md`.
+
+### What changed, and why
+
+- **A MAGI of exactly the IRMAA top threshold now pays the top surcharge (C-1).** 42 U.S.C. §1395r(i)(3)(C) makes tiers 1–4
+  "not more than" their upper amount but the top tier "at least" $500,000 ($750,000 joint) — re-read at the source for this
+  release. Every engine used "not more than" for the top tier too, so a household exactly on that line was billed one tier
+  low: **$580 per person per year optimistic** (single, premium year 2028: $6,360 where the law gives $6,940). It reaches
+  only a household sitting exactly on the threshold, which is what an IRMAA-aware plan aims at.
+- **Tier selection is one shared rule.** Two loops in the Roth comparator and one in the IRMAA tab's engine each chose the
+  tier; all three now call one helper beside the one that computes the thresholds (v5.14), the way v5.77 made §86 one rule.
+- **The IRMAA tab's headroom from tier 4 is one dollar less** (decision D-1): tiers 1–4 are "not more than", so adding the
+  full gap stays in the tier; from tier 4 the next tier starts *at* its threshold, so the most a household can add and stay is
+  one dollar less. The tier table's top row reads **≥ $750K** (≥ $500K single), not "> $750K".
+- **Audit housekeeping.** The audit's at-a-glance table showed C-8, C-3 and C-6 as open long after v5.74 and v5.75 fixed them;
+  they are annotated. `MissingFeatures.md` and `ARCHITECTUREIssues.md` opened with a "build under audit: v5.29" table whose
+  current blocks were the v5.73 ones further down — which misled the v5.77 handover, and a recommendation made from it, into
+  proposing a Phase 3 that had already run; each now names its current pin first. The top-five summary notes what is fixed.
+- **Two new `package_check` checks, K-10 and K-11**, fail an app release whose `TESTING.md` "Current build" line, or whose
+  manifest's newest ship note, names another version. The first went stale four times, the second was skipped by two
+  consecutive releases; both were only ever caught by eye. Each has a control (P66, P67).
+
+### Limitations, stated plainly
+
+- **Projected IRMAA thresholds are not rounded to $1,000** as the statute rounds CMS's figures (2028, single tier 1:
+  $113,403.60). Recorded as **C-13** and deliberately not fixed here (D-2): rounding would move every projected edge by up
+  to $500 and reach far more households than C-1, so it gets its own measurement, alongside the brackets' $50 rounding.
+- **Engine A's second tier loop sits inside the taxable-sale funding solver** and cannot practically be placed on a threshold;
+  `t44` covers it through the helper sweep and a parser check that it calls the helper, not by a numerical case.
+
+### Found while building, and worth recording
+
+- **"Exactly at the threshold" is not always reachable.** Thresholds like 750,000 × 1.02⁴ are not round, and no monthly
+  pension × 12 reproduces some of them bit for bit: a naive joint case landed a hair *under* the 2029 threshold and a hair
+  *over* the 2031 one, and would have passed on the broken build. `t44` searches for a year whose threshold can be placed
+  exactly and asserts that it found one.
+- **`t10`'s reference oracles carried C-1's own rule.** Its exact-top case compared the engine's `<=` against the oracle's
+  `<=` and agreed. Both oracles now state the law; a control that forces the fixed rule onto the v5.77 leg fires on exactly
+  the two exact-threshold cases (−$580 single, −$1,160 joint), proving the case is reached.
+- **The audit counted "Engine A ×3" tier comparisons**; the parser found two loops plus an IRMAA-avoidance cap that targets
+  tier 1 and cannot reach the top. The count is corrected in the audit's entry.
+- **The manifest's hash rows were first rolled by file name, which is wrong for exactly one file.** `index.html` names two
+  different things: the built app in the repo root, and the Vite template the pool keeps (from `src/`). The roll wrote the
+  built app's hash into the template's row; it was caught on inspection before packaging and restored (K-8 would also have
+  failed it). The only other pooled name held by several repo paths is `README.md` (three of them); this release changes
+  none, so no other row was at risk — but a roll must go by path, not by name.
+- **Two full runs were interrupted** between working sessions (green through `t28` and `t38`, no GRAND line) and were
+  re-run in full; a partial run is never counted. The counts above are from a complete run on the packaged copies.
+
 ## v5.77 — one Social Security tax rule for every engine
 
 Source `9cdd345d488443a8ca146e8cbb7da332` · built `index.html` `a2bc67451b11cad440709e3c342834d5` · built from v5.76 `66b0dd944333a53f4cc00a54b9e3d618`.
