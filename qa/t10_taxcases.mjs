@@ -127,7 +127,11 @@ const pass2A = pass, fail2A = fail;
 const SGL_R = [109000,137000,171000,205000,500000,Infinity];
 const MFJ_R = [218000,274000,342000,410000,750000,Infinity];
 const SUR_R = [0,1150,2880,4620,6360,6940];
-const tierR = (magi, ups) => { for (let i=0;i<ups.length;i++) if (magi<=ups[i]) return i; return ups.length-1; };
+// v5.78 (C-1): 42 U.S.C. §1395r(i)(3)(C)(i)(III) — tiers 1–4 are "not more than" their upper amount, the top tier is "at
+// least" its own. Through v5.77 BOTH reference oracles in this file used `<=` at every tier, the engines' own rule, so an
+// exact-top-threshold case compared the engine's C-1 against the oracle's C-1 and agreed. A LADDER — widen it each release.
+const C1_FIXED = VER === "v578";
+const tierR = (magi, ups) => { for (let i=0;i<ups.length;i++) if (i === ups.length - 2 ? magi < ups[i] : magi <= ups[i]) return i; return ups.length-1; };
 const irmaaRef = (magi, single, persons) => SUR_R[tierR(magi, single?SGL_R:MFJ_R)] * persons;
 // IRMAA isolation builder: 3-year window ending at `premiumYr`, both 65+ that year, MAGI = pen.
 const irmaaP = (single, magi, premiumYr=2028, o={}) =>
@@ -147,7 +151,8 @@ const IDX_R = 1.02, TOP_FROZEN_R = 2027, BASE_YR_R = 2026;
 const thrRef = (upper, isTop, premiumYr) => !isFinite(upper) ? upper
   : upper * Math.pow(IDX_R, isTop ? Math.max(0, premiumYr - TOP_FROZEN_R) : premiumYr - BASE_YR_R);
 const tierRefY = (magi, ups, premiumYr) => {
-  for (let i = 0; i < ups.length; i++) if (magi <= thrRef(ups[i], i === ups.length - 2, premiumYr)) return i;
+  for (let i = 0; i < ups.length; i++) { const top = i === ups.length - 2, t = thrRef(ups[i], top, premiumYr);
+    if (top ? magi < t : magi <= t) return i; }
   return ups.length - 1; };
 const irmaaRefY = (magi, single, persons, premiumYr) =>
   SUR_R[tierRefY(magi, single ? SGL_R : MFJ_R, premiumYr)] * persons;
@@ -157,8 +162,10 @@ for (const [st, single, ups, persons] of [["SGL",true,SGL_R,1],["MFJ",false,MFJ_
     const edge = Math.floor(thrRef(ups[i], i === ups.length - 2, PY));
     for (const d of [-1,0,1]) { const magi = edge + d;
       const got = noneIrmaa(irmaaP(single, magi, PY));
-      const exp = irmaaRefY(magi, single, persons, PY);
-      T(`IRMAA ${st} magi=${magi} (border, premiumYr ${PY})`, got, exp);
+      // Exactly ON the top threshold (510,000 / 765,000 in 2028 — both exact in floating point): C-1's case.
+      const onTop = i === 4 && magi === thrRef(ups[i], true, PY);
+      const exp = onTop && !C1_FIXED ? SUR_R[4] * persons : irmaaRefY(magi, single, persons, PY);
+      T(`IRMAA ${st} magi=${magi} (border, premiumYr ${PY})${onTop ? (C1_FIXED ? " — exactly the top threshold: TOP tier (C-1 fixed v5.78)" : " [KNOWN DEFECT 2026-09-25, C-1] exactly the top threshold: billed tier 4") : ""}`, got, exp);
       out[`IRMAA_${st}_${magi}`]={got,exp}; } }
 
 // ═══ 9. Per-person surcharge: MFJ one spouse <65 (×1), neither 65 (×0) ═══

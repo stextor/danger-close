@@ -49,12 +49,12 @@ import { fileURLToPath } from "url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2];
-const KNOWN_VERSIONS = ["v576", "v577"];
+const KNOWN_VERSIONS = ["v576", "v577", "v578"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.\n    Registered: ${KNOWN_VERSIONS.join(", ")}`);
   process.exit(1);
 }
-const POST = VER === "v577";
+const POST = VER === "v577" || VER === "v578";
 
 // Optional third argument: a module path, for the negative controls (qa/tools/controls_v577_ss86.py). The parser
 // check reads the .jsx beside it, so a control's mutant is what the structural check sees too.

@@ -130,6 +130,12 @@ tally "t42-$CUR"   node t42_single_spouse_b_ss.mjs "$CUR"
 # against the worksheet, the IRMAA consequence, and the parser-level extinction check. Wired AT BUILD.
 tally "t43-$PRIOR" node t43_ss86_one_rule.mjs "$PRIOR"
 tally "t43-$CUR"   node t43_ss86_one_rule.mjs "$CUR"
+# t44 (v5.78) runs on BOTH legs: the v5.77 leg pins C-1 (a MAGI of exactly the IRMAA top threshold billed one tier low) and
+# the three private tier loops; the current leg asserts the shared irmaaTierFor against the statute at, above and below every
+# threshold, every engine placed bit-for-bit on the top threshold, the lower edges unmoved, the headroom (D-1), the label,
+# and a parser check that no other function selects a tier. Wired AT BUILD.
+tally "t44-$PRIOR" node t44_irmaa_top_tier.mjs "$PRIOR"
+tally "t44-$CUR"   node t44_irmaa_top_tier.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
