@@ -1,5 +1,65 @@
 # Changelog
 
+## v5.79 — the app fits a phone
+
+Source `b06841a0c23f6451ca60c66755355567` · built `index.html` `137a992f43e5a7d013d67e7ee959c31e` · built from v5.78 `536597644ae036a66f9a441e6311ad5c`. A **presentation release**:
+no engine changed (MC parity 10/10, every engine suite unchanged), so no figure anywhere moves. `src/index.html` and
+`src/main.jsx` are unchanged; `METHODOLOGY.md` is unchanged (no modeling change, decision D-4).
+
+**Suite: 4,564 app checks, 0 failed, 0 DIED** — 44 app suites plus MC parity 10/10; tooling `t21` 64, `domdiff` 32,
+`sets` 12 + 12 (GRAND 4,694), run from the packaged copies. **In that run `domdiff` failed one check on this release's own CSS** (below);
+it was corrected — for this pair only — and re-run from the same packaged folder: **32 passed, 0 failed**. The totals count it at 32. **`t45` is new: 88 checks in real Chromium against the
+built page.** `smoke_built` **22 passed, 0 failed**. Negative controls: `controls_v579_layout.py` **7 of 7**. Per-suite: `TESTING.md`.
+
+### What changed, and why
+
+- **No tab scrolls sideways on a phone any more (F-11, the audit's highest-ranked open item).** At 390 px every one of the
+  26 tabs was 566–680 px wide on v5.78, so every screen scrolled sideways; now all 26 fit. Desktop and tablet are
+  **unchanged, element by element**: every element of every tab's default view sits in exactly the same place and size as
+  in v5.78, at 1440 and 820 px (measured with the Monte Carlo seeded, and repeat-run to prove the measurement is exact).
+- **The audit's diagnosis was only part of it.** It traced the overflow to one control — the retirement selector's grid —
+  and proposed a one-line fix. Measured in the browser first, that fix left all 26 tabs overflowing. The shell had three
+  causes (the selector grid, the text inside each retirement card, and the allocation strip), and eleven tabs had wide
+  tables or card rows of their own.
+- **How:** every equal-width grid column may now narrow on a small screen (`minmax(0, 1fr)`, identical to the old `1fr`
+  whenever content fits); each wide table or card row sits in its own sideways-scrolling box, so the table scrolls and the
+  page does not (decision D-1); drop-down menus are capped at the screen's width; a few rows may wrap or narrow on a phone.
+- **The Field Manual's "designed for a desktop browser" note** no longer says wide tables make the page scroll; it says
+  the page fits and a wide table scrolls within its own box, and that the tab strip still fills the first screen.
+
+### Limitations, stated plainly
+
+- **The first screen on a phone is still all header and tabs (F-12)** — the selected tab's content starts near the bottom
+  edge. That is a design choice about what to hide, and is its own release (decision D-3).
+- **Text size and touch targets (F-3/F-4) are unchanged.**
+- **Scrolling tables are a compromise on a phone:** readable, but sideways within their box. Reflowing tables into stacked
+  cards is the better phone experience and is a possible follow-up, table by table.
+- **What `t45` cannot see.** It measures page width. Each scroll box gives its table a 600 px floor (320 / 480 px for two
+  of Grade's) so cells stay legible inside it; the page fits with or without that floor, so no page-width test guards it.
+- **Desktop and tablet were verified on each tab's default view** with the example household; expanded panels and other
+  data were not measured element by element.
+
+### Found while building, and worth recording
+
+- **The first wrapper rule changed desktop.** It let each table be as wide as its unwrapped content, which forbade cell
+  text to wrap at *every* width: six desktop and tablet views came out up to 98 px shorter. The element-by-element check
+  caught it before anything shipped; it was replaced by a fixed floor that cannot engage where the table already has room.
+- **The last 2 px were text, not an element.** "~$16K/yr" was a hair wider than its card; no box-based probe could see it,
+  because text has no element box of its own. A probe that measures the text itself found it.
+- **Rolling out a Python suite needed the run-folder builder.** `mk_runfolder.sh` copied only `.mjs` and `.sh` suites, so
+  `t45` would have been left out of every run folder and run nowhere; it now copies `qa/t*.py` and the tree's built page.
+- **`t45` first failed on a correct page under load.** "Use example data" starts the Monte Carlo on the page's main thread; with
+  the full suite running alongside it passed Playwright's 30 s click limit. The page was fine (the button was on screen and
+  on top, measured); `t45` now allows 120 s, stated in the code, so it fails on layout and never on load.
+- **`domdiff` compared the Withdrawal tab's full text — which includes the shell's CSS.** This release added CSS, so the
+  check failed on a change made on purpose. For the v5.78→v5.79 pair only, exactly the two inserted passages are removed
+  (each must occur exactly once) and nothing else; later pairs compare byte for byte again.
+- **The shell is defended twice.** Reverting the selector's grid alone, or the allocation strip's, now breaks nothing: the
+  fixes inside them (cards that may shrink, rows that wrap) cover them too. Controls M2 and M3 revert both layers, and then
+  every tab breaks — defence in depth, not a blind spot.
+- **One `t1` assertion counted 9-column grids by their spelling**; the same two grids are now spelled
+  `repeat(9, minmax(0, 1fr))`. Gated per leg, same protection.
+
 ## v5.78 — the IRMAA top tier starts at its threshold
 
 Source `536597644ae036a66f9a441e6311ad5c` · built `index.html` `a11c46dca503a433eaaf6665427769f9` · built from v5.77 `9cdd345d488443a8ca146e8cbb7da332`. `src/index.html` and
