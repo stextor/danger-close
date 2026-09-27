@@ -70,6 +70,10 @@
 >
 > ### F-11 · NEW · Every tab scrolls sideways on a phone, because of one shell control — **HIGH (phone)**
 >
+> **FIXED at v5.79** (`docs/SCOPE_PHONE_LAYOUT.md`). All 26 tabs fit at 390 px; desktop and tablet unchanged element by
+> element. The cause below was only part of it: the fix shape given here, applied alone in the browser, left all 26 tabs
+> overflowing — the shell had three causes and eleven tabs had wide tables of their own. `t45` (real Chromium) guards it.
+>
 > **Measured (390 px):** the document is **566 px** wide on 19 of the 26 tabs and wider on the rest — Guardrails 680,
 > Expenses 638, Monte Carlo 624, Social Security 621, Income 611, Stress 608, Positions 571. Desktop and tablet: **no**
 > sideways scroll on any tab. The disclaimer gate and the landing screen fit (390).
@@ -81,6 +85,8 @@
 > tabs that are wider still.
 >
 > ### F-12 · NEW · On a phone the first screen is all chrome — **MED (phone)**
+>
+> **Still open after v5.79** — deliberately its own release (decision D-3 of `SCOPE_PHONE_LAYOUT.md`).
 >
 > **Measured (390×844):** the header, the three retirement cards, the allocation strip, the example-data banner and the
 > wrapped 26-tab grid end at **y = 824 px** of an 844 px screen, so the selected tab's content begins at the bottom edge on

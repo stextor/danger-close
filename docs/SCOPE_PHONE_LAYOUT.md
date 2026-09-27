@@ -1,6 +1,7 @@
 # SCOPE — the app fits a phone (F-11), and what F-12 needs first
 
-**Status: SCOPED 2026-09-26 — awaiting decisions D-1 to D-4 (§6). No code written.** Target **v5.79**, built from **v5.78**
+**FULFILLED — shipped in v5.79 (2026-09-27).** Decisions D-1 (a), D-2 (a), D-3 (a), D-4 yes — all as recommended (§6).
+See §9 for what the build found that this document did not say. Retained in the repo as the record. Target **v5.79**, built from **v5.78**
 (source `536597644ae036a66f9a441e6311ad5c`, built `index.html` `a11c46dca503a433eaaf6665427769f9`, repo `67012ab`, verified
 post-ship 2026-09-26). This is a presentation release: no engine changes; parity and the example household stay pinned.
 
@@ -115,3 +116,28 @@ the Field Manual's own layout (`DOCS_HTML`, which already carries the app's only
 at 1440/820. 3. The shell fixes; re-measure (expect 15/26). 4. The eleven tabs, one at a time, each re-measured; Monte Carlo
 and Social Security culprits named at the build. 5. Full suite, parity, `domdiff`; controls. 6. Docs, bump, build,
 `smoke_built`, package per §L, `package_check`.
+
+## 9 · Build record (v5.79) — where the build departed from this document, and why
+
+- **Result:** all 26 tabs fit at 390 px (v5.78: none); desktop (1440) and tablet (820) **unchanged element by element** on
+  every tab's default view — every v5.78 element box identical, every page height identical, the only additions 42
+  invisible scroll-box wrappers. The measurement seeds `Math.random` before the page loads (the Monte Carlo is random in
+  the browser) and was run twice on v5.78 first to prove it exact.
+- **§3 said `minmax(0, 1fr)` "cannot change desktop". True only where content fits** — where it does not, `1fr` grows a
+  column and `minmax(0, 1fr)` holds it equal. That is why invariance was MEASURED (the layout signature) rather than
+  argued; applied to all 86 static grid literals it changed 0 of 52 views.
+- **§1's census of eleven tabs was incomplete.** Several tabs had a second culprit once the first was wrapped (SS,
+  Ranking, Backtest, Grade), Income's last 2 px were TEXT spilling from a 44 px card (invisible to every box-based probe),
+  and Monte Carlo's grid template is built in code, which the static rewrite could not reach.
+- **D-1's box needed a floor, and the first floor was wrong.** A child sized `max-content` forbade cell text to wrap at every
+  width and changed six desktop/tablet views (up to 98 px shorter); replaced by `min-width: var(--dc-floor, 600px)`, with
+  320 px and 480 px for two of Grade's, where the tablet column is narrower than 600.
+- **The shell is now defended twice.** The retirement cards' zero minimum and word-break, and the allocation strip's row
+  wrap, each make their grid's `1fr` harmless on their own; controls M2 and M3 revert BOTH layers.
+- **`mk_runfolder.sh` copied only `.mjs`/`.sh` suites** — `t45` (Python) would have run nowhere. It now copies `qa/t*.py`
+  and the tree's built page; `t45` checks the page's footer names its own tag, so a stale page fails loudly.
+- **Two tabs needed scoped adjustments:** My Data's rows (a −6 px inner margin, netting their collapsed margin back to
+  v5.78's) and Income's timeline (its 170 px label floor scales down on a phone only: `min(170px, 40%)`).
+- **Known gap (disclosed):** the 600 px floor keeps cells legible inside their box; the page fits without it, so `t45`,
+  a page-width test, cannot guard it.
+
