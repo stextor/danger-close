@@ -136,6 +136,10 @@ tally "t43-$CUR"   node t43_ss86_one_rule.mjs "$CUR"
 # and a parser check that no other function selects a tier. Wired AT BUILD.
 tally "t44-$PRIOR" node t44_irmaa_top_tier.mjs "$PRIOR"
 tally "t44-$CUR"   node t44_irmaa_top_tier.mjs "$CUR"
+# t45 (v5.79) — the phone layout, in REAL Chromium against the BUILT page (../index.html, copied in by mk_runfolder).
+# Current leg ONLY by construction: the run folder carries exactly one built page. It FAILS, never skips, when no browser
+# can launch or the page is not this build (decision D-2). Python, the first non-Node suite: Playwright ships in Python here.
+tally "t45-$CUR"   python3 t45_phone_layout.py "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

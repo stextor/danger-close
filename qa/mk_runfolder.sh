@@ -80,11 +80,15 @@ cp "$PRIOR_SRC"                "$OUT/$PRIOR.jsx"
 cp "$REPO/src/DangerClose.jsx" "$OUT/DangerClose.jsx"
 # t31 is the first suite to read METHODOLOGY.md, and exits loudly rather than skipping without it.
 cp "$REPO/METHODOLOGY.md"      "$OUT/METHODOLOGY.md"
+# v5.79: t45 drives Chromium against the BUILT page — jsdom does no layout. The tree's root index.html is that page; t45
+# checks its footer names the current tag, so a page left over from the previous release fails loudly, never passes.
+[ -f "$REPO/index.html" ] && cp "$REPO/index.html" "$OUT/index.html"
 cp "$REPO/package.json"        "$OUT/package.json"
 
 # FLATTEN: feature suites and the runner from qa/, then t1-t6 and the harness from qa/qa-baseline/
 # on top. A bare `cp qa/*.mjs` gets t7-t35 and MISSES EVERY BASELINE SUITE — t1-t6 are not in qa/.
 cp "$REPO"/qa/*.mjs "$REPO"/qa/*.sh "$OUT/qa/"
+cp "$REPO"/qa/t*.py "$OUT/qa/" 2>/dev/null || true   # v5.79: t45 is the first Python suite (Playwright + Chromium)
 cp -R "$REPO/qa/tools" "$OUT/qa/tools"          # ⚠ tools/fixture/, NOT a flat copy — see below
 cp "$REPO"/qa/qa-baseline/*.mjs "$REPO"/qa/qa-baseline/*.sh "$REPO/qa/qa-baseline/shim.txt" "$OUT/qa/"
 cp "$REPO/qa/qa-baseline/dom_entry_$PRIOR.jsx" "$REPO/qa/qa-baseline/dom_entry_$CUR.jsx" "$OUT/qa/"

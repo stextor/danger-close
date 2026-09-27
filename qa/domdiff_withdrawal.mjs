@@ -155,7 +155,16 @@ console.log(`TAX-BEARING TABS \u2014 cross-version DOM diff ${VA} \u2192 ${VB}\n
 ck(`${VA}: schedule table rendered`, !!A.schedule, "not found");
 ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
 {
-  const wA = stripV(A.withdrawal), wB = stripV(B.withdrawal);
+  // v5.79 (SCOPE_PHONE_LAYOUT) added CSS rules to the shell's <style> block, and this capture is body.textContent, which
+  // INCLUDES that CSS as text. For THIS pair only, exactly those two inserted passages are removed from the v5.79 side
+  // (each must occur exactly once, or the check fails) and nothing else — any other difference still fails. Applied
+  // BEFORE stripV, which would otherwise rewrite the "v5.79" inside them. The claim behind this check (no rendered cell
+  // moves) was proved at that build in real Chromium, element by element at 1440 and 820 px.
+  const _p579 = VA === "v578" && VB === "v579";
+  const _cut = (s, re, what) => { const m = s.match(re); if (!m || s.split(m[0]).length !== 2) { ck(`v5.79 CSS passage found exactly once (${what})`, false, m ? "more than once" : "absent"); return s; } return s.replace(m[0], ""); };
+  const _n579 = (s) => !_p579 ? s : _cut(_cut(s, /\s*select \{ max-width: 100%; \}\s*\/\* v5\.79 \(F-11\)[^*]*\*\//, "select cap"),
+                                     /\s*\/\* v5\.79 \(F-11, decision D-1\)[\s\S]*?per table where 600 is wider than its tablet column \*\//, "scroll-box rules");
+  const wA = stripV(A.withdrawal), wB = stripV(_n579(B.withdrawal));
   ck("WITHDRAWAL: the tab is byte-identical across the pair (v5.40 is disclosure + mechanics; no rendered cell moves \u2014 measured)",
      wA === wB, firstDiff(wA, wB));
   // The v5.35 claims must still hold on BOTH sides — this is the assertion that would catch
