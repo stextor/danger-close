@@ -90,4 +90,7 @@ F-12, F-3/F-4, C-13.
   are red at baseline — a control planting a second source would have been "caught" by a check already failing.
 - **A contradiction found in OPERATIONS:** "What does NOT rotate" (2026-09-03) still said the pool keeps every `controls_v*.sh`,
   which the previous ops package overrode without seeing it. Reconciled in the text; reported to Steve.
+- **Post-upload, P22 went vacuous** — its prior was `ls /mnt/project/DangerClose-v5_*.jsx | head -1`, the current source once
+  the pool held one. §2's census never searched the controls for code that globs the pool's sources; P22 was the only such
+  site. Fixed in the third ops package of 2026-09-28 (resolved from history by md5; refuses to run if it would be vacuous).
 
