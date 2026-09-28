@@ -1,5 +1,47 @@
 # Changelog
 
+## v5.80 — Bull-leaning is the default scenario, and your choice is remembered
+
+Source `7a04dadb86bdef6534bdc03a1d87e8d8` · built `index.html` `a7394fad7c58dfccc2ddce86ac6dd0c9` · built from v5.79 `b06841a0c23f6451ca60c66755355567`. **No engine changed**
+(MC parity 10/10); what changed is the scenario every run assumes unless the user chooses otherwise, so `METHODOLOGY.md`'s
+description of the default prior is rewritten. `src/index.html` and `src/main.jsx` are unchanged.
+
+**Suite: 4,592 app checks, 0 failed, 0 DIED** — 45 app suites plus MC parity 10/10; tooling `t21` 64, `domdiff` 32,
+`sets` 12 + 12 (GRAND 4,722), run from the packaged copies. `t46` is new on both legs (11 on v5.79, 16 on v5.80).
+`t45` (real Chromium) **88 passed, 0 failed**. `smoke_built` **22 passed, 0 failed**. Negative controls: `controls_v580_scenario.py` **6 of 6**.
+
+### What changed, and why
+
+- **A first visit now starts on BULL-LEANING instead of BASE.** Measured against the app's own 1928–2025 returns: BASE
+  expects 3.1% nominal / **0.4% real** equity return; BULL-LEANING 5.2% / **2.6% real**, and keeps history's frequency of bad
+  years (10% of simulated years below −10%, against 12% in the record). It still sits about 5 points below history's average,
+  so the default stays on the conservative side. (HISTORICAL matches the average only by making bad years about four times
+  rarer than they were — the risk this app exists to test.)
+- **Every user's numbers change on their next visit**, because nobody had a saved choice before. On the example household the
+  displayed success rate moves from 99.6% to 99.8% (it is well funded); its median balance 25 years out from $1.96M to $2.11M.
+  Households nearer the edge will move more. Choosing BASE on the Monte Carlo tab brings the old model back — and now stays.
+- **The chosen preset is remembered** in the browser, exactly as the Social Security and ACA scenario settings already are:
+  restored on the next visit, cleared by "delete everything", and not written into backup files (neither are those two). An
+  unrecognised stored value falls back to the default rather than breaking the app.
+- **The "not the default" warning names the default** (it used to say "non-base scenario"), and the Field Manual's glossary
+  gives Bull-leaning's crisis / recession / stagflation frequencies (2% / 8% / 5% a year) with Base's alongside.
+
+### Limitations, stated plainly
+
+- **The "10–20 points lower than raw-history tools" figure** in METHODOLOGY was measured under BASE and is kept as that; the
+  gap under Bull-leaning is smaller and has not been re-measured across households.
+- **The preset is per browser.** A user on two devices chooses on each; a restored backup does not carry it.
+
+### Found while building, and worth recording
+
+- **A test that could not fail.** `t46`'s first draft checked that a saved BASE came back on the next visit — but BASE was the
+  old default, so the check passed on the old code with no restore at all. It now restores HISTORICAL, which neither version
+  defaults to.
+- **`domdiff` compared different inputs, not different engines.** It rendered each version at its own default, so the new
+  default made three identity checks fail. It now pins BASE for both legs through the key v5.80 restores; every check stays
+  byte-strict, and the run doubles as a second proof that the restore works.
+- **The version-registration sweep does not see Python files**, so `t45` (the first Python suite) was registered by hand.
+
 ## v5.79 — the app fits a phone
 
 Source `b06841a0c23f6451ca60c66755355567` · built `index.html` `137a992f43e5a7d013d67e7ee959c31e` · built from v5.78 `536597644ae036a66f9a441e6311ad5c`. A **presentation release**:
