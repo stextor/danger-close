@@ -145,6 +145,9 @@ tally "t45-$CUR"   python3 t45_phone_layout.py "$CUR"
 # invalid stored value falling back to the default, and the non-default notice naming the default. Wired AT BUILD.
 tally "t46-$PRIOR" node t46_scenario_default.mjs "$PRIOR"
 tally "t46-$CUR"   node t46_scenario_default.mjs "$CUR"
+# t47 (v5.81) — a phone's first screen (F-12), real Chromium, the BUILT page; current leg only, like t45. Structure checks read
+# the run folder's ../<tag>.jsx (one tab list, one guarded selectTab); the guard is exercised through the phone menu. Wired AT BUILD.
+tally "t47-$CUR"   python3 t47_phone_first_screen.py "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

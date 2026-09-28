@@ -20,7 +20,7 @@
 import os, sys, re
 
 VER = sys.argv[1] if len(sys.argv) > 1 else ""
-KNOWN_VERSIONS = ["v579", "v580"]
+KNOWN_VERSIONS = ["v579", "v580", "v581"]
 HERE = os.path.dirname(os.path.abspath(__file__))
 PAGE = os.path.abspath(sys.argv[2]) if len(sys.argv) > 2 else os.path.join(HERE, "..", "index.html")
 ok = 0; bad = 0; fails = []
@@ -69,11 +69,18 @@ try:
             T(f"G-2 {name}: the gate's scroll lock is RELEASED before anything is measured", st in ("", None), repr(st))
             if st not in ("", None): pg.close(); continue
             pg.get_by_text("Use example data", exact=False).first.click(); pg.wait_for_timeout(2200)
-            tabs = pg.eval_on_selector_all("button.tab", "els => els.map(e => e.textContent.trim())")
+            # From v5.81 (F-12) a phone below 600 px has no tab grid — it has ONE tab menu — so move between tabs the way a user
+            # of this viewport does. At v5.81 this suite still clicked the hidden grid buttons on the phone and timed out.
+            menu = pg.locator('select[aria-label="Choose a tab"]')
+            use_menu = menu.count() == 1 and menu.is_visible()
+            if use_menu: tabs = pg.eval_on_selector_all('select[aria-label="Choose a tab"] option', "els => els.map(e => e.value)")
+            else: tabs = pg.eval_on_selector_all("button.tab", "els => els.map(e => e.textContent.trim())")
             tabsSeen[name] = len(tabs)
             over = []
             for t in tabs:
-                pg.locator("button.tab", has_text=t).first.click(); pg.wait_for_timeout(500)
+                if use_menu: menu.select_option(t)
+                else: pg.locator("button.tab", has_text=t).first.click()
+                pg.wait_for_timeout(500)
                 m = pg.evaluate(MEASURE)
                 if m["sw"] > m["vw"]: over.append(f"{t} {m['sw']}")
                 T(f"L-{name} '{t}': the page does not scroll sideways at {w} px (scrollWidth {m['sw']} vs {m['vw']})", m["sw"] <= m["vw"])

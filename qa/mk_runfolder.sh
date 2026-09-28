@@ -20,6 +20,7 @@
 #   ./qa/mk_runfolder.sh <prior-tag> <cur-tag> [--git | <prior-source.jsx>] [outdir]
 #     ./qa/mk_runfolder.sh v580 v581                    # prior resolved from git history (the default)
 #     ./qa/mk_runfolder.sh v580 v581 --git /tmp/run     # the same, with an output folder
+#     ./qa/mk_runfolder.sh v580 v581 /tmp/run           # the same: a third argument not ending in .jsx is the output folder
 #     ./qa/mk_runfolder.sh v580 v581 ~/DangerClose-v5_80.jsx /tmp/run   # fallback: a file, VERIFIED by md5
 #
 #  v5.80+ (SCOPE_SINGLE_SOURCE_POOL, 2026-09-28): THE POOL KEEPS ONE SOURCE. The prior leg is resolved from this clone's
@@ -51,6 +52,10 @@ say () { printf '  %s\n' "$*"; }
 # ── arguments ────────────────────────────────────────────────────────────────────────────────
 [ $# -ge 2 ] || die "usage: ./qa/mk_runfolder.sh <prior-tag> <cur-tag> [--git | <prior-source.jsx>] [outdir]"
 PRIOR="$1"; CUR="$2"; PRIOR_SRC="${3:---git}"; OUT="${4:-/tmp/run}"
+# v5.81: a THIRD argument that does not end in .jsx is the OUTPUT folder (git mode), not a prior source. Twice on the day this
+# tool gained git mode, `mk_runfolder.sh v580 v581 /tmp/run` was typed meaning "into /tmp/run" and was refused as "prior
+# source not found" — safe, but a trap. The suffix decides, so nothing is guessed: `.jsx` = a source to verify by md5.
+if [ "$PRIOR_SRC" != "--git" ] && [ "${PRIOR_SRC%.jsx}" = "$PRIOR_SRC" ] && [ $# -eq 3 ]; then OUT="$PRIOR_SRC"; PRIOR_SRC="--git"; fi
 
 for t in "$PRIOR" "$CUR"; do
   case "$t" in

@@ -137,7 +137,13 @@ const renderTabs = async (ver) => {
       .find(e => (e.textContent || "").trim().toLowerCase() === name);
     tab.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
     await flush(); await flush(); await flush();
-    return body().textContent || "";
+    // v5.81: capture what is RENDERED on this desktop viewport, not everything in the DOM. <style> text is never displayed,
+    // and .dc-phone-only elements (v5.81's tab menu and plan-summary line) have no box at desktop width. Both were in
+    // body.textContent, so every CSS addition (v5.79, v5.81) and every phone-only element broke the byte-identity check with
+    // no rendered cell moving. Excluded for EVERY pair; everything else stays byte-strict.
+    const clone = body().cloneNode(true);
+    clone.querySelectorAll("style, .dc-phone-only").forEach(n => n.remove());
+    return clone.textContent || "";
   };
   const out = {};
   for (const name of ["withdrawal", "taxes", "irmaa"]) out[name] = await readTab(name);
