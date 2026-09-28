@@ -1,5 +1,16 @@
 # Changelog
 
+## ops 2026-09-28 (third) — control P22 went vacuous when the pool became single-source; fixed
+
+No app change (v5.80 stays current). After the single-source package was uploaded, `package_check_controls.sh` reported **P22
+NOT CAUGHT**. P22 builds "a different release" by copying a source over the clone's, and picked it with
+`ls /mnt/project/DangerClose-v5_*.jsx | head -1` — the prior while the pool held two sources, the CURRENT once it held one, so
+it copied v5.80 over v5.80 and planted nothing. The control framework reported it rather than passing it. **The single-source
+scope's census missed it**: it covered `package_check` and `mk_runfolder.sh`, not controls that glob the pool's sources (a
+full census now finds P22 the only such site). P22 now resolves the prior release from the clone's history by the manifest's
+Prior md5, as `mk_runfolder.sh` does, and reports itself INVALID if that equals the current source. After the fix, post-upload:
+**62 behaved as designed, 0 did not, 1 skipped**, P22 caught by H-3.
+
 ## ops 2026-09-28 (second) — the pool keeps ONE source; the prior comes from the repo's history by md5
 
 No app change (v5.80 stays current). The pool held two full copies of the app source — current and prior, 1.3 MB each, about
