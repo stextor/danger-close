@@ -129,7 +129,10 @@ Copying the repo layout verbatim and running it fails. The qa-baseline README ca
 
 ⚠ **DO NOT ASSEMBLE THAT FOLDER BY HAND. Run `./qa/mk_runfolder.sh <prior-tag> <cur-tag> [--git | <prior-source.jsx>]
 [outdir]` from a FULL clone** (added v5.68; from 2026-09-28 the prior source is resolved from the clone's git history by the
-md5 the manifest records for that version, and a file given instead is accepted only if its md5 matches). Steps 1–4 above are what the script does,
+md5 the manifest records for that version, and a file given instead is accepted only if its md5 matches; from v5.81 a third
+argument that does not end in `.jsx` is the OUTPUT folder, so `mk_runfolder.sh v580 v581 /tmp/run` does what it reads as).
+**Registration:** `vercensus.cjs` does not scan `.py` files — the Python suites (`t45`, `t47`) are registered by hand, by adding the
+new tag to their `KNOWN_VERSIONS` (found at v5.80, when `t45` alone would have reported "not registered"). Steps 1–4 above are what the script does,
 and they are kept here because they document the mechanism — but the script is the thing to run, and
 where the two disagree the script is what was last measured. It also carries the three inputs this
 prose has never named: the **prior leg's `.jsx` is not in the repo** (the tree holds one source, the

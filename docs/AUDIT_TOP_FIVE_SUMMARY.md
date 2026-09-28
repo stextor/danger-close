@@ -19,6 +19,8 @@
 > from the five: the second (phone layout, F-11/F-12) and the fifth (text size and touch targets, F-3/F-4).
 > **v5.79:** the second is half done — **F-11 fixed** (no tab scrolls sideways on a phone); F-12 (the first screen is all chrome)
 > remains, as does the fifth.
+> **v5.81:** the second is **done** — **F-12 fixed** (a phone's first screen shows the plan). Open from the five: the fifth
+> (text size and touch targets, F-3/F-4).
 >
 >
 > Build v5.73 · source `3bf1e15f1b28659aae9a78e3186d2ae8` · built `index.html` `345ccbceb58bf74f9fbdde5db0646d1d`. Drawn from

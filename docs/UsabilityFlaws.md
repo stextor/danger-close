@@ -88,6 +88,10 @@
 >
 > **Still open after v5.79** — deliberately its own release (decision D-3 of `SCOPE_PHONE_LAYOUT.md`).
 >
+> **FIXED at v5.81** (`docs/SCOPE_PHONE_FIRST_SCREEN.md`): below 600 px the tab grid is one native menu and the retirement
+> cards and allocation strip fold into one line; content begins at y = 613 (example mode; v5.80: 1005). This is also the app's
+> first breakpoint outside the Field Manual (F-1, partly addressed). `t47` guards it.
+>
 > **Measured (390×844):** the header, the three retirement cards, the allocation strip, the example-data banner and the
 > wrapped 26-tab grid end at **y = 824 px** of an 844 px screen, so the selected tab's content begins at the bottom edge on
 > every tab (desktop: content starts at y = 406 of 900). A phone user who taps a tab sees no change above the fold.
