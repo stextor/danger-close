@@ -1,7 +1,7 @@
 # SCOPE — Bull-leaning becomes the default scenario, and each user's chosen preset is remembered
 
-**Status: SCOPED 2026-09-27 — direction decided by Steve (Bull-leaning default; remember the choice); awaiting decisions
-D-1 to D-4 (§6). No code written.** Target **v5.80**, built from **v5.79** (source `b06841a0c23f6451ca60c66755355567`, built
+**FULFILLED — shipped in v5.80 (2026-09-27).** Direction decided by Steve; D-1 to D-4 all as recommended (§6). See §9 for
+what the build found that this document did not say. Retained in the repo as the record. Target **v5.80**, built from **v5.79** (source `b06841a0c23f6451ca60c66755355567`, built
 `index.html` `137a992f43e5a7d013d67e7ee959c31e`, repo `bf56c35`). This changes a **modeling default**: METHODOLOGY is updated.
 
 ---
@@ -102,3 +102,25 @@ here); F-12, F-3/F-4, C-13.
 1. Freshness (OPERATIONS §A). 2. `t46` first, run against v5.79 — its v5.80 checks must fail. 3. The change (§3).
 4. Full suite; census and per-leg gating of anything the default moves; `t5`'s wipe guard. 5. Controls. 6. Copy,
 METHODOLOGY, CHANGELOG, TESTING, manifest; bump; build; `smoke_built`; `t45`; package per §L; `package_check`.
+
+## 9 · Build record (v5.80)
+
+- **§5 is void:** Steve committed `t45`'s chmod fix (`9461e90`, 100755) before the build started.
+- **D-2 verified:** the backup file carries portfolio, expenses, checklist and theme — not `acaRegime` or `ssCut` — so the
+  preset is per browser and the backup format is untouched.
+- **`t46`'s first restore check was vacuous.** It restored BASE, which is v5.79's default, so it passed on unchanged code with
+  no restore at all. It now restores HISTORICAL — neither the old default nor the new; on unchanged code all 11 v5.80
+  claims then failed, and the 5 passes are behaviour both versions share.
+- **The Field Manual's glossary** said "Default 3% / 10% / 7% per year under BASE" for Crisis, Recession and Stagflation;
+  each now gives Bull-leaning's figure first (2% / 8% / 5%) and BASE's in brackets. Its return-by-prior chart names no
+  default and stays accurate. METHODOLOGY's "Conservative BASE prior" passage is rewritten; its "10–20 points lower"
+  figure is kept as what it was — a Base-era figure — and not restated as if re-measured.
+- **`domdiff` rendered each leg at its own default**, so on this pair it compared Base with Bull-leaning and three
+  cross-version identity checks failed (the Withdrawal plan follows the preset; Taxes and IRMAA follow the plan). It now
+  pins BASE through the one key v5.80 restores — v5.79 never reads it — so both legs render from identical inputs and every
+  check stays byte-strict: 32 / 32. That is also a second, independent proof that the restore works.
+- **Registration:** the sweep (`vercensus.cjs`) does not scan `.py` files, so `t45` was registered by hand; `domdiff`'s
+  v5.79-only pair gate is deliberately left unwidened; `controls_v579_layout.py` is release-pinned and stays as it is.
+- **A discovery run started before `t46` was wired** into the runner; it served to find the `domdiff` consequence. The
+  authoritative run, from the packaged copies, includes `t46`.
+
