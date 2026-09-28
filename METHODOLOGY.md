@@ -35,11 +35,20 @@ Design decisions worth knowing:
 - **Arithmetic-vs-geometric discipline.** Regime returns are calibrated so the simulation's
   compound growth matches the intended CAGR — avoiding the common error of feeding arithmetic
   average returns into a volatile simulation, which double-counts variance drag.
-- **Conservative BASE prior.** The BASE scenario set is deliberately more pessimistic than the
-  1926– historical record. Success rates will read roughly 10–20 points lower than tools
-  calibrated to raw history. This is a choice, not a bug: the tool's job is stress-testing, and
-  an optimistic prior defeats that purpose. The Backtest tab exists precisely so users can see
-  the same plan against actual history side by side.
+- **A conservative default prior — BULL-LEANING since v5.80.** The scenario weights a run uses come
+  from the Scenario Probability Stress presets. Through v5.79 every visit started on **BASE**
+  (45/20/15/10/7/3: expected equity return 3.1% nominal, 0.4% real). From v5.80 a first visit starts
+  on **BULL-LEANING** (35/40/10/8/5/2: 5.2% nominal, 2.6% real), and a user's own choice is
+  remembered in their browser. Bull-leaning was chosen because it keeps history's *frequency of bad
+  years* — 10% of simulated years below −10%, against 12% in the 1928–2025 record — while lifting
+  Base's very low average. It still sits about 5 points below history's average, so the default
+  remains the conservative choice; the HISTORICAL preset matches history's average only by making
+  bad years about four times rarer than they were, which is the risk this tool exists to test.
+  Success rates typically read lower than tools calibrated to raw history — by roughly 10–20
+  points under BASE (the figure this document gave before v5.80); by less under BULL-LEANING, not
+  re-measured across households. On the example household the displayed success rate moves only
+  from 99.6% to 99.8% (it is well funded); its median balance 25 years out, from $1.96M to $2.11M.
+  The Backtest tab shows any plan against actual history side by side.
 - **Asset-class weights are the user's own.** The engine consumes the four descriptive sleeve
   weights (cash / bonds / equity / hedge) derived from the user's actual holdings. It never
   imposes a target allocation.
