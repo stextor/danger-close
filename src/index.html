@@ -4,7 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Danger Close — Retirement Stress-Test Console</title>
-    <style>body { margin: 0; background: #070b09; }</style>
+    <style>body { margin: 0; background: #070b09; }
+      /* v5.82 (F-3, D-2): the five phone-critical controls are 44 px tall below 600 px wide */
+      @media (max-width: 599px) { #dc-dg-accept, .dc-tap44 { min-height: 44px; } }   /* also .dc-tap44 - the data-load screen has no app style block */</style>
   </head>
   <body>
     <!-- DC-DISCLAIMER-GATE-START — first-open notice; runs independently of the React app -->
