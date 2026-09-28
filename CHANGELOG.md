@@ -1,5 +1,76 @@
 # Changelog
 
+## v5.82 — legible text and usable targets (F-3 / F-4)
+
+Source `f6a54749bb14a291971395b0db20d11f` · built `index.html` `725bde1524d1ce00592aea9a621e1c03` · built from v5.81 `cdca327526e3a259c5269aca02576753`. A **presentation
+release**: no engine changed (MC parity 10/10), so no figure moves; METHODOLOGY is unchanged. Unlike v5.79–v5.81, **desktop
+changes by design** — reviewed box by box (below).
+
+**Suite: 4,727 app checks, 0 failed, 0 DIED** — 47 app suites plus MC parity 10/10; tooling `t21` 64, `domdiff` 32, `sets` 12 + 12 (GRAND 4,857),
+run from the packaged copies. **`t48` is new (99 checks, real Chromium, the built page, all 13 skins, ~10 minutes).** `smoke_built`
+**22 passed, 0 failed**. Negative controls: `controls_v582_legibility.py` **13 of 13** (eight source mutations, four built-page
+mutations, the unmutated run at 44 passed / 0 failed).
+
+### What changed, and why
+
+- **Secondary text is readable in every skin.** `--ink-faint` — the app's most-used small-text colour — failed WCAG AA (4.5:1) in
+  **9 of 13 skins** (the default measured 3.43–3.83). It now clears 4.6:1 on every base surface in all 13, and `--ink-dim` stays
+  at least 1.20× brighter so the three text levels stay distinct (decision D-1). In the dark skins the values were then nudged
+  again, the smallest step that clears 4.6:1 on every **tinted row** text was actually measured on.
+- **The chart's axis labels were the least readable text in the app** — painted in a *border* colour (`--line2`) at 9 px,
+  1.4–3.2:1 in every skin. Every Trajectory label is now ≥ 11 px, the axis text is `--ink-dim`, and the percentile labels lose a
+  70 % fade. The axis lines and domain path keep their v5.81 colours (d3 styles all three together; a fill on the path draws a band).
+- **62 hard-coded dark-theme colours became skin tokens** (D-3, E-2) — retirement-date, scenario, grade, IRMAA-tier, warning and
+  footer colours that nearly vanished on light skins (the RETIRE marker measured 1.34:1 on Report). Every exact match is the
+  default skin's own token, so the default does not change; the one-offs are listed below.
+- **Eight colours were built by gluing a hex alpha onto a colour** (`${c}33`) — invalid CSS the moment the colour is a token.
+  **Three already were, in v5.81:** the income-phase cards' borders and tints were silently dropped. All eight use `color-mix()`
+  now (E-1), and those three cards get their tints back.
+- **The type floor's leftovers reach 11 px** — the 26-tab grid, three data-row classes, the Ask AI buttons (v5.48 set the 12/11 px
+  floor for style objects; these CSS rules survived it).
+- **Every control is at least 24 × 24 px** (WCAG 2.2 AA 2.5.8; 15 were smaller — × buttons at 17 px, "+ Add" buttons at 20,
+  sliders at 16); a bare checkbox gets its target from a 24 px label. **Five phone-critical controls are 44 px tall below 600 px**
+  (D-2): Enter the tool, Use example data, the tab menu, the plan-summary line, and the Simple Mode toggle.
+- **Selected controls read in `--ink`** on the `--ring` highlight (Roth law toggle, UI size, skin cards, the selected retirement
+  card's description and median) — the highlight made accent- and dim-coloured text fail; the border, tint and ✓ still mark it.
+- **Pulsing status text** fades to 85 %, not 60 % (E-3), so it never drops below AA; the title keeps its pulse (a logotype).
+- **Field Manual §13** no longer says the tab strip "wraps heavily" (v5.81 fixed that and left the sentence) and now says what
+  remains (below). The Skins tab no longer says it has seven themes; it has 13.
+
+**Reviewed desktop change** (layout signature, all 26 tabs at 1440 and 820 against v5.81): every view moves down 4–6 px (the tab
+grid's taller text); views with sliders grow 16–22 px (SS, Taxes, Monte Carlo, Roth); My Data gains 31 elements (the checkbox
+labels). **No view became wider.** The tab grid keeps its row count (2 / 3 / 3 at 1440 / 1024 / 820).
+
+### Limitations, stated plainly
+
+- **The six light skins still have text below AA** on tinted panels — KNOWN DEFECT, pinned per skin in `t48` and allowed only to
+  fall: Field Paper 288 · Reading Paper 716 · E-Ink Gray 269 · High Contrast Light 106 · Colorblind-Safe 144 · Report 198 distinct
+  elements across 26 tabs (Reading Paper 665 on a phone). The cause is **366 hard-coded `rgba()` surfaces** (65 values, nearly all
+  dark-theme tints), plus Reading Paper's accent and warn tokens. A v5.83 surface pass owns them and needs its own scope.
+- **Hovered rows are below AA**: `.prow:hover` / `.erow:hover` tint a row with `--ring`. `t48` measures resting states only.
+- **Most controls are still under the 44 px platform guideline** (disclosed in §13). The Field Manual's own small print is
+  unchanged — 122 elements under 11 px, 66 below AA — deferred (D-4).
+- The top two IRMAA tiers now share `--crit` (their labels differ). One-off colours changed slightly on the default skin:
+  `#ff8888`→`--crit`, `#9ec4b0`→`--ink`, `#ddb84a`→`--plan`, `#8a9a8f`→`--ink-dim`, `#ffcc00`→`--plan`; `#ff8800` is a mix of
+  `--warn` and `--orange`, identical on the default.
+- `color-mix()` needs Safari 16.2+ / Firefox 113+ / Chrome 111+; older browsers drop those borders and tints (as v5.81 already
+  did for three of them).
+
+### Found while building, and worth recording
+
+- **The handover's F-4 premise was 33 releases stale** ("8 px × 341, 9 px × 325"): v5.48 already fixed those; `UsabilityFlaws.md`
+  kept quoting them. Marked there.
+- **The scope under-counted three times, each caught by a command:** 62 hard-coded colours, not 36 (the census read only `color:`
+  properties); the alpha-glued colours; and the 366 `rgba()` surfaces text sits on, which were never in the census. The build halted
+  twice and went back to Steve (E-1…E-4, then F-1) rather than adapting.
+- **Measurement traps, each recorded in the scope:** SVG text paints with `fill`, not `color` (the first contrast probe understated
+  the chart); the skin is stored through `window.storage`, so a `localStorage` write silently changed nothing; a pulsing element's
+  contrast depends on when it is read (animations are frozen at their faintest keyframe); and on a touch screen **hover sticks
+  where the last tap landed** — two phone rows read 3.22:1 only because of it (the pointer is now parked).
+- **acorn reports UTF-16 offsets**; Python indexes code points — AST-range edits are applied in Node (the emoji shifted them).
+- **The version bump cost 109 judgement points** (vercensus: 29 ladders, 79 gated, 1 keyed — `t33`'s `PINS` gets v5.81's figures,
+  no engine change), none outside the three known shapes; `t45`/`t47` by hand.
+
 ## v5.81 — a phone's first screen shows the plan
 
 Source `cdca327526e3a259c5269aca02576753` · built `index.html` `c711610e81410ba20c7e61270e5454fe` · built from v5.80 `7a04dadb86bdef6534bdc03a1d87e8d8`. A **presentation release**: no engine
