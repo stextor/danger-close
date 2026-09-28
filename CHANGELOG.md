@@ -1,5 +1,56 @@
 # Changelog
 
+## v5.81 — a phone's first screen shows the plan
+
+Source `cdca327526e3a259c5269aca02576753` · built `index.html` `c711610e81410ba20c7e61270e5454fe` · built from v5.80 `7a04dadb86bdef6534bdc03a1d87e8d8`. A **presentation release**: no engine
+changed (MC parity 10/10), so no figure moves; METHODOLOGY is unchanged. The first release built with the prior source resolved
+from the repo's history by md5 (the single-source pool of 2026-09-28).
+
+**Suite: 4,628 app checks, 0 failed, 0 DIED** — 46 app suites plus MC parity 10/10; tooling `t21` 64, `domdiff` 32,
+`sets` 12 + 12 (GRAND 4,758), run from the packaged copies. **In that run `domdiff` failed one check** on this release's own
+stylesheet and phone-only elements (below); corrected and re-run from the same packaged folder: **32 passed, 0 failed**. **`t47` is new (30 checks, real Chromium, the built page).**
+`t45` **88 passed, 0 failed** (now moving between tabs through the phone menu). `smoke_built` **22 passed, 0 failed**. Negative controls: `controls_v581_first_screen.py` **7 of 7**; `controls_runfolder_prior.sh`
+**6 of 6**.
+
+### What changed, and why
+
+- **On a phone, the selected tab now starts on the first screen (F-12).** Measured on the built page at 390 × 844: v5.80's
+  content began at y = 1005 — below the screen — behind the header, the retirement cards, the allocation strip and a 26-tab grid.
+  Below 600 px wide the grid is now **one native tab menu** (with the Simple Mode toggle beside it), and the retirement cards and
+  allocation strip fold into **one line that keeps the chosen date and its success rate** ("PLAN: RETIRE JAN 1, 2029 · 99.8% ▸"),
+  collapsed on every visit; one tap opens it. Content now begins at **y = 613** in example mode (≈ 437 with your own data).
+- **Desktop and tablet do not change**, verified element by element against v5.80 on every tab: the phone-only pieces have no
+  box at 600 px and up; the one added element is the summary's invisible wrapper.
+- **One tab list, one way to change tab.** The grid's tab list and labels were written inline; the menu reads the same shared
+  list, and both go through the one function that guards unsaved My Data edits — so the menu cannot become a way to lose them
+  (tested by editing My Data and leaving through the menu).
+- **The app's first breakpoint outside the Field Manual** — the audit's F-1 ("no breakpoints"), partly addressed.
+
+### Limitations, stated plainly
+
+- **The header itself is unchanged** (216 px on a phone); compacting it was option C, not chosen. The example-data banner stays.
+- **Text size and touch targets (F-3/F-4) are unchanged.**
+
+### Found while building, and worth recording
+
+- **The code was written before `t47`,** against the test-first order every recent scope spelled out. `t47` was then run against
+  v5.80's page, where its claims fail, so it discriminates; the order was still wrong.
+- **`t47`'s first structure check reported a second copy of correct code:** it counted a prefix of the tab list, and the Simple
+  Mode list starts with the same three tabs. It now compares the complete list.
+- **The new CSS landed between an existing rule and its comment.** The AST literal census caught it; the repair was proven to move
+  only the comment.
+- **`t45` (v5.79) clicked the tab grid on a phone** — which v5.81 hides — and timed out. It now moves between tabs through the
+  phone menu there, as a phone user does.
+- **`mk_runfolder.sh`'s third argument was typed as an output folder twice in a day** and refused as "prior source not found". A
+  third argument that does not end in `.jsx` is now the output folder.
+- **`domdiff` compared everything in the page, not what is rendered.** Its Withdrawal check read `body.textContent`, which
+  includes the stylesheet's text and v5.81's phone-only elements (no box at desktop width) — so any CSS addition failed it with no
+  cell moving (v5.79 had worked around this for one version pair). It now excludes `<style>` text and `.dc-phone-only` elements for
+  every pair, and stays byte-strict on everything else.
+- **Decision recorded, 2026-09-28 (Steve):** the 24 release-pinned `controls_v5*` scripts **stay out of the knowledge pool**, their
+  copies kept in the repo. This closes the "whether they stay out of the pool is Steve's call" in the ops entry of 2026-09-28
+  (second); it is also why `controls_v581_first_screen.py` ships to the repo only.
+
 ## ops 2026-09-28 (third) — control P22 went vacuous when the pool became single-source; fixed
 
 No app change (v5.80 stays current). After the single-source package was uploaded, `package_check_controls.sh` reported **P22
