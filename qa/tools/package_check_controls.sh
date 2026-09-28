@@ -988,6 +988,34 @@ runDecl "P66 TESTING.md's Current build line names an older version" FIRE "K-10"
   'stamp_v00 TESTING.md "\*\*Current build: v(\d+\.\d+)\*\*"'
 runDecl "P67 the manifest's newest ship note names an older version" FIRE "K-11" "newest ship note is v0.0" \
   'stamp_v00 PROJECT_KNOWLEDGE_INDEX.md "\*\*v(\d+\.\d+) SHIPPED"'
+
+# ── P68..P71  one source in the pool (SCOPE_SINGLE_SOURCE_POOL, 2026-09-28) ──────────────────────────────────────────────
+# Each FIRST builds the post-upload pool state — only the Current table's source and dom entry — so a control is never
+# "caught" by a baseline that is already red before the upload (two sources pre-ship), then plants ONE defect.
+if [ -n "$POOLARG" ]; then
+  echo ""; echo "P68..P71  one source in the pool (J-3, J-4, K-6, K-5b)"
+  ONE_SRC='
+import re, glob
+cur = re.search(r"## Current build.*?\| Source file in knowledge \| `([^`]+)`", rd(), re.S).group(1)
+for f in glob.glob("/tmp/pkpool/DangerClose-v5_*.jsx"):
+    if not f.endswith("/" + cur): os.remove(f)
+curtag = "dom_entry_v" + cur.replace("DangerClose-v", "").replace("_", "").replace(".jsx", "") + ".jsx"
+for f in glob.glob("/tmp/pkpool/dom_entry_v5*.jsx"):
+    if not f.endswith("/" + curtag): os.remove(f)
+assert os.path.exists("/tmp/pkpool/" + cur), "the Current source is not in the pool copy"
+'
+  runk "P68 a SECOND source left in the pool after the rotation" "J-3" "" "$ONE_SRC
+import shutil; shutil.copy('/tmp/pkpool/' + cur, '/tmp/pkpool/DangerClose-v5_01.jsx')" "DangerClose-v5_01.jsx"
+  runk "P69 the pool's one source is not the Current table's" "K-6" "" "$ONE_SRC
+os.rename('/tmp/pkpool/' + cur, '/tmp/pkpool/DangerClose-v5_02.jsx')" "DangerClose-v5_02.jsx"
+  runk "P70 the Prior table names an md5 no commit holds" "K-5b" "" "$ONE_SRC
+s = rd(); i = s.index('## Prior build'); j = s.index('| Source md5 |', i)
+k = s.index('\`', j) + 1; wr(s[:k] + '0' * 32 + s[k + 32:])" "no commit has"
+  runk "P71 a SECOND dom entry left in the pool" "J-4" "" "$ONE_SRC
+import shutil; shutil.copy('/tmp/pkpool/' + curtag, '/tmp/pkpool/dom_entry_v501.jsx')" "dom_entry_v501.jsx"
+else
+  echo "  - SKIPPED: P68..P71 - no pool dir given"; SKIP=$((SKIP+4))
+fi
 printf "\n  controls: %d behaved as designed, %d did not, %d skipped\n" "$PASS" "$MISS" "$SKIP"
 
 [ "$SKIP" -gt 0 ] && echo "  ⚠ A SKIPPED control is not a passing one."

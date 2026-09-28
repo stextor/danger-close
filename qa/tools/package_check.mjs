@@ -979,12 +979,14 @@ if (POOL && existsSync(POOL)) {
     ck("J-2: and none of them landed STALE \u2014 the pool is add-only, so a same-name upload " +
        "without the delete first leaves the OLD copy in place",
       stale.length === 0, stale.join(" | "));
-    // A rotation is TWO deletes. A pool holding three source legs means one was missed.
+    // 2026-09-28 (SCOPE_SINGLE_SOURCE_POOL): the pool keeps ONE source — the current — and one dom entry; the prior
+    // build is read from the repo's history by its recorded md5 (mk_runfolder.sh). Until then these asserted TWO of each.
+    // A pool holding two sources now means the outgoing one was not deleted at the rotation.
     const legs = readdirSync(POOL).filter(f => /^DangerClose-v5_\d+\.jsx$/.test(f)).sort();
     const doms = readdirSync(POOL).filter(f => /^dom_entry_v5\d+\.jsx$/.test(f)).sort();
-    ck("J-3: the pool holds exactly two source legs (a rotation is TWO deletes)",
-      legs.length === 2, legs.join(", ") || "none");
-    ck("J-4: and exactly two dom entries", doms.length === 2, doms.join(", ") || "none");
+    ck("J-3: the pool holds exactly ONE source (the prior build lives in the repo's history)",
+      legs.length === 1, legs.join(", ") || "none");
+    ck("J-4: and exactly one dom entry", doms.length === 1, doms.join(", ") || "none");
 
     // ── J-5 · A FILE THAT SHOULD HAVE *LEFT* THE POOL (F-2, added 2026-09-14) ─────────────
     // J-1..J-4 assert PRESENCE and rotation. Nothing asserted ABSENCE, so a document retired
@@ -1119,20 +1121,35 @@ console.log("\nK. Manifest — PROJECT_KNOWLEDGE_INDEX.md vs the clone and the p
       // K-4..K-6 anchor BOTH tables to the pool. K-4 is what catches a table naming a leg the
       // rotation has already removed.
       if (POOL && existsSync(POOL)) {
-        const named = [C, P].map(t => t["Source file in knowledge"]);
+        // From 2026-09-28 only the CURRENT table names a pool file; the Prior table's source is in the repo's history.
+        const named = [C].map(t => t["Source file in knowledge"]);
         const missing = named.filter(f => !f || !existsSync(join(POOL, f)));
-        ck("K-4: every source file the two tables name is still in the pool",
+        ck("K-4: the source file the Current table names is in the pool",
           missing.length === 0, missing.join(", "));
         const wrong = [];
-        for (const t of [C, P]) {
+        for (const t of [C]) {
           const f = t["Source file in knowledge"];
           if (!f || !existsSync(join(POOL, f))) continue;
           if (md5(join(POOL, f)) !== t["Source md5"]) wrong.push(`${f} (table ${t["Source md5"]}, pool ${md5(join(POOL, f))})`);
         }
-        ck("K-5: each table's source md5 == the actual md5 of the pool file it names",
+        ck("K-5: the Current table's source md5 == the actual md5 of the pool file it names",
           wrong.length === 0, wrong.join(" | "));
+        // K-5b: the Prior table's md5 must be a real commit's src/DangerClose.jsx in the clone — the property
+        // mk_runfolder.sh now relies on to build the prior leg. A Prior md5 no commit holds cannot be built from.
+        if (CLONE) {
+          let hit = "";
+          try {
+            const shas = execFileSync("git", ["-C", CLONE, "log", "--format=%H", "--", "src/DangerClose.jsx"], { encoding: "utf8" }).split("\n").filter(Boolean);
+            for (const c of shas) {
+              const buf = execFileSync("git", ["-C", CLONE, "show", `${c}:src/DangerClose.jsx`], { maxBuffer: 64 * 1024 * 1024 });
+              if (createHash("md5").update(buf).digest("hex") === P["Source md5"]) { hit = c.slice(0, 7); break; }
+            }
+          } catch (e) { hit = ""; }
+          ck("K-5b: the Prior table's source md5 is held by a commit in the clone's history (mk_runfolder.sh builds the prior leg from it)",
+            !!hit, hit ? `commit ${hit}` : `no commit has ${P["Source md5"]}`);
+        } else skipped("K-5b: the Prior table's md5 in the clone's history", "no clone given");
         const legs = readdirSync(POOL).filter(f => /^DangerClose-v5_\d+\.jsx$/.test(f)).sort();
-        ck("K-6: the pool's two legs ARE the two the tables name",
+        ck("K-6: the pool's one source IS the one the Current table names",
           legs.join() === named.filter(Boolean).sort().join(),
           `pool [${legs.join(", ")}] vs manifest [${named.filter(Boolean).sort().join(", ")}]`);
 
