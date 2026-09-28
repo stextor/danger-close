@@ -20,7 +20,7 @@
 import os, sys, re
 
 VER = sys.argv[1] if len(sys.argv) > 1 else ""
-KNOWN_VERSIONS = ["v579"]
+KNOWN_VERSIONS = ["v579", "v580"]
 HERE = os.path.dirname(os.path.abspath(__file__))
 PAGE = os.path.abspath(sys.argv[2]) if len(sys.argv) > 2 else os.path.join(HERE, "..", "index.html")
 ok = 0; bad = 0; fails = []

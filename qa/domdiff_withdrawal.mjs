@@ -100,6 +100,12 @@ const renderTabs = async (ver) => {
   window.matchMedia = () => ({ matches: false, addListener(){}, removeListener(){}, addEventListener(){}, removeEventListener(){} });
   window.ResizeObserver = class { observe(){} unobserve(){} disconnect(){} };
   window.scrollTo = () => {};
+  // v5.80 (SCOPE_SCENARIO_DEFAULT): the DEFAULT scenario preset changed (BASE → BULL-LEANING), and Engine D's draws follow the
+  // preset, so rendering each leg at its own default compares different INPUTS, not different engines. Pin BASE — the only
+  // preset v5.79 knows — through the one storage key v5.80 restores; v5.79 never reads it. Everything else in storage stays
+  // absent, as it was before this line. Both legs then render from identical inputs and every check here stays byte-strict.
+  window.storage = { async get(k) { if (k === "danger_close:scenario_v1") return { key: k, value: "base" }; throw new Error("key not found: " + k); },
+                     async set(k, v) { return { key: k, value: v }; }, async delete(k) { return { key: k, deleted: true }; }, async list() { return { keys: [] }; } };
   window.HTMLCanvasElement.prototype.getContext = () => ({
     fillRect(){}, clearRect(){}, beginPath(){}, moveTo(){}, lineTo(){}, stroke(){}, fill(){}, arc(){},
     save(){}, restore(){}, translate(){}, rotate(){}, scale(){}, fillText(){}, measureText: () => ({ width: 10 }),

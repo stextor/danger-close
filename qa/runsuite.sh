@@ -140,6 +140,11 @@ tally "t44-$CUR"   node t44_irmaa_top_tier.mjs "$CUR"
 # Current leg ONLY by construction: the run folder carries exactly one built page. It FAILS, never skips, when no browser
 # can launch or the page is not this build (decision D-2). Python, the first non-Node suite: Playwright ships in Python here.
 tally "t45-$CUR"   python3 t45_phone_layout.py "$CUR"
+# t46 (v5.80) runs on BOTH legs: the v5.79 leg pins BASE on every visit with nothing stored; the current leg asserts a
+# first visit on BULL-LEANING (label AND the Monte Carlo's regime weights), a saved choice restored in a new session, an
+# invalid stored value falling back to the default, and the non-default notice naming the default. Wired AT BUILD.
+tally "t46-$PRIOR" node t46_scenario_default.mjs "$PRIOR"
+tally "t46-$CUR"   node t46_scenario_default.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
