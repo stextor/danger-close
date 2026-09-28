@@ -148,6 +148,9 @@ tally "t46-$CUR"   node t46_scenario_default.mjs "$CUR"
 # t47 (v5.81) — a phone's first screen (F-12), real Chromium, the BUILT page; current leg only, like t45. Structure checks read
 # the run folder's ../<tag>.jsx (one tab list, one guarded selectTab); the guard is exercised through the phone menu. Wired AT BUILD.
 tally "t47-$CUR"   python3 t47_phone_first_screen.py "$CUR"
+# t48 (v5.82) — legible text and usable targets (F-3/F-4), real Chromium, the BUILT page, all 13 skins; current leg only, like
+# t45/t47. Source invariants read ../<tag>.jsx by AST. ~10 minutes — the longest suite. Wired AT BUILD.
+tally "t48-$CUR"   python3 t48_legibility_targets.py "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
