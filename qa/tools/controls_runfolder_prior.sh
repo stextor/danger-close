@@ -8,6 +8,7 @@
 #   C  a wrong prior file (the current source) is REFUSED, both md5s named
 #   D  a version neither build table names is REFUSED
 #   E  a shallow clone is REFUSED in git mode, and leaves no output folder
+#   F  a third argument NOT ending in .jsx is taken as the output folder, in git mode (v5.81)
 # USAGE  from the root of a FULL clone:  bash qa/tools/controls_runfolder_prior.sh
 set -uo pipefail
 REPO="$(cd "$(dirname "$0")/../.." && pwd)"; cd "$REPO"
@@ -33,5 +34,8 @@ git show "$(git log --format=%H -- src/DangerClose.jsx | while read c; do [ "$(g
 git clone -q --depth 1 "file://$REPO" "$T/shallow" 2>/dev/null && cp qa/mk_runfolder.sh "$T/shallow/qa/"
 ( cd "$T/shallow" && ./qa/mk_runfolder.sh "$P" "$C" --git "$T/e" > "$T/e.log" 2>&1 ); rc=$?
 [ $rc -ne 0 ] && grep -q "shallow" "$T/e.log" && [ ! -d "$T/e" ] && ok "E a shallow clone is refused, no output left" || bad "E shallow" "exit $rc"
+./qa/mk_runfolder.sh "$P" "$C" "$T/f" > "$T/f.log" 2>&1; rc=$?
+[ $rc -eq 0 ] && [ "$(md5sum "$T/f/$P.jsx" 2>/dev/null | cut -c1-32)" = "$WANT" ] && grep -q "resolved from commit" "$T/f.log" \
+  && ok "F a third argument not ending in .jsx is the output folder (git mode)" || bad "F folder as third argument" "exit $rc; $(tail -1 "$T/f.log")"
 rm -rf "$T"
 printf '\ncontrols_runfolder_prior: %d passed, %d failed\n' "$PASS" "$FAIL"; [ $FAIL -eq 0 ]
