@@ -662,7 +662,21 @@ only.** The split recovered space when the pool reached 98% of capacity. The rul
 may be written that needs the archive to be pooled — the suites mention the CHANGELOG only in comments, and
 `package_check` reads only the newest release entries (H-1, H-2, K-1–K-3). If space runs short again, move the next
 block of oldest entries into a **new** archive file (never append to an old one), and say so in the pooled file's
-closing pointer and in this paragraph.
+closing pointer and in this paragraph. **Done again 2026-09-28:** v5.60–v5.74 (with the ops entries between them) moved
+verbatim to **`docs/CHANGELOG_ARCHIVE_v5_60_to_v5_74.md`**, repo only; the pooled `CHANGELOG.md` holds **v5.75 onward**
+(315 KB → 33 KB).
+
+### Release-pinned control scripts are repo-only (added 2026-09-28)
+
+**A `controls_v5NN_*` script belongs in the repo (`qa/tools/`), never the pool.** Each plants mutations into ITS release's
+source and runs that release's suites in that release's run folder; no later session can run it against a later build, so a
+pooled copy is space spent on a file nobody can use from the pool. All 24 were un-pooled on 2026-09-28 (their rows now read
+*un-pooled, repo-only*), recovering ~150 KB; three of them had been pooled with **no manifest row at all**, and gained one.
+**From v5.81, a release's new `controls_v5NN_*.py|sh` ships in `github/` only** — its manifest row is written un-pooled, and it
+is not in `knowledge/`. The control scripts WITHOUT a release in their name stay pooled for now
+(`package_check_controls.sh`, `controls_manifest_rows.py`, `controls_state.sh`, `controls_state_sets.py`, `controls_source.sh`,
+`controls_t21_censusp1.sh`). Not all of them are version-free: `controls_source.sh` targets the v5.47 source; the others were not
+checked at this split. Whether they too belong repo-only is left for a later pass rather than asserted here.
 
 **Un-pooling a retired document** follows the three-place rule above with one difference: the repo copy **stays**.
 The manifest row is marked *un-pooled, repo-only*, and §G's decision check is run line by line first — anything still
