@@ -1,5 +1,27 @@
 # Changelog
 
+## ops 2026-09-28 (second) — the pool keeps ONE source; the prior comes from the repo's history by md5
+
+No app change (v5.80 stays current). The pool held two full copies of the app source — current and prior, 1.3 MB each, about
+half of it — because `mk_runfolder.sh` took the prior as a file path. It now resolves the prior from the clone's git history by
+the md5 the manifest records for that version (from whichever build table names it, so it works mid-build and after the roll),
+and refuses a shallow clone, an unrecorded version, and an md5 no commit holds. A file may still be passed, but it is accepted
+only if its md5 matches (decision D-1). `DangerClose-v5_79.jsx` and `dom_entry_v579.jsx` leave the pool (**~1.3 MB**; pool
+111 → 110 with the one new control script).
+
+- **`package_check`:** J-3 and J-4 now assert **one** source and **one** dom entry; K-4/K-5 check only the Current table
+  against the pool; **K-6** asserts the pool's one source is the Current table's; new **K-5b** asserts the Prior table's md5 is
+  held by a commit in the clone. None of these had a negative control before; **P68–P71** now plant each defect after first
+  building the post-upload pool state, so none is "caught" by a baseline that is already red.
+- **`qa/tools/controls_runfolder_prior.sh`** (new, general-purpose, pooled): git mode resolves the prior byte-exact; a correct
+  file is accepted; a wrong file, an unrecorded version and a shallow clone are refused, each by exit code and message.
+
+**A miss in the previous ops package, found while building this one.** OPERATIONS' "What does NOT rotate" (2026-09-03) said the
+pool "keeps every `controls_v*.sh`" because a control script is evidence. The package that un-pooled all 24 did not see that
+section, so the document contradicted itself for a day, and the un-pooling was approved without that rule being on the table.
+Nothing was lost — the repo keeps all 24, which is what makes them evidence — and the section now says so. Whether they stay
+out of the pool is Steve's call; re-pooling them costs ~150 KB.
+
 ## ops 2026-09-28 — the knowledge pool ran out of room: two moves free ~430 KB, nothing deleted
 
 No app change (v5.80 stays current: source `7a04dadb86bdef6534bdc03a1d87e8d8`). Two moves, both to the repo, neither losing
