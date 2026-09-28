@@ -190,8 +190,22 @@ fi
 
 # P22 is THE control for this section: the 66db033 shape, where the built artifact was pushed
 # ahead of the source and the repo carried a release whose source was the previous one.
-PRIOR_JSX=$(ls /mnt/project/DangerClose-v5_*.jsx 2>/dev/null | head -1)
-if [ -n "$PRIOR_JSX" ]; then
+# 2026-09-28 (third ops package): the pool keeps ONE source, so the old `ls /mnt/project/DangerClose-v5_*.jsx | head -1`
+# picked the CURRENT source and P22 planted no defect (it copied v5.80 over v5.80) — reported NOT CAUGHT after the upload
+# that made the pool single-source. The prior release now comes from the clone's history by the manifest's Prior md5, as
+# mk_runfolder.sh does, and P22 refuses to run if that source equals the clone's current one (a vacuous control).
+PRIOR_JSX=""
+P22_MD5=$(awk '/^## Prior build/{f=1} f&&/\| Source md5 \|/{match($0,/[0-9a-f]{32}/); print substr($0,RSTART,32); exit}' "$CLONE/PROJECT_KNOWLEDGE_INDEX.md" 2>/dev/null)
+if [ -n "$P22_MD5" ]; then
+  for c in $(git -C "$CLONE" log --format=%H -- src/DangerClose.jsx 2>/dev/null); do
+    if [ "$(git -C "$CLONE" show "$c:src/DangerClose.jsx" | md5sum | cut -c1-32)" = "$P22_MD5" ]; then
+      git -C "$CLONE" show "$c:src/DangerClose.jsx" > /tmp/p22_prior.jsx; PRIOR_JSX=/tmp/p22_prior.jsx; break; fi
+  done
+fi
+if [ -n "$PRIOR_JSX" ] && cmp -s "$PRIOR_JSX" "$CLONE/src/DangerClose.jsx"; then
+  MISS=$((MISS+1)); printf "  *** NOT CAUGHT *** P22 (the resolved prior source equals the clone's current one - control is INVALID)\n"; PRIOR_JSX="__invalid__"
+fi
+if [ -n "$PRIOR_JSX" ] && [ "$PRIOR_JSX" != "__invalid__" ]; then
   runc "P22 clone source is a DIFFERENT release from the served one (the 66db033 shape)" H-3 \
     "cp '$PRIOR_JSX' src/DangerClose.jsx"
 else
