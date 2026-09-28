@@ -127,8 +127,9 @@ the older, separate public-constants suite (kept; different purpose). **It is NO
 **flat working folder** — sources at the root, every test + harness file together in a single `qa/`.
 Copying the repo layout verbatim and running it fails. The qa-baseline README carries the exact shape.
 
-⚠ **DO NOT ASSEMBLE THAT FOLDER BY HAND. Run `./qa/mk_runfolder.sh <prior-tag> <cur-tag>
-<prior-source.jsx> [outdir]` from a clone** (added v5.68). Steps 1–4 above are what the script does,
+⚠ **DO NOT ASSEMBLE THAT FOLDER BY HAND. Run `./qa/mk_runfolder.sh <prior-tag> <cur-tag> [--git | <prior-source.jsx>]
+[outdir]` from a FULL clone** (added v5.68; from 2026-09-28 the prior source is resolved from the clone's git history by the
+md5 the manifest records for that version, and a file given instead is accepted only if its md5 matches). Steps 1–4 above are what the script does,
 and they are kept here because they document the mechanism — but the script is the thing to run, and
 where the two disagree the script is what was last measured. It also carries the three inputs this
 prose has never named: the **prior leg's `.jsx` is not in the repo** (the tree holds one source, the
@@ -597,7 +598,8 @@ not a real regression.
   that release. That line is the only durable record of what a given version actually was. It is
   written during packaging, so it costs nothing to maintain. Entries before v5.12 do not have it —
   for those, identify a retired source by reading it out of the commit that shipped it.
-- **Project knowledge:** the versioned-source pair plus CHANGELOG, METHODOLOGY, TESTING, README, the test
+- **Project knowledge:** the CURRENT versioned source (one — the prior build is read from the repo's history by its recorded md5,
+  from 2026-09-28) plus CHANGELOG, METHODOLOGY, TESTING, README, the test
   files, harness, site census, active scope docs, this file, and the manifest.
 - **Build scaffold (project knowledge, all four):** `src/index.html` (the Vite HTML entry template),
   `src/main.jsx` (the browser bootstrap), `vite.config.js`, and `package.json`. Without all four, a session
@@ -693,8 +695,12 @@ old name isn't removed, the pool holds the same document twice under two names (
 
 ### The versioned-source rotation
 
-Knowledge holds **exactly two** app sources: `DangerClose-<current>.jsx` and `DangerClose-<prior>.jsx`.
-Rotate on every release; never let a third accumulate — older sources live in commit history. From
+Knowledge holds **exactly ONE** app source, `DangerClose-<current>.jsx` (from 2026-09-28; until then two, current and prior,
+which was about half the pool). The prior build's source is **not** pooled: `mk_runfolder.sh` resolves it from the clone's
+history by the md5 the manifest records for its version, and a session that needs to read it runs
+`git show <commit>:src/DangerClose.jsx` (the Prior table names the commit). **A release rotation deletes ONE source** — the
+outgoing current becomes history — and one `dom_entry_*`. `package_check` J-3/J-4 assert exactly one of each; K-5b asserts
+the Prior md5 is held by a commit. From
 v5.12 forward their identity is pinned by the provenance line at the end of that release's CHANGELOG
 entry (§G); for earlier releases there is no recorded md5, so identification means reading the file
 out of the commit that shipped it. Only
@@ -703,13 +709,14 @@ out of the commit that shipped it. Only
 
 ### ⚠ What does NOT rotate (added 2026-09-03)
 
-The rotation rule above is scoped to **app sources**, and nothing else in the pool rotates on a
-release. In particular the pool **keeps every `controls_v*.sh`** — at v5.61 it held `controls_v557`,
-`controls_v5571`, `controls_v559`, `controls_v560` and `controls_v561` simultaneously, and that is
-correct: each is the negative-control record for the release that wrote it, and a control script is
-evidence, not scaffolding.
+The rotation rule above is scoped to **app sources**, and nothing else rotates on a release. In particular **no
+`controls_v*` script is ever deleted as rotation**: each is the negative-control record for the release that wrote it, and a
+control script is evidence, not scaffolding. **Where that evidence lives changed on 2026-09-28:** the release-pinned ones left
+the POOL for space (§G, "Release-pinned control scripts are repo-only") and are kept in the REPO, which is what makes them
+evidence. ⚠ That ops package un-pooled them without noticing this section, which then still said the pool "keeps every
+`controls_v*.sh`" — two rules in one document, contradicting each other, found the next day and reconciled here.
 
-**`dom_entry_*.jsx` DOES rotate** with its source leg — `package_check` J-4 asserts exactly two —
+**`dom_entry_*.jsx` DOES rotate** with its source leg — `package_check` J-4 asserts exactly ONE (two until 2026-09-28) —
 and its row in the §A2 fallback hash table must be pruned in the same pass, or the table names a
 file the pool no longer holds (K-8).
 
