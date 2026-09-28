@@ -17,8 +17,16 @@
 # nine suites and skips six.
 #
 # USAGE
-#   ./qa/mk_runfolder.sh <prior-tag> <cur-tag> <prior-source.jsx> [outdir]
-#     ./qa/mk_runfolder.sh v566 v567 ~/pool/DangerClose-v5_66.jsx /tmp/run
+#   ./qa/mk_runfolder.sh <prior-tag> <cur-tag> [--git | <prior-source.jsx>] [outdir]
+#     ./qa/mk_runfolder.sh v580 v581                    # prior resolved from git history (the default)
+#     ./qa/mk_runfolder.sh v580 v581 --git /tmp/run     # the same, with an output folder
+#     ./qa/mk_runfolder.sh v580 v581 ~/DangerClose-v5_80.jsx /tmp/run   # fallback: a file, VERIFIED by md5
+#
+#  v5.80+ (SCOPE_SINGLE_SOURCE_POOL, 2026-09-28): THE POOL KEEPS ONE SOURCE. The prior leg is resolved from this clone's
+#   git history: the tool maps the prior tag to its version (v580 -> v5.80), reads that version's source md5 from whichever
+#   of PROJECT_KNOWLEDGE_INDEX.md's two build tables names it (the CURRENT table mid-build, the PRIOR table after the roll),
+#   and walks `git log -- src/DangerClose.jsx` for the commit whose source has exactly that md5. It REFUSES a shallow clone,
+#   a version neither table names, and an md5 no commit holds. A file given instead is accepted only if its md5 matches.
 #   Run from the root of a clone. Tags are the suites' own (v566, v567 — no dots, no "v5.67").
 #
 # ⚠ THE PRIOR SOURCE IS NOT IN THE REPO. The tree carries exactly one source, `src/DangerClose.jsx`,
@@ -41,8 +49,8 @@ die () { echo "mk_runfolder: FATAL — $*" >&2; exit 1; }
 say () { printf '  %s\n' "$*"; }
 
 # ── arguments ────────────────────────────────────────────────────────────────────────────────
-[ $# -ge 3 ] || die "usage: ./qa/mk_runfolder.sh <prior-tag> <cur-tag> <prior-source.jsx> [outdir]"
-PRIOR="$1"; CUR="$2"; PRIOR_SRC="$3"; OUT="${4:-/tmp/run}"
+[ $# -ge 2 ] || die "usage: ./qa/mk_runfolder.sh <prior-tag> <cur-tag> [--git | <prior-source.jsx>] [outdir]"
+PRIOR="$1"; CUR="$2"; PRIOR_SRC="${3:---git}"; OUT="${4:-/tmp/run}"
 
 for t in "$PRIOR" "$CUR"; do
   case "$t" in
@@ -60,9 +68,34 @@ say "repo:   $REPO"
 [ -d "$REPO/qa/tools/fixture" ]    || die "no qa/tools/fixture/ under $REPO."
 [ -f "$REPO/METHODOLOGY.md" ]      || die "no METHODOLOGY.md at the repo root — t31 reads it and fails closed."
 
-[ -f "$PRIOR_SRC" ] || die "prior source '$PRIOR_SRC' not found.
-    The repo carries ONE source (the current build). The prior leg's .jsx comes from the knowledge
-    pool. Without it there is no prior leg, no parity leg, and no regression suite."
+# ── the prior source: resolved by md5, never taken on trust ──
+PRIOR_DOT="$(printf '%s' "$PRIOR" | sed -n 's/^v5\([0-9][0-9]\)$/v5.\1/p')"
+[ -n "$PRIOR_DOT" ] || die "prior tag '$PRIOR' is not of the form v5NN; its version cannot be looked up in the manifest."
+WANT="$(node -e '
+  const s = require("fs").readFileSync(process.argv[1], "utf8"), v = process.argv[2];
+  for (const h of ["## Current build", "## Prior build"]) { const i = s.indexOf(h); if (i < 0) continue;
+    const t = s.slice(i, i + 900); const ver = /\| Version \| \*\*(v[0-9.]+)\*\* \|/.exec(t), md = /\| Source md5 \| `([0-9a-f]{32})` \|/.exec(t);
+    if (ver && md && ver[1] === v) { console.log(md[1]); process.exit(0); } }
+  process.exit(3);' "$REPO/PROJECT_KNOWLEDGE_INDEX.md" "$PRIOR_DOT")" \
+  || die "neither build table in PROJECT_KNOWLEDGE_INDEX.md names $PRIOR_DOT, so its source md5 is unknown.
+    The prior leg must be a build the manifest records (Current or Prior table)."
+if [ "$PRIOR_SRC" = "--git" ]; then
+  [ "$(git -C "$REPO" rev-parse --is-shallow-repository 2>/dev/null)" = "false" ] \
+    || die "this clone is shallow (or not a git clone); the prior source cannot be found in its history.
+    Clone with full history, or pass the prior .jsx as the third argument (it is verified by md5)."
+  FOUND=""
+  for c in $(git -C "$REPO" log --format=%H -- src/DangerClose.jsx); do
+    if [ "$(git -C "$REPO" show "$c:src/DangerClose.jsx" | md5sum | cut -c1-32)" = "$WANT" ]; then FOUND="$c"; break; fi
+  done
+  [ -n "$FOUND" ] || die "no commit's src/DangerClose.jsx has md5 $WANT (the manifest's $PRIOR_DOT)."
+  PRIOR_TMP="$(mktemp)"; git -C "$REPO" show "$FOUND:src/DangerClose.jsx" > "$PRIOR_TMP"; PRIOR_SRC="$PRIOR_TMP"
+  say "prior:  $PRIOR_DOT resolved from commit $(git -C "$REPO" log -1 --format='%h %ad' --date=short "$FOUND") (md5 $WANT)"
+else
+  [ -f "$PRIOR_SRC" ] || die "prior source '$PRIOR_SRC' not found (omit it, or pass --git, to resolve it from history)."
+  GOT="$(md5sum "$PRIOR_SRC" | cut -c1-32)"
+  [ "$GOT" = "$WANT" ] || die "prior source '$PRIOR_SRC' has md5 $GOT, but the manifest records $WANT for $PRIOR_DOT. Refused."
+  say "prior:  $PRIOR_DOT from $PRIOR_SRC (md5 $WANT, matches the manifest)"
+fi
 
 # The DOM parity leg needs BOTH entry shims, and they are per-release files.
 for t in "$PRIOR" "$CUR"; do
