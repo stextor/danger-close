@@ -1,6 +1,6 @@
 # SCOPE — legible text and usable targets (F-3 / F-4: contrast, the type floor's leftovers, target size)
 
-**ACTIVE — decisions D-1 to D-4 (§6) open; build after they are answered.** Target **v5.82**, built from **v5.81** (source
+**ACTIVE — BUILD HALTED 2026-09-28 (§9).** D-1 to D-4 and E-1 to E-4 decided as recommended; decision F-1 (§9) is open. Nothing shipped. Target **v5.82**, built from **v5.81** (source
 `cdca327526e3a259c5269aca02576753`, built `index.html` `c711610e81410ba20c7e61270e5454fe`, repo `8f26c95`). A presentation
 release: no engine changes; parity pinned; METHODOLOGY unchanged. **Unlike v5.79–v5.81 this release changes how desktop
 looks, by design** — the layout signature is a review of intended change, not a zero-change gate.
@@ -150,3 +150,46 @@ Five measurement mistakes, each caught by a later command, none in the figures a
 ran before tabs existed and compared two empty lists; a `localStorage` skin switch silently did nothing, so two runs
 labelled as other skins measured the default; a text click meant for the Reading Paper skin hit a description paragraph;
 and the chat reply that preceded this scope said the tab grid "may need an extra row" — measured, it does not.
+
+## 9 · Revision — build halted, 2026-09-28
+
+**Decisions (Steve, 2026-09-28), all as recommended:** D-1 (a) dim ≥ 1.20× faint · D-2 (a) the five first-screen controls · D-3 (a)
+every literal text colour to a token · D-4 (a) defer the Field Manual's own CSS · **E-1** hex alpha glued onto a colour
+(`${c}33`) becomes `color-mix()` · **E-2** the whole class of hard-coded colours, not only the 36 of §3 · **E-3** the title is a
+logotype (WCAG-exempt); the four pulsing status labels pulse 85–100 % · **E-4** one release.
+
+**Premise corrections found at build (each by a command; none by review):**
+
+- §3's colour census saw only `color:` properties: **62** hex literals, not 36 (also `rowColor`, `tierColors`, `_ckColor`,
+  `overallColor`, a bare array, an `accentColor`). All 62 reach CSS contexts only (no export, canvas or print window).
+- **8** template sites glue a hex alpha onto a colour; **three already received tokens on v5.81** (the income-phase cards,
+  L7624/L7636) — so their borders and tints have been invalid CSS, silently dropped, in the shipped app.
+- The `breathe` animation fades five text elements to 60 %; a contrast reading depended on when it was taken.
+- **The surfaces text sits on were never in the census.** **366** `rgba()` literals outside `SKINS`/`DOCS_HTML` — 234
+  backgrounds, 122 borders, **65 distinct values**, nearly all tuned for dark themes (`rgba(26,58,42,0.3)` ×82,
+  `rgba(0,255,136,0.03)` ×40, `rgba(0,0,0,0.3)` ×29 …). On light skins they sink text that passes on a plain panel.
+
+**What was built (not shipped; re-derivable from v5.81 by the handover's `rebuild_wip.sh`, source `1817828a…`, template
+`543af5a9…`, built page `4e1d9da3…`, `smoke_built` 22/22):** A (tokens, 9 faint + 6 dim — Quiet Dark's dim needed a
+one-step nudge for margin), B (chart; axis colour applied to TEXT only — d3 styles text, tick lines and the domain path
+together, and a fill on the path draws a band), C (62 literals, 8 `color-mix` sites; the top two IRMAA tiers now share
+`--crit`, labels differ), D, E (global 24 px minimums, `.dc-hit` labels, `.dc-tap44`), E-3, F, the version bump. v5.81
+rebuilt byte-identically (`c711610e…`) first, so the scaffold is complete.
+
+**`t48` on that build: 65 passed, 19 failed** (v5.81: 42 / 40). Every X (source) and T (token) check passes; tab-grid rows
+unchanged; no clipped cells. Red: **R-1** in 12 skins (default 44 unique elements, down from 837; High Contrast Dark 1;
+Reading Paper 718), **C-1** two checkbox labels 19 px tall (Trajectory, Command), **P-2** "Use example data" 35 px — its
+`.dc-tap44` rule lives in the main app's style block, which is not rendered on the data-load screen.
+
+**What the remaining R-1 failures are** (classified in three skins): default — `--ink-faint` on tinted rows (36 of 44);
+Reading Paper — accent and warn fail even on plain panels (292), the rest on tints; High Contrast Light — all on tints.
+
+**F-1 · How to finish.** (a) **Add a surface pass to v5.82**: map the 366 `rgba()` literals to token-derived `color-mix()`
+values so each skin's tints come from its own palette, then nudge Reading Paper's accent/warn — needs a mapping table for
+review, changes how every light skin looks, default nearly identical; (b) **split**: v5.82 ships A–F with the default and
+dark skins fully passing (faint margin for tinted rows, P-2, the two labels) and each remaining skin's failure count pinned
+as a KNOWN DEFECT that may only fall (OPERATIONS §D), the §13 text rewritten to say so; v5.83 is the surface pass under its
+own scope; (c) narrow the promise to the dark and high-contrast skins and disclose the light themes as non-AA.
+**Recommend (b)**: it ships measured gains now (default 837 → 0 targeted) under an honest pin, and the surface pass is a
+different risk class — how light themes look — that deserves its own review. **If (b): §13's new sentence ("meets … AA in
+every skin") is false and must change before ship.**
