@@ -149,12 +149,23 @@ Severity scale: **HIGH** = materially impairs use of a core flow for a real clas
 **Note:** the UI SIZE control (F-10) makes this *worse* — it is applied as CSS `zoom` on the root (L5808), so at 130–150% these grids overflow proportionally sooner.
 
 ### F-3 · The 26-tab strip on a phone: a wall of sub-target-size buttons — **MED**
+> **PARTLY FIXED at v5.82** (`docs/SCOPE_TEXT_AND_TARGETS.md`): v5.81 replaced the phone's tab strip with one menu (F-12); v5.82
+> makes every control at least 24 × 24 px (WCAG 2.2 AA 2.5.8) and the five phone-critical controls 44 px tall below 600 px.
+> Most controls remain under the 44 px platform guideline — not fixed, disclosed in Field Manual §13. `t48` guards it.
+>
 **What:** The tab strip (L5954–5961) is `flexWrap:"wrap"` over 26 buttons styled `.tab` (L5817): `font-size:10px`, `padding:7px 13px`, well under the 44px platform guideline for touch targets.
 **Measured (380px viewport, gate dismissed):** **26 buttons, 27.0px tall, wrapping to 7 rows** — confirming the computed estimate (≈29px, 6–8 rows) and landing inside it. Seven rows of 27px targets consume roughly 190px of vertical space before any content renders.
 **Mitigation that exists and works:** Simple Mode. `SIMPLE_TABS` (L5292) is exactly the six tabs the manual claims (`mydata, dashboard, trajectory, montecarlo, ss, docs`), the toggle persists (`danger_close:simple_v1`), and Guided Setup starts new plans in it. On a phone, Simple Mode is the difference between usable and hostile — but nothing *suggests* it on a narrow viewport (no breakpoint exists to do so, F-1). The toggle's own label is `fontSize:8` with a hover-only `title` explanation (F-5).
 **Suspected cause:** design intent is a desktop console; Simple Mode was added for cognitive load, and happens to be the mobile answer too.
 
 ### F-4 · Micro-typography at sub-AA contrast, for a 55+ audience — **HIGH (accessibility, both form factors)**
+> **PARTLY FIXED at v5.82** (`docs/SCOPE_TEXT_AND_TARGETS.md`). ⚠ **The counts below are pre-v5.48**: v5.48 raised the 341 × 8 px and
+> 325 × 9 px sites to a 12 px body / 11 px label floor; this block kept quoting them as current until v5.82. v5.82 raises the floor's
+> leftovers (the tab grid, the Trajectory chart's labels, three data-row classes, the Ask AI buttons) to 11 px, and brings
+> `--ink-faint` to AA in every skin — measured on the built page, the **default and all seven dark skins now have no text below AA
+> on any tab**. **Not fixed:** the six light skins still fail AA on tinted panels (hard-coded dark-theme `rgba()` surfaces, 366
+> literals — pinned as KNOWN DEFECT counts in `t48`, owned by a v5.83 surface pass); hovered rows; the Field Manual's own text.
+>
 **What:** The dominant type sizes in the app are **8px (341 sites) and 9px (325 sites)** — together more than half of all explicit `fontSize` declarations — and the color most used for that micro text, `--ink-faint` (#3a7a5a, **410 sites**), measures **3.88:1** on the app background and **3.61:1** on panels (computed from the shipped default-skin values, L3603). WCAG AA requires 4.5:1 for normal-size text; these fail AA *at sizes far below normal*, and the app's stated audience is households within sight of retirement.
 **Where:** measured whole-file; representative: diagnostics line 8px `--ink-dim`, `.micro` 11px `--ink-faint`, table headers 8px, the Simple Mode toggle 8px.
 **Mitigations that exist:** the **UI SIZE control** (Skins tab: 100/115/130/150%, persisted, applied as root `zoom` — L5808, L6284–6291, L12538) genuinely enlarges everything, and the three light themes help in bright rooms. But zoom does not change a contrast *ratio*, and see F-10: the control is undocumented.

@@ -1,6 +1,6 @@
 # SCOPE — legible text and usable targets (F-3 / F-4: contrast, the type floor's leftovers, target size)
 
-**ACTIVE — BUILD HALTED 2026-09-28 (§9).** D-1 to D-4 and E-1 to E-4 decided as recommended; decision F-1 (§9) is open. Nothing shipped. Target **v5.82**, built from **v5.81** (source
+**FULFILLED — shipped in v5.82**, as F-1 (b) (§9, §10): the default and the seven dark skins pass; the six light skins' failures are pinned as KNOWN DEFECT counts for a v5.83 surface pass, which needs its own scope. D-1…D-4, E-1…E-4, F-1 all as recommended. Retained as the record. Target **v5.82**, built from **v5.81** (source
 `cdca327526e3a259c5269aca02576753`, built `index.html` `c711610e81410ba20c7e61270e5454fe`, repo `8f26c95`). A presentation
 release: no engine changes; parity pinned; METHODOLOGY unchanged. **Unlike v5.79–v5.81 this release changes how desktop
 looks, by design** — the layout signature is a review of intended change, not a zero-change gate.
@@ -193,3 +193,24 @@ own scope; (c) narrow the promise to the dark and high-contrast skins and disclo
 **Recommend (b)**: it ships measured gains now (default 837 → 0 targeted) under an honest pin, and the surface pass is a
 different risk class — how light themes look — that deserves its own review. **If (b): §13's new sentence ("meets … AA in
 every skin") is false and must change before ship.**
+
+## 10 · Build record, F-1 (b) — 2026-09-28/29
+
+**Decision (Steve):** F-1 (b). **Stage 2** (on stage 1 of §9; both re-derivable from v5.81 by the handover's `rebuild_wip.sh`):
+
+- **Dark-skin token nudges**, each the smallest step (toward the skin's `--ink` for faint/dim, toward white for semantic colours)
+  that clears 4.6:1 on every surface text was MEASURED on — base surfaces and the tinted rows: default faint/dim/crit/violet;
+  Soft Dark faint/dim/crit/violet; Warm Executive faint/dim/crit; Low-Glare faint/dim/crit/violet/info/accent (its `--crit` failed
+  even on plain panels); Quiet Dark faint/dim. Values in the CHANGELOG.
+- **Selected-state text on `--ring` reads in `--ink`** (Roth law toggle, UI size, skin cards, the selected retirement card's
+  description and median). The alternative — nudging whole palettes for one state — would have paled Soft Dark's info to
+  `#91DBFB`. Border, tint and ✓ still mark the selection.
+- **The 44 px rule lives in `src/index.html`**: the data-load screen renders before the app's style block exists.
+- **`label:has(> input[type=checkbox]) { min-height: 24px; }`** — a checkbox's target is its label.
+- **§13 rewritten** for the split. **`t48`**: text under 11 px is never pinned; a dark skin (bg luminance < 0.18, derived) must be
+  0; each light skin at or under its pin; the pointer is parked before measuring (below).
+
+**Found at build:** `.prow:hover` / `.erow:hover` tint a row with `--ring`, and on a touch screen hover STICKS where the last tap
+landed — two phone rows read 3.22:1 only because of an earlier tap. The test now parks the pointer; **hovered rows below AA are a
+disclosed limitation** for v5.83. **Negative controls:** `controls_v582_legibility.py`. **A no-op skin switch was NOT built** as a
+control (no stable target in the minified page); `R-0` is exercised positively 13 times per run.
