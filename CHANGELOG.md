@@ -1,5 +1,57 @@
 # Changelog
 
+## v5.83 — every skin readable: light-skin surfaces, selected items, hovered rows
+
+Source `47beecf81eb45bd6faea899fa093dd81` · built `index.html` `9f39232ee73b0d46f25933302dcf7474` · built from v5.82 `f6a54749bb14a291971395b0db20d11f`. A **presentation
+release**: no engine changed (MC parity 10/10), so no figure moves; METHODOLOGY is unchanged. **Desktop layout is box-for-box
+identical to v5.82** on all 52 tab-views at 1440 and 820 — only colours change.
+
+**Suite: 4,732 app checks, 0 failed, 0 DIED** — 47 app suites plus MC parity 10/10; tooling `t21` 64, `domdiff` 32, `sets` 12 + 12 (GRAND 4,862),
+run from the packaged copies. **`t48` 104** (was 99): its KNOWN_DEFECT pins are gone — every one of the 13 skins must be 0 —
+and it now measures a **hovered** table row on every tab. `smoke_built` **22 passed, 0 failed**. Negative controls:
+`controls_v583_surfaces.py` **8 of 8**.
+
+### What changed, and why
+
+- **All 13 skins now meet WCAG AA on every tab.** v5.82 left the six light skins with 106–716 failing text elements each, pinned as
+  a known defect. The cause was **366 hard-coded `rgba()` surfaces** — 65 values, every one a dark-theme colour — under the text.
+  Each is now the skin's own token at the same opacity (`color-mix()`, as v5.82 introduced), so a light skin's tints come from its
+  own palette. The two neutral grey swatch rims on the Skins tab are kept.
+- **"Recessed" dark panels** (60 black overlays) now use the page colour at the same opacity (decision G-1): indistinguishable on
+  dark skins; on light skins a faint wash instead of murky grey.
+- **Selected items on light skins read in ink** (G-2): the active tab and the selected retirement card's date, tag and success rate
+  sat on a coloured highlight and measured as low as 3.22:1. A new token, `--on-ring`, is defined only in the six light skins, so
+  the default and dark skins look exactly as before.
+- **Hovered table rows** (Expenses, Positions) use a light accent wash (G-3). **This also fixes the default skin**: a hovered
+  Expenses row read **2.66:1** there — found by `t48`'s new hover leg; v5.82 never measured hover.
+- **Light-skin colours darkened slightly** where they still missed AA on plain panels (G-4): Reading Paper's warn, accent,
+  positive, info, plan and orange; Field Paper's warn, positive, plan, accent; E-Ink Gray's warn, positive, info, plan;
+  Colorblind-Safe's accent. Each is the smallest step to 4.6:1. High Contrast Light and Report change no colours. A before/after
+  swatch page shipped with the package for review.
+- **Field Manual §13** now says every skin meets AA, hover and selected items included.
+
+### Limitations, stated plainly
+
+- **Most controls are still under the 44 px platform guideline**; the **Field Manual's own small print** is unchanged (both
+  disclosed in §13).
+- **Borders are not held to a ratio** (WCAG 1.4.11 non-text contrast): they are skin-aware now, but no check asserts them.
+- `color-mix()` needs Safari 16.2+ / Firefox 113+ / Chrome 111+; older browsers drop those tints and borders.
+- The default skin's crit, violet and old-faint tints move to v5.82's nudged token values (at most a 10-unit shift at ≤ 40 %
+  opacity); black overlays → `--bg` differ by at most 6 units per channel on the default. Neither is visible on the layout signature,
+  which compares geometry, not colour.
+
+### Found while building, and worth recording
+
+- **The hover defect was in the default skin**, not only the light ones: `t48` parked the pointer at v5.82 precisely because hover
+  made readings depend on an earlier tap, and so never measured hover at all. The hover leg now hovers deliberately.
+- **Ring opacity was not the lever.** The scope's prototype showed that for blue and violet date labels to clear AA on the
+  selection highlight, five of six light skins would need a highlight of opacity 0. The text colour was the fix.
+- **`color-mix()` inside SVG `fill` attributes was an open question**: an attribute the browser cannot parse falls back to black.
+  Verified on the built page — all three chart fills compute to v5.82's colours. The build record first asserted this before
+  measuring it; corrected in the scope.
+- **The version bump cost 109 judgement points** again (29 ladders, 79 gated, 1 keyed — `t33`'s `PINS` gets v5.82's figures), none
+  outside the three known shapes; `t45`/`t47`/`t48` by hand.
+
 ## v5.82 — legible text and usable targets (F-3 / F-4)
 
 Source `f6a54749bb14a291971395b0db20d11f` · built `index.html` `725bde1524d1ce00592aea9a621e1c03` · built from v5.81 `cdca327526e3a259c5269aca02576753`. A **presentation
