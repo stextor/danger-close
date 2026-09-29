@@ -20,7 +20,7 @@
 # on the last line (tally sums them).
 import os, sys, json, subprocess
 VER = sys.argv[1] if len(sys.argv) > 1 else ""
-KNOWN_VERSIONS = ["v582"]
+KNOWN_VERSIONS = ["v582", "v583"]
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.abspath(os.path.join(HERE, ".."))
 PAGE = os.path.abspath(sys.argv[2]) if len(sys.argv) > 2 else os.path.join(ROOT, "index.html")
 ok = 0; bad = 0; fails = []
@@ -57,7 +57,8 @@ const docs = decl('DOCS_HTML'), skins = decl('SKINS');
 const inside = (n, r) => r && n.range[0] >= r.range[0] && n.range[1] <= r.range[1];
 const SKINS = Function('return ' + src.slice(skins.range[0], skins.range[1]))();
 const out = { skins: Object.entries(SKINS).map(([k, s]) => ({ key: k, label: s.label, t: s.tokens })),
-  d3size: [], d3sizeNonLit: [], d3lineFill: [], cssSmall: [], objSmall: [], hexColor: [], alphaCat: [], retireColors: null, docs: '' };
+  d3size: [], d3sizeNonLit: [], d3lineFill: [], cssSmall: [], objSmall: [], hexColor: [], alphaCat: [], rgba: [], retireColors: null, docs: '' };
+const RGBA = (n, s) => { if (inside(n, skins) || inside(n, docs)) return; for (const m of String(s).matchAll(/rgba\([^)]*\)/g)) out.rgba.push(n.loc.start.line + ':' + m[0].replace(/\s/g, '')); };
 walk.simple(ast, {
   CallExpression(n) {
     const c = n.callee; if (c.type !== 'MemberExpression' || !c.property || (c.property.name !== 'attr' && c.property.name !== 'style')) return;
@@ -67,11 +68,13 @@ walk.simple(ast, {
   },
   Literal(n) {
     if (typeof n.value !== 'string' || inside(n, docs)) return;
+    RGBA(n, n.value);
     if (!inside(n, skins) && /^\s*#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?\s*$/.test(n.value)) out.hexColor.push(n.loc.start.line + ':' + n.value);
     for (const m of n.value.matchAll(/font-size\s*:\s*([0-9.]+)px/g)) if (parseFloat(m[1]) < 11) out.cssSmall.push(n.loc.start.line + ':' + m[1]);
   },
   TemplateElement(n) {
     if (inside(n, docs)) return;
+    RGBA(n, n.value.cooked || '');
     for (const m of (n.value.cooked || '').matchAll(/font-size\s*:\s*([0-9.]+)px/g)) if (parseFloat(m[1]) < 11) out.cssSmall.push(n.loc.start.line + ':' + m[1]);
   },
   TemplateLiteral(t) {   // `${colour}33` — a hex alpha glued on: invalid CSS the moment the colour is a token (E-1)
@@ -102,6 +105,10 @@ T("X-4 no CSS rule under 11 px outside the Field Manual (DOCS_HTML is deferred, 
 T("X-5 no style-object fontSize under 11", not A["objSmall"], ", ".join(A["objSmall"][:8]))
 T("X-6 no hex colour literal outside SKINS (and no rgb `color:`) — every colour is a skin token (D-3, E-2)", not A["hexColor"], f"{len(A['hexColor'])}: " + ", ".join(A["hexColor"][:8]))
 T("X-11 no hex alpha glued onto a colour in a template (`${c}33`) — use color-mix (E-1)", not A["alphaCat"], str(A["alphaCat"]))
+_rg = [x for x in A["rgba"] if not x.split(":", 1)[1].startswith("rgba(128,128,128,")]
+_rim = [x for x in A["rgba"] if x.split(":", 1)[1].startswith("rgba(128,128,128,")]
+T("X-12 no rgba() literal outside SKINS and the Field Manual — every surface is a skin token (G-1); only the 2 neutral swatch rims remain",
+  not _rg and len(_rim) == 2, f"{len(_rg)} tinted: " + ", ".join(_rg[:6]) + f" | rims {len(_rim)}")
 rc = A["retireColors"]
 T("X-7 the retirement-date colours are skin tokens", bool(rc) and all(isinstance(c, str) and c.startswith("var(--") for c in rc), str(rc))
 d = A["docs"]
@@ -126,11 +133,23 @@ ONLY = [s for s in os.environ.get("T48_SKINS", "").split(",") if s]
 # KNOWN DEFECT (F-1 (b), OPERATIONS §D): the six LIGHT skins still fail AA on tinted panels — hard-coded dark-theme rgba() surfaces
 # (366 literals, 65 values) that v5.83's surface pass replaces. Counts are distinct failing elements over all 26 tabs, measured on
 # the v5.82 build; each may only FALL. A dark skin is never pinned: it must be 0. Which skins are dark is derived (bg luminance).
-KNOWN_DEFECT = {   # measured on the v5.82 build (725bde15…), pointer parked, animations frozen; identical across two desktop runs
+KNOWN_DEFECT = {} if VER != "v582" else {   # v5.83 (SCOPE_LIGHT_SKIN_SURFACES) deletes every pin: all skins must be 0. v5.82: measured on the v5.82 build (725bde15…), pointer parked, animations frozen; identical across two desktop runs
     (1440, "fieldPaper"): 288, (1440, "paperSepia"): 716, (1440, "inkGray"): 269, (1440, "highLight"): 106,
     (1440, "cbSafe"): 144, (1440, "report"): 198, (390, "paperSepia"): 665,
 }
 SK = [s for s in A["skins"] if not ONLY or s["key"] in ONLY]
+if VER != "v582":
+    _light = [s for s in A["skins"] if lum(parse(s["t"]["bg"])) >= 0.18]; _dark = [s for s in A["skins"] if lum(parse(s["t"]["bg"])) < 0.18]
+    T("X-13 every LIGHT skin defines onRing = its own ink, and no dark skin defines it (G-2: default and dark skins unchanged)",
+      all(s["t"].get("onRing", "").lower() == s["t"]["ink"].lower() for s in _light) and not any("onRing" in s["t"] for s in _dark),
+      ", ".join(f"{s['key']}={s['t'].get('onRing')}" for s in _light))
+    _src = open(SRC, encoding="utf-8").read()
+    import re as _r2
+    _rule = lambda sel: (_r2.search(_r2.escape(sel) + r"\s*\{([^}]*)\}", _src) or [None, ""])[1]
+    T("X-14 selected states read var(--on-ring, …): .tab.on and .rbtn.sel", "var(--on-ring" in _rule(".tab.on") and "var(--on-ring" in _rule(".rbtn.sel"),
+      f".tab.on {{{_rule('.tab.on')[:80]}}} | .rbtn.sel {{{_rule('.rbtn.sel')[:80]}}}")
+    T("X-15 hovered rows are not washed with --ring (G-3)", "var(--ring)" not in _rule(".prow:hover") and "var(--ring)" not in _rule(".erow:hover")
+      and _rule(".prow:hover") != "" and _rule(".erow:hover") != "", f"{_rule('.prow:hover')} | {_rule('.erow:hover')}")
 for s in SK:
     t = s["t"]; bg = parse(t["bg"]); surf = [bg, over(parse(t["panel"]), bg), over(parse(t["panel2"]), bg)]
     f = [cr(parse(t["inkFaint"]), x) for x in surf]; dm = [cr(parse(t["inkDim"]), x) for x in surf]
@@ -141,7 +160,7 @@ for s in SK:
 if os.environ.get("T48_SOURCE_ONLY"): finish()   # negative controls ONLY (source mutations need no browser); the suite never sets it
 # ── browser legs ────────────────────────────────────────────────────────────────────────────────────────────────────────────
 SEED = "(()=>{let s=12345;Math.random=()=>{s=(s*1103515245+12345)%2147483648;return s/2147483648;};})();"
-MEASURE = r"""() => {
+MEASURE = r"""(rootSel) => {
  const P = c => { const m = c && c.match(/rgba?\(([^)]+)\)/); if (!m) return null; const v = m[1].split(',').map(Number); return [v[0], v[1], v[2], v[3] ?? 1]; };
  const L = c => { const s = c.slice(0, 3).map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return .2126 * s[0] + .7152 * s[1] + .0722 * s[2]; };
  const CR = (a, b) => { const x = L(a), y = L(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); };
@@ -149,7 +168,8 @@ MEASURE = r"""() => {
    let b = [255, 255, 255, 1]; for (let i = st.length - 1; i >= 0; i--) { const f = st[i]; b = [0, 1, 2].map(k => f[k] * f[3] + b[k] * (1 - f[3])).concat(1); } return b; };
  const vis = e => { const r = e.getBoundingClientRect(), s = getComputedStyle(e); return r.width > 0 && r.height > 0 && s.visibility !== 'hidden' && s.display !== 'none'; };
  const text = []; let logo = 0;
- for (const e of document.querySelectorAll('body *')) {
+ const root = rootSel ? (document.querySelector(rootSel) || document.createElement('div')) : document.body;
+ for (const e of root.querySelectorAll('*')) {
    if (!vis(e)) continue; const isSvg = e instanceof SVGElement; if (isSvg && e.tagName.toLowerCase() !== 'text' && e.tagName.toLowerCase() !== 'tspan') continue;
    const own = [...e.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join('').trim(); if (own.length < 2) continue;
    if (e.closest(':disabled,[aria-disabled="true"]')) continue;   // WCAG 1.4.3: inactive components are exempt
@@ -192,11 +212,22 @@ def set_skin(pg, s, phone):
     got = pg.evaluate("getComputedStyle(document.querySelector('[style*=\"--bg\"]')).getPropertyValue('--bg').trim()")
     return got.lower() == s["t"]["bg"].lower(), got
 LOGO_SEEN = [0]
+ROW_AT = """() => { const r = [...document.querySelectorAll('.prow, .erow')].find(e => { const b = e.getBoundingClientRect(); return b.width > 0 && b.height > 0; });
+  if (!r) return null; r.scrollIntoView({ block: 'center' }); const b = r.getBoundingClientRect(); return [b.left + Math.min(40, b.width / 2), b.top + b.height / 2]; }"""
+HOVER_SEEN = [0]
 def sweep(pg, phone):
     fails_t, fails_c = {}, {}
     for i, tid in enumerate(tabs(pg)):
         go(pg, i, tid, phone); m = pg.evaluate(MEASURE); LOGO_SEEN[0] += m["logo"]
         for x in m["text"]: fails_t.setdefault((x["t"], x["fs"], x["cr"]), tid)
+        # H · a HOVERED table row (v5.83, G-3): .prow/.erow wash on hover; measure the hovered row's own text, then park again.
+        if VER != "v582":
+            at = pg.evaluate(ROW_AT)
+            if at:
+                pg.mouse.move(at[0], at[1]); pg.wait_for_timeout(450)
+                h = pg.evaluate(MEASURE, ":is(.prow, .erow):hover"); HOVER_SEEN[0] += 1
+                for x in h["text"]: fails_t.setdefault(("HOVER " + x["t"], x["fs"], x["cr"]), tid)
+                pg.mouse.move(0, 0); pg.wait_for_timeout(300)
         for x in m["ctl"]: fails_c.setdefault((x["t"], x["w"], x["h"]), tid)
     return fails_t, fails_c
 def show(dct, n=6): return "; ".join(f"{k[0]!r} {k[1]}/{k[2]} @{v}" for k, v in list(dct.items())[:n])
@@ -222,11 +253,15 @@ try:
                     T(f"R-2 {w}px {s['key']} (dark): every visible text element on every tab meets AA", not ft, f"{len(ft)}: " + show(ft))
                 else:
                     pin = KNOWN_DEFECT.get((w, s["key"]))
-                    T(f"R-2 {w}px {s['key']} (light): AA failures <= the pinned KNOWN DEFECT ({pin}) — may only fall; the v5.83 surface pass",
-                      pin is not None and len(ft) <= pin, f"{len(ft)} measured: " + show(ft))
+                    if pin is None:
+                        T(f"R-2 {w}px {s['key']} (light): every visible text element on every tab meets AA (no pin from v5.83)", not ft, f"{len(ft)}: " + show(ft))
+                    else:
+                        T(f"R-2 {w}px {s['key']} (light): AA failures <= the pinned KNOWN DEFECT ({pin}) — may only fall",
+                          len(ft) <= pin, f"{len(ft)} measured: " + show(ft))
                     if pin is not None and len(ft) < pin: print(f"  NOTE {w}px {s['key']}: {len(ft)} < pin {pin} — LOWER THE PIN")
                 if s["key"] == "default": T(f"C-1 {w}px: every control is at least 24 x 24 px (a checkbox counts its label)", not fc, f"{len(fc)}: " + show(fc))
             pg.close()
+        if VER != "v582": T("H-1 the hover leg ran (a row was hovered on at least one tab per sweep)", HOVER_SEEN[0] > 0, str(HOVER_SEEN[0]))
         T("R-3 the one exemption (the logotype) still matches an element — an allowlist entry that matches nothing is stale", LOGO_SEEN[0] > 0, str(LOGO_SEEN[0]))
         # C · the tablet width, controls only; and the tab grid keeps its row count (measured on v5.81: 2 / 3 / 3)
         for w, rows in [(1440, 2), (1024, 3), (820, 3)]:
