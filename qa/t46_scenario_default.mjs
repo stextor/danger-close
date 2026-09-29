@@ -16,9 +16,9 @@
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 const VER = process.argv[2];
-const KNOWN_VERSIONS = ["v579", "v580", "v581", "v582", "v583", "v584"];
+const KNOWN_VERSIONS = ["v579", "v580", "v581", "v582", "v583", "v584", "v585"];
 if (!KNOWN_VERSIONS.includes(VER)) { console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.\n    Registered: ${KNOWN_VERSIONS.join(", ")}`); process.exit(1); }
-const POST = VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584";
+const POST = VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585";
 
 const { window } = await import("./env_dom.mjs");
 const PREFIX = "dc:";

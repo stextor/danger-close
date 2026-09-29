@@ -154,6 +154,9 @@ tally "t48-$CUR"   python3 t48_legibility_targets.py "$CUR"
 # t49 (v5.84) — Engine A sees the spending draw (D-7): hand-verified bracket arithmetic, inertness on 11 households, the draw
 # taxed and drained, and AST checks on every caller. Current leg only (the feature does not exist on the prior leg).
 tally "t49-$CUR"   node t49_engineA_draw.mjs "$CUR"
+# t50 (v5.85) — the seven SS states follow their own law (D-19): statute-typed cases at every threshold and phase-out, CO's
+# shared pension cap, RI's age test per spouse, Utah's 4.45 % rate. Current leg only.
+tally "t50-$CUR"   node t50_ss_states.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

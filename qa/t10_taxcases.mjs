@@ -130,7 +130,7 @@ const SUR_R = [0,1150,2880,4620,6360,6940];
 // v5.78 (C-1): 42 U.S.C. §1395r(i)(3)(C)(i)(III) — tiers 1–4 are "not more than" their upper amount, the top tier is "at
 // least" its own. Through v5.77 BOTH reference oracles in this file used `<=` at every tier, the engines' own rule, so an
 // exact-top-threshold case compared the engine's C-1 against the oracle's C-1 and agreed. A LADDER — widen it each release.
-const C1_FIXED = VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584";
+const C1_FIXED = VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585";
 const tierR = (magi, ups) => { for (let i=0;i<ups.length;i++) if (i === ups.length - 2 ? magi < ups[i] : magi <= ups[i]) return i; return ups.length-1; };
 const irmaaRef = (magi, single, persons) => SUR_R[tierR(magi, single?SGL_R:MFJ_R)] * persons;
 // IRMAA isolation builder: 3-year window ending at `premiumYr`, both 65+ that year, MAGI = pen.
@@ -451,8 +451,8 @@ const pass2E = pass, fail2E = fail;
     // hand CO single:      0.044  x ((60,000 - 24,000) + 10,000 + 15,000 + 5,000) = 0.044  x 66,000 = 2,904
     const _v5 = Number(String(VER).replace(/[^0-9]/g, "")) || 0;
     if (_v5 >= 573) {
-      T("2E partial-SS (CO 4.4%, MFJ): half of federally-taxable SS enters the base", run("CO", 2), 1848);
-      T("2E partial-SS (CO 4.4%, single)", run("CO", 1), 2904);
+      T("2E partial-SS (CO 4.4%, MFJ): half of federally-taxable SS enters the base", run("CO", 2), _v5 >= 585 ? 2508 : 1848); // v5.85 (D-19): the state's own SS rule — statute-consistent; see CHANGELOG v5.85: both 65+, all SS subtracted, the $48K cap shrinks by it
+      T("2E partial-SS (CO 4.4%, single)", run("CO", 1), _v5 >= 585 ? 3564 : 2904); // v5.85 (D-19): the state's own SS rule — statute-consistent; see CHANGELOG v5.85: run() passes no `single` — a JOINT return with ONE spouse 65+
       T("2E full-SS (MT 5.65%, MFJ) [v5.73]: ALL federally-taxable SS enters the base, $5,660 each", run("MT", 2), 5292.92);
       T("2E full-SS (MT 5.65%, single) [v5.73]", run("MT", 1), 5612.71);
     } else {
@@ -530,7 +530,10 @@ const pass2E = pass, fail2E = fail;
     T("2E control: there really are eight states that tax some SS (not vacuous)",
       Object.keys(R).filter(c => R[c].ss > 0).length, 8);
     // v5.73: of the eight, Montana alone taxes the FULL federally-taxable amount; seven remain at half.
-    if (_v >= 573) {
+    if (_v >= 585) {   // v5.85 (D-19): the seven carry the state's own rule; no fractional factor survives
+      T("2E [v5.85]: no partial-SS factor survives; CO CT MN NM RI UT VT carry an ssRule, and Montana stays at ss 1",
+        (Object.keys(R).filter(c => R[c].ss > 0 && R[c].ss < 1).length === 0 && Object.keys(R).filter(c => R[c].ssRule).sort().join(",") === "CO,CT,MN,NM,RI,UT,VT" && R.MT.ss === 1) ? 1 : 0, 1);
+    } else if (_v >= 573) {
       T("2E [v5.73]: exactly seven partial-SS states (ss 0.5), and Montana at ss 1",
         (Object.keys(R).filter(c => R[c].ss === 0.5).sort().join(",") === "CO,CT,MN,NM,RI,UT,VT" && R.MT.ss === 1) ? 1 : 0, 1);
     }
@@ -956,7 +959,7 @@ const pass2E = pass, fail2E = fail;
         T("[EXTINCTION v5.59] and RI's note states that figure, so moving one without the other fails",
           /\$50,000/.test(R.RI.note) ? 1 : 0, 1);
         T("[EXTINCTION v5.59] RI hand case: a qualifying 68/68 couple pays tax on half of SS only",
-          RIWI("RI", 80000), 1020.00);
+          RIWI("RI", 80000), _v >= 585 ? 0 : 1020.00);   // v5.85 (D-19): the state's own SS rule — statute-consistent; see CHANGELOG v5.85: 68/68 at full retirement age, AGI under $133,750 — no SS taxed
         if (_v >= 560) {
           T("[APPLIED v5.60] RI's note names the full-retirement-age floor AND the model applies it",
             /full retirement age/i.test(R.RI.note) && /\b67\b/.test(R.RI.note) && R.RI.exclAge === 67 ? 1 : 0, 1);
@@ -1053,7 +1056,7 @@ const pass2E = pass, fail2E = fail;
         T("[EXTINCTION v5.60] WI gates its exclusion at 67 (Wis. Stat. § 71.05(6)(b)54m.)",
           R.WI.exclAge === 67 ? 1 : 0, 1);
         T("[EXTINCTION v5.60] RI denies the exclusion to a 66/66 couple, as the statute does",
-          RIWI_AGE("RI", 80000, 66, 66), 5020.00);
+          RIWI_AGE("RI", 80000, 66, 66), _v >= 585 ? 6040.00 : 5020.00);   // v5.85 (D-19): the state's own SS rule — statute-consistent; see CHANGELOG v5.85: under 67, so ALL taxable SS is taxed (+$1,020)
         T("[EXTINCTION v5.60] WI denies the exclusion to a 66/66 couple, as the statute does",
           RIWI_AGE("WI", 60000, 66, 66), 3180.00);
         T("[EXTINCTION v5.60] RI grants ONE exclusion at 68/66 — the floor is per person, not per return",
@@ -1061,11 +1064,11 @@ const pass2E = pass, fail2E = fail;
         T("[EXTINCTION v5.60] WI grants ONE exclusion at 68/66 — the floor is per person, not per return",
           RIWI_AGE("WI", 60000, 68, 66), 1908.00);
         T("[EXTINCTION v5.60] and the qualifying 68/68 RI couple is UNCHANGED from v5.59",
-          RIWI_AGE("RI", 80000, 68, 68), 1020.00);
+          RIWI_AGE("RI", 80000, 68, 68), _v >= 585 ? 0 : 1020.00);   // v5.85 (D-19): the state's own SS rule — statute-consistent; see CHANGELOG v5.85: "unchanged from v5.59" holds only through v5.84
         T("[EXTINCTION v5.60] and the qualifying 68/68 WI couple is UNCHANGED from v5.59",
           RIWI_AGE("WI", 60000, 68, 68), 636.00);
         T("[EXTINCTION v5.60] the correction is confined to the window: RI 66/66 now costs exactly 0.05 x 80,000 more",
-          Math.round((RIWI_AGE("RI", 80000, 66, 66) - RIWI_AGE("RI", 80000, 68, 68)) * 100) / 100, 4000.00);
+          Math.round((RIWI_AGE("RI", 80000, 66, 66) - RIWI_AGE("RI", 80000, 68, 68)) * 100) / 100, _v >= 585 ? 6040.00 : 4000.00);   // v5.85 (D-19): the state's own SS rule — statute-consistent; see CHANGELOG v5.85: the window now also moves ALL taxable SS (0.05 x 40,800)
         T("[EXTINCTION v5.60] and WI 66/66 exactly 0.053 x 48,000 more",
           Math.round((RIWI_AGE("WI", 60000, 66, 66) - RIWI_AGE("WI", 60000, 68, 68)) * 100) / 100, 2544.00);
         T("[BY DECISION v5.60] NM keeps the implicit 65 default — its pass is separate (ROUND4 D-C)",
@@ -1277,7 +1280,7 @@ const pass2E = pass, fail2E = fail;
         //   gains all ride it. These two cells are the ones a wrong base fails: if the measure read
         //   retirement income alone, the first would price at $833.00 and the second at $1,421.00.
         T("[HAND v5.66] NM: taxable SS rides the AGI measure — $28K retirement + $10K taxable SS lands two bands down — $1,127.00",
-          NM({ retIncome: 28000, ssTaxableFed: 10000, ageA: 70, ageB: 68 }), 1127.00);
+          NM({ retIncome: 28000, ssTaxableFed: 10000, ageA: 70, ageB: 68 }), _v >= 585 ? 882.00 : 1127.00);   // v5.85 (D-19): the state's own SS rule — statute-consistent; see CHANGELOG v5.85: AGI under $150,000 — the SS is exempt (−0.049 x 5,000)
         T("[HAND v5.66] NM: wages/other ordinary and realized gains ride it too — $20K + $15K + $10K = $45,000, the $3,000 row — $1,911.00",
           NM({ retIncome: 20000, work: 15000, capGains: 10000, ageA: 70, ageB: 68 }), 1911.00);
         // — the clamp: an exemption bigger than the retirement income it applies to must not spill
@@ -1541,11 +1544,11 @@ const pass2E = pass, fail2E = fail;
           ["C5 single 70, $106,999 — one dollar below", { retIncome: 106999, single: true, ageB: null }, 2849.95],
           ["C6 single 70, $107,000 — AT the cliff, exclusive [DISC cmp]", { retIncome: 107000, single: true, ageB: null }, 5350.00],
           ["C7 joint 70/70, $110,000 — between the two columns [DISC swapped columns]", { retIncome: 110000 }, 500.00],
-          ["C8 joint 70/70, $60,000 + $80,000 taxable SS — the measure carries SS [DISC base]", { retIncome: 60000, ssTaxableFed: 80000 }, 5000.00],
+          ["C8 joint 70/70, $60,000 + $80,000 taxable SS — the measure carries SS [DISC base]", { retIncome: 60000, ssTaxableFed: 80000 }, _v >= 585 ? 7000.00 : 5000.00],   // v5.85 (D-19): the state's own SS rule — statute-consistent; see CHANGELOG v5.85: AGI $140,000 >= $133,750 — all SS taxed
           ["C9 joint 70/60, $120,000 — one qualifying (pins the table, NOT the unit)", { retIncome: 120000, ageB: 60 }, 3500.00],
           ["C10 joint 66/66, $100,000 — under the 67 floor [DISC exclAge]", { retIncome: 100000, ageA: 66, ageB: 66 }, 5000.00],
-          ["X1 joint 70/70, pension $40,000 + RMD $60,000 + SS $20,000 — below; pension qualifies", { retIncome: 60000, pen: 40000, ssTaxableFed: 20000 }, 500.00],
-          ["X2 joint 70/70, pension $40,000 + RMD $80,000 + SS $20,000 — above", { retIncome: 80000, pen: 40000, ssTaxableFed: 20000 }, 6500.00],
+          ["X1 joint 70/70, pension $40,000 + RMD $60,000 + SS $20,000 — below; pension qualifies", { retIncome: 60000, pen: 40000, ssTaxableFed: 20000 }, _v >= 585 ? 0 : 500.00],   // v5.85 (D-19): the state's own SS rule — statute-consistent; see CHANGELOG v5.85: AGI under the line at 70/70 — no SS taxed
+          ["X2 joint 70/70, pension $40,000 + RMD $80,000 + SS $20,000 — above", { retIncome: 80000, pen: 40000, ssTaxableFed: 20000 }, _v >= 585 ? 7000.00 : 6500.00],   // v5.85 (D-19): the state's own SS rule — statute-consistent; see CHANGELOG v5.85: above the line — all SS taxed
         ];
         for (const [label, args, exp] of _RI)
           T(`[HAND v5.69] RI ${label} -> $${exp.toFixed(2)}`, RIC(args), exp);

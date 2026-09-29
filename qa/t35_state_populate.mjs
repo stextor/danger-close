@@ -33,7 +33,7 @@ let _s = 42; Math.random = () => { _s = (_s * 1103515245 + 12345) & 0x7fffffff; 
 
 const VER = process.argv[2] || "v565";
 const _vt = Number(String(VER).replace(/[^0-9]/g, "")) || 0;
-const KNOWN_VERSIONS = ["v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584"];
+const KNOWN_VERSIONS = ["v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -166,7 +166,7 @@ const ctTax = (args) => ST({
   //               0.05 x (36,000 + 15,000) = $2,550
   //   pre-pop   : 0.05 x (80,000 + 15,000) = $4,750
   EQ("B-7: MFJ $80,000 retirement + $30,000 taxable SS — the SS carries the measure into band 4",
-    ctTax({ retIncome: 80000, ssTaxableFed: 30000 }), POPULATED ? 2550 : 4750);
+    ctTax({ retIncome: 80000, ssTaxableFed: 30000 }), POPULATED ? (_v >= 585 ? 3300 : 2550) : 4750);   // v5.85 (D-19): AGI $110,000 >= $100,000 and no gross benefit supplied — CT's 25 %-of-total cap is not applied (conservative), so all $30,000 is taxed: 0.05 x (36,000 + 30,000)
 
   // ⚠ CAPITAL GAINS COUNT TOWARD THE MEASURE and are also taxed as ordinary income by the model.
   //   populated : measure $130,000 -> 0.05 x $90,000 = $4,500 excl -> retBase $85,500
@@ -414,7 +414,9 @@ const ctTax = (args) => ST({
     G.applyLoadedData({ portfolio: P });
 
     const tl = G.PLAN_TIMELINE();
-    const plan = E.computeTaxPlan({ retireYear: tl.targetRetireYear, rothAmount: 0, qcdAnnual: 0, taxYield: 0 });
+    // v5.85 (D-19): with no conversions the example household is below Connecticut's thresholds every year and now correctly owes
+    // $0 — which would make E-4's guard fail and the agreement vacuous. From v5.85 the ladder takes AGI over the line so rows are taxed.
+    const plan = E.computeTaxPlan({ retireYear: tl.targetRetireYear, rothAmount: _v >= 585 ? 150000 : 0, qcdAnnual: 0, taxYield: 0 });
     T("E-1: the engine produced a plan with rows to compare", !!(plan && plan.rows && plan.rows.length));
 
     // ⚠ THE ROW FIELDS ARE NOT THE ARGUMENT NAMES, and assuming they were is how the first draft of
