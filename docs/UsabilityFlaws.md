@@ -159,6 +159,10 @@ Severity scale: **HIGH** = materially impairs use of a core flow for a real clas
 **Suspected cause:** design intent is a desktop console; Simple Mode was added for cognitive load, and happens to be the mobile answer too.
 
 ### F-4 · Micro-typography at sub-AA contrast, for a 55+ audience — **HIGH (accessibility, both form factors)**
+> **CONTRAST FIXED IN EVERY SKIN at v5.83** (`docs/SCOPE_LIGHT_SKIN_SURFACES.md`): the 366 dark-theme `rgba()` surfaces are skin
+> tokens, light skins' selected states and hovered rows read at AA, and `t48` requires 0 in all 13 skins (hover included). Still open:
+> 44 px targets everywhere, and the Field Manual's own text.
+>
 > **PARTLY FIXED at v5.82** (`docs/SCOPE_TEXT_AND_TARGETS.md`). ⚠ **The counts below are pre-v5.48**: v5.48 raised the 341 × 8 px and
 > 325 × 9 px sites to a 12 px body / 11 px label floor; this block kept quoting them as current until v5.82. v5.82 raises the floor's
 > leftovers (the tab grid, the Trajectory chart's labels, three data-row classes, the Ask AI buttons) to 11 px, and brings

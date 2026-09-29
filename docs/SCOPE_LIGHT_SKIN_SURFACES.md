@@ -1,6 +1,6 @@
 # SCOPE — light skins readable: skin-aware surfaces, selected states, hovered rows (v5.82's KNOWN DEFECT)
 
-**ACTIVE — decisions G-1 to G-4 (§6) open; build after they are answered.** Target **v5.83**, built from **v5.82** (source
+**FULFILLED — shipped in v5.83.** G-1 to G-4 all as recommended (Steve, 2026-09-29). See §7. Retained as the record. Target **v5.83**, built from **v5.82** (source
 `f6a54749bb14a291971395b0db20d11f`, built `index.html` `725bde1524d1ce00592aea9a621e1c03`, repo `f0ec889`). A presentation release:
 no engine changes; parity pinned; METHODOLOGY unchanged. Follows `docs/SCOPE_TEXT_AND_TARGETS.md` (v5.82, FULFILLED), whose §9–§10
 recorded this work as deferred.
@@ -116,3 +116,21 @@ tints, measured to pass by the new hover leg; (b) no hover wash at all. **Recomm
 AA, but Reading Paper's gold-and-sepia look will be a little browner. (a) **Accept, with a before/after swatch page for review at
 the build**; (b) review swatches before any build. **Recommend (a)** — the test fixes the rule, not the look, and you see it
 before it ships.
+
+## 7 · Build record — 2026-09-29
+
+**Decisions (Steve, 2026-09-29), all as recommended:** G-1 (a) black surfaces → `--bg` at the same opacity · G-2 (a) `--on-ring`,
+light skins only · G-3 (a) hovered rows `color-mix(in srgb, var(--accent) 8%, transparent)` · G-4 (a) accept the nudges, with a
+before/after swatch page for review before upload.
+
+**Built as scoped, no premise change.** §1's mapping (`surfaces.cjs`, 363 literal nodes; the 2 neutral swatch rims kept), §1's
+token table unchanged from the candidates, `--on-ring` in the six light skins (each its own `--ink`), the selected-state and hover
+rules, and the selected retirement card's label, tag and success figure through `var(--on-ring, …)`.
+
+**Test first:** the revised `t48` failed **19** checks on v5.82 — X-12…X-15, every light skin with no pin, and **the new hover leg
+caught the DEFAULT skin**: a hovered Expenses row read **2.66:1** (six dark skins likewise). v5.82 never measured hover. On the
+v5.83 build: **104 passed, 0 failed, first build**. **Layout signature: 52 of 52 tab-views box-for-box identical to v5.82** at 1440
+and 820 — the colours-only prediction held. **Literal census:** only the two new `"v5.83"` version arms change outcome. **Controls:**
+`controls_v583_surfaces.py`. §3's open question on `color-mix()` inside SVG `fill` attributes: **verified** on the built page — Chromium
+computes all three chart fills to the same colours as v5.82 (e.g. `color(srgb 0 1 0.533 / 0.06)` vs `rgba(0,255,136,0.06)`); an
+unparsed fill would have fallen back to black. A first draft of this record asserted it before measuring; corrected here.
