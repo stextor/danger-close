@@ -1,5 +1,53 @@
 # Changelog
 
+## v5.85 — Social Security in seven states follows each state's own law (D-19); Utah's 2026 rate
+
+Source `a1d9c5e03e4aa7c059427fdf4fc84a98` · built `index.html` `7ff3d434fbfb13a32e3582870d991834` · built from v5.84 `1d7208800a325e78220917d3f767b517`. **A modelling release:**
+state tax moves for households in CO, CT, MN, NM, RI, UT and VT; METHODOLOGY gains a section.
+
+**Suite: 4,775 app checks, 0 failed, 0 DIED** — 49 app suites plus MC parity 10/10; tooling `t21` 64, `domdiff` 32, `sets` 12 + 12 (GRAND 4,905),
+run from the packaged copies. **`t50` is new** (32, statute-typed, dollar-exact). `smoke_built` **22 passed, 0 failed**.
+Negative controls: `controls_v585_ss_states.py` **9 of 9**.
+
+### What changed, and why
+
+- **Seven states taxed "half of taxable Social Security" for every household.** Each actually conditions it on income and/or
+  age, so that flat half was wrong in both directions, depending on the household. Each now follows its own statute, read from
+  primary sources (`docs/SCOPE_SS_STATES.md` §1):
+  **Colorado** — 65+ subtract all of it; 55–64 all at AGI ≤ $75K / $95K, else up to $20K; and the subtraction **uses up** the $24K
+  pension cap. **Connecticut** — none below $75K / $100K AGI; above, at most 25 % of total benefits. **Minnesota** — all
+  subtracted up to $86,410 / $110,780 (TY2026), then 10 % less per $4,000. **New Mexico** — none up to $100K / $150K, then all (a
+  cliff). **Rhode Island** — none at full retirement age and AGI under $107,000 / $133,750, per spouse. **Utah** — a credit of the
+  rate × taxable SS, less 2.5 ¢ per dollar of AGI over $54K / $90K. **Vermont** — none up to $55K / $70K (2025 Act 71), phasing in
+  over the next $10K.
+- **Utah's rate is 4.45 %** from 2026 (S.B. 60, signed 23 March 2026, retroactive) — the model had 4.50 %.
+- **What moved on the example household**, lifetime state tax (the Taxes tab, at the defaults), v5.84 → v5.85: Colorado
+  **$50,558 → $60,200**; Connecticut $68,875 → $56,871; Minnesota $139,611 → $123,974; New Mexico $100,602 → $82,897; Rhode Island
+  $49,096 → $35,364; Utah $92,390 → $87,680; Vermont **$135,505 → $159,160**.
+- **Colorado goes UP** although its retirees owe no tax on Social Security: the statute makes that subtraction use up the pension
+  cap, and the old model gave both in full (its own note said it overstated the exclusion). **Vermont** was the largest
+  optimistic error: the example household sits above its line, so Vermont taxes all of it, not half.
+- **The Field Manual said twice that Colorado's shared cap "is not modelled"** — corrected in-app; METHODOLOGY's three passages
+  describing the half-rate are marked superseded and point to the new section.
+
+### Limitations, stated plainly
+
+- Minnesota's alternative subtraction (at most $5,840) is not modelled — conservative. Rhode Island uses its 2025 thresholds (2026
+  unpublished at the build) — conservative. Thresholds are fixed; indexing belongs to D-18.
+- Head-of-household and married-separate thresholds are not modelled (the app has single and joint). The AGI measure omits
+  tax-exempt interest (Utah's MAGI adds it). Colorado's 55–64 pension subtraction is not modelled.
+- Engine A's state call passes the household's filing status, not a widow-aware one (pre-existing; recorded, not changed).
+
+### Found while building, and worth recording
+
+- **`t50` and the existing suites caught four flaws of mine before they shipped** — a widowed survivor's benefit in the second
+  slot would have escaped Connecticut's cap; count-only callers got no Colorado subtraction; Connecticut's cap with gross unknown
+  computed $0; and I had put Colorado's cap in a field a v5.56 decision reserves for Maryland and Maine. Scope §7.
+- **13 existing test pins moved**, each checked against the statute and version-gated so earlier releases keep their pins.
+- **Workspace drift, handled by the rule:** after an environment outage, the scope file held a build record I had not written
+  (accurate, but unreviewed). It was quarantined, reverted to the repo's copy, and the record re-applied deliberately; every other
+  changed file matched the last verified backup byte for byte.
+
 ## v5.84 — the Roth comparator sees your spending draw (D-7), with D-4 measured
 
 Source `1d7208800a325e78220917d3f767b517` · built `index.html` `985b488bf4d622970ef52f055d90bbaa` · built from v5.83 `47beecf81eb45bd6faea899fa093dd81`. **A modelling release:**
