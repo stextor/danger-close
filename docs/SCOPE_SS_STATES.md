@@ -1,6 +1,6 @@
 # SCOPE — the seven "half-rate" Social Security states follow their own law (D-19), and Utah's 2026 rate
 
-**ACTIVE — decisions L-1 to L-4 (§6) open; build after they are answered.** Target **v5.85**, built from **v5.84** (source
+**FULFILLED — shipped in v5.85.** L-1 to L-4 all as recommended (Steve, 2026-09-29). See §7. Retained as the record. Target **v5.85**, built from **v5.84** (source
 `1d7208800a325e78220917d3f767b517`, built `index.html` `985b488bf4d622970ef52f055d90bbaa`, repo `2cfdc05`). **A modelling release:**
 state tax moves for households in these seven states; METHODOLOGY changes.
 
@@ -95,3 +95,35 @@ not tax: the conservative direction; (b) index them now. **Recommend (a).**
 
 **L-4 · Utah's 2026 rate cut (S.B. 60).** (a) **Include it** — it sits in the same table row, makes an existing output more
 correct, and Utah's SS credit is defined by that rate; (b) leave it for a separate release. **Recommend (a).**
+
+## 7 · Build record — 2026-09-29
+
+**Decisions (Steve), all as recommended:** L-1 (a) a per-state `ssRule` · L-2 (a) CO's shared cap, RI's age test per spouse, MN's
+simplified method only · L-3 (a) latest published thresholds, fixed · L-4 (a) Utah 4.45 %.
+
+**Built as scoped.** `stateTaxAnnual` evaluates each state's rule per year and per spouse from its own AGI measure; no caller changed
+(all three already passed ages and gross benefits). Kinds: `age` (CO), `cliff` (CT, NM, RI), `step` (MN), `linear` (VT), `credit` (UT).
+
+**`t50` first** (32 statute-typed cases): failed 29 on v5.84, 32/0 on v5.85. **Found by the suites and fixed before shipping — each
+a flaw in my code:** (1) CT's 25 %-of-total cap summed spouse A's gross only on a single return — a widowed survivor's benefit in
+B's slot would have gone untaxed (t50 CT-4); (2) the count-only path (callers without ages) subtracted nothing for CO — the 65+
+count now stands in for age, and CO's cap reduces the household exclusion; (3) CT's cap with gross unknown computed $0 — now not
+applied (conservative); (4) I first carried CO's shared cap in `ssOffset`, which v5.56 DECIDED is Maryland's and Maine's
+mechanism — CO has its own `ssSharesCap` (t10's decision checks caught it).
+
+**13 existing pins moved, each verified against the statute, and version-gated** (v5.84 and earlier keep theirs): t10 — CO both-65+
+$1,848 → $2,508 and one-65+ $2,904 → $3,564 (t10's "single" case is a joint return with one spouse 65+); seven RI cases (the other
+half of the benefit, now taxed or exempt by the cliff and the age test); NM $1,127 → $882; the seven-states structural check
+replaced. t35 — CT B-7 $2,550 → $3,300 (gross unknown, no cap); section E needs a household that owes CT tax (the example household
+now correctly owes $0). Both legs green.
+
+**The Field Manual said twice that Colorado's shared cap is not modelled** — false from v5.85; corrected in-app. Negative controls
+`controls_v585_ss_states.py` 9/9. **Colorado's lifetime tax rises** on the example household ($50,558 → $60,200): SS subtraction now
+consumes the pension cap, as the statute says — the old model's own note said it overstated the exclusion. §1's measurement covered
+the SS share only, which is why its Colorado direction differs. **Also recorded, not changed:** Engine A's state call passes
+`single: !!P.single`, not a widow-aware status (pre-existing).
+
+**Workspace drift, handled per the project rule:** after an environment outage this turn, the workspace copy of this file carried a
+§7 I had not written (accurate in substance, but unreviewed). It was quarantined, the file reverted to the repo's copy, and this
+record re-applied deliberately. No other file differed from the last verified backup.
+

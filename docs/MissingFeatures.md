@@ -1103,6 +1103,9 @@ the federal `TAX_CONSTANTS_YEAR` cycle but with no staleness banner of its own. 
 
 ## D-19 · The seven half-rate Social Security states need re-checking against current law
 
+> **FIXED at v5.85** (`docs/SCOPE_SS_STATES.md`): each of the seven now follows its own statute (`ssRule`), and Utah's rate is
+> 4.45 % (S.B. 60). Read against primary sources 2026-09-29; the remaining approximations are listed in METHODOLOGY.
+
 `ss: 0.5` stands for "income thresholds that exempt most retirees" (`stateTaxAnnual`, the ss-factor comment). Montana's
 0.5 had described pre-2024 law for two years before v5.73 corrected it. CO, CT, MN, NM, RI, UT and VT keep 0.5; each should
 be read against its current statute. Filed as a lead in `FlawsToFix-v5_69-Phase1.md`. **Medium** — the error is
