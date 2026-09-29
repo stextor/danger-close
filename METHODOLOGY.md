@@ -248,7 +248,7 @@ and the model cannot tell from 401(k) money (no input carries account type — `
 person's $50,000 at that person's own pension income, and the rule that only a spouse at full retirement age counts (the engine
 sees household totals only); and dividend and interest income, which the measure does not carry. Separately, the model still
 taxes half of federally taxable Social Security at every income, which overstates Rhode Island tax under the cliff and
-understates it above — the Social Security modification is part of the eight-state partial-SS approximation, a release of its own. *(From v5.73 that approximation covers seven states: Montana taxes Social Security exactly as the federal return does — below.)*
+understates it above — the Social Security modification is part of the eight-state partial-SS approximation, a release of its own. *(From v5.73 that approximation covers seven states: Montana taxes Social Security exactly as the federal return does — below.)* *(Superseded at v5.85 — see "Social Security in the seven states follows each state's law".)*
 
 **The cliff reaches the Roth comparison.** Because a conversion can push federal AGI across Rhode Island's cliff, the
 conversion strategy the model scores best can change. Measured at the v5.69 build on four Rhode Island households: the best
@@ -920,7 +920,7 @@ first, then phaseout. A household at $300,000 joint with $30,000 and $20,000 of 
 *Which figures move:* Maine households above the thresholds pay **more** Maine tax; Montana households with
 Social Security pay **more** Montana tax; Montana households with anyone 65+ pay about $9 a person **less**.
 No other state changes. The seven remaining partial-SS states (CO, CT, MN, NM, RI, UT, VT) keep the
-half-rate approximation, and whether each still matches its post-reform law is a filed lead.
+half-rate approximation, and whether each still matches its post-reform law is a filed lead. *(Superseded at v5.85 — see "Social Security in the seven states follows each state's law".)*
 
 ## 12. Validation & known limitations
 
@@ -1868,6 +1868,32 @@ pass was taken at **v5.66**, which populated its income-conditioned exemption �
 section above. No `exclAge` moved for
 either state **in v5.59**: a gate change alongside a figure change cannot be attributed if a
 downstream figure moves. That deferral was spent at **v5.60**, which set both gates and moved no
-figure — see the section below. The eight-state `ss: 0.5` blend is unchanged. `MissingFeatures.md` D-11 records the group
+figure — see the section below. The eight-state `ss: 0.5` blend is unchanged. `MissingFeatures.md` D-11 records the group *(Superseded at v5.85 — see "Social Security in the seven states follows each state's law".)*
 these three states form — a modelled figure that is right on one side of a statutory gate and wrong
 on the other — as distinct from the D-3c optimistic class (NJ, VA).
+
+## Social Security in the seven states follows each state's law (v5.85)
+
+Until v5.85 seven states — CO, CT, MN, NM, RI, UT, VT — taxed `ss: 0.5`, half of federally taxable Social Security, for every
+household. Each state conditions it on income and/or age, so that single factor was wrong in both directions. Each now carries an
+`ssRule`, evaluated every year from the state layer's AGI measure (retirement income + pension + work + gains + taxable SS), the
+filing status and each spouse's age; taxable SS is split between spouses by gross benefit (`docs/SCOPE_SS_STATES.md`):
+
+- **Colorado** — 65+ subtract all taxable SS; 55–64 all of it at AGI ≤ $75,000 single / $95,000 joint, else up to $20,000. The SS
+  subtraction **consumes** the $24,000 pension cap (`ssSharesCap`), so on the example household Colorado's lifetime tax RISES
+  ($50,558 → $60,200): the old model gave both in full, which its own note said overstated the exclusion.
+- **Connecticut** — none taxed below $75,000 / $100,000 AGI; above, at most 25 % of total benefits (not applied if gross is unknown).
+- **Minnesota** — the simplified subtraction (TY2026: $86,410 / $110,780), −10 % per $4,000 above; the alternative method (≤ $5,840)
+  is **not modeled** — conservative.
+- **New Mexico** — none taxed at AGI ≤ $100,000 / $150,000; a cliff. **Rhode Island** — none taxed at full retirement age (67 here)
+  and AGI < $107,000 / $133,750 (the TY2025 figures; TY2026 unpublished at the build — conservative), per spouse; a cliff.
+- **Utah** — a credit of the rate × taxable SS, less $0.025 per dollar of AGI over $54,000 / $90,000; nonrefundable. Utah's rate is
+  4.45 % from 2026 (S.B. 60).
+- **Vermont** — none taxed at AGI ≤ $55,000 / $70,000, then proportionally over $10,000 (2025 Act 71; not indexed). The example
+  household sits above the line, so Vermont taxes all of it: lifetime $135,505 → $159,160 — the largest optimistic error removed.
+
+**Approximations kept:** the AGI measure omits tax-exempt interest (Utah's MAGI adds it); head-of-household and married-filing-
+separately thresholds are not modeled (the app has single and joint); Colorado's 55–64 pension subtraction is not modeled; the
+count-only path (callers without ages) treats its 65+ count as the age — conservative for Rhode Island's 67. Thresholds are the
+latest published and fixed; indexing belongs to D-18.
+
