@@ -151,6 +151,9 @@ tally "t47-$CUR"   python3 t47_phone_first_screen.py "$CUR"
 # t48 (v5.82) — legible text and usable targets (F-3/F-4), real Chromium, the BUILT page, all 13 skins; current leg only, like
 # t45/t47. Source invariants read ../<tag>.jsx by AST. ~10 minutes — the longest suite. Wired AT BUILD.
 tally "t48-$CUR"   python3 t48_legibility_targets.py "$CUR"
+# t49 (v5.84) — Engine A sees the spending draw (D-7): hand-verified bracket arithmetic, inertness on 11 households, the draw
+# taxed and drained, and AST checks on every caller. Current leg only (the feature does not exist on the prior leg).
+tally "t49-$CUR"   node t49_engineA_draw.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
