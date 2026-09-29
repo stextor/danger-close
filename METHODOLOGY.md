@@ -326,6 +326,20 @@ capital-gains excise. Verify your state.
 
 ## 7. Roth conversion modeling
 
+**The comparator sees the spending draw (v5.84).** Engine A — the strategy comparator, the solve-for grid, the grid's
+current-slider row and the stress solver's tax estimate — now includes the household's ordinary spending draw from
+Traditional in its ordinary base, per year: the series Engines B and C have used since v5.74, taken from the withdrawal plan
+at the slider's conversion amount (exact for the slider's own strategy, an approximation for the others). It is **taxed, not
+drained** (see "The Taxes tab and the drawdown", item 4). On the example household the Fill-12 % strategy's estate advantage
+falls $218,720 → $150,518, Fill-22 % turns negative, Stay-under-IRMAA falls to $884; the solver's winner stays Fill 12 %; the
+stress solver's tax estimate rises (the conservative direction).
+
+**The conversion caps differ between engines (D-4), measured, not fixed.** Engines B and C cap a conversion at
+`tradBal − max(RMD, QCD)`, Engine D at `tradNotional − RMD`. At the default $70,000/yr no cap binds in any engine on the 11
+fixture households. At $150,000–$250,000/yr the caps bind and the Taxes tab and the Withdrawal plan convert different
+lifetime totals — ≈ $90,000–$181,000 — mostly because Engine D's balance grows at its scenario rate (D-9, a decided
+difference) and runs out sooner; with a QCD the cap formula itself decides 2–4 years.
+
 **Who the age-65 deductions belong to, and an unused deduction against gains (v5.75).** Two
 corrections, both in the taxpayer-unfavourable direction — the model now reports MORE tax in the
 first case and LESS in the second, and both match the statute.
@@ -1392,11 +1406,14 @@ the engine itself, so a term added to the total later cannot go unlisted without
    concept — so gifted dollars never leave the Withdrawal plan's portfolio. Setting the QCD slider
    above $0 makes the Taxes tab and the Withdrawal plan disagree by the gifted amount. Disclosed
    in-app rather than modeled.
-4. **Engine A (the Roth comparator) is excluded, and its size is unmeasured.** Its ordinary base
-   has the same gap, but its taxable pool is sold only to fund taxes and ACA losses and its output
-   is a *differential* between conversion strategies, where a spending draw common to both paths
-   largely cancels. "Largely" is doing real work in that sentence: this is recorded as an open
-   finding, not a clean exclusion.
+4. **Engine A (the Roth comparator) — measured at v5.84, and it did NOT cancel.** Until v5.84 its ordinary base had
+   the same gap, excused as "largely cancels" between strategies. Measured (`docs/SCOPE_ROTH_COMPARATOR_DRAW.md`): four
+   strategies SIZE the conversion from this base, so the omission let them fill bracket room the household's spending
+   had already used. **v5.84 taxes the draw in Engine A** (the same series, all four callers). It does **not** drain it
+   from Engine A's balances: that needs each strategy's own spending path, which Engine A cannot compute, and one shared
+   series drained from every strategy decided the solver's winner by its own approximation (measured). So Engine A's
+   Traditional balance still omits spending — the same overstatement in every strategy — disclosed in the Field Manual;
+   follow-up **D-7b**.
 5. **The draws follow the selected Monte Carlo scenario**, as the gains already did. Lifetime
    ordinary draw on the example household is $352,485 base, $660,662 bear, $352,386 bull — so the
    Taxes tab's headline figure now moves when the scenario picker moves. That is correct, and new.
