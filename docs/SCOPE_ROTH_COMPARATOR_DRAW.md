@@ -1,6 +1,6 @@
 # SCOPE — the Roth comparator sees the spending draw (D-7), with D-4 measured and disclosed
 
-**ACTIVE — decisions H-1 to H-4 (§6) open; build after they are answered.** Target **v5.84**, built from **v5.83** (source
+**FULFILLED — shipped in v5.84.** H-2, H-3, H-4 as recommended; **H-1 superseded by K-1** and a stress-solver decision **J-1 superseded by K-2** at the build (§7). Follow-up **D-7b** (a per-strategy spending model in Engine A) is open. Retained as the record. Target **v5.84**, built from **v5.83** (source
 `47beecf81eb45bd6faea899fa093dd81`, built `index.html` `9f39232ee73b0d46f25933302dcf7474`, repo `d5be743`). **A modelling
 release**: Engine A's figures change, so METHODOLOGY changes and the CHANGELOG discloses every moved headline.
 
@@ -109,3 +109,32 @@ question gets the same answer; (b) the Roth tab only. **Recommend (a)**; the str
 
 **H-4 · D-4.** (a) **Disclose in METHODOLOGY with §1's figures, no fix** — it binds only well above the default and mostly
 through D-9, a decided difference; (b) align the cap formulas now. **Recommend (a).**
+
+## 7 · Revision at the build — 2026-09-29 (Steve decided each step)
+
+**H-1 (a) was built first and then withdrawn on measurement.** Tax **and** drain shipped the draw into Engine A exactly as scoped,
+`t49` 11/0 — and moved the example household's solver winner **Fill 12 % → Fill 24 %**, and the stress solver's lifetime-tax input
+**down** ($225,275 → $217,507), contradicting §3's "the conservative direction". The build STOPPED and reported (J-1, J-2).
+
+**J-2's measurement — does the flip survive exact draws?** Each of the solver's 21 fixed cells can take its OWN draw (Engine D
+plans any fixed amount); the four policy cells cannot. On all 11 fixture households:
+- **Tax and drain:** the winner changed between the slider's series and the exact one in **11 of 11**; the draw-series choice moved
+  the best estate by ≈ **$100K–$150K** — the approximation decided the answer.
+- **Tax only:** Fill 12 % in 7 of 11 on the slider's series, and Fill 12 % or a fixed $40K–$130K on exact draws, within
+  ≈ **$15K–$30K** — the answer barely depends on the series.
+Draining is only right with each strategy's OWN spending path, which Engine A cannot compute (no spending model; policy
+strategies have no Engine D plan). **K-1 (Steve): tax the draw, do not drain it**; disclose that Engine A's balances still omit
+spending — the same overstatement in every strategy; file **D-7b** (a per-strategy spending model in Engine A) as the follow-up.
+
+**K-2 (Steve), superseding J-1:** under tax-only the stress solver's input RISES ($225,275 → $270,640 on the example) — the
+conservative direction §3 intended — so it receives the draw like the other three callers.
+
+**Shipped result on the example household** (UI defaults) — identical to §1's tax-only counterfactual, to the dollar: Fill 12 %
+$218,720 → **$150,518**; Fill 22 % $23,915 → **−$25,782**; Stay under IRMAA $63,468 → **$884**; your slider $125,753 → $112,736.
+**The solver's winner stays Fill 12 %**; the $70K slider ranks #11 → **#8** of 25.
+
+**Corrections of my own work during the build** (each caught by `t49`): (1) the hand-verified cases first ran with the example's
+income streams loaded — the harness trap the project instructions name — and read $2,160 for a $1,200 draw; `t10`'s neutraliser is
+now applied. (2) A check expected lifetime tax to RISE with the draw; with the drain it can fall (early draws cut later RMD tax) —
+the invariant is that the estate falls. (3) The solver's current-slider row builds a SECOND `PO` object the first edit missed;
+§3's census counted call sites, not declarations.

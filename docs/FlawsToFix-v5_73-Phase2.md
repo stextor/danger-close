@@ -11,7 +11,10 @@ and the scope's standalone top-five summary is written only after Phase 4.
 `FlawsToFix-v5_73-Phase2.md`, with a manifest row.
 
 **Post-audit update, v5.74 (2026-09-21).** **C-8 is FIXED at v5.74** (`docs/SCOPE_TAXES_DRAWDOWN.md`, retired with its
-build record in §12; pinned by `t40` on both legs). The findings below are left as written. **Filed here — two open
+build record in §12; pinned by `t40` on both legs). The findings below are left as written. > **Status at v5.84** (`docs/SCOPE_ROTH_COMPARATOR_DRAW.md`): **D-7 FIXED** — Engine A taxes the draw (measured: it did
+> not cancel); the balance drain is follow-up **D-7b**. **D-4 MEASURED, DISCLOSED, NOT FIXED** — binds only at $150K+/yr, mostly via D-9.
+
+**Filed here — two open
 follow-ups whose only pooled record was that scope, which leaves the pool at this ship:** (1) **D-4 · the conversion caps
 still differ.** Engine B caps a conversion at `tradBal − max(rmd_y, qcd_y)`, Engine D at `tradNotional_boy − rmd_y`
 (both read in the v5.74 source). The scope expected them to converge once the engines shared one balance path, but D-9
