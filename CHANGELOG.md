@@ -1,5 +1,53 @@
 # Changelog
 
+## v5.84 — the Roth comparator sees your spending draw (D-7), with D-4 measured
+
+Source `1d7208800a325e78220917d3f767b517` · built `index.html` `985b488bf4d622970ef52f055d90bbaa` · built from v5.83 `47beecf81eb45bd6faea899fa093dd81`. **A modelling release:**
+Engine A's figures move (below); METHODOLOGY §7 and "The Taxes tab and the drawdown" item 4 are rewritten.
+
+**Suite: 4,743 app checks, 0 failed, 0 DIED** — 48 app suites plus MC parity 10/10; tooling `t21` 64, `domdiff` 32, `sets` 12 + 12 (GRAND 4,873),
+run from the packaged copies. **`t49` is new** (11, dollar-exact at the engine). `smoke_built` **22 passed, 0 failed**.
+Negative controls: `controls_v584_draw.py` **6 of 6**.
+
+### What changed, and why
+
+- **Engine A — the Roth tab's strategy comparator, its solve-for grid, the grid's current-slider row and the stress solver's
+  tax estimate — now taxes the household's spending draw from Traditional.** It never had: v5.74 put the draw into the Taxes and
+  IRMAA engines and excused Engine A because a draw "common to both paths largely cancels". Measured, it does not: four of the
+  six strategies SIZE the conversion from this base, so they were filling bracket room the household's own spending had
+  already used. The draw is the series the Taxes tab already uses (the withdrawal plan at the slider amount).
+- **What moved on the example household** (UI defaults), estate advantage over NO CONVERSIONS: Fill 12 % **$218,720 → $150,518**
+  (it now converts $989,133, not $1,203,528); Fill 22 % **$23,915 → −$25,782**; Stay under IRMAA **$63,468 → $884**; your $70K
+  slider $125,753 → $112,736. **The solve-for grid's winner stays Fill 12 %**; the $70K slider ranks **#8 of 25** (was #11). The
+  stress solver's lifetime-tax input rises **$225,275 → $270,640**, so its thresholds move in the conservative direction.
+- **The draw is taxed, not drained** — a decision made on measurement at the build. Taxing AND draining it (the scope's first
+  choice) flipped the grid's winner to Fill 24 %, but that answer came from the approximation, not the plan: giving each
+  fixed-amount cell its own exact draw changed the winner again in all 11 test households, by $100K–$150K. Taxed only, the
+  draw-series choice moves the result by ≈ $15K–$30K. Draining properly needs each strategy's own spending path, which
+  Engine A cannot compute; filed as **D-7b**.
+- **D-4 (the engines' conversion caps differ) — measured and disclosed, not fixed.** No cap binds at the default $70K/yr; at
+  $150K–$250K/yr the Taxes tab and the Withdrawal plan convert lifetime totals ≈ $90K–$181K apart, mostly through D-9's decided
+  growth difference. METHODOLOGY §7.
+
+### Limitations, stated plainly
+
+- **Engine A's balances still omit spending** — every strategy keeps the same overstated Traditional balance. Disclosed in the
+  Field Manual's Roth tab description and METHODOLOGY; D-7b.
+- **The draw series is exact only for the slider's own strategy**; other strategies use the same series.
+- The stress solver's tax estimate is still the "current" strategy's lifetime tax spread evenly over the plan.
+
+### Found while building, and worth recording
+
+- **The build stopped twice and went back to Steve** rather than adapting: once when the first design moved the stress
+  estimate in the optimistic direction (the opposite of the scope's claim), and once when measurement showed that design's new
+  winner came from its own approximation. Decisions H-1 → K-1 and J-1 → K-2 are in the scope's §7.
+- **`t49` caught three mistakes of mine before they shipped:** its hand-verified cases first ran with the example household's
+  income streams loaded (the harness trap the project instructions name) and read $2,160 for a $1,200 draw; a check expected
+  lifetime tax to rise with the draw, which the drain could legitimately reverse; and the grid's current-slider row builds a
+  SECOND input object the first edit missed — the scope's census had counted call sites, not declarations.
+- **The shipped figures equal the scope's tax-only counterfactual to the dollar** ($150,518, −$25,782, $884): the code does
+  what was measured.
+
 ## v5.83 — every skin readable: light-skin surfaces, selected items, hovered rows
 
 Source `47beecf81eb45bd6faea899fa093dd81` · built `index.html` `9f39232ee73b0d46f25933302dcf7474` · built from v5.82 `f6a54749bb14a291971395b0db20d11f`. A **presentation
