@@ -81,8 +81,9 @@ rules' thresholds for CO ($75K / $95K, $20K), NM ($100K / $150K), UT ($54K / $90
   *higher* of the $8,000 or the sum of other modifications including Social Security, and from TY2026 Social Security is fully
   exempt. A retiree whose benefit is $8,000 or more gets nothing further; the model grants both — **optimistic by up to
   $8,000 per person per year**. This is a modelling rule, not a stale figure, and the obvious mechanism (`ssOffset`) is
-  reserved for MD/ME by a v5.56 decision — **file it as its own entry for Steve; do not fold into D-18.**
-- **Rates for D-18b (secondary sources; unread at primary):** GA 5.19 % → **4.99 %** retroactive to TY2026 (HB 463, May 2026);
+  reserved for MD/ME by a v5.56 decision. ✅ **Settled (Steve, 2026-09-29): filed as its own entry, D-21, and fixed in a
+  separate release after v5.86 — not folded into D-18.** v5.86 files the entry in `MissingFeatures.md`; the fix gets its own scope.
+- **Rates for the follow-on — filed by v5.86 as D-22 ("D-18b" is this scope's working label for it) (secondary sources; unread at primary):** GA 5.19 % → **4.99 %** retroactive to TY2026 (HB 463, May 2026);
   OK 4.75 % → **4.5 %** (HB 2764). The remaining 40 are unmeasured.
 - **Next refresh, already known:** GA $70,000 at 65+ from TY2027.
 
@@ -95,7 +96,8 @@ rules' thresholds for CO ($75K / $95K, $20K), NM ($100K / $150K), UT ($54K / $90
   which is why the proposal is a field. The My Data line (L12921) replaces the blanket "Model (2026 approx)" with each
   figure's year (D18-1 settles the wording for rates).
 - **C · Disclosures.** Each changed row's `note`; METHODOLOGY's state section (three $48,216 sites); `MissingFeatures.md`
-  D-18 → fixed, with the recurring refresh noted; plus any §1b corrections (D18-2).
+  D-18 → fixed, with the recurring refresh noted, and **two new entries filed: D-21 (WV, §1c) and D-22 (the rate refresh,
+  §1c)**; plus the §1b corrections (D18-2).
 
 ## 3 · Site census (v5.85, AST)
 
@@ -149,6 +151,6 @@ correction, as Utah's rate rode with v5.85 (L-4); (b) file it separately. **Reco
 ## 7 · Status
 
 Ready to build. §1 complete: two value changes (ME cap, LA), one note correction (SC), the rest unchanged — of which
-ME's thresholds, MT and RI are kept at their latest published year (TY2025) and disclosed, not confirmed for TY2026. Separately: put §1c's WV
-finding to Steve as its own entry — it does not block this build per OPERATIONS (test first, shown failing on
+ME's thresholds, MT and RI are kept at their latest published year (TY2025) and disclosed, not confirmed for TY2026. WV (§1c) settled as D-21,
+after v5.86 — it does not block this build per OPERATIONS (test first, shown failing on
 v5.85).
