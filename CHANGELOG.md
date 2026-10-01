@@ -1,5 +1,55 @@
 # Changelog
 
+## v5.86 — every state dollar figure carries its tax year (D-18); Maine's and Louisiana's refreshed
+
+Source `74c880bc3af80865f6b99759cc7bba3b` · built `index.html` `bad51541661e84bd0dd245e77f243150` · built from v5.85 `a1d9c5e03e4aa7c059427fdf4fc84a98`. **A modelling release:**
+state tax moves for households in Maine and Louisiana; METHODOLOGY gains a section.
+
+**Suite: 4,832 app checks, 0 failed, 0 DIED** — 50 app suites plus MC parity 10/10; tooling `t21` 64, `domdiff` 32, `sets` 12 + 12 (GRAND 4,962),
+run from the packaged copies. **`t51` is new** (57, primary-source values, an extinction check, dollar-exact fixture households, the My Data line through the DOM). `smoke_built` **22 passed, 0 failed**.
+Negative controls: `controls_v586_state_years.py` **15 of 15**.
+
+### What changed, and why
+
+- **Nothing in the state table said which tax year a dollar figure came from**, and My Data headlined every state "Model (2026
+  approx)" while Maine's, Montana's and Rhode Island's notes said 2025. Every dollar-bearing figure — 31 of them, on 23 states —
+  now records the tax year it was checked for against a primary source, and My Data shows those years ("Dollar figures by tax
+  year: exclusion 2026 · income test 2025"). The effective rate is called an approximation and carries no year: the rates were
+  not re-read in this release (filed as D-22), and a displayed year is a claim.
+- **Maine's pension deduction cap is $49,824** (TY2026, Maine Revenue Services' 2026 Form 1040ES-ME) — the model had $48,216
+  (2025). Its phase-out thresholds stay at the TY2025 $125,000 / $250,000, which Maine had not updated when this was built, and
+  say so.
+- **Louisiana's retirement-income exemption is $12,324** (TY2026) — the model had $6,000, the pre-2025 amount. The state
+  doubled it to $12,000 from 2025 and indexes it from 2026; the TY2026 figure is the Department of Revenue's own statement in its
+  proposed rule of 20 June 2026. It covers pension, annuity and IRA income.
+- **South Carolina's note** gave the under-65 retirement deduction as $10,000; it is $3,000. The modelled $15,000 at 65+ was right.
+- **The Field Manual** called the whole state module "2026 approximations" in two places; both now say the rates are
+  approximate and each dollar figure is dated in My Data.
+- **Checked and unchanged**, each against its state's own source: AL, AR, CO, CT, DE, GA, KY, MD, MN, NJ, NM, NY, OK, RI, UT,
+  VA, VT, WI, WV. Bills that would have raised Kentucky's, Alabama's, Maryland's and Delaware's did not pass. Montana ($5,660) and
+  Rhode Island keep their 2025 figures until those states publish 2026's, and are shown as 2025.
+- **What moved on the example household: nothing, by construction** — it has no state selected. The evidence is `t51`'s fixture
+  households, computed by hand: e.g. a single 70-year-old in Maine with a $60,000 IRA draw and $20,000 of Social Security pays
+  $2,157.58 (was $2,272.56); in Louisiana with $20,000 of IRA income, $230.28 (was $420.00).
+
+### Limitations, stated plainly
+
+- **Louisiana's larger amount enlarges an existing approximation.** Louisiana allows each person the exemption only against that
+  person's own retirement income; the model nets it against the household's, which overstates it when one spouse receives most
+  of that income (D-12). Louisiana's note now says so.
+- **West Virginia is optimistic by up to $8,000 per person per year**: its $8,000 is not in addition to its Social Security
+  exemption, and the model gives both. Found here, filed as D-21, fixed in its own release.
+- **New York's and Arkansas's exclusions start earlier in law than the model's 65** (conservative). New York's note still says
+  59½; whether to correct it is decision D18-3, open, filed as D-23.
+- The 42 effective rates are not re-read (D-22); Georgia's and Oklahoma's look stale for 2026 on secondary sources.
+
+### Found while building, and worth recording
+
+- **`t51` caught my own census miss before it shipped:** the Field Manual's "2026 approximations" appeared twice, and my first
+  search reported one hit per string — the whole manual is one string. The second site was fixed and the tool corrected.
+- **10 existing test pins moved**, all Maine, each recomputed by hand at $49,824 and version-gated so earlier releases
+  keep theirs. 8 of them derive from the old cap arithmetically and were invisible to a literal search; the run found them.
+
 ## v5.85 — Social Security in seven states follows each state's own law (D-19); Utah's 2026 rate
 
 Source `a1d9c5e03e4aa7c059427fdf4fc84a98` · built `index.html` `7ff3d434fbfb13a32e3582870d991834` · built from v5.84 `1d7208800a325e78220917d3f767b517`. **A modelling release:**
