@@ -279,7 +279,9 @@ deliberately **not** applied: South Carolina's under-65 tier, which is a second 
 earlier start, and is stated in its own state note. *(⚠ Corrected at v5.68: until then this sentence
 also named New Jersey's 62 as unapplied. v5.67 applied it, as the income-conditioning section above
 says, and this line was left contradicting that section for one release.)* **Thirteen of the nineteen exclusion states remain unverified, so more
-thresholds may differ from 65 than are modelled here.**
+thresholds may differ from 65 than are modelled here.** *(Updated v5.86: D-18 read every exclusion state's figure against a
+primary source. Two start earlier in law than modelled — Arkansas (IRAs from 59½, employer plans at any age) and New York (59½) —
+and both are applied from 65, which overstates their tax: the conservative direction. See *State dollar figures carry their tax year (v5.86)*.)*
 
 One shared calculator serves the Taxes engine, the Roth strategy comparator, and the Withdrawal
 engine.
@@ -889,17 +891,19 @@ recorded as limits; this is input validation, not a change to any engine.
 ### Maine's phaseout and Montana's corrections (v5.73)
 
 **Maine — the pension-deduction phaseout is modelled.** 36 M.R.S. §5122(2)(M-3), from TY2025: each
-person's deduction under M-2(1)(a) — $48,216, already reduced dollar-for-dollar by the Social Security
+person's deduction under M-2(1)(a) — $48,216 at v5.73 ($49,824 from v5.86, TY2026), already reduced dollar-for-dollar by the Social Security
 that person received — is reduced by itself times *(federal AGI − applicable amount) ÷ $100,000*, the
 fraction floored at 0 and capped at 1. Applicable amounts are **$250,000 joint** and **$125,000 single**, so
 the deduction is gone at **$350,000** and **$225,000**. The order matters and is the statute's: offset
 first, then phaseout. A household at $300,000 joint with $30,000 and $20,000 of Social Security keeps
-**$23,216** (half of $18,216 + $28,216); applying the phaseout first would leave $4,108.
+**$23,216** (half of $18,216 + $28,216) on v5.73's figures; applying the phaseout first would leave $4,108. At v5.86's $49,824 the
+same household keeps **$24,824** (half of $19,824 + $29,824), and phaseout-first would leave $4,912.
 - *Measure:* the model's state AGI — retirement, pension, other ordinary income, gains and federally
   taxable Social Security. It carries **no dividends or interest**, so a household whose income is
   materially dividend- or interest-driven sits lower on the phaseout than the statute puts it
   (**optimistic**, as for every conditioned state).
-- *Figures:* TY2025 throughout ($48,216 and both thresholds). Maine indexes the thresholds after 2025.
+- *Figures:* TY2025 throughout at v5.73 ($48,216 and both thresholds). Maine indexes the thresholds after 2025. *(Superseded
+  at v5.86: the cap is $49,824, TY2026; the thresholds stay TY2025 because Maine had not published TY2026's — see *State dollar figures carry their tax year (v5.86)*.)*
 - *Still not modelled:* head-of-household and separate-filer thresholds (the model files joint or single),
   military retirement pay (which the statute does not phase out), Railroad Retirement, and **the absence of
   an age-65 test** — Maine's deduction is not limited to people 65 and over, but the model applies it from
@@ -1707,7 +1711,7 @@ the tax.
 ### Two modelled amounts were stale and were corrected in the same release
 
 Maryland's modelled cap moved **$36,200 → $40,600** (2026) and Maine's **$35,000 → $48,216** (2025,
-indexed to the Social Security maximum). Both were verified against the states' own revenue
+indexed to the Social Security maximum). *(Maine's is $49,824 from v5.86, TY2026 — see *State dollar figures carry their tax year (v5.86)*.)* Both were verified against the states' own revenue
 authorities. Correcting the caps in the same release means the direction reported above is the net
 of both changes, not of the offset alone.
 
@@ -1895,5 +1899,46 @@ filing status and each spouse's age; taxable SS is split between spouses by gros
 **Approximations kept:** the AGI measure omits tax-exempt interest (Utah's MAGI adds it); head-of-household and married-filing-
 separately thresholds are not modeled (the app has single and joint); Colorado's 55–64 pension subtraction is not modeled; the
 count-only path (callers without ages) treats its 65+ count as the age — conservative for Rhode Island's 67. Thresholds are the
-latest published and fixed; indexing belongs to D-18.
+latest published and fixed; indexing belongs to D-18. *(v5.86 dates each of these figures; see *State dollar figures carry their tax year (v5.86)*.)*
 
+
+## State dollar figures carry their tax year (v5.86)
+
+Until v5.86 nothing in the state table said which tax year a dollar figure came from, and My Data headlined every state
+"Model (2026 approx)" while three notes (ME, MT, RI) said their figures were 2025. Every dollar-bearing figure now carries the
+tax year it was verified for against a primary source — `years` on each of the 23 rows that hold one, keyed by the field that
+holds it (`excl65`, `exclTest`, `ssRule`; 31 figures in all) — and My Data shows those years instead of the blanket label
+(`docs/SCOPE_D18_STATE_FIGURES.md`).
+
+- **What a displayed year means.** The tax year the figure was checked for. A figure whose current-year value was unpublished
+  when this build was made keeps its latest published year and says so: **Maine's phase-out thresholds** ($125,000 / $250,000,
+  TY2025; Maine indexes them), **Montana's** 65+ subtraction ($5,660, TY2025; the Department of Revenue sets each year's figure by
+  1 November, MCA 15-30-2120(7)) and **all of Rhode Island's** (TY2025; Rhode Island publishes a year in arrears). Every other
+  figure is TY2026.
+- **Rates carry no year.** The 42 nonzero effective rates were not re-read in this release (filed as D-22), and a displayed year
+  is a claim, so My Data calls the rate an approximation and dates only what was verified.
+- **Maine's cap: $48,216 → $49,824** (TY2026), the Social Security maximum at full retirement age on 1 January 2026 (Maine Revenue
+  Services, 2026 Form 1040ES-ME, line 2). Everything that derives from it moves with it: the Social Security offset starts from
+  the higher figure and the phase-out scales the higher result.
+- **Louisiana's exemption: $6,000 → $12,324** (TY2026). Act 11 of the 2024 Third Extraordinary Session doubled it to $12,000 from
+  TY2025 and indexes it to CPI-U from 2026 (R.S. 47:44.1); the model had never picked up the doubling. The TY2026 amount is the
+  Department of Revenue's own statement, in the fiscal statement of its proposed rule for LAC 61:I.1311 (Louisiana Register,
+  20 June 2026) — no separately posted figure was found. It covers pension, annuity **and IRA** distributions.
+  ⚠ **An approximation this change enlarges:** Louisiana allows each person the exemption only against that person's own
+  retirement income; the model nets each qualifying person's amount against the household's. For a couple where one spouse
+  receives most of the retirement income, that overstates the exemption — and doubling the amount doubles the overstatement. The
+  same household-level netting applies to every per-person exclusion in the table; Louisiana's note now says so.
+- **South Carolina's note corrected.** It gave the under-65 retirement deduction as $10,000; it is $3,000 (the $10,000 applies at
+  65+, where the $15,000 senior deduction absorbs it). The modelled $15,000 at 65+ was right and is unchanged.
+- **The Field Manual** described the whole state module as "2026 approximations" in two places; both now say rates are
+  approximate and each dollar figure is dated in My Data.
+- **What was read and did not change** (scope §1b, §3b): AL, AR, CO, CT (all 20 bands), DE, GA, KY, MD, MN, NJ, NM (all 18
+  bands, TRD's 2025 instructions), NY, OK, RI, UT, VA, VT, WI, WV. Bills that would have changed KY, AL, MD and DE did not pass.
+- **Nothing here moves the example household.** It has no state selected, so it takes the flat-rate fallback (OPERATIONS §K1). The evidence
+  is `qa/t51_state_figure_years.mjs`: fixture households in Maine, Louisiana and New Jersey, each computed by hand to the dollar,
+  including New Jersey's inclusive boundary at exactly $100,000.
+
+**Found and recorded, not changed here:** West Virginia's $8,000 is not additive to its Social Security modification — the state
+gives the higher of the two — so the model is optimistic by up to $8,000 per person per year (D-21, its own release). Georgia's
+65+ amount rises to $70,000 in TY2027. Arkansas and New York allow their exclusions earlier than the model's 65 (see the
+age-threshold paragraph above).
