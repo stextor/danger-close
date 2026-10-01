@@ -1,5 +1,46 @@
 # Changelog
 
+## v5.87 — six state notes say when the model applies the exclusion (D-23)
+
+**A PRESENTATION release.** No figure, rate, rule or age moved; the engines are unchanged (MC parity 10/10). Six `STATE_RULES` notes
+described a start age the model does not use, or none. Measured on v5.86 (single filer, $50,000 retirement income, through the shim):
+
+- **New York** said "59½+"; the model applies the $20,000 from 65. **Georgia** named "$35K at 62–64"; the model applies nothing before
+  65. Both overstate tax for a younger retiree (conservative), and the notes now say so.
+- **Iowa** said "55+" and **Pennsylvania** "59½+"; the model exempts retirement income at **any age** (`retExempt` has no age gate), so it
+  **understates** tax for a younger retiree — the optimistic direction. Both notes now say so plainly; changing the model is **D-24**.
+- **Arkansas** and **Oklahoma** named no age; both now say "applied here from 65". Arkansas's note adds the law's split (IRAs from 59½,
+  employer plans at any age). Oklahoma's claims no law age: OAC 710:50-15-49 does not settle one, so it says the state's condition was not verified.
+
+The law each note states was read at the build from: tax.ny.gov (retired persons); Arkansas DFA Subject 206; Georgia Dept. of Audits and
+Accounts' Retirement Income Exclusion evaluation; Iowa DOR Retirement Income Tax Guidance; Pennsylvania DOR rev-636 and the PA-40 instructions.
+
+**Scope grew at the build, by its own rule.** The draft (`docs/SCOPE_D23_AGE_START_NOTES.md`) covered New York and Arkansas; its census
+found the other four and stopped; Steve widened it (D23-D) and sent Iowa's and Pennsylvania's modelling to D-24 (D23-E). The scope's
+proposed invariant was also wrong in both directions (it would have compared the `retExempt` rows to 65 and missed Georgia's range); the
+shipped one is the revised form (§7b).
+
+**New suite `t52`** (34 checks, current leg; node + DOM): each rewritten note typed from its source, the model's behaviour behind
+each disclosure dollar-exact by hand, an extinction check over all 51 rows (a note names only the age the model applies — `exclAge ?? 65`,
+or any age for `retExempt` — unless it carries an "applied here …" disclosure, which must itself be true; no exclusion row silent), an
+empty-set guard, and My Data's line for New York, Pennsylvania and Georgia through the DOM. **Shown failing 18 of 34 on v5.86 first.**
+Negative controls `qa/tools/controls_v587_age_notes.py` (repo-only): **12 of 12** — each note reverted, "59½+" planted in a third 65-floor row,
+a false disclosure (Wisconsin), New York given `exclAge: 59` under its note, Montana's note made silent, Iowa's drifting into the income-limited set.
+
+**Limitations, disclosed:**
+- **D-25 (found at the build, decided for v5.88):** My Data's generated summary still reads "65+ exclusion" for every row, which misstates
+  Delaware (60), Kentucky (any age), Rhode Island and Wisconsin (67). A different site from the notes, pre-existing since v5.55, and not
+  widened into mid-build. `t52`'s extinction covers notes, **not** that summary.
+- **D-24:** Iowa's and Pennsylvania's exemptions remain optimistic below the law's ages; the other twelve `retExempt` rows' age rules were not read.
+- METHODOLOGY corrected in place: it listed "IA 55+" among the exemptions as though the model applied that age.
+
+**Suite, run from the packaged copies:** 4,866 app checks across **51 app suites**, 0 failed, 0 DIED; MC parity 10/10; tooling `t21`
+64, `domdiff` 32, `sets` 12 + 12; **GRAND 4,996** — v5.86's 4,962 plus `t52`'s 34, so no
+existing check moved. ⚠ **Run from the PACKAGED copies as two halves at once (approved by Steve, 2026-10-01): one turn cannot hold the ~40-minute single run (a command is capped at 300 s and a turn at about eight calls; two single runs died at the turn boundary, after t29 and t47). Two run folders were built by mk_runfolder.sh v586 v587 from the same fresh clone of 754e948 with the github/ files overlaid; each ran the shipped runsuite.sh through a session-only copy whose one added line skips the other half's labels (half B: t45, t47, t48; half A: everything else, tooling included). Half A GRAND 4774, half B GRAND 222, both exit 0, no suite ran in both, none DIED.** Per-suite counts are in `TESTING.md`. `smoke_built` on the packaged `index.html`: 22 passed, 0 failed. The prior
+release's page was rebuilt byte-identical first (`bad51541…`), so the scaffold is complete.
+
+Source `3bb42add57012e0e8a9d6df350afd0df` · built `index.html` `0b9b36a0f33baac1df933a8a909393a5`
+
 ## v5.86 — every state dollar figure carries its tax year (D-18); Maine's and Louisiana's refreshed
 
 Source `74c880bc3af80865f6b99759cc7bba3b` · built `index.html` `bad51541661e84bd0dd245e77f243150` · built from v5.85 `a1d9c5e03e4aa7c059427fdf4fc84a98`. **A modelling release:**
