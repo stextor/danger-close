@@ -157,6 +157,9 @@ tally "t49-$CUR"   node t49_engineA_draw.mjs "$CUR"
 # t50 (v5.85) — the seven SS states follow their own law (D-19): statute-typed cases at every threshold and phase-out, CO's
 # shared pension cap, RI's age test per spouse, Utah's 4.45 % rate. Current leg only.
 tally "t50-$CUR"   node t50_ss_states.mjs "$CUR"
+# t51 (v5.86) — state dollar figures carry their tax year; Maine and Louisiana refreshed (D-18): primary-source values, the
+# extinction (no dollar figure without a year), fixture households dollar-exact, and the My Data line through the DOM.
+tally "t51-$CUR"   node t51_state_figure_years.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

@@ -19,13 +19,16 @@
 import { createRequire } from "module";
 
 const VER = process.argv[2];
-const KNOWN_VERSIONS = ["v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585"];
+const KNOWN_VERSIONS = ["v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.\n    Registered: ${KNOWN_VERSIONS.join(", ")}`);
   process.exit(1);
 }
-const POST = VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585"));
+const POST = VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586"));
 
+// v5.86 (D-18): Maine's cap is $49,824 (TY2026, MRS 2026 Form 1040ES-ME line 2) from v586; every case below that derives from
+// the cap is gated so each earlier leg keeps the $48,216 it shipped with. Recomputed by hand at the build (fractions, not floats).
+const CAP586 = (Number(String(VER).replace(/[^0-9]/g, "")) || 0) >= 586;
 const g = (await import(`./app_${VER}.mjs`)).__g;
 const S = g.stateTaxAnnual, R = g.STATE_RULES();
 
@@ -41,22 +44,26 @@ console.log(`t39 \u2014 MAINE PHASEOUT / MONTANA (${VER})`);
 // A household is given by its AGI; all non-SS income is retirement income so the base stays linear.
 //   joint, both 67, SS received $30,000 and $20,000, federally taxable SS $42,500 (85% of $50,000)
 //   offset caps: (48,216 − 30,000) + (48,216 − 20,000) = 18,216 + 28,216 = 46,432
+//   v586+: (49,824 − 30,000) + (49,824 − 20,000) = 19,824 + 29,824 = 49,648
 const ME_J = (agi) => S({ code: "ME", retIncome: agi - 42500, ssTaxableFed: 42500,
   ssGrossA: 30000, ssGrossB: 20000, ageA: 67, ageB: 67, single: false });
-//   single, 67, SS received $24,000, taxable $20,400; offset cap 48,216 − 24,000 = 24,216
+//   single, 67, SS received $24,000, taxable $20,400; offset cap 48,216 − 24,000 = 24,216 (v586+: 49,824 − 24,000 = 25,824)
 const ME_S = (agi) => S({ code: "ME", retIncome: agi - 20400, ssTaxableFed: 20400,
   ssGrossA: 24000, ageA: 67, single: true });
 
 // M-1 · joint, AGI $249,999 — below the threshold, identical on both legs
 //   0.0715 × (207,499 − 46,432) = 0.0715 × 161,067 = 11,516.2905
-T("M-1 joint AGI $249,999: the full offset-reduced deduction, $46,432 (both legs)", ME_J(249999), 11516.2905);
+//   v586+: 0.0715 × (207,499 − 49,648) = 0.0715 × 157,851 = 11,286.3465
+T("M-1 joint AGI $249,999: the full offset-reduced deduction (both legs)", ME_J(249999), CAP586 ? 11286.3465 : 11516.2905);
 // M-2 · joint, AGI $250,000 — AT the threshold the numerator is zero: still the full $46,432
 //   0.0715 × (207,500 − 46,432) = 0.0715 × 161,068 = 11,516.362
-T("M-2 joint AGI $250,000: at the threshold, nothing is phased out (both legs)", ME_J(250000), 11516.362);
+//   v586+: 0.0715 × (207,500 − 49,648) = 0.0715 × 157,852 = 11,286.418
+T("M-2 joint AGI $250,000: at the threshold, nothing is phased out (both legs)", ME_J(250000), CAP586 ? 11286.418 : 11516.362);
 if (POST) {
   // M-3 · AGI $300,000: fraction 50,000 / 100,000 = 0.5 → 46,432 × 0.5 = 23,216
   //   0.0715 × (257,500 − 23,216) = 0.0715 × 234,284 = 16,751.306
-  T("M-3 joint AGI $300,000: half phased out, deduction $23,216", ME_J(300000), 16751.306);
+  //   v586+: 49,648 × 0.5 = 24,824; 0.0715 × (257,500 − 24,824) = 0.0715 × 232,676 = 16,636.334
+  T("M-3 joint AGI $300,000: half phased out", ME_J(300000), CAP586 ? 16636.334 : 16751.306);
   // M-4 · AGI $350,000: fraction 1 → deduction 0
   //   0.0715 × 307,500 = 21,986.25
   T("M-4 joint AGI $350,000: fully phased out", ME_J(350000), 21986.25);
@@ -67,14 +74,16 @@ if (POST) {
   //   0.0715 × (104,600 − 24,216) = 0.0715 × 80,384  = 5,747.456
   //   0.0715 × (154,600 − 12,108) = 0.0715 × 142,492 = 10,188.178
   //   0.0715 × 204,600                                 = 14,628.9
-  T("M-6a single AGI $125,000: at the single threshold, full $24,216", ME_S(125000), 5747.456);
-  T("M-6b single AGI $175,000: half phased out, $12,108", ME_S(175000), 10188.178);
+  //   v586+: 0.0715 × (104,600 − 25,824) = 0.0715 × 78,776 = 5,632.484; 0.0715 × (154,600 − 12,912) = 0.0715 × 141,688 = 10,130.692
+  T("M-6a single AGI $125,000: at the single threshold, the full offset-reduced deduction", ME_S(125000), CAP586 ? 5632.484 : 5747.456);
+  T("M-6b single AGI $175,000: half phased out", ME_S(175000), CAP586 ? 10130.692 : 10188.178);
   T("M-6c single AGI $225,000: fully phased out", ME_S(225000), 14628.9);
   // M-7 · ORDER. At AGI $300,000 the statute's order (offset, then phaseout) gives $23,216 (M-3).
   //   Phaseout first would give 48,216 × 0.5 = 24,108 per person, then offsets: max(0, 24,108 − 30,000) = 0
   //   and 24,108 − 20,000 = 4,108 → $4,108, tax 0.0715 × (257,500 − 4,108) = 18,117.528. It must NOT be that.
-  T("M-7 the phaseout applies AFTER the Social Security offset (not 18,117.528)",
-    Math.abs(ME_J(300000) - 18117.528) > 1 ? 1 : 0, 1);
+  //   v586+: phaseout first gives 24,912 per person → offsets 0 and 4,912 → 0.0715 × 252,588 = 18,060.042. It must NOT be that.
+  T("M-7 the phaseout applies AFTER the Social Security offset (not the phaseout-first figure)",
+    Math.abs(ME_J(300000) - (CAP586 ? 18060.042 : 18117.528)) > 1 ? 1 : 0, 1);
 } else {
   // prior leg: no phaseout at any AGI — the deduction stays $46,432
   //   0.0715 × (257,500 − 46,432) = 0.0715 × 211,068 = 15,091.362
@@ -91,9 +100,10 @@ T("M-8 offset already zero: stays zero, whatever the phaseout says (both legs)",
   S({ code: "ME", retIncome: 6500, ssTaxableFed: 93500, ssGrossA: 50000, ssGrossB: 60000, ageA: 67, ageB: 67, single: false }), 464.75);
 // M-9 · the scalar still equals what the row yields below the threshold, with no SS (the D-3(b) rule)
 //   AGI $100,000 all retirement, joint, no SS: 0.0715 × (100,000 − 96,432) = 0.0715 × 3,568 = 255.112
-T("M-9 below the threshold with no SS, two people exclude 2 × $48,216 (both legs)",
-  S({ code: "ME", retIncome: 100000, ageA: 67, ageB: 67, single: false }), 255.112);
-T("M-10 the scalar is still the statutory $48,216", R.ME.excl65, 48216);
+//   v586+: 0.0715 × (100,000 − 99,648) = 0.0715 × 352 = 25.168
+T("M-9 below the threshold with no SS, two people exclude twice the cap (both legs)",
+  S({ code: "ME", retIncome: 100000, ageA: 67, ageB: 67, single: false }), CAP586 ? 25.168 : 255.112);
+T(CAP586 ? "M-10 the scalar is the statutory $49,824 (TY2026)" : "M-10 the scalar is still the statutory $48,216", R.ME.excl65, CAP586 ? 49824 : 48216);
 
 // ── Montana ──────────────────────────────────────────────────────────────────────────────────────
 const MT = (o) => S(Object.assign({ code: "MT" }, o));

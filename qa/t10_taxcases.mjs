@@ -130,7 +130,7 @@ const SUR_R = [0,1150,2880,4620,6360,6940];
 // v5.78 (C-1): 42 U.S.C. §1395r(i)(3)(C)(i)(III) — tiers 1–4 are "not more than" their upper amount, the top tier is "at
 // least" its own. Through v5.77 BOTH reference oracles in this file used `<=` at every tier, the engines' own rule, so an
 // exact-top-threshold case compared the engine's C-1 against the oracle's C-1 and agreed. A LADDER — widen it each release.
-const C1_FIXED = VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585";
+const C1_FIXED = VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586";
 const tierR = (magi, ups) => { for (let i=0;i<ups.length;i++) if (i === ups.length - 2 ? magi < ups[i] : magi <= ups[i]) return i; return ups.length-1; };
 const irmaaRef = (magi, single, persons) => SUR_R[tierR(magi, single?SGL_R:MFJ_R)] * persons;
 // IRMAA isolation builder: 3-year window ending at `premiumYr`, both 65+ that year, MAGI = pen.
@@ -846,8 +846,11 @@ const pass2E = pass, fail2E = fail;
       //   SS 0      -> excl 96,432 -> 0.0715 x  53,568 = 3,830.11 (3,830.112 -> banker-free round)
       //   SS 20k ea -> excl 56,432 -> 0.0715 x  93,568 = 6,690.11
       //   SS 50k ea -> excl 0      -> 0.0715 x 150,000 = 10,725.00
-      T("2E ssOffset (ME): zero Social Security leaves the deduction whole", OFF("ME",150000,0,0),         3830.112);
-      T("2E ssOffset (ME): $20,000 each reduces it dollar-for-dollar",       OFF("ME",150000,20000,20000), 6690.112);
+      // v5.86 (D-18) — cap $49,824 from v586 (TY2026): SS 0 -> excl 99,648 -> 0.0715 x 50,352 = 3,600.168;
+      //   SS 20k ea -> excl 59,648 -> 0.0715 x 90,352 = 6,460.168; SS 50k ea still exceeds the cap -> 10,725.00 unchanged.
+      const _me586 = (Number(String(VER).replace(/[^0-9]/g, "")) || 0) >= 586;
+      T("2E ssOffset (ME): zero Social Security leaves the deduction whole", OFF("ME",150000,0,0),         _me586 ? 3600.168 : 3830.112);
+      T("2E ssOffset (ME): $20,000 each reduces it dollar-for-dollar",       OFF("ME",150000,20000,20000), _me586 ? 6460.168 : 6690.112);
       T("2E ssOffset (ME): above the cap the deduction is gone entirely",    OFF("ME",150000,50000,50000), 10725.00);
 
       // THE ASSERTION THAT JUSTIFIES THE REWRITE. Before v5.56 the exclusion was `cap x count`, and
@@ -885,7 +888,8 @@ const pass2E = pass, fail2E = fail;
           !/reduced dollar-for-dollar by the social security/i.test(R[c].note || "")).length, 0);
       // The statutory amounts were corrected in the same release (decision D-c).
       T("2E ssOffset (MD): the modelled cap is the current statutory figure", R.MD.excl65, 40600);
-      T("2E ssOffset (ME): the modelled cap is the current statutory figure", R.ME.excl65, 48216);
+      // v5.86 (D-18): $49,824 from v586 (TY2026, MRS 2026 Form 1040ES-ME line 2); earlier legs keep the $48,216 they shipped with.
+      T("2E ssOffset (ME): the modelled cap is the current statutory figure", R.ME.excl65, (Number(String(VER).replace(/[^0-9]/g, "")) || 0) >= 586 ? 49824 : 48216);
       // AND THE OTHER TWO MECHANISMS MUST NOT MOVE.
       // ⚠ AND — added v5.67 — this cell now also proves the MEASURE. NJ's base is `agiExSS`, so the
       // $80,000 of gross Social Security here must not move the household up a tier or change the
