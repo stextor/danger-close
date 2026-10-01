@@ -626,7 +626,8 @@ consistent with existing precedent and would not require per-lot tracking.
 >   it** while four (CA, DC, MD, OR) disclose it, and called that D-3's defensible core. **False on
 >   both counts.** The approximation is disclosed in three places — Field Manual §13, the Field
 >   Manual's Taxes tab entry, and `src/DangerClose.jsx` **L11889**, which renders *"2026 approx: X.XX%
->   effective … — [note]. Verify against your state's rules."* beneath the My Data selector for **every**
+>   effective … — [note]. Verify against your state's rules."* *(from v5.86: "Model: X.XX% effective rate (an
+>   approximation) … — [note]. Dollar figures by tax year: …" — the rate disclosure stands; D-18)* beneath the My Data selector for **every**
 >   jurisdiction. All six named states carry notes. And Maryland was misfiled: its note says
 >   *"effective"* but never *"progressive"*, so the disclosing set is **three** — CA, DC, OR — against **30**
 >   whose notes say nothing about the shape of the schedule (26 excluding the four `retExempt` states). The exact count in between is **unmeasured**. What is left: **per-state `note`
@@ -1097,6 +1098,14 @@ cheap half.
 
 ## D-18 · Indexed state figures need a tax-year refresh
 
+> **FIXED at v5.86** (`docs/SCOPE_D18_STATE_FIGURES.md`): every dollar-bearing state figure carries the tax year it was verified for
+> (`years`, 31 figures on 23 rows) and My Data shows it in place of the blanket "Model (2026 approx)". Maine's cap is $49,824
+> (TY2026); Louisiana's exemption $12,324 (TY2026); South Carolina's note corrected. Maine's thresholds, Montana and Rhode Island
+> stay TY2025 (unpublished for 2026) and say so. **The refresh itself recurs** — next known: Montana's TY2026 subtraction (set by
+> 1 November 2026), Rhode Island's TY2026 thresholds (expected November 2026), Maine's TY2026 thresholds, Louisiana's TY2027
+> amount (posted each January), Georgia's $70,000 at 65+ from TY2027. Louisiana's larger amount enlarges the household-netting
+> approximation recorded under D-12. Rates are D-22.
+
 Maine's $48,216 and both phaseout thresholds, and Montana's $5,660, are TY2025 figures, disclosed as such (v5.73 D-2);
 both states index them. Several other rows carry dated figures of their own. A small, recurring populate release, akin to
 the federal `TAX_CONSTANTS_YEAR` cycle but with no staleness banner of its own. **Low**, recurring.
@@ -1116,3 +1125,32 @@ directional per state and large relative to the other state items.
 Montana starts from federal taxable income, so the federal senior bonus (2025–2028) and the age-65 extra lower Montana's
 base. The model's state measure is AGI-like and does not subtract them. Disclosed in METHODOLOGY at v5.73. **Low.**
 
+## D-21 · West Virginia's $8,000 is not additive to its Social Security modification
+
+Filed at v5.86 (`docs/SCOPE_D18_STATE_FIGURES.md` §1c). Per the WV Tax Division, a taxpayer 65+ receives the **higher** of the
+$8,000 senior modification or the sum of the other modifications, Social Security included — and from TY2026 Social Security is
+fully exempt. A retiree whose benefit is $8,000 or more therefore gets nothing further; the model grants both, so it is
+**optimistic by up to $8,000 per person per year** in West Virginia. A modelling rule, not a stale figure. The obvious mechanism
+(`ssOffset`) is reserved for MD/ME by the v5.56 decision, so the fix needs its own scope. Settled 2026-09-29: its own release,
+after v5.86. **Medium** — optimistic, and large relative to WV's other figures.
+
+## D-22 · The 42 nonzero state rates have not been re-read
+
+Filed at v5.86 (D-18's scope called it D-18b). D-18 dated the dollar figures and deliberately left the effective rates undated
+(decision D18-1), because none was re-read. Secondary sources already suggest two are stale for TY2026: **Georgia 4.99 %** (model
+5.19 %; HB 463, May 2026, retroactive) and **Oklahoma 4.5 %** (model 4.75 %; HB 2764). Both would lower modelled tax. The other
+40 are unmeasured, and Kentucky's own note says to check the year. Each rate should be read at a primary source and, once read,
+can carry a year like the dollar figures. **Medium** — two known misses, direction mixed across the rest.
+
+## D-23 · Two exclusions start earlier in law than the model applies them — New York, Arkansas (decision D18-3 open)
+
+Found at v5.86 (`docs/SCOPE_D18_STATE_FIGURES.md` §3b item 5, §6a). **New York** allows its $20,000 pension-and-annuity exclusion
+from 59½; the model applies it from 65 (no `exclAge`), **and New York's in-app note says "59½+" — so the note misdescribes the
+model.** **Arkansas** allows its $6,000 for IRA money from 59½ and for employer plans at any age; the model applies it from 65 and
+its note does not say so. Both overstate tax (conservative). **Decision D18-3, open for Steve:** (a) correct New York's note to say
+the model applies it from 65 — one clause, the same kind of correction as South Carolina's at v5.86; recommended, because a note
+that misdescribes the model breaks the "simplifications are disclosed, never silent" rule; or (b) review with Arkansas. Changing
+the modelled ages is a separate question (the app has one age per person and no account-type split — D-12). v5.86 ships **without**
+the New York clause. The edit under (a), in full: New York's note `$20K/person pension & annuity exclusion 59½+; NYC local tax not
+modeled` becomes `$20K/person pension & annuity exclusion — applied here from 65, although the law allows it from 59½
+(conservative); NYC local tax not modeled`. **Low** in dollars, but a disclosure defect.

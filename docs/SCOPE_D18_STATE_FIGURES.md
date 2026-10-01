@@ -1,6 +1,6 @@
 # SCOPE — a tax-year refresh of dated state figures, each figure carrying its year (D-18)
 
-**READY TO BUILD — 2026-09-29.** Premise read from primary sources for all 23 rows (MN, UT, VT and CO's cap via the v5.85 scope, same day, cited not re-read); decisions D18-A–C, D18-1, D18-2 settled;
+**BUILT at v5.86 — 2026-09-30; RETIRED (repo only). Build record §9. D18-3 still open, re-homed as `MissingFeatures.md` D-23.** *(Was: READY TO BUILD 2026-09-29; §3a re-checks run 2026-09-30, premise held.)* Premise read from primary sources for all 23 rows (MN, UT, VT and CO's cap via the v5.85 scope, same day, cited not re-read); decisions D18-A–C, D18-1, D18-2 settled;
 the build-time re-checks are gathered in §3a. Target **v5.86**,
 built from **v5.85** (source `a1d9c5e03e4aa7c059427fdf4fc84a98`, built `index.html` `7ff3d434fbfb13a32e3582870d991834`,
 repo `917a6f7`). Freshness check (OPERATIONS §A/§A2) run this session: all 114 pool files byte-identical to a committed file.
@@ -122,6 +122,47 @@ the Python suites.
 5. **NJ** — boundary at exactly $100,000. **NY** — which age the model applies (the note says 59½).
 6. **Suite** — derived pins on ME's $48,216 and on LA via `literal_census.cjs`; Python suites by `ast`.
 
+## 3b · Re-check results (2026-09-30, build session 1 — before any source change)
+
+Freshness (OPERATIONS §A/§A2) re-run first: v5.85 source `a1d9c5e0…` in pool, repo `src/DangerClose.jsx`, manifest and CHANGELOG;
+built `index.html` `7ff3d434…`; all 114 pool files byte-identical to a committed file; repo HEAD `8b36fad` — three commits past
+`917a6f7`, all touching only this file (the committed copy was `f8ff0753…`, identical to the handover's). **No re-check contradicts
+the premise.** Item by item:
+
+1. **LA — holds.** $12,324 is LDR's own statement: the fiscal and economic impact statement of its Notice of Intent for
+   LAC 61:I.1311 (Louisiana Register, 20 June 2026; comments closed 27 July 2026) says the TY2026 amount "is $12,324". No separately
+   *posted* TY2026 page was found; the notice says adjusted amounts are posted each January. **Cite it as LDR's proposed-rule
+   statement, not as a posted figure.** Cross-check: $12,000 × 1.027; LDR's 2026 withholding tables indexed the standard deduction
+   by 3.0 % ($12,500 → $12,875), but that notice says it used preliminary CPI and the final figure "may differ slightly" — consistent
+   with the later notice's 2.7 %. **IRA distributions qualify:** LDR's 2025 IT-540 instructions define annual retirement income as
+   distributions from a pension, an annuity or an IRA (federal lines 4b/5b), and LAC 61:I.1311(B) has an IRA receipt rule.
+2. **ME — holds as scoped.** $49,824 re-confirmed on MRS's 2026 Form 1040ES-ME worksheet (rev. July 2026), line 2. That worksheet
+   states no TY2026 phase-out thresholds; none found elsewhere at MRS → thresholds stay TY2025, disclosed.
+   **MT — holds as scoped, with a date.** MCA 15-30-2120(7): DOR sets each year's indexed subtraction *by 1 November* of that year,
+   so TY2026's is not yet due; $5,660 (TY2025) stays, disclosed. The next refresh can quote the date.
+3. **KY — holds.** The 2026 refile, HB 183 ($41,110 from TY**2027**), never left House A&R (legislature's record, last action
+   14 Jan 2026; session ended 15 Apr 2026). **AL — holds, weaker evidence.** No 2026 enactment found in two searches (only county
+   property-tax exemptions passed); HB 388 appears only as "previously filed". **MD — holds.** HB 707 (2026) never passed its
+   19 Feb hearing (MGA page, updated 30 Jun 2026). SB 607 (2026, Ch. 686) *did* pass, but it raises the separate public-safety
+   retirement subtraction ($15K → $20K by TY2030), which the model does not carry — **no change, and nothing to disclose beyond
+   what MD's note already omits.** **NM — partly closed.** The latest primary text reached that quotes 7-2-5.2 as existing law is
+   HB 174 (2021), $8,000 table intact; no later amendment was found, but TRD's current instructions were not reached. **Owed at
+   build before NM's figures are dated 2026: read TRD's 2025 PIT-ADJ instructions (primary).** If unreachable, date NM 2021 — the
+   displayed year is a claim (D18-1).
+4. **CT — closed.** All 20 modelled rows (10 single, 10 joint) match OLR 2025-R-0152 Table 1 band for band, including the exclusive
+   band tops `cmp: "lt"` encodes.
+5. **NJ** — no `cmp` on the row, so bands are inclusive (`lte`): the build's boundary test pins exactly $100,000 → full exclusion.
+   **NY — a finding.** No `exclAge`, so the model applies the $20,000 from **65** (read live through the shim); the note says
+   "59½+". Later than law, so conservative in direction — but **the in-app note misdescribes the model.** See §6 D18-3.
+6. **Suite pins** — owed at build (needs the new source for `literal_census.cjs`).
+
+**Census, live through the shim (v5.85):** 51 rows; **23** dollar-bearing; **31** figure-fields to date — `excl65 > 0` ×18
+(AL AR CO DE GA KY LA ME MD MT NM NY OK RI SC VA WV WI), `exclTest` ×6 (CT ME NJ NM RI VA), `ssRule` ×7 (CO CT MN NM RI UT VT). No row
+carries `years`.
+
+**Prose sites the docs pass must cover** (word search, prose only): METHODOLOGY `48,216` ×3, `South Carolina` ×1; MissingFeatures
+`48,216` ×1 and `2026 approx` ×1 (both inside the D-18 entry, L1098). IDs D-21 and D-22 are unused.
+
 ## 4 · Tests (written first, run against v5.85, where they must fail)
 
 A new suite (proposed `t51_state_figure_years.mjs`):
@@ -148,9 +189,56 @@ year is a claim, and (b) would make it for 42 figures nobody read. **Recommend (
 **D18-2 · If §1b finds a fixed amount has changed, does the fix ship in v5.86?** (a) **Yes** — same row, same kind of
 correction, as Utah's rate rode with v5.85 (L-4); (b) file it separately. **Recommend (a).** ✅ *Settled: (a).*
 
+## 6a · One new decision (for Steve)
+
+**D18-3 · New York's note.** The note says the $20,000 applies from 59½; the model applies it from 65. (a) **Correct the note in
+v5.86** — one clause, e.g. "applied here from 65; the law allows it from 59½ (conservative)", the same kind of correction as South
+Carolina's (D18-2); (b) leave it for the age-start disclosure review with Arkansas. A note that misdescribes the model is the
+"simplifications are disclosed, never silent" rule failing, so **recommend (a).** Changing the modelled age is out of scope either way.
+
 ## 7 · Status
 
 Ready to build. §1 complete: two value changes (ME cap, LA), one note correction (SC), the rest unchanged — of which
 ME's thresholds, MT and RI are kept at their latest published year (TY2025) and disclosed, not confirmed for TY2026. WV (§1c) settled as D-21,
 after v5.86 — it does not block this build per OPERATIONS (test first, shown failing on
 v5.85).
+
+## 8 · Build design (build decisions within the settled scope — not new questions)
+
+- **`years` shape.** One map per dollar-bearing row keyed by the field holding the figure, value = the tax year the figure was
+  verified for. Proposed values: every field 2026 **except** ME `exclTest` 2025, MT `excl65` 2025, and RI `excl65`/`exclTest`/`ssRule`
+  2025 (D18-A); NM per §3b item 3. `rate` never carries a year (D18-1).
+- **Extinction (t51).** Every one of the 31 figure-fields has a year; every year is an integer ≤ `TAX_CONSTANTS_YEAR`; a key in
+  `years` names a field that exists and is dollar-bearing (no stale keys); a row that gains `excl65 > 0`, `exclTest` or `ssRule`
+  without a year fails. Run on the current leg only (v5.85 has no `years`, so every check there fails — that is the shown-failing
+  step).
+- **Display (L12921).** Drop the blanket "Model (2026 approx)". Rate reads as an approximation with no year; append the dated
+  figures, e.g. *"… — note. Dollar figures by tax year: exclusion 2026 · income phase-out 2025."* Labels: `excl65` exclusion,
+  `exclTest` income test, `ssRule` Social Security rule. **Before the copy is final, run the §B1a regex census** (every suite regex
+  literal executed against old and new text) — dropping "2026 approx" may release or break a live matcher.
+- **Display test.** Through the DOM (`dom_v586.cjs`, as `t37` drives My Data): pick ME, read the line, assert both years and the
+  absence of "2026 approx"; pick a no-tax state and assert no year appears.
+- **Notes.** ME ($49,824, TY2026; thresholds TY2025), LA ($12,324 TY2026, pension/annuity/IRA, R.S. 47:44.1 — must not match
+  `NOTE_MATCHER`, LA is not income-limited), SC ($3,000 under 65). NY per D18-3.
+- **Known approximation to restate, not change:** the per-person caps are netted against *household* retirement income, while LA
+  (and others) allow it only against the recipient's own income. Doubling LA's cap doubles that optimism for a one-earner couple;
+  METHODOLOGY's LA passage should say so.
+
+## 9 · Build record (2026-09-30)
+
+- **NM closed at a primary source before dating it.** TRD's *Instructions for 2025 PIT-ADJ*, Table 1, match all 18 modelled bands
+  ("but not over" = inclusive, the row's default) and line 25's Social Security thresholds ($100,000 / $150,000). NM dated 2026.
+- **Test first.** `t51` (57 checks) ran against v5.85 with 20 failures — every changed figure, note, year and display line — and
+  37 passes on what both builds share. On the v5.86 source: 57 of 57. Controls `qa/tools/controls_v586_state_years.py`: C0 green and
+  all 14 planted defects fire their named checks.
+- **A premise gap, found by `t51` D-6.** §1.0 says the Field Manual carries none of the figures — true of figures, but it carried
+  the same blanket *label* twice: "(2026 approximations)" in the Taxes-tab prose and a sources-table cell. My first census missed
+  the second because my walk reported one hit per string node and `DOCS_HTML` is one node; the walk was fixed to report every
+  occurrence and both sites changed.
+- **Derived pins the literal census could not see**, all Maine: `t10` 2E ssOffset (two cases) and `t39` M-1, M-2, M-3, M-6a,
+  M-6b, M-7, M-9 — each recomputed by hand at $49,824 (fractions) and version-gated `>= 586`, so every earlier leg keeps its
+  $48,216 values. Plus the two literal pins the scope named (`t10` L888, `t39` M-10). Louisiana's $6,000 was pinned nowhere.
+- **Suite regexes:** all 527 executed against the My Data line rendered for all 51 states, every note and the Field Manual, on
+  both builds — no verdict changes.
+- **D18-3 not applied** (unanswered at packaging). Re-homed with its recommendation and exact edit as `MissingFeatures.md` D-23.
+
