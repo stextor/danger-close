@@ -160,6 +160,9 @@ tally "t50-$CUR"   node t50_ss_states.mjs "$CUR"
 # t51 (v5.86) — state dollar figures carry their tax year; Maine and Louisiana refreshed (D-18): primary-source values, the
 # extinction (no dollar figure without a year), fixture households dollar-exact, and the My Data line through the DOM.
 tally "t51-$CUR"   node t51_state_figure_years.mjs "$CUR"
+# t52 (v5.87) — a state note names only the age the model applies, or says the model differs (D-23): six notes typed from
+# their primary sources, the model's behaviour behind each dollar-exact, the extinction across all 51 rows, and My Data via the DOM.
+tally "t52-$CUR"   node t52_age_start_notes.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

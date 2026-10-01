@@ -13,7 +13,7 @@
 //
 // Run: node t50_ss_states.mjs <tag>        Current leg only (the rules do not exist on the prior leg).
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v585", "v586"];
+const KNOWN_VERSIONS = ["v585", "v586", "v587"];
 let pass = 0, fail = 0; const fails = [];
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; const m = `  \u2717 ${n}${d ? " \u2014 " + d : ""}`; console.log(m); fails.push(m); } };
 const done = () => { console.log(`\nt50 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
