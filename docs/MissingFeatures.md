@@ -1144,6 +1144,12 @@ can carry a year like the dollar figures. **Medium** — two known misses, direc
 
 ## D-23 · Two exclusions start earlier in law than the model applies them — New York, Arkansas (decision D18-3 open)
 
+> ✅ **FIXED v5.87 (2026-10-01) — and the class was six notes, not two.** Steve answered D18-3 (as D23-A/B/C) "yes"; the build's
+> census then found Georgia (a 62–64 tier the model does not apply), Iowa and Pennsylvania (ages the model ignores — **optimistic**)
+> and Oklahoma (silent, as Arkansas). D23-D/E: all six notes rewritten in v5.87; the modelling for Iowa and Pennsylvania is **D-24**.
+> Every note is now held to the model's age by `qa/t52_age_start_notes.mjs`. The generated "65+" summary in the same My Data line was
+> found at the build and is **D-25**. Record: `docs/SCOPE_D23_AGE_START_NOTES.md` §7–§8. *(The entry below is the v5.86 finding, retained.)*
+
 Found at v5.86 (`docs/SCOPE_D18_STATE_FIGURES.md` §3b item 5, §6a). **New York** allows its $20,000 pension-and-annuity exclusion
 from 59½; the model applies it from 65 (no `exclAge`), **and New York's in-app note says "59½+" — so the note misdescribes the
 model.** **Arkansas** allows its $6,000 for IRA money from 59½ and for employer plans at any age; the model applies it from 65 and
@@ -1154,3 +1160,30 @@ the modelled ages is a separate question (the app has one age per person and no 
 the New York clause. The edit under (a), in full: New York's note `$20K/person pension & annuity exclusion 59½+; NYC local tax not
 modeled` becomes `$20K/person pension & annuity exclusion — applied here from 65, although the law allows it from 59½
 (conservative); NYC local tax not modeled`. **Low** in dollars, but a disclosure defect.
+
+## D-24 · `retExempt` has no age gate — Iowa and Pennsylvania exempt retirement income below the law's age (optimistic)
+
+Found at the v5.87 build (`docs/SCOPE_D23_AGE_START_NOTES.md` §7a, measured through the shim). `stateTaxAnnual` computes
+`retBase = r.retExempt ? 0 : …` with no age test, so every one of the fourteen `retExempt` rows (AK FL IL IA MI MS NV NH PA SD TN TX
+WA WY) exempts retirement income at any age. **Iowa**'s exclusion requires 55 or older on 31 December, disability, or a qualifying
+survivor, per spouse (Iowa DOR, Retirement Income Tax Guidance, read 2026-10-01); **Pennsylvania** taxes IRA distributions before
+59½ and employer-plan payments before the plan's own retirement age or service (DOR rev-636; PA-40 instructions). The model is
+therefore **optimistic** for a retiree younger than those ages — $0 Iowa or Pennsylvania tax on $50,000 of IRA income at 50,
+measured. v5.87 discloses this in both notes; it does not change the model. **The scope should re-read the law for all fourteen
+rows** (only Iowa's and Pennsylvania's were read at v5.87), add a per-row age (as `exclAge` does for exclusions), and
+apply it per person — `retIncome` is household-level, so this is D-12's territory. **Also here: Oklahoma's age condition.** OAC
+710:50-15-49 (read 2026-10-01) states no age test for private retirement income in its general rule but exempts disability benefits
+"without regard to age", and secondary sources disagree (none vs 65); the model applies 65 and the v5.87 note claims no law age. Rank
+beside D-21, the other known optimistic item. **Medium** — optimistic, but only for retirees under 55–59½ in two states.
+
+## D-25 · My Data's generated summary says "65+ exclusion" for every state, whatever age the model applies
+
+Found at the v5.87 build, by `t52`'s DOM read of the My Data line. The line's summary (the `excl65` branch of the JSX that renders
+`Model: … effective rate (an approximation)`, `MyDataEditor`) is the literal `` ` · $${…}K/person 65+ exclusion` `` for every row with
+a dollar exclusion. It misstates the modelled age for **Delaware** (60), **Kentucky** (any age), **Rhode Island** and **Wisconsin**
+(67) — Wisconsin's line reads "65+" immediately before a note saying "from age 67". Pre-existing since `exclAge` arrived at v5.55;
+not made worse by v5.87, and deliberately not widened into it (a new site mid-build). **Fix, designed:** render the age from the
+same rule the engine uses — `exclAge ?? 65`, with 0 shown as "any age" — and extend `t52`'s extinction to the generated summary.
+(Separately, `toFixed(0)` shows Delaware's $12,500 as "$13K"; cosmetic.) **Low** in dollars, a disclosure defect; presentation-only.
+
+> **Decided 2026-10-01 (Steve, option (a)):** v5.87 ships without it; the fix is **v5.88**, presentation-only.
