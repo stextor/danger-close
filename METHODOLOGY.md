@@ -137,8 +137,11 @@ Replaces the former single flat rate with a **51-jurisdiction rules table** (50 
 for a typical retiree; Social Security treatment (43 jurisdictions none; the eight partial states
 — CO, CT, MN, MT, NM, RI, UT, VT — approximated as taxing half the federally-taxable portion,
 since their income thresholds exempt most retirees; WV's phase-out completed for 2026);
-full retirement-income exemptions (IL, MS, PA, IA 55+, MI post-phase-in, plus the nine
-no-income-tax states); and major 65+ retirement-income exclusions where they exist (e.g., GA
+full retirement-income exemptions (IL, MS, PA, IA, MI post-phase-in, plus the nine
+no-income-tax states — **applied at every age**: `retExempt` carries no age gate. *(Corrected at v5.87, D-23: this list read
+"IA 55+" until then, which described Iowa's law, not the model. The model applies Iowa's and Pennsylvania's exemptions below the
+law's ages — 55, and 59½ or the plan's own retirement age — which understates tax for a younger retiree: the **optimistic**
+direction. Both notes now say so; making the model age-aware is D-24, which re-reads all fourteen `retExempt` rows.)*); and major 65+ retirement-income exclusions where they exist (e.g., GA
 $65K/person, KY $31,110, NY $20K, NJ a $100K HOUSEHOLD cap at 62+ (not per-person), VA $12K, SC $15K, DE $12.5K). **Which of these have been checked against a primary source, and what was found, is recorded in `AUDIT_STATE_EXCL65_NOTES.md` — this section routes there rather than restating it, because a verification claim expires and a dated audit does not.**
 
 **Income conditioning: the machinery exists as of v5.64, and all five states are populated —
@@ -276,12 +279,20 @@ start at 67**, the full retirement age both statutes require. Before v5.55 every
 65, which withheld a real statutory exclusion from households below that age and so **overstated**
 state tax — the conservative direction, which is why it went unnoticed. One known threshold is
 deliberately **not** applied: South Carolina's under-65 tier, which is a second amount rather than an
-earlier start, and is stated in its own state note. *(⚠ Corrected at v5.68: until then this sentence
+earlier start, and is stated in its own state note. *(v5.87: Georgia's $35,000 at 62–64 is the same shape — a second, smaller
+amount before 65 — and is likewise not applied; its note said so only from v5.87.)* *(⚠ Corrected at v5.68: until then this sentence
 also named New Jersey's 62 as unapplied. v5.67 applied it, as the income-conditioning section above
 says, and this line was left contradicting that section for one release.)* **Thirteen of the nineteen exclusion states remain unverified, so more
 thresholds may differ from 65 than are modelled here.** *(Updated v5.86: D-18 read every exclusion state's figure against a
 primary source. Two start earlier in law than modelled — Arkansas (IRAs from 59½, employer plans at any age) and New York (59½) —
 and both are applied from 65, which overstates their tax: the conservative direction. See *State dollar figures carry their tax year (v5.86)*.)*
+*(Updated v5.87, D-23: the notes now say so. A census of every note against the age the model applies (`exclAge ?? 65`, or any
+age for `retExempt`) found six that misdescribed it: New York and Georgia named ages the model does not apply (conservative),
+Iowa and Pennsylvania named ages the model ignores (optimistic — above), and Arkansas and Oklahoma named none. All six now state
+the model's age and, where the primary source was read at the build, the law's; Oklahoma's own age condition was not settled from
+a primary source, so its note claims none. Nothing modelled moved. `qa/t52_age_start_notes.mjs` holds every note to the model's
+age. **Not covered:** My Data's generated summary still reads "65+ exclusion" for every row, which misstates Delaware (60),
+Kentucky (any age), Rhode Island and Wisconsin (67) — D-25.)*
 
 One shared calculator serves the Taxes engine, the Roth strategy comparator, and the Withdrawal
 engine.
