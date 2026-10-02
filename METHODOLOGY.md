@@ -1955,3 +1955,12 @@ holds it (`excl65`, `exclTest`, `ssRule`; 31 figures in all) — and My Data sho
 gives the higher of the two — so the model is optimistic by up to $8,000 per person per year (D-21, its own release). Georgia's
 65+ amount rises to $70,000 in TY2027. Arkansas and New York allow their exclusions earlier than the model's 65 (see the
 age-threshold paragraph above).
+
+*(Fixed v5.89, D-21 — `docs/SCOPE_D21_WV_SENIOR_MODIFICATION.md`. W. Va. Code §11-21-12(c)(9)(ii), read 2026-10-01, limits each PERSON's
+$8,000 to $8,000 minus that person's other modifications, of which the (c)(8) Social Security modification is the SS "included in
+federal adjusted gross income" — taxable SS. `stateTaxAnnual` now applies exactly that per person (`seniorVsTaxableSS`), splitting the
+household's taxable SS by each spouse's gross benefit as the v5.85 SS layer already does; a caller without ages gets the household form,
+which is never more generous. The law's other offsetting modifications — the first $2,000 of WV public or federal pensions, police and
+fire pensions, military retirement, U.S. obligation interest — are not modelled (no account type: D-12), which leaves a WV public
+pensioner slightly optimistic; military retirement's own exemption is not modelled either (conservative). Measured on v5.88, a single
+66-year-old with $30,000 of IRA income and $20,400 of taxable SS was under-taxed $385.60. `qa/t54_wv_senior_modification.mjs`.)*
