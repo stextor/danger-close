@@ -1,5 +1,40 @@
 # Changelog
 
+## v5.89 — West Virginia's $8,000 senior modification is reduced by the person's taxable Social Security (D-21)
+
+**A MODELLING release** (METHODOLOGY updated). Through v5.88 the model exempted West Virginia Social Security **and** granted the full
+$8,000 senior modification per person 65+ on top. W. Va. Code §11-21-12(c)(9)(ii) — read at the build, 2026-10-01 — limits each
+**person's** $8,000 to $8,000 minus that person's other modifications, and (c)(8) makes the Social Security "included in federal
+adjusted gross income" (taxable SS) one of them; the WV Tax Division states it as "the higher of" the two. A retiree whose taxable SS
+is $8,000 or more therefore gets none. The model was **optimistic** by up to $8,000 of income per person: measured on v5.88, a single
+66-year-old with $30,000 of IRA income and $20,400 of taxable SS was under-taxed $385.60 a year; a couple, $771.20.
+
+`stateTaxAnnual` now gives each person 65+ max(0, $8,000 − their share of taxable SS), the household's taxable SS split by each spouse's
+gross benefit (the split the v5.85 SS layer already makes), through a new WV-only field, `seniorVsTaxableSS`. Maryland's and Maine's
+gross-SS offset (`ssOffset`) and Colorado's (`ssSharesCap`) are untouched. A caller supplying only a count of people 65+ gets the household
+form, which is never more generous. Decision D21-A, Steve 2026-10-01: per person if the statute says so — it does.
+
+**New suite `t54`** (18 checks, current leg): nine households computed by hand at WV's 4.82 % (single and joint, under and over
+65, taxable SS of $0, $3,000, exactly $8,000 and $20,400, a mixed couple where per person and per household differ, the count-only
+path); Maryland and Maine held to their own gross-SS rule by hand; an extinction grid of WV household shapes (single and joint, four ages, five taxable-SS levels, three benefit splits)
+asserting the relief equals the per-person rule, with Maryland checked on the same grid; and the note. **Shown failing 11 of 18 on v5.88
+first.** Negative controls `qa/tools/controls_v589_wv_senior.py` (repo-only): **9 of 9** — the rule removed, its base switched to gross
+SS, each person offset by the household total, Maryland's offset removed, the count-only path made generous, the flag removed, a 64
+floor, the note drifting.
+
+**Limitations, disclosed in WV's note and METHODOLOGY:** the law's other offsetting modifications — the first $2,000 of WV public or
+federal pensions, police and fire pensions, military retirement, U.S. obligation interest — are not modelled (the model has no account
+type: D-12), which leaves a WV public pensioner slightly optimistic; military retirement's own exemption is not modelled either
+(conservative); the statute caps the modification at income "received by that person", which the household-level model cannot apply
+(D-12); the disability path has no input. WV's 4.82 % rate was not re-read in this release.
+
+**Suite, run from the packaged copies:** 4,927 app checks across **53 app suites**, 0 failed, 0 DIED; MC parity 10/10; tooling `t21`
+64, `domdiff` 32, `sets` 12 + 12; **GRAND 5,057** — v5.88's 5,039 plus `t54`'s 18, so no
+existing check moved (no suite household is in West Virginia). ⚠ **Run from the PACKAGED copies as two concurrent halves, the method approved at v5.87: run folders built by mk_runfolder.sh v588 v589 from a fresh clone of b584b50 with the github/ files overlaid; each ran the shipped runsuite.sh through a session-only copy whose one added line skips the other half's labels (half B: t45, t47, t48; half A: the rest, tooling included). An earlier half B, started alone, was cut off at a turn boundary in t48; it was discarded and half B re-run in a freshly built folder from the same inputs, concurrently with half A. Half A GRAND 4835, half B GRAND 222, both exit 0, no suite in both, none DIED.** Per-suite counts are in `TESTING.md`. `smoke_built` on the
+packaged `index.html`: 22 passed, 0 failed. The prior release's page was rebuilt byte-identical first (`115b6883…`).
+
+Source `abf14500169ac6a6793607fdda82a688` · built `index.html` `ae0f99bf9e3064da0d4d04f66d8808d0`
+
 ## v5.88 — My Data's summary says the age the model applies, and the exact figure (D-25)
 
 **A PRESENTATION release.** No figure, rate, rule or age moved; the engines are unchanged (MC parity 10/10). My Data's state line opens
