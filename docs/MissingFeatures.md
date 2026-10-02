@@ -1127,6 +1127,11 @@ base. The model's state measure is AGI-like and does not subtract them. Disclose
 
 ## D-21 · West Virginia's $8,000 is not additive to its Social Security modification
 
+> ✅ **FIXED v5.89 (2026-10-02).** W. Va. Code §11-21-12(c)(9)(ii), read at the build: each person's $8,000 is reduced by that
+> person's taxable SS (the (c)(8) modification). Modelled per person (D21-A) through the new `seniorVsTaxableSS` field; MD/ME/CO untouched.
+> Held by `qa/t54_wv_senior_modification.mjs`. The law's other offsets (public pensions etc.) remain unmodelled — D-12. Record:
+> `docs/SCOPE_D21_WV_SENIOR_MODIFICATION.md` §7. *(The entry below is the v5.86 finding, retained.)*
+
 Filed at v5.86 (`docs/SCOPE_D18_STATE_FIGURES.md` §1c). Per the WV Tax Division, a taxpayer 65+ receives the **higher** of the
 $8,000 senior modification or the sum of the other modifications, Social Security included — and from TY2026 Social Security is
 fully exempt. A retiree whose benefit is $8,000 or more therefore gets nothing further; the model grants both, so it is
