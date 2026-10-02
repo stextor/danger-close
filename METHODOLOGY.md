@@ -293,6 +293,8 @@ the model's age and, where the primary source was read at the build, the law's; 
 a primary source, so its note claims none. Nothing modelled moved. `qa/t52_age_start_notes.mjs` holds every note to the model's
 age. **Not covered:** My Data's generated summary still reads "65+ exclusion" for every row, which misstates Delaware (60),
 Kentucky (any age), Rhode Island and Wisconsin (67) — D-25.)*
+*(Fixed v5.88, D-25: the summary now names the age the engine applies — "from 60", "from 67", "at any age" — by the engine's own
+rule, and the exact dollar figure rather than a rounded "$NK", four of which rounded up. `qa/t53_mydata_summary_age.mjs` holds all eighteen rows.)*
 
 One shared calculator serves the Taxes engine, the Roth strategy comparator, and the Withdrawal
 engine.
