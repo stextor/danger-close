@@ -1,6 +1,8 @@
 # SCOPE — D-25 · My Data's summary says the age the model applies (v5.88)
 
-**DRAFT — 2026-10-01. Decisions D25-A and D25-B (§5) need Steve's answer before any build.** Steve chose to fix D-25 in v5.88
+**FULFILLED — shipped as v5.88 (2026-10-01).** Retired to repo-only at the ship (OPERATIONS §G). §7 is the build record.
+
+*(Superseded status line, retained:)* **DRAFT — 2026-10-01. Decisions D25-A and D25-B (§5) need Steve's answer before any build.** Steve chose to fix D-25 in v5.88
 (option (a), 2026-10-01). Presentation-only: no figure, rate, rule or age in the engine moves.
 
 ## 0 · Premise (verified against v5.87, not assumed)
@@ -101,3 +103,17 @@ Full suite after, run as two concurrent halves as at v5.87.
 
 DRAFT. Destination: repo `docs/SCOPE_D25_MYDATA_SUMMARY_AGE.md` and the knowledge pool once D25-A/B are answered (the active
 scope, OPERATIONS §G). Retire to repo-only when v5.88 ships.
+
+## 7 · Build record (v5.88, 2026-10-01)
+
+- **Decisions:** D25-A (a) and D25-B (a), Steve 2026-10-01 ("continue with your recommendations").
+- **Source** `9843bd1747a24af2791e4ba0fa94ab7f`: the one template in `MyDataEditor` and the four version sites, each anchor asserted once. **Built** `115b688347e671716f6f562d57608e0b`; v5.87
+  rebuilt byte-identical first; `smoke_built` 22 passed, 0 failed. Display only — the engine's `_floor` line is untouched; the display uses `exclAge ?? 65`.
+- **Census (§B1a):** the literal census against the staged source changed only the version-string arms (`t1`:241, `t4`:65); the METHODOLOGY
+  annotation moved nothing in `t31`.
+- **Tests:** `t53` 43 checks — v5.87 38 failed, v5.88 43/43. Two test defects found and fixed before the run: X-2 first scanned the
+  whole line and tripped on New York's and Georgia's notes ("$20K/person"); S-age would have accepted "from 0" for Kentucky (now must read
+  "at any age"; control C3 proves it). Controls 7 of 7. Registration: 33 ladders + 79 gated by `register_tag2`, `t33`'s pin, three Python lists.
+- **Repo moved during the build:** `be8ec7c` (this scope's draft, uploaded) landed after the freshness check; it touches none of the release's
+  files or any suite input, and the run used it.
+- **Suite:** 4,909 app checks, 52 suites, 0 failed, 0 DIED; GRAND 5,039. Run from the PACKAGED copies as two concurrent halves, the method approved at v5.87: two run folders built by mk_runfolder.sh v587 v588 from a fresh clone of be8ec7c with the github/ files overlaid; each ran the shipped runsuite.sh through a session-only copy whose one added line skips the other half's labels (half B: t45, t47, t48; half A: the rest, tooling included). The first half A was cut off at a turn boundary after t38 and was re-run alone in a freshly built folder from the same inputs; half B's completed run stands. Half A GRAND 4817, half B GRAND 222, both exit 0, no suite in both, none DIED.

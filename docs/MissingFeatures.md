@@ -1178,6 +1178,10 @@ beside D-21, the other known optimistic item. **Medium** — optimistic, but onl
 
 ## D-25 · My Data's generated summary says "65+ exclusion" for every state, whatever age the model applies
 
+> ✅ **FIXED v5.88 (2026-10-01).** The summary now reads "$12,500/person exclusion from 60" / "…at any age": the engine's own age rule
+> and its exact figure (D25-A (a), D25-B (a)). Held by `qa/t53_mydata_summary_age.mjs` against the engine's measured onset for all 18 rows.
+> Record: `docs/SCOPE_D25_MYDATA_SUMMARY_AGE.md` §7. *(The entry below is the v5.87 finding, retained.)*
+
 Found at the v5.87 build, by `t52`'s DOM read of the My Data line. The line's summary (the `excl65` branch of the JSX that renders
 `Model: … effective rate (an approximation)`, `MyDataEditor`) is the literal `` ` · $${…}K/person 65+ exclusion` `` for every row with
 a dollar exclusion. It misstates the modelled age for **Delaware** (60), **Kentucky** (any age), **Rhode Island** and **Wisconsin**
