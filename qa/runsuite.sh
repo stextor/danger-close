@@ -163,6 +163,9 @@ tally "t51-$CUR"   node t51_state_figure_years.mjs "$CUR"
 # t52 (v5.87) — a state note names only the age the model applies, or says the model differs (D-23): six notes typed from
 # their primary sources, the model's behaviour behind each dollar-exact, the extinction across all 51 rows, and My Data via the DOM.
 tally "t52-$CUR"   node t52_age_start_notes.mjs "$CUR"
+# t53 (v5.88) — My Data's summary names the age the engine applies and the exact figure (D-25): all eighteen exclusion rows
+# through the DOM, each against the engine's measured onset; the summary and the note cannot disagree.
+tally "t53-$CUR"   node t53_mydata_summary_age.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
