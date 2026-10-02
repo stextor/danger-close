@@ -1,5 +1,33 @@
 # Changelog
 
+## v5.88 — My Data's summary says the age the model applies, and the exact figure (D-25)
+
+**A PRESENTATION release.** No figure, rate, rule or age moved; the engines are unchanged (MC parity 10/10). My Data's state line opens
+with a summary built from `STATE_RULES`, not from the note. Through v5.87 it read `$NK/person 65+ exclusion` for every row with a dollar
+exclusion — "65+" whatever age the engine applies, which was wrong for **Delaware** (60), **Kentucky** (any age), **Rhode Island** and
+**Wisconsin** (67), measured through the DOM at scope — and rounded to thousands, four of which rounded **up** (Delaware's $12,500 read
+"$13K"; Maine, Maryland, Montana likewise). It now reads, for example, "$12,500/person exclusion from 60" or "…at any age": the exact
+figure the engine uses and the age by the engine's own rule (`exclAge ?? 65`). Decisions D25-A (a) and D25-B (a), Steve 2026-10-01. The
+text changes on all 18 exclusion rows; the age changes on four. Found at the v5.87 build by `t52`'s DOM read (D-25).
+
+**New suite `t53`** (43 checks, current leg; node + DOM): all 18 exclusion rows read through My Data, each summary's age compared
+with the engine's **measured** onset (the youngest age its tax drops, at $15,000 — below New Mexico's income limit) and with the rule, and
+its figure with the engine's, exact; a zero must read "at any age"; no "65+" or rounded "$NK" left in any summary; summary and note agree
+where the note states a start; the exempt rows keep their own wording. **Shown failing 38 of 43 on v5.87 first.** Negative controls
+`qa/tools/controls_v588_summary_age.py` (repo-only): **7 of 7** — the template reverted, the display's default age drifting with the engine
+untouched and the reverse, the "any age" wording broken, rounding planted back, an age on the exempt wording.
+
+**Limitations, disclosed:** New Mexico's summary does not mention its income limit (its note does). The Field Manual's general prose about
+"65+ exclusions" was reviewed and left: each sentence uses a 65-floor example or is a dated historical statement. **D-24** (Iowa and
+Pennsylvania's exemptions apply at any age; optimistic) is open.
+
+**Suite, run from the packaged copies:** 4,909 app checks across **52 app suites**, 0 failed, 0 DIED; MC parity 10/10; tooling `t21`
+64, `domdiff` 32, `sets` 12 + 12; **GRAND 5,039** — v5.87's 4,996 plus `t53`'s 43, so no
+existing check moved. ⚠ **Run from the PACKAGED copies as two concurrent halves, the method approved at v5.87: two run folders built by mk_runfolder.sh v587 v588 from a fresh clone of be8ec7c with the github/ files overlaid; each ran the shipped runsuite.sh through a session-only copy whose one added line skips the other half's labels (half B: t45, t47, t48; half A: the rest, tooling included). The first half A was cut off at a turn boundary after t38 and was re-run alone in a freshly built folder from the same inputs; half B's completed run stands. Half A GRAND 4817, half B GRAND 222, both exit 0, no suite in both, none DIED.** Per-suite counts are in `TESTING.md`. `smoke_built` on the packaged `index.html`: 22 passed, 0 failed. The prior
+release's page was rebuilt byte-identical first (`0b9b36a0…`).
+
+Source `9843bd1747a24af2791e4ba0fa94ab7f` · built `index.html` `115b688347e671716f6f562d57608e0b`
+
 ## v5.87 — six state notes say when the model applies the exclusion (D-23)
 
 **A PRESENTATION release.** No figure, rate, rule or age moved; the engines are unchanged (MC parity 10/10). Six `STATE_RULES` notes
