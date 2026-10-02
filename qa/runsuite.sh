@@ -166,6 +166,9 @@ tally "t52-$CUR"   node t52_age_start_notes.mjs "$CUR"
 # t53 (v5.88) — My Data's summary names the age the engine applies and the exact figure (D-25): all eighteen exclusion rows
 # through the DOM, each against the engine's measured onset; the summary and the note cannot disagree.
 tally "t53-$CUR"   node t53_mydata_summary_age.mjs "$CUR"
+# t54 (v5.89) — West Virginia's $8,000 senior modification is reduced by the person's taxable SS (D-21): hand-computed cases,
+# per person, the count-only fallback, an extinction grid, and Maryland/Maine/Colorado held to their own rules.
+tally "t54-$CUR"   node t54_wv_senior_modification.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
