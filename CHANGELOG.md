@@ -1,5 +1,49 @@
 # Changelog
 
+## v5.90 — the law's age gates on Iowa's, Pennsylvania's and Mississippi's exemptions; Michigan's cap (D-24)
+
+**A MODELLING release** (METHODOLOGY updated). Through v5.89 every "retirement income exempt" row exempted all retirement income at any
+age and any amount (`retBase = r.retExempt ? 0 : …`). Five of the fourteen such rows tax anything; read at the build:
+
+- **Iowa** exempts it only from **55** (Iowa DOR). **Pennsylvania** exempts IRA distributions only from **59½**, employer-plan payments once the
+  plan's own age or service is met (DOR rev-636; PA-40 instructions). **Mississippi**: early distributions do not qualify (DOR regulation
+  Ch. 07). The model was **optimistic** for younger retirees — at v5.87, a 50-year-old with $50,000 of IRA income paid $0 in Iowa or
+  Pennsylvania where the law gives $1,900 and $1,535.
+- **Michigan** has no age test from TY2026 but caps the deduction per return at the private-retirement maximum, public and private combined
+  (Treasury RAB 2026-1, read in full). The model treated it as unlimited — optimistic above the cap.
+- **Illinois** includes early distributions (IDOR Publication 120): unchanged.
+
+**What changed:** `retExemptAge` — IA 55; PA and MS 60, i.e. 59½ in whole years (conservative). A joint return is exempt only when **both**
+spouses qualify, because the model cannot tell whose account a withdrawal comes from (D-12) — conservative, and disclosed. PA and MS keep
+pensions in payment exempt at any age (`retExemptPensionAnyAge`), as their employer-plan tests are the plan's own. Michigan's `retCap` is
+**$65,897 single / $131,794 joint, TY2025**, the latest Treasury has published (TY2026's indexed figure is higher, so this is
+conservative), shown as a dated figure. My Data's line says "retirement income exempt from 55" / "up to …". Notes rewritten for IA, PA, MS, MI.
+
+**Decisions taken on recommendation** (Steve's standing instruction of 2026-10-02; recorded in the scope): the both-spouses rule; 59½ as 60;
+pensions vs withdrawals; Michigan's TY2025 cap, and **no** Michigan age gate because its IRA bulletin (RAB 2017-21) was not read; Oklahoma
+**kept at 65** — its regulation's general rule states no age but the statute (68 O.S. §2358) was not read.
+
+**Tests changed by design, each found by the literal census or the run:** `t52` (its model-age helper, four Iowa/Pennsylvania note checks,
+M-IA1/M-PA1 — which said in advance they would flip — X-5, and the Pennsylvania DOM check D-2); `t53` X-4 (the gated wording); `t51` (a
+new dollar field, and its census pins: 24 rows, 32 dated figures, Michigan's cap among the TY2025 figures). **`t10` 2E**, found by the first
+full run: its "an exempt state exempts any size" case was Mississippi with nobody counted 65+, which v5.90 rightly taxes ($20,000). Its
+intent (size) kept with a household past the gate; the original inputs kept with their new answer, gated from v5.90 by a version list.
+
+**New suite `t55`** (27 checks, current leg): hand-computed cases for each state under and over its gate, single and joint, the
+both-spouses rule, pensions vs withdrawals, the count-only path, Michigan under and over its cap, Illinois and the nine no-tax rows
+unchanged, and an extinction grid. **Shown failing 14 of 27 on v5.89 first.** Controls `qa/tools/controls_v590_retexempt.py` (repo-only):
+**8 of 8**.
+
+**Limitations, disclosed:** per-person retirement income and account type (D-12) — the joint rule over-taxes a couple whose older spouse
+owns the account; Iowa's disability and survivor paths; Michigan's early-distribution rule unread; Oklahoma's statute unread.
+
+**Suite, run from the packaged copies:** 4,955 app checks across **54 app suites**, 0 failed, 0 DIED; MC parity 10/10; tooling `t21`
+64, `domdiff` 32, `sets` 12 + 12; **GRAND 5,085** — v5.89's 5,057 plus `t55`'s 27 plus `t10`'s
+one new check, so nothing else moved. ⚠ **Run from the PACKAGED copies as two concurrent halves, the method approved at v5.87, run folders built by mk_runfolder.sh v589 v590 from a fresh clone of db860f2 with the github/ files overlaid; each ran the shipped runsuite.sh through a session-only copy whose one added line skips the other half's labels (half B: t45, t47, t48; half A: the rest, tooling included). The first run found one failure, t10 2E on v5.90 (a by-design change; see below); after the fix both halves were re-run in freshly rebuilt folders from the corrected package. Half A GRAND 4863, half B GRAND 222, both exit 0, no suite in both, none DIED.** Per-suite counts are in `TESTING.md`. `smoke_built` on the packaged `index.html`:
+22 passed, 0 failed. The prior release's page was rebuilt byte-identical first (`ae0f99bf…`).
+
+Source `653fff47f0f7665bb4d07a74bdf3d109` · built `index.html` `153ad9a2e773c56b5414714bebf9e40a`
+
 ## v5.89 — West Virginia's $8,000 senior modification is reduced by the person's taxable Social Security (D-21)
 
 **A MODELLING release** (METHODOLOGY updated). Through v5.88 the model exempted West Virginia Social Security **and** granted the full
