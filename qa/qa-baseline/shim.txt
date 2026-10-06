@@ -52,6 +52,10 @@ export const __g = {
   retireStartBalances: _g("retireStartBalances"),
   otherTaxableInit: _g("otherTaxableInit"),
   taxableInitAll: _g("taxableInitAll"),
+  // v5.93 (D-12 Phase 2) — the ONE per-person attribution function the three state call sites share, and the pension-owner
+  // accessor. GUARDED: neither exists before v5.93, and mk_testable.sh splices this shim into every leg. t57 unit-tests them.
+  attributeRetIncome: _g("attributeRetIncome"),
+  getPensionOwner: _g("getPensionOwner"),
   STORAGE_KEYS: () => _g("STORAGE_KEYS"), // t5 loops this map for the Clear-All wipe invariant (v5.10.2)
   // v5.71 (finding A-6) — t37 reads the live master prompt to prove an imported one is accepted
   // only as a string and truncated. A live GETTER, not a captured value: applyLoadedData reassigns
