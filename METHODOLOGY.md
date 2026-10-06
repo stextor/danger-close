@@ -1964,3 +1964,12 @@ which is never more generous. The law's other offsetting modifications — the f
 fire pensions, military retirement, U.S. obligation interest — are not modelled (no account type: D-12), which leaves a WV public
 pensioner slightly optimistic; military retirement's own exemption is not modelled either (conservative). Measured on v5.88, a single
 66-year-old with $30,000 of IRA income and $20,400 of taxable SS was under-taxed $385.60. `qa/t54_wv_senior_modification.mjs`.)*
+
+*(v5.90, D-24 — `docs/SCOPE_D24_RETEXEMPT_AGE.md`. The "retirement income exempt" rows now carry the law's age gates where the law has
+one: Iowa from 55 (Iowa DOR), Pennsylvania and Mississippi from 60 for withdrawals and conversions — 59½ in whole years, conservative —
+with pensions in payment exempt at any age, as their employer-plan tests are the plan's own (PA DOR rev-636 and PA-40 instructions;
+MS DOR regulation Ch. 07). Without per-person retirement income (D-12) a joint return is exempt only when both spouses qualify, which
+over-taxes a couple whose older spouse owns the account (conservative). Michigan has no age test from TY2026 but its deduction is capped
+per return at the private-retirement maximum (Treasury RAB 2026-1); the model applies TY2025's $65,897 / $131,794, the latest published,
+which is conservative. Illinois includes early distributions (IDOR Publication 120) and is unchanged. Oklahoma stays at 65: its
+regulation states no age in its general rule but the statute was not read. `qa/t55_retexempt_age.mjs`.)*
