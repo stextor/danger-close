@@ -1,5 +1,66 @@
 # Changelog
 
+## v5.91 — plan type and pension owner, collected but not yet used (D-12 Phase 1)
+
+**A DATA-MODEL release; no figure moves** (METHODOLOGY unchanged — the project updates it when modelling changes, and this release changes
+none; `t56` group F proves it). Phase 1 of three (`docs/SCOPE_D12_PLAN_TYPE_PER_PERSON.md`). Rhode Island excludes pensions and employer plans
+but **no IRA**; Pennsylvania and Mississippi gate IRAs at 59½ but employer plans at the plan's own age; several states apply their rules per
+person. The model could tell neither an IRA from a 401(k) nor whose pension it was, so it could not apply them. This release collects both;
+v5.92 carries them through the engines and v5.93 uses them.
+
+**What changed:**
+- **`planType`** (`"ira"` | `"employer"`) on every row holding Traditional money: a holding with Traditional dollars, and an Other account whose
+  tax type is Traditional. Labels: "IRA (incl. rollover, SEP, SIMPLE)" and "Employer plan (401(k), 403(b), 457, TSP)". Absent on every other row.
+- **`incomeSources.pension.owner`** (`"A"` | `"B"`); a single filer's is always A.
+- **Saved data.** A v5.91 schema-default block in `applyLoadedData` (every load path goes through it: boot, wizard, start fresh, restore,
+  draft, My Data apply, import, sample): missing or unrecognised plan type → `"ira"`; a stray value on a row with no Traditional dollars is
+  removed; missing or unrecognised pension owner → A. **No name inference** — IRA is the conservative answer whatever a row is called. The
+  backup envelope stays `version: 5`: v5.90 ignores the new fields, and `t56` shows v5.90 reading a v5.91 backup with unchanged figures.
+- **My Data:** a plan-type selector under the tax type on each Traditional or Mixed holding, a full-width one under each Traditional Other
+  account, and a pension-owner selector for couples (none for a single household — one possible owner). A standing line says both are
+  recorded and change no figure yet. A plan saved before v5.91 shows a one-time notice naming the rows set to IRA; it clears at the next
+  Save &amp; Apply. The example household and Guided Setup carry explicit values, so neither shows it. Field Manual §08: one sentence.
+
+**Decisions taken on recommendation** (Steve's standing instruction of 2026-10-02; recorded in the scope's build record): two plan types;
+default IRA; pension owner A; **the scope's premise corrected** — holdings carry Traditional/Roth *dollar* fields, not a tax type, so the
+field lives on holdings with Traditional dollars and on Traditional Other accounts; no name inference; envelope unchanged; explicit values in
+the sample; selector values sharing nothing with existing filters; no new table column; and no pension-owner control at all for a single
+household (changed during the build from fixed text).
+
+**Tests.** New suite **`t56`** — v590 48 (the prior leg pins the fields' absence and runs group F), v591 50. Its v5.91
+assertions run ungated against v5.90 fail 23 of 50 (shown before the build). Group F, the extinction invariant until v5.93: every engine
+output — withdrawal schedule, federal and state tax rows, IRMAA rows, a seeded Monte Carlo median — compared as a whole across all-IRA,
+all-employer, pension owner B and the fields stripped, in the plan's own state, Rhode Island and Pennsylvania, with a positive control.
+Group R: a v5.90 plan opened in v5.91 and saved twice is **byte-identical** between the saves (measured on v5.90 first: its own cycle is
+byte-stable from save 1). Controls `qa/tools/controls_v591_plantype.py` (repo-only): **7 of 7**. `v591` registered in 36 JS suites (114 sites by
+AST, two version-string arms by hand) and three Python suites. **`t33`'s PINS gained `v591` equal to `v590`** — by design, since no figure may
+move. `t10`'s prior leg now runs v5.90's gated check (357 → 358).
+**`package_check.mjs`:** this scope added to its OPEN allowlist (I-2), the first scope held open across releases by design; the entry states
+that it expires when v5.93 ships and must be removed in the package that marks the scope FULFILLED. Tooling only — no suite reads it.
+
+**Errors in this build, owned:**
+- `t33` has an identifier-keyed version table that the registration tool cannot see (missed before at v5.66 and v5.72). It was not checked
+  after registration, and the first full run died on it (`t33-v591`, fail-closed). A parser scan of object-literal keys then found it was
+  the only such table; the first version of that scan was itself blind to object keys and found nothing.
+- `t56`'s first draft named R-5 as the witness that `buildPortfolio` keeps the field. Control C1 showed otherwise: Save &amp; Apply migrates
+  the rebuilt plan in place before the storage write, so a default is re-added and only a user's choice is lost — R-8/R-9 are the
+  witnesses. Corrected in the suite's header before it shipped.
+- Three `__pycache__` files from a compile check reached the package list and were removed before the run.
+- The first `package_check` run failed D-3 on a parser symlink I had placed in the pristine clone; re-run without it.
+- The split run's background halves were killed when a tool call or a turn ended; started with `setsid` they survive a call but not a
+  turn, so a full run must start and finish within one turn. One partial run was discarded and the full run repeated.
+
+**Suite, run from the packaged copies:** 5,054 app checks across **55 app suites**, 0 failed, 0 DIED; MC parity 10/10; tooling `t21`
+64, `domdiff` 32, `sets` 12 + 12; **GRAND 5,184** — v5.90's 5,085 plus `t56`'s 98 (48 + 50) plus
+`t10`'s prior leg (+1). Run from the PACKAGED copies as two concurrent halves, the method approved at v5.87: run folders built by mk_runfolder.sh v590 v591 from a fresh clone of df34f03 with the github/ files overlaid, each running the shipped runsuite.sh through a session-only copy whose one added line skips the other half's labels (half B: t45, t47, t48; half A: the rest, tooling included). Half A GRAND 4962, half B GRAND 222; none DIED; identical suite by suite to the workspace run. Source `bdeb550dc23a20d0b2c156ac1dd533fb` · built `ed695a74ed0350f4846b957a09239561` (v5.90 rebuilt byte-identical first; `smoke_built` 22 passed, 0 failed).
+
+**Limitations, disclosed:**
+- Both fields are **collected and unused** until v5.93; the app says so beside each control.
+- One plan type per row: a Mixed holding's Traditional dollars share one type.
+- **The pension is one household amount with one owner.** A couple with a pension each cannot record the split; Phase 3 must decide
+  (recorded in MissingFeatures).
+- A user who holds a 401(k) must change the row; IRA is the default by design.
+
 ## v5.90 — the law's age gates on Iowa's, Pennsylvania's and Mississippi's exemptions; Michigan's cap (D-24)
 
 **A MODELLING release** (METHODOLOGY updated). Through v5.89 every "retirement income exempt" row exempted all retirement income at any
