@@ -1168,6 +1168,11 @@ modeled` becomes `$20K/person pension & annuity exclusion — applied here from 
 
 ## D-24 · `retExempt` has no age gate — Iowa and Pennsylvania exempt retirement income below the law's age (optimistic)
 
+> ✅ **FIXED v5.90 (2026-10-02).** Iowa 55, Pennsylvania and Mississippi 60 (59½ in whole years) with pensions in payment exempt at any age,
+> joint returns only when both spouses qualify (D-12 for the exact answer); Michigan capped at TY2025's $65,897 / $131,794; Illinois unchanged. All fourteen
+> rows reviewed: nine have no income tax. Oklahoma kept at 65 (statute unread). Held by `qa/t55_retexempt_age.mjs`. Record:
+> `docs/SCOPE_D24_RETEXEMPT_AGE.md` §6. *(The entry below is the v5.87 finding, retained.)*
+
 Found at the v5.87 build (`docs/SCOPE_D23_AGE_START_NOTES.md` §7a, measured through the shim). `stateTaxAnnual` computes
 `retBase = r.retExempt ? 0 : …` with no age test, so every one of the fourteen `retExempt` rows (AK FL IL IA MI MS NV NH PA SD TN TX
 WA WY) exempts retirement income at any age. **Iowa**'s exclusion requires 55 or older on 31 December, disability, or a qualifying
