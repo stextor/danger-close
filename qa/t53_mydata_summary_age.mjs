@@ -15,7 +15,7 @@ import { window } from "./env_dom.mjs";
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v587", "v588", "v589"];
+const KNOWN_VERSIONS = ["v587", "v588", "v589", "v590"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; console.log(`  \u2717 ${n}${d ? " \u2014 " + String(d).slice(0, 240) : ""}`); } };
 const done = () => { console.log(`\nt53 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
@@ -78,6 +78,6 @@ const clash = pairs.filter(([, n, s]) => n !== s).map(([c, n, s]) => `${c} note 
 CK(`X-3 note and summary agree on the start age (${pairs.length} rows state one in the note)`, pairs.length >= 8 && clash.length === 0, clash.join(" · ") || pairs.length);
 // rows exempt outright keep their own wording, with no age and no dollar figure
 for (const c of ["IL", "IA", "PA"]) { await pick(c); const l = modelLine();
-  CK(`X-4-${c} exempt row: "retirement income exempt", no exclusion summary`, SR[c].retExempt && / · retirement income exempt · /.test(l) && !/\/person exclusion/.test(l), l.slice(0, 160)); }
+  CK(`X-4-${c} exempt row: "retirement income exempt", no exclusion summary`, SR[c].retExempt && / · retirement income exempt( from \d+)?( up to \$[\d,]+ single \/ \$[\d,]+ joint)? · /.test(l) && !/\/person exclusion/.test(l), l.slice(0, 160)); }
 try { await act(async () => { root.unmount(); }); } catch (e) {}
 done();

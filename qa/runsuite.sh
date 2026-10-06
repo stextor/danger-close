@@ -169,6 +169,9 @@ tally "t53-$CUR"   node t53_mydata_summary_age.mjs "$CUR"
 # t54 (v5.89) — West Virginia's $8,000 senior modification is reduced by the person's taxable SS (D-21): hand-computed cases,
 # per person, the count-only fallback, an extinction grid, and Maryland/Maine/Colorado held to their own rules.
 tally "t54-$CUR"   node t54_wv_senior_modification.mjs "$CUR"
+# t55 (v5.90) — the law's age gates on IA/PA/MS's exemptions and Michigan's cap (D-24): hand-computed cases per state, both-spouses
+# rule, pensions vs withdrawals, the count-only path, an extinction grid, the nine no-tax rows, Illinois unchanged.
+tally "t55-$CUR"   node t55_retexempt_age.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

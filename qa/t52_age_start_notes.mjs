@@ -23,7 +23,7 @@ import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 const require = createRequire(import.meta.url);
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v586", "v587", "v588", "v589"];
+const KNOWN_VERSIONS = ["v586", "v587", "v588", "v589", "v590"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; console.log(`  \u2717 ${n}${d ? " \u2014 " + String(d).slice(0, 240) : ""}`); } };
 const done = () => { console.log(`\nt52 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
@@ -40,7 +40,7 @@ const EQ = (n, got, exp) => CK(n, Math.abs(got - exp) <= 0.005, `engine ${Number
 // single filer, $50,000 of retirement-account income, nothing else — the scope §7a probe household
 const tax = (code, age) => g.stateTaxAnnual({ code, retIncome: 50000, pen: 0, work: 0, capGains: 0, ssTaxableFed: 0, ssGrossA: 0, ssGrossB: 0, ageA: age, ageB: null, single: true });
 const note = c => (SR[c] && SR[c].note) || "";
-const MODEL_AGE = r => r.retExempt ? 0 : (r.exclAge === undefined || r.exclAge === null ? 65 : r.exclAge);   // stateTaxAnnual's _floor; retBase has no gate
+const MODEL_AGE = r => r.retExempt ? (r.retExemptAge || 0) : (r.exclAge === undefined || r.exclAge === null ? 65 : r.exclAge);   // stateTaxAnnual's _floor; retBase has no gate
 const DISCLOSE = /applied here (?:from (\d{2})|at any age)/i;
 
 // ── T · each rewritten note states the model's age, the law's age, and the direction (typed from the sources above) ─────
@@ -52,10 +52,10 @@ CK("T-AR1 Arkansas: applied here from 65", /applied here from 65\b/.test(n.AR), 
 CK("T-AR2 Arkansas: the law's split — IRAs from 59½, employer plans at any age; conservative", /from 59½ for IRAs/.test(n.AR) && /at any age for employer plans/.test(n.AR) && /\(conservative\)/.test(n.AR), n.AR);
 CK("T-GA1 Georgia: applied here from 65 only", /applied here from 65 only/.test(n.GA), n.GA);
 CK("T-GA2 Georgia: the law's $35K at 62–64 is named as NOT modelled; conservative", /\$35K at 62–64 is not modelled/.test(n.GA) && /\(conservative\)/.test(n.GA), n.GA);
-CK("T-IA1 Iowa: applied here at any age", /applied here at any age/.test(n.IA), n.IA);
-CK("T-IA2 Iowa: the law's 55 (or disability, or survivor), per person; optimistic, with the direction spelled out", /only from 55/.test(n.IA) && /disability/.test(n.IA) && /survivor/.test(n.IA) && /per person/.test(n.IA) && /understates Iowa tax \(optimistic\)/.test(n.IA) && !/55\s*\+/.test(n.IA), n.IA);
-CK("T-PA1 Pennsylvania: applied here at any age", /applied here at any age/.test(n.PA), n.PA);
-CK("T-PA2 Pennsylvania: IRAs from 59½, employer plans at the plan's own age or service; optimistic", /IRA distributions only from 59½/.test(n.PA) && /plan's own retirement age or service/.test(n.PA) && /understates Pennsylvania tax \(optimistic\)/.test(n.PA) && !/59½\s*\+/.test(n.PA), n.PA);
+CK("T-IA1 Iowa: applied here from 55 (v5.90, D-24 — was \"at any age\")", /applied here from 55\b/.test(n.IA), n.IA);
+CK("T-IA2 Iowa (v5.90): the law's 55 on 31 December, disability and survivor not modelled, both spouses on a joint return; conservative", /55 or older on 31 December/.test(n.IA) && /disability/.test(n.IA) && /survivor/.test(n.IA) && /both spouses are 55 or older/.test(n.IA) && /\(conservative\)/.test(n.IA) && !/55\s*\+/.test(n.IA), n.IA);
+CK("T-PA1 Pennsylvania: applied here from 60 (v5.90, D-24 — was \"at any age\")", /applied here from 60\b/.test(n.PA), n.PA);
+CK("T-PA2 Pennsylvania (v5.90): withdrawals from 59½ in whole years, pensions at any age (the plan's own age or service), both spouses; conservative", /59½ in whole years/.test(n.PA) && /plan's own retirement age or service/.test(n.PA) && /both spouses qualify/.test(n.PA) && /\(conservative\)/.test(n.PA) && !/59½\s*\+/.test(n.PA), n.PA);
 CK("T-OK1 Oklahoma: applied here from 65, per person, and claims NO law age (not settled from a primary source)", /applied here from 65\b/.test(n.OK) && /per person/.test(n.OK) && /not verified/.test(n.OK) && !/law/.test(n.OK), n.OK);
 
 // ── M · the model does what each disclosure says — dollar-exact by hand, so a note and the engine cannot drift apart ─────
@@ -67,8 +67,8 @@ EQ("M-AR1 AR 60: no exclusion — 3.9 % × $50,000 = $1,950", tax("AR", 60), 195
 EQ("M-AR2 AR 65: $6,000 excluded — 3.9 % × $44,000 = $1,716", tax("AR", 65), 1716);
 EQ("M-GA1 GA 63: no $35K tier — 5.19 % × $50,000 = $2,595", tax("GA", 63), 2595);
 EQ("M-GA2 GA 65: $65,000 cap covers it — $0", tax("GA", 65), 0);
-EQ("M-IA1 IA 50: exempt below the law's 55 — $0 (the disclosed optimism)", tax("IA", 50), 0);
-EQ("M-PA1 PA 50: exempt below the law's 59½ — $0 (the disclosed optimism)", tax("PA", 50), 0);
+EQ("M-IA1 IA 50 (v5.90): no longer exempt below the law's 55 — 3.8 % × $50,000 = $1,900", tax("IA", 50), 1900);
+EQ("M-PA1 PA 50 (v5.90): withdrawals no longer exempt below 59½ — 3.07 % × $50,000 = $1,535", tax("PA", 50), 1535);
 EQ("M-OK1 OK 64: no exclusion — 4.75 % × $50,000 = $2,375", tax("OK", 64), 2375);
 EQ("M-OK2 OK 65: $10,000 excluded — 4.75 % × $40,000 = $1,900", tax("OK", 65), 1900);
 
@@ -92,7 +92,7 @@ CK("X-1 no note names an age the model does not apply, unless it says \"applied 
 CK("X-2 every \"applied here …\" disclosure states the model's real age (retExempt → any age; else exclAge ?? 65)", x2.length === 0, x2.join(" · "));
 CK("X-3 every row with a dollar exclusion names the age it is applied from (or \"any age\") — none silent", x3.length === 0, x3.join(" "));
 CK(`X-4 not vacuous: at least 18 rows name an age (§B2 empty-set guard; ${named} do)`, named >= 18, named);
-CK("X-5 exactly the six rewritten rows carry the disclosure phrase", rows.filter(c => DISCLOSE.test(note(c))).sort().join(",") === "AR,GA,IA,NY,OK,PA", rows.filter(c => DISCLOSE.test(note(c))).join(","));
+CK("X-5 exactly the seven rows carry the disclosure phrase (v5.90: Mississippi joins)", rows.filter(c => DISCLOSE.test(note(c))).sort().join(",") === "AR,GA,IA,MS,NY,OK,PA", rows.filter(c => DISCLOSE.test(note(c))).join(","));
 const { NOTE_MATCHER } = require(SETS);
 CK("X-6 none of the six enters the income-limited set (NOTE_MATCHER)", ["NY", "AR", "GA", "IA", "PA", "OK"].every(c => !NOTE_MATCHER.test(note(c))));
 
@@ -123,7 +123,7 @@ const modelLine = () => { const d = [...body().querySelectorAll("div")].filter(x
   await pick("NY"); const ny = modelLine();
   CK("D-1 New York's line says the model applies it from 65 and the law from 59½", /applied here from 65, although the law allows it from 59½/.test(ny) && !/59½\+/.test(ny), ny.slice(0, 220));
   await pick("PA"); const pa = modelLine();
-  CK("D-2 Pennsylvania's line says the model applies it at any age and is optimistic", /applied here at any age/.test(pa) && /\(optimistic\)/.test(pa), pa.slice(0, 260));
+  CK("D-2 Pennsylvania's line says the model applies it from 60 and is conservative (v5.90, D-24 — was \"at any age … (optimistic)\")", /applied here from 60/.test(pa) && /\(conservative\)/.test(pa), pa.slice(0, 260));
   await pick("GA"); const ga = modelLine();
   CK("D-3 Georgia's line says the 62–64 tier is not modelled", /\$35K at 62–64 is not modelled/.test(ga), ga.slice(0, 220));
   try { await act(async () => { root.unmount(); }); } catch (e) {}

@@ -130,7 +130,7 @@ const SUR_R = [0,1150,2880,4620,6360,6940];
 // v5.78 (C-1): 42 U.S.C. §1395r(i)(3)(C)(i)(III) — tiers 1–4 are "not more than" their upper amount, the top tier is "at
 // least" its own. Through v5.77 BOTH reference oracles in this file used `<=` at every tier, the engines' own rule, so an
 // exact-top-threshold case compared the engine's C-1 against the oracle's C-1 and agreed. A LADDER — widen it each release.
-const C1_FIXED = VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589";
+const C1_FIXED = VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590";
 const tierR = (magi, ups) => { for (let i=0;i<ups.length;i++) if (i === ups.length - 2 ? magi < ups[i] : magi <= ups[i]) return i; return ups.length-1; };
 const irmaaRef = (magi, single, persons) => SUR_R[tierR(magi, single?SGL_R:MFJ_R)] * persons;
 // IRMAA isolation builder: 3-year window ending at `premiumYr`, both 65+ that year, MAGI = pen.
@@ -484,9 +484,16 @@ const pass2E = pass, fail2E = fail;
     T("2E clamp: a no-tax state ignores the fallback rate entirely",
       S({ code: "FL", fallbackRate: 0.9, retIncome: 1e6, pen: 1e6, work: 1e6, capGains: 1e6,
           ssTaxableFed: 1e6, persons65: 0 }), 0);
-    T("2E: a retExempt state exempts retirement income at ANY size",
+    // v5.90 (D-24): exempt rows may carry the law's age gate, so "any size" needs a household that meets it. Mississippi's gate is 60
+    // (59½ in whole years); a count-only caller's people counted 65+ meet it. The original inputs (nobody counted) are kept below with
+    // their v5.90 answer: withdrawals taxed, the pension in payment still exempt at any age.
+    T("2E: a retExempt state exempts retirement income at ANY size (both counted 65+, past Mississippi's gate)",
       S({ code: "MS", fallbackRate: 0, retIncome: 5e5, pen: 2e5, work: 0, capGains: 0,
-          ssTaxableFed: 0, persons65: 0 }), 0);
+          ssTaxableFed: 0, persons65: 2 }), 0);
+    // Gated from v5.90 (a version LIST, so register_tag extends it each release; the prior leg, v5.89, has no gate to test).
+    if (["v590"].includes(VER)) T("2E (v5.90): nobody counted 65+ — Mississippi taxes the withdrawals (0.04 × 500,000), not the pension in payment",
+      S({ code: "MS", fallbackRate: 0, retIncome: 5e5, pen: 2e5, work: 0, capGains: 0,
+          ssTaxableFed: 0, persons65: 0 }), 20000);
 
     // ── THE DEFECT TEST D-5 ACTUALLY NAMES: a state whose behaviour contradicts its own note.
     // Scanned across all 51. Seven candidates surfaced; six were dollar figures in the note that

@@ -17,7 +17,7 @@ import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 const require = createRequire(import.meta.url);
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v586", "v587", "v588", "v589"];
+const KNOWN_VERSIONS = ["v586", "v587", "v588", "v589", "v590"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; console.log(`  \u2717 ${n}${d ? " \u2014 " + String(d).slice(0, 240) : ""}`); } };
 const done = () => { console.log(`\nt51 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
@@ -78,7 +78,7 @@ CK("V-LA2 Louisiana's note carries $12,324, names IRA distributions, and disclos
 
 // ── X · extinction: no dollar figure without a year ────────────────────────────────────────────────────────────────────
 const TAX_YEAR = 2026;   // TAX_CONSTANTS_YEAR at v5.86: no displayed year may run ahead of the model's tax year
-const dollarFields = r => ["excl65", "exclTest", "ssRule"].filter(f => f === "excl65" ? (r.excl65 || 0) > 0 : r[f] !== undefined);
+const dollarFields = r => ["excl65", "exclTest", "ssRule", "retCap"].filter( /* retCap: v5.90 (D-24), Michigan */f => f === "excl65" ? (r.excl65 || 0) > 0 : r[f] !== undefined);
 const bearing = Object.entries(SR).filter(([, r]) => dollarFields(r).length > 0);
 const missing = [], badYear = [], stale = [], stray = [];
 for (const [c, r] of Object.entries(SR)) {
@@ -95,13 +95,13 @@ CK(`X-2 every year is an integer from 2024 to ${TAX_YEAR} — none runs ahead of
 CK("X-3 no `years` key names a field that is absent or carries no dollars", stale.length === 0, stale.join(","));
 CK("X-4 no row without a dollar figure carries `years`", stray.length === 0, stray.join(","));
 CK("X-5 no rate carries a year (D18-1)", Object.values(SR).every(r => !r.years || r.years.rate === undefined));
-CK("X-6 the census: 23 dollar-bearing rows, 31 dated figures", bearing.length === 23 && bearing.reduce((a, [, r]) => a + dollarFields(r).length, 0) === 31,
+CK("X-6 the census: 24 dollar-bearing rows, 32 dated figures (v5.90: + Michigan's cap, D-24)", bearing.length === 24 && bearing.reduce((a, [, r]) => a + dollarFields(r).length, 0) === 32,
    `${bearing.length} rows`);
 // D18-A: exactly these figures stay at their latest published year, TY2025; every other is TY2026
-const Y2025 = ["ME.exclTest", "MT.excl65", "RI.excl65", "RI.exclTest", "RI.ssRule"];
+const Y2025 = ["ME.exclTest", "MT.excl65", "RI.excl65", "RI.exclTest", "RI.ssRule", "MI.retCap"];
 const yr = bearing.flatMap(([c, r]) => dollarFields(r).map(f => [`${c}.${f}`, r.years && r.years[f]]));
 const wrongYr = yr.filter(([k, v]) => v !== (Y2025.includes(k) ? 2025 : 2026)).map(([k, v]) => `${k}=${v}`);
-CK("X-7 TY2025 exactly for ME's thresholds, MT and RI (unpublished for 2026); TY2026 for the other 26", wrongYr.length === 0, wrongYr.join(","));
+CK("X-7 TY2025 exactly for ME's thresholds, MT, RI and MI's cap (unpublished for 2026; MI added v5.90); TY2026 for the other 26", wrongYr.length === 0, wrongYr.join(","));
 const { NOTE_MATCHER } = require(SETS);
 CK("X-8 Louisiana's rewritten note does not enter the income-limited set (LA is not income-limited in law)", !NOTE_MATCHER.test(SR.LA.note));
 
