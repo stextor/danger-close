@@ -172,6 +172,11 @@ tally "t54-$CUR"   node t54_wv_senior_modification.mjs "$CUR"
 # t55 (v5.90) — the law's age gates on IA/PA/MS's exemptions and Michigan's cap (D-24): hand-computed cases per state, both-spouses
 # rule, pensions vs withdrawals, the count-only path, an extinction grid, the nine no-tax rows, Illinois unchanged.
 tally "t55-$CUR"   node t55_retexempt_age.mjs "$CUR"
+# t56 (v5.91) — plan type and pension owner COLLECTED, NOT READ (D-12 Phase 1): migration, saved-data round-trip (save 1 == save 2,
+# raw), and the extinction invariant that no figure depends on either field until v5.93. Both legs: the prior leg pins the fields'
+# absence and proves v5.90 reads a v5.91 backup with unchanged figures.
+tally "t56-$PRIOR" node t56_plan_type_collect.mjs "$PRIOR"
+tally "t56-$CUR"   node t56_plan_type_collect.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
