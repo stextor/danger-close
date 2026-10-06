@@ -999,6 +999,11 @@ section state the current position.
 
 ## D-12 · Account type (IRA versus employer plan) and per-person retirement income — opened at v5.69
 
+> 🟡 **PHASE 1 SHIPPED v5.91 (2026-10-06): collected, not yet used.** Plan type (IRA / employer plan) on every row holding Traditional money,
+> and the pension's owner; defaults IRA and A; no figure moves (`qa/t56_plan_type_collect.mjs`). **Open:** Phase 2 (v5.92, carry them through the
+> engines) and Phase 3 (v5.93, use them in RI, IA, PA, MS, WV). **New finding for Phase 3:** the pension is one household amount with one owner, so a
+> couple with a pension each cannot record the split — decide before per-person caps use it. Record: `docs/SCOPE_D12_PLAN_TYPE_PER_PERSON.md` §8.
+
 **Opened 2026-09-10 by `docs/SCOPE_RI_POPULATE.md` decision D-RI-1 (approved).** Rhode Island's modification (§ 44-30-12(c)(9))
 covers Form 1040 line 5b income — pensions, annuities, 401(k), 403(b), 457(b), TSP — and **no IRA of any kind**. It is also
 capped at each person's own qualifying income, and only a spouse at full retirement age counts. **The model can express none of
