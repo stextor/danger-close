@@ -13,8 +13,11 @@
 //   The pool argument is POST-SHIP: run it again after uploading to close section J.
 //
 // The clone is the committed tree to diff `github/` against. Omit it and the content checks that
-// need it are SKIPPED AND SAID SO — never silently passed. Clone it yourself with:
-//   git clone --depth 1 https://github.com/stextor/danger-close.git /tmp/ship
+// need it are SKIPPED AND SAID SO — never silently passed. Clone it yourself, WITH HISTORY:
+//   git clone https://github.com/stextor/danger-close.git /tmp/ship
+// v5.93: this line used to say `--depth 1`. K-5b searches the clone's HISTORY for the Prior source, so a shallow clone failed it
+// with a false cause (measured at the v5.91 post-upload run: 49/1/1 shallow, 50/0/1 after `git fetch --unshallow`). K-5b now
+// SKIPS on a shallow clone and names the fix; the other clone checks read only the tip and are unaffected by depth.
 //
 // The THIRD argument is optional and is the run folder the release was built and verified in. With
 // it, section G answers the question the rest of this file structurally cannot: not "is everything
@@ -301,7 +304,7 @@ console.log("\nD. github/ \u2014 \u00a7L: 'changed files only'");
 console.log(`     phase: ${PHASE.toUpperCase()} \u2014 ${phaseWhy}`);
 if (!CLONE || !existsSync(CLONE)) {
   skipped("D-1/D-2: github/ contents vs the committed tree",
-    "no clone given. git clone --depth 1 https://github.com/stextor/danger-close.git /tmp/ship");
+    "no clone given. git clone https://github.com/stextor/danger-close.git /tmp/ship");
 } else {
   const unchanged = [], changed = [];
   for (const f of ghFiles) {
@@ -817,8 +820,8 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
     //   Removed at v5.57.1 after re-verifying every premise by content against v5.57.
     const OPEN = new Set([
       "SCOPE_STANDING_AUDIT.md",                  // not a build scope at all (OPERATIONS §K)
-      "SCOPE_D12_PLAN_TYPE_PER_PERSON.md",        // ACTIVE across three releases (D-12): Phase 1 shipped v5.91; Phases 2 (v5.92) and 3 (v5.93) open.
-      //    ⚠ EXPIRES WHEN v5.93 SHIPS. That release marks the scope FULFILLED in its first 12 lines and retires it to repo-only, and this entry
+      "SCOPE_D12_PLAN_TYPE_PER_PERSON.md",        // ACTIVE across three releases (D-12): Phase 1 shipped v5.91, Phase 2 v5.93; Phase 3 (v5.95) open. No v5.92 (P2-9).
+      //    ⚠ EXPIRES WHEN v5.95 SHIPS (was "v5.93" until the renumbering at the v5.93 build: no v5.92; the spending-draw fix is v5.94). That release marks the scope FULFILLED in its first 12 lines and retires it to repo-only, and this entry
       //    must be REMOVED IN THE SAME PACKAGE (the two halves ship together). Added at the v5.91 ship: the first scope held open across releases
       //    by design. I-3 cannot see this entry go stale while the file exists — only a person reading this note can.
       // ── REMOVED at the v5.74 ship: "SCOPE_TAXES_DRAWDOWN.md". The release built it: Engines B and C consume
@@ -1149,7 +1152,13 @@ console.log("\nK. Manifest — PROJECT_KNOWLEDGE_INDEX.md vs the clone and the p
               if (createHash("md5").update(buf).digest("hex") === P["Source md5"]) { hit = c.slice(0, 7); break; }
             }
           } catch (e) { hit = ""; }
-          ck("K-5b: the Prior table's source md5 is held by a commit in the clone's history (mk_runfolder.sh builds the prior leg from it)",
+          // v5.93: a SHALLOW clone has no history to search, so "no commit has it" would be a false cause. Skip and name the fix;
+          // a FULL clone that lacks the md5 still fails. A hit is a pass at any depth.
+          let shallow = false;
+          try { shallow = execFileSync("git", ["-C", CLONE, "rev-parse", "--is-shallow-repository"], { encoding: "utf8" }).trim() === "true"; } catch (e) { shallow = false; }
+          if (!hit && shallow) skipped("K-5b: the Prior table's md5 in the clone's history",
+            `the clone is SHALLOW and holds no history to search. Run: git -C ${CLONE} fetch --unshallow — then re-run`);
+          else ck("K-5b: the Prior table's source md5 is held by a commit in the clone's history (mk_runfolder.sh builds the prior leg from it)",
             !!hit, hit ? `commit ${hit}` : `no commit has ${P["Source md5"]}`);
         } else skipped("K-5b: the Prior table's md5 in the clone's history", "no clone given");
         const legs = readdirSync(POOL).filter(f => /^DangerClose-v5_\d+\.jsx$/.test(f)).sort();
@@ -1229,8 +1238,12 @@ console.log("\nK. Manifest — PROJECT_KNOWLEDGE_INDEX.md vs the clone and the p
       // that catch a stale-in-both-tables manifest. The danger was never this assertion; it was
       // believing it sufficient.
       const num = v => Number(String(v).replace(/[^\d]/g, ""));
+      // v5.93: version numbers that were NEVER RELEASED, each with its reason, so "one below" steps over them. Without this K-7 reds on
+      // every correct v5.91 -> v5.93 manifest. A NAMED exception, not a looser rule: v5.90 -> v5.93 still fails.
+      const NEVER_RELEASED = new Map([[592, "v5.92 skipped: its suite tag `v592` is the retired v5.9.2 leg's (OPERATIONS \u00a7G, the registry shapes)"]]);
+      let _below = num(C.Version) - 1; while (NEVER_RELEASED.has(_below)) _below--;
       ck("K-7: Prior is exactly one release below Current (WEAK \u2014 cannot see a both-tables-stale manifest; see K-1..K-6)",
-        num(C.Version) === num(P.Version) + 1, `Current ${C.Version}, Prior ${P.Version}`);
+        num(P.Version) === _below, `Current ${C.Version}, Prior ${P.Version}` + (_below !== num(C.Version) - 1 ? ` (expected ${_below}: ${NEVER_RELEASED.get(num(C.Version) - 1)})` : ""));
     }
   }
 }
