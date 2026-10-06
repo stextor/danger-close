@@ -999,6 +999,11 @@ section state the current position.
 
 ## D-12 · Account type (IRA versus employer plan) and per-person retirement income — opened at v5.69
 
+> 🟡 **PHASE 2 SHIPPED v5.93 (2026-10-06): carried, not yet used.** Engines A and B pass the state calculator each person's retirement income by
+> plan type, the pension by owner and the draw separately, through one shared `attributeRetIncome`; the calculator ignores it, no figure moves
+> (`qa/t57_attribution_carry.mjs`). **There is no v5.92** (tag collision with the retired v5.9.2 leg). **Open:** Phase 3, **v5.95** (RI, IA, PA, MS, WV),
+> after the spending-draw fix (**D-26**, v5.94). Still to decide for Phase 3: a couple with a pension each. Record: the scope's §9.
+
 > 🟡 **PHASE 1 SHIPPED v5.91 (2026-10-06): collected, not yet used.** Plan type (IRA / employer plan) on every row holding Traditional money,
 > and the pension's owner; defaults IRA and A; no figure moves (`qa/t56_plan_type_collect.mjs`). **Open:** Phase 2 (v5.92, carry them through the
 > engines) and Phase 3 (v5.93, use them in RI, IA, PA, MS, WV). **New finding for Phase 3:** the pension is one household amount with one owner, so a
@@ -1206,3 +1211,19 @@ same rule the engine uses — `exclAge ?? 65`, with 0 shown as "any age" — and
 (Separately, `toFixed(0)` shows Delaware's $12,500 as "$13K"; cosmetic.) **Low** in dollars, a disclosure defect; presentation-only.
 
 > **Decided 2026-10-01 (Steve, option (a)):** v5.87 ships without it; the fix is **v5.88**, presentation-only.
+
+## D-26 · State tax omits the spending draw — opened at v5.93 (found during the D-12 Phase 2 build)
+
+> 🔴 **OPEN — fix decided as its own release, v5.94 (Steve, 2026-10-06),** between D-12 Phase 2 (v5.93) and Phase 3 (v5.95), so Phase 3's
+> per-person rules are not built on an incomplete base.
+
+Both engines that compute state tax count Traditional dollars spent on living costs as ordinary income for **federal** tax and pass none
+of them to `stateTaxAnnual`. Engine B (`computeTaxPlan`): `ordinaryIncome` includes `ordDraw_y`, but its state call passes
+`retIncome: rmdTax_y + conv_y` and `work: work_y + otherOrd_y`. Engine A (`runRothStrategies`): `base` includes `draw_y`, but its state
+call passes `retIncome: rmd + conv`. Introduced with the draw bridges (v5.74 for B, v5.84 for A), after v5.62 fixed the call's argument
+shape; never disclosed. **Measured (v5.91 source, the example household, NC and VA):** in all ten draw years 2029–2038 ordinary income rises by
+exactly the draw and federal tax rises, and **state tax does not move**; $313,303 of lifetime draw goes untaxed by the state. Engine A,
+one-year household, $10,000: as a draw +$1,200 federal, +$0 state; as a pension +$399 (NC) / +$575 (VA) state. **Optimistic.** Whole-plan
+totals hide it, because draws also shrink later RMDs. **Fix, designed:** route the draw into the state calculator as retirement income
+(D-12 Phase 2 already attributes it per person, `byPerson.draw`), in both engines; measure the real dollar effect with the fixed engine;
+METHODOLOGY entry and a CHANGELOG disclosure of the understatement since v5.74 / v5.84. **Raises state tax** (conservative direction).

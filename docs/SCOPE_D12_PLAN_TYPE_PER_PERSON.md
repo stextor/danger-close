@@ -1,6 +1,8 @@
-# SCOPE — D-12 · Account type and per-person retirement income (three releases, v5.91–v5.93)
+# SCOPE — D-12 · Account type and per-person retirement income (three releases: v5.91, v5.93, v5.95)
 
-**PHASE 1 SHIPPED as v5.91 (2026-10-06); Phases 2 and 3 open.** Stays in the pool while active (OPERATIONS §G). §8 is the Phase 1 build record.
+**PHASE 2 SHIPPED as v5.93 (2026-10-06); Phase 3 (v5.95) open.** Stays in the pool while active (OPERATIONS §G). §8 is the Phase 1 build record, §9 Phase 2's. **Renumbered at the v5.93 build:** there is no v5.92 (P2-9), and the spending-draw fix (MissingFeatures D-26) ships as v5.94 between Phases 2 and 3. Where this document says v5.92 read **v5.93**; where it says v5.93 for Phase 3 read **v5.95**.
+
+*(Superseded status line, retained:)* **PHASE 1 SHIPPED as v5.91 (2026-10-06); Phases 2 and 3 open.** Stays in the pool while active (OPERATIONS §G). §8 is the Phase 1 build record.
 
 *(Superseded status line, retained:)* **READY — 2026-10-02.** Written against v5.90 (freshness: repo `df34f03`; all 119 pool files match committed content; source
 `653fff47f0f7665bb4d07a74bdf3d109`). Under Steve's standing instruction (2026-10-02) every decision below carries a recommendation that
@@ -129,3 +131,27 @@ to repo-only when v5.93 ships.
 - **Suite:** 5,054 app checks, 55 suites, 0 failed, 0 DIED; GRAND 5,184. Run from the PACKAGED copies as two concurrent halves, the method approved at v5.87: run folders built by mk_runfolder.sh v590 v591 from a fresh clone of df34f03 with the github/ files overlaid, each running the shipped runsuite.sh through a session-only copy whose one added line skips the other half's labels (half B: t45, t47, t48; half A: the rest, tooling included). Half A GRAND 4962, half B GRAND 222; none DIED; identical suite by suite to the workspace run.
 - **Found for Phase 3:** the pension is one household amount with one owner; a couple with a pension each cannot record the split.
 - **`package_check` I-2:** this scope is held on the OPEN allowlist in `qa/tools/package_check.mjs` until v5.93; remove it in the package that marks the scope FULFILLED.
+
+## 9 · Build record — Phase 2 (v5.93, 2026-10-06)
+
+- **Freshness:** repo `40681d5`; v5.91 source `bdeb550d…` matched manifest and CHANGELOG; all 121 pool files matched committed content. The v5.91
+  post-upload `package_check` closed at 50/0/1 (G-1 skipped: no run folder) after a shallow-clone false red on K-5b — fixed in this release.
+- **Premise corrected (§2):** "each engine" — only Engines A (`runRothStrategies`, two call sites) and B (`computeTaxPlan`, one) compute state
+  tax; C and D have no state identifiers. §5's third stop condition did not fire: both keep per-person Traditional legs.
+- **F-3 confirmed by source:** each person's Traditional money is one leg with one growth rate, so pro rata by start-of-year balance reduces to a
+  share fixed at retirement start — the `annShare` idiom already in `retireStartBalances`.
+- **Decisions taken on recommendation:** P2-1 one optional `byPerson` argument, ignored; P2-2 `empShareA/B` beside `annShare`; P2-3 inherited
+  employer dollars become the survivor's IRA dollars; P2-4 QCDs from IRA first; P2-5 annuity a third category; P2-6 the draw attributed, kept out
+  of the household totals; P2-7 bonus deferral + match are employer, monthly pre-tax contributions IRA; P2-8 the pension to the survivor after a
+  death; **P2-9 no v5.92** (the tag `v592` is the retired v5.9.2 leg's, gated in `t1`/`t4`/`t5`/`t6`); P2-10 METHODOLOGY unchanged.
+- **Steve's decision (2026-10-06):** the spending-draw omission found here (D-26, measured in both engines) is fixed in its own release between
+  Phases 2 and 3 — now v5.94, with Phase 3 at v5.95.
+- **Equivalence before tests:** every engine output (A, B with and without conversions and QCDs, C, D) on 23 households, v5.91 vs v5.93 — 161 of 161
+  byte-identical.
+- **Source** `e60a09711b5c1451d144a208bd82991b` (33 anchors, each once; Engine B's two shared-with-C anchors scoped to `computeTaxPlan`); **built** `b7ebd28e9f0d1abf063068dd438a35e1` (v5.91 rebuilt
+  byte-identical first; `smoke_built` 22 passed, 0 failed).
+- **`t57`** 34, current leg only. **Controls 12 of 12** — three of them first exposed blind spots in `t57` (K8, K9, and the per-strategy C7b),
+  each fixed and re-proved.
+- **Suite:** 5,090 app checks, 56 suites, 0 failed, 0 DIED; GRAND 5,220; every current-leg count equals v5.91's but `t57`. Run from the PACKAGED copies as two concurrent halves, the method approved at v5.87: run folders built by mk_runfolder.sh v591 v593 from a full clone of 40681d5 with the github/ files overlaid (v5.91 resolved from history, commit 54764c5), each running the shipped runsuite.sh through a session-only copy whose one added line skips the other half's labels (half B: t45, t47, t48; half A: the rest, tooling included). Half A GRAND 4998, half B GRAND 222; none DIED.
+- **Open for Phase 3:** a couple with a pension each (one household amount, one owner); and §2's state rules, each re-read at the build.
+- **`package_check` I-2:** this scope stays on the OPEN allowlist until **v5.95**; remove it in the package that marks the scope FULFILLED.

@@ -825,6 +825,18 @@ blanket `VER === "vNNN"` → `|| VER === "vNNN+1"` edit across all four shapes c
 (`TESTING.md` carries the per-release counts; this table is the durable shape list, and the two
 must not both try to be the record.)
 
+⚠ **A FIFTH place, outside every shape above: the Python suites (added at the v5.93 build).** `t45`, `t47` and `t48` are `.py`
+files with their own `KNOWN_VERSIONS` lists. `register_tag2.cjs`, `tagkeys.cjs` and `vercensus` parse JavaScript only, so a
+registration they report as complete leaves all three unregistered. They fail closed (`0-0 version tag … is registered`, zero
+checks run), which is how v5.93's half B caught it. After registering, check the `.py` suites by hand until a tool reads them.
+
+⚠ **Choose a version whose TAG is free (added at the v5.93 build).** Tags drop the dots, so **v5.9.2 and v5.92 are both
+`v592`** — and `v592` is the retired v5.9.2 leg's, gated in `t1`, `t4`, `t5`, `t6` (`IS510 = VER !== "v592"`) and named by its
+`dom_entry_v592.jsx`, `cap_tabs.mjs` and `domdiff_withdrawal.mjs`. A build registered under it is tested as v5.9.2. **v5.92 was
+skipped for this reason.** Before a release takes a number, ask `qa/tools/vercensus.cjs` for the tag (it counts every literal equal
+to it, by AST — a presence question is a parser question, project rules), read the three `.py` suites' lists by hand (above), and run
+`git log -- qa/qa-baseline/dom_entry_vNNN.jsx`; all must come back empty.
+
 
 
 The rule above is the one part of §G **no check enforces**. `package_check`'s section `J` (`J-1`,
@@ -1381,9 +1393,7 @@ Not every engine is testable to the dollar, and a scope must not assume otherwis
   - **How the error was made, because the shape recurs.** The claim traces to a comment in
     `shim.txt` at the `__engines` export — *"which empties the ±$500 category in OPERATIONS §M — no
     engine is now both inline AND unreachable."* True **of the four drawdown engines**; this section
-    generalised it to "every engine." ⚠ **That comment is still uncorrected** — it is a harness file
-    spliced into every leg by `mk_testable.sh`, so amending it requires a full suite run and belongs
-    to a release that is running the suite anyway.
+    generalised it to "every engine." ✓ **That comment WAS corrected, at v5.47** — the shim's own text reads "CORRECTED v5.47". This bullet said otherwise until the v5.93 build, which found it while adding the shim's two D-12 exports: the stale copy was this one.
 - **TWO different reasons a suite reads at ±$500 — do not conflate them.** `t13`, `t14`, `t16` read
   the DOM **by design**: the engine behind them IS reachable, and these suites exist to prove the
   tabs render what it computes. `t23`, `t24`, `t26`, `t27`, `t28` read the DOM **by necessity**:
