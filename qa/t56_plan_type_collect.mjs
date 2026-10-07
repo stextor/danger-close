@@ -29,12 +29,12 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
 const VER = process.argv[2];
-const KNOWN_VERSIONS = ["v590", "v591", "v593"];
+const KNOWN_VERSIONS = ["v590", "v591", "v593", "v594"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.\n    Registered: ${KNOWN_VERSIONS.join(", ")}`);
   process.exit(1);
 }
-const POST = ["v591", "v593"].includes(VER); // D-12 Phase 1 shipped at v5.91
+const POST = ["v591", "v593", "v594"].includes(VER); // D-12 Phase 1 shipped at v5.91
 
 const mulberry = (a) => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a);
   t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };

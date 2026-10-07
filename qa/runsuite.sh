@@ -182,7 +182,14 @@ tally "t56-$CUR"   node t56_plan_type_collect.mjs "$CUR"
 # attributeRetIncome unit + 2,000-case identity grid, the employer share hand-computed, a runtime recorder on all three call sites
 # (sums back, decedent gets nothing, the death rescale in both engines), and AST guards. CURRENT LEG ONLY: the function, the
 # fields and the anchor do not exist before v5.93. Controls: qa/tools/controls_v593_attribution.py (repo-only), 12 of 12.
+# From v5.94 BOTH LEGS (the prior leg is v5.93, which has them); A7/A9 are gated per build — the draw joined the split at v5.94 (D-26).
+tally "t57-$PRIOR" node t57_attribution_carry.mjs "$PRIOR"
 tally "t57-$CUR"   node t57_attribution_carry.mjs "$CUR"
+# t58 (v5.94) — the spending draw reaches the state calculator (D-26): draw == pension in every jurisdiction (Engine A), Engine B
+# hand-computed to the dollar (NC, CA, GA, NY), federal and Engines C/D byte-identical to v5.93, AST extinction on every state call,
+# the Field Manual line. Both legs: the v593 leg PINS the defect. Controls: qa/tools/controls_v594_state_draw.py (repo-only).
+tally "t58-$PRIOR" node t58_state_draw.mjs "$PRIOR"
+tally "t58-$CUR"   node t58_state_draw.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

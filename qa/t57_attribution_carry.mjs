@@ -24,7 +24,7 @@
 // calculator read byPerson, that statement goes and section C fails loudly here — it cannot pass vacuously.
 const VER = process.argv[2];
 const MODPATH = process.argv[3] || `./app_${VER}.mjs`;
-const KNOWN_VERSIONS = ["v593"];
+const KNOWN_VERSIONS = ["v593", "v594"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -36,6 +36,9 @@ const { resolve, dirname } = await import("path");
 const { createRequire } = await import("module");
 const m = await import(MODPATH);
 const g = m.__g, E = m.__engines;
+// v5.94 (D-26): the spending draw joins the income split, because every call site now passes it in retIncome. Gated per build
+// (OPERATIONS \u00a7B2): the v593 leg still asserts P2-6 (draw kept apart), every later leg asserts the draw inside the split.
+const DRAW_IN_SPLIT = VER !== "v593";
 
 let pass = 0, fail = 0;
 const ck = (name, cond, detail = "") => {
@@ -73,9 +76,13 @@ if (typeof AR === "function") {
   ck("A6: pension 30,000 owned by B \u2192 B 30,000, A 0", r.B.pension === 30000 && r.A.pension === 0);
   r = AR({ pen: 30000 });
   ck("A6b: penOwner omitted \u2192 A (the v5.91 default)", r.A.pension === 30000 && r.B.pension === 0);
-  // A7 · the draw is attributed SEPARATELY and is NOT in the income split (P2-6).
+  // A7 · v593: the draw is attributed SEPARATELY and is NOT in the income split (P2-6). v594+: it IS in the split (D-26), and the
+  //      `draw` record still carries the same dollars as an of-which breakdown.
   r = AR({ drawA: 8000, drawB: 2000, annShareB: 0.5, empShareA: 1 });
-  ck("A7: the draw is kept apart from the income split", inc(r, "A") === 0 && inc(r, "B") === 0 &&
+  if (!DRAW_IN_SPLIT) ck("A7: the draw is kept apart from the income split", inc(r, "A") === 0 && inc(r, "B") === 0 &&
+     r.draw.A.employer === 8000 && r.draw.B.annuity === 1000 && r.draw.B.ira === 1000, JSON.stringify(r));
+  else ck("A7: the draw is IN the income split (D-26) \u2192 A employer 8,000; B annuity 1,000, IRA 1,000; of-which record unchanged",
+     r.A.employer === 8000 && r.A.ira === 0 && r.B.annuity === 1000 && r.B.ira === 1000 && inc(r, "A") === 8000 && inc(r, "B") === 2000 &&
      r.draw.A.employer === 8000 && r.draw.B.annuity === 1000 && r.draw.B.ira === 1000, JSON.stringify(r));
   // A8 · defaults and clamps: no argument → all zero; shares outside [0, 1] or NaN are clamped, never propagated.
   r = AR();
@@ -92,7 +99,7 @@ if (typeof AR === "function") {
                 annShareA: rnd() < 0.5 ? 0 : rnd(), annShareB: rnd() * 0.3, empShareA: rnd(), empShareB: rnd() < 0.5 ? 0 : rnd() };
     const rm = a.rmdA + a.rmdB;
     if (rnd() < 0.5) a.rmdTaxable = Math.max(0, rm - rnd() * 3e4);
-    const o = AR(a), want = (a.rmdTaxable ?? rm) + a.convA + a.convB;
+    const o = AR(a), want = (a.rmdTaxable ?? rm) + a.convA + a.convB + (DRAW_IN_SPLIT ? a.drawA + a.drawB : 0);
     const ok = near(inc(o, "A") + inc(o, "B"), want) && near(o.A.pension + o.B.pension, a.pen) &&
       near(o.draw.A.ira + o.draw.A.employer + o.draw.A.annuity + o.draw.B.ira + o.draw.B.employer + o.draw.B.annuity, a.drawA + a.drawB);
     if (!ok) { bad++; if (!first) first = JSON.stringify(a); }
