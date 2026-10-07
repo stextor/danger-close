@@ -164,6 +164,11 @@ before starting one, check `ps` that no earlier run is alive and stop it; give e
 and never read a sentinel or log older than the run you started. `pgrep` is no substitute — its pattern can match the
 checking command itself. The first v5.74 session recorded a lost run as a `pgrep` self-match; these facts explain it better.
 
+⚠ **Build `index.html` into the clone BEFORE `mk_runfolder.sh` (added v5.94).** The run folder copies the clone's built page, and `t45`, `t47`
+and `t48` test that page, not the source. A folder built before the release's `index.html` carries the PRIOR build's page. At v5.94 the
+suite was started that way; `t45` and `t47` failed `0-2` (the footer must name the current version) — loud, because that guard exists, but
+it cost a re-run. Order: stage source → build and smoke-test `index.html` → place it at the clone root → build the run folders → run.
+
 ### B1. Census and site-count questions go through `qa/tools/`, never greps
 
 **A grep is not an answer to "how many sites?" or "where is this used?"** Grep line-number and identifier

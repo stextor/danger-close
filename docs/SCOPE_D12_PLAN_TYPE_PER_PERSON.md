@@ -1,6 +1,8 @@
 # SCOPE — D-12 · Account type and per-person retirement income (three releases: v5.91, v5.93, v5.95)
 
-**PHASE 2 SHIPPED as v5.93 (2026-10-06); Phase 3 (v5.95) open.** Stays in the pool while active (OPERATIONS §G). §8 is the Phase 1 build record, §9 Phase 2's. **Renumbered at the v5.93 build:** there is no v5.92 (P2-9), and the spending-draw fix (MissingFeatures D-26) ships as v5.94 between Phases 2 and 3. Where this document says v5.92 read **v5.93**; where it says v5.93 for Phase 3 read **v5.95**.
+**PHASE 2 SHIPPED as v5.93; D-26 SHIPPED as v5.94 (2026-10-06); Phase 3 (v5.95) open.** ⚠ **For Phase 3: P2-6 is superseded** (`docs/SCOPE_D26_STATE_TAX_DRAW.md` D26-2) — from v5.94 the draw is INSIDE `attributeRetIncome`'s ira / employer / annuity figures, and `byPerson.draw` is an of-which breakdown of the same dollars: a rule that adds it double-counts.
+
+*(Superseded status line, retained:)* **PHASE 2 SHIPPED as v5.93 (2026-10-06); Phase 3 (v5.95) open.** Stays in the pool while active (OPERATIONS §G). §8 is the Phase 1 build record, §9 Phase 2's. **Renumbered at the v5.93 build:** there is no v5.92 (P2-9), and the spending-draw fix (MissingFeatures D-26) ships as v5.94 between Phases 2 and 3. Where this document says v5.92 read **v5.93**; where it says v5.93 for Phase 3 read **v5.95**.
 
 *(Superseded status line, retained:)* **PHASE 1 SHIPPED as v5.91 (2026-10-06); Phases 2 and 3 open.** Stays in the pool while active (OPERATIONS §G). §8 is the Phase 1 build record.
 

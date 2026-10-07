@@ -999,6 +999,9 @@ section state the current position.
 
 ## D-12 · Account type (IRA versus employer plan) and per-person retirement income — opened at v5.69
 
+> 🟡 **D-26 SHIPPED v5.94 (2026-10-06)** — the base Phase 3 builds on is complete: the spending draw now reaches the state calculator and sits
+> inside the per-person split (P2-6 superseded by D26-2; `byPerson.draw` is an of-which, never to be added again). **Open:** Phase 3, **v5.95**.
+
 > 🟡 **PHASE 2 SHIPPED v5.93 (2026-10-06): carried, not yet used.** Engines A and B pass the state calculator each person's retirement income by
 > plan type, the pension by owner and the draw separately, through one shared `attributeRetIncome`; the calculator ignores it, no figure moves
 > (`qa/t57_attribution_carry.mjs`). **There is no v5.92** (tag collision with the retired v5.9.2 leg). **Open:** Phase 3, **v5.95** (RI, IA, PA, MS, WV),
@@ -1214,6 +1217,11 @@ same rule the engine uses — `exclAge ?? 65`, with 0 shown as "any age" — and
 
 ## D-26 · State tax omits the spending draw — opened at v5.93 (found during the D-12 Phase 2 build)
 
+> ✅ **FIXED v5.94 (2026-10-06).** All three state call sites pass the draw in `retIncome`; `attributeRetIncome` folds it into the income split
+> (D26-2, superseding P2-6). Measured: NC +$12,501 lifetime on the example household; Engine B 392 year-rows rise, none fall; federal and Engines C/D
+> unchanged. `qa/t58_state_draw.mjs`; scope `docs/SCOPE_D26_STATE_TAX_DRAW.md` (fulfilled, repo-only).
+>
+> *(Superseded, retained:)*
 > 🔴 **OPEN — fix decided as its own release, v5.94 (Steve, 2026-10-06),** between D-12 Phase 2 (v5.93) and Phase 3 (v5.95), so Phase 3's
 > per-person rules are not built on an incomplete base.
 
