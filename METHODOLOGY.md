@@ -1973,3 +1973,11 @@ over-taxes a couple whose older spouse owns the account (conservative). Michigan
 per return at the private-retirement maximum (Treasury RAB 2026-1); the model applies TY2025's $65,897 / $131,794, the latest published,
 which is conservative. Illinois includes early distributions (IDOR Publication 120) and is unchanged. Oklahoma stays at 65: its
 regulation states no age in its general rule but the statute was not read. `qa/t55_retexempt_age.mjs`.)*
+
+*(v5.94, D-26 — `docs/SCOPE_D26_STATE_TAX_DRAW.md`. The Traditional dollars a plan draws for spending are retirement income to the state
+module, as they are ordinary income to the federal engine: both engines that compute state tax now pass them in `retIncome`, where they take
+the state's retirement exemption, 65+ exclusion and income tests exactly as an RMD or a conversion does. From the draw bridges — v5.74 on the
+Taxes tab, v5.84 in the Roth comparator — until this release the state module received none of them, so state tax was understated in every
+draw year in which the state would have taxed those dollars (on the example household in North Carolina, $313,303 of lifetime draw and $12,501 of
+state tax; in Georgia, none, because its exclusion absorbed the draw). Whole-plan totals partly
+hid it, because draws also shrink later RMDs. Engines C and D compute no state tax and are unchanged. `qa/t58_state_draw.mjs`.)*
