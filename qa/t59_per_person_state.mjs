@@ -7,7 +7,7 @@
 // every jurisdiction prices exactly as v5.94 (v595 leg, needs app_v594.mjs) · D AST/data guards · E the copy.
 // BOTH LEGS; the v594 leg PINS the pre-Phase-3 figures. Run: node t59_per_person_state.mjs <tag>
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v594", "v595", "v596"];
+const KNOWN_VERSIONS = ["v594", "v595", "v596", "v597"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; console.log(`  \u2717 ${n}${d !== "" ? " \u2014 " + String(d).slice(0, 240) : ""}`); } };
 const done = () => { console.log(`\nt59 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
@@ -16,11 +16,13 @@ if (!KNOWN_VERSIONS.includes(VER)) { CK(`0-0 version tag ${JSON.stringify(VER)} 
 const P3 = VER !== "v594";
 console.error = () => {}; console.warn = () => {};
 const m = await import(`./app_${VER}.mjs`), g = m.__g, E = m.__engines, ST = E.stateTaxAnnual || g.stateTaxAnnual, SR = g.STATE_RULES();
+// v5.97 (D-22): Georgia is 4.99 % from TY2026 (HB 463); earlier legs keep 5.19 %.
+const GA_R = (VER === "v597" ? 0.0499 : 0.0519);
 const z = { ira: 0, employer: 0, annuity: 0, pension: 0 }, zd = { ira: 0, employer: 0, annuity: 0 };
 const bp = (a, b) => ({ A: { ...z, ...a }, B: { ...z, ...b }, draw: { A: { ...zd }, B: { ...zd } } });
 // ── 0 · the rates and fields the hand figures assume (asserted, then hardcoded) ──
-CK("0-1 rates RI 5 % · IA 3.8 % · PA 3.07 % · MS 4 % · WV 4.82 % · GA 5.19 %; RI $50,000 at 67; WV $8,000; IA 55, PA/MS 60",
-   SR.RI.rate === 0.05 && SR.IA.rate === 0.038 && SR.PA.rate === 0.0307 && SR.MS.rate === 0.04 && SR.WV.rate === 0.0482 && SR.GA.rate === 0.0519 &&
+CK("0-1 rates RI 5 % · IA 3.8 % · PA 3.07 % · MS 4 % · WV 4.82 % · GA " + (GA_R * 100).toFixed(2) + " %; RI $50,000 at 67; WV $8,000; IA 55, PA/MS 60",
+   SR.RI.rate === 0.05 && SR.IA.rate === 0.038 && SR.PA.rate === 0.0307 && SR.MS.rate === 0.04 && SR.WV.rate === 0.0482 && SR.GA.rate === GA_R &&
    SR.RI.excl65 === 50000 && SR.RI.exclAge === 67 && SR.WV.excl65 === 8000 && SR.IA.retExemptAge === 55 && SR.PA.retExemptAge === 60 && SR.MS.retExemptAge === 60);
 // ── A · the seven hand cases [args, hand v5.95, hand v5.94] ──
 const A = [
@@ -49,7 +51,7 @@ for (const [lbl, args, h95, h94] of A) {
   const ga = rows("GA"); CK("B-0 the household loaded: A dies 2027 (72), B born 1966 survives", tl().lifeExpA === 72 && tl().dobB.year === 1966);
   const r = yr => ga.find(x => x.yr === yr);
   // GA, survivor B aged 62–64 in 2028–2030: no 65+ exclusion in law's modelled tier (the 62–64 tier is disclosed as not modelled)
-  const gaHand = (x, excl) => 0.0519 * Math.max(0, x.pen_y + x.rmdTax_y + x.conv_y - excl) + 0.0519 * (x.work_y + x.otherOrd_y + x.capGains_y + x.div_y);
+  const gaHand = (x, excl) => GA_R * Math.max(0, x.pen_y + x.rmdTax_y + x.conv_y - excl) + GA_R * (x.work_y + x.otherOrd_y + x.capGains_y + x.div_y);
   for (const yr of [2028, 2029, 2030]) CK(`B-GA ${yr} (B aged ${yr - 1966}): $${r(yr).stateTax.toFixed(2)} = hand with ${P3 ? "NO exclusion (the survivor's own age)" : "$65,000 (the DECEDENT's age — PIN v5.94)"}`,
     Math.abs(r(yr).stateTax - gaHand(r(yr), P3 ? 0 : 65000)) < 0.01, `${r(yr).stateTax} vs ${gaHand(r(yr), P3 ? 0 : 65000)}`);
   CK("B-GA 2031 (B aged 65): $65,000 exclusion on both legs", Math.abs(r(2031).stateTax - gaHand(r(2031), 65000)) < 0.01, r(2031).stateTax);

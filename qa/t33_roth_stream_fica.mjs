@@ -40,7 +40,7 @@ const VER = process.argv[2] || "v563";
 // pre-fix like v5.62; only the two ABSOLUTE pins differ, because v5.62 raised state tax in the
 // Roth outputs (SCOPE_ENGINE_STATE_PARITY). Everything else here is a DELTA between two streams
 // on one build and is therefore version-independent by construction.
-const KNOWN_VERSIONS = ["v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596"];
+const KNOWN_VERSIONS = ["v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is not registered in this suite.");
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -48,7 +48,7 @@ if (!KNOWN_VERSIONS.includes(VER)) {
   process.exit(1);
 }
 // The fix landed at v5.63. Every later tag is post-fix and must be added here as well.
-const POST_FIX = VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596"));
+const POST_FIX = VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597"));
 
 // The only two build-specific ABSOLUTE figures in this suite. Kept in one table so a tag added to
 // KNOWN_VERSIONS without its pins fails CLOSED rather than reading someone else's numbers — the
@@ -185,6 +185,9 @@ const PINS = {
   // v5.96 (D-27): MEASURED with a sentinel at the build — 174,883, equal to v5.95's: this Georgia household never reaches a
   // single-filing survivor year that D-27 re-taxes, so no figure may move. acaConv is read only by the pre-fix branch.
   v596: { noStream: 174883, acaConv: 1203137 },
+  // v5.97 (D-22): MEASURED with a sentinel at the build — 173,836 (v5.96: 174,883, −$1,047). This household IS in Georgia, whose rate
+  // falls from 5.19 % to 4.99 % (HB 463, TY2026), so this pin moves by design. acaConv is read only by the pre-fix branch.
+  v597: { noStream: 173836, acaConv: 1203137 },
 };
 if (!PINS[VER]) {
   console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is registered but has no PINS entry.");
@@ -382,9 +385,9 @@ console.log("\n  E — the ACA-bridge path (second FICA site, via the cliff solv
     T("E-2: the cliff solver CONVERTS A DIFFERENT AMOUNT — only the sale sub-engine can do this",
       w.totConv !== r.totConv, `${w.totConv} vs ${r.totConv}`);
     T("E-3: conversions rise for the wage household, whose estimated bill is larger",
-      w.totConv - r.totConv === 738, `delta ${w.totConv - r.totConv}`);
+      w.totConv - r.totConv === (VER === "v597" ? 739 : 738), `delta ${w.totConv - r.totConv}`);   // v5.97 (D-22): 739 MEASURED — Georgia's rate moves the cliff solver's estimate
     T("E-4: lifetime tax on the cliff strategy falls for the non-work stream",
-      w.totTax - r.totTax === 60041, `delta ${w.totTax - r.totTax}`);
+      w.totTax - r.totTax === (VER === "v597" ? 60036 : 60041), `delta ${w.totTax - r.totTax}`);   // v5.97 (D-22): 60,036 MEASURED, as E-3
   } else {
     T("E-2 [PRE-FIX]: the cliff solver converts the SAME amount either way",
       w.totConv === r.totConv, `${w.totConv} vs ${r.totConv}`);

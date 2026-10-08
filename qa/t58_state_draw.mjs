@@ -14,7 +14,7 @@
 // BOTH LEGS. The v593 leg PINS the defect (A, B, D, E assert the pre-fix state); group C runs on the v594 leg only, because it
 // asserts what THIS release changed relative to its prior. Run: node t58_state_draw.mjs <tag>
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v593", "v594", "v595", "v596"];
+const KNOWN_VERSIONS = ["v593", "v594", "v595", "v596", "v597"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; console.log(`  \u2717 ${n}${d !== "" ? " \u2014 " + String(d).slice(0, 260) : ""}`); } };
 const done = () => { console.log(`\nt58 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
@@ -31,8 +31,9 @@ const g = m.__g, E = m.__engines, SR = g.STATE_RULES();
 const P0 = JSON.parse(JSON.stringify(g.PORTFOLIO()));
 
 // ── 0 · the rates the hand figures assume ──────────────────────────────────────────────────────────────────────────────────
-const RATE = { NC: 0.0399, CA: 0.06, GA: 0.0519, NY: 0.06 }, EXCL = { NC: 0, CA: 0, GA: 65000, NY: 20000 };
-CK("0-1 NC 3.99 % / CA 6 % / GA 5.19 % / NY 6 %; exclusions 0 / 0 / $65,000 / $20,000 per person; no SS, exemption, test or age field",
+// v5.97 (D-22): Georgia is 4.99 % from TY2026 (HB 463); earlier legs keep 5.19 %.
+const RATE = { NC: 0.0399, CA: 0.06, GA: (VER === "v597" ? 0.0499 : 0.0519), NY: 0.06 }, EXCL = { NC: 0, CA: 0, GA: 65000, NY: 20000 };
+CK(`0-1 NC 3.99 % / CA 6 % / GA ${(RATE.GA * 100).toFixed(2)} % / NY 6 %; exclusions 0 / 0 / $65,000 / $20,000 per person; no SS, exemption, test or age field`,
    Object.keys(RATE).every(c => SR[c].rate === RATE[c] && (SR[c].excl65 || 0) === EXCL[c] && !SR[c].ss && !SR[c].retExempt &&
      !SR[c].exclTest && SR[c].exclAge == null && !SR[c].ssRule && !SR[c].ssOffset), Object.keys(RATE).map(c => JSON.stringify(SR[c])).join(" "));
 

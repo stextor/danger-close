@@ -200,6 +200,10 @@ tally "t59-$CUR"   node t59_per_person_state.mjs "$CUR"
 # an AST extinction check, the Field Manual line. Both legs; the v595 leg pins the defect. Controls: qa/tools/controls_v596_survivor_state.py.
 tally "t60-$PRIOR" node t60_engineA_survivor_state.mjs "$PRIOR"
 tally "t60-$CUR"   node t60_engineA_survivor_state.mjs "$CUR"
+# t61 (v5.97) — D-22 (two of 42): Georgia 4.99 % (HB 463) and Oklahoma 4.5 % (HB 2764) from TY2026; a note stating a rate for a year
+# states the row's own rate (all rows); hand cases to the cent; v5.96 -> v5.97 moves only GA/OK, by exactly the rate ratio.
+tally "t61-$PRIOR" node t61_ga_ok_rates.mjs "$PRIOR"
+tally "t61-$CUR"   node t61_ga_ok_rates.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

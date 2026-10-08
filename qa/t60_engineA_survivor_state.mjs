@@ -15,7 +15,7 @@
 //          E the Field Manual's dated line
 // BOTH LEGS; the v595 leg PINS the defect. Group C runs on the v596 leg only (it needs app_v595.mjs). Run: node t60_engineA_survivor_state.mjs <tag>
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v595", "v596"];
+const KNOWN_VERSIONS = ["v595", "v596", "v597"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  ✓ ${n}`); } else { fail++; console.log(`  ✗ ${n}${d !== "" ? " — " + String(d).slice(0, 260) : ""}`); } };
 const done = () => { console.log(`\nt60 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
@@ -35,8 +35,9 @@ let m; try { m = await import(recPath); } finally { if (existsSync(recPath)) unl
 const g = m.__g, E = m.__engines, ST = E.stateTaxAnnual || g.stateTaxAnnual, SR = g.STATE_RULES();
 
 // ── 0 · rates and figures ──
-const R = { GA: 0.0519, ME: 0.0715, MI: 0.0425 };
-CK("0-1 GA 5.19 % with $65,000 per person 65+; ME 7.15 % with $49,824 per person, SS-offset; MI 4.25 %, exempt, capped $65,897 single / $131,794 joint",
+// v5.97 (D-22): Georgia is 4.99 % from TY2026 (HB 463); earlier legs keep 5.19 %.
+const R = { GA: (VER === "v597" ? 0.0499 : 0.0519), ME: 0.0715, MI: 0.0425 };
+CK("0-1 GA " + (R.GA * 100).toFixed(2) + " % with $65,000 per person 65+; ME 7.15 % with $49,824 per person, SS-offset; MI 4.25 %, exempt, capped $65,897 single / $131,794 joint",
    SR.GA.rate === R.GA && SR.GA.excl65 === 65000 && SR.ME.rate === R.ME && SR.ME.excl65 === 49824 && !!SR.ME.ssOffset &&
    SR.MI.rate === R.MI && SR.MI.retExempt && SR.MI.retCap.single === 65897 && SR.MI.retCap.joint === 131794);
 

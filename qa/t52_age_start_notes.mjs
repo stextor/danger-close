@@ -23,7 +23,7 @@ import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 const require = createRequire(import.meta.url);
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596"];
+const KNOWN_VERSIONS = ["v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; console.log(`  \u2717 ${n}${d ? " \u2014 " + String(d).slice(0, 240) : ""}`); } };
 const done = () => { console.log(`\nt52 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
@@ -53,10 +53,10 @@ CK("T-AR2 Arkansas: the law's split — IRAs from 59½, employer plans at any ag
 CK("T-GA1 Georgia: applied here from 65 only", /applied here from 65 only/.test(n.GA), n.GA);
 CK("T-GA2 Georgia: the law's $35K at 62–64 is named as NOT modelled; conservative", /\$35K at 62–64 is not modelled/.test(n.GA) && /\(conservative\)/.test(n.GA), n.GA);
 CK("T-IA1 Iowa: applied here from 55 (v5.90, D-24 — was \"at any age\")", /applied here from 55\b/.test(n.IA), n.IA);
-if ((VER === "v595" || VER === "v596")) CK("T-IA2 Iowa (v5.95): the law's 55 on 31 December, disability and survivor not modelled, PER PERSON; conservative", /55 or older on 31 December/.test(n.IA) && /disability/.test(n.IA) && /survivor/.test(n.IA) && /per person/.test(n.IA) && !/both spouses/.test(n.IA) && /\(conservative\)/.test(n.IA), n.IA);
+if ((VER === "v595" || VER === "v596" || VER === "v597")) CK("T-IA2 Iowa (v5.95): the law's 55 on 31 December, disability and survivor not modelled, PER PERSON; conservative", /55 or older on 31 December/.test(n.IA) && /disability/.test(n.IA) && /survivor/.test(n.IA) && /per person/.test(n.IA) && !/both spouses/.test(n.IA) && /\(conservative\)/.test(n.IA), n.IA);
 else CK("T-IA2 Iowa (v5.90): the law's 55 on 31 December, disability and survivor not modelled, both spouses on a joint return; conservative", /55 or older on 31 December/.test(n.IA) && /disability/.test(n.IA) && /survivor/.test(n.IA) && /both spouses are 55 or older/.test(n.IA) && /\(conservative\)/.test(n.IA) && !/55\s*\+/.test(n.IA), n.IA);
 CK("T-PA1 Pennsylvania: applied here from 60 (v5.90, D-24 — was \"at any age\")", /applied here from 60\b/.test(n.PA), n.PA);
-if ((VER === "v595" || VER === "v596")) CK("T-PA2 Pennsylvania (v5.95): IRAs from 59½ in whole years, employer plans and pensions at any age (the plan's own age or service), PER PERSON; conservative", /59½ in whole years/.test(n.PA) && /plan's own retirement age or service/.test(n.PA) && /per person/.test(n.PA) && !/both spouses/.test(n.PA) && /\(conservative\)/.test(n.PA), n.PA);
+if ((VER === "v595" || VER === "v596" || VER === "v597")) CK("T-PA2 Pennsylvania (v5.95): IRAs from 59½ in whole years, employer plans and pensions at any age (the plan's own age or service), PER PERSON; conservative", /59½ in whole years/.test(n.PA) && /plan's own retirement age or service/.test(n.PA) && /per person/.test(n.PA) && !/both spouses/.test(n.PA) && /\(conservative\)/.test(n.PA), n.PA);
 else CK("T-PA2 Pennsylvania (v5.90): withdrawals from 59½ in whole years, pensions at any age (the plan's own age or service), both spouses; conservative", /59½ in whole years/.test(n.PA) && /plan's own retirement age or service/.test(n.PA) && /both spouses qualify/.test(n.PA) && /\(conservative\)/.test(n.PA) && !/59½\s*\+/.test(n.PA), n.PA);
 CK("T-OK1 Oklahoma: applied here from 65, per person, and claims NO law age (not settled from a primary source)", /applied here from 65\b/.test(n.OK) && /per person/.test(n.OK) && /not verified/.test(n.OK) && !/law/.test(n.OK), n.OK);
 
@@ -67,12 +67,14 @@ EQ("M-NY2 NY 59 (inside the law's 59½+ only next year, outside the model's 65):
 EQ("M-NY3 NY 65: $20,000 excluded — 6 % × $30,000 = $1,800", tax("NY", 65), 1800);
 EQ("M-AR1 AR 60: no exclusion — 3.9 % × $50,000 = $1,950", tax("AR", 60), 1950);
 EQ("M-AR2 AR 65: $6,000 excluded — 3.9 % × $44,000 = $1,716", tax("AR", 65), 1716);
-EQ("M-GA1 GA 63: no $35K tier — 5.19 % × $50,000 = $2,595", tax("GA", 63), 2595);
+// v5.97 (D-22): Georgia 4.99 % and Oklahoma 4.5 % from TY2026; earlier legs keep 5.19 % and 4.75 %.
+const D22 = VER === "v597";
+EQ(D22 ? "M-GA1 GA 63: no $35K tier — 4.99 % × $50,000 = $2,495" : "M-GA1 GA 63: no $35K tier — 5.19 % × $50,000 = $2,595", tax("GA", 63), D22 ? 2495 : 2595);
 EQ("M-GA2 GA 65: $65,000 cap covers it — $0", tax("GA", 65), 0);
 EQ("M-IA1 IA 50 (v5.90): no longer exempt below the law's 55 — 3.8 % × $50,000 = $1,900", tax("IA", 50), 1900);
 EQ("M-PA1 PA 50 (v5.90): withdrawals no longer exempt below 59½ — 3.07 % × $50,000 = $1,535", tax("PA", 50), 1535);
-EQ("M-OK1 OK 64: no exclusion — 4.75 % × $50,000 = $2,375", tax("OK", 64), 2375);
-EQ("M-OK2 OK 65: $10,000 excluded — 4.75 % × $40,000 = $1,900", tax("OK", 65), 1900);
+EQ(D22 ? "M-OK1 OK 64: no exclusion — 4.5 % × $50,000 = $2,250" : "M-OK1 OK 64: no exclusion — 4.75 % × $50,000 = $2,375", tax("OK", 64), D22 ? 2250 : 2375);
+EQ(D22 ? "M-OK2 OK 65: $10,000 excluded — 4.5 % × $40,000 = $1,800" : "M-OK2 OK 65: $10,000 excluded — 4.75 % × $40,000 = $1,900", tax("OK", 65), D22 ? 1800 : 1900);
 
 // ── X · extinction: across ALL rows, a note names only the age the model applies, or carries a TRUE disclosure ───────────
 // An age mention is a 2-digit 50–75 with a qualifier: "NN+", "NN½+", "NN–NN", "from/at (age) NN", "aged NN", "under NN".
