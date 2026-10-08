@@ -1996,3 +1996,9 @@ one — jointly for the death year, single after (IRS Pub. 501) — with the lat
 slot, as the Taxes tab has since v5.95. Through v5.95 it taxed the survivor as a couple at state level: the late spouse's 65+ exclusion and the
 joint thresholds, bands, cliffs and caps, which understated state tax in survivor years (on the example household in Maine, $35,853 of lifetime
 state tax under no conversions) and, in a handful of measured cases, changed the strategy the Roth tab ranks best by estate. `qa/t60_engineA_survivor_state.mjs`.)*
+
+*(v5.97, D-22 for two states — `docs/SCOPE_D22_GA_OK_RATES.md`. Georgia's rate is 4.99 % for TY2026 (O.C.G.A. §48-7-20(a.1), HB 463, retroactive to
+1 January 2026; flat, so exact) and Oklahoma's 4.5 % (HB 2764, 68 O.S. §2355), each read at a primary source; the model had 5.19 % and 4.75 %, both
+conservative. Oklahoma keeps the row's top-rate convention, which overstates tax against its new three-bracket schedule by $214.75 single / $429.50 joint
+a year on a base above the top threshold. Both rates are held for every later year, as every state's is; Georgia's step-down from 2027 and its $70,000
+exclusion from 2027 are not applied (conservative). The other 40 rates remain unread (D-22). `qa/t61_ga_ok_rates.mjs`.)*

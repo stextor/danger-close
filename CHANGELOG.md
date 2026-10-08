@@ -1,5 +1,62 @@
 # Changelog
 
+## v5.97 — Georgia's and Oklahoma's 2026 rates (D-22, two of 42)
+
+**A MODELLING release** (METHODOLOGY updated). `docs/SCOPE_D22_GA_OK_RATES.md` (repo-only, fulfilled). Two state rates, each re-read at a primary
+source on 2026-10-08, were a legislative cycle stale, both in the conservative direction:
+- **Georgia: 5.19 % → 4.99 %** for taxable years from 1 January 2026 — O.C.G.A. §48-7-20(a.1) as amended by HB 463 (Ga. L. 2026, p. 397), signed
+  11 May 2026 and retroactive to 1 January; the Department of Revenue's *2026 Employer's Tax Guide* (June 2026) states the same. Georgia's tax is flat,
+  so this is the statutory rate exactly.
+- **Oklahoma: 4.75 % → 4.5 %** from tax year 2026 — HB 2764 (2025), 68 O.S. §2355; Oklahoma Tax Commission, *2025 Tax Legislation Summary*. 4.75 %
+  was Oklahoma's previous TOP rate, so the row keeps its top-rate convention; against the new three-bracket schedule that overstates tax by exactly
+  **$214.75 single / $429.50 joint a year** on a base above $7,200 / $14,400, and the note now says so.
+
+**Lowers modelled state tax** in those two states only — correct beats conservative, by explicit decision, as Kentucky's rate at v5.57. Each row's
+note now names its rate, tax year, act and code section (Kentucky's and Utah's form); the rates are not added to the dated `years` field, which
+stays reserved for dollar figures (D18-1).
+
+**Measured** (v5.96 → v5.97): the Taxes tab's lifetime state tax on the example household, no conversions, Georgia **$20,678 → $19,881** and Oklahoma
+**$67,852 → $64,281** — exactly the rate ratio, since the rate is a scalar on the state bill; every other jurisdiction byte-identical. In the Roth
+comparator, across 51 jurisdictions and three households, 12 strategy runs fall per household (six strategies × two states), **none rise**, and the
+strategy ranked best by estate changes in **none**. Engines C and D compute no state tax. Hand cases (`t61` B, to the cent): Georgia, single at 66 with
+$100,000 of IRA income, **$1,746.50** = 4.99 % × ($100,000 − $65,000) (was $1,816.50); Oklahoma, single at 66 with $50,000, **$1,800.00** = 4.5 % ×
+($50,000 − $10,000) (was $1,900.00).
+
+**Decisions taken on recommendation** (scope §1): D22-1 the two rates, Oklahoma keeping the top-rate convention; D22-2 the reading recorded in the note,
+not `years`; D22-3 both rates held flat for later years (Georgia's statutory step-down from 2027 and Oklahoma's triggered cuts not applied —
+conservative, and said in each note); D22-4 Georgia's $70,000 exclusion from 2027 not applied (TY2026 figures; said in the note); D22-5 `t2`'s
+parity guardrail declares its Georgia-based `stateTax` fingerprint as an intended v5.96 → v5.97 change, so the nine other keys stay byte-identical;
+D22-6 the notes are the in-app disclosure (no Field Manual change); D22-7 Oklahoma's note cites the act without the word "law" (`t52` T-OK1).
+
+**Tests.** New suite **`t61`** — **23** on v5.97, **12** on v5.96 (that leg pins the old rates): the rates and the notes; an
+extinction guard over all 51 rows that **any note stating a rate for a year states the row's own rate** (it covers Georgia, Kentucky, North Carolina,
+Ohio, Oklahoma and Utah; the matched set is itself asserted, so a reworded note cannot leave it vacuous); the Oklahoma overstatement figures recomputed
+from the bracket schedule; six hand cases; a v5.96 → v5.97 comparison (the calculator across every row and a grid of households moves only in Georgia
+and Oklahoma and there by exactly the rate ratio; the Taxes tab moves only those rows' state-tax fields and never up; Engines C and D byte-identical;
+Engine A never rises and its best-by-estate cell does not change). Controls `qa/tools/controls_v597_rates.py` (repo-only): **8 of 8**, over two runs — the first K7 (`t2` without its declaration) looked for a passing
+line `t2` never prints and reported its own baseline red; the control was corrected, not the suite. **Changed by
+design, each a figure computed from Georgia's or Oklahoma's rate, gated per build so earlier legs keep theirs:** `t52` M-GA1, M-OK1, M-OK2; `t58` group 0;
+`t59` group 0 and its Georgia survivor hand cases; `t60` group 0 and B-GA; `t33`'s Georgia household (PINS `v597` noStream **173,836**, measured with a
+sentinel — v5.96 174,883 — and E-3/E-4's measured deltas 739 / 60,036); `t2`'s declared diff. The first three were found by an AST census of the suite's
+literals; `t33`'s were found by running it — a figure derived from a rate is invisible to a literal search, which is why the scope said the run would
+find them. `v597` registered by AST (43 array entries, 83 OR-gates, two version arms; `t60`'s v5.96-only comparison left as it is) and in the three
+Python suites by hand.
+
+**Suite, run from the packaged copies:** 5,259 app checks across **60 app suites**, 0 failed, 0 DIED; MC parity 10/10 (its `stateTax` key
+changed as declared, the other nine byte-identical); tooling `t21` 64, `domdiff` 32, `sets` 12 + 12;
+**GRAND 5,389**. Every current-leg count equals v5.96's except the new `t61` and two suites whose comparison groups need a module this folder does
+not hold (`t59` 22, `t60` 16 — each ran 23 and 19 in the v5.95 → v5.96 folder); the prior leg likewise. Run from the PACKAGED copies as two concurrent halves, the method approved at v5.87: run folders built by mk_runfolder.sh v596 v597 from a full clone of 54dcc09 with the github/ files overlaid (v5.96 resolved from history, commit 2d61c3c), each through a session-only copy of runsuite.sh whose one added line skips the other half's labels. Half A GRAND 5167, half B GRAND 222; none DIED. Source `4157137a9ce50db365a1a190fa10f617` · built `42c082a242cb157ee6de8044f5ca9db8`
+(v5.96 rebuilt byte-identical first; `smoke_built` 22 passed, 0 failed).
+
+**Also in this package (documents):** OPERATIONS §C3 records the v5.96 upload's fourth instance of the committed-tree shape: 32 of the 41 loose
+`qa/` files were simply **not committed** — nothing landed elsewhere — and in a session without the pool folder `package_check` cannot run D-1's
+post-ship form, so the per-file comparison of the package against a fresh clone is what found it. Re-uploaded the same day (`54dcc09`) and verified.
+
+**Limitations, disclosed:**
+- Oklahoma is still one flat (top) rate: its 0 % band and its 2.5 % and 3.5 % brackets are not modelled (conservative, by the amounts above).
+- Both rates are held for every later year; Georgia's step-down from 2027 and its $70,000 exclusion from 2027, and Oklahoma's triggered cuts, are not applied.
+- The other 40 nonzero state rates have still not been re-read (D-22 stays open).
+
 ## v5.96 — the Roth comparator files a survivor's state return single (D-27)
 
 **A MODELLING release** (METHODOLOGY updated). `docs/SCOPE_D27_ENGINE_A_SURVIVOR_STATE.md` (repo-only, fulfilled). Through v5.95 the Roth
