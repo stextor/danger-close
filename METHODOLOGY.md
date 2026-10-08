@@ -1990,3 +1990,9 @@ age, the plan's own conditions treated as met; West Virginia's $8,000 is capped 
 investment income have no owner in the model. Without the split (any direct caller) every rule keeps the household path. After a death the
 calculator reads the SURVIVOR's slot — age, benefit and income; through v5.94 the Taxes tab passed the late spouse's age when the
 second-named spouse survived. `qa/t59_per_person_state.mjs`.)*
+
+*(v5.96, D-27 — `docs/SCOPE_D27_ENGINE_A_SURVIVOR_STATE.md`. The Roth comparator files a surviving spouse's state return as it files the federal
+one — jointly for the death year, single after (IRS Pub. 501) — with the late spouse's age blanked and the survivor's benefit in the survivor's
+slot, as the Taxes tab has since v5.95. Through v5.95 it taxed the survivor as a couple at state level: the late spouse's 65+ exclusion and the
+joint thresholds, bands, cliffs and caps, which understated state tax in survivor years (on the example household in Maine, $35,853 of lifetime
+state tax under no conversions) and, in a handful of measured cases, changed the strategy the Roth tab ranks best by estate. `qa/t60_engineA_survivor_state.mjs`.)*

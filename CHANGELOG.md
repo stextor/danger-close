@@ -1,5 +1,66 @@
 # Changelog
 
+## v5.96 — the Roth comparator files a survivor's state return single (D-27)
+
+**A MODELLING release** (METHODOLOGY updated). `docs/SCOPE_D27_ENGINE_A_SURVIVOR_STATE.md` (repo-only, fulfilled). Through v5.95 the Roth
+comparator (Engine A) taxed a surviving spouse **as a couple at state level**: both of its state calls passed the household's filing flag
+and both spouses' ages in every year, while every federal rule in the same engine already filed joint for the death year and single after
+(IRS Pub. 501). So in survivor years the state layer granted the late spouse's 65+ exclusion and used the joint thresholds, bands, cliffs and
+caps. **State tax in survivor years was understated on the Roth tab, in every state where a per-person exclusion or a filing-status
+threshold applies** — the optimistic direction. The Taxes tab (Engine B) was corrected for the related age defect at v5.95; this release
+brings Engine A into line: its state calls take the engine's own filing status, blank the late spouse's age in single survivor years, and put
+the survivor's benefit in the survivor's slot. **Raises state tax** (conservative). The death year itself, filed jointly, does not move.
+
+**Measured** (v5.95 → v5.96, Engine A lifetime tax per strategy, 51 jurisdictions): on the example household (first death 2044) 59 strategy runs
+rise and **none fall**; the no-conversion strategy rises in 17 states — Maine +$35,853, Maryland +$27,553, Georgia +$27,050, Michigan +$22,061,
+Wisconsin +$11,534, New York +$10,878 — and the strategy ranked best by estate changes in **none**. For an early widow (the first death in 2027,
+the survivor 61, a $50,000 pension) 134 runs rise and none fall (Maine +$101,729, Maryland +$91,357, Georgia +$73,042), and **the best-by-estate
+strategy changes in Connecticut (fill 12 % → fill 22 %) and Minnesota (stay under IRMAA → fill 12 %)**; where the spouse with the larger benefit
+dies first, it changes in **Kentucky, Minnesota, Rhode Island and Wisconsin** (stay under IRMAA → fill 22 %). The Roth tab's ranking is the
+model's best cell under its assumptions, not a recommendation; these are the cases where the corrected survivor years change that cell.
+Every move is a survivor-year move (lifetime change = widow-year change). Engines B, C and D are byte-identical to v5.95.
+Hand cases (`t60` B, a pension-only survivor at 72): Georgia $0 → **$1,816.50** = 5.19 % × ($100,000 − $65,000); Maine **$3,587.58** = 7.15 % ×
+($100,000 − $49,824); Michigan **$1,449.38** = 4.25 % × ($100,000 − $65,897), each to the cent through the calculator with Engine A's own arguments
+and to the dollar through the whole engine.
+
+**Decisions taken on recommendation** (scope §1): D27-1 the state call files by `effSingle`; D27-2 the decedent's age blanked in single survivor
+years (the calculator's v5.95 swap then reads the survivor); D27-3 the survivor's slot holds the benefit; D27-4 the ACA sale-gain estimate the same;
+D27-5 this entry, METHODOLOGY, a dated Field Manual line, MissingFeatures D-27 closed.
+
+**Tests.** New suite **`t60`** — **19** on v5.96, **15** on v5.95 (that leg pins the defect): a runtime recorder on Engine A's state
+calls (filing status, ages and gross benefit, both survivors, both years); the hand cases above; a v5.95 → v5.96 comparison (Engines B, C, D
+byte-identical; no Engine A strategy falls; every move in survivor years); an AST extinction check that both calls file by `effSingle`; the Field
+Manual line. Controls `qa/tools/controls_v596_survivor_state.py` (repo-only): **9 of 9**, over two runs — the first named two witnesses for K1
+(Georgia's and Maine's hand cases) that cannot see a filing flag while the late spouse's age stays blanked; the prediction was corrected, not the
+suite. One control (the ACA estimate's call) is caught only by the AST check, since no runtime household reaches that path. **Changed by design,
+each a test that read the old argument shape:** `t8`'s v5.56 gross-SS check accepts Engine A's filing flags as non-taxable identifiers; `t57` C5 and
+C7b date each call from whichever age is present (v5.95 fixed C7 for Engine B and missed its Engine A twin). `t59` group C compares against the prior
+module present (v5.94 or v5.95), so its v5.95 leg here is 22, not 23. The six v5.95 Phase 3 gates in `t35`, `t52`, `t56` hold on v5.96 too and were
+widened. `v596` registered by AST (42 array entries, 77 OR-gates, two version arms), in `t33`'s PINS by measurement (174,883, unchanged), and in the
+three Python suites by hand.
+
+**Errors in this build, owned:**
+- `t60`'s first A-4 asserted the benefit in A's slot; the recorder sees the arguments before the calculator's swap, so it arrives in B's. Failed on
+  correct code; the assertion was fixed.
+- To print the registration tool's manual sites I stashed the working tree and re-ran it — but the tool writes, so the clean tree was registered a
+  second time and the stash would not re-apply. Recovered by discarding the duplicate and restoring the stash; nothing was lost, and the tree was
+  re-verified (source hash, the new files, a registered suite).
+- A build-folder clean-up (`cd … && rm -rf *`) was refused by the session's safety check; a fresh folder was used. Only my copy path was then wrong.
+- The registration tools were first run without their parser library linked and did nothing; the three Python suites were edited by hand as intended.
+
+**Suite, run from the packaged copies:** 5,227 app checks across **59 app suites**, 0 failed, 0 DIED; MC parity 10/10; tooling `t21`
+64, `domdiff` 32, `sets` 12 + 12; **GRAND 5,357**. Every current-leg count equals v5.95's except the
+new `t60`; every prior-leg count equals v5.95's own run except `t59` (22, above) and `t60`. Run from the PACKAGED copies as two concurrent halves, the method approved at v5.87: run folders built by mk_runfolder.sh v595 v596 from a full clone of 110cd45 with the github/ files overlaid (v5.95 resolved from history, commit caf29a1), each through a session-only copy of runsuite.sh whose one added line skips the other half's labels. Half A GRAND 5135, half B GRAND 222; none DIED. Source `2431abbb17ab7c21bd6cc73b84decd41` · built `11bbf9af0ea25c03f8009c7e57e0b792` (v5.95 rebuilt
+byte-identical first; `smoke_built` 22 passed, 0 failed).
+
+**Also in this package (documents):** OPERATIONS §I records how to verify a ship when project knowledge is not mounted as a folder (the Projects
+listing for presence, absence, duplicates and count; local-file hashes for large files). `FlawsToFix-v5_73-Phase2.md`'s header no longer says
+Phases 3 and 4 remain — both ran at v5.73; the stale line misled a recommendation once already.
+
+**Limitations, disclosed:**
+- Qualifying-surviving-spouse years (joint rates for two years with a dependent child) are not modelled, in either engine (D-16).
+- The death year is filed jointly with the late spouse counted by calendar age (unchanged).
+
 ## v5.95 — per-person state rules, by plan type; the survivor's own age (D-12 Phase 3)
 
 **A MODELLING release** (METHODOLOGY updated). `docs/SCOPE_D12_PLAN_TYPE_PER_PERSON.md` §10 — the scope is FULFILLED by this release and leaves
