@@ -85,6 +85,9 @@ if (MODE === "compare") {
     // property of THEIR FIXTURES, not of the code — the same sentence this file's v5.34 note
     // records about `rothCurrentEstate`, now true of a second and third key for a second reason.
     "v546→v547": ["rothOther"],
+    // v5.97 (D-22, scope D22-5): Georgia's rate is 4.99 % from TY2026 (HB 463), and the `stateTax` fingerprint is a Georgia
+    // call ($260,000 at two 65+ exclusions: 5.19 % → 4.99 % of $130,000). It MUST move; the nine other keys must not.
+    "v596→v597": ["stateTax"],
   };
   const expectDiff = new Set(INTENDED_DIFFS[`${PRIOR}→${CUR}`] || []);
   for (const key of Object.keys(a)) {
