@@ -389,6 +389,11 @@ re-derived, not carried.
 
 ### C1. The jsdom environment is duplicated EIGHT times — audit outstanding
 
+> ⚠ **Re-counted at the census of 2026-10-08 (v5.97): NINE in `qa/`, TEN in the repo** — inline `new JSDOM` in `domdiff_withdrawal.mjs`, `smoke_built.mjs`,
+> `t9`, `t11`, `t12`, `t13`, `t14`, `t16`, plus `env_dom.mjs` itself, plus `validation/run.cjs`; **29 files now import `env_dom`**, not four. The count below
+> and its list are the 2026-08-11 record. `ARCHITECTUREIssues.md` E-6 said nine while this section said eight — the two-documents-disagree
+> pattern; the census is the reconciliation. The trap-by-trap audit of the copies is still outstanding (E-6).
+
 `env_dom.mjs` exists but is imported by only four files: `cap_tabs.mjs`, `t4`, `t5`, `t6`. The other
 seven stand up their own inline jsdom: `smoke_built.mjs`, `t9`, `t11`, `t12`, `t13`, `t14`, `t16` —
 eight copies of the environment setup in total, counting `env_dom.mjs` itself.

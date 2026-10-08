@@ -13,6 +13,36 @@
 ---
 
 
+> ## CENSUS AT v5.97 (2026-10-08) — read this first; it supersedes the v5.40 status block below
+>
+> **Method.** One pass per register on 2026-10-08 against the shipped v5.97 (repo `2cfe5e2`, source `4157137a…`): every ID the register defines, what it says, what the CHANGELOG and archives record, and — for anything still open — the current source or suite, read by parser where a count is claimed. The body below is the record as written; where a marker in it disagrees with this table, **this table is current**.
+>
+> **F-11 and F-12 are each two items.** The v5.73 re-pin uses them for the phone findings (**F-11p** sideways scroll, **F-12p** first screen — the meanings every CHANGELOG entry uses); §D.2 uses them for two Field Manual defects (**F-11d** over-escaped callout, **F-12d** "25 vs 26 tabs"), and so do §F's groupings. Cite them with the suffix; nothing is renumbered.
+>
+> | ID | Status at v5.97 | Evidence |
+> |---|---|---|
+> | F-1 | **PARTLY FIXED v5.81** | one app breakpoint (`max-width: 599px`) beside the Field Manual's; v5.81 calls it "partly addressed" |
+> | F-2 | **FIXED v5.40, v5.79** | no tab scrolls sideways on a phone (`t45`) |
+> | F-3 | **PARTLY FIXED v5.81–v5.82** | one phone tab menu; every control ≥ 24 px, five phone-critical ones 44 px; most still under 44 px — disclosed in §13 |
+> | F-4 | **FIXED for app text** (v5.48 size, v5.82–v5.83 contrast, `t48` in all 13 skins) | the Field Manual's own small print is open — disclosed in §13 |
+> | F-5 | **OPEN, NOT DISCLOSED** | **42** JSX `title` attributes (one is an iframe's name); the Field Manual has no mention of tooltips or touch |
+> | F-6 | **FIXED v5.40** | 48 `inputMode="decimal"` fields (47 at v5.40) |
+> | F-7 | **OPEN, NOT DISCLOSED** | no resize observer or listener; the chart reads its width once; the Field Manual never mentions resizing. Whether it visibly goes stale needs a browser |
+> | F-8 | **FIXED v5.40** | grids wrapped, later `repeat(9, minmax(0, 1fr))` |
+> | F-9 | **OPEN, NOT DISCLOSED** | the Docs tab's iframe is still `74vh`; the Field Manual says nothing of nested scrolling |
+> | F-10 | **FIXED v5.39** | the Skins entry documents UI SIZE |
+> | F-11p | **FIXED v5.79** | `t45` |
+> | F-12p | **FIXED v5.81** | `t47` |
+> | F-11d, F-12d, F-13, F-14, F-15, F-17, F-18 | **FIXED v5.39** | `t4`'s Field Manual assertions |
+> | F-15b | **OPEN** | "Success (>$1,500K)" beside a sibling "Success Rate (>$1.25M)" — still in the source |
+> | F-16 | **OPEN, NOT DISCLOSED** | the glossary still sorts "API Key" before "Agency MBS" |
+> | §E-1 / §E-2 | **OPEN** | no physical-device pass; no keyboard / screen-reader pass (4 `aria-label`s in the app) |
+> | §E-3 | **DONE v5.82–v5.83** | all 13 skins measured by `t48` |
+> | §E-4 | **DONE v5.73** | `AUDIT_TOP_FIVE_SUMMARY.md` |
+>
+> ⚠ **A finding of this census: the v5.40 block's "DISCLOSED, NOT FIXED — v5.39 disclosed them in Field Manual §13" was never true for F-5, F-7, F-9 or F-16.** Read at v5.39 (commit `d18f7cc`), §13 said the app had "no responsive phone layout", that the tab strip wraps, wide tables scroll sideways and the smallest text is below AA, and that "a phone remains a compromised experience" — nothing about tooltips, a chart that does not redraw, nested scrolling or the glossary's order; no commit ever put "tooltip" into the source. That blanket sentence was itself replaced as v5.79–v5.83 fixed the phone layout, so even its general cover is gone. **Four simplifications are undisclosed today**, against the project's "disclosed in-app, never silent" rule — a small presentation release can disclose them (or fix F-16, a one-line reorder).
+> **Stale passages below, left as written:** the v5.40 block (superseded by this one); the v5.73 table's HOLDS/WORSE rows for F-1–F-4; L89 "still open after v5.79" directly above its own v5.81 fix; the touch-target counts (pre-v5.82); F-4's 8/9 px counts and "three light themes" (six); F-5's "38"; §D.2 (no fix markers); §E (items 3 and 4 done); §F's groupings (shipped v5.39, v5.40, v5.79–v5.83 except F-5, F-7, F-9, F-15b, F-16); §G (superseded by `t45`/`t47`/`t48`).
+
 > ## STATUS AT v5.40 — rewritten 2026-08-19
 >
 > **This document's findings text is pinned to v5.38 and describes the app before two releases acted

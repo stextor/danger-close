@@ -29,6 +29,36 @@ ordinary income, though both were in its "Gross taxable" total; it now lists eve
 
 ---
 
+## Census at v5.97 (2026-10-08) — read this first
+
+**Method.** One pass per register on 2026-10-08 against the shipped v5.97 (repo `2cfe5e2`, source `4157137a…`): every ID the register defines, what it says, what the CHANGELOG and archives record, and — for anything still open — the current source or suite, read by parser where a count is claimed. The body below is the record as written; where a marker in it disagrees with this table, **this table is current**.
+
+| ID | Status at v5.97 | Evidence |
+|---|---|---|
+| C-1 | **FIXED v5.78** | `irmaaTierFor`, top tier "at least" (`t44`) |
+| C-2 | **DISCLOSED** — limitation, not a defect | METHODOLOGY §8 (within $5/person/yr) |
+| C-3 | **FIXED v5.75** | `persons65OnReturn` (`t41`). ⚠ its body below has no fix note; L177 still says "not decided here" |
+| C-4 | **FIXED v5.77** | one `taxableSS86` for every engine (`t43`) |
+| C-5 | **OPEN** | Engine D still uses `(ssA_y + ssB_y) * 0.85` and the joint bracket table for the Withdrawal tab's bracket column; v5.77 says "untouched"; no in-app disclosure found |
+| C-6 | **FIXED v5.75** | all thirteen stacking sites, regular and AMT (`t41`). ⚠ its body below has no fix note |
+| C-7 | **FIXED v5.76** | `getSSB()` returns 0 for a single household (`t42`) |
+| C-8 | **FIXED v5.74** | the drawdown bridge (`t40`); the remaining RMD gap is a decided difference (D-9), tracked as E-21 |
+| C-9 | **OPEN** | the annuity share is still fixed at retirement start (`retireStartBalances`); not re-measured since v5.74 changed the drain; not disclosed |
+| C-10 | **OPEN** | Engine D's gain pool still starts from `household − total401k`, so a Roth IRA under Other accounts can realize gains when a gain share is set |
+| C-11 | **OPEN** | the break-even card still says "after-tax wealth" for a face-value sum — and so do the Field Manual and METHODOLOGY ("Roth break-even"): **three sites**, not the one named below |
+| C-12 | **FIXED v5.77** | Engine C on the shared §86 helper |
+| C-13 | **OPEN by decision** (D-2 at v5.78) | thresholds unrounded; METHODOLOGY §8 names it, the app does not |
+| D-1 | **FIXED v5.77** | METHODOLOGY's §86 passage rewritten |
+| D-4 *(follow-up)* | **MEASURED, DISCLOSED v5.84** | METHODOLOGY §7; the caps still differ in the source |
+| D-7 *(follow-up)* | **FIXED v5.84** (tax half) | Engine A taxes the draw (`t49`) |
+| D-7b *(follow-up)* | **OPEN, disclosed** | Engine A taxes the draw but does not drain it (Field Manual, METHODOLOGY) |
+
+**Stale passages below, left as written:** the "two open follow-ups" paragraph (D-4 is now measured, D-7 fixed); §2's heading "READ, NOT YET EXECUTED" (all were executed); the C-8 note sits at the end of C-7's text; §3's "top-five summary … only after the final phase" (written 2026-09-15, `AUDIT_TOP_FIVE_SUMMARY.md`); §4's three "not covered" lines (Engine C's §86 was executed at v5.77, the bracket projection checked to the dollar at v5.75, C-8 computed to the dollar at v5.74).
+**IDs to read with care:** this register's D-1, D-4, D-7, D-9 are not `MissingFeatures.md`'s D-1, D-4, D-7, D-9 (different items with the same labels).
+**Elsewhere:** `ARCHITECTUREIssues.md` E-22 and E-25 still list C-1, C-3, C-4, C-6, C-7, C-12 as live — see its census.
+
+---
+
 ## 0 · Findings at a glance
 
 | ID | What | Engines | Severity | Direction | Disclosed? |

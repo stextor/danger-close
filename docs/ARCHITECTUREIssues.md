@@ -5,6 +5,48 @@
 > under audit: v5.29", and it misled the v5.77 handover — and a recommendation made from it — into proposing a Phase 3 that
 > had already run. Items fixed since v5.73 are annotated at their entries.)*
 
+## Census at v5.97 (2026-10-08) — read this first
+
+**Method.** One pass per register on 2026-10-08 against the shipped v5.97 (repo `2cfe5e2`, source `4157137a…`): every ID the register defines, what it says, what the CHANGELOG and archives record, and — for anything still open — the current source or suite, read by parser where a count is claimed. The body below is the record as written; where a marker in it disagrees with this table, **this table is current**.
+**E-15 is two items.** The ID was given twice: **E-15a** below is the MC-parity/ACA entry, **E-15b** the `taxOrd` entry. Cite them that way; neither is renumbered, because other documents cite both by the bare ID.
+
+| ID | Status at v5.97 | Evidence / today's figure |
+|---|---|---|
+| E-1 | **OPEN** | `t19` still labels two correct behaviours `[KNOWN DEFECT]` (its L73, L100); the blindness to `othOrdDraw` was not re-measured |
+| E-2 | **FIXED v5.31** | `OBBBA_CONSTS` + the dated sunset, Verify rows |
+| E-3 | **FIXED v5.30** | the false comment is gone |
+| E-4 | **OPEN** | the version is still four string literals (DATA LOAD, Field Manual ×2, footer) |
+| E-5 | **OPEN** | the backup export's keys carry `version: 5` (the envelope) and no build |
+| E-6 | **OPEN** | **9** jsdom set-ups in `qa/` (8 inline + `env_dom.mjs`), **10** with `validation/run.cjs`; 29 files now import `env_dom`; the trap-by-trap audit has never run. ⚠ OPERATIONS §C1 said EIGHT — corrected in this package |
+| E-7 | **OPEN, grown** | **4,222** `VER` comparisons across 34 suite files (AST), not 202 |
+| E-8 | **OPEN** | the eight orphaned pre-v5.10 pins remain (`t3`, `t5`, `t6`) |
+| E-9 | **OPEN** | `TAX_INDEX_RATE` and `IRMAA_INDEX_RATE` are still two declarations of 1.02 |
+| E-10 | **RE-OPENED (pool)** | `t19` still cites `SCOPE_FIX_otherAccounts_tax_treatment_v5_21.md` and `SCOPE_ENGINE_D_MAGI_v5_24.md`; both are in the repo's `docs/`, **neither is in the pool** (Projects listing, 125 files), while the manifest rows say "retained deliberately" |
+| E-11 | **OPEN, accepted as procedure** | `DOCS_HTML` is 157,656 bytes / 156,483 characters at v5.97 (144,008 bytes at v5.29) |
+| E-12 | **OPEN** (no decision recorded) | three calling conventions remain |
+| E-13 | **OPEN (records only)** | the code is fixed (`t15` has no default tag); the manifest's numbered item 11 still describes the old `"v514"` default |
+| E-14 | **PARTLY FIXED** | §A2 procedure (v5.30) and `package_check` section K; automatic hash emission not done. The summary table's "Open/High" is stale |
+| E-15a | **OPEN, Low** | the ENHANCED ACA regime is still unexported and unfingerprinted; its vehicle ("A3") was declined (MissingFeatures D-8b), so nothing schedules it. Parity is **10/10** since v5.48, not 9/9 |
+| E-15b | **FIXED v5.37** | `taxOrd` grows |
+| E-16 | **FIXED v5.36** | gains enter the §86 test |
+| E-17 | **FIXED v5.37** | fixtures converted; the trap stays an OPERATIONS §C2 rule |
+| E-18 | **PARTLY FIXED (process)** | `package_check` G/K/E-1b checks |
+| E-19 | **PARTLY FIXED** | `qa/controls.sh`, named below, was deleted 2026-08-21; per-release controls now live in `qa/tools/controls_v5NN_*` |
+| E-20 | **FIXED v5.36**; the rule stands | — |
+| E-21 | **NARROWED** (v5.74 Engines B/C; v5.84 Engine A taxes the draw) | the D-9 RMD gap is pinned by `t40` |
+| E-22 | **PARTLY FIXED** | §86 is one helper (v5.77), IRMAA tiers one helper (v5.78), C-3/C-6 fixed (v5.75); still two LTCG copies, two federal-bracket copies, Engine D's flat 85% (C-5) |
+| E-23 | **OPEN** | NIIT, AMT and FICA rates still inline at three sites each |
+| E-24 | **OPEN** | Engine A exposes no bracket field |
+| E-25 | **PARTLY FIXED** | `t40`–`t44` cover six of the eight classes; C-9's and C-10's classes remain |
+| E-26 | **OPEN** | no build identity in the export or the built page beyond the version |
+| E-27 | **ACCEPTED** | run the controls twice (OPERATIONS §I) |
+| E-28 | **FIXED** (both passages) | — |
+
+**Stale figures below, left as written:** E-6 "imported by only four files"; E-7 "202"; E-11 "144,008" and "12,151 lines"; the summary table (frozen at the v5.30 additions, with E-14 still Open/High); E-15a "parity 9/9" and "scheduled to fold into the A3 release"; E-10 "CLOSED … must not be re-retired"; E-19's `qa/controls.sh`; E-21's annotation (omits v5.84); E-22 and E-25 (no fix notes). Line addresses in E-4, E-5, E-8, E-9, E-12, E-15a, E-23 and E-26 are v5.29/v5.73 addresses.
+
+---
+
+
 | Field | Value |
 |---|---|
 | Build under audit | **v5.29** (findings as audited) |
