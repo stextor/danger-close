@@ -469,6 +469,15 @@ packaged file land at its path*; in the v5.68 case every packaged file did, so `
 new assertion passes clean. The three instances are one shape seen three ways and only two of the
 three are gated.
 
+⚠ **FOURTH INSTANCE — the v5.96 upload (recorded 2026-10-08, at v5.97): files simply NOT committed.** 32 of the 41 loose files in the package's
+`github/qa/` never reached the repo — `t60`, `runsuite.sh`, `t8`, `t57`, `t59`, `t33` and the version registrations among them — while the app, the built
+page, `qa/qa-baseline/`, `qa/tools/` and `docs/` all landed. Nothing was committed at a wrong path (`D-3` green), so this is neither the v5.68 shape nor
+the v5.71 one: the upload batch holding `qa/`'s loose files committed nine of them. The app and the pool were right; **the committed suite could not
+test its own release.** `package_check` did not name it: without the pool folder (§I, no-mount note) the phase is `UNKNOWN`, so `D-1` asserts its
+pre-ship form and lists unchanged files, which a correct upload also produces. **What found it was comparing every `github/` file byte-for-byte
+against a fresh clone** (`cmp` per path, plus the count of paths changed since the previous release's commit). Make that comparison part of every
+post-upload verification while the pool is not mounted; re-uploading the `qa` folder whole fixed it (`54dcc09`), and identical files are no-ops.
+
 ⚠ **The baseline files are NOT in this set and must never be added to it.** `qa/t1_units.mjs`,
 `qa/env_dom.mjs`, `qa/shim.txt`, `qa/dom_entry_*.jsx` and the rest look like run-folder artifacts
 because the run folder is flat — but they are real repo files at `qa/qa-baseline/`. A rule matching

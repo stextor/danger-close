@@ -1160,6 +1160,11 @@ after v5.86. **Medium** — optimistic, and large relative to WV's other figures
 
 ## D-22 · The 42 nonzero state rates have not been re-read
 
+> 🔶 **PARTLY FIXED v5.97 (2026-10-08) — Georgia and Oklahoma, the two known misses.** Georgia 4.99 % (O.C.G.A. §48-7-20(a.1), HB 463, TY2026) and
+> Oklahoma 4.5 % (HB 2764, 68 O.S. §2355, the top rate), each read at a primary source and recorded in the row's note; `t61` holds every note that
+> states a rate for a year to the row's own rate. **The other 40 nonzero rates are still unread — this item stays OPEN.** Scope
+> `docs/SCOPE_D22_GA_OK_RATES.md` (fulfilled, repo-only). *(The entry below is the v5.86 finding, retained.)*
+
 Filed at v5.86 (D-18's scope called it D-18b). D-18 dated the dollar figures and deliberately left the effective rates undated
 (decision D18-1), because none was re-read. Secondary sources already suggest two are stale for TY2026: **Georgia 4.99 %** (model
 5.19 %; HB 463, May 2026, retroactive) and **Oklahoma 4.5 %** (model 4.75 %; HB 2764). Both would lower modelled tax. The other
