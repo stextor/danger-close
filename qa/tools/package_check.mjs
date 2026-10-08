@@ -820,10 +820,8 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
     //   Removed at v5.57.1 after re-verifying every premise by content against v5.57.
     const OPEN = new Set([
       "SCOPE_STANDING_AUDIT.md",                  // not a build scope at all (OPERATIONS §K)
-      "SCOPE_D12_PLAN_TYPE_PER_PERSON.md",        // ACTIVE across three releases (D-12): Phase 1 shipped v5.91, Phase 2 v5.93; Phase 3 (v5.95) open. No v5.92 (P2-9).
-      //    ⚠ EXPIRES WHEN v5.95 SHIPS (was "v5.93" until the renumbering at the v5.93 build: no v5.92; the spending-draw fix is v5.94). That release marks the scope FULFILLED in its first 12 lines and retires it to repo-only, and this entry
-      //    must be REMOVED IN THE SAME PACKAGE (the two halves ship together). Added at the v5.91 ship: the first scope held open across releases
-      //    by design. I-3 cannot see this entry go stale while the file exists — only a person reading this note can.
+      // ── REMOVED at the v5.95 ship: "SCOPE_D12_PLAN_TYPE_PER_PERSON.md" — FULFILLED (all three phases), un-pooled, repo-only; the removal
+      //    shipped in the same package that marked it FULFILLED, as its own entry required.
       // ── REMOVED at the v5.74 ship: "SCOPE_TAXES_DRAWDOWN.md". The release built it: Engines B and C consume
       //    Engine D's spending draws through ONE shared bridge, `withdrawalPlanSeries`, and recompute the Traditional
       //    balance from those draws at their OWN growth. That is D-2 as QUALIFIED by D-9 — "the path recomputed from
