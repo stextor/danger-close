@@ -7,7 +7,7 @@
 // every jurisdiction prices exactly as v5.94 (v595 leg, needs app_v594.mjs) · D AST/data guards · E the copy.
 // BOTH LEGS; the v594 leg PINS the pre-Phase-3 figures. Run: node t59_per_person_state.mjs <tag>
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v594", "v595"];
+const KNOWN_VERSIONS = ["v594", "v595", "v596"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; console.log(`  \u2717 ${n}${d !== "" ? " \u2014 " + String(d).slice(0, 240) : ""}`); } };
 const done = () => { console.log(`\nt59 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
@@ -62,14 +62,17 @@ for (const [lbl, args, h95, h94] of A) {
 // ── C · without byPerson, every jurisdiction prices exactly as v5.94 (the household path, P3-7) ──
 if (P3) {
   const fs = await import("fs");
-  if (!fs.existsSync(new URL("./app_v594.mjs", import.meta.url))) console.log("  \u2013 group C not run: app_v594.mjs is not in this run folder");
+  // v5.96: compare against the v5.94 module when present, else the v5.95 one (a v595 -> v596 folder). D-27 changed no line of the
+  // calculator, so "prices exactly as v5.94" still holds against v5.95's copy; the label below names which module was used.
+  const _ref = ["v594", "v595"].find(t => t !== VER && fs.existsSync(new URL(`./app_${t}.mjs`, import.meta.url)));
+  if (!_ref) console.log("  \u2013 group C not run: no prior app module (v594 or v595) in this run folder");
   else {
-    const _m4 = await import("./app_v594.mjs"), ST4 = _m4.__engines.stateTaxAnnual || _m4.__g.stateTaxAnnual;
+    const _m4 = await import(`./app_${_ref}.mjs`), ST4 = _m4.__engines.stateTaxAnnual || _m4.__g.stateTaxAnnual;
     let n = 0, bad = [];
     const sets = [{ retIncome: 40000, pen: 20000, ageA: 70, ageB: 66 }, { retIncome: 15000, pen: 0, ageA: 58, ageB: 62, work: 30000 }, { retIncome: 90000, pen: 30000, ageA: 75, ageB: null, single: true, ssTaxableFed: 20000, ssGrossA: 30000 },
                   { retIncome: 60000, pen: 10000, ageA: 67, ageB: 67, ssTaxableFed: 25000, ssGrossA: 20000, ssGrossB: 15000, capGains: 8000 }];
     for (const code of [null, ...Object.keys(SR)]) for (const s of sets) { n++; const a = ST4({ code, fallbackRate: 0.05, ...s }), b = ST({ code, fallbackRate: 0.05, ...s }); if (Math.abs(a - b) > 1e-9) bad.push(`${code} ${a} vs ${b}`); }
-    CK(`C-1 without byPerson, ${n} calls across every jurisdiction price exactly as v5.94`, bad.length === 0 && n > 200, bad.slice(0, 3).join(" · "));
+    CK(`C-1 without byPerson, ${n} calls across every jurisdiction price exactly as v5.94 (compared with app_${_ref})`, bad.length === 0 && n > 200, bad.slice(0, 3).join(" · "));
   }
 }
 // ── D · data and AST guards ──

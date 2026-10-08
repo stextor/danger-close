@@ -213,7 +213,9 @@ T.applyLoadedData({ portfolio: port, expenses: [], incomeFromForm: true });
     // v5.95 (D-12 Phase 3, P3-S): Engine B routes the survivor's GROSS benefit to the survivor's slot in single-filing survivor years
     // (`ssGrossA: _svS ? (_survivorIsA ? ssTotal : 0) : ssA_y`). The class this guards is TAXABLE SS passed as gross, so the check is
     // semantic: each argument is built only from gross-benefit identifiers, includes its own spouse's benefit, and names nothing taxable.
-    const GROSS_IDS = new Set(["ssA_y", "ssB_y", "ssTotal", "_svS", "_survivorIsA"]);
+    // v5.96 (D-27): Engine A routes the survivor's gross benefit the same way, keyed on its own filing flags — `effSingle`, `P.single`
+    // and `survivorIsA` are FILING flags, not amounts; the class this guards (taxable SS passed as gross) is still excluded by name.
+    const GROSS_IDS = new Set(["ssA_y", "ssB_y", "ssTotal", "_svS", "_survivorIsA", "effSingle", "P", "single", "survivorIsA"]);
     const grossOnly = (expr, own) => !!expr && !/taxable/i.test(expr) && new RegExp(`\\b${own}\\b`).test(expr) &&
       (expr.match(/[A-Za-z_$][\w$]*/g) || []).every(id => GROSS_IDS.has(id));
     const gA = (args.match(/ssGrossA:\s*([^,]+)/) || [])[1], gB = (args.match(/ssGrossB:\s*([^,]+)/) || [])[1];

@@ -24,7 +24,7 @@
 // calculator read byPerson, that statement goes and section C fails loudly here — it cannot pass vacuously.
 const VER = process.argv[2];
 const MODPATH = process.argv[3] || `./app_${VER}.mjs`;
-const KNOWN_VERSIONS = ["v593", "v594", "v595"];
+const KNOWN_VERSIONS = ["v593", "v594", "v595", "v596"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -203,9 +203,12 @@ console.log("\n  C \u2014 runtime: the split each call site passes sums back to 
           if (b.B.pension > 0 && b.A.pension === 0) sawPenB++;
           if (b.draw.A.ira + b.draw.A.employer + b.draw.A.annuity + b.draw.B.ira + b.draw.B.employer + b.draw.B.annuity > 0) sawDraw++;
           if (c.sale) callsSale++;
-          // A death is detected by YEAR (both engines pass ageA; year = dobA + ageA). NOT by the call's `single` flag: Engine A
-          // passes the household's filing status every year, so a flag-based test would never see its widowed calls (control K8).
-          if (!single && tl.dobA.year + c.ageA >= deathYr) {
+          // A death is detected by YEAR. NOT by the call's `single` flag: it is joint in the death year itself (Pub. 501), so a flag
+          // test misses that year (and through v5.95 Engine A passed the household's flag every year — control K8). v5.95 (Engine B)
+          // and v5.96 (Engine A, D-27) blank the decedent's age in single survivor years, so the year is read from whichever age is
+          // present (`_yr`); `dobA + ageA` alone misfiled a surviving B's calls as pre-death once ageA went null.
+          const _yr = (c.ageA !== null && c.ageA !== undefined) ? tl.dobA.year + c.ageA : tl.dobB.year + c.ageB;
+          if (!single && _yr >= deathYr) {
             deadYears++;
             const d = survivorIsA ? "B" : "A";
             const got = b[d].ira + b[d].employer + b[d].annuity + b[d].pension + b.draw[d].ira + b.draw[d].employer + b.draw[d].annuity;
@@ -250,7 +253,8 @@ console.log("\n  C \u2014 runtime: the split each call site passes sums back to 
         const S = survivorIsA ? "A" : "B", runs = []; let lastYr = Infinity;
         for (const c of globalThis.__T57) {
           if (c.sale) continue;
-          const yr = tl.dobA.year + c.ageA; if (yr < lastYr) runs.push({ pre: [], post: [] }); lastYr = yr;
+          // v5.96 (D-27): Engine A blanks the decedent's age in single survivor years — date the call from whichever age is present.
+          const yr = (c.ageA !== null && c.ageA !== undefined) ? tl.dobA.year + c.ageA : tl.dobB.year + c.ageB; if (yr < lastYr) runs.push({ pre: [], post: [] }); lastYr = yr;
           const q2 = c.byPerson[S].ira + c.byPerson[S].employer; if (!(q2 > 1)) continue;
           (yr >= deathYr ? runs[runs.length - 1].post : runs[runs.length - 1].pre).push(c.byPerson[S].employer / q2);
         }

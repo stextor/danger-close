@@ -195,6 +195,11 @@ tally "t58-$CUR"   node t58_state_draw.mjs "$CUR"
 # Controls: qa/tools/controls_v595_per_person.py (repo-only).
 tally "t59-$PRIOR" node t59_per_person_state.mjs "$PRIOR"
 tally "t59-$CUR"   node t59_per_person_state.mjs "$CUR"
+# t60 (v5.96) — D-27: Engine A files the survivor's state return as its federal one (single from the year after the death): a runtime
+# recorder on Engine A's state calls, GA/ME/MI hand cases to the cent and through the whole engine, a v5.95 -> v5.96 comparison (v596 leg),
+# an AST extinction check, the Field Manual line. Both legs; the v595 leg pins the defect. Controls: qa/tools/controls_v596_survivor_state.py.
+tally "t60-$PRIOR" node t60_engineA_survivor_state.mjs "$PRIOR"
+tally "t60-$CUR"   node t60_engineA_survivor_state.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
