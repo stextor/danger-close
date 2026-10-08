@@ -1,6 +1,8 @@
 # SCOPE — D-12 · Account type and per-person retirement income (three releases: v5.91, v5.93, v5.95)
 
-**PHASE 2 SHIPPED as v5.93; D-26 SHIPPED as v5.94 (2026-10-06); Phase 3 (v5.95) open.** ⚠ **For Phase 3: P2-6 is superseded** (`docs/SCOPE_D26_STATE_TAX_DRAW.md` D26-2) — from v5.94 the draw is INSIDE `attributeRetIncome`'s ira / employer / annuity figures, and `byPerson.draw` is an of-which breakdown of the same dollars: a rule that adds it double-counts.
+**FULFILLED — all three phases shipped: v5.91, v5.93, v5.95 (2026-10-07).** Retired to repo-only at the v5.95 ship (OPERATIONS §G); residuals re-homed to MissingFeatures D-12, D-27, D-28. §11 is Phase 3's build record.
+
+*(Superseded status line, retained:)* **PHASE 3 (v5.95) IN BUILD — §10 is its scope, READY 2026-10-07.** **PHASE 2 SHIPPED as v5.93; D-26 SHIPPED as v5.94 (2026-10-06); Phase 3 (v5.95) open.** ⚠ **For Phase 3: P2-6 is superseded** (`docs/SCOPE_D26_STATE_TAX_DRAW.md` D26-2) — from v5.94 the draw is INSIDE `attributeRetIncome`'s ira / employer / annuity figures, and `byPerson.draw` is an of-which breakdown of the same dollars: a rule that adds it double-counts.
 
 *(Superseded status line, retained:)* **PHASE 2 SHIPPED as v5.93 (2026-10-06); Phase 3 (v5.95) open.** Stays in the pool while active (OPERATIONS §G). §8 is the Phase 1 build record, §9 Phase 2's. **Renumbered at the v5.93 build:** there is no v5.92 (P2-9), and the spending-draw fix (MissingFeatures D-26) ships as v5.94 between Phases 2 and 3. Where this document says v5.92 read **v5.93**; where it says v5.93 for Phase 3 read **v5.95**.
 
@@ -81,6 +83,59 @@ more correct.
 - Each state gets hand-computed per-person cases; the existing `t50`–`t55` assertions that encoded the interim rules change by design,
   each named in the CHANGELOG.
 
+## 10 · Phase 3 at the build (v5.95, 2026-10-07) — READY
+
+Written before any Phase 3 rule is coded. Freshness: repo `0f28967`; v5.94 source `47090df091940165dc32356b56ada760` = pool = manifest =
+CHANGELOG newest; built `b3d8b7ead5553ac97036e80e7a820dc1`; all 123 pool files match committed content.
+
+### 10.1 · Law, re-read at primary sources
+- **RI** (§44-30-12(c)(9); Division of Taxation PUB 2026-01 and ADV 2025-22): pensions, annuities, 401(k), 403(b), 457(b), TSP qualify;
+  **no IRA does** (SEP and SIMPLE included). $50,000 **per individual**, capped at that person's own qualifying income; full retirement age
+  **per spouse**, only that spouse's own income counts. ⚠ The guide gives the TY2025 joint AGI limit as $133,500; the advisory's
+  "for the 2025 Tax Year" table gives **$133,750**, which the model carries and cites. The advisory sets the figures: **no change**.
+- **IA** (Department of Revenue guidance): 55+ on 31 December, **per spouse**; covers IRAs, employer plans, pensions, annuities alike.
+  Survivor-of-a-qualifier path not modelled (disclosed).
+- **PA** (REV-636): IRAs exempt from 59½ with no early exceptions; employer plans under the plan's own conditions (D12-E: treated as met).
+- **MS** (35 Miss. Admin. Code Pt. III, Subpt. 02, Ch. 07, R. 100–104; DOR FAQ): pensions, annuities from plans, IRAs exempt; early
+  distributions do not qualify (R. 104) → PA's structure.
+- **WV** (§11-21-12(c)(9), read via the legislature's bill texts; numbering per the Tax Department): $8,000 "received ... by any person"
+  65+, limited to $8,000 minus that person's other modifications (the (c)(8) SS modification included) → per person, own income.
+
+### 10.2 · Census (v5.94, AST)
+- `byPerson` = `{ A: {ira, employer, annuity, pension}, B: {...}, draw: {A, B} }`; the draw is inside ira/employer/annuity (D26-2).
+- Wages, other ordinary income, dividends and capital gains have **no owner** anywhere in the model.
+- ⚠ **SURVIVOR SLOT (pre-existing defect, found at this build).** In single mode the calculator reads spouse A's slot only. Engine B
+  files single after a death but kept passing `ageA = yr − dobA`, so **when B survived, every state age test used the decedent's age**;
+  and it kept the larger benefit in whichever slot held it, so the survivor's gross SS could read $0. Engine A never files single after a
+  death (`single: !!P.single`) — its per-person slots stay right, but the survivor keeps joint state thresholds.
+
+### 10.3 · Decisions
+| ID | Decision | Taken |
+|---|---|---|
+| P3-S | The survivor slot | **Steve, 2026-10-07: fixed in this release (option 1).** The calculator moves B into A's slot when a single return blanks A's age; Engine B blanks the decedent's age and puts the survivor's benefit in the survivor's slot, in single-filing survivor years, for the state call only. |
+| P3-1 | A couple with a pension each | **Steve, 2026-10-07:** one household pension, one owner, disclosed. |
+| P3-2 | Reach of the per-person exemption path | Only rules with `retExemptAge` (IA, PA, MS), and only when `byPerson` is passed; Michigan and other exempt states unchanged. |
+| P3-3 | PA, MS plan types | Employer plans and pensions exempt at any age (D12-E); IRAs and the annuity category per owner from 60 (59½ in whole years). |
+| P3-4 | The annuity category in PA/MS | Today's treatment, per person. Whether PA taxes commercial-annuity earnings is filed as a new MissingFeatures item. |
+| P3-5 | RI | Per person at 67: `min(band amount, own employer + annuity + pension)`; IRA income stays taxable; the AGI cliff unchanged. |
+| P3-6 | WV | Per person: `max(0, min(8,000 − taxable SS_p, retirement income_p))`; unattributed income (wages, investment) excluded — the cap binds sooner, pessimistic, disclosed. |
+| P3-7 | Callers without `byPerson` | The v5.94 household path, unchanged (every direct `stateTaxAnnual` call in the suites). |
+| P3-8 | Engine A's joint filing after a death | Not fixed here; filed as a new MissingFeatures item. |
+
+### 10.4 · Measured before the rules (survivor slot alone, Engine B, v5.94 vs v5.94 + P3-S)
+- Example household (B survives from 2044), 51 jurisdictions: **nothing moves** — both spouses are past every floor by then.
+- H1 (A dies 2027; B survives at 62; $50,000 pension): **15 of 51 rise**, survivor years only, none fall; GA +$7,785 = 3 × $50,000 × 5.19 %
+  (hand-checked), RI +$12,500 = 5 × $50,000 × 5 %. GA's unmodelled 62–64 tier is already disclosed in its note.
+- H2 (B, the larger benefit, dies 2030; A survives): MD +$67,320, ME +$48,409 over 25 years — the offset now sees the survivor's benefit.
+- Both: federal tax and every non-state row field byte-identical; no move in any non-widowed year; Engines C and D identical.
+
+### 10.5 · Tests and stop conditions
+New suite `t59` (both legs; the v5.94 leg pins the defects): per-state hand cases for RI, IA, PA, MS, WV, per person and per plan type;
+the survivor slot (H1, H2) to the dollar; `byPerson`-absent calls byte-identical to v5.94; AST guards. `t50`–`t55` assertions that
+encoded the interim rules change by design, each named in the CHANGELOG. Controls `qa/tools/controls_v595_per_person.py`.
+**Stop:** any federal figure moves; Engines C/D move; MC parity is not 10/10; a non-widowed-year figure moves in a state outside the five;
+any state figure falls in a case where the fix can only remove an exclusion.
+
 ## 3 · Out of scope
 
 - A public/private pension flag.
@@ -157,3 +212,12 @@ to repo-only when v5.93 ships.
 - **Suite:** 5,090 app checks, 56 suites, 0 failed, 0 DIED; GRAND 5,220; every current-leg count equals v5.91's but `t57`. Run from the PACKAGED copies as two concurrent halves, the method approved at v5.87: run folders built by mk_runfolder.sh v591 v593 from a full clone of 40681d5 with the github/ files overlaid (v5.91 resolved from history, commit 54764c5), each running the shipped runsuite.sh through a session-only copy whose one added line skips the other half's labels (half B: t45, t47, t48; half A: the rest, tooling included). Half A GRAND 4998, half B GRAND 222; none DIED.
 - **Open for Phase 3:** a couple with a pension each (one household amount, one owner); and §2's state rules, each re-read at the build.
 - **`package_check` I-2:** this scope stays on the OPEN allowlist until **v5.95**; remove it in the package that marks the scope FULFILLED.
+
+## 11 · Build record — Phase 3 (v5.95, 2026-10-07)
+
+- **Law** re-read for all five states (§10.1); the RI guide/advisory conflict recorded, no change. **Survivor slot** found, decided (Steve, option 1),
+  measured on two stress households through the app's load path (§10.4), then built with the rules.
+- **Source** `b8f7039c0720248edf0aa0b8fc72c71d` (24 anchors, each once on v5.94); **built** `7d27099415c9dcccdf0b1a04dc176b19` (`smoke_built` 22 passed, 0 failed). Hand cases 7 of 7.
+- **`t59`** 23 (v5.95) / 19 (v5.94). **Controls 11 of 11.** Gated inversions in `t35`, `t52`, `t56`, `t57`, `t58`; `t8`'s gross-SS check made semantic (CHANGELOG).
+- **Suite:** 5,189 app checks, 58 suites, 0 failed, 0 DIED; GRAND 5,319. Run from the PACKAGED copies as two concurrent halves, the method approved at v5.87: run folders built by mk_runfolder.sh v594 v595 from a full clone of 0f28967 with the github/ files overlaid (v5.94 resolved from history), each through a session-only copy of runsuite.sh whose one added line skips the other half's labels. Half A GRAND 5097, half B GRAND 222; none DIED.
+- **Stop conditions:** none fired — federal and Engines C/D unchanged; MC parity 10/10; on the example household only RI moves, all up.

@@ -999,7 +999,13 @@ section state the current position.
 
 ## D-12 · Account type (IRA versus employer plan) and per-person retirement income — opened at v5.69
 
-> 🟡 **D-26 SHIPPED v5.94 (2026-10-06)** — the base Phase 3 builds on is complete: the spending draw now reaches the state calculator and sits
+> ✅ **D-12 CLOSED v5.95 (2026-10-07) — all three phases shipped.** RI, IA, PA, MS and WV apply their rules per person and (RI, PA, MS) by plan type;
+> the survivor-slot defect found at the build is fixed with it. Scope `docs/SCOPE_D12_PLAN_TYPE_PER_PERSON.md` FULFILLED (repo-only). **Residuals,
+> re-homed here from the scope's out-of-scope list (§G):** a public/private pension flag (WV's public-pension offsets); inherited IRAs; 457(b)'s
+> penalty exception; Roth subtypes; a second pension for a couple (P3-1: one pension, one owner, disclosed); Iowa's survivor and disability paths.
+> New items from the build: **D-27** and **D-28** below.
+>
+> *(Superseded, retained:)* > 🟡 **D-26 SHIPPED v5.94 (2026-10-06)** — the base Phase 3 builds on is complete: the spending draw now reaches the state calculator and sits
 > inside the per-person split (P2-6 superseded by D26-2; `byPerson.draw` is an of-which, never to be added again). **Open:** Phase 3, **v5.95**.
 
 > 🟡 **PHASE 2 SHIPPED v5.93 (2026-10-06): carried, not yet used.** Engines A and B pass the state calculator each person's retirement income by
@@ -1235,3 +1241,16 @@ one-year household, $10,000: as a draw +$1,200 federal, +$0 state; as a pension 
 totals hide it, because draws also shrink later RMDs. **Fix, designed:** route the draw into the state calculator as retirement income
 (D-12 Phase 2 already attributes it per person, `byPerson.draw`), in both engines; measure the real dollar effect with the fixed engine;
 METHODOLOGY entry and a CHANGELOG disclosure of the understatement since v5.74 / v5.84. **Raises state tax** (conservative direction).
+
+## D-27 · The Roth comparator files jointly for a survivor in the state calculation — opened at v5.95 (found during the D-12 Phase 3 build)
+
+Engine A (`runRothStrategies`) passes `single: !!P.single` to `stateTaxAnnual`, so after a death the survivor keeps joint state thresholds,
+bands and cliffs (RI, NJ, CT, VA, ...), and the decedent keeps an age. Its per-person slots are right (the decedent is attributed nothing), so
+v5.95's per-person rules read the survivor correctly; the filing status is what is wrong. Direction: mixed by state (joint thresholds are
+higher — optimistic where a cliff or band binds). Engine B was fixed for the related age defect at v5.95. **Not measured. Medium.**
+
+## D-28 · Pennsylvania and commercial annuities — opened at v5.95
+
+The model's `annuity` category (Other accounts of type annuity) is exempt in Pennsylvania from 60, per person, as at v5.90. Pennsylvania's
+REV-636 points commercial annuities to the cost-recovery method; whether their earnings are taxable to a retiree is not settled from a primary
+source here. Possibly optimistic. **Low — verify before changing.**
