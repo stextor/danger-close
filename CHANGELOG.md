@@ -1,5 +1,33 @@
 # Changelog
 
+## ops 2026-10-08 — census of the C, E and F audit registers
+
+**KIND: ops** — documents only; v5.97 stays current (source `4157137a9ce50db365a1a190fa10f617`, built `42c082a242cb157ee6de8044f5ca9db8`). Every ID in the
+three standing-audit registers that are not `MissingFeatures.md` — `FlawsToFix-v5_73-Phase2.md` (C), `ARCHITECTUREIssues.md` (E), `UsabilityFlaws.md` (F) —
+was checked against the shipped v5.97: what the register says, what the CHANGELOG and its archives record, and for every open item the source or suite
+today, by parser where a count is claimed. Each register now opens with a dated **census table**, which is current where the body's older markers disagree;
+the bodies are left as written. Verified by: the census commands (re-run for the figures quoted), and `package_check` on this zip.
+
+**Status at v5.97.** C: 8 fixed (C-1, C-3, C-4, C-6, C-7, C-8, C-12, D-1), **5 open** (C-5, C-9, C-10, C-11, C-13 — the last by decision), C-2 disclosed; the
+three filed follow-ups are D-4 measured and disclosed, D-7 fixed, D-7b open and disclosed. E: 7 fixed, 6 partly fixed or narrowed, **14 open**, 1 accepted,
+1 re-opened. F: every phone, contrast and Field Manual item that had a release is fixed or partly fixed; **F-5, F-7, F-9, F-15b, F-16** and the device and
+screen-reader passes are open.
+
+**Findings of the census (each recorded in its register):**
+- **Four usability simplifications are undisclosed** — hover-only tooltips (F-5, 42 `title` attributes), a chart that does not redraw on resize (F-7), the
+  Docs tab's nested scroll (F-9), the glossary's order (F-16). `UsabilityFlaws.md`'s v5.40 block said v5.39 disclosed them in Field Manual §13; read at
+  v5.39 (`d18f7cc`), §13 never named any of them, and its blanket phone sentence was replaced at v5.79–v5.83. Against "disclosed in-app, never silent";
+  a small presentation release can disclose them, or fix F-16 outright.
+- **E-10 re-opened:** `t19` cites two scope documents that are in the repo but no longer in the pool, while the manifest's rows say they are retained.
+- **Stale figures:** E-6 (nine jsdom set-ups in `qa/`, ten with `validation/`; **OPERATIONS §C1 said eight** — corrected here), E-7 (4,222 version
+  comparisons across 34 suites, not 202), E-11 (`DOCS_HTML` 157,656 bytes), E-15a (parity is 10/10, and its vehicle, A3, was declined).
+- **ID collisions, labelled not renumbered:** E-15 is two items (E-15a, E-15b); F-11 and F-12 each mean a phone finding (CHANGELOG) and a Field Manual
+  defect (§D.2) — F-11p/F-12p and F-11d/F-12d; the C register's D-1/D-4/D-7/D-9 are not `MissingFeatures.md`'s.
+- **C-11 has three sites,** not one: the break-even card, the Field Manual and METHODOLOGY all call a face-value sum "after-tax wealth".
+
+**Not done here, on purpose:** no code, no test and no figure changes; the register bodies are not rewritten (an audit record is not edited to match later
+work); TESTING.md's "433" gates and the manifest's numbered item 11 (`t15`'s old default) are named in the census and left for the next package that touches them.
+
 ## v5.97 — Georgia's and Oklahoma's 2026 rates (D-22, two of 42)
 
 **A MODELLING release** (METHODOLOGY updated). `docs/SCOPE_D22_GA_OK_RATES.md` (repo-only, fulfilled). Two state rates, each re-read at a primary
