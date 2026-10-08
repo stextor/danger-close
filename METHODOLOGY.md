@@ -1981,3 +1981,12 @@ Taxes tab, v5.84 in the Roth comparator — until this release the state module 
 draw year in which the state would have taxed those dollars (on the example household in North Carolina, $313,303 of lifetime draw and $12,501 of
 state tax; in Georgia, none, because its exclusion absorbed the draw). Whole-plan totals partly
 hid it, because draws also shrink later RMDs. Engines C and D compute no state tax and are unchanged. `qa/t58_state_draw.mjs`.)*
+
+*(v5.95, D-12 Phase 3 — `docs/SCOPE_D12_PLAN_TYPE_PER_PERSON.md` §10. Five states apply their retirement rules per person, from the per-person,
+per-plan-type split the engines carry (`attributeRetIncome`): Rhode Island excludes each qualifying person's own pension, annuity and
+employer-plan income up to $50,000 — IRA income does not qualify; Iowa exempts each person's retirement income from that person's 55th year;
+Pennsylvania and Mississippi exempt IRA income per owner from 60 (the law's 59½ in whole years) and employer-plan and pension income at any
+age, the plan's own conditions treated as met; West Virginia's $8,000 is capped at each person's own retirement income, since wages and
+investment income have no owner in the model. Without the split (any direct caller) every rule keeps the household path. After a death the
+calculator reads the SURVIVOR's slot — age, benefit and income; through v5.94 the Taxes tab passed the late spouse's age when the
+second-named spouse survived. `qa/t59_per_person_state.mjs`.)*
