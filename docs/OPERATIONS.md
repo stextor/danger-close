@@ -1187,6 +1187,19 @@ edits were needed. Two shapes to look for:
 
 These failures are the reminder working, not a regression — but budget for them.
 
+### ⚠ When project knowledge is NOT mounted (added v5.96, 2026-10-08)
+
+Some sessions are given project knowledge as a read-only folder (`/mnt/project`); others reach it only through the **Projects tool**. Measured on
+2026-10-08: the folder was absent, and Steve cannot mount it — it comes with the kind of session. Without it, `package_check`'s pool argument has
+nothing to read and section J and K-4…K-9 cannot run. Verify a ship this way instead:
+- **Presence, absence, duplicates and count** from the Projects listing (`project_info`): it reads no contents and, unlike a mounted folder, it
+  SHOWS two files with one name. ⚠ A mounted folder cannot show duplicates — at v5.94 the pool was counted as 123 from the folder while the
+  listing held 126 (three names twice, from August and September). Count from the listing.
+- **Byte-exact content** for large files: `project_read` writes them to a local file — hash that against the package. Small files come back
+  inline; read those through a helper agent so their text does not fill the working context, and record that they were compared as content, not
+  hashed.
+- Record in the stop report which pool checks were run which way.
+
 ## J. Re-baseline the regression suite each build
 
 The suite compares immediately-prior → current, and re-baselines every build. There is no permanent floor:

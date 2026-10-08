@@ -1244,6 +1244,11 @@ METHODOLOGY entry and a CHANGELOG disclosure of the understatement since v5.74 /
 
 ## D-27 · The Roth comparator files jointly for a survivor in the state calculation — opened at v5.95 (found during the D-12 Phase 3 build)
 
+> ✅ **FIXED v5.96 (2026-10-08).** Both Engine A state calls file by the engine's own `effSingle`, blank the late spouse's age and put the survivor's
+> benefit in the survivor's slot in single survivor years. Measured: every change an increase, survivor years only; ME +$35,853 lifetime on the example
+> household; the Roth tab's best-by-estate cell changed in 6 of 102 measured state-household cases (none on the example household). `qa/t60_engineA_survivor_state.mjs`;
+> scope `docs/SCOPE_D27_ENGINE_A_SURVIVOR_STATE.md` (fulfilled, repo-only). *(The entry below is the v5.95 finding, retained.)*
+
 Engine A (`runRothStrategies`) passes `single: !!P.single` to `stateTaxAnnual`, so after a death the survivor keeps joint state thresholds,
 bands and cliffs (RI, NJ, CT, VA, ...), and the decedent keeps an age. Its per-person slots are right (the decedent is attributed nothing), so
 v5.95's per-person rules read the survivor correctly; the filing status is what is wrong. Direction: mixed by state (joint thresholds are

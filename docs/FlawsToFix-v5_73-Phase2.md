@@ -6,6 +6,8 @@
 **Status:** ☑ **PHASE 2 COMPLETE (six working sessions, 2026-09-15).** Every item of Section C was executed against the
 build above; §0 summarises the findings, §4 states plainly what was **not** covered. Phases 3 (D + E) and 4 (F) remain,
 and the scope's standalone top-five summary is written only after Phase 4.
+**⚠ Superseded (corrected at v5.96): Phases 3 and 4 both ran at v5.73 — the full standing audit is complete** (`MissingFeatures.md`,
+`ARCHITECTUREIssues.md`, `UsabilityFlaws.md`). This line misled the v5.77 handover once, and nearly a recommendation at v5.94.
 
 **Destination of this file:** session workbench until Phase 2 closes; then `docs/` **and** the pool, as
 `FlawsToFix-v5_73-Phase2.md`, with a manifest row.
