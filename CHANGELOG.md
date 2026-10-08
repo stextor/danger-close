@@ -1,5 +1,77 @@
 # Changelog
 
+## v5.95 — per-person state rules, by plan type; the survivor's own age (D-12 Phase 3)
+
+**A MODELLING release** (METHODOLOGY updated). `docs/SCOPE_D12_PLAN_TYPE_PER_PERSON.md` §10 — the scope is FULFILLED by this release and leaves
+the pool (repo-only, OPERATIONS §G). Five states now apply their retirement rules per person, as their laws do, each re-read at a primary
+source at the build: **Rhode Island** (IRA income does not qualify; each person's $50,000 capped at that person's own pension, annuity and
+employer-plan income; full retirement age per spouse), **Iowa** (55, per spouse), **Pennsylvania** and **Mississippi** (IRAs from 59½ — the
+model's 60 — per owner; employer plans and pensions at any age), and **West Virginia** (each person's $8,000 capped at that person's own income).
+The plan type (v5.91) and pension owner (v5.91) that were collected and carried (v5.93) are now read.
+
+**A pre-existing defect, found at this build and fixed in it (Steve's decision, 2026-10-07):** after a death the Taxes tab (Engine B) filed
+single but kept passing spouse A's age to the state calculator, which in single mode reads spouse A's slot only — so **when the second-named
+spouse survived, every state age test used the late spouse's age**, and the survivor's benefit could sit in the other slot. The calculator now
+moves a surviving B into A's slot; Engine B blanks the decedent's age and places the survivor's benefit in the survivor's slot (state call only).
+
+**What moves.** On the example household only **Rhode Island**: +$29,247 of lifetime state tax over 13 years, all increases (its default IRA
+rows no longer earn the pension exclusion); every other jurisdiction, federal tax, every non-state row field and Engines C and D are unchanged.
+Hand cases (each to the cent, `t59` A): RI couple, A's $30k IRA + B's $10k 401(k): $0 → $1,500; IA 60/50: $1,330 → $570; PA 58/62 with a 401(k)
+and a pension: $921 → $0; MS 58/62, two IRAs: $1,200 → $800; WV, only one spouse with income: $674.80 → $1,060.40. The survivor fix alone,
+measured on households where it must matter: A dies at 72 with B 62 — 15 of 51 jurisdictions rise for the years B is under the floor (GA
++$7,785 = 3 × $50,000 × 5.19 %; RI +$12,500); B (the larger benefit) dies first — MD +$67,320 and ME +$48,409 over 25 years. Nothing falls
+except where Phase 3 replaces v5.90's conservative both-spouses stand-in (IA, PA, MS), by design.
+
+**Decisions** (§10.3): P3-S the survivor slot (Steve); P3-1 one household pension, one owner, disclosed (Steve); P3-2 the per-person exemption
+only for the age-gated states; P3-3 PA/MS employer plans at any age (D12-E); P3-4 the annuity category keeps today's treatment, per person; P3-5
+RI per person at 67, IRA excluded; P3-6 WV per person, unattributed income (wages, investment) excluded — pessimistic; P3-7 callers without
+`byPerson` keep the v5.94 household path exactly; P3-8 Engine A's joint filing after a death left for its own item (MissingFeatures D-27).
+
+**Law conflict recorded, no change:** Rhode Island's February 2026 Retirement Income Guide gives the TY2025 joint AGI limit as $133,500; its
+formal advisory ADV 2025-22 (the document that sets the figures) gives $133,750, which the model carries.
+
+**Tests.** New suite **`t59`** — **23** on v5.95, **19** on v5.94 (that leg pins the pre-Phase-3 figures): seven hand cases
+through the calculator; the survivor slot through Engine B to the dollar (GA and RI); without `byPerson`, 208 calls across every jurisdiction
+price exactly as v5.94; data and AST guards; the copy, walked by the parser. Controls `qa/tools/controls_v595_per_person.py` (repo-only):
+**11 of 11**. Gated per build (OPERATIONS §B2), each a Phase 3 inversion: `t35` D-16/D-17 (RI's note now states the gaps closed) and RI-2 (rows
+re-price identically except where a per-person rule binds, and there the engine is higher); `t52` T-IA2/T-PA2 (per person, not both spouses);
+`t56` F-1/F-3 for RI and PA (plan type now moves state tax and nothing else) and R-2d (the disclosure says the fields are used); `t57` C7 (dates
+a call from whichever age is present) and D3 (the Phase 2 guard flips). `t58`'s A grid: from v5.95 Rhode Island taxes an IRA draw but shelters a
+pension — the draw costs exactly $400 more there (hand: 5 % × the $8,000 of cap the pension leaves), every other jurisdiction unchanged; its
+v5.93-vs-v5.94 comparison (group C) runs only where `app_v593.mjs` exists, so its v5.94 leg here is 11, not 16. `t33`'s `v595` pin measured
+with a sentinel: 174,883, unchanged. `t8`'s
+v5.56 extinction check (every state call passes GROSS Social Security) matched the code's literal shape and went red on the survivor routing; it
+now checks meaning — each argument built only from gross-benefit names, nothing taxable — and a planted regression (taxable SS passed as gross)
+still turns it red (shown at the build).
+
+**Errors in this build, owned:**
+- My first copy of the census tools into the workspace failed silently (`/bin/sh` does not expand `{a,b}`; the error was suppressed); the
+  first census printed nothing and was caught as empty, not read as clean.
+- My first stress measurement of the survivor fix set life expectancy through the test hook, which does not rebuild the plan timeline — both
+  households ran on the default lifespans and tested nothing. Caught by printing the timeline; discarded; re-run through the app's load path.
+- My first Mississippi note moved "per person" between "applied here" and "from 60", breaking `t52`'s disclosure phrase; my first Pennsylvania
+  and Mississippi notes dropped the literal "(conservative)". The notes were corrected, not the test.
+- `t59`'s first E-1 searched the raw source, comments included, and failed on v5.93's code comments — the grep-versus-parser trap §B1 names.
+  The full suite had been started before `t59` was verified on both legs; it was stopped by process group, E-1 rewritten to walk the parser's
+  string literals, and the run restarted from fresh folders. `t59`'s first group C also looked the calculator up under the wrong export.
+- A full run surfaced `t8` (above); because `t8` changed after that run started, the run was discarded and the suite re-run in full from fresh
+  folders — the counts here are that third run's.
+- `t58` (my own, v5.94) imported `app_v593.mjs` unconditionally in its v5.94 leg, which would have crashed in every later run folder; now guarded.
+
+**Suite, run from the packaged copies:** 5,189 app checks across **58 app suites**, 0 failed, 0 DIED; MC parity 10/10; tooling `t21`
+64, `domdiff` 32, `sets` 12 + 12; **GRAND 5,319**. Every current-leg count equals v5.94's
+except `t58` (12) and the new `t59`; every prior-leg count equals v5.94's own run except `t58` (11) and `t59`. Run from the PACKAGED copies as two concurrent halves, the method approved at v5.87: run folders built by mk_runfolder.sh v594 v595 from a full clone of 0f28967 with the github/ files overlaid (v5.94 resolved from history), each through a session-only copy of runsuite.sh whose one added line skips the other half's labels. Half A GRAND 5097, half B GRAND 222; none DIED. Source `b8f7039c0720248edf0aa0b8fc72c71d` · built
+`7d27099415c9dcccdf0b1a04dc176b19` (`smoke_built` 22 passed, 0 failed).
+
+**Limitations, disclosed:**
+- Wages, other ordinary income, dividends and capital gains have no owner in the model, so West Virginia's per-person cap counts only
+  retirement income — pessimistic for a 65+ spouse with wages.
+- A couple with a pension each records one owner (the model holds one pension).
+- Iowa's survivor-of-a-qualifier and disability paths are not modelled; Georgia's 62–64 tier remains disclosed as not modelled, and from this
+  release it applies to survivors too.
+- The Roth comparator (Engine A) still files jointly for a survivor in the state calculation (MissingFeatures D-27); whether Pennsylvania taxes
+  commercial-annuity earnings is open (D-28).
+
 ## v5.94 — state tax counts the spending draw (D-26)
 
 **A MODELLING release** (METHODOLOGY updated). `docs/SCOPE_D26_STATE_TAX_DRAW.md`. Since the draw bridges — v5.74 for the Taxes tab (Engine B),
