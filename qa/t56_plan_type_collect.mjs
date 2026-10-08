@@ -29,12 +29,12 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
 const VER = process.argv[2];
-const KNOWN_VERSIONS = ["v590", "v591", "v593", "v594"];
+const KNOWN_VERSIONS = ["v590", "v591", "v593", "v594", "v595"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.\n    Registered: ${KNOWN_VERSIONS.join(", ")}`);
   process.exit(1);
 }
-const POST = ["v591", "v593", "v594"].includes(VER); // D-12 Phase 1 shipped at v5.91
+const POST = ["v591", "v593", "v594", "v595"].includes(VER); // D-12 Phase 1 shipped at v5.91
 
 const mulberry = (a) => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a);
   t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
@@ -133,6 +133,17 @@ function tradOthSet(P) { P.otherAccounts.forEach(a => { if (a.taxType === "trad"
   T("F-0: positive control — Rhode Island's figures differ from Pennsylvania's", figs(inState(BASE, "RI")) !== figs(inState(BASE, "PA")));
   for (const code of [null, "RI", "PA"]) {
     const ref = figs(inState(BASE, code)), tag = code || "plan's own state";
+    // v5.95 (D-12 Phase 3): plan type is READ in RI and PA — the figures move, and ONLY state tax: federal, Engines C and D, MC unchanged.
+    const _stOnly = (a, b) => { const x = JSON.parse(a), y = JSON.parse(b); if (JSON.stringify(x.D) !== JSON.stringify(y.D) || JSON.stringify(x.C) !== JSON.stringify(y.C) || x.med !== y.med) return false;
+      let moved = 0; for (let i = 0; i < x.B.length; i++) for (const f of Object.keys(x.B[i])) if (JSON.stringify(x.B[i][f]) !== JSON.stringify(y.B[i][f])) { if (!["stateTax", "totalTax", "effRate"].includes(f)) return false; moved++; }
+      return moved > 0; };
+    if (VER === "v595" && code) {
+      T(`F-1 ${tag} [v5.95]: all plan types "employer" moves state tax and nothing else`, _stOnly(ref, figs(inState(EMP, code))));
+      T(`F-2 ${tag}: pension owner "B" changes no figure (measured for this household; not a rule)`, figs(inState(PENB, code)) === ref);
+      T(`F-3 ${tag} [v5.95]: both together move state tax and nothing else`, _stOnly(ref, figs(inState(ALLB, code))));
+      T(`F-4 ${tag}: the fields stripped (a v5.90 backup) changes no figure`, figs(inState(OLD, code)) === ref);
+      continue;
+    }
     T(`F-1 ${tag}: all plan types "employer" changes no figure`, figs(inState(EMP, code)) === ref);
     T(`F-2 ${tag}: pension owner "B" changes no figure`, figs(inState(PENB, code)) === ref);
     T(`F-3 ${tag}: both together change no figure`, figs(inState(ALLB, code)) === ref);
@@ -177,7 +188,8 @@ function tradOthSet(P) { P.otherAccounts.forEach(a => { if (a.taxType === "trad"
   T(PIN("R-2", "a plan-type selector on each of the 8 rows holding Traditional money, and nowhere else"), POST ? planSels().length === 8 : planSels().length === 0, `found ${planSels().length}`);
   T(PIN("R-2b", "the selector's labels are human, sentence case"), POST ? planSels().every(s => [...s.options].map(o => o.textContent).join("|") === "IRA (incl. rollover, SEP, SIMPLE)|Employer plan (401(k), 403(b), 457, TSP)") : true);
   T(PIN("R-2c", "a couple gets a pension-owner selector"), POST ? !!penSel() : !penSel());
-  T(PIN("R-2d", "the collected-not-used disclosure is on the page"), POST ? text().includes("change no figure yet") : true);
+  if (VER === "v595") T("R-2d [v5.95]: the disclosure now says the fields are used", text().includes("From v5.95 the model uses them"));
+  else T(PIN("R-2d", "the collected-not-used disclosure is on the page"), POST ? text().includes("change no figure yet") : true);
   const first = await save();
 
   // a v5.90 backup of the same household, then two saves

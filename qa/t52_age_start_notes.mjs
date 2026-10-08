@@ -23,7 +23,7 @@ import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 const require = createRequire(import.meta.url);
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594"];
+const KNOWN_VERSIONS = ["v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; console.log(`  \u2717 ${n}${d ? " \u2014 " + String(d).slice(0, 240) : ""}`); } };
 const done = () => { console.log(`\nt52 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
@@ -53,9 +53,11 @@ CK("T-AR2 Arkansas: the law's split — IRAs from 59½, employer plans at any ag
 CK("T-GA1 Georgia: applied here from 65 only", /applied here from 65 only/.test(n.GA), n.GA);
 CK("T-GA2 Georgia: the law's $35K at 62–64 is named as NOT modelled; conservative", /\$35K at 62–64 is not modelled/.test(n.GA) && /\(conservative\)/.test(n.GA), n.GA);
 CK("T-IA1 Iowa: applied here from 55 (v5.90, D-24 — was \"at any age\")", /applied here from 55\b/.test(n.IA), n.IA);
-CK("T-IA2 Iowa (v5.90): the law's 55 on 31 December, disability and survivor not modelled, both spouses on a joint return; conservative", /55 or older on 31 December/.test(n.IA) && /disability/.test(n.IA) && /survivor/.test(n.IA) && /both spouses are 55 or older/.test(n.IA) && /\(conservative\)/.test(n.IA) && !/55\s*\+/.test(n.IA), n.IA);
+if (VER === "v595") CK("T-IA2 Iowa (v5.95): the law's 55 on 31 December, disability and survivor not modelled, PER PERSON; conservative", /55 or older on 31 December/.test(n.IA) && /disability/.test(n.IA) && /survivor/.test(n.IA) && /per person/.test(n.IA) && !/both spouses/.test(n.IA) && /\(conservative\)/.test(n.IA), n.IA);
+else CK("T-IA2 Iowa (v5.90): the law's 55 on 31 December, disability and survivor not modelled, both spouses on a joint return; conservative", /55 or older on 31 December/.test(n.IA) && /disability/.test(n.IA) && /survivor/.test(n.IA) && /both spouses are 55 or older/.test(n.IA) && /\(conservative\)/.test(n.IA) && !/55\s*\+/.test(n.IA), n.IA);
 CK("T-PA1 Pennsylvania: applied here from 60 (v5.90, D-24 — was \"at any age\")", /applied here from 60\b/.test(n.PA), n.PA);
-CK("T-PA2 Pennsylvania (v5.90): withdrawals from 59½ in whole years, pensions at any age (the plan's own age or service), both spouses; conservative", /59½ in whole years/.test(n.PA) && /plan's own retirement age or service/.test(n.PA) && /both spouses qualify/.test(n.PA) && /\(conservative\)/.test(n.PA) && !/59½\s*\+/.test(n.PA), n.PA);
+if (VER === "v595") CK("T-PA2 Pennsylvania (v5.95): IRAs from 59½ in whole years, employer plans and pensions at any age (the plan's own age or service), PER PERSON; conservative", /59½ in whole years/.test(n.PA) && /plan's own retirement age or service/.test(n.PA) && /per person/.test(n.PA) && !/both spouses/.test(n.PA) && /\(conservative\)/.test(n.PA), n.PA);
+else CK("T-PA2 Pennsylvania (v5.90): withdrawals from 59½ in whole years, pensions at any age (the plan's own age or service), both spouses; conservative", /59½ in whole years/.test(n.PA) && /plan's own retirement age or service/.test(n.PA) && /both spouses qualify/.test(n.PA) && /\(conservative\)/.test(n.PA) && !/59½\s*\+/.test(n.PA), n.PA);
 CK("T-OK1 Oklahoma: applied here from 65, per person, and claims NO law age (not settled from a primary source)", /applied here from 65\b/.test(n.OK) && /per person/.test(n.OK) && /not verified/.test(n.OK) && !/law/.test(n.OK), n.OK);
 
 // ── M · the model does what each disclosure says — dollar-exact by hand, so a note and the engine cannot drift apart ─────

@@ -14,13 +14,17 @@
 // BOTH LEGS. The v593 leg PINS the defect (A, B, D, E assert the pre-fix state); group C runs on the v594 leg only, because it
 // asserts what THIS release changed relative to its prior. Run: node t58_state_draw.mjs <tag>
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v593", "v594"];
+const KNOWN_VERSIONS = ["v593", "v594", "v595"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; console.log(`  \u2717 ${n}${d !== "" ? " \u2014 " + String(d).slice(0, 260) : ""}`); } };
 const done = () => { console.log(`\nt58 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
 console.log(`t58 \u2014 D-26: THE SPENDING DRAW REACHES THE STATE CALCULATOR (${VER})`);
 if (!KNOWN_VERSIONS.includes(VER)) { CK(`0-0 version tag ${JSON.stringify(VER)} is registered`, false, `registered: ${KNOWN_VERSIONS}`); done(); }
 const FIXED = VER !== "v593";
+// v5.95 (D-12 Phase 3): from v5.95 Rhode Island taxes an IRA draw but shelters a pension (\u00a744-30-12(c)(9)); the grid household's draw is
+// the default IRA. Hand: its $42,000 pension leaves $8,000 of RI's $50,000 cap, so $10,000 more pension adds $2,000 taxable and $10,000
+// of IRA draw adds $10,000 \u2014 the draw costs 5 % \u00d7 $8,000 = $400 more. Every other jurisdiction is unchanged.
+const RI_SPLIT = FIXED && VER !== "v594";
 console.error = () => {}; console.warn = () => {};
 const m = await import(`./app_${VER}.mjs`);
 const g = m.__g, E = m.__engines, SR = g.STATE_RULES();
@@ -44,16 +48,18 @@ CK("0-1 NC 3.99 % / CA 6 % / GA 5.19 % / NY 6 %; exclusions 0 / 0 / $65,000 / $2
   const tax = p => g.runRothStrategies(p).find(r => r.key === "none").totTax;
   const X = 10000, PEN = 42000 / 12;
   const cases = [[null, 0.05], ...Object.keys(SR).map(c => [c, 0])];
-  let n = 0, taxing = 0, eq = 0, drawLess = 0, other = [];
+  let n = 0, taxing = 0, eq = 0, drawLess = 0, other = [], riCases = [];
   for (const single of [true, false]) {
    // the federal-only cost of $X of pension for this filing status (no state): the baseline "taxing" is measured against
    const fed0 = (() => { const mk = o => P({ single, pen: PEN, ...o }); return tax(mk({ pen: PEN + X / 12 })) - tax(mk()); })();
    for (const [code, rate] of cases) {
     const mk = o => P({ single, pen: PEN, stateCode: code, stateRate: rate, ...o });
     const b = tax(mk()), dDraw = tax(mk({ ordDrawByYr: { 2026: X } })) - b, dPen = tax(mk({ pen: PEN + X / 12 })) - b;
+    if (RI_SPLIT && code === "RI") { riCases.push(dDraw - dPen); continue; }
     n++; if (dPen > dDraw + 0.5) drawLess++; else if (Math.abs(dDraw - dPen) <= 0.5) eq++; else other.push(`${code}/${single ? "S" : "J"} ${dDraw} vs ${dPen}`);
     if (dPen > fed0 + 0.5) taxing++; // the state taxes the pension
   } }
+  if (RI_SPLIT) CK(`A-RI (v5.95): Rhode Island, single and joint \u2014 the IRA draw costs exactly $400 more than the pension (${riCases.map(x => x.toFixed(2)).join(", ")})`, riCases.length === 2 && riCases.every(x => Math.abs(x - 400) < 0.5), riCases.join(","));
   CK(`A-0 not vacuous: ${n} cases (≥ 100), the state taxes the pension in ${taxing} (≥ 60)`, n >= 100 && taxing >= 60, `${n} / ${taxing}`);
   CK("A-1 the draw is never taxed MORE than the pension (no case outside the two expected shapes)", other.length === 0, other.slice(0, 3).join(" · "));
   if (FIXED) CK(`A-2 every case: $10,000 drawn costs exactly what $10,000 of pension costs (${eq} of ${n})`, eq === n && drawLess === 0, `${drawLess} draws taxed less`);
@@ -104,7 +110,9 @@ CK("0-1 NC 3.99 % / CA 6 % / GA 5.19 % / NY 6 %; exclusions 0 / 0 / $65,000 / $2
 }
 
 // ── C · v5.93 -> v5.94: nothing but state tax moves (this release's own comparison) ───────────────────────────────────────
-if (VER === "v594") {
+const _HAVE593 = (await import("fs")).existsSync(new URL("./app_v593.mjs", import.meta.url));
+if (VER === "v594" && !_HAVE593) console.log("  \u2013 group C not run: app_v593.mjs is not in this run folder (it runs in a v593 -> v594 folder; v5.94's release ran it, 5 checks)");
+if (VER === "v594" && _HAVE593) {
   const pm = await import("./app_v593.mjs");
   const homes = [];
   for (const st of [null, "NC", "VA", "GA", "PA", "MN", "NJ", "RI"]) homes.push([`example/${st}`, p => { p.stateCode = st; }]);

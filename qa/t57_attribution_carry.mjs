@@ -24,7 +24,7 @@
 // calculator read byPerson, that statement goes and section C fails loudly here — it cannot pass vacuously.
 const VER = process.argv[2];
 const MODPATH = process.argv[3] || `./app_${VER}.mjs`;
-const KNOWN_VERSIONS = ["v593", "v594"];
+const KNOWN_VERSIONS = ["v593", "v594", "v595"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -169,7 +169,7 @@ console.log("\n  C \u2014 runtime: the split each call site passes sums back to 
   ck("C0: the recorder anchor `void byPerson;` occurs exactly once in the test module [Phase 3 removes it by design]", n === 1, `found ${n}`);
   if (n === 1) {
     const recPath = absMod.replace(/\.mjs$/, "_t57rec.mjs");
-    writeFileSync(recPath, txt.replace(ANCHOR, "globalThis.__T57 && globalThis.__T57.push({ byPerson, retIncome, pen, single, ageA, sale: String(new Error().stack).includes('_estSaleGain') });"));
+    writeFileSync(recPath, txt.replace(ANCHOR, "globalThis.__T57 && globalThis.__T57.push({ byPerson, retIncome, pen, single, ageA, ageB, sale: String(new Error().stack).includes('_estSaleGain') });"));
     let R;
     try { R = await import(recPath); } finally { if (existsSync(recPath)) unlinkSync(recPath); }
     const rg = R.__g, RE = R.__engines;
@@ -225,7 +225,9 @@ console.log("\n  C \u2014 runtime: the split each call site passes sums back to 
           const pre = [], post = [];
           for (const c of globalThis.__T57) {
             const q2 = c.byPerson[S].ira + c.byPerson[S].employer; if (!(q2 > 1)) continue;
-            (tl.dobA.year + c.ageA >= deathYr ? post : pre).push(c.byPerson[S].employer / q2);
+            // v5.95 (P3-S): Engine B passes a BLANK ageA for a surviving B in single years — date the call from whichever age is present
+            const _cy = c.ageA !== null && c.ageA !== undefined ? tl.dobA.year + c.ageA : tl.dobB.year + c.ageB;
+            (_cy >= deathYr ? post : pre).push(c.byPerson[S].employer / q2);
           }
           c7 = { pre, post };
         }
@@ -320,8 +322,10 @@ console.log("\n  D \u2014 source shape (AST)");
   // D3 · [PHASE-2 GUARD] the calculator reads byPerson nowhere but `void byPerson;`. Phase 3 replaces this check by design.
   const sta = ast.body.find(n => n.type === "FunctionDeclaration" && n.id.name === "stateTaxAnnual");
   const uses = []; walk.ancestor(sta.body, { Identifier(n, st, anc) { if (n.name === "byPerson") uses.push(anc[anc.length - 2]); } }, wb);
-  ck("D3 [PHASE-2 GUARD]: stateTaxAnnual's body reads byPerson only in `void byPerson;` \u2014 so no figure can move this release",
+  // v5.95 (D-12 Phase 3): the guard flips by design — byPerson is now READ by the per-person rules. Gated per build (OPERATIONS §B2).
+  if (VER === "v593" || VER === "v594") ck("D3 [PHASE-2 GUARD]: stateTaxAnnual's body reads byPerson only in `void byPerson;` \u2014 so no figure can move this release",
      uses.length === 1 && uses[0].type === "UnaryExpression" && uses[0].operator === "void", `${uses.length} uses: ${uses.map(u => u.type).join(", ")}`);
+  else ck(`D3 [PHASE-3]: stateTaxAnnual reads byPerson beyond the recorder anchor (${uses.length} uses)`, uses.length > 1, `${uses.length}`);
   // D4 · every object literal that builds an Engine A P (has pen AND stateCode keys) also passes penOwner.
   const pObjs = []; walk.simple(ast, { ObjectExpression(n) {
     const keys = new Set(n.properties.filter(p => p.key).map(p => p.key.name)); if (keys.has("pen") && keys.has("stateCode")) pObjs.push([n, keys.has("penOwner")]);

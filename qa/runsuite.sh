@@ -190,6 +190,11 @@ tally "t57-$CUR"   node t57_attribution_carry.mjs "$CUR"
 # the Field Manual line. Both legs: the v593 leg PINS the defect. Controls: qa/tools/controls_v594_state_draw.py (repo-only).
 tally "t58-$PRIOR" node t58_state_draw.mjs "$PRIOR"
 tally "t58-$CUR"   node t58_state_draw.mjs "$CUR"
+# t59 (v5.95) — D-12 Phase 3: per-person, per-plan-type state rules (RI, IA, PA, MS, WV) and the survivor slot, to the dollar; without
+# byPerson every jurisdiction prices as v5.94 (v595 leg). Both legs; the v594 leg pins the pre-Phase-3 figures.
+# Controls: qa/tools/controls_v595_per_person.py (repo-only).
+tally "t59-$PRIOR" node t59_per_person_state.mjs "$PRIOR"
+tally "t59-$CUR"   node t59_per_person_state.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
