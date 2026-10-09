@@ -1,5 +1,70 @@
 # Changelog
 
+## v6.00 — D-22 option 3, batch 1: ten states taxed on their own bracket schedules
+
+**A MODELLING release** (METHODOLOGY updated). `docs/SCOPE_D22_BRACKETS_V600.md` (repo-only, fulfilled). Through v5.99 every state was taxed at ONE rate on
+its whole base — a statutory flat rate where the state has one, and elsewhere a top rate (Oklahoma) or an "effective" rate of the model's own making
+(California 6 %, New York 6 %, New Jersey 5.5 %, Oregon 8 %, Minnesota 6.8 %, Wisconsin 5.3 %, South Carolina 6 %). After v5.99 Steve chose option 3:
+the progressive states' real schedules, read from the law, in batches. **This is the first batch — ten states, each schedule re-read at its primary
+source on 2026-10-09:**
+- **California** — Schedules X / Y, 1 %–12.3 %, the **TY2025** table (TY2026 not published; the 2026 Form 540-ES says to use the 2025 table), plus the 1 %
+  Behavioral Health Services Tax on taxable income over $1,000,000 at every filing status (R&TC §17041, §17043): top rate 13.3 %.
+- **Minnesota** 5.35 %–9.85 % (TY2026, MN DOR) · **Mississippi** 0 % on the first $10,000, 4 % above · **New Jersey** N.J.S.A. 54A:2-1, separate single
+  and joint tables, 1.4 %–10.75 % · **Oklahoma** 0 / 2.5 / 3.5 / 4.5 % (HB 2764; the top-rate convention of v5.97 retires) · **Oregon** 4.75 %–9.9 %
+  (OR-ESTIMATE 2026) · **South Carolina** 1.99 % and 5.21 % for every status (Act 110 of 2026, H.4216 — its $15,000 age-65 deduction stands; §12-6-1170 is
+  unamended) · **Virginia** 2 %–5.75 %, one schedule for every status (§58.1-320) · **Wisconsin** 3.5 %–7.65 % (2026 Form 1-ES).
+- **New York** 3.9 %–10.9 % (Form IT-2105-I, 2026) **with its tax-benefit recapture**: above New York AGI of $107,650 the first worksheet moves the tax
+  toward a flat 5.9 % single / 5.4 % joint on all taxable income over $50,000 — modelled exactly, four-place fraction and all; above $215,400 single /
+  $161,550 joint the later worksheets' end point (the bracket's own rate on all of it) is taken at once, where the law phases it in (conservative).
+
+**How.** A row may now carry `brackets: { single, joint }`; the calculator taxes it on its schedule — single or joint by the return's status, so a
+survivor files on the single schedule — applied to the same base the flat rate saw. `rate` stays, equal to the top rate (asserted), so every reader of
+it keeps working. My Data's line reads "the state's own brackets, L% to T%" with "brackets YYYY" among its dated figures; the AI context line says the
+same. The Field Manual's three sentences that said effective rates stand in for progressive brackets now name the ten states, and say that no
+state's standard deduction or personal exemption is taken anywhere.
+
+**Measured** (v5.99 → v6.00): the Taxes tab's lifetime state tax on the example household, no conversions — California **$109,108 → $72,258**, Minnesota
+**$151,642 → $140,098**, Mississippi **$2,565 → $991**, New Jersey **$26,360 → $13,388**, New York **$65,747 → $54,969**, Oklahoma **$64,281 → $55,476**,
+**Oregon $145,477 → $146,037 (up)**, South Carolina **$74,510 → $46,676**, Virginia **$86,431 → $80,326**, Wisconsin **$56,266 → $45,957**; the other 42
+jurisdictions byte-identical. **Direction is mixed by design:** the effective rates overstated the lower brackets, so most households fall; the high
+single-schedule incomes in California, Oregon and New York rise. **The Roth comparator's best-by-estate cell changes in 5 of the 30 cells tested** (ten
+states × three households: an early widow in MN and NJ; a B-dies household in CA, SC and WI) — with a graduated schedule a conversion's state cost
+depends on the bracket it fills, which one rate could not see. Engines C and D compute no state tax; MC parity 10/10 with **no** declared diff (its
+state fingerprint is a Georgia call).
+
+**v6.00, not v5.100.** The suites compare version tags as strings and sort pool files lexically, so `v5100` would sort below `v599`. Thirteen tooling
+patterns that assumed a major of 5 now read any single-digit major (`mk_runfolder.sh`, `smoke_built`, `t9`, `domdiff_withdrawal`, `vergates`, `vercensus`,
+`vercensus_list`, `package_check`, `package_check_controls.sh`); OPERATIONS §G records the rule. The pool's source is `DangerClose-v6_00.jsx`.
+
+**Decisions taken on recommendation** (scope §1): BR-1 the field; BR-2 `rate` = the top rate; BR-3 no state standard deductions or exemptions yet
+(conservative — recommended as a follow-up); BR-4 schedules held at their latest year; BR-5 New York's recapture; BR-6 Mississippi one band per return;
+BR-7 Virginia one schedule; BR-8 South Carolina's SCIAD not taken; BR-9 New Jersey's 50 cents; BR-13 the batch; BR-14 the version number.
+
+**Tests.** New suite **`t64`** — **65** on v6.00, **34** on v5.99 (that leg pins the single rates): each schedule equals its source
+and is dated; an extinction check over every row with a schedule (ascending, rates never fall, last row open, top rate = `rate`); each schedule against
+the state's PRINTED table (to the cent for WI, OK, NJ and SC; within 2 cents for CA and $1 for NY and OR, which round their bases); hand cases to the cent computed
+independently from the printed tables (e.g. California single at 66 with $60,000: **$2,184.05**, was $3,600.00; Oklahoma single at 66 with $50,000:
+**$1,585.25**, was $1,800.00; New York single with $120,000: **$6,652.11** inside the recapture's phase-in); a v5.99 → v6.00 comparison over every
+jurisdiction and a grid of households (byte-identical outside the ten; inside, equal to an independent schedule on v5.99's base); the display and the
+Field Manual, each clause held to its code fact. Controls `qa/tools/controls_v600_brackets.py` (repo-only): **11 of 11**. **Derived pins gated per build**
+(their base kept, the bracket leg's figure computed in the suite and labelled): `t10` (Mississippi, New Jersey, Virginia, Wisconsin — the NJ residual
+block now asserts the flat-rate error is ZERO), `t50` (MN), `t51` (dated-figure census, NJ), `t52` (NY, OK), `t53` (its line selector), `t55` and `t59`
+(MS), `t58` (CA, NY), `t61` (OK, the rate-claim set), `t63` (MS's note). `v600` registered by AST (52 array entries, 83 OR-gates, two version arms; one
+manual site, `t63`'s single-build group C, left single-build by design), the three Python suites and `t33`'s PINS by hand (173,836, measured).
+
+**Suite, run from the packaged copies:** 5,395 app checks across **63 app suites**, 0 failed, 0 DIED; MC parity 10/10; tooling `t21` 64,
+`domdiff` 32, `sets` 12 + 12; **GRAND 5,525**. Every current-leg count equals v5.99's except the new `t64` and
+`t63` (18 → 9: its group C compares v5.99 with v5.98 and runs on the v5.99 leg only). Run from the PACKAGED copies as two concurrent halves, the method approved at v5.87: run folders built by mk_runfolder.sh v599 v600 from a full clone of 5c90d85 with the github/ files overlaid (v5.99 resolved from history, commit f7ce172), each through a session-only copy of runsuite.sh whose one added line skips the other half's labels. Half A GRAND 5303, half B GRAND 222; none DIED. Source `d535e13e865e9592e41f93f4359328f0` · built `3e02a42fac6f6281d7c0b17ab77cdcbd` (v5.99 rebuilt byte-identical
+first; `smoke_built` 22 passed, 0 failed).
+
+**Limitations, disclosed:**
+- No state standard deduction, personal exemption or exemption credit is taken in any state (conservative).
+- Schedules are held at their latest published year (California's TY2025) for every later year; indexing is not applied (conservative).
+- New York: the later recapture worksheets' phase-in is not modelled (conservative); NYC tax is not modelled.
+- Mississippi's per-spouse band on a combined return, Virginia's Filing Status 4 and $259 spouse adjustment, and South Carolina's SCIAD are not modelled
+  (conservative); New Jersey's joint $70,000–$80,000 band is 50 cents below the statute (immaterial; in its note).
+- Seventeen progressive rows still use one rate (AL, AR, CT, DE, DC, HI, KS, ME, MD, MO, MT, NE, NM, ND, RI, VT, WV) — D-22 stays open for them.
+
 ## v5.99 — D-22 batch 1: the thirteen flat-rate states read for TY2026; Idaho, Indiana and Ohio corrected
 
 **A MODELLING release** (METHODOLOGY updated). `docs/SCOPE_D22_FLAT_RATES_V599.md` (repo-only, fulfilled). The thirteen states whose income tax is one
