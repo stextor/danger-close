@@ -1,5 +1,48 @@
 # Changelog
 
+## v5.99 — D-22 batch 1: the thirteen flat-rate states read for TY2026; Idaho, Indiana and Ohio corrected
+
+**A MODELLING release** (METHODOLOGY updated). `docs/SCOPE_D22_FLAT_RATES_V599.md` (repo-only, fulfilled). The thirteen states whose income tax is one
+rate — Arizona, Colorado, Idaho, Illinois, Indiana, Iowa, Louisiana, Massachusetts, Michigan, Mississippi, North Carolina, Ohio and Pennsylvania (Mississippi
+and Ohio above a zero band) — were read at primary sources for TY2026, because their one rate can be checked against the law exactly. **Ten matched.
+Three were stale, each in the conservative direction:**
+- **Idaho 5.695 % → 5.3 %** — Idaho Code §63-3024(2)(a), as amended by HB 40 (2025 ch. 13), unchanged for 2026.
+- **Indiana 3.0 % → 2.95 %** — IC 6-3-2-1; the Department of Revenue: "for 2026 is 2.95% and will adjust in 2027 to 2.90%". County taxes still not modeled.
+- **Ohio 3.1 % → 2.75 %** — R.C. 5747.02(A)(3)(c), as amended by HB 96 (2025): "$332.00 plus 2.75% of the amount in excess of $26,050". The row keeps
+  the top-rate convention (Oklahoma's at v5.97), which overstates the law by exactly 0.0275 × $26,050 − $332 = **$384.38 a year** above $26,050 — said in
+  the note.
+
+Every one of the thirteen notes now names its rate, tax year and source, so `t61`'s guard (a note's stated rate equals the row's) covers them; zero
+bands taxed here (Ohio's, Mississippi's first $10,000, Idaho's small indexed band) and the scheduled 2027 cuts not applied (Indiana 2.90 %, Mississippi
+3.75 %, North Carolina 3.49 % under S.L. 2026-41) are each disclosed as conservative. Massachusetts' 4 % surtax remains unmodelled, its TY2026 threshold
+($1,107,750) now named.
+
+**Measured** (v5.98 → v5.99): the Taxes tab's lifetime state tax on the example household, no conversions — Idaho **$103,561 → $96,379**, Indiana
+**$54,554 → $53,645**, Ohio **$56,372 → $50,008** — exactly the rate ratio; every other jurisdiction byte-identical. The Roth comparator: 18 strategy runs
+fall (six strategies × three states), none rise, and its best-by-estate cell changes in none of the jurisdictions tested. Engines C and D compute no state tax.
+
+**Decisions taken on recommendation** (scope §1): D22-8 Ohio keeps one rate, the top one; D22-9 zero bands taxed here, disclosed; D22-10 the reading recorded
+in all thirteen notes; D22-11 scheduled later cuts not applied. **For the next batch (scope §4):** most of the remaining 27 rows are progressive, and the
+table mixes conventions — top rate (OK, OH), a "mid-range effective" rate (CA 6 %, OR 8 %, DC) and middle brackets — so re-reading them needs one
+convention first; that is a decision for Steve, put in the next scope.
+
+**Tests.** New suite **`t63`** — **18** on v5.99, **6** on v5.98 (that leg pins the old rates): the thirteen rates per leg; every note
+states its rate for its year; Ohio's and Mississippi's disclosures; the 2027 cuts named; hand cases to the cent (Idaho single at 66 with $60,000:
+**$3,180.00**, was $3,417.00; Indiana **$1,770.00**, was $1,800.00; Ohio joint at 70 with $80,000: **$2,200.00**, was $2,480.00 — the statute gives
+$1,815.63, $384.38 less); a v5.98 → v5.99 comparison (the calculator across all 51 rows and a grid of households moves only in ID, IN and OH and there by
+exactly the rate ratio; the Taxes tab only those rows' state-tax fields, never up; Engines C and D byte-identical; Engine A never rises). Controls
+`qa/tools/controls_v599_flat_rates.py` (repo-only): **7 of 7**. `t61`'s matched set widened for v5.99 (gated per build). `v599` registered by AST (51 array
+entries, 83 OR-gates, two version arms, **no manual site** — v5.98's array form held), the three Python suites by hand, `t33`'s PINS by measurement (173,836).
+
+**Suite, run from the packaged copies:** 5,302 app checks across **62 app suites**, 0 failed, 0 DIED; MC parity 10/10; tooling `t21` 64,
+`domdiff` 32, `sets` 12 + 12; **GRAND 5,432**. Every current-leg count equals v5.98's except the new `t63`.
+Run from the PACKAGED copies as two concurrent halves, the method approved at v5.87: run folders built by mk_runfolder.sh v598 v599 from a full clone of 24ef3af with the github/ files overlaid (v5.98 resolved from history, commit 9945d3c), each through a session-only copy of runsuite.sh whose one added line skips the other half's labels. Half A GRAND 5210, half B GRAND 222; none DIED. Source `8c02876e4841e638a1a83425314586f4` · built `8047df4c66caab74d43ec42541f65d3d` (v5.98 rebuilt byte-identical first; `smoke_built` 22 passed, 0 failed).
+
+**Limitations, disclosed:**
+- One rate per state: Ohio's and Mississippi's zero bands and Idaho's indexed one are taxed (conservative); Indiana's county taxes are not modelled (optimistic).
+- Rates are held for every later year; the 2027 cuts above are not applied.
+- 27 nonzero rows remain to be read in D-22 (Kentucky's and Utah's rates were read for 2026 at v5.57 and v5.85).
+
 ## v5.98 — three desktop-page behaviours disclosed; the glossary in order (F-5, F-7, F-9, F-16)
 
 **A PRESENTATION release** — no engine changed (MC parity 10/10, no declared diff), no figure moves, METHODOLOGY unchanged.
