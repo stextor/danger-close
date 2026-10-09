@@ -1160,6 +1160,11 @@ after v5.86. **Medium** — optimistic, and large relative to WV's other figures
 
 ## D-22 · The 42 nonzero state rates have not been re-read
 
+> 🔶 **BATCH 1 DONE v5.99 (2026-10-09) — the thirteen flat-rate states.** AZ, CO, ID, IL, IN, IA, LA, MA, MI, MS, NC, OH, PA read at primary sources for
+> TY2026; Idaho (5.3 %), Indiana (2.95 %) and Ohio (2.75 %, top-rate convention, $384.38 a year overstated above $26,050) corrected; every note names its
+> rate, year and source. `qa/t63_flat_rates.mjs`; scope `docs/SCOPE_D22_FLAT_RATES_V599.md` (fulfilled, repo-only). **27 rows remain, mostly progressive:
+> the table mixes top-rate, effective-rate and middle-bracket conventions, so the next batch needs one convention decided first (Steve).**
+
 > 🔶 **PARTLY FIXED v5.97 (2026-10-08) — Georgia and Oklahoma, the two known misses.** Georgia 4.99 % (O.C.G.A. §48-7-20(a.1), HB 463, TY2026) and
 > Oklahoma 4.5 % (HB 2764, 68 O.S. §2355, the top rate), each read at a primary source and recorded in the row's note; `t61` holds every note that
 > states a rate for a year to the row's own rate. **The other 40 nonzero rates are still unread — this item stays OPEN.** Scope
