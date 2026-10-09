@@ -424,11 +424,12 @@ runk "P29 THE v5.61 DEFECT - manifest not updated at all, NEITHER table rolled" 
 import re
 s=rd()
 a=s.index('## Current build'); b=s.index('## Prior build')
-def ver(blk): return re.search(r'\| Version \| \*\*(v5\.(\d+))\*\* \|', blk)
+def ver(blk): return re.search(r'\| Version \| \*\*(v(\d)\.(\d+))\*\* \|', blk)
+vd=lambda k: 'v%d.%02d'%divmod(k,100)  # v6.00: any major; 600-1 -> v5.99
 mc=ver(s[a:b]); mp=ver(s[b:]); assert mc and mp, 'version rows not found'
-n=int(mc.group(2))
-cur=s[a:b].replace(mc.group(1), 'v5.%d'%(n-1), 1)
-pri=s[b:].replace(mp.group(1), 'v5.%d'%(n-2), 1)
+n=int(mc.group(2))*100+int(mc.group(3))
+cur=s[a:b].replace(mc.group(1), vd(n-1), 1)
+pri=s[b:].replace(mp.group(1), vd(n-2), 1)
 assert cur!=s[a:b] and pri!=s[b:], 'neither table moved'
 wr(s[:a]+cur+pri)
 "
@@ -485,8 +486,8 @@ wr(s.replace('$P33F','REMOVED_BY_CONTROL.cjs'))
 runk "P34 Current rolled but Prior NOT - the defect that ran for seven releases" "K-7" "" "
 import re
 s=rd(); b=s.index('## Prior build')
-m=re.search(r'\| Version \| \*\*(v5\.(\d+))\*\* \|', s[b:]); assert m, 'Prior version row not found'
-wr(s[:b]+s[b:].replace(m.group(1),'v5.%d'%(int(m.group(2))-5),1))
+m=re.search(r'\| Version \| \*\*(v(\d)\.(\d+))\*\* \|', s[b:]); assert m, 'Prior version row not found'
+wr(s[:b]+s[b:].replace(m.group(1),'v%d.%02d'%divmod(int(m.group(2))*100+int(m.group(3))-5,100),1))
 "
 
 # ⚠ P35: the manifest is GONE from the PACKAGE, the clone AND the pool. K must SKIP LOUDLY, never
@@ -892,8 +893,8 @@ for q in ['/tmp/pkk/github/PROJECT_KNOWLEDGE_INDEX.md', '/tmp/pkk/knowledge/PROJ
     if not os.path.exists(q): continue
     s = open(q).read()
     a = s.index('## Current build'); b = s.index('## Prior build')
-    m = re.search(r'\| Version \| \*\*(v5\.(\d+))\*\* \|', s[a:b]); assert m
-    s = s[:a] + s[a:b].replace(m.group(1), 'v5.%d' % (int(m.group(2)) - 1), 1) + s[b:]
+    m = re.search(r'\| Version \| \*\*(v(\d)\.(\d+))\*\* \|', s[a:b]); assert m
+    s = s[:a] + s[a:b].replace(m.group(1), 'v%d.%02d' % divmod(int(m.group(2)) * 100 + int(m.group(3)) - 1, 100), 1) + s[b:]
     open(q, 'w').write(s)
 PY
   # keep MANIFEST.txt honest about the mutated copies, so only K can object

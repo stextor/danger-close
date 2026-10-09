@@ -31,7 +31,7 @@ const B = Object.assign({}, walk.base, {
 });
 
 const CUR = process.argv[2];
-if (!CUR || !/^v5\d+$/.test(CUR)) {
+if (!CUR || !/^v\d{3,}$/.test(CUR)) {
   console.error("usage: node vercensus.cjs <current-tag> [dir ...]   e.g. v557");
   process.exit(2);
 }

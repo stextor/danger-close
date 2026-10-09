@@ -13,7 +13,7 @@ const B=Object.assign({},walk.base,{
   JSXExpressionContainer(n,s,c){c(n.expression,s);},
   JSXEmptyExpression(){},JSXText(){},JSXIdentifier(){},JSXMemberExpression(){},JSXNamespacedName(){}});
 const CUR=process.argv[2];
-if(!CUR||!/^v5\d+$/.test(CUR)){console.error("usage: node vercensus_list.cjs <tag> [dir ...]");process.exit(2);}
+if(!CUR||!/^v\d{3,}$/.test(CUR)){console.error("usage: node vercensus_list.cjs <tag> [dir ...]");process.exit(2);}
 const DIRS=process.argv.slice(3).length?process.argv.slice(3):["."];
 for(const d of DIRS){
   let entries; try{entries=fs.readdirSync(d);}catch{continue;}

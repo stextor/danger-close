@@ -161,7 +161,7 @@ if (knIndex.length) {
 }
 ck("B-2: knowledge/index.html is the src/ template, NOT the built artifact (output is not input \u2014 \u00a7G)",
   b2bad.length === 0, b2why);
-const knSrc = knFiles.filter(f => /^DangerClose-v5_\d+\.jsx$/.test(f));
+const knSrc = knFiles.filter(f => /^DangerClose-v\d_\d+\.jsx$/.test(f));
 if (KIND === "app-release") {
   ck("B-3: exactly one versioned app source in knowledge/ (the incoming half of the two-source rotation)",
     knSrc.length === 1, knSrc.join(", ") || "none");
@@ -243,7 +243,7 @@ if (!existsSync(manPath)) {
         if (/^## /.test(l)) break;
         if (/^### /.test(l)) { inNew = !committed.has(l); continue; }
         const r = inNew && /^\|\s*`([^`]+)`\s*\|/.exec(l);
-        if (r && !existsSync(join(KN, r[1])) && !/^DangerClose-v5_\d+\.jsx$|^dom_entry_v5\d+\.jsx$/.test(r[1])) leaving.push(r[1]);
+        if (r && !existsSync(join(KN, r[1])) && !/^DangerClose-v\d_\d+\.jsx$|^dom_entry_v\d\d\d\.jsx$/.test(r[1])) leaving.push(r[1]);
       }
       const declared = new Set([..._man0.matchAll(/^\s*RETIRE:\s*(\S+)\s*$/gm)].map(x => x[1]));
       const judged = [...new Set(leaving)], undeclared = judged.filter(x => !declared.has(x));
@@ -470,7 +470,7 @@ if (CLONE && existsSync(CLONE)) {
   const ambiguous = [];
   for (const k of knFiles) {
     // The versioned source is renamed across the two destinations by design; E-2 covers it.
-    if (/^DangerClose-v5_\d+\.jsx$/.test(k)) continue;
+    if (/^DangerClose-v\d_\d+\.jsx$/.test(k)) continue;
     const cands = byBase.get(k) || [];
     // Unambiguous counterpart only. A basename matching several repo paths cannot be resolved
     // from here, and guessing which one was meant is how a check starts lying.
@@ -526,9 +526,9 @@ if (existsSync(rfPath)) {
   ck("F-1: names the delete-first list for the pool (\u00a7G \u2014 the pool is add-only)",
     /delete[- ]first|DELETE FIRST/i.test(rf));
   ck("F-2: every knowledge/ file that replaces a pool file is named for deletion",
-    knFiles.filter(f => !/^DangerClose-v5_\d+\.jsx$/.test(f))
+    knFiles.filter(f => !/^DangerClose-v\d_\d+\.jsx$/.test(f))
            .every(f => rf.includes(f)),
-    knFiles.filter(f => !/^DangerClose-v5_\d+\.jsx$/.test(f) && !rf.includes(f)).join(", "));
+    knFiles.filter(f => !/^DangerClose-v\d_\d+\.jsx$/.test(f) && !rf.includes(f)).join(", "));
   ck("F-3: states the two destinations explicitly", /github/i.test(rf) && /knowledge/i.test(rf));
 } else ck("F-1: README-FIRST.md readable", false, "absent");
 
@@ -605,7 +605,7 @@ if (!WORK || !existsSync(WORK)) {
   //   by another road. A run folder is FULL of legitimately new files: built artifacts, the two
   //   source legs, node_modules. G-2 asks only about hand-written suite and tool files under
   //   `qa/`, which is where a forgotten instrument actually lands.
-  const DERIVED = /^(app_|dom_|v5\d|DangerClose\.jsx|package(-lock)?\.json|METHODOLOGY\.md)/;
+  const DERIVED = /^(app_|dom_|v\d\d\d|DangerClose\.jsx|package(-lock)?\.json|METHODOLOGY\.md)/;
   const orphans = [];
   for (const w of walk(WORK)) {
     if (w.startsWith("node_modules/") || w.includes("/node_modules/")) continue;
@@ -987,8 +987,8 @@ if (POOL && existsSync(POOL)) {
     // 2026-09-28 (SCOPE_SINGLE_SOURCE_POOL): the pool keeps ONE source — the current — and one dom entry; the prior
     // build is read from the repo's history by its recorded md5 (mk_runfolder.sh). Until then these asserted TWO of each.
     // A pool holding two sources now means the outgoing one was not deleted at the rotation.
-    const legs = readdirSync(POOL).filter(f => /^DangerClose-v5_\d+\.jsx$/.test(f)).sort();
-    const doms = readdirSync(POOL).filter(f => /^dom_entry_v5\d+\.jsx$/.test(f)).sort();
+    const legs = readdirSync(POOL).filter(f => /^DangerClose-v\d_\d+\.jsx$/.test(f)).sort();
+    const doms = readdirSync(POOL).filter(f => /^dom_entry_v\d\d\d\.jsx$/.test(f)).sort();
     ck("J-3: the pool holds exactly ONE source (the prior build lives in the repo's history)",
       legs.length === 1, legs.join(", ") || "none");
     ck("J-4: and exactly one dom entry", doms.length === 1, doms.join(", ") || "none");
@@ -1159,7 +1159,7 @@ console.log("\nK. Manifest — PROJECT_KNOWLEDGE_INDEX.md vs the clone and the p
           else ck("K-5b: the Prior table's source md5 is held by a commit in the clone's history (mk_runfolder.sh builds the prior leg from it)",
             !!hit, hit ? `commit ${hit}` : `no commit has ${P["Source md5"]}`);
         } else skipped("K-5b: the Prior table's md5 in the clone's history", "no clone given");
-        const legs = readdirSync(POOL).filter(f => /^DangerClose-v5_\d+\.jsx$/.test(f)).sort();
+        const legs = readdirSync(POOL).filter(f => /^DangerClose-v\d_\d+\.jsx$/.test(f)).sort();
         ck("K-6: the pool's one source IS the one the Current table names",
           legs.join() === named.filter(Boolean).sort().join(),
           `pool [${legs.join(", ")}] vs manifest [${named.filter(Boolean).sort().join(", ")}]`);

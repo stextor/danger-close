@@ -12,7 +12,7 @@ for(const p of files){
   let a;try{a=P.parse(fs.readFileSync(p,'utf8'),{ecmaVersion:'latest',sourceType:'module',locations:true});}catch{continue;}
   const src=fs.readFileSync(p,'utf8').split('\n');
   walk.simple(a,{
-    Literal(n){ if(typeof n.value==='string'&&/^v5\d\d$/.test(n.value)){
+    Literal(n){ if(typeof n.value==='string'&&/^v\d\d\d$/.test(n.value)){
       const line=src[n.loc.start.line-1];
       if(/KNOWN_VERSIONS|ORDER|POST|VERSIONS|TAGS/.test(line)){ regs++; }
       else { gates++; }
