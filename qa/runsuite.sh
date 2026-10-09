@@ -208,6 +208,10 @@ tally "t61-$CUR"   node t61_ga_ok_rates.mjs "$CUR"
 # case-insensitive order (extinction). Both legs; the v597 leg pins the absence and the one out-of-order pair.
 tally "t62-$PRIOR" node t62_desktop_disclosures.mjs "$PRIOR"
 tally "t62-$CUR"   node t62_desktop_disclosures.mjs "$CUR"
+# t63 (v5.99) — D-22 batch 1: the thirteen flat-rate states read for TY2026 (ID, IN, OH move); hand cases to the cent; Ohio's top-rate
+# overstatement from the statute's formula; v5.98 -> v5.99 moves only ID/IN/OH, by exactly the rate ratio. Both legs; the v598 leg pins the old rates.
+tally "t63-$PRIOR" node t63_flat_rates.mjs "$PRIOR"
+tally "t63-$CUR"   node t63_flat_rates.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

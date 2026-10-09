@@ -24,7 +24,7 @@
 // calculator read byPerson, that statement goes and section C fails loudly here — it cannot pass vacuously.
 const VER = process.argv[2];
 const MODPATH = process.argv[3] || `./app_${VER}.mjs`;
-const KNOWN_VERSIONS = ["v593", "v594", "v595", "v596", "v597", "v598"];
+const KNOWN_VERSIONS = ["v593", "v594", "v595", "v596", "v597", "v598", "v599"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));

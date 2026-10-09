@@ -15,7 +15,7 @@
 //            byte-identical; Engine A never rises and its estate-best strategy does not change
 // BOTH LEGS; the v596 leg PINS the old rates. Run: node t61_ga_ok_rates.mjs <tag>
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v596", "v597", "v598"];
+const KNOWN_VERSIONS = ["v596", "v597", "v598", "v599"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  ✓ ${n}`); } else { fail++; console.log(`  ✗ ${n}${d !== "" ? " — " + String(d).slice(0, 260) : ""}`); } };
 const EQ = (n, got, want, tol = 0.005) => CK(n, typeof got === "number" && Math.abs(got - want) <= tol, `got ${got}, want ${want}`);
@@ -50,7 +50,8 @@ const RATE_CLAIM = /(\d+(?:\.\d+)?)\s?%\s*(?:flat\s+)?(?:for|effective|from)\s+(
 const claims = Object.entries(SR).filter(([, r]) => r.note && RATE_CLAIM.test(r.note)).map(([c, r]) => [c, Number(r.note.match(RATE_CLAIM)[1]), r.rate]);
 const bad = claims.filter(([, said, rate]) => Math.abs(said / 100 - rate) > 1e-9);
 CK(`A-5 EXTINCTION: every note stating a rate for a year states the row's own rate (${claims.map(x => x[0]).join(", ")})`, bad.length === 0, JSON.stringify(bad));
-const WANT = FIXED ? "GA,KY,NC,OH,OK,UT" : "KY,NC,OH,UT";
+// v5.99 (D-22 batch 1) records the reading in eleven more notes, so the matched set grows; earlier legs keep theirs.
+const WANT = !FIXED ? "KY,NC,OH,UT" : ["v597", "v598"].includes(VER) ? "GA,KY,NC,OH,OK,UT" : "AZ,CO,GA,IA,ID,IL,IN,KY,LA,MA,MI,MS,NC,OH,OK,PA,UT";
 CK(`A-6 the rate-claim set is exactly ${WANT} (a reworded note cannot leave A-5 vacuous)`, claims.map(x => x[0]).sort().join(",") === WANT, claims.map(x => x[0]).sort().join(","));
 if (FIXED) {
   // Oklahoma's TY2026 schedule (OTC, 2025 Tax Legislation Summary): single 0 % to $3,750, 2.5 % to $4,900, 3.5 % to $7,200, 4.5 % above;
