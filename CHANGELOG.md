@@ -1,5 +1,39 @@
 # Changelog
 
+## v5.98 — three desktop-page behaviours disclosed; the glossary in order (F-5, F-7, F-9, F-16)
+
+**A PRESENTATION release** — no engine changed (MC parity 10/10, no declared diff), no figure moves, METHODOLOGY unchanged.
+`docs/SCOPE_F_DISCLOSURES_V598.md` (repo-only, fulfilled). The census of the C/E/F registers (ops 2026-10-08) found four simplifications the app did
+not disclose, although `UsabilityFlaws.md`'s v5.40 block said v5.39 had (v5.39's Field Manual, read at commit `d18f7cc`, named none of them):
+- **F-5** — 41 labels and buttons explain themselves only in a hover tooltip (a `title` attribute), which a touch screen never shows.
+- **F-7** — the Trajectory chart reads its width when it draws and nothing listens for a resize, so a resized window or a rotated phone leaves it at
+  the old width until it redraws; it redraws when you leave the tab and come back (the effect re-runs on the active tab).
+- **F-9** — the Docs tab shows the Field Manual in a 74vh box that scrolls inside the page's own scroll.
+- **F-16** — the glossary was alphabetical except one pair: "API Key" before "Agency MBS".
+
+**What changed:** Field Manual §13's "Designed for a desktop browser" item gains one dated sentence naming the first three, with the chart's
+work-around; the two glossary entries swap. **Decisions taken on recommendation** (scope §1): F1-1 disclose F-5/F-7/F-9 rather than fix them (each
+fix needs a real-browser test to be claimed); F1-2 fix F-16; F1-3 each clause held to the code fact that makes it true; F1-4 the F register's census
+table updated.
+
+**Tests.** New suite **`t62`** — **12** on v5.98, **9** on v5.97 (that leg pins the absence and the one out-of-order pair): the
+sentence and its three clauses; each clause's **code fact** — non-iframe elements still carry a hover `title`, the chart's draw effect reads
+`clientWidth` and re-runs on the active tab with no resize listener or `ResizeObserver`, the Docs iframe is still `74vh` — which makes the
+disclosure a deliberate LOCK (OPERATIONS §B2): fixing any of the three turns `t62` red until the clause leaves the Field Manual; the glossary in
+case-insensitive order over all 78 terms (EXTINCTION), the "Authoritative sources" footer last, and a parse guard so the check cannot pass on an
+empty list. Controls `qa/tools/controls_v598_disclosures.py` (repo-only): **7 of 7**. **Registration:** `v598` by AST (44 array entries, 83 OR-gates,
+two version arms), the three Python suites by hand, `t33`'s PINS by measurement (173,836, equal to v5.97's). **v5.97's own gates were the wrong shape:**
+the six single-tag gates it added (`VER === "v597"`, five of them in ternaries, in `t33`, `t52`, `t58`, `t59`, `t60`) are invisible to the registration tool, which
+reported them among seven manual sites (the seventh, `t61`'s v5.96 → v5.97 comparison, is single-build by design); each became `["v597", "v598"].includes(VER)`, an array the tool extends from now on. OPERATIONS records the shape.
+
+**Suite, run from the packaged copies:** 5,275 app checks across **61 app suites**, 0 failed, 0 DIED; MC parity 10/10; tooling `t21` 64,
+`domdiff` 32, `sets` 12 + 12; **GRAND 5,405**. Every current-leg count equals v5.97's except the new `t62` and
+`t61` (15: its v5.96 → v5.97 comparison runs only in a v596 → v597 folder). Run from the PACKAGED copies as two concurrent halves, the method approved at v5.87: run folders built by mk_runfolder.sh v597 v598 from a full clone of 106b2d8 with the github/ files overlaid (v5.97 resolved from history, commit ba46635), each through a session-only copy of runsuite.sh whose one added line skips the other half's labels. Half A GRAND 5183, half B GRAND 222; none DIED. Source `240f5ae6e56bd5d5662891ceec60fbbb` · built `11518a499200afb433f11bcb23a2317b` (v5.97 rebuilt
+byte-identical first; `smoke_built` 22 passed, 0 failed).
+
+**Limitations, disclosed:** F-5, F-7 and F-9 are disclosed, not fixed; F-15b ("$1,500K" beside a sibling "$1.25M") is open; the Field Manual's own
+small print and the device and screen-reader passes are unchanged.
+
 ## ops 2026-10-08 — census of the C, E and F audit registers
 
 **KIND: ops** — documents only; v5.97 stays current (source `4157137a9ce50db365a1a190fa10f617`, built `42c082a242cb157ee6de8044f5ca9db8`). Every ID in the
