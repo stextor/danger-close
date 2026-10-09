@@ -2002,3 +2002,9 @@ state tax under no conversions) and, in a handful of measured cases, changed the
 conservative. Oklahoma keeps the row's top-rate convention, which overstates tax against its new three-bracket schedule by $214.75 single / $429.50 joint
 a year on a base above the top threshold. Both rates are held for every later year, as every state's is; Georgia's step-down from 2027 and its $70,000
 exclusion from 2027 are not applied (conservative). The other 40 rates remain unread (D-22). `qa/t61_ga_ok_rates.mjs`.)*
+
+*(v5.99, D-22 batch 1 — `docs/SCOPE_D22_FLAT_RATES_V599.md`. The thirteen flat-rate states were read at primary sources for TY2026: AZ 2.5 %, CO 4.4 % (no TABOR
+reduction for 2026), IL 4.95 %, IA 3.8 %, LA 3 %, MA 5 %, MI 4.25 %, MS 4 %, NC 3.99 % and PA 3.07 % matched; **Idaho 5.3 %** (was 5.695 %), **Indiana 2.95 %**
+(was 3.0 %) and **Ohio 2.75 %** (was 3.1 %) were stale and conservative. Ohio's law is $332 plus 2.75 % above $26,050; the row keeps the top rate, which
+overstates by $384.38 a year above that line. Zero bands (OH, MS, ID) are taxed and 2027's scheduled cuts (IN, MS, NC) not applied — conservative, and
+said in each note. The remaining rows are mostly progressive and need a rate convention before they are read. `qa/t63_flat_rates.mjs`.)*
