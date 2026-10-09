@@ -134,7 +134,7 @@ future law is "current law, inflated."
 
 Replaces the former single flat rate with a **51-jurisdiction rules table** (50 states + DC),
 2026 vintage. Per state: an *effective flat approximation* of the (often progressive) schedule
-for a typical retiree — *from v6.00, ten states (CA, MN, MS, NJ, NY, OK, OR, SC, VA, WI) are taxed on their own bracket schedules instead (§ v6.00 below)*; Social Security treatment (43 jurisdictions none; the eight partial states
+for a typical retiree — *from v6.00 ten states, and from v6.01 every progressive state (27), are taxed on their own bracket schedules instead (§ v6.00 and § v6.01 below); the fifteen flat-rate states keep their one rate*; Social Security treatment (43 jurisdictions none; the eight partial states
 — CO, CT, MN, MT, NM, RI, UT, VT — approximated as taxing half the federally-taxable portion,
 since their income thresholds exempt most retirees; WV's phase-out completed for 2026);
 full retirement-income exemptions (IL, MS, PA, IA, MI post-phase-in, plus the nine
@@ -333,9 +333,9 @@ filers. That is an existence result on a grid this project chose — it is not a
 percentage should be read off it. Selecting no state preserves the legacy flat-rate
 behavior exactly (backward compatible with every existing backup).
 
-**This is an approximation layer and is labeled as such in the UI.** Not modeled: progressive
-state brackets for the seventeen rows not yet on their own schedule (one rate instead; ten states are on their own schedules from v6.00), county/city income taxes (IN, MD partially folded, NYC
-not), Rhode Island's IRA distinction and per-person cap (**its AGI cliff is applied as of v5.69**, exclusive, on the TY2025 thresholds — Connecticut, New Mexico, New Jersey, Virginia and Rhode Island are conditioned as of v5.65, v5.66, v5.67, v5.68 and v5.69; ⚠ *corrected at v5.69: this clause listed Rhode Island's cliff as approximated as unconditional*; ⚠ *this clause was stale and is corrected at v5.62: v5.60 DID apply RI's and WI's full-retirement-age (67) floors, as stated above — the contradiction stood within this one document for two releases*; ⚠ *corrected again at v5.68: it listed NJ and VA as unconditional, false from v5.67 and v5.68 respectively* — **Virginia's $12K age deduction tapers $1 for every $1 of adjusted federal AGI above $50K single/$75K married, and is applied that way, once per couple, as of v5.68**), SC's under-65 tier (disclosed, not applied; *NJ's 62 floor stood beside it here as unapplied until v5.68, although v5.67 applied it*), **Colorado's shared $24K cap between Social Security and pension — a cap the two share rather than one reducing the other, which overstates Colorado's exclusion and understates its state tax**. Maryland's and Maine's exclusions, which are reduced by Social Security received dollar-for-dollar, ARE applied as of v5.56 (§12), state
+**This is an approximation layer and is labeled as such in the UI.** Not modeled: *(progressive
+state brackets ARE modelled from v6.01 — every progressive state is on its own schedule)*, county/city income taxes (IN, NYC and city taxes
+not; Maryland's county tax is taken at the highest county rate, 3.30 %, from v6.01), Rhode Island's IRA distinction and per-person cap (**its AGI cliff is applied as of v5.69**, exclusive, on the TY2025 thresholds — Connecticut, New Mexico, New Jersey, Virginia and Rhode Island are conditioned as of v5.65, v5.66, v5.67, v5.68 and v5.69; ⚠ *corrected at v5.69: this clause listed Rhode Island's cliff as approximated as unconditional*; ⚠ *this clause was stale and is corrected at v5.62: v5.60 DID apply RI's and WI's full-retirement-age (67) floors, as stated above — the contradiction stood within this one document for two releases*; ⚠ *corrected again at v5.68: it listed NJ and VA as unconditional, false from v5.67 and v5.68 respectively* — **Virginia's $12K age deduction tapers $1 for every $1 of adjusted federal AGI above $50K single/$75K married, and is applied that way, once per couple, as of v5.68**), SC's under-65 tier (disclosed, not applied; *NJ's 62 floor stood beside it here as unapplied until v5.68, although v5.67 applied it*), **Colorado's shared $24K cap between Social Security and pension — a cap the two share rather than one reducing the other, which overstates Colorado's exclusion and understates its state tax**. Maryland's and Maine's exclusions, which are reduced by Social Security received dollar-for-dollar, ARE applied as of v5.56 (§12), state
 standard deductions/credits, pension-source distinctions (AL/HI DB exemptions), and WA's
 capital-gains excise. Verify your state.
 
@@ -949,8 +949,8 @@ export paths; state-module ordering test TX=IL < GA < CA; solve-for grid; MC tog
 
 Not yet done, in honesty: **independent professional (CPA/EA/actuary) review** — the single
 most valuable outstanding validation, and the reason the trust case remains self-referential;
-golden-file cross-validation against Pralana/ProjectionLab on identical inputs; state progressive
-brackets for seventeen rows (ten states use their own schedules from v6.00; the rest one rate); ACA premium-subsidy modeling; and stochastic
+golden-file cross-validation against Pralana/ProjectionLab on identical inputs; state standard
+deductions, exemptions and credits (every progressive state is on its own schedule from v6.01; none of these is taken — D-30); ACA premium-subsidy modeling; and stochastic
 health-state modeling.
 
 **No estate tax or inheritance tax is modeled — federal or state (disclosed at v5.50).** The
@@ -2018,3 +2018,20 @@ end point at once (the law phases it in — conservative). The AGI measure is th
 is. **Not modelled, each conservative:** any state standard deduction, personal exemption or exemption credit; indexing the schedules forward;
 Mississippi's per-spouse band on a combined return; Virginia's Filing Status 4 and spouse adjustment; South Carolina's SCIAD. New Jersey's statute is 50
 cents above its own arithmetic in one joint band, not modelled. Seventeen progressive rows keep one rate (D-22). `qa/t64_state_brackets.mjs`.)*
+
+*(v6.01, D-22 option 3, batch 2 — `docs/SCOPE_D22_BRACKETS_V601.md`. **The other seventeen progressive states are taxed on their own schedules**, each
+read at its primary source for TY2026: AL, AR, CT, DC, DE, HI, KS, MD, ME, MO, MT, ND, NE, NM, RI, VT, WV — single or joint by the return's status, one
+schedule where the law has one (AR, DC, DE, MO, RI, WV). **D-22 closes:** every taxing row is on its own schedule or is one of the fifteen flat-rate
+states (`t65` A-7). Added rules, each exact: **Arkansas's** table above $94,700 of net income (2 % on $4,700, 3.7 % on the rest, less the bracket
+adjustment from $290 at $94,701 to nothing above $97,600); **Connecticut's** 2 %-bracket phase-out and three recapture amounts, per $5,000 (single) or
+$10,000 (joint) of Connecticut AGI "or fraction thereof" — the AGI measure is the state base, which is after the pension and Social Security
+subtractions as Connecticut AGI is; **Maryland's** county income tax on the same base at the highest county rate, 3.30 % (conservative for every county
+below it), and its 2 % tax on all net capital gain when federal AGI exceeds $350,000 (from 2025), measured on the calculator's federal-AGI measure;
+**Maine's** 2 % surcharge above $1,000,000 / $1,500,000 as a fourth bracket. **Enacted later top brackets are applied in every year:** Hawaii's 13 % above
+$500,000 / $1,000,000 (Act 24 of 2026, from 2027) and Rhode Island's surtax above $1,000,000 at its 2029+ 3 % (FY2027 budget, 1 % / 2 % / 3 % in 2027 /
+2028 / 2029+); at every income the result is at or above every schedule those acts enact (`t65` A-12), so in a model with no year dimension it is the
+conservative stand-in. **Not modelled, each conservative:** state standard deductions, exemptions and credits and Alabama's deduction of federal income tax
+(D-30); Missouri's 100 % capital-gains subtraction from 2025 (D-29); Hawaii's 7.25 % capital-gains cap, Montana's capital-gains rates, North Dakota's 40 %
+and New Mexico's $2,500 gains deductions, Vermont's gains exclusion; per-spouse computation where the law allows it (AR, DE, MO); later lower schedules (MT,
+NE 2027) and triggered cuts (KS, MO, WV); indexing. Vermont's 3 % minimum tax on AGI over $150,000 cannot bind in the model (`t65` A-13).
+`qa/t65_state_brackets_b2.mjs`.)*
