@@ -23,7 +23,7 @@ import { createRequire } from "module";
 import { existsSync, readFileSync } from "fs";
 const require = createRequire(import.meta.url);
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v599", "v600"];
+const KNOWN_VERSIONS = ["v599", "v600", "v601"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  ✓ ${n}`); } else { fail++; console.log(`  ✗ ${n}${d !== "" ? " — " + String(d).slice(0, 260) : ""}`); } };
 const EQ = (n, got, want, tol = 0.005) => CK(n, typeof got === "number" && Math.abs(got - want) <= tol, `got ${got}, want ${want}`);
@@ -58,7 +58,9 @@ const S = {
 const OLD_RATE = { CA: 0.06, MN: 0.068, MS: 0.04, NJ: 0.055, NY: 0.06, OK: 0.045, OR: 0.08, SC: 0.06, VA: 0.0575, WI: 0.053 };
 const withB = Object.keys(SR).filter(c => SR[c].brackets !== undefined).sort();
 if (BR) {
-  CK(`A-1 exactly the ten rows carry a schedule (${withB.join(",")})`, withB.join(",") === TEN.join(","), withB.join(","));
+  // v6.01 (D-22 batch 2) puts seventeen more rows on schedules; t65 A-1 pins the full set of twenty-seven. A LIST.
+  if (["v600"].includes(VER)) CK(`A-1 exactly the ten rows carry a schedule (${withB.join(",")})`, withB.join(",") === TEN.join(","), withB.join(","));
+  else CK(`A-1 the ten carry a schedule, among the ${withB.length} that do from v6.01 (t65 A-1 pins the set)`, TEN.every(c => withB.includes(c)), withB.join(","));
   for (const c of TEN) {
     const b = SR[c].brackets || {};
     CK(`A-2${c} ${SR[c].name}: single and joint schedules equal the source (${S[c].single.length} / ${S[c].joint.length} rows), dated ${S[c].year}`,
@@ -82,9 +84,10 @@ for (const c of withB) for (const k of ["single", "joint"]) {
     if (!(r >= 0 && r < 0.2)) shapeBad.push(`${c}.${k}[${i}] rate ${r}`);
     if (i && r < rows[i - 1][1]) shapeBad.push(`${c}.${k}[${i}] rate falls`);
   });
-  if (rows[rows.length - 1][1] !== SR[c].rate) shapeBad.push(`${c}.${k} top ${rows[rows.length - 1][1]} != rate ${SR[c].rate}`);
+  // v6.01: Maryland's `rate` is its top bracket plus its county rate (`local`); every other row's `local` is absent, so this is v6.00's test there.
+  if (Math.abs(rows[rows.length - 1][1] + (SR[c].local || 0) - SR[c].rate) > 1e-12) shapeBad.push(`${c}.${k} top ${rows[rows.length - 1][1]} (+ local ${SR[c].local || 0}) != rate ${SR[c].rate}`);
 }
-CK(`A-5 EXTINCTION: every schedule ascends, its rates never fall, its last row is open, and its top rate IS the row's \`rate\` (${withB.length} rows)`, shapeBad.length === 0, shapeBad.join(" · "));
+CK(`A-5 EXTINCTION: every schedule ascends, its rates never fall, its last row is open, and its top rate (plus any county rate) IS the row's \`rate\` (${withB.length} rows)`, shapeBad.length === 0, shapeBad.join(" · "));
 if (BR) {
   const RATE_CLAIM = /(\d+(?:\.\d+)?)\s?%\s*(?:flat\s+)?(?:for|effective|from)\s+(20\d\d)/;
   const silent = TEN.filter(c => !RATE_CLAIM.test(SR[c].note || "") || Math.abs(Number(SR[c].note.match(RATE_CLAIM)[1]) / 100 - SR[c].rate) > 1e-9);
@@ -175,8 +178,10 @@ EQ(`C-SV a survivor (spouse B, 70) on a single return in Oregon, IRA $60,000: ${
 EQ("C-GA Georgia (flat 4.99 %, not a schedule) single 66, IRA $100,000: $1,746.50 on both legs", call("GA", { retIncome: 100000 }), 1746.5);
 
 // ── D · v5.99 -> v6.00: only the ten move, and each equals an independent bracket implementation ──
-if (BR) {
-  if (!existsSync(new URL("./app_v599.mjs", import.meta.url))) CK("D-0 app_v599.mjs is in this run folder (group D needs it)", false, "missing");
+// Single-build by design: it needs app_v599.mjs, which only a v599 -> v600 run folder holds (t65 D owns v6.00 -> v6.01).
+if (VER === "v600") {
+  // From v6.01 the run folder is v600 -> v601 and holds no app_v599.mjs: the group is reported as not run (t63 C's convention), not failed.
+  if (!existsSync(new URL("./app_v599.mjs", import.meta.url))) console.log("  – group D not run: app_v599.mjs is not in this run folder (a v599 -> v600 folder runs it)");
   else {
     const pm = await import("./app_v599.mjs"), PST = pm.__engines.stateTaxAnnual || pm.__g.stateTaxAnnual;
     let n = 0, same = 0, indep = 0; const bad = [];
@@ -206,8 +211,10 @@ const WB = { ...walk.base, JSXElement(n, s, c) { c(n.openingElement, s); n.child
   JSXExpressionContainer(n, s, c) { if (n.expression.type !== "JSXEmptyExpression") c(n.expression, s); }, JSXText() {}, JSXEmptyExpression() {} };
 const quasis = []; walk.full(ast, n => { if (n.type === "TemplateLiteral") quasis.push(n.quasis.map(q => q.value.cooked).join("\u0000")); }, WB);
 const aiLine = quasis.find(q => q.startsWith("Target retirement year: ")) || "";
+// v6.01 splits the phrase around Maryland's county clause (t65 E-1 holds that form). A LIST.
+const E1 = ["v601"].includes(VER) ? quasis.some(q => q === "on the state's own brackets\u0000, top rate \u0000%") : quasis.some(q => q === "on the state's own brackets, top rate \u0000%");
 CK(`E-1 the AI context's state line ${BR ? "says a bracket state is taxed on its own brackets, with its top rate" : "PIN v5.99: gives one income-tax rate"}`,
-   BR ? quasis.some(q => q === "on the state's own brackets, top rate \u0000%") : /\(income tax \u0000%\)\.$/.test(aiLine), aiLine.slice(-80));
+   BR ? E1 : /\(income tax \u0000%\)\.$/.test(aiLine), aiLine.slice(-80));
 // The My Data line, rendered
 const body = () => window.document.body;
 let root, act, DangerClose;
@@ -239,20 +246,24 @@ const modelLine = () => { const n = [...body().querySelectorAll("div")].filter(d
     await pick("OK"); const ok = modelLine();
     CK("E-4 Oklahoma: \"0.00% to 4.50%\"", /^Model: the state's own brackets, 0\.00% to 4\.50% · /.test(ok), ok.slice(0, 120));
   } else CK("E-2 PIN v5.99: New York reads \"6.00% effective rate (an approximation)\"", /^Model: 6\.00% effective rate \(an approximation\)/.test(ny), ny.slice(0, 120));
-  await pick("ME"); const me = modelLine();
-  CK("E-5 a state without a schedule (Maine) still reads \"effective rate (an approximation)\"", /^Model: 7\.15% effective rate \(an approximation\)/.test(me), me.slice(0, 120));
+  // v6.01 puts Maine on its schedule; the state without one is then a flat-rate state (Georgia). A LIST.
+  if (["v601"].includes(VER)) { await pick("GA"); const ga = modelLine();
+    CK("E-5 a state without a schedule (Georgia, flat) still reads \"effective rate (an approximation)\"", /^Model: 4\.99% effective rate \(an approximation\)/.test(ga), ga.slice(0, 120)); }
+  else { await pick("ME"); const me = modelLine();
+    CK("E-5 a state without a schedule (Maine) still reads \"effective rate (an approximation)\"", /^Model: 7\.15% effective rate \(an approximation\)/.test(me), me.slice(0, 120)); }
   try { await act(async () => { root.unmount(); }); } catch (e) {}
 }
 // The Field Manual: three sentences, each held to the code fact that keeps it true (OPERATIONS §B2)
 const DOCS = g.DOCS_HTML().replace(/<[^>]+>/g, "").replace(/\s+/g, " ");
 const named = (DOCS.match(/from v6\.00 ten states - ([A-Z, ]+) - are taxed on their own bracket schedules/) || [])[1];
 if (BR) {
-  CK(`E-6 the Taxes entry names the ten states on their own schedules, and the list IS the set of rows carrying one (${named})`,
+  // v6.01 rewrites the Taxes entry's list and the methodology sentence for twenty-seven states; t65 E-6 and E-8 hold the new forms. A LIST.
+  if (["v600"].includes(VER)) CK(`E-6 the Taxes entry names the ten states on their own schedules, and the list IS the set of rows carrying one (${named})`,
      !!named && named.split(", ").sort().join(",") === withB.join(","), named);
   const noDed = Object.keys(SR).filter(c => Object.keys(SR[c]).some(k => /std|standard|deduct|exempt(?!Age|ion)|personal/i.test(k) && !/^retExempt/.test(k)));
   CK("E-7 \"no state's standard deduction or personal exemption is taken\" — and no row carries a field that could hold one",
      /no state's standard deduction or personal exemption is taken \(conservative\)/.test(DOCS) && noDed.length === 0, noDed.join(","));
-  CK("E-8 the methodology entry: ten states on their own schedules, one rate for the other progressive states",
+  if (["v600"].includes(VER)) CK("E-8 the methodology entry: ten states on their own schedules, one rate for the other progressive states",
      /taxes ten states on their own bracket schedules \(v6\.00\) and uses one rate in place of the brackets for the other progressive states/.test(DOCS));
   CK("E-9 the old claims are gone: \"effective rates stand in for progressive brackets\", \"effective flat rates in place of progressive state brackets\"",
      !/effective rates stand in for progressive brackets/.test(DOCS) && !/effective flat rates in place of progressive state brackets/.test(DOCS));

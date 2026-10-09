@@ -33,7 +33,7 @@ let _s = 42; Math.random = () => { _s = (_s * 1103515245 + 12345) & 0x7fffffff; 
 
 const VER = process.argv[2] || "v565";
 const _vt = Number(String(VER).replace(/[^0-9]/g, "")) || 0;
-const KNOWN_VERSIONS = ["v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600"];
+const KNOWN_VERSIONS = ["v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -43,6 +43,23 @@ if (!KNOWN_VERSIONS.includes(VER)) {
 }
 const _v = Number(String(VER).replace(/[^0-9]/g, "")) || 0;
 const POPULATED = _v >= 565;   // v5.65 is the release that populates Connecticut
+// v6.01 (D-22 batch 2 — docs/SCOPE_D22_BRACKETS_V601.md): Connecticut and Rhode Island move to their own schedules, Connecticut with the
+// phase-out of its 2 % bracket and its recapture amounts (both on Connecticut AGI, which is the model's state base). §B, §C and RI-4 price
+// exclusions: each keeps its BASE and, on the v6.01 leg, expects that base on the state's schedule, computed HERE, independently of the app
+// (t65 §A's transcription). `CTX(flat)` turns a v6.00 figure (5 % × base) into the base's tax on Connecticut's schedule; §C recovers the
+// exclusion by inverting that schedule rather than dividing by 5 %. A version LIST.
+const BR2 = ["v601"].includes(VER);
+const _CTS = { single: [[10000, .02], [50000, .045], [100000, .055], [200000, .06], [250000, .065], [500000, .069], [null, .0699]],
+               joint: [[20000, .02], [100000, .045], [200000, .055], [400000, .06], [500000, .065], [1000000, .069], [null, .0699]] };
+const _CTA = { single: [[56500, 5000, 25, 250], [105000, 5000, 25, 250], [200000, 5000, 90, 2700], [500000, 5000, 50, 450]],
+               joint: [[100500, 5000, 50, 500], [210000, 10000, 50, 500], [400000, 10000, 180, 5400], [1000000, 10000, 100, 900]] };
+const _RIS = [[82050, .0375], [186450, .0475], [1000000, .0599], [null, .0899]];
+const _bsum = (rows, x) => { let t = 0, lo = 0; for (const [u, r] of rows) { const hi = u === null ? Infinity : u; if (x <= lo) break; t += (Math.min(x, hi) - lo) * r; lo = hi; } return t; };
+const ctSched = (base, single = false) => { const k = single ? "single" : "joint"; let t = _bsum(_CTS[k], base);
+  for (const [over, per, each, mx] of _CTA[k]) if (base > over) t += Math.min(mx, each * Math.ceil((base - over) / per)); return t; };
+const CTX = (flat, single = false) => BR2 ? ctSched(flat / 0.05, single) : flat;
+// The schedule is strictly increasing in the base, so a tax names one base: bisection to a millionth of a dollar.
+const ctBase = (tax, single = false) => { let lo = 0, hi = 1e8; for (let i = 0; i < 200 && hi - lo > 1e-7; i++) { const m = (lo + hi) / 2; if (ctSched(m, single) < tax) lo = m; else hi = m; } return (lo + hi) / 2; };
 
 // SCOPE_STATE_SET_SELECTOR §7.6 stage 1: the in-law set and the ONE phrase matcher come from a shared module.
 // Resolved the way t29 resolves its tools — the pool is flat and the repo is not.
@@ -127,35 +144,35 @@ const ctTax = (args) => ST({
   //   populated : factor 1 x $90,000 = $90,000 excl -> retBase 0            -> 0.05 x 0       = $0
   //   pre-pop   : no exclusion at all -> retBase $90,000                    -> 0.05 x 90,000  = $4,500
   EQ("B-1: MFJ $90,000 retirement income — band 1 (100%)",
-    ctTax({ retIncome: 90000 }), POPULATED ? 0 : 4500);
+    ctTax({ retIncome: 90000 }), CTX(POPULATED ? 0 : 4500));
 
   // band 5 — $115,000-$119,999 -> 40%.
   //   populated : 0.40 x $118,000 = $47,200 excl -> retBase $70,800 -> 0.05 x 70,800 = $3,540
   //   pre-pop   : 0.05 x 118,000 = $5,900
   EQ("B-2: MFJ $118,000 — band 5 (40%)",
-    ctTax({ retIncome: 118000 }), POPULATED ? 3540 : 5900);
+    ctTax({ retIncome: 118000 }), CTX(POPULATED ? 3540 : 5900));
 
   // band 6 — $120,000-$124,999 -> 25%.
   //   populated : 0.25 x $122,000 = $30,500 -> retBase $91,500 -> 0.05 x 91,500 = $4,575
   EQ("B-3: MFJ $122,000 — band 6 (25%)",
-    ctTax({ retIncome: 122000 }), POPULATED ? 4575 : 6100);
+    ctTax({ retIncome: 122000 }), CTX(POPULATED ? 4575 : 6100));
 
   // band 7 — $125,000-$129,999 -> 10%.
   //   populated : 0.10 x $128,000 = $12,800 -> retBase $115,200 -> 0.05 x 115,200 = $5,760
   EQ("B-4: MFJ $128,000 — band 7 (10%)",
-    ctTax({ retIncome: 128000 }), POPULATED ? 5760 : 6400);
+    ctTax({ retIncome: 128000 }), CTX(POPULATED ? 5760 : 6400));
 
   // band 8 — $130,000-$139,999 -> 5%.
   //   populated : 0.05 x $135,000 = $6,750 -> retBase $128,250 -> 0.05 x 128,250 = $6,412.50
   EQ("B-5: MFJ $135,000 — band 8 (5%)",
-    ctTax({ retIncome: 135000 }), POPULATED ? 6412.50 : 6750);
+    ctTax({ retIncome: 135000 }), CTX(POPULATED ? 6412.50 : 6750));
 
   // the zero band — at and above $150,000 joint the statute grants nothing, so BOTH legs agree.
   // ⚠ THIS IS THE AGREEMENT POINT, and it is what stops §B being read as "the model is simply
   // always different now". Without it, an implementation that returned zero exemption everywhere
   // would pass none of the above but this case would not notice.
   EQ("B-6: MFJ $160,000 — above the table entirely, and the two legs AGREE",
-    ctTax({ retIncome: 160000 }), 8000);
+    ctTax({ retIncome: 160000 }), CTX(8000));
 
   // ⚠ THE BASE INCLUDES FEDERALLY-TAXABLE SOCIAL SECURITY (`agi`, decision D-2). This case is the
   // one that discriminates it: $80,000 of retirement income alone would be band 1 and exempt
@@ -166,47 +183,47 @@ const ctTax = (args) => ST({
   //               0.05 x (36,000 + 15,000) = $2,550
   //   pre-pop   : 0.05 x (80,000 + 15,000) = $4,750
   EQ("B-7: MFJ $80,000 retirement + $30,000 taxable SS — the SS carries the measure into band 4",
-    ctTax({ retIncome: 80000, ssTaxableFed: 30000 }), POPULATED ? (_v >= 585 ? 3300 : 2550) : 4750);   // v5.85 (D-19): AGI $110,000 >= $100,000 and no gross benefit supplied — CT's 25 %-of-total cap is not applied (conservative), so all $30,000 is taxed: 0.05 x (36,000 + 30,000)
+    ctTax({ retIncome: 80000, ssTaxableFed: 30000 }), CTX(POPULATED ? (_v >= 585 ? 3300 : 2550) : 4750));   // v5.85 (D-19): AGI $110,000 >= $100,000 and no gross benefit supplied — CT's 25 %-of-total cap is not applied (conservative), so all $30,000 is taxed: 0.05 x (36,000 + 30,000)
 
   // ⚠ CAPITAL GAINS COUNT TOWARD THE MEASURE and are also taxed as ordinary income by the model.
   //   populated : measure $130,000 -> 0.05 x $90,000 = $4,500 excl -> retBase $85,500
   //               0.05 x (85,500 + 40,000) = $6,275
   //   pre-pop   : 0.05 x (90,000 + 40,000) = $6,500
   EQ("B-8: MFJ $90,000 retirement + $40,000 capital gains — the gains move the band",
-    ctTax({ retIncome: 90000, capGains: 40000 }), POPULATED ? 6275 : 6500);
+    ctTax({ retIncome: 90000, capGains: 40000 }), CTX(POPULATED ? 6275 : 6500));
 
   // ⚠ `work` IS NOT WAGES — since v5.63 it carries `work + otherOrd`, so rental, annuity and
   // royalty income ride in this slot and reach the measure. CT's note must not call it wages.
   //   populated : measure $120,000 -> 0.25 x $90,000 = $22,500 -> retBase $67,500
   //               0.05 x (67,500 + 30,000) = $4,875
   EQ("B-9: MFJ $90,000 retirement + $30,000 other ordinary income — it reaches the measure",
-    ctTax({ retIncome: 90000, work: 30000 }), POPULATED ? 4875 : 6000);
+    ctTax({ retIncome: 90000, work: 30000 }), CTX(POPULATED ? 4875 : 6000));
 
   // NO AGE GATE. A 55-year-old Connecticut couple gets the whole exemption, because the statute
   // has no age test. This is the case `exclAge: 0` exists for: without that key the engine's
   // default floor of 65 would deny it and the release would be silently pessimistic again.
   EQ("B-10: MFJ aged 55 — Connecticut has NO age test, so the exemption still applies in full",
-    ctTax({ retIncome: 90000, ageA: 55, ageB: 55 }), POPULATED ? 0 : 4500);
+    ctTax({ retIncome: 90000, ageA: 55, ageB: 55 }), CTX(POPULATED ? 0 : 4500));
   // and the non-vacuity control for it: a 65+ couple gets the same figure, so B-10 is not just
   // reading a household that would have qualified anyway on the default floor.
   EQ("B-11: and a 70-year-old couple gets exactly the same — the floor is not doing any work",
-    ctTax({ retIncome: 90000, ageA: 70, ageB: 70 }), POPULATED ? 0 : 4500);
+    ctTax({ retIncome: 90000, ageA: 70, ageB: 70 }), CTX(POPULATED ? 0 : 4500));
 
   // SINGLE FILER — the single column is half the story and has its own thresholds.
   //   populated : $70,000 measure < $75,000 -> 100% -> retBase 0 -> $0
   EQ("B-12: single $70,000 — band 1 of the SINGLE column (100%)",
-    ctTax({ retIncome: 70000, single: true, ageB: null }), POPULATED ? 0 : 3500);
+    ctTax({ retIncome: 70000, single: true, ageB: null }), CTX(POPULATED ? 0 : 3500, true));
   //   populated : $86,000 -> band $85,000-$87,499 -> 25% -> $21,500 excl -> retBase $64,500
   //               0.05 x 64,500 = $3,225
   EQ("B-13: single $86,000 — band 6 of the single column (25%)",
-    ctTax({ retIncome: 86000, single: true, ageB: null }), POPULATED ? 3225 : 4300);
+    ctTax({ retIncome: 86000, single: true, ageB: null }), CTX(POPULATED ? 3225 : 4300, true));
 
   // ⚠ THE LEGACY COUNT PATH. A caller that supplies no ages cannot be asked how many people clear
   // the floor, so `_qual` falls back to `persons65`. With a HOUSEHOLD unit and persons65 = 0 that
   // yields NOTHING — the conservative degradation, and it must stay that way rather than silently
   // granting a full exemption to a partial caller.
   EQ("B-14: a caller supplying neither ages nor persons65 gets NO exemption — conservative degradation",
-    ctTax({ retIncome: 90000, ageA: null, ageB: null, persons65: 0 }), 4500);
+    ctTax({ retIncome: 90000, ageA: null, ageB: null, persons65: 0 }), CTX(4500));
 }
 
 // ── §C · Boundary pins AT every threshold, both columns ───────────────────────────────────────
@@ -228,8 +245,11 @@ const ctTax = (args) => ST({
   ];
   // The exclusion the engine granted, recovered from the tax at CT's real 5% rate:
   //   tax = 0.05 x (income - excl)  ->  excl = income - tax/0.05
-  const exclAt = (income, single) =>
-    income - ctTax({ retIncome: income, single, ageB: single ? null : 70 }) / 0.05;
+  // v6.01: on Connecticut's schedule the tax is no longer 5 % of the base, so the base is recovered by inverting the schedule (`ctBase`).
+  const exclAt = (income, single) => {
+    const tax = ctTax({ retIncome: income, single, ageB: single ? null : 70 });
+    return income - (BR2 ? ctBase(tax, single) : tax / 0.05);
+  };
 
   for (const [label, table, single] of [["joint", JOINT, false], ["single", SINGLE, true]]) {
     for (const [thr, atF, belowF] of table) {
@@ -352,7 +372,7 @@ const ctTax = (args) => ST({
       T("D-15 [v5.69]: and states the cliff is EXCLUSIVE — AGI must be less than the threshold",
         /less than the threshold/i.test(_rin));
       // v5.95 (D-12 Phase 3): both gaps are CLOSED — the note now says IRA income stays taxable and each $50,000 is capped per person.
-      if ((VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600")) {
+      if ((VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601")) {
         T("D-16 [v5.95]: the note says IRA distributions stay taxable (D-RI-1 closed)", /IRA distributions, which the statute does not cover, stay taxable/i.test(_rin));
         T("D-17 [v5.95]: and that each person's $50,000 is capped at that person's own income (D-RI-3 closed)", /capped at that person's own pension, annuity and employer-plan income/i.test(_rin));
       } else {
@@ -515,14 +535,15 @@ const ctTax = (args) => ST({
                           ssGrossA: r.ssA_y || 0, ssGrossB: r.ssB_y || 0, ageA: r.ageA, ageB: r.ageB, single: !!r.filingSingle });
       if (Math.abs(direct - r.stateTax) > 0.01) { mismatched++; if (r.stateTax < direct - 0.01) lower++; }
       const m = ret + pen + work + cg + ss, qualAges = (r.ageA >= 67) || (!r.filingSingle && r.ageB >= 67);
-      const noExcl = r0.rate * (Math.max(0, ret + pen) + Math.max(0, work) + (r0.ss || 0) * Math.max(0, ss) + Math.max(0, cg));
+      const _b0 = Math.max(0, ret + pen) + Math.max(0, work) + (r0.ss || 0) * Math.max(0, ss) + Math.max(0, cg);
+      const noExcl = BR2 ? _bsum(_RIS, _b0) : r0.rate * _b0;   // v6.01: Rhode Island's schedule on the no-exclusion base
       if (m >= THR(r) && qualAges && ret + pen > 0) { above++; if (r.stateTax < noExcl - 0.01) aboveGranted++; }
       if (m < THR(r) && qualAges && ret + pen > 0) belowQual++;
     }
     T(`RI-1: the engine priced Rhode Island rows to compare (compared ${compared})`, compared > 0);
     // v5.95 (D-12 Phase 3): the engine now passes byPerson, which this re-price cannot rebuild from row fields. Rows still match where
     // no per-person rule binds; where one does, RI's per-person caps and IRA exclusion can only REMOVE exclusion, so the engine is higher.
-    if ((VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600")) T(`RI-2 [v5.95]: rows re-price identically except where a per-person rule binds, and there the engine is HIGHER (mismatched ${mismatched} of ${compared}, lower ${lower})`, lower === 0 && mismatched > 0 && mismatched < compared);
+    if ((VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601")) T(`RI-2 [v5.95]: rows re-price identically except where a per-person rule binds, and there the engine is HIGHER (mismatched ${mismatched} of ${compared}, lower ${lower})`, lower === 0 && mismatched > 0 && mismatched < compared);
     else T(`RI-2: every engine row re-prices identically through the module (mismatched ${mismatched} of ${compared})`, mismatched === 0);
     T(`RI-3: the household crosses the cliff \u2014 qualifying rows exist BOTH at/above it (${above}) and below it (${belowQual}), so the section can discriminate`,
       above > 0 && belowQual > 0);

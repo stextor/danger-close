@@ -7,7 +7,7 @@
 // every jurisdiction prices exactly as v5.94 (v595 leg, needs app_v594.mjs) · D AST/data guards · E the copy.
 // BOTH LEGS; the v594 leg PINS the pre-Phase-3 figures. Run: node t59_per_person_state.mjs <tag>
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v594", "v595", "v596", "v597", "v598", "v599", "v600"];
+const KNOWN_VERSIONS = ["v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; console.log(`  \u2717 ${n}${d !== "" ? " \u2014 " + String(d).slice(0, 240) : ""}`); } };
 const done = () => { console.log(`\nt59 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
@@ -17,21 +17,28 @@ const P3 = VER !== "v594";
 console.error = () => {}; console.warn = () => {};
 const m = await import(`./app_${VER}.mjs`), g = m.__g, E = m.__engines, ST = E.stateTaxAnnual || g.stateTaxAnnual, SR = g.STATE_RULES();
 // v5.97 (D-22): Georgia is 4.99 % from TY2026 (HB 463); earlier legs keep 5.19 %.
-const GA_R = (["v597", "v598", "v599", "v600"].includes(VER) ? 0.0499 : 0.0519);
+const GA_R = (["v597", "v598", "v599", "v600", "v601"].includes(VER) ? 0.0499 : 0.0519);
 const z = { ira: 0, employer: 0, annuity: 0, pension: 0 }, zd = { ira: 0, employer: 0, annuity: 0 };
+// v6.01 (D-22 batch 2, SCOPE_D22_BRACKETS_V601): Rhode Island and West Virginia move to their own schedules. The hand figures keep their BASE (the
+// per-person arithmetic this suite pins) and, on the v6.01 leg, price it on the state's schedule — computed here from t65 §A's transcription.
+const BR2 = ["v601"].includes(VER);
+const _bs = (rows, x) => { let t = 0, lo = 0; for (const [u, r] of rows) { const hi = u === null ? Infinity : u; if (x <= lo) break; t += (Math.min(x, hi) - lo) * r; lo = hi; } return t; };
+const riT = (b) => BR2 ? _bs([[82050, .0375], [186450, .0475], [1000000, .0599], [null, .0899]], b) : 0.05 * b;   // one schedule for every status
+const wvT = (b) => BR2 ? _bs([[10000, .0211], [25000, .0281], [40000, .0316], [60000, .0422], [null, .0458]], b) : 0.0482 * b;   // likewise
+const RI_R = BR2 ? 0.0899 : 0.05, WV_R = BR2 ? 0.0458 : 0.0482;
 const bp = (a, b) => ({ A: { ...z, ...a }, B: { ...z, ...b }, draw: { A: { ...zd }, B: { ...zd } } });
 // ── 0 · the rates and fields the hand figures assume (asserted, then hardcoded) ──
-CK("0-1 rates RI 5 % · IA 3.8 % · PA 3.07 % · MS 4 % · WV 4.82 % · GA " + (GA_R * 100).toFixed(2) + " %; RI $50,000 at 67; WV $8,000; IA 55, PA/MS 60",
-   SR.RI.rate === 0.05 && SR.IA.rate === 0.038 && SR.PA.rate === 0.0307 && SR.MS.rate === 0.04 && SR.WV.rate === 0.0482 && SR.GA.rate === GA_R &&
+CK(`0-1 rates RI ${BR2 ? "on its schedule (top 8.99 %)" : "5 %"} · IA 3.8 % · PA 3.07 % · MS 4 % · WV ${BR2 ? "on its schedule (top 4.58 %)" : "4.82 %"} · GA ` + (GA_R * 100).toFixed(2) + " %; RI $50,000 at 67; WV $8,000; IA 55, PA/MS 60",
+   SR.RI.rate === RI_R && (!BR2 || (!!SR.RI.brackets && !!SR.WV.brackets)) && SR.IA.rate === 0.038 && SR.PA.rate === 0.0307 && SR.MS.rate === 0.04 && SR.WV.rate === WV_R && SR.GA.rate === GA_R &&
    SR.RI.excl65 === 50000 && SR.RI.exclAge === 67 && SR.WV.excl65 === 8000 && SR.IA.retExemptAge === 55 && SR.PA.retExemptAge === 60 && SR.MS.retExemptAge === 60);
 // ── A · the seven hand cases [args, hand v5.95, hand v5.94] ──
 const A = [
- ["A-1 RI 70/70, A IRA $30k, B 401(k) $10k: only B's 401(k) qualifies", { code: "RI", retIncome: 40000, ageA: 70, ageB: 70, byPerson: bp({ ira: 30000 }, { employer: 10000 }) }, 0.05 * 30000, 0],
+ ["A-1 RI 70/70, A IRA $30k, B 401(k) $10k: only B's 401(k) qualifies", { code: "RI", retIncome: 40000, ageA: 70, ageB: 70, byPerson: bp({ ira: 30000 }, { employer: 10000 }) }, riT(30000), 0],
  ["A-2 IA 60/50, A IRA $20k, B 401(k) $15k: A's exempt, B under 55", { code: "IA", retIncome: 35000, ageA: 60, ageB: 50, byPerson: bp({ ira: 20000 }, { employer: 15000 }) }, 0.038 * 15000, 0.038 * 35000],
  ["A-3 PA 58/62, A 401(k) $20k + pension $12k, B IRA $10k: all exempt", { code: "PA", retIncome: 30000, pen: 12000, ageA: 58, ageB: 62, byPerson: bp({ employer: 20000, pension: 12000 }, { ira: 10000 }) }, 0, 0.0307 * 30000],
- ["A-4 MS 58/62, A IRA $20k, B IRA $10k: A's taxable (under 60)", { code: "MS", retIncome: 30000, ageA: 58, ageB: 62, byPerson: bp({ ira: 20000 }, { ira: 10000 }) }, ["v600"].includes(VER) ? 0.04 * (20000 - 10000) : 0.04 * 20000, 0.04 * 30000],   // v6.00: MS's first $10,000 untaxed (a version LIST)
- ["A-5 WV 70/70, only A has retirement income ($30k IRA): B's $8,000 capped at $0", { code: "WV", retIncome: 30000, ageA: 70, ageB: 70, byPerson: bp({ ira: 30000 }, {}) }, 0.0482 * 22000, 0.0482 * 14000],
- ["A-6 RI 70 single (survivor slot normalised): an IRA alone gets no RI exclusion", { code: "RI", retIncome: 20000, ageA: null, ageB: 70, single: true, byPerson: bp({}, { ira: 20000 }) }, 0.05 * 20000, null],
+ ["A-4 MS 58/62, A IRA $20k, B IRA $10k: A's taxable (under 60)", { code: "MS", retIncome: 30000, ageA: 58, ageB: 62, byPerson: bp({ ira: 20000 }, { ira: 10000 }) }, ["v600", "v601"].includes(VER) ? 0.04 * (20000 - 10000) : 0.04 * 20000, 0.04 * 30000],   // v6.00: MS's first $10,000 untaxed (a version LIST)
+ ["A-5 WV 70/70, only A has retirement income ($30k IRA): B's $8,000 capped at $0", { code: "WV", retIncome: 30000, ageA: 70, ageB: 70, byPerson: bp({ ira: 30000 }, {}) }, wvT(22000), 0.0482 * 14000],
+ ["A-6 RI 70 single (survivor slot normalised): an IRA alone gets no RI exclusion", { code: "RI", retIncome: 20000, ageA: null, ageB: 70, single: true, byPerson: bp({}, { ira: 20000 }) }, riT(20000), null],
  ["A-7 RI 70/70 without byPerson: the household path, unchanged", { code: "RI", retIncome: 40000, ageA: 70, ageB: 70 }, 0, 0],
 ];
 for (const [lbl, args, h95, h94] of A) {
@@ -56,7 +63,7 @@ for (const [lbl, args, h95, h94] of A) {
     Math.abs(r(yr).stateTax - gaHand(r(yr), P3 ? 0 : 65000)) < 0.01, `${r(yr).stateTax} vs ${gaHand(r(yr), P3 ? 0 : 65000)}`);
   CK("B-GA 2031 (B aged 65): $65,000 exclusion on both legs", Math.abs(r(2031).stateTax - gaHand(r(2031), 65000)) < 0.01, r(2031).stateTax);
   const ri = rows("RI"), q = yr => ri.find(x => x.yr === yr);
-  const riHand = (x, excl) => 0.05 * (Math.max(0, x.pen_y + x.rmdTax_y + x.conv_y - excl) + x.work_y + x.otherOrd_y + x.capGains_y + x.div_y);
+  const riHand = (x, excl) => riT(Math.max(0, x.pen_y + x.rmdTax_y + x.conv_y - excl) + x.work_y + x.otherOrd_y + x.capGains_y + x.div_y);
   for (const yr of [2028, 2032]) CK(`B-RI ${yr} (B aged ${yr - 1966}, under 67): $${q(yr).stateTax.toFixed(2)} = hand with ${P3 ? "no exclusion" : "$50,000 (decedent's age — PIN v5.94)"}`,
     Math.abs(q(yr).stateTax - riHand(q(yr), P3 ? 0 : Math.min(50000, q(yr).pen_y))) < 0.01, q(yr).stateTax);
   CK("B-RI 2033 (B aged 67): the pension excluded up to $50,000 on both legs", Math.abs(q(2033).stateTax - riHand(q(2033), Math.min(50000, q(2033).pen_y))) < 0.01, q(2033).stateTax);

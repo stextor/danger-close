@@ -13,7 +13,7 @@ import { window } from "./env_dom.mjs";
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600"];
+const KNOWN_VERSIONS = ["v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; console.log(`  \u2717 ${n}${d ? " \u2014 " + String(d).slice(0, 240) : ""}`); } };
 const done = () => { console.log(`\nt55 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
@@ -46,7 +46,7 @@ EQ("PA-6 joint 61/60, $40,000 IRA: exempt — $0", J("PA", { retIncome: 40000, a
 // ── MS: as PA ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
 // v6.00 (D-22 option 3, SCOPE_D22_BRACKETS_V600): Mississippi's first $10,000 of taxable income is untaxed from v6.00 (its own schedule,
 // one band per return). The hand figures keep their taxable base and, on a bracket leg, take the band off it. A version LIST.
-const MSB = ["v600"].includes(VER), ms = x => MSB ? 0.04 * Math.max(0, x - 10000) : 0.04 * x;
+const MSB = ["v600", "v601"].includes(VER), ms = x => MSB ? 0.04 * Math.max(0, x - 10000) : 0.04 * x;
 EQ(MSB ? "MS-1 single 59, $50,000 IRA — the first $10,000 untaxed: 0.04 × 40,000 = $1,600.00" : "MS-1 single 59, $50,000 IRA — 0.04 × 50,000 = $2,000.00", T("MS", { retIncome: 50000, ageA: 59 }), ms(50000));
 EQ("MS-2 single 60, $50,000 IRA: exempt — $0", T("MS", { retIncome: 50000, ageA: 60 }), 0);
 EQ("MS-3 single 50, $30,000 pension: exempt at any age — $0", T("MS", { pen: 30000, ageA: 50 }), 0);

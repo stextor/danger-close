@@ -216,6 +216,12 @@ tally "t63-$CUR"   node t63_flat_rates.mjs "$CUR"
 # each schedule against its source and the state's printed table; hand cases to the cent; v5.99 -> v6.00 moves only the ten. Both legs.
 tally "t64-$PRIOR" node t64_state_brackets.mjs "$PRIOR"
 tally "t64-$CUR"   node t64_state_brackets.mjs "$CUR"
+# t65 (v6.01) — D-22 option 3, batch 2: the other seventeen progressive states on their own schedules (AL AR CT DC DE HI KS MD ME MO MT ND
+# NE NM RI VT WV), with Arkansas's high-income table, Connecticut's phase-out and recapture, Maryland's county and capital-gains taxes, Maine's
+# surcharge, and Hawaii's and Rhode Island's later top brackets; each against its source and printed table; hand cases to the cent; the
+# D-22 extinction (every taxing row on a schedule or flat); v6.00 -> v6.01 moves only the seventeen. Both legs.
+tally "t65-$PRIOR" node t65_state_brackets_b2.mjs "$PRIOR"
+tally "t65-$CUR"   node t65_state_brackets_b2.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

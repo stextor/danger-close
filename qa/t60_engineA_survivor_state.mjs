@@ -15,7 +15,7 @@
 //          E the Field Manual's dated line
 // BOTH LEGS; the v595 leg PINS the defect. Group C runs on the v596 leg only (it needs app_v595.mjs). Run: node t60_engineA_survivor_state.mjs <tag>
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v595", "v596", "v597", "v598", "v599", "v600"];
+const KNOWN_VERSIONS = ["v595", "v596", "v597", "v598", "v599", "v600", "v601"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  ✓ ${n}`); } else { fail++; console.log(`  ✗ ${n}${d !== "" ? " — " + String(d).slice(0, 260) : ""}`); } };
 const done = () => { console.log(`\nt60 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
@@ -36,9 +36,15 @@ const g = m.__g, E = m.__engines, ST = E.stateTaxAnnual || g.stateTaxAnnual, SR 
 
 // ── 0 · rates and figures ──
 // v5.97 (D-22): Georgia is 4.99 % from TY2026 (HB 463); earlier legs keep 5.19 %.
-const R = { GA: (["v597", "v598", "v599", "v600"].includes(VER) ? 0.0499 : 0.0519), ME: 0.0715, MI: 0.0425 };
-CK("0-1 GA " + (R.GA * 100).toFixed(2) + " % with $65,000 per person 65+; ME 7.15 % with $49,824 per person, SS-offset; MI 4.25 %, exempt, capped $65,897 single / $131,794 joint",
-   SR.GA.rate === R.GA && SR.GA.excl65 === 65000 && SR.ME.rate === R.ME && SR.ME.excl65 === 49824 && !!SR.ME.ssOffset &&
+const R = { GA: (["v597", "v598", "v599", "v600", "v601"].includes(VER) ? 0.0499 : 0.0519), ME: 0.0715, MI: 0.0425 };
+// v6.01 (D-22 batch 2, SCOPE_D22_BRACKETS_V601): Maine moves to its own schedule (top 9.15 %, with the 2 % surcharge). B-ME keeps its BASE (the
+// survivor's relief this suite pins) and, on the v6.01 leg, prices it on Maine's single schedule — t65 §A's transcription, not the app's. A LIST.
+const BR2 = ["v601"].includes(VER);
+if (BR2) R.ME = 0.0915;
+const _bs = (rows, x) => { let t = 0, lo = 0; for (const [u, r] of rows) { const hi = u === null ? Infinity : u; if (x <= lo) break; t += (Math.min(x, hi) - lo) * r; lo = hi; } return t; };
+const taxOn = (code, base) => (BR2 && code === "ME") ? _bs([[27400, .058], [64850, .0675], [1000000, .0715], [null, .0915]], base) : R[code] * base;   // 2027: the survivor files single
+CK("0-1 GA " + (R.GA * 100).toFixed(2) + ` % with $65,000 per person 65+; ME ${BR2 ? "on its own schedule (top 9.15 %)" : "7.15 %"} with $49,824 per person, SS-offset; MI 4.25 %, exempt, capped $65,897 single / $131,794 joint`,
+   SR.GA.rate === R.GA && SR.GA.excl65 === 65000 && SR.ME.rate === R.ME && (!BR2 || !!SR.ME.brackets) && SR.ME.excl65 === 49824 && !!SR.ME.ssOffset &&
    SR.MI.rate === R.MI && SR.MI.retExempt && SR.MI.retCap.single === 65897 && SR.MI.retCap.joint === 131794);
 
 // ── the hand household: A born 1950, B 1955; A dies 2026 (the death year, filed jointly); B survives 2027 (filed single).
@@ -77,10 +83,10 @@ const record = p => { globalThis.__T60 = []; const out = g.runRothStrategies(p);
 {
   for (const code of ["GA", "ME", "MI"]) {
     const relief = FIXED ? { GA: 65000, ME: 49824, MI: 65897 }[code] : { GA: 130000, ME: 99648, MI: 131794 }[code];
-    const hand = R[code] * Math.max(0, 100000 - relief);
+    const hand = taxOn(code, Math.max(0, 100000 - relief));
     const { rec } = record(P({ stateCode: code })), c = rec.filter(x => x.code === code && (FIXED ? x.ageB === 72 : x.ageA === 77));
     const got = c.length ? ST(c[0]) : NaN;
-    CK(`B-${code} 2027, to the cent through the calculator with Engine A's own arguments: $${got.toFixed(2)} = ${R[code] * 100}% × ($100,000 − $${relief.toLocaleString()}) = $${hand.toFixed(2)}${FIXED ? "" : " (PIN v5.95: two people's relief)"}`,
+    CK(`B-${code} 2027, to the cent through the calculator with Engine A's own arguments: $${got.toFixed(2)} = ${BR2 && code === "ME" ? "Maine's single schedule on" : `${R[code] * 100}% ×`} ($100,000 − $${relief.toLocaleString()}) = $${hand.toFixed(2)}${FIXED ? "" : " (PIN v5.95: two people's relief)"}`,
        Math.abs(got - hand) < 0.005, `${got} vs ${hand}`);
     const tax = p => g.runRothStrategies(p).find(r => r.key === "none").totTax;
     const st27 = (tax(P({ stateCode: code })) - tax(P())) - (tax(P({ stateCode: code, horizonYr: 2026 })) - tax(P({ horizonYr: 2026 })));

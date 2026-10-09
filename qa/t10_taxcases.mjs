@@ -36,7 +36,7 @@ const R = Math.round;
 // its expectation is that base on the state's schedule. `SCH` computes it here, independently of the app, from schedules transcribed from
 // the same primary sources as t64 §A (only the four states §2E prices are needed). `TB` labels the bracket figure, so a passing line never
 // claims "0.055 x ..." while asserting something else. A version LIST, so register_tag extends it each release.
-const STB_LEGS = ["v600"], STB = STB_LEGS.includes(VER);
+const STB_LEGS = ["v600", "v601"], STB = STB_LEGS.includes(VER);
 const _STB = { MS: [0.04, [[10000, 0], [null, 0.04]], [[10000, 0], [null, 0.04]]],
   NJ: [0.055, [[20000, .014], [35000, .0175], [40000, .035], [75000, .05525], [500000, .0637], [1000000, .0897], [null, .1075]],
               [[20000, .014], [50000, .0175], [70000, .0245], [80000, .035], [150000, .05525], [500000, .0637], [1000000, .0897], [null, .1075]]],
@@ -46,6 +46,23 @@ const SCH = (code, flat, single = false) => { if (!STB) return flat; const [r0, 
   for (const [u, r] of (single ? sg : jt)) { const hi = u === null ? Infinity : u; if (x <= lo) break; t += (Math.min(x, hi) - lo) * r; lo = hi; } return t; };
 const TV = (name, got, before, after) => T(STB ? `${name} [v6.00: the same base on the state's own brackets -> $${(+after).toFixed(2)}]` : name, got, STB ? after : before);
 const TB = (name, got, code, flat, single = false) => TV(name, got, flat, SCH(code, flat, single));
+// v6.01 (D-22 batch 2 — docs/SCOPE_D22_BRACKETS_V601.md): seventeen more states move to their own schedules. The §2E pins that price one of
+// them at its v6.00 single rate keep their BASE (the exclusion arithmetic each exists to pin) and, on the v6.01 leg, expect that base on the
+// state's schedule — computed here, independently of the app, from t65 §A's transcription. Maryland adds its 3.30 % county tax on the same base
+// (no pin here reaches its $350,000 capital-gains test). `TB2` labels the schedule figure. A version LIST.
+const STB2_LEGS = ["v601"], STB2 = STB2_LEGS.includes(VER);
+const _STB2 = { AL: [0.045, [[500, .02], [3000, .04], [null, .05]], [[1000, .02], [6000, .04], [null, .05]]],
+  DE: [0.055, [[2000, 0], [5000, .022], [10000, .039], [20000, .048], [25000, .052], [60000, .0555], [null, .066]], [[2000, 0], [5000, .022], [10000, .039], [20000, .048], [25000, .052], [60000, .0555], [null, .066]]],
+  MD: [0.075, [[1000, .02], [2000, .03], [3000, .04], [100000, .0475], [125000, .05], [150000, .0525], [250000, .055], [500000, .0575], [1000000, .0625], [null, .065]],
+              [[1000, .02], [2000, .03], [3000, .04], [150000, .0475], [175000, .05], [225000, .0525], [300000, .055], [600000, .0575], [1200000, .0625], [null, .065]], 0.033],
+  ME: [0.0715, [[27400, .058], [64850, .0675], [1000000, .0715], [null, .0915]], [[54850, .058], [129750, .0675], [1500000, .0715], [null, .0915]]],
+  MT: [0.0565, [[47500, .047], [null, .0565]], [[95000, .047], [null, .0565]]],
+  NM: [0.049, [[5500, .015], [16500, .032], [33500, .043], [66500, .047], [210000, .049], [null, .059]], [[8000, .015], [25000, .032], [50000, .043], [100000, .047], [315000, .049], [null, .059]]],
+  RI: [0.05, [[82050, .0375], [186450, .0475], [1000000, .0599], [null, .0899]], [[82050, .0375], [186450, .0475], [1000000, .0599], [null, .0899]]] };
+const SCH2 = (code, flat, single = false) => { if (!STB2) return flat; const [r0, sg, jt, loc = 0] = _STB2[code], x = flat / r0; let t = 0, lo = 0;
+  for (const [u, r] of (single ? sg : jt)) { const hi = u === null ? Infinity : u; if (x <= lo) break; t += (Math.min(x, hi) - lo) * r; lo = hi; } return t + loc * x; };
+const TV2 = (name, got, before, after) => T(STB2 ? `${name} [v6.01: the same base on the state's own brackets -> $${(+after).toFixed(2)}]` : name, got, STB2 ? after : before);
+const TB2 = (name, got, code, flat, single = false) => TV2(name, got, flat, SCH2(code, flat, single));
 
 // ── IRS-verified 2026 constants (independent copy from primary source, NOT from the app) ──
 const STD = { S: 16100, M: 32200 }, SR = { S: 2050, M: 1650 };
@@ -145,7 +162,7 @@ const SUR_R = [0,1150,2880,4620,6360,6940];
 // v5.78 (C-1): 42 U.S.C. §1395r(i)(3)(C)(i)(III) — tiers 1–4 are "not more than" their upper amount, the top tier is "at
 // least" its own. Through v5.77 BOTH reference oracles in this file used `<=` at every tier, the engines' own rule, so an
 // exact-top-threshold case compared the engine's C-1 against the oracle's C-1 and agreed. A LADDER — widen it each release.
-const C1_FIXED = VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600";
+const C1_FIXED = VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601";
 const tierR = (magi, ups) => { for (let i=0;i<ups.length;i++) if (i === ups.length - 2 ? magi < ups[i] : magi <= ups[i]) return i; return ups.length-1; };
 const irmaaRef = (magi, single, persons) => SUR_R[tierR(magi, single?SGL_R:MFJ_R)] * persons;
 // IRMAA isolation builder: 3-year window ending at `premiumYr`, both 65+ that year, MAGI = pen.
@@ -451,8 +468,8 @@ const pass2E = pass, fail2E = fail;
     // ── ARCHETYPE 4 — per-person 65+ exclusion. AL at 4.5%, $6,000 each.
     // hand MFJ:    0.045 x ((60,000 - 12,000) + 10,000 + 0 + 5,000) = 0.045 x 63,000 = 2,835
     // hand single: 0.045 x ((60,000 -  6,000) + 10,000 + 0 + 5,000) = 0.045 x 69,000 = 3,105
-    T("2E excl65 (AL 4.5%, MFJ): exclusion applied per person", run("AL", 2), 2835);
-    T("2E excl65 (AL 4.5%, single): exclusion is half the MFJ amount", run("AL", 1), 3105);
+    TB2("2E excl65 (AL 4.5%, MFJ): exclusion applied per person", run("AL", 2), "AL", 2835);
+    TB2("2E excl65 (AL 4.5%, single): exclusion is half the MFJ amount", run("AL", 1), "AL", 3105);
 
     // ── ARCHETYPE 5 — partial-SS. MT at 5.65%: ss factor 0.5 AND a $5,500 65+ subtraction, so it
     // exercises two branches at once.
@@ -470,8 +487,8 @@ const pass2E = pass, fail2E = fail;
     if (_v5 >= 573) {
       T("2E partial-SS (CO 4.4%, MFJ): half of federally-taxable SS enters the base", run("CO", 2), _v5 >= 585 ? 2508 : 1848); // v5.85 (D-19): the state's own SS rule — statute-consistent; see CHANGELOG v5.85: both 65+, all SS subtracted, the $48K cap shrinks by it
       T("2E partial-SS (CO 4.4%, single)", run("CO", 1), _v5 >= 585 ? 3564 : 2904); // v5.85 (D-19): the state's own SS rule — statute-consistent; see CHANGELOG v5.85: run() passes no `single` — a JOINT return with ONE spouse 65+
-      T("2E full-SS (MT 5.65%, MFJ) [v5.73]: ALL federally-taxable SS enters the base, $5,660 each", run("MT", 2), 5292.92);
-      T("2E full-SS (MT 5.65%, single) [v5.73]", run("MT", 1), 5612.71);
+      TB2("2E full-SS (MT 5.65%, MFJ) [v5.73]: ALL federally-taxable SS enters the base, $5,660 each", run("MT", 2), "MT", 5292.92);
+      TB2("2E full-SS (MT 5.65%, single) [v5.73]", run("MT", 1), "MT", 5612.71);
     } else {
       T("2E partial-SS (MT 5.65%, MFJ): half of federally-taxable SS enters the base", run("MT", 2), 4463.5);
       T("2E partial-SS (MT 5.65%, single)", run("MT", 1), 4774.25);
@@ -489,15 +506,15 @@ const pass2E = pass, fail2E = fail;
 
     // ── CLAMPS. Each of these is a place a sign error would silently produce a negative tax, and
     // none of them is exercised by the archetype cases above.
-    T("2E clamp: an exclusion larger than retirement income cannot go negative",
+    TB2("2E clamp: an exclusion larger than retirement income cannot go negative",
       S({ code: "AL", fallbackRate: 0, retIncome: 3000, pen: 0, work: 20000, capGains: 0,
-          ssTaxableFed: 0, persons65: 2 }), 900);
+          ssTaxableFed: 0, persons65: 2 }), "AL", 900);
     T("2E clamp: a capital LOSS is ignored, not deducted",
       S({ code: "AZ", fallbackRate: 0, retIncome: 50000, pen: 0, work: 0, capGains: -30000,
           ssTaxableFed: 0, persons65: 0 }), 1250);
-    T("2E clamp: a negative persons65 cannot create a negative exclusion",
+    TB2("2E clamp: a negative persons65 cannot create a negative exclusion",
       S({ code: "AL", fallbackRate: 0, retIncome: 60000, pen: 0, work: 0, capGains: 0,
-          ssTaxableFed: 0, persons65: -5 }), 2700);
+          ssTaxableFed: 0, persons65: -5 }), "AL", 2700);
     T("2E clamp: a no-tax state ignores the fallback rate entirely",
       S({ code: "FL", fallbackRate: 0.9, retIncome: 1e6, pen: 1e6, work: 1e6, capGains: 1e6,
           ssTaxableFed: 1e6, persons65: 0 }), 0);
@@ -508,7 +525,7 @@ const pass2E = pass, fail2E = fail;
       S({ code: "MS", fallbackRate: 0, retIncome: 5e5, pen: 2e5, work: 0, capGains: 0,
           ssTaxableFed: 0, persons65: 2 }), 0);
     // Gated from v5.90 (a version LIST, so register_tag extends it each release; the prior leg, v5.89, has no gate to test).
-    if (["v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600"].includes(VER)) TB("2E (v5.90): nobody counted 65+ — Mississippi taxes the withdrawals (0.04 × 500,000), not the pension in payment",
+    if (["v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601"].includes(VER)) TB("2E (v5.90): nobody counted 65+ — Mississippi taxes the withdrawals (0.04 × 500,000), not the pension in payment",
       S({ code: "MS", fallbackRate: 0, retIncome: 5e5, pen: 2e5, work: 0, capGains: 0,
           ssTaxableFed: 0, persons65: 0 }), "MS", 20000);
 
@@ -732,19 +749,19 @@ const pass2E = pass, fail2E = fail;
       //   61/61 -> 0.055 x (100,000 - 25,000) = 4,125.00
       //   59/59 -> 0.055 x  100,000           = 5,500.00
       //   61/59 -> 0.055 x (100,000 - 12,500) = 4,812.50
-      T("2E age (DE, floor 60): both spouses over the floor get one exclusion each",
-        AGE("DE", 61, 61), 4125.00);
-      T("2E age (DE, floor 60): both under the floor get nothing",
-        AGE("DE", 59, 59), 5500.00);
-      T("2E age (DE, floor 60): one each side of the floor gets exactly one exclusion",
-        AGE("DE", 61, 59), 4812.50);
+      TB2("2E age (DE, floor 60): both spouses over the floor get one exclusion each",
+        AGE("DE", 61, 61), "DE", 4125.00);
+      TB2("2E age (DE, floor 60): both under the floor get nothing",
+        AGE("DE", 59, 59), "DE", 5500.00);
+      TB2("2E age (DE, floor 60): one each side of the floor gets exactly one exclusion",
+        AGE("DE", 61, 59), "DE", 4812.50);
 
       // NOT VACUOUS, and this is the assertion that would have caught a global floor change:
       // a state with NO exclAge must still use 65. AL's statutory floor IS 65, so it must not move.
       // hand AL (4.5%, $6,000 each): 65/65 -> 0.045 x (100,000 - 12,000) = 3,960.00
       //                              64/64 -> 0.045 x  100,000           = 4,500.00
-      T("2E age control: a state with no exclAge still uses 65 (AL, both 65)", AGE("AL", 65, 65), 3960.00);
-      T("2E age control: and denies it one year earlier (AL, both 64)",       AGE("AL", 64, 64), 4500.00);
+      TB2("2E age control: a state with no exclAge still uses 65 (AL, both 65)", AGE("AL", 65, 65), "AL", 3960.00);
+      TB2("2E age control: and denies it one year earlier (AL, both 64)",       AGE("AL", 64, 64), "AL", 4500.00);
       // ⚠ GATED AGAIN AT v565 (OPERATIONS §B2). Connecticut joins the set: populating its
       // income-conditioned exemption REQUIRES `exclAge: 0`, because Connecticut conditions on
       // income alone and the engine's default floor is 65. v5.64 and earlier legitimately carry
@@ -826,9 +843,9 @@ const pass2E = pass, fail2E = fail;
             ssTaxableFed: 0, ageA: 65, ageB: 65 }), "NJ", _v >= 567 ? 11000 : 2750);
       // [4] The legacy count path must still work for a caller that supplies no ages, or a partial
       //     caller would silently receive NO exclusion instead of the old behaviour.
-      T("2E age: a caller supplying persons65 and no ages still gets the old behaviour",
+      TB2("2E age: a caller supplying persons65 and no ages still gets the old behaviour",
         S({ code: "AL", fallbackRate: 0, retIncome: 100000, pen: 0, work: 0, capGains: 0,
-            ssTaxableFed: 0, persons65: 2 }), 3960.00);
+            ssTaxableFed: 0, persons65: 2 }), "AL", 3960.00);
     } else {
       // [KNOWN DEFECT pre-v5.55] every state's exclusion was gated on a hardcoded 65, so a state
       // with a lower statutory floor — or none at all — withheld a real exclusion. CONSERVATIVE
@@ -864,10 +881,10 @@ const pass2E = pass, fail2E = fail;
       //   SS 10k ea -> excl 2 x 30,600 = 61,200 -> 0.075 x  58,800 = 4,410.00
       //   SS 40k ea -> excl 2 x    600 =  1,200 -> 0.075 x 118,800 = 8,910.00
       //   SS 50k ea -> excl 0 (floored, NOT -9,400 each) -> 0.075 x 120,000 = 9,000.00
-      T("2E ssOffset (MD): zero Social Security leaves the exclusion whole", OFF("MD",120000,0,0),      2910.00);
-      T("2E ssOffset (MD): $10,000 each reduces it dollar-for-dollar",      OFF("MD",120000,10000,10000), 4410.00);
-      T("2E ssOffset (MD): $40,000 each all but eliminates it",             OFF("MD",120000,40000,40000), 8910.00);
-      T("2E ssOffset (MD): above the cap it FLOORS at zero, never negative",OFF("MD",120000,50000,50000), 9000.00);
+      TB2("2E ssOffset (MD): zero Social Security leaves the exclusion whole", OFF("MD",120000,0,0),      "MD", 2910.00);
+      TB2("2E ssOffset (MD): $10,000 each reduces it dollar-for-dollar",      OFF("MD",120000,10000,10000), "MD", 4410.00);
+      TB2("2E ssOffset (MD): $40,000 each all but eliminates it",             OFF("MD",120000,40000,40000), "MD", 8910.00);
+      TB2("2E ssOffset (MD): above the cap it FLOORS at zero, never negative",OFF("MD",120000,50000,50000), "MD", 9000.00);
       // hand ME (cap $48,216 each, 7.15%, retIncome $150,000):
       //   SS 0      -> excl 96,432 -> 0.0715 x  53,568 = 3,830.11 (3,830.112 -> banker-free round)
       //   SS 20k ea -> excl 56,432 -> 0.0715 x  93,568 = 6,690.11
@@ -875,9 +892,9 @@ const pass2E = pass, fail2E = fail;
       // v5.86 (D-18) — cap $49,824 from v586 (TY2026): SS 0 -> excl 99,648 -> 0.0715 x 50,352 = 3,600.168;
       //   SS 20k ea -> excl 59,648 -> 0.0715 x 90,352 = 6,460.168; SS 50k ea still exceeds the cap -> 10,725.00 unchanged.
       const _me586 = (Number(String(VER).replace(/[^0-9]/g, "")) || 0) >= 586;
-      T("2E ssOffset (ME): zero Social Security leaves the deduction whole", OFF("ME",150000,0,0),         _me586 ? 3600.168 : 3830.112);
-      T("2E ssOffset (ME): $20,000 each reduces it dollar-for-dollar",       OFF("ME",150000,20000,20000), _me586 ? 6460.168 : 6690.112);
-      T("2E ssOffset (ME): above the cap the deduction is gone entirely",    OFF("ME",150000,50000,50000), 10725.00);
+      TB2("2E ssOffset (ME): zero Social Security leaves the deduction whole", OFF("ME",150000,0,0),         "ME", _me586 ? 3600.168 : 3830.112);
+      TB2("2E ssOffset (ME): $20,000 each reduces it dollar-for-dollar",       OFF("ME",150000,20000,20000), "ME", _me586 ? 6460.168 : 6690.112);
+      TB2("2E ssOffset (ME): above the cap the deduction is gone entirely",    OFF("ME",150000,50000,50000), "ME", 10725.00);
 
       // THE ASSERTION THAT JUSTIFIES THE REWRITE. Before v5.56 the exclusion was `cap x count`, and
       // a count cannot distinguish these two households — same total SS, same number of qualifying
@@ -885,18 +902,18 @@ const pass2E = pass, fail2E = fail;
       //   10k/50k -> (40,600-10,000) + (40,600-40,600 floored at 0... no: 40,600-50,000 -> 0)
       //           -> 30,600 + 0 = 30,600 -> 0.075 x 89,400 = 6,705.00
       //   30k/30k -> 10,600 + 10,600 = 21,200 -> 0.075 x 98,800 = 7,410.00
-      T("2E ssOffset (MD): asymmetric spouses — $10k/$50k", OFF("MD",120000,10000,50000), 6705.00);
-      T("2E ssOffset (MD): and the SAME TOTAL split evenly gives a DIFFERENT answer",
-        OFF("MD",120000,30000,30000), 7410.00);
+      TB2("2E ssOffset (MD): asymmetric spouses — $10k/$50k", OFF("MD",120000,10000,50000), "MD", 6705.00);
+      TB2("2E ssOffset (MD): and the SAME TOTAL split evenly gives a DIFFERENT answer",
+        OFF("MD",120000,30000,30000), "MD", 7410.00);
       T("2E ssOffset: the two differ — a per-person offset is not expressible as a count",
         OFF("MD",120000,10000,50000) === OFF("MD",120000,30000,30000) ? 0 : 1, 1);
 
       // GROSS, NOT TAXABLE. ssTaxableFed is deliberately 0 in every case above; if someone rewires
       // the offset to read it, every MD/ME assertion above returns the unoffset figure and this
       // case pins the reason.
-      T("2E ssOffset: the offset reads GROSS SS — ssTaxableFed does not drive it",
+      TB2("2E ssOffset: the offset reads GROSS SS — ssTaxableFed does not drive it",
         S({ code: "MD", fallbackRate: 0, retIncome: 120000, pen: 0, work: 0, capGains: 0,
-            ssTaxableFed: 99999, ssGrossA: 50000, ssGrossB: 50000, ageA: 65, ageB: 65 }), 9000.00);
+            ssTaxableFed: 99999, ssGrossA: 50000, ssGrossB: 50000, ageA: 65, ageB: 65 }), "MD", 9000.00);
 
       // ── EXTINCTION INVARIANTS
       T("[BY DECISION v5.56] exactly two states carry ssOffset",
@@ -1085,20 +1102,20 @@ const pass2E = pass, fail2E = fail;
           R.RI.exclAge === 67 ? 1 : 0, 1);
         T("[EXTINCTION v5.60] WI gates its exclusion at 67 (Wis. Stat. § 71.05(6)(b)54m.)",
           R.WI.exclAge === 67 ? 1 : 0, 1);
-        T("[EXTINCTION v5.60] RI denies the exclusion to a 66/66 couple, as the statute does",
-          RIWI_AGE("RI", 80000, 66, 66), _v >= 585 ? 6040.00 : 5020.00);   // v5.85 (D-19): the state's own SS rule — statute-consistent; see CHANGELOG v5.85: under 67, so ALL taxable SS is taxed (+$1,020)
+        TB2("[EXTINCTION v5.60] RI denies the exclusion to a 66/66 couple, as the statute does",
+          RIWI_AGE("RI", 80000, 66, 66), "RI", _v >= 585 ? 6040.00 : 5020.00);   // v5.85 (D-19): the state's own SS rule — statute-consistent; see CHANGELOG v5.85: under 67, so ALL taxable SS is taxed (+$1,020)
         TB("[EXTINCTION v5.60] WI denies the exclusion to a 66/66 couple, as the statute does",
           RIWI_AGE("WI", 60000, 66, 66), "WI", 3180.00);
-        T("[EXTINCTION v5.60] RI grants ONE exclusion at 68/66 — the floor is per person, not per return",
-          RIWI_AGE("RI", 80000, 68, 66), 2520.00);
+        TB2("[EXTINCTION v5.60] RI grants ONE exclusion at 68/66 — the floor is per person, not per return",
+          RIWI_AGE("RI", 80000, 68, 66), "RI", 2520.00);
         TB("[EXTINCTION v5.60] WI grants ONE exclusion at 68/66 — the floor is per person, not per return",
           RIWI_AGE("WI", 60000, 68, 66), "WI", 1908.00);
         T("[EXTINCTION v5.60] and the qualifying 68/68 RI couple is UNCHANGED from v5.59",
           RIWI_AGE("RI", 80000, 68, 68), _v >= 585 ? 0 : 1020.00);   // v5.85 (D-19): the state's own SS rule — statute-consistent; see CHANGELOG v5.85: "unchanged from v5.59" holds only through v5.84
         TB("[EXTINCTION v5.60] and the qualifying 68/68 WI couple is UNCHANGED from v5.59",
           RIWI_AGE("WI", 60000, 68, 68), "WI", 636.00);
-        T("[EXTINCTION v5.60] the correction is confined to the window: RI 66/66 now costs exactly 0.05 x 80,000 more",
-          Math.round((RIWI_AGE("RI", 80000, 66, 66) - RIWI_AGE("RI", 80000, 68, 68)) * 100) / 100, _v >= 585 ? 6040.00 : 4000.00);   // v5.85 (D-19): the state's own SS rule — statute-consistent; see CHANGELOG v5.85: the window now also moves ALL taxable SS (0.05 x 40,800)
+        TV2("[EXTINCTION v5.60] the correction is confined to the window: RI 66/66 now costs exactly 0.05 x 80,000 more",
+          Math.round((RIWI_AGE("RI", 80000, 66, 66) - RIWI_AGE("RI", 80000, 68, 68)) * 100) / 100, _v >= 585 ? 6040.00 : 4000.00, Math.round((SCH2("RI", 6040) - SCH2("RI", 0)) * 100) / 100);   // v5.85 (D-19): the state's own SS rule — statute-consistent; see CHANGELOG v5.85: the window now also moves ALL taxable SS (0.05 x 40,800)
         TV("[EXTINCTION v5.60] and WI 66/66 exactly 0.053 x 48,000 more",
           Math.round((RIWI_AGE("WI", 60000, 66, 66) - RIWI_AGE("WI", 60000, 68, 68)) * 100) / 100, 2544.00, Math.round((SCH("WI", 3180) - SCH("WI", 636)) * 100) / 100);
         T("[BY DECISION v5.60] NM keeps the implicit 65 default — its pass is separate (ROUND4 D-C)",
@@ -1136,14 +1153,14 @@ const pass2E = pass, fail2E = fail;
            RIWI_AGE("WI", 60000, 66, 66) === RIWI_AGE("WI", 60000, 68, 68)) ? 1 : 0, 1);
       }
 
-      T("2E ssOffset: an unflagged state ignores Social Security entirely (AL)",
+      TB2("2E ssOffset: an unflagged state ignores Social Security entirely (AL)",
         S({ code: "AL", fallbackRate: 0, retIncome: 100000, pen: 0, work: 0, capGains: 0,
-            ssTaxableFed: 0, ssGrossA: 50000, ssGrossB: 50000, ageA: 65, ageB: 65 }), 3960.00);
+            ssTaxableFed: 0, ssGrossA: 50000, ssGrossB: 50000, ageA: 65, ageB: 65 }), "AL", 3960.00);
       // The legacy count path cannot offset — it has no per-person SS — so it returns the UNOFFSET
       // exclusion at the CURRENT cap. Not "pre-v5.56 behaviour": the cap correction applies there too.
-      T("2E ssOffset: the count fallback returns the unoffset exclusion at the current cap",
+      TB2("2E ssOffset: the count fallback returns the unoffset exclusion at the current cap",
         S({ code: "MD", fallbackRate: 0, retIncome: 120000, pen: 0, work: 0, capGains: 0,
-            ssTaxableFed: 0, persons65: 2 }), 2910.00);
+            ssTaxableFed: 0, persons65: 2 }), "MD", 2910.00);
     } else {
       // [KNOWN DEFECT pre-v5.56] the exclusion ignored Social Security entirely, and both caps were
       // stale. MD granted $72,400 to a couple whose statutory exclusion was near zero.
@@ -1261,11 +1278,11 @@ const pass2E = pass, fail2E = fail;
                             [24000, 980.00], [25500, 1102.50], [27000, 1225.00], [28500, 1347.50],
                             [28501, 1396.549]];
         for (const [agi, exp] of _NM_JOINT)
-          T(`[HAND v5.66] NM joint, AGI $${agi.toLocaleString()} -> $${exp.toFixed(2)}`,
-            NM({ retIncome: agi, ageA: 70, ageB: 68 }), exp);
+          TB2(`[HAND v5.66] NM joint, AGI $${agi.toLocaleString()} -> $${exp.toFixed(2)}`,
+            NM({ retIncome: agi, ageA: 70, ageB: 68 }), "NM", exp);
         for (const [agi, exp] of _NM_SINGLE)
-          T(`[HAND v5.66] NM single, AGI $${agi.toLocaleString()} -> $${exp.toFixed(2)}`,
-            NM({ retIncome: agi, ageA: 70, single: true }), exp);
+          TB2(`[HAND v5.66] NM single, AGI $${agi.toLocaleString()} -> $${exp.toFixed(2)}`,
+            NM({ retIncome: agi, ageA: 70, single: true }), "NM", exp, true);
         // — ONE DOLLAR OVER EVERY BAND TOP. The sweep above prices each top; these price the first
         //   dollar past it, which is what pins the top itself in the DOLLAR path.
         //
@@ -1284,39 +1301,39 @@ const pass2E = pass, fail2E = fail;
                                  [22501, 906.549], [24001, 1029.049], [25501, 1151.549],
                                  [27001, 1274.049]];
         for (const [agi, exp] of _NM_JOINT_OVER)
-          T(`[HAND v5.66] NM joint, AGI $${agi.toLocaleString()} (one dollar past a band top) -> $${exp.toFixed(2)}`,
-            NM({ retIncome: agi, ageA: 70, ageB: 68 }), exp);
+          TB2(`[HAND v5.66] NM joint, AGI $${agi.toLocaleString()} (one dollar past a band top) -> $${exp.toFixed(2)}`,
+            NM({ retIncome: agi, ageA: 70, ageB: 68 }), "NM", exp);
         for (const [agi, exp] of _NM_SINGLE_OVER)
-          T(`[HAND v5.66] NM single, AGI $${agi.toLocaleString()} (one dollar past a band top) -> $${exp.toFixed(2)}`,
-            NM({ retIncome: agi, ageA: 70, single: true }), exp);
+          TB2(`[HAND v5.66] NM single, AGI $${agi.toLocaleString()} (one dollar past a band top) -> $${exp.toFixed(2)}`,
+            NM({ retIncome: agi, ageA: 70, single: true }), "NM", exp, true);
         // — the band tops are INCLUSIVE ("not over $30,000"), which the sweep above asserts at every
         //   row; this pair makes the STEP itself explicit. An `lt` comparator fails these two.
-        T("[HAND v5.66] NM joint: one dollar over $30,000 costs 0.049 x (1 + 2,000) = $98.05",
-          NM({ retIncome: 30001, ageA: 70, ageB: 68 }) - NM({ retIncome: 30000, ageA: 70, ageB: 68 }), 98.049);
-        T("[HAND v5.66] NM single: one dollar over $18,000 costs 0.049 x (1 + 1,000) = $49.05",
-          NM({ retIncome: 18001, ageA: 70, single: true }) - NM({ retIncome: 18000, ageA: 70, single: true }), 49.049);
+        TV2("[HAND v5.66] NM joint: one dollar over $30,000 costs 0.049 x (1 + 2,000) = $98.05",
+          NM({ retIncome: 30001, ageA: 70, ageB: 68 }) - NM({ retIncome: 30000, ageA: 70, ageB: 68 }), 98.049, SCH2("NM", 784.049) - SCH2("NM", 686));
+        TV2("[HAND v5.66] NM single: one dollar over $18,000 costs 0.049 x (1 + 1,000) = $49.05",
+          NM({ retIncome: 18001, ageA: 70, single: true }) - NM({ retIncome: 18000, ageA: 70, single: true }), 49.049, SCH2("NM", 539.049, true) - SCH2("NM", 490, true));
         // — above the top band, which is the whole point of the release
-        T("[HAND v5.66] NM joint at $60,000 AGI: above $51,000, exemption is $0 — 0.049 x 60,000 = $2,940.00",
-          NM({ retIncome: 60000, ageA: 70, ageB: 68 }), 2940.00);
-        T("[HAND v5.66] NM single at $35,000 AGI: above $28,500, exemption is $0 — 0.049 x 35,000 = $1,715.00",
-          NM({ retIncome: 35000, ageA: 70, single: true }), 1715.00);
+        TB2("[HAND v5.66] NM joint at $60,000 AGI: above $51,000, exemption is $0 — 0.049 x 60,000 = $2,940.00",
+          NM({ retIncome: 60000, ageA: 70, ageB: 68 }), "NM", 2940.00);
+        TB2("[HAND v5.66] NM single at $35,000 AGI: above $28,500, exemption is $0 — 0.049 x 35,000 = $1,715.00",
+          NM({ retIncome: 35000, ageA: 70, single: true }), "NM", 1715.00, true);
         // — the age floor is per person and still 65, and the row amount is granted PER PERSON.
         //   A household-level implementation passes the 70/68 sweep and fails this one.
-        T("[HAND v5.66] NM joint, both under 65: no qualifying person, no exemption at any income — $980.00",
-          NM({ retIncome: 20000, ageA: 60, ageB: 58 }), 980.00);
-        T("[HAND v5.66] NM joint, ONE spouse 65+: the row amount is granted once, not twice — 0.049 x 22,000 = $1,078.00",
-          NM({ retIncome: 30000, ageA: 70, ageB: 60 }), 1078.00);
+        TB2("[HAND v5.66] NM joint, both under 65: no qualifying person, no exemption at any income — $980.00",
+          NM({ retIncome: 20000, ageA: 60, ageB: 58 }), "NM", 980.00);
+        TB2("[HAND v5.66] NM joint, ONE spouse 65+: the row amount is granted once, not twice — 0.049 x 22,000 = $1,078.00",
+          NM({ retIncome: 30000, ageA: 70, ageB: 60 }), "NM", 1078.00);
         // — THE MEASURE. `base: "agi"` means federally-taxable SS, wages/other ordinary and realized
         //   gains all ride it. These two cells are the ones a wrong base fails: if the measure read
         //   retirement income alone, the first would price at $833.00 and the second at $1,421.00.
-        T("[HAND v5.66] NM: taxable SS rides the AGI measure — $28K retirement + $10K taxable SS lands two bands down — $1,127.00",
-          NM({ retIncome: 28000, ssTaxableFed: 10000, ageA: 70, ageB: 68 }), _v >= 585 ? 882.00 : 1127.00);   // v5.85 (D-19): the state's own SS rule — statute-consistent; see CHANGELOG v5.85: AGI under $150,000 — the SS is exempt (−0.049 x 5,000)
-        T("[HAND v5.66] NM: wages/other ordinary and realized gains ride it too — $20K + $15K + $10K = $45,000, the $3,000 row — $1,911.00",
-          NM({ retIncome: 20000, work: 15000, capGains: 10000, ageA: 70, ageB: 68 }), 1911.00);
+        TB2("[HAND v5.66] NM: taxable SS rides the AGI measure — $28K retirement + $10K taxable SS lands two bands down — $1,127.00",
+          NM({ retIncome: 28000, ssTaxableFed: 10000, ageA: 70, ageB: 68 }), "NM", _v >= 585 ? 882.00 : 1127.00);   // v5.85 (D-19): the state's own SS rule — statute-consistent; see CHANGELOG v5.85: AGI under $150,000 — the SS is exempt (−0.049 x 5,000)
+        TB2("[HAND v5.66] NM: wages/other ordinary and realized gains ride it too — $20K + $15K + $10K = $45,000, the $3,000 row — $1,911.00",
+          NM({ retIncome: 20000, work: 15000, capGains: 10000, ageA: 70, ageB: 68 }), "NM", 1911.00);
         // — the clamp: an exemption bigger than the retirement income it applies to must not spill
         //   onto wages. Same class as the v5.62 spill checks above, priced on the conditioned table.
-        T("[HAND v5.66] NM: the exemption cannot shelter wages — $500 retirement against $8,000 of exemption clamps at zero — 0.049 x 40,000 = $1,960.00",
-          NM({ retIncome: 500, work: 40000, ageA: 70, ageB: 68 }), 1960.00);
+        TB2("[HAND v5.66] NM: the exemption cannot shelter wages — $500 retirement against $8,000 of exemption clamps at zero — 0.049 x 40,000 = $1,960.00",
+          NM({ retIncome: 500, work: 40000, ageA: 70, ageB: 68 }), "NM", 1960.00);
         // — EXTINCTION (OPERATIONS §D). The defect class is "the exemption is blind to income."
         //   Under v5.65 a $30,000 step up the table cost exactly the rate on the income (0.049 x
         //   30,000 = $1,470.00) because the exemption never moved. It must never cost that again.
@@ -1581,9 +1598,9 @@ const pass2E = pass, fail2E = fail;
           ["X2 joint 70/70, pension $40,000 + RMD $80,000 + SS $20,000 — above", { retIncome: 80000, pen: 40000, ssTaxableFed: 20000 }, _v >= 585 ? 7000.00 : 6500.00],   // v5.85 (D-19): the state's own SS rule — statute-consistent; see CHANGELOG v5.85: above the line — all SS taxed
         ];
         for (const [label, args, exp] of _RI)
-          T(`[HAND v5.69] RI ${label} -> $${exp.toFixed(2)}`, RIC(args), exp);
-        T("[EXTINCTION v5.69] RI's exclusion is no longer income-blind: one dollar across the joint cliff ($133,749 -> $133,750) costs $5,000.05 — the whole $100,000 at 5% plus the rate on $1",
-          RIC({ retIncome: 133750 }) - RIC({ retIncome: 133749 }), 5000.05);
+          TB2(`[HAND v5.69] RI ${label} -> $${exp.toFixed(2)}`, RIC(args), "RI", exp, !!args.single);
+        TV2("[EXTINCTION v5.69] RI's exclusion is no longer income-blind: one dollar across the joint cliff ($133,749 -> $133,750) costs $5,000.05 — the whole $100,000 at 5% plus the rate on $1",
+          RIC({ retIncome: 133750 }) - RIC({ retIncome: 133749 }), 5000.05, SCH2("RI", 6687.50) - SCH2("RI", 1687.45));
         T("[INVARIANT v5.69] RI's excl65 scalar still equals its table's per-person amount at zero income — $50,000",
           R.RI.excl65, 50000);
         T("[INVARIANT v5.69] and that value is the table's own first-row amount in BOTH columns, not a coincidence of literals",
