@@ -592,6 +592,9 @@ consistent with existing precedent and would not require per-lot tracking.
 
 ## D-3 · Progressive state schedules are approximated by an effective flat rate
 
+> ✅ **CLOSED v6.01 (2026-10-09).** Every progressive state is taxed on its own schedule — ten from v6.00, the other seventeen from v6.01 (D-22). What remains
+> of this item's over-taxing direction is the absence of state standard deductions, exemptions and credits, now **D-30**. *(The entry below is retained.)*
+
 > ### ⚠ DIRECTION CORRECTED 2026-08-19 — measured against v5.40, and the finding splits
 >
 > ⚠ **v5.48: this box HOLDS, and a NEW sub-item D-3c runs the OTHER WAY — income-limited
@@ -1160,6 +1163,13 @@ after v5.86. **Medium** — optimistic, and large relative to WV's other figures
 
 ## D-22 · The 42 nonzero state rates have not been re-read
 
+> ✅ **CLOSED v6.01 (2026-10-09) — option 3, batch 2: the seventeen remaining progressive rows are on their own schedules.** AL, AR (Act 1 of 2026, top 3.7 %,
+> with its high-income table and bracket adjustment), CT (with the 2 % phase-out and the recapture amounts), DC, DE, HI (with Act 24's 13 % from 2027), KS, MD
+> (with the county tax at 3.30 % and the 2 % capital-gains tax), ME (with the 2026 surcharge), MO, MT, ND, NE, NM, RI (with the 2027+ surtax at 3 %), VT and
+> WV (SB 392 of 2026), each read at its primary source. `qa/t65_state_brackets_b2.mjs` asserts the extinction: every taxing row is on its own schedule or is
+> one of the fifteen flat-rate states, all read at v5.99. Scope `docs/SCOPE_D22_BRACKETS_V601.md` (fulfilled, repo-only). **Follow-ups opened:** D-29
+> (Missouri's capital-gains subtraction) and D-30 (state standard deductions, exemptions and credits). *(The history below is retained.)*
+
 > 🔶 **OPTION 3, BATCH 1 DONE v6.00 (2026-10-09) — ten states on their own bracket schedules.** Steve chose option 3 after v5.99: the progressive states'
 > real schedules, read from the law. CA (TY2025 + the BHST), MN, MS, NJ, NY (with its recapture), OK, OR, SC (Act 110), VA and WI, each read at its primary
 > source. `qa/t64_state_brackets.mjs`; scope `docs/SCOPE_D22_BRACKETS_V600.md` (fulfilled, repo-only). **Seventeen progressive rows remain on one rate:**
@@ -1275,3 +1285,19 @@ higher — optimistic where a cliff or band binds). Engine B was fixed for the r
 The model's `annuity` category (Other accounts of type annuity) is exempt in Pennsylvania from 60, per person, as at v5.90. Pennsylvania's
 REV-636 points commercial annuities to the cost-recovery method; whether their earnings are taxable to a retiree is not settled from a primary
 source here. Possibly optimistic. **Low — verify before changing.**
+
+## D-29 · Missouri exempts capital gains from 2025; the model taxes them — opened at v6.01
+
+HB 594 & 508 (2025), RSMo 143.121: from TY2025 an individual subtracts 100 % of the capital gain reported for federal purposes (the DOR's 2025
+legislative-changes summary: "one hundred percent (100%) of the income reported as capital gain for federal tax purposes can be subtracted"). The model
+taxes Missouri gains on the state's schedule (found while reading Missouri's brackets for v6.01, `docs/SCOPE_D22_BRACKETS_V601.md` §0). Conservative, and
+large for a household that funds spending from a taxable account. An exclusion field (gains exempt) and its tests; re-read the statute first.
+**Medium — simple, conservative today.**
+
+## D-30 · No state standard deduction, personal exemption or credit is taken — opened at v6.01
+
+Every state is taxed on its income from the first dollar: no state's standard deduction (or its sliding or phased version), personal exemption, exemption
+credit or personal tax credit is taken, and neither is Alabama's deduction of federal income tax (which is large). v6.00 BR-3 left them out, one change at a
+time; with every progressive state on its own schedule from v6.01 (D-22) this is the main remaining over-statement in the state layer. The figures come
+from the same sources the schedules were read from (several noted in `docs/SCOPE_D22_BRACKETS_V601.md` §0). Related: D-20 (Montana starts from federal
+taxable income). **Medium-high — the recommended next state release; conservative today.**
