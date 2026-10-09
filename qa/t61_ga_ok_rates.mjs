@@ -15,7 +15,7 @@
 //            byte-identical; Engine A never rises and its estate-best strategy does not change
 // BOTH LEGS; the v596 leg PINS the old rates. Run: node t61_ga_ok_rates.mjs <tag>
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v596", "v597"];
+const KNOWN_VERSIONS = ["v596", "v597", "v598"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  ✓ ${n}`); } else { fail++; console.log(`  ✗ ${n}${d !== "" ? " — " + String(d).slice(0, 260) : ""}`); } };
 const EQ = (n, got, want, tol = 0.005) => CK(n, typeof got === "number" && Math.abs(got - want) <= tol, `got ${got}, want ${want}`);

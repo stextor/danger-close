@@ -204,6 +204,10 @@ tally "t60-$CUR"   node t60_engineA_survivor_state.mjs "$CUR"
 # states the row's own rate (all rows); hand cases to the cent; v5.96 -> v5.97 moves only GA/OK, by exactly the rate ratio.
 tally "t61-$PRIOR" node t61_ga_ok_rates.mjs "$PRIOR"
 tally "t61-$CUR"   node t61_ga_ok_rates.mjs "$CUR"
+# t62 (v5.98) — F-5/F-7/F-9 disclosed in Field Manual §13, each clause held to the code fact that keeps it true; F-16: the glossary in
+# case-insensitive order (extinction). Both legs; the v597 leg pins the absence and the one out-of-order pair.
+tally "t62-$PRIOR" node t62_desktop_disclosures.mjs "$PRIOR"
+tally "t62-$CUR"   node t62_desktop_disclosures.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
