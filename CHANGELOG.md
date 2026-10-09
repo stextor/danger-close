@@ -1,5 +1,85 @@
 # Changelog
 
+## v6.01 — D-22 option 3, batch 2: the seventeen remaining progressive states on their own schedules; D-22 closes
+
+**A MODELLING release** (METHODOLOGY updated). `docs/SCOPE_D22_BRACKETS_V601.md` (repo-only, fulfilled). v6.00 put ten states on their own bracket
+schedules and left seventeen progressive rows on one rate each — a top rate (KS, MO, MT), a rate below the top (AL, CT, DC, DE, HI, ME, MD's "state+county",
+ND, NE, NM, RI, VT) or a stale one (AR 3.9 %, WV 4.82 %). Steve: "Let's do the next batch for D-22." **All seventeen are now on their own schedules, each read
+at its primary source on 2026-10-09** — with this release every taxing row is either on its own schedule or is one of the fifteen flat-rate states, and
+`t65` asserts it:
+- **Alabama** 2 / 4 / 5 % (§40-18-5) · **Delaware** 0 %–6.6 %, one schedule (30 Del. C. §1102(a)(14)) · **District of Columbia** 4 %–10.75 %, one schedule
+  (§47-1806.03(a)(11)) · **Kansas** 5.2 / 5.58 % (K.S.A. 79-32,110; no 2026 cut, KDOR Notice 25-06) · **Missouri** 0 %–4.7 % in $1,348 bands (RSMo 143.011;
+  2026 thresholds from the DOR's withholding formula) · **Montana** 4.7 / 5.65 % (HB 337) · **Nebraska** 2.46 %–4.55 % (LB 754; the DOR's 2026 schedule is a
+  draft) · **New Mexico** 1.5 %–5.9 % (Laws 2024 ch. 67 — its top rate was 1 point above the row's 4.9 %) · **North Dakota** 0 / 1.95 / 2.5 % with a 0 % band to
+  $49,575 single / $82,800 joint (Form ND-1ES 2026) · **Vermont** 3.35 %–8.75 % (2026 preliminary rates, IN-114) · **West Virginia** 2.11 %–4.58 %, one schedule
+  (§11-21-4j, SB 392 of 2026, a 5 % cut retroactive to 1 January).
+- **Arkansas** 0 %–3.7 % (Act 1 of the 2026 First Extraordinary Session — the top rate fell from 3.9 %), **with its high-income table**: above $94,700 of net
+  income the law taxes all of it at 2 % on the first $4,700 and 3.7 % above, less a bracket adjustment of $290 that falls $10 per $100 to nothing above
+  $97,600 — all modelled (new field `upper`).
+- **Connecticut** 2 %–6.99 % (§12-700(a)(10)) **with the 2 % bracket's phase-out and the three benefit-recapture amounts** — whole dollars per $5,000 (or
+  $10,000) of Connecticut AGI "or fraction thereof", up to $3,400 single / $6,800 joint — all modelled (new field `stepAdds`), on the state base.
+- **Maryland** 2 %–6.5 % (§10-105, as amended in 2025) **plus the county income tax on the same base, at the highest county rate, 3.30 %** (the row used to be
+  "state + county effective" at 7.5 %; new field `local`), **plus the 2 % tax on net capital gain when federal AGI exceeds $350,000** (from 2025; new field
+  `cgSurtax`, measured on the calculator's existing federal-AGI measure).
+- **Maine** 5.8 %–7.15 % **plus the new 2 % surcharge above $1,000,000 single / $1,500,000 joint** (36 M.R.S. §5111(7)) — a fourth bracket, top 9.15 %.
+- **Hawaii** 1.4 %–11 % (the 2026 schedule) **plus the 13 % bracket Act 24 of 2026 adds from 2027 above $500,000 single / $1,000,000 joint**, and **Rhode
+  Island** 3.75 %–5.99 % (ADV 2025-22) **plus the surtax the FY2027 budget imposes above $1,000,000 — 1 % in 2027, 2 % in 2028, 3 % from 2029 — taken at
+  3 %**: each is applied in every year. At every income the result is at or above every schedule those acts enact for 2027–2029 (asserted to $3M), so it is
+  a conservative stand-in for a model with no year dimension; holding 2026 alone would have understated tax from 2027 above the new lines.
+
+**How.** Each row carries `brackets` and `rate` = its top rate, as at v6.00 (Maryland's `rate` is 6.5 % + 3.3 % = 9.8 %). Three new fields, each on exactly
+one row (asserted): `upper` (Arkansas), `stepAdds` (Connecticut), `local` and `cgSurtax` (Maryland). My Data's line reads the schedule's own top rate and
+adds Maryland's county clause ("the state's own brackets, 2.00% to 6.50%, plus a 3.30% county tax"); the AI context line likewise. The Field Manual's Taxes
+entry now lists every progressive state on its own schedule and names the added rules; its "for the other progressive states one rate stands in" clause
+is gone; the methodology entry follows; "skips county/city taxes" now excepts Maryland's.
+
+**Measured** (v6.00 → v6.01): the Taxes tab's lifetime state tax on the example household, no conversions — **AL $71,301 → $77,583 (up)**, AR $61,794 →
+$50,830, CT $75,553 → $70,199, DE $72,014 → $66,614, **DC $118,200 → $118,735 (up)**, HI $122,746 → $97,191, KS $101,470 → $98,216, ME $78,212 → $70,129,
+**MD $101,478 → $107,711 (up)**, MO $85,468 → $80,952, MT $133,967 → $119,556, NE $94,560 → $71,599, NM $103,949 → $87,978, ND $36,369 → $9,526, RI $107,214 →
+$85,823, VT $159,468 → $114,827, WV $85,801 → $62,920; the other 34 jurisdictions and "none" byte-identical. **Direction is mixed by design:** most households
+pay less (the one rates overstated the low brackets); Alabama (4.5 % → 5 % on nearly all income), DC (its 8.5 % bracket) and Maryland (the explicit 3.30 %
+county rate) pay more, and so do high incomes in Hawaii, Rhode Island, Maine, New Mexico and Connecticut. **The Roth comparator's best-by-estate cell
+changes in 4 of the 51 cells tested** (seventeen states × three households: an early widow in RI; a B-dies household in AR, DE and VT). Engines C and D
+compute no state tax; MC parity 10/10 with **no** declared diff (its state fingerprint is a Georgia call).
+
+**Decisions taken on recommendation** (scope §1): BR2-1 the same field; BR2-2 Arkansas's table exactly; BR2-3 Connecticut's adds exactly; BR2-4 Maryland's
+county tax at the highest rate (3.30 %, not the 3.20 % most Marylanders pay — overstates by 0.10–1.05 points of the base below 3.30 %, disclosed); BR2-5
+Maryland's capital-gains tax; BR2-6 Maine's surcharge as a bracket; BR2-7 Hawaii's and Rhode Island's enacted later top brackets applied in every year;
+BR2-8 later lower schedules (MT, NE 2027; triggered cuts) not applied; BR2-9 one schedule on a couple's combined income where the law lets spouses compute
+separately (AR, DE, MO); BR2-10 Missouri's capital-gains subtraction left for its own release (D-29).
+
+**Tests.** New suite **`t65`** — **103** on v6.01, **54** on v6.00 (that leg pins the one rates): each schedule and new field equals its
+source; **the D-22 extinction** (no taxing row lacks a schedule unless it is a flat-rate state); every note states its top rate for its year, its own
+brackets and its simplification; the notes' claims about later schedules (HI, MT, NE, RI) and Vermont's minimum tax held to the code; the printed bases
+(to the cent for CT, DC, KS, NM, ND, NE, RI, WV and Arkansas's DFA constants; within $1 for HI, ME and VT, which print whole dollars); 46 hand cases to the
+cent computed independently from the printed tables (e.g. Alabama single, $50,000 of wages: **$2,460.00**, was $2,250.00; Arkansas at $94,750, inside the
+adjustment band: **$3,135.85**; Maryland single, $120,000: **$9,657.50**, was $9,000.00; North Dakota joint, $400,000: **$6,708.73**, was $8,000.00);
+a v6.00 → v6.01 comparison over every jurisdiction and 192 households (byte-identical outside the seventeen; inside, equal to an independent
+implementation on v6.00's base); the display and the Field Manual. Controls `qa/tools/controls_v601_brackets.py` (repo-only): **13 of 13**. **Derived pins
+gated per build** (their base kept, the schedule figure computed in the suite and labelled; sites counted by AST): `t10` 42 (AL, DE, MD, ME, MT, NM, RI),
+`t35` (CT §B 14, §C by inverting the schedule; RI-4), `t39` 14 (ME, MT), `t50` 14 (CT, NM, RI, VT), `t51` (the dated-figure census, 33 rows / 59 figures;
+six Maine cases; the display), `t52` (AR), `t54` (WV, MD, ME; §X by inversion), `t58` (RI), `t59` (RI, WV), `t60` (ME), `t61` (the rate-claim set, now every
+taxing row), and v6.00's own `t64` (its A-1, A-5, D, E-1, E-5, E-6 and E-8 on a v6.01 leg; its group D needs `app_v599.mjs` and reports itself not run in a
+v6.00 → v6.01 folder). `v601` registered by AST (64 array entries, 83 OR-gates, two version arms; no manual site), the three Python suites and `t33`'s PINS
+by hand (unchanged: its household is in Georgia).
+
+**Suite, run from the packaged copies:** 5,579 app checks across **64 app suites**, 0 failed, 0 DIED; MC parity 10/10; tooling `t21` 64,
+`domdiff` 32, `sets` 12 + 12; **GRAND 5,709**. Every current-leg count equals v6.00's except the new `t65` and
+`t64` (65 → 62: two of its v6.00-only checks, E-6 and E-8, are gated to that leg, and its group D, which needs `app_v599.mjs`, reports itself not run). Run from the PACKAGED copies as two concurrent halves, the method approved at v5.87: run folders built by mk_runfolder.sh v600 v601 from a full clone of c00822f with the github/ files overlaid (v6.00 resolved from history, commit b800ca1), each through a session-only copy of runsuite.sh whose one added line skips the other half's labels. Half A GRAND 5487, half B GRAND 222; none DIED. Source `b7eb4dcb32795a35c5026953a5a31b68` · built `55cae3ab526d114eaaa89a6d890d8a8e`
+(v6.00 rebuilt byte-identical first; `smoke_built` 22 passed, 0 failed).
+
+**Limitations, disclosed:**
+- No state standard deduction, personal exemption or credit is taken in any state, nor Alabama's deduction of federal income tax (conservative) — now **D-30**,
+  the recommended next release.
+- Missouri exempts capital gains from 2025 (HB 594); the model taxes them (conservative) — **D-29**.
+- Hawaii's 7.25 % capital-gains cap, Montana's 3 % / 4.1 % capital-gains rates, North Dakota's 40 % and New Mexico's $2,500 capital-gains deductions and
+  Vermont's capital-gains exclusion are not modelled (conservative).
+- Maryland's county tax is the highest county's (3.30 %); Arkansas, Delaware and Missouri tax a couple on one schedule where the law lets spouses compute
+  separately; later lower schedules (MT, NE 2027) and triggered cuts (KS, MO, WV) are not applied — each conservative.
+- Hawaii's and Rhode Island's later top brackets are applied in 2026 too (conservative before they start); Nebraska's 2026 schedule is the DOR's draft
+  and Vermont's the Department's preliminary table, both computed by statute from published indexes.
+- Flat-rate rows still read "X% effective rate (an approximation)" in My Data — a label, not a figure; left for a presentation release.
+
 ## v6.00 — D-22 option 3, batch 1: ten states taxed on their own bracket schedules
 
 **A MODELLING release** (METHODOLOGY updated). `docs/SCOPE_D22_BRACKETS_V600.md` (repo-only, fulfilled). Through v5.99 every state was taxed at ONE rate on
