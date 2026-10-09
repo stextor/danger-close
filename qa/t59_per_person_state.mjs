@@ -7,7 +7,7 @@
 // every jurisdiction prices exactly as v5.94 (v595 leg, needs app_v594.mjs) · D AST/data guards · E the copy.
 // BOTH LEGS; the v594 leg PINS the pre-Phase-3 figures. Run: node t59_per_person_state.mjs <tag>
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v594", "v595", "v596", "v597", "v598", "v599"];
+const KNOWN_VERSIONS = ["v594", "v595", "v596", "v597", "v598", "v599", "v600"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; console.log(`  \u2717 ${n}${d !== "" ? " \u2014 " + String(d).slice(0, 240) : ""}`); } };
 const done = () => { console.log(`\nt59 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
@@ -17,7 +17,7 @@ const P3 = VER !== "v594";
 console.error = () => {}; console.warn = () => {};
 const m = await import(`./app_${VER}.mjs`), g = m.__g, E = m.__engines, ST = E.stateTaxAnnual || g.stateTaxAnnual, SR = g.STATE_RULES();
 // v5.97 (D-22): Georgia is 4.99 % from TY2026 (HB 463); earlier legs keep 5.19 %.
-const GA_R = (["v597", "v598", "v599"].includes(VER) ? 0.0499 : 0.0519);
+const GA_R = (["v597", "v598", "v599", "v600"].includes(VER) ? 0.0499 : 0.0519);
 const z = { ira: 0, employer: 0, annuity: 0, pension: 0 }, zd = { ira: 0, employer: 0, annuity: 0 };
 const bp = (a, b) => ({ A: { ...z, ...a }, B: { ...z, ...b }, draw: { A: { ...zd }, B: { ...zd } } });
 // ── 0 · the rates and fields the hand figures assume (asserted, then hardcoded) ──
@@ -29,7 +29,7 @@ const A = [
  ["A-1 RI 70/70, A IRA $30k, B 401(k) $10k: only B's 401(k) qualifies", { code: "RI", retIncome: 40000, ageA: 70, ageB: 70, byPerson: bp({ ira: 30000 }, { employer: 10000 }) }, 0.05 * 30000, 0],
  ["A-2 IA 60/50, A IRA $20k, B 401(k) $15k: A's exempt, B under 55", { code: "IA", retIncome: 35000, ageA: 60, ageB: 50, byPerson: bp({ ira: 20000 }, { employer: 15000 }) }, 0.038 * 15000, 0.038 * 35000],
  ["A-3 PA 58/62, A 401(k) $20k + pension $12k, B IRA $10k: all exempt", { code: "PA", retIncome: 30000, pen: 12000, ageA: 58, ageB: 62, byPerson: bp({ employer: 20000, pension: 12000 }, { ira: 10000 }) }, 0, 0.0307 * 30000],
- ["A-4 MS 58/62, A IRA $20k, B IRA $10k: A's taxable (under 60)", { code: "MS", retIncome: 30000, ageA: 58, ageB: 62, byPerson: bp({ ira: 20000 }, { ira: 10000 }) }, 0.04 * 20000, 0.04 * 30000],
+ ["A-4 MS 58/62, A IRA $20k, B IRA $10k: A's taxable (under 60)", { code: "MS", retIncome: 30000, ageA: 58, ageB: 62, byPerson: bp({ ira: 20000 }, { ira: 10000 }) }, ["v600"].includes(VER) ? 0.04 * (20000 - 10000) : 0.04 * 20000, 0.04 * 30000],   // v6.00: MS's first $10,000 untaxed (a version LIST)
  ["A-5 WV 70/70, only A has retirement income ($30k IRA): B's $8,000 capped at $0", { code: "WV", retIncome: 30000, ageA: 70, ageB: 70, byPerson: bp({ ira: 30000 }, {}) }, 0.0482 * 22000, 0.0482 * 14000],
  ["A-6 RI 70 single (survivor slot normalised): an IRA alone gets no RI exclusion", { code: "RI", retIncome: 20000, ageA: null, ageB: 70, single: true, byPerson: bp({}, { ira: 20000 }) }, 0.05 * 20000, null],
  ["A-7 RI 70/70 without byPerson: the household path, unchanged", { code: "RI", retIncome: 40000, ageA: 70, ageB: 70 }, 0, 0],

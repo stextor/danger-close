@@ -15,7 +15,7 @@
 //            byte-identical; Engine A never rises and its estate-best strategy does not change
 // BOTH LEGS; the v596 leg PINS the old rates. Run: node t61_ga_ok_rates.mjs <tag>
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v596", "v597", "v598", "v599"];
+const KNOWN_VERSIONS = ["v596", "v597", "v598", "v599", "v600"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  ✓ ${n}`); } else { fail++; console.log(`  ✗ ${n}${d !== "" ? " — " + String(d).slice(0, 260) : ""}`); } };
 const EQ = (n, got, want, tol = 0.005) => CK(n, typeof got === "number" && Math.abs(got - want) <= tol, `got ${got}, want ${want}`);
@@ -37,9 +37,12 @@ if (FIXED) {
   CK("A-3 Georgia's note names the rate, the year, the act and the code section, and that 2027's step-down and $70K exclusion are not applied (conservative)",
      /Rate 4\.99% flat for 2026/.test(nGA) && /HB 463, 2026/.test(nGA) && /O\.C\.G\.A\. §48-7-20/.test(nGA) && /step-down from 2027/.test(nGA) &&
      /\$70K exclusion from 2027 are not applied here \(conservative\)/.test(nGA), nGA);
-  CK("A-4 Oklahoma's note names the rate, the year, the act and the section, the top-rate overstatement, and claims no law age",
+  // v6.00 (D-22 option 3): Oklahoma is taxed on its own three brackets, so the top-rate overstatement the note disclosed is gone; the
+  // bracket leg asserts the note says all three are modelled instead (t64 A-7, A-9 own the rest). A version LIST.
+  const OKB = ["v600"].includes(VER);
+  CK(`A-4 Oklahoma's note names the rate, the year, the act and the section, ${OKB ? "that all three brackets are modelled (v6.00)" : "the top-rate overstatement"}, and claims no law age`,
      /Rate 4\.5% from 2026, the top of three brackets/.test(nOK) && /HB 2764, 2025/.test(nOK) && /68 O\.S\. §2355/.test(nOK) &&
-     /\$214\.75 single \/ \$429\.50 joint a year \(conservative\)/.test(nOK) && /triggered cuts are not applied/.test(nOK) && !/law/.test(nOK), nOK);
+     (OKB ? /all modelled from v6\.00/.test(nOK) && !/\$214\.75/.test(nOK) : /\$214\.75 single \/ \$429\.50 joint a year \(conservative\)/.test(nOK)) && /triggered cuts are not applied/.test(nOK) && !/law/.test(nOK), nOK);
 } else {
   CK("A-3 PIN v5.96: Georgia's note states no rate", !/\d%|\d %/.test(nGA.replace(/\$\d+K/g, "")), nGA);
   CK("A-4 PIN v5.96: Oklahoma's note states no rate", !/%/.test(nOK), nOK);
@@ -51,7 +54,8 @@ const claims = Object.entries(SR).filter(([, r]) => r.note && RATE_CLAIM.test(r.
 const bad = claims.filter(([, said, rate]) => Math.abs(said / 100 - rate) > 1e-9);
 CK(`A-5 EXTINCTION: every note stating a rate for a year states the row's own rate (${claims.map(x => x[0]).join(", ")})`, bad.length === 0, JSON.stringify(bad));
 // v5.99 (D-22 batch 1) records the reading in eleven more notes, so the matched set grows; earlier legs keep theirs.
-const WANT = !FIXED ? "KY,NC,OH,UT" : ["v597", "v598"].includes(VER) ? "GA,KY,NC,OH,OK,UT" : "AZ,CO,GA,IA,ID,IL,IN,KY,LA,MA,MI,MS,NC,OH,OK,PA,UT";
+// v6.00 (D-22 option 3): the ten bracket notes each state their top rate for 2026, so eight more rows join (CA, MN, NJ, NY, OR, SC, VA, WI).
+const WANT = !FIXED ? "KY,NC,OH,UT" : ["v597", "v598"].includes(VER) ? "GA,KY,NC,OH,OK,UT" : ["v600"].includes(VER) ? "AZ,CA,CO,GA,IA,ID,IL,IN,KY,LA,MA,MI,MN,MS,NC,NJ,NY,OH,OK,OR,PA,SC,UT,VA,WI" : "AZ,CO,GA,IA,ID,IL,IN,KY,LA,MA,MI,MS,NC,OH,OK,PA,UT";
 CK(`A-6 the rate-claim set is exactly ${WANT} (a reworded note cannot leave A-5 vacuous)`, claims.map(x => x[0]).sort().join(",") === WANT, claims.map(x => x[0]).sort().join(","));
 if (FIXED) {
   // Oklahoma's TY2026 schedule (OTC, 2025 Tax Legislation Summary): single 0 % to $3,750, 2.5 % to $4,900, 3.5 % to $7,200, 4.5 % above;
@@ -71,9 +75,11 @@ const call = (code, retIncome, ageA, ageB = null, single = true) =>
 EQ(`B-1 GA single 66, $100,000 of IRA income: ${(GA * 100).toFixed(2)} % × ($100,000 − $65,000) = $${(GA * 35000).toFixed(2)}`, call("GA", 100000, 66), FIXED ? 1746.50 : 1816.50);
 EQ(`B-2 GA single 63, $50,000 (no exclusion before 65 here): $${(GA * 50000).toFixed(2)}`, call("GA", 50000, 63), FIXED ? 2495 : 2595);
 EQ(`B-3 GA joint 66/66, $200,000: ${(GA * 100).toFixed(2)} % × ($200,000 − $130,000) = $${(GA * 70000).toFixed(2)}`, call("GA", 200000, 66, 66, false), FIXED ? 3493 : 3633);
-EQ(`B-4 OK single 66, $50,000: ${(OK * 100).toFixed(2)} % × ($50,000 − $10,000) = $${(OK * 40000).toFixed(2)}`, call("OK", 50000, 66), FIXED ? 1800 : 1900);
-EQ(`B-5 OK joint 65/65, $100,000: ${(OK * 100).toFixed(2)} % × ($100,000 − $20,000) = $${(OK * 80000).toFixed(2)}`, call("OK", 100000, 65, 65, false), FIXED ? 3600 : 3800);
-EQ(`B-6 OK single 64, $50,000 (no exclusion before 65 here): $${(OK * 50000).toFixed(2)}`, call("OK", 50000, 64), FIXED ? 2250 : 2375);
+// v6.00 (D-22 option 3): Oklahoma's own schedule (OW-2 2026: $109.25 at $7,200 single, $218.50 at $14,400 joint, 4.5 % above). A version LIST.
+const OKS = ["v600"].includes(VER);
+EQ(OKS ? "B-4 OK single 66, $50,000: $10,000 excluded; $109.25 + 4.5 % × $32,800 = $1585.25 (the schedule, v6.00)" : `B-4 OK single 66, $50,000: ${(OK * 100).toFixed(2)} % × ($50,000 − $10,000) = $${(OK * 40000).toFixed(2)}`, call("OK", 50000, 66), OKS ? 1585.25 : FIXED ? 1800 : 1900);
+EQ(OKS ? "B-5 OK joint 65/65, $100,000: $20,000 excluded; $218.50 + 4.5 % × $65,600 = $3170.50 (the schedule, v6.00)" : `B-5 OK joint 65/65, $100,000: ${(OK * 100).toFixed(2)} % × ($100,000 − $20,000) = $${(OK * 80000).toFixed(2)}`, call("OK", 100000, 65, 65, false), OKS ? 3170.5 : FIXED ? 3600 : 3800);
+EQ(OKS ? "B-6 OK single 64, $50,000 (no exclusion before 65 here): $109.25 + 4.5 % × $42,800 = $2035.25 (the schedule, v6.00)" : `B-6 OK single 64, $50,000 (no exclusion before 65 here): $${(OK * 50000).toFixed(2)}`, call("OK", 50000, 64), OKS ? 2035.25 : FIXED ? 2250 : 2375);
 
 // ── C · v5.96 -> v5.97: only Georgia and Oklahoma move, by exactly the rate ratio ──
 if (VER === "v597") {

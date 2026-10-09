@@ -157,7 +157,7 @@ const B = await renderTabs(VB);
 
 let pass = 0, fail = 0;
 const ck = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; console.log(`  \u2717 ${n}${d ? " \u2014 " + d : ""}`); } };
-const stripV = s => s.replace(/v5\.\d+(\.\d+)?/g, "vX");
+const stripV = s => s.replace(/v\d\.\d+(\.\d+)?/g, "vX"); // v6.00: any major, not v5 only
 const firstDiff = (a, b) => { let k = 0; while (k < Math.min(a.length, b.length) && a[k] === b[k]) k++;
   return `at ${k}: ${VA} ...${a.slice(Math.max(0,k-50), k+60)}... / ${VB} ...${b.slice(Math.max(0,k-50), k+60)}...`; };
 

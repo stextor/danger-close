@@ -33,7 +33,7 @@ let _s = 42; Math.random = () => { _s = (_s * 1103515245 + 12345) & 0x7fffffff; 
 
 const VER = process.argv[2] || "v565";
 const _vt = Number(String(VER).replace(/[^0-9]/g, "")) || 0;
-const KNOWN_VERSIONS = ["v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599"];
+const KNOWN_VERSIONS = ["v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -352,7 +352,7 @@ const ctTax = (args) => ST({
       T("D-15 [v5.69]: and states the cliff is EXCLUSIVE — AGI must be less than the threshold",
         /less than the threshold/i.test(_rin));
       // v5.95 (D-12 Phase 3): both gaps are CLOSED — the note now says IRA income stays taxable and each $50,000 is capped per person.
-      if ((VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599")) {
+      if ((VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600")) {
         T("D-16 [v5.95]: the note says IRA distributions stay taxable (D-RI-1 closed)", /IRA distributions, which the statute does not cover, stay taxable/i.test(_rin));
         T("D-17 [v5.95]: and that each person's $50,000 is capped at that person's own income (D-RI-3 closed)", /capped at that person's own pension, annuity and employer-plan income/i.test(_rin));
       } else {
@@ -522,7 +522,7 @@ const ctTax = (args) => ST({
     T(`RI-1: the engine priced Rhode Island rows to compare (compared ${compared})`, compared > 0);
     // v5.95 (D-12 Phase 3): the engine now passes byPerson, which this re-price cannot rebuild from row fields. Rows still match where
     // no per-person rule binds; where one does, RI's per-person caps and IRA exclusion can only REMOVE exclusion, so the engine is higher.
-    if ((VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599")) T(`RI-2 [v5.95]: rows re-price identically except where a per-person rule binds, and there the engine is HIGHER (mismatched ${mismatched} of ${compared}, lower ${lower})`, lower === 0 && mismatched > 0 && mismatched < compared);
+    if ((VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600")) T(`RI-2 [v5.95]: rows re-price identically except where a per-person rule binds, and there the engine is HIGHER (mismatched ${mismatched} of ${compared}, lower ${lower})`, lower === 0 && mismatched > 0 && mismatched < compared);
     else T(`RI-2: every engine row re-prices identically through the module (mismatched ${mismatched} of ${compared})`, mismatched === 0);
     T(`RI-3: the household crosses the cliff \u2014 qualifying rows exist BOTH at/above it (${above}) and below it (${belowQual}), so the section can discriminate`,
       above > 0 && belowQual > 0);

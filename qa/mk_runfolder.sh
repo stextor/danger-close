@@ -74,8 +74,8 @@ say "repo:   $REPO"
 [ -f "$REPO/METHODOLOGY.md" ]      || die "no METHODOLOGY.md at the repo root — t31 reads it and fails closed."
 
 # ── the prior source: resolved by md5, never taken on trust ──
-PRIOR_DOT="$(printf '%s' "$PRIOR" | sed -n 's/^v5\([0-9][0-9]\)$/v5.\1/p')"
-[ -n "$PRIOR_DOT" ] || die "prior tag '$PRIOR' is not of the form v5NN; its version cannot be looked up in the manifest."
+PRIOR_DOT="$(printf '%s' "$PRIOR" | sed -n 's/^v\([0-9]\)\([0-9][0-9]\)$/v\1.\2/p')"
+[ -n "$PRIOR_DOT" ] || die "prior tag '$PRIOR' is not of the form vMNN (v599, v600); its version cannot be looked up in the manifest."
 WANT="$(node -e '
   const s = require("fs").readFileSync(process.argv[1], "utf8"), v = process.argv[2];
   for (const h of ["## Current build", "## Prior build"]) { const i = s.indexOf(h); if (i < 0) continue;

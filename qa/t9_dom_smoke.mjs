@@ -62,7 +62,7 @@ try {
   // Smoke-level check: a version badge rendered at all. Pinned to the exact string it is a
   // per-release maintenance burden and duplicates t1/t4, which assert the version exactly;
   // here we only prove the shell mounted and stamped a 5.x version (v5.10.x, v5.11, ...).
-  ck("app shell renders after example load (version badge)", /v5\.\d+/.test(bodyText), "version string not found");
+  ck("app shell renders after example load (version badge)", /v\d\.\d+/.test(bodyText), "version string not found");
 
   // Open My Data
   const myDataCands = [...body().querySelectorAll("button, div, span")].filter(el => /^my data$/i.test((el.textContent || "").trim()));

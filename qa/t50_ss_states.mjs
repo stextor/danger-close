@@ -13,7 +13,7 @@
 //
 // Run: node t50_ss_states.mjs <tag>        Current leg only (the rules do not exist on the prior leg).
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599"];
+const KNOWN_VERSIONS = ["v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600"];
 let pass = 0, fail = 0; const fails = [];
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; const m = `  \u2717 ${n}${d ? " \u2014 " + d : ""}`; console.log(m); fails.push(m); } };
 const done = () => { console.log(`\nt50 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
@@ -46,12 +46,18 @@ EQ("CT-3 single AGI $74,999 → none taxed", H("CT", 74999, 20000, 30000, { sing
 EQ("CT-4 single AGI $75,000, taxable SS $5,000 < 25 % of $30,000 → all $5,000 taxed", H("CT", 75000, 5000, 30000, { single: true }), 0.05 * 75000);
 
 // ── MN · all subtracted if AGI ≤ $110,780 joint / $86,410 single (TY2026); −10 % per $4,000 or fraction above ──────────────────
-EQ("MN-1 joint AGI $110,780 → none taxed", H("MN", 110780, 30000, 40000), 0.068 * 80780);
-EQ("MN-2 joint AGI $110,781 → 10 % ($3,000) taxed", H("MN", 110781, 30000, 40000), 0.068 * (80781 + 3000));
-EQ("MN-3 joint AGI $114,780 (exactly one $4,000 step) → 10 % taxed", H("MN", 114780, 30000, 40000), 0.068 * (84780 + 3000));
-EQ("MN-4 joint AGI $114,781 → 20 % ($6,000) taxed", H("MN", 114781, 30000, 40000), 0.068 * (84781 + 6000));
-EQ("MN-5 joint AGI $160,000 → all taxed", H("MN", 160000, 30000, 40000), 0.068 * 160000);
-EQ("MN-6 single AGI $86,411 → 10 % taxed", H("MN", 86411, 20000, 30000, { single: true }), 0.068 * (66411 + 2000));
+// v6.00 (D-22 option 3, SCOPE_D22_BRACKETS_V600): Minnesota is taxed on its own TY2026 schedule from v6.00. These cells pin the SS rule, so
+// each keeps its taxable amount and, on a bracket leg, prices it on the schedule (computed here from the MN DOR table, not the app's). A LIST.
+const MN_BRK = ["v600"].includes(VER);
+const MNS = { single: [[33310, .0535], [109430, .068], [203150, .0785], [null, .0985]], joint: [[48700, .0535], [193480, .068], [337930, .0785], [null, .0985]] };
+const mn = (x, single = false) => { if (!MN_BRK) return 0.068 * x; let t = 0, lo = 0;
+  for (const [u, r] of MNS[single ? "single" : "joint"]) { const hi = u === null ? Infinity : u; if (x <= lo) break; t += (Math.min(x, hi) - lo) * r; lo = hi; } return t; };
+EQ("MN-1 joint AGI $110,780 → none taxed", H("MN", 110780, 30000, 40000), mn(80780));
+EQ("MN-2 joint AGI $110,781 → 10 % ($3,000) taxed", H("MN", 110781, 30000, 40000), mn(80781 + 3000));
+EQ("MN-3 joint AGI $114,780 (exactly one $4,000 step) → 10 % taxed", H("MN", 114780, 30000, 40000), mn(84780 + 3000));
+EQ("MN-4 joint AGI $114,781 → 20 % ($6,000) taxed", H("MN", 114781, 30000, 40000), mn(84781 + 6000));
+EQ("MN-5 joint AGI $160,000 → all taxed", H("MN", 160000, 30000, 40000), mn(160000));
+EQ("MN-6 single AGI $86,411 → 10 % taxed", H("MN", 86411, 20000, 30000, { single: true }), mn(66411 + 2000, true));
 
 // ── NM · none taxed if AGI ≤ $100,000 single / $150,000 joint; a hard cliff ──────────────────────────────────────────────────────
 EQ("NM-1 joint AGI $150,000 → none taxed", H("NM", 150000, 30000, 40000), 0.049 * 120000);

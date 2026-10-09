@@ -14,7 +14,7 @@
 // BOTH LEGS. The v593 leg PINS the defect (A, B, D, E assert the pre-fix state); group C runs on the v594 leg only, because it
 // asserts what THIS release changed relative to its prior. Run: node t58_state_draw.mjs <tag>
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v593", "v594", "v595", "v596", "v597", "v598", "v599"];
+const KNOWN_VERSIONS = ["v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; console.log(`  \u2717 ${n}${d !== "" ? " \u2014 " + String(d).slice(0, 260) : ""}`); } };
 const done = () => { console.log(`\nt58 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
@@ -32,10 +32,24 @@ const P0 = JSON.parse(JSON.stringify(g.PORTFOLIO()));
 
 // ── 0 · the rates the hand figures assume ──────────────────────────────────────────────────────────────────────────────────
 // v5.97 (D-22): Georgia is 4.99 % from TY2026 (HB 463); earlier legs keep 5.19 %.
-const RATE = { NC: 0.0399, CA: 0.06, GA: (["v597", "v598", "v599"].includes(VER) ? 0.0499 : 0.0519), NY: 0.06 }, EXCL = { NC: 0, CA: 0, GA: 65000, NY: 20000 };
-CK(`0-1 NC 3.99 % / CA 6 % / GA ${(RATE.GA * 100).toFixed(2)} % / NY 6 %; exclusions 0 / 0 / $65,000 / $20,000 per person; no SS, exemption, test or age field`,
+// v6.00 (D-22 option 3, SCOPE_D22_BRACKETS_V600): California and New York are taxed on their own schedules from v6.00 (`rate` = the top
+// rate). The hand formula keeps its base and, on a bracket leg, prices it on the schedule — computed here, independently of the app, from
+// the sources t64 §A cites, with New York's recapture (worksheet 1 exactly; above its limit the bracket's rate on all of it). A version LIST.
+const BRACKET_LEGS = ["v600"], BRK = BRACKET_LEGS.includes(VER);
+const SCHED = !BRK ? {} : {
+  CA: { single: [[11079, .01], [26264, .02], [41452, .04], [57542, .06], [72724, .08], [371479, .093], [445771, .103], [742953, .113], [1000000, .123], [null, .133]],
+        joint: [[22158, .01], [52528, .02], [82904, .04], [115084, .06], [145448, .08], [742958, .093], [891542, .103], [1000000, .113], [1485906, .123], [null, .133]] },
+  NY: { single: [[8500, .039], [11700, .044], [13900, .0515], [80650, .054], [215400, .059], [1077550, .0685], [5000000, .0965], [25000000, .103], [null, .109]],
+        joint: [[17150, .039], [23600, .044], [27900, .0515], [161550, .054], [323200, .059], [2155350, .0685], [5000000, .0965], [25000000, .103], [null, .109]] } };
+const schedTax = (code, x, single) => { const rows = SCHED[code][single ? "single" : "joint"]; let t = 0, lo = 0;
+  for (const [u, r] of rows) { const hi = u === null ? Infinity : u; if (x <= lo) break; t += (Math.min(x, hi) - lo) * r; lo = hi; }
+  if (code === "NY" && x > 107650) { const up = single ? 215400 : 161550, fl = single ? 0.059 : 0.054;
+    t = x <= up ? t + (fl * x - t) * Math.min(1, Math.round((x - 107650) / 50000 * 1e4) / 1e4) : rows.find(([u]) => u === null || x <= u)[1] * x; }
+  return t; };
+const RATE = { NC: 0.0399, CA: BRK ? 0.133 : 0.06, GA: (["v597", "v598", "v599", "v600"].includes(VER) ? 0.0499 : 0.0519), NY: BRK ? 0.109 : 0.06 }, EXCL = { NC: 0, CA: 0, GA: 65000, NY: 20000 };
+CK(`0-1 NC 3.99 % / CA ${BRK ? "on its schedule, top 13.3 %" : "6 %"} / GA ${(RATE.GA * 100).toFixed(2)} % / NY ${BRK ? "on its schedule, top 10.9 %" : "6 %"}; exclusions 0 / 0 / $65,000 / $20,000 per person; no SS, exemption, test or age field`,
    Object.keys(RATE).every(c => SR[c].rate === RATE[c] && (SR[c].excl65 || 0) === EXCL[c] && !SR[c].ss && !SR[c].retExempt &&
-     !SR[c].exclTest && SR[c].exclAge == null && !SR[c].ssRule && !SR[c].ssOffset), Object.keys(RATE).map(c => JSON.stringify(SR[c])).join(" "));
+     !SR[c].exclTest && SR[c].exclAge == null && !SR[c].ssRule && !SR[c].ssOffset && !!SR[c].brackets === !!SCHED[c]), Object.keys(RATE).map(c => JSON.stringify(SR[c])).join(" "));
 
 // ── A · Engine A: a draw is taxed by the state exactly as a pension is ─────────────────────────────────────────────────────
 // Age 70 clears every jurisdiction's age floor and exemption gate, so in this model a pension and a Traditional distribution
@@ -85,7 +99,8 @@ CK(`0-1 NC 3.99 % / CA 6 % / GA ${(RATE.GA * 100).toFixed(2)} % / NY 6 %; exclus
     const hand = (r, withDraw) => {
       const n65 = (r.ageA >= 65 ? 1 : 0) + (!r.filingSingle && r.ageB >= 65 ? 1 : 0);
       const R = r.rmdTax_y + r.conv_y + (withDraw ? r.ordDraw_y : 0);
-      return RATE[code] * (Math.max(0, R + r.pen_y - EXCL[code] * n65) + r.work_y + r.otherOrd_y + r.capGains_y + r.div_y);
+      const base = Math.max(0, R + r.pen_y - EXCL[code] * n65) + r.work_y + r.otherOrd_y + r.capGains_y + r.div_y;
+      return SCHED[code] ? schedTax(code, base, !!r.filingSingle) : RATE[code] * base;
     };
     W.forEach((r, i) => {
       if (r.widowed) return;

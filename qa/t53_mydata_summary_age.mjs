@@ -15,7 +15,7 @@ import { window } from "./env_dom.mjs";
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599"];
+const KNOWN_VERSIONS = ["v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; console.log(`  \u2717 ${n}${d ? " \u2014 " + String(d).slice(0, 240) : ""}`); } };
 const done = () => { console.log(`\nt53 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
@@ -42,7 +42,7 @@ const stateSelect = () => [...body().querySelectorAll("select")].find(s => [...s
 const pick = async (code) => { const s = stateSelect(); if (!s) return false;
   try { await act(async () => { Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, "value").set.call(s, code); s.dispatchEvent(new window.Event("change", { bubbles: true })); }); } catch (e) {}
   await flush(); return true; };
-const modelLine = () => { const d = [...body().querySelectorAll("div")].filter(x => /^Model[ :(]/.test(x.textContent || "") && /effective rate/.test(x.textContent || ""));
+const modelLine = () => { const d = [...body().querySelectorAll("div")].filter(x => /^Model[ :(]/.test(x.textContent || "") && /effective rate|the state's own brackets/.test(x.textContent || ""));
   return d.length ? d.sort((a, b) => a.textContent.length - b.textContent.length)[0].textContent : ""; };
 window.localStorage.clear();
 el = window.document.createElement("div"); body().appendChild(el);

@@ -212,6 +212,10 @@ tally "t62-$CUR"   node t62_desktop_disclosures.mjs "$CUR"
 # overstatement from the statute's formula; v5.98 -> v5.99 moves only ID/IN/OH, by exactly the rate ratio. Both legs; the v598 leg pins the old rates.
 tally "t63-$PRIOR" node t63_flat_rates.mjs "$PRIOR"
 tally "t63-$CUR"   node t63_flat_rates.mjs "$CUR"
+# t64 (v6.00) — D-22 option 3, batch 1: ten states on their own bracket schedules (CA MN MS NJ NY OK OR SC VA WI), New York's recapture;
+# each schedule against its source and the state's printed table; hand cases to the cent; v5.99 -> v6.00 moves only the ten. Both legs.
+tally "t64-$PRIOR" node t64_state_brackets.mjs "$PRIOR"
+tally "t64-$CUR"   node t64_state_brackets.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

@@ -13,7 +13,7 @@ import { window } from "./env_dom.mjs";
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599"];
+const KNOWN_VERSIONS = ["v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; console.log(`  \u2717 ${n}${d ? " \u2014 " + String(d).slice(0, 240) : ""}`); } };
 const done = () => { console.log(`\nt55 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
@@ -44,7 +44,10 @@ EQ("PA-4 single 50, $10,000 IRA + $20,000 pension: only the withdrawal taxed —
 EQ("PA-5 joint 61/59, $40,000 IRA: both must qualify — 0.0307 × 40,000 = $1,228.00", J("PA", { retIncome: 40000, ageA: 61, ageB: 59 }), 1228);
 EQ("PA-6 joint 61/60, $40,000 IRA: exempt — $0", J("PA", { retIncome: 40000, ageA: 61, ageB: 60 }), 0);
 // ── MS: as PA ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
-EQ("MS-1 single 59, $50,000 IRA — 0.04 × 50,000 = $2,000.00", T("MS", { retIncome: 50000, ageA: 59 }), 2000);
+// v6.00 (D-22 option 3, SCOPE_D22_BRACKETS_V600): Mississippi's first $10,000 of taxable income is untaxed from v6.00 (its own schedule,
+// one band per return). The hand figures keep their taxable base and, on a bracket leg, take the band off it. A version LIST.
+const MSB = ["v600"].includes(VER), ms = x => MSB ? 0.04 * Math.max(0, x - 10000) : 0.04 * x;
+EQ(MSB ? "MS-1 single 59, $50,000 IRA — the first $10,000 untaxed: 0.04 × 40,000 = $1,600.00" : "MS-1 single 59, $50,000 IRA — 0.04 × 50,000 = $2,000.00", T("MS", { retIncome: 50000, ageA: 59 }), ms(50000));
 EQ("MS-2 single 60, $50,000 IRA: exempt — $0", T("MS", { retIncome: 50000, ageA: 60 }), 0);
 EQ("MS-3 single 50, $30,000 pension: exempt at any age — $0", T("MS", { pen: 30000, ageA: 50 }), 0);
 // ── MI: no age test, capped per return ────────────────────────────────────────────────────────────────────────────────────
@@ -65,7 +68,7 @@ for (const c of ["IA", "PA", "MS"]) for (const aA of [50, 54, 55, 59, 60, 66]) f
   const single = aB === null, age = SR[c].retExemptAge, ok = a => a >= age;
   const gate = single ? ok(aA) : ok(aA) && ok(aB);
   const exempt = (gate ? ri : 0) + ((gate || SR[c].retExemptPensionAnyAge) ? pen : 0);
-  const want = SR[c].rate * (ri + pen - exempt), got = T(c, { retIncome: ri, pen, ageA: aA, ageB: aB, single });
+  const want = c === "MS" ? ms(ri + pen - exempt) : SR[c].rate * (ri + pen - exempt), got = T(c, { retIncome: ri, pen, ageA: aA, ageB: aB, single });   // v6.00: MS's band
   if (Math.abs(got - want) > 0.005) bad.push(`${c} ${aA}/${aB} ri${ri} pen${pen}: ${got.toFixed(2)} vs ${want.toFixed(2)}`); n++;
 }
 for (const single of [true, false]) for (const ri of [20000, 70000, 140000]) for (const pen of [0, 30000]) {

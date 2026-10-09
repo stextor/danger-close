@@ -103,7 +103,7 @@ ck("React app mounted from the inlined bundle", (window.document.getElementById(
 // Version is read FROM the artifact rather than hardcoded, so this check does not need a manual
 // bump every release (a hardcoded "v5.11" here failed at v5.12 — the same class of stale-literal
 // breakage PROJECT_INSTRUCTIONS §I warns about for the suites).
-const _verMatch = html.match(/DANGER CLOSE (v5\.[0-9.]+) \u2502 Not financial advice/);
+const _verMatch = html.match(/DANGER CLOSE (v\d\.[0-9.]+) \u2502 Not financial advice/);
 const _ver = _verMatch ? _verMatch[1] : null;
 ck("artifact declares a version in its footer string", !!_ver, "footer version not found");
 ck(`built app renders its own declared version (${_ver})`, !!_ver && txt().includes(_ver), txt().slice(0, 120));
@@ -111,10 +111,10 @@ ck(`built app renders its own declared version (${_ver})`, !!_ver && txt().inclu
 // throughout the Field Manual and are legitimate — an earlier version of this check flagged them
 // and was wrong about the build, not the other way round.
 const _siteVers = [
-  ...html.matchAll(/FIELD MANUAL \u00b7 (v5\.[0-9.]+) \u00b7 PUBLIC BUILD/g),
-  ...html.matchAll(/DANGER CLOSE (v5\.[0-9.]+) \u00b7 documentation regenerated/g),
-  ...html.matchAll(/DATA LOAD \u2502 (v5\.[0-9.]+)/g),
-  ...html.matchAll(/DANGER CLOSE (v5\.[0-9.]+) \u2502 Not financial advice/g),
+  ...html.matchAll(/FIELD MANUAL \u00b7 (v\d\.[0-9.]+) \u00b7 PUBLIC BUILD/g),
+  ...html.matchAll(/DANGER CLOSE (v\d\.[0-9.]+) \u00b7 documentation regenerated/g),
+  ...html.matchAll(/DATA LOAD \u2502 (v\d\.[0-9.]+)/g),
+  ...html.matchAll(/DANGER CLOSE (v\d\.[0-9.]+) \u2502 Not financial advice/g),
 ].map(m => m[1]);
 ck("all four in-app version sites agree, each present exactly once",
   _siteVers.length === 4 && _siteVers.every(v => v === _ver),

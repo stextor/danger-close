@@ -31,6 +31,21 @@ const EPS = 0.01;
 const T = (name, got, exp) => { const ok = Math.abs(got - exp) < EPS;
   if (ok) pass++; else { fail++; fails.push(`  ✗ ${name}: got ${got}  exp ${exp}  Δ ${(got-exp).toFixed(4)}`); } };
 const R = Math.round;
+// v6.00 (D-22 option 3 — docs/SCOPE_D22_BRACKETS_V600.md): ten states are taxed on their own bracket schedules from v6.00. A §2E hand case
+// written as (v5.99's single rate × base) keeps its BASE — the exclusion arithmetic it exists to pin is unchanged — and on a bracket leg
+// its expectation is that base on the state's schedule. `SCH` computes it here, independently of the app, from schedules transcribed from
+// the same primary sources as t64 §A (only the four states §2E prices are needed). `TB` labels the bracket figure, so a passing line never
+// claims "0.055 x ..." while asserting something else. A version LIST, so register_tag extends it each release.
+const STB_LEGS = ["v600"], STB = STB_LEGS.includes(VER);
+const _STB = { MS: [0.04, [[10000, 0], [null, 0.04]], [[10000, 0], [null, 0.04]]],
+  NJ: [0.055, [[20000, .014], [35000, .0175], [40000, .035], [75000, .05525], [500000, .0637], [1000000, .0897], [null, .1075]],
+              [[20000, .014], [50000, .0175], [70000, .0245], [80000, .035], [150000, .05525], [500000, .0637], [1000000, .0897], [null, .1075]]],
+  VA: [0.0575, [[3000, .02], [5000, .03], [17000, .05], [null, .0575]], [[3000, .02], [5000, .03], [17000, .05], [null, .0575]]],
+  WI: [0.053, [[15110, .035], [51950, .044], [332720, .053], [null, .0765]], [[20150, .035], [69260, .044], [443630, .053], [null, .0765]]] };
+const SCH = (code, flat, single = false) => { if (!STB) return flat; const [r0, sg, jt] = _STB[code], x = flat / r0; let t = 0, lo = 0;
+  for (const [u, r] of (single ? sg : jt)) { const hi = u === null ? Infinity : u; if (x <= lo) break; t += (Math.min(x, hi) - lo) * r; lo = hi; } return t; };
+const TV = (name, got, before, after) => T(STB ? `${name} [v6.00: the same base on the state's own brackets -> $${(+after).toFixed(2)}]` : name, got, STB ? after : before);
+const TB = (name, got, code, flat, single = false) => TV(name, got, flat, SCH(code, flat, single));
 
 // ── IRS-verified 2026 constants (independent copy from primary source, NOT from the app) ──
 const STD = { S: 16100, M: 32200 }, SR = { S: 2050, M: 1650 };
@@ -130,7 +145,7 @@ const SUR_R = [0,1150,2880,4620,6360,6940];
 // v5.78 (C-1): 42 U.S.C. §1395r(i)(3)(C)(i)(III) — tiers 1–4 are "not more than" their upper amount, the top tier is "at
 // least" its own. Through v5.77 BOTH reference oracles in this file used `<=` at every tier, the engines' own rule, so an
 // exact-top-threshold case compared the engine's C-1 against the oracle's C-1 and agreed. A LADDER — widen it each release.
-const C1_FIXED = VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599";
+const C1_FIXED = VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600";
 const tierR = (magi, ups) => { for (let i=0;i<ups.length;i++) if (i === ups.length - 2 ? magi < ups[i] : magi <= ups[i]) return i; return ups.length-1; };
 const irmaaRef = (magi, single, persons) => SUR_R[tierR(magi, single?SGL_R:MFJ_R)] * persons;
 // IRMAA isolation builder: 3-year window ending at `premiumYr`, both 65+ that year, MAGI = pen.
@@ -404,6 +419,8 @@ const pass2D = pass - pass2C, fail2D = fail - fail2C;
 // progressive state schedule is a disclosed limitation (Field Manual §13 and the module's own
 // header), and is therefore not a defect. A state whose modelled treatment contradicts its own
 // `note` string IS one.
+// (v6.00: ten states are taxed on their own bracket schedules — t64 owns those; the cells here that price one of them keep their base
+// and are gated through `SCH` above. For the other progressive rows the paragraph above still holds.)
 //
 // Every expected figure below was computed by hand from the rule table first, then compared to
 // engine output — not read back from the engine. The arithmetic is written out so it can be
@@ -429,7 +446,7 @@ const pass2E = pass, fail2E = fail;
 
     // ── ARCHETYPE 3 — retExempt. MS at 4%: ALL retirement income exempt, everything else taxed.
     // hand: 0.04 x (0 + 10,000 + 0 + 5,000) = 600
-    T("2E retExempt (MS 4%): retirement excluded, work and gains still taxed", run("MS", 2), 600);
+    TB("2E retExempt (MS 4%): retirement excluded, work and gains still taxed", run("MS", 2), "MS", 600);
 
     // ── ARCHETYPE 4 — per-person 65+ exclusion. AL at 4.5%, $6,000 each.
     // hand MFJ:    0.045 x ((60,000 - 12,000) + 10,000 + 0 + 5,000) = 0.045 x 63,000 = 2,835
@@ -491,9 +508,9 @@ const pass2E = pass, fail2E = fail;
       S({ code: "MS", fallbackRate: 0, retIncome: 5e5, pen: 2e5, work: 0, capGains: 0,
           ssTaxableFed: 0, persons65: 2 }), 0);
     // Gated from v5.90 (a version LIST, so register_tag extends it each release; the prior leg, v5.89, has no gate to test).
-    if (["v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599"].includes(VER)) T("2E (v5.90): nobody counted 65+ — Mississippi taxes the withdrawals (0.04 × 500,000), not the pension in payment",
+    if (["v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600"].includes(VER)) TB("2E (v5.90): nobody counted 65+ — Mississippi taxes the withdrawals (0.04 × 500,000), not the pension in payment",
       S({ code: "MS", fallbackRate: 0, retIncome: 5e5, pen: 2e5, work: 0, capGains: 0,
-          ssTaxableFed: 0, persons65: 0 }), 20000);
+          ssTaxableFed: 0, persons65: 0 }), "MS", 20000);
 
     // ── THE DEFECT TEST D-5 ACTUALLY NAMES: a state whose behaviour contradicts its own note.
     // Scanned across all 51. Seven candidates surfaced; six were dollar figures in the note that
@@ -607,12 +624,12 @@ const pass2E = pass, fail2E = fail;
     T("2E D-3c (NJ, MFJ 65+): $90,000 — below the limit, model and statute agree",  NJ(90000),  0);
     if (_v >= 567) {
       // FIXED v5.67 — the exclusion is income-conditioned. 50% / 25% / 0% of the payments received.
-      T("[FIXED v5.67] 2E D-3c (NJ, MFJ 65+): $120,000 — tier 2 excludes 50%, so 0.055 x 60,000",
-        NJ(120000), 3300);
-      T("[FIXED v5.67] 2E D-3c (NJ, MFJ 65+): $140,000 — tier 3 excludes 25%, so 0.055 x 105,000",
-        NJ(140000), 5775);
-      T("[FIXED v5.67] 2E D-3c (NJ, MFJ 65+): $200,000 — tier 4 excludes nothing, so 0.055 x 200,000",
-        NJ(200000), 11000);
+      TB("[FIXED v5.67] 2E D-3c (NJ, MFJ 65+): $120,000 — tier 2 excludes 50%, so 0.055 x 60,000",
+        NJ(120000), "NJ", 3300);
+      TB("[FIXED v5.67] 2E D-3c (NJ, MFJ 65+): $140,000 — tier 3 excludes 25%, so 0.055 x 105,000",
+        NJ(140000), "NJ", 5775);
+      TB("[FIXED v5.67] 2E D-3c (NJ, MFJ 65+): $200,000 — tier 4 excludes nothing, so 0.055 x 200,000",
+        NJ(200000), "NJ", 11000);
     } else {
       T("2E D-3c (NJ, MFJ 65+): $120,000 — model shields everything",                 NJ(120000), 0);
       T("2E D-3c (NJ, MFJ 65+): $140,000 — model still shields everything",           NJ(140000), 0);
@@ -653,12 +670,14 @@ const pass2E = pass, fail2E = fail;
       //   direction the design default asks for, and it is the opposite of what shipped before.
       const _gap = i => Number((S({ code: "NJ", fallbackRate: 0, retIncome: i, pen: 0, work: 0,
                                     capGains: 0, ssTaxableFed: 0, persons65: 2 }) - i * 0).toFixed(2));
-      T("[FIXED v5.67] NJ $120,000: the residual is the FLAT-RATE error alone, and it OVERSTATES — model $3,300.00 vs graduated $1,050.00",
-        Number((NJ(120000) - 1050.00).toFixed(2)), 2250.00);
-      T("[FIXED v5.67] NJ $140,000: same, overstating — model $5,775.00 vs graduated $3,026.25",
-        Number((NJ(140000) - 3026.25).toFixed(2)), 2748.75);
-      T("[FIXED v5.67] NJ $200,000: same, overstating — model $11,000.00 vs graduated $8,697.50",
-        Number((NJ(200000) - 8697.50).toFixed(2)), 2302.50);
+      // v6.00: on a bracket leg the model IS New Jersey's graduated schedule, so each residual below is asserted to be ZERO — the
+      //   flat-rate error this block has pinned since v5.67 is gone (SCOPE_D22_BRACKETS_V600). The prior leg keeps the overstatement.
+      TV("[FIXED v5.67] NJ $120,000: the residual is the FLAT-RATE error alone, and it OVERSTATES — model $3,300.00 vs graduated $1,050.00",
+        Number((NJ(120000) - 1050.00).toFixed(2)), 2250.00, Number((SCH("NJ", 3300) - 1050.00).toFixed(2)));
+      TV("[FIXED v5.67] NJ $140,000: same, overstating — model $5,775.00 vs graduated $3,026.25",
+        Number((NJ(140000) - 3026.25).toFixed(2)), 2748.75, Number((SCH("NJ", 5775) - 3026.25).toFixed(2)));
+      TV("[FIXED v5.67] NJ $200,000: same, overstating — model $11,000.00 vs graduated $8,697.50",
+        Number((NJ(200000) - 8697.50).toFixed(2)), 2302.50, Number((SCH("NJ", 11000) - 8697.50).toFixed(2)));
       T("[EXTINCTION v5.67] NJ never understates against the graduated schedule at any of the three pinned incomes — the optimistic direction is extinct",
         (NJ(120000) >= 1050 && NJ(140000) >= 3026.25 && NJ(200000) >= 8697.50) ? 1 : 0, 1);
     } else {
@@ -802,9 +821,9 @@ const pass2E = pass, fail2E = fail;
           _ageNoteOffenders(_AGE_NOTE).includes("RI") ? 1 : 0, 0);
       }
       // [3] The D-3c pins above measure a 65+ household. This release must not move them.
-      T("2E age: the D-3c NJ case set still reads the same through the AGE path as through persons65",
+      TB("2E age: the D-3c NJ case set still reads the same through the AGE path as through persons65",
         S({ code: "NJ", fallbackRate: 0, retIncome: 200000, pen: 0, work: 0, capGains: 0,
-            ssTaxableFed: 0, ageA: 65, ageB: 65 }), _v >= 567 ? 11000 : 2750);
+            ssTaxableFed: 0, ageA: 65, ageB: 65 }), "NJ", _v >= 567 ? 11000 : 2750);
       // [4] The legacy count path must still work for a caller that supplies no ages, or a partial
       //     caller would silently receive NO exclusion instead of the old behaviour.
       T("2E age: a caller supplying persons65 and no ages still gets the old behaviour",
@@ -901,9 +920,9 @@ const pass2E = pass, fail2E = fail;
       // ⚠ AND — added v5.67 — this cell now also proves the MEASURE. NJ's base is `agiExSS`, so the
       // $80,000 of gross Social Security here must not move the household up a tier or change the
       // answer at all. Under `base: "agi"` it could not stay equal to the cell above.
-      T("2E ssOffset: NJ has no ssOffset, and its agiExSS measure ignores Social Security entirely",
+      TB("2E ssOffset: NJ has no ssOffset, and its agiExSS measure ignores Social Security entirely",
         S({ code: "NJ", fallbackRate: 0, retIncome: 200000, pen: 0, work: 0, capGains: 0,
-            ssTaxableFed: 0, ssGrossA: 40000, ssGrossB: 40000, ageA: 65, ageB: 65 }), _v >= 567 ? 11000 : 2750);
+            ssTaxableFed: 0, ssGrossA: 40000, ssGrossB: 40000, ageA: 65, ageB: 65 }), "NJ", _v >= 567 ? 11000 : 2750);
       // KY carries no ssOffset, so Social Security must not touch its exclusion on EITHER build.
       // The figure moves at v5.57 for the RATE alone — same gate, same reason.
       T("2E ssOffset: the v5.55 age floors are untouched (KY has no ssOffset)",
@@ -1004,8 +1023,8 @@ const pass2E = pass, fail2E = fail;
           R.WI.excl65 === 24000 ? 1 : 0, 1);
         T("[EXTINCTION v5.59] and WI's note states that figure",
           /\$24,000/.test(R.WI.note) ? 1 : 0, 1);
-        T("[EXTINCTION v5.59] WI hand case: a qualifying 68/68 couple is taxed on income above 2 x $24,000",
-          RIWI("WI", 60000), 636.00);
+        TB("[EXTINCTION v5.59] WI hand case: a qualifying 68/68 couple is taxed on income above 2 x $24,000",
+          RIWI("WI", 60000), "WI", 636.00);
         if (_v >= 560) {
           T("[APPLIED v5.60] WI's note names the 67 floor AND the model applies it",
             /\b67\b/.test(R.WI.note) && R.WI.exclAge === 67 ? 1 : 0, 1);
@@ -1068,20 +1087,20 @@ const pass2E = pass, fail2E = fail;
           R.WI.exclAge === 67 ? 1 : 0, 1);
         T("[EXTINCTION v5.60] RI denies the exclusion to a 66/66 couple, as the statute does",
           RIWI_AGE("RI", 80000, 66, 66), _v >= 585 ? 6040.00 : 5020.00);   // v5.85 (D-19): the state's own SS rule — statute-consistent; see CHANGELOG v5.85: under 67, so ALL taxable SS is taxed (+$1,020)
-        T("[EXTINCTION v5.60] WI denies the exclusion to a 66/66 couple, as the statute does",
-          RIWI_AGE("WI", 60000, 66, 66), 3180.00);
+        TB("[EXTINCTION v5.60] WI denies the exclusion to a 66/66 couple, as the statute does",
+          RIWI_AGE("WI", 60000, 66, 66), "WI", 3180.00);
         T("[EXTINCTION v5.60] RI grants ONE exclusion at 68/66 — the floor is per person, not per return",
           RIWI_AGE("RI", 80000, 68, 66), 2520.00);
-        T("[EXTINCTION v5.60] WI grants ONE exclusion at 68/66 — the floor is per person, not per return",
-          RIWI_AGE("WI", 60000, 68, 66), 1908.00);
+        TB("[EXTINCTION v5.60] WI grants ONE exclusion at 68/66 — the floor is per person, not per return",
+          RIWI_AGE("WI", 60000, 68, 66), "WI", 1908.00);
         T("[EXTINCTION v5.60] and the qualifying 68/68 RI couple is UNCHANGED from v5.59",
           RIWI_AGE("RI", 80000, 68, 68), _v >= 585 ? 0 : 1020.00);   // v5.85 (D-19): the state's own SS rule — statute-consistent; see CHANGELOG v5.85: "unchanged from v5.59" holds only through v5.84
-        T("[EXTINCTION v5.60] and the qualifying 68/68 WI couple is UNCHANGED from v5.59",
-          RIWI_AGE("WI", 60000, 68, 68), 636.00);
+        TB("[EXTINCTION v5.60] and the qualifying 68/68 WI couple is UNCHANGED from v5.59",
+          RIWI_AGE("WI", 60000, 68, 68), "WI", 636.00);
         T("[EXTINCTION v5.60] the correction is confined to the window: RI 66/66 now costs exactly 0.05 x 80,000 more",
           Math.round((RIWI_AGE("RI", 80000, 66, 66) - RIWI_AGE("RI", 80000, 68, 68)) * 100) / 100, _v >= 585 ? 6040.00 : 4000.00);   // v5.85 (D-19): the state's own SS rule — statute-consistent; see CHANGELOG v5.85: the window now also moves ALL taxable SS (0.05 x 40,800)
-        T("[EXTINCTION v5.60] and WI 66/66 exactly 0.053 x 48,000 more",
-          Math.round((RIWI_AGE("WI", 60000, 66, 66) - RIWI_AGE("WI", 60000, 68, 68)) * 100) / 100, 2544.00);
+        TV("[EXTINCTION v5.60] and WI 66/66 exactly 0.053 x 48,000 more",
+          Math.round((RIWI_AGE("WI", 60000, 66, 66) - RIWI_AGE("WI", 60000, 68, 68)) * 100) / 100, 2544.00, Math.round((SCH("WI", 3180) - SCH("WI", 636)) * 100) / 100);
         T("[BY DECISION v5.60] NM keeps the implicit 65 default — its pass is separate (ROUND4 D-C)",
           R.NM.exclAge === undefined ? 1 : 0, 1);
         // ⚠ ADDED after the C5/C6 negative controls came back NOT CAUGHT. Without these two, a
@@ -1349,33 +1368,33 @@ const pass2E = pass, fail2E = fail;
         //   tier because a cap-then-percentage misreading PASSES A TIER-1 TEST (E-NJ-1 below).
         T("[HAND v5.67] NJ joint tier 1, gross $90,000 all pension: fully excluded — $0.00",
           NJ({ retIncome: 90000, ageA: 66, ageB: 66 }), 0.00);
-        T("[HAND v5.67] NJ joint tier 2, gross $120,000, pension $60,000: 50% of PAYMENTS = $30,000 — 0.055 x 30,000 = $1,650.00",
-          NJ({ retIncome: 60000, work: 60000, ageA: 66, ageB: 66 }), 0.055 * (30000 + 60000));
-        T("[HAND v5.67] NJ joint tier 3, gross $140,000, pension $80,000: 25% of PAYMENTS = $20,000 — 0.055 x (60,000 + 60,000) = $6,600.00",
-          NJ({ retIncome: 80000, work: 60000, ageA: 66, ageB: 66 }), 0.055 * (60000 + 60000));
-        T("[HAND v5.67] NJ joint tier 4, gross $175,000, pension $90,000: NOTHING excluded — 0.055 x 175,000 = $9,625.00",
-          NJ({ retIncome: 90000, work: 85000, ageA: 66, ageB: 66 }), 9625.00);
-        T("[HAND v5.67] NJ single tier 2, gross $120,000, pension $60,000: 37.5% of PAYMENTS = $22,500 — 0.055 x (37,500 + 60,000) = $5,362.50",
-          NJ({ retIncome: 60000, work: 60000, ageA: 66, single: true }), 5362.50);
+        TB("[HAND v5.67] NJ joint tier 2, gross $120,000, pension $60,000: 50% of PAYMENTS = $30,000 — 0.055 x 30,000 = $1,650.00",
+          NJ({ retIncome: 60000, work: 60000, ageA: 66, ageB: 66 }), "NJ", 0.055 * (30000 + 60000));
+        TB("[HAND v5.67] NJ joint tier 3, gross $140,000, pension $80,000: 25% of PAYMENTS = $20,000 — 0.055 x (60,000 + 60,000) = $6,600.00",
+          NJ({ retIncome: 80000, work: 60000, ageA: 66, ageB: 66 }), "NJ", 0.055 * (60000 + 60000));
+        TB("[HAND v5.67] NJ joint tier 4, gross $175,000, pension $90,000: NOTHING excluded — 0.055 x 175,000 = $9,625.00",
+          NJ({ retIncome: 90000, work: 85000, ageA: 66, ageB: 66 }), "NJ", 9625.00);
+        TB("[HAND v5.67] NJ single tier 2, gross $120,000, pension $60,000: 37.5% of PAYMENTS = $22,500 — 0.055 x (37,500 + 60,000) = $5,362.50",
+          NJ({ retIncome: 60000, work: 60000, ageA: 66, single: true }), "NJ", 5362.50, true);
         // — THE TIER TOPS ARE INCLUSIVE ("not more than $125,000"). Each belongs to the tier BELOW.
         //   An `lt` comparator fails all three. Same class as NM's step cells above.
         T("[HAND v5.67] NJ joint at EXACTLY $100,000 gross: still tier 1, fully excluded — $0.00",
           NJ({ retIncome: 100000, ageA: 66, ageB: 66 }), 0.00);
-        T("[HAND v5.67] NJ joint at EXACTLY $125,000 gross, pension $70,000: still tier 2 at 50% — 0.055 x (35,000 + 55,000) = $4,950.00",
-          NJ({ retIncome: 70000, work: 55000, ageA: 66, ageB: 66 }), 4950.00);
-        T("[HAND v5.67] NJ joint at EXACTLY $150,000 gross, pension $70,000: still tier 3 at 25% — 0.055 x (52,500 + 80,000) = $7,287.50",
-          NJ({ retIncome: 70000, work: 80000, ageA: 66, ageB: 66 }), 7287.50);
-        T("[HAND v5.67] NJ joint ONE DOLLAR past $150,000: tier 4, nothing excluded — 0.055 x 150,001 = $8,250.06",
-          NJ({ retIncome: 70000, work: 80001, ageA: 66, ageB: 66 }), 0.055 * 150001);
+        TB("[HAND v5.67] NJ joint at EXACTLY $125,000 gross, pension $70,000: still tier 2 at 50% — 0.055 x (35,000 + 55,000) = $4,950.00",
+          NJ({ retIncome: 70000, work: 55000, ageA: 66, ageB: 66 }), "NJ", 4950.00);
+        TB("[HAND v5.67] NJ joint at EXACTLY $150,000 gross, pension $70,000: still tier 3 at 25% — 0.055 x (52,500 + 80,000) = $7,287.50",
+          NJ({ retIncome: 70000, work: 80000, ageA: 66, ageB: 66 }), "NJ", 7287.50);
+        TB("[HAND v5.67] NJ joint ONE DOLLAR past $150,000: tier 4, nothing excluded — 0.055 x 150,001 = $8,250.06",
+          NJ({ retIncome: 70000, work: 80001, ageA: 66, ageB: 66 }), "NJ", 0.055 * 150001);
 
         // — ⚠ E-NJ-1 · EXTINCTION (OPERATIONS §D). The defect class is "the percentage is taken of
         //   the CAP instead of the PAYMENTS." A `pct x cap` reading returns 0.50 x $100,000 =
         //   $50,000 for EVERY tier-2 household regardless of what it receives, and it passes every
         //   tier-1 cell above, because in tier 1 the amount row is the cap. This is the only cell
         //   that separates the two readings, which is why the tier-2 case uses payments != $100,000.
-        T("[EXTINCTION v5.67] NJ tier 2 takes 50% of the PAYMENTS, not of the $100,000 cap: $60,000 of pension excludes $30,000, not $50,000",
+        TV("[EXTINCTION v5.67] NJ tier 2 takes 50% of the PAYMENTS, not of the $100,000 cap: $60,000 of pension excludes $30,000, not $50,000",
           NJ({ retIncome: 60000, work: 60000, ageA: 66, ageB: 66 })
-            - NJ({ retIncome: 60000, work: 60000, ageA: 50, ageB: 50 }), -0.055 * 30000);
+            - NJ({ retIncome: 60000, work: 60000, ageA: 50, ageB: 50 }), -0.055 * 30000, SCH("NJ", 0.055 * 90000) - SCH("NJ", 0.055 * 120000));
         // — ⚠ E-NJ-2 · EXTINCTION. The defect class is "a household exclusion applied per person."
         //   A per-person reading doubles it for a couple. Two people and one person in the SAME tier
         //   with the SAME payments must exclude the SAME amount.
@@ -1387,8 +1406,8 @@ const pass2E = pass, fail2E = fail;
         //   the household that now qualifies, and the one that still does not.
         T("[HAND v5.67] NJ joint aged 62-64 NOW qualifies — gross $90,000 all pension, fully excluded — $0.00",
           NJ({ retIncome: 90000, ageA: 63, ageB: 62 }), 0.00);
-        T("[HAND v5.67] NJ joint BELOW 62 still does not — 0.055 x 90,000 = $4,950.00",
-          NJ({ retIncome: 90000, ageA: 61, ageB: 61 }), 4950.00);
+        TB("[HAND v5.67] NJ joint BELOW 62 still does not — 0.055 x 90,000 = $4,950.00",
+          NJ({ retIncome: 90000, ageA: 61, ageB: 61 }), "NJ", 4950.00);
         T("[HAND v5.67] NJ at EXACTLY 62 qualifies — the floor is inclusive",
           NJ({ retIncome: 90000, ageA: 62, ageB: 50 }), 0.00);
 
@@ -1398,15 +1417,15 @@ const pass2E = pass, fail2E = fail;
         T("[HAND v5.67] NJ: taxable SS does NOT ride the measure — $95,000 pension + $40,000 taxable SS stays in tier 1 — $0.00",
           NJ({ retIncome: 95000, ssTaxableFed: 40000, ageA: 66, ageB: 66 }), 0.00);
         // — but wages and realized gains DO ride it, and are themselves taxed.
-        T("[HAND v5.67] NJ: wages and realized gains ride the measure — $60K pension + $50K wages + $45K gains = $155,000, tier 4 — 0.055 x 155,000 = $8,525.00",
-          NJ({ retIncome: 60000, work: 50000, capGains: 45000, ageA: 66, ageB: 66 }), 8525.00);
+        TB("[HAND v5.67] NJ: wages and realized gains ride the measure — $60K pension + $50K wages + $45K gains = $155,000, tier 4 — 0.055 x 155,000 = $8,525.00",
+          NJ({ retIncome: 60000, work: 50000, capGains: 45000, ageA: 66, ageB: 66 }), "NJ", 8525.00);
         // — the clamp: an exclusion larger than the payments it applies to must not shelter wages.
         // ⚠ THIS CELL'S EXPECTED VALUE WAS WRONG IN ITS FIRST DRAFT AND THE ENGINE CAUGHT IT. The
         //   draft asserted 0.055 x 60,000, double-counting the $5,000 of pension that tier 1 fully
         //   excludes. The clamp works in BOTH directions: the exclusion cannot spill onto wages,
         //   and the sheltered pension does not reappear in the base. 0.055 x 55,000 is the answer.
-        T("[HAND v5.67] NJ: the exclusion cannot shelter wages — $5,000 pension is fully excluded, the $55,000 of wages is not — 0.055 x 55,000 = $3,025.00",
-          NJ({ retIncome: 5000, work: 55000, ageA: 66, ageB: 66 }), 3025.00);
+        TB("[HAND v5.67] NJ: the exclusion cannot shelter wages — $5,000 pension is fully excluded, the $55,000 of wages is not — 0.055 x 55,000 = $3,025.00",
+          NJ({ retIncome: 5000, work: 55000, ageA: 66, ageB: 66 }), "NJ", 3025.00);
 
         // — ⚠ EXTINCTION. The defect the release exists to kill: the exclusion was INCOME-BLIND.
         //   Under v5.66, stepping from $90,000 to $175,000 of gross cost only the rate on the extra
@@ -1462,35 +1481,35 @@ const pass2E = pass, fail2E = fail;
                             [98999, 5692.385, "$1 under extinction [DISC, 5 cents]"], [99000, 5692.50, "EXACTLY extinguished"],
                             [110000, 6325.00, "past extinction"]];
         for (const [m, exp, why] of _VA_JOINT2)
-          T(`[HAND v5.68] VA joint, both 70, AFAGI $${m.toLocaleString()} — ${why} -> $${exp.toFixed(2)}`,
-            VA({ retIncome: m, ageA: 70, ageB: 70 }), exp);
+          TB(`[HAND v5.68] VA joint, both 70, AFAGI $${m.toLocaleString()} — ${why} -> $${exp.toFixed(2)}`,
+            VA({ retIncome: m, ageA: 70, ageB: 70 }), "VA", exp);
         // — JOINT, ONE 65+: pins the $12,000 maximum and the joint threshold. NOT a discriminator.
         const _VA_JOINT1 = [[60000, 2760.00, "below"], [80000, 4197.50, "mid taper"], [87000, 5002.50, "EXACTLY extinguished"]];
         for (const [m, exp, why] of _VA_JOINT1)
-          T(`[HAND v5.68] VA joint, one spouse 70 and one 62, AFAGI $${m.toLocaleString()} — ${why} -> $${exp.toFixed(2)}`,
-            VA({ retIncome: m, ageA: 70, ageB: 62 }), exp);
+          TB(`[HAND v5.68] VA joint, one spouse 70 and one 62, AFAGI $${m.toLocaleString()} — ${why} -> $${exp.toFixed(2)}`,
+            VA({ retIncome: m, ageA: 70, ageB: 62 }), "VA", exp);
         // — SINGLE: pins the single threshold ($50,000) and its extinction ($62,000). NOT a discriminator.
         const _VA_SINGLE = [[40000, 1610.00, "below"], [50000, 2185.00, "EXACTLY at the threshold"],
                             [55000, 2760.00, "mid taper"], [62000, 3565.00, "EXACTLY extinguished"], [70000, 4025.00, "past extinction"]];
         for (const [m, exp, why] of _VA_SINGLE)
-          T(`[HAND v5.68] VA single, 70, AFAGI $${m.toLocaleString()} — ${why} -> $${exp.toFixed(2)}`,
-            VA({ retIncome: m, ageA: 70, single: true }), exp);
+          TB(`[HAND v5.68] VA single, 70, AFAGI $${m.toLocaleString()} — ${why} -> $${exp.toFixed(2)}`,
+            VA({ retIncome: m, ageA: 70, single: true }), "VA", exp, true);
         // — THE AGE FLOOR is 65 per person (no exclAge). Both sides of it.
-        T("[HAND v5.68] VA joint, both 64: nobody qualifies, no deduction at any income — 0.0575 x 80,000 = $4,600.00",
-          VA({ retIncome: 80000, ageA: 64, ageB: 64 }), 4600.00);
-        T("[HAND v5.68] VA joint, both EXACTLY 65 inside the taper: the floor is inclusive [DISC] — $3,507.50",
-          VA({ retIncome: 80000, ageA: 65, ageB: 65 }), 3507.50);
+        TB("[HAND v5.68] VA joint, both 64: nobody qualifies, no deduction at any income — 0.0575 x 80,000 = $4,600.00",
+          VA({ retIncome: 80000, ageA: 64, ageB: 64 }), "VA", 4600.00);
+        TB("[HAND v5.68] VA joint, both EXACTLY 65 inside the taper: the floor is inclusive [DISC] — $3,507.50",
+          VA({ retIncome: 80000, ageA: 65, ageB: 65 }), "VA", 3507.50);
         // — THE MEASURE. `base: "agiExSS"` is Virginia's AFAGI exactly. Taxable SS must NOT ride it:
         //   under `base: "agi"` the household below sits at $110,000, is extinguished, and pays $4,600.00.
-        T("[HAND v5.68] VA: taxable SS does NOT ride AFAGI — $80K retirement + $30K taxable SS still takes $19,000 [DISC] — $3,507.50",
-          VA({ retIncome: 80000, ssTaxableFed: 30000, ageA: 70, ageB: 70 }), 3507.50);
-        T("[HAND v5.68] VA: wages/other ordinary ride AFAGI and are taxed — $60K + $25K = $85,000, deduction $14,000 [DISC] — $4,082.50",
-          VA({ retIncome: 60000, work: 25000, ageA: 70, ageB: 70 }), 4082.50);
-        T("[HAND v5.68] VA: realized gains ride AFAGI and are taxed — $60K + $20K = $80,000, deduction $19,000 [DISC] — $3,507.50",
-          VA({ retIncome: 60000, capGains: 20000, ageA: 70, ageB: 70 }), 3507.50);
+        TB("[HAND v5.68] VA: taxable SS does NOT ride AFAGI — $80K retirement + $30K taxable SS still takes $19,000 [DISC] — $3,507.50",
+          VA({ retIncome: 80000, ssTaxableFed: 30000, ageA: 70, ageB: 70 }), "VA", 3507.50);
+        TB("[HAND v5.68] VA: wages/other ordinary ride AFAGI and are taxed — $60K + $25K = $85,000, deduction $14,000 [DISC] — $4,082.50",
+          VA({ retIncome: 60000, work: 25000, ageA: 70, ageB: 70 }), "VA", 4082.50);
+        TB("[HAND v5.68] VA: realized gains ride AFAGI and are taxed — $60K + $20K = $80,000, deduction $19,000 [DISC] — $3,507.50",
+          VA({ retIncome: 60000, capGains: 20000, ageA: 70, ageB: 70 }), "VA", 3507.50);
         // — the clamp: a deduction larger than the retirement income cannot shelter wages.
-        T("[HAND v5.68] VA: the deduction cannot shelter wages — $5,000 retirement against $24,000 clamps at zero — 0.0575 x 60,000 = $3,450.00",
-          VA({ retIncome: 5000, work: 60000, ageA: 70, ageB: 70 }), 3450.00);
+        TB("[HAND v5.68] VA: the deduction cannot shelter wages — $5,000 retirement against $24,000 clamps at zero — 0.0575 x 60,000 = $3,450.00",
+          VA({ retIncome: 5000, work: 60000, ageA: 70, ageB: 70 }), "VA", 3450.00);
 
         // — ⚠ E-VA-1 · ONCE, NOT TWICE, AT HOUSEHOLD LEVEL (scope §5). t34 D-3 proves this for the
         //   synthetic jurisdiction only; a correct evaluator wired to a per-person call site passes D-3.
