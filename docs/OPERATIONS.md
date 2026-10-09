@@ -849,6 +849,11 @@ files with their own `KNOWN_VERSIONS` lists. `register_tag2.cjs`, `tagkeys.cjs` 
 registration they report as complete leaves all three unregistered. They fail closed (`0-0 version tag … is registered`, zero
 checks run), which is how v5.93's half B caught it. After registering, check the `.py` suites by hand until a tool reads them.
 
+⚠ **Write a new gate as an ARRAY, never a single-tag ternary (added at the v5.98 build).** v5.97 gated its rate pins as
+`VER === "v597" ? new : old`; `register_tag2.cjs` cannot extend that shape and reported seven MANUAL sites at v5.98 — six of them those gates, each hand-converted to
+`["v597", "v598"].includes(VER) ? new : old`, which the tool extends like any ladder. A gate that must stay single-build (a comparison that needs one
+specific prior module) is the exception, and says so in a comment.
+
 ⚠ **Choose a version whose TAG is free (added at the v5.93 build).** Tags drop the dots, so **v5.9.2 and v5.92 are both
 `v592`** — and `v592` is the retired v5.9.2 leg's, gated in `t1`, `t4`, `t5`, `t6` (`IS510 = VER !== "v592"`) and named by its
 `dom_entry_v592.jsx`, `cap_tabs.mjs` and `domdiff_withdrawal.mjs`. A build registered under it is tested as v5.9.2. **v5.92 was
