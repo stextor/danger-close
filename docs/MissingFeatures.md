@@ -1160,6 +1160,12 @@ after v5.86. **Medium** — optimistic, and large relative to WV's other figures
 
 ## D-22 · The 42 nonzero state rates have not been re-read
 
+> 🔶 **OPTION 3, BATCH 1 DONE v6.00 (2026-10-09) — ten states on their own bracket schedules.** Steve chose option 3 after v5.99: the progressive states'
+> real schedules, read from the law. CA (TY2025 + the BHST), MN, MS, NJ, NY (with its recapture), OK, OR, SC (Act 110), VA and WI, each read at its primary
+> source. `qa/t64_state_brackets.mjs`; scope `docs/SCOPE_D22_BRACKETS_V600.md` (fulfilled, repo-only). **Seventeen progressive rows remain on one rate:**
+> AL, AR, CT, DE, DC, HI, KS, ME, MD, MO, MT, NE, NM, ND, RI, VT, WV. **Recommended alongside them:** state standard deductions and exemptions (none is
+> modelled in any state today — conservative), which the same sources give.
+
 > 🔶 **BATCH 1 DONE v5.99 (2026-10-09) — the thirteen flat-rate states.** AZ, CO, ID, IL, IN, IA, LA, MA, MI, MS, NC, OH, PA read at primary sources for
 > TY2026; Idaho (5.3 %), Indiana (2.95 %) and Ohio (2.75 %, top-rate convention, $384.38 a year overstated above $26,050) corrected; every note names its
 > rate, year and source. `qa/t63_flat_rates.mjs`; scope `docs/SCOPE_D22_FLAT_RATES_V599.md` (fulfilled, repo-only). **27 rows remain, mostly progressive:

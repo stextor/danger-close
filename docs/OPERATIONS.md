@@ -861,6 +861,16 @@ skipped for this reason.** Before a release takes a number, ask `qa/tools/vercen
 to it, by AST — a presence question is a parser question, project rules), read the three `.py` suites' lists by hand (above), and run
 `git log -- qa/qa-baseline/dom_entry_vNNN.jsx`; all must come back empty.
 
+⚠ **The major version is not fixed at 5 (added at the v6.00 build).** v5.99 was the last two-digit minor of the v5 line, so the release after
+it is **v6.00, tag `v600`** — not v5.100, whose tag `v5100` sorts and compares below `v599` as a string, and the suites compare tags as strings
+(`VER >= "v590"`) and sort pool files lexically. Tags are `v` + one major digit + a two-digit minor. Thirteen places assumed a major of 5 and were
+widened at v6.00 to any single-digit major: `mk_runfolder.sh`'s tag-to-version map; `smoke_built.mjs`'s four version-site patterns and its footer
+read; `t9`'s version badge; `domdiff_withdrawal.mjs`'s version strip; `vergates.cjs` (`/^v\d\d\d$/`); `vercensus.cjs` and `vercensus_list.cjs`
+(`/^v\d{3,}$/` — `t21`'s synthetic tag `v5999` is four digits, which a three-digit pattern refused on the first run); `package_check.mjs`'s
+pool-file patterns (`DangerClose-v\d_\d+.jsx`, `dom_entry_v\d\d\d.jsx`, the derived-file prefix); and `package_check_controls.sh`'s manifest
+arithmetic, which now counts major × 100 + minor (600 − 1 → v5.99) instead of subtracting from the minor. The pool's source file for v6.00 is
+`DangerClose-v6_00.jsx`. Historical references (`v5.66` in a control's regex, `t35`'s "Rhode Island at v5.69") are about those releases and stay.
+
 
 
 The rule above is the one part of §G **no check enforces**. `package_check`'s section `J` (`J-1`,
