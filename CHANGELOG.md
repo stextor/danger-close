@@ -1,5 +1,88 @@
 # Changelog
 
+## v6.02 — Ask AI's answers no longer cut off; D-30 batch 1: the 27 progressive states' deductions, exemptions and personal credits
+
+**A MODELLING release** (METHODOLOGY updated). `docs/SCOPE_D30_DEDUCTIONS_V602.md` (repo-only, fulfilled). Steve: "one thing I've noticed in ASK AI, the
+response field seems not to be long (big) enough. Some of the answers given out get's cutoff. Can you fix this along with D-30?"
+
+**Ask AI.** The box was never the limit: the transcript shows the whole returned text. **The request was** — both routes (Anthropic and Local Model) asked
+the model for at most 1,000 tokens, about 750 words, so a longer answer was cut off mid-sentence, and the app never read the API's stop reason, so a cut-off
+answer looked finished. From v6.02:
+- **The cap is 4,096 tokens on both routes** (one constant, `AI_MAX_TOKENS`) — roughly 3,000 words.
+- **A cut-off is said, never silent:** when the API reports `stop_reason: "max_tokens"` (a Local Model, `finish_reason: "length"`) the answer is shown with
+  a notice that it reached the length limit — type *continue* for the rest. The notice is kept apart from the answer, so the conversation memory re-sends
+  the answer alone and the model can carry on from it.
+- **The timeout is 120 seconds** (was 45; a longer answer takes longer), and the timeout message and the Field Manual's error table say so.
+- **The default master prompt's note** ("~1000 token cap") now says answers may run to about 4,000 tokens, most far shorter. A master prompt restored from an
+  older backup keeps its own wording (disclosed in the Field Manual).
+- **The cost sentence is corrected.** The Field Manual said a question costs "well under a cent". Measured on the example plan, one question sends
+  16,603 characters (about 4,150 tokens); at the Claude Sonnet 4.6 prices Anthropic listed in October 2026 ($3 per million input tokens, $15 per million
+  output) a typical question costs about one to five cents, and a full-length answer adds about six. The BYOK section and the glossary now say so.
+- The model is unchanged (`claude-sonnet-4-6`); a newer, cheaper Sonnet is listed — Steve's call (scope AI-6).
+
+**D-30 batch 1.** Through v6.01 no state's standard deduction, personal exemption or personal credit was taken — every state taxed income from the first
+dollar (conservative, disclosed). **From v6.02 the 27 progressive states take them**, each figure read at its primary source on 2026-10-09 (the scope's §0.2
+table cites each): standard deductions — flat (NY, VA, MS, NE, HI, KS, OR, VT, DC, DE, AR per person), sliding (Wisconsin), phased out (Alabama's $25/$175
+per $500, Maine's linear phase-out, Minnesota's 3 % / 10 %, Rhode Island's 20 % steps, South Carolina's new Income Adjusted Deduction) or the federal one
+(MO, MT, ND, NM), with their 65-and-over additions; personal exemptions (incl. Connecticut's $1,000-per-$1,000 phase-out, Maryland's AGI table, Maine's and
+Rhode Island's phase-outs, New Mexico's low- and middle-income exemption, Oklahoma's 65+ exemption at low AGI); and personal credits (Arkansas, California's
+exemption credits with their phase-out, Delaware, Nebraska, Oregon's exemption credit, Connecticut's Table E credit decimal, Maryland's senior credit at its
+reduced schedule). **The order is the forms':** state AGI − deductions = taxable income; the schedule (and Arkansas's high-income table, and Maryland's
+county tax) on taxable income; New York's recapture fraction and Connecticut's added amounts on AGI, as their statutes measure them; then the credits,
+nonrefundable, against the state tax (Maryland's senior credit not against the county tax). One field, `deduct` (a list of components), one evaluator
+(`stateDeductions`), six phase shapes. Six states hold their latest published figures, TY2025 (AR, CA, DC, MD, OR, VT — each at or below its 2026 value).
+
+**Measured** (v6.01 → v6.02): the Taxes tab's lifetime state tax on the example household, no conversions — every one of the 27 falls and the other 24
+jurisdictions and "none" are byte-identical: AL $77,583 → $67,983 · AR $50,830 → $44,724 · CA $72,258 → $52,405 · CT $70,199 → $65,467 · DE $66,614 →
+$50,491 · DC $118,735 → $71,432 · HI $97,191 → $73,135 · KS $98,216 → $67,430 · ME $70,129 → $40,873 · MD $107,711 → $81,984 · MN $140,098 → $95,880 ·
+MS $991 → $0 · MO $80,952 → $48,310 · MT $119,556 → $82,773 · NE $71,599 → $46,547 · NJ $13,388 → $12,495 · NM $87,978 → $58,278 · NY $54,969 → $43,598 ·
+ND $9,526 → $6,114 · OK $55,476 → $45,182 · OR $146,037 → $124,104 · RI $85,823 → $59,370 · SC $46,676 → $38,244 · VT $114,827 → $84,832 · VA $80,326 →
+$61,805 · WV $62,920 → $59,641 · WI $45,957 → $33,863. **The direction is one way** (optimistic relative to v6.01, and each figure now nearer the law). The
+Roth comparator's strategy tax falls in every changed run; **its estate-best cell changes in 3 of 81 cells tested** (27 states × three households: a B-dies
+household in MD, ND and RI). Engines C and D compute no state tax; MC parity 10/10 with **no** declared diff (its state fingerprint is a Georgia call).
+
+**Not taken, each conservative and disclosed in its note:** the federal income tax that Alabama, Missouri and Oregon let a return deduct, and the federal
+senior deduction (2025–2028) that flows into Montana and North Dakota — both need inputs the calculator is not given (**D-31**, opened); low-income
+refundable credits and rebates (HI, ME, NM, NY, OK, WV — each gone well below a retiree's income); Arkansas's "65 Special" credit (it excludes those taking the
+retirement exemption the model applies); itemized deductions (no state's are modelled); and the fifteen flat-rate states' deductions — **D-30 batch 2, v6.03**
+(Georgia is among them, the example household's state and the parity fingerprint's, so batch 2 re-baselines both on its own).
+
+**Display.** My Data's model line adds "· deductions and exemptions taken" for each of the 27 and dates the figures ("deductions 2026"; "2025" for the six
+held); the AI context line adds "after its deductions and exemptions"; the Field Manual's "no state's standard deduction or personal exemption is taken" is
+replaced by what is and is not taken, in the Taxes entry and the methodology entry; each of the 27 notes says what it takes and what it does not.
+
+**Tests.** New suite **`t66`** — **194** on v6.02, **54** on v6.01 (that leg pins the absence of `deduct`, the 1,000-token request, the silent
+cut-off and the 45-second timeout): the 27 rows' components equal to the sources, dated, well formed (an extinction: exactly the 27 carry `deduct`); every
+note names what is taken and what is not, and every age it names is one a component applies; the six phase shapes at their edges (Alabama's full $500
+steps, Connecticut's "or fraction" and Table E rows, California's $6 steps, Maine's four-place ratio, Minnesota's cap, Maryland's table and senior-credit
+bands, the Oklahoma and Oregon cliffs, Rhode Island's 20 % steps, South Carolina's $10 rounding, Wisconsin's slide, New Mexico's rate); 37 hand cases to the
+cent computed independently in Decimal (e.g. Virginia single 66, $50,000 of wages: **$2,014.90**, was $2,617.50; Maryland joint 67/66 at $99,999:
+**$5,031.87**); v6.01 → v6.02 over every jurisdiction, 22,032 calls (with `deduct` removed, byte-identical to v6.01; with it, the 27 equal an
+independent implementation, `qa/d30_ref.mjs`, on the calculator's own measures, and the other 24 are byte-identical); Ask AI through the DOM with a
+recording stub (both routes ask for 4,096; a `max_tokens` / `length` stop shows the notice and a finished one does not; the conversation memory re-sends the
+answer without it; a timeout says 120 s; the AST holds every `max_tokens` and the timer to the constants); the Field Manual's cost, cap and timeout lines
+held to the constants and the arithmetic; the display. A test seam `_onDetail` (no engine passes it) reports the calculator's measures. Controls
+`qa/tools/controls_v602_deduct.py` (repo-only): **12 of 12**. **Derived pins gated per build** (DD-14 — each keeps its base and, on the v6.02 leg, expects that
+base after the state's deductions and credits, priced by `qa/d30_ref.mjs` on the calculator's record of the very call; a different base fails; labels say
+so): `t10` (§2E — through the TB / TB2 wrappers, and 15 difference, extinction and invariant pins gated one by one), `t35` (CT §B, §C by the record's base, RI-4), `t39` (ME, MT), `t50` (CT, MN, NM, RI, VT),
+`t51` (the dated-figure census, 33 rows / 86 figures; six Maine cases; NJ; the display), `t52` (NY, AR, OK), `t53` (the exclusion-onset probe lifts `deduct`),
+`t54` (WV, MD, ME; §X by the record), `t55` (MS), `t58` (CA, NY, RI), `t59` (RI, MS, WV), `t60` (ME), `t61` (OK), `t64` (§C, §E) and `t65` (§A-9, B-AR, §C, §E;
+its group D reports itself not run in a v6.01 → v6.02 folder). `v602` registered by AST (77 array entries, 83 OR-gates, two version arms; no manual
+site), the three Python suites and `t33`'s PINS by hand (unchanged: its household is in Georgia); the shim exports the evaluator and the Ask AI constants.
+
+**Suite, run from the packaged copies:** 5,872 app checks across **65 app suites**, 0 failed, 0 DIED; MC parity 10/10; tooling `t21` 64,
+`domdiff` 32, `sets` 12 + 12; **GRAND 6,002**. Every current-leg count equals v6.01's except the new `t66` and `t65`
+(103 → 102: its group D, which needs `app_v600.mjs`, reports itself not run). Run from the PACKAGED copies as two concurrent halves, the method approved at v5.87: run folders built by mk_runfolder.sh v601 v602 from a full clone of 9b531a1 with the github/ files overlaid (v6.01 resolved from history, commit 1c2674e), each through a session-only copy of runsuite.sh whose one added line skips the other half's labels. Half A GRAND 5780, half B GRAND 222; none DIED. Source `d76dddc6381041c987fc5c87b8edad53` · built `16a4a850e5a10582b91eb98ea9b32ce5` (v6.01 rebuilt byte-identical
+first; `smoke_built` 22 passed, 0 failed).
+
+**Limitations, disclosed:**
+- The fifteen flat-rate states take no deduction yet (D-30 batch 2, v6.03); federal-tax deductions (AL, MO, OR) and the federal senior deduction (MT, ND) are
+  not taken (D-31); low-income refundable credits are not taken; itemized deductions are not modelled — each conservative.
+- Maryland's senior credit is taken at its reduced schedule (the full one applies only in a year the revenue trigger does not fire; TY2026's status is
+  unpublished); AR, CA, DC, MD, OR and VT hold their 2025 figures — each conservative.
+- The calculator has no dependents: exemptions count the filers only (the model's household has no dependents).
+- Ask AI: an answer can still reach the 4,096-token limit — it now says so; the cost figures are October 2026's list prices for the model the app names.
+
 ## v6.01 — D-22 option 3, batch 2: the seventeen remaining progressive states on their own schedules; D-22 closes
 
 **A MODELLING release** (METHODOLOGY updated). `docs/SCOPE_D22_BRACKETS_V601.md` (repo-only, fulfilled). v6.00 put ten states on their own bracket
