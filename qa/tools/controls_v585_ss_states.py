@@ -31,7 +31,7 @@ M = {
     "M7": ("CO cap not consumed", "    if (r.ssSharesCap) return Math.max(0, _cap - Math.max(0, ssSub || 0));", "    if (r.ssSharesCap) return _cap;", ["CO-5"]),
     "M8": ("total benefits from A's slot only", "  const _gTot = Math.max(0, ssGrossA) + Math.max(0, ssGrossB);", "  const _gTot = Math.max(0, ssGrossA) + (single ? 0 : Math.max(0, ssGrossB));", ["CT-4"]),
 }
-md5 = lambda p: hashlib.md5(open(p, "rb").read()).hexdigest()
+md5 = lambda p: hashlib.sha256(open(p, "rb").read()).hexdigest()
 SRC0 = open(SRC, "rb").read(); BEFORE = (md5(SRC), md5(MOD))
 build = lambda: subprocess.run(["bash", os.path.join(QA, "mk_testable.sh"), "v585"], cwd=ROOT, capture_output=True, text=True, check=True)
 def run(label):
