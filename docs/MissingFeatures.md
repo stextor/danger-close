@@ -1296,8 +1296,21 @@ large for a household that funds spending from a taxable account. An exclusion f
 
 ## D-30 · No state standard deduction, personal exemption or credit is taken — opened at v6.01
 
+> ◐ **BATCH 1 CLOSED v6.02 (2026-10-09) — the 27 progressive states take their standard deductions, personal exemptions and personal credits**, each read at
+> its primary source (`docs/SCOPE_D30_DEDUCTIONS_V602.md`, fulfilled, repo-only; `qa/t66_deductions_askai.mjs`). **Open: batch 2, v6.03** — the fifteen
+> flat-rate states (Georgia among them, the example household's state and the parity fingerprint's, so batch 2 re-baselines both). Alabama's deduction of
+> federal income tax moved to **D-31**. *(The entry below is retained.)*
+
 Every state is taxed on its income from the first dollar: no state's standard deduction (or its sliding or phased version), personal exemption, exemption
 credit or personal tax credit is taken, and neither is Alabama's deduction of federal income tax (which is large). v6.00 BR-3 left them out, one change at a
 time; with every progressive state on its own schedule from v6.01 (D-22) this is the main remaining over-statement in the state layer. The figures come
 from the same sources the schedules were read from (several noted in `docs/SCOPE_D22_BRACKETS_V601.md` §0). Related: D-20 (Montana starts from federal
 taxable income). **Medium-high — the recommended next state release; conservative today.**
+
+## D-31 · Deductions a state takes from the federal return are not taken — opened at v6.02
+
+Two kinds, both found while reading D-30's sources (`docs/SCOPE_D30_DEDUCTIONS_V602.md` §0.2): **federal income tax** that Alabama (in full), Missouri (a
+percentage, capped at $5,000 / $10,000) and Oregon (up to $8,500, phased out by federal AGI) let a return deduct; and the **federal senior deduction**
+($6,000 for each filer 65 or older, 2025–2028, phased out above $75,000 / $150,000 of MAGI), which flows into Montana and North Dakota because they start from
+federal taxable income. The state calculator is given neither the year's federal tax nor the model year, and its three callers would each have to pass
+them. Conservative today (more state tax than the law), disclosed in each note. **Medium — its own change to the calculator's arguments; scope first.**
