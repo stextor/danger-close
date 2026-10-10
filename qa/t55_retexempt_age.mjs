@@ -11,9 +11,10 @@
 // Current leg. v589 is registered ONLY so the pre-fix failure stays reproducible.
 import { window } from "./env_dom.mjs";
 import { createRequire } from "module";
+import { d30Pins } from "./d30_ref.mjs";
 const require = createRequire(import.meta.url);
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601"];
+const KNOWN_VERSIONS = ["v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; console.log(`  \u2717 ${n}${d ? " \u2014 " + String(d).slice(0, 240) : ""}`); } };
 const done = () => { console.log(`\nt55 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
@@ -22,8 +23,11 @@ if (!KNOWN_VERSIONS.includes(VER)) { CK(`0-0 version tag ${JSON.stringify(VER)} 
 console.error = () => {}; console.warn = () => {};
 require(`./dom_${VER}.cjs`);
 const g = window.__g; const SR = g.STATE_RULES();
-const EQ = (n, got, exp) => CK(n, Math.abs(got - exp) <= 0.005, `engine ${Number(got).toFixed(4)}, hand ${Number(exp).toFixed(4)}`);
-const T = (code, o) => g.stateTaxAnnual({ code, retIncome: 0, pen: 0, work: 0, capGains: 0, ssTaxableFed: 0, ssGrossA: 0, ssGrossB: 0, ageB: null, single: true, ...o });
+const EQ = (n, got, exp) => CK(n + D30.tag(), Math.abs(got - exp) <= 0.005, `engine ${Number(got).toFixed(4)}, hand ${Number(exp).toFixed(4)}`);
+// v6.02 (D-30 batch 1 — docs/SCOPE_D30_DEDUCTIONS_V602.md, DD-14): Mississippi takes its standard deduction and exemptions. Its pins keep their
+// BASE and on a D-30 leg expect it after them (qa/d30_ref.mjs, on the calculator's own record of the call). A version LIST.
+const D30L = ["v602"].includes(VER), D30 = d30Pins((a) => g.stateTaxAnnual(a), SR, D30L);
+const T = (code, o) => D30.S({ code, retIncome: 0, pen: 0, work: 0, capGains: 0, ssTaxableFed: 0, ssGrossA: 0, ssGrossB: 0, ageB: null, single: true, ...o });
 const J = (code, o) => T(code, { single: false, ...o });
 
 CK("0-1 rates the hand figures assume: IA 3.8 %, PA 3.07 %, MS 4 %, MI 4.25 %, IL 4.95 %", SR.IA.rate === 0.038 && SR.PA.rate === 0.0307 && SR.MS.rate === 0.04 && SR.MI.rate === 0.0425 && SR.IL.rate === 0.0495,
@@ -46,7 +50,7 @@ EQ("PA-6 joint 61/60, $40,000 IRA: exempt — $0", J("PA", { retIncome: 40000, a
 // ── MS: as PA ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
 // v6.00 (D-22 option 3, SCOPE_D22_BRACKETS_V600): Mississippi's first $10,000 of taxable income is untaxed from v6.00 (its own schedule,
 // one band per return). The hand figures keep their taxable base and, on a bracket leg, take the band off it. A version LIST.
-const MSB = ["v600", "v601"].includes(VER), ms = x => MSB ? 0.04 * Math.max(0, x - 10000) : 0.04 * x;
+const MSB = ["v600", "v601", "v602"].includes(VER), ms = x => D30L ? D30.B("MS", x) : MSB ? 0.04 * Math.max(0, x - 10000) : 0.04 * x;
 EQ(MSB ? "MS-1 single 59, $50,000 IRA — the first $10,000 untaxed: 0.04 × 40,000 = $1,600.00" : "MS-1 single 59, $50,000 IRA — 0.04 × 50,000 = $2,000.00", T("MS", { retIncome: 50000, ageA: 59 }), ms(50000));
 EQ("MS-2 single 60, $50,000 IRA: exempt — $0", T("MS", { retIncome: 50000, ageA: 60 }), 0);
 EQ("MS-3 single 50, $30,000 pension: exempt at any age — $0", T("MS", { pen: 30000, ageA: 50 }), 0);
@@ -68,7 +72,7 @@ for (const c of ["IA", "PA", "MS"]) for (const aA of [50, 54, 55, 59, 60, 66]) f
   const single = aB === null, age = SR[c].retExemptAge, ok = a => a >= age;
   const gate = single ? ok(aA) : ok(aA) && ok(aB);
   const exempt = (gate ? ri : 0) + ((gate || SR[c].retExemptPensionAnyAge) ? pen : 0);
-  const want = c === "MS" ? ms(ri + pen - exempt) : SR[c].rate * (ri + pen - exempt), got = T(c, { retIncome: ri, pen, ageA: aA, ageB: aB, single });   // v6.00: MS's band
+  const got = T(c, { retIncome: ri, pen, ageA: aA, ageB: aB, single }), want = c === "MS" ? ms(ri + pen - exempt) : SR[c].rate * (ri + pen - exempt);   // v6.00: MS's band; v6.02: the call first, so MS's want reads its record
   if (Math.abs(got - want) > 0.005) bad.push(`${c} ${aA}/${aB} ri${ri} pen${pen}: ${got.toFixed(2)} vs ${want.toFixed(2)}`); n++;
 }
 for (const single of [true, false]) for (const ri of [20000, 70000, 140000]) for (const pen of [0, 30000]) {

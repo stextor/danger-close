@@ -20,13 +20,14 @@
 // BOTH LEGS. Run: node t64_state_brackets.mjs <tag>
 import { window } from "./env_dom.mjs";
 import { createRequire } from "module";
+import { d30Pins } from "./d30_ref.mjs";
 import { existsSync, readFileSync } from "fs";
 const require = createRequire(import.meta.url);
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v599", "v600", "v601"];
+const KNOWN_VERSIONS = ["v599", "v600", "v601", "v602"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  ✓ ${n}`); } else { fail++; console.log(`  ✗ ${n}${d !== "" ? " — " + String(d).slice(0, 260) : ""}`); } };
-const EQ = (n, got, want, tol = 0.005) => CK(n, typeof got === "number" && Math.abs(got - want) <= tol, `got ${got}, want ${want}`);
+const EQ = (n, got, want, tol = 0.005) => CK(n + D30.tag(), typeof got === "number" && Math.abs(got - want) <= tol, `got ${got}, want ${want}`);
 const done = () => { console.log(`\nt64 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
 console.log(`t64 — STATE BRACKET SCHEDULES (${VER})`);
 if (!KNOWN_VERSIONS.includes(VER)) { CK(`0-0 version tag ${JSON.stringify(VER)} is registered`, false, KNOWN_VERSIONS.join(",")); done(); }
@@ -34,7 +35,11 @@ const BR = VER !== "v599";
 console.error = () => {}; console.warn = () => {};
 require(`./dom_${VER}.cjs`);
 const React = require("react");
-const g = window.__g, SR = g.STATE_RULES(), ST = g.stateTaxAnnual;
+const g = window.__g, SR = g.STATE_RULES();
+// v6.02 (D-30 batch 1 — docs/SCOPE_D30_DEDUCTIONS_V602.md, DD-14): the ten take their deductions, exemptions and credits. §C keeps each
+// case's BASE (written beside it below) and on a D-30 leg expects it after them — qa/d30_ref.mjs, independent of the app, on the calculator's
+// own record of the call; a different base fails. §E's display and Field Manual checks take the v6.02 forms (t66 F holds them). A version LIST.
+const D30L = ["v602"].includes(VER), D30 = d30Pins((a) => g.stateTaxAnnual(a), SR, D30L), ST = D30.S;
 const TEN = ["CA", "MN", "MS", "NJ", "NY", "OK", "OR", "SC", "VA", "WI"];
 
 // ── A · the schedules ──
@@ -156,7 +161,9 @@ const HC = [
   ["WI single 68, IRA $60,000 — $24,000 excluded; $528.85 + 4.4 % × $20,890", "WI", { retIncome: 60000, ageA: 68 }, 1448.01, 1908],
   ["WI joint 60/60, IRA $500,000 — $22,707.70 + 7.65 % × $56,370", "WI", { retIncome: 500000, ageA: 60, ageB: 60, single: false }, 27020.005, 26500],
 ];
-for (const [lbl, code, o, nv, ov] of HC) EQ(`C-${code} ${lbl}: ${BR ? `$${nv}` : `PIN v5.99 $${ov}`}`, call(code, o), BR ? nv : ov);
+// each case's base, in HC's order: the IRA, pension or wages less the exclusion the label names
+const HCB = [60000, 1200000, 800000, 40000, 250000, 40000, 250000, 60000, 40000, 80000, 60000, 200000, 65000, 26000, 36000, 500000];
+HC.forEach(([lbl, code, o, nv, ov], i) => EQ(`C-${code} ${lbl}: ${BR ? `$${nv}` : `PIN v5.99 $${ov}`}`, call(code, o), D30L ? D30.B(code, HCB[i]) : BR ? nv : ov));
 // New York: $20,000 pension exclusion per person from 65; the model's New York AGI is its state base. Worksheet 1 (IT-2105-I 2026): tax + (flat ×
 // TI − tax) × round4((AGI − $107,650) / $50,000), capped at 1; above $215,400 single / $161,550 joint the bracket's own rate on all of it.
 const NYC = [
@@ -170,10 +177,11 @@ const NYC = [
   ["joint, base $200,000 — above $161,550: 5.9 % on all of it", { retIncome: 200000, ageA: 60, ageB: 60, single: false }, 11800],
   ["joint 66/66, pension $160,000 — $40,000 excluded, base $120,000 (the measure is net of the exclusion)", { pen: 160000, ageA: 66, ...J }, 6229.6275],
 ];
-for (const [lbl, o, nv] of NYC) EQ(`C-NY ${lbl}: ${BR ? `$${nv}` : "PIN v5.99: 6 % of the base"}`, call("NY", { ageA: 60, ...o }), BR ? nv : 0.06 * Math.max(0, (o.retIncome || 0) + (o.pen || 0) - (o.pen ? 40000 : 0)));
+const NYB = [100000, 107650, 120000, 140000, 157650, 300000, 120000, 200000, 120000];
+for (const [i, [lbl, o, nv]] of NYC.entries()) EQ(`C-NY ${lbl}: ${BR ? `$${nv}` : "PIN v5.99: 6 % of the base"}`, call("NY", { ageA: 60, ...o }), D30L ? D30.B("NY", NYB[i]) : BR ? nv : 0.06 * Math.max(0, (o.retIncome || 0) + (o.pen || 0) - (o.pen ? 40000 : 0)));
 // A survivor who is spouse B files single: the calculator moves B into A's slot, and the SINGLE schedule applies.
 EQ(`C-SV a survivor (spouse B, 70) on a single return in Oregon, IRA $60,000: ${BR ? "the single chart, $678 + 8.75 % × $48,600 = $4,930.50 (bracket sum $4,931.00)" : "PIN v5.99 8 %"}`,
-   call("OR", { retIncome: 60000, ageA: null, ageB: 70, single: true }), BR ? 4931 : 4800);
+   call("OR", { retIncome: 60000, ageA: null, ageB: 70, single: true }), D30L ? D30.B("OR", 60000) : BR ? 4931 : 4800);
 // Outside the ten, nothing changes: Georgia is flat, Utah keeps its credit (which reads `rate`).
 EQ("C-GA Georgia (flat 4.99 %, not a schedule) single 66, IRA $100,000: $1,746.50 on both legs", call("GA", { retIncome: 100000 }), 1746.5);
 
@@ -212,7 +220,7 @@ const WB = { ...walk.base, JSXElement(n, s, c) { c(n.openingElement, s); n.child
 const quasis = []; walk.full(ast, n => { if (n.type === "TemplateLiteral") quasis.push(n.quasis.map(q => q.value.cooked).join("\u0000")); }, WB);
 const aiLine = quasis.find(q => q.startsWith("Target retirement year: ")) || "";
 // v6.01 splits the phrase around Maryland's county clause (t65 E-1 holds that form). A LIST.
-const E1 = ["v601"].includes(VER) ? quasis.some(q => q === "on the state's own brackets\u0000, top rate \u0000%") : quasis.some(q => q === "on the state's own brackets, top rate \u0000%");
+const E1 = D30L ? quasis.some(q => q === "on the state's own brackets\u0000\u0000, top rate \u0000%") : ["v601", "v602"].includes(VER) ? quasis.some(q => q === "on the state's own brackets\u0000, top rate \u0000%") : quasis.some(q => q === "on the state's own brackets, top rate \u0000%");
 CK(`E-1 the AI context's state line ${BR ? "says a bracket state is taxed on its own brackets, with its top rate" : "PIN v5.99: gives one income-tax rate"}`,
    BR ? E1 : /\(income tax \u0000%\)\.$/.test(aiLine), aiLine.slice(-80));
 // The My Data line, rendered
@@ -240,14 +248,14 @@ const modelLine = () => { const n = [...body().querySelectorAll("div")].filter(d
   await pick("NY"); const ny = modelLine();
   if (BR) {
     CK("E-2 New York: \"the state's own brackets, 3.90% to 10.90%\", no \"effective rate\", dated \"brackets 2026\"",
-       /^Model: the state's own brackets, 3\.90% to 10\.90% · /.test(ny) && !/effective rate/.test(ny) && /Dollar figures by tax year: exclusion 2026 · brackets 2026\./.test(ny), ny.slice(0, 160));
+       /^Model: the state's own brackets, 3\.90% to 10\.90% · /.test(ny) && !/effective rate/.test(ny) && (D30L ? /Dollar figures by tax year: exclusion 2026 · brackets 2026 · deductions 2026\./ : /Dollar figures by tax year: exclusion 2026 · brackets 2026\./).test(ny), ny.slice(0, 160));
     await pick("CA"); const ca = modelLine();
-    CK("E-3 California: \"1.00% to 13.30%\", dated \"brackets 2025\"", /^Model: the state's own brackets, 1\.00% to 13\.30% · /.test(ca) && /Dollar figures by tax year: brackets 2025\./.test(ca), ca.slice(0, 160));
+    CK("E-3 California: \"1.00% to 13.30%\", dated \"brackets 2025\"", /^Model: the state's own brackets, 1\.00% to 13\.30% · /.test(ca) && (D30L ? /Dollar figures by tax year: brackets 2025 · deductions 2025\./ : /Dollar figures by tax year: brackets 2025\./).test(ca), ca.slice(0, 160));
     await pick("OK"); const ok = modelLine();
     CK("E-4 Oklahoma: \"0.00% to 4.50%\"", /^Model: the state's own brackets, 0\.00% to 4\.50% · /.test(ok), ok.slice(0, 120));
   } else CK("E-2 PIN v5.99: New York reads \"6.00% effective rate (an approximation)\"", /^Model: 6\.00% effective rate \(an approximation\)/.test(ny), ny.slice(0, 120));
   // v6.01 puts Maine on its schedule; the state without one is then a flat-rate state (Georgia). A LIST.
-  if (["v601"].includes(VER)) { await pick("GA"); const ga = modelLine();
+  if (["v601", "v602"].includes(VER)) { await pick("GA"); const ga = modelLine();
     CK("E-5 a state without a schedule (Georgia, flat) still reads \"effective rate (an approximation)\"", /^Model: 4\.99% effective rate \(an approximation\)/.test(ga), ga.slice(0, 120)); }
   else { await pick("ME"); const me = modelLine();
     CK("E-5 a state without a schedule (Maine) still reads \"effective rate (an approximation)\"", /^Model: 7\.15% effective rate \(an approximation\)/.test(me), me.slice(0, 120)); }
@@ -261,7 +269,10 @@ if (BR) {
   if (["v600"].includes(VER)) CK(`E-6 the Taxes entry names the ten states on their own schedules, and the list IS the set of rows carrying one (${named})`,
      !!named && named.split(", ").sort().join(",") === withB.join(","), named);
   const noDed = Object.keys(SR).filter(c => Object.keys(SR[c]).some(k => /std|standard|deduct|exempt(?!Age|ion)|personal/i.test(k) && !/^retExempt/.test(k)));
-  CK("E-7 \"no state's standard deduction or personal exemption is taken\" — and no row carries a field that could hold one",
+  if (D30L) CK("E-7 (v6.02) the sentence \"no state's standard deduction or personal exemption is taken\" is gone, and the only deduction field is `deduct`, on exactly the 27 progressive rows (t66 A-1, F-5 hold the rest)",
+     !/no state's standard deduction or personal exemption is taken/.test(DOCS) && noDed.join(",") === Object.keys(SR).filter(c => SR[c].brackets).join(",")
+     && Object.keys(SR).every(c => Object.keys(SR[c]).filter(k => /std|standard|deduct|exempt(?!Age|ion)|personal/i.test(k) && !/^retExempt/.test(k)).every(k => k === "deduct")), noDed.join(","));
+  else CK("E-7 \"no state's standard deduction or personal exemption is taken\" — and no row carries a field that could hold one",
      /no state's standard deduction or personal exemption is taken \(conservative\)/.test(DOCS) && noDed.length === 0, noDed.join(","));
   if (["v600"].includes(VER)) CK("E-8 the methodology entry: ten states on their own schedules, one rate for the other progressive states",
      /taxes ten states on their own bracket schedules \(v6\.00\) and uses one rate in place of the brackets for the other progressive states/.test(DOCS));

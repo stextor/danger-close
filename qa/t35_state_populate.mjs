@@ -29,11 +29,12 @@ import { existsSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { createRequire } from "module";
+import { d30Want, d30Recorder, d30Tax } from "./d30_ref.mjs";
 let _s = 42; Math.random = () => { _s = (_s * 1103515245 + 12345) & 0x7fffffff; return _s / 0x7fffffff; };
 
 const VER = process.argv[2] || "v565";
 const _vt = Number(String(VER).replace(/[^0-9]/g, "")) || 0;
-const KNOWN_VERSIONS = ["v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601"];
+const KNOWN_VERSIONS = ["v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -48,7 +49,7 @@ const POPULATED = _v >= 565;   // v5.65 is the release that populates Connecticu
 // exclusions: each keeps its BASE and, on the v6.01 leg, expects that base on the state's schedule, computed HERE, independently of the app
 // (t65 §A's transcription). `CTX(flat)` turns a v6.00 figure (5 % × base) into the base's tax on Connecticut's schedule; §C recovers the
 // exclusion by inverting that schedule rather than dividing by 5 %. A version LIST.
-const BR2 = ["v601"].includes(VER);
+const BR2 = ["v601", "v602"].includes(VER);
 const _CTS = { single: [[10000, .02], [50000, .045], [100000, .055], [200000, .06], [250000, .065], [500000, .069], [null, .0699]],
                joint: [[20000, .02], [100000, .045], [200000, .055], [400000, .06], [500000, .065], [1000000, .069], [null, .0699]] };
 const _CTA = { single: [[56500, 5000, 25, 250], [105000, 5000, 25, 250], [200000, 5000, 90, 2700], [500000, 5000, 50, 450]],
@@ -57,7 +58,13 @@ const _RIS = [[82050, .0375], [186450, .0475], [1000000, .0599], [null, .0899]];
 const _bsum = (rows, x) => { let t = 0, lo = 0; for (const [u, r] of rows) { const hi = u === null ? Infinity : u; if (x <= lo) break; t += (Math.min(x, hi) - lo) * r; lo = hi; } return t; };
 const ctSched = (base, single = false) => { const k = single ? "single" : "joint"; let t = _bsum(_CTS[k], base);
   for (const [over, per, each, mx] of _CTA[k]) if (base > over) t += Math.min(mx, each * Math.ceil((base - over) / per)); return t; };
-const CTX = (flat, single = false) => BR2 ? ctSched(flat / 0.05, single) : flat;
+// v6.02 (D-30 batch 1 — docs/SCOPE_D30_DEDUCTIONS_V602.md, DD-14): Connecticut and Rhode Island take their personal exemptions (and
+// Connecticut its personal-credit decimal; Rhode Island its standard deduction). §B keeps each BASE and on a D-30 leg expects it after them,
+// computed by qa/d30_ref.mjs (independent of the app) from the calculator's own record of the pinned call; a different base fails (NaN).
+// §C recovers the exclusion from that record's base and asserts the tax equals the reference on it, so the exclusion -> tax wiring stays
+// checked; RI-4 prices the no-exclusion base the same way. A version LIST.
+const D30L = ["v602"].includes(VER);
+const CTX = (flat, single = false) => D30L ? d30Want(R, "CT", flat / 0.05, D30REC.last) : BR2 ? ctSched(flat / 0.05, single) : flat;
 // The schedule is strictly increasing in the base, so a tax names one base: bisection to a millionth of a dollar.
 const ctBase = (tax, single = false) => { let lo = 0, hi = 1e8; for (let i = 0; i < 200 && hi - lo > 1e-7; i++) { const m = (lo + hi) / 2; if (ctSched(m, single) < tax) lo = m; else hi = m; } return (lo + hi) / 2; };
 
@@ -76,6 +83,7 @@ const NOTE_MATCHER = SETS.NOTE_MATCHER;
 const MOD = await import(`./app_${VER}.mjs`);
 const __g = MOD.__g, __engines = MOD.__engines;
 const ST = __g.stateTaxAnnual;
+const D30REC = d30Recorder(ST);
 const R = __g.STATE_RULES();
 // v5.69: the shipped example household, captured BEFORE any section mutates PORTFOLIO (§E replaces it with a
 // Connecticut fixture). §F prices Rhode Island through the engine on this household, which crosses RI's cliff.
@@ -90,7 +98,7 @@ console.log(`t35 — POPULATED STATES: Connecticut (${VER}${POPULATED ? "" : " �
 // Connecticut priced through `stateTaxAnnual` at its REAL shipped rate (5%), not at rate 1. Every
 // expectation below is a state TAX in dollars, so a wiring error between the exclusion and the tax
 // cannot pass here the way it could in a suite that recovers the exclusion algebraically.
-const ctTax = (args) => ST({
+const ctTax = (args) => (D30L ? D30REC.call : ST)({
   code: "CT", fallbackRate: 0, ageA: 70, ageB: 70, single: false,
   retIncome: 0, pen: 0, work: 0, capGains: 0, ssTaxableFed: 0, ...args,
 });
@@ -248,6 +256,8 @@ const ctTax = (args) => ST({
   // v6.01: on Connecticut's schedule the tax is no longer 5 % of the base, so the base is recovered by inverting the schedule (`ctBase`).
   const exclAt = (income, single) => {
     const tax = ctTax({ retIncome: income, single, ageB: single ? null : 70 });
+    if (D30L) { const d = D30REC.last; const w = d30Tax(R, "CT", { base: d.base, agi: d.agi, single: d.single, ageA: d.ageA, ageB: d.ageB }).tax;
+      return Math.abs(tax - w) <= 0.005 ? income - d.base : NaN; }   // v6.02: the record's base, its tax held to the reference
     return income - (BR2 ? ctBase(tax, single) : tax / 0.05);
   };
 
@@ -372,7 +382,7 @@ const ctTax = (args) => ST({
       T("D-15 [v5.69]: and states the cliff is EXCLUSIVE — AGI must be less than the threshold",
         /less than the threshold/i.test(_rin));
       // v5.95 (D-12 Phase 3): both gaps are CLOSED — the note now says IRA income stays taxable and each $50,000 is capped per person.
-      if ((VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601")) {
+      if ((VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602")) {
         T("D-16 [v5.95]: the note says IRA distributions stay taxable (D-RI-1 closed)", /IRA distributions, which the statute does not cover, stay taxable/i.test(_rin));
         T("D-17 [v5.95]: and that each person's $50,000 is capped at that person's own income (D-RI-3 closed)", /capped at that person's own pension, annuity and employer-plan income/i.test(_rin));
       } else {
@@ -536,14 +546,15 @@ const ctTax = (args) => ST({
       if (Math.abs(direct - r.stateTax) > 0.01) { mismatched++; if (r.stateTax < direct - 0.01) lower++; }
       const m = ret + pen + work + cg + ss, qualAges = (r.ageA >= 67) || (!r.filingSingle && r.ageB >= 67);
       const _b0 = Math.max(0, ret + pen) + Math.max(0, work) + (r0.ss || 0) * Math.max(0, ss) + Math.max(0, cg);
-      const noExcl = BR2 ? _bsum(_RIS, _b0) : r0.rate * _b0;   // v6.01: Rhode Island's schedule on the no-exclusion base
+      const noExcl = D30L ? d30Tax(R, "RI", { base: _b0, agi: m, single: !!r.filingSingle, ageA: r.ageA, ageB: r.ageB }).tax   // v6.02: after RI's deductions
+                   : BR2 ? _bsum(_RIS, _b0) : r0.rate * _b0;   // v6.01: Rhode Island's schedule on the no-exclusion base
       if (m >= THR(r) && qualAges && ret + pen > 0) { above++; if (r.stateTax < noExcl - 0.01) aboveGranted++; }
       if (m < THR(r) && qualAges && ret + pen > 0) belowQual++;
     }
     T(`RI-1: the engine priced Rhode Island rows to compare (compared ${compared})`, compared > 0);
     // v5.95 (D-12 Phase 3): the engine now passes byPerson, which this re-price cannot rebuild from row fields. Rows still match where
     // no per-person rule binds; where one does, RI's per-person caps and IRA exclusion can only REMOVE exclusion, so the engine is higher.
-    if ((VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601")) T(`RI-2 [v5.95]: rows re-price identically except where a per-person rule binds, and there the engine is HIGHER (mismatched ${mismatched} of ${compared}, lower ${lower})`, lower === 0 && mismatched > 0 && mismatched < compared);
+    if ((VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602")) T(`RI-2 [v5.95]: rows re-price identically except where a per-person rule binds, and there the engine is HIGHER (mismatched ${mismatched} of ${compared}, lower ${lower})`, lower === 0 && mismatched > 0 && mismatched < compared);
     else T(`RI-2: every engine row re-prices identically through the module (mismatched ${mismatched} of ${compared})`, mismatched === 0);
     T(`RI-3: the household crosses the cliff \u2014 qualifying rows exist BOTH at/above it (${above}) and below it (${belowQual}), so the section can discriminate`,
       above > 0 && belowQual > 0);

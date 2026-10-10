@@ -16,9 +16,10 @@
 // Run: node t54_wv_senior_modification.mjs <tag>   Current leg. v588 is registered ONLY so the pre-fix failure stays reproducible.
 import { window } from "./env_dom.mjs";
 import { createRequire } from "module";
+import { d30Pins, d30Tax } from "./d30_ref.mjs";
 const require = createRequire(import.meta.url);
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601"];
+const KNOWN_VERSIONS = ["v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; console.log(`  \u2717 ${n}${d ? " \u2014 " + String(d).slice(0, 240) : ""}`); } };
 const done = () => { console.log(`\nt54 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
@@ -27,22 +28,29 @@ if (!KNOWN_VERSIONS.includes(VER)) { CK(`0-0 version tag ${JSON.stringify(VER)} 
 console.error = () => {}; console.warn = () => {};
 require(`./dom_${VER}.cjs`);
 const g = window.__g; const SR = g.STATE_RULES();
-const EQ = (n, got, exp) => CK(n, Math.abs(got - exp) <= 0.005, `engine ${Number(got).toFixed(4)}, hand ${Number(exp).toFixed(4)}`);
-const T = (code, o) => g.stateTaxAnnual({ code, pen: 0, work: 0, capGains: 0, ssGrossA: 0, ssGrossB: 0, ageB: null, single: true, ...o });
+// v6.02 (D-30 batch 1 — docs/SCOPE_D30_DEDUCTIONS_V602.md, DD-14): WV, MD and ME take their deductions and exemptions (MD its senior credit).
+// Each pin keeps its BASE and on a D-30 leg expects it after them (qa/d30_ref.mjs, on the calculator's own record of the call). The grid
+// recovers each household's base from that record and holds its tax to the reference on it, so the relief stays measured. A version LIST.
+const D30L = ["v602"].includes(VER), D30 = d30Pins((a) => g.stateTaxAnnual(a), SR, D30L);
+const EQ = (n, got, exp) => CK(n + D30.tag(), Math.abs(got - exp) <= 0.005, `engine ${Number(got).toFixed(4)}, hand ${Number(exp).toFixed(4)}`);
+const T = (code, o) => D30.S({ code, pen: 0, work: 0, capGains: 0, ssGrossA: 0, ssGrossB: 0, ageB: null, single: true, ...o });
 // v6.01 (D-22 batch 2, SCOPE_D22_BRACKETS_V601): West Virginia, Maryland and Maine move to their own schedules (Maryland with its 3.30 % county
 // tax). Every hand figure keeps its BASE — the modification arithmetic this suite pins — and, on the v6.01 leg, expects that base on the state's
 // schedule, computed here from t65 §A's transcription (`SX`, a v6.00 figure rate × base -> the base's tax). §X recovers the relief by inverting
 // the schedule (`SBASE`, bisection: each schedule is strictly increasing) instead of dividing by the rate. A version LIST.
-const BR2 = ["v601"].includes(VER);
+const BR2 = ["v601", "v602"].includes(VER);
 const _bs = (rows, x) => { let t = 0, lo = 0; for (const [u, r] of rows) { const hi = u === null ? Infinity : u; if (x <= lo) break; t += (Math.min(x, hi) - lo) * r; lo = hi; } return t; };
 const _S2 = { WV: [0.0482, [[10000, .0211], [25000, .0281], [40000, .0316], [60000, .0422], [null, .0458]], [[10000, .0211], [25000, .0281], [40000, .0316], [60000, .0422], [null, .0458]], 0],
   MD: [0.075, [[1000, .02], [2000, .03], [3000, .04], [100000, .0475], [125000, .05], [150000, .0525], [250000, .055], [500000, .0575], [1000000, .0625], [null, .065]],
               [[1000, .02], [2000, .03], [3000, .04], [150000, .0475], [175000, .05], [225000, .0525], [300000, .055], [600000, .0575], [1200000, .0625], [null, .065]], 0.033],
   ME: [0.0715, [[27400, .058], [64850, .0675], [1000000, .0715], [null, .0915]], [[54850, .058], [129750, .0675], [1500000, .0715], [null, .0915]], 0] };
-const EQ2 = (n, got, exp) => EQ(BR2 ? `${n} [v6.01: the same base on the state's own brackets -> $${exp.toFixed(2)}]` : n, got, exp);
+const EQ2 = (n, got, exp) => EQ(BR2 && !D30L ? `${n} [v6.01: the same base on the state's own brackets -> $${exp.toFixed(2)}]` : n, got, exp);
 const SCHT = (code, base, single) => { const [, sg, jt, loc] = _S2[code]; return _bs(single ? sg : jt, base) + loc * base; };
-const SX = (code, flat, single = true) => BR2 ? SCHT(code, flat / _S2[code][0], single) : flat;
-const SBASE = (code, tax, single) => { if (!BR2) return tax / _S2[code][0]; let lo = 0, hi = 1e8;
+const SX = (code, flat, single = true) => D30L ? D30.X(code, flat, _S2[code][0]) : BR2 ? SCHT(code, flat / _S2[code][0], single) : flat;
+const SBASE = (code, tax, single) => {
+  if (D30L) { const d = D30.rec.last, w = d && d30Tax(SR, code, { base: d.base, agi: d.agi, single: d.single, ageA: d.ageA, ageB: d.ageB }).tax;
+    return d && Math.abs(tax - w) <= 0.005 ? d.base : NaN; }
+  if (!BR2) return tax / _S2[code][0]; let lo = 0, hi = 1e8;
   for (let i = 0; i < 200 && hi - lo > 1e-7; i++) { const m = (lo + hi) / 2; if (SCHT(code, m, single) < tax) lo = m; else hi = m; } return (lo + hi) / 2; };
 
 // ── 0 · the inputs the hand figures rest on ─────────────────────────────────────────────────────────────────────────────────

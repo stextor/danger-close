@@ -12,12 +12,13 @@
 // Run: node t51_state_figure_years.mjs <tag>        Current leg only (`years` does not exist before v5.86).
 import { window } from "./env_dom.mjs";
 import { createRequire } from "module";
+import { d30Pins } from "./d30_ref.mjs";
 import { existsSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 const require = createRequire(import.meta.url);
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601"];
+const KNOWN_VERSIONS = ["v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; console.log(`  \u2717 ${n}${d ? " \u2014 " + String(d).slice(0, 240) : ""}`); } };
 const done = () => { console.log(`\nt51 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
@@ -28,10 +29,14 @@ require(`./dom_${VER}.cjs`);
 const React = require("react");
 const g = window.__g;
 const SR = g.STATE_RULES();
+// v6.02 (D-30 batch 1 — docs/SCOPE_D30_DEDUCTIONS_V602.md): the 27 progressive rows carry `deduct`, a dollar figure dated by `years.deduct`
+// (DD-12); the six held at TY2025 are AR, CA, DC, MD, OR, VT (DD-8). §E's pins keep their BASE and on a D-30 leg expect it after the state's
+// deductions (qa/d30_ref.mjs on the calculator's own record of the call; a different base fails). A version LIST.
+const D30L = ["v602"].includes(VER), D30 = d30Pins(g.stateTaxAnnual, SR, D30L);
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SETS = [join(HERE, "tools", "state_sets.cjs"), join(HERE, "state_sets.cjs")].find(existsSync);
-const EQ = (n, got, exp) => CK(n, Math.abs(got - exp) <= 0.005, `engine ${Number(got).toFixed(4)}, hand ${Number(exp).toFixed(4)}`);
-const tax = o => g.stateTaxAnnual({ retIncome: 0, pen: 0, work: 0, capGains: 0, ssTaxableFed: 0, ssGrossA: 0, ssGrossB: 0, ageA: 70, ageB: 70, single: false, ...o });
+const EQ = (n, got, exp) => CK(n + D30.tag(), Math.abs(got - exp) <= 0.005, `engine ${Number(got).toFixed(4)}, hand ${Number(exp).toFixed(4)}`);
+const tax = o => D30.S({ retIncome: 0, pen: 0, work: 0, capGains: 0, ssTaxableFed: 0, ssGrossA: 0, ssGrossB: 0, ageA: 70, ageB: 70, single: false, ...o });
 
 // ── V · every §1a/§1b figure equals the primary source ─────────────────────────────────────────────────────────────────
 const V = [
@@ -79,8 +84,8 @@ CK("V-LA2 Louisiana's note carries $12,324, names IRA distributions, and disclos
 // ── X · extinction: no dollar figure without a year ────────────────────────────────────────────────────────────────────
 const TAX_YEAR = 2026;   // TAX_CONSTANTS_YEAR at v5.86: no displayed year may run ahead of the model's tax year
 // v6.00 (D-22 option 3): a bracket schedule's thresholds are dollar figures and carry their tax year (`years.brackets`). A version LIST.
-const BRACKET_LEGS = ["v600", "v601"], BRK = BRACKET_LEGS.includes(VER);
-const dollarFields = r => ["excl65", "exclTest", "ssRule", "retCap", ...(BRK ? ["brackets"] : [])].filter( /* retCap: v5.90 (D-24), Michigan */f => f === "excl65" ? (r.excl65 || 0) > 0 : r[f] !== undefined);
+const BRACKET_LEGS = ["v600", "v601", "v602"], BRK = BRACKET_LEGS.includes(VER);
+const dollarFields = r => ["excl65", "exclTest", "ssRule", "retCap", ...(BRK ? ["brackets"] : []), ...(D30L ? ["deduct"] : [])].filter( /* retCap: v5.90 (D-24), Michigan */f => f === "excl65" ? (r.excl65 || 0) > 0 : r[f] !== undefined);
 const bearing = Object.entries(SR).filter(([, r]) => dollarFields(r).length > 0);
 const missing = [], badYear = [], stale = [], stray = [];
 for (const [c, r] of Object.entries(SR)) {
@@ -98,15 +103,16 @@ CK("X-3 no `years` key names a field that is absent or carries no dollars", stal
 CK("X-4 no row without a dollar figure carries `years`", stray.length === 0, stray.join(","));
 CK("X-5 no rate carries a year (D18-1)", Object.values(SR).every(r => !r.years || r.years.rate === undefined));
 // v6.01 (D-22 batch 2): seventeen more schedules, six of them in rows with no other figure (DC, HI, KS, MO, ND, NE). A version LIST.
-const BRK2 = ["v601"].includes(VER);
-CK(`X-6 the census: ${BRK2 ? "33 dollar-bearing rows, 59 dated figures (v6.01: + seventeen bracket schedules, six of them in rows with no other figure — DC, HI, KS, MO, ND, NE)" : BRK ? "27 dollar-bearing rows, 42 dated figures (v6.00: + ten bracket schedules, three of them in rows with no other figure — CA, MS, OR)" : "24 dollar-bearing rows, 32 dated figures (v5.90: + Michigan's cap, D-24)"}`,
-   bearing.length === (BRK2 ? 33 : BRK ? 27 : 24) && bearing.reduce((a, [, r]) => a + dollarFields(r).length, 0) === (BRK2 ? 59 : BRK ? 42 : 32),
+const BRK2 = ["v601", "v602"].includes(VER);
+CK(`X-6 the census: ${D30L ? "33 dollar-bearing rows, 86 dated figures (v6.02: + the 27 progressive rows' deductions, every one in a row already dated)" : BRK2 ? "33 dollar-bearing rows, 59 dated figures (v6.01: + seventeen bracket schedules, six of them in rows with no other figure — DC, HI, KS, MO, ND, NE)" : BRK ? "27 dollar-bearing rows, 42 dated figures (v6.00: + ten bracket schedules, three of them in rows with no other figure — CA, MS, OR)" : "24 dollar-bearing rows, 32 dated figures (v5.90: + Michigan's cap, D-24)"}`,
+   bearing.length === (BRK2 ? 33 : BRK ? 27 : 24) && bearing.reduce((a, [, r]) => a + dollarFields(r).length, 0) === (D30L ? 86 : BRK2 ? 59 : BRK ? 42 : 32),
    `${bearing.length} rows`);
 // D18-A: exactly these figures stay at their latest published year, TY2025; every other is TY2026
-const Y2025 = ["ME.exclTest", "MT.excl65", "RI.excl65", "RI.exclTest", "RI.ssRule", "MI.retCap", ...(BRK ? ["CA.brackets"] : [])];   // v6.00: California's TY2025 schedules (TY2026 unpublished)
+const Y2025 = ["ME.exclTest", "MT.excl65", "RI.excl65", "RI.exclTest", "RI.ssRule", "MI.retCap", ...(BRK ? ["CA.brackets"] : []),
+  ...(D30L ? ["AR.deduct", "CA.deduct", "DC.deduct", "MD.deduct", "OR.deduct", "VT.deduct"] : [])];   // v6.02 (DD-8): the six deductions held at TY2025   // v6.00: California's TY2025 schedules (TY2026 unpublished)
 const yr = bearing.flatMap(([c, r]) => dollarFields(r).map(f => [`${c}.${f}`, r.years && r.years[f]]));
 const wrongYr = yr.filter(([k, v]) => v !== (Y2025.includes(k) ? 2025 : 2026)).map(([k, v]) => `${k}=${v}`);
-CK(`X-7 TY2025 exactly for ME's thresholds, MT, RI and MI's cap (unpublished for 2026; MI added v5.90)${BRK ? ` and CA's brackets (v6.00); TY2026 for the other ${BRK2 ? 52 : 35}` : "; TY2026 for the other 26"}`, wrongYr.length === 0, wrongYr.join(","));
+CK(`X-7 TY2025 exactly for ME's thresholds, MT, RI and MI's cap (unpublished for 2026; MI added v5.90)${BRK ? ` and CA's brackets (v6.00)${D30L ? ", and the AR, CA, DC, MD, OR and VT deductions (v6.02)" : ""}; TY2026 for the other ${D30L ? 73 : BRK2 ? 52 : 35}` : "; TY2026 for the other 26"}`, wrongYr.length === 0, wrongYr.join(","));
 const { NOTE_MATCHER } = require(SETS);
 CK("X-8 Louisiana's rewritten note does not enter the income-limited set (LA is not income-limited in law)", !NOTE_MATCHER.test(SR.LA.note));
 
@@ -115,8 +121,8 @@ CK("X-8 Louisiana's rewritten note does not enter the income-limited set (LA is 
 // v6.01 (D-22 batch 2): Maine is on its own schedule. Each case keeps its BASE (the exclusion arithmetic it pins) and, on the v6.01 leg, prices
 // it on Maine's schedule — t65 §A's transcription, not the app's (`MEX`: a v6.00 figure, 7.15 % × base -> the base's tax). A version LIST.
 const _bs = (rows, x) => { let t = 0, lo = 0; for (const [u, r] of rows) { const hi = u === null ? Infinity : u; if (x <= lo) break; t += (Math.min(x, hi) - lo) * r; lo = hi; } return t; };
-const MEX = (flat, single = false) => BRK2 ? _bs(single ? [[27400, .058], [64850, .0675], [1000000, .0715], [null, .0915]] : [[54850, .058], [129750, .0675], [1500000, .0715], [null, .0915]], flat / 0.0715) : flat;
-const EQM = (n, got, flat, single = false) => EQ(BRK2 ? `${n} [v6.01: the same base on Maine's own brackets -> $${MEX(flat, single).toFixed(2)}]` : n, got, MEX(flat, single));
+const MEX = (flat, single = false) => D30L ? D30.X("ME", flat, 0.0715) : BRK2 ? _bs(single ? [[27400, .058], [64850, .0675], [1000000, .0715], [null, .0915]] : [[54850, .058], [129750, .0675], [1500000, .0715], [null, .0915]], flat / 0.0715) : flat;
+const EQM = (n, got, flat, single = false) => EQ(BRK2 && !D30L ? `${n} [v6.01: the same base on Maine's own brackets -> $${MEX(flat, single).toFixed(2)}]` : n, got, MEX(flat, single));
 EQ("E-ME1 single 70, pension $30,000 < cap → no tax", tax({ code: "ME", single: true, pen: 30000 }), 0);
 EQM("E-ME2 single 70, IRA $60,000, SS $20,000 → excl $29,824, tax 7.15 % × $30,176 = $2,157.584",
    tax({ code: "ME", single: true, retIncome: 60000, ssGrossA: 20000 }), 2157.584, true);
@@ -139,7 +145,7 @@ EQ("E-LA7 single 70, taxable SS $20,000 only → Louisiana taxes none of it", ta
 // New Jersey 5.5 %, joint 70/70: "$100,000 or less" takes the full exclusion (inclusive, no `cmp`); above, 50 % of the payments.
 EQ("E-NJ1 joint, pension $100,000 exactly → full $100,000 exclusion, no tax", tax({ code: "NJ", pen: 100000 }), 0);
 EQ(BRK ? "E-NJ2 joint, pension $100,001 → 50 % excluded; $50,000.50 on New Jersey's joint schedule: .0245 × $50,000.50 − $420 = $805.01 (v6.00)"
-        : "E-NJ2 joint, pension $100,001 → 50 % excluded, 5.5 % × $50,000.50 = $2,750.03", tax({ code: "NJ", pen: 100001 }), BRK ? 0.0245 * 50000.5 - 420 : 2750.0275);
+        : "E-NJ2 joint, pension $100,001 → 50 % excluded, 5.5 % × $50,000.50 = $2,750.03", tax({ code: "NJ", pen: 100001 }), D30L ? D30.B("NJ", 50000.5) : BRK ? 0.0245 * 50000.5 - 420 : 2750.0275);
 
 // ── D · the display: My Data shows each figure's year, never the blanket label ─────────────────────────────────────────
 const body = () => window.document.body;
@@ -169,14 +175,14 @@ const modelLine = () => { const n = [...body().querySelectorAll("div")].filter(d
   await pick("ME"); const me = modelLine();
   // v6.01: Maine's schedule adds a third dated figure, and Maine no longer reads as one rate; D-3 moves to Georgia, a flat-rate state with a dated
   // figure (its exclusion). A version LIST.
-  CK(BRK2 ? "D-1 Maine: the line dates every figure — exclusion 2026, income test 2025, brackets 2026" : "D-1 Maine: the line dates both figures — exclusion 2026, income test 2025",
-     (BRK2 ? /Dollar figures by tax year: exclusion 2026 · income test 2025 · brackets 2026\./ : /Dollar figures by tax year: exclusion 2026 · income test 2025\./).test(me), me.slice(0, 200));
+  CK(D30L ? "D-1 Maine: the line dates every figure — exclusion 2026, income test 2025, brackets 2026, deductions 2026" : BRK2 ? "D-1 Maine: the line dates every figure — exclusion 2026, income test 2025, brackets 2026" : "D-1 Maine: the line dates both figures — exclusion 2026, income test 2025",
+     (D30L ? /Dollar figures by tax year: exclusion 2026 · income test 2025 · brackets 2026 · deductions 2026\./ : BRK2 ? /Dollar figures by tax year: exclusion 2026 · income test 2025 · brackets 2026\./ : /Dollar figures by tax year: exclusion 2026 · income test 2025\./).test(me), me.slice(0, 200));
   CK("D-2 the blanket \"2026 approx\" label is gone", me.length > 0 && !/2026 approx/i.test(me), me.slice(0, 80));
   let d3 = me; if (BRK2) { await pick("GA"); d3 = modelLine(); }
   CK(`D-3 ${BRK2 ? "a flat-rate state's (Georgia's) rate" : "the rate"} reads as an approximation, with no year beside it`, /effective rate \(an approximation\)/.test(d3) && !/rate[^·]*20\d\d/.test(d3.split("—")[0]), d3.slice(0, 80));
   await pick("RI"); const ri = modelLine();
-  CK(BRK2 ? "D-4 Rhode Island: its exclusion figures dated 2025 and its 2026 schedule dated 2026, as its note says" : "D-4 Rhode Island: every figure dated 2025, as its note says",
-     (BRK2 ? /Dollar figures by tax year: exclusion 2025 · income test 2025 · Social Security rule 2025 · brackets 2026\./ : /Dollar figures by tax year: exclusion 2025 · income test 2025 · Social Security rule 2025\./).test(ri), ri.slice(-260));
+  CK(D30L ? "D-4 Rhode Island: its exclusion figures dated 2025, its 2026 schedule and deductions dated 2026, as its note says" : BRK2 ? "D-4 Rhode Island: its exclusion figures dated 2025 and its 2026 schedule dated 2026, as its note says" : "D-4 Rhode Island: every figure dated 2025, as its note says",
+     (D30L ? /Dollar figures by tax year: exclusion 2025 · income test 2025 · Social Security rule 2025 · brackets 2026 · deductions 2026\./ : BRK2 ? /Dollar figures by tax year: exclusion 2025 · income test 2025 · Social Security rule 2025 · brackets 2026\./ : /Dollar figures by tax year: exclusion 2025 · income test 2025 · Social Security rule 2025\./).test(ri), ri.slice(-260));
   await pick("TX"); const tx = modelLine();
   CK("D-5 a state with no dollar figure shows no year line", tx.length > 0 && !/Dollar figures by tax year/.test(tx), tx.slice(0, 120));
   try { await act(async () => { root.unmount(); }); } catch (e) {}

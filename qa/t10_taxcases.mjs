@@ -14,6 +14,7 @@ import { existsSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { createRequire } from "module";
+import { d30Want, d30Recorder, d30Tax } from "./d30_ref.mjs";
 // SCOPE_STATE_SET_SELECTOR §7.6 stage 1: the [BY DECISION v5.59] pins read the ONE shared phrase matcher.
 const _HERE = dirname(fileURLToPath(import.meta.url));
 const _SETS_PATH = [join(_HERE, "tools", "state_sets.cjs"), join(_HERE, "state_sets.cjs")].find(existsSync);
@@ -36,7 +37,7 @@ const R = Math.round;
 // its expectation is that base on the state's schedule. `SCH` computes it here, independently of the app, from schedules transcribed from
 // the same primary sources as t64 §A (only the four states §2E prices are needed). `TB` labels the bracket figure, so a passing line never
 // claims "0.055 x ..." while asserting something else. A version LIST, so register_tag extends it each release.
-const STB_LEGS = ["v600", "v601"], STB = STB_LEGS.includes(VER);
+const STB_LEGS = ["v600", "v601", "v602"], STB = STB_LEGS.includes(VER);
 const _STB = { MS: [0.04, [[10000, 0], [null, 0.04]], [[10000, 0], [null, 0.04]]],
   NJ: [0.055, [[20000, .014], [35000, .0175], [40000, .035], [75000, .05525], [500000, .0637], [1000000, .0897], [null, .1075]],
               [[20000, .014], [50000, .0175], [70000, .0245], [80000, .035], [150000, .05525], [500000, .0637], [1000000, .0897], [null, .1075]]],
@@ -45,12 +46,12 @@ const _STB = { MS: [0.04, [[10000, 0], [null, 0.04]], [[10000, 0], [null, 0.04]]
 const SCH = (code, flat, single = false) => { if (!STB) return flat; const [r0, sg, jt] = _STB[code], x = flat / r0; let t = 0, lo = 0;
   for (const [u, r] of (single ? sg : jt)) { const hi = u === null ? Infinity : u; if (x <= lo) break; t += (Math.min(x, hi) - lo) * r; lo = hi; } return t; };
 const TV = (name, got, before, after) => T(STB ? `${name} [v6.00: the same base on the state's own brackets -> $${(+after).toFixed(2)}]` : name, got, STB ? after : before);
-const TB = (name, got, code, flat, single = false) => TV(name, got, flat, SCH(code, flat, single));
+const TB = (name, got, code, flat, single = false) => D30L ? TD(name, got, code, flat) : TV(name, got, flat, SCH(code, flat, single));
 // v6.01 (D-22 batch 2 — docs/SCOPE_D22_BRACKETS_V601.md): seventeen more states move to their own schedules. The §2E pins that price one of
 // them at its v6.00 single rate keep their BASE (the exclusion arithmetic each exists to pin) and, on the v6.01 leg, expect that base on the
 // state's schedule — computed here, independently of the app, from t65 §A's transcription. Maryland adds its 3.30 % county tax on the same base
 // (no pin here reaches its $350,000 capital-gains test). `TB2` labels the schedule figure. A version LIST.
-const STB2_LEGS = ["v601"], STB2 = STB2_LEGS.includes(VER);
+const STB2_LEGS = ["v601", "v602"], STB2 = STB2_LEGS.includes(VER);
 const _STB2 = { AL: [0.045, [[500, .02], [3000, .04], [null, .05]], [[1000, .02], [6000, .04], [null, .05]]],
   DE: [0.055, [[2000, 0], [5000, .022], [10000, .039], [20000, .048], [25000, .052], [60000, .0555], [null, .066]], [[2000, 0], [5000, .022], [10000, .039], [20000, .048], [25000, .052], [60000, .0555], [null, .066]]],
   MD: [0.075, [[1000, .02], [2000, .03], [3000, .04], [100000, .0475], [125000, .05], [150000, .0525], [250000, .055], [500000, .0575], [1000000, .0625], [null, .065]],
@@ -62,7 +63,21 @@ const _STB2 = { AL: [0.045, [[500, .02], [3000, .04], [null, .05]], [[1000, .02]
 const SCH2 = (code, flat, single = false) => { if (!STB2) return flat; const [r0, sg, jt, loc = 0] = _STB2[code], x = flat / r0; let t = 0, lo = 0;
   for (const [u, r] of (single ? sg : jt)) { const hi = u === null ? Infinity : u; if (x <= lo) break; t += (Math.min(x, hi) - lo) * r; lo = hi; } return t + loc * x; };
 const TV2 = (name, got, before, after) => T(STB2 ? `${name} [v6.01: the same base on the state's own brackets -> $${(+after).toFixed(2)}]` : name, got, STB2 ? after : before);
-const TB2 = (name, got, code, flat, single = false) => TV2(name, got, flat, SCH2(code, flat, single));
+const TB2 = (name, got, code, flat, single = false) => D30L ? TD(name, got, code, flat) : TV2(name, got, flat, SCH2(code, flat, single));
+// v6.02 (D-30 batch 1 — docs/SCOPE_D30_DEDUCTIONS_V602.md, DD-14): the 27 progressive states take their standard deductions, exemptions and
+// personal credits. A §2E pin that prices one of them keeps its BASE (flat / its old single rate — the exclusion arithmetic it exists to pin)
+// and on a D-30 leg expects that base after the state's deductions and credits, computed by qa/d30_ref.mjs (independent of the app) from the
+// calculator's own record of the pinned call: its federal-AGI measure, filing status and ages. If the calculator built a different base the
+// expectation is NaN and the pin FAILS — its claim about the base is kept, not re-derived. `S` in §2E records every call; TB / TB2 read the
+// last one, which is the call that produced `got` (an argument evaluated before the wrapper runs). A version LIST.
+const D30_LEGS = ["v602"], D30L = D30_LEGS.includes(VER);
+const D30REC = d30Recorder((a) => g.stateTaxAnnual(a));
+const TD = (name, got, code, flat) => { const x = flat / (_STB[code] || _STB2[code])[0], w = d30Want(g.STATE_RULES(), code, x, D30REC.last);
+  T(`${name} [v6.02: the same base, $${x.toFixed(2)}, after the state's deductions and credits -> $${(+w).toFixed(2)}]`, got, w); };
+// The difference pins: each of the two calls keeps its own hand base; the expectation is the difference of the two after-deduction figures.
+const D30B = (code, base) => d30Want(g.STATE_RULES(), code, base, D30REC.last);   // the call just made, at its hand base
+const D30D = (name, code, f1, b1, f2, b2) => { const a = f1(), wa = D30B(code, b1), b = f2(), wb = D30B(code, b2);
+  T(`${name} [v6.02: each call's base ($${b1.toLocaleString("en-US")} / $${b2.toLocaleString("en-US")}) after the state's deductions and credits -> $${(wa - wb).toFixed(2)}]`, a - b, wa - wb); };
 
 // ── IRS-verified 2026 constants (independent copy from primary source, NOT from the app) ──
 const STD = { S: 16100, M: 32200 }, SR = { S: 2050, M: 1650 };
@@ -162,7 +177,7 @@ const SUR_R = [0,1150,2880,4620,6360,6940];
 // v5.78 (C-1): 42 U.S.C. §1395r(i)(3)(C)(i)(III) — tiers 1–4 are "not more than" their upper amount, the top tier is "at
 // least" its own. Through v5.77 BOTH reference oracles in this file used `<=` at every tier, the engines' own rule, so an
 // exact-top-threshold case compared the engine's C-1 against the oracle's C-1 and agreed. A LADDER — widen it each release.
-const C1_FIXED = VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601";
+const C1_FIXED = VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602";
 const tierR = (magi, ups) => { for (let i=0;i<ups.length;i++) if (i === ups.length - 2 ? magi < ups[i] : magi <= ups[i]) return i; return ups.length-1; };
 const irmaaRef = (magi, single, persons) => SUR_R[tierR(magi, single?SGL_R:MFJ_R)] * persons;
 // IRMAA isolation builder: 3-year window ending at `premiumYr`, both 65+ that year, MAGI = pen.
@@ -444,7 +459,7 @@ const pass2D = pass - pass2C, fail2D = fail - fail2C;
 // re-checked without running anything.
 const pass2E = pass, fail2E = fail;
 {
-  const S = g.stateTaxAnnual, R = g.STATE_RULES ? g.STATE_RULES() : null;
+  const S = D30L ? D30REC.call : g.stateTaxAnnual, R = g.STATE_RULES ? g.STATE_RULES() : null;   // v6.02: on a D-30 leg every call is recorded (DD-14)
   if (S && R) {
     // One income shape for every archetype, so the only variable is the jurisdiction.
     const IN = { fallbackRate: 0.05, retIncome: 40000, pen: 20000, work: 10000,
@@ -525,7 +540,7 @@ const pass2E = pass, fail2E = fail;
       S({ code: "MS", fallbackRate: 0, retIncome: 5e5, pen: 2e5, work: 0, capGains: 0,
           ssTaxableFed: 0, persons65: 2 }), 0);
     // Gated from v5.90 (a version LIST, so register_tag extends it each release; the prior leg, v5.89, has no gate to test).
-    if (["v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601"].includes(VER)) TB("2E (v5.90): nobody counted 65+ — Mississippi taxes the withdrawals (0.04 × 500,000), not the pension in payment",
+    if (["v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602"].includes(VER)) TB("2E (v5.90): nobody counted 65+ — Mississippi taxes the withdrawals (0.04 × 500,000), not the pension in payment",
       S({ code: "MS", fallbackRate: 0, retIncome: 5e5, pen: 2e5, work: 0, capGains: 0,
           ssTaxableFed: 0, persons65: 0 }), "MS", 20000);
 
@@ -689,14 +704,22 @@ const pass2E = pass, fail2E = fail;
                                     capGains: 0, ssTaxableFed: 0, persons65: 2 }) - i * 0).toFixed(2));
       // v6.00: on a bracket leg the model IS New Jersey's graduated schedule, so each residual below is asserted to be ZERO — the
       //   flat-rate error this block has pinned since v5.67 is gone (SCOPE_D22_BRACKETS_V600). The prior leg keeps the overstatement.
+      // v6.02 (DD-14): New Jersey now takes its personal exemptions ($1,000 each and $1,000 more each at 65 — $4,000 for this couple), so the
+      //   graduated figure the residual is measured against is the same base AFTER them (qa/d30_ref.mjs); the residual is still zero.
+      if (D30L) for (const [i, b] of [[120000, 60000], [140000, 105000], [200000, 200000]]) {
+        const m = NJ(i), w = D30B("NJ", b);
+        T(`[FIXED v5.67] NJ $${i.toLocaleString("en-US")}: the residual against the graduated schedule [v6.02: the base $${b.toLocaleString("en-US")} after New Jersey's exemptions -> $${(+w).toFixed(2)}; residual zero]`, Number((m - w).toFixed(2)), 0);
+      } else {
       TV("[FIXED v5.67] NJ $120,000: the residual is the FLAT-RATE error alone, and it OVERSTATES — model $3,300.00 vs graduated $1,050.00",
         Number((NJ(120000) - 1050.00).toFixed(2)), 2250.00, Number((SCH("NJ", 3300) - 1050.00).toFixed(2)));
       TV("[FIXED v5.67] NJ $140,000: same, overstating — model $5,775.00 vs graduated $3,026.25",
         Number((NJ(140000) - 3026.25).toFixed(2)), 2748.75, Number((SCH("NJ", 5775) - 3026.25).toFixed(2)));
       TV("[FIXED v5.67] NJ $200,000: same, overstating — model $11,000.00 vs graduated $8,697.50",
         Number((NJ(200000) - 8697.50).toFixed(2)), 2302.50, Number((SCH("NJ", 11000) - 8697.50).toFixed(2)));
-      T("[EXTINCTION v5.67] NJ never understates against the graduated schedule at any of the three pinned incomes — the optimistic direction is extinct",
-        (NJ(120000) >= 1050 && NJ(140000) >= 3026.25 && NJ(200000) >= 8697.50) ? 1 : 0, 1);
+      }
+      T(`[EXTINCTION v5.67] NJ never understates against the graduated schedule at any of the three pinned incomes — the optimistic direction is extinct${D30L ? " [v6.02: the schedule after New Jersey's exemptions]" : ""}`,
+        (D30L ? [[120000, 60000], [140000, 105000], [200000, 200000]].every(([i, b]) => { const m = NJ(i); return m >= D30B("NJ", b) - EPS; })
+              : (NJ(120000) >= 1050 && NJ(140000) >= 3026.25 && NJ(200000) >= 8697.50)) ? 1 : 0, 1);
     } else {
       T("[KNOWN DEFECT 2026-08-29] NJ $120,000: model understates by the full statutory tax",
         Number((1050.00 - NJ(120000)).toFixed(2)), 1050.00);
@@ -1114,9 +1137,13 @@ const pass2E = pass, fail2E = fail;
           RIWI_AGE("RI", 80000, 68, 68), _v >= 585 ? 0 : 1020.00);   // v5.85 (D-19): the state's own SS rule — statute-consistent; see CHANGELOG v5.85: "unchanged from v5.59" holds only through v5.84
         TB("[EXTINCTION v5.60] and the qualifying 68/68 WI couple is UNCHANGED from v5.59",
           RIWI_AGE("WI", 60000, 68, 68), "WI", 636.00);
-        TV2("[EXTINCTION v5.60] the correction is confined to the window: RI 66/66 now costs exactly 0.05 x 80,000 more",
+        if (D30L) D30D("[EXTINCTION v5.60] the correction is confined to the window: RI 66/66 costs exactly the window's base more", "RI",
+          () => RIWI_AGE("RI", 80000, 66, 66), 120800, () => RIWI_AGE("RI", 80000, 68, 68), 0);
+        else TV2("[EXTINCTION v5.60] the correction is confined to the window: RI 66/66 now costs exactly 0.05 x 80,000 more",
           Math.round((RIWI_AGE("RI", 80000, 66, 66) - RIWI_AGE("RI", 80000, 68, 68)) * 100) / 100, _v >= 585 ? 6040.00 : 4000.00, Math.round((SCH2("RI", 6040) - SCH2("RI", 0)) * 100) / 100);   // v5.85 (D-19): the state's own SS rule — statute-consistent; see CHANGELOG v5.85: the window now also moves ALL taxable SS (0.05 x 40,800)
-        TV("[EXTINCTION v5.60] and WI 66/66 exactly 0.053 x 48,000 more",
+        if (D30L) D30D("[EXTINCTION v5.60] and WI 66/66 exactly the $48,000 window more", "WI",
+          () => RIWI_AGE("WI", 60000, 66, 66), 60000, () => RIWI_AGE("WI", 60000, 68, 68), 12000);
+        else TV("[EXTINCTION v5.60] and WI 66/66 exactly 0.053 x 48,000 more",
           Math.round((RIWI_AGE("WI", 60000, 66, 66) - RIWI_AGE("WI", 60000, 68, 68)) * 100) / 100, 2544.00, Math.round((SCH("WI", 3180) - SCH("WI", 636)) * 100) / 100);
         T("[BY DECISION v5.60] NM keeps the implicit 65 default — its pass is separate (ROUND4 D-C)",
           R.NM.exclAge === undefined ? 1 : 0, 1);
@@ -1186,7 +1213,9 @@ const pass2E = pass, fail2E = fail;
       const _retEx = Object.keys(R).filter(c => R[c].rate && R[c].retExempt);
       let _wagesTaxed = 0;
       for (const code of _retEx) {
-        const t = S({ code, fallbackRate: 0, retIncome: 0, pen: 0, work: 28000, capGains: 0,
+        // v6.02 (DD-14): Mississippi's deductions and exemptions ($19,600 for this couple) plus its $10,000 zero band now shelter $28,000 of
+        //   wages entirely — the deductions at work, not a wage exemption — so on a D-30 leg the wages are $60,000, above every shelter.
+        const t = S({ code, fallbackRate: 0, retIncome: 0, pen: 0, work: D30L ? 60000 : 28000, capGains: 0,
                       ssTaxableFed: 0, ageA: 67, ageB: 67 });
         if (t > 0) _wagesTaxed++;
       }
@@ -1308,10 +1337,17 @@ const pass2E = pass, fail2E = fail;
             NM({ retIncome: agi, ageA: 70, single: true }), "NM", exp, true);
         // — the band tops are INCLUSIVE ("not over $30,000"), which the sweep above asserts at every
         //   row; this pair makes the STEP itself explicit. An `lt` comparator fails these two.
+        if (D30L) {
+          D30D("[HAND v5.66] NM joint: one dollar over $30,000 moves the base by $2,001", "NM",
+            () => NM({ retIncome: 30001, ageA: 70, ageB: 68 }), 16001, () => NM({ retIncome: 30000, ageA: 70, ageB: 68 }), 14000);
+          D30D("[HAND v5.66] NM single: one dollar over $18,000 moves the base by $1,001", "NM",
+            () => NM({ retIncome: 18001, ageA: 70, single: true }), 11001, () => NM({ retIncome: 18000, ageA: 70, single: true }), 10000);
+        } else {
         TV2("[HAND v5.66] NM joint: one dollar over $30,000 costs 0.049 x (1 + 2,000) = $98.05",
           NM({ retIncome: 30001, ageA: 70, ageB: 68 }) - NM({ retIncome: 30000, ageA: 70, ageB: 68 }), 98.049, SCH2("NM", 784.049) - SCH2("NM", 686));
         TV2("[HAND v5.66] NM single: one dollar over $18,000 costs 0.049 x (1 + 1,000) = $49.05",
           NM({ retIncome: 18001, ageA: 70, single: true }) - NM({ retIncome: 18000, ageA: 70, single: true }), 49.049, SCH2("NM", 539.049, true) - SCH2("NM", 490, true));
+        }
         // — above the top band, which is the whole point of the release
         TB2("[HAND v5.66] NM joint at $60,000 AGI: above $51,000, exemption is $0 — 0.049 x 60,000 = $2,940.00",
           NM({ retIncome: 60000, ageA: 70, ageB: 68 }), "NM", 2940.00);
@@ -1337,6 +1373,12 @@ const pass2E = pass, fail2E = fail;
         // — EXTINCTION (OPERATIONS §D). The defect class is "the exemption is blind to income."
         //   Under v5.65 a $30,000 step up the table cost exactly the rate on the income (0.049 x
         //   30,000 = $1,470.00) because the exemption never moved. It must never cost that again.
+        if (D30L) {   // v6.02 (DD-14): "the rate on the income alone" was a flat-rate proxy; the income-blind counterfactual is now priced directly
+          const a = NM({ retIncome: 60000, ageA: 70, ageB: 68 }), wa = D30B("NM", 60000), b = NM({ retIncome: 30000, ageA: 70, ageB: 68 }), wb = D30B("NM", 14000);
+          const blind = d30Tax(g.STATE_RULES(), "NM", { base: 44000, agi: 60000, single: false, ageA: 70, ageB: 68 }).tax - wb;
+          T(`[EXTINCTION v5.66] NM's exemption is no longer income-blind [v6.02: after New Mexico's deductions the $30K step costs $${(wa - wb).toFixed(2)}, more than the $${blind.toFixed(2)} an income-blind $16,000 would leave it]`,
+            (Math.abs((a - b) - (wa - wb)) < EPS && (a - b) > blind + EPS) ? 1 : 0, 1);
+        } else
         T("[EXTINCTION v5.66] NM's exemption is no longer income-blind: a $30K step up the table costs MORE than the rate on the income alone",
           (NM({ retIncome: 60000, ageA: 70, ageB: 68 }) - NM({ retIncome: 30000, ageA: 70, ageB: 68 })) > 1470.00 + EPS ? 1 : 0, 1);
         // — the scalar beside the table. stateTaxAnnual L1231 requires this of every populated
@@ -1409,13 +1451,19 @@ const pass2E = pass, fail2E = fail;
         //   $50,000 for EVERY tier-2 household regardless of what it receives, and it passes every
         //   tier-1 cell above, because in tier 1 the amount row is the cap. This is the only cell
         //   that separates the two readings, which is why the tier-2 case uses payments != $100,000.
-        TV("[EXTINCTION v5.67] NJ tier 2 takes 50% of the PAYMENTS, not of the $100,000 cap: $60,000 of pension excludes $30,000, not $50,000",
+        if (D30L) D30D("[EXTINCTION v5.67] NJ tier 2 takes 50% of the PAYMENTS, not of the $100,000 cap: $60,000 of pension excludes $30,000, not $50,000", "NJ",
+          () => NJ({ retIncome: 60000, work: 60000, ageA: 66, ageB: 66 }), 90000, () => NJ({ retIncome: 60000, work: 60000, ageA: 50, ageB: 50 }), 120000);
+        else TV("[EXTINCTION v5.67] NJ tier 2 takes 50% of the PAYMENTS, not of the $100,000 cap: $60,000 of pension excludes $30,000, not $50,000",
           NJ({ retIncome: 60000, work: 60000, ageA: 66, ageB: 66 })
             - NJ({ retIncome: 60000, work: 60000, ageA: 50, ageB: 50 }), -0.055 * 30000, SCH("NJ", 0.055 * 90000) - SCH("NJ", 0.055 * 120000));
         // — ⚠ E-NJ-2 · EXTINCTION. The defect class is "a household exclusion applied per person."
         //   A per-person reading doubles it for a couple. Two people and one person in the SAME tier
         //   with the SAME payments must exclude the SAME amount.
-        T("[EXTINCTION v5.67] NJ's exclusion is per HOUSEHOLD: a couple both 66 excludes exactly what one 66-year-old does, not twice",
+        // v6.02 (DD-14): both calls keep the SAME base, $90,000 — the exclusion is per household; the only difference left is New Jersey's
+        //   $1,000 exemption for the second spouse at 65, priced by qa/d30_ref.mjs.
+        if (D30L) D30D("[EXTINCTION v5.67] NJ's exclusion is per HOUSEHOLD: a couple both 66 excludes exactly what one 66-year-old does, not twice", "NJ",
+          () => NJ({ retIncome: 60000, work: 60000, ageA: 66, ageB: 66 }), 90000, () => NJ({ retIncome: 60000, work: 60000, ageA: 66, ageB: 50 }), 90000);
+        else T("[EXTINCTION v5.67] NJ's exclusion is per HOUSEHOLD: a couple both 66 excludes exactly what one 66-year-old does, not twice",
           NJ({ retIncome: 60000, work: 60000, ageA: 66, ageB: 66 })
             - NJ({ retIncome: 60000, work: 60000, ageA: 66, ageB: 50 }), 0.00);
 
@@ -1533,11 +1581,15 @@ const pass2E = pass, fail2E = fail;
         //   Inside the taper the excess has ALREADY been taken once, so a SECOND qualifying spouse adds
         //   a FULL $12,000 to the maximum: -0.0575 x 12,000 = -$690.00. The per-spouse reading gives
         //   -$402.50 here, because it takes the $5,000 excess from the second spouse's $12,000 again.
-        T("[EXTINCTION v5.68] VA once-not-twice: inside the taper a second qualifying spouse adds a FULL $12,000 — the excess is not taken again",
+        if (D30L) D30D("[EXTINCTION v5.68] VA once-not-twice: inside the taper a second qualifying spouse adds a FULL $12,000 — the excess is not taken again", "VA",
+          () => VA({ retIncome: 80000, ageA: 70, ageB: 70 }), 61000, () => VA({ retIncome: 80000, ageA: 70, ageB: 62 }), 73000);
+        else T("[EXTINCTION v5.68] VA once-not-twice: inside the taper a second qualifying spouse adds a FULL $12,000 — the excess is not taken again",
           VA({ retIncome: 80000, ageA: 70, ageB: 70 }) - VA({ retIncome: 80000, ageA: 70, ageB: 62 }), -0.0575 * 12000);
         // — E-VA-2 · the same class where the two readings are furthest apart: at $90,000 the
         //   per-spouse reading has extinguished both deductions (gap $0.00); the statute leaves $9,000.
-        T("[EXTINCTION v5.68] VA once-not-twice: at $90,000 a both-65+ couple still keeps $9,000 that a per-spouse taper would have extinguished at $87,000",
+        if (D30L) D30D("[EXTINCTION v5.68] VA once-not-twice: at $90,000 a both-65+ couple still keeps $9,000 that a per-spouse taper would have extinguished at $87,000", "VA",
+          () => VA({ retIncome: 90000, ageA: 70, ageB: 70 }), 81000, () => VA({ retIncome: 90000, ageA: 64, ageB: 64 }), 90000);
+        else T("[EXTINCTION v5.68] VA once-not-twice: at $90,000 a both-65+ couple still keeps $9,000 that a per-spouse taper would have extinguished at $87,000",
           VA({ retIncome: 90000, ageA: 70, ageB: 70 }) - VA({ retIncome: 90000, ageA: 64, ageB: 64 }), -0.0575 * 9000);
         // — ⚠ EXTINCTION. The defect the release kills: the deduction was INCOME-BLIND. Under v5.67
         //   a step from $75,000 to $99,000 cost exactly the rate on the income, 0.0575 x 24,000 =
@@ -1599,7 +1651,9 @@ const pass2E = pass, fail2E = fail;
         ];
         for (const [label, args, exp] of _RI)
           TB2(`[HAND v5.69] RI ${label} -> $${exp.toFixed(2)}`, RIC(args), "RI", exp, !!args.single);
-        TV2("[EXTINCTION v5.69] RI's exclusion is no longer income-blind: one dollar across the joint cliff ($133,749 -> $133,750) costs $5,000.05 — the whole $100,000 at 5% plus the rate on $1",
+        if (D30L) D30D("[EXTINCTION v5.69] RI's exclusion is no longer income-blind: one dollar across the joint cliff ($133,749 -> $133,750) moves the base by $100,001", "RI",
+          () => RIC({ retIncome: 133750 }), 133750, () => RIC({ retIncome: 133749 }), 33749);
+        else TV2("[EXTINCTION v5.69] RI's exclusion is no longer income-blind: one dollar across the joint cliff ($133,749 -> $133,750) costs $5,000.05 — the whole $100,000 at 5% plus the rate on $1",
           RIC({ retIncome: 133750 }) - RIC({ retIncome: 133749 }), 5000.05, SCH2("RI", 6687.50) - SCH2("RI", 1687.45));
         T("[INVARIANT v5.69] RI's excl65 scalar still equals its table's per-person amount at zero income — $50,000",
           R.RI.excl65, 50000);

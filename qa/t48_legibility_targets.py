@@ -20,7 +20,7 @@
 # on the last line (tally sums them).
 import os, sys, json, subprocess
 VER = sys.argv[1] if len(sys.argv) > 1 else ""
-KNOWN_VERSIONS = ["v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601"]
+KNOWN_VERSIONS = ["v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602"]
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.abspath(os.path.join(HERE, ".."))
 PAGE = os.path.abspath(sys.argv[2]) if len(sys.argv) > 2 else os.path.join(ROOT, "index.html")
 ok = 0; bad = 0; fails = []

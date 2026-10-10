@@ -19,31 +19,37 @@
 import { createRequire } from "module";
 
 const VER = process.argv[2];
-const KNOWN_VERSIONS = ["v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601"];
+const KNOWN_VERSIONS = ["v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.\n    Registered: ${KNOWN_VERSIONS.join(", ")}`);
   process.exit(1);
 }
-const POST = VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601"));
+const POST = VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602"));
 
 // v5.86 (D-18): Maine's cap is $49,824 (TY2026, MRS 2026 Form 1040ES-ME line 2) from v586; every case below that derives from
 // the cap is gated so each earlier leg keeps the $48,216 it shipped with. Recomputed by hand at the build (fractions, not floats).
 const CAP586 = (Number(String(VER).replace(/[^0-9]/g, "")) || 0) >= 586;
+import { d30Pins } from "./d30_ref.mjs";
 const g = (await import(`./app_${VER}.mjs`)).__g;
-const S = g.stateTaxAnnual, R = g.STATE_RULES();
+const R = g.STATE_RULES();
+// v6.02 (D-30 batch 1 — docs/SCOPE_D30_DEDUCTIONS_V602.md, DD-14): Maine and Montana take their standard deductions and exemptions. Every pin
+// keeps its BASE and on a D-30 leg expects it after them — qa/d30_ref.mjs, independent of the app, on the calculator's own record of the call
+// (its federal-AGI measure, filing status, ages); a different base fails (NaN). The label says so. A version LIST.
+const D30L = ["v602"].includes(VER), D30 = d30Pins(g.stateTaxAnnual, R, D30L), S = D30.S;
 // v6.01 (D-22 batch 2 — docs/SCOPE_D22_BRACKETS_V601.md): Maine and Montana move to their own schedules. Every pin below keeps its BASE (the
 // offset, phaseout and subtraction arithmetic it exists to pin) and, on the v6.01 leg, expects that base on the state's schedule — computed
 // here, independently of the app (t65 §A's transcription): `MEX` / `MTX` turn a v6.00 figure (rate × base) into the base's tax. A version LIST.
-const BR2 = ["v601"].includes(VER);
+const BR2 = ["v601", "v602"].includes(VER);
 const _bsum = (rows, x) => { let t = 0, lo = 0; for (const [u, r] of rows) { const hi = u === null ? Infinity : u; if (x <= lo) break; t += (Math.min(x, hi) - lo) * r; lo = hi; } return t; };
 const _MES = { single: [[27400, .058], [64850, .0675], [1000000, .0715], [null, .0915]], joint: [[54850, .058], [129750, .0675], [1500000, .0715], [null, .0915]] };
 const _MTS = { single: [[47500, .047], [null, .0565]], joint: [[95000, .047], [null, .0565]] };
-const MEX = (flat, single = false) => BR2 ? _bsum(_MES[single ? "single" : "joint"], flat / 0.0715) : flat;
-const MTX = (flat, single = false) => BR2 ? _bsum(_MTS[single ? "single" : "joint"], flat / 0.0565) : flat;
+const MEX = (flat, single = false) => D30L ? D30.X("ME", flat, 0.0715) : BR2 ? _bsum(_MES[single ? "single" : "joint"], flat / 0.0715) : flat;
+const MTX = (flat, single = false) => D30L ? D30.X("MT", flat, 0.0565) : BR2 ? _bsum(_MTS[single ? "single" : "joint"], flat / 0.0565) : flat;
 
 let pass = 0, fail = 0; const fails = [];
 const EPS = 0.01;
 const T = (name, got, exp) => {
+  name += D30.tag();
   const ok = typeof exp === "number" ? Math.abs(got - exp) < EPS : got === exp;
   if (ok) pass++; else { fail++; fails.push(`  \u2717 ${name}: got ${got}  exp ${exp}`); }
 };

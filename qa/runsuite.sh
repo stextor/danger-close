@@ -222,6 +222,11 @@ tally "t64-$CUR"   node t64_state_brackets.mjs "$CUR"
 # D-22 extinction (every taxing row on a schedule or flat); v6.00 -> v6.01 moves only the seventeen. Both legs.
 tally "t65-$PRIOR" node t65_state_brackets_b2.mjs "$PRIOR"
 tally "t65-$CUR"   node t65_state_brackets_b2.mjs "$CUR"
+# t66 (v6.02) — D-30 batch 1: the 27 progressive states' standard deductions, exemptions and personal credits (each against its source, dated),
+# the phase shapes at their edges, hand cases to the cent, v6.01 -> v6.02 against an independent implementation (qa/d30_ref.mjs, which the
+# derived pins in t10, t35, t39, t50-t55, t58-t61, t64 and t65 also use); and Ask AI's cap, cut-off notice and timeout. Both legs.
+tally "t66-$PRIOR" node t66_deductions_askai.mjs "$PRIOR"
+tally "t66-$CUR"   node t66_deductions_askai.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

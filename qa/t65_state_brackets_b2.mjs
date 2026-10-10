@@ -17,13 +17,14 @@
 // BOTH LEGS. Run: node t65_state_brackets_b2.mjs <tag>
 import { window } from "./env_dom.mjs";
 import { createRequire } from "module";
+import { d30Pins } from "./d30_ref.mjs";
 import { existsSync, readFileSync } from "fs";
 const require = createRequire(import.meta.url);
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v600", "v601"];
+const KNOWN_VERSIONS = ["v600", "v601", "v602"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  ✓ ${n}`); } else { fail++; console.log(`  ✗ ${n}${d !== "" ? " — " + String(d).slice(0, 260) : ""}`); } };
-const EQ = (n, got, want, tol = 0.005) => CK(n, typeof got === "number" && Math.abs(got - want) <= tol, `got ${got}, want ${want}`);
+const EQ = (n, got, want, tol = 0.005) => CK(n + D30.tag(), typeof got === "number" && Math.abs(got - want) <= tol, `got ${got}, want ${want}`);
 const done = () => { console.log(`\nt65 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
 console.log(`t65 — STATE BRACKET SCHEDULES, BATCH 2 (${VER})`);
 if (!KNOWN_VERSIONS.includes(VER)) { CK(`0-0 version tag ${JSON.stringify(VER)} is registered`, false, KNOWN_VERSIONS.join(",")); done(); }
@@ -31,7 +32,12 @@ const BR = VER !== "v600";
 console.error = () => {}; console.warn = () => {};
 require(`./dom_${VER}.cjs`);
 const React = require("react");
-const g = window.__g, SR = g.STATE_RULES(), ST = g.stateTaxAnnual;
+const g = window.__g, SR = g.STATE_RULES();
+// v6.02 (D-30 batch 1 — docs/SCOPE_D30_DEDUCTIONS_V602.md, DD-14): the seventeen take their deductions, exemptions and credits. §C keeps each
+// case's BASE (its last column) and on a D-30 leg expects it after them — qa/d30_ref.mjs, independent of the app, on the calculator's own record
+// of the call; a different base fails. B-AR2/3 hold Arkansas's DFA formula at the same NET income (wages + the $2,470 deduction). §A-9 and §E
+// take the v6.02 forms (t66 A-5, F hold them). Group D (v6.00 -> v6.01) runs in a v600 -> v601 folder only. A version LIST.
+const D30L = ["v602"].includes(VER), D30 = d30Pins((a) => g.stateTaxAnnual(a), SR, D30L), ST = D30.S;
 const SEV = ["AL", "AR", "CT", "DC", "DE", "HI", "KS", "MD", "ME", "MO", "MT", "ND", "NE", "NM", "RI", "VT", "WV"];
 const TEN = ["CA", "MN", "MS", "NJ", "NY", "OK", "OR", "SC", "VA", "WI"];
 const FLAT = ["AZ", "CO", "GA", "IA", "ID", "IL", "IN", "KY", "LA", "MA", "MI", "NC", "OH", "PA", "UT"];
@@ -97,7 +103,9 @@ if (BR) {
   const silent = SEV.filter(c => !RATE_CLAIM.test(SR[c].note || "") || Math.abs(Number(SR[c].note.match(RATE_CLAIM)[1]) / 100 - SR[c].rate) > 1e-9);
   CK("A-8 each of the seventeen notes states its top rate for its year (t61 A-5 checks the value table-wide)", silent.length === 0, silent.join(","));
   const noOwn = SEV.filter(c => !/own brackets/.test(SR[c].note));
-  CK("A-9 each of the seventeen notes says the state's own brackets are used, and that no standard deduction or exemption is taken (conservative)",
+  if (D30L) CK("A-9 (v6.02) each of the seventeen notes says the state's own brackets are used, and what it takes from v6.02",
+     noOwn.length === 0 && SEV.every(c => /from v6\.02/i.test(SR[c].note)), noOwn.join(",") + " / " + SEV.filter(c => !/from v6\.02/i.test(SR[c].note)).join(","));
+  else CK("A-9 each of the seventeen notes says the state's own brackets are used, and that no standard deduction or exemption is taken (conservative)",
      noOwn.length === 0 && SEV.every(c => /not taken \(conservative\)/.test(SR[c].note)), noOwn.join(",") + " / " + SEV.filter(c => !/not taken \(conservative\)/.test(SR[c].note)).join(","));
   const NAMED = {
     AL: /deduction of federal income tax that Alabama allows/, AR: /bracket adjustment from \$94,701 to \$97,600 — all modelled/,
@@ -176,8 +184,9 @@ if (BR) {
   }
   // Arkansas's table above $94,700, against the DFA formula: 3.7 % × NI − $79.90, less the adjustment ($369.90 − $290 = $79.90 + $290)
   const arB = x => 0.037 * x - 79.90;
-  EQ("B-AR2 Arkansas above $97,600: the model is the DFA's 3.7 % × net income − $79.90 (at $150,000)", ST({ code: "AR", work: 150000, ageA: 45, single: true }), arB(150000), 0.006);
-  EQ("B-AR3 …and inside the adjustment band the DFA's subtraction is $369.90 at $94,701-$94,800 (at $94,750)", ST({ code: "AR", work: 94750, ageA: 45, single: true }), 0.037 * 94750 - 369.90, 0.006);
+  const NI = D30L ? 2470 : 0, CR = D30L ? 29 : 0, nt = D30L ? " [v6.02: wages + the $2,470 standard deduction reach the same net income; less the $29 credit]" : "";
+  EQ("B-AR2 Arkansas above $97,600: the model is the DFA's 3.7 % × net income − $79.90 (at $150,000)" + nt, ST({ code: "AR", work: 150000 + NI, ageA: 45, single: true }), arB(150000) - CR, 0.006);
+  EQ("B-AR3 …and inside the adjustment band the DFA's subtraction is $369.90 at $94,701-$94,800 (at $94,750)" + nt, ST({ code: "AR", work: 94750 + NI, ageA: 45, single: true }), 0.037 * 94750 - 369.90 - CR, 0.006);
 }
 
 // ── C · hand cases to the cent through stateTaxAnnual ──
@@ -233,14 +242,16 @@ const HC = [
   ["VT-2", "joint 45/45, wages $300,000", "VT", { work: 300000, ...J }, 17999.75, 300000],
   ["WV-1", "joint 45/45, wages $80,000 — ONE schedule for single and joint", "WV", { work: 80000, ...J }, 2866.5, 80000],
 ];
-for (const [id, lbl, code, o, nv, base] of HC) EQ(`C-${id} ${lbl}: ${BR ? `$${nv}` : `PIN v6.00 ${(OLD_RATE[code] * 100).toFixed(2)}% × $${Math.round(base * 100) / 100}`}`, call(code, o), BR ? nv : OLD_RATE[code] * base, BR ? 0.005 : 0.01);
+for (const [id, lbl, code, o, nv, base] of HC) EQ(`C-${id} ${lbl}: ${BR ? `$${nv}` : `PIN v6.00 ${(OLD_RATE[code] * 100).toFixed(2)}% × $${Math.round(base * 100) / 100}`}`, call(code, o), D30L ? D30.B(code, base, o.capGains) : BR ? nv : OLD_RATE[code] * base, BR ? 0.005 : 0.01);
 // A survivor who is spouse B files single: the calculator moves B into A's slot, and the SINGLE schedule applies (Kansas: $23,000, not $46,000).
 EQ(`C-SV a survivor (spouse B, 70) on a single return in Kansas, IRA $60,000: ${BR ? "the single schedule, $1,196 + 5.58 % × $37,000 = $3,260.60" : "PIN v6.00 5.58 %"}`,
-   call("KS", { retIncome: 60000, ageA: null, ageB: 70, single: true }), BR ? 3260.6 : 3348);
+   call("KS", { retIncome: 60000, ageA: null, ageB: 70, single: true }), D30L ? D30.B("KS", 60000) : BR ? 3260.6 : 3348);
 EQ("C-GA Georgia (flat 4.99 %, not a schedule) single 66, IRA $100,000: $1,746.50 on both legs", call("GA", { retIncome: 100000, ageA: 66 }), 1746.5);
 
 // ── D · v6.00 -> v6.01: only the seventeen move, and each equals an independent implementation on v6.00's base ──
-if (BR) {
+// From v6.02 the run folder is v601 -> v602 and holds no app_v600.mjs: the group is reported as not run on either leg (t64 D's convention); t66 D owns v6.01 -> v6.02.
+if (BR && !existsSync(new URL("./app_v600.mjs", import.meta.url))) console.log("  – group D not run: app_v600.mjs is not in this run folder (a v600 -> v601 folder runs it)");
+else if (BR) {
   if (!existsSync(new URL("./app_v600.mjs", import.meta.url))) CK("D-0 app_v600.mjs is in this run folder (group D needs it)", false, "missing");
   else {
     const pm = await import("./app_v600.mjs"), PST = pm.__engines.stateTaxAnnual || pm.__g.stateTaxAnnual;
@@ -276,7 +287,7 @@ const WB = { ...walk.base, JSXElement(n, s, c) { c(n.openingElement, s); n.child
   JSXExpressionContainer(n, s, c) { if (n.expression.type !== "JSXEmptyExpression") c(n.expression, s); }, JSXText() {}, JSXEmptyExpression() {} };
 const quasis = []; walk.full(ast, n => { if (n.type === "TemplateLiteral") quasis.push(n.quasis.map(q => q.value.cooked).join("\u0000")); }, WB);
 CK(`E-1 the AI context's state line ${BR ? "adds Maryland's county tax to \"on the state's own brackets\" where a row carries one" : "PIN v6.00: has no county clause"}`,
-   BR ? quasis.some(q => q === "on the state's own brackets\u0000, top rate \u0000%") && quasis.some(q => q === " plus a \u0000% county tax")
+   BR ? quasis.some(q => q === (D30L ? "on the state's own brackets\u0000\u0000, top rate \u0000%" : "on the state's own brackets\u0000, top rate \u0000%")) && quasis.some(q => q === " plus a \u0000% county tax")
       : quasis.some(q => q === "on the state's own brackets, top rate \u0000%") && !quasis.some(q => q === " plus a \u0000% county tax"));
 const body = () => window.document.body;
 let root, act, DangerClose;
@@ -302,11 +313,11 @@ const modelLine = () => { const n = [...body().querySelectorAll("div")].filter(d
   await pick("MD"); const md = modelLine();
   if (BR) {
     CK("E-2 Maryland: \"the state's own brackets, 2.00% to 6.50%, plus a 3.30% county tax\", dated \"brackets 2026\"",
-       /^Model: the state's own brackets, 2\.00% to 6\.50%, plus a 3\.30% county tax · /.test(md) && /Dollar figures by tax year: exclusion 2026 · brackets 2026\./.test(md), md.slice(0, 200));
+       /^Model: the state's own brackets, 2\.00% to 6\.50%, plus a 3\.30% county tax · /.test(md) && (D30L ? /Dollar figures by tax year: exclusion 2026 · brackets 2026 · deductions 2025\./ : /Dollar figures by tax year: exclusion 2026 · brackets 2026\./).test(md), md.slice(0, 200));
     await pick("HI"); const hi = modelLine();
     CK("E-3 Hawaii: \"1.40% to 13.00%\", no county clause", /^Model: the state's own brackets, 1\.40% to 13\.00% · /.test(hi) && !/county/.test(hi), hi.slice(0, 140));
     await pick("ND"); const nd = modelLine();
-    CK("E-4 North Dakota: \"0.00% to 2.50%\", dated \"brackets 2026\"", /^Model: the state's own brackets, 0\.00% to 2\.50% · /.test(nd) && /brackets 2026\./.test(nd), nd.slice(0, 160));
+    CK("E-4 North Dakota: \"0.00% to 2.50%\", dated \"brackets 2026\"", /^Model: the state's own brackets, 0\.00% to 2\.50% · /.test(nd) && (D30L ? /brackets 2026 · deductions 2026\./ : /brackets 2026\./).test(nd), nd.slice(0, 160));
   } else CK("E-2 PIN v6.00: Maryland reads \"7.50% effective rate (an approximation)\"", /^Model: 7\.50% effective rate \(an approximation\)/.test(md), md.slice(0, 120));
   await pick("GA"); const ga = modelLine();
   CK("E-5 a flat-rate state (Georgia) is unchanged: \"4.99% effective rate (an approximation)\"", /^Model: 4\.99% effective rate \(an approximation\)/.test(ga), ga.slice(0, 120));

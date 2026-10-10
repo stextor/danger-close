@@ -12,16 +12,21 @@
 // and the function's AGI measure is work + federally taxable SS. Spouses have equal gross benefits unless a case says so.
 //
 // Run: node t50_ss_states.mjs <tag>        Current leg only (the rules do not exist on the prior leg).
+import { d30Pins } from "./d30_ref.mjs";
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601"];
+const KNOWN_VERSIONS = ["v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602"];
 let pass = 0, fail = 0; const fails = [];
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; const m = `  \u2717 ${n}${d ? " \u2014 " + d : ""}`; console.log(m); fails.push(m); } };
 const done = () => { console.log(`\nt50 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
 console.log(`t50 \u2014 SOCIAL SECURITY IN THE SEVEN STATES (${VER})`);
 if (!KNOWN_VERSIONS.includes(VER)) { CK(`0-0 version tag ${JSON.stringify(VER)} is registered`, false, `registered: ${KNOWN_VERSIONS}`); done(); }
 const g = (await import(`./app_${VER}.mjs`)).__g;
-const tax = o => g.stateTaxAnnual({ retIncome: 0, pen: 0, work: 0, capGains: 0, ssGrossA: 0, ssGrossB: 0, ageA: 70, ageB: 70, single: false, ...o });
-const EQ = (n, got, exp) => CK(n, Math.abs(got - exp) <= 0.01, `engine ${got.toFixed(2)}, statute ${exp.toFixed(2)}`);
+// v6.02 (D-30 batch 1 — docs/SCOPE_D30_DEDUCTIONS_V602.md, DD-14): CT, MN, NM, RI and VT take their deductions, exemptions and credits. Each
+// pin keeps its BASE and on a D-30 leg expects it after them (qa/d30_ref.mjs, on the calculator's own record of the call; a different base
+// fails). A version LIST.
+const D30L = ["v602"].includes(VER), D30 = d30Pins(g.stateTaxAnnual, g.STATE_RULES(), D30L);
+const tax = o => D30.S({ retIncome: 0, pen: 0, work: 0, capGains: 0, ssGrossA: 0, ssGrossB: 0, ageA: 70, ageB: 70, single: false, ...o });
+const EQ = (n, got, exp) => CK(n + D30.tag(), Math.abs(got - exp) <= 0.01, `engine ${got.toFixed(2)}, statute ${exp.toFixed(2)}`);
 // a household with AGI m, federally taxable SS s, gross G split equally: work = m − s
 const H = (code, m, s, G, extra = {}) => tax({ code, work: m - s, ssTaxableFed: s, ssGrossA: G / 2, ssGrossB: G / 2, ...extra });
 
@@ -42,15 +47,15 @@ EQ("CO-5 joint, both 70, pension $40,000, SS $30,000 → SS consumes the $24,000
 // v6.01 (D-22 batch 2, SCOPE_D22_BRACKETS_V601): Connecticut, New Mexico, Rhode Island and Vermont move to their own schedules. Like Minnesota's
 // cells below, these pin the SS rule: each keeps its taxable amount and, on the v6.01 leg, prices it on the state's schedule (Connecticut with its
 // phase-out and recapture amounts) — computed here from t65 §A's transcription, not the app's. `B2(code, x)` is rate × x on earlier legs. A LIST.
-const BR2 = ["v601"].includes(VER);
+const BR2 = ["v601", "v602"].includes(VER);
 const _bs = (rows, x) => { let t = 0, lo = 0; for (const [u, r] of rows) { const hi = u === null ? Infinity : u; if (x <= lo) break; t += (Math.min(x, hi) - lo) * r; lo = hi; } return t; };
 const _S2 = { CT: [0.05, [[10000, .02], [50000, .045], [100000, .055], [200000, .06], [250000, .065], [500000, .069], [null, .0699]], [[20000, .02], [100000, .045], [200000, .055], [400000, .06], [500000, .065], [1000000, .069], [null, .0699]]],
   NM: [0.049, [[5500, .015], [16500, .032], [33500, .043], [66500, .047], [210000, .049], [null, .059]], [[8000, .015], [25000, .032], [50000, .043], [100000, .047], [315000, .049], [null, .059]]],
   RI: [0.05, [[82050, .0375], [186450, .0475], [1000000, .0599], [null, .0899]], [[82050, .0375], [186450, .0475], [1000000, .0599], [null, .0899]]],
   VT: [0.066, [[50750, .0335], [122850, .066], [256300, .076], [null, .0875]], [[84700, .0335], [204750, .066], [312050, .076], [null, .0875]]] };
 const _CTA = { single: [[56500, 5000, 25, 250], [105000, 5000, 25, 250], [200000, 5000, 90, 2700], [500000, 5000, 50, 450]], joint: [[100500, 5000, 50, 500], [210000, 10000, 50, 500], [400000, 10000, 180, 5400], [1000000, 10000, 100, 900]] };
-const EQ2 = (n, got, exp) => EQ(BR2 ? `${n} [v6.01: the same base on the state's own brackets -> $${exp.toFixed(2)}]` : n, got, exp);
-const B2 = (code, x, single = false) => { const [r0, sg, jt] = _S2[code]; if (!BR2) return r0 * x; let t = _bs(single ? sg : jt, x);
+const EQ2 = (n, got, exp) => EQ(BR2 && !D30L ? `${n} [v6.01: the same base on the state's own brackets -> $${exp.toFixed(2)}]` : n, got, exp);
+const B2 = (code, x, single = false) => { if (D30L) return D30.B(code, x); const [r0, sg, jt] = _S2[code]; if (!BR2) return r0 * x; let t = _bs(single ? sg : jt, x);
   if (code === "CT") for (const [over, per, each, mx] of _CTA[single ? "single" : "joint"]) if (x > over) t += Math.min(mx, each * Math.ceil((x - over) / per)); return t; };
 
 // ── CT · none taxed if AGI < $75,000 single / < $100,000 joint; otherwise at most 25 % of total benefits ────────────────────────
@@ -62,9 +67,9 @@ EQ2("CT-4 single AGI $75,000, taxable SS $5,000 < 25 % of $30,000 → all $5,000
 // ── MN · all subtracted if AGI ≤ $110,780 joint / $86,410 single (TY2026); −10 % per $4,000 or fraction above ──────────────────
 // v6.00 (D-22 option 3, SCOPE_D22_BRACKETS_V600): Minnesota is taxed on its own TY2026 schedule from v6.00. These cells pin the SS rule, so
 // each keeps its taxable amount and, on a bracket leg, prices it on the schedule (computed here from the MN DOR table, not the app's). A LIST.
-const MN_BRK = ["v600", "v601"].includes(VER);
+const MN_BRK = ["v600", "v601", "v602"].includes(VER);
 const MNS = { single: [[33310, .0535], [109430, .068], [203150, .0785], [null, .0985]], joint: [[48700, .0535], [193480, .068], [337930, .0785], [null, .0985]] };
-const mn = (x, single = false) => { if (!MN_BRK) return 0.068 * x; let t = 0, lo = 0;
+const mn = (x, single = false) => { if (D30L) return D30.B("MN", x); if (!MN_BRK) return 0.068 * x; let t = 0, lo = 0;
   for (const [u, r] of MNS[single ? "single" : "joint"]) { const hi = u === null ? Infinity : u; if (x <= lo) break; t += (Math.min(x, hi) - lo) * r; lo = hi; } return t; };
 EQ("MN-1 joint AGI $110,780 → none taxed", H("MN", 110780, 30000, 40000), mn(80780));
 EQ("MN-2 joint AGI $110,781 → 10 % ($3,000) taxed", H("MN", 110781, 30000, 40000), mn(80781 + 3000));
