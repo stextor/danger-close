@@ -56,6 +56,10 @@ export const __g = {
   // accessor. GUARDED: neither exists before v5.93, and mk_testable.sh splices this shim into every leg. t57 unit-tests them.
   attributeRetIncome: _g("attributeRetIncome"),
   getPensionOwner: _g("getPensionOwner"),
+  // v6.02 (D-30 batch 1; Ask AI's cap) — the deductions evaluator and the Ask AI constants. GUARDED: none exists before v6.02, and
+  // mk_testable.sh splices this shim into every leg; t66 reads `undefined` on the v6.01 leg and asserts the pre-change state there.
+  stateDeductions: _g("stateDeductions"),
+  AI_CONSTS: () => ({ MAX_TOKENS: _g("AI_MAX_TOKENS"), TIMEOUT_MS: _g("AI_TIMEOUT_MS"), CUTOFF: _g("AI_CUTOFF_NOTICE") }),
   STORAGE_KEYS: () => _g("STORAGE_KEYS"), // t5 loops this map for the Clear-All wipe invariant (v5.10.2)
   // v5.71 (finding A-6) — t37 reads the live master prompt to prove an imported one is accepted
   // only as a string and truncated. A live GETTER, not a captured value: applyLoadedData reassigns
