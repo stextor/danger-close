@@ -949,8 +949,8 @@ export paths; state-module ordering test TX=IL < GA < CA; solve-for grid; MC tog
 
 Not yet done, in honesty: **independent professional (CPA/EA/actuary) review** — the single
 most valuable outstanding validation, and the reason the trust case remains self-referential;
-golden-file cross-validation against Pralana/ProjectionLab on identical inputs; the federal-tax and federal
-senior deductions some states start from or subtract (D-31; every state's own deductions are taken from v6.03), a few state credits that need measures the calculator lacks (D-32); ACA premium-subsidy modeling; and stochastic
+golden-file cross-validation against Pralana/ProjectionLab on identical inputs; a few state credits that need
+measures the calculator lacks (D-32; every state's own deductions are taken from v6.03, and those it takes from the federal return from v6.04); ACA premium-subsidy modeling; and stochastic
 health-state modeling.
 
 **No estate tax or inheritance tax is modeled — federal or state (disclosed at v5.50).** The
@@ -2069,3 +2069,21 @@ in law — understated here for a household whose Idaho tax is below it). **Not 
 Arizona, Colorado, Idaho and Iowa (D-31); Ohio's retirement income and joint filing credits and Utah's retirement credit (D-32); low-income and
 property-tax credits (Massachusetts' senior circuit breaker among them); itemized deductions; dependents. `qa/t67_deductions_flat.mjs`, with the
 independent implementation extended in `qa/d30_ref.mjs`.)*
+
+*(v6.04, D-31 and D-29 — `docs/SCOPE_D31_D29_V604.md`. **The deductions a state takes from the federal return are taken.** The calculator is given the
+model year, the year's federal income tax (the regular tax on ordinary income, the capital-gains-rate tax and AMT — what the model computes of Form 1040
+line 22; it computes no credits), the year's net investment income tax, and the realized-gain part of its capital gains, by all three call sites (Engine A's
+year and its cliff-solver estimate, Engine B's year); a caller passing none gets the v6.03 figure. **Alabama** deducts the federal income tax and the NIIT in
+full (§40-18-15(c); the 2025 worksheet). **Missouri** deducts 35 % / 25 % / 15 % / 5 % / none of it as Missouri AGI passes $25,000 / $50,000 / $100,000 /
+$125,000, at most $5,000 single / $10,000 joint (RSMo 143.171 — measured on Missouri AGI as the MO-1040 does, where the statute says gross income), and from
+TY2025 subtracts 100 % of realized capital gains (RSMo 143.121.3(14)) — qualified dividends stay taxed, and the gains leave the base before the percentage is
+measured. **Oregon** subtracts it up to $8,500 (the 2025 cap, held), less in $5,000 / $10,000 steps of federal AGI from $125,000 single / $250,000 joint,
+nothing from $145,000 / $290,000 (ORS 316.695; OR-40 Table 4). **The federal senior deduction** ($6,000 each 65 or older, 2025–2028, less 6 % of MAGI above
+$75,000 / $150,000 — IRC §151(d)(5)(C)) is taken in the six states whose returns carry it: Colorado, Iowa, Montana and North Dakota through federal taxable
+income, Idaho by conformity (HB 559), Arizona by its own subtraction (A.R.S. §43-1022(35)); its figures are the federal block's (`OBBBA_CONSTS`), its phase-out
+runs on the calculator's federal-AGI measure, which equals Engine B's MAGI, and Engine B's state figure equals its federal bonus year by year (`t68` E-2).
+Engine A takes the state senior deduction from its own post-conversion MAGI although its federal calculation omits the bonus (that solver decision stands);
+Alabama, Missouri and Oregon read Engine A's federal tax as Engine A computes it — in 2026–2028 slightly higher than Engine B's for a 65+ household, so their
+deduction there is slightly larger. **Not modelled:** the District of Columbia's senior deduction (unsettled law; conservative); the refunds Alabama and
+Oregon recapture (the model has none); Oregon's 2026 cap (unconfirmed; the 2025 one is lower). `qa/t68_fed_deductions.mjs`, with the independent
+implementation extended in `qa/d30_ref.mjs`.)*
