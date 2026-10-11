@@ -1,5 +1,39 @@
 # Changelog
 
+## ops 2026-10-11 — `package_check_controls.sh` could not see a v6 source: P8 and P10 run again
+
+**KIND: ops** — tooling and documents only; **v6.04 stays current** (source `8226b20b62334074606993d411bb0fb1`, built `71f4ada6ac4923075f9f1d1a576c2293`).
+No app source, suite or figure changes. Verified by `package_check_controls.sh` before and after the change, on the v6.04 package (below), and by
+`package_check` and the controls on this package (its `MANIFEST.txt`).
+
+**What was wrong.** `qa/tools/package_check_controls.sh` found a package's source with `ls knowledge/DangerClose-v5_*.jsx`. A `v5_*` pattern cannot
+match a `v6_` name, so from v6.00 the script found no source and **skipped P8** (a third `.jsx` rides along — `B-3`) **and P10** (the versioned source
+differs from the canonical one — `E-2`), printing *"this package ships no versioned .jsx"*. Found at the v6.04 ship by reading that SKIPPED line. The same
+script's P68–P71 tidy a pool copy down to one source before planting each defect, with `glob("…/DangerClose-v5_*.jsx")` and `glob("…/dom_entry_v5*.jsx")`:
+on a v6 pool that tidy-up removed nothing. It was harmless where it is normally run (a post-upload pool already holds one source), but on a pool still
+holding two, each control would have been "caught" by a baseline already red — the case the tidy-up exists for. v6.00 widened this script's manifest
+arithmetic for the new major and missed these patterns (OPERATIONS §G now records it). **The four patterns now read any single-digit major** (`v[0-9]_*`),
+as `package_check.mjs`'s own pattern does (`DangerClose-v\d_\d+.jsx`).
+
+**Census, not a list.** An AST walk over every string, template and regex literal in the 145 JavaScript files under `qa/` found one other hit: `E-2`'s
+printed label in `package_check.mjs` (*"knowledge/DangerClose-v5_*.jsx == …"*) — label text only, its check already version-agnostic; corrected to
+`vN_NN`. A text search of the shell and Python tooling (acorn cannot parse them) found, beyond the four patterns: release-pinned `controls_v5NN_*` scripts
+(historical by design, §G), comments, and planted file names (P8's `DangerClose-v5_00.jsx`, P68–P71's `v5_01` / `v5_02` / `dom_entry_v501`), which still
+match the checks' version-agnostic patterns and are left. OPERATIONS §L's two sentences naming `DangerClose-v5_*.jsx` now read `vN_NN`.
+
+**Evidence** (`package_check_controls.sh` against the v6.04 package):
+- **Before**, the shipped script, post-upload clone and a pool folder: 58 behaved as designed, 1 did not, 3 skipped — **P8/P10 skipped**; the miss is P17,
+  which by design fires only against the pre-upload tree (OPERATIONS §I).
+- **After**, post-upload clone, pool and `PRIOR_CLONE`: **60 behaved, 1 did not (P17, as above), 2 skipped**; pre-upload clone: **34 behaved, 0 did not,
+  10 skipped** (the pool-dependent and handover controls). **P8 caught by `B-3` and P10 by `E-2` in both runs**; P17 fires pre-upload and P48 post-upload.
+  The remaining skips are P15 (needs an ops package — run on this one, recorded in its `MANIFEST.txt`) and P58–P61 (need a handover package; none exists).
+- **The tidy-up directly:** on a pool copy holding two sources and two dom entries, the old snippet left all four; the new one leaves the current pair.
+- **The pool folder** is not the real pool — this session has none mounted (OPERATIONS §I). It was rebuilt from the v6.04 clone through the manifest's
+  repo-path rows (133 files, `vite.config.js` under its mount name `vite_config.js`); `package_check` against it with all four arguments: **52 passed,
+  0 failed, 0 skipped**, the green baseline that makes the pool controls' results meaningful.
+
+**No scope document** — a judgement, stated: a pattern fix with no decision open; its premise, census and evidence are this entry.
+
 ## v6.04 — D-31 and D-29: deducting federal income tax (AL, MO, OR), the federal senior deduction in six states, Missouri's capital-gains subtraction
 
 **A MODELLING release** (METHODOLOGY updated). `docs/SCOPE_D31_D29_V604.md` (repo-only, fulfilled). Steve: "start the v6.04 scope on D-31 plus D-29."
