@@ -142,13 +142,34 @@ def delete_added_row(txt):
     return out, True
 
 
+def _b1_target():
+    """B1's target, DERIVED: the pool's dom entry that has a hash row.
+
+    ⚠ Until 2026-10-11 this was the literal `dom_entry_v566.jsx`. That file's hash row left the manifest at the
+    v5.68 rotation (2026-09-10); from then on B1 deleted a RETIREMENT-LIST line of the same name instead and
+    reported the demonstration as holding - a demonstration of nothing. The ops package of 2026-10-11 (third)
+    moved that line to the manifest archive, the anchor stopped matching, and B1 reported a FINDING, which is
+    how this was seen. Deriving the target keeps it on a real hash row at every release."""
+    txt = open(os.path.join(PKG, MANS[0]), encoding="utf-8").read()
+    for f, h in ROW.findall(txt):
+        if re.fullmatch(r"dom_entry_v\d+\.jsx", f) and os.path.exists(os.path.join(POOL, f)):
+            return f
+    return None
+
+B1_FILE = _b1_target()
+
 def blind_spot(txt):
-    """B1: remove dom_entry_v566.jsx's md5 row but LEAVE its rotation-note mention.
-    K-9 is expected to STAY GREEN. This is not a control - it is the demonstration that the
-    gap this package closed by hand was invisible to both gates."""
+    """B1: remove the current dom entry's md5 row but LEAVE its mentions (the ship note, the delete-first list).
+    K-9 is expected to STAY GREEN. This is not a control - it is the demonstration that a missing row
+    is invisible to both gates when the file is named anywhere else in the manifest."""
+    if not B1_FILE:
+        return txt, False
     lines = txt.split("\n")
-    keep = [l for l in lines if not l.startswith("| `dom_entry_v566.jsx` |")]
-    return "\n".join(keep), len(keep) == len(lines) - 1
+    row = re.compile(r"^\|\s*`" + re.escape(B1_FILE) + r"`\s*\|\s*`[0-9a-f]{32}`")
+    keep = [l for l in lines if not row.match(l)]
+    rest = "\n".join(keep)
+    # the bare mention must survive the edit, or K-9 staying green would demonstrate nothing
+    return rest, len(keep) == len(lines) - 1 and B1_FILE in rest
 
 
 print("controls - manifest hash-row repair (K-8 / K-9)")
@@ -168,9 +189,9 @@ results.append(("C2  one added row deleted, name redacted        K-9", control(
 
 print("\n  --- blind-spot demonstration, NOT a control ---")
 bs = control("B1", "K-9", None, blind_spot, expect_fire=False)
-print("  B1: dom_entry_v566.jsx's md5 row removed and K-9 stayed GREEN, as documented:")
-print("      the file is named in the Current-build rotation note, and a bare mention satisfies")
-print("      K-9. This is why the missing row had to be found by hand.")
+print(f"  B1: {B1_FILE}'s md5 row removed and K-9 stayed GREEN, as documented:")
+print("      the file is named elsewhere in the manifest (its ship note, its delete-first list), and a")
+print("      bare mention satisfies K-9. This is why a missing row has to be found by hand.")
 
 after = {r: md5(os.path.join(PKG, r)) for r in MANS}
 print(f"\n  pristine manifest md5 after the run: {set(after.values())}")
