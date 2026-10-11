@@ -24,7 +24,7 @@ import { d30Pins } from "./d30_ref.mjs";
 import { existsSync, readFileSync } from "fs";
 const require = createRequire(import.meta.url);
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v599", "v600", "v601", "v602"];
+const KNOWN_VERSIONS = ["v599", "v600", "v601", "v602", "v603"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  ✓ ${n}`); } else { fail++; console.log(`  ✗ ${n}${d !== "" ? " — " + String(d).slice(0, 260) : ""}`); } };
 const EQ = (n, got, want, tol = 0.005) => CK(n + D30.tag(), typeof got === "number" && Math.abs(got - want) <= tol, `got ${got}, want ${want}`);
@@ -39,7 +39,10 @@ const g = window.__g, SR = g.STATE_RULES();
 // v6.02 (D-30 batch 1 — docs/SCOPE_D30_DEDUCTIONS_V602.md, DD-14): the ten take their deductions, exemptions and credits. §C keeps each
 // case's BASE (written beside it below) and on a D-30 leg expects it after them — qa/d30_ref.mjs, independent of the app, on the calculator's
 // own record of the call; a different base fails. §E's display and Field Manual checks take the v6.02 forms (t66 F holds them). A version LIST.
-const D30L = ["v602"].includes(VER), D30 = d30Pins((a) => g.stateTaxAnnual(a), SR, D30L), ST = D30.S;
+const D30L = ["v602", "v603"].includes(VER), D30 = d30Pins((a) => g.stateTaxAnnual(a), SR, D30L), ST = D30.S;
+// v6.03 (D-30 batch 2, t67): the flat-rate states take their deductions (Georgia's C-GA keeps its base and on this leg expects it after them),
+// their My Data line reads "flat rate", and `deduct` sits on 41 rows. A version LIST.
+const D30FL = ["v603"].includes(VER);
 const TEN = ["CA", "MN", "MS", "NJ", "NY", "OK", "OR", "SC", "VA", "WI"];
 
 // ── A · the schedules ──
@@ -183,7 +186,7 @@ for (const [i, [lbl, o, nv]] of NYC.entries()) EQ(`C-NY ${lbl}: ${BR ? `$${nv}` 
 EQ(`C-SV a survivor (spouse B, 70) on a single return in Oregon, IRA $60,000: ${BR ? "the single chart, $678 + 8.75 % × $48,600 = $4,930.50 (bracket sum $4,931.00)" : "PIN v5.99 8 %"}`,
    call("OR", { retIncome: 60000, ageA: null, ageB: 70, single: true }), D30L ? D30.B("OR", 60000) : BR ? 4931 : 4800);
 // Outside the ten, nothing changes: Georgia is flat, Utah keeps its credit (which reads `rate`).
-EQ("C-GA Georgia (flat 4.99 %, not a schedule) single 66, IRA $100,000: $1,746.50 on both legs", call("GA", { retIncome: 100000 }), 1746.5);
+EQ("C-GA Georgia (flat 4.99 %, not a schedule) single 66, IRA $100,000: $1,746.50 on both legs", call("GA", { retIncome: 100000 }), D30FL ? D30.B("GA", 35000) : 1746.5);
 
 // ── D · v5.99 -> v6.00: only the ten move, and each equals an independent bracket implementation ──
 // Single-build by design: it needs app_v599.mjs, which only a v599 -> v600 run folder holds (t65 D owns v6.00 -> v6.01).
@@ -220,7 +223,7 @@ const WB = { ...walk.base, JSXElement(n, s, c) { c(n.openingElement, s); n.child
 const quasis = []; walk.full(ast, n => { if (n.type === "TemplateLiteral") quasis.push(n.quasis.map(q => q.value.cooked).join("\u0000")); }, WB);
 const aiLine = quasis.find(q => q.startsWith("Target retirement year: ")) || "";
 // v6.01 splits the phrase around Maryland's county clause (t65 E-1 holds that form). A LIST.
-const E1 = D30L ? quasis.some(q => q === "on the state's own brackets\u0000\u0000, top rate \u0000%") : ["v601", "v602"].includes(VER) ? quasis.some(q => q === "on the state's own brackets\u0000, top rate \u0000%") : quasis.some(q => q === "on the state's own brackets, top rate \u0000%");
+const E1 = D30L ? quasis.some(q => q === "on the state's own brackets\u0000\u0000, top rate \u0000%") : ["v601", "v602", "v603"].includes(VER) ? quasis.some(q => q === "on the state's own brackets\u0000, top rate \u0000%") : quasis.some(q => q === "on the state's own brackets, top rate \u0000%");
 CK(`E-1 the AI context's state line ${BR ? "says a bracket state is taxed on its own brackets, with its top rate" : "PIN v5.99: gives one income-tax rate"}`,
    BR ? E1 : /\(income tax \u0000%\)\.$/.test(aiLine), aiLine.slice(-80));
 // The My Data line, rendered
@@ -255,8 +258,9 @@ const modelLine = () => { const n = [...body().querySelectorAll("div")].filter(d
     CK("E-4 Oklahoma: \"0.00% to 4.50%\"", /^Model: the state's own brackets, 0\.00% to 4\.50% · /.test(ok), ok.slice(0, 120));
   } else CK("E-2 PIN v5.99: New York reads \"6.00% effective rate (an approximation)\"", /^Model: 6\.00% effective rate \(an approximation\)/.test(ny), ny.slice(0, 120));
   // v6.01 puts Maine on its schedule; the state without one is then a flat-rate state (Georgia). A LIST.
-  if (["v601", "v602"].includes(VER)) { await pick("GA"); const ga = modelLine();
-    CK("E-5 a state without a schedule (Georgia, flat) still reads \"effective rate (an approximation)\"", /^Model: 4\.99% effective rate \(an approximation\)/.test(ga), ga.slice(0, 120)); }
+  if (["v601", "v602", "v603"].includes(VER)) { await pick("GA"); const ga = modelLine();
+    if (D30FL) CK("E-5 a state without a schedule (Georgia, flat) reads its flat rate (v6.03: \"flat rate\", t67 E-1)", /^Model: 4\.99% flat rate/.test(ga), ga.slice(0, 120));
+    else CK("E-5 a state without a schedule (Georgia, flat) still reads \"effective rate (an approximation)\"", /^Model: 4\.99% effective rate \(an approximation\)/.test(ga), ga.slice(0, 120)); }
   else { await pick("ME"); const me = modelLine();
     CK("E-5 a state without a schedule (Maine) still reads \"effective rate (an approximation)\"", /^Model: 7\.15% effective rate \(an approximation\)/.test(me), me.slice(0, 120)); }
   try { await act(async () => { root.unmount(); }); } catch (e) {}
@@ -270,7 +274,7 @@ if (BR) {
      !!named && named.split(", ").sort().join(",") === withB.join(","), named);
   const noDed = Object.keys(SR).filter(c => Object.keys(SR[c]).some(k => /std|standard|deduct|exempt(?!Age|ion)|personal/i.test(k) && !/^retExempt/.test(k)));
   if (D30L) CK("E-7 (v6.02) the sentence \"no state's standard deduction or personal exemption is taken\" is gone, and the only deduction field is `deduct`, on exactly the 27 progressive rows (t66 A-1, F-5 hold the rest)",
-     !/no state's standard deduction or personal exemption is taken/.test(DOCS) && noDed.join(",") === Object.keys(SR).filter(c => SR[c].brackets).join(",")
+     !/no state's standard deduction or personal exemption is taken/.test(DOCS) && noDed.join(",") === Object.keys(SR).filter(c => D30FL ? SR[c].deduct : SR[c].brackets).join(",") && (!D30FL || noDed.length === 41)   // v6.03: the 27 and t67's 14
      && Object.keys(SR).every(c => Object.keys(SR[c]).filter(k => /std|standard|deduct|exempt(?!Age|ion)|personal/i.test(k) && !/^retExempt/.test(k)).every(k => k === "deduct")), noDed.join(","));
   else CK("E-7 \"no state's standard deduction or personal exemption is taken\" — and no row carries a field that could hold one",
      /no state's standard deduction or personal exemption is taken \(conservative\)/.test(DOCS) && noDed.length === 0, noDed.join(","));

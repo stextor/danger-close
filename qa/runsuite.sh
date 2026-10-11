@@ -227,6 +227,11 @@ tally "t65-$CUR"   node t65_state_brackets_b2.mjs "$CUR"
 # derived pins in t10, t35, t39, t50-t55, t58-t61, t64 and t65 also use); and Ask AI's cap, cut-off notice and timeout. Both legs.
 tally "t66-$PRIOR" node t66_deductions_askai.mjs "$PRIOR"
 tally "t66-$CUR"   node t66_deductions_askai.mjs "$CUR"
+# t67 (v6.03) — D-30 batch 2: the fourteen flat-rate states' deductions, exemptions and personal credits (each against its source, dated;
+# Pennsylvania's law has none), Idaho's zero band and Ohio's 2026 schedule with its $332 step; v6.02 -> v6.03 against qa/d30_ref.mjs (D30F);
+# My Data's flat-rate line. Both legs.
+tally "t67-$PRIOR" node t67_deductions_flat.mjs "$PRIOR"
+tally "t67-$CUR"   node t67_deductions_flat.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

@@ -14,7 +14,7 @@
 //            those rows' state-tax fields, never up; Engines C and D byte-identical; Engine A never rises; its estate-best cell does not change
 // BOTH LEGS; the v598 leg pins the old rates. Run: node t63_flat_rates.mjs <tag>
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v598", "v599", "v600", "v601", "v602"];
+const KNOWN_VERSIONS = ["v598", "v599", "v600", "v601", "v602", "v603"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  ✓ ${n}`); } else { fail++; console.log(`  ✗ ${n}${d !== "" ? " — " + String(d).slice(0, 260) : ""}`); } };
 const EQ = (n, got, want, tol = 0.005) => CK(n, typeof got === "number" && Math.abs(got - want) <= tol, `got ${got}, want ${want}`);
@@ -26,6 +26,11 @@ console.error = () => {}; console.warn = () => {};
 const { existsSync } = await import("fs");
 const HERE = new URL(".", import.meta.url);
 const m = await import(`./app_${VER}.mjs`), g = m.__g, E = m.__engines, ST = E.stateTaxAnnual || g.stateTaxAnnual, SR = g.STATE_RULES();
+// v6.03 (D-30 batch 2 — docs/SCOPE_D30_DEDUCTIONS_V603.md, DD-14): Idaho, Indiana and Ohio take their deductions, exemptions and credits, and Idaho's
+// zero band and Ohio's schedule are modelled. §B's pins keep their base and on this leg expect it after them (qa/d30_ref.mjs D30F, on the recorded
+// call). A version LIST.
+const { d30Pins } = await import("./d30_ref.mjs");
+const D30FL = ["v603"].includes(VER), D30 = d30Pins(ST, SR, D30FL), B2T = D30FL ? " [v6.03: the same base after the state's deductions, schedule and credits]" : "";
 
 // ── A · the thirteen rates ──
 const NEW = { AZ: 0.025, CO: 0.044, ID: 0.053, IL: 0.0495, IN: 0.0295, IA: 0.038, LA: 0.03, MA: 0.05, MI: 0.0425, MS: 0.04, NC: 0.0399, OH: 0.0275, PA: 0.0307 };
@@ -37,20 +42,22 @@ const RATE_CLAIM = /(\d+(?:\.\d+)?)\s?%\s*(?:flat\s+)?(?:for|effective|from)\s+(
 if (FIXED) {
   const silent = Object.keys(NEW).filter(c => !RATE_CLAIM.test(SR[c].note || ""));
   CK("A-2 every one of the thirteen notes states its rate and the year it was read for", silent.length === 0, silent.join(","));
-  CK("A-3 Ohio's note gives the statute's form ($332 plus 2.75 % above $26,050) and the overstatement ($384.38, conservative)",
+  if (D30FL) CK("A-3 Ohio's note gives the statute's form ($332 plus 2.75 % above $26,050), now modelled (v6.03) — and no longer an overstatement",
+     /no tax on an income tax base of \$26,050 or less, and \$332 plus 2\.75% of the excess above it/.test(SR.OH.note) && !/384\.38/.test(SR.OH.note), SR.OH.note);
+  else CK("A-3 Ohio's note gives the statute's form ($332 plus 2.75 % above $26,050) and the overstatement ($384.38, conservative)",
      /\$332 plus 2\.75% of the excess above it/.test(SR.OH.note) && /\$26,050/.test(SR.OH.note) && /\$384\.38 a year above that line \(conservative\)/.test(SR.OH.note), SR.OH.note);
   // v6.00 (D-22 option 3): Mississippi's band is modelled from v6.00 (t64 A-7 owns that note); this leg asserts the old disclosure is gone. A LIST.
-  if (["v600", "v601", "v602"].includes(VER)) CK("A-4 Mississippi's note no longer says its first $10,000 is taxed here — the band is modelled (v6.00)", !/taxed here, overstating tax by up to \$400/.test(SR.MS.note) && /first \$10,000 of taxable income is untaxed/.test(SR.MS.note), SR.MS.note);
+  if (["v600", "v601", "v602", "v603"].includes(VER)) CK("A-4 Mississippi's note no longer says its first $10,000 is taxed here — the band is modelled (v6.00)", !/taxed here, overstating tax by up to \$400/.test(SR.MS.note) && /first \$10,000 of taxable income is untaxed/.test(SR.MS.note), SR.MS.note);
   else CK("A-4 Mississippi's note discloses its untaxed first $10,000 as taxed here (conservative)", /first \$10,000 of taxable income is untaxed in law and taxed here, overstating tax by up to \$400 a year \(conservative\)/.test(SR.MS.note), SR.MS.note);
   CK("A-5 the scheduled 2027 cuts (IN, MS, NC) are named as not applied", ["IN", "MS", "NC"].every(c => /2027, not applied here \(conservative\)|from 2027, not applied here \(conservative\)/.test(SR[c].note)), ["IN", "MS", "NC"].map(c => SR[c].note.slice(-90)).join(" | "));
 } else CK("A-2 PIN v5.98: Ohio's note still says ~3.1 %", /~3\.1%/.test(SR.OH.note), SR.OH.note);
 
 // ── B · hand cases to the cent ──
 const call = (code, retIncome, ageA, ageB = null, single = true) =>
-  ST({ code, retIncome, pen: 0, work: 0, capGains: 0, ssTaxableFed: 0, ssGrossA: 0, ssGrossB: 0, ageA, ageB, single });
-EQ(`B-1 ID single 66, $60,000: ${(WANT.ID * 100).toFixed(3)} % × $60,000`, call("ID", 60000, 66), FIXED ? 3180 : 3417);
-EQ(`B-2 IN single 66, $60,000: ${(WANT.IN * 100).toFixed(2)} % × $60,000`, call("IN", 60000, 66), FIXED ? 1770 : 1800);
-EQ(`B-3 OH joint 70/70, $80,000: ${(WANT.OH * 100).toFixed(2)} % × $80,000`, call("OH", 80000, 70, 70, false), FIXED ? 2200 : 2480);
+  D30.S({ code, retIncome, pen: 0, work: 0, capGains: 0, ssTaxableFed: 0, ssGrossA: 0, ssGrossB: 0, ageA, ageB, single });
+EQ(`B-1 ID single 66, $60,000: ${(WANT.ID * 100).toFixed(3)} % × $60,000${B2T}`, call("ID", 60000, 66), D30FL ? D30.B("ID", 60000) : FIXED ? 3180 : 3417);
+EQ(`B-2 IN single 66, $60,000: ${(WANT.IN * 100).toFixed(2)} % × $60,000${B2T}`, call("IN", 60000, 66), D30FL ? D30.B("IN", 60000) : FIXED ? 1770 : 1800);
+EQ(`B-3 OH joint 70/70, $80,000: ${(WANT.OH * 100).toFixed(2)} % × $80,000${B2T}`, call("OH", 80000, 70, 70, false), D30FL ? D30.B("OH", 80000) : FIXED ? 2200 : 2480);
 // Ohio's law for the same $80,000 of Ohio taxable income: $332 + 2.75 % × ($80,000 − $26,050) = $1,815.63; the model's $2,200.00 is $384.38 above.
 const ohLaw = x => x <= 26050 ? 0 : 332 + 0.0275 * (x - 26050);
 EQ("B-4 Ohio: the flat top rate overstates the statute's formula by exactly $384.38 above $26,050 (checked at $80,000 and $250,000)",

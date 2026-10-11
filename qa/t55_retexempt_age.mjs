@@ -14,7 +14,7 @@ import { createRequire } from "module";
 import { d30Pins } from "./d30_ref.mjs";
 const require = createRequire(import.meta.url);
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602"];
+const KNOWN_VERSIONS = ["v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; console.log(`  \u2717 ${n}${d ? " \u2014 " + String(d).slice(0, 240) : ""}`); } };
 const done = () => { console.log(`\nt55 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
@@ -26,20 +26,23 @@ const g = window.__g; const SR = g.STATE_RULES();
 const EQ = (n, got, exp) => CK(n + D30.tag(), Math.abs(got - exp) <= 0.005, `engine ${Number(got).toFixed(4)}, hand ${Number(exp).toFixed(4)}`);
 // v6.02 (D-30 batch 1 — docs/SCOPE_D30_DEDUCTIONS_V602.md, DD-14): Mississippi takes its standard deduction and exemptions. Its pins keep their
 // BASE and on a D-30 leg expect it after them (qa/d30_ref.mjs, on the calculator's own record of the call). A version LIST.
-const D30L = ["v602"].includes(VER), D30 = d30Pins((a) => g.stateTaxAnnual(a), SR, D30L);
+const D30L = ["v602", "v603"].includes(VER), D30 = d30Pins((a) => g.stateTaxAnnual(a), SR, D30L);
+// v6.03 (D-30 batch 2 — docs/SCOPE_D30_DEDUCTIONS_V603.md, DD-14): Iowa and Michigan take theirs too (Pennsylvania's law has none). Their pins
+// keep the taxable base and on the batch-2 leg expect it after the state's deductions and credits (qa/d30_ref.mjs D30F, on the recorded call). A version LIST.
+const D30FL = ["v603"].includes(VER), fl = (c, x) => D30FL ? D30.B(c, x) : SR[c].rate * x;
 const T = (code, o) => D30.S({ code, retIncome: 0, pen: 0, work: 0, capGains: 0, ssTaxableFed: 0, ssGrossA: 0, ssGrossB: 0, ageB: null, single: true, ...o });
 const J = (code, o) => T(code, { single: false, ...o });
 
 CK("0-1 rates the hand figures assume: IA 3.8 %, PA 3.07 %, MS 4 %, MI 4.25 %, IL 4.95 %", SR.IA.rate === 0.038 && SR.PA.rate === 0.0307 && SR.MS.rate === 0.04 && SR.MI.rate === 0.0425 && SR.IL.rate === 0.0495,
    ["IA", "PA", "MS", "MI", "IL"].map(c => c + " " + SR[c].rate).join(", "));
 // ── IA: 55, all retirement income ─────────────────────────────────────────────────────────────────────────────────────────
-EQ("IA-1 single 54, $50,000 IRA: under 55 — 0.038 × 50,000 = $1,900.00", T("IA", { retIncome: 50000, ageA: 54 }), 1900);
+EQ("IA-1 single 54, $50,000 IRA: under 55 — 0.038 × 50,000 = $1,900.00", T("IA", { retIncome: 50000, ageA: 54 }), fl("IA", 50000));
 EQ("IA-2 single 55, $50,000 IRA: exempt — $0", T("IA", { retIncome: 50000, ageA: 55 }), 0);
-EQ("IA-3 single 50, $20,000 PENSION: Iowa's 55 gates pensions too — 0.038 × 20,000 = $760.00", T("IA", { pen: 20000, ageA: 50 }), 760);
-EQ("IA-4 joint 56/54, $50,000 IRA: both must be 55 — $1,900.00", J("IA", { retIncome: 50000, ageA: 56, ageB: 54 }), 1900);
+EQ("IA-3 single 50, $20,000 PENSION: Iowa's 55 gates pensions too — 0.038 × 20,000 = $760.00", T("IA", { pen: 20000, ageA: 50 }), fl("IA", 20000));
+EQ("IA-4 joint 56/54, $50,000 IRA: both must be 55 — $1,900.00", J("IA", { retIncome: 50000, ageA: 56, ageB: 54 }), fl("IA", 50000));
 EQ("IA-5 joint 56/55, $50,000 IRA: both 55+ — $0", J("IA", { retIncome: 50000, ageA: 56, ageB: 55 }), 0);
 EQ("IA-6 count-only, two 65+: exempt — $0", g.stateTaxAnnual({ code: "IA", retIncome: 50000, pen: 0, work: 0, capGains: 0, ssTaxableFed: 0, ssGrossA: 0, ssGrossB: 0, ageA: null, ageB: null, single: false, persons65: 2 }), 0);
-EQ("IA-7 count-only, one 65+ on a joint return: the other's age unknown — not exempt, $1,900.00", g.stateTaxAnnual({ code: "IA", retIncome: 50000, pen: 0, work: 0, capGains: 0, ssTaxableFed: 0, ssGrossA: 0, ssGrossB: 0, ageA: null, ageB: null, single: false, persons65: 1 }), 1900);
+EQ("IA-7 count-only, one 65+ on a joint return: the other's age unknown — not exempt, $1,900.00", D30.S({ code: "IA", retIncome: 50000, pen: 0, work: 0, capGains: 0, ssTaxableFed: 0, ssGrossA: 0, ssGrossB: 0, ageA: null, ageB: null, single: false, persons65: 1 }), fl("IA", 50000));
 // ── PA: 60 for withdrawals, pensions any age ──────────────────────────────────────────────────────────────────────────────
 EQ("PA-1 single 59, $50,000 IRA — 0.0307 × 50,000 = $1,535.00", T("PA", { retIncome: 50000, ageA: 59 }), 1535);
 EQ("PA-2 single 60, $50,000 IRA: exempt — $0", T("PA", { retIncome: 50000, ageA: 60 }), 0);
@@ -50,15 +53,15 @@ EQ("PA-6 joint 61/60, $40,000 IRA: exempt — $0", J("PA", { retIncome: 40000, a
 // ── MS: as PA ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
 // v6.00 (D-22 option 3, SCOPE_D22_BRACKETS_V600): Mississippi's first $10,000 of taxable income is untaxed from v6.00 (its own schedule,
 // one band per return). The hand figures keep their taxable base and, on a bracket leg, take the band off it. A version LIST.
-const MSB = ["v600", "v601", "v602"].includes(VER), ms = x => D30L ? D30.B("MS", x) : MSB ? 0.04 * Math.max(0, x - 10000) : 0.04 * x;
+const MSB = ["v600", "v601", "v602", "v603"].includes(VER), ms = x => D30L ? D30.B("MS", x) : MSB ? 0.04 * Math.max(0, x - 10000) : 0.04 * x;
 EQ(MSB ? "MS-1 single 59, $50,000 IRA — the first $10,000 untaxed: 0.04 × 40,000 = $1,600.00" : "MS-1 single 59, $50,000 IRA — 0.04 × 50,000 = $2,000.00", T("MS", { retIncome: 50000, ageA: 59 }), ms(50000));
 EQ("MS-2 single 60, $50,000 IRA: exempt — $0", T("MS", { retIncome: 50000, ageA: 60 }), 0);
 EQ("MS-3 single 50, $30,000 pension: exempt at any age — $0", T("MS", { pen: 30000, ageA: 50 }), 0);
 // ── MI: no age test, capped per return ────────────────────────────────────────────────────────────────────────────────────
 EQ("MI-1 single 50, $50,000 IRA: under the cap, no age test — $0", T("MI", { retIncome: 50000, ageA: 50 }), 0);
-EQ("MI-2 single 66, $80,000 IRA: 0.0425 × (80,000 − 65,897) = 0.0425 × 14,103 = $599.3775", T("MI", { retIncome: 80000, ageA: 66 }), 599.3775);
-EQ("MI-3 single 66, $50,000 IRA + $30,000 pension: public and private combined under one cap — $599.3775", T("MI", { retIncome: 50000, pen: 30000, ageA: 66 }), 599.3775);
-EQ("MI-4 joint 66/66, $150,000 IRA: 0.0425 × (150,000 − 131,794) = 0.0425 × 18,206 = $773.755", J("MI", { retIncome: 150000, ageA: 66, ageB: 66 }), 773.755);
+EQ("MI-2 single 66, $80,000 IRA: 0.0425 × (80,000 − 65,897) = 0.0425 × 14,103 = $599.3775", T("MI", { retIncome: 80000, ageA: 66 }), fl("MI", 14103));
+EQ("MI-3 single 66, $50,000 IRA + $30,000 pension: public and private combined under one cap — $599.3775", T("MI", { retIncome: 50000, pen: 30000, ageA: 66 }), fl("MI", 14103));
+EQ("MI-4 joint 66/66, $150,000 IRA: 0.0425 × (150,000 − 131,794) = 0.0425 × 18,206 = $773.755", J("MI", { retIncome: 150000, ageA: 66, ageB: 66 }), fl("MI", 18206));
 CK("MI-5 Michigan's cap is dated TY2025 and shown as a dated figure", SR.MI.years && SR.MI.years.retCap === 2025 && SR.MI.retCap.single === 65897 && SR.MI.retCap.joint === 131794, JSON.stringify(SR.MI.years));
 // ── unchanged rows ────────────────────────────────────────────────────────────────────────────────────────────────────────
 EQ("IL-1 single 50, $50,000 IRA: Illinois includes early distributions — $0", T("IL", { retIncome: 50000, ageA: 50 }), 0);
@@ -72,11 +75,11 @@ for (const c of ["IA", "PA", "MS"]) for (const aA of [50, 54, 55, 59, 60, 66]) f
   const single = aB === null, age = SR[c].retExemptAge, ok = a => a >= age;
   const gate = single ? ok(aA) : ok(aA) && ok(aB);
   const exempt = (gate ? ri : 0) + ((gate || SR[c].retExemptPensionAnyAge) ? pen : 0);
-  const got = T(c, { retIncome: ri, pen, ageA: aA, ageB: aB, single }), want = c === "MS" ? ms(ri + pen - exempt) : SR[c].rate * (ri + pen - exempt);   // v6.00: MS's band; v6.02: the call first, so MS's want reads its record
+  const got = T(c, { retIncome: ri, pen, ageA: aA, ageB: aB, single }), want = c === "MS" ? ms(ri + pen - exempt) : c === "IA" ? fl("IA", ri + pen - exempt) : SR[c].rate * (ri + pen - exempt);   // v6.00: MS's band; v6.02: the call first, so MS's want reads its record
   if (Math.abs(got - want) > 0.005) bad.push(`${c} ${aA}/${aB} ri${ri} pen${pen}: ${got.toFixed(2)} vs ${want.toFixed(2)}`); n++;
 }
 for (const single of [true, false]) for (const ri of [20000, 70000, 140000]) for (const pen of [0, 30000]) {
-  const cap = single ? 65897 : 131794, want = 0.0425 * Math.max(0, ri + pen - cap), got = T("MI", { retIncome: ri, pen, ageA: 66, ageB: single ? null : 66, single });
+  const cap = single ? 65897 : 131794, got = T("MI", { retIncome: ri, pen, ageA: 66, ageB: single ? null : 66, single }), want = fl("MI", Math.max(0, ri + pen - cap));   // v6.03: the call first, so the want reads its record
   if (Math.abs(got - want) > 0.005) bad.push(`MI ${single ? "S" : "J"} ri${ri} pen${pen}: ${got.toFixed(2)} vs ${want.toFixed(2)}`); n++;
 }
 CK(`X-0 not vacuous: ${n} grid cases (≥ 300)`, n >= 300, n);

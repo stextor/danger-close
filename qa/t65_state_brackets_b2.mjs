@@ -21,7 +21,7 @@ import { d30Pins } from "./d30_ref.mjs";
 import { existsSync, readFileSync } from "fs";
 const require = createRequire(import.meta.url);
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v600", "v601", "v602"];
+const KNOWN_VERSIONS = ["v600", "v601", "v602", "v603"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  ✓ ${n}`); } else { fail++; console.log(`  ✗ ${n}${d !== "" ? " — " + String(d).slice(0, 260) : ""}`); } };
 const EQ = (n, got, want, tol = 0.005) => CK(n + D30.tag(), typeof got === "number" && Math.abs(got - want) <= tol, `got ${got}, want ${want}`);
@@ -37,10 +37,13 @@ const g = window.__g, SR = g.STATE_RULES();
 // case's BASE (its last column) and on a D-30 leg expects it after them — qa/d30_ref.mjs, independent of the app, on the calculator's own record
 // of the call; a different base fails. B-AR2/3 hold Arkansas's DFA formula at the same NET income (wages + the $2,470 deduction). §A-9 and §E
 // take the v6.02 forms (t66 A-5, F hold them). Group D (v6.00 -> v6.01) runs in a v600 -> v601 folder only. A version LIST.
-const D30L = ["v602"].includes(VER), D30 = d30Pins((a) => g.stateTaxAnnual(a), SR, D30L), ST = D30.S;
+const D30L = ["v602", "v603"].includes(VER), D30 = d30Pins((a) => g.stateTaxAnnual(a), SR, D30L), ST = D30.S;
 const SEV = ["AL", "AR", "CT", "DC", "DE", "HI", "KS", "MD", "ME", "MO", "MT", "ND", "NE", "NM", "RI", "VT", "WV"];
 const TEN = ["CA", "MN", "MS", "NJ", "NY", "OK", "OR", "SC", "VA", "WI"];
 const FLAT = ["AZ", "CO", "GA", "IA", "ID", "IL", "IN", "KY", "LA", "MA", "MI", "NC", "OH", "PA", "UT"];
+// v6.03 (D-30 batch 2, t67): Idaho's zero band and Ohio's 2026 schedule are carried as schedules — still flat-rate states, now the only two of
+// the fifteen with `brackets`; Georgia takes its deduction (C-GA keeps its base). A version LIST.
+const B2L = ["v603"].includes(VER), FLAT_SCH = B2L ? ["ID", "OH"] : [];
 
 // ── A · the schedules (upper bounds inclusive, "not over"; transcribed from the sources the header names) ──
 const same = (x) => ({ single: x, joint: x });
@@ -76,8 +79,8 @@ const CT_ADDS = { single: [[56500, 5000, 25, 250], [105000, 5000, 25, 250], [200
                   joint: [[100500, 5000, 50, 500], [210000, 10000, 50, 500], [400000, 10000, 180, 5400], [1000000, 10000, 100, 900]] };
 const withB = Object.keys(SR).filter(c => SR[c].brackets !== undefined).sort();
 if (BR) {
-  const want = [...TEN, ...SEV].sort();
-  CK(`A-1 exactly the twenty-seven rows carry a schedule — v6.00's ten and these seventeen (${withB.length})`, withB.join(",") === want.join(","), withB.join(","));
+  const want = [...TEN, ...SEV, ...FLAT_SCH].sort();
+  CK(`A-1 exactly the twenty-seven rows carry a schedule — v6.00's ten and these seventeen${B2L ? ", and Idaho's and Ohio's from v6.03" : ""} (${withB.length})`, withB.join(",") === want.join(","), withB.join(","));
   for (const c of SEV) {
     const b = SR[c].brackets || {};
     CK(`A-2${c} ${SR[c].name}: single and joint schedules equal the source (${S[c].single.length} / ${S[c].joint.length} rows), dated 2026, top rate ${(TOP[c] * 100).toFixed(2)}%`,
@@ -96,7 +99,7 @@ if (BR) {
      [own("upper"), own("stepAdds"), own("local"), own("cgSurtax"), own("recapture")].join(" | "));
   // D-22 is closed by this release: every row that taxes income is either on its own schedule or is a flat-rate state.
   const loose = Object.keys(SR).filter(c => SR[c].rate > 0 && !SR[c].brackets && !FLAT.includes(c));
-  const flatWrong = FLAT.filter(c => !(SR[c].rate > 0) || SR[c].brackets);
+  const flatWrong = FLAT.filter(c => !(SR[c].rate > 0) || (SR[c].brackets && !FLAT_SCH.includes(c)));
   CK(`A-7 EXTINCTION (D-22): no taxing row lacks a schedule unless it is one of the fifteen flat-rate states (${FLAT.join(" ")})`, loose.length === 0 && flatWrong.length === 0,
      `loose ${loose.join(",")} · flat list wrong ${flatWrong.join(",")}`);
   const RATE_CLAIM = /(\d+(?:\.\d+)?)\s?%\s*(?:flat\s+)?(?:for|effective|from)\s+(20\d\d)/;
@@ -246,7 +249,7 @@ for (const [id, lbl, code, o, nv, base] of HC) EQ(`C-${id} ${lbl}: ${BR ? `$${nv
 // A survivor who is spouse B files single: the calculator moves B into A's slot, and the SINGLE schedule applies (Kansas: $23,000, not $46,000).
 EQ(`C-SV a survivor (spouse B, 70) on a single return in Kansas, IRA $60,000: ${BR ? "the single schedule, $1,196 + 5.58 % × $37,000 = $3,260.60" : "PIN v6.00 5.58 %"}`,
    call("KS", { retIncome: 60000, ageA: null, ageB: 70, single: true }), D30L ? D30.B("KS", 60000) : BR ? 3260.6 : 3348);
-EQ("C-GA Georgia (flat 4.99 %, not a schedule) single 66, IRA $100,000: $1,746.50 on both legs", call("GA", { retIncome: 100000, ageA: 66 }), 1746.5);
+EQ("C-GA Georgia (flat 4.99 %, not a schedule) single 66, IRA $100,000: $1,746.50 on both legs", call("GA", { retIncome: 100000, ageA: 66 }), B2L ? D30.B("GA", 35000) : 1746.5);
 
 // ── D · v6.00 -> v6.01: only the seventeen move, and each equals an independent implementation on v6.00's base ──
 // From v6.02 the run folder is v601 -> v602 and holds no app_v600.mjs: the group is reported as not run on either leg (t64 D's convention); t66 D owns v6.01 -> v6.02.
@@ -320,19 +323,21 @@ const modelLine = () => { const n = [...body().querySelectorAll("div")].filter(d
     CK("E-4 North Dakota: \"0.00% to 2.50%\", dated \"brackets 2026\"", /^Model: the state's own brackets, 0\.00% to 2\.50% · /.test(nd) && (D30L ? /brackets 2026 · deductions 2026\./ : /brackets 2026\./).test(nd), nd.slice(0, 160));
   } else CK("E-2 PIN v6.00: Maryland reads \"7.50% effective rate (an approximation)\"", /^Model: 7\.50% effective rate \(an approximation\)/.test(md), md.slice(0, 120));
   await pick("GA"); const ga = modelLine();
-  CK("E-5 a flat-rate state (Georgia) is unchanged: \"4.99% effective rate (an approximation)\"", /^Model: 4\.99% effective rate \(an approximation\)/.test(ga), ga.slice(0, 120));
+  if (B2L) CK("E-5 a flat-rate state (Georgia) reads its flat rate (v6.03: \"flat rate\", t67 E-1)", /^Model: 4\.99% flat rate/.test(ga), ga.slice(0, 120));
+  else CK("E-5 a flat-rate state (Georgia) is unchanged: \"4.99% effective rate (an approximation)\"", /^Model: 4\.99% effective rate \(an approximation\)/.test(ga), ga.slice(0, 120));
   try { await act(async () => { root.unmount(); }); } catch (e) {}
 }
 const DOCS = g.DOCS_HTML().replace(/<[^>]+>/g, "").replace(/\s+/g, " ");
 const named = (DOCS.match(/from v6\.01 every progressive state - ([A-Z, ]+) - is taxed on its own bracket schedule/) || [])[1];
 if (BR) {
   CK(`E-6 the Taxes entry lists every progressive state on its own schedule, and the list IS the set of rows carrying one (${named ? named.split(", ").length : 0})`,
-     !!named && named.split(", ").sort().join(",") === withB.join(","), named);
+     !!named && named.split(", ").sort().join(",") === withB.filter(c => !FLAT_SCH.includes(c)).join(","), named);   // v6.03: Idaho's and Ohio's are named apart (t67 E-8)
   CK("E-7 …and names the added rules, each of which a row carries: New York's recapture, Connecticut's added amounts, Arkansas's high-income table, Maryland's county tax",
      /with New York's tax-benefit recapture, Connecticut's phase-out and recapture amounts, Arkansas's high-income table and Maryland's county tax at its highest rate; the flat-rate states keep their one rate/.test(DOCS)
      && !!SR.NY.recapture && !!SR.CT.stepAdds && !!SR.AR.upper && SR.MD.local === 0.033);
   CK("E-8 the methodology entry: every progressive state on its own schedule (ten at v6.00, seventeen at v6.01); the flat-rate states at one rate",
-     /taxes every progressive state on its own bracket schedule \(ten at v6\.00, the other seventeen at v6\.01\) and each flat-rate state at its one rate/.test(DOCS) && withB.length === 27);
+     /taxes every progressive state on its own bracket schedule \(ten at v6\.00, the other seventeen at v6\.01\) and each flat-rate state at its one rate/.test(DOCS) && withB.length === 27 + FLAT_SCH.length
+     && (!B2L || DOCS.includes("and each flat-rate state at its one rate (Idaho with its zero band and Ohio on its own schedule from v6.03),")));
   CK("E-9 county taxes: skipped except Maryland's, at the highest county rate — and Maryland is the only row carrying one",
      /skips county\/city taxes except Maryland's county tax, taken at the highest county rate \(from v6\.01\)/.test(DOCS) && Object.keys(SR).filter(c => SR[c].local !== undefined).join(",") === "MD");
   CK("E-10 the old claims are gone: \"for the other progressive states one rate stands in for the brackets\", \"ten states on their own bracket schedules\"",

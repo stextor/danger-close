@@ -37,7 +37,7 @@ const R = Math.round;
 // its expectation is that base on the state's schedule. `SCH` computes it here, independently of the app, from schedules transcribed from
 // the same primary sources as t64 §A (only the four states §2E prices are needed). `TB` labels the bracket figure, so a passing line never
 // claims "0.055 x ..." while asserting something else. A version LIST, so register_tag extends it each release.
-const STB_LEGS = ["v600", "v601", "v602"], STB = STB_LEGS.includes(VER);
+const STB_LEGS = ["v600", "v601", "v602", "v603"], STB = STB_LEGS.includes(VER);
 const _STB = { MS: [0.04, [[10000, 0], [null, 0.04]], [[10000, 0], [null, 0.04]]],
   NJ: [0.055, [[20000, .014], [35000, .0175], [40000, .035], [75000, .05525], [500000, .0637], [1000000, .0897], [null, .1075]],
               [[20000, .014], [50000, .0175], [70000, .0245], [80000, .035], [150000, .05525], [500000, .0637], [1000000, .0897], [null, .1075]]],
@@ -51,7 +51,7 @@ const TB = (name, got, code, flat, single = false) => D30L ? TD(name, got, code,
 // them at its v6.00 single rate keep their BASE (the exclusion arithmetic each exists to pin) and, on the v6.01 leg, expect that base on the
 // state's schedule — computed here, independently of the app, from t65 §A's transcription. Maryland adds its 3.30 % county tax on the same base
 // (no pin here reaches its $350,000 capital-gains test). `TB2` labels the schedule figure. A version LIST.
-const STB2_LEGS = ["v601", "v602"], STB2 = STB2_LEGS.includes(VER);
+const STB2_LEGS = ["v601", "v602", "v603"], STB2 = STB2_LEGS.includes(VER);
 const _STB2 = { AL: [0.045, [[500, .02], [3000, .04], [null, .05]], [[1000, .02], [6000, .04], [null, .05]]],
   DE: [0.055, [[2000, 0], [5000, .022], [10000, .039], [20000, .048], [25000, .052], [60000, .0555], [null, .066]], [[2000, 0], [5000, .022], [10000, .039], [20000, .048], [25000, .052], [60000, .0555], [null, .066]]],
   MD: [0.075, [[1000, .02], [2000, .03], [3000, .04], [100000, .0475], [125000, .05], [150000, .0525], [250000, .055], [500000, .0575], [1000000, .0625], [null, .065]],
@@ -70,7 +70,7 @@ const TB2 = (name, got, code, flat, single = false) => D30L ? TD(name, got, code
 // calculator's own record of the pinned call: its federal-AGI measure, filing status and ages. If the calculator built a different base the
 // expectation is NaN and the pin FAILS — its claim about the base is kept, not re-derived. `S` in §2E records every call; TB / TB2 read the
 // last one, which is the call that produced `got` (an argument evaluated before the wrapper runs). A version LIST.
-const D30_LEGS = ["v602"], D30L = D30_LEGS.includes(VER);
+const D30_LEGS = ["v602", "v603"], D30L = D30_LEGS.includes(VER);
 const D30REC = d30Recorder((a) => g.stateTaxAnnual(a));
 const TD = (name, got, code, flat) => { const x = flat / (_STB[code] || _STB2[code])[0], w = d30Want(g.STATE_RULES(), code, x, D30REC.last);
   T(`${name} [v6.02: the same base, $${x.toFixed(2)}, after the state's deductions and credits -> $${(+w).toFixed(2)}]`, got, w); };
@@ -78,6 +78,12 @@ const TD = (name, got, code, flat) => { const x = flat / (_STB[code] || _STB2[co
 const D30B = (code, base) => d30Want(g.STATE_RULES(), code, base, D30REC.last);   // the call just made, at its hand base
 const D30D = (name, code, f1, b1, f2, b2) => { const a = f1(), wa = D30B(code, b1), b = f2(), wb = D30B(code, b2);
   T(`${name} [v6.02: each call's base ($${b1.toLocaleString("en-US")} / $${b2.toLocaleString("en-US")}) after the state's deductions and credits -> $${(wa - wb).toFixed(2)}]`, a - b, wa - wb); };
+// v6.03 (D-30 batch 2 — docs/SCOPE_D30_DEDUCTIONS_V603.md, DD-14): the flat-rate states take theirs too. A pin that prices one at its flat rate keeps
+// its BASE (flat / rate — the arithmetic it exists to pin) and on a batch-2 leg expects that base after the state's deductions and credits, computed by
+// qa/d30_ref.mjs (D30F, independent of the app) from the recorded call. `TF` labels the after-deduction figure. A version LIST.
+const D30F_LEGS = ["v603"], D30FL = D30F_LEGS.includes(VER);
+const TF = (name, got, code, rate, flat) => { if (!D30FL) return T(name, got, flat); const x = flat / rate, w = d30Want(g.STATE_RULES(), code, x, D30REC.last);
+  T(`${name} [v6.03: the same base, $${x.toFixed(2)}, after the state's deductions and credits -> $${(+w).toFixed(2)}]`, got, w); };
 
 // ── IRS-verified 2026 constants (independent copy from primary source, NOT from the app) ──
 const STD = { S: 16100, M: 32200 }, SR = { S: 2050, M: 1650 };
@@ -177,7 +183,7 @@ const SUR_R = [0,1150,2880,4620,6360,6940];
 // v5.78 (C-1): 42 U.S.C. §1395r(i)(3)(C)(i)(III) — tiers 1–4 are "not more than" their upper amount, the top tier is "at
 // least" its own. Through v5.77 BOTH reference oracles in this file used `<=` at every tier, the engines' own rule, so an
 // exact-top-threshold case compared the engine's C-1 against the oracle's C-1 and agreed. A LADDER — widen it each release.
-const C1_FIXED = VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602";
+const C1_FIXED = VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603";
 const tierR = (magi, ups) => { for (let i=0;i<ups.length;i++) if (i === ups.length - 2 ? magi < ups[i] : magi <= ups[i]) return i; return ups.length-1; };
 const irmaaRef = (magi, single, persons) => SUR_R[tierR(magi, single?SGL_R:MFJ_R)] * persons;
 // IRMAA isolation builder: 3-year window ending at `premiumYr`, both 65+ that year, MAGI = pen.
@@ -474,7 +480,7 @@ const pass2E = pass, fail2E = fail;
 
     // ── ARCHETYPE 2 — plain flat rate, no exclusions, no SS. AZ at 2.5%.
     // hand: 0.025 x ((40,000 + 20,000) + 10,000 + 0 + 5,000) = 0.025 x 75,000 = 1,875
-    T("2E flat (AZ 2.5%): taxes retirement, work and gains alike", run("AZ", 2), 1875);
+    TF("2E flat (AZ 2.5%): taxes retirement, work and gains alike", run("AZ", 2), "AZ", 0.025, 1875);
 
     // ── ARCHETYPE 3 — retExempt. MS at 4%: ALL retirement income exempt, everything else taxed.
     // hand: 0.04 x (0 + 10,000 + 0 + 5,000) = 600
@@ -500,8 +506,8 @@ const pass2E = pass, fail2E = fail;
     // hand CO single:      0.044  x ((60,000 - 24,000) + 10,000 + 15,000 + 5,000) = 0.044  x 66,000 = 2,904
     const _v5 = Number(String(VER).replace(/[^0-9]/g, "")) || 0;
     if (_v5 >= 573) {
-      T("2E partial-SS (CO 4.4%, MFJ): half of federally-taxable SS enters the base", run("CO", 2), _v5 >= 585 ? 2508 : 1848); // v5.85 (D-19): the state's own SS rule — statute-consistent; see CHANGELOG v5.85: both 65+, all SS subtracted, the $48K cap shrinks by it
-      T("2E partial-SS (CO 4.4%, single)", run("CO", 1), _v5 >= 585 ? 3564 : 2904); // v5.85 (D-19): the state's own SS rule — statute-consistent; see CHANGELOG v5.85: run() passes no `single` — a JOINT return with ONE spouse 65+
+      TF("2E partial-SS (CO 4.4%, MFJ): half of federally-taxable SS enters the base", run("CO", 2), "CO", 0.044, _v5 >= 585 ? 2508 : 1848); // v5.85 (D-19): the state's own SS rule — statute-consistent; see CHANGELOG v5.85: both 65+, all SS subtracted, the $48K cap shrinks by it
+      TF("2E partial-SS (CO 4.4%, single)", run("CO", 1), "CO", 0.044, _v5 >= 585 ? 3564 : 2904); // v5.85 (D-19): the state's own SS rule — statute-consistent; see CHANGELOG v5.85: run() passes no `single` — a JOINT return with ONE spouse 65+
       TB2("2E full-SS (MT 5.65%, MFJ) [v5.73]: ALL federally-taxable SS enters the base, $5,660 each", run("MT", 2), "MT", 5292.92);
       TB2("2E full-SS (MT 5.65%, single) [v5.73]", run("MT", 1), "MT", 5612.71);
     } else {
@@ -510,8 +516,8 @@ const pass2E = pass, fail2E = fail;
     }
     // NOT VACUOUS: a state with ss=0 on the same inputs must exclude SS entirely, or the assertion
     // above would pass on any implementation that simply ignored the flag.
-    T("2E control: an ss=0 state excludes SS from the base",
-      run("AZ", 2), 0.025 * 75000);
+    TF("2E control: an ss=0 state excludes SS from the base",
+      run("AZ", 2), "AZ", 0.025, 0.025 * 75000);
 
     // ── ARCHETYPE 6 — the fallback path for an unknown/absent code.
     // hand: 0.05 x ((40,000 + 20,000 + 10,000) + 5,000) = 0.05 x 75,000 = 3,750
@@ -524,9 +530,9 @@ const pass2E = pass, fail2E = fail;
     TB2("2E clamp: an exclusion larger than retirement income cannot go negative",
       S({ code: "AL", fallbackRate: 0, retIncome: 3000, pen: 0, work: 20000, capGains: 0,
           ssTaxableFed: 0, persons65: 2 }), "AL", 900);
-    T("2E clamp: a capital LOSS is ignored, not deducted",
+    TF("2E clamp: a capital LOSS is ignored, not deducted",
       S({ code: "AZ", fallbackRate: 0, retIncome: 50000, pen: 0, work: 0, capGains: -30000,
-          ssTaxableFed: 0, persons65: 0 }), 1250);
+          ssTaxableFed: 0, persons65: 0 }), "AZ", 0.025, 1250);
     TB2("2E clamp: a negative persons65 cannot create a negative exclusion",
       S({ code: "AL", fallbackRate: 0, retIncome: 60000, pen: 0, work: 0, capGains: 0,
           ssTaxableFed: 0, persons65: -5 }), "AL", 2700);
@@ -540,7 +546,7 @@ const pass2E = pass, fail2E = fail;
       S({ code: "MS", fallbackRate: 0, retIncome: 5e5, pen: 2e5, work: 0, capGains: 0,
           ssTaxableFed: 0, persons65: 2 }), 0);
     // Gated from v5.90 (a version LIST, so register_tag extends it each release; the prior leg, v5.89, has no gate to test).
-    if (["v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602"].includes(VER)) TB("2E (v5.90): nobody counted 65+ — Mississippi taxes the withdrawals (0.04 × 500,000), not the pension in payment",
+    if (["v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603"].includes(VER)) TB("2E (v5.90): nobody counted 65+ — Mississippi taxes the withdrawals (0.04 × 500,000), not the pension in payment",
       S({ code: "MS", fallbackRate: 0, retIncome: 5e5, pen: 2e5, work: 0, capGains: 0,
           ssTaxableFed: 0, persons65: 0 }), "MS", 20000);
 
@@ -764,10 +770,10 @@ const pass2E = pass, fail2E = fail;
       //   sources its expectation from the app agrees with the app when the app is wrong, which
       //   is exactly the defect this release corrects. (scope D-3)
       const _kyAge = _v >= 557 ? 1322.30 : 1511.20;
-      T(`2E age (KY, no statutory age test): a 60-year-old couple gets the full exclusion — $${_kyAge}`,
-        AGE("KY", 60, 60), _kyAge);
-      T(`2E age (KY): and so does a 45-year-old couple — there is no floor to clear — $${_kyAge}`,
-        AGE("KY", 45, 45), _kyAge);
+      TF(`2E age (KY, no statutory age test): a 60-year-old couple gets the full exclusion — $${_kyAge}`,
+        AGE("KY", 60, 60), "KY", 0.035, _kyAge);
+      TF(`2E age (KY): and so does a 45-year-old couple — there is no floor to clear — $${_kyAge}`,
+        AGE("KY", 45, 45), "KY", 0.035, _kyAge);
       // hand DE (rate 5.5%, $12,500 each, floor 60):
       //   61/61 -> 0.055 x (100,000 - 25,000) = 4,125.00
       //   59/59 -> 0.055 x  100,000           = 5,500.00
@@ -965,10 +971,10 @@ const pass2E = pass, fail2E = fail;
             ssTaxableFed: 0, ssGrossA: 40000, ssGrossB: 40000, ageA: 65, ageB: 65 }), "NJ", _v >= 567 ? 11000 : 2750);
       // KY carries no ssOffset, so Social Security must not touch its exclusion on EITHER build.
       // The figure moves at v5.57 for the RATE alone — same gate, same reason.
-      T("2E ssOffset: the v5.55 age floors are untouched (KY has no ssOffset)",
+      TF("2E ssOffset: the v5.55 age floors are untouched (KY has no ssOffset)",
         S({ code: "KY", fallbackRate: 0, retIncome: 100000, pen: 0, work: 0, capGains: 0,
             ssTaxableFed: 0, ssGrossA: 30000, ssGrossB: 30000, ageA: 60, ageB: 60 }),
-        _v >= 557 ? 1322.30 : 1511.20);
+        "KY", 0.035, _v >= 557 ? 1322.30 : 1511.20);
       // —— v5.57 EXTINCTION · a rate and the note describing it must not drift apart ——
       // THE CLASS THIS CLOSES. Kentucky carried 4% in code and 3.5% in law for eight months and
       // nothing compared the two. The note is the only place a reader sees which YEAR a rate
@@ -1247,8 +1253,8 @@ const pass2E = pass, fail2E = fail;
                    ssTaxableFed: 18000, ssGrossA: 22000, ssGrossB: 14000, ageA: 67, ageB: 67 };
       T("[HAND v5.62] PA (retExempt, 3.07%): 0.0307 × (28,000 + 8,000) = $1,105.20",
         S({ code: "PA", ..._H }), 1105.2);
-      T("[HAND v5.62] IL (retExempt, 4.95%): 0.0495 × (28,000 + 8,000) = $1,782",
-        S({ code: "IL", ..._H }), 1782);
+      TF("[HAND v5.62] IL (retExempt, 4.95%): 0.0495 × (28,000 + 8,000) = $1,782",
+        S({ code: "IL", ..._H }), "IL", 0.0495, 1782);
 
       // ── RETIRED at v5.63 (scope D-4): the [KNOWN DEFECT pre-otherOrd] pin that stood here ──
       // It added $12,000 to `work` and asserted state tax moved in every taxing state — i.e. that

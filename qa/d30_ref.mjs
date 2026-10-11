@@ -1,5 +1,6 @@
 // d30_ref.mjs — an INDEPENDENT implementation of D-30 batch 1 (docs/SCOPE_D30_DEDUCTIONS_V602.md, added v6.02): the 27 progressive states'
-// standard deductions, personal exemptions and personal credits, and the state tax they produce. Imported by t66 (groups B–D) and by the
+// standard deductions, personal exemptions and personal credits, and the state tax they produce — and from v6.03 batch 2's, the fourteen
+// flat-rate states that take any (docs/SCOPE_D30_DEDUCTIONS_V603.md; `D30F` below). Imported by t66 (groups B–D) and by the
 // suites whose derived pins price one of the 27 (DD-14: a pin keeps its BASE and, on a v6.02+ leg, expects that base after the state's
 // deductions and credits — computed HERE, not by the app).
 //
@@ -66,8 +67,30 @@ export const D30 = {
   WI: ({ s, p, n65, base }) => ({ ded: Math.max(0, (s ? 13960 : 25840) - (s ? 0.12 : 0.19778) * Math.max(0, base - (s ? 20120 : 29040))) + 700 * p + 250 * n65 }),
   WV: ({ p }) => ({ ded: 2000 * p }),
 };
+// ── v6.03 · D-30 batch 2 (docs/SCOPE_D30_DEDUCTIONS_V603.md §0.2): the fourteen flat-rate states that take something (Pennsylvania's law has
+// none). The same independence: one plain function per state from the scope's figures, each test written as its statute words it — Ohio's
+// credits on "modified adjusted gross income less exemptions" (the app converts them to modified-AGI thresholds, DD-10), Colorado's addback
+// "equal to or exceeding" $300,000, Utah's credit as the TC-40 lines compute it. Their schedules are transcribed in d30Tax below.
+export const D30_FLAT_STATES = ["AZ", "CO", "GA", "IA", "ID", "IL", "IN", "KY", "LA", "MA", "MI", "NC", "OH", "UT"];
+export const D30F = {
+  AZ: ({ s, n65 }) => ({ ded: (s ? 15750 : 31500) + 2100 * n65 }),
+  CO: ({ s, n65, agi }) => { const fed = FEDSTD(s, n65); return { ded: agi >= 300000 ? Math.min(fed, s ? 12000 : 16000) : fed }; },
+  GA: ({ s }) => ({ ded: s ? 15000 : 30000 }),
+  IA: ({ s, p, n65 }) => ({ ded: FEDSTD(s, n65), credit: 40 * p + 20 * n65 }),
+  ID: ({ s, p, n65 }) => ({ ded: (s ? 15750 : 31500) + (s ? 2000 : 1600) * n65, credit: 155 * p }),
+  IL: ({ s, p, n65, agi }) => ({ ded: agi > (s ? 250000 : 500000) ? 0 : 2925 * p + 1000 * n65 }),
+  IN: ({ p, n65, agi }) => ({ ded: 1000 * p + 1000 * n65 + (agi < 40000 ? 500 * n65 : 0) }),
+  KY: ({ n65 }) => ({ ded: 3360, credit: 40 * n65 }),
+  LA: ({ s }) => ({ ded: s ? 12500 : 25000 }),
+  MA: ({ p, n65 }) => ({ ded: 4400 * p + 700 * n65 }),
+  MI: ({ p }) => ({ ded: 5900 * p }),
+  NC: ({ s }) => ({ ded: s ? 12750 : 25500 }),
+  OH: ({ p, n65, base }) => { const each = base <= 40000 ? 2400 : base <= 80000 ? 2150 : base < 500000 ? 1900 : 0, ex = each * p, less = base - ex;
+    return { ded: ex, credit: (less < 30000 ? 20 * p : 0) + (n65 > 0 && less < 100000 ? 50 : 0) }; },
+  UT: ({ s, n65, base }) => ({ credit: Math.max(0, 0.06 * FEDSTD(s, n65) - 0.013 * Math.max(0, base - (s ? 18213 : 36426))) }),
+};
 export function d30Deductions(code, { single = false, ageA = null, ageB = null, base = 0, agi = 0 }) {
-  const f = D30[code]; if (!f) return { ded: 0, credit: 0, pct: 0 };
+  const f = D30[code] || D30F[code]; if (!f) return { ded: 0, credit: 0, pct: 0 };
   return { ded: 0, credit: 0, pct: 0, ...f({ s: single, p: single ? 1 : 2, n65: cnt(ageA, ageB, single, 65), n60: cnt(ageA, ageB, single, 60), base, agi }) };
 }
 const bsum = (rows, x) => { let t = 0, lo = 0; for (const [u, r] of rows) { const hi = u === null ? Infinity : u; if (x <= lo) break; t += (Math.min(x, hi) - lo) * r; lo = hi; } return t; };
@@ -77,8 +100,16 @@ const CT_ADD = { s: [[56500, 5000, 25, 250], [105000, 5000, 25, 250], [200000, 5
 // The state tax for one of the 27 from the calculator's own measures: deductions off the base, the schedule (and its added rules) on taxable
 // income — New York's recapture fraction and Connecticut's added amounts on the base — then the credits, then Maryland's county tax on taxable
 // income and its 2 % capital-gains tax on federal AGI over $350,000. Utah's credit never applies (Utah is not among the 27).
+// v6.03: a flat-rate state of batch 2 — its rate (t63 holds every flat rate), Idaho's zero band and Ohio's schedule transcribed here, then
+// its credits, nonrefundable. Utah's Social Security credit (its ssRule, applied after) is NOT included: a pin with taxable Social Security
+// in Utah must add it.
 export function d30Tax(SR, code, { base, agi, single = false, ageA = null, ageB = null, capGains = 0 }) {
   const d = d30Deductions(code, { single, ageA, ageB, base, agi }), ti = Math.max(0, base - d.ded);
+  if (D30F[code]) {
+    const t = code === "ID" ? 0.053 * Math.max(0, ti - (single ? 4811 : 9622))
+            : code === "OH" ? (ti <= 26050 ? 0 : 332 + 0.0275 * (ti - 26050)) : SR[code].rate * ti;
+    return { tax: Math.max(0, t - d.credit), ti, ...d };
+  }
   const sch = single ? SR[code].brackets.single : SR[code].brackets.joint;
   let t = bsum(sch, ti);
   if (code === "AR" && ti > 94700) { t = bsum([[4700, 0.02], [null, 0.037]], ti); if (ti <= 97600) t -= Math.max(0, 290 - 10 * (Math.ceil((ti - 94700) / 100) - 1)); }
@@ -112,6 +143,6 @@ export function d30Recorder(fn) { const r = { last: null }; r.call = (a) => fn({
 export function d30Pins(fn, SR, on) {
   const rec = d30Recorder(fn); let tag = "";
   const B = (code, base, capGains) => { const w = d30Want(SR, code, base, rec.last, capGains);
-    tag = ` [v6.02: the same base, $${base.toFixed(2)}, after the state's deductions and credits -> $${(+w).toFixed(2)}]`; return w; };
+    tag = ` [v6.02+: the same base, $${base.toFixed(2)}, after the state's deductions and credits -> $${(+w).toFixed(2)}]`; return w; };
   return { S: on ? rec.call : fn, rec, B, X: (code, flat, rate) => B(code, flat / rate), tag: () => { const t = tag; tag = ""; return t; } };
 }

@@ -14,7 +14,7 @@
 // Run: node t50_ss_states.mjs <tag>        Current leg only (the rules do not exist on the prior leg).
 import { d30Pins } from "./d30_ref.mjs";
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602"];
+const KNOWN_VERSIONS = ["v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603"];
 let pass = 0, fail = 0; const fails = [];
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; const m = `  \u2717 ${n}${d ? " \u2014 " + d : ""}`; console.log(m); fails.push(m); } };
 const done = () => { console.log(`\nt50 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
@@ -24,30 +24,36 @@ const g = (await import(`./app_${VER}.mjs`)).__g;
 // v6.02 (D-30 batch 1 — docs/SCOPE_D30_DEDUCTIONS_V602.md, DD-14): CT, MN, NM, RI and VT take their deductions, exemptions and credits. Each
 // pin keeps its BASE and on a D-30 leg expects it after them (qa/d30_ref.mjs, on the calculator's own record of the call; a different base
 // fails). A version LIST.
-const D30L = ["v602"].includes(VER), D30 = d30Pins(g.stateTaxAnnual, g.STATE_RULES(), D30L);
+const D30L = ["v602", "v603"].includes(VER), D30 = d30Pins(g.stateTaxAnnual, g.STATE_RULES(), D30L);
 const tax = o => D30.S({ retIncome: 0, pen: 0, work: 0, capGains: 0, ssGrossA: 0, ssGrossB: 0, ageA: 70, ageB: 70, single: false, ...o });
 const EQ = (n, got, exp) => CK(n + D30.tag(), Math.abs(got - exp) <= 0.01, `engine ${got.toFixed(2)}, statute ${exp.toFixed(2)}`);
 // a household with AGI m, federally taxable SS s, gross G split equally: work = m − s
 const H = (code, m, s, G, extra = {}) => tax({ code, work: m - s, ssTaxableFed: s, ssGrossA: G / 2, ssGrossB: G / 2, ...extra });
+// v6.03 (D-30 batch 2 — docs/SCOPE_D30_DEDUCTIONS_V603.md, DD-14): Colorado and Utah take theirs too. Each pin keeps its base (Colorado) or its
+// base and Social Security credit (Utah, whose taxpayer credit is applied before the SS credit) and on a batch-2 leg expects them after the state's
+// deductions and credits (qa/d30_ref.mjs D30F, on the recorded call). A version LIST.
+const D30FL = ["v603"].includes(VER);
+const FB = (code, rate, x) => D30FL ? D30.B(code, x) : rate * x;
+const UTW = (m, exp) => D30FL ? Math.max(0, D30.B("UT", m) - (0.0445 * m - exp)) : exp;   // exp = rate × m − the SS credit
 
 // ── R · the rates (L-4) ──────────────────────────────────────────────────────────────────────────────────────────────────────────
 const SR = g.STATE_RULES();
 CK("R-1 Utah's rate is 4.45 % (S.B. 60, 2026 General Session, retroactive to TY2026)", SR.UT && SR.UT.rate === 0.0445, String(SR.UT && SR.UT.rate));
 
 // ── CO · 65+: all taxable SS subtracted; 55–64: all if AGI ≤ $75K / $95K, else $20K per person; SS consumes the pension cap ─────────
-EQ("CO-1 joint, both 70, AGI $80,000, SS $30,000 → none of the SS taxed", H("CO", 80000, 30000, 40000), 0.044 * 50000);
-EQ("CO-2 joint, both 60, AGI $95,000 (at the line) → none taxed", H("CO", 95000, 30000, 40000, { ageA: 60, ageB: 60 }), 0.044 * 65000);
+EQ("CO-1 joint, both 70, AGI $80,000, SS $30,000 → none of the SS taxed", H("CO", 80000, 30000, 40000), FB("CO", 0.044, 50000));
+EQ("CO-2 joint, both 60, AGI $95,000 (at the line) → none taxed", H("CO", 95000, 30000, 40000, { ageA: 60, ageB: 60 }), FB("CO", 0.044, 65000));
 EQ("CO-3 joint, both 60, AGI $150,000, SS $50,000 → $20,000 each subtracted, $10,000 taxed",
-   H("CO", 150000, 50000, 60000, { ageA: 60, ageB: 60 }), 0.044 * (100000 + 10000));
-EQ("CO-4 joint, both 50 → no subtraction under 55, all $30,000 taxed", H("CO", 80000, 30000, 40000, { ageA: 50, ageB: 50 }), 0.044 * 80000);
+   H("CO", 150000, 50000, 60000, { ageA: 60, ageB: 60 }), FB("CO", 0.044, 100000 + 10000));
+EQ("CO-4 joint, both 50 → no subtraction under 55, all $30,000 taxed", H("CO", 80000, 30000, 40000, { ageA: 50, ageB: 50 }), FB("CO", 0.044, 80000));
 // shared cap: pension $40,000, SS $30,000 (each spouse $15,000 subtracted) → pension subtraction $24,000 − $15,000 = $9,000 each
 EQ("CO-5 joint, both 70, pension $40,000, SS $30,000 → SS consumes the $24,000 cap: $22,000 of pension taxed",
-   tax({ code: "CO", pen: 40000, ssTaxableFed: 30000, ssGrossA: 20000, ssGrossB: 20000 }), 0.044 * 22000);
+   tax({ code: "CO", pen: 40000, ssTaxableFed: 30000, ssGrossA: 20000, ssGrossB: 20000 }), FB("CO", 0.044, 22000));
 
 // v6.01 (D-22 batch 2, SCOPE_D22_BRACKETS_V601): Connecticut, New Mexico, Rhode Island and Vermont move to their own schedules. Like Minnesota's
 // cells below, these pin the SS rule: each keeps its taxable amount and, on the v6.01 leg, prices it on the state's schedule (Connecticut with its
 // phase-out and recapture amounts) — computed here from t65 §A's transcription, not the app's. `B2(code, x)` is rate × x on earlier legs. A LIST.
-const BR2 = ["v601", "v602"].includes(VER);
+const BR2 = ["v601", "v602", "v603"].includes(VER);
 const _bs = (rows, x) => { let t = 0, lo = 0; for (const [u, r] of rows) { const hi = u === null ? Infinity : u; if (x <= lo) break; t += (Math.min(x, hi) - lo) * r; lo = hi; } return t; };
 const _S2 = { CT: [0.05, [[10000, .02], [50000, .045], [100000, .055], [200000, .06], [250000, .065], [500000, .069], [null, .0699]], [[20000, .02], [100000, .045], [200000, .055], [400000, .06], [500000, .065], [1000000, .069], [null, .0699]]],
   NM: [0.049, [[5500, .015], [16500, .032], [33500, .043], [66500, .047], [210000, .049], [null, .059]], [[8000, .015], [25000, .032], [50000, .043], [100000, .047], [315000, .049], [null, .059]]],
@@ -67,7 +73,7 @@ EQ2("CT-4 single AGI $75,000, taxable SS $5,000 < 25 % of $30,000 → all $5,000
 // ── MN · all subtracted if AGI ≤ $110,780 joint / $86,410 single (TY2026); −10 % per $4,000 or fraction above ──────────────────
 // v6.00 (D-22 option 3, SCOPE_D22_BRACKETS_V600): Minnesota is taxed on its own TY2026 schedule from v6.00. These cells pin the SS rule, so
 // each keeps its taxable amount and, on a bracket leg, prices it on the schedule (computed here from the MN DOR table, not the app's). A LIST.
-const MN_BRK = ["v600", "v601", "v602"].includes(VER);
+const MN_BRK = ["v600", "v601", "v602", "v603"].includes(VER);
 const MNS = { single: [[33310, .0535], [109430, .068], [203150, .0785], [null, .0985]], joint: [[48700, .0535], [193480, .068], [337930, .0785], [null, .0985]] };
 const mn = (x, single = false) => { if (D30L) return D30.B("MN", x); if (!MN_BRK) return 0.068 * x; let t = 0, lo = 0;
   for (const [u, r] of MNS[single ? "single" : "joint"]) { const hi = u === null ? Infinity : u; if (x <= lo) break; t += (Math.min(x, hi) - lo) * r; lo = hi; } return t; };
@@ -90,9 +96,9 @@ EQ2("RI-3 joint, 67 and 65, AGI $100,000 → only the 65-year-old's half ($15,00
    H("RI", 100000, 30000, 40000, { ageA: 67, ageB: 65 }), B2("RI", (70000 + 15000)));
 
 // ── UT · credit = rate × taxable SS, reduced $0.025 per dollar of AGI over $54,000 single / $90,000 joint; nonrefundable ─────────
-EQ("UT-1 single AGI $50,000 → the credit cancels the SS tax", H("UT", 50000, 20000, 30000, { single: true }), 0.0445 * 30000);
-EQ("UT-2 single AGI $60,000 → credit $890 − $150 = $740", H("UT", 60000, 20000, 30000, { single: true }), 0.0445 * 60000 - 740);
-EQ("UT-3 joint AGI $200,000 → the credit is gone", H("UT", 200000, 30000, 40000), 0.0445 * 200000);
+EQ("UT-1 single AGI $50,000 → the credit cancels the SS tax", H("UT", 50000, 20000, 30000, { single: true }), UTW(50000, 0.0445 * 30000));
+EQ("UT-2 single AGI $60,000 → credit $890 − $150 = $740", H("UT", 60000, 20000, 30000, { single: true }), UTW(60000, 0.0445 * 60000 - 740));
+EQ("UT-3 joint AGI $200,000 → the credit is gone", H("UT", 200000, 30000, 40000), UTW(200000, 0.0445 * 200000));
 
 // ── VT · none taxed if AGI ≤ $55,000 single / $70,000 joint; the taxable share rises over the next $10,000 ─────────────────────
 EQ2("VT-1 joint AGI $70,000 → none taxed", H("VT", 70000, 30000, 40000), B2("VT", 40000));

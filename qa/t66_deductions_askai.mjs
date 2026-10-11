@@ -20,7 +20,7 @@ import { existsSync, readFileSync } from "fs";
 import { d30Tax, d30Deductions, D30_STATES } from "./d30_ref.mjs";
 const require = createRequire(import.meta.url);
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v601", "v602"];
+const KNOWN_VERSIONS = ["v601", "v602", "v603"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  ✓ ${n}`); } else { fail++; console.log(`  ✗ ${n}${d !== "" ? " — " + String(d).slice(0, 300) : ""}`); } };
 const EQ = (n, got, want, tol = 0.005) => CK(n, typeof got === "number" && Math.abs(got - want) <= tol, `got ${got}, want ${want}`);
@@ -28,6 +28,9 @@ const done = () => { console.log(`\nt66 SUITE (${VER}): ${pass} passed, ${fail} 
 console.log(`t66 — STATE DEDUCTIONS (D-30 BATCH 1) AND ASK AI'S CUT-OFF ANSWERS (${VER})`);
 if (!KNOWN_VERSIONS.includes(VER)) { CK(`0-0 version tag ${JSON.stringify(VER)} is registered`, false, KNOWN_VERSIONS.join(",")); done(); }
 const DD = VER !== "v601";   // a version on which D-30 batch 1 and the Ask AI fix are present
+// v6.03 (D-30 batch 2, t67): the fourteen flat-rate states take theirs too, and Idaho and Ohio gain schedules. This suite keeps to the 27 — its
+// group-wide checks read `withD` (the 27) and `progressive` (the batch-1 schedules) below; t67 holds batch 2. A version LIST.
+const B2 = !["v601", "v602"].includes(VER);
 // Self-hosted branch for group E (t36's harness trap: without a `location` the bundle takes the claude.ai branch, which has no key panel).
 dom.reconfigure({ url: "https://stextor.github.io/danger-close/" });
 globalThis.location = window.location;
@@ -96,8 +99,8 @@ const WANT = {
   WI: [2026, [std(13960, 25840, { phase: { on: "base", shape: "rate", start: sj(20120, 29040), rate: sj(0.12, 0.19778), floor: 0 } }), cp("personal exemption", "ded", "person", 700, { add: [65, 250] })]],
   WV: [2026, [cp("personal exemption", "ded", "person", 2000)]],
 };
-const withD = Object.keys(SR).filter(c => SR[c].deduct !== undefined).sort();
-const progressive = Object.keys(SR).filter(c => SR[c].brackets).sort();
+const withD = Object.keys(SR).filter(c => SR[c].deduct !== undefined && (!B2 || D30_STATES.includes(c))).sort();
+const progressive = Object.keys(SR).filter(c => SR[c].brackets && (!B2 || D30_STATES.includes(c))).sort();
 if (DD) {
   CK(`A-1 EXTINCTION: exactly the 27 progressive states carry \`deduct\` (${withD.length}), and they are the rows on their own schedules`,
      withD.join(",") === Object.keys(WANT).sort().join(",") && withD.join(",") === progressive.join(",") && D30_STATES.slice().sort().join(",") === withD.join(","), withD.join(","));
@@ -140,7 +143,8 @@ if (DD) {
     WV: /family tax credit is not/, NY: /household credit is not/, MD: /reduced schedule/, AR: /additional credit for those 65 or older who take no retirement exclusion is not taken/ };
   for (const [c, re] of Object.entries(NOT)) CK(`A-6 ${c}: the note names what is not taken (${re.source.slice(0, 60)})`, re.test(SR[c].note), SR[c].note.slice(-240));
   CK("A-7 the 2025-figure rows say so: AR, CA, DC, MD, OR, VT name their 2025 amounts", ["AR", "CA", "DC", "MD", "OR", "VT"].every(c => /2025 (amounts|figures)/.test(SR[c].note)));
-  CK("A-8 the flat-rate and no-tax rows carry no `deduct` (batch 2 is v6.03)", Object.keys(SR).filter(c => !SR[c].brackets).every(c => SR[c].deduct === undefined));
+  if (B2) CK("A-8 the rows without an income tax carry no `deduct` (the flat-rate states' are batch 2, held by t67)", Object.keys(SR).filter(c => SR[c].rate === 0).every(c => SR[c].deduct === undefined));
+  else CK("A-8 the flat-rate and no-tax rows carry no `deduct` (batch 2 is v6.03)", Object.keys(SR).filter(c => !SR[c].brackets).every(c => SR[c].deduct === undefined));
   CK("A-9 the evaluator is exported and the shim reaches it", typeof SD === "function");
   // each age a note names for a deduction ("for each filer NN or older") is one a component applies, and each component's age is named
   const ageBad = [];
@@ -232,8 +236,9 @@ if (DD) {
   { const { t, d } = det("MD", W("MD", 20000, true, 66));   // state tax $538.875 < the $1,000 senior credit: nothing left of it for the county's
     EQ("B-C-7 Maryland's senior credit stops at the state tax — single 66, wages $20,000: only the county's 3.30 % of $12,450 remains, $410.85", t, 0.033 * (20000 - 3350 - 3200 - 1000));
     CK("B-C-7b …and the record shows the credit and the taxable income it ran on", d && d.credit === 1000 && d.ti === 12450, JSON.stringify(d)); }
-  { let calls0 = 0; ST({ ...W("GA", 60000, true, 66), code: "GA", _onDetail: () => { calls0++; } }); let d = null; ST({ ...W("GA", 60000, true, 66), code: "GA", _onDetail: x => { d = x; } });
-    CK("B-C-6 a row without `deduct` (Georgia) reports nothing taken, and taxable income equals the base", calls0 === 1 && d.ded === 0 && d.credit === 0 && d.pct === 0 && d.ti === d.base, JSON.stringify(d)); }
+  { const nd = B2 ? "PA" : "GA";   // v6.03: Georgia takes its deduction (t67); Pennsylvania, whose law has none, is the taxing row without `deduct`
+    let calls0 = 0; ST({ ...W(nd, 60000, true, 66), code: nd, _onDetail: () => { calls0++; } }); let d = null; ST({ ...W(nd, 60000, true, 66), code: nd, _onDetail: x => { d = x; } });
+    CK(`B-C-6 a row without \`deduct\` (${B2 ? "Pennsylvania" : "Georgia"}) reports nothing taken, and taxable income equals the base`, calls0 === 1 && d.ded === 0 && d.credit === 0 && d.pct === 0 && d.ti === d.base, JSON.stringify(d)); }
 } else {
   CK("B-0 PIN v6.01: the calculator has no detail seam — `_onDetail` is never called", (() => { let n = 0; ST({ ...W("VA", 50000, true, 66), _onDetail: () => { n++; } }); return n === 0; })());
 }
@@ -274,7 +279,11 @@ if (DD) {
 }
 
 // ── D · v6.01 -> v6.02 ──
-if (VER === "v602") {
+// From v6.03 the run folder is v602 -> v603 and holds no app_v601.mjs: the group is then reported as not run (t64 D's and t65 D's convention); t67 D
+// owns v6.02 -> v6.03. In a v601 -> v602 folder its absence is still a failure.
+if (VER === "v602" && !existsSync(new URL("./app_v601.mjs", import.meta.url)) && existsSync(new URL("./app_v603.mjs", import.meta.url)))
+  console.log("  – group D not run: app_v601.mjs is not in this run folder (a v601 -> v602 folder runs it)");
+else if (VER === "v602") {
   if (!existsSync(new URL("./app_v601.mjs", import.meta.url))) CK("D-0 app_v601.mjs is in this run folder (group D needs it)", false, "missing");
   else {
     const pm = await import("./app_v601.mjs"), PST = pm.__engines.stateTaxAnnual || pm.__g.stateTaxAnnual;
@@ -447,16 +456,17 @@ if (DD) {
        /^Model: the state's own brackets, 2\.00% to 5\.75% · deductions and exemptions taken · /.test(va) && /Dollar figures by tax year: exclusion 2026 · income test 2026 · brackets 2026 · deductions 2026\./.test(va), va.slice(0, 220));
     CK("F-3 My Data (California): \"deductions 2025\" — the held year shows", / · deductions and exemptions taken · /.test(ca) && /brackets 2025 · deductions 2025\./.test(ca), ca.slice(-260));
   } else CK("F-2 PIN v6.01: My Data (Virginia) names no deductions", !/deductions/.test(va) && /^Model: the state's own brackets, 2\.00% to 5\.75% · /.test(va), va.slice(0, 160));
-  CK("F-4 a flat-rate state (Georgia) is unchanged: no deductions clause", /^Model: 4\.99% effective rate \(an approximation\)/.test(ga) && !/deductions/.test(ga), ga.slice(0, 160));
+  if (B2) CK("F-4 a flat-rate state (Georgia) reads as batch 2 has it (t67 E-1 holds the line)", /^Model: 4\.99% flat rate · deductions and exemptions taken/.test(ga), ga.slice(0, 160));
+  else CK("F-4 a flat-rate state (Georgia) is unchanged: no deductions clause", /^Model: 4\.99% effective rate \(an approximation\)/.test(ga) && !/deductions/.test(ga), ga.slice(0, 160));
   try { await act(async () => { root.unmount(); }); } catch (e) {}
   el.remove();
 }
 if (DD) {
   CK("F-5 the Taxes entry: the 27 progressive states take their deductions, exemptions and personal credits; what is not taken is named; the flat-rate states take none yet — and the code agrees (27 rows, every one on a schedule, no flat row)",
-     DOCS.includes("It is an approximation layer: from v6.02 the twenty-seven progressive states take their standard deductions, personal exemptions and personal credits before their schedules (Alabama's, Missouri's and Oregon's deduction of federal income tax, the federal senior deduction Montana and North Dakota start from, and low-income refundable credits are not taken), while the flat-rate states take none yet (conservative),")
-     && withD.length === 27 && withD.every(c => SR[c].brackets) && Object.keys(SR).filter(c => !SR[c].brackets && SR[c].rate > 0).every(c => !SR[c].deduct));
+     DOCS.includes("It is an approximation layer: from v6.02 the twenty-seven progressive states take their standard deductions, personal exemptions and personal credits before their schedules (Alabama's, Missouri's and Oregon's deduction of federal income tax, the federal senior deduction Montana and North Dakota start from, and low-income refundable credits are not taken), " + (B2 ? "and from v6.03 the fourteen flat-rate states with them do too" : "while the flat-rate states take none yet (conservative),"))
+     && withD.length === 27 && withD.every(c => SR[c].brackets) && (B2 || Object.keys(SR).filter(c => !SR[c].brackets && SR[c].rate > 0).every(c => !SR[c].deduct)));
   CK("F-6 the methodology entry says the same, and that itemized deductions are not modelled (no row carries an itemized component)",
-     DOCS.includes("From v6.02 the progressive states take their standard deductions, personal exemptions and personal credits; the flat-rate states take none yet, and no state's itemized deductions are modelled (conservative).")
+     DOCS.includes("From v6.02 the progressive states take their standard deductions, personal exemptions and personal credits; " + (B2 ? "from v6.03 the flat-rate states take theirs too (Pennsylvania's law has none)" : "the flat-rate states take none yet") + ", and no state's itemized deductions are modelled (conservative).")
      && withD.every(c => SR[c].deduct.every(x => !/itemiz/i.test(x.what))));
   CK("F-7 the old claim is gone: \"no state's standard deduction or personal exemption is taken\"", !/no state's standard deduction or personal exemption is taken/.test(DOCS));
 } else CK("F-5 PIN v6.01: the Field Manual says no state's standard deduction or personal exemption is taken", /no state's standard deduction or personal exemption is taken \(conservative\)/.test(DOCS));
