@@ -688,7 +688,9 @@ may be written that needs the archive to be pooled — the suites mention the CH
 block of oldest entries into a **new** archive file (never append to an old one), and say so in the pooled file's
 closing pointer and in this paragraph. **Done again 2026-09-28:** v5.60–v5.74 (with the ops entries between them) moved
 verbatim to **`docs/CHANGELOG_ARCHIVE_v5_60_to_v5_74.md`**, repo only; the pooled `CHANGELOG.md` holds **v5.75 onward**
-(315 KB → 33 KB).
+(315 KB → 33 KB). **Done a third time 2026-10-11:** v5.75–v5.99 moved verbatim to **`docs/CHANGELOG_ARCHIVE_v5_75_to_v5_99.md`**; the pooled file holds **v6.00
+onward**. The same day `TESTING.md`'s per-suite lines from v6.01 back to v5.53 moved verbatim to `docs/TESTING_ARCHIVE_per_suite_v5_53_to_v6_01.md`;
+`TESTING.md` keeps the newest three, and a release adding its line may move the oldest of those to the same kind of archive.
 
 ### Release-pinned control scripts are repo-only (added 2026-09-28)
 
@@ -948,6 +950,11 @@ exercise it. **`qa/tools/row_census.cjs` checks that the three agree; run it aft
 them.** It is a parser, not a grep, because a grep cannot tell a regex definition from a mention of
 one and cannot execute a pattern. A fourth copy in `package_check_controls.sh` is narrower on
 purpose and is excluded by name.
+
+⚠ **A roll REPLACES the hash; it does not append a trail (from 2026-10-11).** Rows used to grow a `**rolled at vX.YY** (was `…`).` phrase
+at every roll; by v6.04 those phrases were 61 KB of the pool, and every past value is already in the manifest's git history (`git log -p --
+PROJECT_KNOWLEDGE_INDEX.md`). The ops package of 2026-10-11 (second) removed them all. Write the new hash in the hash cell and leave the
+description as it is, unless what the file IS has changed.
 
 ⚠ **Roll `CHANGELOG.md`'s row last, after the entry is final**, and roll the row of any tool the
 package itself edits — including `package_check.mjs`. Editing a file after computing its row pins
