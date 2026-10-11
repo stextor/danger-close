@@ -1,9 +1,56 @@
 # MISSING TAXATION FEATURES — Section D of the standing code audit
 
-> **CURRENT PIN: v5.73 (2026-09-15) — the standing audit's full run, all four phases, is COMPLETE.** Read the **RE-PINNED TO v5.73** block directly below this table (items D-14–D-20 at the end of the file) first.
+> **CURRENT PIN: v5.73 (2026-09-15) — the standing audit's full run, all four phases, is COMPLETE.** Read the **Census at v6.04** table directly below first (added 2026-10-11 — every item's status); the **RE-PINNED TO v5.73** block follows the original audit table.
 > The table below records the ORIGINAL v5.29 audit and is kept as history. *(Added 2026-09-26: this header read as "build
 > under audit: v5.29", and it misled the v5.77 handover — and a recommendation made from it — into proposing a Phase 3 that
 > had already run. Items fixed since v5.73 are annotated at their entries.)*
+
+## Census at v6.04 (2026-10-11) — read this first
+
+**Method.** Every D item's status, read from its own entry's annotations and, where marked *(parser)*, re-checked against the v6.04
+source (`8226b20b62334074606993d411bb0fb1`, repo `c200261`) by evaluating `STATE_RULES` or walking the source's literals with acorn.
+Written when this file became the pooled home for the open threads of documents leaving the pool (ops package of 2026-10-11, third).
+The blocks below this table — the v5.73, v5.48, v5.39 and v5.29 pins — are history; each entry keeps its full record. Headings of closed
+items now carry their status; IDs are unchanged.
+
+| ID | Status at v6.04 | Evidence / what remains |
+|---|---|---|
+| D-1 | **CLOSED** (confirmed v5.73) | at v5.73 Engine A still omitted the senior deduction, as disclosed — not re-checked here |
+| D-2 | **CLOSED v5.36** | confirmed v5.73 |
+| D-3 | **CLOSED v6.01** | every progressive state on its own schedule (v6.00–v6.01, D-22); its over-taxing remainder was D-30, closed v6.03. The v5.73 row's "filed lead" (Montana's two brackets) is modelled — `MT.brackets` 4.7 % / 5.65 % *(parser)* |
+| D-3c | **CLOSED** | NJ v5.67, VA v5.68, Maine v5.73 |
+| D-4 | **OPEN** (Low–Med, conservative) | itemized deductions not modelled — METHODOLOGY says so |
+| D-5 | **DECLINED** | — |
+| D-6 | **CLOSED v5.49** | the entry's HALF-CLOSED box (v5.48) is superseded |
+| D-7 | **DISCLOSED v5.50**; modelling declined | state estate and inheritance tax — optimistic, stated in-app |
+| D-8 | D-8a **ADDRESSED v5.32**; D-8b **PARTIALLY ADDRESSED v5.32** | the declined toggle is not built |
+| D-9 | **DISCLOSED v5.51** | `HEIR_RATE` stays 0.22 by decision |
+| D-10 | ◑ **PARTLY SHIPPED** | disclosure v5.52; modelling in part v5.53 (dividends landed; realized gains did not, by resolved decision) — its row in the summary table |
+| D-11 | ◐ **NARROWED** | WI exact (v5.60); RI's cliff (v5.69), per-person and IRA rule (v5.95, D-12) and SS modification (v5.85); NM's bands (v5.66), SS cliff (v5.85) and own brackets (D-22). **Still open:** New Mexico's age floor was never established against its statute (the model uses 65); Rhode Island's removal of the age test from its SS modification for TY2027 (H 7127) is recorded in METHODOLOGY and not modelled; RI's AGI measure omits dividends and interest (disclosed in its note) |
+| D-12 | **CLOSED v5.95** | all three phases |
+| D-13 | **OPEN, unanswered** | a research question — how often any state threshold binds |
+| D-14 | **FIXED v5.74** | — |
+| D-15 | **OPEN** (Low, pessimistic) | Maine's note still reads "Applied from 65, although Maine law has no age-65 test" *(parser)* |
+| D-16 | **OPEN** (Low–Med) | no head-of-household or qualifying-surviving-spouse status — no such string in the source *(parser)* |
+| D-17 | **OPEN** (Low) | no `0.009` numeric literal in the source *(parser)* |
+| D-18 | **FIXED v5.86**; the refresh **recurs** | next known: Montana's TY2026 subtraction (by 1 Nov 2026), Rhode Island's TY2026 thresholds (Nov 2026), Maine's TY2026 thresholds, Louisiana's TY2027 amount, Georgia's $70,000 at 65+ from TY2027 — the entry's list |
+| D-19 | **FIXED v5.85** | — |
+| D-20 | **CLOSED v6.04** | v6.02 takes the federal standard deduction (and its 65+ additions) Montana starts from; v6.04 the senior deduction — `MT.deduct` *(parser)* |
+| D-21 | **FIXED v5.89** | — |
+| D-22 | **CLOSED v6.01** | — |
+| D-23 | **FIXED v5.87** | decision D18-3 answered (as D23-A/B/C) |
+| D-24 | **FIXED v5.90** | — |
+| D-25 | **FIXED v5.88** | — |
+| D-26 | **FIXED v5.94** | — |
+| D-27 | **FIXED v5.96** | — |
+| D-28 | **OPEN** (Low, possibly optimistic) | Pennsylvania and commercial annuities — verify before changing |
+| D-29 | **CLOSED v6.04** | — |
+| D-30 | **CLOSED v6.03** | — |
+| D-31 | **CLOSED v6.04** | not taken, disclosed: DC's senior deduction, the refunds Alabama and Oregon recapture, Oregon's 2026 cap |
+| D-32 | **OPEN** (Low, conservative) | Ohio's retirement income and joint filing credits and Utah's retirement credit — each state's note says not taken *(parser)* |
+
+**Open, in this file: D-4, D-11 (narrowed), D-13, D-15, D-16, D-17, D-18 (recurring), D-28, D-32; D-5 declined.** Non-tax open threads
+re-homed the same day are in `ARCHITECTUREIssues.md` **E-29**.
 
 | Field | Value |
 |---|---|
@@ -406,7 +453,7 @@ argument, not a measured one, and a later session should expect to reorder it.
 
 ---
 
-## D-1 · The OBBBA senior bonus deduction is modelled by the Taxes engine, absent from the Roth engine, and declared absent by both disclosures
+## D-1 · The OBBBA senior bonus deduction is modelled by the Taxes engine, absent from the Roth engine, and declared absent by both disclosures — ✅ CLOSED
 
 > ### CLOSED — verified against v5.39 source on 2026-08-18
 >
@@ -539,7 +586,7 @@ Three separable pieces, and they should not be one release:
 
 ---
 
-## D-2 · Realized capital gains are never generated by ordinary drawdown
+## D-2 · Realized capital gains are never generated by ordinary drawdown — ✅ CLOSED v5.36
 
 > ### ✅ CLOSED AT v5.36 — verified against v5.39 source on 2026-08-18
 >
@@ -590,7 +637,7 @@ consistent with existing precedent and would not require per-lot tracking.
 
 ---
 
-## D-3 · Progressive state schedules are approximated by an effective flat rate
+## D-3 · Progressive state schedules are approximated by an effective flat rate — ✅ CLOSED v6.01
 
 > ✅ **CLOSED v6.01 (2026-10-09).** Every progressive state is taxed on its own schedule — ten from v6.00, the other seventeen from v6.01 (D-22). What remains
 > of this item's over-taxing direction is the absence of state standard deductions, exemptions and credits, now **D-30**. *(The entry below is retained.)*
@@ -730,7 +777,7 @@ RMD), which is the part that matters for mainstream charitable givers.
 
 ---
 
-## D-6 · IRMAA life-changing-event relief (SSA-44) appears to be unmodelled and undisclosed
+## D-6 · IRMAA life-changing-event relief (SSA-44) appears to be unmodelled and undisclosed — ✅ CLOSED v5.49
 
 > ⚠ **HALF-CLOSED at v5.48 — see the v5.48 re-pin block at the top.** `METHODOLOGY.md` now names
 > SSA-44 and work stoppage; the render tree and Field Manual still carry **zero** mention of either.
@@ -937,7 +984,7 @@ That is a coherent outcome, and it is now a decision on the record rather than a
 next release. What D-8b does give that release is a principled way to identify which households'
 apparent improvement is this artifact.
 
-## D-11 · Three states' modelled 65+ figures are correct on one side of a statutory gate and wrong on the other — New Mexico, Rhode Island, Wisconsin
+## D-11 · Three states' modelled 65+ figures are correct on one side of a statutory gate and wrong on the other — New Mexico, Rhode Island, Wisconsin — ◐ NARROWED (see the census)
 
 **Opened 2026-09-02 from `docs/AUDIT_STATE_EXCL65_ROUND4.md` §4 and §6 D-A.** ROUND3 §4 established
 that `excl65` (a scalar) and `persons65` / per-person ages (a count and a floor) cannot express a
@@ -1000,7 +1047,7 @@ section state the current position.
 
 
 
-## D-12 · Account type (IRA versus employer plan) and per-person retirement income — opened at v5.69
+## D-12 · Account type (IRA versus employer plan) and per-person retirement income — opened at v5.69 — ✅ CLOSED v5.95
 
 > ✅ **D-12 CLOSED v5.95 (2026-10-07) — all three phases shipped.** RI, IA, PA, MS and WV apply their rules per person and (RI, PA, MS) by plan type;
 > the survivor-slot defect found at the build is fixed with it. Scope `docs/SCOPE_D12_PLAN_TYPE_PER_PERSON.md` FULFILLED (repo-only). **Residuals,
@@ -1082,7 +1129,7 @@ independently in `AUDIT_STATE_EXCL65_ROUND3.md` and needed no re-homing.)*
 
 # New at v5.73 — standing audit Phase 3 (2026-09-15)
 
-## D-14 · Traditional spending withdrawals never reach the Taxes tab
+## D-14 · Traditional spending withdrawals never reach the Taxes tab — ✅ FIXED v5.74
 
 > **⚠ FIXED at v5.74 (2026-09-21)** — the Taxes and IRMAA tabs now take the plan's spending draws from the Withdrawal plan
 > through one shared bridge (`docs/SCOPE_TAXES_DRAWDOWN.md`, retired with its build record; C-8 in
@@ -1118,7 +1165,7 @@ source (a parser census of numeric literals finds no `0.009`), and METHODOLOGY d
 households still earning above those thresholds, which the app models in pre-retirement years. **Low.** Disclosure is the
 cheap half.
 
-## D-18 · Indexed state figures need a tax-year refresh
+## D-18 · Indexed state figures need a tax-year refresh — ✅ FIXED v5.86 (recurs)
 
 > **FIXED at v5.86** (`docs/SCOPE_D18_STATE_FIGURES.md`): every dollar-bearing state figure carries the tax year it was verified for
 > (`years`, 31 figures on 23 rows) and My Data shows it in place of the blanket "Model (2026 approx)". Maine's cap is $49,824
@@ -1132,7 +1179,7 @@ Maine's $48,216 and both phaseout thresholds, and Montana's $5,660, are TY2025 f
 both states index them. Several other rows carry dated figures of their own. A small, recurring populate release, akin to
 the federal `TAX_CONSTANTS_YEAR` cycle but with no staleness banner of its own. **Low**, recurring.
 
-## D-19 · The seven half-rate Social Security states need re-checking against current law
+## D-19 · The seven half-rate Social Security states need re-checking against current law — ✅ FIXED v5.85
 
 > **FIXED at v5.85** (`docs/SCOPE_SS_STATES.md`): each of the seven now follows its own statute (`ssRule`), and Utah's rate is
 > 4.45 % (S.B. 60). Read against primary sources 2026-09-29; the remaining approximations are listed in METHODOLOGY.
@@ -1142,12 +1189,15 @@ the federal `TAX_CONSTANTS_YEAR` cycle but with no staleness banner of its own. 
 be read against its current statute. Filed as a lead in `FlawsToFix-v5_69-Phase1.md`. **Medium** — the error is
 directional per state and large relative to the other state items.
 
-## D-20 · Montana's base should reflect federal deductions
+## D-20 · Montana's base should reflect federal deductions — ✅ CLOSED v6.04
+
+> ✅ **CLOSED v6.04 (2026-10-11).** v6.02 took the federal standard deduction, with its 65+ additions, that Montana starts from; v6.04 took the
+> federal senior deduction (2025–2028). Both are in `STATE_RULES.MT.deduct` and Montana's note. *(Closed in the census of 2026-10-11; the entry below is retained.)*
 
 Montana starts from federal taxable income, so the federal senior bonus (2025–2028) and the age-65 extra lower Montana's
 base. The model's state measure is AGI-like and does not subtract them. Disclosed in METHODOLOGY at v5.73. **Low.**
 
-## D-21 · West Virginia's $8,000 is not additive to its Social Security modification
+## D-21 · West Virginia's $8,000 is not additive to its Social Security modification — ✅ FIXED v5.89
 
 > ✅ **FIXED v5.89 (2026-10-02).** W. Va. Code §11-21-12(c)(9)(ii), read at the build: each person's $8,000 is reduced by that
 > person's taxable SS (the (c)(8) modification). Modelled per person (D21-A) through the new `seniorVsTaxableSS` field; MD/ME/CO untouched.
@@ -1161,7 +1211,7 @@ fully exempt. A retiree whose benefit is $8,000 or more therefore gets nothing f
 (`ssOffset`) is reserved for MD/ME by the v5.56 decision, so the fix needs its own scope. Settled 2026-09-29: its own release,
 after v5.86. **Medium** — optimistic, and large relative to WV's other figures.
 
-## D-22 · The 42 nonzero state rates have not been re-read
+## D-22 · The 42 nonzero state rates have not been re-read — ✅ CLOSED v6.01
 
 > ✅ **CLOSED v6.01 (2026-10-09) — option 3, batch 2: the seventeen remaining progressive rows are on their own schedules.** AL, AR (Act 1 of 2026, top 3.7 %,
 > with its high-income table and bracket adjustment), CT (with the 2 % phase-out and the recapture amounts), DC, DE, HI (with Act 24's 13 % from 2027), KS, MD
@@ -1192,7 +1242,7 @@ Filed at v5.86 (D-18's scope called it D-18b). D-18 dated the dollar figures and
 40 are unmeasured, and Kentucky's own note says to check the year. Each rate should be read at a primary source and, once read,
 can carry a year like the dollar figures. **Medium** — two known misses, direction mixed across the rest.
 
-## D-23 · Two exclusions start earlier in law than the model applies them — New York, Arkansas (decision D18-3 open)
+## D-23 · Two exclusions start earlier in law than the model applies them — New York, Arkansas (decision D18-3 open) — ✅ FIXED v5.87
 
 > ✅ **FIXED v5.87 (2026-10-01) — and the class was six notes, not two.** Steve answered D18-3 (as D23-A/B/C) "yes"; the build's
 > census then found Georgia (a 62–64 tier the model does not apply), Iowa and Pennsylvania (ages the model ignores — **optimistic**)
@@ -1211,7 +1261,7 @@ the New York clause. The edit under (a), in full: New York's note `$20K/person p
 modeled` becomes `$20K/person pension & annuity exclusion — applied here from 65, although the law allows it from 59½
 (conservative); NYC local tax not modeled`. **Low** in dollars, but a disclosure defect.
 
-## D-24 · `retExempt` has no age gate — Iowa and Pennsylvania exempt retirement income below the law's age (optimistic)
+## D-24 · `retExempt` has no age gate — Iowa and Pennsylvania exempt retirement income below the law's age (optimistic) — ✅ FIXED v5.90
 
 > ✅ **FIXED v5.90 (2026-10-02).** Iowa 55, Pennsylvania and Mississippi 60 (59½ in whole years) with pensions in payment exempt at any age,
 > joint returns only when both spouses qualify (D-12 for the exact answer); Michigan capped at TY2025's $65,897 / $131,794; Illinois unchanged. All fourteen
@@ -1231,7 +1281,7 @@ apply it per person — `retIncome` is household-level, so this is D-12's territ
 "without regard to age", and secondary sources disagree (none vs 65); the model applies 65 and the v5.87 note claims no law age. Rank
 beside D-21, the other known optimistic item. **Medium** — optimistic, but only for retirees under 55–59½ in two states.
 
-## D-25 · My Data's generated summary says "65+ exclusion" for every state, whatever age the model applies
+## D-25 · My Data's generated summary says "65+ exclusion" for every state, whatever age the model applies — ✅ FIXED v5.88
 
 > ✅ **FIXED v5.88 (2026-10-01).** The summary now reads "$12,500/person exclusion from 60" / "…at any age": the engine's own age rule
 > and its exact figure (D25-A (a), D25-B (a)). Held by `qa/t53_mydata_summary_age.mjs` against the engine's measured onset for all 18 rows.
@@ -1247,7 +1297,7 @@ same rule the engine uses — `exclAge ?? 65`, with 0 shown as "any age" — and
 
 > **Decided 2026-10-01 (Steve, option (a)):** v5.87 ships without it; the fix is **v5.88**, presentation-only.
 
-## D-26 · State tax omits the spending draw — opened at v5.93 (found during the D-12 Phase 2 build)
+## D-26 · State tax omits the spending draw — opened at v5.93 (found during the D-12 Phase 2 build) — ✅ FIXED v5.94
 
 > ✅ **FIXED v5.94 (2026-10-06).** All three state call sites pass the draw in `retIncome`; `attributeRetIncome` folds it into the income split
 > (D26-2, superseding P2-6). Measured: NC +$12,501 lifetime on the example household; Engine B 392 year-rows rise, none fall; federal and Engines C/D
@@ -1268,7 +1318,7 @@ totals hide it, because draws also shrink later RMDs. **Fix, designed:** route t
 (D-12 Phase 2 already attributes it per person, `byPerson.draw`), in both engines; measure the real dollar effect with the fixed engine;
 METHODOLOGY entry and a CHANGELOG disclosure of the understatement since v5.74 / v5.84. **Raises state tax** (conservative direction).
 
-## D-27 · The Roth comparator files jointly for a survivor in the state calculation — opened at v5.95 (found during the D-12 Phase 3 build)
+## D-27 · The Roth comparator files jointly for a survivor in the state calculation — opened at v5.95 (found during the D-12 Phase 3 build) — ✅ FIXED v5.96
 
 > ✅ **FIXED v5.96 (2026-10-08).** Both Engine A state calls file by the engine's own `effSingle`, blank the late spouse's age and put the survivor's
 > benefit in the survivor's slot in single survivor years. Measured: every change an increase, survivor years only; ME +$35,853 lifetime on the example
@@ -1286,7 +1336,7 @@ The model's `annuity` category (Other accounts of type annuity) is exempt in Pen
 REV-636 points commercial annuities to the cost-recovery method; whether their earnings are taxable to a retiree is not settled from a primary
 source here. Possibly optimistic. **Low — verify before changing.**
 
-## D-29 · Missouri exempts capital gains from 2025; the model taxes them — opened at v6.01
+## D-29 · Missouri exempts capital gains from 2025; the model taxes them — opened at v6.01 — ✅ CLOSED v6.04
 
 > ✅ **CLOSED v6.04 (2026-10-11)** — Missouri subtracts 100 % of realized capital gains from TY2025 (RSMo 143.121.3(14), re-read; the 2025 Form MO-A line 18;
 > Letter Ruling 8397), through a row field `gainsExempt`; qualified dividends stay taxed (`docs/SCOPE_D31_D29_V604.md`, fulfilled, repo-only;
@@ -1298,7 +1348,7 @@ taxes Missouri gains on the state's schedule (found while reading Missouri's bra
 large for a household that funds spending from a taxable account. An exclusion field (gains exempt) and its tests; re-read the statute first.
 **Medium — simple, conservative today.**
 
-## D-30 · No state standard deduction, personal exemption or credit is taken — opened at v6.01
+## D-30 · No state standard deduction, personal exemption or credit is taken — opened at v6.01 — ✅ CLOSED v6.03
 
 > ✅ **CLOSED v6.03 (2026-10-10) — batch 2: the fourteen flat-rate states whose law has them take their standard deductions, exemptions and personal credits**
 > (Pennsylvania's has none), with Idaho's zero band and Ohio's 2026 schedule (`docs/SCOPE_D30_DEDUCTIONS_V603.md`, fulfilled, repo-only; `qa/t67_deductions_flat.mjs`).
@@ -1317,7 +1367,7 @@ time; with every progressive state on its own schedule from v6.01 (D-22) this is
 from the same sources the schedules were read from (several noted in `docs/SCOPE_D22_BRACKETS_V601.md` §0). Related: D-20 (Montana starts from federal
 taxable income). **Medium-high — the recommended next state release; conservative today.**
 
-## D-31 · Deductions a state takes from the federal return are not taken — opened at v6.02
+## D-31 · Deductions a state takes from the federal return are not taken — opened at v6.02 — ✅ CLOSED v6.04
 
 > ✅ **CLOSED v6.04 (2026-10-11)** — Alabama (in full, NIIT included), Missouri (by income band, capped) and Oregon (capped, phased out by federal AGI) deduct
 > the year's federal income tax as the model computes it; the federal senior deduction (2025–2028) is taken in Arizona, Colorado, Idaho, Iowa, Montana and

@@ -312,6 +312,72 @@ Three rules follow:
 This is the same failure class as §M's instrumentation ceiling, one level up: **§M is about what
 *cannot* be measured, B2 is about assuming something *is* being measured when it is not.**
 
+### B2a. Traps that lived only in documents leaving the pool (carried 2026-10-11)
+
+Moved here verbatim when the manifest's superseded ship notes went to `docs/MANIFEST_ARCHIVE_notes_and_lists_to_v6_03.md` and
+`FlawsToFix-v5_69-Phase1.md` left the pool (both repo only): each states a standing rule or trap rather than history, and no pooled
+document carried it. Dates and figures are as first written and were **not re-measured** in the move; re-measure before relying on a
+number. The first four are from the ship notes, the fifth from the Phase 1 audit; one more (the truncated-hash lesson) is in §I.
+
+> ⚠ **A FIXTURE THAT CANNOT REACH A BEHAVIOUR MAKES EVERY ASSERTION ABOUT IT VACUOUS — and the
+> suite reports green either way.** Four instances found in two weeks, which is why this is here
+> rather than in a CHANGELOG entry: `t2`'s parity fixture supplied no Other-accounts fields, so
+> v5.47's HSA fix was worth $0 on it; and three §86 controls (the half-cap in Engine C, the half-cap
+> in the Roth tab, the middle tier in Engine C) each reverted correct code that NO household in the
+> suite could reach. In every case the code was right, the assertion was right, and the fixture
+> could not exercise the line. **A green suite is not evidence of coverage; a green suite on a
+> fixture that reaches the code is.** When adding an assertion, prove the fixture enters the region
+> — `t25` §F/§G and `t27` §A show the idiom, and `t25`'s first §F draft checked ZERO rows and passed
+> until its own anti-vacuity assertion caught it.
+
+> ⚠ **Three fixtures cannot see item 5, by construction — this is a live trap, not history.**
+> `t2`'s parity fixture builds its portfolio from `positions` only, and `t17`/`t18` both do
+> `P.otherAccounts = []`. `othHsa` is 0 in all three, so item 5 is worth **$0** on them and the
+> MC-parity guardrail's 9/9 is NOT evidence about it. Any future scope premise that reaches for
+> those fixtures to measure an Other-accounts behaviour must build its own household first.
+
+*(Item 5 is v5.47's HSA change. Written at v5.47; the parity count has since grown to 10.)*
+
+> ⚠ **`t13` LOOKS like `t14` and is NOT — do not apply `t14`'s drift correction to it.** Measured
+> 2026-08-23, after a recommendation to do exactly that was made and withdrawn. `t14`'s households
+> drift ~$4K/yr, so subtracting one year of drift is right there. `t13`'s are purpose-built and do
+> not drift: case 1 moves +$2K, and case 2's `d-2` year is a **one-off −$63K step**. Applying the
+> correction takes case 1 from margin 2.26 to 0.26 and case 2 from 1.74 to **−61.26**. It would have
+> broken the suite.
+>
+> `t13` does carry a *related* defect, from a different cause. Counterfactual, both deaths pushed
+> past the horizon: the isolated death effect is **$17,100.81** on case 1 against an expectation of
+> $13,260.00. Decomposed — holding both spouses alive and removing spouse B's check gives **exactly
+> $13,260.00**, so the **$3,840.81 residual** is not the SS term. The death also rolls the deceased's
+> Traditional balance to the survivor and recomputes RMDs on the survivor's age; case 1's survivor is
+> younger (larger divisor, smaller RMD, MAGI falls further), case 2's is older, which is why case 2
+> lands at −$0.61K instead. So the check is NAMED for the SS loss while MEASURING SS plus the
+> rollover, and its ±$4K band absorbs the difference. Margins are 2.26 and 1.74 — healthy next to the
+> 0.74 and 0.08 that made `t14` urgent — so this is recorded, not fixed. The fix is a counterfactual
+> anchor, and `t13` is DOM-driven, so that is a scope rather than a ride-along.
+>
+> ⚠ **`t14`'s Engine C magnitude checks were re-anchored at v5.47** after measurement showed they
+> had been differencing raw year-over-year MAGI while the household's MAGI also rises $3,959/yr
+> from RMD growth. Both passed for eleven releases with a structural offset inside their ±$4,000
+> bands ($740 and $80 of margin left at v5.47). They now subtract one year of drift. A tolerance
+> that has never been examined is not the same as headroom.
+
+> ⚠ **`t10`'s printed section labels OVERLAP — do not total that suite by adding them up.** `pass`
+> is one running counter across its blocks, and until v5.47 the "2B" line evaluated `pass-pass2A`
+> at print time, so it reported 2B+2C+2D+2E while the 2D and 2E lines reported those blocks again.
+> Adding the four labels gives **211**; the true total, printed on `t10`'s own total line, is
+> **163**. The v5.47 session made exactly this error and nearly published a false finding that
+> v5.46 had under-reported its suite by 96. The label is fixed, but the general rule stands: read
+> a suite's own total line, and if it disagrees with the sum of its parts, that disagreement is
+> the finding.
+
+*From `FlawsToFix-v5_69-Phase1.md` (v5.69), the third of its harness notes:*
+
+> 3. **The DOM bundle is CommonJS (sloppy mode); the shipped build is an ES module (strict).** A write to a property
+> of a primitive is silently ignored in the harness and throws in the browser, so the *first* throw inside
+> `applyLoadedData` can come earlier in the real app than in the probe. The outcome class reported in A-4 —
+> a throw before `saveToStorage` — is the same either way.
+
 ## C. Environment traps encoded in the harness — do not "simplify" them away
 
 
@@ -702,11 +768,22 @@ pooled copy is space spent on a file nobody can use from the pool. All 24 were u
 is not in `knowledge/`. The control scripts WITHOUT a release in their name stay pooled for now
 (`package_check_controls.sh`, `controls_manifest_rows.py`, `controls_state.sh`, `controls_state_sets.py`, `controls_source.sh`,
 `controls_t21_censusp1.sh`). Not all of them are version-free: `controls_source.sh` targets the v5.47 source; the others were not
-checked at this split. Whether they too belong repo-only is left for a later pass rather than asserted here.
+checked at this split. Whether they too belong repo-only is left for a later pass rather than asserted here. **`controls_source.sh` was
+un-pooled 2026-10-11** for that reason (it reverts fixes in the v5.47 source and cannot run against a later build); the other five were
+not re-examined.
 
 **Un-pooling a retired document** follows the three-place rule above with one difference: the repo copy **stays**.
 The manifest row is marked *un-pooled, repo-only*, and §G's decision check is run line by line first — anything still
 open is re-homed into a pooled register **in the same package** (the 2026-09-14 near-miss, `MissingFeatures.md` D-13).
+
+**The manifest's own history goes the same way (2026-10-11).** Its superseded ship notes and its older delete-first lists moved verbatim to
+`docs/MANIFEST_ARCHIVE_notes_and_lists_to_v6_03.md`, repo only; the manifest keeps the newest ship note and the lists from the current
+release on, with a pointer at each cut. The same pre-move check applies, line by line — and it found **standing guidance** as well as open
+threads: rules and traps written into a ship note because that was where the session was writing. Those go to the document that owns
+the rule (here §B2a and §I), not to a register. When the lists or notes grow long again, move the oldest to a **new** archive file.
+Six documents were un-pooled in the same package (`FlawsToFix-v5_69-Phase1.md`, `AUDIT_STATE_EXCL65_ROUND3.md`, `AUDIT_STATE_EXCL65_ROUND4.md`,
+`AUDIT_STATE_INCOME_BASES_ROUND5.md`, `BUILD_BRIEF_v5_49.md`, `controls_source.sh`); their open threads went to `MissingFeatures.md`'s
+census and `ARCHITECTUREIssues.md` E-29. The archive's §0 is the trace.
 
 ### Project knowledge is flat, add-only — so delete-first
 
@@ -951,10 +1028,24 @@ them.** It is a parser, not a grep, because a grep cannot tell a regex definitio
 one and cannot execute a pattern. A fourth copy in `package_check_controls.sh` is narrower on
 purpose and is excluded by name.
 
+⚠ **Carried 2026-10-11 from the manifest's archived ship notes (§B2a) — the reason a row's hash is computed, never typed** ("this file" in it is the manifest):
+
+> ⚠ **STANDING LESSON, from the v5.64 post-ship correction (kept because it earned its place).**
+> Two rows added by the v5.64 packaging carried **fabricated hashes** — `dom_entry_v564.jsx` and
+> `t34_income_conditioning.mjs`. The packaging session rolled existing rows with a script that
+> computed real md5s, then hand-wrote the new rows by copying that script's **truncated
+> ten-character display** and inventing the remaining twenty-two characters. Both matched their file
+> for exactly ten characters and were wrong after that. `package_check` K-8 caught it against the
+> pool; nothing before that could have. **A truncated hash is not a hash. A row's md5 gets computed
+> into place or it does not get written.** Every hashed row in this file was re-computed against the
+> pool at the v5.65 ship.
+
 ⚠ **A roll REPLACES the hash; it does not append a trail (from 2026-10-11).** Rows used to grow a `**rolled at vX.YY** (was `…`).` phrase
 at every roll; by v6.04 those phrases were 61 KB of the pool, and every past value is already in the manifest's git history (`git log -p --
-PROJECT_KNOWLEDGE_INDEX.md`). The ops package of 2026-10-11 (second) removed them all. Write the new hash in the hash cell and leave the
-description as it is, unless what the file IS has changed.
+PROJECT_KNOWLEDGE_INDEX.md`). The ops package of 2026-10-11 (second) removed 1,408 of them; ⚠ **it said "all", and eleven rows written in
+other shapes kept theirs** (`**rolled at …** — <what changed> (was `…`).`, the description before the hash) — the third ops package of
+2026-10-11 removed those (9 KB). Free-text history inside a description ("**rolled 2026-09-09** at…", "hash rolled …") is left as
+description. Write the new hash in the hash cell and leave the description as it is, unless what the file IS has changed.
 
 ⚠ **Roll `CHANGELOG.md`'s row last, after the entry is final**, and roll the row of any tool the
 package itself edits — including `package_check.mjs`. Editing a file after computing its row pins
