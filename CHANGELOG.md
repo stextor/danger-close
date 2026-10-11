@@ -1,5 +1,79 @@
 # Changelog
 
+## v6.03 — D-30 batch 2: the flat-rate states' deductions, exemptions and personal credits; D-30 closes
+
+**A MODELLING release** (METHODOLOGY updated). `docs/SCOPE_D30_DEDUCTIONS_V603.md` (repo-only, fulfilled). Steve: "start the v6.03 scope".
+
+**What changed.** Through v6.02 the fifteen flat-rate states were taxed from the first dollar of their base — no standard deduction, exemption or personal
+credit (conservative, disclosed). **From v6.03 the fourteen whose law has any take them**, each read at its primary source on 2026-10-10 (the scope's §0.2
+table cites each): Arizona's standard deduction ($15,750 / $31,500) and $2,100 for each filer 65 or older; Colorado's and Iowa's federal standard deduction
+(both start from federal taxable income; $16,100 / $32,200 and $2,050 / $1,650 for each filer 65 or older), Colorado's cut to $12,000 / $16,000 at federal AGI
+of $300,000 or more (Proposition FF, "equal to or exceeding" as the statute says — the 2025 form says "exceeds"), Iowa's $40 exemption credits and $20 for each
+filer 65 or older; Georgia's $15,000 / $30,000 (HB 463); Idaho's $15,750 / $31,500 with $2,000 / $1,600 for each filer 65 or older and its $155 grocery credit;
+Illinois's $2,925 exemptions and $1,000 for each filer 65 or older, none above federal AGI of $250,000 / $500,000; Indiana's $1,000 exemptions, $1,000 more
+for each filer 65 or older and $500 more each below federal AGI of $40,000; Kentucky's one $3,360 deduction per return and $40 credit for each filer 65 or
+older; Louisiana's $12,500 / $25,000; Massachusetts' $4,400 exemptions and $700 for each filer 65 or older; Michigan's $5,900 exemptions; North Carolina's
+$12,750 / $25,500; Ohio's exemptions by modified-AGI band ($2,400 / $2,150 / $1,900, none from $500,000), its $20 exemption credits and $50 senior citizen
+credit; Utah's taxpayer tax credit (6 % of the federal standard deduction, less 1.3 % of Utah taxable income above $18,213 / $36,426). **Pennsylvania's law
+has none**, and its note says so. **Idaho's zero band** ($4,811 / $9,622) and **Ohio's 2026 schedule** (no tax on a base of $26,050 or less, $332 plus
+2.75 % above it — the statute's step, kept) are modelled as schedules; Ohio's step is a new row field, `notch`, read only with a schedule. The v6.02 evaluator
+serves every row; its `tiers` shape now reads a single/joint start (Utah's) — numbers pass through unchanged, so the 27 batch-1 rows are byte-identical. Five
+held at their 2025 figures (Arizona's, Idaho's and Louisiana's deductions, Ohio's exemptions, Utah's phase-out base), each at or below its later value.
+
+**Measured** (v6.02 → v6.03, a scratch probe, not shipped): the Taxes tab's lifetime state tax on the example plan with each state selected, no conversions —
+every one of the fourteen falls, and Pennsylvania, the other 36 jurisdictions and "none" are byte-identical: AZ $45,462 → $27,415 · CO $65,430 → $42,563 · GA $19,881 → $10,133 · ID $96,379 → $48,206 · IL $3,174 → $1,645 · IN $53,645 → $51,285 · IA $2,437 → $0 · KY $28,135 → $24,985 · LA $40,225 → $28,234 · MA $90,923 → $80,538 · MI $16,590 → $12,592 · NC $72,557 → $51,699 · OH $50,008 → $36,901 · UT $99,516 → $78,178. Engine A on the same plan: no strategy's
+lifetime tax rises in any state, and the estate-best strategy changes in none. Engines C and D compute no state tax. **MC parity 10/10, one declared
+diff:** the `stateTax` fingerprint is a Georgia call and moves $6,487 → $4,990 (= ($260,000 − 2 × $65,000 − $30,000) × 4.99 %), declared in `INTENDED_DIFFS`
+as `v602→v603`; the nine other keys are byte-identical (the Engine A fingerprints carry no state).
+
+**Display.** My Data's model line for a flat-rate row read "N% effective rate (an approximation)" — wrong for every row it reached since v6.01, when every
+progressive state moved to its schedule. It now reads "N% flat rate", adds "· deductions and exemptions taken" for the fourteen, and a state without an income
+tax reads "no state income tax" (it read "0.00% …"). The AI context line says "N% flat, after its deductions and exemptions". The Taxes tab's footer called
+the state module "effective-rate approximations" and now names each state's own rate or schedule after its deductions. The Field Manual's "the flat-rate states
+take none yet" (two places) and its two sentences giving every flat-rate state one rate are replaced with what is and is not taken, and Idaho's and Ohio's schedules.
+
+**Not taken, each conservative and disclosed in its note:** the federal senior deduction (2025–2028) that reaches Arizona (its own subtraction), Colorado and
+Iowa (through federal taxable income) and Idaho (conformity, HB 559) — added to **D-31**; Ohio's retirement income credit (at most $200) and joint filing credit,
+and Utah's retirement credit (filers born in 1952 or earlier) — they need measures the calculator lacks (**D-32**, opened); low-income and property-tax
+credits (Georgia's low income credit, Iowa's low-income exemption, Kentucky's family size credit, Indiana's unified credit, Arizona's family and property tax
+credits, Pennsylvania's Tax Forgiveness, Massachusetts' circuit breaker and limited-income credits); Michigan's deduction for filers born before 1946. Idaho's
+grocery credit is refundable in law and taken here against tax only. **D-30 closes:** every state's standard deduction, exemptions and personal credits are taken.
+
+**Correction, owned here.** v6.02's CHANGELOG entry and the D-30 entry in MissingFeatures called Georgia "the example household's state". It is not: the
+example plan files in Florida ("State: Florida (no income tax)"). Georgia is the parity fingerprint's state and `t33`'s household's. This release's scope
+repeated the claim in its first draft; it is corrected there (§0.1) and in MissingFeatures.
+
+**Tests.** New suite **`t67`** — **123** on v6.03, **6** on v6.02 (that leg pins the absence of all of it): the fourteen rows' components equal to
+the sources, dated, well formed — an extinction: exactly 41 rows carry `deduct` (the 27 and the 14), only Ohio a `notch`, Pennsylvania none; every note names
+what is taken and what is not, and every age it names; the edges (Colorado at $299,999 / $300,000, Illinois's and Indiana's cliffs, Ohio's bands, credits and
+$26,050 step, Idaho's band, Utah's credit, Kentucky's one deduction, the `tiers` pick); 39 hand cases to the cent computed independently in Decimal (e.g.
+Ohio single 50 at $28,451: **$312.03** — the step; Colorado joint 66/64 at $300,000: **$12,496.00**; Utah joint 66/66 at $80,000: **$1,996.46**); v6.02 → v6.03
+over every jurisdiction, 22,572 calls (with the fifteen's additions removed, byte-identical to v6.02; with them, the fourteen equal the independent
+implementation, `qa/d30_ref.mjs` extended with `D30F`, on the calculator's own measures, and the other 37 rows are byte-identical); the display and the Field
+Manual held to the code. Controls `qa/tools/controls_v603_deduct.py` (repo-only): **11 of 11**. **Derived pins gated per build** (DD-14 — each keeps its base and,
+on the v6.03 leg, expects that base after the state's deductions, schedule and credits, priced by `qa/d30_ref.mjs` on the calculator's record of the very call;
+labels say so): `t10` (§2E — AZ, CO, KY; IL's hand case), `t50` (CO, UT), `t51` (the dated-figure census, 41 rows / 102 figures; Louisiana's cases; the display),
+`t52` (GA, IA; the display finder), `t53` (the display finder), `t55` (IA, MI), `t58` (North Carolina's lifetime draw Δ, now the sum of its per-year hand
+marginals), `t59` (IA; Georgia's survivor years), `t60` (GA, MI), `t61` (GA), `t63` (ID, IN, OH), `t64` (GA, the display, the `deduct` census), `t65` (the
+schedule census with Idaho and Ohio, GA, the display, the Field Manual's lists) and `t66` (its group-wide checks keep to the 27; its group D reports itself not run
+in a v6.02 → v6.03 folder). **Measured pins** (the household is in Georgia; second-order engine figures, measured at the build as v5.97's were): `t33`
+`noStream` 173,836 → 155,661, and its E-3 / E-4 / F-2 / F-3 deltas 739 → 738, 60,036 → 60,035, 2,300 → 560, 48 → 50. `v603` registered by AST (93 array entries, 83
+OR-gates, two version arms; one site reviewed by hand and left — `t66`'s v6.01 → v6.02 group), the three Python suites and `t33`'s PINS by hand.
+
+**Suite, run from the packaged copies:** 6,135 app checks across **66 app suites**, 0 failed, 0 DIED; MC parity 10/10; tooling `t21` 64,
+`domdiff` 32, `sets` 12 + 12; **GRAND 6,265**. Every current-leg count equals v6.02's except the new `t67` and `t66`
+(194 → 191: its group D, which needs `app_v601.mjs`, reports itself not run). Run from the PACKAGED copies as two concurrent halves, the method approved at v5.87: run folders built by mk_runfolder.sh v602 v603 from a full clone of 7af5fbb with the github/ files overlaid (v6.02 resolved from history, commit a7bbdb5), each through a session-only copy of runsuite.sh whose one added line skips the other half's labels. Half A GRAND 6043, half B GRAND 222; none DIED. Source `bba6256a1380feae47809094ac667ffd` · built `7acea8cda30fe596ad986935eefa611e` (v6.02 rebuilt byte-identical
+first; `smoke_built` 22 passed, 0 failed).
+
+**Limitations, disclosed:**
+- The federal senior deduction (AZ, CO, ID, IA; and MT, ND from v6.02) and federal-tax deductions (AL, MO, OR) are not taken (D-31); Ohio's retirement income
+  and joint filing credits and Utah's retirement credit are not taken (D-32); low-income and property-tax credits are not taken; itemized deductions are not
+  modelled — each conservative.
+- Credits are nonrefundable: Idaho's grocery credit (refundable in law) is understated for a household whose Idaho tax is below it.
+- Ohio's credits are tested on the state base, the model's Ohio AGI; Ohio's modified AGI adds back a business-income deduction the model does not have.
+- Arizona, Idaho, Louisiana, Ohio (exemptions) and Utah (phase-out base) hold 2025 figures — each conservative.
+- The calculator has no dependents: exemptions count the filers only.
+
 ## v6.02 — Ask AI's answers no longer cut off; D-30 batch 1: the 27 progressive states' deductions, exemptions and personal credits
 
 **A MODELLING release** (METHODOLOGY updated). `docs/SCOPE_D30_DEDUCTIONS_V602.md` (repo-only, fulfilled). Steve: "one thing I've noticed in ASK AI, the

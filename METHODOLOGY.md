@@ -134,7 +134,7 @@ future law is "current law, inflated."
 
 Replaces the former single flat rate with a **51-jurisdiction rules table** (50 states + DC),
 2026 vintage. Per state: an *effective flat approximation* of the (often progressive) schedule
-for a typical retiree — *from v6.00 ten states, and from v6.01 every progressive state (27), are taxed on their own bracket schedules instead (§ v6.00 and § v6.01 below); the fifteen flat-rate states keep their one rate*; Social Security treatment (43 jurisdictions none; the eight partial states
+for a typical retiree — *from v6.00 ten states, and from v6.01 every progressive state (27), are taxed on their own bracket schedules instead (§ v6.00 and § v6.01 below); the fifteen flat-rate states keep their one rate, Idaho with its zero band and Ohio on its own 2026 schedule from v6.03 (§ v6.03 below)*; Social Security treatment (43 jurisdictions none; the eight partial states
 — CO, CT, MN, MT, NM, RI, UT, VT — approximated as taxing half the federally-taxable portion,
 since their income thresholds exempt most retirees; WV's phase-out completed for 2026);
 full retirement-income exemptions (IL, MS, PA, IA, MI post-phase-in, plus the nine
@@ -335,8 +335,8 @@ behavior exactly (backward compatible with every existing backup).
 
 **This is an approximation layer and is labeled as such in the UI.** Not modeled: *(progressive
 state brackets ARE modelled from v6.01 — every progressive state is on its own schedule)*, county/city income taxes (IN, NYC and city taxes
-not; Maryland's county tax is taken at the highest county rate, 3.30 %, from v6.01), Rhode Island's IRA distinction and per-person cap (**its AGI cliff is applied as of v5.69**, exclusive, on the TY2025 thresholds — Connecticut, New Mexico, New Jersey, Virginia and Rhode Island are conditioned as of v5.65, v5.66, v5.67, v5.68 and v5.69; ⚠ *corrected at v5.69: this clause listed Rhode Island's cliff as approximated as unconditional*; ⚠ *this clause was stale and is corrected at v5.62: v5.60 DID apply RI's and WI's full-retirement-age (67) floors, as stated above — the contradiction stood within this one document for two releases*; ⚠ *corrected again at v5.68: it listed NJ and VA as unconditional, false from v5.67 and v5.68 respectively* — **Virginia's $12K age deduction tapers $1 for every $1 of adjusted federal AGI above $50K single/$75K married, and is applied that way, once per couple, as of v5.68**), SC's under-65 tier (disclosed, not applied; *NJ's 62 floor stood beside it here as unapplied until v5.68, although v5.67 applied it*), **Colorado's shared $24K cap between Social Security and pension — a cap the two share rather than one reducing the other, which overstates Colorado's exclusion and understates its state tax**. Maryland's and Maine's exclusions, which are reduced by Social Security received dollar-for-dollar, ARE applied as of v5.56 (§12), state
-standard deductions/credits *for the fifteen flat-rate states (the 27 progressive states take theirs from v6.02)*, pension-source distinctions (AL/HI DB exemptions), and WA's
+not; Maryland's county tax is taken at the highest county rate, 3.30 %, from v6.01), Rhode Island's IRA distinction and per-person cap (**its AGI cliff is applied as of v5.69**, exclusive, on the TY2025 thresholds — Connecticut, New Mexico, New Jersey, Virginia and Rhode Island are conditioned as of v5.65, v5.66, v5.67, v5.68 and v5.69; ⚠ *corrected at v5.69: this clause listed Rhode Island's cliff as approximated as unconditional*; ⚠ *this clause was stale and is corrected at v5.62: v5.60 DID apply RI's and WI's full-retirement-age (67) floors, as stated above — the contradiction stood within this one document for two releases*; ⚠ *corrected again at v5.68: it listed NJ and VA as unconditional, false from v5.67 and v5.68 respectively* — **Virginia's $12K age deduction tapers $1 for every $1 of adjusted federal AGI above $50K single/$75K married, and is applied that way, once per couple, as of v5.68**), SC's under-65 tier (disclosed, not applied; *NJ's 62 floor stood beside it here as unapplied until v5.68, although v5.67 applied it*), **Colorado's shared $24K cap between Social Security and pension — a cap the two share rather than one reducing the other, which overstates Colorado's exclusion and understates its state tax**. Maryland's and Maine's exclusions, which are reduced by Social Security received dollar-for-dollar, ARE applied as of v5.56 (§12), itemized
+deductions and the few state credits that need a measure the calculator lacks *(every state's standard deduction, exemptions and personal credits are taken — the 27 progressive states from v6.02, the flat-rate states from v6.03; Pennsylvania's law has none)*, pension-source distinctions (AL/HI DB exemptions), and WA's
 capital-gains excise. Verify your state.
 
 ## 7. Roth conversion modeling
@@ -949,8 +949,8 @@ export paths; state-module ordering test TX=IL < GA < CA; solve-for grid; MC tog
 
 Not yet done, in honesty: **independent professional (CPA/EA/actuary) review** — the single
 most valuable outstanding validation, and the reason the trust case remains self-referential;
-golden-file cross-validation against Pralana/ProjectionLab on identical inputs; the flat-rate states'
-standard deductions and exemptions (the 27 progressive states take theirs from v6.02 — D-30 batch 2), and the federal-tax and federal senior deductions some states start from (D-31); ACA premium-subsidy modeling; and stochastic
+golden-file cross-validation against Pralana/ProjectionLab on identical inputs; the federal-tax and federal
+senior deductions some states start from or subtract (D-31; every state's own deductions are taken from v6.03), a few state credits that need measures the calculator lacks (D-32); ACA premium-subsidy modeling; and stochastic
 health-state modeling.
 
 **No estate tax or inheritance tax is modeled — federal or state (disclosed at v5.50).** The
@@ -2051,3 +2051,21 @@ $7,450 "or fraction" above $261,000; South Carolina's Income Adjusted Deduction 
 Mexico's low- and middle-income exemption. **Not modelled, each conservative:** the flat-rate states' deductions (D-30 batch 2); the federal income tax Alabama,
 Missouri and Oregon let a return deduct, and the federal senior deduction Montana and North Dakota inherit (D-31 — the calculator is given neither);
 low-income refundable credits; itemized deductions; dependents. `qa/t66_deductions_askai.mjs`, with an independent implementation in `qa/d30_ref.mjs`.)*
+
+*(v6.03, D-30 batch 2 — `docs/SCOPE_D30_DEDUCTIONS_V603.md`. **The fourteen flat-rate states whose law has a standard deduction, exemption or personal
+credit take them** (Pennsylvania's has none), each read at its primary source (TY2026; TY2025 where 2026 was unpublished — Arizona's, Idaho's and
+Louisiana's deductions, Ohio's exemptions, Utah's phase-out base — each at or below its later value, or, for Utah's base, making the credit smaller), in the
+order and with the evaluator of v6.02: Arizona's standard deduction and $2,100 for each filer 65 or older; Colorado's and Iowa's federal standard deduction
+(both start from federal taxable income), Colorado's cut to $12,000 / $16,000 at federal AGI of $300,000 or more (the Proposition FF addback — the statute's
+"equal to or exceeding", which the 2025 form words as "exceeds"), Iowa's $40 exemption credits and $20 for each filer 65 or older; Georgia's $15,000 /
+$30,000; Idaho's deduction, its $155 grocery credit and its zero band; Illinois's $2,925 exemptions and $1,000 for each filer 65 or older, none above federal
+AGI of $250,000 / $500,000; Indiana's $1,000 exemptions, $1,000 more for each filer 65 or older and $500 more each below federal AGI of $40,000;
+Kentucky's one $3,360 deduction per return and $40 credit for each filer 65 or older; Louisiana's $12,500 / $25,000; Massachusetts' $4,400 exemptions and
+$700 for each filer 65 or older; Michigan's $5,900 exemptions; North Carolina's $12,750 / $25,500; Ohio's exemptions by modified-AGI band, its $20 exemption
+credits and $50 senior citizen credit (their "modified AGI less exemptions" tests converted exactly to modified-AGI thresholds within the band each falls
+in), and its 2026 schedule — no tax on a base of $26,050 or less, $332 plus 2.75 % above it, the statute's step kept; Utah's taxpayer tax credit, 6 % of
+the federal standard deduction less 1.3 % of Utah taxable income above $18,213 / $36,426. Credits stay nonrefundable (Idaho's grocery credit is refundable
+in law — understated here for a household whose Idaho tax is below it). **Not modelled, each conservative:** the federal senior deduction that reaches
+Arizona, Colorado, Idaho and Iowa (D-31); Ohio's retirement income and joint filing credits and Utah's retirement credit (D-32); low-income and
+property-tax credits (Massachusetts' senior circuit breaker among them); itemized deductions; dependents. `qa/t67_deductions_flat.mjs`, with the
+independent implementation extended in `qa/d30_ref.mjs`.)*
