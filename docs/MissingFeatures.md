@@ -1296,6 +1296,12 @@ large for a household that funds spending from a taxable account. An exclusion f
 
 ## D-30 · No state standard deduction, personal exemption or credit is taken — opened at v6.01
 
+> ✅ **CLOSED v6.03 (2026-10-10) — batch 2: the fourteen flat-rate states whose law has them take their standard deductions, exemptions and personal credits**
+> (Pennsylvania's has none), with Idaho's zero band and Ohio's 2026 schedule (`docs/SCOPE_D30_DEDUCTIONS_V603.md`, fulfilled, repo-only; `qa/t67_deductions_flat.mjs`).
+> Every state's standard deduction, exemptions and personal credits are now taken. The federal senior deduction that reaches Arizona, Colorado, Idaho and Iowa
+> joined **D-31**; three credits that need measures the calculator lacks are **D-32**. ⚠ *Correction:* the batch-1 note below calls Georgia "the example
+> household's state" — the example plan files in Florida; Georgia is the parity fingerprint's state. *(The entries below are retained.)*
+
 > ◐ **BATCH 1 CLOSED v6.02 (2026-10-09) — the 27 progressive states take their standard deductions, personal exemptions and personal credits**, each read at
 > its primary source (`docs/SCOPE_D30_DEDUCTIONS_V602.md`, fulfilled, repo-only; `qa/t66_deductions_askai.mjs`). **Open: batch 2, v6.03** — the fifteen
 > flat-rate states (Georgia among them, the example household's state and the parity fingerprint's, so batch 2 re-baselines both). Alabama's deduction of
@@ -1309,8 +1315,22 @@ taxable income). **Medium-high — the recommended next state release; conservat
 
 ## D-31 · Deductions a state takes from the federal return are not taken — opened at v6.02
 
+> **Widened v6.03 (D-30 batch 2):** the federal senior deduction also reaches **Arizona** (its own subtraction, A.R.S. §43-1022, from TY2025), **Colorado** and
+> **Iowa** (both start from federal taxable income; Iowa's DOR: "Iowa conforms") and **Idaho** (conformity to 1 January 2026, HB 559, retroactive to 2025) —
+> not taken, disclosed in each note (`docs/SCOPE_D30_DEDUCTIONS_V603.md` §0.2). The other eleven flat-rate states start from federal AGI or their own income,
+> which the deduction comes after.
+
 Two kinds, both found while reading D-30's sources (`docs/SCOPE_D30_DEDUCTIONS_V602.md` §0.2): **federal income tax** that Alabama (in full), Missouri (a
 percentage, capped at $5,000 / $10,000) and Oregon (up to $8,500, phased out by federal AGI) let a return deduct; and the **federal senior deduction**
 ($6,000 for each filer 65 or older, 2025–2028, phased out above $75,000 / $150,000 of MAGI), which flows into Montana and North Dakota because they start from
 federal taxable income. The state calculator is given neither the year's federal tax nor the model year, and its three callers would each have to pass
 them. Conservative today (more state tax than the law), disclosed in each note. **Medium — its own change to the calculator's arguments; scope first.**
+
+## D-32 · State credits that need a measure the calculator lacks are not taken — opened at v6.03
+
+Found reading D-30 batch 2's sources (`docs/SCOPE_D30_DEDUCTIONS_V603.md` §0.2, DD-8): **Ohio's retirement income credit** (R.C. 5747.055(B): $25 to $200 per
+return by the retirement income received "on account of retirement", while modified AGI less exemptions is under $100,000) — the evaluator is given no
+retirement-income measure, and whether a Roth conversion counts was not read; **Ohio's joint filing credit** (§5747.05(E): 5 % to 20 % of tax, at most $650,
+each spouse needing $500 of qualifying income other than interest, dividends, distributions, rents and gains) — per-person income by type; and **Utah's
+retirement credit** (up to $450 each, only for a filer born on or before 31 December 1952) — the calculator has ages, not birth years. Conservative today (more
+state tax than the law), disclosed in each note. **Low — small amounts; an argument or two each.**
