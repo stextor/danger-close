@@ -41,10 +41,13 @@ PASS=0; MISS=0; SKIP=0
 
 # ── targets DERIVED from the package, so nothing here names a file that can be renamed away ──
 QA_FILE=$(cd "$APP" && find github -type f -name '*.mjs' | head -1)
-JSX=$(cd "$APP" && ls knowledge/DangerClose-v5_*.jsx 2>/dev/null | head -1)
+# 2026-10-11: these two globs read `v5_*` until this date, so from v6.00 no package's source matched, JSX came back empty and P8/P10
+# SKIPPED on every release ("ships no versioned .jsx") — loud, but read as benign. v6.00 widened this script's manifest arithmetic and
+# missed them. Any single-digit major now, as package_check.mjs's own pattern (DangerClose-v\d_\d+.jsx).
+JSX=$(cd "$APP" && ls knowledge/DangerClose-v[0-9]_*.jsx 2>/dev/null | head -1)
 BOTH=""
 for k in $(cd "$APP/knowledge" && ls); do
-  case "$k" in DangerClose-v5_*.jsx) continue;; esac
+  case "$k" in DangerClose-v[0-9]_*.jsx) continue;; esac
   if (cd "$APP" && find github -type f -name "$k" | grep -q .); then BOTH="$k"; break; fi
 done
 UNCH=""
@@ -1012,10 +1015,10 @@ if [ -n "$POOLARG" ]; then
   ONE_SRC='
 import re, glob
 cur = re.search(r"## Current build.*?\| Source file in knowledge \| `([^`]+)`", rd(), re.S).group(1)
-for f in glob.glob("/tmp/pkpool/DangerClose-v5_*.jsx"):
+for f in glob.glob("/tmp/pkpool/DangerClose-v[0-9]_*.jsx"):   # v5_* until 2026-10-11 (missed at v6.00)
     if not f.endswith("/" + cur): os.remove(f)
 curtag = "dom_entry_v" + cur.replace("DangerClose-v", "").replace("_", "").replace(".jsx", "") + ".jsx"
-for f in glob.glob("/tmp/pkpool/dom_entry_v5*.jsx"):
+for f in glob.glob("/tmp/pkpool/dom_entry_v[0-9]*.jsx"):
     if not f.endswith("/" + curtag): os.remove(f)
 assert os.path.exists("/tmp/pkpool/" + cur), "the Current source is not in the pool copy"
 '

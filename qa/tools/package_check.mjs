@@ -510,7 +510,7 @@ if (CLONE && existsSync(CLONE)) {
 // the "shipped jsx == canonical == build input" hash rule, checked rather than asserted.
 const srcGh = join(GH, "src/DangerClose.jsx");
 if (knSrc.length === 1 && existsSync(srcGh)) {
-  ck("E-2: knowledge/DangerClose-v5_*.jsx == github/src/DangerClose.jsx (the hash-verify rule)",
+  ck("E-2: knowledge/DangerClose-vN_NN.jsx == github/src/DangerClose.jsx (the hash-verify rule)",
     md5(join(KN, knSrc[0])) === md5(srcGh));
 } else if (KIND === "app-release") {
   ck("E-2: versioned source vs canonical source both present", false, "one of the two is absent");
