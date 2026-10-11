@@ -1,5 +1,76 @@
 # Changelog
 
+## v6.04 — D-31 and D-29: deducting federal income tax (AL, MO, OR), the federal senior deduction in six states, Missouri's capital-gains subtraction
+
+**A MODELLING release** (METHODOLOGY updated). `docs/SCOPE_D31_D29_V604.md` (repo-only, fulfilled). Steve: "start the v6.04 scope on D-31 plus D-29."
+
+**What changed.** Through v6.03 the state calculator was given neither the model year nor any federal tax figure, so no state could take a deduction that
+depends on either (conservative, disclosed). **From v6.04 all three call sites pass the year, the year's federal income tax and its NIIT, and Engine B its
+realized gains**, and nine rows take what their laws allow, each read at its primary source on 2026-10-11 (the scope's §0.2 cites each):
+- **Alabama** deducts the year's federal income tax in full, the net investment income tax included (Code of Ala. §40-18-15(c); the 2025 worksheet).
+- **Missouri** deducts 35 % / 25 % / 15 % / 5 % / none of it as Missouri AGI passes $25,000 / $50,000 / $100,000 / $125,000, at most $5,000 single /
+  $10,000 joint (RSMo 143.171), and **subtracts 100 % of realized capital gains from TY2025** (RSMo 143.121.3(14), D-29) — qualified dividends stay taxed,
+  and the gains leave the base before the percentage is measured.
+- **Oregon** subtracts it up to $8,500 (the 2025 cap, held), less in $5,000 / $10,000 steps of federal AGI from $125,000 single / $250,000 joint, nothing
+  from $145,000 / $290,000 (ORS 316.695; OR-40 Table 4).
+- **The federal senior deduction** ($6,000 each 65 or older, 2025–2028, less 6 % of MAGI above $75,000 / $150,000 — IRC §151(d)(5)(C)) is taken in the six
+  states whose returns carry it: Colorado, Iowa, Montana and North Dakota (they start from federal taxable income), Idaho (conformity, HB 559) and Arizona
+  (its own subtraction, A.R.S. §43-1022(35)). Its figures are read from the federal block (`OBBBA_CONSTS`), not copied, and it ends with the federal sunset.
+
+The evaluator `stateDeductions` gains three fields — `years`, `of: "fedtax"` and `cap` — and Missouri's row a field `gainsExempt`; the data stays
+declarative. A caller that passes none of the new arguments gets v6.03's figure byte for byte. "Federal income tax" is what the model computes of Form 1040
+line 22: regular tax on ordinary income, the capital-gains-rate tax and AMT (Alabama adds NIIT). Only the nine rows move, all downward.
+
+**Measured** (v6.03 → v6.04, a scratch probe, not shipped): the Taxes tab's lifetime state tax on the example plan with each state selected, no conversions —
+AL $67,983 → $57,518 · MO $48,310 → $47,276 · OR $124,104 → $114,915; the other 48 jurisdictions and "none" are byte-identical (the example plan's tax years start at its 2029 retirement, after the senior deduction ends —
+its filers, born 1964 and 1966, are under 65 until then — so the six senior-deduction states do not move for it). A 65+ household (an $80,000 pension, born 1958 and 1959): AL $86,285 → $81,338 · MO $57,232 → $56,534 · OR $152,945 → $144,286 · MT $47,401 → $45,709 (2026–2028: $4,678 → $2,986) · ID $48,285 → $46,377 · AZ $33,096 → $32,196; North Dakota, Colorado and Iowa do not move
+for it (they already tax that household's income at zero before the deduction), nor does any state outside the nine. Engine A on the example plan: no
+strategy's lifetime tax rises in any state, and the estate-best strategy changes in none. Engines C and D compute no state tax. **MC parity 10/10,
+unchanged** — no fingerprint is priced in the nine.
+
+**Not taken or approximated, each disclosed in its note and in METHODOLOGY:**
+- The federal tax is the model's own figure for Form 1040 line 22: the model computes no federal credits, so none is subtracted.
+- Oregon's cap is held at the 2025 $8,500: Oregon's 2026 withholding formulas use $8,750, but the same publication's text says $8,500, so the 2026 return
+  figure is unconfirmed — the lower one is kept (conservative).
+- Missouri's percentage table runs on Missouri AGI, as the MO-1040 administers it, where the statute says "Missouri gross income".
+- The District of Columbia's senior deduction is not taken (its 2025 law disallows it; 2026 is unsettled) — conservative.
+- The refunds of deducted federal tax that Alabama and Oregon tax as income are not modelled (the model has none).
+- Engine A takes the state senior deduction from its own MAGI although its federal calculation omits the bonus (that solver decision stands). Alabama,
+  Missouri and Oregon read Engine A's federal tax as Engine A computes it — in 2026–2028 slightly higher than Engine B's for a 65+ household, so their
+  deduction there is slightly larger.
+- Missouri's gains subtraction reaches only realized gains, which Engine B passes; Engine A realizes none (it passes dividends alone).
+
+**Correction, owned here.** The scope's first draft said Alabama's deduction sits at §40-18-15(c), "not the (a)(2) this project's notes cite". No project
+file cites (a)(2): the subsection came from my own research brief, and the research pass found the text at (c). Corrected in the scope (§0.2, §6).
+
+**Tests.** New suite **`t68`** — **49** on v6.04, **5** on v6.03 (that leg pins the absence of the arguments, fields and
+components): the nine rows' components equal to the sources, the senior component read from `OBBBA_CONSTS` and carried by exactly the six, only AL / MO / OR
+an `of: "fedtax"` component, only Missouri `gainsExempt` — an extinction that every component is well formed; the edges (Missouri's and Oregon's bands to
+the dollar, the joint doubling, the senior window at 2024 / 2025 and 2028 / 2029, its phase-out, one filer 65+ against two, Alabama with and without NIIT,
+Missouri's gains floored at zero with dividends taxed); 15 hand cases to the cent computed independently in Decimal (e.g. Alabama single 50 at $40,000 with
+$3,000 of federal tax: **$1,610.00**; Missouri single 66 at $24,000 with $1,000: **$104.88**; Oregon single 66 at $124,999 / $125,000 with $20,000:
+**$9,521.60 / $9,670.44**; Montana joint 66/66 at $100,000 in 2027 / 2029: **$2,467.50 / $3,031.50**); v6.03 → v6.04 over every jurisdiction, a household
+grid, the years 2026–2030 and a band sweep for Missouri, Oregon and Alabama, 25,818 calls (without the new arguments byte-identical to v6.03; with them the
+nine equal the independent implementation, `qa/d30_ref.mjs` extended, on 4,650 calls and the other rows are byte-identical on 21,168; none pays more and
+1,726 pay less); Engine B's state senior deduction equal to its own federal bonus year by year in each of the six; the three call sites' arguments by AST; the
+Field Manual and notes held to the code. Controls `qa/tools/controls_v604_feddeduct.py` (repo-only): **8 of 8**. **Derived checks gated per build** (v6.02
+DD-14): `t64` (the `deduct` census allows Missouri's `gainsExempt`), `t65` (Alabama's note), `t66` and `t67` (each keeps to its own components — the
+federal-tax and senior components are `t68`'s — and their "not taken" claims for the nine are retired on the v6.04 leg, `t68` holding the new wording);
+`t33`'s PINS carried unchanged (its household is in Georgia). `v604` registered by AST, the three Python suites and `t33`'s PINS by hand.
+
+**Suite, run from the packaged copies:** 6,293 app checks across **67 app suites**, 0 failed, 0 DIED; MC parity 10/10; tooling `t21` 64,
+`domdiff` 32, `sets` 12 + 12; **GRAND 6,423**. Every current-leg count equals v6.03's except the new `t68`,
+`t66` (191 → 186: its five "not taken" checks for AL, MO, OR, MT and ND retire, `t68` A-7 holding the new wording) and `t67` (123 → 118:
+its two for CO and ID retire, and its group D, which needs `app_v602.mjs`, reports itself not run in a v6.03 → v6.04 folder). Run from the PACKAGED copies as two concurrent halves, the method approved at v5.87: run folders built by mk_runfolder.sh v603 v604 from a full clone of 3540e4f with the github/ files overlaid (v6.03 resolved from history, commit 12a4428), each through a session-only copy of runsuite.sh whose one added line skips the other half's labels. Half A GRAND 6201, half B GRAND 222; none DIED. Source `8226b20b62334074606993d411bb0fb1` ·
+built `71f4ada6ac4923075f9f1d1a576c2293` (v6.03 rebuilt byte-identical first; `smoke_built` 22 passed, 0 failed).
+
+**Limitations, disclosed:**
+- The federal tax deducted is the model's, with no federal credits subtracted; Alabama's and Oregon's recapture of refunded federal tax is not modelled.
+- Oregon's cap held at its 2025 figure; Missouri's table on Missouri AGI; DC's senior deduction not taken — each conservative or as administered.
+- Ohio's retirement income and joint filing credits and Utah's retirement credit are still not taken (D-32); low-income and property-tax credits are not
+  taken; itemized deductions are not modelled.
+- Engine A's federal figure still omits the senior bonus (its recorded solver decision); the state layer takes it in both engines.
+
 ## v6.03 — D-30 batch 2: the flat-rate states' deductions, exemptions and personal credits; D-30 closes
 
 **A MODELLING release** (METHODOLOGY updated). `docs/SCOPE_D30_DEDUCTIONS_V603.md` (repo-only, fulfilled). Steve: "start the v6.03 scope".
