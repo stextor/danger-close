@@ -870,6 +870,15 @@ read; `t9`'s version badge; `domdiff_withdrawal.mjs`'s version strip; `vergates.
 pool-file patterns (`DangerClose-v\d_\d+.jsx`, `dom_entry_v\d\d\d.jsx`, the derived-file prefix); and `package_check_controls.sh`'s manifest
 arithmetic, which now counts major × 100 + minor (600 − 1 → v5.99) instead of subtracting from the minor. The pool's source file for v6.00 is
 `DangerClose-v6_00.jsx`. Historical references (`v5.66` in a control's regex, `t35`'s "Rhode Island at v5.69") are about those releases and stay.
+⚠ **The list above missed two sites, in the one script it names twice (found 2026-10-11, at the v6.04 ship, fixed by that day's ops package).**
+`package_check_controls.sh` found the package's source with `ls knowledge/DangerClose-v5_*.jsx` and tidied a pool copy with
+`glob("…/DangerClose-v5_*.jsx")` / `glob("…/dom_entry_v5*.jsx")`. A `v5_*` pattern cannot match a `v6_` name, so from v6.00 **P8 and P10 —
+the rotation and source-identity controls — could not run on any release**; at the v6.04 ship the run printed *"SKIPPED … this package ships no
+versioned .jsx"*, which reads as benign. (The v6.00–v6.03 runs were not re-read for this note.) The second made P68–P71's tidy-up a no-op, harmless only because a post-upload pool already holds one source. Both
+now read any single-digit major (`v[0-9]_*`). Found by reading a SKIPPED line rather than counting past it — §B2's rule that a skipped control
+is not a passing one, applied. **The census that should have caught it was a list, not a parser run**; the 2026-10-11 census was both (AST over
+every JS literal in `qa/`, and a text search of the shell and Python tooling, which acorn cannot parse) and found these two sites plus `E-2`'s
+printed label, nothing else live.
 
 
 
@@ -1343,11 +1352,11 @@ takes the built zip and a fresh clone and verifies what this section requires: t
 are present; every `MANIFEST.txt` md5 matches the file it names; `github/` holds **exactly** the
 files that differ from the committed tree — so both a *missing* file and a needlessly-shipped
 *unchanged* one fail; `knowledge/` is flat, carries no built `index.html`, and holds exactly one
-`DangerClose-v5_*.jsx`; and `MANIFEST.txt` records that the suite was run from the packaged copies.
+`DangerClose-vN_NN.jsx` (any single-digit major — this read `v5_*` until 2026-10-11); and `MANIFEST.txt` records that the suite was run from the packaged copies.
 Run it before sending — **on EVERY package, including ones that ship no app source.**
 
 **Ops packages (added 2026-08-26).** Not every zip is a release. A documentation or tooling package
-ships no `DangerClose-v5_*.jsx` and no built `index.html`, so the app-release predicates above cannot
+ships no `DangerClose-vN_NN.jsx` and no built `index.html`, so the app-release predicates above cannot
 apply to it — and `package_check` knows this even though this section previously did not. Such a
 package **declares `KIND: ops` on its own line in `MANIFEST.txt`**; undeclared, the tool fails closed
 to `app-release` and reports failures that are artifacts of the mis-declaration rather than real
