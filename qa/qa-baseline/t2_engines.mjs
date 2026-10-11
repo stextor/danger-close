@@ -88,6 +88,10 @@ if (MODE === "compare") {
     // v5.97 (D-22, scope D22-5): Georgia's rate is 4.99 % from TY2026 (HB 463), and the `stateTax` fingerprint is a Georgia
     // call ($260,000 at two 65+ exclusions: 5.19 % → 4.99 % of $130,000). It MUST move; the nine other keys must not.
     "v596→v597": ["stateTax"],
+    // v6.03 (D-30 batch 2, scope DD-14): Georgia takes its standard deduction ($30,000 joint, HB 463) — the `stateTax` fingerprint is a
+    // Georgia call, so it MUST move (MEASURED at the build: $6,487 → $4,990, = ($260,000 − 2 × $65,000 − $30,000) × 4.99 %); the nine
+    // other keys must not, and did not.
+    "v602→v603": ["stateTax"],
   };
   const expectDiff = new Set(INTENDED_DIFFS[`${PRIOR}→${CUR}`] || []);
   for (const key of Object.keys(a)) {
