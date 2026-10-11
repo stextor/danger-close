@@ -1288,6 +1288,10 @@ source here. Possibly optimistic. **Low — verify before changing.**
 
 ## D-29 · Missouri exempts capital gains from 2025; the model taxes them — opened at v6.01
 
+> ✅ **CLOSED v6.04 (2026-10-11)** — Missouri subtracts 100 % of realized capital gains from TY2025 (RSMo 143.121.3(14), re-read; the 2025 Form MO-A line 18;
+> Letter Ruling 8397), through a row field `gainsExempt`; qualified dividends stay taxed (`docs/SCOPE_D31_D29_V604.md`, fulfilled, repo-only;
+> `qa/t68_fed_deductions.mjs`). Engine B passes its realized gains; Engine A realizes none. *(The entry below is retained.)*
+
 HB 594 & 508 (2025), RSMo 143.121: from TY2025 an individual subtracts 100 % of the capital gain reported for federal purposes (the DOR's 2025
 legislative-changes summary: "one hundred percent (100%) of the income reported as capital gain for federal tax purposes can be subtracted"). The model
 taxes Missouri gains on the state's schedule (found while reading Missouri's brackets for v6.01, `docs/SCOPE_D22_BRACKETS_V601.md` §0). Conservative, and
@@ -1314,6 +1318,12 @@ from the same sources the schedules were read from (several noted in `docs/SCOPE
 taxable income). **Medium-high — the recommended next state release; conservative today.**
 
 ## D-31 · Deductions a state takes from the federal return are not taken — opened at v6.02
+
+> ✅ **CLOSED v6.04 (2026-10-11)** — Alabama (in full, NIIT included), Missouri (by income band, capped) and Oregon (capped, phased out by federal AGI) deduct
+> the year's federal income tax as the model computes it; the federal senior deduction (2025–2028) is taken in Arizona, Colorado, Idaho, Iowa, Montana and
+> North Dakota. The calculator is given the year, the federal tax and NIIT by all three call sites (`docs/SCOPE_D31_D29_V604.md`, fulfilled, repo-only;
+> `qa/t68_fed_deductions.mjs`). Not taken, disclosed: the District of Columbia's senior deduction (unsettled law), the refunds Alabama and Oregon recapture,
+> Oregon's 2026 cap (the 2025 one is held). *(The entries below are retained.)*
 
 > **Widened v6.03 (D-30 batch 2):** the federal senior deduction also reaches **Arizona** (its own subtraction, A.R.S. §43-1022, from TY2025), **Colorado** and
 > **Iowa** (both start from federal taxable income; Iowa's DOR: "Iowa conforms") and **Idaho** (conformity to 1 January 2026, HB 559, retroactive to 2025) —
