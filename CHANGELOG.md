@@ -1,5 +1,53 @@
 # Changelog
 
+## ops 2026-10-11 (third) — the manifest's history to the repo; six documents un-pooled; their open threads re-homed
+
+**KIND: ops** — documents and one QA tool; **v6.04 stays current** (source `8226b20b62334074606993d411bb0fb1`, built `71f4ada6ac4923075f9f1d1a576c2293`).
+No app source, suite or figure changes; one tool fix (the last bullet). Steps 5–6 of the cleanup plan of 2026-10-11, after its steps 1–4 (the second ops package).
+**328,402 bytes net out of the pool; the pool goes 131 → 125 files.**
+
+**First, the trace (OPERATIONS §G).** Before anything left the pool, every open-sounding line in the text leaving — the manifest's
+superseded ship notes, its old delete-first lists, and the six documents below — was read in context, and all 60 register IDs it cites
+were checked for a pooled record. The full trace is §0 of the new archive file. In short:
+- **Nine open threads had no other pooled record** and are re-homed as `ARCHITECTUREIssues.md` **E-29**: `main.jsx`'s `/anthropic`
+  rewrite (D-B3-1 (b), never scoped); `t13`'s survivor check measuring more than its name; `E-1b`'s silent skip of renamed pool files;
+  the manifest → pool check for unhashed rows, proposed as `K-10` and never built (the ID was later reused for another check); A-2's
+  last bullet (imported checklists are not shape-checked); the suite's unpinned harness dependencies; Phase 1's "not examined, therefore
+  not cleared" list; and two items for Steve — the v5.69 Roth best-cell move (disclosed, unpinned, no decision recorded) and a request to
+  read two v5.69 Field Manual sentences. Two more were found while tracing: METHODOLOGY's "thirteen of nineteen unverified" beside its own
+  v5.86 update, and a v5.72 behaviour change (a draft survives a rejected import) flagged for the maintainer and never acknowledged.
+- **Six standing traps lived only in the leaving text** and are carried verbatim to OPERATIONS: §B2a (unreachable fixtures make
+  assertions vacuous; three fixtures cannot see v5.47's item 5; `t13` is not `t14`; `t10`'s labels overlap; the DOM bundle is sloppy-mode
+  CommonJS where the build is a strict ES module) and §I (a truncated hash is not a hash).
+- ⚠ **The first pass missed four of these** (the `K-10` proposal, the checklist shape check, the harness dependencies, the CommonJS trap)
+  and wrote two wrong statuses into the trace. **An independent second read by a separate agent found them**; all were fixed before
+  the package was cut. The method is in the trace's last paragraph.
+- Everything else is resolved, with evidence in the trace, or already held by a pooled register.
+
+**Then the moves.**
+- **The manifest's superseded ship notes** (v6.03 back to v5.42, 82,546 bytes) and **its delete-first lists** (v6.03 back to v5.31,
+  129,298 bytes) moved verbatim to `docs/MANIFEST_ARCHIVE_notes_and_lists_to_v6_03.md`, repo only, with a pointer at each cut. The
+  manifest keeps the v6.04 note and the lists from v6.04 on.
+- **Six documents un-pooled** (137,409 bytes; each stays in the repo): `FlawsToFix-v5_69-Phase1.md`, `AUDIT_STATE_EXCL65_ROUND3.md`,
+  `AUDIT_STATE_EXCL65_ROUND4.md`, `AUDIT_STATE_INCOME_BASES_ROUND5.md` (its row's "three findings still open" was stale — all four are
+  resolved), `BUILD_BRIEF_v5_49.md`, and `controls_source.sh` (it reverts fixes in the v5.47 source, so no session can run it from the pool).
+- **`MissingFeatures.md`** opens with a census of every D item at v6.04, like the other registers' (some statuses re-checked against the
+  source by parser); closed items' headings now carry their status, IDs unchanged. **D-20 is closed** — v6.02 and v6.04 took the
+  federal deductions Montana starts from. D-11 is narrowed to New Mexico's unestablished age floor and two disclosed Rhode Island points.
+- ⚠ **Correction to the second ops package of 2026-10-11.** It said it removed the hash rows' "rolled at" trail "from every row"; eleven
+  rows written in another shape (the trail before the description) kept theirs. Removed here (9,285 bytes; file/hash pairs unchanged,
+  asserted); OPERATIONS §I's sentence corrected.
+- ⚠ **`controls_manifest_rows.py`'s B1 had been demonstrating nothing since 2026-09-10.** B1 (a demonstration, not a control) deletes a
+  pool file's hash row to show that K-9 stays green while the file is named elsewhere. Its target was the literal `dom_entry_v566.jsx`,
+  whose hash row left the manifest at the v5.68 rotation; from then on it deleted a retirement-list line of that name and still
+  reported success. Archiving that line made its anchor fail, which is how it was seen. B1 now derives its target — the pool's dom
+  entry with a hash row — and requires the file's other mentions to survive the edit.
+
+**Verified by:** the archive reassembles the committed manifest byte for byte; the hash table's file/hash pairs compared before and after
+(the four hashed rows of un-pooled files aside); `package_check` and `package_check_controls.sh` on this package, and `row_census.cjs`,
+`controls_manifest_rows.py` and `controls_runfolder_prior.sh` re-run, since they read the manifest — results in the package's `MANIFEST.txt`.
+No suite reads any of these documents (AST census of `qa/`: one tool, `lits_p1.cjs`, names `FlawsToFix` in a pattern it prints, and reads nothing).
+
 ## ops 2026-10-11 (second) — project knowledge trimmed: old CHANGELOG and TESTING history to the repo, the hash rows' roll trail removed
 
 **KIND: ops** — documents only; **v6.04 stays current** (source `8226b20b62334074606993d411bb0fb1`, built `71f4ada6ac4923075f9f1d1a576c2293`).
