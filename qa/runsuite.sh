@@ -232,6 +232,10 @@ tally "t66-$CUR"   node t66_deductions_askai.mjs "$CUR"
 # My Data's flat-rate line. Both legs.
 tally "t67-$PRIOR" node t67_deductions_flat.mjs "$PRIOR"
 tally "t67-$CUR"   node t67_deductions_flat.mjs "$CUR"
+# t68 (v6.04) — D-31 and D-29: Alabama's, Missouri's and Oregon's deduction of federal income tax, the federal senior deduction in the six states
+# whose returns carry it, Missouri's capital-gains subtraction; v6.03 -> v6.04 against qa/d30_ref.mjs; Engine B against the calculator. Both legs.
+tally "t68-$PRIOR" node t68_fed_deductions.mjs "$PRIOR"
+tally "t68-$CUR"   node t68_fed_deductions.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

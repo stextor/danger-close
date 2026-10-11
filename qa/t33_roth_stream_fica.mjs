@@ -40,7 +40,7 @@ const VER = process.argv[2] || "v563";
 // pre-fix like v5.62; only the two ABSOLUTE pins differ, because v5.62 raised state tax in the
 // Roth outputs (SCOPE_ENGINE_STATE_PARITY). Everything else here is a DELTA between two streams
 // on one build and is therefore version-independent by construction.
-const KNOWN_VERSIONS = ["v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603"];
+const KNOWN_VERSIONS = ["v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is not registered in this suite.");
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -48,7 +48,7 @@ if (!KNOWN_VERSIONS.includes(VER)) {
   process.exit(1);
 }
 // The fix landed at v5.63. Every later tag is post-fix and must be added here as well.
-const POST_FIX = VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603"));
+const POST_FIX = VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v604"));
 
 // The only two build-specific ABSOLUTE figures in this suite. Kept in one table so a tag added to
 // KNOWN_VERSIONS without its pins fails CLOSED rather than reading someone else's numbers — the
@@ -203,6 +203,9 @@ const PINS = {
   // v6.03 (D-30 batch 2): MEASURED with a sentinel at the build — 155,661 (v6.02: 173,836, −$18,175). This household IS in Georgia, which takes its
   // standard deduction from v6.03 ($30,000 joint, HB 463), so this pin moves by design. acaConv is read only by the pre-fix branch.
   v603: { noStream: 155661, acaConv: 1203137 },
+  // v6.04 (D-31, D-29) moves Alabama, Missouri, Oregon and the six senior-deduction states only; this household is in Georgia, so the pins carry
+  // over unchanged — the assertion that the release reaches no other state. Registered by hand (this keyed table is invisible to register_tag2).
+  v604: { noStream: 155661, acaConv: 1203137 },
 };
 if (!PINS[VER]) {
   console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is registered but has no PINS entry.");
@@ -400,9 +403,9 @@ console.log("\n  E — the ACA-bridge path (second FICA site, via the cliff solv
     T("E-2: the cliff solver CONVERTS A DIFFERENT AMOUNT — only the sale sub-engine can do this",
       w.totConv !== r.totConv, `${w.totConv} vs ${r.totConv}`);
     T("E-3: conversions rise for the wage household, whose estimated bill is larger",
-      w.totConv - r.totConv === (VER === "v603" ? 738 : ["v597", "v598", "v599", "v600", "v601", "v602"].includes(VER) ? 739 : 738), `delta ${w.totConv - r.totConv}`);   // v5.97 (D-22): 739 MEASURED — Georgia's rate moves the cliff solver's estimate; v6.03 (D-30 batch 2): 738 MEASURED — Georgia's standard deduction moves it again
+      w.totConv - r.totConv === (["v603", "v604"].includes(VER) ? 738 : ["v597", "v598", "v599", "v600", "v601", "v602"].includes(VER) ? 739 : 738), `delta ${w.totConv - r.totConv}`);   // v5.97 (D-22): 739 MEASURED — Georgia's rate moves the cliff solver's estimate; v6.03 (D-30 batch 2): 738 MEASURED — Georgia's standard deduction moves it again
     T("E-4: lifetime tax on the cliff strategy falls for the non-work stream",
-      w.totTax - r.totTax === (VER === "v603" ? 60035 : ["v597", "v598", "v599", "v600", "v601", "v602"].includes(VER) ? 60036 : 60041), `delta ${w.totTax - r.totTax}`);   // v5.97 (D-22): 60,036 MEASURED, as E-3; v6.03: 60,035 MEASURED
+      w.totTax - r.totTax === (["v603", "v604"].includes(VER) ? 60035 : ["v597", "v598", "v599", "v600", "v601", "v602"].includes(VER) ? 60036 : 60041), `delta ${w.totTax - r.totTax}`);   // v5.97 (D-22): 60,036 MEASURED, as E-3; v6.03: 60,035 MEASURED
   } else {
     T("E-2 [PRE-FIX]: the cliff solver converts the SAME amount either way",
       w.totConv === r.totConv, `${w.totConv} vs ${r.totConv}`);
@@ -426,8 +429,8 @@ console.log("\n  F — second-order: IRMAA and NIIT move on a tier-crossing hous
   if (POST_FIX) {
     T("F-1: lifetime tax falls when the stream is non-work", r.totTax < w.totTax, `${r.totTax} vs ${w.totTax}`);
     T("F-2: IRMAA RISES — the surcharge is not inert, and not in the same direction as tax",
-      r.totIrmaa - w.totIrmaa === (VER === "v603" ? 560 : 2300), `delta ${r.totIrmaa - w.totIrmaa}`);   // v6.03 (D-30 batch 2): 560 MEASURED — this household is in Georgia; its standard deduction lowers the state bill and so the funding draw and the pool (still a rise; the size of the move was measured, not derived)
-    T("F-3: NIIT rises too", r.totNiit - w.totNiit === (VER === "v603" ? 50 : 48), `delta ${r.totNiit - w.totNiit}`);   // v6.03: 50 MEASURED, as F-2
+      r.totIrmaa - w.totIrmaa === (["v603", "v604"].includes(VER) ? 560 : 2300), `delta ${r.totIrmaa - w.totIrmaa}`);   // v6.03 (D-30 batch 2): 560 MEASURED — this household is in Georgia; its standard deduction lowers the state bill and so the funding draw and the pool (still a rise; the size of the move was measured, not derived)
+    T("F-3: NIIT rises too", r.totNiit - w.totNiit === (["v603", "v604"].includes(VER) ? 50 : 48), `delta ${r.totNiit - w.totNiit}`);   // v6.03: 50 MEASURED, as F-2
     T("F-4: the mechanism is the taxable pool, so IRMAA moves in tiers, not smoothly",
       (r.totIrmaa - w.totIrmaa) % 10 === 0, String(r.totIrmaa - w.totIrmaa));
   } else {

@@ -14,6 +14,12 @@
 // only work income and no Social Security, pension, retirement income or gains has base == agi == work (t66 §C's hand cases do that).
 const cnt = (ageA, ageB, single, k) => ((ageA != null && ageA >= k) ? 1 : 0) + ((!single && ageB != null && ageB >= k) ? 1 : 0);
 const FEDSTD = (s, n65) => (s ? 16100 : 32200) + (s ? 2050 : 1650) * n65;   // Rev. Proc. 2025-32 §4.14 (TY2026)
+// v6.04 (D-31 — docs/SCOPE_D31_D29_V604.md §0.2): the federal senior deduction (IRC §151(d)(5)(C), P.L. 119-21 §70103) — $6,000 for each filer 65 or
+// older, less 6 % of MAGI above $75,000 single / $150,000 joint, tax years 2025-2028 only; and the three federal-income-tax deductions. Written from
+// the statutes and forms, not from the app's components or OBBBA_CONSTS.
+const SENIOR = (s, n65, agi, yr) => (yr != null && yr >= 2025 && yr <= 2028) ? n65 * Math.max(0, 6000 - 0.06 * Math.max(0, agi - (s ? 75000 : 150000))) : 0;
+const MO_PCT = (m) => m <= 25000 ? 0.35 : m <= 50000 ? 0.25 : m <= 100000 ? 0.15 : m <= 125000 ? 0.05 : 0;   // RSMo 143.171.2(1)
+const OR_CAP = (s, agi) => { const k = s ? 1 : 2; return agi < 125000 * k ? 8500 : agi < 130000 * k ? 6800 : agi < 135000 * k ? 5100 : agi < 140000 * k ? 3400 : agi < 145000 * k ? 1700 : 0; };   // OR-40 2025 Table 4
 const CT_E = {   // C.G.S. §12-703 Table E: [upTo inclusive, decimal]
   s: [[18800, .75], [19300, .70], [19800, .65], [20300, .60], [20800, .55], [21300, .50], [21800, .45], [22300, .40], [25000, .35], [25500, .30], [26000, .25],
       [26500, .20], [31300, .15], [31800, .14], [32300, .13], [32800, .12], [33300, .11], [60000, .10], [60500, .09], [61000, .08], [61500, .07], [62000, .06],
@@ -24,8 +30,8 @@ const CT_E = {   // C.G.S. §12-703 Table E: [upTo inclusive, decimal]
 export const D30_STATES = ["AL", "AR", "CA", "CT", "DC", "DE", "HI", "KS", "MD", "ME", "MN", "MO", "MS", "MT", "ND", "NE", "NJ", "NM", "NY", "OK", "OR", "RI", "SC", "VA", "VT", "WI", "WV"];
 // Each returns { ded, credit, pct } for a return: s = single, p = filers (1 or 2), n65 / n60 = filers at or above that age.
 export const D30 = {
-  AL: ({ s, base }) => { const k = base > 25500 ? Math.floor((base - 25500) / 500) : 0;
-    return { ded: Math.max(s ? 2500 : 5000, (s ? 3000 : 8500) - (s ? 25 : 175) * k) + (s ? 1500 : 3000) }; },
+  AL: ({ s, base, ft = 0, fn = 0 }) => { const k = base > 25500 ? Math.floor((base - 25500) / 500) : 0;
+    return { ded: Math.max(s ? 2500 : 5000, (s ? 3000 : 8500) - (s ? 25 : 175) * k) + (s ? 1500 : 3000) + Math.max(0, ft) + Math.max(0, fn) }; },   // v6.04: + federal income tax and NIIT
   AR: ({ p, n65 }) => ({ ded: 2470 * p, credit: 29 * p + 29 * n65 }),
   CA: ({ s, p, n65, agi }) => { const thr = s ? 252203 : 504411, k = agi > thr ? Math.ceil((agi - thr) / 2500) : 0;
     return { ded: s ? 5706 : 11412, credit: Math.max(0, 153 - 6 * k) * (p + n65) }; },
@@ -48,16 +54,16 @@ export const D30 = {
   MN: ({ s, n65, agi }) => { const sd = (s ? 15300 : 30600) + (s ? 2000 : 1600) * n65;
     const cut = 0.03 * Math.max(0, Math.min(agi, 337800) - 244400) + 0.10 * Math.max(0, agi - 337800);
     return { ded: sd - Math.min(cut, 0.8 * sd) }; },
-  MO: ({ s, n65 }) => ({ ded: FEDSTD(s, n65) }),
+  MO: ({ s, n65, base, ft = 0 }) => ({ ded: FEDSTD(s, n65) + Math.min(s ? 5000 : 10000, MO_PCT(base) * Math.max(0, ft)) }),   // v6.04: + the federal-tax percentage
   MS: ({ s, n65 }) => ({ ded: (s ? 2300 : 4600) + (s ? 6000 : 12000) + 1500 * n65 }),
-  MT: ({ s, n65 }) => ({ ded: FEDSTD(s, n65) }),
-  ND: ({ s, n65 }) => ({ ded: FEDSTD(s, n65) }),
+  MT: ({ s, n65, agi, yr }) => ({ ded: FEDSTD(s, n65) + SENIOR(s, n65, agi, yr) }),   // v6.04: + the senior deduction
+  ND: ({ s, n65, agi, yr }) => ({ ded: FEDSTD(s, n65) + SENIOR(s, n65, agi, yr) }),
   NE: ({ s, p, n65 }) => ({ ded: (s ? 8850 : 17700) + (s ? 2050 : 1700) * n65, credit: 176 * p }),
   NJ: ({ p, n65 }) => ({ ded: 1000 * p + 1000 * n65 }),
   NM: ({ s, p, n65, agi }) => ({ ded: FEDSTD(s, n65) + p * Math.max(0, 2500 - (s ? 0.15 : 0.10) * Math.max(0, agi - (s ? 20000 : 30000))) }),
   NY: ({ s }) => ({ ded: s ? 8000 : 16050 }),
   OK: ({ s, p, n65, agi }) => ({ ded: (s ? 6350 : 12700) + 1000 * p + (agi <= (s ? 15000 : 25000) ? 1000 * n65 : 0) }),
-  OR: ({ s, p, n65, agi }) => ({ ded: (s ? 2835 : 5670) + (s ? 1200 : 1000) * n65, credit: agi <= (s ? 100000 : 200000) ? 256 * p : 0 }),
+  OR: ({ s, p, n65, agi, ft = 0 }) => ({ ded: (s ? 2835 : 5670) + (s ? 1200 : 1000) * n65 + Math.min(Math.max(0, ft), OR_CAP(s, agi)), credit: agi <= (s ? 100000 : 200000) ? 256 * p : 0 }),   // v6.04: + federal tax
   RI: ({ s, p, base }) => { const k = base > 261000 ? Math.ceil((base - 261000) / 7450) : 0, f = Math.max(0, 1 - 0.2 * k);
     return { ded: (s ? 11200 : 22400) * f + 5250 * p * f }; },
   SC: ({ s, agi }) => { const full = s ? 15000 : 30000, f = Math.min(1, Math.max(0, agi - (s ? 40000 : 80000)) / (s ? 55000 : 110000));
@@ -73,11 +79,11 @@ export const D30 = {
 // "equal to or exceeding" $300,000, Utah's credit as the TC-40 lines compute it. Their schedules are transcribed in d30Tax below.
 export const D30_FLAT_STATES = ["AZ", "CO", "GA", "IA", "ID", "IL", "IN", "KY", "LA", "MA", "MI", "NC", "OH", "UT"];
 export const D30F = {
-  AZ: ({ s, n65 }) => ({ ded: (s ? 15750 : 31500) + 2100 * n65 }),
-  CO: ({ s, n65, agi }) => { const fed = FEDSTD(s, n65); return { ded: agi >= 300000 ? Math.min(fed, s ? 12000 : 16000) : fed }; },
+  AZ: ({ s, n65, agi, yr }) => ({ ded: (s ? 15750 : 31500) + 2100 * n65 + SENIOR(s, n65, agi, yr) }),
+  CO: ({ s, n65, agi, yr }) => { const fed = FEDSTD(s, n65); return { ded: (agi >= 300000 ? Math.min(fed, s ? 12000 : 16000) : fed) + SENIOR(s, n65, agi, yr) }; },
   GA: ({ s }) => ({ ded: s ? 15000 : 30000 }),
-  IA: ({ s, p, n65 }) => ({ ded: FEDSTD(s, n65), credit: 40 * p + 20 * n65 }),
-  ID: ({ s, p, n65 }) => ({ ded: (s ? 15750 : 31500) + (s ? 2000 : 1600) * n65, credit: 155 * p }),
+  IA: ({ s, p, n65, agi, yr }) => ({ ded: FEDSTD(s, n65) + SENIOR(s, n65, agi, yr), credit: 40 * p + 20 * n65 }),
+  ID: ({ s, p, n65, agi, yr }) => ({ ded: (s ? 15750 : 31500) + (s ? 2000 : 1600) * n65 + SENIOR(s, n65, agi, yr), credit: 155 * p }),
   IL: ({ s, p, n65, agi }) => ({ ded: agi > (s ? 250000 : 500000) ? 0 : 2925 * p + 1000 * n65 }),
   IN: ({ p, n65, agi }) => ({ ded: 1000 * p + 1000 * n65 + (agi < 40000 ? 500 * n65 : 0) }),
   KY: ({ n65 }) => ({ ded: 3360, credit: 40 * n65 }),
@@ -89,9 +95,9 @@ export const D30F = {
     return { ded: ex, credit: (less < 30000 ? 20 * p : 0) + (n65 > 0 && less < 100000 ? 50 : 0) }; },
   UT: ({ s, n65, base }) => ({ credit: Math.max(0, 0.06 * FEDSTD(s, n65) - 0.013 * Math.max(0, base - (s ? 18213 : 36426))) }),
 };
-export function d30Deductions(code, { single = false, ageA = null, ageB = null, base = 0, agi = 0 }) {
+export function d30Deductions(code, { single = false, ageA = null, ageB = null, base = 0, agi = 0, fedTax = 0, fedNiit = 0, yr = null }) {
   const f = D30[code] || D30F[code]; if (!f) return { ded: 0, credit: 0, pct: 0 };
-  return { ded: 0, credit: 0, pct: 0, ...f({ s: single, p: single ? 1 : 2, n65: cnt(ageA, ageB, single, 65), n60: cnt(ageA, ageB, single, 60), base, agi }) };
+  return { ded: 0, credit: 0, pct: 0, ...f({ s: single, p: single ? 1 : 2, n65: cnt(ageA, ageB, single, 65), n60: cnt(ageA, ageB, single, 60), base, agi, ft: fedTax || 0, fn: fedNiit || 0, yr }) };
 }
 const bsum = (rows, x) => { let t = 0, lo = 0; for (const [u, r] of rows) { const hi = u === null ? Infinity : u; if (x <= lo) break; t += (Math.min(x, hi) - lo) * r; lo = hi; } return t; };
 const rateAt = (rows, x) => { for (const [u, r] of rows) if (u === null || x <= u) return r; return rows[rows.length - 1][1]; };
@@ -103,8 +109,8 @@ const CT_ADD = { s: [[56500, 5000, 25, 250], [105000, 5000, 25, 250], [200000, 5
 // v6.03: a flat-rate state of batch 2 — its rate (t63 holds every flat rate), Idaho's zero band and Ohio's schedule transcribed here, then
 // its credits, nonrefundable. Utah's Social Security credit (its ssRule, applied after) is NOT included: a pin with taxable Social Security
 // in Utah must add it.
-export function d30Tax(SR, code, { base, agi, single = false, ageA = null, ageB = null, capGains = 0 }) {
-  const d = d30Deductions(code, { single, ageA, ageB, base, agi }), ti = Math.max(0, base - d.ded);
+export function d30Tax(SR, code, { base, agi, single = false, ageA = null, ageB = null, capGains = 0, fedTax = 0, fedNiit = 0, yr = null }) {
+  const d = d30Deductions(code, { single, ageA, ageB, base, agi, fedTax, fedNiit, yr }), ti = Math.max(0, base - d.ded);
   if (D30F[code]) {
     const t = code === "ID" ? 0.053 * Math.max(0, ti - (single ? 4811 : 9622))
             : code === "OH" ? (ti <= 26050 ? 0 : 332 + 0.0275 * (ti - 26050)) : SR[code].rate * ti;
@@ -131,7 +137,7 @@ export function d30Tax(SR, code, { base, agi, single = false, ageA = null, ageB 
 // `capGains`; without it the answer there is NaN.
 export function d30Want(SR, code, x, d, capGains) {
   if (!d || Math.abs(d.base - x) > 0.01 || (code === "MD" && d.agi > 350000 && capGains === undefined)) return NaN;
-  return d30Tax(SR, code, { base: x, agi: d.agi, single: d.single, ageA: d.ageA, ageB: d.ageB, capGains: capGains || 0 }).tax;
+  return d30Tax(SR, code, { base: x, agi: d.agi, single: d.single, ageA: d.ageA, ageB: d.ageB, capGains: capGains || 0, fedTax: d.fedTax || 0, fedNiit: d.fedNiit || 0, yr: d.yr ?? null }).tax;
 }
 // Wrap a stateTaxAnnual so every call records its detail in `.last` (the seam is ignored by a build without it).
 export function d30Recorder(fn) { const r = { last: null }; r.call = (a) => fn({ ...a, _onDetail: (d) => { r.last = d; } }); return r; }

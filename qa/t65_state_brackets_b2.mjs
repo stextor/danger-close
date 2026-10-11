@@ -21,7 +21,7 @@ import { d30Pins } from "./d30_ref.mjs";
 import { existsSync, readFileSync } from "fs";
 const require = createRequire(import.meta.url);
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v600", "v601", "v602", "v603"];
+const KNOWN_VERSIONS = ["v600", "v601", "v602", "v603", "v604"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  ✓ ${n}`); } else { fail++; console.log(`  ✗ ${n}${d !== "" ? " — " + String(d).slice(0, 260) : ""}`); } };
 const EQ = (n, got, want, tol = 0.005) => CK(n + D30.tag(), typeof got === "number" && Math.abs(got - want) <= tol, `got ${got}, want ${want}`);
@@ -37,13 +37,13 @@ const g = window.__g, SR = g.STATE_RULES();
 // case's BASE (its last column) and on a D-30 leg expects it after them — qa/d30_ref.mjs, independent of the app, on the calculator's own record
 // of the call; a different base fails. B-AR2/3 hold Arkansas's DFA formula at the same NET income (wages + the $2,470 deduction). §A-9 and §E
 // take the v6.02 forms (t66 A-5, F hold them). Group D (v6.00 -> v6.01) runs in a v600 -> v601 folder only. A version LIST.
-const D30L = ["v602", "v603"].includes(VER), D30 = d30Pins((a) => g.stateTaxAnnual(a), SR, D30L), ST = D30.S;
+const D30L = ["v602", "v603", "v604"].includes(VER), D30 = d30Pins((a) => g.stateTaxAnnual(a), SR, D30L), ST = D30.S;
 const SEV = ["AL", "AR", "CT", "DC", "DE", "HI", "KS", "MD", "ME", "MO", "MT", "ND", "NE", "NM", "RI", "VT", "WV"];
 const TEN = ["CA", "MN", "MS", "NJ", "NY", "OK", "OR", "SC", "VA", "WI"];
 const FLAT = ["AZ", "CO", "GA", "IA", "ID", "IL", "IN", "KY", "LA", "MA", "MI", "NC", "OH", "PA", "UT"];
 // v6.03 (D-30 batch 2, t67): Idaho's zero band and Ohio's 2026 schedule are carried as schedules — still flat-rate states, now the only two of
 // the fifteen with `brackets`; Georgia takes its deduction (C-GA keeps its base). A version LIST.
-const B2L = ["v603"].includes(VER), FLAT_SCH = B2L ? ["ID", "OH"] : [];
+const B2L = ["v603", "v604"].includes(VER), FLAT_SCH = B2L ? ["ID", "OH"] : [];
 
 // ── A · the schedules (upper bounds inclusive, "not over"; transcribed from the sources the header names) ──
 const same = (x) => ({ single: x, joint: x });
@@ -111,7 +111,7 @@ if (BR) {
   else CK("A-9 each of the seventeen notes says the state's own brackets are used, and that no standard deduction or exemption is taken (conservative)",
      noOwn.length === 0 && SEV.every(c => /not taken \(conservative\)/.test(SR[c].note)), noOwn.join(",") + " / " + SEV.filter(c => !/not taken \(conservative\)/.test(SR[c].note)).join(","));
   const NAMED = {
-    AL: /deduction of federal income tax that Alabama allows/, AR: /bracket adjustment from \$94,701 to \$97,600 — all modelled/,
+    AL: ["v604"].includes(VER) ? /the deduction of federal income tax is taken too/ : /deduction of federal income tax that Alabama allows/, /* v6.04 (D-31) takes it; t68 holds it */ AR: /bracket adjustment from \$94,701 to \$97,600 — all modelled/,
     CT: /phase-out of the 2% bracket and the benefit recapture amounts/, DE: /combined-separate on one return, which is not modelled \(conservative\)/,
     HI: /13% bracket that Act 24 of 2026 adds above \$500,000 single \/ \$1,000,000 joint from 2027, applied here in every year/,
     MD: /taken at the highest county rate, 3\.30%/, ME: /2% surcharge on Maine taxable income over \$1,000,000 single \/ \$1,500,000 joint/,

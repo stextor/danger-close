@@ -20,7 +20,7 @@ import { existsSync, readFileSync } from "fs";
 import { d30Tax, d30Deductions, D30_STATES } from "./d30_ref.mjs";
 const require = createRequire(import.meta.url);
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v601", "v602", "v603"];
+const KNOWN_VERSIONS = ["v601", "v602", "v603", "v604"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  ✓ ${n}`); } else { fail++; console.log(`  ✗ ${n}${d !== "" ? " — " + String(d).slice(0, 300) : ""}`); } };
 const EQ = (n, got, want, tol = 0.005) => CK(n, typeof got === "number" && Math.abs(got - want) <= tol, `got ${got}, want ${want}`);
@@ -31,6 +31,10 @@ const DD = VER !== "v601";   // a version on which D-30 batch 1 and the Ask AI f
 // v6.03 (D-30 batch 2, t67): the fourteen flat-rate states take theirs too, and Idaho and Ohio gain schedules. This suite keeps to the 27 — its
 // group-wide checks read `withD` (the 27) and `progressive` (the batch-1 schedules) below; t67 holds batch 2. A version LIST.
 const B2 = !["v601", "v602"].includes(VER);
+// v6.04 (D-31, t68): nine rows gain a component (a federal-income-tax deduction or the federal senior deduction), appended last; this suite
+// keeps to its own components (`own` drops them) and t68 holds the new ones and the notes' new wording. A version LIST.
+const D31L = ["v604"].includes(VER);
+const own = l => (l || []).filter(x => !(D31L && (x.of !== undefined || x.years !== undefined)));
 // Self-hosted branch for group E (t36's harness trap: without a `location` the bundle takes the claude.ai branch, which has no key panel).
 dom.reconfigure({ url: "https://stextor.github.io/danger-close/" });
 globalThis.location = window.location;
@@ -106,7 +110,7 @@ if (DD) {
      withD.join(",") === Object.keys(WANT).sort().join(",") && withD.join(",") === progressive.join(",") && D30_STATES.slice().sort().join(",") === withD.join(","), withD.join(","));
   for (const c of Object.keys(WANT)) {
     const [yr, comps] = WANT[c];
-    CK(`A-2 ${c}: the components equal §0.2 (${comps.map(x => x.what).join(" · ")})`, JSON.stringify(SR[c].deduct) === JSON.stringify(comps),
+    CK(`A-2 ${c}: the components equal §0.2 (${comps.map(x => x.what).join(" · ")})${D31L && own(SR[c].deduct).length !== SR[c].deduct.length ? " [v6.04: and one more, held by t68]" : ""}`, JSON.stringify(own(SR[c].deduct)) === JSON.stringify(comps),
        JSON.stringify(SR[c].deduct).slice(0, 260));
     CK(`A-3 ${c}: dated — years.deduct ${yr}${yr === 2025 ? " (2026 unpublished at the build: the latest published, held — DD-8)" : ""}`, SR[c].years && SR[c].years.deduct === yr, JSON.stringify(SR[c].years));
   }
@@ -141,6 +145,7 @@ if (DD) {
     OR: /subtraction of federal income tax that Oregon allows is not taken/, MT: /but not the federal senior deduction/, ND: /but not the federal senior deduction/,
     HI: /refundable credits are not/, ME: /refundable credits are not/, OK: /sales tax relief credit is not/, NM: /low-income rebates and credits are not/,
     WV: /family tax credit is not/, NY: /household credit is not/, MD: /reduced schedule/, AR: /additional credit for those 65 or older who take no retirement exclusion is not taken/ };
+  if (D31L) for (const c of ["AL", "MO", "OR", "MT", "ND"]) delete NOT[c];   // v6.04 takes these five notes' named items (t68 A-7 holds the new wording)
   for (const [c, re] of Object.entries(NOT)) CK(`A-6 ${c}: the note names what is not taken (${re.source.slice(0, 60)})`, re.test(SR[c].note), SR[c].note.slice(-240));
   CK("A-7 the 2025-figure rows say so: AR, CA, DC, MD, OR, VT name their 2025 amounts", ["AR", "CA", "DC", "MD", "OR", "VT"].every(c => /2025 (amounts|figures)/.test(SR[c].note)));
   if (B2) CK("A-8 the rows without an income tax carry no `deduct` (the flat-rate states' are batch 2, held by t67)", Object.keys(SR).filter(c => SR[c].rate === 0).every(c => SR[c].deduct === undefined));
@@ -463,7 +468,7 @@ if (DD) {
 }
 if (DD) {
   CK("F-5 the Taxes entry: the 27 progressive states take their deductions, exemptions and personal credits; what is not taken is named; the flat-rate states take none yet — and the code agrees (27 rows, every one on a schedule, no flat row)",
-     DOCS.includes("It is an approximation layer: from v6.02 the twenty-seven progressive states take their standard deductions, personal exemptions and personal credits before their schedules (Alabama's, Missouri's and Oregon's deduction of federal income tax, the federal senior deduction Montana and North Dakota start from, and low-income refundable credits are not taken), " + (B2 ? "and from v6.03 the fourteen flat-rate states with them do too" : "while the flat-rate states take none yet (conservative),"))
+     DOCS.includes("It is an approximation layer: from v6.02 the twenty-seven progressive states take their standard deductions, personal exemptions and personal credits before their schedules " + (D31L ? "(low-income refundable credits are not taken), and from v6.03 the fourteen flat-rate states with them do too" : "(Alabama's, Missouri's and Oregon's deduction of federal income tax, the federal senior deduction Montana and North Dakota start from, and low-income refundable credits are not taken), " + (B2 ? "and from v6.03 the fourteen flat-rate states with them do too" : "while the flat-rate states take none yet (conservative),")))
      && withD.length === 27 && withD.every(c => SR[c].brackets) && (B2 || Object.keys(SR).filter(c => !SR[c].brackets && SR[c].rate > 0).every(c => !SR[c].deduct)));
   CK("F-6 the methodology entry says the same, and that itemized deductions are not modelled (no row carries an itemized component)",
      DOCS.includes("From v6.02 the progressive states take their standard deductions, personal exemptions and personal credits; " + (B2 ? "from v6.03 the flat-rate states take theirs too (Pennsylvania's law has none)" : "the flat-rate states take none yet") + ", and no state's itemized deductions are modelled (conservative).")

@@ -21,7 +21,7 @@ import { existsSync, readFileSync } from "fs";
 import { d30Tax, D30_STATES, D30_FLAT_STATES } from "./d30_ref.mjs";
 const require = createRequire(import.meta.url);
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v602", "v603"];
+const KNOWN_VERSIONS = ["v602", "v603", "v604"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  ✓ ${n}`); } else { fail++; console.log(`  ✗ ${n}${d !== "" ? " — " + String(d).slice(0, 300) : ""}`); } };
 const EQ = (n, got, want, tol = 0.005) => CK(n, typeof got === "number" && Math.abs(got - want) <= tol, `got ${got}, want ${want}`);
@@ -29,6 +29,10 @@ const done = () => { console.log(`\nt67 SUITE (${VER}): ${pass} passed, ${fail} 
 console.log(`t67 — STATE DEDUCTIONS, D-30 BATCH 2: THE FLAT-RATE STATES (${VER})`);
 if (!KNOWN_VERSIONS.includes(VER)) { CK(`0-0 version tag ${JSON.stringify(VER)} is registered`, false, KNOWN_VERSIONS.join(",")); done(); }
 const B2 = VER !== "v602";   // a version on which batch 2 is present
+// v6.04 (D-31, t68): nine rows gain a component (a federal-income-tax deduction or the federal senior deduction), appended last; this suite
+// keeps to its own components (`own` drops them) and t68 holds the new ones and the notes' new wording. A version LIST.
+const D31L = ["v604"].includes(VER);
+const own = l => (l || []).filter(x => !(D31L && (x.of !== undefined || x.years !== undefined)));
 const PREFIX = "dc:";
 window.storage = {
   async get(key) { const v = window.localStorage.getItem(PREFIX + key); if (v === null) throw new Error("key not found: " + key); return { key, value: v }; },
@@ -79,7 +83,7 @@ if (B2) {
      withD.join(",") === [...D30_STATES, ...Object.keys(WANT)].sort().join(",") && D30_FLAT_STATES.slice().sort().join(",") === Object.keys(WANT).sort().join(","), withD.join(","));
   for (const c of Object.keys(WANT)) {
     const [yr, comps] = WANT[c];
-    CK(`A-2 ${c}: the components equal §0.2 (${comps.map(x => x.what).join(" · ")})`, JSON.stringify(SR[c].deduct) === JSON.stringify(comps), JSON.stringify(SR[c].deduct).slice(0, 300));
+    CK(`A-2 ${c}: the components equal §0.2 (${comps.map(x => x.what).join(" · ")})${D31L && own(SR[c].deduct).length !== SR[c].deduct.length ? " [v6.04: and the senior deduction, held by t68]" : ""}`, JSON.stringify(own(SR[c].deduct)) === JSON.stringify(comps), JSON.stringify(SR[c].deduct).slice(0, 300));
     CK(`A-3 ${c}: dated — years.deduct ${yr}${yr === 2025 ? " (the latest published, held — DD-11)" : ""}`, SR[c].years && SR[c].years.deduct === yr, JSON.stringify(SR[c].years));
   }
   CK("A-4 Idaho's schedule: nothing on the first $4,811 single / $9,622 joint, 5.3 % above (2025, held); `rate` still the top rate",
@@ -118,6 +122,7 @@ if (B2) {
     ID: /federal senior deduction Idaho conforms to from 2025 \(HB 559, 2026\) is not taken/, OH: /retirement income credit \(at most \$200\) and the joint filing credit are not taken/,
     UT: /retirement credit \(filers born in 1952 or earlier\) is not taken/, GA: /low income credit is not taken/, IN: /unified tax credit for the elderly is not taken/,
     KY: /family size tax credit is not taken/, MA: /senior circuit breaker credit .* not taken/, MI: /deduction for filers born before 1946 is not taken/ };
+  if (D31L) { delete NOT.CO; delete NOT.ID; NOT.AZ = /low-income family and property tax credits are not taken \(conservative\)/; NOT.IA = /the low-income exemption is not taken \(conservative\)/; }   // v6.04: the senior deduction is taken (t68 A-7)
   for (const [c, re] of Object.entries(NOT)) CK(`A-10 ${c}: the note names what is not taken (${re.source.slice(0, 64)})`, re.test(SR[c].note), SR[c].note.slice(-260));
   CK("A-11 Idaho's note says the grocery credit is taken against tax only though the law refunds it (DD-3)", /takes against tax only though the law refunds it/.test(SR.ID.note));
   CK("A-12 Colorado's note follows the statute's \"equal to or exceeding\" and says the form says \"exceeds\" (DD-7)", /whose “equal to or exceeding” the model follows; the 2025 form says “exceeds”/.test(SR.CO.note));
@@ -207,7 +212,8 @@ if (B2) {
 
 // ── D · v6.02 -> v6.03 ──
 if (B2) {
-  if (!existsSync(new URL("./app_v602.mjs", import.meta.url))) CK("D-0 app_v602.mjs is in this run folder (group D needs it)", false, "missing");
+  if (!existsSync(new URL("./app_v602.mjs", import.meta.url)) && existsSync(new URL("./app_v604.mjs", import.meta.url))) console.log("  – group D not run: app_v602.mjs is not in this run folder (a v602 -> v603 folder runs it; t68 D owns v6.03 -> v6.04)");
+  else if (!existsSync(new URL("./app_v602.mjs", import.meta.url))) CK("D-0 app_v602.mjs is in this run folder (group D needs it)", false, "missing");
   else {
     const pm = await import("./app_v602.mjs"), PST = pm.__engines.stateTaxAnnual || pm.__g.stateTaxAnnual;
     const grid = [];
@@ -286,7 +292,8 @@ if (B2) {
      src.includes('`${num(stateTax)}% flat${stateCode && STATE_RULES[stateCode] && STATE_RULES[stateCode].deduct ? ", after its deductions and exemptions" : ""}`'));
   const flatTaking = FLAT.filter(c => SR[c].deduct), noneFlat = FLAT.filter(c => !SR[c].deduct);
   CK(`E-6 the Taxes entry: the fourteen flat-rate states with deductions take them, Pennsylvania's law has none, and what is not taken is named — and the code agrees (${flatTaking.length} flat rows carry \`deduct\`, ${noneFlat.join(",")} none)`,
-     DOCS.includes("and from v6.03 the fourteen flat-rate states with them do too (Pennsylvania's law has none; the federal senior deduction Arizona, Colorado, Idaho and Iowa allow, Ohio's retirement income and joint filing credits and Utah's retirement credit are not taken),")
+     DOCS.includes(D31L ? "and from v6.03 the fourteen flat-rate states with them do too (Pennsylvania's law has none; Ohio's retirement income and joint filing credits and Utah's retirement credit are not taken);"   // v6.04: the senior deduction is taken (t68 E-4)
+       : "and from v6.03 the fourteen flat-rate states with them do too (Pennsylvania's law has none; the federal senior deduction Arizona, Colorado, Idaho and Iowa allow, Ohio's retirement income and joint filing credits and Utah's retirement credit are not taken),")
      && flatTaking.length === 14 && noneFlat.join(",") === "PA");
   CK("E-7 the methodology entry: the flat-rate states take theirs too (Pennsylvania's law has none)", DOCS.includes("from v6.03 the flat-rate states take theirs too (Pennsylvania's law has none), and no state's itemized deductions are modelled (conservative)."));
   CK("E-8 the state-tax sentence names Idaho's zero band and Ohio's own schedule — and only they of the flat-rate states carry a schedule",
