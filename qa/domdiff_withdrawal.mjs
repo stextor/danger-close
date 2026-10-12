@@ -225,7 +225,22 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   // v5.73 \u2014 cells that were exactly $0 ("\u2014") now carry a sub-$1K amount, and the detail panel gains lines
   // \u2014 so "same number of figures" is false about the model. What the draws cannot change is the rows.
   const C8_PAIR = (VA === "v573" && VB === "v574");
-  if (C8_PAIR) {
+  // v6.07 (D-33 — docs/SCOPE_D33_ANNUITY_CONVERSION_V607.md) joins the precedent at v606→v607: Engines B and C carry the example
+  // household's $7,000 annuity, so no RMD or conversion drains it and the RMD-bearing figures move BY DESIGN. Bounded as v5.47 was:
+  // the table differs, the rows are the same, and the blast radius is pinned by the engine-measured size (t40: every lifetime move is
+  // under $2,100; per year it is under $1K, so a rendered $K figure holds or steps exactly one $K).
+  const D33_PAIR = (VA === "v606" && VB === "v607");
+  if (D33_PAIR) {
+    const nA = (figA.match(/\$[\d,]+K?/g) || []), nB = (figB.match(/\$[\d,]+K?/g) || []);
+    const val = t => Number(String(t).replace(/[$,K]/g, "")) * (String(t).endsWith("K") ? 1000 : 1);
+    const rowsOf = s => (s.match(/20[2-6]\d(?=\d{2}\/\d{2})/g) || []).length;
+    ck("TAXES: both legs still render the year table", figA.length > 0 && figB.length > 0);
+    ck("TAXES (v606\u2192v607): the figures DIFFER \u2014 the annuity is no longer drained by RMDs or converted", figA !== figB);
+    ck("TAXES (v606\u2192v607): the same year rows render on both legs", rowsOf(figA) > 0 && rowsOf(figA) === rowsOf(figB), `${rowsOf(figA)} vs ${rowsOf(figB)}`);
+    const steps = nA.length === nB.length ? nA.map((t, i) => Math.abs(val(nB[i]) - val(t))).filter(d => d > 0) : [-1];
+    ck("TAXES (v606\u2192v607): same SHAPE, and every moved figure moves exactly one $K step \u2014 a sub-$1K yearly change cannot do more",
+       steps.length > 0 && steps.every(d => d === 1000), `${nA.length} vs ${nB.length}; steps ${[...new Set(steps)].join(",")}`);
+  } else if (C8_PAIR) {
     const rowsOf = s => (s.match(/20[2-6]\d(?=\d{2}\/\d{2})/g) || []).length;       // "2029" + ages "65/63"
     ck("TAXES: both legs still render the year table", figA.length > 0 && figB.length > 0);
     ck("TAXES (v573\u2192v574): the figures DIFFER \u2014 the plan's spending draws now reach Engine B (a dead v5.74 call site renders v5.73's table and fails here)",
@@ -296,7 +311,17 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   const ENGINE_C_CHANGED = (VA === "v542" && VB === "v543") || (VA === "v546" && VB === "v547");
   // v5.74 (C-8, decision D-6): Engine C takes the same draw series in the same release \u2014 see the Taxes note above.
   const C8_PAIR_I = (VA === "v573" && VB === "v574");
-  if (C8_PAIR_I) {
+  // v6.07 (D-33): see the Taxes note above. MAGI falls where an RMD falls and headroom rises by the same amount, so no direction is
+  // asserted (the v5.43 lesson); the blast radius is: same shape, every moved figure one $K step.
+  if (VA === "v606" && VB === "v607") {
+    const numsA = (magA.match(/\$[\d,]+K?/g) || []), numsB = (magB.match(/\$[\d,]+K?/g) || []);
+    const val = t => Number(String(t).replace(/[$,K]/g, "")) * (String(t).endsWith("K") ? 1000 : 1);
+    ck("IRMAA: both legs still render the MAGI table", magA.length > 0 && magB.length > 0);
+    ck("IRMAA (v606\u2192v607): the MAGI figures DIFFER \u2014 Engine C carries the annuity dollars", magA !== magB);
+    const moves = numsA.length === numsB.length ? numsA.map((t, i) => Math.abs(val(numsB[i]) - val(t))).filter(d => d > 0) : [-1];
+    ck("IRMAA (v606\u2192v607): same SHAPE, and every moved figure moves exactly one $K step",
+       moves.length > 0 && moves.every(d => d === 1000), `${numsA.length} vs ${numsB.length}; steps ${[...new Set(moves)].join(",")}`);
+  } else if (C8_PAIR_I) {
     ck("IRMAA: both legs still render the MAGI table", magA.length > 0 && magB.length > 0);
     ck("IRMAA (v573\u2192v574): the MAGI figures DIFFER \u2014 the spending draws now reach Engine C (a dead v5.74 call site renders v5.73's table and fails here)",
        magA !== magB);

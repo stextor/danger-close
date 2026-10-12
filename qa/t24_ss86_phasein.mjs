@@ -55,13 +55,13 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true; window.IS_REACT_ACT_ENVIRONMENT = tr
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v542";
-const KNOWN_VERSIONS = ["v540", "v541", "v542", "v543", "v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606"];
+const KNOWN_VERSIONS = ["v540", "v541", "v542", "v543", "v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST_FIX = VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v604" || VER === "v605" || VER === "v606")));
+const POST_FIX = VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607")));
 
 // The repo keeps the oracle at qa/tools/hand_86.mjs; PROJECT KNOWLEDGE IS FLAT and holds it
 // beside the suites. Resolve rather than assume, and say which copy was used, so a stale
@@ -89,7 +89,7 @@ const T = (name, ok, detail = "") => {
 const _appMod = await import(`./app_${VER}.mjs`);
 const _app = _appMod.__g;
 const _tlD = typeof _app.PLAN_TIMELINE === "function" ? _app.PLAN_TIMELINE() : _app.PLAN_TIMELINE;
-const DIV = (VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v604" || VER === "v605" || VER === "v606")))
+const DIV = (VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607")))
   ? Math.round(Math.max(0, _app.taxableInitAll()
       - (_app.retireStartBalances(_tlD.rothLadderStart).othHsa || 0)) * (2.0 / 100))
   : 0;
@@ -106,6 +106,11 @@ function cliff86(ss, nonSS, T1, T2) {
 // getSSA()*12, getSSB()*12, and the spouse-B part-time work taper.
 const G = 0.045, ULT = { 75: 24.6, 76: 23.7 };
 const A0 = 1180000, B0 = 218600;
+// v6.07 (D-33 — docs/SCOPE_D33_ANNUITY_CONVERSION_V607.md): B0 includes the $7,000 "Spouse B - Annuity" row (tradInitB 218,600 less
+// rmdInitB 211,600). From v6.07 the ladder carries it: it takes no RMD, is never converted, and only grows. Zero on earlier legs, which
+// keeps their recursion exactly the v5.41 transcription. An array, so register_tag2 widens it each release.
+const POST_D33 = ["v607"].includes(VER);
+const NB0 = POST_D33 ? 7000 : 0;
 const PEN = 4800, SSA = 39600, SSB = 15600;
 const SSA_YR = 2031, T1 = 32000, T2 = 44000;              // joint thresholds; example is MFJ
 // v5.46: spouse B's benefit is gated by B's OWN claim date, mirroring A. On the example
@@ -121,18 +126,18 @@ const dobA = 1964, dobB = 1966, START = 2029, END = 2040, endA = 2038, endB = 20
 const taper = y => (y === 2029 ? 20000 : y === 2030 ? 18000 : y === 2031 ? 15000 : 0);
 
 function ladder(rothAmount, ssFn) {
-  let a = A0, b = B0; const out = [];
+  let a = A0, b = B0, nb = NB0; const out = [];
   for (let y = START; y <= END; y++) {
     const ageA = y - dobA, ageB = y - dobB;
     const rA = ageA >= 75 ? a / (ULT[ageA] || 6.4) : 0;    // prior 31 Dec basis (Pub. 590-B)
-    const rB = ageB >= 75 ? b / (ULT[ageB] || 6.4) : 0;
+    const rB = ageB >= 75 ? Math.max(0, b - nb) / (ULT[ageB] || 6.4) : 0;
     const rmd = Math.round(rA + rB);
     const gA = a * (1 + G), gB = b * (1 + G);
     const capA = Math.max(0, (y <= endA ? gA : 0) - rA);
-    const capB = Math.max(0, (y <= endB ? gB : 0) - rB);
+    const capB = Math.max(0, (y <= endB ? gB - nb * (1 + G) : 0) - rB);
     const conv = Math.min(rothAmount, capA + capB);
     const cA = (capA + capB) > 0 ? conv * (capA / (capA + capB)) : 0;
-    a = Math.max(0, gA - cA - rA); b = Math.max(0, gB - (conv - cA) - rB);
+    a = Math.max(0, gA - cA - rA); b = Math.max(0, gB - (conv - cA) - rB); nb = Math.min(nb * (1 + G), b);
 
     const ss = (y >= SSA_YR ? SSA : 0) + bTerm(y);
     // v5.53 (D-10 modelling half): the taxable sleeve's DIVIDENDS enter both the §86 provisional
@@ -251,7 +256,7 @@ if (POST_FIX) {
   // a K boundary — a rendered figure moving by exactly the term that was added, not a regression.
   // The oracle, not this list, is the independent derivation; these are spot pins on its rows.
   // Gated per leg: v5.52 and earlier legitimately read the lower figure (OPERATIONS §B2).
-  const _k = (v553, older) => (VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v604" || VER === "v605" || VER === "v606")) ? v553 : older);
+  const _k = (v553, older) => (VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607")) ? v553 : older);
   // ⚠ v5.74: this chain is a TERNARY, and that is why it was missed. The version-roll sweep for
   // this release matched chains ending in ";", ")" or "||" and silently left `? :` alone, so
   // `_k` returned the PRE-v5.53 figure while the DOM correctly rendered the current one — the
@@ -300,7 +305,7 @@ if (POST_FIX) {
   // Gated on the VERSION, not on whether the helper is present: feature detection would let a v5.77+ build
   // without the helper take the "no helper" branch and pass — the silent-vacuity class §D itself once was.
   const H = _app.taxableSS86;
-  const V577 = VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v604" || VER === "v605" || VER === "v606";   // a LADDER — widen it each release
+  const V577 = VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607";   // a LADDER — widen it each release
   if (V577) {
     T("D-0 (V577): the shared §86 helper is exported by this build", typeof H === "function", typeof H);
     let diverged = 0, worstJ = 0, worstS = 0, cells = 0, halfBinds = 0;

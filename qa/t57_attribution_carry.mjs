@@ -24,7 +24,7 @@
 // calculator read byPerson, that statement goes and section C fails loudly here — it cannot pass vacuously.
 const VER = process.argv[2];
 const MODPATH = process.argv[3] || `./app_${VER}.mjs`;
-const KNOWN_VERSIONS = ["v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606"];
+const KNOWN_VERSIONS = ["v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -69,6 +69,14 @@ if (typeof AR === "function") {
   ck("A4: QCD shared by RMD \u2192 A 3,000, B 1,000", near(r.A.ira, 3000) && near(r.B.ira, 1000), JSON.stringify(r));
   // A5 · a conversion leaves the whole leg: annuity 10 % → 1,000; the remaining 9,000 at employer share 0.5 → 4,500 / 4,500.
   r = AR({ convA: 10000, annShareA: 0.1, empShareA: 0.5 });
+  // v6.07 (D-33 — docs/SCOPE_D33_ANNUITY_CONVERSION_V607.md): a conversion carries NO annuity money — a non-qualified annuity cannot be
+  // converted (IRC §408A(d)(3)) and every engine now takes the conversion from the non-annuity dollars. A5 is inverted on those legs:
+  // the 10,000 splits by the employer share alone, 5,000 / 5,000. (A draw keeps the annuity share; t70 §A pins that.) An array, so
+  // register_tag2 widens it each release.
+  if (["v607"].includes(VER))
+    ck("A5 [D-33]: conversion 10,000, annuity 0.1, employer 0.5 \u2192 annuity 0, employer 5,000, IRA 5,000",
+       near(r.A.annuity, 0) && near(r.A.employer, 5000) && near(r.A.ira, 5000), JSON.stringify(r.A));
+  else
   ck("A5: conversion 10,000, annuity 0.1, employer 0.5 \u2192 annuity 1,000, employer 4,500, IRA 4,500",
      near(r.A.annuity, 1000) && near(r.A.employer, 4500) && near(r.A.ira, 4500), JSON.stringify(r.A));
   // A6 · the pension goes to its owner, whole.

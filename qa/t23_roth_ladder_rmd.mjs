@@ -27,13 +27,19 @@ if (!window.URL.createObjectURL) window.URL.createObjectURL = () => "blob:stub";
 globalThis.IS_REACT_ACT_ENVIRONMENT = true; window.IS_REACT_ACT_ENVIRONMENT = true;
 
 const VER = process.argv[2] || "v541";
-const KNOWN_VERSIONS = ["v539", "v540", "v541", "v542", "v543", "v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606"];
+const KNOWN_VERSIONS = ["v539", "v540", "v541", "v542", "v543", "v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST_FIX = VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v604" || VER === "v605" || VER === "v606"))); // v5.42 carries v5.41's RMD term forward; the §86 fix is $0 at this suite's $70,000 default
+const POST_FIX = VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607"))); // v5.42 carries v5.41's RMD term forward; the §86 fix is $0 at this suite's $70,000 default
+// v6.07 (D-33 — docs/SCOPE_D33_ANNUITY_CONVERSION_V607.md): the ladder no longer converts spouse B's $7,000 annuity, so B's convertible
+// balance is smaller and more of each year's conversion is allocated to spouse A — A's 31 Dec 2038 balance falls and the card with it,
+// $44,991 -> $44,842. A holds no annuity; this is the cross-person effect, reproduced to the dollar by t70 §E's independent ladder
+// recursion. An array, so register_tag2 widens it each release.
+const POST_D33 = ["v607"].includes(VER);
+const A_CARD = POST_D33 ? 44842 : 44991;
 
 let pass = 0, fail = 0;
 const T = (name, ok, detail = "") => {
@@ -150,8 +156,8 @@ if (POST_FIX) {
   //   · the D-1 recursion — convert-then-grow gives a materially smaller balance;
   //   · the D-2 unification — this card is now derived from the ladder loop's own
   //     per-person balance, not from a separate replay of it.
-  T("B-1 (V541): spouse A's with-conversion RMD is EXACTLY $44,991 (prior 31 Dec basis ÷ 24.6)",
-    withA === 44991, `got ${withA}`);
+  T(`B-1 (V541): spouse A's with-conversion RMD is EXACTLY $${A_CARD.toLocaleString()} (prior 31 Dec basis ÷ 24.6)${POST_D33 ? " — D-33 moved it from $44,991" : ""}`,
+    withA === A_CARD, `got ${withA}`);
   // B-2 · the basis error, excluded by name. The grown-balance mistake lands here.
   T("B-2 (V541): the card is NOT the grown-balance figure ($47,016)", withA !== 47016, `got ${withA}`);
   // B-3 · RECURSION UNIFICATION. The card's figure must equal the RMD the ladder loop

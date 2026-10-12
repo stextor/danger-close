@@ -32,16 +32,23 @@ import { fileURLToPath, pathToFileURL } from "url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v543";
-const KNOWN_VERSIONS = ["v541", "v542", "v543", "v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606"];
+const KNOWN_VERSIONS = ["v541", "v542", "v543", "v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST_FIX = VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v604" || VER === "v605" || VER === "v606")));
+const POST_FIX = VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607")));
 // v5.47 — tidy-up item 5 held the HSA out of the dividend base, which lowers Engine C's MAGI on
 // this household by $300/yr. Legs v541-v546 keep asserting their own correct pre-item-5 figures.
-const POST_ITEM5 = VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v604" || VER === "v605" || VER === "v606")));
+const POST_ITEM5 = VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607")));
+
+// v6.07 (D-33 — docs/SCOPE_D33_ANNUITY_CONVERSION_V607.md): the engines carry the annuity dollars, so no RMD or conversion drains spouse B's
+// $7,000 annuity. Spouse B's convertible balance is smaller, so more of each year's pooled conversion lands on spouse A, whose RMD from 2039
+// is therefore lower: Engine C's RMD falls $155 (2039), $175 (2040), $231, $251, $272 (2041-2043). MAGI follows one for one past §86
+// convergence and x1.85 inside the phase-in (−$428, −$465, −$504); headroom moves by the same amounts the other way. The RMDs are
+// reproduced by t70 §C's independent recursion. An array, so register_tag2 widens it each release.
+const POST_D33 = ["v607"].includes(VER);
 
 // The repo keeps the oracle at qa/tools/hand_86.mjs; PROJECT KNOWLEDGE IS FLAT and holds it beside
 // the suites. Resolve rather than assume, and say which copy was used (the t21/t24 pattern).
@@ -81,12 +88,16 @@ const by = Object.fromEntries(rows.map(r => [r.yr, r]));
 // and it is why these three pins move by a different amount from §C's twelve.
 // Headroom is (threshold - MAGI), so it moves the same $555 in the OPPOSITE direction — pinning
 // both is what proves the shift is a MAGI change and not a threshold change.
-const MOVERS = POST_ITEM5
+const MOVERS = POST_D33
+  ? { 2041: 92509, 2042: 96168, 2043: 99890 }
+  : POST_ITEM5
   ? { 2041: 92937, 2042: 96633, 2043: 100394 }
   : POST_FIX
   ? { 2041: 93492, 2042: 97188, 2043: 100949 }
   : { 2041: 101748, 2042: 103746, 2043: 105779 };
-const HEADROOM = POST_ITEM5
+const HEADROOM = POST_D33
+  ? { 2041: 212743, 2042: 215189, 2043: 217694 }
+  : POST_ITEM5
   ? { 2041: 212316, 2042: 214725, 2043: 217190 }
   : POST_FIX
   ? { 2041: 211761, 2042: 214170, 2043: 216635 }
@@ -105,7 +116,10 @@ for (const [yr, want] of Object.entries(MOVERS)) {
 // twelve years moving $300 and three moving $555 is the signature of a change to the dividend
 // base seen through §86, and NOT of a change to the §86 term itself, which would move only the
 // phase-in years. A single-figure delta across all fifteen would be the defect.
-const UNCHANGED = POST_ITEM5 ? {
+const UNCHANGED = POST_D33 ? {
+  2029: 108480, 2030: 106480, 2031: 137140, 2032: 122140, 2033: 122140, 2034: 122140,
+  2035: 122140, 2036: 122140, 2037: 122140, 2038: 122140, 2039: 165648, 2040: 164814,
+} : POST_ITEM5 ? {
   2029: 108480, 2030: 106480, 2031: 137140, 2032: 122140, 2033: 122140, 2034: 122140,
   2035: 122140, 2036: 122140, 2037: 122140, 2038: 122140, 2039: 165803, 2040: 164989,
 } : {
@@ -115,7 +129,7 @@ const UNCHANGED = POST_ITEM5 ? {
 let moved = [];
 for (const [yr, want] of Object.entries(UNCHANGED))
   if (!by[yr] || Math.round(by[yr].magi) !== want) moved.push(`${yr}: want ${usd(want)} got ${by[yr] ? usd(by[yr].magi) : "none"}`);
-T(`C-1: the 12 pre-2041 years are past §86 convergence${POST_ITEM5 ? " and each moved item 5's flat $300" : " \u2014 the v5.43 fix must not touch them"}`,
+T(`C-1: the 12 pre-2041 years are past §86 convergence${POST_D33 ? " (2039 and 2040 also carry D-33's lower RMD, one for one)" : POST_ITEM5 ? " and each moved item 5's flat $300" : " \u2014 the v5.43 fix must not touch them"}`,
   moved.length === 0, moved.join(" | "));
 T("C-2: every year sits in tier 0 \u2014 this household never pays IRMAA on either leg",
   rows.every(r => r.tier === 0), rows.filter(r => r.tier !== 0).map(r => r.yr).join(","));
@@ -200,8 +214,19 @@ if (POST_ITEM5) {
   // The measured effect, per §86 region. Twelve flat-$300 years and three $555 years — the
   // signature described at §C. A regression that puts the HSA back in the base restores every
   // one of these to its v5.46 figure, so both sets are named.
-  const PRE_UNCHANGED = { 2029: 108780, 2039: 166103, 2040: 165289 };
-  const PRE_MOVERS = { 2041: 93492, 2042: 97188, 2043: 100949 };
+  // v6.07 (D-33): from this leg the absolute v5.46 figures below cannot witness item 5 — D-33 moved 2039-2043 underneath them. The
+  // SAME household re-run with its HSA re-typed Taxable puts the HSA back in the dividend base, which is exactly what item 5 removed;
+  // the in-build difference is item 5's effect on this build, and the $300 / $555 signature must hold on it.
+  let PRE_UNCHANGED = { 2029: 108780, 2039: 166103, 2040: 165289 };
+  let PRE_MOVERS = { 2041: 93492, 2042: 97188, 2043: 100949 };
+  if (POST_D33) {
+    const _base = JSON.parse(JSON.stringify(__g.PORTFOLIO()));
+    __g.applyLoadedData({ portfolio: { ..._base, otherAccounts: _base.otherAccounts.map(a => a.taxType === "hsa" ? { ...a, taxType: "taxable" } : a) } });
+    const _pre = Object.fromEntries((__engines.computeIrmaaPlan({ retireYear: 2029, rothAmount: 70000, qcdAnnual: 0, taxYield: 2.0 }).rows).map(r => [r.yr, Math.round(r.magi)]));
+    __g.applyLoadedData({ portfolio: _base });
+    PRE_UNCHANGED = { 2029: _pre[2029], 2039: _pre[2039], 2040: _pre[2040] };
+    PRE_MOVERS = { 2041: _pre[2041], 2042: _pre[2042], 2043: _pre[2043] };
+  }
   T("E-3 [EXTINCTION]: past convergence, item 5 moves MAGI by exactly $300 \u2014 the dividend, undamped",
     Object.entries(PRE_UNCHANGED).every(([y, pre]) => by[y] && pre - Math.round(by[y].magi) === 300),
     Object.entries(PRE_UNCHANGED).map(([y, pre]) => `${y}: ${pre - (by[y] ? Math.round(by[y].magi) : NaN)}`).join(" "));

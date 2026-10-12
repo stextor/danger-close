@@ -36,17 +36,23 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true; window.IS_REACT_ACT_ENVIRONMENT = tr
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v544";
-const KNOWN_VERSIONS = ["v542", "v543", "v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606"];
+const KNOWN_VERSIONS = ["v542", "v543", "v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST_FIX = VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v604" || VER === "v605" || VER === "v606")));
+const POST_FIX = VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607")));
 // v5.47 — tidy-up item 6. The Roth tab's RMD cards now scale by (1 - annShare), so the
 // no-conversion counterfactual sits on the RMD-BEARING balance instead of the whole
 // Traditional balance. Legs v542-v546 keep asserting their own correct pre-state.
-const POST_ITEM6 = VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v604" || VER === "v605" || VER === "v606")));
+const POST_ITEM6 = VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607")));
+// v6.07 (D-33 — docs/SCOPE_D33_ANNUITY_CONVERSION_V607.md): the ladder carries each spouse's annuity dollars. The with-conversion cards
+// move — B's subtracts the carried annuity ($3,178 -> $2,962), A's falls $149 ($44,991 -> $44,842) because B's smaller convertible
+// balance moves conversion onto A. Both reproduced to the dollar by t70 §E's independent recursion. The NO-conversion cards do not move
+// (no outflow before RMD age, so the static share is exact there). An array, so register_tag2 widens it each release.
+const POST_D33 = ["v607"].includes(VER);
+const A_WITH = POST_D33 ? 44842 : 44991, B_WITH = POST_D33 ? 2962 : 3178;
 const { __g } = await import(pathToFileURL(join(HERE, `app_${VER}.mjs`)).href);
 
 let pass = 0, fail = 0;
@@ -151,8 +157,8 @@ for (const p of (POST_FIX ? CORRECT : OLD)) {
 // counterfactual's exponent, so the with-conversion cards are the thing that proves it did not
 // reach further. t23 pins their values; this pins that the two legs agree on them.
 {
-  T("C-1: spouse A's WITH-conversion card is $44,991 on both legs (t23's dollar-exact pin, untouched)",
-    lastFor(2039) === 44991, usd(lastFor(2039)));
+  T(`C-1: spouse A's WITH-conversion card is ${usd(A_WITH)} (t23's dollar-exact pin${POST_D33 ? "; D-33 moved it, see the header" : ", untouched"})`,
+    lastFor(2039) === A_WITH, usd(lastFor(2039)));
   T("C-2: the with-conversion figure is BELOW the no-conversion one \u2014 converting reduces RMDs",
     lastFor(2039) < firstFor(2039));
   // The user-facing consequence: a smaller counterfactual means a smaller claimed reduction.
@@ -213,9 +219,14 @@ if (POST_ITEM6) {
     firstFor(yrB) === 14587, `rendered ${usd(firstFor(yrB))}`);
   T(`E-5 [EXTINCTION]: it is exactly $483/yr below the whole-Traditional figure (${usd(oldB)})`,
     oldB - firstFor(yrB) === 483, `${usd(oldB)} - ${usd(firstFor(yrB))} = ${usd(oldB - firstFor(yrB))}`);
-  T("E-6 [EXTINCTION]: the WITH-conversion card moved too ($3,178) — both halves of one quantity " +
+  T(`E-6 [EXTINCTION]: the WITH-conversion card moved too (${usd(B_WITH)}) — both halves of one quantity ` +
     "on ONE basis, the v5.41 failure mode",
-    lastFor(yrB) === 3178, `rendered ${usd(lastFor(yrB))}`);
+    lastFor(yrB) === B_WITH, `rendered ${usd(lastFor(yrB))}`);
+  if (POST_D33)
+    T("E-7 [EXTINCTION]: the with-conversion half is $321 below v5.46's $3,283 — item 6's own $105 plus D-33's $216 (the carried " +
+      "annuity, not a static share), and still not the no-conversion half's $483",
+      3283 - lastFor(yrB) === 321 && 3178 - lastFor(yrB) === 216, `3,283 - ${usd(lastFor(yrB))} = ${usd(3283 - lastFor(yrB))}`);
+  else
   T("E-7 [EXTINCTION]: the with-conversion half fell $105 — its own correct amount, not the " +
     "no-conversion half's $483",
     3283 - lastFor(yrB) === 105, `3,283 - ${usd(lastFor(yrB))} = ${usd(3283 - lastFor(yrB))}`);
@@ -228,8 +239,9 @@ if (POST_ITEM6) {
   T("E-9 [NEGATIVE CONTROL]: A's no-conversion card is UNMOVED at $74,492",
     firstFor(yrA) === 74492 && firstFor(yrA) === tradFig(tl.dobA.year, rsb.tradInitA),
     `rendered ${usd(firstFor(yrA))}`);
-  T("E-10 [NEGATIVE CONTROL]: A's with-conversion card is UNMOVED at $44,991 (t23's pin)",
-    lastFor(yrA) === 44991, `rendered ${usd(lastFor(yrA))}`);
+  T(POST_D33 ? "E-10 [NEGATIVE CONTROL]: A's with-conversion card is $44,842 (t23's pin) — moved $149 by the conversion B can no longer take, not by any share of A's"
+              : "E-10 [NEGATIVE CONTROL]: A's with-conversion card is UNMOVED at $44,991 (t23's pin)",
+    lastFor(yrA) === A_WITH, `rendered ${usd(lastFor(yrA))}`);
   // ...and the control is MEANINGFUL: a control that cannot fire proves nothing. If A carried
   // B's share, A's card WOULD move — by $2,385 — so E-9 is discriminating, not vacuous.
   {

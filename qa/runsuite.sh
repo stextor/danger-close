@@ -240,6 +240,10 @@ tally "t68-$CUR"   node t68_fed_deductions.mjs "$CUR"
 # and Maryland's pension exclusion no longer reaches IRA money; hand cases, v6.05 -> v6.06 over every jurisdiction, the data. Both legs.
 tally "t69-$PRIOR" node t69_annuity_relief.mjs "$PRIOR"
 tally "t69-$CUR"   node t69_annuity_relief.mjs "$CUR"
+# t70 (v6.07) — D-33: a Roth conversion, a QCD and an RMD never take non-qualified annuity money; the engines carry the annuity dollars.
+# Both legs: the prior leg pins the defect ([KNOWN DEFECT]); §D's differential reads app_v606.mjs when the run folder has it.
+tally "t70-$PRIOR" node t70_annuity_conversion.mjs "$PRIOR"
+tally "t70-$CUR"   node t70_annuity_conversion.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
