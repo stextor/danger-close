@@ -48,9 +48,10 @@ items now carry their status; IDs are unchanged.
 | D-30 | **CLOSED v6.03** | — |
 | D-31 | **CLOSED v6.04** | not taken, disclosed: DC's senior deduction, the refunds Alabama and Oregon recapture, Oregon's 2026 cap |
 | D-32 | **OPEN** (Low, conservative) | Ohio's retirement income and joint filing credits and Utah's retirement credit — each state's note says not taken *(parser)* |
-| D-33 | **OPEN** (Low–Med, direction unmeasured) | *(added v6.06)* a Roth conversion draws annuity money pro rata, which a non-qualified annuity cannot do |
+| D-33 | **CLOSED v6.07** | a conversion, a QCD and an RMD never take non-qualified annuity money; the engines carry the annuity dollars |
+| D-34 | **OPEN** (Low) | *(added v6.07)* Engine D converts bucket money only: an Other-accounts Traditional IRA is never converted there, and its cap subtracts that IRA's RMD from bucket money |
 
-**Open, in this file: D-4, D-11 (narrowed), D-13, D-15, D-16, D-17, D-18 (recurring), D-32, D-33; D-5 declined.** *(D-28 closed and D-33 added at v6.06.)* Non-tax open threads
+**Open, in this file: D-4, D-11 (narrowed), D-13, D-15, D-16, D-17, D-18 (recurring), D-32, D-34; D-5 declined.** *(D-33 closed and D-34 added at v6.07; D-28 closed and D-33 added at v6.06.)* Non-tax open threads
 re-homed the same day are in `ARCHITECTUREIssues.md` **E-29**.
 
 | Field | Value |
@@ -1402,10 +1403,24 @@ each spouse needing $500 of qualifying income other than interest, dividends, di
 retirement credit** (up to $450 each, only for a filer born on or before 31 December 1952) — the calculator has ages, not birth years. Conservative today (more
 state tax than the law), disclosed in each note. **Low — small amounts; an argument or two each.**
 
-## D-33 · A Roth conversion draws annuity money, which a non-qualified annuity cannot convert — opened at v6.06
+## D-33 · A Roth conversion draws annuity money, which a non-qualified annuity cannot convert — opened at v6.06 — ✅ CLOSED v6.07
+
+> ✅ **CLOSED v6.07 (2026-10-12).** Engines A, B and C and the Roth tab's ladder carry the annuity dollars: a conversion and a QCD are capped at the
+> non-annuity balance, the RMD, any QCD above it and the conversion leave non-annuity dollars only, the spending draw stays pro rata, and the share is
+> re-taken every year. The census found the related defect — with a constant share every RMD and conversion drained annuity money too — and the
+> ladder's own RMD on annuity money (open since v5.44); both fixed with it. Direction measured: lower RMDs and tax for an annuity household; estate
+> figures both ways. `docs/SCOPE_D33_ANNUITY_CONVERSION_V607.md` (fulfilled, repo-only); `qa/t70_annuity_conversion.mjs`. New from the scope: **D-34**.
+> *(The entry below is retained.)*
 
 Found measuring v6.06 (`docs/SCOPE_D28_ANNUITY_RELIEF_V606.md` §6). The Other-accounts *Annuity* type rides inside the Traditional pool as a share
 (`annShareA`/`annShareB`, v5.26), and both engines take a Roth conversion pro rata from the whole pool, annuity included (`attributeRetIncome`: "a conversion
 or a draw leaves the whole leg: annuity by annShare"). A non-qualified annuity is not a traditional IRA or an eligible plan, so in law it cannot be converted
 (IRC §408A(d)(3)). The conversion's tax is charged now and the money then grows as Roth, so the net direction is not obvious and was not measured. Fixing it
 means converting from the non-annuity share only — an engine change with a scope. **Low–medium.**
+
+## D-34 · Engine D converts bucket money only — opened at v6.07
+
+Found scoping D-33 (`docs/SCOPE_D33_ANNUITY_CONVERSION_V607.md` §4). Engine D (`computeWithdrawalPlan`) caps its conversion as
+`min(rothAmount, tradNotional_boy − rmd_y)`: `tradNotional_boy` is the buckets' pre-tax money, while `rmd_y` includes the RMD of any Traditional IRA
+entered under Other accounts (held in the Priority-1 pool, v5.26). So such an IRA is never converted in Engine D, and its RMD shrinks the bucket cap. It
+matters only where the cap binds — a slider above the bucket money left — and lowers the conversion there; direction not measured. Not a D-33 defect: annuity money was never converted in Engine D. **Low.**
