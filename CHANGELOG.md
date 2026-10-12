@@ -1,5 +1,43 @@
 # Changelog
 
+## ops 2026-10-12 — E-29 (b), (c), (g) and (i): `t13`'s counterfactual, E-1b through the manifest, K-12, the locked harness
+
+**KIND: ops** — one suite, three QA tools, the harness lock and documents; **v6.07 stays current** (source `ee557028aba1dfb1acb5bb647f6c5630`, built `5b444023ed72ebca40c9d0443b2ddf05`). No app
+source and no figure changes. `docs/SCOPE_E29_BCGI_OPS.md` (repo-only, fulfilled). Steve: "let's do the E-29 housekeeping package for items (b),
+(c), (g) and (i)" — D-34 kept out (it changes Engine D; its own release) — and he took every recommendation on the four decisions.
+
+- **(b) `t13` measured more than its name said.** Its survivor check reads the year-over-year MAGI drop at the first death in $K, ±$4K of
+  85 % of the smaller SS check — and that drop also carries the RMD change from rolling the decedent's IRA to the survivor, plus a year's
+  drift. New §E runs both cases through Engine C: the death effect (the same year, with no death against with it) equals the SS term plus
+  the rollover's RMD change **to the cent** — case 1 (A dies) $17,082.82 = $13,260.00 + $3,822.82, case 2 (B dies) $12,653.31 = $13,260.00 − $606.69 — the SS term
+  equals 85 % of the smaller check to the cent (the household is past §86 convergence), the RMD term's sign follows the survivor's age, and
+  each engine run is tied to the DOM's death-year row. The DOM check keeps its band, renamed to what it reads; its comment no longer calls
+  §86's 85 % "the engine's flat approximation". **`t13` 42 → 53.**
+- **(c) `package_check` E-1b could not see four pool files.** It matched a `knowledge/` file to the repo by basename, so a file renamed for
+  the flat pool (`tools_fixture.jsx`, `qa-baseline-README.md`) was skipped without a word and a multi-path one (`README.md`, `index.html`)
+  with one. It now resolves those through the manifest's hash-row path cell, and names anything still unresolved. `qa-baseline-README.md`
+  gained the hash row it needed — its pool copy verified byte-identical to `qa/qa-baseline/README.md` first. Controls P72, P73.
+- **(g) K-12, the manifest → pool direction for every row.** Nothing checked a row without a hash that names a file no longer in the
+  pool. K-12 requires every row of the manifest's three indexing sections to name a pool file or say `repo-only` (or `in neither the repo
+  nor the pool`). **50 rows carried no such word** and are marked — 47 repo-only, and three scope files that were never committed
+  (`SCOPE_CONSOLIDATE_taxable_residual_v5_22.md`, `SCOPE_FIX_irmaa_indexation_v5_13.md`, `SCOPE_FIX_roth_tab_filing_status_v5_14.md`).
+  None deleted. The ID E-29 proposed, `K-10`, is taken (and `K-11`). Controls P74, P75. OPERATIONS §I documents the rule.
+- **(i) The suite's harness is locked.** `mk_runfolder.sh` installed `jsdom`, `esbuild`, the acorn packages and the app's packages with no
+  versions, so every run folder resolved them fresh (the run folder did not even use the app's own resolution: `mammoth` 1.13.0 against
+  the app lock's 1.8.x). New `qa/harness/package.json` + `package-lock.json` pin the whole tree — the 184 packages v6.07's suite ran green
+  on, entry for entry — and `mk_runfolder.sh` installs it with `npm ci`. `controls_runfolder_prior.sh` gains G (the run folder's tree is the
+  lock) and H (a harness `package.json` out of step with its lock is refused): **8 passed, 0 failed**. The app's own build files
+  are untouched; the built page's md5 is unchanged.
+
+E-29 now holds (a), (h) and (j). OPERATIONS §B, §B2a, §I, §N3a and the E-1b notes updated; `ARCHITECTUREIssues.md` E-29 marks the four fixed.
+
+**Suite, run from the packaged copies:** 6,442 app checks across **69 app suites**, 0 failed, 0 DIED (v6.07's 6,431, plus `t13`'s eleven);
+MC parity 10/10; tooling `t21` 64, `domdiff` 37, `sets` 12 + 12; **GRAND 6,577**. Every count equals
+v6.07's but `t13`. Run from the PACKAGED copies as two concurrent halves (the v5.87 method): run folders built by the PACKAGED mk_runfolder.sh v606 v607 — so installed from the packaged harness lock — from the workspace, a full clone of a7de0b9 carrying exactly the packaged changes, each changed suite and tool hash-checked against its run-folder copy. Half A GRAND 6355, half B GRAND 222; none DIED.
+
+**Limitations, disclosed:** `t13` §E's RMD term is read off Engine C's own rows — the independent half is the SS term; K-12's vocabulary is two
+phrases, so a row must use one of them; the harness lock pins what v6.07 ran on, and moving a version is a deliberate change with a full run.
+
 ## v6.07 — D-33: a Roth conversion, a QCD and an RMD never take non-qualified annuity money
 
 **A MODELLING release** (METHODOLOGY updated). `docs/SCOPE_D33_ANNUITY_CONVERSION_V607.md` (repo-only, fulfilled). Steve: "let's do D-33" — E-29 kept for
