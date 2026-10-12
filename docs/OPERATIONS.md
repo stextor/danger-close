@@ -116,9 +116,12 @@ the older, separate public-constants suite (kept; different purpose). **It is NO
 
 **Setup** (from a folder holding the two version `.jsx` files next to `qa/`):
 
-1. `npm i esbuild react react-dom d3 xlsx mammoth jsdom acorn acorn-jsx acorn-walk`
-   *(the three acorn packages added v5.31 — `qa/tools/*.cjs` require them, so `t21` dies at
-   module load without them. They were missing from this line through v5.30.)*
+1. `npm ci` with **`qa/harness/package.json` + `package-lock.json`** at the folder root, then the scaffold's own `package.json` and
+   `package-lock.json` copied back over them *(from the ops package of 2026-10-12, E-29 (i): the harness is LOCKED — the 184 packages
+   v6.07's suite ran green on, jsdom 29.1.1, esbuild 0.28.2 and acorn 8.19.0 among them. Through v6.07 this step was
+   `npm i esbuild react react-dom d3 xlsx mammoth jsdom acorn acorn-jsx acorn-walk` with no versions, so each run folder resolved its
+   tools fresh and two sessions could test on different jsdom versions. The three acorn packages joined that line at v5.31 —
+   `qa/tools/*.cjs` require them. To move a harness version, change the pair, run the full suite, ship them together.)*
 2. `./qa/mk_testable.sh <prior> && ./qa/mk_testable.sh <current>`
 3. `npx esbuild qa/dom_entry_<ver>.jsx --bundle --format=cjs --platform=browser --loader:.jsx=jsx --jsx=automatic --outfile=qa/dom_<ver>.cjs`
 4. `./qa/run_all.sh <prior>` · `./qa/run_all.sh <current>` · `./qa/run_all.sh parity`
@@ -150,8 +153,10 @@ inputs before it reports ready. Its negative controls are `qa/tools/controls_v56
 (22 checks, every one shown to fire), which asserts nothing in the app and is counted in no release's
 total.
 
-⚠ **One `npm install`, not several.** A later `npm install <one-package> --no-save` PRUNED `jsdom`
-mid-session at v5.67 and killed six suites a second time in the same day.
+⚠ **One install, not several.** A later `npm install <one-package> --no-save` PRUNED `jsdom`
+mid-session at v5.67 and killed six suites a second time in the same day. From 2026-10-12 the one install is `npm ci` from the
+harness lock; `controls_runfolder_prior.sh` G asserts the run folder's tree is the lock entry for entry, and H that a harness
+`package.json` out of step with its lock is refused.
 
 ⚠ **Run the suite in ONE turn, detached, one run at a time, and trust only a fresh sentinel (added 2026-09-21, at the
 v5.74 build).** Measured in the sandbox: a job started with plain `nohup … &` is killed when the tool call that started it
@@ -354,7 +359,11 @@ number. The first four are from the ship notes, the fifth from the Phase 1 audit
 > lands at −$0.61K instead. So the check is NAMED for the SS loss while MEASURING SS plus the
 > rollover, and its ±$4K band absorbs the difference. Margins are 2.26 and 1.74 — healthy next to the
 > 0.74 and 0.08 that made `t14` urgent — so this is recorded, not fixed. The fix is a counterfactual
-> anchor, and `t13` is DOM-driven, so that is a scope rather than a ride-along.
+> anchor, and `t13` is DOM-driven, so that is a scope rather than a ride-along. *(✓ **Done in the ops package of 2026-10-12** (E-29 (b),
+> `docs/SCOPE_E29_BCGI_OPS.md`). `t13` §E runs both cases through Engine C directly: the death effect (counterfactual, same year) equals the
+> SS term plus the rollover's RMD change to the cent, the SS term equals 85 % of the smaller check to the cent, and each engine run is tied
+> to its DOM row. At v6.07: case 1 $17,082.82 = $13,260.00 + $3,822.82, case 2 $12,653.31 = $13,260.00 − $606.69. The DOM check keeps its
+> ±$4K band, renamed to what it reads.)*
 >
 > ⚠ **`t14`'s Engine C magnitude checks were re-anchored at v5.47** after measurement showed they
 > had been differencing raw year-over-year MAGI while the household's MAGI also rises $3,959/yr
@@ -524,7 +533,10 @@ reason said "expensive" and was wrong, and nobody re-measured it because the ent
 **When deferring something, the re-measurement that would overturn it is the thing to write down.**
 Two basenames are multi-path by design and long-standing, so E-1b cannot see them either:
 `index.html` (root artifact + `src/` template, §N) and `README.md` (root, `qa/qa-baseline/`,
-`validation/`).
+`validation/`). *(✓ **Closed in the ops package of 2026-10-12** (E-29 (c)): E-1b now resolves a name with zero or several basename
+candidates through the manifest's hash-row path cell — `index.html` → `src/index.html`, `README.md` → `README.md`,
+`tools_fixture.jsx` → `qa/tools/fixture/fixture.jsx`, `qa-baseline-README.md` → `qa/qa-baseline/README.md` (rowed that day) — and
+names anything still unresolved. Controls P72 and P73.)*
 
 ⚠ **THIRD INSTANCE — the v5.71 upload (recorded 2026-09-14), and the worst of the three.** Seventeen
 files — `qa/runsuite.sh`, `qa/smoke_built.mjs` and `qa/t23`–`qa/t37` — were committed at the repo root
@@ -1064,7 +1076,7 @@ node qa/tools/package_check.mjs <zip-or-dir> <clone-dir> <workspace-dir> <pool-d
 ```
 
 **Run it again after the upload, with all four.** Passing the pool third binds it to the workspace
-slot and leaves `POOL` null, at which point **K-4**, **K-5**, **K-6**, **K-8** and **K-9** print
+slot and leaves `POOL` null, at which point **K-4**, **K-5**, **K-6**, **K-8**, **K-9** and **K-12** print
 *"no pool given — this is the POST-SHIP half"* — which reads like a benign skip and is in fact the
 entire post-ship half of section K not running. The v5.66 session read that line and came within one
 step of recording a false green. The tool's *printed* usage named only two of the four positionals
@@ -1337,7 +1349,7 @@ These failures are the reminder working, not a regression — but budget for the
 
 Some sessions are given project knowledge as a read-only folder (`/mnt/project`); others reach it only through the **Projects tool**. Measured on
 2026-10-08: the folder was absent, and Steve cannot mount it — it comes with the kind of session. Without it, `package_check`'s pool argument has
-nothing to read and section J and K-4…K-9 cannot run. Verify a ship this way instead:
+nothing to read and section J, K-4…K-9 and K-12 cannot run. Verify a ship this way instead:
 - **Presence, absence, duplicates and count** from the Projects listing (`project_info`): it reads no contents and, unlike a mounted folder, it
   SHOWS two files with one name. ⚠ A mounted folder cannot show duplicates — at v5.94 the pool was counted as 123 from the folder while the
   listing held 126 (three names twice, from August and September). Count from the listing.
@@ -1345,6 +1357,18 @@ nothing to read and section J and K-4…K-9 cannot run. Verify a ship this way i
   inline; read those through a helper agent so their text does not fill the working context, and record that they were compared as content, not
   hashed.
 - Record in the stop report which pool checks were run which way.
+
+### K-12 · every manifest row names a pool file, or says why not (added in the ops package of 2026-10-12)
+
+E-29 (g). K-8 checks hashed rows with a plain name and K-9 runs pool → manifest, so a row WITHOUT a hash naming a file that has left the
+pool was seen by nothing — 22 of 24 stale rows on 2026-09-04 were of that kind. K-12 reads every row of the manifest's three indexing
+sections (*Test and harness file hashes*, *Everything else in knowledge*, *Audit findings and scopes*; the Retirement list and the rest are
+excluded — they name files that left on purpose) and requires each to name a pool file **or** carry one of two exact phrases: `repo-only`,
+or `in neither the repo nor the pool` (a history row for a file never committed). A closed vocabulary on purpose: the naive form fires on
+every legitimate repo-only row, and a loose one would excuse a stale row that merely mentions the repo. **When a file leaves the pool, its
+row gets `repo-only` in the same edit** — that is now the rule K-12 enforces. 50 rows were marked when it was built (47 repo-only, three
+in neither). ⚠ The ID `K-10` that E-29 first proposed is taken (TESTING's Current-build line), as is `K-11`. Controls P74 (fires) and P75
+(silent when marked, and must have run).
 
 ## J. Re-baseline the regression suite each build
 
@@ -1655,8 +1679,8 @@ source as `src/DangerClose.jsx`. Copy the config to **`vite.config.js` — with 
 
 ```
 npm ci                          # NOT `npm install` — see the lockfile note below
-npm install --no-save jsdom     # harness dep, deliberately NOT in package.json; --no-save
-                                # keeps the scaffold package.json byte-identical to knowledge
+npm install --no-save jsdom     # only to run smoke_built.mjs here; --no-save keeps the scaffold package.json
+                                # byte-identical. The SUITE's harness is locked separately (qa/harness/, §B step 1).
 npx vite build                  # -> dist/index.html, the ONLY output
 node qa/smoke_built.mjs         # -> 20 checks at v5.70. An optional first argument overrides the
                                 # input path: `node qa/smoke_built.mjs some/other.html`

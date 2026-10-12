@@ -7,7 +7,7 @@
 
 ## Census at v5.97 (2026-10-08) — read this first
 
-*E-29 added 2026-10-11 (ops package, third): open threads whose only pooled record was a document leaving the pool. Statuses above are as of v5.97 except E-29's, which is as of v6.05 (2026-10-12): (d) and (k) closed by Steve's decisions, (e) and (f) fixed.*
+*E-29 added 2026-10-11 (ops package, third): open threads whose only pooled record was a document leaving the pool. Statuses above are as of v5.97 except E-29's, which is as of the ops package of 2026-10-12: (d) and (k) closed by Steve's decisions, (e) and (f) fixed at v6.05, (b), (c), (g) and (i) fixed in that ops package.*
 
 **Method.** One pass per register on 2026-10-08 against the shipped v5.97 (repo `2cfe5e2`, source `4157137a…`): every ID the register defines, what it says, what the CHANGELOG and archives record, and — for anything still open — the current source or suite, read by parser where a count is claimed. The body below is the record as written; where a marker in it disagrees with this table, **this table is current**.
 **E-15 is two items.** The ID was given twice: **E-15a** below is the MC-parity/ACA entry, **E-15b** the `taxOrd` entry. Cite them that way; neither is renumbered, because other documents cite both by the bare ID.
@@ -43,7 +43,7 @@
 | E-26 | **OPEN** | no build identity in the export or the built page beyond the version |
 | E-27 | **ACCEPTED** | run the controls twice (OPERATIONS §I) |
 | E-28 | **FIXED** (both passages) | — |
-| E-29 | **OPEN** (seven of eleven threads, each Low) | re-homed 2026-10-11 from documents leaving the pool; (d) and (k) closed by decision and (e) and (f) fixed at v6.05 — see its entry |
+| E-29 | **OPEN** (three of eleven threads, each Low: (a), (h), (j)) | re-homed 2026-10-11 from documents leaving the pool; (d) and (k) closed by decision, (e) and (f) fixed at v6.05, (b), (c), (g) and (i) fixed in the ops package of 2026-10-12 — see its entry |
 
 **Stale figures below, left as written:** E-6 "imported by only four files"; E-7 "202"; E-11 "144,008" and "12,151 lines"; the summary table (frozen at the v5.30 additions, with E-14 still Open/High); E-15a "parity 9/9" and "scheduled to fold into the A3 release"; E-10 "CLOSED … must not be re-retired"; E-19's `qa/controls.sh`; E-21's annotation (omits v5.84); E-22 and E-25 (no fix notes). Line addresses in E-4, E-5, E-8, E-9, E-12, E-15a, E-23 and E-26 are v5.29/v5.73 addresses.
 
@@ -1049,11 +1049,15 @@ and found by an independent second read before the package shipped. Each is smal
   to `/anthropic` — and, optionally, the proxy it relies on in development — for "its own later release". Both are still there at
   `c200261`: an acorn walk finds the rewrite's string literals at `main.jsx` L57 and L65 and the proxy's at `vite.config.js` L20–21.
   **Never scoped.** It changes app behaviour, so it is a release with a scope.
-- **(b) `t13`'s survivor check measures more than its name says.** Counterfactual (both deaths past the horizon), case 1's isolated death
+- ✅ **FIXED in the ops package of 2026-10-12** (`docs/SCOPE_E29_BCGI_OPS.md`; Steve took every recommendation). `t13` §E runs both cases through Engine C: the death effect equals the SS term plus the rollover's RMD change to the cent, the SS term equals 85 % of
+  the smaller check to the cent, each engine run tied to its DOM row; the DOM check is renamed to what it reads. *(The entry as re-homed is retained:)*
+  **(b) `t13`'s survivor check measures more than its name says.** Counterfactual (both deaths past the horizon), case 1's isolated death
   effect is $17,100.81 against the $13,260.00 the check is named for; the $3,840.81 residual is the Traditional rollover and the survivor's
   RMD recomputation. Margins 2.26 and 1.74, so recorded, not fixed (2026-08-23). **The fix is a counterfactual anchor and `t13` is
   DOM-driven, so it needs a scope.** The full measurement is in OPERATIONS §B2a, with the warning not to apply `t14`'s drift correction to `t13`.
-- **(c) `package_check` `E-1b` skips a `knowledge/` file with no repo counterpart by basename, silently.** Its "multi-candidate" skip has
+- ✅ **FIXED in the ops package of 2026-10-12** (`docs/SCOPE_E29_BCGI_OPS.md`; Steve took every recommendation). E-1b resolves a name with zero or several basename candidates through the manifest's hash-row path cell (`qa-baseline-README.md` rowed for it)
+  and names anything still unresolved; controls P72, P73. *(The entry as re-homed is retained:)*
+  **(c) `package_check` `E-1b` skips a `knowledge/` file with no repo counterpart by basename, silently.** Its "multi-candidate" skip has
   been announced since 2026-09-14; the zero-candidate case — a pool file renamed from its repo path (`tools_fixture.jsx`,
   `qa-baseline-README.md`) — is still skipped without a line. Recorded 2026-09-07 as "the fix, if it ever matters, is a rename map rather
   than a looser match. Not built."
@@ -1077,7 +1081,9 @@ and found by an independent second read before the package shipped. Each is smal
   exclusion states remain unverified"* directly before its own v5.86 update saying D-18 read every exclusion state's figure against a
   primary source. The update is right. A wording fix for the next release that touches METHODOLOGY.
 
-- **(g) `K-10` as first proposed — the manifest → pool direction for UNHASHED rows — was never built.** K-8 checks hashed rows only and
+- ✅ **FIXED in the ops package of 2026-10-12** (`docs/SCOPE_E29_BCGI_OPS.md`; Steve took every recommendation). Built as **K-12** (OPERATIONS §I): every row of the three indexing sections names a pool file or says `repo-only` (or `in neither the repo nor
+  the pool`); 50 rows marked, none deleted; controls P74, P75. *(The entry as re-homed is retained:)*
+  **(g) `K-10` as first proposed — the manifest → pool direction for UNHASHED rows — was never built.** K-8 checks hashed rows only and
   K-9 runs pool → manifest, so an unhashed row naming a file that has left the pool is seen by nothing (22 of 24 stale rows on 2026-09-04
   were of that kind). The proposal's correct form is *every row NOT marked repo-only names a pool file* — its naive form would fire on the
   legitimate repo-only rows — and it needs its own §B2 control. ⚠ **The ID was reused:** the `K-10` that shipped at v5.78 checks
@@ -1085,7 +1091,9 @@ and found by an independent second read before the package shipped. Each is smal
 - **(h) A-2's last bullet — an imported checklist is replaced wholesale and persisted with no shape check** (`typeof === "object"` only;
   object-valued `done`/`notes`/`contact` were stored at v5.69; rendering with a real item id was inconclusive). `SCOPE_IMPORT_HARDENING.md`
   §6 put it out of scope ("needs its own probe first"); A-2's other bullets were fixed at v5.72. Low, user-side, needs a doctored file.
-- **(i) The suite's harness dependencies are resolved fresh at every run folder.** `qa/mk_runfolder.sh` runs one `npm install` of
+- ✅ **FIXED in the ops package of 2026-10-12** (`docs/SCOPE_E29_BCGI_OPS.md`; Steve took every recommendation). `qa/harness/package.json` + `package-lock.json` lock the whole harness tree (184 packages, v6.07's); `mk_runfolder.sh` installs it with
+  `npm ci`; `controls_runfolder_prior.sh` G and H. *(The entry as re-homed is retained:)*
+  **(i) The suite's harness dependencies are resolved fresh at every run folder.** `qa/mk_runfolder.sh` runs one `npm install` of
   `jsdom`, `acorn`, `acorn-jsx`, `acorn-walk`, `esbuild` and the app's packages, and `package-lock.json` carries no `jsdom` entry, so two
   sessions can run the suite on different `jsdom` versions (observed 2026-09-11: `jsdom ^30.0.1` and `esbuild ^0.28.2` resolved on the day).
   OPERATIONS §N3a records the `--no-save` install as deliberate; the version drift itself has no remedy. *"The remedy needs a scope, not a flag."*
@@ -1102,4 +1110,4 @@ and found by an independent second read before the package shipped. Each is smal
   leaving in this package).
 
 **Severity: low** for all eleven. (a), (b), (g), (h) and (i) are the ones that would take a release or a scope. **Open at v6.05:** (a), (b), (c), (g),
-(h), (i), (j).
+(h), (i), (j). **Open after the ops package of 2026-10-12:** (a), (h), (j).
