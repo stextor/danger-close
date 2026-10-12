@@ -92,6 +92,13 @@ if (MODE === "compare") {
     // Georgia call, so it MUST move (MEASURED at the build: $6,487 → $4,990, = ($260,000 − 2 × $65,000 − $30,000) × 4.99 %); the nine
     // other keys must not, and did not.
     "v602→v603": ["stateTax"],
+    // v6.07 (D-33 — docs/SCOPE_D33_ANNUITY_CONVERSION_V607.md): Engine A no longer converts annuity money or lets an RMD or conversion drain
+    // it. Only `rothOther` holds an annuity (its P carries `annShare*` through the `retireStartBalances` spread), so only it MUST move —
+    // MEASURED at the build: all six estates move — "current" $6,257,642 -> $6,279,480, while the highest falls $6,355,764 -> $6,311,884
+    // (a strategy that had been converting annuity money into the heir-tax-free Roth). `roth`, `rothCurrentEstate` and `rothAca`
+    // are hand-built Ps with no share and stay byte-identical, as do the three Monte Carlo keys and `stateTax`: share 0 reduces every
+    // changed expression to v6.06's operand for operand.
+    "v606→v607": ["rothOther"],
   };
   const expectDiff = new Set(INTENDED_DIFFS[`${PRIOR}→${CUR}`] || []);
   for (const key of Object.keys(a)) {
