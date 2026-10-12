@@ -43,13 +43,14 @@ items now carry their status; IDs are unchanged.
 | D-25 | **FIXED v5.88** | — |
 | D-26 | **FIXED v5.94** | — |
 | D-27 | **FIXED v5.96** | — |
-| D-28 | **OPEN** (Low, possibly optimistic) | Pennsylvania and commercial annuities — verify before changing |
+| D-28 | **CLOSED v6.06** (widened) | a commercial annuity gets no retirement relief in the thirteen states whose law gives it none — PA was one of them; Maryland's IRAs with it |
 | D-29 | **CLOSED v6.04** | — |
 | D-30 | **CLOSED v6.03** | — |
 | D-31 | **CLOSED v6.04** | not taken, disclosed: DC's senior deduction, the refunds Alabama and Oregon recapture, Oregon's 2026 cap |
 | D-32 | **OPEN** (Low, conservative) | Ohio's retirement income and joint filing credits and Utah's retirement credit — each state's note says not taken *(parser)* |
+| D-33 | **OPEN** (Low–Med, direction unmeasured) | *(added v6.06)* a Roth conversion draws annuity money pro rata, which a non-qualified annuity cannot do |
 
-**Open, in this file: D-4, D-11 (narrowed), D-13, D-15, D-16, D-17, D-18 (recurring), D-28, D-32; D-5 declined.** Non-tax open threads
+**Open, in this file: D-4, D-11 (narrowed), D-13, D-15, D-16, D-17, D-18 (recurring), D-32, D-33; D-5 declined.** *(D-28 closed and D-33 added at v6.06.)* Non-tax open threads
 re-homed the same day are in `ARCHITECTUREIssues.md` **E-29**.
 
 | Field | Value |
@@ -1330,7 +1331,13 @@ bands and cliffs (RI, NJ, CT, VA, ...), and the decedent keeps an age. Its per-p
 v5.95's per-person rules read the survivor correctly; the filing status is what is wrong. Direction: mixed by state (joint thresholds are
 higher — optimistic where a cliff or band binds). Engine B was fixed for the related age defect at v5.95. **Not measured. Medium.**
 
-## D-28 · Pennsylvania and commercial annuities — opened at v5.95
+## D-28 · Pennsylvania and commercial annuities — opened at v5.95 — ✅ CLOSED v6.06 (widened)
+
+> ✅ **CLOSED v6.06 (2026-10-12).** Pennsylvania taxes a commercial annuity as interest income at any age (2025 PA-40 instructions, Code 7D; Act 40 of
+> 2005), and a census of all 25 taxing states that give retirement relief found twelve more whose relief does not reach it — AR, DE, IL, IA, ME, MD, NY,
+> OK, WI; CO and MI (life annuities only, not distinguished); MS (unclear, conservative). Maryland's exclusion reaches no IRA money either. Rows carry
+> `reliefKinds` (`docs/SCOPE_D28_ANNUITY_RELIEF_V606.md`, fulfilled, repo-only; `qa/t69_annuity_relief.mjs`). New from the build: **D-33**. *(The entry
+> below is retained.)*
 
 The model's `annuity` category (Other accounts of type annuity) is exempt in Pennsylvania from 60, per person, as at v5.90. Pennsylvania's
 REV-636 points commercial annuities to the cost-recovery method; whether their earnings are taxable to a retiree is not settled from a primary
@@ -1394,3 +1401,11 @@ retirement-income measure, and whether a Roth conversion counts was not read; **
 each spouse needing $500 of qualifying income other than interest, dividends, distributions, rents and gains) — per-person income by type; and **Utah's
 retirement credit** (up to $450 each, only for a filer born on or before 31 December 1952) — the calculator has ages, not birth years. Conservative today (more
 state tax than the law), disclosed in each note. **Low — small amounts; an argument or two each.**
+
+## D-33 · A Roth conversion draws annuity money, which a non-qualified annuity cannot convert — opened at v6.06
+
+Found measuring v6.06 (`docs/SCOPE_D28_ANNUITY_RELIEF_V606.md` §6). The Other-accounts *Annuity* type rides inside the Traditional pool as a share
+(`annShareA`/`annShareB`, v5.26), and both engines take a Roth conversion pro rata from the whole pool, annuity included (`attributeRetIncome`: "a conversion
+or a draw leaves the whole leg: annuity by annShare"). A non-qualified annuity is not a traditional IRA or an eligible plan, so in law it cannot be converted
+(IRC §408A(d)(3)). The conversion's tax is charged now and the money then grows as Roth, so the net direction is not obvious and was not measured. Fixing it
+means converting from the non-annuity share only — an engine change with a scope. **Low–medium.**
