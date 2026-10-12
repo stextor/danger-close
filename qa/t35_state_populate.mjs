@@ -34,7 +34,7 @@ let _s = 42; Math.random = () => { _s = (_s * 1103515245 + 12345) & 0x7fffffff; 
 
 const VER = process.argv[2] || "v565";
 const _vt = Number(String(VER).replace(/[^0-9]/g, "")) || 0;
-const KNOWN_VERSIONS = ["v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604"];
+const KNOWN_VERSIONS = ["v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -49,7 +49,7 @@ const POPULATED = _v >= 565;   // v5.65 is the release that populates Connecticu
 // exclusions: each keeps its BASE and, on the v6.01 leg, expects that base on the state's schedule, computed HERE, independently of the app
 // (t65 §A's transcription). `CTX(flat)` turns a v6.00 figure (5 % × base) into the base's tax on Connecticut's schedule; §C recovers the
 // exclusion by inverting that schedule rather than dividing by 5 %. A version LIST.
-const BR2 = ["v601", "v602", "v603", "v604"].includes(VER);
+const BR2 = ["v601", "v602", "v603", "v604", "v605"].includes(VER);
 const _CTS = { single: [[10000, .02], [50000, .045], [100000, .055], [200000, .06], [250000, .065], [500000, .069], [null, .0699]],
                joint: [[20000, .02], [100000, .045], [200000, .055], [400000, .06], [500000, .065], [1000000, .069], [null, .0699]] };
 const _CTA = { single: [[56500, 5000, 25, 250], [105000, 5000, 25, 250], [200000, 5000, 90, 2700], [500000, 5000, 50, 450]],
@@ -63,7 +63,7 @@ const ctSched = (base, single = false) => { const k = single ? "single" : "joint
 // computed by qa/d30_ref.mjs (independent of the app) from the calculator's own record of the pinned call; a different base fails (NaN).
 // §C recovers the exclusion from that record's base and asserts the tax equals the reference on it, so the exclusion -> tax wiring stays
 // checked; RI-4 prices the no-exclusion base the same way. A version LIST.
-const D30L = ["v602", "v603", "v604"].includes(VER);
+const D30L = ["v602", "v603", "v604", "v605"].includes(VER);
 const CTX = (flat, single = false) => D30L ? d30Want(R, "CT", flat / 0.05, D30REC.last) : BR2 ? ctSched(flat / 0.05, single) : flat;
 // The schedule is strictly increasing in the base, so a tax names one base: bisection to a millionth of a dollar.
 const ctBase = (tax, single = false) => { let lo = 0, hi = 1e8; for (let i = 0; i < 200 && hi - lo > 1e-7; i++) { const m = (lo + hi) / 2; if (ctSched(m, single) < tax) lo = m; else hi = m; } return (lo + hi) / 2; };
@@ -382,7 +382,7 @@ const ctTax = (args) => (D30L ? D30REC.call : ST)({
       T("D-15 [v5.69]: and states the cliff is EXCLUSIVE — AGI must be less than the threshold",
         /less than the threshold/i.test(_rin));
       // v5.95 (D-12 Phase 3): both gaps are CLOSED — the note now says IRA income stays taxable and each $50,000 is capped per person.
-      if ((VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v604")) {
+      if ((VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v604" || VER === "v605")) {
         T("D-16 [v5.95]: the note says IRA distributions stay taxable (D-RI-1 closed)", /IRA distributions, which the statute does not cover, stay taxable/i.test(_rin));
         T("D-17 [v5.95]: and that each person's $50,000 is capped at that person's own income (D-RI-3 closed)", /capped at that person's own pension, annuity and employer-plan income/i.test(_rin));
       } else {
@@ -554,7 +554,7 @@ const ctTax = (args) => (D30L ? D30REC.call : ST)({
     T(`RI-1: the engine priced Rhode Island rows to compare (compared ${compared})`, compared > 0);
     // v5.95 (D-12 Phase 3): the engine now passes byPerson, which this re-price cannot rebuild from row fields. Rows still match where
     // no per-person rule binds; where one does, RI's per-person caps and IRA exclusion can only REMOVE exclusion, so the engine is higher.
-    if ((VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v604")) T(`RI-2 [v5.95]: rows re-price identically except where a per-person rule binds, and there the engine is HIGHER (mismatched ${mismatched} of ${compared}, lower ${lower})`, lower === 0 && mismatched > 0 && mismatched < compared);
+    if ((VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v604" || VER === "v605")) T(`RI-2 [v5.95]: rows re-price identically except where a per-person rule binds, and there the engine is HIGHER (mismatched ${mismatched} of ${compared}, lower ${lower})`, lower === 0 && mismatched > 0 && mismatched < compared);
     else T(`RI-2: every engine row re-prices identically through the module (mismatched ${mismatched} of ${compared})`, mismatched === 0);
     T(`RI-3: the household crosses the cliff \u2014 qualifying rows exist BOTH at/above it (${above}) and below it (${belowQual}), so the section can discriminate`,
       above > 0 && belowQual > 0);
@@ -574,8 +574,33 @@ const ctTax = (args) => (D30L ? D30REC.call : ST)({
     T("RI-5 [v5.69]: the Field Manual no longer says Rhode Island is not yet conditioned", !DOCS.includes("Rhode Island is not yet"));
     T("RI-6 [v5.69]: nor that SEVERAL income-limited exclusions are treated as unconditional (OPERATIONS \u00a7B2 lock)",
       !/several income-limited exclusions (are treated )?as unconditional/i.test(DOCS));
-    T("RI-7 [v5.69]: and names Rhode Island among the conditioned states, with the IRA money it still over-grants",
-      /Rhode Island at v5\.69/.test(DOCS) && /still applied to IRA money/i.test(DOCS));
+    if (_vt >= 605) {
+      // v6.05 (E-29 (e) — docs/SCOPE_V605_RI_FIELD_MANUAL.md): the v5.69 RI-7 asserted "still applied to IRA money", true at v5.69 and false
+      // from v5.95 (D-12: the per-person, per-plan-type path every in-app call takes), and its count "five" was false from v5.73 (Maine).
+      // RI-7 was the OPERATIONS §B2 lock that kept both in place. Inverted here and gated: the v6.04 leg below keeps the old RI-7.
+      T("RI-7 [v6.05]: names Rhode Island (v5.69) and Maine (v5.73) among the conditioned states, and says Rhode Island's exclusion never reaches IRA money",
+        /Rhode Island at v5\.69/.test(DOCS) && /Maine at v5\.73/.test(DOCS) && /never IRA money/.test(DOCS));
+      T("RI-8 [v6.05, extinction]: the Field Manual no longer says the Rhode Island exclusion is still applied to IRA money", !/still applied to IRA money/i.test(DOCS));
+      // RI-9: the manual's count is derived from the table, never typed — the next state given incomeLimitedInLaw fails here until the manual says so.
+      const _nw = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
+      const _nIL = Object.keys(R).filter(k => R[k] && R[k].incomeLimitedInLaw === true).length;
+      const _cnt = [...DOCS.matchAll(/\b([a-z]+) (?:state )?exclusions known to be income-limited in law/gi)].map(m => m[1].toLowerCase());
+      T(`RI-9 [v6.05, extinction]: every Field Manual count of the exclusions known to be income-limited in law (${_cnt.join(", ") || "none found"}) is the table's ${_nIL} (${_nw[_nIL]})`,
+        _cnt.length >= 1 && _cnt.every(w => w === _nw[_nIL]));
+      const _cond = Object.keys(R).filter(k => R[k] && R[k].exclTest !== undefined), _unnamed = _cond.filter(k => !DOCS.includes(`${R[k].name} at v`));
+      T(`RI-10 [v6.05]: every state whose exclusion is conditioned on income (${_cond.join(" ")}) is named in the Field Manual's list (missing: ${_unnamed.join(" ") || "none"})`,
+        _cond.length >= 1 && _unnamed.length === 0);
+    } else {
+      T("RI-7 [v5.69]: and names Rhode Island among the conditioned states, with the IRA money it still over-grants",
+        /Rhode Island at v5\.69/.test(DOCS) && /still applied to IRA money/i.test(DOCS));
+      if (["v604", "v605"].includes(VER)) {   // single-build on purpose: the stale count is pinned only on the leg that ran beside its fix (v6.05)
+        const _nw = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
+        const _nIL = Object.keys(R).filter(k => R[k] && R[k].incomeLimitedInLaw === true).length;
+        const _cnt = [...DOCS.matchAll(/\b([a-z]+) (?:state )?exclusions known to be income-limited in law/gi)].map(m => m[1].toLowerCase());
+        T(`RI-9 [KNOWN STALE v6.04]: the Field Manual counts ${_cnt.join(", ") || "none"} income-limited exclusions while the table holds ${_nIL}`,
+          _cnt.length >= 1 && _cnt.some(w => w !== _nw[_nIL]));
+      }
+    }
   } else {
     T("RI-5 [pre-v5.69]: the Field Manual said Rhode Island was not yet conditioned — true on this leg", DOCS.includes("Rhode Island is not yet"));
   }
