@@ -747,8 +747,11 @@ console.log("\nH. Provenance \u2014 what GitHub holds vs what the CHANGELOG clai
     // The lesson is the one this release cycle keeps re-teaching: when a check's INPUTS change,
     // the check can quietly start asserting something weaker than its name claims. Ask what it
     // would take to fail, every time it passes.
+    // ⚠ v6.05 (2026-10-12): the window ENDS at the next heading of ANY kind. It ended at the next `## v` heading, so an app release
+    //   shipped after ops packages (`## ops …` entries, which quote the build they leave current) read those entries too — found in the
+    //   v6.05 rehearsal, where H-1/H-2 passed against the PRIOR build's md5s quoted by the 2026-10-11 ops entries, the shape above again.
     const firstHeading = ch.indexOf("\n## v");
-    const end = firstHeading >= 0 ? ch.indexOf("\n## v", firstHeading + 1) : -1;
+    const end = firstHeading >= 0 ? ch.indexOf("\n## ", firstHeading + 1) : -1;
     const head = firstHeading >= 0 ? ch.slice(firstHeading, end > 0 ? end : undefined) : ch;
     const hashes = [...head.matchAll(/\b([0-9a-f]{32})\b/g)].map(m => m[1]);
     const version = (/^## (v[0-9][^\s—-]*)/m.exec(ch) || [, "?"])[1];

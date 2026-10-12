@@ -880,7 +880,9 @@ fi
 #   from the baseline — OPERATIONS §I recorded that P29 "cannot fire against an app release".
 if [ -z "${PRIOR_CLONE:-}" ] || [ ! -d "${PRIOR_CLONE:-/nonexistent}" ]; then
   SKIP=$((SKIP+1)); echo "  - SKIPPED: P56/P57 (K pre-upload) - set PRIOR_CLONE to a clone at the prior release"
-elif ! grep -q '^## v5' "$APP/github/CHANGELOG.md" 2>/dev/null || [ ! -f "$APP/github/src/DangerClose.jsx" ]; then
+# ⚠ v6.05: this read '^## v5' until 2026-10-12. The CHANGELOG has carried no v5 heading since the ops package of 2026-10-11 (second) archived
+#   v5.75-v5.99, so from then on every app release SKIPPED P56/P57 as "not an app release" (OPERATIONS §G, the major-version list).
+elif ! grep -q '^## v[0-9]' "$APP/github/CHANGELOG.md" 2>/dev/null || [ ! -f "$APP/github/src/DangerClose.jsx" ]; then
   SKIP=$((SKIP+1)); echo "  - SKIPPED: P56/P57 - '$APP' is not an app release (it ships no source), so K reads the clone either way"
 else
   out=$(node "$PKG_CHECK" "$APP" "$PRIOR_CLONE" 2>&1)

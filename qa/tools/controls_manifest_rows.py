@@ -149,10 +149,19 @@ def _b1_target():
     v5.68 rotation (2026-09-10); from then on B1 deleted a RETIREMENT-LIST line of the same name instead and
     reported the demonstration as holding - a demonstration of nothing. The ops package of 2026-10-11 (third)
     moved that line to the manifest archive, the anchor stopped matching, and B1 reported a FINDING, which is
-    how this was seen. Deriving the target keeps it on a real hash row at every release."""
+    how this was seen. Deriving the target keeps it on a real hash row at every release.
+
+    ⚠ v6.05 (2026-10-12): on an app release that ROTATES the dom entry, the pre-upload pool holds only the outgoing entry, whose row the
+    package has turned into an un-pooled line, so no dom entry qualified and B1 reported a FINDING about itself (first seen at the v6.05
+    ship). It now falls back to the first pool file whose hash row the manifest also names elsewhere - the same demonstration on another
+    row. Post-upload the dom entry qualifies again."""
     txt = open(os.path.join(PKG, MANS[0]), encoding="utf-8").read()
     for f, h in ROW.findall(txt):
         if re.fullmatch(r"dom_entry_v\d+\.jsx", f) and os.path.exists(os.path.join(POOL, f)):
+            return f
+    for f, h in ROW.findall(txt):
+        if os.path.exists(os.path.join(POOL, f)) and len(re.findall(r"^\|\s*`" + re.escape(f) + r"`\s*\|\s*`[0-9a-f]{32}`", txt, re.M)) == 1 \
+           and txt.count(f) >= 2:
             return f
     return None
 
