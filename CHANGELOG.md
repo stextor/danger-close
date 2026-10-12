@@ -1,5 +1,62 @@
 # Changelog
 
+## v6.07 — D-33: a Roth conversion, a QCD and an RMD never take non-qualified annuity money
+
+**A MODELLING release** (METHODOLOGY updated). `docs/SCOPE_D33_ANNUITY_CONVERSION_V607.md` (repo-only, fulfilled). Steve: "let's do D-33" — E-29 kept for
+separate builds — and he took every recommendation on the four decisions.
+
+**What was wrong.** The Other-accounts type *Annuity* (a commercial, non-qualified contract) rides inside each person's Traditional pool as a share, and
+through v6.06 the share was constant. Engines A (the strategy comparison), B (the Taxes tab) and C (the IRMAA tab), and the Roth tab's ladder, capped a
+Roth conversion at the whole pool and B and C capped a QCD there too — so annuity money was converted and given away, which the law does not allow
+(26 U.S.C. §408A(c)(5)(A), (e)(1) and (d)(3)(B) with §402(c)(8)(B): a Roth accepts a rollover only from an eligible retirement plan, and a §72 annuity
+is not one; §408(d)(8)(B): a QCD comes only from an IRA). Less visibly, every RMD and conversion left the pool pro rata with the share held fixed,
+draining annuity dollars the law never touches, so the model understated the annuity and overstated every later RMD — the related defect the census
+found. The ladder also counted annuity money in its own RMD (open since v5.44).
+
+**What changed.** The annuity dollars are carried. A conversion and a QCD are capped at the non-annuity balance; the RMD, any QCD above it and the
+conversion leave non-annuity dollars only (in B and C split between the spouses by each one's non-annuity balance after the RMD); the spending draw is
+unchanged — pro rata at the year's share; the share is re-taken every year on what is left. The state attribution gives a conversion no annuity money.
+The ladder carries each spouse's annuity dollars: its cap, its own RMD and the with-conversion card use the balance less them. **Engine D (the
+Withdrawal tab) and the Monte Carlo are untouched** — Engine D held the annuity in the Priority-1 pool all along (its function is byte-identical by AST).
+**A household with no annuity is untouched:** every changed expression reduces to v6.06's operand for operand, and t70 re-checks that bit for bit.
+The Field Manual says so in one sentence; METHODOLOGY gains a section and two cross-references.
+
+**Measured** (scratch probe on the staged engines; the shipped source differs from it only by the Field Manual sentence): on the Taxes tab as it opens ($70,000 a year of conversions, 2 % yield, the plan's spending draws), the example plan ($7,000 of annuity, spouse B): lifetime RMD $573,803 → $569,505, total tax $215,911 → $215,219, conversions and IRMAA unchanged; the Roth tab's with-conversion RMD cards A $44,991 → $44,842 and B $3,178 → $2,962, so "Combined RMDs reduced by" rises $365. With B's annuity at $150,000: lifetime RMD −$85,295, total tax −$12,415, conversions unchanged. With a pool 96 % annuity: Engines B and C convert $88,717 instead of $280,000, Engine A's "current" strategy $104,067 instead of $452,949.
+
+**Direction — not one way.** Ending the RMD drain lowers RMDs and the tax on them, so tax figures improve for a household holding an annuity: the model
+had been forcing annuity money out through RMDs the law does not require. Ending impossible conversions lowers tax now and what reaches the Roth, so the
+strategy comparison's estate figures move both ways (on the suite's Other-accounts household "current" rises $21,838 and the highest falls $43,880).
+
+**Tests.** New suite **`t70`** — **36** on v6.07, **33** on v6.06 (that leg pins the defect by the same methods): the attribution;
+an all-annuity pool converts and gives $0 in Engines A, B and C; Engines B and C's RMD and conversion every year to the dollar against an independent
+recursion seeded from the `retireStartBalances` primitives (two households), with the v6.06 rule reproduced on the prior leg; Engine A's RMD path the
+same way; v6.06 → v6.07 bit-identical for sixteen annuity-free runs of Engines B, C and D; the Roth tab's with-conversion cards to the dollar against an
+independent ladder recursion on two households, and the ladder table's own RMD on the second; the four D-33 expressions by source text. Controls
+`qa/tools/controls_v607_annuity_conv.py` (repo-only): **15 of 15** — fourteen planted defects, each turning its named checks red.
+**Existing pins moved by the example's $7,000 annuity, each re-gated per leg with its figure and reason (never loosened):** `t1` S-2 and S-8 (the
+ladder RMD and card expressions); `t23` B-1 and `t26` C-1, E-6, E-7, E-10 (the cards — E-10's "A unmoved" control now names the $149 move and why);
+`t24` (its statute model carries the annuity); `t25` §B, C-1 (Engine C's MAGI 2039–2043, one for one past §86 convergence and ×1.85 inside it), and E-3/E-4,
+which now measure the v5.47 HSA fix as an in-build difference because D-33 moved the absolute figures under them; `t40` A3, A5, B3, E1, E2, E4; `t42`
+D-3; `t57` A5 inverted (a conversion carries no annuity). `t56` F-2 compares to the cent on v6.07 legs: Engine B's per-leg conversion split adds terms in
+another order and Pennsylvania's 2042 state tax moved by 2 × 10⁻¹³ dollars. Parity declares `rothOther` (the only fingerprint holding an annuity) as moving;
+the nine others are byte-identical. `domdiff` gains bounded v6.06 → v6.07 branches (figures differ, rows the same, every moved figure one $K step).
+`t33`'s PINS carried (its P holds no annuity). `v607` registered by AST, the three Python suites and `t33`'s PINS by hand. The literal census of every
+suite string and regex against the new source and METHODOLOGY: only the checks named here change outcome.
+
+**Suite, run from the packaged copies:** 6,431 app checks across **69 app suites**, 0 failed, 0 DIED; MC parity 10/10; tooling `t21` 64,
+`domdiff` 37, `sets` 12 + 12; **GRAND 6,566**. Every current-leg count equals v6.06's but `t1` (181: S-8's v6.07 branch pins the carried annuity in two checks where v6.06's pinned the static share in one), `t69` (15 on both legs: its group B, the v6.05 → v6.06 differential, runs only in a folder holding the v6.05 module — by design, and it prints so) and the new `t70`; the v6.06 leg equals v6.06's own counts, `t69` and `t70` aside (33, pinning the defect). Run from the PACKAGED copies as two concurrent halves, the method approved at v5.87: run folders built by mk_runfolder.sh v606 v607 from the build workspace — a full clone of 9edbffd carrying exactly the packaged changes, each changed file's run-folder copy hash-checked against it (v6.06 resolved from history, commit 9232406) — each through a session-only copy of runsuite.sh whose one added line skips the other half's labels. Half A GRAND 6344, half B GRAND 222; none DIED. Source `ee557028aba1dfb1acb5bb647f6c5630` · built `5b444023ed72ebca40c9d0443b2ddf05` (`smoke_built` 22 passed, 0 failed).
+
+**Found at the build, fixed before the final run:** the first controls run missed one — reverting the ladder's own RMD on spouse A's annuity moved no
+card, because A's conversion window has closed by A's first RMD year. `t70` gained E-5, which reads the ladder table's MAGI, and the control fires on it. METHODOLOGY's new section was reworded while the first full run was under way (three sentences; no check reads them — the literal census), so half A
+was stopped and re-run whole on the final text; half B reads only the built page.
+
+**Limitations, disclosed:**
+- Engine A taxes the spending draw without draining it (v5.84), so in that engine the annuity share moves with RMDs and conversions only.
+- The QCD cap still admits employer-plan dollars, which in law must reach an IRA first.
+- The annuity's after-tax basis is still taxed as ordinary income; the draw order is unchanged.
+- **Found while scoping, not changed — filed as `MissingFeatures.md` D-34:** Engine D converts bucket money only, so a Traditional IRA entered under
+  Other accounts is never converted there, and its cap subtracts the Other-accounts RMD from bucket money.
+
 ## v6.06 — D-28 widened: a commercial annuity gets no retirement relief in the thirteen states whose law gives it none; Maryland's pension exclusion no longer reaches IRA money
 
 **A MODELLING release** (METHODOLOGY updated). `docs/SCOPE_D28_ANNUITY_RELIEF_V606.md` (repo-only, fulfilled). Steve: "start on D-28", then, asked how wide, "census

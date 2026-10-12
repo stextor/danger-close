@@ -536,7 +536,9 @@ carries no required distribution. Every engine excludes it from the RMD base; th
 in two places — the no-conversion card's seed and the ladder's own per-spouse distribution. Worth
 $483/yr on the example household. Left standing deliberately: correcting one site and not the other
 would put the tab's two RMD projections on disagreeing bases, the defect v5.41 was built to remove,
-so both sites are scheduled together.
+so both sites are scheduled together. *(Both closed: the cards at v5.47 — "The Roth tab's RMD cards no longer count annuity money"
+below — and the ladder's own distribution at v6.07, which carries each spouse's annuity dollars — "Annuity money is never converted"
+at the end of this paper.)*
 
 **§86 is one rule, in one place, for every engine (v5.77).** Taxable Social Security is computed by a
 single function written line for line from the IRS Social Security Benefits Worksheet (2025 Form 1040
@@ -1048,7 +1050,7 @@ pre-tax money but carries no RMD; recording it as Traditional (which v5.25 did, 
 approximation) would manufacture a legal obligation the owner does not have and force money out
 early. It therefore has its own type. The residual approximation is that an annuity is part
 after-tax basis, which a single label cannot express — Annuity treats all of it as ordinary income,
-the pessimistic direction. *(Its state treatment differs by state from v6.06 — see the v6.06 D-28 note in the state-tax section.)* A **qualified** annuity held inside an IRA does have an RMD, and the
+the pessimistic direction. *(Its state treatment differs by state from v6.06 — see the v6.06 D-28 note in the state-tax section. From v6.07 it is never converted, given by QCD or drawn by an RMD — see "Annuity money is never converted" at the end of this paper.)* A **qualified** annuity held inside an IRA does have an RMD, and the
 name-inference will mis-classify one; the field is user-correctable for exactly that reason, and any
 row it re-classifies is named in the review notice.
 
@@ -2108,4 +2110,49 @@ that eligible income only — at household level, as before; no new per-person c
 Every change raises tax or leaves it unchanged. Where an exclusion is capped, the annuity rarely moves the figure: other retirement income usually fills the
 cap, and Engine B reaches annuity money only through conversions and draws, never through RMDs, which carry none. ⚠ *Found while measuring, not changed:*
 both engines take a Roth conversion pro rata from the Traditional pool, annuity money included, although a non-qualified annuity cannot be converted —
-filed as `MissingFeatures.md` D-33. `qa/t69_annuity_relief.mjs`.)*
+filed as `MissingFeatures.md` D-33 *(fixed at v6.07 — see the next section)*. `qa/t69_annuity_relief.mjs`.)*
+
+## Annuity money is never converted, given by QCD or drawn by an RMD (v6.07)
+
+*(v6.07, D-33 — `docs/SCOPE_D33_ANNUITY_CONVERSION_V607.md`; `qa/t70_annuity_conversion.mjs`.)*
+
+**The law.** A Roth IRA accepts a rollover only from another Roth IRA, a 529 plan, or an *eligible retirement plan* (26 U.S.C. §408A(c)(5)(A),
+(e)(1)); §408A(d)(3)(B) takes that term from §402(c)(8)(B), which lists IRAs, individual retirement annuities, qualified trusts, §403(a) and §403(b)
+annuities and governmental §457(b) plans. A commercial (non-qualified, §72) annuity is none of them, so it **cannot be converted**. A qualified
+charitable distribution is "any distribution from an individual retirement plan" (§408(d)(8)(B)), so it cannot make a **QCD** either. And it carries
+**no RMD**, which the model has known since v5.26.
+
+**What the model did through v6.06.** The Other-accounts type *Annuity* rides inside each person's Traditional pool as a share, and the share was
+**constant**. Engines A (the strategy comparison), B (the Taxes tab) and C (the IRMAA tab) and the Roth tab's ladder capped a conversion at the whole
+pool, and B and C capped a QCD there too; so annuity money was converted and given away. Less visibly, every RMD and every conversion left the pool pro rata,
+annuity included, and with the share held fixed that drained annuity dollars the law never touches — understating what the annuity was worth and
+overstating every later RMD. The ladder also counted annuity money in its own RMD (open since v5.44).
+
+**What it does now.** The annuity dollars are carried. A conversion and a QCD are capped at the **non-annuity** balance (the RMD base each engine
+already computed); the RMD, any QCD above it and the conversion leave non-annuity dollars only — in Engines B and C split between the spouses by each
+one's non-annuity balance after the RMD; the **spending draw is unchanged**: it takes annuity money in proportion to what is left, which is what the
+state attribution has always reported for a draw. The share is re-taken every year on the dollars that remain (the same dollar-invariant rescale the
+first-death merge has used since v5.26). The state attribution gives a conversion no annuity money. The Roth tab's ladder carries each spouse's
+annuity dollars: its conversion cap and its own RMD use the balance less them, and the with-conversion RMD card subtracts them; the no-conversion card
+keeps its static share, which is exact there (nothing leaves the account before RMD age). **Engine D — the Withdrawal tab and everything that reads it —
+was never affected**: there the annuity sits in the Priority-1 pool and the conversion is bucket money only.
+
+**A household with no annuity is untouched** — every changed expression reduces to v6.06's operand for operand, and fourteen state and QCD
+combinations of two annuity-free households were bit-identical in Engines A, B and C when measured at the build. `t70` §D re-checks sixteen such
+runs of Engines B, C and D against v6.06 on every suite run.
+
+**Measured** (Taxes tab as it opens: $70,000/yr conversions, 2 % yield, the plan's spending draws). *The example household* ($7,000 of annuity, spouse
+B): lifetime RMD $573,803 → $569,505, total tax $215,911 → $215,219, conversions unchanged; IRMAA unchanged ($0). The Roth tab's with-conversion RMD
+cards move A $44,991 → $44,842 and B $3,178 → $2,962 — A holds no annuity, but B's smaller convertible balance moves more of each year's conversion
+onto A — so "Combined RMDs reduced by" rises $365. *The same household with B's annuity at $150,000*: lifetime RMD falls $85,295 and total tax $12,415;
+conversions are unchanged because $70,000 still fits the non-annuity balance. *A pool that is almost all annuity* (96 %): Engines B and C convert $88,717
+where they converted $280,000, and Engine A's "current" strategy $104,067 where it converted $452,949.
+
+**Direction — not one way.** Removing the RMD drain lowers RMDs and the tax on them, so the tax figures improve for a household holding an annuity: the
+model had been forcing annuity money out through RMDs the law does not require. Removing impossible conversions lowers the tax paid now **and** what
+reaches the Roth, so where conversions were large a strategy's estate figure can fall (the highest estate on the suite's Other-accounts household fell
+$43,880) while others rise. Neither direction was chosen; both follow from the law.
+
+**What is still approximate.** Engine A taxes the spending draw without draining it (v5.84), so in that engine the annuity share moves with RMDs and
+conversions only. The QCD cap admits employer-plan dollars, which in law must reach an IRA first (the attribution already sends a QCD to IRA dollars
+first). The annuity's after-tax basis is still taxed as ordinary income (the pessimistic simplification above). The draw order is unchanged.
