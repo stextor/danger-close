@@ -1048,7 +1048,7 @@ pre-tax money but carries no RMD; recording it as Traditional (which v5.25 did, 
 approximation) would manufacture a legal obligation the owner does not have and force money out
 early. It therefore has its own type. The residual approximation is that an annuity is part
 after-tax basis, which a single label cannot express — Annuity treats all of it as ordinary income,
-the pessimistic direction. A **qualified** annuity held inside an IRA does have an RMD, and the
+the pessimistic direction. *(Its state treatment differs by state from v6.06 — see the v6.06 D-28 note in the state-tax section.)* A **qualified** annuity held inside an IRA does have an RMD, and the
 name-inference will mis-classify one; the field is user-correctable for exactly that reason, and any
 row it re-classifies is named in the review notice.
 
@@ -2092,3 +2092,20 @@ Alabama, Missouri and Oregon read Engine A's federal tax as Engine A computes it
 deduction there is slightly larger. **Not modelled:** the District of Columbia's senior deduction (unsettled law; conservative); the refunds Alabama and
 Oregon recapture (the model has none); Oregon's 2026 cap (unconfirmed; the 2025 one is lower). `qa/t68_fed_deductions.mjs`, with the independent
 implementation extended in `qa/d30_ref.mjs`.)*
+
+*(v6.06, D-28 widened — `docs/SCOPE_D28_ANNUITY_RELIEF_V606.md`. **A commercial (non-qualified) annuity gets no retirement relief where the law gives
+it none.** The Other-accounts type *Annuity* is a contract bought outside an employer plan or IRA. Through v6.05 its withdrawals could use every state's
+retirement relief. Read at primary sources state by state (the scope's §0.2 cites each), the relief reaches it in twelve of the 25 taxing states that give
+any (Alabama, Connecticut, Georgia, Kentucky, Louisiana, New Jersey, Rhode Island, and — because their relief is against any income — Montana, New
+Mexico, South Carolina's 65+ deduction, Virginia and West Virginia) and not in thirteen: **Arkansas, Delaware, Illinois, Iowa, Maine, Maryland, New York,
+Oklahoma, Pennsylvania and Wisconsin** limit theirs to employer plans and IRAs (Pennsylvania taxes it as interest income at any age; Iowa's rule names
+"nonqualified annuities"; New York's names "an annuity contract purchased with your own funds"); **Colorado and Michigan** admit it only once it pays out
+for life, which the model cannot tell from withdrawals, so it is taken as not qualifying (conservative); and **Mississippi**'s regulation speaks of
+annuities from a "retirement system or plan" without saying whether a privately bought contract is one, so the conservative reading is taken. Those rows
+carry `reliefKinds`, the categories their relief reaches, and with the per-person split (every in-app call) the exclusion or exemption is netted against
+that eligible income only — at household level, as before; no new per-person cap. **Maryland's pension exclusion reaches no IRA money either**
+(Tax-Gen. §10-209: plans an employer established, qualified under §401(a), §403 or §457(b)), disclosed as not modelled until now and modelled from v6.06.
+Every change raises tax or leaves it unchanged. Where an exclusion is capped, the annuity rarely moves the figure: other retirement income usually fills the
+cap, and Engine B reaches annuity money only through conversions and draws, never through RMDs, which carry none. ⚠ *Found while measuring, not changed:*
+both engines take a Roth conversion pro rata from the Traditional pool, annuity money included, although a non-qualified annuity cannot be converted —
+filed as `MissingFeatures.md` D-33. `qa/t69_annuity_relief.mjs`.)*
