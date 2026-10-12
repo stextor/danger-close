@@ -36,9 +36,16 @@
 #   Hence the third argument. It is required, and it is checked, because the two-leg comparison IS
 #   the regression suite and a run folder without it is not a run folder.
 #
-# ⚠ ONE `npm install`, NOT SEVERAL. A later `npm install <one-package> --no-save` PRUNED `jsdom`
+# ⚠ ONE INSTALL, NOT SEVERAL. A later `npm install <one-package> --no-save` PRUNED `jsdom`
 #   mid-session at v5.67 and killed six suites a SECOND time in the same day. Every dependency the
-#   suite and the parser toolkit need is on the single line below; do not add to it incrementally.
+#   suite and the parser toolkit need is in ONE committed lock; do not add to it incrementally.
+#
+# ⚠ FROM THE ops package of 2026-10-12 (E-29 (i), docs/SCOPE_E29_BCGI_OPS.md): THE HARNESS IS LOCKED. Through v6.07 this
+#   was `npm install esbuild react react-dom d3 xlsx mammoth jsdom acorn acorn-jsx acorn-walk` with no versions, so every
+#   run folder resolved the suite's own tools fresh — two sessions could run the suite on different jsdom versions, and
+#   the run folder did not even use the app's own resolution (mammoth 1.13.0 against the app lock's 1.8.x). Now
+#   `qa/harness/package.json` + `package-lock.json` pin the whole tree — the 184 packages v6.07's suite ran green on —
+#   and `npm ci` installs exactly that. To move a harness version: change the pair, run the full suite, ship them together.
 #
 # WHAT IT DOES NOT DO. It does not run the suite (use `qa/runsuite.sh <prior> <cur>` from the run
 # folder's `qa/`), it does not build `index.html` (§N), and it asserts nothing — it is setup, and it
@@ -139,19 +146,24 @@ say "assembled $(ls "$OUT/qa" | wc -l | tr -d ' ') files into $OUT/qa"
 [ -f "$OUT/qa/tools/fixture/households.mjs" ] || die "qa/tools/fixture/households.mjs did not land — t29's fixtures resolve from tools/ first."
 
 # ── dependencies: ONE install ────────────────────────────────────────────────────────────────
-say "npm install (single call — see the header)"
-( cd "$OUT" && npm install esbuild react react-dom d3 xlsx mammoth jsdom acorn acorn-jsx acorn-walk \
-    --no-audit --no-fund --silent ) || die "npm install failed."
+say "npm ci from qa/harness/ (the locked harness — see the header)"
+for f in package.json package-lock.json; do
+  [ -f "$REPO/qa/harness/$f" ] || die "qa/harness/$f is missing — the harness lock cannot be installed."
+  cp "$REPO/qa/harness/$f" "$OUT/$f"
+done
+( cd "$OUT" && npm ci --no-audit --no-fund --silent ) || die "npm ci from the harness lock failed."
+_jsdom="$(node -p "require('$OUT/node_modules/jsdom/package.json').version")"
+_want="$(node -p "require('$REPO/qa/harness/package.json').dependencies.jsdom")"
+[ "$_jsdom" = "$_want" ] || die "jsdom $_jsdom installed, the harness lock pins $_want."
+say "harness: jsdom $_jsdom, esbuild $(node -p "require('$OUT/node_modules/esbuild/package.json').version"), acorn $(node -p "require('$OUT/node_modules/acorn/package.json').version") (locked)"
 for m in jsdom acorn acorn-jsx acorn-walk esbuild react react-dom d3 xlsx mammoth; do
   [ -d "$OUT/node_modules/$m" ] || die "'$m' is not installed after npm install. Do NOT repair this with a second
     'npm install <pkg> --no-save' — that is what pruned jsdom and killed six suites at v5.67."
 done
 
-# ⚠ ADDED 2026-09-15 (SCOPE_TOOLING_GAPS_V572 item 4). The install above has no --no-save (see the
-#   header: a --no-save install pruned jsdom), so npm REWRITES package.json and writes its own
-#   package-lock.json. The run folder then differs from the committed scaffold, and package_check G-1
-#   correctly names both files — it did at both v5.72 checks, and they were reverted by hand. Put the
-#   committed copies back AFTER the one install. node_modules is not touched, so nothing is pruned.
+# ⚠ ADDED 2026-09-15 (SCOPE_TOOLING_GAPS_V572 item 4). The run folder's root package.json and package-lock.json must be the
+#   committed SCAFFOLD's, or package_check G-1 names both files. From 2026-10-12 the install puts the HARNESS pair there (npm ci
+#   needs them at the root), so the scaffold copies go back AFTER the one install. node_modules is not touched, so nothing is pruned.
 cp "$REPO/package.json" "$OUT/package.json"
 if [ -f "$REPO/package-lock.json" ]; then cp "$REPO/package-lock.json" "$OUT/package-lock.json"; else rm -f "$OUT/package-lock.json"; fi
 for f in package.json package-lock.json; do

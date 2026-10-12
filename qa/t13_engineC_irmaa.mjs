@@ -131,6 +131,7 @@ window.IS_REACT_ACT_ENVIRONMENT = true;
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
 let pass = 0, fail = 0;
+const DOMAT = {};   // §E reads the DOM's death-year MAGI ($K) to tie the engine-level counterfactual to the rendered tab
 const ck = (name, ok, detail = "") => {
   if (ok) { pass++; console.log(`  \u2713 ${name}`); }
   else { fail++; console.log(`  \u2717 ${name}${detail ? " \u2014 " + detail : ""}`); }
@@ -206,8 +207,10 @@ try {
   ck("constants: Single thresholds are half MFJ at tier 1 (the gap the defect lived in)",
     MFJ[0] === SGL[0] * 2, `SGL ${SGL[0]} vs MFJ ${MFJ[0]}`);
 
-  // The smaller check is what a survivor LOSES; 85% of it is what MAGI loses (the engine's flat
-  // SS-taxability approximation, which is pre-existing and out of scope here).
+  // The smaller check is what a survivor LOSES; 85% of it is what MAGI loses HERE because this household is past §86 convergence
+  // (Engine C has used §86 since v5.43 — the old note called it "the engine's flat approximation", true only before then).
+  // ⚠ ops 2026-10-12 (E-29 (b), docs/SCOPE_E29_BCGI_OPS.md): what the DOM check below READS is the year-over-year drop, which
+  // also carries the rollover's RMD change and a year's drift; §E at the end isolates each term at engine level, to the cent.
   const ssA = g.getSSA(), ssB = g.getSSB();
   const smallerAnnual = Math.min(ssA, ssB) * 12;
   const expectedMagiDropK = (smallerAnnual * 0.85) / 1000;
@@ -231,7 +234,7 @@ try {
     // Pre-fix MAGI drifted across this boundary by a couple of $K in either direction, so a bare
     // "MAGI drops" assertion would not discriminate — the MAGNITUDE is the test.
     const dropK = before.magi - at.magi;
-    ck(`${label} [EXTINCTION]: MAGI falls at the first death by the smaller SS check (85% taxable)`,
+    ck(`${label} [EXTINCTION]: MAGI falls year over year at the first death by about the smaller SS check (85% taxable), ±$4K for the rollover's RMD change and a year's drift — §E isolates each to the cent`,
       Math.abs(dropK - expectedMagiDropK) <= 4,
       `${d - 1} $${before.magi}K -> ${d} $${at.magi}K = $${dropK}K, expected ~$${expectedMagiDropK.toFixed(1)}K`);
     ck(`${label}: MAGI does not collapse — the LARGER check is retained`,
@@ -283,6 +286,7 @@ try {
     ck(`${label}: the survivor treatment persists to the end of the horizon`,
       yrs.every(y => rows[y].marked === true) && Math.abs(last.surcharge - SUR[1]) <= 60,
       `${yrs.length} survivor years, last $${last.surcharge}`);
+    DOMAT[d] = at.magi;
     return { before, at, after, dropK };
   };
 
@@ -337,6 +341,55 @@ try {
   }
 } catch (e) {
   fail++; console.log(`  \u2717 t13 run threw: ${String(e).slice(0, 400)}`);
+}
+
+// ── §E · ENGINE LEVEL — the first death's effect, isolated by a counterfactual and decomposed to the cent ─────────────────────
+// ops 2026-10-12 (E-29 (b), docs/SCOPE_E29_BCGI_OPS.md). The DOM check above reads a year-over-year drop in $K. Here the SAME two
+// households are run through Engine C directly (the module, not the bundle): the death effect is the death year's MAGI with no
+// death (both lives past the horizon) less the same year's MAGI with it. That difference must be exactly
+//   SS term  — the same no-death household with the smaller check removed: 85% of the smaller annual check, past §86 convergence;
+//   RMD term — the RMD change the rollover causes (the survivor's divisor on the merged balance), read off the two runs' rows.
+// Measured at v6.07: case 1 $17,082.82 = $13,260.00 + $3,822.82; case 2 $12,653.31 = $13,260.00 − $606.69. The sign of the RMD
+// term follows the survivor's age: case 1's survivor is younger (a larger divisor, a smaller RMD), case 2's older.
+try {
+  const { pathToFileURL } = await import("url");
+  const { existsSync } = await import("fs");
+  const _bundle = process.argv[2] || "./dom_bundle.cjs";
+  const _tag = (/dom_(v\d+)\.cjs$/.exec(_bundle) || [])[1];
+  const _mod = new URL(_tag ? `./app_${_tag}.mjs` : "./app_testable.mjs", import.meta.url);
+  ck("E-0: the engine module beside this bundle exists (app_testable.mjs for dom_bundle.cjs)", existsSync(_mod), _mod.pathname);
+  const { __g: G, __engines: EN } = await import(pathToFileURL(_mod.pathname).href);
+  const BASE = JSON.parse(JSON.stringify(G.PORTFOLIO()));
+  const run = (cfg, zeroB) => {
+    const P = JSON.parse(JSON.stringify(BASE));
+    P.lifeExpA = cfg.lifeExpA; P.lifeExpB = cfg.lifeExpB;
+    P.incomeSources.pension = { ...(P.incomeSources.pension || {}), amount: cfg.pension };
+    if (zeroB) P.incomeSources.ssB = { ...P.incomeSources.ssB, planned: 0 };
+    G.applyLoadedData({ portfolio: P });
+    const tl = G.PLAN_TIMELINE(), ry = tl.targetRetireYear;
+    const S = G.withdrawalPlanSeries({ retireYear: ry, rothAmount: 70000, scenarioPreset: "bull" });   // the tab's defaults
+    const C = EN.computeIrmaaPlan({ retireYear: ry, rothAmount: 70000, qcdAnnual: 0, taxYield: 2.0, gainByYr: S.gainByYr, ordDrawByYr: S.ordDrawByYr });
+    return { by: Object.fromEntries(C.rows.map(r => [r.yr, r])), d: C._deathYr1, ssB: G.getSSB(), ssA: G.getSSA() };
+  };
+  const cents = x => Math.round(x * 100) / 100;
+  for (const [label, cfg, d] of [["case 1 (A dies)", { lifeExpA: 80, lifeExpB: 87, pension: 9600 }, 2044], ["case 2 (B dies)", { lifeExpA: 87, lifeExpB: 76, pension: 9600 }, 2042]]) {
+    const dead = run(cfg), alive = run({ ...cfg, lifeExpA: 99, lifeExpB: 99 }), noB = run({ ...cfg, lifeExpA: 99, lifeExpB: 99 }, true);
+    const smaller = Math.min(dead.ssA, dead.ssB) * 12;
+    ck(`${label} E-1: the engine's first death is ${d}, the counterfactual has none in it, and the smaller check is B's`,
+      dead.d === d && alive.d > d && dead.ssB < dead.ssA && noB.ssB === 0, `death ${dead.d}, counterfactual ${alive.d}`);
+    const effect = alive.by[d].magi - dead.by[d].magi, ss = alive.by[d].magi - noB.by[d].magi, rmd = alive.by[d].rmd_y - dead.by[d].rmd_y;
+    ck(`${label} E-2: the SS term is 85% of the smaller annual check to the cent ($${cents(0.85 * smaller)}) — the household is past §86 convergence`,
+      Math.abs(ss - 0.85 * smaller) < 0.005, `$${cents(ss)}`);
+    ck(`${label} E-3: the death effect is EXACTLY the SS term plus the rollover's RMD change (to the cent)`,
+      Math.abs(effect - (ss + rmd)) < 0.005, `$${cents(effect)} vs $${cents(ss)} + $${cents(rmd)}`);
+    ck(`${label} E-4: the RMD term has the survivor's sign — ${d === 2044 ? "a younger survivor lowers the RMD (positive)" : "an older survivor raises it (negative)"}`,
+      d === 2044 ? rmd > 0 : rmd < 0, `$${cents(rmd)}`);
+    ck(`${label} E-5: the engine run IS the tab's — its death-year MAGI renders as the DOM row's $${DOMAT[d]}K`,
+      DOMAT[d] !== undefined && Math.round(dead.by[d].magi / 1000) === DOMAT[d], `engine $${cents(dead.by[d].magi)}, DOM $${DOMAT[d]}K`);
+    console.log(`  · ${label}: death effect $${cents(effect)} = SS $${cents(ss)} + RMD $${cents(rmd)}; year over year $${cents(dead.by[d - 1].magi - dead.by[d].magi)}`);
+  }
+} catch (e) {
+  fail++; console.log(`  \u2717 t13 §E threw: ${String(e).slice(0, 400)}`);
 }
 
 console.log(`\nt13 SUITE: ${pass} passed, ${fail} failed`);
