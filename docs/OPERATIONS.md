@@ -958,6 +958,12 @@ now read any single-digit major (`v[0-9]_*`). Found by reading a SKIPPED line ra
 is not a passing one, applied. **The census that should have caught it was a list, not a parser run**; the 2026-10-11 census was both (AST over
 every JS literal in `qa/`, and a text search of the shell and Python tooling, which acorn cannot parse) and found these two sites plus `E-2`'s
 printed label, nothing else live.
+⚠ **A third site, found at the v6.05 ship (2026-10-12) and fixed in that package.** `package_check_controls.sh` decides whether P56/P57 can run
+by asking whether the package's `CHANGELOG.md` has a line matching `^## v5`. That was still TRUE when the census above ran, so the pattern did not
+look broken; the ops package of 2026-10-11 (second) — later the same day — archived v5.75–v5.99 to the repo, after which the CHANGELOG carries no v5
+heading and every app release would SKIP P56/P57 with *"is not an app release (it ships no source)"*. It was seen at the first app release after,
+by reading that SKIPPED line. Now `^## v[0-9]`. The lesson is the one above with a time axis: **a pattern that matches by luck today is a version
+assumption all the same** — moving history out of a file can break a check that reads it.
 
 
 
@@ -1177,6 +1183,10 @@ gate nothing cross-references is the failure this section already records four t
   `66db033` was titled "v5.53" while its `src/DangerClose.jsx` still hashed to **v5.52's** source,
   because the built artifact was pushed ahead of the source. Offline, it **skips loudly**; it never
   passes blind.
+  ⚠ *Its window was too wide until v6.05 (2026-10-12):* it read from the newest `## v` heading to the NEXT `## v` heading, so an app
+  release shipped after ops packages also read their `## ops` entries, which quote the build they leave current. In the v6.05 rehearsal
+  (a simulated upload, so GitHub still served v6.04) H-1 and H-2 passed on v6.04's md5s quoted by the 2026-10-11 ops entries, and the
+  provenance controls P20/P21 could not fire. The window now ends at the next heading of any kind.
 - **§I · scope status-line sweep.** Lists every `docs/SCOPE_*.md` that carries neither a retirement
   marker nor a place on the OPEN allowlist held inside the check itself. It **reports; it does not
   decide** — see the warning below.

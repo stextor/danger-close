@@ -7,7 +7,7 @@
 
 ## Census at v5.97 (2026-10-08) — read this first
 
-*E-29 added 2026-10-11 (ops package, third): open threads whose only pooled record was a document leaving the pool. Statuses above are as of v5.97 except E-29's.*
+*E-29 added 2026-10-11 (ops package, third): open threads whose only pooled record was a document leaving the pool. Statuses above are as of v5.97 except E-29's, which is as of v6.05 (2026-10-12): (d) and (k) closed by Steve's decisions, (e) and (f) fixed.*
 
 **Method.** One pass per register on 2026-10-08 against the shipped v5.97 (repo `2cfe5e2`, source `4157137a…`): every ID the register defines, what it says, what the CHANGELOG and archives record, and — for anything still open — the current source or suite, read by parser where a count is claimed. The body below is the record as written; where a marker in it disagrees with this table, **this table is current**.
 **E-15 is two items.** The ID was given twice: **E-15a** below is the MC-parity/ACA entry, **E-15b** the `taxOrd` entry. Cite them that way; neither is renumbered, because other documents cite both by the bare ID.
@@ -43,7 +43,7 @@
 | E-26 | **OPEN** | no build identity in the export or the built page beyond the version |
 | E-27 | **ACCEPTED** | run the controls twice (OPERATIONS §I) |
 | E-28 | **FIXED** (both passages) | — |
-| E-29 | **OPEN** (eleven threads, each Low) | re-homed 2026-10-11 from documents leaving the pool — see its entry |
+| E-29 | **OPEN** (seven of eleven threads, each Low) | re-homed 2026-10-11 from documents leaving the pool; (d) and (k) closed by decision and (e) and (f) fixed at v6.05 — see its entry |
 
 **Stale figures below, left as written:** E-6 "imported by only four files"; E-7 "202"; E-11 "144,008" and "12,151 lines"; the summary table (frozen at the v5.30 additions, with E-14 still Open/High); E-15a "parity 9/9" and "scheduled to fold into the A3 release"; E-10 "CLOSED … must not be re-retired"; E-19's `qa/controls.sh`; E-21's annotation (omits v5.84); E-22 and E-25 (no fix notes). Line addresses in E-4, E-5, E-8, E-9, E-12, E-15a, E-23 and E-26 are v5.29/v5.73 addresses.
 
@@ -1057,12 +1057,23 @@ and found by an independent second read before the package shipped. Each is smal
   been announced since 2026-09-14; the zero-candidate case — a pool file renamed from its repo path (`tools_fixture.jsx`,
   `qa-baseline-README.md`) — is still skipped without a line. Recorded 2026-09-07 as "the fix, if it ever matters, is a rename map rather
   than a looser match. Not built."
-- **(d) The v5.69 Roth best-cell move is disclosed, not pinned.** One of four Rhode Island households measured at v5.69 changed its best
+- ✅ **CLOSED by decision (Steve, 2026-10-12): leave it disclosed, unpinned.** METHODOLOGY and the v5.69 CHANGELOG entry keep the disclosure; no
+  assertion is added. *(The entry as re-homed is retained:)* **(d) The v5.69 Roth best-cell move is disclosed, not pinned.** One of four Rhode Island households measured at v5.69 changed its best
   Roth cell (`fill12` → `current`); CHANGELOG and METHODOLOGY disclose it and no assertion pins it. The recommendation given was *leave it
   disclosed, unpinned*. **No decision is recorded** — Steve's to confirm or overrule.
-- **(e) The v5.69 Field Manual wording.** Steve was asked (2026-09-11) to read the two rewritten Rhode Island sentences; no answer is recorded.
+- ✅ **FIXED v6.05 (2026-10-12; Steve: "fix in a small v6.05").** Read against the v6.04 source, both sentences were false: they counted **five**
+  income-limited exclusions while `STATE_RULES` holds six (Maine, listed at v5.72 and conditioned at v5.73), and the second said Rhode Island's
+  exclusion *"is still applied to IRA money"* — false from v5.95 (D-12), since every in-app call passes the per-person split. `t35` RI-7 asserted
+  the IRA clause on every leg from v5.69, an OPERATIONS §B2 lock, which is why the sentence outlived v5.95. Both sentences corrected; RI-7 inverted
+  and gated per build, with RI-9 deriving the count from the table (`docs/SCOPE_V605_RI_FIELD_MANUAL.md`, repo-only).
+  *(The entry as re-homed is retained:)* **(e) The v5.69 Field Manual wording.** Steve was asked (2026-09-11) to read the two rewritten Rhode Island sentences; no answer is recorded.
   They are locked by `t35`'s RI-5…RI-7 (acorn walk). **Steve's read**, or close this item.
-- **(f) METHODOLOGY contradicts itself on the exclusion states — found 2026-10-11, not fixed.** It still says *"Thirteen of the nineteen
+- ✅ **FIXED v6.05** — the sentence is rewritten and the correction recorded where it stands. Three more METHODOLOGY lines of the same kind were
+  corrected with it: the income-conditioning section's "five states" (Maine is the sixth), the v5.69 Rhode Island paragraph's unmodelled points
+  (three modelled from v5.95), and the *Not modeled* list's "Rhode Island's IRA distinction and per-person cap" (modelled from v5.95).
+  The Field Manual carried the same sentence in its state-age paragraph, beside "One threshold remains deliberately NOT applied" (Georgia's
+  62–64 tier, disclosed in its note since v5.87, was missing); found at the release's own re-read and corrected too (`t52` F-1–F-3).
+  *(The entry as re-homed is retained:)* **(f) METHODOLOGY contradicts itself on the exclusion states — found 2026-10-11, not fixed.** It still says *"Thirteen of the nineteen
   exclusion states remain unverified"* directly before its own v5.86 update saying D-18 read every exclusion state's figure against a
   primary source. The update is right. A wording fix for the next release that touches METHODOLOGY.
 
@@ -1084,9 +1095,11 @@ and found by an independent second read before the package shipped. Each is smal
   Field Manual wording; checklist rendering with a real item id and inherited skin names other than `"constructor"`; anything in a real
   browser; claude.ai's storage method list from a primary source; whether any suite sets a `location` global. **The next Phase 1 run starts
   from that list** (`docs/FlawsToFix-v5_69-Phase1.md`, repo).
-- **(k) A v5.72 behaviour change was "flagged for the maintainer" and never acknowledged.** The import-hardening work made an unsaved
+- ✅ **CLOSED by decision (Steve, 2026-10-12): keep it.** An unsaved My Data draft survives a rejected import; `t38` I-5 pins it (its pre-v5.72 leg
+  pins the old drop as a known defect). *(The entry as re-homed is retained:)* **(k) A v5.72 behaviour change was "flagged for the maintainer" and never acknowledged.** The import-hardening work made an unsaved
   My Data draft survive a rejected import — beyond the scope's letter. Its only record is the v5.72-era handover entry, repo-only in
   `docs/CHANGELOG_ARCHIVE_v5_60_to_v5_74.md` since 2026-09-28. **Steve's to accept or reverse** (found while tracing; not from a document
   leaving in this package).
 
-**Severity: low** for all eleven. (a), (b), (g), (h) and (i) are the ones that would take a release or a scope.
+**Severity: low** for all eleven. (a), (b), (g), (h) and (i) are the ones that would take a release or a scope. **Open at v6.05:** (a), (b), (c), (g),
+(h), (i), (j).
