@@ -468,10 +468,22 @@ if (CLONE && existsSync(CLONE)) {
   const ghSet = new Set(ghFiles);
   const orphans = [];
   const ambiguous = [];
+  // ⚠ ops 2026-10-12 (E-29 (c), docs/SCOPE_E29_BCGI_OPS.md): A NAME THE BASENAME CANNOT RESOLVE IS RESOLVED THROUGH THE MANIFEST.
+  //   Through v6.07 a pool name with NO repo basename — a file renamed for the flat pool (`tools_fixture.jsx` is
+  //   `qa/tools/fixture/fixture.jsx`, `qa-baseline-README.md` is `qa/qa-baseline/README.md`) — was skipped WITHOUT A LINE, and a
+  //   name with several (`README.md`, `index.html`) was skipped with one. Four pool files E-1b could not see. The manifest's hash
+  //   rows already carry each file's repo path in their third cell; that is the rename map, kept where the rows are rolled, not
+  //   in this file. It is read from the package's own manifest first (the copy that will stand), then the clone's. A mapped path
+  //   is used only if the clone holds it AND, for a multi-path name, it is one of the candidates; anything still unresolved is
+  //   NAMED below, never skipped silently. Negative-controlled by P72 (renamed) and P73 (multi-path) in package_check_controls.sh.
+  const _mText = [join(KN, "PROJECT_KNOWLEDGE_INDEX.md"), join(GH, "PROJECT_KNOWLEDGE_INDEX.md"), join(CLONE, "PROJECT_KNOWLEDGE_INDEX.md")]
+    .filter(existsSync).map(f => readFileSync(f, "utf8"))[0] || "";
+  const pathOf = new Map([..._mText.matchAll(/^\|\s*`([^`\/]+)`\s*\|\s*`[0-9a-f]{32}`\s*\|\s*`([^`]+)`/gm)].map(m => [m[1], m[2]]));
+  const unresolved = [], viaManifest = [];
   for (const k of knFiles) {
     // The versioned source is renamed across the two destinations by design; E-2 covers it.
     if (/^DangerClose-v\d_\d+\.jsx$/.test(k)) continue;
-    const cands = byBase.get(k) || [];
+    let cands = byBase.get(k) || [];
     // Unambiguous counterpart only. A basename matching several repo paths cannot be resolved
     // from here, and guessing which one was meant is how a check starts lying.
     //
@@ -485,7 +497,11 @@ if (CLONE && existsSync(CLONE)) {
     // early warning that E-1b has gone partly blind. D-3 is what catches the duplicate itself.
     // Repairing the matcher to disambiguate by content is deliberately left to its own scope —
     // it is a real change to a gate that has no controls of its own yet.
-    if (cands.length !== 1) { if (cands.length > 1) ambiguous.push(`${k} (${cands.length} paths)`); continue; }
+    if (cands.length !== 1) {
+      const mp = pathOf.get(k);
+      if (mp && existsSync(join(CLONE, mp)) && (cands.length === 0 || cands.includes(mp))) { viaManifest.push(`${k} -> ${mp}`); cands = [mp]; }
+      else { if (cands.length > 1) ambiguous.push(`${k} (${cands.length} paths)`); else unresolved.push(k); continue; }
+    }
     const repoPath = cands[0];
     // ⚠ The package is REMOVING this path, so there is nothing to ship to it. Checked BEFORE the
     // md5 comparison deliberately: a deletion is owed nothing whether the bytes match or not, and
@@ -498,9 +514,11 @@ if (CLONE && existsSync(CLONE)) {
   ck("E-1b: every knowledge/ file that DIFFERS from its repo counterpart also ships to github/",
     orphans.length === 0, orphans.join(" | "));
   // Not a check — a disclosure. E-1b did not evaluate these, and saying so is the whole point.
-  console.log(ambiguous.length
-    ? `     \u26a0 E-1b SKIPPED ${ambiguous.length} ambiguous basename(s), NOT evaluated: ${ambiguous.join(", ")}`
-    : "     (E-1b evaluated every knowledge/ file \u2014 no ambiguous basenames)");
+  if (viaManifest.length) console.log(`     (E-1b resolved ${viaManifest.length} through the manifest's path cell: ${viaManifest.join(", ")})`);
+  console.log(ambiguous.length || unresolved.length
+    ? `     \u26a0 E-1b SKIPPED ${ambiguous.length + unresolved.length} name(s), NOT evaluated` +
+      (ambiguous.length ? ` \u2014 ambiguous: ${ambiguous.join(", ")}` : "") + (unresolved.length ? ` \u2014 no repo path found: ${unresolved.join(", ")}` : "")
+    : "     (E-1b evaluated every knowledge/ file \u2014 none ambiguous, none unresolved)");
 } else {
   skipped("E-1b: knowledge/ files that differ from the repo but are missing from github/",
     "no clone given — this is the check that caught nothing at v5.47");
@@ -1227,8 +1245,33 @@ console.log("\nK. Manifest — PROJECT_KNOWLEDGE_INDEX.md vs the clone and the p
         const unlisted = readdirSync(POOL).filter(f => !M.includes(f));
         ck("K-9: every pool file is named somewhere in the manifest (\u00a7G: list every file explicitly)",
           unlisted.length === 0, unlisted.join(", "));
+
+        // K-12 (ops 2026-10-12, E-29 (g), docs/SCOPE_E29_BCGI_OPS.md): THE MANIFEST -> POOL DIRECTION, FOR EVERY ROW. K-8 checks hashed
+        // rows with a plain name; K-9 runs pool -> manifest. A row naming a file that has LEFT the pool, with no hash, was seen by
+        // nothing — 22 of 24 stale rows on 2026-09-04 were of that kind, and 50 rows carried no word saying they were repo-only when
+        // this was built. Every row of the three indexing sections (`| \`name\` | …`; the Retirement list and every other section are
+        // excluded — they name files that have left on purpose) must name a pool file OR say why not, in one of two exact phrases:
+        // `repo-only`, or `in neither the repo nor the pool` (a history row for a file that was never committed). A closed
+        // vocabulary, not a loose match: the naive form fires on every legitimate repo-only row, and a loose one would excuse a stale
+        // row that merely mentions the repo. ⚠ The ID K-10 that E-29 proposed is taken (TESTING's Current-build line), as is K-11.
+        // Negative-controlled by P74 (an unmarked row for a file not in the pool must fire) and P75 (the same row marked must not).
+        {
+          const SECS = ["## Test and harness file hashes", "## Everything else in knowledge", "## Audit findings and scopes"];
+          const poolSet = new Set(readdirSync(POOL)), stale = [];
+          let inSec = false;
+          for (const line of M.split("\n")) {
+            if (line.startsWith("## ")) { inSec = SECS.some(h => line.startsWith(h)); continue; }
+            if (!inSec) continue;
+            const m = /^\|\s*`([^`]+)`\s*\|(.*)$/.exec(line);
+            if (!m || poolSet.has(m[1])) continue;
+            if (/repo-only|in neither the repo nor the pool/i.test(m[2])) continue;
+            stale.push(m[1]);
+          }
+          ck("K-12: every manifest row names a pool file, or says it is repo-only (or in neither) \u2014 the manifest -> pool direction",
+            stale.length === 0, stale.join(", "));
+        }
       } else {
-        skipped("K-4..K-6, K-8, K-9: manifest vs the pool", "no pool given \u2014 this is the POST-SHIP half");
+        skipped("K-4..K-6, K-8, K-9, K-12: manifest vs the pool", "no pool given \u2014 this is the POST-SHIP half");
       }
 
       // K-7 is D-4 EXACTLY AS ORIGINALLY FRAMED, and it is kept deliberately underneath a warning.

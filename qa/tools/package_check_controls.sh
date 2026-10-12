@@ -1036,6 +1036,49 @@ import shutil; shutil.copy('/tmp/pkpool/' + curtag, '/tmp/pkpool/dom_entry_v501.
 else
   echo "  - SKIPPED: P68..P71 - no pool dir given"; SKIP=$((SKIP+4))
 fi
+# ── P72, P73  E-1b resolves names the basename cannot (ops 2026-10-12, E-29 (c), docs/SCOPE_E29_BCGI_OPS.md) ──────────────
+# Through v6.07 E-1b skipped a renamed pool file silently and a multi-path one with a line, so a knowledge/ copy of either could
+# drift from the repo and ship to the pool alone. Each plants exactly that drift; the old matcher misses both (measured at the build).
+echo ""; echo "P72..P73  E-1b through the manifest's path cell"
+runDecl "P72 a RENAMED pool file (tools_fixture.jsx) differs from its repo path and is not in github/" FIRE "E-1b" "tools_fixture.jsx (differs from qa/tools/fixture/fixture.jsx" \
+  'printf "// drift p72\n" > knowledge/tools_fixture.jsx'
+runDecl "P73 a MULTI-PATH pool file (index.html) differs from its manifest path and is not in github/" FIRE "E-1b" "index.html (differs from src/index.html" \
+  'printf "<!-- drift p73 -->\n" > knowledge/index.html'
+
+# ── P74, P75  K-12, the manifest -> pool direction (ops 2026-10-12, E-29 (g)) ─────────────────────────────────────────────
+# P74 plants an UNMARKED row for a file not in the pool — K-12 must fire and name it. P75 plants the same row carrying
+# `repo-only` — K-12 must stay green, and must have RUN (a skipped K-12 is not a quiet one).
+# K-12 judges the manifest the package presents, and an app package older than the marking presents unmarked rows — an ambient
+# red that would make P74 pass spuriously and P75 report a FINDING. So both start from the NEWEST manifest available: the ops
+# package's (when given), else the clone's — then plant their one row.
+K12SRC="$CLONE/PROJECT_KNOWLEDGE_INDEX.md"
+for _c in "${OPS:+$OPS/knowledge/PROJECT_KNOWLEDGE_INDEX.md}" "${OPS:+$OPS/github/PROJECT_KNOWLEDGE_INDEX.md}"; do [ -n "$_c" ] && [ -f "$_c" ] && { K12SRC="$_c"; break; }; done
+K12ROW="
+wr(open('$K12SRC').read())
+"'
+L = rd().split("\n"); i = next(n for n, l in enumerate(L) if l.startswith("## Everything else in knowledge"))
+j = next(n for n in range(i, len(L)) if L[n].startswith("| `"))
+'
+if [ -n "$POOLARG" ]; then
+  runk "P74 an UNMARKED manifest row names a file that is not in the pool" "K-12" "" "$K12ROW
+L.insert(j, '| \`p74_left_the_pool.md\` | a document that has left the pool, row never updated |'); wr(chr(10).join(L))" "p74_left_the_pool.md"
+  rm -rf /tmp/pkpool /tmp/pkpkg; cp -r "$POOLARG" /tmp/pkpool; cp -r "$APP" /tmp/pkpkg
+  python3 -c "
+import os
+MANPATHS=[q for q in ['/tmp/pkpkg/github/PROJECT_KNOWLEDGE_INDEX.md','/tmp/pkpkg/knowledge/PROJECT_KNOWLEDGE_INDEX.md','/tmp/pkpool/PROJECT_KNOWLEDGE_INDEX.md'] if os.path.exists(q)]
+def rd(): return open(MANPATHS[0]).read()
+def wr(s):
+    for q in MANPATHS: open(q,'w').write(s)
+$K12ROW
+L.insert(j, '| \`p74_left_the_pool.md\` | a document that has left the pool, **repo-only** |'); wr(chr(10).join(L))" >/dev/null 2>&1
+  _o=$(node "$PKG_CHECK" /tmp/pkpkg "$CLONE" "" /tmp/pkpool 2>&1)
+  if echo "$_o" | grep -q "✗ K-12"; then MISS=$((MISS+1)); printf "  *** FINDING *** P75 the same row marked repo-only - K-12 fired when it must NOT\n"
+  elif echo "$_o" | grep -q "✓ K-12"; then PASS=$((PASS+1)); printf "  CORRECTLY SILENT   P75 the same row marked repo-only\n"
+  else MISS=$((MISS+1)); printf "  *** VACUOUS *** P75 - K-12 did not run\n"; fi
+  rm -rf /tmp/pkpool /tmp/pkpkg
+else
+  echo "  - SKIPPED: P74..P75 - no pool dir given"; SKIP=$((SKIP+2))
+fi
 printf "\n  controls: %d behaved as designed, %d did not, %d skipped\n" "$PASS" "$MISS" "$SKIP"
 
 [ "$SKIP" -gt 0 ] && echo "  ⚠ A SKIPPED control is not a passing one."
