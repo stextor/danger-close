@@ -1,5 +1,56 @@
 # Changelog
 
+## v6.06 — D-28 widened: a commercial annuity gets no retirement relief in the thirteen states whose law gives it none; Maryland's pension exclusion no longer reaches IRA money
+
+**A MODELLING release** (METHODOLOGY updated). `docs/SCOPE_D28_ANNUITY_RELIEF_V606.md` (repo-only, fulfilled). Steve: "start on D-28", then, asked how wide, "census
+all states first"; he took every recommendation on the four decisions.
+
+**What was wrong.** The Other-accounts type *Annuity* is a non-qualified annuity — bought outside an employer plan or IRA. Through v6.05 its withdrawals and
+conversions could use every state's retirement relief. D-28 suspected Pennsylvania. A census of all 25 taxing states that give retirement relief, read at
+primary sources (the scope's §0.2 cites each; each of the thirteen affected states re-read by the build session itself), found the relief does not reach it in **thirteen**:
+- **Arkansas, Delaware, Illinois, Iowa, Maine, Maryland, New York, Oklahoma, Pennsylvania and Wisconsin** limit their relief to employer plans and IRAs.
+  Pennsylvania taxes it as interest income at any age (2025 PA-40 instructions, Code 7D); Iowa's rule names "nonqualified annuities"; New York's
+  instructions name "an annuity contract purchased with your own funds".
+- **Colorado and Michigan** admit it only once it pays out for life, which the model cannot tell from withdrawals — taken as not qualifying (conservative).
+- **Mississippi**'s regulation speaks of annuities from a "retirement system or plan" and does not say whether a privately bought contract is one — the
+  conservative reading is taken.
+- In the other twelve (Alabama, Connecticut, Georgia, Kentucky, Louisiana, New Jersey, Rhode Island, and Montana, New Mexico, South Carolina's 65+ deduction,
+  Virginia and West Virginia, whose relief is against any income) it qualifies, and nothing changes. Alabama's law is unclear too; its revenue department's
+  own form routes all pension and annuity income into the exclusion, so it stays covered (Steve's decision).
+- **Maryland's pension exclusion reaches no IRA money either** (Tax-Gen. §10-209) — disclosed as "not modelled" until now; modelled from this release.
+
+**What changed.** Those thirteen rows carry a new field, `reliefKinds` — the categories their relief reaches; with the per-person split every in-app call
+passes, the exclusion or exemption is netted against that eligible income only, at household level as before. Without the split nothing changes. Every
+affected note says what the law admits; METHODOLOGY gains a section; the Field Manual names the thirteen. **Every change raises tax or leaves it unchanged.**
+
+**Measured** (scratch probe, v6.05 → v6.06, Engine B): with $70,000 a year of Roth conversions (the Taxes tab), the example plan's lifetime state tax rises in Illinois $1,557 → $1,609, Michigan $986 → $1,030 and Pennsylvania $1,627 → $1,757, and in Maryland $75,530 → $101,679 (its IRA money and the annuity); with the annuity raised to $150,000, Illinois +$1,011, Michigan +$868, Pennsylvania +$2,530, Maryland +$29,224. In the ten other affected states the figure does not move for these households: their exclusion is capped, and the plan's other retirement income already fills the cap. Without conversions only Maryland moves ($108,536 → $120,031): Engine B reaches annuity money through conversions and draws, never through RMDs, and the example plan draws none (checked in Pennsylvania: no draw or conversion year without the slider). The calculator over every jurisdiction and a household grid: 3,264 calls over 51 jurisdictions, rows without the field byte-identical, 238 paying more, all in the thirteen — no call pays less.
+
+**Found while measuring, not changed:** both engines take a Roth conversion pro rata from the Traditional pool, annuity money included, although a
+non-qualified annuity cannot be converted. Filed as `MissingFeatures.md` **D-33**.
+
+**Tests.** New suite **`t69`** — **19** on v6.06, **10** on v6.05 (that leg pins the absence of the field and Maryland's old note):
+Pennsylvania hand cases to the cent (70/70 with $20,000 of annuity and $10,000 of IRA: **$614.00**, $0.00 at v6.05); v6.05 → v6.06 over every
+jurisdiction — rows without the field byte-identical, none falls, the thirteen move, and each affected call equals the **v6.05 calculator** with its
+excluded categories moved to `work`, to the cent; the classification of all 25 relief states (a state that gains relief later must decide its annuity
+treatment), the field, the notes and the Field Manual derived from the table; all three call sites pass the per-person split (AST). Controls
+`qa/tools/controls_v606_annuity.py` (repo-only): **7 of 7**. `t33`'s PINS carried (its household is in Georgia). `v606` registered by AST, the three Python
+suites and `t33`'s PINS by hand. The literal census of every suite string and regex against the new source and METHODOLOGY: no existing check changes outcome.
+
+**Suite, run from the packaged copies:** 6,360 app checks across **68 app suites**, 0 failed, 0 DIED; MC parity 10/10; tooling `t21` 64,
+`domdiff` 32, `sets` 12 + 12; **GRAND 6,490**. Every current-leg count equals v6.05's, the new `t69` aside; the v6.05 leg equals v6.05's own counts, `t69` aside (10, pinning the absence of the field). Run from the PACKAGED copies as two concurrent halves, the method approved at v5.87: run folders built by mk_runfolder.sh v605 v606 from the build workspace — a full clone of a3d0da6 carrying exactly the packaged changes, each changed file's run-folder copy hash-checked against it (v6.05 resolved from history, commit 11c1d13) — each through a session-only copy of runsuite.sh whose one added line skips the other half's labels. Half A GRAND 6268, half B GRAND 222; none DIED. Source `a5ac49a570a2e776a26ad64536420566` · built `fa02504f34989cb2054de3f5d9e9138f` (`smoke_built` 22 passed, 0 failed).
+
+**Found at the build, fixed before the final run:** `t67`'s group D (v6.02 → v6.03) was skipped only when `app_v604.mjs` sat in the run folder — true in
+the two folders built since v6.04 and false in a v6.05 → v6.06 folder, where its D-0 then failed on both legs. The skip now holds on every leg but
+v6.03's, the only one whose folder can hold `app_v602.mjs`; `t67` reads 118 on both legs, as at v6.05. An AST census of every version-pinned module test
+in the suite found no other of that shape.
+
+**Limitations, disclosed:**
+- An annuity paid for life would qualify in Colorado and Michigan; the model has no payout field, so it never does.
+- Mississippi's treatment is the conservative reading of an unclear rule.
+- The annuity's after-tax basis is still taxed (the federal simplification METHODOLOGY discloses), so in Pennsylvania the taxable interest is overstated too.
+- The exclusion stays netted at household level: no state applies a per-person own-income cap it did not already (RI, WV).
+- Conversions still draw annuity money (D-33).
+
 ## v6.05 — the Field Manual counts six income-limited exclusions and no longer says Rhode Island's is applied to IRA money; stale lines in it and METHODOLOGY corrected
 
 **A TEXT-ONLY release** — no figure moves; no engine, table or note changes. `docs/SCOPE_V605_RI_FIELD_MANUAL.md` (repo-only, fulfilled). Closes four of
