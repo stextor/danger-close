@@ -21,7 +21,7 @@ import { existsSync, readFileSync } from "fs";
 import { d30Tax, D30_STATES, D30_FLAT_STATES } from "./d30_ref.mjs";
 const require = createRequire(import.meta.url);
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v602", "v603", "v604", "v605"];
+const KNOWN_VERSIONS = ["v602", "v603", "v604", "v605", "v606"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  ✓ ${n}`); } else { fail++; console.log(`  ✗ ${n}${d !== "" ? " — " + String(d).slice(0, 300) : ""}`); } };
 const EQ = (n, got, want, tol = 0.005) => CK(n, typeof got === "number" && Math.abs(got - want) <= tol, `got ${got}, want ${want}`);
@@ -31,7 +31,7 @@ if (!KNOWN_VERSIONS.includes(VER)) { CK(`0-0 version tag ${JSON.stringify(VER)} 
 const B2 = VER !== "v602";   // a version on which batch 2 is present
 // v6.04 (D-31, t68): nine rows gain a component (a federal-income-tax deduction or the federal senior deduction), appended last; this suite
 // keeps to its own components (`own` drops them) and t68 holds the new ones and the notes' new wording. A version LIST.
-const D31L = ["v604", "v605"].includes(VER);
+const D31L = ["v604", "v605", "v606"].includes(VER);
 const own = l => (l || []).filter(x => !(D31L && (x.of !== undefined || x.years !== undefined)));
 const PREFIX = "dc:";
 window.storage = {
@@ -212,7 +212,9 @@ if (B2) {
 
 // ── D · v6.02 -> v6.03 ──
 if (B2) {
-  if (!existsSync(new URL("./app_v602.mjs", import.meta.url)) && existsSync(new URL("./app_v604.mjs", import.meta.url))) console.log("  – group D not run: app_v602.mjs is not in this run folder (a v602 -> v603 folder runs it; t68 D owns v6.03 -> v6.04)");
+  // v6.06: the skip read "app_v604.mjs is present", true only in a v603 -> v604 or v604 -> v605 folder; a v605 -> v606 folder has neither app_v602 nor
+  // app_v604, so D-0 failed there. Group D belongs to a v602 -> v603 folder only: without app_v602 it is skipped on every leg but v603's.
+  if (!existsSync(new URL("./app_v602.mjs", import.meta.url)) && VER !== "v603") console.log("  – group D not run: app_v602.mjs is not in this run folder (a v602 -> v603 folder runs it; t68 D owns v6.03 -> v6.04)");
   else if (!existsSync(new URL("./app_v602.mjs", import.meta.url))) CK("D-0 app_v602.mjs is in this run folder (group D needs it)", false, "missing");
   else {
     const pm = await import("./app_v602.mjs"), PST = pm.__engines.stateTaxAnnual || pm.__g.stateTaxAnnual;

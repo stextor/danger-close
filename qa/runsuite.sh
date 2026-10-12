@@ -236,6 +236,10 @@ tally "t67-$CUR"   node t67_deductions_flat.mjs "$CUR"
 # whose returns carry it, Missouri's capital-gains subtraction; v6.03 -> v6.04 against qa/d30_ref.mjs; Engine B against the calculator. Both legs.
 tally "t68-$PRIOR" node t68_fed_deductions.mjs "$PRIOR"
 tally "t68-$CUR"   node t68_fed_deductions.mjs "$CUR"
+# t69 (v6.06) — D-28 widened: a commercial (non-qualified) annuity gets no retirement relief in the thirteen states whose law gives it none,
+# and Maryland's pension exclusion no longer reaches IRA money; hand cases, v6.05 -> v6.06 over every jurisdiction, the data. Both legs.
+tally "t69-$PRIOR" node t69_annuity_relief.mjs "$PRIOR"
+tally "t69-$CUR"   node t69_annuity_relief.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
