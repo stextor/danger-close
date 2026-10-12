@@ -1,5 +1,68 @@
 # Changelog
 
+## v6.05 — the Field Manual counts six income-limited exclusions and no longer says Rhode Island's is applied to IRA money; stale lines in it and METHODOLOGY corrected
+
+**A TEXT-ONLY release** — no figure moves; no engine, table or note changes. `docs/SCOPE_V605_RI_FIELD_MANUAL.md` (repo-only, fulfilled). Closes four of
+`ARCHITECTUREIssues.md` E-29's eleven threads: Steve asked for (e) to be fixed in a small release with (f) folded in (2026-10-12), and decided (d) and (k).
+
+**What was wrong.** Two Field Manual sentences — the two Rhode Island sentences v5.69 rewrote — were false against the v6.04 source:
+- They counted **five** exclusions known to be income-limited in law. The table holds six: Maine joined the list at v5.72 and has been conditioned on
+  income since v5.73, which the Field Manual itself says elsewhere ("Maine's income phaseout is modelled from v5.73").
+- The second said Rhode Island's $50,000 exclusion *"is still applied to IRA money the statute does not cover"*. That stopped being true at v5.95
+  (D-12): Rhode Island's exclusion reaches only each person's own pension, annuity and employer-plan income, and all three in-app calls of the state
+  calculator take that per-person path (AST census). Through the v6.04 calculator, a 70/70 couple with $30,000 of IRA money and $30,000 of 401(k) money
+  leaves $30,000 taxable in Rhode Island — the IRA money.
+- **A third Field Manual passage, found at this release's own re-read** (a search of the tree for every phrasing it retires): the state-age paragraph
+  carried METHODOLOGY's (f) sentence word for word — *"Thirteen of the nineteen states remain unverified"* — and said *"One threshold remains deliberately
+  NOT applied: South Carolina's under-65 tier"*, though Georgia's $35,000 at 62–64 has been disclosed as not modelled in its note since v5.87.
+- **Why the second survived v5.95:** `t35` RI-7 asserted the IRA clause on every leg from v5.69 — a test that checks a disclosure is present turns into
+  a lock once the disclosure goes false (OPERATIONS §B2). v5.95 changed the behaviour and left the lock and the sentence in place.
+
+**What changed.**
+- **Field Manual** (both sentences): *six* exclusions; the list gains *Maine at v5.73*; Rhode Island's exclusion *"from v5.95, reaches only each
+  person's own pension, annuity and employer-plan income — never IRA money, which the statute does not cover"*. The state-age paragraph: *two*
+  thresholds are deliberately not applied (South Carolina's under-65 tier and Georgia's $35,000 at 62–64), and *"Since v5.86 every exclusion state's
+  figure has been read against a primary source"*, naming the two that start earlier in law than the model applies — Arkansas and New York, both applied
+  from 65 (conservative).
+- **METHODOLOGY**, each correction annotated where it stands: (f) the sentence *"Thirteen of the nineteen exclusion states remain unverified"*, false since
+  its own v5.86 update, rewritten; and three lines of the same kind found while checking (e) — the income-conditioning section's *"Five states"*
+  (Maine is the sixth), the v5.69 Rhode Island paragraph's *"four things remain unmodelled"* (three are modelled from v5.95; the fourth, dividend and
+  interest income in the measure, stands), and the *Not modeled* list's *"Rhode Island's IRA distinction and per-person cap"* (modelled from v5.95; the
+  item now names what is still unmodelled for Rhode Island, and the conditioned-state list adds Maine).
+- **E-29** — (d) **closed by decision**: the v5.69 Roth best-cell move stays disclosed, unpinned. (k) **closed by decision**: an unsaved My Data draft
+  survives a rejected import, as `t38` I-5 pins. (e) and (f) **fixed**. Open: (a), (b), (c), (g), (h), (i), (j).
+
+**Tests.** `t35` RI-7 is inverted and gated per build (OPERATIONS §B2): on v6.05 it asserts the new wording; the v6.04 leg keeps the old one. New on
+v6.05: **RI-8** (extinction) the IRA over-grant sentence is gone; **RI-9** (extinction) every Field Manual count of *exclusions known to be
+income-limited in law* equals, as a word, the number of `STATE_RULES` rows marked `incomeLimitedInLaw` — derived from the table, so the next state marked
+fails until the manual says so; **RI-10** every state with an income test is named in the list. On the v6.04 leg **RI-9 [KNOWN STALE]** pins the old
+count. `t35` 114 → **117** on v6.05, **115** on v6.04. `t52` (current leg only) gains **F-1** (extinction) the "thirteen of
+nineteen" sentence is gone, **F-2** both unapplied lower tiers are named, **F-3** every state whose note applies it from 65 although the law starts earlier
+is named in the Field Manual — derived from the notes; 34 → **37**. Controls `qa/tools/controls_v605_fm.py` (repo-only): **9 of 9** —
+the old sentence restored, the Taxes-tab count alone reverted, Maine dropped from the list, the IRA clause restored, a seventh row marked income-limited
+(which also turns `t35` D-7 and D-8 red), the old state-age paragraph restored, New York dropped from it, and the unmutated runs of both suites. Every suite literal, string and regex, was evaluated against the old and new source and
+METHODOLOGY (§B1a): only the new and inverted `t35` and `t52` matchers change outcome, besides the version strings. `t33`'s PINS carried unchanged; `v605` registered by AST,
+the three Python suites and `t33`'s PINS by hand.
+
+**Suite, run from the packaged copies:** 6,329 app checks across **67 app suites**, 0 failed, 0 DIED; MC parity 10/10; tooling `t21` 64,
+`domdiff` 32, `sets` 12 + 12; **GRAND 6,459**. Every current-leg count equals v6.04's except `t35`
+(114 → 117), `t52` (34 → 37) and `t68` (49 → 45: its group D compares v6.03 with v6.04 and needs `app_v603.mjs`, so it reports itself
+not run in a v6.04 → v6.05 folder, as `t66`'s and `t67`'s do in theirs). The v6.04 leg equals v6.04's own counts except `t35` (115) and `t68`
+(45), for the same reasons. Run from the PACKAGED copies as two concurrent halves, the method approved at v5.87: run folders built by mk_runfolder.sh v604 v605 from the build workspace — a full clone of 16dcba4 carrying exactly the packaged changes, each changed file's run-folder copy hash-checked against it (v6.04 resolved from history, commit a923332) — each through a session-only copy of runsuite.sh whose one added line skips the other half's labels. Half A GRAND 6237, half B GRAND 222; none DIED. Source `f230ffbbd4f2773f7816769bb726d975` · built `1c3d9f3a83bcdd6c09fe99fc574b5085` (v6.04 rebuilt byte-identical first; `smoke_built` 22 passed, 0 failed).
+
+**Three QA-tool fixes, found at this ship.** *First, owned here:* `package_check_controls.sh` ran P56/P57 (the pre-upload K-1–K-3 controls) only for a package whose
+`CHANGELOG.md` has a `## v5` heading. The ops package of 2026-10-11 (second) — mine — archived v5.75–v5.99 to the repo, leaving none, so this package's
+first controls run SKIPPED both with *"is not an app release (it ships no source)"*. The pattern is now `^## v[0-9]`; with it both run (results in the
+package's `MANIFEST.txt`). OPERATIONS §G records it beside the two v5-only patterns fixed the day before. *Second:* `package_check`'s provenance check H-1/H-2 read the newest
+CHANGELOG entry up to the next `## v` heading, so after ops packages it also read their `## ops` entries, which quote the build they leave current.
+In this package's post-upload rehearsal (GitHub still served v6.04) H-1 and H-2 passed on v6.04's md5s quoted by the 2026-10-11 ops entries, and
+their controls P20/P21 could not fire. The window now ends at the next heading of any kind (OPERATIONS §I). *Third, owned here:* `controls_manifest_rows.py`'s B1 demonstration, whose
+target I made derived on 2026-10-11 (the pool's dom entry with a hash row), found none before the upload of a release that rotates the dom entry, and
+reported a FINDING about itself; it now falls back to another pool file whose row the manifest also names elsewhere. None of the three is part of the suite.
+
+**Limitations, disclosed:** none new — no figure moved. Rhode Island's AGI measure still omits dividend and interest income (the state's note and
+METHODOLOGY say so).
+
 ## ops 2026-10-11 (third) — the manifest's history to the repo; six documents un-pooled; their open threads re-homed
 
 **KIND: ops** — documents and one QA tool; **v6.04 stays current** (source `8226b20b62334074606993d411bb0fb1`, built `71f4ada6ac4923075f9f1d1a576c2293`).
