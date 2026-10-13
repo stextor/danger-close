@@ -49,9 +49,10 @@ items now carry their status; IDs are unchanged.
 | D-31 | **CLOSED v6.04** | not taken, disclosed: DC's senior deduction, the refunds Alabama and Oregon recapture, Oregon's 2026 cap |
 | D-32 | **OPEN** (Low, conservative) | Ohio's retirement income and joint filing credits and Utah's retirement credit — each state's note says not taken *(parser)* |
 | D-33 | **CLOSED v6.07** | a conversion, a QCD and an RMD never take non-qualified annuity money; the engines carry the annuity dollars |
-| D-34 | **OPEN** (Low) | *(added v6.07)* Engine D converts bucket money only: an Other-accounts Traditional IRA is never converted there, and its cap subtracts that IRA's RMD from bucket money |
+| D-34 | **CLOSED v6.08** | Engine D converts an Other-accounts Traditional IRA after the bucket money, figures the cap after the draws, grows that IRA's RMD tracker and takes its RMD whole |
+| D-35 | **OPEN** (Low–Med, both directions) | *(added v6.08)* a Roth IRA entered under Other accounts is counted twice in Engine D: as gains-bearing brokerage in the pool, and inside the buckets' Roth share |
 
-**Open, in this file: D-4, D-11 (narrowed), D-13, D-15, D-16, D-17, D-18 (recurring), D-32, D-34; D-5 declined.** *(D-33 closed and D-34 added at v6.07; D-28 closed and D-33 added at v6.06.)* Non-tax open threads
+**Open, in this file: D-4, D-11 (narrowed), D-13, D-15, D-16, D-17, D-18 (recurring), D-32, D-35; D-5 declined.** *(D-34 closed and D-35 added at v6.08; D-33 closed and D-34 added at v6.07; D-28 closed and D-33 added at v6.06.)* Non-tax open threads
 re-homed the same day are in `ARCHITECTUREIssues.md` **E-29**.
 
 | Field | Value |
@@ -1418,9 +1419,31 @@ or a draw leaves the whole leg: annuity by annShare"). A non-qualified annuity i
 (IRC §408A(d)(3)). The conversion's tax is charged now and the money then grows as Roth, so the net direction is not obvious and was not measured. Fixing it
 means converting from the non-annuity share only — an engine change with a scope. **Low–medium.**
 
-## D-34 · Engine D converts bucket money only — opened at v6.07
+## D-34 · Engine D converts bucket money only — opened at v6.07 — ✅ CLOSED v6.08
+
+> ✅ **CLOSED v6.08 (2026-10-12).** Engine D's conversion is figured after the year's draws: the buckets' pre-tax money left after their own RMD and
+> the year's spending draw first, then the Other-account IRA's RMD-bearing money (never annuity money). The census found two more defects in that
+> IRA's tracker, both fixed with it: it never grew (so its RMD was figured on the opening balance — optimistic), and its RMD left it pro rata across
+> the whole pool. Direction measured: the Withdrawal tab's RMD and MAGI rise where the IRA reaches RMD age; the Taxes tab's lifetime tax falls on such
+> households, a correction (Engines B and C had already converted the IRA, so some dollars were taxed twice). The example household does not move
+> at $0 or $70,000. `docs/SCOPE_D34_ENGINE_D_OTHER_IRA_V608.md` (fulfilled, repo-only); `qa/t71_engine_d_other_ira.mjs`. New from the scope: **D-35**.
+> *(The entry below is retained.)*
 
 Found scoping D-33 (`docs/SCOPE_D33_ANNUITY_CONVERSION_V607.md` §4). Engine D (`computeWithdrawalPlan`) caps its conversion as
 `min(rothAmount, tradNotional_boy − rmd_y)`: `tradNotional_boy` is the buckets' pre-tax money, while `rmd_y` includes the RMD of any Traditional IRA
 entered under Other accounts (held in the Priority-1 pool, v5.26). So such an IRA is never converted in Engine D, and its RMD shrinks the bucket cap. It
 matters only where the cap binds — a slider above the bucket money left — and lowers the conversion there; direction not measured. Not a D-33 defect: annuity money was never converted in Engine D. **Low.**
+
+## D-35 · A Roth IRA entered under Other accounts is counted twice in Engine D — opened at v6.08
+
+Found scoping D-34 (`docs/SCOPE_D34_ENGINE_D_OTHER_IRA_V608.md` §0.2 (3)). Engine D (`computeWithdrawalPlan`) holds every Other account in its
+Priority-1 pool (`_taxInit = household − total401k`), and its gains-bearing sub-pool is that pool less ordinary and HSA money
+(`_gainPoolInit`) — **not less Roth money**, so a Roth IRA there is treated as brokerage: its growth is booked as capital gain when spent, and that
+gain reaches Engines B and C through the gains bridge. Separately, the buckets' Roth fraction is `_rothInit / _t401kInit`, and `_rothInit`
+(`retireStartBalances`) includes Other-account Roth money the buckets do not hold, so the buckets' Traditional share — and every bucket RMD — is
+understated. Measured on the example household plus $200,000 of Roth IRA under Other accounts, against the same $200,000 entered as brokerage: capital
+gain identical ($29,227 both — the conservative half); the buckets' first-year Traditional $1,048,850 against $1,179,744; lifetime RMD $343,192
+against $470,488 (the optimistic half). Fixing it means holding Roth money out of the gains pool (it would sit in the tax-free remainder, as converted
+IRA money does from v6.08) and out of the buckets' fraction — an engine change that moves every household with a Roth IRA under Other accounts, in
+both directions; it needs its own scope and measurement. **Low–medium.** *(Named D-36 in the D-34 scope's draft and its decision question; D-35 is the
+next free ID.)*
