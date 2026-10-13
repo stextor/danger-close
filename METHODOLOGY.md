@@ -1047,6 +1047,9 @@ tracked separately, because they have different answers:
 
 - **Taxed as ordinary income when spent:** Traditional and Annuity.
 - **Subject to a required minimum distribution:** Traditional only.
+- **Neither, and never a capital gain:** Roth. *(The Withdrawal tab's engine has treated it so only from v6.09 — before it, Engine D held a
+  Roth IRA under Other accounts as brokerage and counted it in the buckets' Roth share too; see "A Roth IRA under Other accounts is counted
+  once" at the end of this paper.)*
 
 A **non-qualified annuity** is the reason those are two questions rather than one. It is taxed like
 pre-tax money but carries no RMD; recording it as Traditional (which v5.25 did, and disclosed as an
@@ -2211,4 +2214,48 @@ B's own Traditional balance was $0 at the start of the year while it still charg
 
 **What is still approximate.** The order between bucket money and the IRA is the model's. Engine D converts on one household ladder window, not each
 spouse's. A Roth IRA entered under Other accounts is still counted twice in Engine D — as brokerage money in the pool and inside the buckets' Roth
-share — which is filed as `MissingFeatures.md` D-35 and was not changed here.
+share — which is filed as `MissingFeatures.md` D-35 and was not changed here. *(Fixed at v6.09 — see the next section.)*
+
+## A Roth IRA under Other accounts is counted once in the Withdrawal tab, as Roth money (v6.09)
+
+*(v6.09, D-35 — `docs/SCOPE_D35_ENGINE_D_OTHER_ROTH_V609.md`; `qa/t72_engine_d_other_roth.mjs`.)*
+
+**The law.** A qualified distribution from a Roth IRA is not income at all (26 U.S.C. §408A(d)(1)), so spending one realizes neither ordinary
+income nor a capital gain; and a Roth IRA carries no required distribution in its owner's life (§408A(c)(4)).
+
+**What the model did through v6.08.** Engines A, B and C were right: they count Roth money entered under Other accounts in each person's Roth
+balance and keep it out of their taxable balance. Engine D — the Withdrawal tab, whose spending-draw and realized-gain series the other three also
+read — holds every Other account in its Priority-1 pool, and counted a Roth IRA there **twice**:
+- as **brokerage**: the pool's gains-bearing part took out ordinary and HSA money but not Roth money, so the Roth IRA's growth was booked as
+  capital gain when it was spent, and that gain reached the Taxes and IRMAA tabs — the conservative direction, and wrong in law;
+- inside the **buckets' Roth share**, which was figured on every Roth dollar the household holds although the buckets hold only the holdings'
+  money — so their Traditional share, and every bucket RMD, was understated: the optimistic direction.
+
+The Withdrawal tab showed the double count as well: the Roth IRA was in the Priority-1 card's starting balance and again in the Roth card's.
+
+**What it does now.** The Roth money sits in the pool's tax-free remainder, with the HSA money and (since v6.08) converted IRA money, so spending it
+is untaxed and realizes nothing; the buckets' Roth share is the holdings' Roth money only, as their Traditional share has been the holdings'
+Traditional money only since v5.26. The Roth card shows the holdings' Roth money; the Priority-1 card says a Roth IRA entered under Other accounts
+sits there, is spent tax-free, carries no RMD, and is counted there only.
+
+**The check that it is right.** A Roth IRA under Other accounts and the same money entered as brokerage sit in the same pool and differ only in tax
+character, so their buckets must be identical. From v6.09 they are, year by year (`t72` §A): on the example household plus $200,000 of either, the
+lifetime RMD at $70,000 a year is $470,488 for both — it was $343,192 for the Roth IRA. Only the brokerage realizes a gain.
+
+**A household with no Roth IRA under Other accounts is untouched** — the example household (which holds none) at $0 and $70,000, its single-filer
+variant, the same household with brokerage in place of the Roth IRA, and an IRA-heavy household are bit-identical in Engines B, C and D and in the
+Roth tab's strategies, and `t72` §D re-checks that against v6.08 on every suite run.
+
+**Measured** (the example household plus Roth IRAs under Other accounts; $70,000 a year unless stated). *$200,000 of Roth IRA:* lifetime RMD $343,192
+→ $470,488, realized gain $29,227 → $2,777 (the example's own brokerage), the Taxes tab's lifetime tax $215,825 → $215,702. *$500,000 of Roth IRAs:*
+lifetime RMD $266,326 → $558,790, realized gain $196,853 → $4,909, lifetime tax $221,644 → $213,744. *A single filer with $200,000:* lifetime tax
+$220,145 → $221,830, lifetime IRMAA $3,450 → $1,150.
+
+**Direction — both ways.** The Withdrawal tab's RMD and MAGI rise (the optimistic half goes); phantom capital gain on Roth money disappears (the
+conservative half goes). The Taxes and IRMAA tabs move a little either way, through the two series they import: less gain arrives, and a higher
+bucket Traditional share makes each spending draw from the buckets more ordinary.
+
+**What is still approximate.** The Priority-1 pool — a Roth IRA under Other accounts included — is still spent first, the opposite of the usual
+advice to spend Roth money last; the draw order has not changed since v5.26, and spending tax-free money first leaves Traditional money growing
+longer, the conservative direction. Every Roth dollar is treated as a qualified distribution: the five-year rule and withdrawals before 59½ are not
+modelled, here or for the holdings' Roth money.
