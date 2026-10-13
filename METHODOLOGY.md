@@ -2259,3 +2259,50 @@ bucket Traditional share makes each spending draw from the buckets more ordinary
 advice to spend Roth money last; the draw order has not changed since v5.26, and spending tax-free money first leaves Traditional money growing
 longer, the conservative direction. Every Roth dollar is treated as a qualified distribution: the five-year rule and withdrawals before 59½ are not
 modelled, here or for the holdings' Roth money.
+
+## The Ranking tab's peer figures, and where each comes from (v6.10)
+
+*Not a modelling change — no engine reads these figures. Recorded here because the tab now states that its survey figures are computed,
+and this is where a reader looks for how.*
+
+**One table.** Every peer figure the Ranking tab shows or ranks against is in one module-level table, `PEER_BENCHMARKS`, beside
+`PEER_DATA_SCF_YEAR`. Through v6.09 the net-worth cut-offs were typed at three sites, two figures were repeated inline in prose and the
+survey year was typed as text at three sites; `t73` §B holds the table to being the only copy.
+
+**The Federal Reserve's Survey of Consumer Finances (2025).** Computed by `qa/tools/peer_scf.py` from the Fed's Summary Extract Public Data
+(`scfp2025excel.zip`, released 2026-10-09). The weight is the extract's `WGT`, which the Fed's own summary-variable macro defines as
+`X42001/5` "so totals estimated on the 5 implicates jointly are correct", so every figure is computed on all five implicates **pooled**. The
+population is families whose reference person is 55–64 (`AGECL` 4), except the mortgage share, which is families whose reference person is
+60 or older. A weighted percentile is the smallest value whose cumulative weight reaches that share. Dollars are 2025 dollars, as the survey
+publishes them; they are not indexed to today, so peers sit one year of inflation behind a plan stated in today's dollars.
+
+| Figure | Definition | 2025 |
+|---|---|---|
+| Median / mean net worth | `NETWORTH` | $411,340 / $1,871,019 |
+| Net-worth cut-offs — tiers and the affluent proxy | weighted 75th, 87.5th, 90th, 95th percentiles of `NETWORTH` | $1,416,200 · $2,925,250 · $3,457,640 · $7,545,000 |
+| Portfolio-size cut-offs | weighted 90th, 95th percentiles of financial assets, `FIN` | $1,950,000 · $4,928,350 |
+| Retirement savings, median / mean | `RETQLIQ`, families holding any (`HRETQLIQ` = 1) | $239,000 / $670,248 |
+| Household debt, median / mean | `DEBT`, families holding any (`HDEBT` = 1) | $101,000 / $197,305 |
+| Under $100K saved | share of ALL 55–64 families with `RETQLIQ` < $100,000 | 61% |
+| Mortgage at 60+ | share of families 60+ with `NH_MORT` > 0 | 33% |
+
+**The check.** Before it prints, the script requires its median and mean net worth for ages 55–64 to agree with the Fed's published figures
+(the 2025 Bulletin's Table 2, $411.9K and $1,878.0K) within 2%. The Bulletin uses the Fed's internal data and the extract is the public
+data, so exact equality is not expected. Measured: **−0.14% and −0.37%**. The mean retirement savings, $670,248, also matches the Bulletin's
+$670.2K for families with an IRA or a DC plan.
+
+**The v6.09 cut-offs were far below these, and their source is unknown.** v6.09 tiered net worth at $780K, $1.9M and $3.2M as the 75th,
+90th and 95th percentiles for ages 55–64; the 2025 figures are $1.42M, $3.46M and $7.55M. Three years of growth does not explain that gap:
+the Bulletin's mean for the group rose 9.5% in real terms, from $1,714.7K to $1,878.0K. The same 2025 extract gives **all-ages** cut-offs of
+$813K at the 75th percentile and $2.54M at the 90th, so the old figures are consistent with an all-ages table read as the 55–64 one. **That is
+not confirmed:** confirming it needs the 2022 extract, which was not available to the build. Either way, the effect of the refresh is in
+the **conservative direction**: on the example household, net worth falls from TOP 10% to TOP 25%, portfolio size from TOP 5% to TOP 25%,
+and the headline from TOP 11% to TOP 14%.
+
+**The other sources.** Empower's engaged-saver balances are its September 2026 figures (a self-selected platform sample, not a population
+statistic). The Social Security figure is SSA's average monthly retired-worker award in 2024 across all claiming ages, $2,036 (Annual
+Statistical Supplement 2025, Table 6.B3). Through v6.09 this was $2,000 labelled "at 62"; awards reduced for early retirement, as every claim
+at 62 is, average $1,620. The EBRI, AALTCI and Roth-plan percentages are carried unchanged and were not re-verified.
+
+**What the refresh does not fix.** The tab's headline "TOP N%" averages nine dimension tiers, and eight of them have no peer data behind
+them. That is `docs/UsabilityFlaws.md` F-19, left for its own scope.
