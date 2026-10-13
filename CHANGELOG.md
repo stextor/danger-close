@@ -1,5 +1,63 @@
 # Changelog
 
+## v6.09 — D-35: a Roth IRA entered under Other accounts is counted once in the Withdrawal tab, as Roth money
+
+**A MODELLING release** (METHODOLOGY updated). `docs/SCOPE_D35_ENGINE_D_OTHER_ROTH_V609.md` (repo-only, fulfilled). Steve: "Let's build D-35" — and
+he took both recommendations: fix both halves together, and show each dollar once on the Withdrawal tab.
+
+**What was wrong.** Engine D (`computeWithdrawalPlan`, the Withdrawal tab — whose spending-draw and realized-gain series Engines A, B and C read)
+holds every Other account in its Priority-1 pool, and counted a Roth IRA there **twice** (parser census; found scoping v6.08):
+- **as brokerage:** the pool's gains-bearing part took out ordinary and HSA money but not Roth money, so the Roth IRA's growth was booked as
+  capital gain when spent — wrong in law (a qualified Roth distribution is not income, 26 U.S.C. §408A(d)(1)) — and the gain reached the Taxes
+  and IRMAA tabs; the conservative direction;
+- **inside the buckets' Roth share** (`_rothInit / _t401kInit`, with `_rothInit` holding every Roth dollar), so the buckets' Traditional share
+  and every bucket RMD were understated; the optimistic direction.
+The tab showed it twice too: in the Priority-1 card's starting balance and again in the Roth card's. Engines A, B and C were already right.
+
+**What changed.** The Roth money sits in the pool's tax-free remainder (with the HSA money and, since v6.08, converted IRA money), so spending it
+realizes nothing; the buckets' Roth share is the holdings' Roth only, as their Traditional share has been since v5.26. `retireStartBalances`
+returns the Other-account Roth total (`othRoth`) so Engine D reads one figure. The Roth card shows the holdings' Roth money; the Priority-1 card
+says a Roth IRA entered under Other accounts sits there, is spent tax-free with no RMD, and is counted there only. METHODOLOGY gains a section, a
+line in the tax-type list and the v6.08 section's cross-reference.
+
+**The check that it is right:** a Roth IRA under Other accounts and the same money as brokerage sit in the same pool and differ only in tax
+character, so their buckets must be identical — and from v6.09 they are, year by year (`t72` §A). **A household with no Roth IRA under Other
+accounts does not move** (the example household holds none): Engines B, C and D and the Roth tab's strategies bit-identical for the example at $0
+and $70,000, its single-filer variant, its brokerage twin and an IRA-heavy household. The Monte Carlo does not read Engine D.
+
+**Measured** (engines at module level; the shipped source): on the example household plus Roth IRAs under Other accounts, at $70,000 a year unless stated — with $200,000 of Roth IRA, the Withdrawal tab's lifetime RMD $343,192 → $470,488 (exactly its brokerage twin's), realized gain $29,227 → $2,777 (the example's own brokerage), the Taxes tab's lifetime tax $215,825 → $215,702; with no conversion, lifetime RMD $1,067,582 → $1,199,313 and tax $227,145 → $227,019. With $500,000 of Roth IRAs: lifetime RMD $266,326 → $558,790, realized gain $196,853 → $4,909, lifetime tax $221,644 → $213,744. A single filer with $200,000: lifetime tax $220,145 → $221,830, lifetime IRMAA $3,450 → $1,150.
+
+**Direction — both ways.** The Withdrawal tab's RMD and MAGI rise (the optimistic half goes) and the phantom gain on Roth money goes (the
+conservative half). The Taxes and IRMAA tabs move a little either way: less gain arrives, and a higher bucket Traditional share makes each
+spending draw from the buckets more ordinary.
+
+**Tests.** New suite **`t72`** — **29** on v6.09, **17** on v6.08 (that leg pins the defect): the brokerage twin (identical buckets, RMD,
+pool and ordinary draw, every year, at two sliders); no gain on an all-Roth pool and a dollar-exact pin on the $500,000 fixture; t71's oracle
+extended to hold Roth money out, with the Roth total summed from the portfolio rows — it reproduces each leg to the cent under that leg's rules on
+eight household × slider runs (RMD, conversion, pool, ordinary draw, the buckets' Traditional share, the gain and the gains part) and misses the
+other leg's by more than $1,000; v6.08 → v6.09 bit-identity for five households that must not move; the two cards in the DOM. Controls
+`qa/tools/controls_v609_engine_d_roth.py` (repo-only): **6 of 6** — five planted defects, each turning its named checks red.
+**Before this release no check reached this path**: the whole suite passed unchanged against the prototype. **Existing suites:** `t71`'s §E
+(the v6.07 → v6.08 differential) takes its designed skip on this pair — 26 on both legs; `domdiff`'s byte-identity check sets aside
+exactly the new Priority-1 sentence for this pair only — 32. **The boundary census grows (OPERATIONS §K1):** `oth_roth` (a Roth IRA
+under Other accounts) reads ON for the example household — the condition that hid this — with a fixture clearing it; `t29` 69 on both
+legs. `t33`'s PINS carried. `v609` registered by AST, the three Python suites, `t1`'s and `t4`'s version arms and `t33`'s PINS by hand.
+
+**Suite, run from the packaged copies:** 6,558 app checks across **71 app suites**, 0 failed, 0 DIED; MC parity 10/10; tooling `t21` 64,
+`domdiff` 32, `sets` 12 + 12; **GRAND 6,688**. Every current-leg count equals v6.08's but `t29` (69 on both legs: the new census row), `t71` (26 on both legs: §E's v6.07 differential takes its designed skip on this pair) and the new `t72`; the v6.08 leg equals v6.08's own counts but `t29`, `t71` and `t72` (17, pinning the defect). Run from the PACKAGED copies as two concurrent halves, the method approved at v5.87: run folders built by mk_runfolder.sh v608 v609 from the build workspace — a full clone of c76c385 carrying exactly the packaged changes, each changed file's run-folder copy hash-checked against it (v6.08 resolved from history, commit b6eb255) — each through a session-only copy of runsuite.sh whose one added line skips the other half's labels. Half A GRAND 6466, half B GRAND 222; none DIED. Source `a32ef4531f4b46e18d26ad9accd8a00a` · built `df3d3e7e71df9690ba7183b5411bf653` (`smoke_built` 22 passed, 0 failed).
+
+**Found at the final run, fixed before the figures above:** `t19` asserts the exact set of names Engine D returns (the contract with the
+Withdrawal tab's JSX), and the Roth card's new `_rothOth` made it 18 where it pinned 17 — one red check. The scope's prototype run had the engine
+change but not the card, so it could not see this. The contract now names `_rothOth` (67 checks, as at v6.08), and half A was re-run whole on
+the corrected file; half B had completed green and reads only the built page.
+
+**Limitations, disclosed:**
+- The Priority-1 pool — a Roth IRA under Other accounts included — is still spent first, the opposite of the usual advice to spend Roth money
+  last; the draw order has not changed since v5.26 (the conservative direction: Traditional money grows longer).
+- Every Roth dollar is treated as a qualified distribution; the five-year rule and withdrawals before 59½ are not modelled, here or for the
+  holdings' Roth money.
+- A household with no holdings at all (load heals `total401k` to the whole household) is still not examined.
+
 ## v6.08 — D-34: the Withdrawal tab converts a Traditional IRA entered under Other accounts, and carries it as an account
 
 **A MODELLING release** (METHODOLOGY updated). `docs/SCOPE_D34_ENGINE_D_OTHER_IRA_V608.md` (repo-only, fulfilled). Steve: "Let's do D-34" — and he
