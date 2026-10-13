@@ -34,7 +34,7 @@ let _s = 42; Math.random = () => { _s = (_s * 1103515245 + 12345) & 0x7fffffff; 
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v546";
-const KNOWN_VERSIONS = ["v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607"];
+const KNOWN_VERSIONS = ["v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -82,7 +82,7 @@ T("A-2: row ids are unique \u2014 a duplicate id would make every lookup below a
   new Set(ids).size === ids.length);
 for (const id of ["filing", "dobA_month", "dobB_month", "rmd_age_A", "rmd_age_B", "ssA_claim",
                   "ssB_claim", "ssA_band", "ssB_band", "state_tax", "income_streams", "stream_kinds",
-                  "ladder_windows"])
+                  "ladder_windows", "oth_ira_rmd", "d_conv_cap"])
   T(`A-3: row '${id}' is present`, ids.includes(id));
 T("A-4: every row carries a verdict and a note", example.every(r => typeof r.onBoundary === "boolean" && r.note));
 
@@ -98,6 +98,12 @@ T("B-3: both DOB months are January \u2014 partial-month arithmetic is a no-op",
 T("B-4: spouse A's claim year is CLEAR \u2014 so the census is not simply reporting ON for everything",
   !by(example, "ssA_claim").onBoundary);
 T("B-5: the ladder windows are CLEAR, for the same reason", !by(example, "ladder_windows").onBoundary);
+// v6.08 (D-34, §K1): the two conditions that hid the Withdrawal tab's IRA defects. Both legs: on a build before v6.08 the IRA row reads
+// "n/a" and counts as ON (it cannot be demonstrated); the conversion-cap row reads the same on either.
+T("B-7: the example household's Other-account IRAs never reach an RMD in Engine D (D-34's blind spot)", by(example, "oth_ira_rmd").onBoundary,
+  by(example, "oth_ira_rmd").value);
+T("B-8: the Withdrawal tab's conversion cap never binds at $70,000 on the example household (D-34's other blind spot)",
+  by(example, "d_conv_cap").onBoundary, by(example, "d_conv_cap").value);
 T("B-6: the example household sits on more boundaries than it clears", onBoundary(example).length > example.length / 2,
   `${onBoundary(example).length} of ${example.length}`);
 
@@ -109,6 +115,13 @@ for (const [name, spec] of Object.entries(HOUSEHOLDS)) {
   const rows = at(name);
   for (const id of spec.flips) {
     const before = by(example, id), after = by(rows, id);
+    // v6.08 (D-34): the IRA-RMD row reads Engine D's `rmdSleeve_y`, which builds before v6.08 do not publish — there it reads "n/a" on
+    // every household, so the flip cannot happen and that is asserted instead (a gate, not a skip).
+    if (id === "oth_ira_rmd" && !["v608"].includes(VER)) {
+      T(`C-${name}/${id} (pre-v6.08 build): the row reads n/a on both households — the IRA's RMD is not published here`,
+        !!after && before.value.startsWith("n/a") && after.value.startsWith("n/a"), after ? after.value : "row missing");
+      continue;
+    }
     T(`C-${name}/${id}: the verdict MOVES when the household moves (${spec.why})`,
       !!after && before.onBoundary !== after.onBoundary,
       after ? `was ${before.onBoundary ? "ON" : "clear"}, still ${after.onBoundary ? "ON" : "clear"}` : "row missing");

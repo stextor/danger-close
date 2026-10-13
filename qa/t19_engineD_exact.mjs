@@ -588,9 +588,16 @@ console.log("\n  v5.36 — gain on the SPENDING SALE only");
   // and these exact ARGS, 3,132,745.819315 → 3,162,820.292311 (+$30,074.47 of ordinary growth
   // recognised over the plan). Pinned to the dollar; the v5.36 figure is recorded here so the
   // next re-derivation has both ends.
-  ck("mixed pool: lifetime MAGI is EXACTLY $3,162,820 — the ordinary growth is recognised (was $3,132,746 at v5.36)",
-     Math.round(mx.reduce((s, x) => s + (x.magi || 0), 0)) === 3162820,
+  // v6.08 (D-34) moves it again, and ONLY through the RMD: this household's $300,000 Other-account IRA is still standing at RMD age, and
+  // its RMD tracker now grows and gives up its RMD whole. Measured v6.07 → v6.08 on this household and these ARGS:
+  // 3,162,820.292311 → 3,191,209.308515 (+$28,389.02), and lifetime rmd_y 1,316,332.154880 → 1,344,721.171085 (+$28,389.02) — the same
+  // figure, while othOrdDraw (223,908.637430) and the gain do not move. The ledger below reproduces the IRA's RMD itself, every year.
+  ck("mixed pool: lifetime MAGI is EXACTLY $3,191,209 — the Other-account IRA's RMD is figured on a balance that grows (was $3,162,820 at v6.07, $3,132,746 at v5.36)",
+     Math.round(mx.reduce((s, x) => s + (x.magi || 0), 0)) === 3191209,
      `$${Math.round(mx.reduce((s, x) => s + (x.magi || 0), 0)).toLocaleString()}`);
+  ck("mixed pool: …and the whole move is the RMD — lifetime othOrdDraw is EXACTLY $223,909, unchanged since v5.37",
+     Math.round(mx.reduce((s, x) => s + (x.othOrdDraw || 0), 0)) === 223909,
+     `$${Math.round(mx.reduce((s, x) => s + (x.othOrdDraw || 0), 0)).toLocaleString()}`);
 
   // THE INDEPENDENT LEDGER — the same instrument that derived v5.37's exacts before the engine
   // was edited, carried here so the suite re-runs the derivation instead of trusting it. It
@@ -618,12 +625,14 @@ console.log("\n  v5.36 — gain on the SPENDING SALE only");
     let taxRmdB = bal(a => a.taxType === "trad" && a.owner === "B");
     let gp = Math.max(0, Math.min(taxInit, Math.max(0, taxInit - ordInit - hsaInit)));
     let basis = Math.max(0, gp * (1 - shareOpen));
-    let worstT = 0, worstGp = 0, worstGain = 0, worstBasis = 0;
+    let worstT = 0, worstGp = 0, worstGain = 0, worstBasis = 0, worstRmdS = 0;
     const binds = [], viol = [];
     for (const R of mx) {
       const ageA = R.yr - dobA, ageB = R.yr - dobB;
-      const rmdFromSleeve = (ageA >= rA && taxRmdA > 0 ? taxRmdA / dv(ageA) : 0)
-                          + (!single && ageB >= rB && taxRmdB > 0 ? taxRmdB / dv(ageB) : 0);
+      const sRA = ageA >= rA && taxRmdA > 0 ? taxRmdA / dv(ageA) : 0;
+      const sRB = !single && ageB >= rB && taxRmdB > 0 ? taxRmdB / dv(ageB) : 0;
+      const rmdFromSleeve = sRA + sRB;
+      worstRmdS = Math.max(worstRmdS, Math.abs(rmdFromSleeve - (R.rmdSleeve_y || 0)));   // v6.08 publishes it
       const T_boy = T;
       const sleeve = Math.min(Math.max(0, rmdFromSleeve), T_boy);
       const spend = R.drawFromTaxable - sleeve;
@@ -637,9 +646,18 @@ console.log("\n  v5.36 — gain on the SPENDING SALE only");
       basis = Math.max(0, basis - sale * basisFrac);
       gp = Math.max(0, gp - sale);
       taxOrd = Math.max(0, taxOrd - othOrd - sleeve);
-      const shrink = T_boy > 0 ? R.drawFromTaxable / T_boy : 0;
+      // v6.08 (D-34): the IRA's RMD leaves the IRA it was figured on (identified dollars); only the spending draw leaves pro rata, on
+      // the post-RMD pool — `taxOrd`'s own two rules. (Through v6.07 both left pro rata, `drawFromTaxable / T_boy`.)
+      const kR = rmdFromSleeve > 0 ? sleeve / rmdFromSleeve : 0;
+      taxRmdA = Math.max(0, taxRmdA - sRA * kR);
+      taxRmdB = Math.max(0, taxRmdB - sRB * kR);
+      const shrink = poolPostRmd > 0 ? Math.max(0, spend) / poolPostRmd : 0;
       taxRmdA = Math.max(0, taxRmdA - taxRmdA * shrink);
       taxRmdB = Math.max(0, taxRmdB - taxRmdB * shrink);
+      // v6.08 (D-34): a conversion of that IRA leaves its trackers and `taxOrd`, not the pool. The AMOUNT is read from the engine's
+      // published `convSleeve_y` — an input here, like the draws; t71 re-derives it independently.
+      const cS = R.convSleeve_y || 0;
+      if (cS > 0) { const cA = taxRmdA / (taxRmdA + taxRmdB); taxRmdA = Math.max(0, taxRmdA - cS * cA); taxRmdB = Math.max(0, taxRmdB - cS * (1 - cA)); taxOrd = Math.max(0, taxOrd - cS); }
       T = T_boy - R.drawFromTaxable;
       const u = Math.max(0, R.taxable / (1 + gr) - T);   // RMD-surplus deposit, from published EOY
       T += u; gp += u; basis += u;
@@ -649,6 +667,9 @@ console.log("\n  v5.36 — gain on the SPENDING SALE only");
       const grown = taxOrd * (1 + gr), cap = T - gp;
       if (grown > cap + 0.005) binds.push({ yr: R.yr, by: grown - cap });
       taxOrd = Math.min(cap, grown);
+      // v6.08 (D-34): the RMD-bearing trackers grow at the pool's rate, held inside the ordinary sub-pool.
+      { const gR = (taxRmdA + taxRmdB) * (1 + gr), kG = gR > taxOrd && gR > 0 ? Math.max(0, taxOrd) / gR : 1;
+        taxRmdA = taxRmdA * (1 + gr) * kG; taxRmdB = taxRmdB * (1 + gr) * kG; }
       if (taxOrd + gp > T + 0.01) viol.push({ yr: R.yr, by: taxOrd + gp - T });
       worstT = Math.max(worstT, Math.abs(T - R.taxable));
       worstGp = Math.max(worstGp, Math.abs(gp - R.taxGainPool));
@@ -661,6 +682,8 @@ console.log("\n  v5.36 — gain on the SPENDING SALE only");
     ck("LEDGER: ...and the gains sub-pool", worstGp < 0.01, `worst |Δ taxGainPool| ${worstGp.toFixed(6)}`);
     ck("LEDGER: ...and the realized gain", worstGain < 0.01, `worst |Δ capGain_y| ${worstGain.toFixed(6)}`);
     ck("LEDGER: ...and the published basis", worstBasis < 0.01, `worst |Δ taxBasis| ${worstBasis.toFixed(6)}`);
+    ck("LEDGER (v6.08): ...and the RMD figured on the Other-account IRA (`rmdSleeve_y`), with the tracker grown and the RMD identified",
+       worstRmdS < 0.01 && mx.some(x => (x.rmdSleeve_y || 0) > 1), `worst |Δ rmdSleeve_y| ${worstRmdS.toFixed(6)}`);
     // §8-3, both halves. Conservation is ONE-SIDED by design: the HSA share is the untaxed
     // remainder, so `taxOrd + taxGainPool` may sit BELOW `taxable` by the grown HSA slack —
     // asserting equality here would be wrong. What must never happen is the sum EXCEEDING the

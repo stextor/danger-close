@@ -27,13 +27,13 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v607";
-const KNOWN_VERSIONS = ["v606", "v607"];
+const KNOWN_VERSIONS = ["v606", "v607", "v608"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v607"].includes(VER);   // an array, so register_tag2 widens it each release
+const POST = ["v607", "v608"].includes(VER);   // an array, so register_tag2 widens it each release
 const { __g: g, __engines: E } = await import(pathToFileURL(join(HERE, `app_${VER}.mjs`)).href);
 
 let pass = 0, fail = 0;
@@ -321,8 +321,15 @@ T(`E-0b: the A-annuity fixture ${POST ? "leaves both cards where they are" : "mo
   T(POST ? "F-1: Engines A, B and C cap the conversion at the non-annuity balance; the attribution gives a conversion no annuity"
          : "F-1 (prior leg): none of the four D-33 expressions is present", POST ? capB && capC && headA && attr : !capB && !capC && !headA && !attr,
     JSON.stringify({ capB, capC, headA, attr }));
-  T("F-2: Engine D's conversion is bucket money only, unchanged on both legs (annuity sits in the Priority-1 sleeve there)",
-    /const conv_y = yr <= _ladderEnd \? Math\.min\(rothAmount, Math\.max\(0, tradNotional_boy - rmd_y\)\) : 0;/.test(SRC));
+  // v6.08 (D-34) rewrote Engine D's conversion (docs/SCOPE_D34_ENGINE_D_OTHER_IRA_V608.md; t71 carries it): figured after the draws, bucket
+  // money first, then a Traditional IRA entered under Other accounts — never annuity money, which is not in that IRA's tracker. Gated per leg.
+  const D34 = ["v608"].includes(VER);   // an array, so register_tag2 widens it each release
+  const capD607 = /const conv_y = yr <= _ladderEnd \? Math\.min\(rothAmount, Math\.max\(0, tradNotional_boy - rmd_y\)\) : 0;/.test(SRC);
+  const capD608 = /const _bucketConvCap = Math\.max\(0, tradNotional_boy - _bucketRmdTaken - _spendFromBuckets \* tradFrac\);/.test(SRC)
+    && /const _sleeveConvCap = Math\.max\(0, taxRmdA \+ taxRmdB\);/.test(SRC);
+  T(D34 ? "F-2 (v6.08+): Engine D's conversion is figured after the draws — bucket money, then the Other-account IRA's RMD-bearing money (never annuity)"
+        : "F-2: Engine D's conversion is bucket money only, unchanged on both legs (annuity sits in the Priority-1 sleeve there)",
+    D34 ? capD608 && !capD607 : capD607 && !capD608, JSON.stringify({ capD607, capD608 }));
 }
 
 console.log(`\nt70 SUITE (${VER}): ${pass} passed, ${fail} failed`);

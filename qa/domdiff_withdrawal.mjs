@@ -176,7 +176,13 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   const _cut = (s, re, what) => { const m = s.match(re); if (!m || s.split(m[0]).length !== 2) { ck(`v5.79 CSS passage found exactly once (${what})`, false, m ? "more than once" : "absent"); return s; } return s.replace(m[0], ""); };
   const _n579 = (s) => !_p579 ? s : _cut(_cut(s, /\s*select \{ max-width: 100%; \}\s*\/\* v5\.79 \(F-11\)[^*]*\*\//, "select cap"),
                                      /\s*\/\* v5\.79 \(F-11, decision D-1\)[\s\S]*?per table where 600 is wider than its tablet column \*\//, "scroll-box rules");
-  const wA = stripV(A.withdrawal), wB = stripV(_n579(B.withdrawal));
+  // v6.08 (D-34 — docs/SCOPE_D34_ENGINE_D_OTHER_IRA_V608.md) adds ONE sentence to Section A's note, saying where a conversion comes from.
+  // For THIS pair only, exactly that sentence is removed from the v6.08 side (it must occur exactly once, or the check fails) and nothing
+  // else: the release's claim is that on the example household at the opening slider no rendered cell of this tab moves (t71 §E proves it
+  // at engine level, field by field). A single-pair gate on purpose — the next pair has the sentence on both sides.
+  const _p608 = VA === "v607" && VB === "v608";
+  const _n608 = (s) => !_p608 ? s : _cut(s, / ?A conversion takes the buckets' pre-tax money first, then a Traditional IRA you entered under Other accounts, and never annuity money — that order is the model's assumption, not a rule\./, "v6.08 Conv sentence");
+  const wA = stripV(A.withdrawal), wB = stripV(_n608(_n579(B.withdrawal)));
   ck("WITHDRAWAL: the tab is byte-identical across the pair (v5.40 is disclosure + mechanics; no rendered cell moves \u2014 measured)",
      wA === wB, firstDiff(wA, wB));
   // The v5.35 claims must still hold on BOTH sides — this is the assertion that would catch

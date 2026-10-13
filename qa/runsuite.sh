@@ -244,6 +244,11 @@ tally "t69-$CUR"   node t69_annuity_relief.mjs "$CUR"
 # Both legs: the prior leg pins the defect ([KNOWN DEFECT]); §D's differential reads app_v606.mjs when the run folder has it.
 tally "t70-$PRIOR" node t70_annuity_conversion.mjs "$PRIOR"
 tally "t70-$CUR"   node t70_annuity_conversion.mjs "$CUR"
+# t71 (v6.08) — D-34: Engine D converts an Other-accounts Traditional IRA (bucket money first, never annuity money), figures the cap after
+# the year's draws, grows that IRA's RMD tracker and takes its RMD whole. Both legs: the prior leg pins the defects ([KNOWN DEFECT]); an
+# independent oracle reproduces each leg under its own rules; §E's differential reads app_v607.mjs when the run folder has it.
+tally "t71-$PRIOR" node t71_engine_d_other_ira.mjs "$PRIOR"
+tally "t71-$CUR"   node t71_engine_d_other_ira.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
