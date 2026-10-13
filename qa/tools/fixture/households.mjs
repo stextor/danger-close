@@ -151,6 +151,16 @@ HOUSEHOLDS.capBinds = {
   },
 };
 
+// v6.09 (D-35): the example household plus a $200,000 Roth IRA under Other accounts — clears the one new row and no other.
+HOUSEHOLDS.otherRoth = {
+  why: "a Roth IRA held under Other accounts — Engine D's Roth handling of the Priority-1 pool reaches it",
+  flips: ["oth_roth"],
+  apply: P => {
+    P.otherAccounts = [...(P.otherAccounts || []), { name: "Roth IRA", balance: 200000, owner: "A", taxType: "roth" }];
+    rederive(P);
+  },
+};
+
 export function build(G, name) {
   const P = JSON.parse(JSON.stringify(G.PORTFOLIO()));
   HOUSEHOLDS[name].apply(P);
