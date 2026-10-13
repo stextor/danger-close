@@ -201,6 +201,33 @@ export function census(G) {
     "BOTH halves are required: below the 0% top the rate is 0% either way. The example household's "
     + "preferential income is dividends on the taxable sleeve; pair this row with the one above when scoping.");
 
+  // ── v6.08 (D-34 — SCOPE_D34_ENGINE_D_OTHER_IRA_V608) · two conditions the example data hides (§K1 maintenance rule) ────
+  // Both read Engine D (the Withdrawal tab) itself, at the plan's retirement year and the BASE scenario.
+  // 1. AN OTHER-ACCOUNT IRA THAT REACHES AN RMD THERE. The Withdrawal tab spends the Priority-1 pool first, so the example household's
+  //    Other-account IRAs are gone years before RMD age — and the IRA tracker that never grew, and gave up its RMD pro rata (fixed
+  //    v6.08), was $0 on it. Read with NO conversion, from `rmdSleeve_y` (published from v6.08; the row reads "n/a" on earlier builds).
+  const _ryD = tl.targetRetireYear;
+  const _wD0 = G.computeWithdrawalPlan ? G.computeWithdrawalPlan({ retireYear: _ryD, rothAmount: 0, scenarioPreset: "base" }) : null;
+  const _hasS = !!(_wD0 && _wD0.schedule.length && "rmdSleeve_y" in _wD0.schedule[0]);
+  const _rsbD = G.retireStartBalances ? G.retireStartBalances(_ryD) : null;
+  const _othIra = _rsbD ? (_rsbD.othRmdA || 0) + (_rsbD.othRmdB || 0) : 0;
+  const _sRmd = _hasS ? _wD0.schedule.reduce((t, r) => t + (r.rmdSleeve_y || 0), 0) : 0;
+  row("oth_ira_rmd", "Other-account IRA RMD (Engine D)",
+    _hasS ? `$${Math.round(_othIra).toLocaleString()} held; lifetime RMD on it $${Math.round(_sRmd).toLocaleString()}` : "n/a (pre-v6.08 build)",
+    "an RMD figured on it", !_hasS || _sRmd < 1,
+    !_hasS ? "this build does not publish the IRA's RMD"
+      : _sRmd >= 1 ? "reachable — the IRA is still standing at RMD age"
+      : _othIra > 0 ? "spent as Priority-1 money before RMD age, so its RMD rules are $0 here" : "no Traditional IRA under Other accounts");
+  // 2. THE WITHDRAWAL TAB'S CONVERSION CAP BINDING. Engine D converts bucket money first, then that IRA; the cap only matters where the
+  //    slider outruns what is left. $70,000 is the Roth tab's OPENING slider (a useState literal in the component, not readable through
+  //    the shim — a structural value, like the January rows, kept honest by §K1).
+  const _wD7 = G.computeWithdrawalPlan ? G.computeWithdrawalPlan({ retireYear: _ryD, rothAmount: 70000, scenarioPreset: "base" }) : null;
+  const _lad = _wD7 ? _wD7.schedule.filter(r => r.yr <= _wD7._ladderEnd) : [];
+  const _short = _lad.filter(r => r.conv_y < 70000 - 0.5).length;
+  row("d_conv_cap", "Withdrawal-tab conversion cap", `${_short} of ${_lad.length} ladder years short of $70,000`,
+    "the cap binds in a ladder year at the opening slider", _short === 0,
+    _short === 0 ? "never binds at $70,000 — the cap's rules show only at higher sliders" : "reachable at the opening slider");
+
   return rows;
 }
 

@@ -1048,18 +1048,35 @@ runDecl "P73 a MULTI-PATH pool file (index.html) differs from its manifest path 
 # ── P74, P75  K-12, the manifest -> pool direction (ops 2026-10-12, E-29 (g)) ─────────────────────────────────────────────
 # P74 plants an UNMARKED row for a file not in the pool — K-12 must fire and name it. P75 plants the same row carrying
 # `repo-only` — K-12 must stay green, and must have RUN (a skipped K-12 is not a quiet one).
-# K-12 judges the manifest the package presents, and an app package older than the marking presents unmarked rows — an ambient
-# red that would make P74 pass spuriously and P75 report a FINDING. So both start from the NEWEST manifest available: the ops
-# package's (when given), else the clone's — then plant their one row.
-K12SRC="$CLONE/PROJECT_KNOWLEDGE_INDEX.md"
-for _c in "${OPS:+$OPS/knowledge/PROJECT_KNOWLEDGE_INDEX.md}" "${OPS:+$OPS/github/PROJECT_KNOWLEDGE_INDEX.md}"; do [ -n "$_c" ] && [ -f "$_c" ] && { K12SRC="$_c"; break; }; done
+# K-12 judges the manifest the package presents, and a manifest that does not describe THIS pool carries an ambient red — an app
+# package older than the marking presents unmarked rows; an older package's manifest, after a newer release's rotation, names the
+# rotated-out files. Either would make P74 pass spuriously and P75 report a FINDING. So both start from the first manifest, in the
+# order app package, ops package, clone, on which an UNMUTATED K-12 is green against the pool given — then plant their one row.
+# (Through the v6.08 build this took the ops package's manifest whenever one was given, assuming it the newest; at the v6.08 ship
+# rehearsal the app package was newer, the ops manifest named DangerClose-v6_07.jsx and dom_entry_v607.jsx after their rotation,
+# and P75 reported a FINDING that was the control's, not K-12's.)
+K12SRC=""
+if [ -n "$POOLARG" ]; then
+  for _c in "$APP/knowledge/PROJECT_KNOWLEDGE_INDEX.md" "$APP/github/PROJECT_KNOWLEDGE_INDEX.md" \
+            "${OPS:+$OPS/knowledge/PROJECT_KNOWLEDGE_INDEX.md}" "${OPS:+$OPS/github/PROJECT_KNOWLEDGE_INDEX.md}" "$CLONE/PROJECT_KNOWLEDGE_INDEX.md"; do
+    [ -n "$_c" ] && [ -f "$_c" ] || continue
+    rm -rf /tmp/pkk12; mkdir -p /tmp/pkk12; cp -r "$POOLARG" /tmp/pkk12/pool; cp -r "$APP" /tmp/pkk12/pkg
+    for _q in /tmp/pkk12/pkg/github/PROJECT_KNOWLEDGE_INDEX.md /tmp/pkk12/pkg/knowledge/PROJECT_KNOWLEDGE_INDEX.md /tmp/pkk12/pool/PROJECT_KNOWLEDGE_INDEX.md; do
+      [ -f "$_q" ] && cp "$_c" "$_q"; done
+    if node "$PKG_CHECK" /tmp/pkk12/pkg "$CLONE" "" /tmp/pkk12/pool 2>&1 | grep -q "✓ K-12"; then K12SRC="$_c"; break; fi
+  done
+  rm -rf /tmp/pkk12
+  [ -n "$K12SRC" ] && echo "  (P74/P75 start from $K12SRC — the first manifest on which K-12 is green against this pool)"
+fi
 K12ROW="
 wr(open('$K12SRC').read())
 "'
 L = rd().split("\n"); i = next(n for n, l in enumerate(L) if l.startswith("## Everything else in knowledge"))
 j = next(n for n in range(i, len(L)) if L[n].startswith("| `"))
 '
-if [ -n "$POOLARG" ]; then
+if [ -n "$POOLARG" ] && [ -z "$K12SRC" ]; then
+  echo "  *** FINDING *** P74..P75 - no candidate manifest has K-12 green against this pool, so neither control can isolate its row"; MISS=$((MISS+2))
+elif [ -n "$POOLARG" ]; then
   runk "P74 an UNMARKED manifest row names a file that is not in the pool" "K-12" "" "$K12ROW
 L.insert(j, '| \`p74_left_the_pool.md\` | a document that has left the pool, row never updated |'); wr(chr(10).join(L))" "p74_left_the_pool.md"
   rm -rf /tmp/pkpool /tmp/pkpkg; cp -r "$POOLARG" /tmp/pkpool; cp -r "$APP" /tmp/pkpkg
