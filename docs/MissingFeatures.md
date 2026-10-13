@@ -50,9 +50,9 @@ items now carry their status; IDs are unchanged.
 | D-32 | **OPEN** (Low, conservative) | Ohio's retirement income and joint filing credits and Utah's retirement credit — each state's note says not taken *(parser)* |
 | D-33 | **CLOSED v6.07** | a conversion, a QCD and an RMD never take non-qualified annuity money; the engines carry the annuity dollars |
 | D-34 | **CLOSED v6.08** | Engine D converts an Other-accounts Traditional IRA after the bucket money, figures the cap after the draws, grows that IRA's RMD tracker and takes its RMD whole |
-| D-35 | **OPEN** (Low–Med, both directions) | *(added v6.08)* a Roth IRA entered under Other accounts is counted twice in Engine D: as gains-bearing brokerage in the pool, and inside the buckets' Roth share |
+| D-35 | **CLOSED v6.09** | a Roth IRA entered under Other accounts is counted once in Engine D, as Roth money: out of the pool's gains part and out of the buckets' Roth share |
 
-**Open, in this file: D-4, D-11 (narrowed), D-13, D-15, D-16, D-17, D-18 (recurring), D-32, D-35; D-5 declined.** *(D-34 closed and D-35 added at v6.08; D-33 closed and D-34 added at v6.07; D-28 closed and D-33 added at v6.06.)* Non-tax open threads
+**Open, in this file: D-4, D-11 (narrowed), D-13, D-15, D-16, D-17, D-18 (recurring), D-32; D-5 declined.** *(D-35 closed at v6.09; D-34 closed and D-35 added at v6.08; D-33 closed and D-34 added at v6.07; D-28 closed and D-33 added at v6.06.)* Non-tax open threads
 re-homed the same day are in `ARCHITECTUREIssues.md` **E-29**.
 
 | Field | Value |
@@ -1434,7 +1434,13 @@ Found scoping D-33 (`docs/SCOPE_D33_ANNUITY_CONVERSION_V607.md` §4). Engine D (
 entered under Other accounts (held in the Priority-1 pool, v5.26). So such an IRA is never converted in Engine D, and its RMD shrinks the bucket cap. It
 matters only where the cap binds — a slider above the bucket money left — and lowers the conversion there; direction not measured. Not a D-33 defect: annuity money was never converted in Engine D. **Low.**
 
-## D-35 · A Roth IRA entered under Other accounts is counted twice in Engine D — opened at v6.08
+## D-35 · A Roth IRA entered under Other accounts is counted twice in Engine D — opened at v6.08 — ✅ CLOSED v6.09
+
+> ✅ **CLOSED v6.09 (2026-10-13).** The Roth money sits in the Priority-1 pool's tax-free remainder (no gain, no RMD) and the buckets' Roth share is
+> the holdings' Roth only; the Withdrawal tab shows it once. A Roth IRA under Other accounts and the same money as brokerage now give identical
+> buckets year by year. Direction measured: the Withdrawal tab's RMD and MAGI rise, the phantom gain goes; the Taxes and IRMAA tabs move a little
+> either way. `docs/SCOPE_D35_ENGINE_D_OTHER_ROTH_V609.md` (fulfilled, repo-only); `qa/t72_engine_d_other_roth.mjs`.
+> *(The entry below is retained.)*
 
 Found scoping D-34 (`docs/SCOPE_D34_ENGINE_D_OTHER_IRA_V608.md` §0.2 (3)). Engine D (`computeWithdrawalPlan`) holds every Other account in its
 Priority-1 pool (`_taxInit = household − total401k`), and its gains-bearing sub-pool is that pool less ordinary and HSA money
