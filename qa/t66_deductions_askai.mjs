@@ -20,7 +20,7 @@ import { existsSync, readFileSync } from "fs";
 import { d30Tax, d30Deductions, D30_STATES } from "./d30_ref.mjs";
 const require = createRequire(import.meta.url);
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608"];
+const KNOWN_VERSIONS = ["v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  ✓ ${n}`); } else { fail++; console.log(`  ✗ ${n}${d !== "" ? " — " + String(d).slice(0, 300) : ""}`); } };
 const EQ = (n, got, want, tol = 0.005) => CK(n, typeof got === "number" && Math.abs(got - want) <= tol, `got ${got}, want ${want}`);
@@ -33,7 +33,7 @@ const DD = VER !== "v601";   // a version on which D-30 batch 1 and the Ask AI f
 const B2 = !["v601", "v602"].includes(VER);
 // v6.04 (D-31, t68): nine rows gain a component (a federal-income-tax deduction or the federal senior deduction), appended last; this suite
 // keeps to its own components (`own` drops them) and t68 holds the new ones and the notes' new wording. A version LIST.
-const D31L = ["v604", "v605", "v606", "v607", "v608"].includes(VER);
+const D31L = ["v604", "v605", "v606", "v607", "v608", "v609"].includes(VER);
 const own = l => (l || []).filter(x => !(D31L && (x.of !== undefined || x.years !== undefined)));
 // Self-hosted branch for group E (t36's harness trap: without a `location` the bundle takes the claude.ai branch, which has no key panel).
 dom.reconfigure({ url: "https://stextor.github.io/danger-close/" });

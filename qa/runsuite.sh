@@ -249,6 +249,11 @@ tally "t70-$CUR"   node t70_annuity_conversion.mjs "$CUR"
 # independent oracle reproduces each leg under its own rules; §E's differential reads app_v607.mjs when the run folder has it.
 tally "t71-$PRIOR" node t71_engine_d_other_ira.mjs "$PRIOR"
 tally "t71-$CUR"   node t71_engine_d_other_ira.mjs "$CUR"
+# t72 (v6.09) — D-35: a Roth IRA entered under Other accounts is counted once in Engine D, as Roth money (out of the pool's gains part and out of
+# the buckets' Roth share); its brokerage twin, an independent oracle, and the Withdrawal tab's cards. Both legs: the prior leg pins the defect;
+# §D's differential reads app_v608.mjs when the run folder has it.
+tally "t72-$PRIOR" node t72_engine_d_other_roth.mjs "$PRIOR"
+tally "t72-$CUR"   node t72_engine_d_other_roth.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

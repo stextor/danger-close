@@ -38,10 +38,11 @@ ck("computeWithdrawalPlan is exported at module level",
 const ARGS = { retireYear: 2027, rothAmount: 70000, scenarioPreset: "base" };
 const r = g.computeWithdrawalPlan(ARGS);
 
-// The 17 names the Withdrawal tab's JSX destructures. If this set changes, the render breaks —
-// so this is the contract between the engine and its only consumer.
+// The names the Withdrawal tab's JSX destructures. If this set changes, the render breaks —
+// so this is the contract between the engine and its only consumer. v6.09 (D-35) adds `_rothOth` (the Roth money entered under
+// Other accounts, which the Roth card now subtracts so each dollar is shown once): 17 -> 18.
 const CONTRACT = ["_dobAYr","_horizonYr","_ladderEnd","_rmdAgeA_w","_rmdAgeB_w","_rmdStartYr",
-  "_rothInit","_taxInit","_tlW","_tradInit","_wInfl","avgWR","growth","phaseColor","schedule",
+  "_rothInit","_rothOth","_taxInit","_tlW","_tradInit","_wInfl","avgWR","growth","phaseColor","schedule",
   "totalConverted","totalDrawn"];
 const keys = Object.keys(r).sort();
 ck(`returns exactly the ${CONTRACT.length} keys the JSX consumes`,

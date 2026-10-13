@@ -32,12 +32,12 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
 const VER = process.argv[2];
-const KNOWN_VERSIONS = ["v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608"];
+const KNOWN_VERSIONS = ["v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.\n    Registered: ${KNOWN_VERSIONS.join(", ")}`);
   process.exit(1);
 }
-const POST = VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608";
+const POST = VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609";
 
 // resettable seeded source, installed BEFORE the import (see the seeding trap above)
 const mulberry = (a) => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a);
@@ -118,7 +118,7 @@ T("D-1 married: spouse-B SS still paid", mar.ssB, 284676);
 T("D-2 married: draws", mar.draws, 1469176);
 // v6.07 (D-33): the married example carries spouse B's $7,000 annuity, which no RMD or conversion drains from v6.07 — lifetime federal
 // $208,445 -> $208,000 (the same figure and basis as t40 A5's call-site pin). An array, so register_tag2 widens it each release.
-T("D-3 married: lifetime federal" + (["v607", "v608"].includes(VER) ? " (D-33: −$445)" : ""), mar.fed, ["v607", "v608"].includes(VER) ? 208000 : 208445);
+T("D-3 married: lifetime federal" + (["v607", "v608", "v609"].includes(VER) ? " (D-33: −$445)" : ""), mar.fed, ["v607", "v608", "v609"].includes(VER) ? 208000 : 208445);
 T("D-4 married: Monte Carlo planned path", mar.pp, 2128443);
 T("D-5 married: getSSB() returns the stored benefit", G.getSSB(), 1300);
 
