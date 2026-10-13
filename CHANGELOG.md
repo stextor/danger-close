@@ -1,5 +1,79 @@
 # Changelog
 
+## v6.10 — the Ranking tab's peer benchmarks move to the 2025 Survey of Consumer Finances, computed from the Fed's microdata
+
+**A DATA AND PRESENTATION release** — no engine reads these figures; METHODOLOGY gains a section saying where each comes from.
+`docs/SCOPE_PEER_DATA_SCF2025_V610.md` (repo-only, fulfilled). The Events tab's alarm "Peer-benchmark data refresh (Ranking tab)" opened
+this month; Steve: "Can you download and apply the data refresh mentioned here?" — and he took all four recommendations (DD-1 (a) the
+SCF figures plus Empower; DD-2 (a) compute the portfolio tiers; DD-3 (a) relabel the Social Security figure; DD-4 (a) record the headline
+problem as its own finding).
+
+**The data.** The Fed released the 2025 SCF on 2026-10-09. The session's network cannot reach federalreserve.gov, so Steve attached the
+Summary Extract Public Data (`scfp2025excel.zip`, md5 `c938318c…`: 4,360 families × 5 implicates). The new `qa/tools/peer_scf.py`
+computes every SCF figure from it: all five implicates pooled with the extract's weight (`WGT = X42001/5`, the Fed's own convention),
+families whose reference person is 55–64. **It checks itself before it prints anything:** its median and mean net worth for ages 55–64
+must agree with the Fed's published Bulletin figures within 2% (internal vs public data). Measured: **$411.3K vs $411.9K (−0.14%), and
+$1,871.0K vs $1,878.0K (−0.37%)**; the mean retirement savings, $670,248, matches the Bulletin's $670.2K. Its output is
+`docs/PEER_SCF2025_figures.txt`, so the figures can be re-derived instead of trusted.
+
+**What changed on the tab.**
+- **One table.** Every peer figure lives in one module-level table, `PEER_BENCHMARKS`, beside `PEER_DATA_SCF_YEAR` (now **2025**).
+  Through v6.09 the net-worth cut-offs were typed at three sites, two figures were repeated inline in prose, and the survey year was typed
+  as text at three sites. **Proved separately, before any 2025 figure existed:** staged with v6.09's own values, the Ranking and Events
+  tabs rendered identically to v6.09 on twelve households chosen to straddle every cut-off.
+- **The 2025 figures** (2025 dollars): median / mean net worth $411,340 / $1,871,019; tier cut-offs at the 75th, 90th and 95th
+  percentiles **$1.42M, $3.46M, $7.55M** (v6.09: $780K, $1.9M, $3.2M); the affluent band's "typical affluent", now defined as the 87.5th
+  percentile, $2.93M (v6.09: $1.55M, no recorded definition); retirement savings median / mean $239,000 / $670,248; debt $101,000 /
+  $197,305; under $100K saved **61%** (v6.09: 40%); mortgage at 60+ 33%.
+- **Portfolio-size tiers from data (DD-2):** the 90th and 95th percentiles of 55–64 families' financial assets, **$1.95M and $4.93M**,
+  replace an unsourced $800K and $1.5M.
+- **Social Security, relabelled (DD-3):** "Avg Social Security at 62: ~$2,000" was SSA's all-ages average under an at-62 label. It now
+  reads "Avg Social Security award (SSA, 2024)" at **$2,036** (Annual Statistical Supplement 2025, Table 6.B3; awards reduced for early
+  claiming average $1,620), and the cards compare with "avg SS award" rather than an "SS-only retiree".
+- **Empower** to its September 2026 figures ($1,080,916 / $463,328 for savers in their 50s, $1,247,718 in their 60s).
+- **The Field Manual** names the 2025 survey and the next one (2028, publishing ~fall 2029) in the Ranking entry and the vintage table,
+  and no longer calls the figures "hand-entered approximations".
+- **The alarm clears:** the Events tab now reads "next refresh: 2028 SCF, publishes ~Oct 2029".
+
+**The v6.09 cut-offs were far below the 2025 ones, and their source is unknown.** Three years of growth does not explain it — the
+Bulletin's mean for the group rose 9.5% in real terms. The same 2025 extract gives **all-ages** cut-offs of $813K (75th) and $2.54M (90th),
+so the old figures are consistent with an all-ages table read as the 55–64 one. **Not confirmed:** that needs the 2022 extract, which the
+build did not have. **Direction — conservative:** on the example household net worth falls from TOP 10% to TOP 25%, portfolio size from
+TOP 5% to TOP 25%, its national percentile from about the 90th to the 81st, and the headline from TOP 11% to TOP 14%.
+
+**Recorded, not fixed (DD-4):** the headline "TOP N%" averages nine dimension tiers and eight have no peer data behind them — five are fixed
+strings. `docs/UsabilityFlaws.md` **F-19**, for its own scope.
+
+**Tests.** New suite **`t73`** — **56** on v6.10, **31** on v6.09 (that leg pins what v6.09 shows): the table's values against
+`peer_scf.py`'s output and the Empower and SSA publications (A); one table, by AST — the Ranking render's only six-figure literals are the
+home fallbacks and the $M divisor, and no table dollar figure is typed anywhere else (B); every tier cut-off priced from both sides on the
+rendered tab, exactly at it and $1 above (C); the vintage copy, the relabel and the Field Manual (D); the alarm in October 2026 and January
+2027 (E). **Before this release nothing in the suite asserted a Ranking-tab figure.** Controls `qa/tools/controls_v610_peer.py`
+(repo-only): **9 of 9** — eight planted defects and the unmutated run, each turning its named checks red. The suite and its controls were first
+exercised on a dry-run build carrying deliberately synthetic figures (never shipped). **Existing suites:** `t72`'s §D differential takes its
+designed skip on this pair (19 on both legs). `domdiff` sets aside the shell's action banner for this pair only: it names the most urgent
+open event on the run date, and on 2026-10-13 that is the peer alarm on v6.09 but not on v6.10 (32). The shim exports
+`PEER_BENCHMARKS`, `PEER_DATA_SCF_YEAR` and `computePlanEvents`, guarded. `t33`'s PINS carried. `v610` registered by AST, the three Python
+suites, `t1`'s and `t4`'s version arms and `t33`'s PINS by hand. The boundary census does not grow — the stale figures were not a household
+condition (OPERATIONS §K1).
+
+**Also in this package — the manifest names the Vite config correctly.** Found at the v6.09 verification: its row said `vite_config.js`
+and claimed the pool flattens the inner dot. The pool holds `vite.config.js`, as every Projects listing since 2026-10-08 shows; the mangled
+name was an old session mount's (OPERATIONS §G). `package_check` K-8 and K-12 could not see it because every post-ship check since then ran
+against a local pool copy that kept the mount's name — **the v6.09 verification included**, which reported K-8 and K-12 green. Corrected in
+three places.
+
+**Suite, run from the packaged copies:** 6,637 app checks across **72 app suites**, 0 failed, 0 DIED; MC parity 10/10; tooling `t21` 64,
+`domdiff` 32, `sets` 12 + 12; **GRAND 6,767**. Every current-leg count equals v6.09's but `t72` (19 on both legs: its §D differential needs the v6.08 module, absent on this pair, and takes its designed skip) and the new `t73`; the v6.09 leg equals v6.09's own counts but `t72` (the same skip) and `t73` (31, pinning v6.09's state). Run from the PACKAGED copies as two concurrent halves, the method approved at v5.87: run folders built by mk_runfolder.sh v609 v610 from the build workspace — a full clone of ab6f1b8 carrying exactly the packaged changes, each changed file's run-folder copy hash-checked against it (v6.09 resolved from history, commit 2f25660) — each through a session-only copy of runsuite.sh whose one added line skips the other half's labels. Half A GRAND 6545, half B GRAND 222; none DIED. Source `1b41119b4e8d217a35956de42c09d4eb` · built `93ff44d52b126d3431687a1c51e69f3e` (`smoke_built` 22 passed, 0 failed).
+
+**Limitations, disclosed:**
+- Peer figures are in 2025 dollars and are not indexed, so they sit about a year of inflation behind a plan stated in today's dollars
+  (the optimistic direction for the user's rank, slightly).
+- The extract is the Fed's **public** data; its figures differ slightly from the Bulletin's internal-data ones (measured above).
+- The EBRI "on track" and "nothing saved", AALTCI LTC and Roth-plan percentages are carried from v6.09 and were **not** re-verified; no
+  primary source for EBRI's 47% was located.
+- The Portfolio Size tier still reads TOP 25% below the 90th percentile, even far below the 75th; it is part of F-19.
+
 ## v6.09 — D-35: a Roth IRA entered under Other accounts is counted once in the Withdrawal tab, as Roth money
 
 **A MODELLING release** (METHODOLOGY updated). `docs/SCOPE_D35_ENGINE_D_OTHER_ROTH_V609.md` (repo-only, fulfilled). Steve: "Let's build D-35" — and
