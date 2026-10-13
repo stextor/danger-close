@@ -121,6 +121,36 @@ export const HOUSEHOLDS = {
   },
 };
 
+// v6.08 (D-34): retirement money held mostly as a rollover IRA under Other accounts — holdings at 20 %, a $900,000 IRA for A, still
+// standing at RMD age in the Withdrawal tab. `household`, `total401k` and `bucketActuals` are re-derived the way My Data derives them, or
+// Engine D would read a pool that does not match the rows (the same in `capBinds` below).
+const rederive = P => {
+  const t = P.positions.reduce((a, x) => a + (x.balance || 0), 0), bs = { 1: 0, 2: 0, 3: 0, 4: 0 };
+  P.positions.forEach(x => { if (bs[x.bucket] !== undefined) bs[x.bucket] += x.balance || 0; });
+  P.total401k = t; P.household = t + P.otherAccounts.reduce((a, x) => a + (x.balance || 0), 0);
+  P.bucketActuals = { 1: bs[1] / t, 2: bs[2] / t, 3: bs[3] / t, 4: bs[4] / t };
+};
+HOUSEHOLDS.otherIra = {
+  why: "most pre-tax money in a rollover IRA under Other accounts, still standing at RMD age in the Withdrawal tab",
+  flips: ["oth_ira_rmd"],
+  apply: P => {
+    P.positions = (P.positions || []).map(x => ({ ...x, balance: x.balance * 0.2, trad: (x.trad || 0) * 0.2, roth: (x.roth || 0) * 0.2 }));
+    P.otherAccounts = [...(P.otherAccounts || []), { name: "Rollover IRA", balance: 900000, owner: "A", taxType: "trad", planType: "ira" }];
+    rederive(P);
+  },
+};
+// v6.08 (D-34): too little pre-tax money for the $70,000 slider — holdings at 10 % and no Traditional IRA under Other accounts — so the
+// Withdrawal tab's conversion cap binds inside the ladder window on any build.
+HOUSEHOLDS.capBinds = {
+  why: "too little pre-tax money for the opening slider — the Withdrawal tab's conversion cap binds",
+  flips: ["d_conv_cap"],
+  apply: P => {
+    P.positions = (P.positions || []).map(x => ({ ...x, balance: x.balance * 0.1, trad: (x.trad || 0) * 0.1, roth: (x.roth || 0) * 0.1 }));
+    P.otherAccounts = (P.otherAccounts || []).filter(x => x.taxType !== "trad");
+    rederive(P);
+  },
+};
+
 export function build(G, name) {
   const P = JSON.parse(JSON.stringify(G.PORTFOLIO()));
   HOUSEHOLDS[name].apply(P);
