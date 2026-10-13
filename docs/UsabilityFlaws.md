@@ -367,3 +367,43 @@ await browser.close();
 **Control check (run this first if a result looks like a clipping defect).** Load a blank page containing a single 900px-wide box at the same viewport: a healthy harness reports `overflowX: "visible"` and `documentElement.scrollWidth ≈ 908`. If it reports `hidden`, the artifact is in the harness or the gate, not the app. This control is what caught the retracted F-2 claim in §A.
 
 **Committing this to `qa/tools/` is not proposed here.** It would be a source addition, and the *scope before build* rule applies — it needs a `SCOPE_*.md` naming the premise, the site census, and the tests it ships with, plus a decision on whether an audit-only harness belongs in the shipped repo at all. Flagged for Steve; not actioned.
+
+---
+
+## H. Findings filed after the audit
+
+### F-19 · The Ranking tab's headline "TOP N%" averages nine tiers, and eight have no peer data behind them — **MED (honesty of an output)**
+
+**Filed at v6.10** (scope `docs/SCOPE_PEER_DATA_SCF2025_V610.md`, decision DD-4 (a): record it for its own scope; v6.10 does not change it).
+Measured on v6.09; v6.10 leaves the logic as it was.
+
+**What the tab does.** The Ranking tab's **"Overall tier: TOP N% of Americans age …"**, and the Bottom Line's *"If you walked into a
+room with 100 randomly selected {age}-year-old Americans, you would rank in the top N"*, are the **plain average** of nine dimension
+tiers (`tierVal`, then `avgPctile`). Where each tier comes from:
+
+| Dimension | Tier from | Peer data? |
+|---|---|---|
+| Net Worth | SCF percentile cut-offs (from v6.10, `PEER_BENCHMARKS.nwCuts`) | **yes** |
+| Portfolio Size | SCF financial-asset cut-offs from v6.10 (DD-2); an unsourced $800K / $1.5M before | yes from v6.10 — but below the 90th percentile it always says **TOP 25%**, even for a household at the bottom |
+| Retirement Readiness | the user's own Monte Carlo success against 95% / 85% | no — compared with "~47% on track", a different measure |
+| Income Replacement | the user's own replacement ratio against 65% | no |
+| Debt Load | the fixed string **TOP 20%** | no — the same for any mortgage |
+| Roth Strategy | the fixed string **TOP 10%** | no |
+| Healthcare Planning | the fixed string **TOP 5%** | no |
+| Housing Equity | the fixed string **TOP 15%** | no |
+| Planning Sophistication | the fixed string **TOP 5%** | no |
+
+**Measured (v6.09, session probe; example household with only its investable portfolio changed).** At **$20,000** invested — net
+worth $350,000 with the example's $330,000 home equity — the tab shows Net Worth **TOP 50%**, Portfolio Size **TOP 25%**, and
+**Overall tier TOP 15%**. At $6,000,000 it shows **TOP 10%**. The five fixed strings hold the headline inside a narrow band
+whatever the household enters.
+
+**Smaller things in the same block, noted so a scope finds them:** `tierVal` scores **"TOP 50%"** as 30 (its default branch),
+because the ladder lists no 50. The dimension table's column header reads **"Peer benchmark (age 62)"** while every peer figure is
+for ages 55–64. Income Replacement divides a couple's *combined* guaranteed income by **one person's** average Social Security award.
+
+**Options (for its own scope — Steve decides):**
+(a) **Recommended:** base the headline only on the dimensions with peer data (net worth, portfolio), and show the other seven as
+descriptive notes without a "TOP N%".
+(b) Drop the headline and the Bottom Line's percentile sentence; keep the per-dimension rows.
+(c) Keep both and disclose, next to the headline, that most of its inputs are fixed.

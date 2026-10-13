@@ -1,0 +1,30 @@
+# PEER_SCF2025_figures.txt — the derivation behind the Ranking tab's SCF figures (v6.10). REPO-ONLY.
+#
+# Input : scfp2025excel.zip (the Fed's Summary Extract Public Data, CSV), released 2026-10-09
+#         https://www.federalreserve.gov/econres/files/scfp2025excel.zip — md5 c938318c529a0b200734f35c431f5911; contains SCFP2025.csv (21,800 rows = 4,360 families x 5 implicates, 362 columns)
+# Command: python3 -I qa/tools/peer_scf.py scfp2025excel.zip 2025 --json <out>
+# Run   : 2026-10-13, at the v6.10 build. The output below is verbatim.
+#
+ORACLE 2025 age 55-64 net worth: median 411.3K vs published 411.9K (-0.14%); mean 1871.0K vs published 1878.0K (-0.37%); tolerance ±2%
+  year                 2025
+  families_total       4360
+  rows_total           21800
+  rows_55_64           4205
+  medianNetWorth       411,340.00
+  meanNetWorth         1,871,018.92
+  nwP75                1,416,200.00
+  nwP875               2,925,250.00
+  nwP90                3,457,640.00
+  nwP95                7,545,000.00
+  finP90               1,950,000.00
+  finP95               4,928,350.00
+  medianRetSavings     239,000.00
+  meanRetSavings       670,247.65
+  pctHoldRet           63.10
+  medianHHDebt         101,000.00
+  meanHHDebt           197,305.40
+  pctLessThan100K      60.50
+  pctMortgage60plus    33.30
+#
+# Whole-dollar and whole-percent rounding of these values is what src/DangerClose.jsx's PEER_BENCHMARKS carries, and what t73 §A asserts.
+# pctLessThan100K is 60.504..., so 61. pctHoldRet is printed for reference only; the app does not show it.
