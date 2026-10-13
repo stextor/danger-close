@@ -228,6 +228,13 @@ export function census(G) {
     "the cap binds in a ladder year at the opening slider", _short === 0,
     _short === 0 ? "never binds at $70,000 — the cap's rules show only at higher sliders" : "reachable at the opening slider");
 
+  // ── v6.09 (D-35 — SCOPE_D35_ENGINE_D_OTHER_ROTH_V609) · the condition that hid it (§K1) ────────────────────────────────────────
+  // 3. A ROTH IRA ENTERED UNDER OTHER ACCOUNTS. Engine D held one in its Priority-1 pool as gains-bearing brokerage AND in the buckets' Roth share;
+  //    the example household holds none, so both were $0 there. Structural — read from the rows, so it reads the same on any build.
+  const _othRoth = (P.otherAccounts || []).reduce((t, a) => t + (a.taxType === "roth" ? (a.balance || 0) : 0), 0);
+  row("oth_roth", "Roth IRA under Other accounts", `$${Math.round(_othRoth).toLocaleString()}`, "> $0 held", _othRoth <= 0,
+    _othRoth > 0 ? "reachable — Engine D's Roth handling of Other accounts applies" : "none held, so Engine D's Roth handling of Other accounts is $0 here");
+
   return rows;
 }
 
