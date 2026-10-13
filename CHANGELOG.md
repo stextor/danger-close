@@ -1,5 +1,88 @@
 # Changelog
 
+## v6.08 — D-34: the Withdrawal tab converts a Traditional IRA entered under Other accounts, and carries it as an account
+
+**A MODELLING release** (METHODOLOGY updated). `docs/SCOPE_D34_ENGINE_D_OTHER_IRA_V608.md` (repo-only, fulfilled). Steve: "Let's do D-34" — and he
+took every recommendation on the four decisions: bucket money first, then the IRA; fix the IRA's RMD tracker in the same release; file the Roth
+finding separately; one sentence on the Withdrawal tab plus METHODOLOGY.
+
+**What was wrong.** Engine D (`computeWithdrawalPlan`, the Withdrawal tab — and the spending-draw series Engines A, B and C read) holds a Traditional
+IRA entered under Other accounts in its Priority-1 pool. Three things about it, all found or confirmed by parser census and measured:
+- **The conversion (D-34 as filed, and a third term).** Its cap was the buckets' pre-tax money less the year's whole RMD, figured before the draws: the
+  RMD it subtracted included the IRA's, which never leaves the buckets; it ignored the year's bucket spending draw, so where the slider outran the
+  buckets it converted money already spent (one year, $1,486–$3,180, at sliders of $150,000 and up on the example household — `tradAmt`'s floor hid
+  it); and the IRA itself was never converted, though Engines B and C convert it.
+- **The IRA's RMD tracker never grew** — no growth site at all (`taxRmdA`/`taxRmdB`: init, the RMD read, the shrink). An RMD is figured on the IRA's
+  prior year-end balance (Treas. Reg. §1.408-8(b)(2)), so this understated it: the optimistic direction. Not on record anywhere before this scope.
+- **The IRA's RMD left it pro rata** across the whole pool's draw instead of whole, so where the pool also held brokerage, HSA or annuity money the
+  IRA gave up less than its RMD.
+
+**What changed.** The conversion is figured after the year's draws: the buckets' pre-tax money left after their own RMD and the Traditional share of
+the year's spending draw first, then the IRA's RMD-bearing money left after its RMD and draw. An RMD is never converted (§1.408A-4, Q&A-6); annuity
+money is never in the IRA's figure, so never converted (D-33). Converted IRA money leaves the ordinary and RMD-bearing figures and stays in the pool
+as tax-free money; no balance moves. The IRA's figure grows at the pool's rate inside its ordinary money, and its RMD leaves it whole — the two rules
+the ordinary figure has followed since v5.36. The Withdrawal tab says where a conversion comes from in one sentence (the order is the model's
+assumption, and the conservative one); METHODOLOGY gains a section and two cross-references. Each schedule row publishes `convSleeve_y` and
+`rmdSleeve_y` (the IRA's parts of `conv_y` and `rmd_y`) for the tests and the boundary census; no figure reads them.
+
+**The example household does not move** at $0 or $70,000 — Engines B, C and D and the Roth tab's strategies bit-identical, field by field — because
+its $104,000 of Other-account IRAs is spent as Priority-1 money long before RMD age and its buckets cover the slider. At $150,000 and up one year's
+Withdrawal-tab conversion falls by what that year's spending draw had taken ($105,857 → $103,185 in 2035 at $200,000); the Taxes, IRMAA and Roth tabs
+do not move. The Monte Carlo does not read Engine D.
+
+**Measured** (engines at module level; the shipped source): on a household with $150,000 of holdings, a $900,000 rollover IRA under Other accounts and $300,000 of cash — with no conversion, the Withdrawal tab's lifetime RMD $430,216 → $653,901 and the Taxes tab's lifetime tax $144,301 → $132,864; at $70,000 a year the Withdrawal tab converts $840,000 where it converted $50,000, and the Taxes tab's lifetime tax $157,906 → $143,437. A second household (holdings at 20 %, IRAs of $700,000 and $200,000, a $100,000 annuity): with no conversion lifetime RMD $576,672 → $792,387 and lifetime tax $171,559 → $161,009; at $70,000 converted $247,783 → $840,000 and lifetime tax $193,967 → $173,733. IRMAA unchanged on both.
+
+**Direction — two ways, and the second is a correction.** The Withdrawal tab's RMD and MAGI rise where the IRA reaches RMD age unconverted. The Taxes
+tab's lifetime tax falls on such households because Engines B and C already converted the IRA themselves while the draw series Engine D handed them
+still taxed it as ordinary money — on the first household above at $70,000, in twelve years Engine B's own Traditional balance was $0 at the start of
+the year while it still charged $137,056 of imported ordinary draws; with the fix, none.
+
+**Tests.** New suite **`t71`** — **40** on v6.08, **21** on v6.07 (that leg pins the defects): an oracle re-implements the pool's
+trackers, the RMD, the conversion, the ordinary draw and the buckets' Traditional share year by year with its own divisors and start ages, in both
+rule sets — it reproduces each leg to the cent under that leg's rules on ten household × slider runs and misses the other leg's by more than $1,000;
+five extinction invariants over six households × four sliders (never more than is left, never short while money remains, an all-annuity pool converts
+nothing, RMD-bearing ≤ ordinary, nothing after the window); five dollar-exact pins that flip; v6.07 → v6.08 bit-identity for the households that must
+not move (Engines B, C, D and the strategies); the Withdrawal tab's sentence and its "Roth converted" card in the DOM. Controls
+`qa/tools/controls_v608_engine_d_ira.py` (repo-only): **10 of 10** — nine planted defects, each turning its named check red.
+**Existing suites:** `t19`'s ledger gains v6.08's tracker rules and a check that it reproduces the IRA's RMD every year, and its mixed-pool MAGI pin
+moves $3,162,820 → $3,191,209 — all of it the RMD (+$28,389.02 in both; `othOrdDraw` unchanged, now pinned) — 67 checks; `t70` F-2 gated per leg
+(Engine D's cap expression), and its §D differential takes its designed skip on this pair (it needs `app_v606.mjs`) — 33 on both legs, as `t69`'s
+did at v6.07; `domdiff`'s byte-identity check sets aside exactly the new sentence for this pair only — 32 (the v6.06 → v6.07 branches no longer
+run). **The boundary census grows (OPERATIONS §K1):** `oth_ira_rmd` (an Other-account IRA reaching an RMD in Engine D) and `d_conv_cap` (the
+Withdrawal tab's cap binding at the opening slider) both read ON for the example household — the two conditions that hid these defects — with a
+fixture clearing each; `t29` 66 on both legs. `t33`'s PINS carried (its P passes no draw series). `v608` registered by AST, the three Python
+suites, `t1`'s and `t4`'s version arms and `t33`'s PINS by hand.
+
+**Suite, run from the packaged copies:** 6,515 app checks across **70 app suites**, 0 failed, 0 DIED; MC parity 10/10; tooling `t21` 64,
+`domdiff` 32, `sets` 12 + 12; **GRAND 6,645**. Every current-leg count equals v6.07's (with `t13` at 53 from the ops package) but `t19` (67: the ledger reproduces the Other-account IRA's RMD, and `othOrdDraw` is pinned), `t29` (66 on both legs: the two new census rows), `t70` (33 on both legs: §D's v6.06 differential takes its designed skip on this pair) and the new `t71`; the v6.07 leg equals v6.07's own counts but `t29`, `t70` and `t71` (21, pinning the defects). Run from the PACKAGED copies as two concurrent halves, the method approved at v5.87: run folders built by mk_runfolder.sh v607 v608 from the build workspace — a full clone of e01db32 carrying exactly the packaged changes, each changed file's run-folder copy hash-checked against it (v6.07 resolved from history, commit 4cb6859) — each through a session-only copy of runsuite.sh whose one added line skips the other half's labels. Half A GRAND 6423, half B GRAND 222; none DIED. Source `a739b64a9228ab4fd69fa8226552497b` · built `2e869c23540b8f8e851f714cb0c7ef2b` (`smoke_built` 22 passed, 0 failed).
+
+**Found at the build, fixed before the final run:**
+- The first controls run missed two: reverting "the IRA's RMD comes off bucket money" moved no total, because the IRA now tops up any shortfall —
+  `t71` D-5 asserts where the 2039 conversion came from (all bucket money), and it fires; and "the converted IRA stays RMD-bearing" fires on the
+  second household, not the first, whose IRA is converted away before RMD age (the control's expectation was wrong, not the coverage).
+- A third — `tradAmt` taking the whole conversion instead of its bucket part — is an **equivalent mutant**: the IRA converts only in a year whose
+  bucket conversion took the whole bucket cap, so the Traditional fraction becomes 0 on either expression. Dropped from the controls and recorded in
+  the script; the source keeps the expression that says what is meant.
+- D-5's fixture had to be found by a sweep: the cap can bind through the IRA's RMD only in an RMD year inside the ladder window (2039–2040 here) with
+  bucket money between the slider and the slider plus the RMD.
+- **The Roth finding is filed as D-35, not D-36** as the scope draft and the decision question named it — D-35 was the next free ID; corrected.
+- **The first run of half A was interrupted** — the session's shell was killed while it stood at `t56` (an environment interruption: no suite
+  had failed). Half A was re-run whole from the same run folder, every changed file first re-checked against the workspace; the figures above are
+  the re-run's. Half B had completed and was not re-run.
+- **Found at the ship rehearsal, fixed in this package: `package_check_controls.sh` P75 reported a FINDING that was the control's own.**
+  P74/P75 (added by the ops package of 2026-10-12) start from the newest manifest and assumed that was the ops package's whenever one was given;
+  here the app package is newer, and the ops manifest — naming `DangerClose-v6_07.jsx` and `dom_entry_v607.jsx` after their rotation — made K-12
+  red before any row was planted. They now start from the first manifest (app package, ops package, clone) on which an unmutated K-12 is green
+  against the pool given, and report a FINDING if none is. Both phases re-run after the fix.
+
+**Limitations, disclosed:**
+- The order between bucket money and the IRA is the model's assumption; Engine D converts on the household's single ladder window, not each spouse's.
+- **Found while scoping, not changed — filed as `MissingFeatures.md` D-35:** a Roth IRA entered under Other accounts is counted twice in Engine D —
+  as gains-bearing brokerage in the pool and inside the buckets' Roth share (measured: $200,000 of it understates lifetime RMD by about $127,000 against
+  the same money as brokerage, and books $29,227 of capital gain on Roth money).
+- A household with no holdings at all is healed at load to `total401k` = its whole household, so Engine D holds every dollar in the buckets — seen
+  while building fixtures and **not examined**; every fixture here carries holdings.
+
 ## ops 2026-10-12 — E-29 (b), (c), (g) and (i): `t13`'s counterfactual, E-1b through the manifest, K-12, the locked harness
 
 **KIND: ops** — one suite, three QA tools, the harness lock and documents; **v6.07 stays current** (source `ee557028aba1dfb1acb5bb647f6c5630`, built `5b444023ed72ebca40c9d0443b2ddf05`). No app
