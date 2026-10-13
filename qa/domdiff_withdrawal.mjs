@@ -188,7 +188,15 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   // is set aside (it must occur exactly once) and nothing else — no rendered cell of this tab moves on the example (t72 §D, at engine level).
   const _p609 = VA === "v608" && VB === "v609";
   const _n609 = (s) => !_p609 ? s : _cut(s, / ?A Roth IRA you entered under Other accounts sits here too: it is spent tax-free and carries no RMD, and it is counted here only, not again in the Roth line below\./, "v6.09 Priority-1 sentence");
-  const wA = stripV(A.withdrawal), wB = stripV(_n609(_n608(_n579(B.withdrawal))));
+  // v6.10 (the 2025 SCF refresh — docs/SCOPE_PEER_DATA_SCF2025_V610.md) clears the Events tab's peer-benchmark alarm, which v6.09 raises
+  // from October 2026. The shell's action banner sits above every tab, so it is inside this capture, and it names the most urgent open event
+  // on the RUN DATE, so on this pair it can differ for that reason alone (measured 2026-10-13: v6.09 "ACTION WINDOW OPEN: Peer-benchmark
+  // data refresh", v6.10 "GETTING CLOSE: Annual tax-data refresh"). For THIS pair only, the one banner line is set aside on BOTH sides and
+  // nothing else; on a run date with no open event neither side has one, and the replace is a no-op. The tab itself is still compared whole.
+  const _p610 = VA === "v609" && VB === "v610";
+  const _BAN = /(?:⚠ ACTION REQUIRED|▶ ACTION WINDOW OPEN|◔ GETTING CLOSE):[\s\S]{1,400}?\s+—\s+open the EVENTS tab for instructions/;
+  const _n610 = (s) => !_p610 ? s : s.replace(_BAN, "");
+  const wA = stripV(_n610(A.withdrawal)), wB = stripV(_n610(_n609(_n608(_n579(B.withdrawal)))));
   ck("WITHDRAWAL: the tab is byte-identical across the pair (v5.40 is disclosure + mechanics; no rendered cell moves \u2014 measured)",
      wA === wB, firstDiff(wA, wB));
   // The v5.35 claims must still hold on BOTH sides — this is the assertion that would catch

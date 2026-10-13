@@ -254,6 +254,11 @@ tally "t71-$CUR"   node t71_engine_d_other_ira.mjs "$CUR"
 # §D's differential reads app_v608.mjs when the run folder has it.
 tally "t72-$PRIOR" node t72_engine_d_other_roth.mjs "$PRIOR"
 tally "t72-$CUR"   node t72_engine_d_other_roth.mjs "$CUR"
+# t73 (v6.10) — the Ranking tab's peer benchmarks: one module-level table on the 2025 SCF, no peer figure typed anywhere else (AST), every
+# tier cut-off priced from both sides on the rendered tab, the vintage copy and the Field Manual, and the refresh alarm. Both legs: the
+# prior leg pins what v6.09 shows.
+tally "t73-$PRIOR" node t73_peer_benchmarks.mjs "$PRIOR"
+tally "t73-$CUR"   node t73_peer_benchmarks.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
