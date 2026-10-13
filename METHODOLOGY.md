@@ -358,7 +358,10 @@ stress solver's tax estimate rises (the conservative direction).
 `tradBal − max(RMD, QCD)`, Engine D at `tradNotional − RMD`. At the default $70,000/yr no cap binds in any engine on the 11
 fixture households. At $150,000–$250,000/yr the caps bind and the Taxes tab and the Withdrawal plan convert different
 lifetime totals — ≈ $90,000–$181,000 — mostly because Engine D's balance grows at its scenario rate (D-9, a decided
-difference) and runs out sooner; with a QCD the cap formula itself decides 2–4 years.
+difference) and runs out sooner; with a QCD the cap formula itself decides 2–4 years. *(Both caps have moved since, and the gap
+above was not re-measured: from v6.07 Engines B and C cap at the **non-annuity** balance less max(RMD, QCD); from v6.08 Engine D caps at the
+bucket pre-tax money left after its own RMD and the year's spending draw, then converts a Traditional IRA entered under Other accounts —
+see "Engine D converts an IRA entered under Other accounts" at the end of this paper.)*
 
 **Who the age-65 deductions belong to, and an unused deduction against gains (v5.75).** Two
 corrections, both in the taxpayer-unfavourable direction — the model now reports MORE tax in the
@@ -2135,7 +2138,8 @@ state attribution has always reported for a draw. The share is re-taken every ye
 first-death merge has used since v5.26). The state attribution gives a conversion no annuity money. The Roth tab's ladder carries each spouse's
 annuity dollars: its conversion cap and its own RMD use the balance less them, and the with-conversion RMD card subtracts them; the no-conversion card
 keeps its static share, which is exact there (nothing leaves the account before RMD age). **Engine D — the Withdrawal tab and everything that reads it —
-was never affected**: there the annuity sits in the Priority-1 pool and the conversion is bucket money only.
+was never affected**: there the annuity sits in the Priority-1 pool and the conversion is bucket money only. *(Through v6.07. From v6.08 Engine D
+also converts a Traditional IRA entered under Other accounts, after the bucket money — and still never annuity money; see the next section.)*
 
 **A household with no annuity is untouched** — every changed expression reduces to v6.06's operand for operand, and fourteen state and QCD
 combinations of two annuity-free households were bit-identical in Engines A, B and C when measured at the build. `t70` §D re-checks sixteen such
@@ -2156,3 +2160,55 @@ $43,880) while others rise. Neither direction was chosen; both follow from the l
 **What is still approximate.** Engine A taxes the spending draw without draining it (v5.84), so in that engine the annuity share moves with RMDs and
 conversions only. The QCD cap admits employer-plan dollars, which in law must reach an IRA first (the attribution already sends a QCD to IRA dollars
 first). The annuity's after-tax basis is still taxed as ordinary income (the pessimistic simplification above). The draw order is unchanged.
+
+## Engine D converts an IRA entered under Other accounts, and carries it as an account (v6.08)
+
+*(v6.08, D-34 — `docs/SCOPE_D34_ENGINE_D_OTHER_IRA_V608.md`; `qa/t71_engine_d_other_ira.mjs`.)*
+
+Engine D is the Withdrawal tab. Its spending-draw series is also what Engines A, B and C read for the ordinary income a spending withdrawal creates
+(v5.74, v5.84), so what it does with an IRA reaches the Roth, Taxes and IRMAA tabs too. Since v5.26 a Traditional IRA entered under Other accounts
+sits in Engine D's Priority-1 pool — spent first — tracked as ordinary money and as RMD-bearing money.
+
+**The law.** An RMD cannot be converted, and the year's first dollars out of the IRA are the RMD (Treas. Reg. §1.408A-4, Q&A-6). A conversion is
+income in the year converted (Q&A-7). An IRA's RMD is figured on its balance at the end of the year before (§1.408-8(b)(2)) — so on a balance that
+includes the account's growth. Which account a person converts from is their choice; no rule orders it.
+
+**What the model did through v6.07.** Three things, all about that IRA.
+- *The conversion.* Engine D capped it at the buckets' pre-tax money less the year's whole RMD, figured before the year's draws. The RMD it
+  subtracted included the IRA's, which never comes out of the buckets; it ignored the bucket spending draw later in the year, so where the slider
+  outran the buckets it converted money already spent; and it never converted the IRA at all, though Engines B and C convert it.
+- *The IRA's balance for its RMD never grew.* The pool grew, and so did its ordinary money (v5.37), but the RMD-bearing figure had no growth line,
+  so the IRA's RMD was figured on its opening balance less withdrawals. That is the optimistic direction.
+- *The IRA's RMD left it pro rata.* The year's RMD came out of the RMD-bearing figure in proportion to the whole pool's draw, so where the pool also
+  held brokerage, HSA or annuity money the IRA gave up less than its RMD and its next RMD was figured on dollars already distributed.
+
+**What it does now.** The conversion is figured after the year's draws: first the buckets' pre-tax money left after their own RMD and the
+Traditional share of the year's spending draw from them; then the IRA's RMD-bearing money left after its RMD and its share of the spending draw.
+Annuity money is never in that figure, so it is never converted (D-33). Converted IRA dollars stop being ordinary and RMD-bearing and stay in the
+pool as tax-free money — the remainder HSA money already sits in — so spending them later is untaxed; no balance moves, because a conversion changes
+what the money is, not how much there is. The IRA's RMD-bearing figure grows at the pool's rate, held inside the pool's ordinary money, and its RMD
+leaves it whole while only the spending draw leaves it pro rata — the two rules the ordinary figure has followed since v5.36. The Withdrawal tab says
+in one sentence where a conversion comes from.
+
+**The order is an assumption, and it is the conservative one.** Bucket money first, then the IRA. Keeping the IRA as ordinary money longer means
+more of the early spending draws — which come out of the Priority-1 pool first — are taxed. Converting from both in proportion was prototyped and
+measured: it moves the example household at the opening slider; this order does not.
+
+**A household whose IRA under Other accounts is gone before RMD age and whose buckets cover the slider is untouched** — the example household at
+$0 and $70,000 is bit-identical in Engines B, C and D and in the Roth tab's strategies, and `t71` §E re-checks that against v6.07 on every suite run.
+Its $104,000 of Other-account IRAs is spent as Priority-1 money long before its first RMD year. At sliders of $150,000 and above one year's
+conversion falls by the money that year's spending draw had already taken ($105,857 → $103,185 in 2035 at $200,000); the Taxes, IRMAA and Roth tabs
+do not move, because Engine D's conversion is not part of the series they read.
+
+**Measured** on a household holding $150,000 of holdings, a $900,000 rollover IRA under Other accounts and $300,000 of cash. With no conversion: the
+Withdrawal tab's lifetime RMD $430,216 → $653,901; the Taxes tab's lifetime tax $144,301 → $132,864. At $70,000 a year: the Withdrawal tab converts
+$840,000 where it converted $50,000; the Taxes tab's lifetime tax $157,906 → $143,437.
+
+**Direction — two ways, and the second is a correction.** On the Withdrawal tab the IRA's RMD and MAGI rise where it reaches RMD age unconverted (the
+conservative direction). On the Taxes and IRMAA tabs lifetime tax falls: those engines already converted this IRA themselves, but the spending draw
+Engine D handed them still treated it as ordinary money, so some dollars were taxed twice — on the household above at $70,000, in twelve years Engine
+B's own Traditional balance was $0 at the start of the year while it still charged $137,056 of imported ordinary draws.
+
+**What is still approximate.** The order between bucket money and the IRA is the model's. Engine D converts on one household ladder window, not each
+spouse's. A Roth IRA entered under Other accounts is still counted twice in Engine D — as brokerage money in the pool and inside the buckets' Roth
+share — which is filed as `MissingFeatures.md` D-35 and was not changed here.
