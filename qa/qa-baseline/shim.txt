@@ -101,6 +101,11 @@ export const __test = {
   retireStartBalances: _g("retireStartBalances"),
   otherTaxableInit: _g("otherTaxableInit"),
   taxableInitAll: _g("taxableInitAll"),
+  // v6.10 — the Ranking tab's ONE peer table, the survey year, and the Events engine (t73). GUARDED: PEER_BENCHMARKS does not exist on
+  // the v6.09 leg, where t73 asserts its absence. Read through a function so a leg's own value is read when called.
+  PEER_BENCHMARKS: () => _g("PEER_BENCHMARKS"),
+  PEER_DATA_SCF_YEAR: () => _g("PEER_DATA_SCF_YEAR"),
+  computePlanEvents: _g("computePlanEvents"),
 };
 
 // v5.18: Engine C was hoisted to module level at v5.17; this exposes it to the harness.
