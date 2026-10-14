@@ -259,6 +259,11 @@ tally "t72-$CUR"   node t72_engine_d_other_roth.mjs "$CUR"
 # prior leg pins what v6.09 shows.
 tally "t73-$PRIOR" node t73_peer_benchmarks.mjs "$PRIOR"
 tally "t73-$CUR"   node t73_peer_benchmarks.mjs "$CUR"
+# t74 (v6.11) — F-19r: the Ranking tab's headline is the net-worth band and nothing else; the rows with no peer data carry no tier; the copy
+# states figures, not verdicts; the Field Manual says which rows are ranked. Both legs: the prior leg pins what v6.10 shows. It re-runs the
+# Monte Carlo after each household change and checks that it did (OPERATIONS §C).
+tally "t74-$PRIOR" node t74_ranking_headline.mjs "$PRIOR"
+tally "t74-$CUR"   node t74_ranking_headline.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

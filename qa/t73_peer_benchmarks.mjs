@@ -27,13 +27,16 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v610";
-const KNOWN_VERSIONS = ["v609", "v610"];
+const KNOWN_VERSIONS = ["v609", "v610", "v611"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v610"].includes(VER);   // an array, so register_tag2 widens it each release
+const POST = ["v610", "v611"].includes(VER);   // an array, so register_tag2 widens it each release
+// v6.11 (F-19r DF-4): the Portfolio Size row has no floor band any more — at or below the 90th percentile it reads "Below the top 10%",
+// where v6.10 read "TOP 25%". Gated per leg (§B2), an array so the next registration widens it.
+const NOFLOOR = ["v611"].includes(VER);
 const require = createRequire(import.meta.url);
 const { __g: g, __test: X } = await import(pathToFileURL(join(HERE, `app_${VER}.mjs`)).href);
 const SRC = readFileSync(join(HERE, "..", `${VER}.jsx`), "utf8");
@@ -134,7 +137,7 @@ if (!POST) {
   // applyLoadedData takes a WRAPPER and does not re-render, so park off the tab first (OPERATIONS §C).
   const show = async (patch, masterPrompt) => { await click(tab("dashboard")); await act(async () => { window.__test.applyLoadedData({ portfolio: { ...clone(BASE), ...patch }, ...(masterPrompt ? { masterPrompt } : {}) }); });
     await flush(); await click(tab("ranking")); await flush(); return (body().textContent || "").replace(/\s+/g, " "); };
-  const rowTier = (txt, name) => { const m = txt.match(new RegExp(name + "[^%]*?(TOP \\d+%)")); return m ? m[1] : null; };
+  const rowTier = (txt, name) => { const m = txt.match(new RegExp(name + "[^%]*?(TOP \\d+%|Below the median|Below the top 10%)")); return m ? m[1] : null; };   // v6.11: the two below-band labels
 
   // D · the copy, on the example household
   const t0 = await show({});
@@ -174,7 +177,7 @@ if (!POST) {
     EQ(`C-1 net worth exactly at the ${cut} cut-off (${c}) stays in ${below}`, rowTier(await show({ ...zero, household: c }, NOHOME), "Net Worth"), below);
     EQ(`C-2 net worth $1 above the ${cut} cut-off moves to ${above}`, rowTier(await show({ ...zero, household: c + 1 }, NOHOME), "Net Worth"), above);
   }
-  for (const [cut, below, above] of [["p90", "TOP 25%", "TOP 10%"], ["p95", "TOP 10%", "TOP 5%"]]) {
+  for (const [cut, below, above] of [["p90", NOFLOOR ? "Below the top 10%" : "TOP 25%", "TOP 10%"], ["p95", "TOP 10%", "TOP 5%"]]) {
     const c = FIN[cut];
     EQ(`C-3 a portfolio exactly at the ${cut} cut-off (${c}) stays in ${below}`, rowTier(await show({ ...zero, household: c }, NOHOME), "Portfolio Size"), below);
     EQ(`C-4 a portfolio $1 above the ${cut} cut-off moves to ${above}`, rowTier(await show({ ...zero, household: c + 1 }, NOHOME), "Portfolio Size"), above);
