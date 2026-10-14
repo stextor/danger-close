@@ -1,5 +1,74 @@
 # Changelog
 
+## v6.11 — the Ranking tab's headline is the net-worth band, and the tab stops claiming what it does not measure
+
+**A PRESENTATION release** — no engine reads anything it changes; MC parity unchanged. METHODOLOGY gains a short section (what is ranked
+and what is not), because v6.10's section said the headline problem was left open. `docs/SCOPE_F19R_RANKING_HEADLINE.md` (repo-only,
+fulfilled). The finding is `docs/UsabilityFlaws.md` **F-19r**, filed at v6.10. Steve took all six recommendations: "Let's use your
+recommendations for the decisions on §4."
+
+**What was wrong (v6.10, measured with the Monte Carlo re-run for each household).** The headline "Overall tier: TOP N% of Americans age …"
+and the Bottom Line's "you would rank in the top N by virtually every dimension" were the plain average of nine row tiers. Five were fixed
+strings (Debt Load TOP 20%, Roth Strategy TOP 10%, Healthcare Planning TOP 5%, Housing Equity TOP 15%, Planning Sophistication TOP 5%), two
+came from thresholds on the household's own figures, and two from the SCF — so every possible household read **between TOP 9% and TOP 18%**
+(all 72 reachable combinations enumerated). A $20,000 portfolio with no home, about the 2nd percentile of net worth, read **TOP 18%**, "an
+exceptionally strong position … a structural one", "You have all three", "fewer than 10% of your peers possess" and "ACA bridge + Medicare
++ hybrid LTC"; the example household read TOP 14%.
+
+**What changed on the tab (decisions DF-0 to DF-5, all (a)):**
+- **The headline is the net-worth band** against U.S. families 55–64, labelled "Net worth position … of U.S. families age 55–64 (Fed SCF
+  2025)". Nothing else moves it: two households at the same $2.00M net worth, one at 100% Monte Carlo success and one at 0%, now read the
+  same TOP 25% (v6.10: TOP 13% and TOP 17%). The nine-way average is gone (DF-1). **The example household's headline moves from TOP 14%
+  to TOP 25%** — its net-worth band — the conservative direction.
+- **Net Worth gains its median band** (`nwCuts.p50`, already in the table): below the median it reads "Below the median" instead of TOP 50%.
+  **Portfolio Size loses its floor:** at or below the 90th percentile of financial assets it reads "Below the top 10%" instead of TOP 25%
+  (DF-4). No new data.
+- **Four rows are no longer ranked** — Retirement Readiness, Debt Load, Income Replacement, Housing Equity show the household's own figure
+  beside a survey figure, with "—" for tier and ratio. **Three rows are removed** — Roth Strategy, Healthcare Planning and Planning
+  Sophistication described every household with facts the app does not know (DF-2). Housing Equity no longer says "cash-purchase plan".
+- **Figures, not verdicts** (DF-3): the header gives the national net-worth percentile and the portfolio multiple; the "Planning advantage"
+  block is removed; the Bottom Line states the net-worth position, the percentile, the multiple and the household's guaranteed income beside
+  the average award; the affluent card states one verdict and the percentile, drops "you're around the middle" and "pointing to the upper
+  end of that range", and shows "below entry" rather than a 0th percentile among a group the household is not in. One national percentile,
+  computed once, feeds the header, the affluent card and the Bottom Line.
+- **"Nx avg SS" is gone** (DF-5): it divided a couple's combined Social Security and pension by one retired worker's average award. The two
+  figures are shown side by side, labelled. The MC success card says EBRI's 47% is a different measure.
+- **The table's subtitle** says which rows are ranked; its column header reads "Survey figure" (was "Peer benchmark (age 62)"). **The Field
+  Manual's Ranking entry** says which two rows are ranked and names the four that are not.
+
+**The scope's own errors, corrected while building.** §3 proposed "Peer benchmark (ages 55–64)" as the column header; the EBRI and SSA
+figures in that column are not 55–64 figures, so it reads "Survey figure". And F-19's filed measurement (TOP 15% at $20,000) was taken
+without re-running the Monte Carlo; the real figure is TOP 18% (recorded in UsabilityFlaws and the scope §0b).
+
+**Also in this package.** **F-19 was used twice** (the v5.39 skins finding and this one); the census now calls them F-19s and F-19r and gives
+F-19s the row it never had (DF-0 (a)); shipped entries keep the bare number. **OPERATIONS §C** gains the trap that mis-measured F-19:
+`applyLoadedData` does not re-run the Monte Carlo.
+
+**Tests.** New suite **`t74`** — **34** on v6.11, **16** on v6.10 (that leg pins v6.10's behaviour as dated `[KNOWN DEFECT]` checks): the
+render's structure by AST — six rows, every assigned "TOP N%" literal is the net-worth band or Portfolio Size's tier, the four unranked rows
+carry "—", nothing averages the rows (A); the headline follows net worth and nothing else, behind a **setup check (B-1)** that the Monte
+Carlo really re-ran for two households that must differ (B); every net-worth cut-off — p50, p75, p90, p95 — priced exactly at it and $1
+above on both the headline and the row, and the portfolio floor (C); the copy for a 2nd-percentile household carries none of seventeen
+verdicts or unmeasured claims, the Bottom Line states the headline's position, one national percentile in three places, one verdict on the
+affluent card, the table's rows and header (D); the Field Manual (E). `t73` C-3 gated per leg (the Portfolio Size floor) and its row reader
+taught the two below-band labels. Controls `qa/tools/controls_v611_ranking.py` (repo-only): **9 of 9** — eight planted defects (the average
+back, a fixed row tier back, the praise back, the median band dropped, the portfolio floor back, the Field Manual sentence back, the test
+skipping its Monte Carlo re-run, a second affluent verdict) and the unmutated run, each turning its named checks red. `v611` registered by
+AST (303 sites), with the three Python suites, `t1`'s and `t4`'s version arms and `t33`'s PINS by hand; `domdiff`'s v6.10 banner set-aside
+was left pair-specific on purpose (on v6.10 → v6.11 both sides show the same banner). The boundary census does not grow — the defect was not a
+household condition (OPERATIONS §K1).
+
+**Suite, run from the packaged copies:** **6,712 app checks across 73 app suites**, 0 failed, 0 DIED; MC parity 10/10; tooling `t21` 64, `domdiff` 32, `sets` 12 + 12; **GRAND 6,842**. Every current-leg count equals v6.10's but the new `t74`; the v6.10 leg equals v6.10's own counts but `t74` (16, pinning v6.10's behaviour). Run from the PACKAGED copies in one pass: a run folder built by `mk_runfolder.sh v610 v611` from a fresh clone of `1a64be5` carrying exactly the packaged changes (68 files, each overlay compared byte for byte with the build workspace; every changed suite's run-folder copy 60 of 60 identical), v6.10 resolved from history (commit `89963eb`). Source `35f3c6560cf8da1b984de77e07a4cf8b` · built `ff3c5d7ee91595a4f4634a4aa56f4103` (`smoke_built` 22 passed, 0 failed); v6.10 rebuilt first from its own source to its published `93ff44d5…`.
+
+**Limitations, disclosed:**
+- The national percentile is interpolated between the SCF cut-offs (log-linear above the median, linear below), so between them it is
+  approximate; the tab says "about".
+- The four unranked rows still show survey figures that measure different things (EBRI's share of workers on track, the mean debt of
+  families holding any); each is now labelled as such, and none is ranked or turned into a ratio.
+- The EBRI, AALTCI and Roth-plan percentages in "The broader context" are carried from v6.09, unverified, as before.
+- "Which benchmark?" still calls Empower's engaged savers "the crowd you actually belong to"; it is outside this scope's sites and is left
+  as it was.
+
 ## v6.10 — the Ranking tab's peer benchmarks move to the 2025 Survey of Consumer Finances, computed from the Fed's microdata
 
 **A DATA AND PRESENTATION release** — no engine reads these figures; METHODOLOGY gains a section saying where each comes from.
