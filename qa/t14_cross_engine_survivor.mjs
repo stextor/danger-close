@@ -153,7 +153,7 @@ console.log("t14 \u2014 CROSS-ENGINE SURVIVOR SS (D-5: the class-level invariant
   // and any surviving copy keeps the pattern matched. The assertion reads as "Engine D's
   // death guard is correct" and actually means "at least one death guard exists somewhere".
   //
-  // Engine D has NO filing concept — verified: it carries `_widowedD` and `_tlW.single`, but
+  // (Through v6.11 — see the v6.12 note below.) Engine D had NO filing concept — verified then: it carried `_widowedD` and `_tlW.single`, but
   // no `yr > _deathYr1D` transition, because filing status is Engine B's job. That is why
   // Engine D is legitimately absent from filingEngines below, and it is what makes the fix
   // below sound: inside Engine D, a `>` against the death year can ONLY be a weakened guard,
@@ -162,15 +162,22 @@ console.log("t14 \u2014 CROSS-ENGINE SURVIVOR SS (D-5: the class-level invariant
   //
   // ⚠ If Engine D ever gains a filing concept, this assertion must MOVE to filingEngines
   // rather than being deleted, or the C-2C-6 class reopens silently on this engine.
+  //
+  // ── v6.12 (C-5): IT DID, AND THE CHECK MOVED ─────────────────────────────────────────────
+  // Engine D's Bracket column now files by the year (`_filingSingleD = _tlW.single || yr > _deathYr1D`,
+  // Pub. 501), so the paragraph above no longer describes it: a `>` against the death year is now
+  // legitimate inside Engine D exactly ONCE. The absence check becomes a COUNT — one `>`, and it is the
+  // filing declaration — and Engine D joins filingEngines below with its own death and filing patterns.
+  // Weakening EITHER death guard (`survAdj`, `_widowedD`) still fails: it adds a second `>` and drops a `>=`.
   {
     const dWin = region("const _deathYr1D =", "function computeTaxPlan");
     ck("Engine D window resolves for the death-guard check", !!dWin);
     if (dWin) {
       const ge = (dWin.match(/yr >= _deathYr1D/g) || []).length;
       const gt = (dWin.match(/yr > _deathYr1D/g) || []).length;
-      ck("Engine D: every death guard uses >= (the death YEAR counts)", ge >= 1, `${ge} found`);
-      ck("Engine D [EXTINCTION]: NO weakened > guard — Engine D has no filing switch, so a > here is a defect",
-        gt === 0, `${gt} weakened guard(s); Engine D carries ${ge} correct one(s)`);
+      ck("Engine D: both death guards use >= (the death YEAR counts) — survAdj and _widowedD", ge >= 2, `${ge} found`);
+      ck("Engine D [EXTINCTION]: exactly ONE > against the death year, and it is the filing switch — a second is a weakened death guard",
+        gt === 1 && /const _filingSingleD = _tlW\.single \|\| yr > _deathYr1D;/.test(dWin), `${gt} '>' comparison(s); Engine D carries ${ge} '>=' guard(s)`);
     }
   }
 
@@ -202,6 +209,10 @@ console.log("t14 \u2014 CROSS-ENGINE SURVIVOR SS (D-5: the class-level invariant
       death: /const widowed\s*=\s*!_single && yr >= _deathYr1/, filing: /!_single && yr > _deathYr1/ },
     { name: "Engine C (IRMAA planner)", anchor: "const _survivorIsA = _singleI || ((_dobAYr + _tlI.lifeExpA)", endMarker: "function computeWithdrawalPlan",
       death: /const widowed\s*=\s*!_singleI && yr >= _deathYr1/, filing: /!_singleI && yr > _deathYr1/ },
+    // v6.12 (C-5): Engine D's Bracket column files by the year. Its death event has no `!single &&` term because `_deathYr1D` is
+    // Infinity for a single household; its filing switch carries `_tlW.single ||` because a single household files Single in every year.
+    { name: "Engine D (Withdrawal tab)", anchor: "const _deathYr1D =", endMarker: "function computeTaxPlan",
+      death: /const _widowedD\s*=\s*yr >= _deathYr1D/, filing: /const _filingSingleD = _tlW\.single \|\| yr > _deathYr1D/ },
   ];
   for (const e of filingEngines) {
     const r = region(e.anchor, e.endMarker);

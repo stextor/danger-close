@@ -196,7 +196,22 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   const _p610 = VA === "v609" && VB === "v610";
   const _BAN = /(?:⚠ ACTION REQUIRED|▶ ACTION WINDOW OPEN|◔ GETTING CLOSE):[\s\S]{1,400}?\s+—\s+open the EVENTS tab for instructions/;
   const _n610 = (s) => !_p610 ? s : s.replace(_BAN, "");
-  const wA = stripV(_n610(A.withdrawal)), wB = stripV(_n610(_n609(_n608(_n579(B.withdrawal)))));
+  // v6.12 (C-5 — docs/SCOPE_C5_ENGINE_D_SS86_V612.md) re-figures the Bracket column (Social Security by the §86 worksheet, the year's
+  // filing status, the table indexed) and adds ONE sentence to the table's note saying what the column is. For THIS pair only: that
+  // sentence is set aside on the v6.12 side (exactly once), and every Bracket cell — a one- or two-digit rate immediately followed by the
+  // row's EOY Portfolio "$N.NNM" — is masked on BOTH sides, the same number on each, or the check fails. Everything else in the tab must
+  // still be byte-identical: the release's claim is that nothing but the column moves (t75 C-1 proves it field by field, and t75 E-2
+  // checks every cell's value). The two checks after the identity keep the mask honest: it bit, and the masked cells really did move.
+  const _p612 = VA === "v611" && VB === "v612";
+  const _BR612 = /\d{1,2}%(?=\$\d+\.\d{2}M)/g;
+  const _n612 = (s) => !_p612 ? s : _cut(s, / ?The Bracket column is the federal marginal rate on the year's ordinary income:[^.]*\. State tax and capital-gains rates are on the Taxes tab\./, "v6.12 Bracket sentence");
+  const _m612 = (s) => !_p612 ? s : s.replace(_BR612, "#%");
+  if (_p612) {
+    const cA = (A.withdrawal.match(_BR612) || []), cB = (B.withdrawal.match(_BR612) || []);
+    ck("WITHDRAWAL (v611→v612): the Bracket cells are masked — the same number on each side, one per schedule row", cA.length > 0 && cA.length === cB.length, `${cA.length} vs ${cB.length}`);
+    ck("WITHDRAWAL (v611→v612): …and the masked cells DIFFER — the column was re-figured (a v6.12 still on the flat-85% column fails here)", cA.join() !== cB.join(), cA.join(","));
+  }
+  const wA = stripV(_m612(_n610(A.withdrawal))), wB = stripV(_m612(_n612(_n610(_n609(_n608(_n579(B.withdrawal)))))));
   ck("WITHDRAWAL: the tab is byte-identical across the pair (v5.40 is disclosure + mechanics; no rendered cell moves \u2014 measured)",
      wA === wB, firstDiff(wA, wB));
   // The v5.35 claims must still hold on BOTH sides — this is the assertion that would catch

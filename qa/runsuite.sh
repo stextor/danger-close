@@ -264,6 +264,12 @@ tally "t73-$CUR"   node t73_peer_benchmarks.mjs "$CUR"
 # Monte Carlo after each household change and checks that it did (OPERATIONS §C).
 tally "t74-$PRIOR" node t74_ranking_headline.mjs "$PRIOR"
 tally "t74-$CUR"   node t74_ranking_headline.mjs "$CUR"
+# t75 (v6.12) — C-5: the Withdrawal tab's Bracket column taxes Social Security by the §86 worksheet, on the year's filing status (Single
+# from the year after the first death), on the indexed table with the age-65 extra; an independent oracle every year on ten households,
+# what cannot move (v6.11 → v6.12), the extinction of any × 0.85 product outside the helper, the rendered tabs. Both legs: the prior leg
+# pins what v6.11 shows.
+tally "t75-$PRIOR" node t75_engine_d_ss86.mjs "$PRIOR"
+tally "t75-$CUR"   node t75_engine_d_ss86.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

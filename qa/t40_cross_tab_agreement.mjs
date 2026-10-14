@@ -47,20 +47,20 @@
 
 const VER = process.argv[2];
 const MODPATH = process.argv[3] || `./app_${VER}.mjs`;
-const KNOWN_VERSIONS = ["v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611"];
+const KNOWN_VERSIONS = ["v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   console.log("    Add it to KNOWN_VERSIONS and decide which leg's figures it owes BEFORE running.");
   process.exit(1);
 }
-const POST = (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || VER === "v611") || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || VER === "v611")));
+const POST = (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || VER === "v612")) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || VER === "v612"))));
 // v6.07 (D-33 — docs/SCOPE_D33_ANNUITY_CONVERSION_V607.md): Engines B and C carry spouse B's $7,000 annuity dollars, so no RMD or
 // conversion drains them and B's RMD base is smaller in every later year; the pooled conversion also shifts toward A. Measured on this
 // household: B and C lifetime RMD $1,321,030 -> $1,318,959 (−$2,071); lifetime federal falls $445–$693 by view; the IRMAA peaks fall
 // $391 and $143. Engine D is unmoved (A3's second pin). The mechanism is reproduced to the dollar by t70 §C's independent recursion; the
 // figures here are this household's measurement. An array, so register_tag2 widens it each release.
-const POST_D33 = ["v607", "v608", "v609", "v610", "v611"].includes(VER);
+const POST_D33 = ["v607", "v608", "v609", "v610", "v611", "v612"].includes(VER);
 
 const m = await import(MODPATH);
 const g = m.__g, E = m.__engines;
@@ -98,9 +98,13 @@ const base = { retireYear: retire, rothAmount: 0, qcdAnnual: 0, taxYield: 0 };
 const D = g.computeWithdrawalPlan({ retireYear: retire, rothAmount: 0, scenarioPreset: "base" }).schedule;
 const infl = g.expectedInflation();
 const inflator = yr => Math.pow(1 + infl, Math.max(0, yr - retire));
-// Engine D's taxableSS is a flat 85% (L5360), so this residual of its own `magi` identity is EXACT where
-// streamsOrd_y is 0 — which it is on this household. It is how the v573 leg sees a draw it never published.
-const residual = d => Math.max(0, d.magi - (0.85 * (d.ssA_y + d.ssB_y) + d.pen_y + d.work_y + d.rmd_y + d.conv_y + d.capGain_y));
+// This residual of Engine D's own `magi` identity is EXACT where streamsOrd_y is 0 — which it is on this household. It is how the v573
+// leg sees a draw it never published. GATED PER LEG at v6.12 (C-5): through v6.11 Engine D's taxable SS was a flat 85% of benefits; from
+// v6.12 it is the §86 worksheet's share, published on the row as `ssTaxable`. Each leg subtracts its OWN rule — a v6.12 row without the
+// field reads NaN here and fails, rather than silently falling back. The draw itself does not move (t75 C-1).
+const C5 = ["v612"].includes(VER);   // an array, so register_tag2 widens it each release
+const ssOf = d => C5 ? d.ssTaxable : 0.85 * (d.ssA_y + d.ssB_y);
+const residual = d => Math.max(0, d.magi - (ssOf(d) + d.pen_y + d.work_y + d.rmd_y + d.conv_y + d.capGain_y));
 const lifeDraw = D.reduce((s, d) => s + residual(d), 0);
 T("A1: Engine D draws $352,485 of ordinary income over the plan (scope §3.1)", Math.round(lifeDraw) === 352485, $(lifeDraw));
 const lifeRmdD = D.reduce((s, d) => s + d.rmd_y, 0);

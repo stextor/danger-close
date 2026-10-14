@@ -471,7 +471,12 @@ console.log("\nE2. The annuity carries NO RMD \u2014 in any engine");
     const r = g.computeWithdrawalPlan({ retireYear: 2027, rothAmount: 0, scenarioPreset: "base" });
     const magi = r.schedule.reduce((s, x) => s + (x.magi || 0), 0);
     const gain = r.schedule.reduce((s, x) => s + (x.capGain_y || 0), 0);
-    return { magi, gain, ord: magi - gain }; };
+    // v6.12 (C-5): `ord` is ordinary income EXCLUDING Social Security — what it always meant. Through v6.11 Engine D taxed a flat 85% of
+    // benefits, the same in every household here, so `magi − gain` differenced it away. Under §86 the taxable share rises with other
+    // income (an extra ordinary dollar can carry up to $0.85 of benefits into MAGI), so it is now subtracted explicitly, from the row's
+    // own `ssTaxable`; the 0.85 fallback is the pre-v6.12 rule, for a module that does not publish the field.
+    const ssT = r.schedule.reduce((s, x) => s + (x.ssTaxable ?? 0.85 * (x.ssA_y + x.ssB_y)), 0);
+    return { magi, gain, ord: magi - gain - ssT }; };
   const pTax = planOf(ownedA("taxable")), pTrad = planOf(ownedA("trad")), pAnn = planOf(ownedA("annuity"));
   const magiTax = pTax.magi, magiTrad = pTrad.magi, magiAnn = pAnn.magi;
   ck("Engine D: a TRADITIONAL Other account is taxed as ordinary income when spent",

@@ -96,13 +96,19 @@ ck("[KNOWN DEFECT 2026-08-11 | rel c] Engine D taxable pot == otherAccounts tota
 // about to "fix" magi, read SCOPE_ENGINE_D_MAGI_v5_24.md §1 before touching anything.
 // RELEASE (c) CHANGES THIS \u2014 when the pot is classified, re-point this pin at tradDraw.
 const SRC = readFileSync("../DangerClose.jsx", "utf8");
-const magiLine = SRC.split("\n").find(l => /const magi\s*=/.test(l) && /streamsOrd_y/.test(l));
-ck("source: the Engine D magi expression was located", !!magiLine);
+// v6.12 (C-5): Engine D writes its ordinary terms ONCE, in `_ordOtherD` (they are both the §86 test's other income and MAGI's), and
+// `magi = taxableSS + _ordOtherD + capGain_y`. The three checks below read BOTH lines and mean what they meant: brokerage draws stay out,
+// and every component is named. Through v6.11 they read the one line `const magi = taxableSS + pen_y + … + capGain_y`.
+const _lines = SRC.split("\n");
+const ordLine = _lines.find(l => /const _ordOtherD\s*=/.test(l));
+const magiLine = _lines.find(l => /const magi\s*=/.test(l) && /_ordOtherD/.test(l));
+ck("source: the Engine D magi expression and its ordinary-income sum were located", !!magiLine && !!ordLine);
 ck("[KNOWN DEFECT 2026-08-11 | rel c] misclassified pot never reaches MAGI (magi correctly excludes brokerage draws)",
-   !!magiLine && !/drawFromTaxable/.test(magiLine),
+   !!magiLine && !!ordLine && !/drawFromTaxable/.test(magiLine + ordLine),
    magiLine && magiLine.trim().slice(0, 110));
 ck("...and it does name the components it DOES count (guards against a renamed variable)",
-   !!magiLine && /rmd_y/.test(magiLine) && /conv_y/.test(magiLine) && /pen_y/.test(magiLine));
+   !!ordLine && /rmd_y/.test(ordLine) && /conv_y/.test(ordLine) && /pen_y/.test(ordLine) && /streamsOrd_y/.test(ordLine) &&
+   !!magiLine && /taxableSS/.test(magiLine) && /capGain_y/.test(magiLine));
 
 // ── B-3 · named traditional IRA money inside otherAccounts never reaches the balance
 // RMDs are computed on. Perturb the named IRA and watch where the money lands.
@@ -593,9 +599,16 @@ console.log("\n  v5.36 — gain on the SPENDING SALE only");
   // its RMD tracker now grows and gives up its RMD whole. Measured v6.07 → v6.08 on this household and these ARGS:
   // 3,162,820.292311 → 3,191,209.308515 (+$28,389.02), and lifetime rmd_y 1,316,332.154880 → 1,344,721.171085 (+$28,389.02) — the same
   // figure, while othOrdDraw (223,908.637430) and the gain do not move. The ledger below reproduces the IRA's RMD itself, every year.
-  ck("mixed pool: lifetime MAGI is EXACTLY $3,191,209 — the Other-account IRA's RMD is figured on a balance that grows (was $3,162,820 at v6.07, $3,132,746 at v5.36)",
-     Math.round(mx.reduce((s, x) => s + (x.magi || 0), 0)) === 3191209,
+  // v6.12 (C-5) moves it a third time, and ONLY through taxable Social Security: Engine D now takes the §86 worksheet's share of benefits
+  // instead of a flat 85%. Measured v6.11 → v6.12 on this household and these ARGS: 3,191,209 → 2,960,678 — and the check after this one
+  // states the whole move as Social Security, from the rows' own benefits, so the new figure is a decomposition and not a number copied
+  // from the build. (t75 C-1 asserts every other schedule field bit-identical to v6.11 across ten households.)
+  ck("mixed pool: lifetime MAGI is EXACTLY $2,960,678 — Social Security taxed by the worksheet (was $3,191,209 at v6.11, $3,162,820 at v6.07, $3,132,746 at v5.36)",
+     Math.round(mx.reduce((s, x) => s + (x.magi || 0), 0)) === 2960678,
      `$${Math.round(mx.reduce((s, x) => s + (x.magi || 0), 0)).toLocaleString()}`);
+  ck("mixed pool: …and the whole v6.12 move is Social Security — lifetime MAGI + Σ(0.85 × benefits − ssTaxable) is the v6.11 figure, $3,191,209",
+     Math.round(mx.reduce((s, x) => s + x.magi + 0.85 * (x.ssA_y + x.ssB_y) - x.ssTaxable, 0)) === 3191209,
+     `$${Math.round(mx.reduce((s, x) => s + x.magi + 0.85 * (x.ssA_y + x.ssB_y) - x.ssTaxable, 0)).toLocaleString()}`);
   ck("mixed pool: …and the whole move is the RMD — lifetime othOrdDraw is EXACTLY $223,909, unchanged since v5.37",
      Math.round(mx.reduce((s, x) => s + (x.othOrdDraw || 0), 0)) === 223909,
      `$${Math.round(mx.reduce((s, x) => s + (x.othOrdDraw || 0), 0)).toLocaleString()}`);
