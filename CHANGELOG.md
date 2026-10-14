@@ -1,5 +1,75 @@
 # Changelog
 
+## v6.12 — the Withdrawal tab's Bracket column taxes Social Security by the IRS worksheet, on the household's own return
+
+**A MODELLING release whose reach is one displayed column** (METHODOLOGY gains a section; MC parity unchanged). `docs/SCOPE_C5_ENGINE_D_SS86_V612.md`
+(repo-only, fulfilled). The finding is **C-5** in `docs/FlawsToFix-v5_73-Phase2.md`, open since the v5.73 audit. Steve took all four
+recommendations: "Let's use your recommendations for decisions §5."
+
+**What was wrong (v6.11, measured).** Engine D — the Withdrawal tab's year-by-year schedule — figured its Bracket column from a flat 85% of
+Social Security in every year, on the 2026 **joint** table and standard deduction for every household (a single household and a widowed
+survivor included), never indexed against the schedule's nominal income, with no age-65 deduction, capped at 32%, with realized gain inside
+the rate's input. Every other engine has called the shared §86 helper since v5.77. On five measured households the column was wrong in **73
+of 98 years, in both directions**: too high in married years (the example shows 12% where the correct figure is 10% in 2031–2036, and 22%
+for 12% in 2042–2043; a modest couple living on Social Security showed 10–12% in twelve years in which its taxable income is below the
+deduction), and too low in single and survivor years (the example made single read 12% in all sixteen years against a correct 22%; the
+example's survivor read 12% for 22% in 2045–2047, so the widow's penalty never appeared on this tab). Nothing disclosed it, and My Data
+told a single household its taxes "use Single brackets". Hand-verified to the dollar on the worksheet for 2032 (joint: taxable SS
+$24,993.39, not $50,883.47; 10%) and 2045 (survivor, Single: $51,873.68, the cap binding; 22%).
+
+**What changed (decisions DC-1 to DC-4, all (a)):**
+- **Engine D files by the year** — joint through the year of the first death, Single from the next (IRS Pub. 501), as Engines A, B and C
+  do — and **taxes Social Security with `taxableSS86`**, provisional income including the year's realized gain.
+- **Its table, standard deduction and age-65 extra come from `projectBracketsAt`**, the Roth tab's projection, indexed 2%/yr; Engine D holds
+  no bracket figure of its own. **The rate is read on ordinary taxable income** (DC-1): gain still counts toward §86 and MAGI, but it is
+  taxed at capital-gains rates on the Taxes tab. No OBBBA senior bonus (DC-2), as on the Roth tab. 35% and 37% can show.
+- **Display only, and asserted so:** every balance, draw, RMD, conversion and gain in the schedule, the series the Taxes and IRMAA tabs
+  import, and Engines B and C are bit-identical to v6.11 on ten households at two conversion amounts. Engine D's MAGI changes (it carries
+  the worksheet's taxable Social Security); nothing outside this column reads it. Each row now publishes `ssTaxable`, Engine B's name for
+  the same figure.
+- **The table says what the column is** (DC-3): one sentence under the schedule's note.
+- **Three sentences that misstated the rule elsewhere** (DC-4): the IRMAA tab's footnote said "the simplified 85%-of-SS assumption" (false
+  since v5.77); the Taxes tab's said "Federal brackets are MFJ" (false in single and widowed years); the Roth tab's assumptions said "85%
+  taxable when provisional income > $44K". Each now states the rule the engines apply.
+
+**Also in this package.** **C-10** (a Roth IRA under Other accounts realizing gains) was fixed at v6.09 by D-35 without that scope citing the
+ID; the register row is corrected, and **E-22** / **E-25** in `ARCHITECTUREIssues.md` updated. **OPERATIONS §C** gains a harness trap found
+writing `t75`: the DOM bundle carries its own copy of the app module, so a rendered table must be compared against `window.__g`, not the
+ESM module the suite imported — `t75`'s E-1 setup check caught a first draft comparing a 25-row table with a 16-row fixture.
+
+**Tests.** New suite **`t75`** — **50** on v6.12, **45** on v6.11 (that leg pins v6.11's column as dated `[KNOWN DEFECT]` checks): an
+independent oracle — its own worksheet, its own Rev. Proc. 2025-32 tables, its own indexing and filing rule — reproduces `ssTaxable` and
+MAGI to the cent and the bracket in every year of ten households (the five measured, the slider's default conversion, survivor A, a
+survivor under 65, a big-gain brokerage, a 35%-band single), and each leg is reproduced by its own rule set and not by the other's (A);
+the hand-verified pins (B); v6.11 → v6.12 bit-identity of everything but the column (C); by AST, Engine D calls the helper and the
+projection, reads no bracket constant, and **no `× 0.85` product survives outside `taxableSS86`** (D); the rendered Withdrawal table cell by
+cell, the new sentence and the three corrected ones (E). Controls `qa/tools/controls_v612_c5.py` (repo-only): **11 of 11** — ten planted
+defects (flat 85% back, the joint table always, the death year filed Single, indexing dropped, the age-65 extra dropped, gain back in the
+rate's input, a private `× 0.85` in Engine C, the oracle's filing switch dropped, the 32% cap back, the sentence removed) and the unmutated
+run, each turning its named checks red, every file restored and hash-checked. **Re-gated:** `t14` — Engine D gained a filing concept, so its
+death-guard check MOVED as the suite's own note required: Engine D joins `filingEngines`, and its window must hold exactly one `>` against
+the death year (the filing switch) and both `>=` guards; a weakened guard still fails (controlled by hand: 2 red) (44 → 47). `t19`'s
+source checks read `_ordOtherD` and the MAGI line together, and its mixed-pool lifetime MAGI moves $3,191,209 → $2,960,678, with a second
+check decomposing the whole move into Social Security (67 → 68). `t20`'s "ordinary income" subtracts the row's own `ssTaxable`, its
+original meaning (unchanged count). `t40` A1's residual subtracts each leg's own taxable SS (gated per leg; unchanged count). `t43` E-2 adds
+Engine D as a helper caller, gated per leg (37 → 38). `domdiff` masks the Bracket cells for this pair only, counted on both sides,
+with two checks that the mask bit and the cells moved (32 → 34). `v612` registered by AST (306 sites; `t1`'s `verStr` and `t4`'s `_badge` skipped, because they select a value), with the three Python suites,
+`t1`'s and `t4`'s version arms and `t33`'s PINS by hand (Engine A cannot move). The boundary census does not grow: the defect was not
+hidden by the example household (OPERATIONS §K1).
+
+**Suite, run from the packaged copies:** **6,831 app checks across 74 app suites**, 0 failed, 0 DIED; MC parity 10/10; tooling `t21` 64, `domdiff` 34, `sets` 12 + 12; **GRAND 6,963**. Against v6.11's line, the counts that moved are `t14` 44 → 47, `t19` 67 → 68, `t43` 37 → 38, and `t75` is new; every other current-leg count is unchanged. The app total reconciles with v6.11's 6,712: + 95 (`t75`, both legs) + 6 (`t14` +3, `t19` +1, `t43` +1 on each leg) + 18 (`t74`'s prior leg is now v6.11 — 34 checks where v6.10's leg ran 16) = 6,831. Run from the PACKAGED copies in one pass: a run folder built by `mk_runfolder.sh v611 v612` from a fresh clone of `8e5133a` carrying exactly the packaged changes (72 files, each overlay compared byte for byte with the build workspace; every changed suite's run-folder copy 66 of 66 identical), v6.11 resolved from history (commit `8e5133a`). Source `fc8d2a5f98a1f68314a57214db845426` · built `bc19a24e446ab595ea8975f6fe4191a4` (`smoke_built` 22 passed, 0 failed); v6.11 rebuilt first from its own source to its published `ff3c5d7e…`.
+
+**Limitations, disclosed:**
+- The column is the federal marginal rate only; state tax is on the Taxes tab.
+- Thresholds rise 2%/yr while the schedule's income rises with the scenario's inflation (about 2.7%), so some bracket creep remains — the
+  conservative direction, as in every engine (METHODOLOGY §6).
+- The temporary OBBBA senior deduction (2025–2028) is not applied in this column, as on the Roth tab; the Taxes tab applies it. For a
+  household retiring in 2029 or later it never applies.
+- Worksheet lines 4 and 6 (tax-exempt interest, adjustments) are not modelled, as in every engine. Qualifying-surviving-spouse filing is not
+  modelled (the app has no dependants).
+- The age-65 additional deduction ($1,650 / $2,050) is the app's own 2026 constant; it was not re-read against Rev. Proc. 2025-32 in this
+  release's sessions (the two summaries consulted do not carry it). The brackets, standard deductions and §86 amounts were.
+
 ## v6.11 — the Ranking tab's headline is the net-worth band, and the tab stops claiming what it does not measure
 
 **A PRESENTATION release** — no engine reads anything it changes; MC parity unchanged. METHODOLOGY gains a short section (what is ranked

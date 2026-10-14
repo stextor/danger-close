@@ -546,7 +546,8 @@ at the end of this paper.)*
 **§86 is one rule, in one place, for every engine (v5.77).** Taxable Social Security is computed by a
 single function written line for line from the IRS Social Security Benefits Worksheet (2025 Form 1040
 instructions, lines 6a and 6b), and every engine calls it: the Roth-strategy comparator, the Taxes
-tab, the IRMAA tab and the Roth tab's year table. Each passes the filing status for the year it is
+tab, the IRMAA tab and the Roth tab's year table — and, from v6.12, the Withdrawal tab's Bracket column,
+which until then took a flat 85% of benefits (see *The Withdrawal tab's Bracket column*, v6.12). Each passes the filing status for the year it is
 taxing — joint, or single once a survivor files alone — and the function chooses the §86(c) amounts
 from that. The worksheet's **line 14** is the half-benefits limb of §86(a)(2)(A): above the adjusted
 base amount, the portion carried up from the lower tier is the smaller of half the benefits and half
@@ -2329,3 +2330,38 @@ headline ("by virtually every dimension", "You have all three", "fewer than 10% 
 **The national percentile** the header, the affluent card and the Bottom Line quote is one figure, computed once: log-linear between the
 cut-offs and linear below the median, so it is approximate between them. It is the same interpolation v6.10 used on the affluent card.
 Nothing in this section is read by an engine.
+
+## The Withdrawal tab's Bracket column is figured on the household's own return (v6.12)
+
+**What the column is.** The federal marginal rate on the year's ordinary income, in the Withdrawal tab's year-by-year schedule (Engine D).
+It is a display: no dollar figure is computed from it, and nothing that sets a balance or feeds another tab reads it.
+
+**How it is figured, from v6.12.**
+- *Social Security* is taxed by the shared §86 helper, the IRS worksheet that every other engine has used since v5.77. Provisional income
+  is every ordinary term in the year — pension, work, ordinary income streams, RMDs, Traditional spending draws, the Other-account ordinary
+  draw, conversions — plus the year's realized capital gain, as §86 requires.
+- *Filing status* follows the year: joint while both spouses are alive, through the year of the first death; Single from the year after
+  (IRS Pub. 501). A single household files Single in every year. These are the same years Engines A, B and C use.
+- *The table and the deduction* come from the Roth tab's year-by-year projection: the 2026 table for the year's filing status (Rev. Proc.
+  2025-32), the standard deduction plus the age-65 additional deduction for each person 65 or older on the return (on a Single return, the
+  filer only), both indexed 2%/yr. The temporary OBBBA senior deduction (2025–2028) is not applied, as on the Roth tab.
+- *The rate* is read on ordinary taxable income: Social Security as taxed, plus the ordinary terms, less the deduction. Realized gain counts
+  toward the §86 test and is part of the year's MAGI, but it is taxed at capital-gains rates on the Taxes tab, not at this rate. All seven
+  bands can show.
+
+**What it did through v6.11.** 85% of benefits in every year, whatever the household's other income; the 2026 joint table and standard
+deduction for every household and every year, a single household and a widowed survivor included; never indexed against the schedule's
+nominal income; no age-65 deduction; capped at 32%; realized gain inside the rate's input. Measured at the scope on five households (base
+scenario, no conversions): the column was wrong in 73 of 98 years. In married years it read too high (the example shows 12% where the
+correct figure is 10% in 2031–2036, and 22% for 12% in 2042–2043; a modest couple living on Social Security showed 10–12% in twelve years
+in which its taxable income is below the deduction). In single and survivor years it read too low: the example made single showed 12% in
+all sixteen years against a correct 22%, and the example's survivor showed 12% for 22% in 2045–2047, so the widow's penalty the other tabs
+describe never appeared on this one.
+
+**What did not change.** Every balance, draw, RMD, conversion and gain in the schedule, the series the Taxes and IRMAA tabs import, and
+every other tab: asserted bit-identical to v6.11 on ten households at two conversion amounts (`t75` §C). The schedule's MAGI changes,
+because it carries the worksheet's taxable Social Security; nothing outside this column reads Engine D's MAGI.
+
+**Approximations kept.** Thresholds rise 2%/yr while the schedule's income rises with the scenario's inflation (about 2.7%), so some
+bracket creep remains — the conservative direction, as everywhere else in the app (§6). State tax is not in this column. Worksheet lines 4
+and 6 (tax-exempt interest, adjustments) are not modelled, as in every engine.
