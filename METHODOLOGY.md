@@ -2304,5 +2304,28 @@ statistic). The Social Security figure is SSA's average monthly retired-worker a
 Statistical Supplement 2025, Table 6.B3). Through v6.09 this was $2,000 labelled "at 62"; awards reduced for early retirement, as every claim
 at 62 is, average $1,620. The EBRI, AALTCI and Roth-plan percentages are carried unchanged and were not re-verified.
 
-**What the refresh does not fix.** The tab's headline "TOP N%" averages nine dimension tiers, and eight of them have no peer data behind
-them. That is `docs/UsabilityFlaws.md` F-19, left for its own scope.
+**What the refresh did not fix — fixed at v6.11.** Through v6.10 the tab's headline "TOP N%" averaged nine dimension tiers, and eight of
+them had no peer data behind them (`docs/UsabilityFlaws.md` F-19r). See the next section.
+
+## The Ranking tab ranks only what has a peer distribution (v6.11)
+
+**Two quantities are ranked, both against the SCF figures above:** net worth (portfolio plus home equity) in bands at the 50th, 75th, 90th and
+95th percentiles of families 55–64, and the investable portfolio against the 90th and 95th percentiles of their financial assets. **The
+headline is the net-worth band**, labelled with its population and survey; below the median it says "Below the median". The portfolio row
+reads "Below the top 10%" under the 90th percentile, because the derivation has no lower cut-off for financial assets.
+
+**The other rows are not ranked.** Retirement readiness (the model's own Monte Carlo success rate), income replacement, debt and housing
+equity each show the household's own figure beside a survey figure that measures something different — EBRI's share of workers on track,
+SSA's average award per retired worker, the mean debt of families holding any, the share of families 60+ with a mortgage — with no tier and
+no ratio. Three rows that stated facts the app cannot know about a household (a Roth plan, long-term-care cover, a planning framework) were
+removed.
+
+**What v6.10 did.** The headline was the plain average of nine row tiers; five were fixed strings ("TOP 20%", "TOP 10%", "TOP 5%", "TOP 15%",
+"TOP 5%") and two came from thresholds on the household's own figures, so every possible household read between TOP 9% and TOP 18%
+(all 72 reachable combinations enumerated). Measured with the Monte Carlo re-run: a $20,000 portfolio with no home — about the 2nd
+percentile of net worth — read **TOP 18%** and "an exceptionally strong position"; the example household read TOP 14%. The copy around the
+headline ("by virtually every dimension", "You have all three", "fewer than 10% of your peers possess") rendered for every household.
+
+**The national percentile** the header, the affluent card and the Bottom Line quote is one figure, computed once: log-linear between the
+cut-offs and linear below the median, so it is approximate between them. It is the same interpolation v6.10 used on the affluent card.
+Nothing in this section is read by an engine.
