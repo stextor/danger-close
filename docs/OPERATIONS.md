@@ -438,6 +438,13 @@ and it is the only thing that would have caught this.
   `t74`'s `rerunMC()` flips the preset away and back on the Monte Carlo tab and waits for the buttons to re-enable; its **B-1 is a setup
   check** that two households which must differ do differ before any readiness check counts. Any new suite reading MC-driven output after
   `applyLoadedData` does the same.
+- **The DOM bundle is a SECOND copy of the app module** (added v6.12). `dom_<ver>.cjs` bundles its own `app_<ver>.jsx`, so a suite that
+  imports `app_<ver>.mjs` AND mounts the DOM holds two independent sets of module globals: `applyLoadedData` on one changes nothing in the
+  other, and the rendered tab reads only the bundle's. Read the household the tab rendered through **`window.__g`** (the entry shim sets
+  it), never through the ESM module's `__g`. `t75`'s first draft did the latter and compared the example's 25-row Withdrawal table with
+  the ESM module's last fixture, a 16-row single household. Its **E-1 setup check** caught it: the rendered Year and EOY Portfolio
+  columns must equal the engine's for the arguments chosen before any rendered value is compared. Any new suite that reads a rendered
+  figure against an engine call does the same.
 - **`applyLoadedData` mutates module-level globals, so React does not re-render.** If the target tab is
   already active, clicking it again changes no state and the panel keeps rendering the PREVIOUS
   household's figures — a test that passes while comparing a configuration against itself. Park on a

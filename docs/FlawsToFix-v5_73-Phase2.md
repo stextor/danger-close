@@ -39,12 +39,12 @@ ordinary income, though both were in its "Gross taxable" total; it now lists eve
 | C-2 | **DISCLOSED** — limitation, not a defect | METHODOLOGY §8 (within $5/person/yr) |
 | C-3 | **FIXED v5.75** | `persons65OnReturn` (`t41`). ⚠ its body below has no fix note; L177 still says "not decided here" |
 | C-4 | **FIXED v5.77** | one `taxableSS86` for every engine (`t43`) |
-| C-5 | **OPEN** | Engine D still uses `(ssA_y + ssB_y) * 0.85` and the joint bracket table for the Withdrawal tab's bracket column; v5.77 says "untouched"; no in-app disclosure found |
+| C-5 | **FIXED v6.12** *(row updated 2026-10-14)* | Engine D calls `taxableSS86` on the year's filing status and takes its table, deduction and age-65 extra from `projectBracketsAt` (`t75`; `docs/SCOPE_C5_ENGINE_D_SS86_V612.md`). Severity restated at the scope: wrong in 73 of 98 measured years, both directions — **low–medium, display only** |
 | C-6 | **FIXED v5.75** | all thirteen stacking sites, regular and AMT (`t41`). ⚠ its body below has no fix note |
 | C-7 | **FIXED v5.76** | `getSSB()` returns 0 for a single household (`t42`) |
 | C-8 | **FIXED v5.74** | the drawdown bridge (`t40`); the remaining RMD gap is a decided difference (D-9), tracked as E-21 |
 | C-9 | **OPEN** | the annuity share is still fixed at retirement start (`retireStartBalances`); not re-measured since v5.74 changed the drain; not disclosed |
-| C-10 | **OPEN** | Engine D's gain pool still starts from `household − total401k`, so a Roth IRA under Other accounts can realize gains when a gain share is set |
+| C-10 | **FIXED v6.09** *(row corrected 2026-10-14)* | v6.09's D-35 item 1 is this defect: `_gainPoolInit` subtracts `_rothOth`, and `t72` asserts no gain on Roth money. D-35's scope did not cite this ID, so the row stayed OPEN until the C-5 scope found it |
 | C-11 | **OPEN** | the break-even card still says "after-tax wealth" for a face-value sum — and so do the Field Manual and METHODOLOGY ("Roth break-even"): **three sites**, not the one named below |
 | C-12 | **FIXED v5.77** | Engine C on the shared §86 helper |
 | C-13 | **OPEN by decision** (D-2 at v5.78) | thresholds unrounded; METHODOLOGY §8 names it, the app does not |
@@ -68,9 +68,9 @@ ordinary income, though both were in its "Gross taxable" total; it now lists eve
 | **C-6** | Unused standard deduction is not applied to qualified dividends / capital gains (up to 15% of the unused deduction; $1,582.50 on $60K of gains with no ordinary income) | A, B | Medium · **FIXED v5.75** | pessimistic | No |
 | **C-4** | Engine A keeps the §86 upper-tier error v5.45 fixed in B (+$150 in the worked case); v5.45's census named 2 of 5 §86 sites | A | Low–medium · **FIXED v5.77** | pessimistic | No |
 | **C-7** | A single household is paid spouse B's Social Security in the Withdrawal plan | D | Low–medium → **re-measured larger at v5.75; FIXED v5.76** | optimistic | No |
-| **C-10** | A Roth IRA under Other accounts is sold as brokerage and realizes taxable gains (when a gain share is set) | D → B, C | Low–medium | pessimistic | No |
+| **C-10** | A Roth IRA under Other accounts is sold as brokerage and realizes taxable gains (when a gain share is set) | D → B, C | Low–medium · **FIXED v6.09** (D-35) | pessimistic | No |
 | **C-1** | At exactly the IRMAA top-tier threshold the household is billed one tier low | A, C | Low · **FIXED v5.78** | optimistic | No |
-| **C-5** | The Withdrawal tab's bracket column uses the joint table for every household, unindexed, with a flat 85% of SS | D (display) | Low | varies | No |
+| **C-5** | The Withdrawal tab's bracket column uses the joint table for every household, unindexed, with a flat 85% of SS | D (display) | Low → **low–medium at the v6.12 scope; FIXED v6.12** | varies — both directions on one household | No |
 | **C-9** | The annuity RMD exclusion is a fixed share, so RMDs creep up as the pool drains (+$4,547 by 2050) | B (and C by the same code) | Low | pessimistic | No |
 | **C-11** | The break-even card calls a face-value cash measure "after-tax wealth" | Roth tab | Low | — | — |
 | **C-12** | Engine C taxes a household SINGLE from the start on the joint §86 thresholds (hid a $1,150 IRMAA surcharge in the measured case) — found at the v5.77 build | C | Low–medium · **FIXED v5.77** | optimistic | No |

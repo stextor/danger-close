@@ -36,10 +36,10 @@
 | E-19 | **PARTLY FIXED** | `qa/controls.sh`, named below, was deleted 2026-08-21; per-release controls now live in `qa/tools/controls_v5NN_*` |
 | E-20 | **FIXED v5.36**; the rule stands | — |
 | E-21 | **NARROWED** (v5.74 Engines B/C; v5.84 Engine A taxes the draw) | the D-9 RMD gap is pinned by `t40` |
-| E-22 | **PARTLY FIXED** | §86 is one helper (v5.77), IRMAA tiers one helper (v5.78), C-3/C-6 fixed (v5.75); still two LTCG copies, two federal-bracket copies, Engine D's flat 85% (C-5) |
+| E-22 | **PARTLY FIXED** | §86 is one helper (v5.77) and every engine calls it from v6.12 (C-5: Engine D's flat 85% is gone; `t75` D-4 fails any `× 0.85` product outside the helper), IRMAA tiers one helper (v5.78), C-3/C-6 fixed (v5.75); still two LTCG copies and two federal-bracket copies (Engine D adds none — it reads `projectBracketsAt`'s table) |
 | E-23 | **OPEN** | NIIT, AMT and FICA rates still inline at three sites each |
 | E-24 | **OPEN** | Engine A exposes no bracket field |
-| E-25 | **PARTLY FIXED** | `t40`–`t44` cover six of the eight classes; C-9's and C-10's classes remain |
+| E-25 | **PARTLY FIXED** | `t40`–`t44` cover six of the eight classes; C-9's class remains; C-10's is covered by `t72` (C-10 fixed v6.09, row updated 2026-10-14) |
 | E-26 | **OPEN** | no build identity in the export or the built page beyond the version |
 | E-27 | **ACCEPTED** | run the controls twice (OPERATIONS §I) |
 | E-28 | **FIXED** (both passages) | — |
