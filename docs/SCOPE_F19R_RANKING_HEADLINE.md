@@ -1,6 +1,11 @@
 # SCOPE — The Ranking tab's headline and the claims around it (F-19r, target v6.11)
 
-**Status: AWAITING DECISIONS (DF-0 … DF-5). Nothing built.** Drafted 2026-10-13.
+**FULFILLED — shipped as v6.11 (2026-10-14).** Repo-only. §8 is the build record.
+
+*(Superseded status line, retained:)* **Status: DECISIONS RESOLVED 2026-10-14 — DF-0 (a), DF-1 (a), DF-2 (a), DF-3 (a), DF-4 (a), DF-5 (a), all as recommended. Building as v6.11.**
+Steve: "Let's use your recommendations for the decisions on §4." Drafted 2026-10-13.
+
+*(Superseded status line, retained:)* Status: AWAITING DECISIONS (DF-0 … DF-5). Nothing built.
 Working against **v6.10**, source `1b41119b4e8d217a35956de42c09d4eb`, built `93ff44d52b126d3431687a1c51e69f3e`, repo commit `7c9567b`
 (fresh clone this session; both md5s equal the manifest's Current table). Finding: `docs/UsabilityFlaws.md` §H, filed at v6.10 as **F-19**.
 Every figure below was printed by a command run in this session (§9 lists them). Line numbers are v6.10's.
@@ -230,7 +235,32 @@ a manifest row and `package_check`'s I-2 allowlist entry, and the v6.11 build pa
 
 ## 8. Build record
 
-*(Empty until built.)*
+- **Source** `35f3c6560cf8da1b984de77e07a4cf8b`: 22 anchored edits on v6.10, each anchor asserted unique and each bounded span printed before
+  writing (`edits/v611_source.py`, session-only) — the four version sites; the national percentile and the net-worth band hoisted and
+  computed once; the two ranked rows' tiers (DF-4); the four unranked rows rewritten and three removed, with the nine-way average (DF-1,
+  DF-2, DF-5); the header, the headline box, two headline cards, three affluent-card sentences, the table subtitle and column header, the
+  Planning advantage block, the Bottom Line (DF-3, §3); the Field Manual's Ranking entry, printed back whole after the edit (§C0; the blob is
+  now 158,339 characters / 159,557 bytes). **Built** `ff3c5d7ee91595a4f4634a4aa56f4103`, `smoke_built` 22 passed, 0 failed; v6.10 rebuilt
+  first from its own source to its published `93ff44d5…`, so the toolchain matches.
+- **Corrections to this scope, made while building.**
+  (1) §3 proposed the column header "Peer benchmark (ages 55–64)". The EBRI and SSA figures in that column are not 55–64 figures, so the
+  header reads **"Survey figure"**; §1d's "every peer figure is for ages 55–64" was wrong for those two rows.
+  (2) Two changes beyond the listed sites, both in DF-3's direction: the affluent card's "Among affluent retirees" figure reads "below entry"
+  for a household below the 75th percentile, instead of a 0th percentile among a group it is not in; and the national percentile is floored at
+  0, because a negative net worth produced a negative ordinal through v6.10.
+  (3) "Which benchmark?" still calls Empower's savers "the crowd you actually belong to". It is not among §2's sites and was left; the
+  CHANGELOG discloses it.
+- **The example household moves:** headline TOP 14% → **TOP 25%** (its net-worth band); its rows lose three entries and four tiers.
+- **Suite registration:** `v611` beside every `v610` literal by AST — 303 sites (an array element gains the tag; `VER === "v610"` becomes
+  `(VER === "v610" || VER === "v611")`); by hand, `t1`'s and `t4`'s version-string arms, `t33`'s PINS (unchanged values — no engine moved), the
+  three Python suites. **Not extended, on purpose:** `domdiff`'s v6.10 banner set-aside (`_p610`), which is pair-specific; on v6.10 → v6.11
+  both sides show the same banner, and `domdiff` read 32/32. `t73` C-3 gated per leg (`NOFLOOR`) and its row reader taught the two below-band
+  labels.
+- **`t74`** 34 (v6.11) / 16 (v6.10). Its B-1 setup check is the one the F-19 filing lacked.
+- **Controls** `qa/tools/controls_v611_ranking.py`: **9 of 9** in a copy of the run folder, restored byte-identically (source, app module,
+  DOM bundle and suite hashed before and after). K1 turned 14 checks red, K2 3, K3 1, K4 2, K5 1, K6 1, K7 2 (B-1 and D-0, both setup
+  checks), K8 3.
+- **Suite, run from the packaged copies:** **6,712 app checks across 73 app suites**, 0 failed, 0 DIED; MC parity 10/10; tooling `t21` 64, `domdiff` 32, `sets` 12 + 12; **GRAND 6,842**. Every current-leg count equals v6.10's but the new `t74`; the v6.10 leg equals v6.10's own counts but `t74` (16, pinning v6.10's behaviour). Run from the PACKAGED copies in one pass: a run folder built by `mk_runfolder.sh v610 v611` from a fresh clone of `1a64be5` carrying exactly the packaged changes (68 files, each overlay compared byte for byte with the build workspace; every changed suite's run-folder copy 60 of 60 identical), v6.10 resolved from history (commit `89963eb`). Source `35f3c6560cf8da1b984de77e07a4cf8b` · built `ff3c5d7ee91595a4f4634a4aa56f4103` (`smoke_built` 22 passed, 0 failed); v6.10 rebuilt first from its own source to its published `93ff44d5…`.
 
 ## 9. How each figure in this scope was produced (this session, 2026-10-13)
 

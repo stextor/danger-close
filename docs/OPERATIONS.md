@@ -431,6 +431,13 @@ and it is the only thing that would have caught this.
 - **`applyLoadedData` takes a WRAPPER object — `applyLoadedData({ portfolio: P })`.** Passing the portfolio
   bare is a **silent no-op**: nothing throws, and the test runs against the previous household while
   appearing to configure a new one. (Cost a full probe cycle at v5.11.)
+- **`applyLoadedData` does NOT re-run the Monte Carlo** (added v6.11). The three retire-year simulations (`simData`) are rebuilt
+  only on mount and when the scenario preset or the Social Security haircut changes. A test that loads a household and then reads anything
+  driven by the success rate — the Ranking tab's readiness row, a success figure, anything built on `current` — reads the PREVIOUS
+  household's run, and nothing says so. This is how F-19 was mis-measured at filing (TOP 15% recorded; TOP 18% with the sims re-run).
+  `t74`'s `rerunMC()` flips the preset away and back on the Monte Carlo tab and waits for the buttons to re-enable; its **B-1 is a setup
+  check** that two households which must differ do differ before any readiness check counts. Any new suite reading MC-driven output after
+  `applyLoadedData` does the same.
 - **`applyLoadedData` mutates module-level globals, so React does not re-render.** If the target tab is
   already active, clicking it again changes no state and the panel keeps rendering the PREVIOUS
   household's figures — a test that passes while comparing a configuration against itself. Park on a

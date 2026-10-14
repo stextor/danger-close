@@ -17,6 +17,10 @@
 >
 > **Method.** One pass per register on 2026-10-08 against the shipped v5.97 (repo `2cfe5e2`, source `4157137a…`): every ID the register defines, what it says, what the CHANGELOG and archives record, and — for anything still open — the current source or suite, read by parser where a count is claimed. The body below is the record as written; where a marker in it disagrees with this table, **this table is current**.
 >
+> **F-19 is two items too (recorded 2026-10-14, decision DF-0 (a) of `docs/SCOPE_F19R_RANKING_HEADLINE.md`).** At v5.39 F-19 was the
+> skin-registry drift, fixed in that release; v6.10 filed the Ranking-tab headline finding under the same number. They are **F-19s** and
+> **F-19r**. Entries already shipped (the v5.39 records, the v6.10 CHANGELOG entry) keep the bare "F-19" they were written with.
+>
 > **F-11 and F-12 are each two items.** The v5.73 re-pin uses them for the phone findings (**F-11p** sideways scroll, **F-12p** first screen — the meanings every CHANGELOG entry uses); §D.2 uses them for two Field Manual defects (**F-11d** over-escaped callout, **F-12d** "25 vs 26 tabs"), and so do §F's groupings. Cite them with the suffix; nothing is renumbered.
 >
 > | ID | Status at v5.97 | Evidence |
@@ -34,6 +38,8 @@
 > | F-11p | **FIXED v5.79** | `t45` |
 > | F-12p | **FIXED v5.81** | `t47` |
 > | F-11d, F-12d, F-13, F-14, F-15, F-17, F-18 | **FIXED v5.39** | `t4`'s Field Manual assertions |
+> | F-19s | **FIXED v5.39** — row added 2026-10-14 (it had none) | the skin registry had drifted ahead of both descriptions (13 skins, "Seven color palettes"); `docs/SCOPE_FIX_docs_v5_39.md` D-6, `docs/STATUS_v5_39_shipped.md` |
+> | F-19r | **FIXED v6.11** — filed at v6.10 as "F-19" (§H) | `t74`; `docs/SCOPE_F19R_RANKING_HEADLINE.md` |
 > | F-15b | **OPEN** | "Success (>$1,500K)" beside a sibling "Success Rate (>$1.25M)" — still in the source |
 > | F-16 | **FIXED v5.98** | the pair swapped; `t62` holds every term in order (was: "API Key" before "Agency MBS") |
 > | §E-1 / §E-2 | **OPEN** | no physical-device pass; no keyboard / screen-reader pass (4 `aria-label`s in the app) |
@@ -372,7 +378,18 @@ await browser.close();
 
 ## H. Findings filed after the audit
 
-### F-19 · The Ranking tab's headline "TOP N%" averages nine tiers, and eight have no peer data behind them — **MED (honesty of an output)**
+### F-19r · The Ranking tab's headline "TOP N%" averages nine tiers, and eight have no peer data behind them — **MED (honesty of an output)**
+
+> ✅ **FIXED v6.11** (`docs/SCOPE_F19R_RANKING_HEADLINE.md`; all six decisions as recommended). The headline is the net-worth band against
+> the SCF and nothing else; the four rows without peer data show the household's figure beside a survey figure with no tier and no ratio;
+> Roth Strategy, Healthcare Planning and Planning Sophistication are removed; the praise copy is replaced by figures; Net Worth gains its
+> median band and Portfolio Size loses its floor; "Nx avg SS" is gone; the column header reads "Survey figure"; the Field Manual says which
+> rows are ranked. Pinned by `t74` (both legs). **Filed as "F-19"** — the number was already the v5.39 skins finding (census note above).
+>
+> ⚠ **Its measured figure below was wrong, in the safe direction.** "At $20,000 invested … Overall tier TOP 15%" was read without
+> re-running the Monte Carlo: `applyLoadedData` changes the household but not `simData`, so the Readiness row kept the example's 100%
+> success and "TOP 5%". With the sims re-run, v6.09 and v6.10 both show **TOP 18%** for that household (0.0% success, "TOP 30%"). The
+> trap is now in OPERATIONS §C. The text below is left as filed.
 
 **Filed at v6.10** (scope `docs/SCOPE_PEER_DATA_SCF2025_V610.md`, decision DD-4 (a): record it for its own scope; v6.10 does not change it).
 Measured on v6.09; v6.10 leaves the logic as it was.
