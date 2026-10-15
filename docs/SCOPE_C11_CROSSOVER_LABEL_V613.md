@@ -1,6 +1,8 @@
 # SCOPE — v6.13 · C-11: the break-even card says what it measures · C-9 closed on evidence · the age-65 deduction read at source
 
-**DRAFT — 2026-10-15, awaiting Steve's decisions (§5).** Repo-only. A **PRESENTATION** release: the planned source change is
+**FULFILLED — shipped as v6.13 (2026-10-15).** Repo-only. §7 is the build record; §6a lists what the build changed from this document. C-11 closes; C-9 and E-25 are recorded closed.
+
+*(Superseded status line, retained:)* **DRAFT — 2026-10-15, awaiting Steve's decisions (§5).** Repo-only. A **PRESENTATION** release: the planned source change is
 user-facing text plus one code comment and the version bump. No engine, constant or figure moves, and §3 §D asserts that by AST.
 METHODOLOGY changes anyway, because its crossover section misdescribes the measure (C-11) and leaves out one simplification (§0.3).
 Steve, 2026-10-15: *"Yes, scope C-11 with C-9 and the deduction check folded in."*
@@ -358,7 +360,9 @@ No suite asserts the card's text today, so nothing goes red on the change alone.
 
 ---
 
-## 5 · Decisions for Steve
+## 5 · Decisions for Steve — **taken 2026-10-15: DC-1 (a), DC-2 (a), DC-3 (a), DC-4 (a), DC-5 (a), DC-6 (a)**
+
+Steve, 2026-10-15: *"please continue and use your recommendations on any decisions that need to be made."*
 
 Each has a recommendation. "Recommended" means what I would do; it is your call.
 
@@ -392,7 +396,7 @@ Each has a recommendation. "Recommended" means what I would do; it is your call.
 
 ---
 
-## 6 · Register housekeeping at ship (not decisions; corrections the release carries)
+## 6 · Register housekeeping at ship (not decisions; corrections the release carries) — **done at v6.13**
 
 - **`docs/FlawsToFix-v5_73-Phase2.md` — C-9.**
   - Census row L46 becomes **FIXED v6.07** *(row corrected 2026-10-15)*, with this evidence: D-33 carries the annuity dollars and re-takes the share yearly in Engines A, B and C; the D-33 scope did not cite this ID; re-measured at the v6.13 scope (v6.06 +$41,217 lifetime RMD on the example + $100K annuity; v6.12 $0.00 in every year); `t70` §C and `t76` §C.
@@ -408,9 +412,40 @@ Each has a recommendation. "Recommended" means what I would do; it is your call.
 
 ---
 
-## 7 · Build record
+## 6a · What the build changed from this document (each owned here, not only in chat)
 
-*(Filled at the build: the parser census re-run on v6.12, every count from suite output, controls, and the package verification.)*
+- **§2.3 said the census row reads `DEFAULT_SCENARIO_PRESET` "through the shim". It cannot:** the shim does not export it. The row carries
+  the scenario ("bull") as a structural value, beside the slider, yield and funding defaults, and `t76` E-3 holds the row to the rendered
+  card on two households — the example and survivor A (B dies at 78), the household on which the scope's first, ACA-less reconstruction
+  disagreed with the page. Control K9 (the row's ACA input dropped) turns E-3b red, so the check bites.
+- **§3 C-5 said Engine A's growth rate is "read through the shim". It is not exported either;** `t76` reads `BASE_GROWTH` from the leg's own
+  source by AST — still never typed.
+- **§2.3 said `domdiff` is "re-pointed".** No edit was needed: the runner passes the pair, and every pair mask in the file is gated to its own
+  pair, so v6.12 → v6.13 runs at strict identity on all three tax-bearing tabs. Its count is 32 (34 at v6.12, whose pair ran the Bracket mask's
+  two extra checks). Its hardcoded fallback default (v565 → v566, with a header asking that it be re-pointed every release) is stale and was
+  left alone: the runner never uses it. Recorded, not fixed.
+- **`t75` reads 46 on both legs, not 50.** Its §C differential (v6.11 → v6.12) needs the v6.11 module and takes its designed, printed skip
+  on this pair. Not in §2.3's list; the suite was not edited.
+- **Wording.** The Field Manual's blind item reads "…and the two add together…", and names Rev. Proc. 2025-32 (§1.4 had a shorter form);
+  the source comment (§1.5) also says the old wording and points to `runRothStrategies`' comment; METHODOLOGY's direction paragraph says the
+  measurement is a scope finding, not a shipped assertion, as §1.3 asked.
+- **`t76` is 29 checks on v6.13 and 23 on v6.12** (§3 estimated about 25). §B runs on post-fix legs only and §D on this pair only, both
+  printed when skipped. **OPERATIONS §K2** is the DC-6 line, placed beside §K1 (the other scope-time rule).
+- **Controls: 11 of 11.** K1 also turns D-2 red (with the card's old sentence back, the builds differ in three texts, not four — correct); K5–K7
+  also turn D-1 red (they are code changes — correct); K7 also turns C-6 red (Engine A then taxes the drained annuity — correct).
+
+## 7 · Build record (v6.13, 2026-10-15)
+
+- **Built against** `origin/main` `30fcd8d` (v6.12 + this scope, committed byte-identical: `9b59eab5…`). v6.12 source `fc8d2a5f…`, built
+  `bc19a24e…`; v6.12 rebuilt from its own source to `bc19a24e…` before v6.13 was built.
+- **Census re-run on v6.12 (`textsites.cjs`):** "after-tax wealth" in exactly two texts — the card (L10675) and the Field Manual
+  (DOCS_HTML @58038) — plus METHODOLOGY L1110–1111 and the comment L10641, as §0.1 said. `t76` A-1's prior leg asserts the two.
+- **Source** `b08609bd6bf158ae5c035d9fc87297a4` · **built** `6afe2ab916e2e5443b4fa4a04175688f` (`smoke_built` 22 passed, 0 failed).
+- **Suite:** 6,884 app checks across 75 app suites, 0 failed, 0 DIED; MC parity 10/10; `t21` 64, `domdiff` 32, `sets` 12 + 12; GRAND 7,014 —
+  first on a run folder built from the work tree, then again from the packaged copies (the CHANGELOG records that run). `t76` 29 / 23;
+  `t29` 69 → 71; `t75` 50 → 46 (above).
+- **Controls** `qa/tools/controls_v613_c11.py`: 11 of 11, every file restored and hash-checked.
+- **C-9 and the deduction check** shipped as §0.3–§0.4 and §6 say; E-25 closed.
 
 ---
 

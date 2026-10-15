@@ -39,7 +39,7 @@
 | E-22 | **PARTLY FIXED** | §86 is one helper (v5.77) and every engine calls it from v6.12 (C-5: Engine D's flat 85% is gone; `t75` D-4 fails any `× 0.85` product outside the helper), IRMAA tiers one helper (v5.78), C-3/C-6 fixed (v5.75); still two LTCG copies and two federal-bracket copies (Engine D adds none — it reads `projectBracketsAt`'s table) |
 | E-23 | **OPEN** | NIIT, AMT and FICA rates still inline at three sites each |
 | E-24 | **OPEN** | Engine A exposes no bracket field |
-| E-25 | **PARTLY FIXED** | `t40`–`t44` cover six of the eight classes; C-9's class remains; C-10's is covered by `t72` (C-10 fixed v6.09, row updated 2026-10-14) |
+| E-25 | **FIXED v6.13** *(row updated 2026-10-15)* | all eight classes covered: `t40`–`t44` six; C-10's by `t72` (C-10 fixed v6.09); C-9's — the annuity share over a long horizon — by `t70` §C since v6.07 (an independent recursion carrying annuity dollars every year), and by `t76` §C, C-9's own extinction statement, from v6.13 |
 | E-26 | **OPEN** | no build identity in the export or the built page beyond the version |
 | E-27 | **ACCEPTED** | run the controls twice (OPERATIONS §I) |
 | E-28 | **FIXED** (both passages) | — |
@@ -1000,7 +1000,7 @@ assert tax at bracket edges (`t10`, `t15`, `t17`, `t18`) inherit the same blindn
 | MAGI exactly on an IRMAA threshold (not ±1) | C-1 | `t13` checks transitions, not the exact edge |
 | Single household with stored spouse-B data, in every engine | C-7 | the Roth tab's guard is tested; Engine D's absence is not |
 | Every Other-account type through every engine, with realized gains on | C-10 | `t20` covers tax type, not gains |
-| Annuity share over a long horizon | C-9 | opening-balance checks only |
+| Annuity share over a long horizon | C-9 | opening-balance checks only — **covered since v6.07** by `t70` §C, and from v6.13 by `t76` §C |
 | A §86 case with benefits under $9,000 / $12,000, per engine | C-4 | `t27` covers the Roth tab and Engine B, not Engine A |
 
 **Severity: medium** as a class. Phase 2's probes (`qa/tools/audit_phase2_v573/`) reproduce each case and are the natural

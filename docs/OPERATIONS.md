@@ -1434,6 +1434,16 @@ and hid behind the **default slider position** (a view, not a household), and v5
 example household and simply **unnoticed**. The v5.46 build brief called these part of a four-release
 streak of $0-on-example defects; that was wrong, and the honest streak is two — v5.45 and v5.46.
 
+### K2. Sweep the registers for the MECHANISM at scope time, and cite every item a fix closes (added 2026-10-15)
+
+Twice running, a release closed a register item without naming it, and the register said OPEN until a later scope stumbled on the
+fix: **C-10** (fixed by v6.09's D-35, found at the v6.12 scope) and **C-9** (fixed by v6.07's D-33, found at the v6.13 scope). Both
+scopes searched the registers for their own ID; neither searched for the thing they were changing. So at scope time, search
+`docs/FlawsToFix-*`, `docs/ARCHITECTUREIssues.md` and `docs/MissingFeatures.md` for the **mechanism** — the variable, function or rule
+the change touches (`annShare`, `_gainPoolInit`, "fixed share") — not only for an ID, and list in the scope every item the fix closes or
+changes. A prose search, not a census (§B1 governs claims about code; this is a claim about documents). The release then corrects each
+row it closes, with its evidence.
+
 ## L. Release packaging — one zip, two destinations
 
 Deliverables reach Steve as a **single zip per release**, never as individual files across messages.

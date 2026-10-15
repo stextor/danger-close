@@ -43,9 +43,9 @@ ordinary income, though both were in its "Gross taxable" total; it now lists eve
 | C-6 | **FIXED v5.75** | all thirteen stacking sites, regular and AMT (`t41`). ⚠ its body below has no fix note |
 | C-7 | **FIXED v5.76** | `getSSB()` returns 0 for a single household (`t42`) |
 | C-8 | **FIXED v5.74** | the drawdown bridge (`t40`); the remaining RMD gap is a decided difference (D-9), tracked as E-21 |
-| C-9 | **OPEN** | the annuity share is still fixed at retirement start (`retireStartBalances`); not re-measured since v5.74 changed the drain; not disclosed |
+| C-9 | **FIXED v6.07** *(row corrected 2026-10-15)* | v6.07's D-33 carries the annuity dollars and re-takes the share every year in Engines A, B and C — this register's own fix direction; D-33's scope did not cite this ID, so the row stayed OPEN until the C-11 scope found it. Re-measured there: on the example + a $100,000 annuity for A, no draws, v6.06's RMD runs +$41,217 lifetime and v6.12's is identical to the cent in every year (`t70` §C since v6.07; `t76` §C, the extinction check, from v6.13) |
 | C-10 | **FIXED v6.09** *(row corrected 2026-10-14)* | v6.09's D-35 item 1 is this defect: `_gainPoolInit` subtracts `_rothOth`, and `t72` asserts no gain on Roth money. D-35's scope did not cite this ID, so the row stayed OPEN until the C-5 scope found it |
-| C-11 | **OPEN** | the break-even card still says "after-tax wealth" for a face-value sum — and so do the Field Manual and METHODOLOGY ("Roth break-even"): **three sites**, not the one named below |
+| C-11 | **FIXED v6.13** *(row updated 2026-10-15)* | the card, the Field Manual and METHODOLOGY name the face-value measure — the account total, Traditional dollars before the tax still owed on them — and METHODOLOGY says why it is the conservative direction (`t76` §A, §B, §E; `docs/SCOPE_C11_CROSSOVER_LABEL_V613.md`). The measure did not change. The example household never shows the mislabelled outcome: §K1 row `crossover` |
 | C-12 | **FIXED v5.77** | Engine C on the shared §86 helper |
 | C-13 | **OPEN by decision** (D-2 at v5.78) | thresholds unrounded; METHODOLOGY §8 names it, the app does not |
 | D-1 | **FIXED v5.77** | METHODOLOGY's §86 passage rewritten |
@@ -71,8 +71,8 @@ ordinary income, though both were in its "Gross taxable" total; it now lists eve
 | **C-10** | A Roth IRA under Other accounts is sold as brokerage and realizes taxable gains (when a gain share is set) | D → B, C | Low–medium · **FIXED v6.09** (D-35) | pessimistic | No |
 | **C-1** | At exactly the IRMAA top-tier threshold the household is billed one tier low | A, C | Low · **FIXED v5.78** | optimistic | No |
 | **C-5** | The Withdrawal tab's bracket column uses the joint table for every household, unindexed, with a flat 85% of SS | D (display) | Low → **low–medium at the v6.12 scope; FIXED v6.12** | varies — both directions on one household | No |
-| **C-9** | The annuity RMD exclusion is a fixed share, so RMDs creep up as the pool drains (+$4,547 by 2050) | B (and C by the same code) | Low | pessimistic | No |
-| **C-11** | The break-even card calls a face-value cash measure "after-tax wealth" | Roth tab | Low | — | — |
+| **C-9** | The annuity RMD exclusion is a fixed share, so RMDs creep up as the pool drains (+$4,547 by 2050) | B (and C by the same code) | Low · **FIXED v6.07** (D-33) | pessimistic | No |
+| **C-11** | The break-even card calls a face-value cash measure "after-tax wealth" | Roth tab | Low · **FIXED v6.13** | — | — |
 | **C-12** | Engine C taxes a household SINGLE from the start on the joint §86 thresholds (hid a $1,150 IRMAA surcharge in the measured case) — found at the v5.77 build | C | Low–medium · **FIXED v5.77** | optimistic | No |
 | **C-13** | Projected IRMAA thresholds are not rounded to the nearest $1,000 as §1395r(i)(5)(B) rounds the published figures (2028 tier 1: $113,403.60) — recorded at the v5.78 scope, not fixed (decision D-2) | shared helper | Low | either | Partly — the 2%/yr proxy is disclosed; the missing rounding is not |
 | **D-1** | METHODOLOGY's §86 passage contradicts itself and omits Engine A | doc | Low · **FIXED v5.77** | — | — |
@@ -309,6 +309,13 @@ it (`rmdInitA` 1,090,000 in both runs; `annShareA` 0.0840), but Engine B's RMD t
 grows exactly as the mechanism predicts. Fix direction: track the annuity amount, not a share (the treatment Engine A's
 dividend comment at L4290–4302 already argues for in a sibling case).
 
+> **FIXED at v6.07** (D-33, `docs/SCOPE_D33_ANNUITY_CONVERSION_V607.md`, which did not cite this ID — found at the C-11 scope,
+> 2026-10-15). D-33 carries each spouse's annuity dollars and re-takes the share every year on what is left, in Engines A, B and C —
+> the direction above. Re-measured at the C-11 scope on the example + $100,000 for A, no draws: v6.06 (built from history, `9232406`)
+> gives +$257 (2040), +$543 (2041), +$1,885 (2045), +$4,543 (2050) — this entry's shape on today's example — and v6.12 gives $0.00 in
+> every year, in B and C, with conversions at $0 and $70,000; in Engine A the annuity rides to the horizon at the growth rate and adds
+> no tax. `t76` §C asserts exactly that, both legs, from v6.13.
+
 **C-10 · CONFIRMED (Engine D, executed) — a Roth IRA entered under Other accounts is sold as if it were brokerage, and
 realizes taxable capital gains.** *Severity: low–medium. User-side. Pessimistic (tax and MAGI overstated). Not disclosed.*
 Engine D's taxable pool is `household − total401k` (L5012), i.e. every Other account whatever its type (`buildPortfolio`
@@ -329,6 +336,13 @@ conservative direction). But the card's first outcome (L9936) tells the user it 
 **after-tax** wealth catches the NO CONVERSIONS path"*, while its third outcome (L9938) correctly says *"in cash terms"*.
 One label misdescribes the measure. **Answer to Section C's question "does the break-even use reliable financial-accounting
 technique?": yes, with this labelling defect.**
+
+> **FIXED at v6.13** (`docs/SCOPE_C11_CROSSOVER_LABEL_V613.md`). The card's recovered outcome, the Field Manual's Roth entry and
+> METHODOLOGY's crossover section now say "account total — every balance at face value, Traditional dollars before the tax still owed
+> on them"; the measure is unchanged. The scope measured the alternative: counting Traditional at 88%, 78% or 76% of face moved the
+> crossover earlier or left it unchanged in all 36 cells, and its answer is set by the rate chosen (the example at $30,000: "never" at
+> 12%, "ahead from the first year" at 22%) — so face value is the conservative direction, now stated in METHODOLOGY. The sentence was
+> invisible on the example household, where the card shows "does not break even" at every slider position measured (§K1 row `crossover`).
 
 **D-1 · DOCUMENT — METHODOLOGY's §86 passage contradicts itself and understates the sites.** L448 says the half-benefits
 cap "is applied in both places as of v5.45"; the next paragraph (L457–467) still says the engine's cap and the Roth
