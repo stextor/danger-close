@@ -1,5 +1,70 @@
 # Changelog
 
+## v6.13 — the Roth tab's break-even card says what it measures; C-9 closed on evidence; the age-65 deduction read at source
+
+**A PRESENTATION release** — user-facing text, one code comment and the version; **no code moved** (`t76` §D: the v6.12 and v6.13 syntax
+trees are equal once text is set aside). METHODOLOGY changes anyway, because its crossover section misdescribed the measure.
+`docs/SCOPE_C11_CROSSOVER_LABEL_V613.md` (repo-only, fulfilled). Steve took all six recommendations: "please continue and use your
+recommendations on any decisions that need to be made."
+
+**C-11 (open since the v5.73 audit).** The break-even card compares your conversion strategy with NO CONVERSIONS on the total of every
+account at **face value** — Traditional dollars counted before the income tax still owed on them — deliberately, so that it answers the cash
+question "when does the tax I paid come back?" (verified at v5.28). Its "recovered" sentence, the Field Manual's Roth entry and METHODOLOGY all
+called that total "after-tax wealth"; METHODOLOGY's next paragraph said "deliberately uses FACE VALUE". Now all three say what it is: "your
+account total — every balance at face value, so Traditional dollars count before the tax still owed on them". The measure did not change
+(DC-1 (a)) and the card's header stays (DC-2 (a)). **Why not switch to an after-tax count — measured at the scope:** counting Traditional
+dollars at 88%, 78% or 76% of face moved the crossover earlier or left it unchanged in all 36 cells measured (the example at six slider amounts,
+the example with both spouses to 100 at three, `t10`'s fixture at three), and its answer is set by the rate chosen — on the example at
+$30,000 a year, 12% says the conversion never pays back and 22% says it is ahead from the first year, the paper gain the face-value method
+exists to avoid. So face value is the conservative direction; METHODOLOGY now says so with the argument, and the Field Manual in one clause
+(DC-3 (a)). **The sentence never showed on the example household:** there the card reads "Does not break even within the plan" at every
+slider position measured, $5,000 to $200,000; with both spouses living to 100 at $5,000 it shows the recovered outcome (2062). That
+boundary joins the census (OPERATIONS §K1: row `crossover`, `t29` B-10).
+
+**The §63(f) deduction, read at source.** Rev. Proc. 2025-32 §4.14(3), read from irs.gov: $1,650 for a married filer, $2,050 unmarried and not
+a surviving spouse — both equal to the app's constants (the survivor files Single, so $2,050 is right in widowed years). v6.12's last limitation
+said the constant "was not re-read" that release; it had in fact been verified in the v5.73 audit's register (`FlawsToFix` L104), which that
+entry missed — a resolution line now sits beneath it (DC-4 (a)). **One finding from the same read:** the same additional amount goes to a
+**blind** filer, and the app has no input for blindness, so a blind filer's federal tax is overstated (the conservative direction). It was
+disclosed nowhere for the federal return; METHODOLOGY and the Field Manual's list of simplifications now say so (DC-5 (a)). Not modelled: a
+new input for an uncommon case.
+
+**C-9 — fixed at v6.07, now on the record.** The register's C-9 (the annuity's exclusion from the RMD base fixed at retirement start, so RMDs
+crept up as the pool drained) was fixed by v6.07's D-33, which carries the annuity dollars — but D-33 did not cite the ID, so the register
+said OPEN. Re-measured at the scope on the example plus a $100,000 non-qualified annuity for A, no draws: v6.06 (built from history) gives
++$257 (2040) … +$4,543 (2050), +$41,217 lifetime; v6.12 is identical to the cent in every year, in Engines B and C, with conversions at $0 and
+$70,000, and in Engine A the annuity rides to the horizon at the growth rate and adds no tax. The register row, the summary row and the body
+are corrected; **E-25** in `ARCHITECTUREIssues.md` closes (its last class is C-9's). This is the second time running a fix closed an item
+without naming it (C-10 at v6.09), so **OPERATIONS gains §K2**: at scope time, sweep the registers for the mechanism, not only the ID (DC-6 (a)).
+
+**Tests.** New suite **`t76`** — **29** on v6.13, **23** on v6.12 (that leg pins v6.12's copy as dated `[KNOWN DEFECT]` checks): by AST,
+"after-tax wealth" is extinct in every string, template and JSX text and the three new texts are present, with a guard for `t31`'s "Roth
+break-even" control (A); METHODOLOGY's section, direction paragraph and the blind disclosure (B, post-fix legs); **C-9's extinction** — with no
+draws a $100,000 annuity changes no RMD in Engine B or C, to the cent, every year, at $0 and $70,000 of conversions, and in Engine A rides to
+the horizon at the growth rate read from the source and adds no tax (C, both legs); v6.12 → v6.13 moved text only — the syntax trees equal
+with text set aside, and a control that unmasked they differ in exactly four texts (D, this pair only); the rendered card — the example's
+"does not break even", the recovered outcome and its sentence on a both-to-100 household, the METHOD line — and the census row held to the
+rendered card on two households, because that row is a second copy of the card's inputs and the scope's own first probe got those inputs
+wrong (it left out the example's ACA premium and used the base scenario) (E). Controls `qa/tools/controls_v613_c11.py` (repo-only): **11 of
+11** — the card's and the manual's old sentences, "Roth break-even" dropped from the manual, METHODOLOGY's old sentence, v6.06's fixed
+annuity share in Engines B, C and A, `rothCrossover`'s recovery test changed, the census row's ACA input dropped, the blind item removed, and
+the unmutated run; every file restored and hash-checked. **Re-gated:** `t29` gains the `crossover` row check and B-10 (69 → 71).
+`domdiff` runs this pair at strict identity on all three tax-bearing tabs (the v6.11 → v6.12 Bracket mask is pair-gated and off) (34 →
+32). `v613` registered by AST (312 sites), with `t1`'s and `t4`'s version arms, `t33`'s PINS (Engine A cannot move) and the three Python
+suites by hand. **`t75` reads 46 on both legs** (50 on v6.12's current leg, 45 on its prior): its §C, the v6.11 → v6.12
+differential, needs the v6.11 module and takes its designed skip on this pair — printed, as `t70`'s §D did at v6.08. App total reconciled
+from v6.12's 6,831: + 52 (`t76`) + 4 (`t29`, both legs) − 3 (`t75`: 95 → 92) = 6,884; tooling `domdiff` 34 → 32; GRAND 6,963 → 7,014.
+
+**Suite, run from the packaged copies:** **6,884 app checks across 75 app suites**, 0 failed, 0 DIED; MC parity 10/10; tooling `t21` 64, `domdiff` 32, `sets` 12 + 12; **GRAND 7,014**. Against v6.12's line, the counts that moved are `t29` 69 → 71 and `t75` 50 → 46, and `t76` is new; every other current-leg count is unchanged. Run from the PACKAGED copies in one pass: a run folder built by `mk_runfolder.sh v612 v613` from a fresh clone of `30fcd8d` carrying exactly the packaged changes (75 files, each overlay compared byte for byte with the build workspace), v6.12 resolved from history (commit `47d6854`). Source `b08609bd6bf158ae5c035d9fc87297a4` · built `6afe2ab916e2e5443b4fa4a04175688f` (`smoke_built` 22 passed, 0 failed); v6.12 rebuilt first from its own source to its published `bc19a24e…`.
+
+**Limitations, disclosed:**
+- The crossover's measure is unchanged: face value, the cash question. The heirs' tax advantage of Roth is the ESTATE ranking's subject, as before.
+- The 36-cell after-tax measurement was a scope finding on a session-only copy of the engine instrumented to publish Traditional balances;
+  it is not a shipped assertion (publishing that balance would be an engine change, OPERATIONS §M).
+- The §63(f) blind amount is disclosed, not modelled.
+- Why the example household never breaks even was not re-examined: the deficit is the conversion tax compounded, and the technique was
+  verified at v5.28 (AUDIT_2D).
+
 ## v6.12 — the Withdrawal tab's Bracket column taxes Social Security by the IRS worksheet, on the household's own return
 
 **A MODELLING release whose reach is one displayed column** (METHODOLOGY gains a section; MC parity unchanged). `docs/SCOPE_C5_ENGINE_D_SS86_V612.md`
@@ -69,6 +134,8 @@ hidden by the example household (OPERATIONS §K1).
   modelled (the app has no dependants).
 - The age-65 additional deduction ($1,650 / $2,050) is the app's own 2026 constant; it was not re-read against Rev. Proc. 2025-32 in this
   release's sessions (the two summaries consulted do not carry it). The brackets, standard deductions and §86 amounts were.
+  *Resolved at v6.13 (2026-10-15):* read against Rev. Proc. 2025-32 §4.14(3) itself — $1,650 married, $2,050 unmarried — and equal. It had
+  also been verified in the v5.73 audit's register (`docs/FlawsToFix-v5_73-Phase2.md`, the constants table), which this entry missed.
 
 ## v6.11 — the Ranking tab's headline is the net-worth band, and the tab stops claiming what it does not measure
 

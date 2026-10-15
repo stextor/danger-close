@@ -403,6 +403,13 @@ typical conversion windows, and modelling it would make the bracket-fill solver 
 deduction depends on MAGI which depends on the conversion being solved for. The Taxes tab does model
 it, so the two tabs differ for any ladder year at or before 2028.
 
+**The §63(f) amount for a blind filer is not modelled (disclosed v6.13).** The same additional
+standard deduction goes to a filer who is blind — $1,650 per spouse joint, $2,050 single for 2026
+(Rev. Proc. 2025-32 §4.14(3)), adding to the age amount for a filer who is both — and the app has no
+input for blindness, so a blind filer's federal deduction is understated and the tax overstated (the
+conservative direction). The Field Manual's list of simplifications says so. The age amounts
+themselves were read against Rev. Proc. 2025-32 §4.14(3) at the v6.13 scope and are equal.
+
 **Required minimum distributions in the ladder table (v5.41).** The conversion-ladder projection
 now includes each spouse's required minimum distribution in the years the ladder overlaps their RMD
 window. Through v5.40 it omitted the term entirely, so for any household whose ladder runs past its
@@ -1108,7 +1115,8 @@ assumed flat 24%), undiscounted. That construction erred optimistic in three ind
 rate) and is retired. The replacement runs BOTH the chosen strategy and a no-conversion
 baseline through the full deterministic engine — actual brackets per year, SS taxation, NIIT,
 AMT, state tax, the IRMAA two-year lookback, and ACA subsidies when configured — and reports
-the first year the strategy's after-tax wealth catches the baseline.
+the first year the strategy's account total — every balance at face value, Traditional dollars
+before the tax still owed on them — catches the baseline.
 
 Two properties fall out of the construction rather than being assumed. Discounting is implicit:
 comparing same-year wealth is mathematically equivalent to discounting cash flows at the
@@ -1125,6 +1133,22 @@ distinguished: recovered after a deficit (deepest shortfall shown), never behind
 under the standard deduction cost ≈$0 — common before Social Security starts), never recovers
 within the plan (real for large conversions with little outside money, where the tax is paid
 from the Roth itself), and no measurable difference.
+
+**Direction (v6.13).** Face value makes the crossover arrive no earlier than any after-tax count
+would. A fixed conversion only ever leaves the strategy holding less Traditional money than the
+baseline: the gap starts at the converted amount, every later year carries it forward through the
+same growth and the same RMD divisor, and the spending draw takes the same dollars from both
+paths, so the gap never turns negative — and deducting any tax rate from Traditional balances can
+only shrink the strategy's shortfall. Measured at the v6.13 scope on a session-only copy of the
+engine instrumented to publish its Traditional balances (its wealth series identical to the
+shipped one, with the card's own inputs): on the example household at six slider amounts, the
+example with both spouses living to 100 at three, and `t10`'s fixture at three, counting
+Traditional dollars at 88%, 78% or 76% of face moved the crossover earlier or left it unchanged in
+all 36 cells. It also showed why the after-tax count is not used: its answer is set by the rate
+chosen. On the example at $30,000 a year, a 12% rate says the conversion never pays back and a 22%
+rate says it is ahead from the first year — the paper gain described above. That measurement is
+a scope finding, not a shipped assertion. Through v6.12 this section, the card and the Field Manual
+called the measure "after-tax wealth" (C-11); the wording, not the measure, changed at v6.13.
 
 ## Per-spouse ownership (v5.8)
 
