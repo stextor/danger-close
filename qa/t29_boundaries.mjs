@@ -34,7 +34,7 @@ let _s = 42; Math.random = () => { _s = (_s * 1103515245 + 12345) & 0x7fffffff; 
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v546";
-const KNOWN_VERSIONS = ["v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612"];
+const KNOWN_VERSIONS = ["v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -82,7 +82,7 @@ T("A-2: row ids are unique \u2014 a duplicate id would make every lookup below a
   new Set(ids).size === ids.length);
 for (const id of ["filing", "dobA_month", "dobB_month", "rmd_age_A", "rmd_age_B", "ssA_claim",
                   "ssB_claim", "ssA_band", "ssB_band", "state_tax", "income_streams", "stream_kinds",
-                  "ladder_windows", "oth_ira_rmd", "d_conv_cap", "oth_roth"])
+                  "ladder_windows", "oth_ira_rmd", "d_conv_cap", "oth_roth", "crossover"])
   T(`A-3: row '${id}' is present`, ids.includes(id));
 T("A-4: every row carries a verdict and a note", example.every(r => typeof r.onBoundary === "boolean" && r.note));
 
@@ -106,6 +106,10 @@ T("B-8: the Withdrawal tab's conversion cap never binds at $70,000 on the exampl
   by(example, "d_conv_cap").onBoundary, by(example, "d_conv_cap").value);
 // v6.09 (D-35, §K1): the condition that hid the Withdrawal tab's double count of a Roth IRA under Other accounts. Structural — both legs.
 T("B-9: the example household holds no Roth IRA under Other accounts (D-35's blind spot)", by(example, "oth_roth").onBoundary, by(example, "oth_roth").value);
+// v6.13 (C-11, §K1): the condition that hid the break-even card's mislabelled sentence — on the example household the card never shows
+// its "recovered after a deficit" outcome. Read through Engine A on both legs (identical engines); t76 E-3 holds the row to the rendered card.
+T("B-10: the example household's break-even card does not show the recovered outcome at $70,000 (C-11's blind spot)",
+  by(example, "crossover").onBoundary && by(example, "crossover").value === "does not break even", by(example, "crossover").value);
 T("B-6: the example household sits on more boundaries than it clears", onBoundary(example).length > example.length / 2,
   `${onBoundary(example).length} of ${example.length}`);
 
@@ -119,7 +123,7 @@ for (const [name, spec] of Object.entries(HOUSEHOLDS)) {
     const before = by(example, id), after = by(rows, id);
     // v6.08 (D-34): the IRA-RMD row reads Engine D's `rmdSleeve_y`, which builds before v6.08 do not publish — there it reads "n/a" on
     // every household, so the flip cannot happen and that is asserted instead (a gate, not a skip).
-    if (id === "oth_ira_rmd" && !["v608", "v609", "v610", "v611", "v612"].includes(VER)) {
+    if (id === "oth_ira_rmd" && !["v608", "v609", "v610", "v611", "v612", "v613"].includes(VER)) {
       T(`C-${name}/${id} (pre-v6.08 build): the row reads n/a on both households — the IRA's RMD is not published here`,
         !!after && before.value.startsWith("n/a") && after.value.startsWith("n/a"), after ? after.value : "row missing");
       continue;

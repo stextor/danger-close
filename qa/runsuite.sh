@@ -270,6 +270,11 @@ tally "t74-$CUR"   node t74_ranking_headline.mjs "$CUR"
 # pins what v6.11 shows.
 tally "t75-$PRIOR" node t75_engine_d_ss86.mjs "$PRIOR"
 tally "t75-$CUR"   node t75_engine_d_ss86.mjs "$CUR"
+# t76 (v6.13) — C-11: the Roth tab's break-even card, the Field Manual and METHODOLOGY name the face-value measure ("after-tax wealth" is
+# extinct); the §63(f) blind amount disclosed; C-9's extinction (an annuity changes no RMD in Engines A, B or C when nothing draws on the
+# pool); v6.12 → v6.13 moved text only (AST); the rendered card, and the census row held to it. Both legs: the prior leg pins v6.12's copy.
+tally "t76-$PRIOR" node t76_crossover_label.mjs "$PRIOR"
+tally "t76-$CUR"   node t76_crossover_label.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

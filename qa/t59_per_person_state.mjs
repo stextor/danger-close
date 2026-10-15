@@ -7,7 +7,7 @@
 // every jurisdiction prices exactly as v5.94 (v595 leg, needs app_v594.mjs) · D AST/data guards · E the copy.
 // BOTH LEGS; the v594 leg PINS the pre-Phase-3 figures. Run: node t59_per_person_state.mjs <tag>
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612"];
+const KNOWN_VERSIONS = ["v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; console.log(`  \u2717 ${n}${d !== "" ? " \u2014 " + String(d).slice(0, 240) : ""}`); } };
 const done = () => { console.log(`\nt59 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
@@ -20,17 +20,17 @@ const m = await import(`./app_${VER}.mjs`), g = m.__g, E = m.__engines, SR = g.S
 // BASE (D30A below) and on a D-30 leg expects it after them (qa/d30_ref.mjs, on the calculator's own record of the call); §B's Rhode Island
 // rows price their base through the same reference (RI's deductions depend on the base and the filing status only). A version LIST.
 const { d30Pins, d30Tax } = await import("./d30_ref.mjs");
-const D30L = ["v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612"].includes(VER), D30 = d30Pins(E.stateTaxAnnual || g.stateTaxAnnual, SR, D30L), ST = D30.S;
-const B2L = ["v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612"].includes(VER);   // a batch-2 leg (a version LIST)
+const D30L = ["v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613"].includes(VER), D30 = d30Pins(E.stateTaxAnnual || g.stateTaxAnnual, SR, D30L), ST = D30.S;
+const B2L = ["v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613"].includes(VER);   // a batch-2 leg (a version LIST)
 const D30A = { "A-1": ["RI", 30000], "A-4": ["MS", 20000], "A-5": ["WV", 22000], "A-6": ["RI", 20000], "A-7": ["RI", 0],
   // v6.03 (D-30 batch 2, DD-14): Iowa takes the federal standard deduction and its exemption credits; §B's Georgia hand takes its standard deduction.
   ...(B2L ? { "A-2": ["IA", 15000] } : {}) };
 // v5.97 (D-22): Georgia is 4.99 % from TY2026 (HB 463); earlier legs keep 5.19 %.
-const GA_R = (["v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612"].includes(VER) ? 0.0499 : 0.0519);
+const GA_R = (["v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613"].includes(VER) ? 0.0499 : 0.0519);
 const z = { ira: 0, employer: 0, annuity: 0, pension: 0 }, zd = { ira: 0, employer: 0, annuity: 0 };
 // v6.01 (D-22 batch 2, SCOPE_D22_BRACKETS_V601): Rhode Island and West Virginia move to their own schedules. The hand figures keep their BASE (the
 // per-person arithmetic this suite pins) and, on the v6.01 leg, price it on the state's schedule — computed here from t65 §A's transcription.
-const BR2 = ["v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612"].includes(VER);
+const BR2 = ["v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613"].includes(VER);
 const _bs = (rows, x) => { let t = 0, lo = 0; for (const [u, r] of rows) { const hi = u === null ? Infinity : u; if (x <= lo) break; t += (Math.min(x, hi) - lo) * r; lo = hi; } return t; };
 const riT = (b) => BR2 ? _bs([[82050, .0375], [186450, .0475], [1000000, .0599], [null, .0899]], b) : 0.05 * b;   // one schedule for every status
 const wvT = (b) => BR2 ? _bs([[10000, .0211], [25000, .0281], [40000, .0316], [60000, .0422], [null, .0458]], b) : 0.0482 * b;   // likewise
@@ -45,7 +45,7 @@ const A = [
  ["A-1 RI 70/70, A IRA $30k, B 401(k) $10k: only B's 401(k) qualifies", { code: "RI", retIncome: 40000, ageA: 70, ageB: 70, byPerson: bp({ ira: 30000 }, { employer: 10000 }) }, riT(30000), 0],
  ["A-2 IA 60/50, A IRA $20k, B 401(k) $15k: A's exempt, B under 55", { code: "IA", retIncome: 35000, ageA: 60, ageB: 50, byPerson: bp({ ira: 20000 }, { employer: 15000 }) }, 0.038 * 15000, 0.038 * 35000],
  ["A-3 PA 58/62, A 401(k) $20k + pension $12k, B IRA $10k: all exempt", { code: "PA", retIncome: 30000, pen: 12000, ageA: 58, ageB: 62, byPerson: bp({ employer: 20000, pension: 12000 }, { ira: 10000 }) }, 0, 0.0307 * 30000],
- ["A-4 MS 58/62, A IRA $20k, B IRA $10k: A's taxable (under 60)", { code: "MS", retIncome: 30000, ageA: 58, ageB: 62, byPerson: bp({ ira: 20000 }, { ira: 10000 }) }, ["v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612"].includes(VER) ? 0.04 * (20000 - 10000) : 0.04 * 20000, 0.04 * 30000],   // v6.00: MS's first $10,000 untaxed (a version LIST)
+ ["A-4 MS 58/62, A IRA $20k, B IRA $10k: A's taxable (under 60)", { code: "MS", retIncome: 30000, ageA: 58, ageB: 62, byPerson: bp({ ira: 20000 }, { ira: 10000 }) }, ["v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613"].includes(VER) ? 0.04 * (20000 - 10000) : 0.04 * 20000, 0.04 * 30000],   // v6.00: MS's first $10,000 untaxed (a version LIST)
  ["A-5 WV 70/70, only A has retirement income ($30k IRA): B's $8,000 capped at $0", { code: "WV", retIncome: 30000, ageA: 70, ageB: 70, byPerson: bp({ ira: 30000 }, {}) }, wvT(22000), 0.0482 * 14000],
  ["A-6 RI 70 single (survivor slot normalised): an IRA alone gets no RI exclusion", { code: "RI", retIncome: 20000, ageA: null, ageB: 70, single: true, byPerson: bp({}, { ira: 20000 }) }, riT(20000), null],
  ["A-7 RI 70/70 without byPerson: the household path, unchanged", { code: "RI", retIncome: 40000, ageA: 70, ageB: 70 }, 0, 0],
