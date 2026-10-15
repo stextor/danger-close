@@ -235,6 +235,40 @@ export function census(G) {
   row("oth_roth", "Roth IRA under Other accounts", `$${Math.round(_othRoth).toLocaleString()}`, "> $0 held", _othRoth <= 0,
     _othRoth > 0 ? "reachable — Engine D's Roth handling of Other accounts applies" : "none held, so Engine D's Roth handling of Other accounts is $0 here");
 
+  // ── v6.13 (C-11 — SCOPE_C11_CROSSOVER_LABEL_V613) · the condition that hid it (§K1) ───────────────────────────────────────────
+  // 4. THE ROTH TAB'S BREAK-EVEN CARD, AT THE OPENING SLIDER. The card has four outcomes; only the first ("recovered after a deficit")
+  //    carried the sentence C-11 corrected, and on the example household the card shows the third ("does not break even") at every slider
+  //    position measured, $5,000 to $200,000 — so the wrong sentence never rendered there. The inputs are the card's own (the component,
+  //    ~L10600–10619): ⚠ a SECOND COPY of them, so t76 E-3 asserts this row's outcome equals the RENDERED card's on two households. Three
+  //    are structural — useState defaults the shim cannot read, like d_conv_cap's $70,000: the slider ($70,000), the taxable yield (2%),
+  //    the conversion-tax funding ("taxable") with a 0% gain share, and the scenario the draw series is built on (DEFAULT_SCENARIO_PRESET,
+  //    "bull"). If one moves in the component, E-3 goes red rather than this row going quietly stale.
+  let _xo = null;
+  if (G.runRothStrategies && G.rothCrossover && G.withdrawalPlanSeries) {
+    const _ry = tl.targetRetireYear, _conv = 70000, _aca = P.acaBridge || {};
+    const _PX = { single, asOfYr: tl.asOfYear, retireYr: _ry,
+      horizonYr: Math.max(tl.dobA.year + tl.lifeExpA, tl.dobB.year + tl.lifeExpB), ladderEnd: tl.rothLadderEnd,
+      dobAYr: tl.dobA.year, dobBYr: tl.dobB.year,
+      deathYr1: single ? Infinity : Math.min(tl.dobA.year + tl.lifeExpA, tl.dobB.year + tl.lifeExpB),
+      ssA: G.getSSA(), ssB: single ? 0 : G.getSSB(), ssAYr: tl.ssA_date.year, ssAMo: tl.ssA_date.month, ssBYr: tl.ssB_date.year, ssBMo: tl.ssB_date.month,
+      pen: G.getPension(), penOwner: G.getPensionOwner(), stateRate: tl.stateTaxRate || 0, stateCode: P.stateCode || null,
+      convTaxFunding: "taxable", taxableGainFrac: 0, acaPremium: _aca.premium || 0, acaSize: _aca.size || 0,
+      ...G.retireStartBalances(_ry), ladderEndA: tl.rothLadderEndA, ladderEndB: tl.rothLadderEndB,
+      survivor: single ? "A" : ((tl.dobA.year + tl.lifeExpA) >= (tl.dobB.year + tl.lifeExpB) ? "A" : "B"),
+      taxableInit: G.taxableInitAll(), taxYieldPct: 2.0, currentConv: _conv,
+      ordDrawByYr: G.withdrawalPlanSeries({ retireYear: _ry, rothAmount: _conv, scenarioPreset: "bull" }).ordDrawByYr };
+    const _res = G.runRothStrategies(_PX), _n = _res.find(r => r.key === "none"), _c = _res.find(r => r.key === "current");
+    if (_n && _c) _xo = G.rothCrossover(_n.wealthByYr, _c.wealthByYr);
+  }
+  const _xoBranch = !_xo ? "n/a" : _xo.beYr !== null ? (_xo.beWasBehind ? "recovered" : "never behind")
+    : (_xo.beWasBehind ? "does not break even" : "no measurable difference");
+  row("crossover", "break-even card, $70K",
+    _xoBranch + (_xo && _xo.beYr !== null ? ` (${_xo.beYr})` : ""),
+    "the recovered-after-a-deficit outcome", _xoBranch !== "recovered",
+    _xoBranch === "recovered" ? "reachable — the card's recovered sentence renders"
+      : _xoBranch === "n/a" ? "this build does not export the crossover"
+      : `the card shows "${_xoBranch}", so its recovered sentence (C-11's site) is not shown here`);
+
   return rows;
 }
 
