@@ -161,6 +161,25 @@ HOUSEHOLDS.otherRoth = {
   },
 };
 
+// v6.16 (D-36): one self-employed job row for A, $5,000 a month for the first five plan years — clears the new row (and the count row,
+// since a stream now exists); `stream_kinds` stays ON (a work row) and `payroll` stays ON ($60,000, one earner).
+HOUSEHOLDS.selfEmployed = {
+  why: "a self-employed (1099) job row above the $400 floor — self-employment tax becomes reachable",
+  flips: ["income_streams", "self_employed"],
+  apply: P => {
+    P.incomeStreams = [{ label: "Consulting", monthly: 5000, startYear: 2029, endYear: 2033, cola: false, tax: "ordinary", kind: "work", owner: "A", selfEmployed: true }];
+  },
+};
+// v6.16 (D-36): the same row at $430 a year — net $397.11, under §1402(b)(2)'s $400 floor. NOT a flip fixture (flips: []): t29 drives it
+// directly to prove the row reads the floor rather than "any self-employed row".
+HOUSEHOLDS.selfEmployedFloor = {
+  why: "a self-employed row whose net earnings stay under the $400 floor",
+  flips: [],
+  apply: P => {
+    P.incomeStreams = [{ label: "Side gig", monthly: 430 / 12, startYear: 2029, endYear: 2033, cola: false, tax: "ordinary", kind: "work", owner: "A", selfEmployed: true }];
+  },
+};
+
 export function build(G, name) {
   const P = JSON.parse(JSON.stringify(G.PORTFOLIO()));
   HOUSEHOLDS[name].apply(P);
