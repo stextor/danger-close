@@ -1,5 +1,88 @@
 # Changelog
 
+## v6.15 — the Events tab speaks to users only: no Google Drive, no maintainer chores, and the strip never hides the user's own reminders
+
+**A PRESENTATION release** — no engine, constant or figure moves, so METHODOLOGY does not change (MC parity unchanged).
+`docs/SCOPE_EVENTS_USER_FACING_V615.md` (repo-only, fulfilled). Steve: *"I don't want my users to have to use google drive"*; then all
+four recommendations, and *"Go"* on the scope's five decisions as recommended.
+
+**What was wrong (v6.14, measured).**
+- **Google Drive in the app.** Two Events cards told every user to use a Google Drive folder: the tax card (to fetch a prepared block of
+  constants) and the backup card (to store the quarterly export).
+- **The maintainer's chores, shown to every user.** Three of the eighteen events were the maintainer's work — paste new tax constants into
+  `src/DangerClose.jsx`, append last year's returns to `HISTORICAL_RETURNS`, refresh the Ranking tab's survey tables. The paste-in
+  workflow also contradicted this project's own rule that every refresh is a scoped, tested release.
+- **They hid the user's own reminders.** The colored strip above every tab names only the most urgent tier. On the example household
+  it read "GETTING CLOSE: Annual tax-data refresh" all October 2026; on 5 January 2027 it would have read "⚠ ACTION REQUIRED: Annual tax-data refresh"
+  — and that red alarm hid the user's open annual plan review (green), quarterly backup and SSA record check (yellow). The ⌛ STALE DATA
+  strip already says the figures are old, so the same news appeared twice and the user's real reminders not at all.
+- **A finding from the same read: "your plan survives the swap" was not always true.** The STALE strip and two Field Manual passages said
+  the plan carries over to a fresh copy of the file because it "lives in your browser, not the file"; the backup card said the opposite
+  ("no automatic persistence"). The plan is saved in the browser's `localStorage` (`src/main.jsx`), which belongs to one web address —
+  so moving between the website and a saved copy of the file opens a blank form. Nothing was destroyed (the old copy still holds the
+  plan), but the user was told nothing would be lost. Whether two saved files share storage depends on the browser; this release does
+  not claim it either way.
+
+**What changed (DC-1 to DC-5, all (a)).**
+- **The tax card is a notice** — "Tax figures in this copy (2026)": "current for 2026" until October; then "2027 figures publish Oct–Nov;
+  an updated version follows by January" with a countdown (TRACKING — there is nothing for a user to prepare); red from January 1 of a
+  year past the figures'. Its instructions: reload stextor.github.io/danger-close, or download a fresh copy; export a backup first, and
+  Import Backup if the plan doesn't appear. It carries `notice: true`, and **the strip ignores notices** — the tier rule moved out of the
+  JSX into one small function, `alertStripEvents`; when the figures are out of date the ⌛ STALE DATA strip is the one alarm (DC-1, DC-2).
+  "By January" is kept (DC-5): if an update is late, the STALE strip announces it on January 1 regardless.
+- **The backtest-data and peer-benchmark events are gone.** The Events tab now has sixteen events for a two-person household. The annual
+  plan review's instructions point at the tax-figures notice instead of the removed events.
+- **The backup card:** the app saves the plan in this browser only; the exported JSON is the durable copy; keep it somewhere private —
+  "your Documents folder, a personal cloud drive, or a USB stick", the export dialog's own words.
+- **The STALE DATA strip** loses "nothing is lost" and the maintainer sentence; it says to export first, and that Import Backup brings
+  the plan across (DC-4).
+- **The Field Manual:** the Events entry (sixteen events; the notice is the one exception to the strip), the Ranking entry (a later
+  version carries the 2028 survey), the "Two kinds" table and the freshness paragraph (export, get the current build, Import Backup if
+  the plan doesn't appear), and the maintainer sentence removed.
+- **The maintainer's refresh cycles moved out of the app** into a new subsection of OPERATIONS §I, *Annual data refreshes* (DC-3): the
+  three cycles, their primary sources, and the rule that each is a scoped release, never a paste. The reminders are Claude scheduled tasks
+  on the maintainer's account (research-only, no Drive): tax figures every Nov 15, the returns row every Jan 20, the 2028 SCF once on
+  2029-10-22.
+
+**Tests.** New suite **`t78`** — **42** on v6.15, **21** on v6.14 (that leg pins v6.14's defects as dated `[KNOWN DEFECT]`
+checks). On the first and fifteenth of every month 2026–2028 (72 dates): v6.15's events are v6.14's minus the two chores, in order, and
+the thirteen untouched events are field-for-field identical across the pair; the backup and review cards keep every field but their
+instructions (A). The notice's states and words on five dates; never green or yellow; the only event marked a notice; no source names,
+paste or Drive in its instructions (B). The strip: on 5 January 2027 it is the user's own plan review; it never returns the notice; and
+on every date it is exactly v6.14's rule over v6.14's events minus the three removed — then **rendered** in a child process with the clock
+set to 2027-01-05 before the module loads, where it reads "▶ ACTION WINDOW OPEN: Annual plan review" beside the ⌛ STALE DATA strip and its
+new sentence (C). Extinction: "Google Drive" nowhere in the source's text (AST, Field Manual included) or the built page; no swap or
+persistence claim anywhere (D). The backup card and the export dialog share their wording (E). The Field Manual's event count is tied to
+the real count (F).
+Controls `qa/tools/controls_v615_events.py` (repo-only): **9 of 9** — Drive back in the backup card, the strip ignoring `notice` removed,
+the backtest chore restored, "eighteen" restored, the notice made yellow in October, the STALE strip's old sentence restored, the plan
+review's window moved to February (a non-text change), the Ranking sentence restored, and the unmutated run; every file restored and
+hash-checked.
+**Re-gated:** `t73` §E asserts the peer alarm's absence on v6.15 (one check in place of three); `domdiff` sets the action banner and the
+STALE strip aside for the v6.14 → v6.15 pair only, with two checks that the v6.15 side names neither the tax notice nor the maintainer
+workflow. The test shim exports `alertStripEvents` (guarded). `v615` registered by AST (314 sites), with `t1`'s and `t4`'s version-string
+arms, `t33`'s PINS (no engine moved, so v6.14's values) and the three Python suites by hand. ⚠ **Owned:** I ran the first full suite
+before reviewing the registrar's work. The registrar had folded `v615` into `t1`'s and `t4`'s `"v6.14"` version arm (`t1` failed on the four
+version strings, `t4` on its badge), and I had not added `t33`'s PINS entry (it stopped with its designed FATAL). All three were fixed
+before the packaged run below. Nothing shipped wrong, but the §B2 review is meant to come first; v6.14's CHANGELOG records the same
+registrar trap for the Verify count.
+
+**Suite, run from the packaged copies:** **7,027 app checks across 77 app suites**, 0 failed, 0 DIED; MC parity 10/10; tooling `t21` 64, `domdiff` 34, `sets` 12 + 12; **GRAND 7,159**. Against v6.14's line, the counts that moved are `t73` 56 → 54 (§E: one absence check in place of three) and `t77` 54 → 38 (its §C, the v6.13 → v6.14 differential, takes its designed skip on this pair), and `t78` is new; every other current-leg count is unchanged. Run from the PACKAGED copies in one pass: a run folder built by `mk_runfolder.sh v614 v615` from a fresh clone of `a9e0a79` carrying the package as first cut (73 files, each overlay compared byte for byte with the build workspace; the documentation was finished after the run, and every file outside `CHANGELOG.md`, `TESTING.md`, the TESTING archive, the manifest and the scope is byte-identical to what ran), v6.14 resolved from history (commit `ec5f16c`). Source `a9520db52dc06aa380714c8a2a5c7514` · built `38f51c212390ec41669fb9fb8246f024` (`smoke_built` 22 passed, 0 failed); v6.14 rebuilt first from its own source to its published `2eeb7650…`.
+
+⚠ **One intermittent failure, observed and not fixed.** The first packaged run, which I ran while the controls were rebuilding the app in
+parallel, failed one check: `t38` I-6 on the v6.15 leg ("a file one byte over 5 MB is refused, storage unchanged"). The refusal message
+was right; the whole-storage snapshot differed. `t38` then passed 206 of 206 on five reruns of that leg, and the whole suite passed in
+the clean run recorded above, with nothing else running. The source diff touches neither import nor
+storage. The likely cause is a storage write still pending from the previous case's remount, landing late under load — I have not
+confirmed it. The check is unchanged; a harness fix that waits for writes to settle is left for a later release.
+
+**Limitations, disclosed:**
+- Whether two saved copies of the file share the browser's storage depends on the browser and is not tested; the app now says to export
+  first and Import Backup if the plan does not appear, rather than promising either way.
+- The returns row and the peer tables no longer have an in-app alarm; their vintages are in the Field Manual's *Data vintages* table, and
+  their refresh is the maintainer's (OPERATIONS §I).
+- `t78` C-4 renders the strip on a set clock in a child process; every other date-dependent check passes its date in.
+
 ## v6.14 — payroll tax on job income follows the law: the 0.9% Additional Medicare Tax, and the wage cap per earner
 
 **A MODELLING release** (METHODOLOGY gains a section; MC parity unchanged). `docs/SCOPE_D17_PAYROLL_TAX_V614.md` (repo-only, fulfilled).
