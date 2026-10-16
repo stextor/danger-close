@@ -51,9 +51,10 @@ items now carry their status; IDs are unchanged.
 | D-33 | **CLOSED v6.07** | a conversion, a QCD and an RMD never take non-qualified annuity money; the engines carry the annuity dollars |
 | D-34 | **CLOSED v6.08** | Engine D converts an Other-accounts Traditional IRA after the bucket money, figures the cap after the draws, grows that IRA's RMD tracker and takes its RMD whole |
 | D-35 | **CLOSED v6.09** | a Roth IRA entered under Other accounts is counted once in Engine D, as Roth money: out of the pool's gains part and out of the buckets' Roth share |
-| D-36 | **OPEN, DISCLOSED v6.14** (Low–Med, optimistic) | job income is taxed as wages — the employee's half; a self-employed person's 15.3% (less the half-deduction) is not modelled. Disclosed in the Taxes tab's method note, My Data's job-row note, the Field Manual and METHODOLOGY |
+| D-36 | **CLOSED v6.16** | modelled: a job row of type "Job — self-employed (1099)" pays both halves on 92.35% of the profit, nothing under $400 net, Social Security on the base the same person's wages leave, the 0.9% on wages + net earnings — in `payrollTax`, Engines A and B; rows saved before v6.16 stay employees |
+| D-37 | **OPEN** (Low–Med, conservative) | two self-employment deductions not taken: half the self-employment tax (§164(f), above the line — it would lower AGI and every MAGI) and the QBI deduction (§199A). Disclosed in the Taxes tab's method note, the Field Manual and METHODOLOGY |
 
-**Open, in this file: D-4, D-11 (narrowed), D-13, D-15, D-16, D-18 (recurring), D-32, D-36 (disclosed); D-5 declined.** *(D-17 closed and D-36 added at v6.14; D-35 closed at v6.09; D-34 closed and D-35 added at v6.08; D-33 closed and D-34 added at v6.07; D-28 closed and D-33 added at v6.06.)* Non-tax open threads
+**Open, in this file: D-4, D-11 (narrowed), D-13, D-15, D-16, D-18 (recurring), D-32, D-37; D-5 declined.** *(D-36 closed and D-37 added at v6.16; D-17 closed and D-36 added at v6.14; D-35 closed at v6.09; D-34 closed and D-35 added at v6.08; D-33 closed and D-34 added at v6.07; D-28 closed and D-33 added at v6.06.)* Non-tax open threads
 re-homed the same day are in `ARCHITECTUREIssues.md` **E-29**.
 
 | Field | Value |
@@ -1462,7 +1463,15 @@ IRA money does from v6.08) and out of the buckets' fraction — an engine change
 both directions; it needs its own scope and measurement. **Low–medium.** *(Named D-36 in the D-34 scope's draft and its decision question; D-35 is the
 next free ID.)*
 
-## D-36 · Self-employment tax is not modelled — opened at v6.14, DISCLOSED
+## D-36 · Self-employment tax is not modelled — opened at v6.14 — ✅ CLOSED v6.16
+
+> ✅ **CLOSED v6.16 (2026-10-16).** A job row now has two types, "Job — employee (W-2)" and "Job — self-employed (1099)" (both `kind: "work"`;
+> the second adds `selfEmployed: true`). The one helper, `payrollTax`, applies §1401 and §1402 to a self-employed row: 92.35% of the profit is
+> net earnings, nothing is owed under $400, Social Security 12.4% on the base the same person's wages leave, Medicare 2.9% on all of it, and the
+> 0.9% on the household's wages plus net earnings. Engines A and B move for such a household only; rows saved before v6.16 stay employees.
+> Measured: $60,000 of profit pays $8,477.73 in 2029 where v6.15 charged $4,590.00 (+$19,438.65 over five years). Not taken, filed as **D-37**:
+> the §164(f) deduction and the §199A deduction. `docs/SCOPE_D36_SELF_EMPLOYMENT_V616.md` (fulfilled, repo-only); `qa/t79_self_employment.mjs`.
+> *(The entry below is retained.)*
 
 Found scoping D-17 (`docs/SCOPE_D17_PAYROLL_TAX_V614.md` §0.4). Every job row is taxed as **wages** — the employee's half, 7.65% up to the
 wage base (Social Security per earner from v6.14) plus the 0.9% above $200,000 / $250,000. A self-employed person owes both halves (15.3%,
@@ -1472,3 +1481,16 @@ income is often self-employment income, so the omission is **optimistic** for th
 and METHODOLOGY (*Payroll tax on job income*). **Low–medium.** *(The ID D-36 was a draft name in the D-34 scope for what was filed as D-35;
 this is its first use.)*
 
+## D-37 · Two self-employment deductions are not taken — opened at v6.16, DISCLOSED
+
+Filed at the D-36 build (`docs/SCOPE_D36_SELF_EMPLOYMENT_V616.md` §0.4, decisions DC-2 (a) and DC-5 (a)). From v6.16 a self-employed job row pays
+self-employment tax, but two deductions that come with it are not taken:
+- **Half the self-employment tax (26 U.S.C. §164(f)).** It is taken above the line (§62(a)(1)), so it lowers AGI and every MAGI built on AGI —
+  IRMAA, the ACA subsidy, the Social Security worksheet and state AGI. On $60,000 of profit the deduction is $4,238.87, worth about $509–$933
+  of federal income tax a year at 12–22%. Taking it in Engines A and B alone would make the Taxes tab's MAGI disagree with the IRMAA and
+  Withdrawal tabs' (`t40` asserts they agree), so doing it properly reaches Engines C and D and the Roth tab's ladder too — a wider release.
+- **The qualified business income deduction (§199A).** Up to 20% of a sole proprietor's net profit, limited for service businesses above the
+  income thresholds; those limits need inputs the app does not have.
+
+Both are **conservative**: income tax runs high for a self-employed household. **Disclosed at v6.16** in the Taxes tab's method note, the Field
+Manual's streams entry and METHODOLOGY (*Payroll tax on job income*). **Low–medium.**

@@ -1,6 +1,6 @@
 # SCOPE — v6.16 · D-36: a self-employed person's job income pays self-employment tax
 
-**DRAFT — 2026-10-16, awaiting Steve's decisions (§5).** Repo-only.
+**FULFILLED — shipped as v6.16, 2026-10-16.** Steve: *"go"* — all six decisions (a), as recommended. Build record in §7. Repo-only.
 
 This is a **MODELLING** release, so METHODOLOGY changes. By census (§2) it reaches the payroll helper and its two engines: the Taxes tab
 (Engine B) and the strategy comparison (Engine A). It moves only a household with a job row marked self-employed, and only in that row's
@@ -316,7 +316,38 @@ in `t77`, at L206 and L210.
 
 ## 7 · Build record
 
-*(Filled in at the build.)*
+**Built against v6.15** (`a9520db5…` / built `38f51c21…`); the v6.15 page was rebuilt first and reproduced `38f51c212390ec41669fb9fb8246f024`.
+**v6.16:** source `dfc07ee74ad9dd52c0925f54bee0a682`, built `index.html` `765cd89f6c5d97a937f2fa2e7405ee64`; `smoke_built` 22 of 22.
+Decisions: DC-1 to DC-6 all **(a)**.
+
+**Census at the build (v6.16 lines, `census.cjs`).** `payrollTax` defined L2059, called at L4953 (`_estSaleGain`, Engine A), L5079 (Engine A's
+tax line) and L6388 (Engine B) — three, as before. `workEarners` L2076, called at L4779 and L6388. `SE_MIN_NET`: L916 (`TAX_CONSTS`), L1980 (the
+Verify check), L2065 (read in `payrollTax`). `selfEmployed`: L563 (`streamsMonthlyAt`'s filter), L8178 (Income tab label), L12873 (editor state),
+L12877 (`setStreamType`), L13044 (`buildPortfolio`), L13140 (the Ask AI context), L13830 (the dropdown). Version: four sites; registrar 314 sites.
+
+**Tests.** `t79`: 116 on v6.16, 60 on v6.15. `t29` 73 → 78 per leg (the `self_employed` row). Controls `qa/tools/controls_v616_se.py` 9 of 9,
+files restored and hash-checked. Full suite from the packaged copies: {SUITE}
+
+**STOP conditions.** No engine but A and B moved on any household (Engines C and D, the bridge series and both Monte Carlo engines are
+bit-identical on all thirteen of `t79`'s households); no employee-only household moved in A or B. **One suite outside §2.2 went red on the
+first full run: `t78` D-2a**, on both legs. I read the check before acting: it is a SETUP assertion that the run folder's built page "names
+v6.15" — a typed version string, which every version bump breaks, and which my pre-run review of the value arms missed. It says nothing about
+a figure, so it does not bear on this scope's premise; it now derives the version from the newest source in the run folder (and fails against
+v6.15's page in a v6.16 folder, checked). Recorded here because the condition's letter was met.
+
+**Where the build departed from §3, owned.**
+- **§3 C overstated Engine A.** It said the "none" strategy moves by *exactly* Engine B's payroll change. Measured, that holds to the dollar on
+  four households ($60,000; $30,000 + $40,000; $150,000 + $60,000; $200,000 + $60,000) and not on five: Engine A carries balances forward, so
+  the extra tax leaves less invested and later IRMAA, survivor-year tax and NIIT fall a little (joint-owned $300,000: $74,573 against
+  $96,160.50; single $120,000: $38,825 against $38,877.30; under the floor, $430: −$149 against −$164.48). Instrumenting a session-only copy
+  of the module showed every strategy's first-year tax moving by exactly Engine B's figure on every household. §0.3's own Engine A range at
+  $250,000 ($70,638–$78,525) already showed this, so it was a drafting error in §3, not a changed premise. `t79` C-4 asserts the exact form on
+  the four and, on the rest, the same direction, no larger, and at least 75% of it; C-5 asserts the estate moves the other way.
+- **§3 D's "0.9% on $250,000 of self-employment"** does not bite on a joint return: $250,000 of profit is $230,875 of net earnings, under
+  $250,000. The pin is taken on a single filer instead ($31,251.57), plus one §3 did not list: a $200,000 paycheck with $60,000 of profit
+  ($16,694.74 — no Social Security room left, and the 0.9% on wages plus net earnings).
+- **Additions beyond §3:** a second `t29` fixture under the $400 floor (the row must stay ON — it reads the floor, not merely the flag); `t79`
+  E-7 (the Income tab's label), E-9 (the Ask AI context in the backup) and E-10 (switching back to employee clears the field).
 
 ---
 
