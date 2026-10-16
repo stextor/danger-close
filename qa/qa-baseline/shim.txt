@@ -106,6 +106,8 @@ export const __test = {
   PEER_BENCHMARKS: () => _g("PEER_BENCHMARKS"),
   PEER_DATA_SCF_YEAR: () => _g("PEER_DATA_SCF_YEAR"),
   computePlanEvents: _g("computePlanEvents"),
+  // v6.15 — the app-wide alert strip's tier rule, lifted out of the JSX (t78). GUARDED: it does not exist on the v6.14 leg.
+  alertStripEvents: _g("alertStripEvents"),
 };
 
 // v5.18: Engine C was hoisted to module level at v5.17; this exposes it to the harness.
