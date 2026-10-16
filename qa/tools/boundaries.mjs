@@ -300,6 +300,37 @@ export function census(G) {
       : (_pay.overThr || _pay.pairOverBase) ? "reachable — the Additional Medicare Tax or the per-earner cap applies"
       : "no year reaches the 0.9% threshold or puts two earners over the base, so both rules are $0 here");
 
+  // ── v6.16 (D-36 — SCOPE_D36_SELF_EMPLOYMENT_V616) · the condition that hid it (§K1) ───────────────────────────────────────────────
+  // 6. SELF-EMPLOYMENT. A "Job — self-employed (1099)" row owes both halves of payroll tax on 92.35% of its profit (§1401, §1402(a)(12)),
+  //    but only once a person's net earnings reach $400 (§1402(b)(2)). The example household has no job stream at all, so the rule was
+  //    never reached there. Read from the household's own self-employed rows, per person (a joint row counts half each), over the plan
+  //    years; the floor and both rates read live. A build without `SE_MIN_NET` does not model self-employment: "n/a" (ON).
+  let _se = null;
+  if (T.SE_MIN_NET != null) {
+    const _rows = (P.incomeStreams || []).filter(s => (s.kind || "other") === "work" && !!s.selfEmployed && (s.tax || "ordinary") === "ordinary" && (+s.monthly || 0) > 0);
+    const _f = 1 - T.FICA_SS_RATE - T.FICA_MED_RATE;
+    const _dA = tl.dobA.year + tl.lifeExpA, _dB = single ? Infinity : tl.dobB.year + tl.lifeExpB;
+    const _end = Math.max(_dA, single ? 0 : _dB);
+    let years = 0, peak = 0;
+    for (let yr = tl.targetRetireYear; yr <= _end; yr++) {
+      const aliveA = yr < _dA, aliveB = !single && yr < _dB;
+      let a = 0, b = 0;
+      for (const s of _rows) { if (yr < (+s.startYear || 0) || yr > (+s.endYear || 9999)) continue; const amt = s.monthly * 12;
+        if (s.owner === "A") { if (aliveA) a += amt; } else if (s.owner === "B") { if (aliveB) b += amt; }
+        else if (single) { if (aliveA) a += amt; } else { if (aliveA) a += amt / 2; if (aliveB) b += amt / 2; } }
+      const nets = [a * _f, b * _f];
+      if (nets.some(n => n >= T.SE_MIN_NET)) years++;
+      peak = Math.max(peak, ...nets);
+    }
+    _se = { years, peak };
+  }
+  row("self_employed", "self-employment tax",
+    _se ? `${_se.years} yr with a person's net earnings ≥ $${T.SE_MIN_NET}; peak net $${Math.round(_se.peak).toLocaleString()}` : "n/a (pre-v6.16 build)",
+    "a self-employed job row at or above the $400 floor", !_se || _se.years === 0,
+    !_se ? "this build does not model self-employment"
+      : _se.years ? "reachable — a self-employed person owes both halves on 92.35% of the profit"
+      : "no self-employed row reaches the $400 floor, so self-employment tax is $0 here");
+
   return rows;
 }
 
