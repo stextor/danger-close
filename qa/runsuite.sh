@@ -275,6 +275,12 @@ tally "t75-$CUR"   node t75_engine_d_ss86.mjs "$CUR"
 # pool); v6.12 → v6.13 moved text only (AST); the rendered card, and the census row held to it. Both legs: the prior leg pins v6.12's copy.
 tally "t76-$PRIOR" node t76_crossover_label.mjs "$PRIOR"
 tally "t76-$CUR"   node t76_crossover_label.mjs "$CUR"
+# t77 (v6.14) — D-17 and C-14: payroll tax on job income follows §3101/§3121 — Social Security per earner up to the wage base, Medicare
+# uncapped, the 0.9% Additional Medicare Tax above $200K / $250K (unindexed); an oracle against Engine B every year on nine households;
+# one helper and no stray rate (AST); what cannot move and Engine A across v6.13 → v6.14; the hand pin; the copy and the rendered Taxes tab.
+# Both legs: the prior leg pins v6.13's rule.
+tally "t77-$PRIOR" node t77_payroll_tax.mjs "$PRIOR"
+tally "t77-$CUR"   node t77_payroll_tax.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
