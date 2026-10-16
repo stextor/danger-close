@@ -122,7 +122,7 @@ incl. OBBBA changes) inflated ~2%/yr; Social Security taxation via the provision
 income (v5.75)**; NIIT (3.8%,
 statutorily unindexed thresholds); a simplified AMT check (standard-deduction add-back method);
 FICA on earned income only — Social Security per earner up to the wage base, Medicare uncapped, and the
-0.9% Additional Medicare Tax (see *Payroll tax on job income*, v6.14); RMDs from the Uniform Lifetime Table at the SECURE 2.0 start age;
+0.9% Additional Medicare Tax, and on a self-employed job row self-employment tax, both halves (see *Payroll tax on job income*, v6.14, v6.16); RMDs from the Uniform Lifetime Table at the SECURE 2.0 start age;
 Roth conversions with bracket/IRMAA interaction; and QCDs (2026 cap $111,000/person, indexed —
 excluded from income and MAGI, counting toward the RMD, with the gifted dollars actually leaving
 the Traditional balance).
@@ -1025,8 +1025,8 @@ module.** Each stream (rental / job / annuity / other) carries a monthly amount 
 dollars, an inclusive start/end-year window, an owner (either spouse or joint — an owner's
 stream ends at that person's projected or sampled death), a COLA flag, and taxable vs tax-free
 treatment. Streams flow through every engine — planned trajectory, both Monte Carlo engines,
-what-breaks, the withdrawal schedule, the tax engine (job rows also pay FICA — per earner up to the
-wage base, with the Additional Medicare Tax; see *Payroll tax on job income*, v6.14), IRMAA MAGI, and the Roth optimizer. Entering any stream replaces the built-in example
+what-breaks, the withdrawal schedule, the tax engine (job rows also pay payroll tax — an employee row as wages, per earner up to the
+wage base, with the Additional Medicare Tax; a self-employed row self-employment tax, both halves; see *Payroll tax on job income*, v6.14, v6.16), IRMAA MAGI, and the Roth optimizer. Entering any stream replaces the built-in example
 part-time taper, and the old negative-expense-row workaround is superseded (moving such rows
 into the module lets the tax engines see the income). **From v5.63 the Roth optimizer charges FICA
 on job rows only, as the tax engine always has.** Through v5.62 it charged payroll tax on every
@@ -2391,10 +2391,10 @@ because it carries the worksheet's taxable Social Security; nothing outside this
 bracket creep remains — the conservative direction, as everywhere else in the app (§6). State tax is not in this column. Worksheet lines 4
 and 6 (tax-exempt interest, adjustments) are not modelled, as in every engine.
 
-## Payroll tax on job income (v6.14)
+## Payroll tax on job income (v6.14; self-employment from v6.16)
 
-**The rule.** Job income — a job row under Other income streams, or the built-in part-time taper for spouse B when no stream is
-entered — is taxed as **wages**, the employee's half, in the Taxes tab (Engine B) and the Roth strategy comparison (Engine A, in its tax
+**The rule.** An employee's job income — a job row of type "Job — employee (W-2)" under Other income streams, or the built-in part-time
+taper for spouse B when no stream is entered — is taxed as **wages**, the employee's half, in the Taxes tab (Engine B) and the Roth strategy comparison (Engine A, in its tax
 and in its sale-gain estimate). One shared helper, `payrollTax`, applies 26 U.S.C. §3101 and §3121(a)(1):
 - **Social Security, 6.2%, on each earner's wages up to the year's wage base.** The cap is per person: two spouses each earning $150,000
   each pay on all of it. The 2026 base is $184,500 (SSA), indexed in the projection at 2%/yr like the other constants.
@@ -2407,6 +2407,39 @@ and in its sale-gain estimate). One shared helper, `payrollTax`, applies 26 U.S.
   first death) every dollar is that person's; a deceased owner's row has already stopped.
 - The rates and thresholds live in `TAX_CONSTS` and each has a Verify-tab check citing the statute.
 
+**Self-employment (v6.16, D-36).** A job row of type **"Job — self-employed (1099)"** (stored as `kind: "work"` with
+`selfEmployed: true`) pays **self-employment tax** in place of the employee's half, through the same helper and the same three call sites:
+- **Net earnings are 92.35% of the profit** — the profit less half of the 12.4% and 2.9% rates (26 U.S.C. §1402(a)(12)). The row's amount
+  is read as the year's net profit; a stream is never negative, so losses are not modelled.
+- **Nothing is owed if a person's net earnings are under $400** (§1402(b)(2)); the floor is statutory and unindexed (`SE_MIN_NET`, with a
+  Verify-tab check).
+- **Social Security, 12.4%, on net earnings up to the wage base *minus that person's wages*** (§1401(a), §1402(b)(1)): a person with a
+  paycheck and a side business shares one base between them, earner by earner. **Medicare, 2.9%, on all net earnings** (§1401(b)(1)).
+- **The 0.9% falls on the household's wages plus net earnings** above $200,000 (Single) or $250,000 (joint) — §1401(b)(2) reduces the
+  self-employment threshold by the wages, which comes to the same thing.
+- **Who earned it** follows the wage rule: the owner's, a joint row split equally while both spouses live, everything the survivor's after.
+  A row saved before v6.16 has no field and stays an employee, so its figures do not move; My Data's note asks the user to choose.
+- Every rate is derived from the employee-side constants (2 × 6.2%, 2 × 1.45%, 1 − 7.65%); no self-employment rate is typed anywhere.
+
+**Measured at v6.16** (the example household plus job rows in the first five plan years, 2029–2033; Engine B, v6.15 → v6.16; year-2029 payroll
+tax and the five-year change, which is also the change in lifetime total tax — nothing else in Engine B moves):
+
+| Household | 2029 payroll tax | 5-year change |
+|---|---|---|
+| A self-employed $60,000 | $4,590.00 → **$8,477.73** (55,410 × 15.3%) | +$19,438.65 |
+| A self-employed $30,000 + B employee $40,000 | $5,355.00 → $7,298.87 | +$9,719.32 |
+| A employee $150,000 + A self-employed $60,000 | $15,184.16 → **$18,760.21** (the base shared with the paycheck) | +$19,374.64 |
+| A self-employed $250,000 | $15,764.16 → $30,973.69 | +$78,524.54 |
+| Single, A self-employed $120,000 | $9,180.00 → $16,955.46 | +$38,877.30 |
+| A self-employed $430 a year (net $397.11, under the floor) | $32.90 → $0.00 | −$164.48 |
+| The example household; any household with employee rows only | unchanged, bit-identical | $0 |
+
+In the Roth strategy comparison (Engine A) the $60,000 household's strategies pay $19,329–$19,439 more tax and leave estates $53,299–$53,602
+smaller. Engine A carries balances forward, so where the extra tax leaves enough less invested to lower later IRMAA, survivor-year tax or
+NIIT, its lifetime change is smaller than Engine B's (the $250,000 household: +$75,125 against +$78,525 for the no-conversion strategy;
+in the first plan year every strategy moves by exactly Engine B's figure). The direction for anyone self-employed above the floor is up —
+an optimism corrected. The one figure that falls is a self-employed row under the $400 floor, which the law does not tax.
+
 **What it did through v6.13.** Every site took min(household wages, base) × 6.2% + wages × 1.45%: **one** wage-base cap for the whole
 household, and **no** 0.9% — both errors taking too little tax (register items C-14 and D-17). Measured at the v6.14 scope on the
 example plus job rows in the first five plan years: one $300,000 job, +$2,250 of tax over the five years (the 0.9%); two $150,000 jobs,
@@ -2414,11 +2447,16 @@ example plus job rows in the first five plan years: one $300,000 job, +$2,250 of
 $300,000), lowering the comparison's estate at the default slider by $88,757; two $120,000 jobs, +$11,227; a single household's
 $250,000 job, +$2,250 (above $200,000). Two $60,000 jobs, and the example household itself (whose taper peaks at $20,000), do not move.
 
-**What did not change.** The IRMAA, Withdrawal and Monte Carlo engines carry no payroll tax and are bit-identical; the Roth tab's ladder
-has none either. Rental, annuity and other ordinary streams still pay no payroll tax (v5.63).
+**What did not change.** The IRMAA, Withdrawal and Monte Carlo engines carry no payroll tax and are bit-identical (v6.14, and again at
+v6.16 on every household tested); the Roth tab's ladder has none either. Rental, annuity and other ordinary streams still pay no payroll
+tax (v5.63).
 
-**Simplifications, stated.** Job income is taxed as wages: a **self-employed** person owes both halves of Social Security and Medicare
-(15.3%, less a deduction for half of it), and their 0.9% threshold is reduced by any wages — not modelled, so their tax here is
-understated (MissingFeatures D-36). The wage base is indexed 2%/yr; SSA indexes it to the national average wage index, which has
+**Simplifications, stated.** Two self-employment deductions are **not taken** (MissingFeatures D-37), both conservative — income tax
+runs high: the **deduction for half the self-employment tax** (26 U.S.C. §164(f), taken above the line, so it would also lower AGI and every
+MAGI built on it — IRMAA, the ACA subsidy, the Social Security worksheet and state AGI; on $60,000 of profit it is $4,238.87, worth about
+$509–$933 of federal tax a year at 12–22%), and the **qualified business income deduction** (§199A, up to 20% of a sole proprietor's net
+profit, limited for service businesses above the thresholds). Taking §164(f) correctly means changing MAGI in the IRMAA, Withdrawal and
+Roth-ladder engines too, or the tabs would disagree — a wider release. Net losses, the optional methods on Schedule SE, and Social Security
+credits earned by self-employment are not modelled. The wage base is indexed 2%/yr; SSA indexes it to the national average wage index, which has
 usually risen faster, so later-year caps likely run a little low — slightly optimistic, and reset at each annual refresh. Employer
 withholding rules and the credit for excess Social Security withheld by two employers are timing, not liability, and are not modelled.

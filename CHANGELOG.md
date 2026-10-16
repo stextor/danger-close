@@ -1,5 +1,95 @@
 # Changelog
 
+## v6.16 — self-employment tax: a self-employed job row pays both halves, on 92.35% of the profit (D-36)
+
+**A MODELLING release** — METHODOLOGY changes (*Payroll tax on job income* gains a self-employment subsection; its simplifications are
+rewritten). `docs/SCOPE_D36_SELF_EMPLOYMENT_V616.md` (repo-only, fulfilled). Steve: *"yes"* to scoping D-36 — the only open item whose error
+made plans look better than they are — then *"go"* on the scope's six decisions as recommended.
+
+**What was wrong (v6.15, measured).** Every job row was taxed as a paycheck — the employee's 7.65% — so a self-employed person's payroll tax
+was understated by about half. Disclosed since v6.14 (Taxes tab, My Data, Field Manual, METHODOLOGY), not modelled. On the example household
+plus $60,000 a year of consulting for five years, v6.15 charged $4,590.00 a year where the law charges $8,477.73: **$19,438.65 too little
+tax over the five years**, and a larger estate than the plan can expect.
+
+**What changed (DC-1 to DC-6, all (a)).**
+- **The input.** My Data's Type dropdown offers **"Job — employee (W-2)"** and **"Job — self-employed (1099)"** in place of "Job
+  (part/full-time)". Both store `kind: "work"`, so every site keyed on a job row keeps working; the second adds `selfEmployed: true`, which the
+  editor, Save & Apply, Export Backup and Import carry. **A row saved before v6.16 has no field and stays an employee** — its figures do not
+  move, and the job-row note asks the user to pick the type (DC-3, DC-4). The Income tab and the Ask AI context call such a row self-employed.
+- **The rule** (26 U.S.C. §1401, §1402), in the one helper, `payrollTax`, which keeps its three call sites (Engine A twice, Engine B once):
+  net earnings are 92.35% of the profit; nothing is owed if a person's net earnings are under **$400** (`SE_MIN_NET`, statutory, unindexed,
+  with a new Verify-tab check — the count goes 71 → 72); Social Security 12.4% on net earnings up to the base **the same person's wages
+  leave**; Medicare 2.9% on all of it; the 0.9% on the household's wages **plus** net earnings above $200,000 / $250,000. A joint row is split
+  equally while both spouses live (DC-6). `workEarners` now returns each person's wages and profit apart (`{ w, se }`), through one new
+  `streamsMonthlyAt` filter no other caller passes. No self-employment rate is typed: all derive from the employee-side constants.
+- **Not taken, disclosed** (DC-2, DC-5; filed as **D-37**): the deduction for half the self-employment tax (§164(f)) and the QBI deduction
+  (§199A). Both make income tax run a little high — conservative. Taking §164(f) properly lowers AGI and every MAGI, which reaches the IRMAA,
+  Withdrawal and Roth-ladder engines too; that is its own release.
+- **The copy.** The Taxes tab's method note, My Data's streams and job-row notes, and the Field Manual's streams entry state the rule and the two
+  simplifications; the three "not modelled … understated" sentences are gone.
+
+**Measured** (example household plus job rows in the first five plan years, Engine B; year-2029 payroll tax, v6.15 → v6.16, and the five-year change,
+which is the whole change in lifetime total tax):
+
+| Household | 2029 | 5 years |
+|---|---|---|
+| A self-employed $60,000 | $4,590.00 → $8,477.73 | +$19,438.65 |
+| A self-employed $30,000 + B employee $40,000 | $5,355.00 → $7,298.87 | +$9,719.32 |
+| A employee $150,000 + A self-employed $60,000 | $15,184.16 → $18,760.21 | +$19,374.64 |
+| A self-employed $250,000 | $15,764.16 → $30,973.69 | +$78,524.54 |
+| Single, A self-employed $120,000 | $9,180.00 → $16,955.46 | +$38,877.30 |
+| A self-employed $430 a year (net $397.11, under the floor) | $32.90 → $0.00 | −$164.48 |
+| Example household; any household with employee rows only | bit-identical | $0 |
+
+Engine A (the strategy comparison) on the $60,000 household: every strategy pays $19,329–$19,439 more and leaves an estate $53,299–$53,602
+smaller. The IRMAA and Withdrawal engines, the bridge series and both Monte Carlo engines are bit-identical on every household tested.
+
+**Tests.** New suite **`t79`** — **116** on v6.16, **60** on v6.15 (that leg pins v6.15's rule as dated `[KNOWN DEFECT]` checks).
+An oracle typed from §1401/§1402 reproduces Engine B's payroll tax to the cent in every job year on thirteen households — including a joint-owned
+self-employed row and a survivor who crosses from joint to Single mid-business, where the 0.9% on net earnings appears exactly at the crossing —
+and matches only its own leg's rule (A). By AST: still three `payrollTax` call sites; no 0.124, 0.029, 0.153 or 0.9235 literal outside the
+historical-returns table; the floor read from `SE_MIN_NET`, no 400 typed in the helper (B). Across v6.15 → v6.16: Engines C and D, the bridge
+series and both Monte Carlo engines bit-identical on all thirteen; Engines A and B bit-identical on the three without a self-employed row;
+Engine B's total tax moves by its payroll change and nothing else; Engine A's no-conversion strategy moves by exactly Engine B's change on four
+households and, on the rest, the same way and by no more (C — see the correction below). Five hand pins to the cent, worked in the file:
+$8,477.73, $18,760.21, $16,694.74 (no Social Security room left after a $200,000 paycheck; the 0.9% on wages plus net earnings), $31,251.57 (a
+single filer's 0.9% on net earnings) and $0 under the floor (D). The input rendered: both job types offered; an old row reads as an employee;
+choosing self-employed and pressing Save & Apply stores the field and moves the applied plan's tax; reopening shows it; the Income tab labels
+it; Export Backup carries it (and the Ask AI context names it); switching back clears it; Import restores it (E). The copy, the extinction of
+the three old sentences, and METHODOLOGY (F).
+**Census:** `tools/boundaries.mjs` gains a `self_employed` row (§K1: the example household has no self-employed row, so D-36 was invisible
+there), with a fixture that clears it and one under the $400 floor that must not; `t29` asserts both and gates the row's flip to v6.16.
+Controls `qa/tools/controls_v616_se.py` (repo-only): **9 of 9** — the 92.35% factor dropped, the $400 floor dropped, the base not reduced by
+wages, the 0.9% ignoring net earnings, a joint row given wholly to A, the field lost on save, a stray `0.124`, the old disclosure restored, and
+the unmutated run; every file restored and hash-checked.
+**Re-gated:** `t77` B-3 (the Verify tab's payroll category has six checks on v6.16, the new one citing §1402(b)(2)) and E-4 (on v6.16 it asserts
+the old "owes both halves" disclosure is gone); `t78` D-2a derives the built page's version from the newest source in the run folder (below).
+`t78` and `t77` keep their v6.14 → v6.15 / v6.13 → v6.14 differentials as designed skips on this pair (`t78` 42 → 36 on the current leg). `v616` registered by AST (314 sites); `t1`'s and `t4`'s version-string and Verify-count arms,
+`t33`'s PINS (no pinned household has a self-employed row, so v6.15's values) and the three Python suites by hand, **before** the first full run,
+as v6.15's CHANGELOG requires.
+⚠ **Owned — one version string my pre-run review missed.** `t78` D-2a, a SETUP check, asserted the run folder's built page "names v6.15" —
+a typed version string, not a tag, so the registrar could not see it. The first full run went red on it on both legs (`t78` 35 + 1 failed
+per leg; nothing else red). It now derives the version from the newest source beside it, and fails against v6.15's page in a v6.16 run
+folder (checked). Nothing shipped wrong.
+
+⚠ **Owned — a test claim in the scope was too strong.** The scope's §3 C said Engine A's no-conversion strategy moves by *exactly* Engine B's
+payroll change. Measured, that holds on four households (to the dollar) but not on five others: Engine A carries balances forward, so the extra
+tax leaves less invested, and later IRMAA, survivor-year tax and NIIT fall a little (on the joint-owned $300,000 household, $74,573 against
+$96,160.50). In the first plan year every strategy's tax moves by exactly Engine B's figure on every household (instrumented session-only, not a
+suite check). `t79` C-4 asserts the exact form on the four and the measured bound on the rest; the scope's §7 records it. The scope's §0.3 had
+already measured the wider Engine A range at $250,000, so the "exactly" was a drafting error, not a changed premise. Separately, the scope's §3 D
+named "the 0.9% on $250,000 of self-employment" as a pin; on a joint return $250,000 of profit is $230,875 of net earnings, under the
+threshold, so that pin is taken on a single filer instead ($31,251.57).
+
+**Suite, run from the packaged copies:** **7,220 app checks across 78 app suites**, 0 failed, 0 DIED; MC parity 10/10; tooling `t21` 64, `domdiff` 32, `sets` 12 + 12; **GRAND 7,350**. Against v6.15's line, the counts that moved are `t29` 73 → 78 (the `self_employed` row) and `t78` 42 → 36 (its v6.14 → v6.15 differential takes its designed skip on this pair), and `t79` is new; every other current-leg count is unchanged. Run from the PACKAGED copies in one pass: a run folder built by `mk_runfolder.sh v615 v616` from a fresh clone of `7ee5470` carrying the package as first cut (76 files, each overlay compared byte for byte with the build workspace; the documentation was finished after the run, and every file outside `CHANGELOG.md`, `TESTING.md`, the TESTING archive, the manifest and the scope is byte-identical to what ran), v6.15 resolved from history (commit `cbe2eb2`). While it ran, the repo gained `b47769a` (the scope's draft, byte-identical to the copy the run held); the package is based on `b47769a`. Source `dfc07ee74ad9dd52c0925f54bee0a682` · built `765cd89f6c5d97a937f2fa2e7405ee64` (`smoke_built` 22 passed, 0 failed); v6.15 rebuilt first from its own source to its published `38f51c21…`. The first full run (the build workspace) was green except `t78` D-2a on both legs — owned above.
+
+**Limitations, disclosed:**
+- The §164(f) and §199A deductions are not taken (D-37): a self-employed household's income tax runs high, and its AGI and MAGI do not drop
+  by half the self-employment tax.
+- A job row's amount is read as the year's net profit; losses, the optional methods on Schedule SE, and Social Security credits earned by
+  self-employment are not modelled.
+- A plan saved before v6.16 keeps every job row as an employee until the user changes its type.
+
 ## v6.15 — the Events tab speaks to users only: no Google Drive, no maintainer chores, and the strip never hides the user's own reminders
 
 **A PRESENTATION release** — no engine, constant or figure moves, so METHODOLOGY does not change (MC parity unchanged).
