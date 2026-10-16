@@ -49,12 +49,12 @@ import { fileURLToPath } from "url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2];
-const KNOWN_VERSIONS = ["v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614"];
+const KNOWN_VERSIONS = ["v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.\n    Registered: ${KNOWN_VERSIONS.join(", ")}`);
   process.exit(1);
 }
-const POST = VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || VER === "v614")))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || VER === "v614"))));
+const POST = VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || VER === "v615"))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || VER === "v615")))));
 
 // Optional third argument: a module path, for the negative controls (qa/tools/controls_v577_ss86.py). The parser
 // check reads the .jsx beside it, so a control's mutant is what the structural check sees too.
@@ -257,7 +257,7 @@ if (TOOL) {
       OK(`E-2 ${f} calls the shared helper`, callers.has(f), [...callers].join(","));
     // v6.12 (C-5): Engine D was the one engine outside the helper — it took a flat 85% of benefits, which E-1 cannot see (it reads no
     // threshold). Gated per leg; t75 D-4 adds the extinction that no `× 0.85` product survives outside the helper.
-    if (["v612", "v613", "v614"].includes(VER)) OK("E-2 computeWithdrawalPlan calls the shared helper (v6.12, C-5)", callers.has("computeWithdrawalPlan"), [...callers].join(","));
+    if (["v612", "v613", "v614", "v615"].includes(VER)) OK("E-2 computeWithdrawalPlan calls the shared helper (v6.12, C-5)", callers.has("computeWithdrawalPlan"), [...callers].join(","));
     else OK("E-2 [KNOWN DEFECT C-5, fixed v6.12] computeWithdrawalPlan does not call the helper (a flat 85%)", !callers.has("computeWithdrawalPlan"), [...callers].join(","));
     T("E-3 Engine A's private ssTaxF is gone", outer("ssTaxF", "any").length, 0);
   } else {

@@ -196,6 +196,20 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   const _p610 = VA === "v609" && VB === "v610";
   const _BAN = /(?:⚠ ACTION REQUIRED|▶ ACTION WINDOW OPEN|◔ GETTING CLOSE):[\s\S]{1,400}?\s+—\s+open the EVENTS tab for instructions/;
   const _n610 = (s) => !_p610 ? s : s.replace(_BAN, "");
+  // v6.15 (docs/SCOPE_EVENTS_USER_FACING_V615.md) rebuilds the Events tab: the tax card becomes a NOTICE that never raises the action
+  // banner, the backtest and peer chores leave, and the ⌛ STALE DATA strip loses its maintainer sentence. Both lines sit above every tab,
+  // so they are inside this capture, and both depend on the RUN DATE (measured 2026-10-16: v6.14 "GETTING CLOSE: Annual tax-data
+  // refresh", v6.15 no banner; the STALE strip renders only from the January after the figures' year). For THIS pair only, the two
+  // lines are set aside on BOTH sides and nothing else; on a run date with neither, the replaces are no-ops. The two checks keep the mask
+  // honest: whatever v6.15 shows, its banner never names the tax notice and its STALE strip never carries the maintainer workflow.
+  const _p615 = VA === "v614" && VB === "v615";
+  const _STALE = /⌛ STALE DATA:[\s\S]{1,900}?(?:constant-update workflow\.|brings it across\.)/;
+  const _n615 = (s) => !_p615 ? s : s.replace(_BAN, "").replace(_STALE, "");
+  if (_p615) {
+    const banB = (B.withdrawal.match(_BAN) || [""])[0];
+    ck("WITHDRAWAL (v614\u2192v615): the v6.15 action banner, if any, never names the tax-figures notice", !/Tax figures in this copy|tax-data refresh/.test(banB), banB.slice(0, 120));
+    ck("WITHDRAWAL (v614\u2192v615): the v6.15 side carries no maintainer workflow in the STALE strip", !/Maintaining the file yourself/.test(B.withdrawal));
+  }
   // v6.12 (C-5 — docs/SCOPE_C5_ENGINE_D_SS86_V612.md) re-figures the Bracket column (Social Security by the §86 worksheet, the year's
   // filing status, the table indexed) and adds ONE sentence to the table's note saying what the column is. For THIS pair only: that
   // sentence is set aside on the v6.12 side (exactly once), and every Bracket cell — a one- or two-digit rate immediately followed by the
@@ -211,7 +225,7 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
     ck("WITHDRAWAL (v611→v612): the Bracket cells are masked — the same number on each side, one per schedule row", cA.length > 0 && cA.length === cB.length, `${cA.length} vs ${cB.length}`);
     ck("WITHDRAWAL (v611→v612): …and the masked cells DIFFER — the column was re-figured (a v6.12 still on the flat-85% column fails here)", cA.join() !== cB.join(), cA.join(","));
   }
-  const wA = stripV(_m612(_n610(A.withdrawal))), wB = stripV(_m612(_n612(_n610(_n609(_n608(_n579(B.withdrawal)))))));
+  const wA = stripV(_n615(_m612(_n610(A.withdrawal)))), wB = stripV(_n615(_m612(_n612(_n610(_n609(_n608(_n579(B.withdrawal))))))));
   ck("WITHDRAWAL: the tab is byte-identical across the pair (v5.40 is disclosure + mechanics; no rendered cell moves \u2014 measured)",
      wA === wB, firstDiff(wA, wB));
   // The v5.35 claims must still hold on BOTH sides — this is the assertion that would catch

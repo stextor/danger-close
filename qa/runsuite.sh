@@ -281,6 +281,12 @@ tally "t76-$CUR"   node t76_crossover_label.mjs "$CUR"
 # Both legs: the prior leg pins v6.13's rule.
 tally "t77-$PRIOR" node t77_payroll_tax.mjs "$PRIOR"
 tally "t77-$CUR"   node t77_payroll_tax.mjs "$CUR"
+# t78 (v6.15) — the Events tab speaks to users only: the tax card is a NOTICE the app-wide strip ignores (so a maintainer's alarm can no
+# longer hide the user's own January items), the backtest and peer chores are gone, no Google Drive anywhere (AST and the built page),
+# no "survives the swap" promise; what did not move across v6.14 → v6.15 on 72 dates; the strip rendered with the clock at 2027-01-05.
+# Both legs: the prior leg pins v6.14's defects.
+tally "t78-$PRIOR" node t78_events_user_facing.mjs "$PRIOR"
+tally "t78-$CUR"   node t78_events_user_facing.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

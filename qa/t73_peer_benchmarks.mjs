@@ -27,16 +27,19 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v610";
-const KNOWN_VERSIONS = ["v609", "v610", "v611", "v612", "v613", "v614"];
+const KNOWN_VERSIONS = ["v609", "v610", "v611", "v612", "v613", "v614", "v615"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v610", "v611", "v612", "v613", "v614"].includes(VER);   // an array, so register_tag2 widens it each release
+const POST = ["v610", "v611", "v612", "v613", "v614", "v615"].includes(VER);   // an array, so register_tag2 widens it each release
 // v6.11 (F-19r DF-4): the Portfolio Size row has no floor band any more — at or below the 90th percentile it reads "Below the top 10%",
 // where v6.10 read "TOP 25%". Gated per leg (§B2), an array so the next registration widens it.
-const NOFLOOR = ["v611", "v612", "v613", "v614"].includes(VER);
+const NOFLOOR = ["v611", "v612", "v613", "v614", "v615"].includes(VER);
+// v6.15 (docs/SCOPE_EVENTS_USER_FACING_V615.md): the Events tab no longer carries the peer-benchmark refresh alarm — a maintainer's
+// chore shown to every user. §E asserts its absence on those legs. An array, so the next registration widens it.
+const NOPEER = ["v615"].includes(VER);
 const require = createRequire(import.meta.url);
 const { __g: g, __test: X } = await import(pathToFileURL(join(HERE, `app_${VER}.mjs`)).href);
 const SRC = readFileSync(join(HERE, "..", `${VER}.jsx`), "utf8");
@@ -192,7 +195,10 @@ if (!POST) {
 // ── E · the refresh alarm ─────────────────────────────────────────────────────────────────────────────────────────────────────
 { const peer = d => (X.computePlanEvents(d) || []).find(e => e.key === "peer") || {};
   const oct26 = peer(new Date(2026, 9, 15)), jan27 = peer(new Date(2027, 0, 15));
-  if (POST) {
+  if (NOPEER) {
+    const any = [2026, 2027, 2028, 2029, 2030].some(y => [0, 3, 6, 9, 10, 11].some(m => (X.computePlanEvents(new Date(y, m, 15)) || []).some(e => e.key === "peer")));
+    T("E-0 [v6.15] the peer-benchmark alarm is gone from the Events tab on every probed month, 2026–2030 (the reminder is the maintainer's, outside the app)", !any && oct26.key === undefined && jan27.key === undefined);
+  } else if (POST) {
     EQ("E-1 October 2026: the alarm is no longer due — the 2025 survey is in", oct26.state, "future");
     T("E-2 and it points at the next survey: 2028, publishing ~Oct 2029", /next refresh: 2028 SCF, publishes ~Oct 2029/.test(oct26.when || ""), oct26.when);
     EQ("E-3 January 2027: still not due", jan27.state, "future");
