@@ -15,14 +15,14 @@
 // process whose clock is set to 2027-01-05 BEFORE the DOM bundle loads (DATA_STALE_YEARS is a module-level constant read at load).
 // EVERY DATE IS PASSED IN — nothing here depends on the day the suite runs, except C-4's own fixed clock.
 import { createRequire } from "module";
-import { existsSync, readFileSync } from "fs";
+import { existsSync, readFileSync, readdirSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath, pathToFileURL } from "url";
 import { spawnSync } from "child_process";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v615";
-const KNOWN_VERSIONS = ["v614", "v615"];
+const KNOWN_VERSIONS = ["v614", "v615", "v616"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -57,7 +57,7 @@ if (process.env.T78_CHILD) {
 
 await import("./env_dom.mjs");
 console.error = () => {}; console.warn = () => {};
-const POST = ["v615"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v615", "v616"].includes(VER);   // an array, so the next registration widens it
 // §A / §C-3's pair. Two constants, NOT `VER === "v615"`: the registrar widens equality tests and arrays, and this comparison is true of
 // exactly one pair of builds (t76 records why).
 const D_PRIOR = "v614", D_CUR = "v615";
@@ -214,7 +214,12 @@ console.log("  D — extinction");
     T("D-1 no string, template or JSX text anywhere in the source — the Field Manual included — says Google Drive (any case)", drive.length === 0, drive.map(t => "L" + t.line).join(","));
     const page = join(HERE, "..", "index.html");
     const html = existsSync(page) ? readFileSync(page, "utf8") : "";
-    T("D-2a SETUP — the run folder's built index.html is this build (it names v6.15)", html.includes("DANGER CLOSE v6.15"));
+    // v6.16: this read "it names v6.15" — a version string typed into a SETUP check, which the registrar cannot see (it is not a tag) and
+    // which went red on BOTH legs of the v6.15 → v6.16 run. The run folder holds one built page, the CURRENT build's, so the version it
+    // must name is derived from the newest source in the folder — never typed (owned in v6.16's CHANGELOG).
+    const _newest = readdirSync(join(HERE, "..")).filter(f => /^v\d{3}\.jsx$/.test(f)).sort().pop() || "";
+    const _verStr = _newest ? `v${_newest[1]}.${_newest.slice(2, 4)}` : "(no source in the run folder)";
+    T(`D-2a SETUP — the run folder's built index.html is the run's current build (it names ${_verStr}, the newest source beside it)`, !!_newest && html.includes(`DANGER CLOSE ${_verStr}`));
     T("D-2b the built index.html says Google Drive nowhere", html.length > 0 && !/google drive/i.test(html));
     T("D-3 on all 72 dates no event's instructions name the source file or a source constant", !evIns.some(s => SOURCE_NAMES.test(s)));
     T("D-4 no app text promises the plan survives a swap, or says the browser keeps nothing", swap.length === 0, swap.map(t => "L" + t.line).join(","));

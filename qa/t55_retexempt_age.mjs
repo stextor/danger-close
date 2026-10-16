@@ -14,7 +14,7 @@ import { createRequire } from "module";
 import { d30Pins } from "./d30_ref.mjs";
 const require = createRequire(import.meta.url);
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615"];
+const KNOWN_VERSIONS = ["v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; console.log(`  \u2717 ${n}${d ? " \u2014 " + String(d).slice(0, 240) : ""}`); } };
 const done = () => { console.log(`\nt55 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
@@ -26,10 +26,10 @@ const g = window.__g; const SR = g.STATE_RULES();
 const EQ = (n, got, exp) => CK(n + D30.tag(), Math.abs(got - exp) <= 0.005, `engine ${Number(got).toFixed(4)}, hand ${Number(exp).toFixed(4)}`);
 // v6.02 (D-30 batch 1 — docs/SCOPE_D30_DEDUCTIONS_V602.md, DD-14): Mississippi takes its standard deduction and exemptions. Its pins keep their
 // BASE and on a D-30 leg expect it after them (qa/d30_ref.mjs, on the calculator's own record of the call). A version LIST.
-const D30L = ["v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615"].includes(VER), D30 = d30Pins((a) => g.stateTaxAnnual(a), SR, D30L);
+const D30L = ["v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616"].includes(VER), D30 = d30Pins((a) => g.stateTaxAnnual(a), SR, D30L);
 // v6.03 (D-30 batch 2 — docs/SCOPE_D30_DEDUCTIONS_V603.md, DD-14): Iowa and Michigan take theirs too (Pennsylvania's law has none). Their pins
 // keep the taxable base and on the batch-2 leg expect it after the state's deductions and credits (qa/d30_ref.mjs D30F, on the recorded call). A version LIST.
-const D30FL = ["v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615"].includes(VER), fl = (c, x) => D30FL ? D30.B(c, x) : SR[c].rate * x;
+const D30FL = ["v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616"].includes(VER), fl = (c, x) => D30FL ? D30.B(c, x) : SR[c].rate * x;
 const T = (code, o) => D30.S({ code, retIncome: 0, pen: 0, work: 0, capGains: 0, ssTaxableFed: 0, ssGrossA: 0, ssGrossB: 0, ageB: null, single: true, ...o });
 const J = (code, o) => T(code, { single: false, ...o });
 
@@ -53,7 +53,7 @@ EQ("PA-6 joint 61/60, $40,000 IRA: exempt — $0", J("PA", { retIncome: 40000, a
 // ── MS: as PA ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
 // v6.00 (D-22 option 3, SCOPE_D22_BRACKETS_V600): Mississippi's first $10,000 of taxable income is untaxed from v6.00 (its own schedule,
 // one band per return). The hand figures keep their taxable base and, on a bracket leg, take the band off it. A version LIST.
-const MSB = ["v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615"].includes(VER), ms = x => D30L ? D30.B("MS", x) : MSB ? 0.04 * Math.max(0, x - 10000) : 0.04 * x;
+const MSB = ["v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616"].includes(VER), ms = x => D30L ? D30.B("MS", x) : MSB ? 0.04 * Math.max(0, x - 10000) : 0.04 * x;
 EQ(MSB ? "MS-1 single 59, $50,000 IRA — the first $10,000 untaxed: 0.04 × 40,000 = $1,600.00" : "MS-1 single 59, $50,000 IRA — 0.04 × 50,000 = $2,000.00", T("MS", { retIncome: 50000, ageA: 59 }), ms(50000));
 EQ("MS-2 single 60, $50,000 IRA: exempt — $0", T("MS", { retIncome: 50000, ageA: 60 }), 0);
 EQ("MS-3 single 50, $30,000 pension: exempt at any age — $0", T("MS", { pen: 30000, ageA: 50 }), 0);

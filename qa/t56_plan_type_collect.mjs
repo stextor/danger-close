@@ -29,12 +29,12 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
 const VER = process.argv[2];
-const KNOWN_VERSIONS = ["v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615"];
+const KNOWN_VERSIONS = ["v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.\n    Registered: ${KNOWN_VERSIONS.join(", ")}`);
   process.exit(1);
 }
-const POST = ["v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615"].includes(VER); // D-12 Phase 1 shipped at v5.91
+const POST = ["v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616"].includes(VER); // D-12 Phase 1 shipped at v5.91
 
 const mulberry = (a) => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a);
   t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
@@ -137,14 +137,14 @@ function tradOthSet(P) { P.otherAccounts.forEach(a => { if (a.taxType === "trad"
     const _stOnly = (a, b) => { const x = JSON.parse(a), y = JSON.parse(b); if (JSON.stringify(x.D) !== JSON.stringify(y.D) || JSON.stringify(x.C) !== JSON.stringify(y.C) || x.med !== y.med) return false;
       let moved = 0; for (let i = 0; i < x.B.length; i++) for (const f of Object.keys(x.B[i])) if (JSON.stringify(x.B[i][f]) !== JSON.stringify(y.B[i][f])) { if (!["stateTax", "totalTax", "effRate"].includes(f)) return false; moved++; }
       return moved > 0; };
-    if ((VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || VER === "v615"))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || VER === "v615")))))) && code) {
+    if ((VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || VER === "v616")))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || VER === "v616"))))))) && code) {
       T(`F-1 ${tag} [v5.95]: all plan types "employer" moves state tax and nothing else`, _stOnly(ref, figs(inState(EMP, code))));
       // v6.07 (D-33): Engine B's per-leg split of the conversion adds terms in a different order, and in Pennsylvania the owner swap
       // now moves 2042's state tax by 2e-13 dollars — floating-point order, not a figure. From v6.07 "no figure" is judged to the cent.
       // An array, so register_tag2 widens it each release.
       const _cents = j => JSON.stringify(JSON.parse(j), (k, v) => typeof v === "number" ? Math.round(v * 100) / 100 : v);
-      T(`F-2 ${tag}: pension owner "B" changes no figure (measured for this household; not a rule)${["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615"].includes(VER) ? " — to the cent" : ""}`,
-        ["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615"].includes(VER) ? _cents(figs(inState(PENB, code))) === _cents(ref) : figs(inState(PENB, code)) === ref);
+      T(`F-2 ${tag}: pension owner "B" changes no figure (measured for this household; not a rule)${["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616"].includes(VER) ? " — to the cent" : ""}`,
+        ["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616"].includes(VER) ? _cents(figs(inState(PENB, code))) === _cents(ref) : figs(inState(PENB, code)) === ref);
       T(`F-3 ${tag} [v5.95]: both together move state tax and nothing else`, _stOnly(ref, figs(inState(ALLB, code))));
       T(`F-4 ${tag}: the fields stripped (a v5.90 backup) changes no figure`, figs(inState(OLD, code)) === ref);
       continue;
@@ -193,7 +193,7 @@ function tradOthSet(P) { P.otherAccounts.forEach(a => { if (a.taxType === "trad"
   T(PIN("R-2", "a plan-type selector on each of the 8 rows holding Traditional money, and nowhere else"), POST ? planSels().length === 8 : planSels().length === 0, `found ${planSels().length}`);
   T(PIN("R-2b", "the selector's labels are human, sentence case"), POST ? planSels().every(s => [...s.options].map(o => o.textContent).join("|") === "IRA (incl. rollover, SEP, SIMPLE)|Employer plan (401(k), 403(b), 457, TSP)") : true);
   T(PIN("R-2c", "a couple gets a pension-owner selector"), POST ? !!penSel() : !penSel());
-  if ((VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || VER === "v615"))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || VER === "v615"))))))) T("R-2d [v5.95]: the disclosure now says the fields are used", text().includes("From v5.95 the model uses them"));
+  if ((VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || VER === "v616")))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || VER === "v616")))))))) T("R-2d [v5.95]: the disclosure now says the fields are used", text().includes("From v5.95 the model uses them"));
   else T(PIN("R-2d", "the collected-not-used disclosure is on the page"), POST ? text().includes("change no figure yet") : true);
   const first = await save();
 

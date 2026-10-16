@@ -28,13 +28,13 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v611";
-const KNOWN_VERSIONS = ["v610", "v611", "v612", "v613", "v614", "v615"];
+const KNOWN_VERSIONS = ["v610", "v611", "v612", "v613", "v614", "v615", "v616"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v611", "v612", "v613", "v614", "v615"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v611", "v612", "v613", "v614", "v615", "v616"].includes(VER);   // an array, so the next registration widens it
 const require = createRequire(import.meta.url);
 const { __g: g, __test: X } = await import(pathToFileURL(join(HERE, `app_${VER}.mjs`)).href);
 const SRC = readFileSync(join(HERE, "..", `${VER}.jsx`), "utf8");

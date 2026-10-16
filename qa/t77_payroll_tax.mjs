@@ -26,13 +26,16 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v614";
-const KNOWN_VERSIONS = ["v613", "v614", "v615"];
+const KNOWN_VERSIONS = ["v613", "v614", "v615", "v616"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v614", "v615"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v614", "v615", "v616"].includes(VER);   // an array, so the next registration widens it
+// v6.16 (D-36, docs/SCOPE_D36_SELF_EMPLOYMENT_V616.md): self-employment is modelled — the Verify tab gains a sixth payroll check (the
+// §1402(b)(2) floor) and the "not modelled" disclosure E-4 locked goes false. Gated per leg (§B2); an array, so the next registration widens it.
+const SE = ["v616"].includes(VER);
 // The differential's pair — two constants, NOT `VER === "v614"`, so the registrar cannot widen it (t76 records why).
 const D_PRIOR = "v613", D_CUR = "v614";
 const require = createRequire(import.meta.url);
@@ -146,9 +149,11 @@ console.log("  B — one rule, in one place (AST)");
          : `B-2 ${KD}: the payroll rates are inline literals at the three sites (six literals)`,
     POST ? lits.length === 0 : lits.length === 6, lits.join(", ") || "none");
   const vc = g.buildVerificationChecks().filter(c => c.cat === "PAYROLL TAX");
-  T(POST ? "B-3: the Verify tab checks the five payroll constants, every one passing and citing §3101 or Form 8959"
+  T(SE ? "B-3: the Verify tab checks the six payroll constants — the five employee-side ones citing §3101 or Form 8959, and the self-employment floor citing §1402(b)(2) — every one passing"
+     : POST ? "B-3: the Verify tab checks the five payroll constants, every one passing and citing §3101 or Form 8959"
          : "B-3 (prior leg): the Verify tab has no payroll category yet",
-    POST ? vc.length === 5 && vc.every(c => c.pass && /3101|8959/.test(c.source)) : vc.length === 0, `${vc.length}`);
+    SE ? vc.length === 6 && vc.every(c => c.pass) && vc.filter(c => /3101|8959/.test(c.source)).length === 5 && vc.filter(c => /1402\(b\)\(2\)/.test(c.source)).length === 1
+       : POST ? vc.length === 5 && vc.every(c => c.pass && /3101|8959/.test(c.source)) : vc.length === 0, `${vc.length}`);
 }
 
 // ── §C · what cannot move, and Engine A, across the pair (needs both modules) ──────────────────────────────────────────────
@@ -203,11 +208,14 @@ console.log("  E — copy, and the rendered Taxes tab");
   const NOTE = "Social Security 6.2% on each earner's wages up to the wage base, Medicare 1.45% on all of them, and the 0.9% Additional Medicare Tax on household wages above $200,000 single / $250,000 joint (not indexed)";
   const MYD = "Social Security is capped per earner, and a row owned jointly counts as half each spouse's";
   const FM = "Social Security up to the wage base for each earner, Medicare on all of it, and the 0.9% Additional Medicare Tax on household wages above $200,000 single or $250,000 joint";
-  const SE = "a self-employed person owes both halves";
+  const SE_TXT = "a self-employed person owes both halves";
   T(POST ? "E-1: the Taxes tab's method note states the rule (per-earner cap, 0.9%, unindexed)" : "E-1 (prior leg): the method note says only that FICA applies to earned income", POST ? has(NOTE) : !has(NOTE));
   T(POST ? "E-2: My Data's job-row note says the cap is per earner and a joint row is split" : "E-2 (prior leg): not yet", POST ? has(MYD) : !has(MYD));
   T(POST ? "E-3: the Field Manual's streams entry states the rule" : "E-3 (prior leg): not yet", POST ? has(FM) : !has(FM));
-  T(POST ? "E-4: the self-employment simplification is disclosed in-app (DC-5)" : "E-4 (prior leg): not yet disclosed", POST ? texts.filter(t => t.includes(SE)).length >= 2 : !has(SE));
+  // v6.16: the disclosure is retired with the defect (t79 §F holds the rule's own text); on the v6.16 leg E-4 asserts the old sentence is gone.
+  T(SE ? "E-4 [v6.16]: the \"owes both halves … not modelled\" disclosure is gone — self-employment is modelled (D-36)"
+     : POST ? "E-4: the self-employment simplification is disclosed in-app (DC-5)" : "E-4 (prior leg): not yet disclosed",
+    SE ? !has(SE_TXT) : POST ? texts.filter(t => t.includes(SE_TXT)).length >= 2 : !has(SE_TXT));
   // Rendered: the Taxes tab on the $150K + $150K household. Its detail panel renders FICA as $NK for the selected year.
   require(`./dom_${VER}.cjs`);
   const { root, act, DangerClose } = window.__mount(window.document.getElementById("root"));

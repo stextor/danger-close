@@ -202,7 +202,7 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   // refresh", v6.15 no banner; the STALE strip renders only from the January after the figures' year). For THIS pair only, the two
   // lines are set aside on BOTH sides and nothing else; on a run date with neither, the replaces are no-ops. The two checks keep the mask
   // honest: whatever v6.15 shows, its banner never names the tax notice and its STALE strip never carries the maintainer workflow.
-  const _p615 = VA === "v614" && VB === "v615";
+  const _p615 = VA === "v614" && (VB === "v615" || VB === "v616");
   const _STALE = /⌛ STALE DATA:[\s\S]{1,900}?(?:constant-update workflow\.|brings it across\.)/;
   const _n615 = (s) => !_p615 ? s : s.replace(_BAN, "").replace(_STALE, "");
   if (_p615) {

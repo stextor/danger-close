@@ -287,6 +287,12 @@ tally "t77-$CUR"   node t77_payroll_tax.mjs "$CUR"
 # Both legs: the prior leg pins v6.14's defects.
 tally "t78-$PRIOR" node t78_events_user_facing.mjs "$PRIOR"
 tally "t78-$CUR"   node t78_events_user_facing.mjs "$CUR"
+# t79 (v6.16) — self-employment tax (D-36): a "Job — self-employed (1099)" row owes both halves on 92.35% of the profit (§1401, §1402(a)(12)),
+# the SS base reduced by the person's wages, the 0.9% on wages + net, the $400 floor; an oracle from the statute, one helper and no stray
+# rate (AST); employee-only households, Engines C and D and the Monte Carlo bit-identical across v6.15 → v6.16; hand pins; the input
+# survives save/export/import; the copy. Both legs: the prior leg pins v6.15's employee-only rule as a dated [KNOWN DEFECT].
+tally "t79-$PRIOR" node t79_self_employment.mjs "$PRIOR"
+tally "t79-$CUR"   node t79_self_employment.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

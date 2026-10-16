@@ -28,13 +28,13 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v613";
-const KNOWN_VERSIONS = ["v612", "v613", "v614", "v615"];
+const KNOWN_VERSIONS = ["v612", "v613", "v614", "v615", "v616"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v613", "v614", "v615"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v613", "v614", "v615", "v616"].includes(VER);   // an array, so the next registration widens it
 // §D's pair. Written as two constants, NOT as `VER === "v613"`: the version registrar widens equality tests and arrays, and this
 // comparison is true of exactly one pair of builds — widening it would compare v6.14 against v6.12 and call the difference a defect.
 const D_PRIOR = "v612", D_CUR = "v613";
