@@ -1,5 +1,66 @@
 # Changelog
 
+## v6.14 — payroll tax on job income follows the law: the 0.9% Additional Medicare Tax, and the wage cap per earner
+
+**A MODELLING release** (METHODOLOGY gains a section; MC parity unchanged). `docs/SCOPE_D17_PAYROLL_TAX_V614.md` (repo-only, fulfilled).
+Steve took all six recommendations: "Use your recommendations for the decisions on §5."
+
+**What was wrong (v6.13, measured).** Every payroll site — Engine A (the strategy comparison) twice, Engine B (the Taxes tab) once — took
+min(household wages, wage base) × 6.2% + wages × 1.45%. Two errors, both taking too little tax:
+- **D-17 (registered):** no 0.9% Additional Medicare Tax on household wages above $200,000 Single / $250,000 joint (26 U.S.C. §3101(b)(2);
+  the thresholds are not indexed — IRS Instructions for Form 8959). $450 a year at $300,000.
+- **C-14 (new, found by the scope's mechanism sweep, OPERATIONS §K2):** the Social Security wage base capped the **household's** job
+  income, but §3121(a)(1) caps each **person's**. Two $150,000 earners were taxed on $195,792.88 of Social Security wages in 2029 where the
+  law taxes $300,000 — **$6,460.84 short that year**, $29,827 over five. Two $120,000 earners: $11,227.
+Neither reached the example household (no job stream; B's built-in taper peaks at $20,000), so the boundary census gains a row.
+
+**What changed (DC-1 to DC-6, all (a)).**
+- **One helper, `payrollTax`**, called at all three sites: Social Security 6.2% per earner up to the year's base, Medicare 1.45% on all of
+  it, 0.9% on the household's wages above $200,000 / $250,000 on the year's filing status (joint through the year of the first death,
+  Single from the next). Fixing both errors together (DC-1); modelling the 0.9%, not only disclosing it (DC-2).
+- **Who earned it:** B's taper is B's; a job row is its owner's; a job row owned jointly is split equally — the conservative reading (DC-3).
+  `streamsMonthlyAt` gains an `owner` filter for it.
+- **The rates live in `TAX_CONSTS`** with five Verify-tab checks citing §3101 and Form 8959 (DC-4): the Verify tab now reports 71 checks.
+  E-23 narrows (payroll is out of it; NIIT and AMT remain).
+- **Self-employment is disclosed, not modelled** (DC-5): job income is taxed as wages, the employee's half — said in the Taxes tab's
+  method note, My Data's job-row note, the Field Manual and METHODOLOGY; filed as **D-36**.
+- The Taxes tab's FICA line carries the 0.9% (DC-6); its description and method note say so.
+
+**Measured (v6.13 → v6.14, the example plus job rows in the first five plan years).** One $300,000 job: Taxes tab +$2,250; the comparison's
+"current" strategy +$2,250 of tax, −$6,205 of estate. Two $150,000 jobs: **+$32,077** and −$88,757. Two $120,000 jobs: +$11,227 and
+−$31,262. A single household's $250,000 job: +$2,250. A $300,000 job owned jointly: +$32,077 (split, so each half is under the base).
+**Did not move:** the example household and two $60,000 jobs, in every engine; the IRMAA tab (Engine C), the Withdrawal tab (Engine D),
+the bridge series and both Monte Carlo engines on every household — none carries payroll tax (asserted, `t77` §C).
+
+**Also in this package.** **E-23** narrowed; **D-36** opened (disclosed); **D-17** closed; **C-14** filed and fixed. One slip of mine is
+owned in the scope's §6a: its §0.3 hand check wrote the 2029 base as $195,793.10 and v6.13's figure as $16,489.17; the base is
+$195,792.88 (184,500 × 1.02³) and the figure $16,489.16. The law's $23,400.00 is unaffected. `t77` pins the corrected cents.
+
+**Tests.** New suite **`t77`** — **54** on v6.14, **38** on v6.13 (that leg pins v6.13's rule as dated `[KNOWN DEFECT]` checks): an
+oracle with its own rates and thresholds typed from the statute and its own per-person attribution from the household's rows reproduces
+Engine B's FICA to the cent, every year, on nine households (the scope's seven, a survivor crossing joint → Single mid-job, and one person
+holding two jobs — one cap, not two), each leg by its own rule and not the other's (A); by AST, `payrollTax` is called at exactly the three
+sites and **no 0.062, 0.0145 or 0.009 literal survives outside `TAX_CONSTS`** (B); across the pair, Engines C and D and the bridge are
+bit-identical everywhere, every engine is bit-identical where no threshold is reached, and Engine A's "current" strategy moves by exactly
+Engine B's payroll difference (C); the hand pin, $23,400.00 / $16,489.16 (D); the copy and the rendered Taxes tab's FICA line (E).
+Controls `qa/tools/controls_v614_payroll.py` (repo-only): **10 of 10** — the household cap back, the 0.9% dropped, the threshold indexed,
+the joint threshold in Single years, a joint row given to A, a stray `0.0145` in Engine A, Engine A kept on the old rule, the oracle's
+attribution dropped (a test mutant), the method-note clause removed, and the unmutated run; every file restored and hash-checked.
+**Re-gated:** `t1` and `t4` count 71 Verify checks on v6.14 (66 before) — hand-gated, since the registrar would have folded v6.14 into the
+66 group. `t29` gains the census row `payroll` (B-11). `v614` registered by AST (310 sites), with `t1`'s and `t4`'s version arms, `t33`'s
+PINS (neither of its households reaches a payroll rule) and the three Python suites by hand. **`t76` reads 27 on both legs** (29 / 23 at v6.13): its §D, the v6.12 → v6.13 text-only differential, takes its designed
+skip on this pair, and its v6.13 leg now runs the post-fix sections. App total reconciled from v6.13's 6,884: + 92 (`t77`) + 4 (`t29`, both
+legs) + 2 (`t76`: 52 → 54) = 6,982; tooling unchanged; GRAND 7,014 → 7,112.
+
+**Suite, run from the packaged copies:** **6,982 app checks across 76 app suites**, 0 failed, 0 DIED; MC parity 10/10; tooling `t21` 64, `domdiff` 32, `sets` 12 + 12; **GRAND 7,112**. Against v6.13's line, the counts that moved are `t29` 71 → 73 and `t76` 29 → 27, and `t77` is new; every other current-leg count is unchanged. Run from the PACKAGED copies in one pass: a run folder built by `mk_runfolder.sh v613 v614` from a fresh clone of `6560c2d` carrying exactly the packaged changes (76 files, each overlay compared byte for byte with the build workspace), v6.13 resolved from history (commit `756dc76`). Source `57e4fca1dee821325c99a2334b4ecc60` · built `2eeb765099fd121c8764c464265c3190` (`smoke_built` 22 passed, 0 failed); v6.13 rebuilt first from its own source to its published `6afe2ab9…`.
+
+**Limitations, disclosed:**
+- Self-employment tax is not modelled (D-36): a self-employed person's payroll tax is understated.
+- The wage base is indexed 2%/yr from 2026; SSA indexes it to average wages, usually faster, so later-year caps likely run a little low
+  (slightly optimistic; reset at each annual refresh).
+- Withholding rules and the credit for excess Social Security withheld by two employers are timing, not liability, and are not modelled.
+- A job row owned jointly is split equally between the spouses; enter it under its earner for an exact figure.
+
 ## v6.13 — the Roth tab's break-even card says what it measures; C-9 closed on evidence; the age-65 deduction read at source
 
 **A PRESENTATION release** — user-facing text, one code comment and the version; **no code moved** (`t76` §D: the v6.12 and v6.13 syntax
