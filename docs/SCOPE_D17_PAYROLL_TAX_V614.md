@@ -1,6 +1,8 @@
 # SCOPE — v6.14 · D-17: payroll tax on job income follows the law — the 0.9% Additional Medicare Tax, and the wage cap per earner
 
-**DRAFT — 2026-10-15, awaiting Steve's decisions (§5).** Repo-only.
+**FULFILLED — shipped as v6.14 (2026-10-15).** Repo-only. §7 is the build record; §6a lists what the build changed from this document. D-17 closes; C-14 filed and fixed; E-23 narrowed; D-36 opened (disclosed).
+
+*(Superseded status line, retained:)* **DRAFT — 2026-10-15, awaiting Steve's decisions (§5).** Repo-only.
 
 A **MODELLING** release, so METHODOLOGY changes. By census (§0.3) it reaches exactly the Taxes tab (Engine B) and the strategy
 comparison (Engine A), and only for a household with job income in its plan years. The example household, Engines C and D and the Monte
@@ -274,7 +276,9 @@ plus the unmutated run.
 
 ---
 
-## 5 · Decisions for Steve
+## 5 · Decisions for Steve — **taken 2026-10-15: DC-1 (a), DC-2 (a), DC-3 (a), DC-4 (a), DC-5 (a), DC-6 (a)**
+
+Steve, 2026-10-15: *"Use your recommendations for the decisions on §5."*
 
 Each has a recommendation. "Recommended" means what I would do; it is your call.
 
@@ -304,7 +308,7 @@ Each has a recommendation. "Recommended" means what I would do; it is your call.
 
 ---
 
-## 6 · Register housekeeping at ship (not decisions; corrections the release carries)
+## 6 · Register housekeeping at ship (not decisions; corrections the release carries) — **done at v6.14** (the scheduled-task item aside, which stays your decision)
 
 - **`docs/MissingFeatures.md`:**
   - D-17 → **CLOSED v6.14** (modelled per DC-2).
@@ -316,9 +320,35 @@ Each has a recommendation. "Recommended" means what I would do; it is your call.
 
 ---
 
-## 7 · Build record
+## 6a · What the build changed from this document (each owned here, not only in chat)
 
-*(Filled at the build.)*
+- **A one-cent slip in §0.3's hand check.** It wrote the 2029 wage base as $195,793.10 and v6.13's figure as $16,489.17. 184,500 × 1.02³ is
+  **$195,792.88**, so v6.13's figure is **$16,489.16** and the per-earner shortfall that year **$6,460.84**. The law's $23,400.00 is unaffected
+  (both earners are under the base). `t77` D-1 pins the corrected cents, and the register entries and METHODOLOGY use them.
+- **The joint-owned row moves more than §0.3's table showed.** The session prototype treated a joint job row as one earner; the build
+  follows DC-3 (a) and splits it, so the $300,000 joint row now moves like two $150,000 earners: **+$32,077** over five years, not +$2,250.
+- **§2.2 expected `t33`, `t18` and `t2` might move. None did.** What moved: `t1` and `t4` (their Verify-count check expects 71 on v6.14 — a
+  value, not a count; hand-gated, because the registrar would have folded v6.14 into the 66 group), `t29` (+2: the `payroll` row and B-11),
+  and `t76` (29 → 27 on its current leg — its §D is pair-gated to v6.12 → v6.13 and takes its designed skip). A first full run also failed
+  `t45`, `t47` and `t48` on the built page's footer, because `index.html` had not yet been rebuilt; with it rebuilt they pass unchanged.
+- **`t77` has nine households, not eight:** the build added one person holding two jobs ($150,000 + $110,000), so a per-JOB cap would fail
+  (it must be one cap per person). 54 checks on v6.14, 38 on v6.13.
+- **Controls: 10 of 10.** The build added one planted defect the scope did not list — Engine A kept on v6.13's rule at its tax line (turns
+  B-1 and C-3 red) — beside the eight it listed and the unmutated run.
+- **The census row's base indexing** (2%/yr) is a structural value in `boundaries.mjs`, since `TAX_INDEX_RATE` is not exported; `t77` holds
+  the engines to the same figure to the cent.
+- **The Taxes tab's description** (beside its method note) also names the 0.9%, and the Field Manual sentence carries the self-employment
+  clause (DC-5) — one more site than §2.1 listed.
+
+## 7 · Build record (v6.14, 2026-10-15)
+
+- **Built against** `origin/main` `6560c2d` (v6.13 + this scope, committed byte-identical: `9bd06ea4…`). v6.13 rebuilt from its own source to
+  its published `6afe2ab9…` before v6.14 was built.
+- **Source** `57e4fca1dee821325c99a2334b4ecc60` · **built** `2eeb765099fd121c8764c464265c3190` (`smoke_built` 22 passed, 0 failed).
+- **Measured on the build (v6.13 → v6.14)** — identical to the prototype on every household but the joint row (above).
+- **Suite:** 6,982 app checks across 76 app suites, 0 failed, 0 DIED; MC parity 10/10; `t21` 64, `domdiff` 32, `sets` 12 + 12; GRAND 7,112 —
+  first on a run folder built from the work tree, then again from the packaged copies (the CHANGELOG records that run).
+- **Controls** `qa/tools/controls_v614_payroll.py`: 10 of 10, every file restored and hash-checked.
 
 ---
 

@@ -48,6 +48,7 @@ ordinary income, though both were in its "Gross taxable" total; it now lists eve
 | C-11 | **FIXED v6.13** *(row updated 2026-10-15)* | the card, the Field Manual and METHODOLOGY name the face-value measure — the account total, Traditional dollars before the tax still owed on them — and METHODOLOGY says why it is the conservative direction (`t76` §A, §B, §E; `docs/SCOPE_C11_CROSSOVER_LABEL_V613.md`). The measure did not change. The example household never shows the mislabelled outcome: §K1 row `crossover` |
 | C-12 | **FIXED v5.77** | Engine C on the shared §86 helper |
 | C-13 | **OPEN by decision** (D-2 at v5.78) | thresholds unrounded; METHODOLOGY §8 names it, the app does not |
+| C-14 | **FIXED v6.14** *(filed and fixed 2026-10-15)* | Social Security payroll tax capped per earner, not per household — `payrollTax`, called by Engines A and B (`t77`; `docs/SCOPE_D17_PAYROLL_TAX_V614.md`) |
 | D-1 | **FIXED v5.77** | METHODOLOGY's §86 passage rewritten |
 | D-4 *(follow-up)* | **MEASURED, DISCLOSED v5.84** | METHODOLOGY §7; the caps still differ in the source |
 | D-7 *(follow-up)* | **FIXED v5.84** (tax half) | Engine A taxes the draw (`t49`) |
@@ -75,6 +76,7 @@ ordinary income, though both were in its "Gross taxable" total; it now lists eve
 | **C-11** | The break-even card calls a face-value cash measure "after-tax wealth" | Roth tab | Low · **FIXED v6.13** | — | — |
 | **C-12** | Engine C taxes a household SINGLE from the start on the joint §86 thresholds (hid a $1,150 IRMAA surcharge in the measured case) — found at the v5.77 build | C | Low–medium · **FIXED v5.77** | optimistic | No |
 | **C-13** | Projected IRMAA thresholds are not rounded to the nearest $1,000 as §1395r(i)(5)(B) rounds the published figures (2028 tier 1: $113,403.60) — recorded at the v5.78 scope, not fixed (decision D-2) | shared helper | Low | either | Partly — the 2%/yr proxy is disclosed; the missing rounding is not |
+| **C-14** | Social Security payroll tax capped once per household instead of once per earner (two $150K earners: $6,461 a year) — found at the D-17 scope | A, B | Low–medium · **FIXED v6.14** | optimistic | No |
 | **D-1** | METHODOLOGY's §86 passage contradicts itself and omits Engine A | doc | Low · **FIXED v5.77** | — | — |
 | C-2 | IRMAA surcharges rounded to $10 | — | — | — | **Yes** — documented limitation, not a defect |
 
@@ -161,6 +163,17 @@ EXECUTED (session 5):** MAGI exactly 510,000 (single) and 765,000 (joint), premi
 > "A ×3" above counted Engine A's IRMAA-avoidance cap, which targets tier 1 and cannot reach the top. `t44` places every
 > engine bit-for-bit on the threshold: a naive joint case lands a hair under or over it and would have passed on the broken
 > build. `t10`'s own reference oracle carried the same `<=` and is corrected.
+
+**C-14 · CONFIRMED at the D-17 scope (Engines A and B, executed) — the Social Security wage base capped the HOUSEHOLD's job income, not
+each earner's.** *Severity: low–medium. User-side. Optimistic. Not disclosed.* Found 2026-10-15 by sweeping the payroll mechanism
+(OPERATIONS §K2). Every payroll site (Engine A L4905 and L5031, Engine B L6339 at v6.13) took `min(household wages, base) × 6.2%`, but 26
+U.S.C. §3121(a)(1) limits the wages "paid to an individual". Two earners whose pay together exceeded one base were under-taxed by 6.2% of the
+excess: on the example plus two $150,000 jobs, $6,460.84 in 2029 (taxed on $195,792.88 of Social Security wages where the law taxes
+$300,000) and $29,827 over five years; two $120,000 jobs, $11,227. Invisible on the example household (one earner, $20,000 at most).
+
+> **FIXED at v6.14** (`docs/SCOPE_D17_PAYROLL_TAX_V614.md`, with D-17). One helper, `payrollTax`, caps each earner's wages; a job row
+> owned jointly is split equally (the conservative reading); the rates live in `TAX_CONSTS`. `qa/t77_payroll_tax.mjs` reproduces Engine B
+> to the cent against the statute on nine households, and fails any payroll rate literal outside `TAX_CONSTS`.
 
 **C-13 · RECORDED at the v5.78 scope — projected IRMAA thresholds are not rounded to the nearest $1,000.** *Severity: low.
 User-side. Either direction (up to $500 per edge). Partly disclosed.* §1395r(i)(5)(B) rounds each indexed amount to the

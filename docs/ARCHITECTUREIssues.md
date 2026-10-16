@@ -37,7 +37,7 @@
 | E-20 | **FIXED v5.36**; the rule stands | — |
 | E-21 | **NARROWED** (v5.74 Engines B/C; v5.84 Engine A taxes the draw) | the D-9 RMD gap is pinned by `t40` |
 | E-22 | **PARTLY FIXED** | §86 is one helper (v5.77) and every engine calls it from v6.12 (C-5: Engine D's flat 85% is gone; `t75` D-4 fails any `× 0.85` product outside the helper), IRMAA tiers one helper (v5.78), C-3/C-6 fixed (v5.75); still two LTCG copies and two federal-bracket copies (Engine D adds none — it reads `projectBracketsAt`'s table) |
-| E-23 | **OPEN** | NIIT, AMT and FICA rates still inline at three sites each |
+| E-23 | **NARROWED v6.14** *(row updated 2026-10-15)* | payroll rates and the Additional Medicare thresholds now live in `TAX_CONSTS`, read by one helper (`payrollTax`; `t77` B-2 fails any stray payroll literal); NIIT and AMT rates still inline at three sites each |
 | E-24 | **OPEN** | Engine A exposes no bracket field |
 | E-25 | **FIXED v6.13** *(row updated 2026-10-15)* | all eight classes covered: `t40`–`t44` six; C-10's by `t72` (C-10 fixed v6.09); C-9's — the annuity share over a long horizon — by `t70` §C since v6.07 (an independent recursion carrying annuity dollars every year), and by `t76` §C, C-9's own extinction statement, from v6.13 |
 | E-26 | **OPEN** | no build identity in the export or the built page beyond the version |

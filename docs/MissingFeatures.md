@@ -32,7 +32,7 @@ items now carry their status; IDs are unchanged.
 | D-14 | **FIXED v5.74** | — |
 | D-15 | **OPEN** (Low, pessimistic) | Maine's note still reads "Applied from 65, although Maine law has no age-65 test" *(parser)* |
 | D-16 | **OPEN** (Low–Med) | no head-of-household or qualifying-surviving-spouse status — no such string in the source *(parser)* |
-| D-17 | **OPEN** (Low) | no `0.009` numeric literal in the source *(parser)* |
+| D-17 | **CLOSED v6.14** *(row updated 2026-10-15)* | modelled: the 0.9% on household wages above $200,000 / $250,000, unindexed, in the one payroll helper (`payrollTax`) Engines A and B call — with C-14, the per-earner wage cap, found by the same scope (`docs/SCOPE_D17_PAYROLL_TAX_V614.md`; `t77`) |
 | D-18 | **FIXED v5.86**; the refresh **recurs** | next known: Montana's TY2026 subtraction (by 1 Nov 2026), Rhode Island's TY2026 thresholds (Nov 2026), Maine's TY2026 thresholds, Louisiana's TY2027 amount, Georgia's $70,000 at 65+ from TY2027 — the entry's list |
 | D-19 | **FIXED v5.85** | — |
 | D-20 | **CLOSED v6.04** | v6.02 takes the federal standard deduction (and its 65+ additions) Montana starts from; v6.04 the senior deduction — `MT.deduct` *(parser)* |
@@ -51,8 +51,9 @@ items now carry their status; IDs are unchanged.
 | D-33 | **CLOSED v6.07** | a conversion, a QCD and an RMD never take non-qualified annuity money; the engines carry the annuity dollars |
 | D-34 | **CLOSED v6.08** | Engine D converts an Other-accounts Traditional IRA after the bucket money, figures the cap after the draws, grows that IRA's RMD tracker and takes its RMD whole |
 | D-35 | **CLOSED v6.09** | a Roth IRA entered under Other accounts is counted once in Engine D, as Roth money: out of the pool's gains part and out of the buckets' Roth share |
+| D-36 | **OPEN, DISCLOSED v6.14** (Low–Med, optimistic) | job income is taxed as wages — the employee's half; a self-employed person's 15.3% (less the half-deduction) is not modelled. Disclosed in the Taxes tab's method note, My Data's job-row note, the Field Manual and METHODOLOGY |
 
-**Open, in this file: D-4, D-11 (narrowed), D-13, D-15, D-16, D-17, D-18 (recurring), D-32; D-5 declined.** *(D-35 closed at v6.09; D-34 closed and D-35 added at v6.08; D-33 closed and D-34 added at v6.07; D-28 closed and D-33 added at v6.06.)* Non-tax open threads
+**Open, in this file: D-4, D-11 (narrowed), D-13, D-15, D-16, D-18 (recurring), D-32, D-36 (disclosed); D-5 declined.** *(D-17 closed and D-36 added at v6.14; D-35 closed at v6.09; D-34 closed and D-35 added at v6.08; D-33 closed and D-34 added at v6.07; D-28 closed and D-33 added at v6.06.)* Non-tax open threads
 re-homed the same day are in `ARCHITECTUREIssues.md` **E-29**.
 
 | Field | Value |
@@ -1161,7 +1162,14 @@ the federal tables distinguish) and no qualifying-surviving-spouse years (joint 
 a survivor with a dependent child — METHODOLOGY L1077 notes the rule). Married-filing-separately is out of scope by the
 product boundary. **Low–medium**: a widow(er) with a dependent is uncommon but not rare in the app's population.
 
-## D-17 · The Additional Medicare Tax (0.9%) is not modelled
+## D-17 · The Additional Medicare Tax (0.9%) is not modelled — ✅ CLOSED v6.14
+
+> ✅ **CLOSED v6.14 (2026-10-15).** Modelled (scope DC-2): 0.9% on the household's wages above $200,000 Single / $250,000 joint, not
+> indexed (26 U.S.C. §3101(b)(2); IRS Instructions for Form 8959), on the year's filing status, in one helper Engines A and B call. The
+> scope's census found the same three lines also capped Social Security wages once per household instead of once per earner — **C-14**
+> in `docs/FlawsToFix-v5_73-Phase2.md`, fixed in the same release and the larger error (two $150,000 earners: $6,461 a year against D-17's
+> $450). `docs/SCOPE_D17_PAYROLL_TAX_V614.md` (fulfilled, repo-only); `qa/t77_payroll_tax.mjs`. *(The entry below is retained.)*
+
 
 The additional 0.9% Medicare tax on earned income above $200,000 / $250,000 joint (as stated in SSA's 2026 COLA fact sheet) appears nowhere in the
 source (a parser census of numeric literals finds no `0.009`), and METHODOLOGY does not mention it. It reaches only
@@ -1453,3 +1461,14 @@ against $470,488 (the optimistic half). Fixing it means holding Roth money out o
 IRA money does from v6.08) and out of the buckets' fraction — an engine change that moves every household with a Roth IRA under Other accounts, in
 both directions; it needs its own scope and measurement. **Low–medium.** *(Named D-36 in the D-34 scope's draft and its decision question; D-35 is the
 next free ID.)*
+
+## D-36 · Self-employment tax is not modelled — opened at v6.14, DISCLOSED
+
+Found scoping D-17 (`docs/SCOPE_D17_PAYROLL_TAX_V614.md` §0.4). Every job row is taxed as **wages** — the employee's half, 7.65% up to the
+wage base (Social Security per earner from v6.14) plus the 0.9% above $200,000 / $250,000. A self-employed person owes both halves (15.3%,
+less a deduction for half of it), and the Instructions for Form 8959 reduce their 0.9% threshold by any wages. A retiree's consulting
+income is often self-employment income, so the omission is **optimistic** for that household. Modelling it needs a choice on the job row
+(employee / self-employed) — a new input. **Disclosed at v6.14** in the Taxes tab's method note, My Data's job-row note, the Field Manual
+and METHODOLOGY (*Payroll tax on job income*). **Low–medium.** *(The ID D-36 was a draft name in the D-34 scope for what was filed as D-35;
+this is its first use.)*
+
