@@ -269,6 +269,37 @@ export function census(G) {
       : _xoBranch === "n/a" ? "this build does not export the crossover"
       : `the card shows "${_xoBranch}", so its recovered sentence (C-11's site) is not shown here`);
 
+  // ── v6.14 (D-17, C-14 — SCOPE_D17_PAYROLL_TAX_V614) · the condition that hid them (§K1) ────────────────────────────────────────
+  // 5. PAYROLL TAX THAT DEPENDS ON WHO EARNED IT. Two rules reach a household only with job income: the Additional Medicare Tax (0.9%
+  //    above $200,000 single / $250,000 joint) and the Social Security wage cap applied PER EARNER. The example household has no job
+  //    stream and B's built-in taper peaks at $20,000, so neither rule ever applied there. Read from the household's own job streams (or
+  //    the taper when none is entered), joint rows split equally, over the plan years; thresholds and the 2026 base read live. The base is
+  //    indexed at 2%/yr — structural here (the engines' TAX_INDEX_RATE, not exported); t77 holds the engines to the same figure.
+  let _pay = null;
+  if (T.ADDL_MED_SGL != null && T.ADDL_MED_MFJ != null) {
+    const _streams = (P.incomeStreams || []).filter(s => (s.kind || "other") === "work" && (s.tax || "ordinary") === "ordinary" && (+s.monthly || 0) > 0);
+    const _dA = tl.dobA.year + tl.lifeExpA, _dB = single ? Infinity : tl.dobB.year + tl.lifeExpB, _d1 = single ? Infinity : Math.min(_dA, _dB);
+    const _end = Math.max(_dA, single ? 0 : _dB);
+    let maxW = 0, overThr = 0, pairOverBase = 0;
+    for (let yr = tl.targetRetireYear; yr <= _end; yr++) {
+      const aliveA = yr < _dA, aliveB = !single && yr < _dB, one = single || yr >= _d1;
+      let a = 0, b = 0, j = 0;
+      for (const s of _streams) { if (yr < (+s.startYear || 0) || yr > (+s.endYear || 9999)) continue; const amt = s.monthly * 12;
+        if (s.owner === "A") { if (aliveA) a += amt; } else if (s.owner === "B") { if (aliveB) b += amt; } else j += amt; }
+      if (!_streams.length && !single) { const k = yr - tl.targetRetireYear; b += k === 0 ? 20000 : k === 1 ? 18000 : k === 2 ? 15000 : 0; }   // spouseBWorkTaper (structural)
+      const W = a + b + j, thr = (single || yr > _d1) ? T.ADDL_MED_SGL : T.ADDL_MED_MFJ, base = T.SS_WAGE_BASE * Math.pow(1.02, yr - tl.asOfYear);
+      maxW = Math.max(maxW, W); if (W > thr) overThr++;
+      if (!one && (a + j / 2) > 0 && (b + j / 2) > 0 && W > base) pairOverBase++;
+    }
+    _pay = { maxW, overThr, pairOverBase };
+  }
+  row("payroll", "payroll on job income",
+    _pay ? `peak $${Math.round(_pay.maxW).toLocaleString()}; ${_pay.overThr} yr over $200K/$250K; ${_pay.pairOverBase} two-earner yr over the base` : "n/a (pre-v6.14 build)",
+    "0.9% threshold or two earners over the wage base", !_pay || (_pay.overThr === 0 && _pay.pairOverBase === 0),
+    !_pay ? "this build has no Additional Medicare constants"
+      : (_pay.overThr || _pay.pairOverBase) ? "reachable — the Additional Medicare Tax or the per-earner cap applies"
+      : "no year reaches the 0.9% threshold or puts two earners over the base, so both rules are $0 here");
+
   return rows;
 }
 
