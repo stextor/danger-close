@@ -121,7 +121,8 @@ incl. OBBBA changes) inflated ~2%/yr; Social Security taxation via the provision
 (85%-cap tiers); LTCG/qualified-dividend stacking on top of ordinary income, **capped at taxable
 income (v5.75)**; NIIT (3.8%,
 statutorily unindexed thresholds); a simplified AMT check (standard-deduction add-back method);
-FICA on earned income only; RMDs from the Uniform Lifetime Table at the SECURE 2.0 start age;
+FICA on earned income only — Social Security per earner up to the wage base, Medicare uncapped, and the
+0.9% Additional Medicare Tax (see *Payroll tax on job income*, v6.14); RMDs from the Uniform Lifetime Table at the SECURE 2.0 start age;
 Roth conversions with bracket/IRMAA interaction; and QCDs (2026 cap $111,000/person, indexed —
 excluded from income and MAGI, counting toward the RMD, with the gifted dollars actually leaving
 the Traditional balance).
@@ -1024,8 +1025,8 @@ module.** Each stream (rental / job / annuity / other) carries a monthly amount 
 dollars, an inclusive start/end-year window, an owner (either spouse or joint — an owner's
 stream ends at that person's projected or sampled death), a COLA flag, and taxable vs tax-free
 treatment. Streams flow through every engine — planned trajectory, both Monte Carlo engines,
-what-breaks, the withdrawal schedule, the tax engine (job rows also pay FICA up to the wage
-base), IRMAA MAGI, and the Roth optimizer. Entering any stream replaces the built-in example
+what-breaks, the withdrawal schedule, the tax engine (job rows also pay FICA — per earner up to the
+wage base, with the Additional Medicare Tax; see *Payroll tax on job income*, v6.14), IRMAA MAGI, and the Roth optimizer. Entering any stream replaces the built-in example
 part-time taper, and the old negative-expense-row workaround is superseded (moving such rows
 into the module lets the tax engines see the income). **From v5.63 the Roth optimizer charges FICA
 on job rows only, as the tax engine always has.** Through v5.62 it charged payroll tax on every
@@ -2389,3 +2390,35 @@ because it carries the worksheet's taxable Social Security; nothing outside this
 **Approximations kept.** Thresholds rise 2%/yr while the schedule's income rises with the scenario's inflation (about 2.7%), so some
 bracket creep remains — the conservative direction, as everywhere else in the app (§6). State tax is not in this column. Worksheet lines 4
 and 6 (tax-exempt interest, adjustments) are not modelled, as in every engine.
+
+## Payroll tax on job income (v6.14)
+
+**The rule.** Job income — a job row under Other income streams, or the built-in part-time taper for spouse B when no stream is
+entered — is taxed as **wages**, the employee's half, in the Taxes tab (Engine B) and the Roth strategy comparison (Engine A, in its tax
+and in its sale-gain estimate). One shared helper, `payrollTax`, applies 26 U.S.C. §3101 and §3121(a)(1):
+- **Social Security, 6.2%, on each earner's wages up to the year's wage base.** The cap is per person: two spouses each earning $150,000
+  each pay on all of it. The 2026 base is $184,500 (SSA), indexed in the projection at 2%/yr like the other constants.
+- **Medicare, 1.45%, on all wages.**
+- **The Additional Medicare Tax, 0.9%, on the household's wages above $200,000 (Single) or $250,000 (joint).** The thresholds are
+  statutory and **not indexed** (IRS, Instructions for Form 8959), so a fixed nominal income crosses them more easily over time, as with
+  NIIT. The filing status is the year's: joint through the year of the first death, Single from the next.
+- **Who earned it.** B's taper is B's; a job row is its owner's; a job row owned jointly is split equally between the spouses — the
+  conservative reading, since a split can only raise the capped Social Security tax. With one person (a single household, or after the
+  first death) every dollar is that person's; a deceased owner's row has already stopped.
+- The rates and thresholds live in `TAX_CONSTS` and each has a Verify-tab check citing the statute.
+
+**What it did through v6.13.** Every site took min(household wages, base) × 6.2% + wages × 1.45%: **one** wage-base cap for the whole
+household, and **no** 0.9% — both errors taking too little tax (register items C-14 and D-17). Measured at the v6.14 scope on the
+example plus job rows in the first five plan years: one $300,000 job, +$2,250 of tax over the five years (the 0.9%); two $150,000 jobs,
+**+$32,077** (+$29,827 of it the per-earner cap: in 2029 the household was taxed on $195,793 of Social Security wages where the law taxes
+$300,000), lowering the comparison's estate at the default slider by $88,757; two $120,000 jobs, +$11,227; a single household's
+$250,000 job, +$2,250 (above $200,000). Two $60,000 jobs, and the example household itself (whose taper peaks at $20,000), do not move.
+
+**What did not change.** The IRMAA, Withdrawal and Monte Carlo engines carry no payroll tax and are bit-identical; the Roth tab's ladder
+has none either. Rental, annuity and other ordinary streams still pay no payroll tax (v5.63).
+
+**Simplifications, stated.** Job income is taxed as wages: a **self-employed** person owes both halves of Social Security and Medicare
+(15.3%, less a deduction for half of it), and their 0.9% threshold is reduced by any wages — not modelled, so their tax here is
+understated (MissingFeatures D-36). The wage base is indexed 2%/yr; SSA indexes it to the national average wage index, which has
+usually risen faster, so later-year caps likely run a little low — slightly optimistic, and reset at each annual refresh. Employer
+withholding rules and the credit for excess Social Security withheld by two employers are timing, not liability, and are not modelled.
