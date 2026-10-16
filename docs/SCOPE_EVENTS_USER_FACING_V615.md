@@ -1,6 +1,6 @@
 # SCOPE — v6.15 · The Events tab speaks to users only: no Google Drive, no maintainer chores
 
-**DRAFT — 2026-10-16, awaiting Steve's decisions (§5).** Repo-only.
+**FULFILLED — shipped as v6.15, 2026-10-16.** Steve: *"Go"* — all five decisions as recommended, (a). Repo-only. §7 records the build.
 
 This is a **PRESENTATION** release. No engine, no constant and no figure moves, so METHODOLOGY does not change. What changes is the
 Events tab, the alert strip above every tab that the Events tab drives, the ⌛ STALE DATA strip, and the Field Manual text that describes
@@ -400,8 +400,39 @@ and the controls. The knowledge pool is refreshed per §G.
 
 ## 7 · Build record
 
-*(Filled in at the build: the census re-run, the vercensus/registrar output, which C-4 method was used, the controls tally, and the
-suite totals.)*
+**Built 2026-10-16 against v6.14** (clone at `a9e0a79` — v6.14 plus this scope, the only change since `4dc875f`; source `57e4fca1…`
+unchanged). Source `a9520db52dc06aa380714c8a2a5c7514`; built `index.html` `38f51c212390ec41669fb9fb8246f024` (`smoke_built` 22 of 22; the four version strings once each, no `v6.14`, no
+`<script src>`, no "Google Drive"). v6.14 was rebuilt first from its own source and reproduced its published `2eeb7650…` byte for byte.
+
+**Census re-run on v6.15 (`census.cjs`, `textsites.cjs`, `idsites.cjs`).**
+- `computePlanEvents` L2078; callers L7367 (the strip, through `alertStripEvents`), L7430 (the Events tab), L7478 (the Exit Plan's
+  `evByKey`) — three, as §2.1 said. `alertStripEvents` L2302, one caller (L7367).
+- The tax notice L2093–2105; backup L2255; review L2274. `hist` and `peer` gone; the section comments renumbered 1–15.
+- `textsites` for `Google Drive|Drive folder|survives the swap|in your browser, not|in this browser, not|no automatic persistence|
+  Maintaining the file|tax-refresh alarm|paste-in|Events tab flags|eighteen|Backtest data|Peer-benchmark|tax-data refresh` over the
+  v6.15 source: **0 sites**.
+- Suites: `computePlanEvents` is called by `t73` and `t78` only; `alertStripEvents` by `t78` only.
+
+**Registration.** `register_v611.cjs qa v614 v615`: 314 automatic sites, 2 manual (`t77`'s default tag and its differential pair, both
+left as they are). By hand: `t1`'s and `t4`'s version-string arms (the registrar folded `v615` into `"v6.14"`), `t33`'s PINS (v6.14's
+values; no engine moved), the three Python suites' `KNOWN_VERSIONS`, `t73`'s new `NOPEER` gate, `domdiff`'s `_p615` mask, and the shim's
+guarded `alertStripEvents` export. ⚠ The first two and `t33` were caught by a preliminary full run, not by review beforehand — owned in
+the CHANGELOG.
+
+**C-4 used the child process with a set clock**, not the AST fallback: the DOM bundle loads under a fixed `Date` (2027-01-05, 12:00)
+and the rendered strip and STALE strip are read from the page.
+
+**Where the build differs from §2–§3 as written.**
+- `t78` carries §3's checks plus setup checks (0-1, 0-2, A-0, C-0, D-2a, E-0, F-0), and B-1f, B-4c, A-3b, C-2b, F-5 and F-6.
+- `domdiff`'s second check is "the v6.15 STALE strip carries no maintainer workflow" rather than §2.2's "the mask bit or was a no-op".
+  A bite-or-no-op check is true by construction; the identity check after the mask is what proves nothing else moved.
+- The controls add K8 (the Ranking sentence restored → F-2) to §3's seven.
+
+**Controls** `qa/tools/controls_v615_events.py`: **9 of 9** as expected, files restored and hash-checked. Every control fired its named
+checks; the extra reds are the expected neighbours (K2 also C-3 and C-4c; K3 also A-2, D-3, F-1 and F-1b; K5 also B-1c and B-1d; K7 also
+C-1, C-3 and C-4c).
+
+**Suite, from the packaged copies:** **7,027 app checks across 77 app suites**, 0 failed, 0 DIED; MC parity 10/10; GRAND **7,159** (`t78` 42 / 21; `t73` 54). A first packaged run, made while the controls were rebuilding in parallel, failed `t38` I-6 once on the v6.15 leg (storage snapshot); `t38` passed on five reruns and in the clean run above — disclosed in the CHANGELOG, not changed here.
 
 ---
 

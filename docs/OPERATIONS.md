@@ -1384,6 +1384,38 @@ row gets `repo-only` in the same edit** — that is now the rule K-12 enforces. 
 in neither). ⚠ The ID `K-10` that E-29 first proposed is taken (TESTING's Current-build line), as is `K-11`. Controls P74 (fires) and P75
 (silent when marked, and must have run).
 
+### Annual data refreshes — the three cycles, and why none of them is a paste (added at v6.15, 2026-10-16)
+
+**Why this is here.** Through v6.14 the app's Events tab carried the maintainer's three refresh cycles as alarms shown to **every user**,
+with a paste-into-the-source workflow and a Google Drive folder. v6.15 removed them (`docs/SCOPE_EVENTS_USER_FACING_V615.md`): users now see
+only a notice of which year's tax figures their copy carries. The in-app text was the only written record of the cycles, so the record
+moved here (scope DC-3). The reminders are Claude scheduled tasks on Steve's account; **this subsection is the record and they are only
+the alarm clock** — a task can be deleted, a section here cannot silently disappear.
+
+| Cycle | When | Primary sources | What changes in the source | Reminder (research-only) |
+|---|---|---|---|---|
+| **Tax and IRMAA figures** | yearly; research from mid-November, **ship before January 1** | IRS Rev. Proc. for the year (late Oct: brackets, deductions, §63(f), LTCG, AMT, QCD); IRS retirement-plan limits notice (Nov: §402(g)); SSA COLA fact sheet (Oct: wage base); CMS Part B/D income-related premiums (mid-Nov: IRMAA tiers, surcharges); the statutes for the unindexed items | `TAX_CONSTANTS_YEAR`, `TAX_CONSTS`, `IRMAA_CONSTS`; state figures per `docs/MissingFeatures.md` D-18 | "Danger Close — yearly tax figures research", every Nov 15 |
+| **Historical returns row** | yearly, January | Damodaran (NYU Stern), *Historical Returns on Stocks, Bonds and Bills* — S&P 500 incl. dividends, 10-year T-bond, 3-month T-bill; BLS CPI-U all items, NSA (`CUUR0000SA0`), December over December | one row appended to `HISTORICAL_RETURNS` | "Danger Close — January returns row research", every Jan 20 |
+| **Peer benchmarks** | triennial: the Fed SCF, published the fall after the survey (the 2028 survey ~Oct 2029) | Federal Reserve SCF Summary Extract Public Data (`qa/tools/peer_scf.py` computes the figures); the other peer sources the Ranking tab names | `PEER_DATA_SCF_YEAR`, `PEER_BENCHMARKS` | "Danger Close — 2028 SCF peer data check", once, 2029-10-22 |
+
+**Every refresh is a scoped release, never a paste.** The figures are reference values in the suite as well as in the app, so a pasted
+block turns suites red, and a figure that moves a projection is a modelling change. Each cycle
+therefore goes scope → build → full suite → §L package like any other release; the scope's census finds which suites carry the old year's
+figures, and §B2 decides each gate. The models: `docs/SCOPE_PEER_DATA_SCF2025_V610.md` (the last peer refresh) and, for the tax figures,
+the research brief the November task produces.
+
+**What the user sees meanwhile.** The Events tab's tax-figures notice reads "current for <year>" until October, then "<next year>
+figures publish Oct–Nov; an updated version follows by January". From January 1 of a year past `TAX_CONSTANTS_YEAR` the notice turns red
+and the ⌛ STALE DATA strip appears on every tab (amber the first year, red from the second) until a current build is loaded. **The app
+promises "by January"** (scope DC-5): a tax refresh that misses January 1 is announced to every user by that strip. The returns row and the
+peer tables have no in-app alarm any more; their vintages are listed in the Field Manual's *Data vintages* table.
+
+**The reminders** run in the cloud, are instructed to read the public repo and never edit it, deliver their research as the final message of their
+own session with email and push notifications, and stop early ("already refreshed") if the live source already carries the new figures.
+None of them uses Google Drive — Steve's standing decision is that the app's users must never need it, and the maintainer path follows
+suit. *(A one-off task created earlier, "Danger Close — 2027 tax constants prep" for Nov 15, 2026, still saves to Drive; it is Steve's to
+keep or delete.)*
+
 ## J. Re-baseline the regression suite each build
 
 The suite compares immediately-prior → current, and re-baselines every build. There is no permanent floor:
