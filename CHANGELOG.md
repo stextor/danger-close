@@ -1,5 +1,76 @@
 # Changelog
 
+## v6.17 — the cash from a home move is a My Data field, not a fixed $130,000 added to every plan (D-38)
+
+**A MODELLING release** — METHODOLOGY gains *Cash from a home move*. `docs/SCOPE_D38_HOME_SALE_CASH_V617.md` (repo-only, fulfilled). Steve,
+after a question about another chat's advice: *"Let's make the home-sale cash a field in My Data rather than a number in the code"*; then
+*"go"* on the scope's five decisions as recommended.
+
+**What was wrong (v6.16, measured).** `HOME_SALE_PROCEEDS = 130000` was added to the portfolio in the retirement quarter by both Monte Carlo
+engines for **every** plan — the example, a plan built with Start Fresh or the guided wizard, an imported backup — whether or not anyone
+was moving. No input set it, and only one Events card mentioned it ("the plan books $130K"). The figure is the net of a home move (sell,
+pay off, buy the next home in cash), so for many households it is 0 or negative. On the example household the $130,000 is worth 6.3
+points of 30-year success (81.1% against 74.8% at $0) and about $250,000 of median 30-year balance; on a smaller household (holdings at
+40%) the 6-year headline was 64.8% at +$130,000 and 39.2% at $0. It had never been registered; it is filed as D-38 and closed here.
+
+**What changed (DC-1 to DC-5, all (a)).**
+- **The field.** My Data's home row gains **"Cash from your home move at retirement $"** (`PORTFOLIO.homeMoveCash`), a signed figure: what
+  is left after selling the current home (its mortgage and selling costs paid) and paying cash for the next one; **negative** if the next
+  one costs more; **0** if not moving. Its note says so, says closing costs already in the expenses are counted there, says the sale is
+  treated as tax-free, and shows today's equity from Home value and Mortgage balance as a starting point (DC-1).
+- **One accessor.** `homeMoveCash()` replaces the constant at all five model sites — each Monte Carlo engine's planned path and simulated
+  paths, and the Events card — clamping to ±$10,000,000 and reading anything unparseable as 0. The mortgage what-if adds its principal on
+  top, as before.
+- **Plans without the field** (DC-2, DC-3). A plan or backup saved before v6.17 reads **$0** — the conservative reading — and My Data and the
+  Monte Carlo tab show a notice ("Earlier versions added $130,000 to every plan at retirement; this plan now assumes $0…") until Save & Apply
+  writes the field. Start Fresh and the wizard start at $0 with no notice. **The example keeps $130,000**, so none of its figures move.
+- **What the user reads.** The Monte Carlo tab names the figure ("added to / taken from the portfolio in 2029", or "no home move"); the
+  mortgage what-if says both columns start from it; the Events card names it, or drops the clause at $0; the Ask AI context gains a HOME
+  MOVE line; the Field Manual's Monte Carlo entry and My Data table describe it, with its history.
+- **Not changed, disclosed** (DC-4, DC-5): only the Monte Carlo, Stress and Dashboard figures include the cash — the Withdrawal, Taxes, IRMAA
+  and Roth tabs do not (**D-39**, opened); it arrives in the retirement quarter; the sale is treated as tax-free (26 U.S.C. §121 excludes up
+  to $250,000, $500,000 joint, when the ownership and use tests are met; a larger gain is not taxed here).
+
+**Tests.** New suite **`t80`** — **42** on v6.17, **22** on v6.16 (that leg pins the constant as dated `[KNOWN DEFECT]` checks).
+§A builds **oracle modules at test time** — the v6.16 source in the run folder with the constant set to X, compiled the way `mk_testable.sh`
+compiles a leg — and for X = +$130,000, $0, −$105,000 and +$250,000 the field reproduces both Monte Carlo engines and the mortgage what-if
+**bit for bit**, with a control that the oracle itself moves with X. By AST: `HOME_SALE_PROCEEDS` exists nowhere; no 130000 literal outside
+the example and the state tax tables; the accessor is read at exactly the five model sites and by no engine A–D; Start Fresh and the wizard
+build their plan at 0; the accessor clamps and defaults (B). Across v6.16 → v6.17: on the example, Engines A–D, the bridge and every Monte
+Carlo figure are bit-identical; at $0, −$105,000 and +$250,000, and with the field missing, Engines A–D and the bridge are bit-identical (C).
+A hand pin: the planned path at $0 sits 130,000 × 1.01125 = $131,462.50 below the example's in the first retirement quarter and ×1.01125
+each quarter after; the Events card at +$130,000, −$105,000 and $0 (D). Rendered: the field and its note on the example; −105,000 typed with
+a comma is saved; the Monte Carlo line; Export Backup and its Ask AI line; the clamp and a non-number on save; Import; an old plan at 0 with
+the notice on both tabs, gone after Save & Apply; an old backup imported through My Data (E). The copy, METHODOLOGY, and the extinction of
+"the plan books" (F).
+**Census:** `tools/boundaries.mjs` gains a `home_move` row (§K1: the example's figure equals the old constant, so the field and the constant
+cannot be told apart there), with a fixture that clears it (−$105,000) and one at $0 that must clear as well; `t29` asserts both.
+Controls `qa/tools/controls_v617_home.py` (repo-only): **9 of 9** — the constant restored at one site, the sign flipped, the field lost on save,
+a missing field read as 130,000, the clamp removed, the notice never shown, the example's figure changed, the Events clause kept at $0, and the
+unmutated run; every file restored and hash-checked.
+⚠ **Owned — one control's prediction was wrong.** I expected the sign-flip control to turn `t80` A-1 and D-1 red; it turned B-6 and the
+rendered E-4, E-5 and E-9 red instead, and left A-1 and D-1 green. The loader clamps a stored value in place *through the accessor*, so a
+flip applied at load and again at read cancels in the engines on a freshly loaded plan — the defect shows in the stored and displayed
+value. The control catches it; its expected list now names B-6 and E-4, with the reason in the file.
+⚠ **Owned — the first package check failed.** `t80` built its oracle modules as files in the run folder's `qa/` and left them there;
+`package_check` G-2 (every new hand-written file under `qa/` is in the package) found the eight files. `t80` now deletes each oracle's files
+once it has loaded the module. The packaged suite run and the controls were then repeated in full on the corrected package (below).
+**Registered:** `v617` by AST (322 sites), with `t1`'s and `t4`'s version-string arms, `t33`'s PINS (no Roth figure moves, so v6.16's values)
+and the three Python suites by hand, before the first full run; `suitetext.cjs` found no typed "v6.16" in any SETUP check (the `t78` D-2a
+lesson). The test shim exports `homeMoveCash` (guarded).
+
+**Where the build departed from the scope, recorded in its §7:** Start Fresh and the guided wizard needed `homeMoveCash: 0` written into their
+new plans (the scope said neither needed an edit) — without it a brand-new plan would have shown the "earlier versions" notice. The field is
+not written into a plan that lacks it at load, so a backup restored from the landing page keeps its notice until the user saves.
+
+**Suite, run from the packaged copies:** **7,254 app checks across 79 app suites**, 0 failed, 0 DIED; MC parity 10/10; tooling `t21` 64, `domdiff` 32, `sets` 12 + 12; **GRAND 7,384**. Against v6.16's line, the counts that moved are `t29` 78 → 82 (the `home_move` row) and `t79` 116 → 69 (its v6.15 → v6.16 differential takes its designed skip on this pair), and `t80` is new; every other current-leg count is unchanged. Run from the PACKAGED copies, twice, each in one pass: a run folder built by `mk_runfolder.sh v616 v617` from a fresh clone of `8e54a6a` carrying the package as first cut (78 files), then — after the G-2 fix to `t80` above — one carrying the corrected package (80 files, each overlay compared byte for byte with the build workspace); the two runs gave identical per-suite counts. The documentation was finished after the second run, and every file outside `CHANGELOG.md`, the manifest and the scope is byte-identical to what ran. v6.16 resolved from history (commit `13b281a`). The controls were repeated on a copy of the second run folder: 9 of 9. Source `dc8a4d5f5796b11d88007024b1ecaca7` · built `067c87404e92339a1de9ece815d6151e` (`smoke_built` 22 passed, 0 failed); v6.16 rebuilt first from its own source to its published `765cd89f…`. The first full run (the build workspace) was green as well: GRAND 7,384, 0 failed.
+
+**Limitations, disclosed:**
+- Only the Monte Carlo figures include the home-move cash (D-39); the Withdrawal tab's pool starts without it.
+- The cash arrives in the retirement quarter; a move at another time is not modelled.
+- The sale is treated as tax-free; a gain above the §121 exclusion, or a sale that fails its tests, is not taxed here.
+- A plan saved before v6.17 reads $0 until its owner enters a figure — its Monte Carlo figures fall, and the notice says why.
+
 ## v6.16 — self-employment tax: a self-employed job row pays both halves, on 92.35% of the profit (D-36)
 
 **A MODELLING release** — METHODOLOGY changes (*Payroll tax on job income* gains a self-employment subsection; its simplifications are

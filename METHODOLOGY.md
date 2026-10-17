@@ -2460,3 +2460,46 @@ Roth-ladder engines too, or the tabs would disagree — a wider release. Net los
 credits earned by self-employment are not modelled. The wage base is indexed 2%/yr; SSA indexes it to the national average wage index, which has
 usually risen faster, so later-year caps likely run a little low — slightly optimistic, and reset at each annual refresh. Employer
 withholding rules and the credit for excess Social Security withheld by two employers are timing, not liability, and are not modelled.
+
+## Cash from a home move (v6.17)
+
+**The rule.** The Monte Carlo engines (`runMonteCarlo` and `runExtendedMC` — the Monte Carlo, Stress and Dashboard figures and the Future
+Home mortgage what-if) add one figure to the portfolio in the quarter the plan retires: the **cash from a home move**, the My Data field
+*Cash from your home move at retirement* (`PORTFOLIO.homeMoveCash`). It is a net: what is left after selling the current home, paying off
+its mortgage and the selling costs, and paying cash for the next one. It is **negative** when the next home costs more (cash is taken from
+the portfolio) and **0** when there is no move. The mortgage what-if adds its borrowed principal on top of it and draws the payment. The
+next home's other costs stay where they were — rows in the expense table (closing costs as a one-time row, so they are not subtracted in
+the field as well). One accessor, `homeMoveCash()`, reads the field at all five model sites (each engine's planned path and simulated
+paths, and the Events retirement card); a value is clamped to ±$10,000,000 and anything unparseable reads 0.
+
+**What it did through v6.16 (D-38).** The figure was a constant, `HOME_SALE_PROCEEDS = 130000`, added to **every** plan — the example, a
+blank plan, an imported backup — whether or not anyone was moving, and no text but one Events card mentioned it. That was optimistic for
+every household not moving, and for every household whose next home costs more than the old one nets. Measured at the v6.17 scope on the
+example household (4,000 paths, one random seed for every row; the 6-year headline and the 30-year run with a long-term-care shock and
+deaths at life expectancy):
+
+| Cash from a home move | 6-year: above $800K | 6-year median | 30-year: above $800K | 30-year ruin | 30-year median |
+|---|---|---|---|---|---|
+| +$130,000 (every plan through v6.16) | 99.3% | $1,977K | 81.1% | 2.2% | $1,604K |
+| $0 (no move) | 99.2% | $1,851K | 74.8% | 3.4% | $1,352K |
+| −$105,000 | 98.5% | $1,720K | 67.6% | 4.7% | $1,151K |
+
+On a smaller household (the example's holdings at 40%) the 6-year headline falls from 64.8% at +$130,000 to 39.2% at $0.
+
+**Plans that have no field.** The example keeps $130,000, so none of its figures move (DC-3). A plan built with Start Fresh or the guided
+wizard starts at $0. A plan or backup saved before v6.17 reads **$0** — the conservative reading, since the $130,000 was never the user's
+choice — and My Data and the Monte Carlo tab say so until the next Save & Apply writes the field (DC-2).
+
+**What did not change.** Engines A (the Roth strategy comparison), B (Taxes), C (IRMAA) and D (Withdrawal), the drawdown bridge series and
+the Roth tab's ladder never read the figure; they are bit-identical across v6.16 → v6.17 on every household tested, with the field at
++$130,000, $0, −$105,000, +$250,000 or missing.
+
+**Simplifications, stated.**
+- **Only the Monte Carlo figures include it** (DC-4). The Withdrawal tab's schedule, and the Taxes, IRMAA and Roth tabs, do not see the cash —
+  so a large positive figure is in the Monte Carlo's portfolio but not in the Withdrawal tab's pool (MissingFeatures **D-39**).
+- **It arrives in the retirement quarter** (DC-5); a move years before or after retirement is not modelled.
+- **The sale is treated as tax-free.** 26 U.S.C. §121 excludes the gain on a principal residence up to $250,000 ($500,000 on a joint return)
+  when the ownership and use tests (two of the last five years) are met; a gain above that, or a sale that fails them, is not taxed here —
+  optimistic, and rare for the mainstream couple this app models.
+- **Nothing is derived from Home value and Mortgage balance.** Those fields still feed the Ranking tab and the Ask AI context; My Data shows
+  today's equity from them only as a starting point for the field.
