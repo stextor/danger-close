@@ -331,6 +331,20 @@ export function census(G) {
       : _se.years ? "reachable — a self-employed person owes both halves on 92.35% of the profit"
       : "no self-employed row reaches the $400 floor, so self-employment tax is $0 here");
 
+  // ── v6.17 (D-38 — SCOPE_D38_HOME_SALE_CASH_V617) · the condition that hid it (§K1) ──────────────────────────────────────────────────
+  // 7. THE CASH FROM A HOME MOVE. Through v6.16 every plan got a fixed $130,000 at retirement. The example still carries exactly that
+  //    figure (DC-3 (a)), so on the example the field and the old constant are indistinguishable: a fix that silently restored the
+  //    constant could not be seen. Read through the shim's accessor; a build without it reads "n/a" (ON). The 130,000 here is the old
+  //    constant's value — the thing being compared against — not a figure this tool asserts about the law.
+  const _hmAcc = typeof G.homeMoveCash === "function" ? G.homeMoveCash : null;
+  const _hm = _hmAcc ? _hmAcc() : null;
+  row("home_move", "cash from a home move",
+    _hmAcc ? `${_hm < 0 ? "−" : ""}$${Math.abs(Math.round(_hm)).toLocaleString()} at retirement` : "n/a (pre-v6.17 build)",
+    "a figure other than the old fixed $130,000", !_hmAcc || _hm === 130000,
+    !_hmAcc ? "this build has no home-move field — every plan carries the constant"
+      : _hm === 130000 ? "the household's figure equals the old constant, so the field and the constant cannot be told apart here"
+      : _hm === 0 ? "reachable — no move: nothing is added at retirement" : _hm < 0 ? "reachable — the next home costs more: cash is taken at retirement" : "reachable — a figure of the household's own");
+
   return rows;
 }
 
