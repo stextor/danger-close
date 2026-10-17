@@ -180,6 +180,19 @@ HOUSEHOLDS.selfEmployedFloor = {
   },
 };
 
+// v6.17 (D-38): a home move whose next home costs more than the old one nets — the field differs from the old $130,000 constant.
+HOUSEHOLDS.homeMoveNeg = {
+  why: "a home move that takes cash from the portfolio at retirement (the next home costs more)",
+  flips: ["home_move"],
+  apply: P => { P.homeMoveCash = -105000; },
+};
+// v6.17 (D-38): no home move at all. NOT a flip fixture of its own (flips: []): t29 drives it directly — $0 must also read clear.
+HOUSEHOLDS.homeMoveNone = {
+  why: "no home move — nothing added at retirement",
+  flips: [],
+  apply: P => { P.homeMoveCash = 0; },
+};
+
 export function build(G, name) {
   const P = JSON.parse(JSON.stringify(G.PORTFOLIO()));
   HOUSEHOLDS[name].apply(P);
