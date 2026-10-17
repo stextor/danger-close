@@ -293,6 +293,13 @@ tally "t78-$CUR"   node t78_events_user_facing.mjs "$CUR"
 # survives save/export/import; the copy. Both legs: the prior leg pins v6.15's employee-only rule as a dated [KNOWN DEFECT].
 tally "t79-$PRIOR" node t79_self_employment.mjs "$PRIOR"
 tally "t79-$CUR"   node t79_self_employment.mjs "$CUR"
+# t80 (v6.17) — the cash from a home move is a My Data field, not the fixed $130,000 every plan carried through v6.16 (D-38): against
+# ORACLE modules built at test time from the v6.16 source with the constant set to X, the field reproduces both Monte Carlo engines and the
+# mortgage what-if bit for bit; by AST the constant is gone and the accessor is read at the five model sites only; Engines A–D and the bridge
+# never see it; the planned-path hand pin; the field rendered, saved, exported and imported; an old plan reads $0 with a notice; the copy.
+# Both legs: the prior leg pins the constant as a dated [KNOWN DEFECT].
+tally "t80-$PRIOR" node t80_home_move_cash.mjs "$PRIOR"
+tally "t80-$CUR"   node t80_home_move_cash.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
