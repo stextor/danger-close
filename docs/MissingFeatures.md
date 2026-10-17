@@ -53,8 +53,10 @@ items now carry their status; IDs are unchanged.
 | D-35 | **CLOSED v6.09** | a Roth IRA entered under Other accounts is counted once in Engine D, as Roth money: out of the pool's gains part and out of the buckets' Roth share |
 | D-36 | **CLOSED v6.16** | modelled: a job row of type "Job — self-employed (1099)" pays both halves on 92.35% of the profit, nothing under $400 net, Social Security on the base the same person's wages leave, the 0.9% on wages + net earnings — in `payrollTax`, Engines A and B; rows saved before v6.16 stay employees |
 | D-37 | **OPEN** (Low–Med, conservative) | two self-employment deductions not taken: half the self-employment tax (§164(f), above the line — it would lower AGI and every MAGI) and the QBI deduction (§199A). Disclosed in the Taxes tab's method note, the Field Manual and METHODOLOGY |
+| D-38 | **CLOSED v6.17** *(filed and fixed 2026-10-16)* | the cash from a home move at retirement is the My Data field `homeMoveCash` (signed; 0 = no move), read by the two Monte Carlo engines through one accessor — through v6.16 a fixed $130,000 constant was added to every plan, undisclosed. A plan saved before v6.17 reads $0 with a notice; the example keeps $130,000 |
+| D-39 | **OPEN** (Low–Med, either direction) | the Withdrawal, Taxes, IRMAA and Roth tabs do not see the home-move cash — only the Monte Carlo figures do. Disclosed in My Data, the Monte Carlo tab, the Field Manual and METHODOLOGY |
 
-**Open, in this file: D-4, D-11 (narrowed), D-13, D-15, D-16, D-18 (recurring), D-32, D-37; D-5 declined.** *(D-36 closed and D-37 added at v6.16; D-17 closed and D-36 added at v6.14; D-35 closed at v6.09; D-34 closed and D-35 added at v6.08; D-33 closed and D-34 added at v6.07; D-28 closed and D-33 added at v6.06.)* Non-tax open threads
+**Open, in this file: D-4, D-11 (narrowed), D-13, D-15, D-16, D-18 (recurring), D-32, D-37, D-39; D-5 declined.** *(D-38 filed and closed, and D-39 added, at v6.17; D-36 closed and D-37 added at v6.16; D-17 closed and D-36 added at v6.14; D-35 closed at v6.09; D-34 closed and D-35 added at v6.08; D-33 closed and D-34 added at v6.07; D-28 closed and D-33 added at v6.06.)* Non-tax open threads
 re-homed the same day are in `ARCHITECTUREIssues.md` **E-29**.
 
 | Field | Value |
@@ -1494,3 +1496,28 @@ self-employment tax, but two deductions that come with it are not taken:
 
 Both are **conservative**: income tax runs high for a self-employed household. **Disclosed at v6.16** in the Taxes tab's method note, the Field
 Manual's streams entry and METHODOLOGY (*Payroll tax on job income*). **Low–medium.**
+
+## D-38 · The cash from a home move was a fixed $130,000 added to every plan — filed and ✅ CLOSED v6.17
+
+> ✅ **CLOSED v6.17 (2026-10-16).** `docs/SCOPE_D38_HOME_SALE_CASH_V617.md` (fulfilled, repo-only); `qa/t80_home_move_cash.mjs`.
+
+Found answering a question about another chat's advice. `HOME_SALE_PROCEEDS = 130000` (L1126 at v6.16) was added to the portfolio in the
+retirement quarter by both Monte Carlo engines for **every** plan — the example, a Start Fresh or wizard plan, an imported backup — with no
+input and no disclosure (one Events card said "the plan books $130K"). The figure is the net of a home move, so it can be 0 or negative;
+for anyone not moving it was the largest single optimism in the Monte Carlo (on the example, 30-year success 81.1% at +$130,000 against
+74.8% at $0). Never registered before (the §K2 sweep at the scope found nothing).
+
+**Fixed at v6.17:** a signed My Data field, *Cash from your home move at retirement* (`PORTFOLIO.homeMoveCash`), read through one accessor at
+the five model sites; a plan saved without it reads $0 with a notice until Save & Apply; Start Fresh and the wizard start at $0; the example
+keeps $130,000. **Not changed, disclosed:** the sale is treated as tax-free (26 U.S.C. §121 excludes up to $250,000 / $500,000 joint when the
+ownership and use tests are met — a larger gain is not taxed here, optimistic and rare); the cash arrives in the retirement quarter; the
+Withdrawal, Taxes, IRMAA and Roth tabs do not see it (**D-39**).
+
+## D-39 · The Withdrawal, Taxes, IRMAA and Roth tabs do not see the home-move cash — opened at v6.17, DISCLOSED
+
+Filed at the D-38 build (scope DC-4 (a)). Only the Monte Carlo engines read `homeMoveCash`. Engine D's Priority-1 pool (the Withdrawal tab)
+starts without it, so a household with a large positive figure draws its retirement accounts sooner there than the Monte Carlo assumes, and a
+negative figure (a next home that costs more) is not taken from the pool at all. The tax engines inherit Engine D's draws through the bridge,
+so the Taxes and IRMAA tabs follow it; the Roth comparison has no spending model. The direction depends on the sign. Putting the cash into
+Engine D's pool moves the schedule, the tax engines' MAGI and IRMAA — its own scope. **Disclosed at v6.17** in My Data's note, the Monte
+Carlo tab, the Field Manual and METHODOLOGY (*Cash from a home move*). **Low–medium.**
