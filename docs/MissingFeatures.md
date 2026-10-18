@@ -60,9 +60,12 @@ items now carry their status; IDs are unchanged.
 | D-42 | **OPEN** (Low–Med, conservative) | a $40,000 car every 8 years (`AUTO_REPLACE_COST`) in the Monte Carlo runs with auto-replacement, on every plan — disclosed in the Field Manual as a fixed example schedule; a household that enters car purchases as expenses pays twice |
 | D-43 | **OPEN** (Low, display only) | the Income tab's "Post-car draw" and "Monthly shortfall (car paid off)" subtract the example's $400 car payment from every plan's post-Medicare spending |
 | D-44 | **OPEN** (Low, optimistic) | one-time expenses: the Monte Carlo subtracts them in today's dollars (it inflates the monthly rows); the Withdrawal tab never sees one dated before the retirement year. Disclosed at v6.18 — the first in the Field Manual, the second on the Withdrawal tab |
-| D-45 | **OPEN** (Low–Med, optimistic) | the Monte Carlo charges a one-time row only when it is dated in March, June, September or December (it samples the table at each quarter's last month and the match is exact), so the example's April 2029 rows ($28,000) never reach it; rows added in My Data are dated June. Found at the v6.18 build; disclosed in the Field Manual |
+| D-45 | **OPEN** (Low–Med, optimistic) | the Monte Carlo charges a one-time row only when it is dated in March, June, September or December (it samples the table at each quarter's last month and the match is exact), so the example's April 2029 rows ($28,000) never reach it; rows added in My Data are dated June. Found at the v6.18 build; disclosed in the Field Manual. From v6.19 "a quarter's last month" is the quarter's TRUE last month (D-46); fix scheduled for v6.20 (`docs/SCOPE_D40_MC_TAX_V620.md`) |
+| D-46 | **CLOSED v6.19** *(filed and fixed 2026-10-18)* | the Monte Carlo's quarter calendar: both engines dated quarter 0 "June of the as-of year" for every plan; the 6-year engine placed events by `round(months ÷ 3)` from the as-of month, the 30-year engine by quarters from January of the as-of year (ignoring the as-of month, and for an April–June as-of date retiring and claiming a quarter late); the year 2026 was typed into run A, the chart axis, the Stress table and the longevity ages; the run headers said runs B and C start at retirement. From v6.19 one calendar (`mcQuarterOf` / `mcQuarterDate`), a part first quarter, claims from their month, forced stress years on calendar years |
+| D-47 | **OPEN** (Low, display) | the Stress tab's "30-year guardrail boundaries" table compares the Monte Carlo median with a "planned" figure of `household × 1.04^years` — the benchmark the engines replaced because it ignores withdrawals. To be fixed with v6.20, where `runExtendedMC` returns its planned path |
+| D-48 | **OPEN** (Low) | My Data's as-of date is the UTC date of saving (`toISOString`), so an evening save in the Americas on a quarter's last day falls in the next quarter — after v6.19 that moves the 30-year figures by about a quarter's accumulation. Disclosed in METHODOLOGY |
 
-**Open, in this file: D-4, D-11 (narrowed), D-13, D-15, D-16, D-18 (recurring), D-32, D-37, D-39, D-40, D-42, D-43, D-44, D-45; D-5 declined.** *(D-40 to D-43 filed from the v6.17 findings note, D-41 closed, and D-44 and D-45 added, at v6.18; D-38 filed and closed, and D-39 added, at v6.17; D-36 closed and D-37 added at v6.16; D-17 closed and D-36 added at v6.14; D-35 closed at v6.09; D-34 closed and D-35 added at v6.08; D-33 closed and D-34 added at v6.07; D-28 closed and D-33 added at v6.06.)* Non-tax open threads
+**Open, in this file: D-4, D-11 (narrowed), D-13, D-15, D-16, D-18 (recurring), D-32, D-37, D-39, D-40, D-42, D-43, D-44, D-45, D-47, D-48; D-5 declined.** *(D-46 filed and closed, and D-47 and D-48 added, at v6.19; D-40 to D-43 filed from the v6.17 findings note, D-41 closed, and D-44 and D-45 added, at v6.18; D-38 filed and closed, and D-39 added, at v6.17; D-36 closed and D-37 added at v6.16; D-17 closed and D-36 added at v6.14; D-35 closed at v6.09; D-34 closed and D-35 added at v6.08; D-33 closed and D-34 added at v6.07; D-28 closed and D-33 added at v6.06.)* Non-tax open threads
 re-homed the same day are in `ARCHITECTUREIssues.md` **E-29**.
 
 | Field | Value |
@@ -1586,3 +1589,32 @@ be. The v6.17 home-move note ("If the next home's closing costs are a one-time r
 untrue for the example's closing costs in the Monte Carlo. **Optimistic; low–medium.** Not changed at v6.18 (the scope kept the Monte Carlo
 bit-identical). Candidate fix, with D-40 and D-44: charge a one-time row in the quarter that contains its month, inflated. **Disclosed at v6.18**
 in the Field Manual's Withdrawal Strategy entry and Backtest's comparison sentence.
+
+## D-46 · The Monte Carlo's quarter calendar — filed and ✅ CLOSED v6.19
+
+> ✅ **CLOSED v6.19 (2026-10-18).** `docs/SCOPE_D46_MC_CALENDAR_V619.md` (fulfilled, repo-only); `qa/t82_mc_calendar.mjs`.
+
+Found while scoping D-40 (`docs/SCOPE_D40_MC_TAX_V620.md`, which it now precedes). Both Monte Carlo engines turned their quarter number
+into a date with one formula — quarter 0 "June of the as-of year", whatever the as-of month — and decided when things happened by two other
+rules: `runMonteCarlo` at `round(months from the as-of month ÷ 3)` (right for every event only with an as-of date in May; a quarter late or
+early for some event months otherwise), `runExtendedMC` at quarters from January of the as-of year (ignoring the as-of month: its figures
+were identical for every as-of date in a year, and for an April–June as-of date it retired and paid each claim one quarter late). The year
+2026 was typed into run A's length and label, the chart axis, the Stress tab's table and the current ages for stochastic longevity, and the
+run headers said runs B and C start at retirement (they start at the as-of date). The example (as of 2026-04-18, January events) hid almost
+all of it; the setup wizard's plans (as of 1 January, June claims) did not. **Optimistic for most plans' 30-year figures** — on the example
+81.0% → 80.3% above $800K, median $1,609K → $1,565K; saved in November, $1,487K. **Fixed at v6.19:** one calendar for both engines; the
+first quarter counts only the months from the as-of month; a claim pays from its month; the stress set's forced years are calendar years; a
+plan saved after it retired gets no home-move cash; 2026 comes from the plan; the run headers give the spans the runs model.
+
+## D-47 · The Stress tab's "planned" benchmark ignores withdrawals — opened at v6.19
+
+The Stress tab's 30-year guardrail table shows "Lower (80%)", "Planned" and "Upper (120%)" columns computed as `household × 1.04^years` —
+the same benchmark `runExtendedMC`'s own comment says was replaced as its guardrail reference because it ignores withdrawals. Display only;
+the engines do not read it. **Low.** To be fixed with v6.20, where `runExtendedMC` returns its planned path (D-40's scope).
+
+## D-48 · My Data's as-of date is the UTC date — opened at v6.19
+
+My Data stamps the plan's as-of date with `new Date().toISOString().slice(0, 10)` — the date in UTC, so a save in the evening in the Americas
+on a quarter's last day is dated the next day, in the next quarter. From v6.19 the Monte Carlo counts accumulation from the as-of quarter,
+so that save reads about one quarter less accumulation in the 30-year figures. **Low.** Disclosed in METHODOLOGY (*The Monte Carlo's
+calendar*).
