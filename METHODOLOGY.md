@@ -2503,3 +2503,71 @@ the Roth tab's ladder never read the figure; they are bit-identical across v6.16
   optimistic, and rare for the mainstream couple this app models.
 - **Nothing is derived from Home value and Mortgage balance.** Those fields still feed the Ranking tab and the Ask AI context; My Data shows
   today's equity from them only as a starting point for the field.
+
+## The Withdrawal tab spends the expense table year by year (v6.18)
+
+**The rule.** Engine D (the Withdrawal tab), Backtest and What-Breaks spend one function, `tableYearExpense(yr, survivorFromYr)`: for a
+calendar year, the sum of every monthly row over the months it runs that year, times the survivor factor (0.75) from the first death on,
+plus that year's one-time rows (no survivor factor — a one-time row is a specific purchase). The amount is in the table's own dollars
+(today's); Engine D inflates it from the retirement year at the scenario's expected inflation, Backtest by each historical sequence's
+inflation, What-Breaks at its own rate. Backtest applies no survivor factor, as before. The two Monte Carlo engines read the same table
+once a quarter — `getMonthlyExpense` and `getOneTimeExpenses` at the quarter's last month (March, June, September, December) — and did not
+change; so they charge a one-time row only when it is dated in one of those months (MissingFeatures **D-45**, below).
+
+So, for the example household: 2029 is **$126,280** — $98,280 of monthly rows for the months they run (the current home's costs through
+March, the retirement rows from April) plus $28,000 of one-time rows (the golf cart and the closing costs); from May 2034 the $400 car
+payment is gone. The retirement-year buttons keep the table on its calendar dates: retiring a year early spends the pre-retirement rows
+until the table ends them, as the Monte Carlo already did for that button.
+
+**The display figures.** The "pre-retirement", "post-retirement" and "after spouse B's Medicare" spending quoted in eleven places (the header,
+the Expenses, Income, SS, Grade, Ranking, Backtest, What-Breaks, Survivor and Stress tabs, and the Ask AI context) are the table at one month
+each, taken from the plan's own timeline by one rule: **the later of the event's month, June of the event's year, and the as-of month.**
+Pre-retirement's event is the as-of date; post-retirement's is the retirement date; the Medicare figure's is the later of spouse B's Medicare
+date and the retirement date (spouse A's for a single plan, as Engine D uses). On the example the rule gives 2026-06, 2029-06 and 2031-06,
+so none of its figures moved. No engine reads these three figures.
+
+**What it did through v6.17 (D-41).** All three engines spent two of those figures for life — the table at **June 2029** before spouse B's
+Medicare year and at **June 2031** after it — and the two months were the example household's, typed into the code. So:
+1. a plan on any other calendar spent the wrong rows: retiring in 2032, the June 2029 table still held the current home's mortgage, taxes,
+   HOA, utilities and insurance, and none of the retirement rows;
+2. a row ending after June 2031 was charged for life (the example's car payment), and one starting later was never charged;
+3. one-time rows never reached them.
+The Taxes, IRMAA and Roth tabs inherited it: they take Engine D's draws through the bridge (`withdrawalPlanSeries`).
+
+Measured at the v6.18 scope (Engine D, the $70,000 conversion slider, base scenario):
+
+| Household | Read | First-year spending | Lifetime spending | Ending portfolio | Taxes tab lifetime tax |
+|---|---|---|---|---|---|
+| Example (retires 2029) | v6.17 | $98K | $2,986K | $1,868K | $215K |
+| | year by year | $126K | $2,893K | $1,977K | $215K |
+| Every date 3 years later (retires 2032) | v6.17 | $80K | $2,492K | $2,711K | $219K |
+| | year by year | $126K | $2,893K | $1,977K | $223K |
+
+The second household is the same plan on a later calendar. Through v6.17 it spent $401K less and ended $734K richer than its own table,
+read year by year, says it should — and $494K less / $843K richer than v6.17 itself gave the same plan on the example's dates — **optimistic**, for anyone retiring after the example whose pre-retirement rows end at retirement, which is how My Data
+asks for them. On the example itself the change is mixed: the one-time rows are conservative to include, the car payment's end optimistic.
+
+**How the moved figures are attributed.** Every pinned figure the change moved (38 checks in ten suites at the probe) was re-pinned only
+with its attribution in the same run: `qa/tools/v617_spending.mjs` writes v6.17's two figures as an expense table — the June 2029 amount
+until spouse B's Medicare year, the June 2031 amount from it, no one-time rows — and v6.18 fed that table reproduces v6.17's Engine D on
+every household tested, every field, to 1e-6 (t81 D-4). The suites that pin Engine D figures run a second time on the v6.18 leg with that
+table (the "-spend617" lines in `runsuite.sh`), and every v6.17 figure comes out exactly; so each move is the spending read and nothing
+else. A table that changes only in January of the retirement year or of spouse B's Medicare year, with no one-time rows, moves nothing
+across v6.17 → v6.18 (t81 D-2). The survivor years agree to the last bits of a double rather than bit for bit, because v6.17 applied the
+survivor factor after inflating and v6.18 before.
+
+**Simplifications, stated.**
+- **The inflation base is unchanged.** Engine D inflates spending and Social Security from the retirement year (the pension is flat) and starts
+  from today's balances without growth — the v5.10 "nominal dollars, no growth" house rule (the retirement-start snapshot section above).
+  Inflating only the spending from today would break that convention.
+- **A one-time row dated before the retirement year is not in the Withdrawal tab's schedule** (it starts at retirement, from today's
+  balances). The tab says so. MissingFeatures **D-44**.
+- **The Monte Carlo subtracts one-time rows in today's dollars** while it inflates the monthly rows — optimistic by the inflation to that
+  date, small. Not changed here (it would move every Monte Carlo figure). MissingFeatures **D-44**; the Field Manual says so.
+- **The Monte Carlo samples one month per quarter** — the quarter's last — and Engine D, Backtest and What-Breaks sum all twelve. A monthly
+  row that starts or ends inside a quarter is counted for a few more or fewer months there; and **a one-time row dated in any other month
+  is never charged** by the Monte Carlo — the example's April 2029 golf cart and closing costs ($28,000) never reach it (measured: both
+  engines byte-identical with or without them; dated June they move both). A row added in My Data is dated June, so it is charged; rows
+  from the example, a spreadsheet import or a hand-edited backup may not be. Found at the v6.18 build; the v6.18 scope's premise had said
+  the Monte Carlo charges one-time rows "when they fall". Optimistic for the Monte Carlo; not changed here. MissingFeatures **D-45**; the
+  Field Manual says so.

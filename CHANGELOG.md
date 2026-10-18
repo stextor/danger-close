@@ -1,5 +1,91 @@
 # Changelog
 
+## v6.18 — the Withdrawal tab spends the expense table at the plan's own dates, year by year (D-41)
+
+**A MODELLING release** — METHODOLOGY gains *The Withdrawal tab spends the expense table year by year*. `docs/SCOPE_D41_ENGINE_D_SPENDING_V618.md`
+(repo-only, fulfilled). Steve, on the findings note `docs/FINDINGS-v6_17-fixed-plan-figures.md` (F-2): *"go"* to scope it first; then *"go"* on the
+scope's six decisions as recommended.
+
+**What was wrong (v6.17, measured).** The Withdrawal tab (Engine D), Backtest and What-Breaks spent the expense table as it stood in **June
+2029** before spouse B's Medicare year and **June 2031** after it — the example household's dates, typed into the code — for every plan. So a plan on
+any other calendar spent the wrong rows: the example with every date moved three years later spent $6,700 a month (a month that still held its
+current home's costs and none of its retirement rows) where its own table says $8,170, then $8,020 — **$401K less lifetime spending and a $734K
+higher ending portfolio** than its own table, read year by year, gives. A row ending after June 2031 was charged for life (the example's car
+payment), one starting later never, and one-time rows never arrived. The Taxes, IRMAA and Roth tabs took Engine D's draws through the bridge,
+so they inherited it. The Monte Carlo was not affected — it reads the table itself, once a quarter. Never registered; filed as D-41 and closed.
+
+**What changed (DC-1 to DC-6, all (a)).**
+- **One read of the table.** `tableYearExpense(yr, survivorFromYr)` sums a calendar year's own months for every monthly row (times the survivor
+  factor from the first death) plus that year's one-time rows (no survivor factor). Engine D inflates it from the retirement year as before;
+  Backtest and What-Breaks read it too, so the three agree (DC-1, DC-2, DC-4).
+- **The example moves too, and the reasons are visible.** 2029 spends **$126,280** — the current home's costs through March, the retirement rows
+  from April, and the $28,000 of one-time rows (the golf cart and the closing costs); from May 2034 the $400 car payment is gone. Its ending
+  portfolio rises $109K; its lifetime federal tax as the Taxes tab first opens falls $598 ($210,898 → $210,300, `t40` E2) and on the as-is reading
+  $2,576 (E1); the Roth tab's best strategy is unchanged.
+- **The display figures follow the plan's dates (DC-3).** The "pre-retirement", "post-retirement" and "after spouse B's Medicare" spending quoted
+  in eleven places take their month from the plan's timeline by one rule — the later of the event's month, June of that year, and the as-of
+  month. On the example that is 2026-06, 2029-06 and 2031-06, so **no example display figure moves**; a plan on another calendar now sees its own.
+- **The retirement-year buttons (DC-5)** keep the table on its calendar dates: retiring a year early spends the pre-retirement rows until the table
+  ends them, as the Monte Carlo already did.
+- **What the user reads.** The Withdrawal tab's schedule note says where its spending comes from, and that a one-time row dated before retirement
+  is not in the schedule; the Field Manual's Withdrawal Strategy entry says the same, dated v6.18, and says when the Monte Carlo charges a
+  one-time row (D-45, below); Backtest's comparison sentence no longer says the backtest omits one-time expenses (it now spends them — found
+  rendering the tab at the build) and says when the Monte Carlo charges one. No in-app notice (DC-6): no saved data changes.
+
+⚠ **Owned — a premise error in the scope, found before ship.** The scope's §0.1 (and the v6.17 findings note) said the Monte Carlo subtracts
+one-time rows "when they fall". An independent review of this release found it does not: both engines read the table once a quarter, at the
+quarter's last month, and the one-time match is exact — so a row dated in any other month is never charged. The example's April 2029 golf cart
+and closing costs ($28,000) have never reached the Monte Carlo (measured: byte-identical output with and without them). The first draft of this
+release's copy repeated the false premise ("the Monte Carlo takes it from the portfolio when it falls") on the Withdrawal tab, in the Field
+Manual and in Backtest's sentence; all three were corrected before the package was cut, `t81` E-1, E-6 and F-1 now assert the corrected text,
+and §C2 pins the Monte Carlo's behaviour as a dated `[KNOWN DEFECT]`. The Monte Carlo itself is unchanged (the scope kept it bit-identical);
+filed as **D-45**. The v6.17 home-move note's "closing costs … are already counted" is untrue for the example's April row in the Monte Carlo
+for the same reason (recorded under D-45, not changed).
+
+**Tests.** New suite **`t81`** — **130** on v6.18, **40** on v6.17 (that leg pins the snapshots as dated `[KNOWN DEFECT]` checks). §A:
+Engine D's spending against an **independent oracle** (its own month loop over the EXPENSES rows, its own survivor year and inflator) to the
+cent on the example, every fixture household, the same plan moved 3 and 6 years later, a single plan, spouse B on Medicare before retirement, a
+survivor case, a stress table and both retirement-year buttons; hand pins ($126,280; 2034's four car months; the survivor year); the function
+unit-tested 2026–2060. §B by AST: no typed `"YYYY-MM"` reaches either table reader; Engine D, Backtest and What-Breaks share the one read; no
+engine A–C, the bridge or the Monte Carlo reads a snapshot; Backtest and What-Breaks read the year they are called for (B-6b). §C: the example's three display figures identical on both legs; the shifted plan
+reads its own; the rule's edge cases; a recompute without a timeline rebuild still uses the plan's dates. §D across v6.17 → v6.18: both Monte
+Carlo engines bit-identical on every household; a flat table (rows changing only in January of the retirement or Medicare year, no one-time rows)
+moves nothing — bit for bit single, to 1e-6 for a couple (the survivor factor is applied in a different order); the example's spending moves in
+exactly the years the oracle says. §C2: D-45 pinned on both legs (the April rows never reach either Monte Carlo engine; dated June they do). §E rendered: the Withdrawal tab's 2029 cell ($126K) and sentence, Backtest, What Breaks, the Expenses headers.
+§F: the copy and METHODOLOGY.
+**Attribution of every moved figure.** The change moved 38 pinned checks in ten suites at the probe. Each was re-pinned **with its attribution in the
+same run**: `qa/tools/v617_spending.mjs` writes v6.17's two snapshots as an expense table, and v6.18 fed that table reproduces v6.17's Engine D on
+every household, every field, to 1e-6 (`t81` D-4). `t40`, `t42`, `t43`, `t58`, `t71`, `t72` and `t75` now run a second time on the v6.18 leg with
+that table (`runsuite.sh`'s **"-spend617"** lines) and **every v6.17 figure comes out exactly**; the normal v6.18 run carries the new figures (two hand
+re-derivations: `t42`'s 2035 spending and federal tax, `t75`'s 2032 worksheet). `t19`'s mixed pool does the same inline. Two fixtures whose subject is
+not spending — `t19`'s RMD-sourcing household (it needs a spending need in every RMD year, which the example's table read year by year no longer
+gives it after the car is paid off) and `t20`'s tax-type block (its exacts hold only while the pool exhausts in the horizon) — now run on v6.17's
+spending as a table, which keeps every figure they derived. `t14`'s death-guard check follows the survivor guard into `tableYearExpense`.
+`domdiff_withdrawal` gains a v617 → v618 arm: the spending sentence set aside, the schedule and its two summary figures masked, everything
+else byte-identical, the masked text different and 2029's cell $98K → $126K; the Taxes and IRMAA tables differ with the same rows and shape.
+`t2`'s parity needs no entry and stayed 10 of 10 identical — its witness that the Monte Carlo did not move.
+Controls `qa/tools/controls_v618_spend.py` (repo-only): **11 of 11** — Engine D back on the snapshots (also turns the DOM diff's mask check red),
+one-time rows dropped, the survivor factor on one-time rows, one-time rows uninflated, a snapshot date typed back, Backtest and What-Breaks back on
+the snapshots, inflation from the as-of year, the snapshots from a stale timeline, the survivor guard weakened, and the unmutated run; every file
+restored and hash-checked.
+**Registered:** `v618` by AST (329 sites), `t1`'s and `t4`'s version strings, `t33`'s PINS and the three Python suites by hand; `suitetext.cjs` found
+no typed "v6.17" in a SETUP check. The shim exports `tableYearExpense`, `recomputeDerivedExpenses` and the snapshots (guarded).
+**`t80` §A now skips by design** in a run folder without the v6.16 source (any pair after v6.16 → v6.17); it ran at the v6.17 ship. `t80` reads
+28 on each leg here.
+
+**Suite, run from the packaged copies:** **7,656 app checks across 80 app suites** (the eight `-spend617` attribution runs, 236 checks, included), 0 failed, 0 DIED; MC parity 10/10; tooling `t21` 64, `domdiff` 44, `sets` 12 + 12; **GRAND 7,798**. Against v6.17's line the counts that moved are `t14` 47 → 48, `t19` 68 → 71 and `t80` 42 → 28, and `t81` is new. Run from the PACKAGED copies in one pass: a run folder built by `mk_runfolder.sh v617 v618` from a fresh clone of `52fe385` carrying the package as cut (81 files); the documentation was finished after the run (no suite reads it but `METHODOLOGY.md`, which was final). An earlier pass on a first cut was stopped and discarded when the review's copy corrections changed the source.
+
+**Limitations, disclosed:**
+- The inflation base is unchanged: Engine D inflates from the retirement year and starts from today's balances without growth (the v5.10 house rule).
+- A one-time row dated before the retirement year is not in the Withdrawal tab's schedule (D-44).
+- The Monte Carlo charges a one-time row only when it is dated in March, June, September or December — the example's April rows never reach
+  it (D-45, found at this build, not changed).
+- The Monte Carlo subtracts one-time rows in today's dollars while it inflates the monthly rows — optimistic, small, not changed here (D-44).
+- The Monte Carlo samples one month per quarter; the Withdrawal tab, Backtest and What-Breaks sum all twelve.
+- Every plan not on the example's calendar sees its Withdrawal, Taxes, IRMAA and Roth figures move — usually toward less money left.
+
+**Registered:** D-40 to D-43 filed from the findings note (D-41 closed here); D-44 and D-45 opened.
+
 ## v6.17 — the cash from a home move is a My Data field, not a fixed $130,000 added to every plan (D-38)
 
 **A MODELLING release** — METHODOLOGY gains *Cash from a home move*. `docs/SCOPE_D38_HOME_SALE_CASH_V617.md` (repo-only, fulfilled). Steve,
