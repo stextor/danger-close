@@ -28,14 +28,24 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v609";
-const KNOWN_VERSIONS = ["v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617"];
+const KNOWN_VERSIONS = ["v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617"].includes(VER);   // an array, so register_tag2 widens it each release
+const POST = ["v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618"].includes(VER);   // an array, so register_tag2 widens it each release
 const { __g: g, __engines: E } = await import(pathToFileURL(join(HERE, `app_${VER}.mjs`)).href);
+// v6.18 (D-41): Engine D reads the expense table year by year, which moved two §A/§B figures (a lifetime RMD and a realized gain). PIN18 picks the v6.18 figures (measured at the build);
+// the v6.18 leg is ALSO run with DC_V617_SPENDING=1 — each plan loaded with v6.17's spending as a table (qa/tools/v617_spending.mjs, split
+// at that plan's own Medicare year) — where every v6.17 figure must still come out exactly: the attribution of each move to the read.
+const POST_D41 = ["v618"].includes(VER);   // an array, so the registrar widens it
+const SPEND17 = POST_D41 && process.env.DC_V617_SPENDING === "1";
+const PIN18 = POST_D41 && !SPEND17;
+const P41 = (v617, v618) => PIN18 ? v618 : v617;
+const { v617Table } = await import(pathToFileURL(join(HERE, "tools", "v617_spending.mjs")).href);
+if (SPEND17) console.log("  (DC_V617_SPENDING=1 — v6.17's spending, as a table: every v6.17 figure must come out exactly)");
+const EX0 = JSON.parse(JSON.stringify(g.EXPENSES()));
 
 let pass = 0, fail = 0;
 const T = (n, ok, d = "") => { if (ok) pass++; else { fail++; console.log(`  ✗ ${n}${d ? " — " + d : ""}`); } };
@@ -62,7 +72,8 @@ const F = {
     { name: "Rollover IRA", balance: 700000, owner: "A", taxType: "trad", planType: "ira" }] }),                                  // no Roth: must not move
   SINGLE: { ...BASE, single: true },
 };
-const load = p => { g.applyLoadedData({ portfolio: clone(p) }); return g.buildPlanTimeline(); };
+const load = p => { g.applyLoadedData({ portfolio: clone(p), expenses: clone(EX0) });
+  if (SPEND17) g.applyLoadedData({ portfolio: clone(p), expenses: v617Table(g, EX0) }); return g.buildPlanTimeline(); };
 const plan = (p, amt) => { const tl = load(p); return { tl, W: g.computeWithdrawalPlan({ retireYear: tl.targetRetireYear, rothAmount: amt, scenarioPreset: "base" }), P: g.PORTFOLIO(), rsb: g.retireStartBalances(tl.targetRetireYear) }; };
 
 // ── the oracle (t71's, v6.08 tracker rules on both legs; `rules` decides only how the Roth money is held) ────────────────────────
@@ -135,9 +146,9 @@ for (const amt of [0, 70000]) {
 }
 {
   const r = plan(F.EX_ROTH200, 70000).W.schedule;
-  T(POST ? "A-3: the Roth fixture's lifetime RMD is EXACTLY $470,488 at $70,000 — its brokerage twin's"
+  T(POST ? `A-3: the Roth fixture's lifetime RMD is EXACTLY ${P41("$470,488", "$479,123 (v6.18, D-41; $470,488 at v6.09–v6.17)")} at $70,000 — its brokerage twin's`
          : "A-3 [KNOWN DEFECT D-35]: the Roth fixture's lifetime RMD is $343,192 at $70,000 — understated against its brokerage twin's $470,488",
-    Math.round(sum(r, "rmd_y")) === (POST ? 470488 : 343192), usd(sum(r, "rmd_y")));
+    Math.round(sum(r, "rmd_y")) === (POST ? P41(470488, 479123) : 343192), usd(sum(r, "rmd_y")));
 }
 
 // ── §B · no capital gain on Roth money ─────────────────────────────────────────────────────────────────────────────────────────
@@ -147,9 +158,9 @@ for (const amt of [0, 70000]) {
          : "B-1 [KNOWN DEFECT D-35]: a pool that is all Roth IRA realizes capital gain — its growth is booked as gain when spent",
     POST ? o.every(x => (x.capGain_y || 0) === 0 && x.taxGainPool === 0) : sum(o, "capGain_y") > 1000, `lifetime gain ${usd(sum(o, "capGain_y"))}`);
   const r5 = plan(F.EX_ROTH500, 70000).W.schedule;
-  T(POST ? "B-2: $500,000 of Roth IRAs at $70,000 — lifetime realized gain $4,909, the example's own brokerage only"
+  T(POST ? `B-2: $500,000 of Roth IRAs at $70,000 — lifetime realized gain ${P41("$4,909", "$3,249 (v6.18, D-41; $4,909 at v6.09–v6.17)")}, the example's own brokerage only`
          : "B-2 [KNOWN DEFECT D-35]: $500,000 of Roth IRAs at $70,000 — lifetime realized gain $196,853, nearly all of it on Roth money",
-    Math.round(sum(r5, "capGain_y")) === (POST ? 4909 : 196853), usd(sum(r5, "capGain_y")));
+    Math.round(sum(r5, "capGain_y")) === (POST ? P41(4909, 3249) : 196853), usd(sum(r5, "capGain_y")));
 }
 
 // ── §C · THE ORACLE: each leg reproduced to the cent under its own rules, and missed under the other's ─────────────────────────────

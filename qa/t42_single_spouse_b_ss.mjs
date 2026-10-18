@@ -21,6 +21,11 @@
 //     deduction 16,100 × 1.02^9 = 19,241 + age-65 extra 2,050 × 1.02^9 = 2,450 (bonus expired 2028);
 //     taxable income 79,280.26 − 21,691 = 57,589.26, in the 12% band (10% top 12,400 × 1.02^9 = 14,819.15)
 //     -> 1,481.92 + 0.12 × 42,770.11 = 6,614.33.
+//   v6.18 (D-41), the same year re-derived: Engine D now spends 2035's own table — $7,620 a month (the $400 car payment ended April
+//   2034) × 12 = 91,440 × 1.0274^6 (base-scenario inflation from 2029) = 107,540.88 — so draw needed = 107,541 − 51,373 = 56,168.
+//   Taxes tab: the bridge's Traditional draw is now 38,297.03; provisional 4,800 + 38,297.03 + 19,800 = 62,897.03; taxable SS
+//   0.85 × (62,897.03 − 34,000) + 4,500 = 29,062.48; taxable income 4,800 + 38,297.03 + 29,062.48 − 21,691 = 50,468.51 (12% band)
+//   -> 1,481.92 + 0.12 × (50,468.51 − 14,819.15) = 5,759.84. (The DC_V617_SPENDING=1 run still reproduces 61,813 and 6,614.33.)
 //
 // ⚠ MONTE CARLO SEEDING TRAP. The simulation's market noise comes from `d3.randomNormal`, and d3
 //   captures its own reference to Math.random WHEN IT LOADS. Replacing Math.random after the import
@@ -32,12 +37,12 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
 const VER = process.argv[2];
-const KNOWN_VERSIONS = ["v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617"];
+const KNOWN_VERSIONS = ["v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.\n    Registered: ${KNOWN_VERSIONS.join(", ")}`);
   process.exit(1);
 }
-const POST = VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || VER === "v617"))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || VER === "v617")))))));
+const POST = VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || VER === "v618")))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || VER === "v618"))))))));
 
 // resettable seeded source, installed BEFORE the import (see the seeding trap above)
 const mulberry = (a) => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a);
@@ -52,10 +57,22 @@ const T = (name, got, exp) => { const ok = typeof exp === "number" ? Math.abs(go
 console.log(`t42 — SINGLE HOUSEHOLD, SPOUSE-B SOCIAL SECURITY (${VER})`);
 
 const BASE = JSON.parse(JSON.stringify(G.PORTFOLIO()));
+// v6.18 (D-41): Engine D reads the expense table year by year, which moved this suite's spending-borne figures (2035's spending: the car
+// payment is paid off by then). PIN18 picks the v6.18 figures; the v6.18 leg is ALSO run with DC_V617_SPENDING=1 — every household here
+// loaded with v6.17's spending as a table (qa/tools/v617_spending.mjs, split at that household's own Medicare year) — where every v6.17
+// figure must still come out exactly. That run attributes each move to the spending read alone.
+const POST_D41 = ["v618"].includes(VER);   // an array, so the registrar widens it
+const SPEND17 = POST_D41 && process.env.DC_V617_SPENDING === "1";
+const PIN18 = POST_D41 && !SPEND17;
+const P41 = (v617, v618) => PIN18 ? v618 : v617;
+const EX0 = JSON.parse(JSON.stringify(G.EXPENSES()));
+const { v617Table } = await import("./tools/v617_spending.mjs");
+if (SPEND17) console.log("  (DC_V617_SPENDING=1 — v6.17's spending, as a table: every v6.17 figure must come out exactly)");
 const RY = G.PLAN_TIMELINE().targetRetireYear;
 const A = { retireYear: RY, rothAmount: 0, qcdAnnual: 0, taxYield: 0, scenarioPreset: "base" };
 const sum = (r, k) => r.reduce((s, x) => s + (x[k] || 0), 0);
-const load = (edit) => { const P = JSON.parse(JSON.stringify(BASE)); edit(P); G.applyLoadedData({ portfolio: P }); };
+const load = (edit) => { const P = JSON.parse(JSON.stringify(BASE)); edit(P); G.applyLoadedData({ portfolio: P, expenses: JSON.parse(JSON.stringify(EX0)) });
+  if (SPEND17) G.applyLoadedData({ portfolio: JSON.parse(JSON.stringify(P)), expenses: v617Table(G, EX0) }); };
 const STORED = P => { P.single = true; };
 const ZEROED = P => { P.single = true; P.incomeSources.ssB.planned = 0; for (const k in P.incomeSources.ssB.tableByAge || {}) P.incomeSources.ssB.tableByAge[k] = 0; };
 const NOBLOCK = P => { P.single = true; delete P.incomeSources.ssB; };
@@ -64,8 +81,11 @@ const figures = () => {
   const D = G.computeWithdrawalPlan(A).schedule, S = G.withdrawalPlanSeries(A);
   const B = E.computeTaxPlan({ ...A, gainByYr: S.gainByYr, ordDrawByYr: S.ordDrawByYr }).rows;
   const C = E.computeIrmaaPlan({ ...A, gainByYr: S.gainByYr, ordDrawByYr: S.ordDrawByYr }).rows || [];
+  // The Monte Carlo reads the expense table itself and did not change at v6.18, so under DC_V617_SPENDING=1 it runs on the REAL table.
+  let _keep = null; if (SPEND17) { _keep = { P: JSON.parse(JSON.stringify(G.PORTFOLIO())), X: JSON.parse(JSON.stringify(G.EXPENSES())) }; G.applyLoadedData({ portfolio: JSON.parse(JSON.stringify(_keep.P)), expenses: JSON.parse(JSON.stringify(EX0)) }); }
   const pp = G.runMonteCarlo(RY, 50).plannedPath;
   _src = mulberry(2026); const arr = G.runMonteCarlo(RY, 800).results;
+  if (_keep) G.applyLoadedData({ portfolio: _keep.P, expenses: _keep.X });
   const med = Math.round(arr.map(x => x[x.length - 1]).sort((a, b) => a - b)[arr.length >> 1]);
   const d35 = D.find(x => x.yr === 2035), b35 = B.find(x => x.yr === 2035);
   return { ssB: Math.round(sum(D, "ssB_y")), draws: Math.round(sum(D, "totalDraw")), end: Math.round(D[D.length - 1].portfolioTotal),
@@ -79,8 +99,9 @@ T("M-0 the seeded Monte Carlo harness is deterministic (two identical runs agree
 
 // ── A · the correct case, and the hand checks ────────────────────────────────────────────────────
 const OK = z1;
-T("A-1 2035 Withdrawal plan: draw needed = 113,186 - (46,573 + 4,800), no spouse-B income", OK.d35need, 61813);
-T("A-2 2035 Taxes tab: federal tax by hand (see header)", OK.b35fed, 6614.33);
+T(P41("A-1 2035 Withdrawal plan: draw needed = 113,186 - (46,573 + 4,800), no spouse-B income",
+        "A-1 2035 Withdrawal plan: draw needed = 107,541 - (46,573 + 4,800), no spouse-B income (v6.18, see header)"), OK.d35need, P41(61813, 56168));
+T("A-2 2035 Taxes tab: federal tax by hand (see header)", OK.b35fed, P41(6614.33, 5759.84));
 
 // ── B · a single household WITH a stored spouse-B benefit ────────────────────────────────────────
 load(STORED); const st = figures();
@@ -115,10 +136,10 @@ if (POST) {
 // ── D · the married example household is untouched by this release (the control) ───────────────
 load(MARRIED); const mar = figures();
 T("D-1 married: spouse-B SS still paid", mar.ssB, 284676);
-T("D-2 married: draws", mar.draws, 1469176);
+T("D-2 married: draws" + (PIN18 ? " (v6.18, D-41: the year-by-year read; 1,469,176 through v6.17)" : ""), mar.draws, P41(1469176, 1463097));
 // v6.07 (D-33): the married example carries spouse B's $7,000 annuity, which no RMD or conversion drains from v6.07 — lifetime federal
 // $208,445 -> $208,000 (the same figure and basis as t40 A5's call-site pin). An array, so register_tag2 widens it each release.
-T("D-3 married: lifetime federal" + (["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617"].includes(VER) ? " (D-33: −$445)" : ""), mar.fed, ["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617"].includes(VER) ? 208000 : 208445);
+T("D-3 married: lifetime federal" + (["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618"].includes(VER) ? (PIN18 ? " (v6.18, D-41: $205,423; $208,000 at v6.07–v6.17)" : " (D-33: −$445)") : ""), mar.fed, ["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618"].includes(VER) ? P41(208000, 205423) : 208445);
 T("D-4 married: Monte Carlo planned path", mar.pp, 2128443);
 T("D-5 married: getSSB() returns the stored benefit", G.getSSB(), 1300);
 

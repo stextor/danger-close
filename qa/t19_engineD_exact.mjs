@@ -20,6 +20,8 @@ let _s = 123456789;
 Math.random = () => { _s = (1103515245 * _s + 12345) % 2147483648; return _s / 2147483648; };
 
 const { __g: g } = await import("./app_testable.mjs");
+// v6.18 (D-41): v6.17's spending as a table — the attribution tool for the figures v6.18's year-by-year read moved (qa/tools/v617_spending.mjs).
+const { withV617Spending } = await import("./tools/v617_spending.mjs");
 
 let pass = 0, fail = 0;
 const ck = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; console.log(`  \u2717 ${n}${d ? " \u2014 " + d : ""}`); } };
@@ -329,9 +331,12 @@ console.log("\n  v5.35 — split RMD: bucket share and named-IRA share, with a r
   PS.incomeStreams = [{ monthly: 0, tax: "ordinary", owner: "A", startYear: 2000, endYear: 9999 }];
   const z2 = { tableByAge: { 62: 0, 63: 0, 64: 0, 65: 0, 67: 0, 70: 0 }, planned: 0, plannedAge: 67 };
   PS.incomeSources = { ssA: { ...z2 }, ssB: { ...z2 }, pension: { amount: 120000 / 12 } };
+  // v6.18 (D-41): this fixture is about RMD SOURCING, and it needs a spending need in every RMD year. On the example's table read year by
+  // year the car payment ends in 2034, and by the first RMD year (2039) spending ($7,620 × 12, inflated) falls under the $120,000 pension —
+  // so the precondition below failed (22 of 23). The fixture runs on v6.17's spending, as a table, which keeps every figure it pinned.
   g.applyLoadedData({ portfolio: PS });
-  const ds = g.computeWithdrawalPlan({
-    retireYear: g.PLAN_TIMELINE().targetRetireYear, rothAmount: 0, scenarioPreset: "base" });
+  const ds = withV617Spending(g, PS, () => g.computeWithdrawalPlan({
+    retireYear: g.PLAN_TIMELINE().targetRetireYear, rothAmount: 0, scenarioPreset: "base" }));
   const bdraw = (x) => x.drawFromB1 + x.drawFromB2 + x.drawFromB3 + x.drawFromB4;
   const RY = ds.schedule.filter(x => x.rmd_y > 0);
 
@@ -560,6 +565,10 @@ console.log("\n  v5.36 — gain on the SPENDING SALE only");
   };
   const mxPlan = planFor(mixHH());
   const mx = mxPlan.schedule;
+  // v6.18 (D-41): the same household on v6.17's spending, as a table — every v6.17 pin below must still come out of it exactly, which is
+  // what attributes the v6.18 figures (on the real table) to the year-by-year read alone.
+  const mx17 = withV617Spending(g, mixHH(), () => g.computeWithdrawalPlan({ retireYear: RETIRE(), rothAmount: 0, scenarioPreset: "base" }).schedule);
+  const sumOf = (S, f) => Math.round(S.reduce((t, x) => t + f(x), 0));
   const share = (x) => x.taxable > 0 ? x.taxGainPool / x.taxable : 0;
   // The sub-pool opens at the brokerage share of the pool: 250,000 / 600,000 = 41.667%.
   ck("mixed pool: the gains-bearing share opens at the brokerage share of the pool",
@@ -588,8 +597,12 @@ console.log("\n  v5.36 — gain on the SPENDING SALE only");
   // at the same point `taxGainPool` grows. The blast radius was measured by AST census before the
   // edit: `taxOrd` is write-only into MAGI (its only consumers are `_ordFrac → othOrdDraw → magi`),
   // so the GAINS side of this household cannot move — and did not, to the microdollar:
-  ck("mixed pool: lifetime realized gain is EXACTLY $89,673 — UNCHANGED by v5.37 (census: gains side never reads taxOrd)",
-     Math.round(mx.reduce((s, x) => s + (x.capGain_y || 0), 0)) === 89673,
+  // v6.18 (D-41): $89,673 is the v6.17 figure, reproduced exactly on v6.17's spending; on the example's table read year by year the gain
+  // is $88,383 (measured at the build — less spending from 2034, so less brokerage sold).
+  ck("mixed pool [v6.18 D-41]: on v6.17's spending (a table) the lifetime realized gain is still EXACTLY $89,673",
+     sumOf(mx17, x => x.capGain_y || 0) === 89673, `$${sumOf(mx17, x => x.capGain_y || 0).toLocaleString()}`);
+  ck("mixed pool: lifetime realized gain is EXACTLY $88,383 (v6.18, the year-by-year read; $89,673 through v6.17) — UNCHANGED by v5.37 (census: gains side never reads taxOrd)",
+     Math.round(mx.reduce((s, x) => s + (x.capGain_y || 0), 0)) === 88383,
      `$${Math.round(mx.reduce((s, x) => s + (x.capGain_y || 0), 0)).toLocaleString()}`);
   // What DOES move is MAGI, through othOrdDraw: measured v5.36 → v5.37 on this exact household
   // and these exact ARGS, 3,132,745.819315 → 3,162,820.292311 (+$30,074.47 of ordinary growth
@@ -603,14 +616,21 @@ console.log("\n  v5.36 — gain on the SPENDING SALE only");
   // instead of a flat 85%. Measured v6.11 → v6.12 on this household and these ARGS: 3,191,209 → 2,960,678 — and the check after this one
   // states the whole move as Social Security, from the rows' own benefits, so the new figure is a decomposition and not a number copied
   // from the build. (t75 C-1 asserts every other schedule field bit-identical to v6.11 across ten households.)
-  ck("mixed pool: lifetime MAGI is EXACTLY $2,960,678 — Social Security taxed by the worksheet (was $3,191,209 at v6.11, $3,162,820 at v6.07, $3,132,746 at v5.36)",
-     Math.round(mx.reduce((s, x) => s + (x.magi || 0), 0)) === 2960678,
+  // v6.18 (D-41) moves it a fourth time, and only through spending: on v6.17's spending (a table) it is still $2,960,678 exactly; on the
+  // example's table read year by year it is $2,939,343 (measured at the build).
+  ck("mixed pool [v6.18 D-41]: on v6.17's spending (a table) lifetime MAGI is still EXACTLY $2,960,678",
+     sumOf(mx17, x => x.magi || 0) === 2960678, `$${sumOf(mx17, x => x.magi || 0).toLocaleString()}`);
+  ck("mixed pool: lifetime MAGI is EXACTLY $2,939,343 — the year-by-year read (v6.18); $2,960,678 at v6.12–v6.17, $3,191,209 at v6.11, $3,162,820 at v6.07, $3,132,746 at v5.36",
+     Math.round(mx.reduce((s, x) => s + (x.magi || 0), 0)) === 2939343,
      `$${Math.round(mx.reduce((s, x) => s + (x.magi || 0), 0)).toLocaleString()}`);
-  ck("mixed pool: …and the whole v6.12 move is Social Security — lifetime MAGI + Σ(0.85 × benefits − ssTaxable) is the v6.11 figure, $3,191,209",
-     Math.round(mx.reduce((s, x) => s + x.magi + 0.85 * (x.ssA_y + x.ssB_y) - x.ssTaxable, 0)) === 3191209,
-     `$${Math.round(mx.reduce((s, x) => s + x.magi + 0.85 * (x.ssA_y + x.ssB_y) - x.ssTaxable, 0)).toLocaleString()}`);
-  ck("mixed pool: …and the whole move is the RMD — lifetime othOrdDraw is EXACTLY $223,909, unchanged since v5.37",
-     Math.round(mx.reduce((s, x) => s + (x.othOrdDraw || 0), 0)) === 223909,
+  // The v6.12 decomposition is a statement about v6.17's spending, so it is made on that table (v6.18, D-41).
+  ck("mixed pool: …and the whole v6.12 move is Social Security — lifetime MAGI + Σ(0.85 × benefits − ssTaxable) is the v6.11 figure, $3,191,209 (on v6.17's spending, a table, from v6.18)",
+     sumOf(mx17, x => x.magi + 0.85 * (x.ssA_y + x.ssB_y) - x.ssTaxable) === 3191209,
+     `$${sumOf(mx17, x => x.magi + 0.85 * (x.ssA_y + x.ssB_y) - x.ssTaxable).toLocaleString()}`);
+  ck("mixed pool [v6.18 D-41]: on v6.17's spending (a table) lifetime othOrdDraw is still EXACTLY $223,909",
+     sumOf(mx17, x => x.othOrdDraw || 0) === 223909, `$${sumOf(mx17, x => x.othOrdDraw || 0).toLocaleString()}`);
+  ck("mixed pool: …and the whole move is the RMD — lifetime othOrdDraw is EXACTLY $224,434 (v6.18, the year-by-year read; $223,909 from v5.37 to v6.17)",
+     Math.round(mx.reduce((s, x) => s + (x.othOrdDraw || 0), 0)) === 224434,
      `$${Math.round(mx.reduce((s, x) => s + (x.othOrdDraw || 0), 0)).toLocaleString()}`);
 
   // THE INDEPENDENT LEDGER — the same instrument that derived v5.37's exacts before the engine

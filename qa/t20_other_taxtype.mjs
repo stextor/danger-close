@@ -35,6 +35,8 @@ Math.random = () => { _s = (1103515245 * _s + 12345) % 2147483648; return _s / 2
 
 const VER = process.argv[2] || null;
 const { __g: g } = await import(VER ? `./app_${VER}.mjs` : "./app_testable.mjs");
+// v6.18 (D-41): v6.17's spending as a table (qa/tools/v617_spending.mjs) — see the tax-type block below for why it is used there.
+const { withV617Spending } = await import("./tools/v617_spending.mjs");
 
 let pass = 0, fail = 0; const fails = [];
 const ck = (n, ok, d = "") => {
@@ -467,8 +469,14 @@ console.log("\nE2. The annuity carries NO RMD \u2014 in any engine");
   // fingerprint (growth escaped tax). It is now: every ordinary dollar INCLUDING ITS GROWTH is
   // taxed once on its way out, so the excess is the balance plus the growth recognised. The
   // exact figures are pinned below.
+  // v6.18 (D-41): THE REGIME BOUND BELOW, MET. These exacts hold only while the Priority-1 pool exhausts inside the horizon, and they
+  // ride on the spending figure. v6.18 reads the example's table year by year — and this block retires in 2027, two years before the
+  // table's retirement rows begin, so 2027–2029 spend the pre-retirement table and from 2034 the car payment is gone. The pool then
+  // outlives the plan, and four checks moved (the annuity's excess $724,266 → $634,419; trad − annuity $0 → $88,270). This block is
+  // about TAX TYPES, not spending, so it runs on v6.17's spending as a table, which reproduces v6.17's Engine D (t81 D-4) and keeps
+  // every independently derived figure here. Spending itself is t81's.
   const planOf = (p) => { g.applyLoadedData({ portfolio: JSON.parse(JSON.stringify(p)) });
-    const r = g.computeWithdrawalPlan({ retireYear: 2027, rothAmount: 0, scenarioPreset: "base" });
+    const r = withV617Spending(g, p, () => g.computeWithdrawalPlan({ retireYear: 2027, rothAmount: 0, scenarioPreset: "base" }));
     const magi = r.schedule.reduce((s, x) => s + (x.magi || 0), 0);
     const gain = r.schedule.reduce((s, x) => s + (x.capGain_y || 0), 0);
     // v6.12 (C-5): `ord` is ordinary income EXCLUDING Social Security — what it always meant. Through v6.11 Engine D taxed a flat 85% of

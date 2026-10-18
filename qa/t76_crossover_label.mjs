@@ -28,13 +28,22 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v613";
-const KNOWN_VERSIONS = ["v612", "v613", "v614", "v615", "v616", "v617"];
+const KNOWN_VERSIONS = ["v612", "v613", "v614", "v615", "v616", "v617", "v618"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v613", "v614", "v615", "v616", "v617"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v613", "v614", "v615", "v616", "v617", "v618"].includes(VER);   // an array, so the next registration widens it
+// v6.18 (D-41): Engine A taxes the spending draw it gets from the bridge, and that draw moved with Engine D's year-by-year spending read —
+// so the recovered crossover in §E moved a year (2062 → 2061). PIN18 picks the v6.18 figure; the v6.18 leg is ALSO run with
+// DC_V617_SPENDING=1, where §E's households load v6.17's spending as a table (qa/tools/v617_spending.mjs) and the v6.17 figure must
+// come out exactly.
+const POST_D41 = ["v618"].includes(VER);   // an array, so the registrar widens it
+const SPEND17 = POST_D41 && process.env.DC_V617_SPENDING === "1";
+const PIN18 = POST_D41 && !SPEND17;
+const { v617Table } = await import(pathToFileURL(join(dirname(fileURLToPath(import.meta.url)), "tools", "v617_spending.mjs")).href);
+if (SPEND17) console.log("  (DC_V617_SPENDING=1 — §E on v6.17's spending, as a table: the v6.17 figure must come out exactly)");
 // §D's pair. Written as two constants, NOT as `VER === "v613"`: the version registrar widens equality tests and arrays, and this
 // comparison is true of exactly one pair of builds — widening it would compare v6.14 against v6.12 and call the difference a defect.
 const D_PRIOR = "v612", D_CUR = "v613";
@@ -211,7 +220,9 @@ console.log("  E — the rendered card");
     return h ? h.parentElement.textContent : null; };
   const outcome = t => !t ? "no card" : t.includes("catches the NO CONVERSIONS path") ? "recovered" : t.includes("never fall behind") ? "never behind"
     : t.includes("Does not break even within the plan") ? "does not break even" : t.includes("No measurable wealth difference") ? "no measurable difference" : "?";
-  const loadDom = async p => { await act(async () => { gd.applyLoadedData({ portfolio: clone(p) }); }); await flush();
+  const EX0 = clone(gd.EXPENSES());
+  const loadDom = async p => { await act(async () => { gd.applyLoadedData({ portfolio: clone(p), expenses: clone(EX0) });
+    if (SPEND17) gd.applyLoadedData({ portfolio: clone(p), expenses: v617Table(gd, EX0) }); }); await flush();
     await click(tabBtn("taxes")); await click(tabBtn("roth")); await flush(); };
   const EX = clone(gd.PORTFOLIO());
   T("E-0a: SETUP — the example household is the one rendered, and the conversion slider sits at its $70,000 opening value",
@@ -236,8 +247,9 @@ console.log("  E — the rendered card");
   const tlL = gd.buildPlanTimeline(), cL = card() || "";
   T("E-0c: SETUP — both spouses to 100 are rendered and the slider moved to $5,000 (the native-setter route, t24)",
     tlL.lifeExpA === 100 && tlL.lifeExpB === 100 && slider().value === "5000", `${tlL.lifeExpA}/${tlL.lifeExpB} @ ${slider().value}`);
-  T("E-2a: the card shows the RECOVERED outcome there — 2062, age 98 / 96 (so the corrected sentence is reachable on the page)",
-    outcome(cL) === "recovered" && cL.includes("2062 — age 98 / 96"), cL.slice(0, 120));
+  const _x = PIN18 ? "2061 — age 97 / 95" : "2062 — age 98 / 96";
+  T(`E-2a: the card shows the RECOVERED outcome there — ${_x}${PIN18 ? " (v6.18, D-41: 2062 through v6.17)" : ""} (so the corrected sentence is reachable on the page)`,
+    outcome(cL) === "recovered" && cL.includes(_x), cL.slice(0, 120));
   T(POST ? "E-2b: and it renders the corrected sentence, with no \"after-tax wealth\" anywhere on the card"
          : `E-2b ${KD}: and it renders "after-tax wealth"`,
     POST ? cL.includes(CARD_NEW) && !/after-tax wealth/i.test(cL) : cL.includes(CARD_OLD), cL.slice(0, 200));

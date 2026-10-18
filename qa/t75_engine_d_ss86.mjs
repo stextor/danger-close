@@ -28,15 +28,25 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v612";
-const KNOWN_VERSIONS = ["v611", "v612", "v613", "v614", "v615", "v616", "v617"];
+const KNOWN_VERSIONS = ["v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v612", "v613", "v614", "v615", "v616", "v617"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v612", "v613", "v614", "v615", "v616", "v617", "v618"].includes(VER);   // an array, so the next registration widens it
 const require = createRequire(import.meta.url);
 const M = await import(pathToFileURL(join(HERE, `app_${VER}.mjs`)).href);
+// v6.18 (D-41): Engine D reads the expense table year by year, which moved one §B hand pin (2032's taxable Social Security). PIN18 picks the v6.18 figures (measured at the build);
+// the v6.18 leg is ALSO run with DC_V617_SPENDING=1 — each plan loaded with v6.17's spending as a table (qa/tools/v617_spending.mjs, split
+// at that plan's own Medicare year) — where every v6.17 figure must still come out exactly: the attribution of each move to the read.
+const POST_D41 = ["v618"].includes(VER);   // an array, so the registrar widens it
+const SPEND17 = POST_D41 && process.env.DC_V617_SPENDING === "1";
+const PIN18 = POST_D41 && !SPEND17;
+const P41 = (v617, v618) => PIN18 ? v618 : v617;
+const { v617Table } = await import(pathToFileURL(join(HERE, "tools", "v617_spending.mjs")).href);
+if (SPEND17) console.log("  (DC_V617_SPENDING=1 — v6.17's spending, as a table: every v6.17 figure must come out exactly)");
+const EX0 = JSON.parse(JSON.stringify(M.__g.EXPENSES()));
 const { __g: g, __engines: E } = M;
 const SRC = readFileSync(join(HERE, "..", `${VER}.jsx`), "utf8");
 
@@ -102,7 +112,8 @@ const H = [   // [label, portfolio, conversion slider]
   ["BIG GAIN (low-basis brokerage)", consistent({ ...BASE, taxableGainPct: 95, otherAccounts: [{ name: "Brokerage", balance: 900000, owner: "JT", taxType: "taxable" }] }), 0],
   ["VERY LARGE single (×5)", { ...scaleAll(5), single: true }, 0],
 ];
-const plan = (mod, p, amt) => { const G = mod.__g; G.applyLoadedData({ portfolio: clone(p) }); const tl = G.buildPlanTimeline();
+const plan = (mod, p, amt) => { const G = mod.__g; G.applyLoadedData({ portfolio: clone(p), expenses: clone(EX0) });
+  if (SPEND17 && mod === M) G.applyLoadedData({ portfolio: clone(p), expenses: v617Table(G, EX0) }); const tl = G.buildPlanTimeline();
   return { tl, W: G.computeWithdrawalPlan({ retireYear: tl.targetRetireYear, rothAmount: amt, scenarioPreset: "base" }) }; };
 
 // ── A · the oracle against the engine, every year ────────────────────────────────────────────────────────────────────────────
@@ -156,9 +167,13 @@ console.log("  B — hand-verified pins (scope §0.3; base scenario, no conversi
 {
   const ex = y => AT.EXAMPLE.W.schedule.find(r => r.yr === y), mo = y => AT["MODEST couple (×0.3)"].W.schedule.find(r => r.yr === y);
   // 2032, joint: worksheet lines 7 66,345.16 → 16 24,993.39 (line 14 = 6,000); deduction 36,262 + 2 × 1,858 = 39,978; taxable 21,429.10 ≤ 27,929.
+  // v6.18 (D-41), the same year re-derived: the 2029 one-time rows empty the brokerage sooner, so 2032 is drawn from Traditional —
+  // line 7 = pension 4,800 + Traditional draw 31,902.18 + ½ × benefits 59,862.90 (29,931.45) = 66,633.63; line 16 = 0.85 × (66,633.63 −
+  // 44,000) + 6,000 = 25,238.59 (under the 0.85 × benefits cap); taxable 4,800 + 31,902.18 + 25,238.59 − 39,978 = 21,962.77 ≤ 27,929, so
+  // still 10%. (DC_V617_SPENDING=1 reproduces 24,993.39.)
   // 2045, survivor B 79, Single: line 16 63,389.20 > line 17 51,873.68; deduction 23,455 + 2,986 = 26,441; taxable 98,200.17 in (73,423, 153,985].
   if (POST) {
-    EQ("B-1 2032 (joint): taxable SS $24,993.39 by the worksheet", cents(ex(2032).ssTaxable), 24993.39);
+    EQ(`B-1 2032 (joint): taxable SS ${P41("$24,993.39", "$25,238.59 (v6.18, D-41)")} by the worksheet`, cents(ex(2032).ssTaxable), P41(24993.39, 25238.59));
     EQ("B-2 2032: bracket 10%", ex(2032).bracket, 10);
     EQ("B-3 2045 (survivor, Single): taxable SS $51,873.68 — the 85% cap binds", cents(ex(2045).ssTaxable), 51873.68);
     EQ("B-4 2045: bracket 22% (Single filing — the widow's penalty)", ex(2045).bracket, 22);

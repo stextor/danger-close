@@ -26,16 +26,16 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v614";
-const KNOWN_VERSIONS = ["v613", "v614", "v615", "v616", "v617"];
+const KNOWN_VERSIONS = ["v613", "v614", "v615", "v616", "v617", "v618"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v614", "v615", "v616", "v617"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v614", "v615", "v616", "v617", "v618"].includes(VER);   // an array, so the next registration widens it
 // v6.16 (D-36, docs/SCOPE_D36_SELF_EMPLOYMENT_V616.md): self-employment is modelled — the Verify tab gains a sixth payroll check (the
 // §1402(b)(2) floor) and the "not modelled" disclosure E-4 locked goes false. Gated per leg (§B2); an array, so the next registration widens it.
-const SE = ["v616", "v617"].includes(VER);
+const SE = ["v616", "v617", "v618"].includes(VER);
 // The differential's pair — two constants, NOT `VER === "v614"`, so the registrar cannot widen it (t76 records why).
 const D_PRIOR = "v613", D_CUR = "v614";
 const require = createRequire(import.meta.url);

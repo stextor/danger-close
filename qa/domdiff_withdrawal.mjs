@@ -202,7 +202,7 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   // refresh", v6.15 no banner; the STALE strip renders only from the January after the figures' year). For THIS pair only, the two
   // lines are set aside on BOTH sides and nothing else; on a run date with neither, the replaces are no-ops. The two checks keep the mask
   // honest: whatever v6.15 shows, its banner never names the tax notice and its STALE strip never carries the maintainer workflow.
-  const _p615 = VA === "v614" && (VB === "v615" || (VB === "v616" || VB === "v617"));
+  const _p615 = VA === "v614" && (VB === "v615" || (VB === "v616" || (VB === "v617" || VB === "v618")));
   const _STALE = /⌛ STALE DATA:[\s\S]{1,900}?(?:constant-update workflow\.|brings it across\.)/;
   const _n615 = (s) => !_p615 ? s : s.replace(_BAN, "").replace(_STALE, "");
   if (_p615) {
@@ -225,7 +225,26 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
     ck("WITHDRAWAL (v611→v612): the Bracket cells are masked — the same number on each side, one per schedule row", cA.length > 0 && cA.length === cB.length, `${cA.length} vs ${cB.length}`);
     ck("WITHDRAWAL (v611→v612): …and the masked cells DIFFER — the column was re-figured (a v6.12 still on the flat-85% column fails here)", cA.join() !== cB.join(), cA.join(","));
   }
-  const wA = stripV(_n615(_m612(_n610(A.withdrawal)))), wB = stripV(_n615(_m612(_n612(_n610(_n609(_n608(_n579(B.withdrawal))))))));
+  // v6.18 (D-41 — docs/SCOPE_D41_ENGINE_D_SPENDING_V618.md): Engine D reads the expense table year by year, so on the example the
+  // schedule's spending, draws and balances move BY DESIGN (2029 carries the golf cart and closing costs; from May 2034 the car payment is
+  // gone), with the two summary figures computed from them, and the tab gains ONE sentence saying where its spending comes from. For THIS
+  // pair only: that sentence is set aside on the v6.18 side (exactly once); the schedule grid ("EOY Portfolio" to "Section B"), Total
+  // withdrawn and the 10-year average withdrawal rate are masked on BOTH sides; everything else must still be byte-identical (measured at
+  // the build: nothing else differs). The checks after the identity keep the mask honest: each mask bit once a side, the masked text
+  // differs, and 2029's Expenses cell is the June 2029 snapshot's $98K on v6.17 and $126K on v6.18. Engine-level figures are t81's and t40's.
+  const _p618 = VA === "v617" && VB === "v618";
+  const _M618 = [[/EOY Portfolio[\s\S]*?Section B/, "EOY Portfolio#Section B"], [/Total withdrawn\$[\d.]+[KM]/, "Total withdrawn#"], [/Avg wr \(first 10 yr\)[\d.]+%/, "Avg wr (first 10 yr)#"]];
+  const _n618 = (s) => !_p618 ? s : _cut(s, / ?Expenses are your expense table at each year's own dates[\s\S]*?for every plan\./, "v6.18 spending sentence");
+  const _m618 = (s) => !_p618 ? s : _M618.reduce((t, [re, to]) => t.replace(re, to), s);
+  if (_p618) {
+    for (const [re] of _M618) for (const [V, w] of [[VA, A.withdrawal], [VB, B.withdrawal]])
+      ck(`WITHDRAWAL (v617\u2192v618): the ${String(re).slice(1, 22)}\u2026 mask bites exactly once on ${V}`, (w.match(new RegExp(re.source, "g")) || []).length === 1);
+    const gA = (A.withdrawal.match(_M618[0][0]) || [""])[0], gB = (B.withdrawal.match(_M618[0][0]) || [""])[0];
+    ck("WITHDRAWAL (v617\u2192v618): \u2026and the masked schedule DIFFERS \u2014 the year-by-year read reached the tab (a v6.18 still on the snapshots fails here)", gA.length > 0 && gA !== gB);
+    const c29 = g => (g.match(/EOY Portfolio2029\d{2}\/\d{2}\$[\d.]+K(?:\$[\d.]+K|\u2014)(\$[\d.]+K)/) || [])[1];
+    ck("WITHDRAWAL (v617\u2192v618): 2029's Expenses cell is $98K on v6.17 (the June 2029 snapshot) and $126K on v6.18 (the one-time rows in)", c29(gA) === "$98K" && c29(gB) === "$126K", `${c29(gA)} / ${c29(gB)}`);
+  }
+  const wA = stripV(_m618(_n615(_m612(_n610(A.withdrawal))))), wB = stripV(_m618(_n618(_n615(_m612(_n612(_n610(_n609(_n608(_n579(B.withdrawal))))))))));
   ck("WITHDRAWAL: the tab is byte-identical across the pair (v5.40 is disclosure + mechanics; no rendered cell moves \u2014 measured)",
      wA === wB, firstDiff(wA, wB));
   // The v5.35 claims must still hold on BOTH sides — this is the assertion that would catch
@@ -279,7 +298,15 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   // the table differs, the rows are the same, and the blast radius is pinned by the engine-measured size (t40: every lifetime move is
   // under $2,100; per year it is under $1K, so a rendered $K figure holds or steps exactly one $K).
   const D33_PAIR = (VA === "v606" && VB === "v607");
-  if (D33_PAIR) {
+  // v6.18 (D-41): Engine B is fed Engine D's draws through the bridge, and those move with the year-by-year spending read — so the Taxes
+  // year table differs BY DESIGN at v617→v618. Bounded as C-8 was: it differs (a v6.18 still on the snapshots renders v6.17's table and
+  // fails), and the same year rows render on both legs. Dollar figures are pinned in t40 (both legs, and the v6.17 table run).
+  if (VA === "v617" && VB === "v618") {
+    const rowsOf = s => (s.match(/20[2-6]\d(?=\d{2}\/\d{2})/g) || []).length;
+    ck("TAXES: both legs still render the year table", figA.length > 0 && figB.length > 0);
+    ck("TAXES (v617\u2192v618): the figures DIFFER \u2014 the year-by-year spending read reaches Engine B through the bridge", figA !== figB);
+    ck("TAXES (v617\u2192v618): the same year rows render on both legs \u2014 the draws move values, never rows", rowsOf(figA) > 0 && rowsOf(figA) === rowsOf(figB), `${rowsOf(figA)} vs ${rowsOf(figB)}`);
+  } else if (D33_PAIR) {
     const nA = (figA.match(/\$[\d,]+K?/g) || []), nB = (figB.match(/\$[\d,]+K?/g) || []);
     const val = t => Number(String(t).replace(/[$,K]/g, "")) * (String(t).endsWith("K") ? 1000 : 1);
     const rowsOf = s => (s.match(/20[2-6]\d(?=\d{2}\/\d{2})/g) || []).length;
@@ -362,7 +389,14 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   const C8_PAIR_I = (VA === "v573" && VB === "v574");
   // v6.07 (D-33): see the Taxes note above. MAGI falls where an RMD falls and headroom rises by the same amount, so no direction is
   // asserted (the v5.43 lesson); the blast radius is: same shape, every moved figure one $K step.
-  if (VA === "v606" && VB === "v607") {
+  // v6.18 (D-41): see the Taxes note above — Engine C takes the same bridge, so its MAGI table differs by design at v617→v618; no
+  // direction is asserted (the draws rise in some years and fall in others).
+  if (VA === "v617" && VB === "v618") {
+    ck("IRMAA: both legs still render the MAGI table", magA.length > 0 && magB.length > 0);
+    ck("IRMAA (v617\u2192v618): the MAGI figures DIFFER \u2014 the year-by-year spending read reaches Engine C through the bridge", magA !== magB);
+    const cA = (magA.match(/\$[\d,]+K?/g) || []).length, cB = (magB.match(/\$[\d,]+K?/g) || []).length;
+    ck("IRMAA (v617\u2192v618): same SHAPE \u2014 the same number of figures", cA > 0 && cA === cB, `${cA} vs ${cB}`);
+  } else if (VA === "v606" && VB === "v607") {
     const numsA = (magA.match(/\$[\d,]+K?/g) || []), numsB = (magB.match(/\$[\d,]+K?/g) || []);
     const val = t => Number(String(t).replace(/[$,K]/g, "")) * (String(t).endsWith("K") ? 1000 : 1);
     ck("IRMAA: both legs still render the MAGI table", magA.length > 0 && magB.length > 0);

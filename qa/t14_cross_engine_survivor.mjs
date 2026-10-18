@@ -175,7 +175,13 @@ console.log("t14 \u2014 CROSS-ENGINE SURVIVOR SS (D-5: the class-level invariant
     if (dWin) {
       const ge = (dWin.match(/yr >= _deathYr1D/g) || []).length;
       const gt = (dWin.match(/yr > _deathYr1D/g) || []).length;
-      ck("Engine D: both death guards use >= (the death YEAR counts) — survAdj and _widowedD", ge >= 2, `${ge} found`);
+      // v6.18 (D-41): the survivor spending guard moved out of Engine D into the shared expense read, `tableYearExpense(yr, survivorFromYr)`,
+      // which Engine D calls with `_deathYr1D`. So from v6.18 Engine D carries ONE `yr >= _deathYr1D` (_widowedD) and passes the death year
+      // to that function, whose own guard must still be `>=` — a `>` there is the same weakened guard, one function away.
+      const _tye = src.match(/function tableYearExpense\(yr, survivorFromYr = Infinity\) \{[\s\S]*?\n\}/);
+      const _survMoved = !!_tye && /const annualExpense = \(yr\) => tableYearExpense\(yr, _deathYr1D\) \* _wInflator\(yr\);/.test(dWin);
+      ck("Engine D: both death guards use >= (the death YEAR counts) — survAdj and _widowedD", _survMoved ? ge >= 1 : ge >= 2, `${ge} found${_survMoved ? " (v6.18: survAdj lives in tableYearExpense)" : ""}`);
+      if (_survMoved) ck("Engine D (v6.18): the survivor spending guard in tableYearExpense uses >= and no >", /yr >= survivorFromYr/.test(_tye[0]) && !/yr > survivorFromYr/.test(_tye[0]), _tye[0].slice(0, 200));
       ck("Engine D [EXTINCTION]: exactly ONE > against the death year, and it is the filing switch — a second is a weakened death guard",
         gt === 1 && /const _filingSingleD = _tlW\.single \|\| yr > _deathYr1D;/.test(dWin), `${gt} '>' comparison(s); Engine D carries ${ge} '>=' guard(s)`);
     }

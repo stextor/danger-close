@@ -30,14 +30,24 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v608";
-const KNOWN_VERSIONS = ["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617"];
+const KNOWN_VERSIONS = ["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617"].includes(VER);   // an array, so register_tag2 widens it each release
+const POST = ["v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618"].includes(VER);   // an array, so register_tag2 widens it each release
 const { __g: g, __engines: E } = await import(pathToFileURL(join(HERE, `app_${VER}.mjs`)).href);
+// v6.18 (D-41): Engine D reads the expense table year by year, which moved three §D figures (lifetime RMDs and a cap-year conversion). PIN18 picks the v6.18 figures (measured at the build);
+// the v6.18 leg is ALSO run with DC_V617_SPENDING=1 — each plan loaded with v6.17's spending as a table (qa/tools/v617_spending.mjs, split
+// at that plan's own Medicare year) — where every v6.17 figure must still come out exactly: the attribution of each move to the read.
+const POST_D41 = ["v618"].includes(VER);   // an array, so the registrar widens it
+const SPEND17 = POST_D41 && process.env.DC_V617_SPENDING === "1";
+const PIN18 = POST_D41 && !SPEND17;
+const P41 = (v617, v618) => PIN18 ? v618 : v617;
+const { v617Table } = await import(pathToFileURL(join(HERE, "tools", "v617_spending.mjs")).href);
+if (SPEND17) console.log("  (DC_V617_SPENDING=1 — v6.17's spending, as a table: every v6.17 figure must come out exactly)");
+const EX0 = JSON.parse(JSON.stringify(g.EXPENSES()));
 
 let pass = 0, fail = 0;
 const T = (n, ok, d = "") => { if (ok) pass++; else { fail++; console.log(`  ✗ ${n}${d ? " — " + d : ""}`); } };
@@ -73,7 +83,8 @@ const F = {
   NO_OTHER_TRAD: consistent({ ...BASE, otherAccounts: BASE.otherAccounts.filter(a => a.taxType !== "trad") }),
   SINGLE: { ...BASE, single: true },
 };
-const load = p => { g.applyLoadedData({ portfolio: clone(p) }); return g.buildPlanTimeline(); };
+const load = p => { g.applyLoadedData({ portfolio: clone(p), expenses: clone(EX0) });
+  if (SPEND17) g.applyLoadedData({ portfolio: clone(p), expenses: v617Table(g, EX0) }); return g.buildPlanTimeline(); };
 const plan = (p, amt) => { const tl = load(p); return { tl, W: g.computeWithdrawalPlan({ retireYear: tl.targetRetireYear, rothAmount: amt, scenarioPreset: "base" }), P: g.PORTFOLIO(), rsb: g.retireStartBalances(tl.targetRetireYear) }; };
 
 // ── the oracle ───────────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -190,21 +201,23 @@ if (POST) {
     Math.round(n70.W.totalConverted) === (POST ? 840000 : 50000) && (POST ? standing === 0 : standing > 0),
     `${usd(n70.W.totalConverted)}; ladder years short with the IRA standing: ${standing}`);
   const n0 = plan(F.NAMED_IRA, 0);
-  T(POST ? "D-2: NAMED_IRA with no conversion — lifetime RMD $653,901: the IRA's RMD is figured on a balance that grows"
+  T(POST ? `D-2: NAMED_IRA with no conversion — lifetime RMD ${P41("$653,901", "$671,413 (v6.18, D-41; $653,901 at v6.08–v6.17)")}: the IRA's RMD is figured on a balance that grows`
          : "D-2 [KNOWN DEFECT D-34]: NAMED_IRA with no conversion — lifetime RMD $430,216: the IRA's RMD tracker never grows",
-    Math.round(sum(n0.W.schedule, "rmd_y")) === (POST ? 653901 : 430216), usd(sum(n0.W.schedule, "rmd_y")));
+    Math.round(sum(n0.W.schedule, "rmd_y")) === (POST ? P41(653901, 671413) : 430216), usd(sum(n0.W.schedule, "rmd_y")));
   // The identified RMD, separated from growth: MIXED's pool holds an annuity and cash beside the IRAs, so a pro-rata shrink takes LESS than
   // the RMD out of the IRA. The oracle's v6.08 rules with the shrink swapped back would give a different figure — asserted in §B (B-X).
   const m0 = plan(F.MIXED, 0);
-  T(POST ? "D-3: MIXED with no conversion — lifetime RMD $792,387 (the IRA grows, and its RMD leaves it whole)"
+  T(POST ? `D-3: MIXED with no conversion — lifetime RMD ${P41("$792,387", "$800,869 (v6.18, D-41; $792,387 at v6.08–v6.17)")} (the IRA grows, and its RMD leaves it whole)`
          : "D-3 [KNOWN DEFECT D-34]: MIXED with no conversion — lifetime RMD $576,672",
-    Math.round(sum(m0.W.schedule, "rmd_y")) === (POST ? 792387 : 576672), usd(sum(m0.W.schedule, "rmd_y")));
+    Math.round(sum(m0.W.schedule, "rmd_y")) === (POST ? P41(792387, 800869) : 576672), usd(sum(m0.W.schedule, "rmd_y")));
   // The cap-year over-conversion: at $200,000 the example household's buckets run out in 2035; the year's spending draw has already taken
   // $2,672 of the pre-tax money v6.07's cap counted.
   const e2 = plan(F.EXAMPLE, 200000), r35 = e2.W.schedule.find(r => r.yr === 2035), oe = oracle(e2, 200000, "v608").find(o => o.yr === 2035);
-  T(POST ? "D-4: the example at $200,000 converts $103,185 in 2035 — what the year's spending draw left, not $105,857"
+  // v6.18 (D-41): the example's 2029 one-time rows draw the buckets down sooner, so 2035's cap is $86,883 — still exactly what the year's
+  // spending draw left (the oracle's capB), which is the statement; $103,185 holds under DC_V617_SPENDING=1.
+  T(POST ? `D-4: the example at $200,000 converts ${P41("$103,185 in 2035 — what the year's spending draw left, not $105,857", "$86,883 in 2035 — what the year's spending draw left (v6.18, D-41; $103,185 at v6.08–v6.17)")}`
          : "D-4 [KNOWN DEFECT D-34]: the example at $200,000 converts $105,857 in 2035 — $2,672 more than the spending draw left",
-    !!r35 && Math.round(r35.conv_y) === (POST ? 103185 : 105857) && Math.round(oe.capB) === 103185, r35 ? `${usd(r35.conv_y)}, left ${usd(oe.capB)}` : "row missing");
+    !!r35 && Math.round(r35.conv_y) === (POST ? P41(103185, 86883) : 105857) && Math.round(oe.capB) === P41(103185, 86883), r35 ? `${usd(r35.conv_y)}, left ${usd(oe.capB)}` : "row missing");
   // The IRA's RMD inside the bucket cap. It can bind only in an RMD year inside the ladder window (2039–2040 here: A's first RMD year is
   // 2039, the window ends 2040), with the buckets' pre-tax money between the slider and the slider plus the whole RMD — so this needs its own
   // fixture (found by a sweep at the build; the IRA-heavy fixtures above run out of bucket money first). Holdings at 40 %, a $900,000 IRA, a

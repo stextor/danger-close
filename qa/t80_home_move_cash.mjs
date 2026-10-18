@@ -26,13 +26,13 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v617";
-const KNOWN_VERSIONS = ["v616", "v617"];
+const KNOWN_VERSIONS = ["v616", "v617", "v618"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v617"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v617", "v618"].includes(VER);   // an array, so the next registration widens it
 // The oracle's source and the differential's pair — constants, NOT `VER === "v617"`, so the registrar cannot widen them (t76 records why).
 const ORACLE_SRC = "v616", D_PRIOR = "v616", D_CUR = "v617";
 const require = createRequire(import.meta.url);
@@ -92,7 +92,12 @@ const oracleOf = (() => {
     }
   };
 })();
-T("A-0: SETUP — the oracle can be built: the v6.16 source and shim.txt are beside this run, and the constant occurs exactly once", !!oracleOf);
+// v6.18: §A is the v6.16 → v6.17 replacement proof, and it needs the v6.16 source beside the run. A run folder for a later pair (v6.17 →
+// v6.18 onward) does not carry it, so §A is skipped by design there, as §C is — it ran at the v6.17 ship (42 checks on v6.17, recorded in
+// the CHANGELOG). Where the source IS present, A-0 still asserts the oracle builds, so a broken anchor fails rather than skips.
+const _oracleSrcHere = existsSync(join(HERE, "..", `${ORACLE_SRC}.jsx`));
+if (_oracleSrcHere) T("A-0: SETUP — the oracle can be built: the v6.16 source and shim.txt are beside this run, and the constant occurs exactly once", !!oracleOf);
+else console.log(`  A — skipped by design (the ${ORACLE_SRC} source is not in this run folder; the ${ORACLE_SRC} → v617 proof ran at the v6.17 ship)`);
 if (oracleOf) {
   const O130 = await oracleOf(130000), ref130 = mcRun(O130, BASE);
   for (const x of XS) {
