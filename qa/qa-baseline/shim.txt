@@ -44,6 +44,12 @@ export const __g = {
   // v6.17 (D-38) — the home-move cash accessor that replaced HOME_SALE_PROCEEDS. GUARDED: absent before v6.17 (t80 reads `undefined`
   // on the v6.16 leg and asserts the constant's state there).
   homeMoveCash: _g("homeMoveCash"),
+  // v6.18 (D-41) — the one year-by-year read of the expense table that Engine D, Backtest and What-Breaks share, and the three display
+  // snapshots, read LIVE (recomputeDerivedExpenses reassigns them). GUARDED: tableYearExpense does not exist before v6.18 (t81 reads
+  // `undefined` on the v6.17 leg); recomputeDerivedExpenses and the snapshots exist on every leg.
+  tableYearExpense: _g("tableYearExpense"),
+  recomputeDerivedExpenses: _g("recomputeDerivedExpenses"),
+  snapshots: () => ({ pre: _g("PRE_MONTHLY"), early: _g("POST_MONTHLY_EARLY"), full: _g("POST_MONTHLY_FULL") }),
   // v5.34 — THE shared realized-gain rule. GUARDED for the same reason: it does not exist on
   // any pre-v5.34 build, and mk_testable.sh splices this shim into EVERY leg including frozen
   // ones. E-5 unit-tests this directly instead of comparing two engines' figures and hoping
