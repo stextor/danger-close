@@ -1,5 +1,77 @@
 # Changelog
 
+## v6.19 — the Monte Carlo's quarter calendar (D-46)
+
+**A MODELLING release** — METHODOLOGY gains *The Monte Carlo's calendar*. `docs/SCOPE_D46_MC_CALENDAR_V619.md` (repo-only, fulfilled). Found while
+scoping D-40 (`docs/SCOPE_D40_MC_TAX_V620.md`, repo-only): Steve chose to fix the calendar first, in its own release (that scope's DC-0), and
+then *"Let's continue with your recommendations"* on this scope's eight decisions — all (a). D-40, D-44 and D-45 follow as v6.20 on this
+calendar.
+
+**What was wrong (v6.18, measured).** Both Monte Carlo engines turned a quarter number into a date with one formula — quarter 0 was "June of
+the as-of year" for every plan — and read the expense table, the one-time rows, the ladder's end, the trust-fund year and the income streams
+at that date. But they decided when things happened by two other rules. The 6-year engine placed retirement and the claims at
+`round(months from the as-of month ÷ 3)`: right for every event only with an as-of date in May (in April — the example's month — while no
+event fell in a quarter's last month); for a plan saved in October it read its first retired quarters at September and December 2028, and the
+setup wizard's plans (as of 1 January, June claims) had both claims a quarter late. The 30-year engine (runs A–D, the stress set, the
+Dashboard, the mortgage what-if) counted quarters from **January** of the as-of year and never read the as-of month: its figures were
+identical for every as-of date in a year, and for an April–June as-of date it retired, and paid each claim, a quarter late. The year 2026 was
+typed into run A's length and label, the chart axis, the Stress tab's table and the longevity draws' current ages; the run headers said runs B
+and C start at retirement (they start at the as-of date). **Optimistic for most plans' 30-year figures.** Never registered; filed as D-46 and
+closed.
+
+**What changed (DC-1 to DC-8, all (a)).**
+- **One calendar** (`mcQuarterOf`, `mcQuarterDate`): quarter 0 is the calendar quarter containing the as-of date, each quarter is dated by its
+  own year and last month, and an event falls in the quarter containing its date — retirement, spouse B's retirement and both claims, in both
+  engines; `buildRetireOptions` and `buildPlanTimeline` use it. The two old quarter rules and five timeline fields nothing read are gone.
+- **The first quarter counts only the months from the as-of month** (DC-2): contributions and the bonus, spending, income, the inflation step
+  and the return scale by 3/3, 2/3 or 1/3. **A claim pays from its own month** (DC-3). The bonus falls in the January–March quarter.
+- **The stress set's forced years are calendar years** (DC-4): "a crisis in the first year of retirement" covers the retirement year's four
+  quarters; the random regime is still drawn every fourth quarter, forced or not, and ordinary runs are untouched.
+- **A plan saved after it retired gets no home-move cash** (DC-8) — its balance already holds it; the two engines used to disagree.
+- **The year comes from the plan.** Run A runs to the retirement quarter (`runExtendedMC` takes `totalQuarters`, records a final snapshot and
+  annualizes over the real length); the chart axis, the Stress table and the longevity ages use the as-of year.
+- **What the user reads.** The run headers and the tab's summary give the spans the runs model ("2026–2036 (10 years from your as-of date)");
+  run A reads "2 yr 9 mo" on the example; run C's trajectory table, the Stress tab's table and the Guardrails tab's yearly table label each
+  row with its quarter's true date ("Mar 2029 ◀ RETIRE"); the retirement cards count the Social Security gap in months; the Monte Carlo tab
+  and the Field Manual (Monte Carlo entry, dated v6.19) say how the calendar works. No notice (DC-6). The Stress tab's `1.04^years`
+  benchmark is filed for v6.20 (DC-5, D-47); runs B and C keep their spans from the as-of date (DC-7).
+- **On the example** (as of 2026-04-18, January events) the 6-year run is **bit-identical**; the 30-year engine moves only by its four event
+  quarters — 30-year success above $800K 81.0% → 80.3%, median $1,609K → $1,565K (BASE, at the scope). A plan saved in November moves to
+  78.0% / $1,487K.
+
+**Tests.** New suite **`t82`** — **105** on v6.19, **16** on v6.18 (that leg pins what is observable from outside as dated
+`[KNOWN DEFECT]` checks: the as-of month ignored, the retirement balance stepping by quarters, the claim month rounded, the cash for a plan
+already retired, the old label formula and the five 2026 sites). §A: the calendar against an **independent oracle written from dates** for an
+as-of date in every month of two years and every event month, and `RETIRE_OPTIONS` and the timeline through the app. §B by AST: the old label
+formula, the old quarter rules, the unread fields and the literal 2026 are gone from the machinery; both engines date, scale and pay through
+the calendar. §C across v6.18 → v6.19: the 6-year engine bit-identical on every April household with first-month events, and a March claim as
+the control that it discriminates. §D: the 30-year engine **bit-identical to an ORACLE MODULE built from the v6.18 source with its four event
+quarters one earlier** (the `t80` §A builder) — runs B and C, stochastic longevity, sustained LTC and the mortgage what-if. §E: forced years
+traced quarter by quarter (`runExtendedMC`'s test-only `regimeTrace`). §F, §G: the first quarter and a mid-quarter claim exact on the planned
+path. §H: Engines B, C and D bit-identical. §I (the extinction): the planned balance at retirement falls every month by no more than a month's
+contributions and return, for as-of dates across 2026–2027. §J: run A's length and average return, and 2027's longevity ages against the oracle
+with 2027 in the age line. §L: no home-move cash for a plan already retired. §K rendered.
+**Parity:** `t2`'s `INTENDED_DIFFS` gains `"v618→v619": ["extMC", "stress"]` — **`mc` identical**, and the seven non-Monte-Carlo keys identical.
+**Re-pins:** none — no Monte Carlo pin moved (`t42` D-4, the 6-year planned path, held). `t33`'s PINS gain a `v619` entry equal to v6.18's (its Roth fixtures read no quarter).
+Controls `qa/tools/controls_v619_calendar.py` (repo-only): **11 of 11 as expected** — the old label formula at one site, the 30-year retirement quarter from
+January, a claim a quarter late, `round` back in the retirement options, the first-quarter and claim shares removed, 2026 back in the age line,
+forced years by year-from-start, the cash for a plan already retired, the bonus on `q % 4 === 3`, and the unmutated run; every file restored
+and hash-checked.
+**Tooling:** `package_check`'s OPEN allowlist gains `SCOPE_D40_MC_TAX_V620.md` — decided and unbuilt, shipped here so Steve's ten decisions are on record; it expires at the v6.20 build, which must mark the scope FULFILLED and remove the entry together. I-2 named the scope on the first check of this package, as designed. Changed after the suite run; `t21` re-run on the changed file: 64 passed, 0 failed.
+**Registered:** `v619` by AST (342 sites), `t1`'s and `t4`'s version strings, `t33`'s PINS and the three Python suites by hand. The shim exports
+the calendar functions, `RETIRE_OPTIONS`, `applyScenarioProbs` and `PROB_PRESETS` (guarded).
+
+**Suite, run from the packaged copies:** **7,763 app checks across 81 app suites** (the eight `-spend617` attribution runs, 236 checks, included), 0 failed, 0 DIED; MC parity 10/10; tooling `t21` 64, `domdiff` 36, `sets` 12 + 12; **GRAND 7,897**. Against v6.18's line the counts that moved are `t81` 130 → 78 (§D, the v6.17 → v6.18 differential, takes its designed skip in a run folder without the v6.17 source) and, in tooling, `domdiff` 44 → 36 (v6.18's pair carried the v617 → v618 arm's masks; this pair's arm has four), and `t82` is new. Every skip line read: each is a designed pair-pinned skip, and `t82` takes none on the v6.19 leg. Run from the PACKAGED copies in one pass: a run folder built by `mk_runfolder.sh v618 v619` from a fresh clone of `386bb87` carrying the package as cut (78 files); the documentation and the allowlist entry above were finished after the run (`CHANGELOG.md`, `TESTING.md`, its archive, `PROJECT_KNOWLEDGE_INDEX.md` and the two scopes' status lines — a run folder holds the source, `METHODOLOGY.md` and the built page, and `METHODOLOGY.md` was final). Source `35d3dcb436b7ad801b6c9588d5429cb0` · built `d9e0df4297fce9946417db5b9b322ee3` (`smoke_built` 22 passed, 0 failed); v6.18 rebuilt first from its own source to its published `d228f1d3…`.
+
+**Limitations, disclosed:**
+- Quarters stay the unit: an as-of date on the 28th counts its whole month, and the first quarter's return is scaled linearly.
+- My Data dates a plan in UTC, so an evening save in the Americas on a quarter's last day falls in the next quarter (D-48).
+- The Monte Carlo still reads one month per quarter for the expense table and charges a one-time row only in a quarter's (now true) last month
+  (D-45, with D-40 and D-44 at v6.20). Its income tax is still the flat $4,000 a quarter during the ladder (D-40).
+- The Stress tab's 30-year table compares the median with `household × 1.04^years`, which ignores withdrawals (D-47).
+
+**Registered:** D-46 filed and closed; D-47 and D-48 opened; D-45's entry notes the true quarter-end months.
+
 ## ops 2026-10-18 — the v6.18 entry's provenance line
 
 **KIND: ops** — documentation only; **v6.18 stays current** (source `208bf89d1bd83fc55d430f2eec60d202`, built `d228f1d3391231406848d2647cb97fec`). No app source, suite or figure changes.

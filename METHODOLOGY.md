@@ -24,7 +24,11 @@ simulated year and applies it to all four quarters (a separate quarterly noise t
 10% in crisis, varies returns *within* the year around the regime's mean). Holding the regime for
 a full year is deliberate — the regime parameters are calibrated as annual outcomes, and
 redrawing quarterly shrank regime variance roughly fourfold and largely erased sequence-of-returns
-risk, since a crisis quarter would simply be averaged away by the next boom quarter.
+risk, since a crisis quarter would simply be averaged away by the next boom quarter. The "years" here
+are counted from the plan's as-of date. The stress tests' *forced* years are calendar years instead
+(from v6.19): a forced regime replaces the drawn one quarter by quarter through that calendar year, so
+"a crisis in the first year of retirement" covers the four quarters of the retirement year; the random
+draw still happens every fourth quarter, forced or not (*The Monte Carlo's calendar*, below).
 
 Why: single-Gaussian Monte Carlo understates fat tails and the correlation between returns and
 inflation. A mixture of regimes produces left tails and return/inflation relationships closer to
@@ -2571,3 +2575,70 @@ survivor factor after inflating and v6.18 before.
   from the example, a spreadsheet import or a hand-edited backup may not be. Found at the v6.18 build; the v6.18 scope's premise had said
   the Monte Carlo charges one-time rows "when they fall". Optimistic for the Monte Carlo; not changed here. MissingFeatures **D-45**; the
   Field Manual says so.
+
+## The Monte Carlo's calendar (v6.19)
+
+**The rule.** Both Monte Carlo engines (`runMonteCarlo`, the 6-year chart; `runExtendedMC`, runs A–D, the stress set, the Dashboard and the
+mortgage what-if) step one quarter at a time from the plan's as-of date, on **one calendar**: quarter 0 is the calendar quarter that
+contains the as-of date, quarter *q* the *q*-th calendar quarter after it, and each quarter is dated by its own year and last month (March,
+June, September, December) — the date at which the engines read the expense table and the one-time rows, compare with the Roth ladder's
+end and the mortality years, and pass to the Social Security trust-fund factor and the income streams. An event falls in the quarter that
+contains its date: retirement and spouse B's retirement (always 1 January), and each Social Security claim. Two refinements, both exact to
+the month: **the first quarter counts only the months from the as-of month on** — contributions and the bonus, spending, income, the
+inflation step and the quarter's return are all scaled by 3/3, 2/3 or 1/3 (the as-of month counts in full; the return, noise included, is
+scaled linearly); and **a claim pays from its own month** — a November claim is paid two of its quarter's three months. The bonus is paid in
+the January–March quarter of each working year. A plan whose retirement date falls before its as-of quarter gets no home-move cash (the
+balance on the as-of date already holds it); one saved in its retirement quarter gets it in quarter 0. Runs B and C cover ten and thirty
+years **from the as-of date**; run A runs to the retirement quarter.
+
+**What it did through v6.18 (D-46).** Both engines dated quarter *q* as `as-of year + ⌊(q+1)/4⌋`, month `((q+1) mod 4)·3 + 3` — quarter 0
+was "June of the as-of year" for every plan — while deciding when things happened by two other rules:
+- `runMonteCarlo` placed events at `round(months from the as-of month ÷ 3)`. Its labels were right only for an as-of date in April–June,
+  and `round` disagrees with the calendar for some months: with an as-of date in a quarter's first month, an event in a quarter's last month
+  landed a quarter late; with an as-of date in a quarter's last month, an event in a quarter's first month landed a quarter early. It was
+  right for every event only with an as-of date in May — and in April, the example's month, while no event fell in a quarter's last month.
+  The setup wizard builds as-of 1 January with both claims in June: both claims a quarter late, under labels a quarter late.
+- `runExtendedMC` placed events at quarters counted from **January** of the as-of year and never read the as-of month — so its figures were
+  identical for every as-of date in the same year, and for an April–June as-of date it retired, and paid each claim, one quarter late.
+- The year 2026 was typed into the machinery: run A's length and label, the chart's axis, the Stress tab's 30-year table, and the current
+  ages stochastic longevity starts from. The run headers said runs B and C start at retirement; they start at the as-of date.
+
+For a January 2029 retirement:
+
+| As-of date | 6-year engine: retires in the quarter it labels | 30-year engine: retires in the quarter it labels | Right |
+|---|---|---|---|
+| 2026-01-15 | June 2029 | June 2029 | Jan–Mar 2029 |
+| 2026-04-18 (the example) | March 2029 ✓ | June 2029 | Jan–Mar 2029 |
+| 2026-06-15 | December 2028 | June 2029 | Jan–Mar 2029 |
+| 2026-07-15 | December 2028 | June 2029 | Jan–Mar 2029 |
+| 2026-10-18 | September 2028 | June 2029 | Jan–Mar 2029 |
+| 2027-01-15 | June 2029 | June 2029 | Jan–Mar 2029 |
+
+**What it moved** (measured at the scope on a session-only prototype; BASE, 3,000 paths, run C's shape):
+
+| Household | 6-yr median | 30-yr >$800K | 30-yr median |
+|---|---|---|---|
+| Example (as of 2026-04-18) | $1,990K → $1,990K (bit-identical) | 81.0% → 80.3% | $1,609K → $1,565K |
+| Example, as of 2026-06-15 | $1,968K → $1,971K | 81.0% → 79.3% | $1,609K → $1,540K |
+| Example, as of 2026-10-18 | $1,947K → $1,939K | 81.0% → 78.4% | $1,609K → $1,500K |
+| Example, as of 2026-11-20 | $1,947K → $1,932K | 81.0% → 78.0% | $1,609K → $1,487K |
+| Single, as of 2026-10-18 | $1,876K → $1,868K | 86.6% → 84.9% | $1,503K → $1,414K |
+
+The 30-year figures were **optimistic** for most plans — the engine accumulated a quarter or more longer than the plan does — and more so the
+later in the year a plan was saved. The 6-year figures barely move and, on the example, not at all.
+
+**How the change is attributed.** On the example's April as-of date with January events, the 6-year engine is bit-identical across v6.18 →
+v6.19 (`t82` C), and the 30-year engine is bit-identical to a module built from the v6.18 source with its four event quarters — retirement,
+spouse B's retirement and the two claims — each one earlier (`t82` D, on every April household with first-month claims): that is the whole
+of its move there. Away from that shape, the calendar is checked against an oracle written from dates for an as-of date in every month of two
+years and every event month (`t82` A), and the planned balance at retirement is shown to change smoothly with the as-of date (`t82` I) —
+which v6.18's did not, stepping by a quarter in some months and not at all in others.
+
+**Simplifications, stated.**
+- **Quarters stay the unit.** An as-of date on the 28th counts its whole month; nothing is stepped monthly.
+- **The first quarter's return is scaled linearly** (the regime return and its noise times the share), not compounded by the month.
+- **My Data's as-of date is the UTC date of saving**, so an evening save in the Americas on a quarter's last day falls in the next quarter
+  (MissingFeatures, filed at v6.19).
+- **The Monte Carlo still reads one month per quarter** for the expense table and charges a one-time row only if it is dated in a quarter's
+  last month — now the quarter's true last month (D-45, to be fixed at v6.20 with D-40 and D-44).
+- **The Stress tab's 30-year table** compares the median with `household × 1.04^years`, a benchmark that ignores withdrawals (filed at v6.19).
