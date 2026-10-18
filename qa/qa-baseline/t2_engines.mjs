@@ -99,6 +99,11 @@ if (MODE === "compare") {
     // are hand-built Ps with no share and stay byte-identical, as do the three Monte Carlo keys and `stateTax`: share 0 reduces every
     // changed expression to v6.06's operand for operand.
     "v606→v607": ["rothOther"],
+    // v6.19 (D-46 — docs/SCOPE_D46_MC_CALENDAR_V619.md): the Monte Carlo's quarter calendar. `extMC` and `stress` MUST move: the 30-year
+    // engine retires and claims one quarter earlier on the fingerprint's April as-of date, and the stress set's forced years become calendar
+    // years. `mc` must NOT: on an April as-of date with January events the 6-year engine's labels and event quarters are v6.18's (t82 C proves
+    // it on every qualifying household). The seven non-Monte-Carlo keys must not move.
+    "v618→v619": ["extMC", "stress"],
   };
   const expectDiff = new Set(INTENDED_DIFFS[`${PRIOR}→${CUR}`] || []);
   for (const key of Object.keys(a)) {

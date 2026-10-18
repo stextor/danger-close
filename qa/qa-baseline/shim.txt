@@ -49,6 +49,17 @@ export const __g = {
   // `undefined` on the v6.17 leg); recomputeDerivedExpenses and the snapshots exist on every leg.
   tableYearExpense: _g("tableYearExpense"),
   recomputeDerivedExpenses: _g("recomputeDerivedExpenses"),
+  // v6.19 (D-46): the Monte Carlo's quarter calendar, the run options and the preset weights (t82; SCENARIOS is exported above). GUARDED: none of the calendar
+  // functions exists before v6.19, and t82 reads RETIRE_OPTIONS / SCENARIOS live because loads and presets reassign or mutate them.
+  mcAsOfQuarter: _g("mcAsOfQuarter"),
+  mcQuarterOf: _g("mcQuarterOf"),
+  mcQuarterDate: _g("mcQuarterDate"),
+  mcQuarterFrac: _g("mcQuarterFrac"),
+  mcPaidShare: _g("mcPaidShare"),
+  mcSnapshotDate: _g("mcSnapshotDate"),
+  RETIRE_OPTIONS: () => _g("RETIRE_OPTIONS"),
+  applyScenarioProbs: _g("applyScenarioProbs"),
+  PROB_PRESETS: () => _g("PROB_PRESETS"),
   snapshots: () => ({ pre: _g("PRE_MONTHLY"), early: _g("POST_MONTHLY_EARLY"), full: _g("POST_MONTHLY_FULL") }),
   // v5.34 — THE shared realized-gain rule. GUARDED for the same reason: it does not exist on
   // any pre-v5.34 build, and mk_testable.sh splices this shim into EVERY leg including frozen
