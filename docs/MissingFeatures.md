@@ -55,8 +55,14 @@ items now carry their status; IDs are unchanged.
 | D-37 | **OPEN** (Low–Med, conservative) | two self-employment deductions not taken: half the self-employment tax (§164(f), above the line — it would lower AGI and every MAGI) and the QBI deduction (§199A). Disclosed in the Taxes tab's method note, the Field Manual and METHODOLOGY |
 | D-38 | **CLOSED v6.17** *(filed and fixed 2026-10-16)* | the cash from a home move at retirement is the My Data field `homeMoveCash` (signed; 0 = no move), read by the two Monte Carlo engines through one accessor — through v6.16 a fixed $130,000 constant was added to every plan, undisclosed. A plan saved before v6.17 reads $0 with a notice; the example keeps $130,000 |
 | D-39 | **OPEN** (Low–Med, either direction) | the Withdrawal, Taxes, IRMAA and Roth tabs do not see the home-move cash — only the Monte Carlo figures do. Disclosed in My Data, the Monte Carlo tab, the Field Manual and METHODOLOGY |
+| D-40 | **OPEN** (Med, either direction) | the Monte Carlo's only income tax is a flat $16,000 a year during the Roth ladder (`ROTH_TAX_DRAG_Q`), whatever the plan converts or owes, and none after it. Close to the example's own tax; optimistic for a larger or state-taxed household, conservative for a smaller one. Shown on the Income tab as "modeled in MC sim"; not otherwise disclosed |
+| D-41 | **CLOSED v6.18** *(filed and fixed 2026-10-18)* | the Withdrawal tab (and Backtest and What-Breaks) spent the expense table as it stood in June 2029 and June 2031 — the example's dates — for every plan; from v6.18 each year's own months and one-time rows (`tableYearExpense`), and the display figures follow the plan's dates |
+| D-42 | **OPEN** (Low–Med, conservative) | a $40,000 car every 8 years (`AUTO_REPLACE_COST`) in the Monte Carlo runs with auto-replacement, on every plan — disclosed in the Field Manual as a fixed example schedule; a household that enters car purchases as expenses pays twice |
+| D-43 | **OPEN** (Low, display only) | the Income tab's "Post-car draw" and "Monthly shortfall (car paid off)" subtract the example's $400 car payment from every plan's post-Medicare spending |
+| D-44 | **OPEN** (Low, optimistic) | one-time expenses: the Monte Carlo subtracts them in today's dollars (it inflates the monthly rows); the Withdrawal tab never sees one dated before the retirement year. Disclosed at v6.18 — the first in the Field Manual, the second on the Withdrawal tab |
+| D-45 | **OPEN** (Low–Med, optimistic) | the Monte Carlo charges a one-time row only when it is dated in March, June, September or December (it samples the table at each quarter's last month and the match is exact), so the example's April 2029 rows ($28,000) never reach it; rows added in My Data are dated June. Found at the v6.18 build; disclosed in the Field Manual |
 
-**Open, in this file: D-4, D-11 (narrowed), D-13, D-15, D-16, D-18 (recurring), D-32, D-37, D-39; D-5 declined.** *(D-38 filed and closed, and D-39 added, at v6.17; D-36 closed and D-37 added at v6.16; D-17 closed and D-36 added at v6.14; D-35 closed at v6.09; D-34 closed and D-35 added at v6.08; D-33 closed and D-34 added at v6.07; D-28 closed and D-33 added at v6.06.)* Non-tax open threads
+**Open, in this file: D-4, D-11 (narrowed), D-13, D-15, D-16, D-18 (recurring), D-32, D-37, D-39, D-40, D-42, D-43, D-44, D-45; D-5 declined.** *(D-40 to D-43 filed from the v6.17 findings note, D-41 closed, and D-44 and D-45 added, at v6.18; D-38 filed and closed, and D-39 added, at v6.17; D-36 closed and D-37 added at v6.16; D-17 closed and D-36 added at v6.14; D-35 closed at v6.09; D-34 closed and D-35 added at v6.08; D-33 closed and D-34 added at v6.07; D-28 closed and D-33 added at v6.06.)* Non-tax open threads
 re-homed the same day are in `ARCHITECTUREIssues.md` **E-29**.
 
 | Field | Value |
@@ -1521,3 +1527,62 @@ negative figure (a next home that costs more) is not taken from the pool at all.
 so the Taxes and IRMAA tabs follow it; the Roth comparison has no spending model. The direction depends on the sign. Putting the cash into
 Engine D's pool moves the schedule, the tax engines' MAGI and IRMAA — its own scope. **Disclosed at v6.17** in My Data's note, the Monte
 Carlo tab, the Field Manual and METHODOLOGY (*Cash from a home move*). **Low–medium.**
+
+## D-40 to D-43 · Four fixed figures every plan inherited from the example — filed at v6.18 from the findings note
+
+Measured on 2026-10-17 against v6.17 and written up in `docs/FINDINGS-v6_17-fixed-plan-figures.md` (repo-only; its F-1 to F-4), after
+Steve approved measuring `ROTH_TAX_DRAG_Q` and `AUTO_REPLACE_COST`. The §K2 sweep then found none of them registered. Order agreed: D-41
+first (v6.18, below), then D-40, then D-42 and D-43 together. Each will have its own scope, with its measurements re-run on the build it
+starts from.
+
+- **D-40 · The Monte Carlo's only income tax is a flat $16,000 a year during the Roth ladder — OPEN.** `ROTH_TAX_DRAG_Q = 4000` is subtracted
+  every quarter up to the ladder's end in `runMonteCarlo` and `runExtendedMC`, on every plan, whatever it converts; the spending draw carries
+  no tax term, and after the ladder nothing is charged (RMDs included). On the example it is close to the Taxes tab's own $215K ($192K);
+  for the example's holdings ×1.6 in Georgia the Taxes tab says $368K and 30-year success reads 96.9% against 95.2% with that tax charged.
+  **Either direction; medium.** Candidate fix: the Monte Carlo pays the tax the Taxes tab computes, at the plan's conversion setting —
+  which is built on Engine D's draws, so it waited for D-41.
+- **D-42 · A $40,000 car every 8 years, on every plan — OPEN.** `AUTO_REPLACE_COST = 40000`, spent in March of retirement years 8, 16 and 24 by
+  `runExtendedMC` when auto-replacement is on (the Stress and Dashboard figures, the mortgage what-if). Disclosed in the Field Manual as a
+  fixed example schedule. On the example, 30-year success 81.0% with it and 84.8% without. **Conservative; low–medium.** A household that
+  enters car purchases in the expense table pays twice. Candidate fix: a My Data field (cost and interval, 0 = none), as v6.17 did for the
+  home-move cash.
+- **D-43 · The Income tab subtracts the example's $400 car payment — OPEN.** "Post-car draw" and "Monthly shortfall (car paid off)" are
+  `POST_MONTHLY_FULL − 400` (four sites). Display only. **Low.** To be fixed with D-42.
+
+## D-41 · The Withdrawal tab spent the expense table on the example's calendar — filed and ✅ CLOSED v6.18
+
+> ✅ **CLOSED v6.18 (2026-10-18).** `docs/SCOPE_D41_ENGINE_D_SPENDING_V618.md` (fulfilled, repo-only); `qa/t81_engine_d_spending.mjs`.
+
+Through v6.17 Engine D, Backtest and What-Breaks spent `POST_MONTHLY_EARLY` before spouse B's Medicare year and `POST_MONTHLY_FULL` after —
+the expense table at "2029-06" and "2031-06", the example household's dates typed into the code — for every plan. A plan retiring in 2032
+spent a month that still held its current home's costs and none of its retirement rows ($6,700 a month where its own table says $8,170, then
+$8,020: on the same plan moved three years later, $401K less lifetime spending and a $734K higher ending portfolio than its own table, read
+year by year, gives). A row ending after June
+2031 was charged for life, one starting later never, and one-time rows never arrived. The Taxes, IRMAA and Roth tabs took the error through
+the bridge. **Fixed at v6.18:** one function, `tableYearExpense`, sums each year's own months and one-time rows for all three engines; the
+display figures take their months from the plan's timeline by one rule (the example's three are unchanged); the Withdrawal tab and the
+Field Manual say where the spending comes from. Every moved pinned figure was re-pinned with its attribution: the same suites run on v6.17's
+spending written as a table and reproduce every v6.17 figure exactly.
+
+## D-44 · One-time expenses: the Monte Carlo charges them in today's dollars; the Withdrawal tab misses one dated before retirement — opened at v6.18, DISCLOSED
+
+Filed at the D-41 build. Both Monte Carlo engines subtract `getOneTimeExpenses(dateStr)` uninflated (`runMonteCarlo`, `runExtendedMC`) — when
+they charge it at all, see D-45 — while they inflate the monthly rows — optimistic by the inflation to the row's date (a $20,000 row ten years out at 2.7% is charged about $6,100
+too little). Engine D starts at retirement from today's balances, so a one-time row dated before the retirement year never reaches the
+Withdrawal tab — optimistic for that tab, by the row's amount. **Low.** Not
+changed at v6.18: inflating the Monte Carlo's one-time rows moves every Monte Carlo figure and belongs with D-40. **Disclosed at v6.18**: the
+Monte Carlo half in the Field Manual's Withdrawal Strategy entry, the Withdrawal-tab half in that tab's note; both in METHODOLOGY (*The
+Withdrawal tab spends the expense table year by year*).
+
+## D-45 · The Monte Carlo charges a one-time row only when it is dated in a quarter's last month — opened at v6.18, DISCLOSED
+
+Found at the D-41 build by an independent review of the release, after the scope's premise (§0.1) and the v6.17 findings note had both said
+the Monte Carlo subtracts one-time rows "when they fall". It does not: `runMonteCarlo` and `runExtendedMC` read the table once a quarter, at
+`${year}-${03|06|09|12}`, and `getOneTimeExpenses` needs the row's month to match exactly. So a one-time row dated in any other month is never
+charged by either engine. The example's golf cart and closing costs (April 2029, $28,000) are never charged — measured: both engines give
+byte-identical output with and without them, and the same rows dated June 2029 move both (`t81` C2, pinned as a dated `[KNOWN DEFECT]`).
+A row added through My Data is saved as `${year}-06` and IS charged; the example's, a spreadsheet import's or a hand-edited backup's may not
+be. The v6.17 home-move note ("If the next home's closing costs are a one-time row in your expenses, they are already counted") is therefore
+untrue for the example's closing costs in the Monte Carlo. **Optimistic; low–medium.** Not changed at v6.18 (the scope kept the Monte Carlo
+bit-identical). Candidate fix, with D-40 and D-44: charge a one-time row in the quarter that contains its month, inflated. **Disclosed at v6.18**
+in the Field Manual's Withdrawal Strategy entry and Backtest's comparison sentence.
