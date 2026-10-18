@@ -28,19 +28,19 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v612";
-const KNOWN_VERSIONS = ["v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618"];
+const KNOWN_VERSIONS = ["v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v612", "v613", "v614", "v615", "v616", "v617", "v618"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619"].includes(VER);   // an array, so the next registration widens it
 const require = createRequire(import.meta.url);
 const M = await import(pathToFileURL(join(HERE, `app_${VER}.mjs`)).href);
 // v6.18 (D-41): Engine D reads the expense table year by year, which moved one §B hand pin (2032's taxable Social Security). PIN18 picks the v6.18 figures (measured at the build);
 // the v6.18 leg is ALSO run with DC_V617_SPENDING=1 — each plan loaded with v6.17's spending as a table (qa/tools/v617_spending.mjs, split
 // at that plan's own Medicare year) — where every v6.17 figure must still come out exactly: the attribution of each move to the read.
-const POST_D41 = ["v618"].includes(VER);   // an array, so the registrar widens it
+const POST_D41 = ["v618", "v619"].includes(VER);   // an array, so the registrar widens it
 const SPEND17 = POST_D41 && process.env.DC_V617_SPENDING === "1";
 const PIN18 = POST_D41 && !SPEND17;
 const P41 = (v617, v618) => PIN18 ? v618 : v617;

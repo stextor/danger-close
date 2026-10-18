@@ -317,6 +317,15 @@ tally "t80-$CUR"   node t80_home_move_cash.mjs "$CUR"
 # Both legs: the prior leg pins the snapshots as a dated [KNOWN DEFECT].
 tally "t81-$PRIOR" node t81_engine_d_spending.mjs "$PRIOR"
 tally "t81-$CUR"   node t81_engine_d_spending.mjs "$CUR"
+# t82 (v6.19) — the Monte Carlo's quarter calendar (D-46): the calendar against an INDEPENDENT oracle written from dates, for an as-of date in
+# every month of two years and every event month; RETIRE_OPTIONS and the timeline take their quarters from it; by AST the old label formula,
+# the two old quarter rules and the literal 2026 are gone from the machinery; the example's 6-year run bit-identical across the pair; the
+# 30-year engine bit-identical to ORACLE MODULES built from the v6.18 source with its four event quarters one earlier (and 2027 in the age
+# line); the stress set's forced years are calendar years (regime trace); the first quarter and a mid-quarter claim exact on the planned path;
+# the planned balance at retirement smooth in the as-of date (the extinction); Engines B, C, D unmoved; a plan saved after it retired gets no
+# home-move cash; rendered. Both legs: the prior leg pins what is observable from outside as dated [KNOWN DEFECT] checks.
+tally "t82-$PRIOR" node t82_mc_calendar.mjs "$PRIOR"
+tally "t82-$CUR"   node t82_mc_calendar.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
