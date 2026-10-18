@@ -841,6 +841,11 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
     //   Removed at v5.57.1 after re-verifying every premise by content against v5.57.
     const OPEN = new Set([
       "SCOPE_STANDING_AUDIT.md",                  // not a build scope at all (OPERATIONS §K)
+      // Added at the v6.19 ship (2026-10-18). D-40 / D-44 / D-45 — the Monte Carlo pays the Taxes tab's tax. All ten decisions taken
+      // the day it was written, so it is OPEN-because-UNBUILT, not OPEN-because-undecided; it waited one release for the calendar
+      // (D-46, v6.19), which Steve chose to fix first (its DC-0). ⚠ EXPIRES AT THE v6.20 BUILD: that release marks the scope FULFILLED
+      // with a build record AND removes this entry, in the same package — the two-halves rule in the removal notes below.
+      "SCOPE_D40_MC_TAX_V620.md",
       // ── REMOVED at the v5.95 ship: "SCOPE_D12_PLAN_TYPE_PER_PERSON.md" — FULFILLED (all three phases), un-pooled, repo-only; the removal
       //    shipped in the same package that marked it FULFILLED, as its own entry required.
       // ── REMOVED at the v5.74 ship: "SCOPE_TAXES_DRAWDOWN.md". The release built it: Engines B and C consume
