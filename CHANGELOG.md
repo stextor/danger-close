@@ -1,5 +1,17 @@
 # Changelog
 
+## ops 2026-10-18 — the v6.18 entry's provenance line
+
+**KIND: ops** — documentation only; **v6.18 stays current** (source `208bf89d1bd83fc55d430f2eec60d202`, built `d228f1d3391231406848d2647cb97fec`). No app source, suite or figure changes.
+
+The v6.18 entry shipped without its provenance line — the source and built-page md5s that end each release's suite line (OPERATIONS §G, from
+v5.12) and that `package_check` H-1 and H-2 compare with the files the live site serves. So the post-ship check could not run them: it reported
+50 passed, 0 failed and **H-1 skipped** ("the newest CHANGELOG entry carries 0 md5s"). Owned: the suite record was rewritten after the review's
+corrections and the line was not carried into it; the simulated post-upload check before shipping skipped H-1 the same way, and its skip line
+went unread because only the failure count was checked. A skipped check is not a passed one (`package_check` says so on every run). This entry adds the line to v6.18's suite record,
+marked as added; `PROJECT_KNOWLEDGE_INDEX.md` rolls its CHANGELOG hash row. Verified by `package_check` on this package, and after the upload
+with all four arguments (H-1 and H-2 must then pass, not skip).
+
 ## v6.18 — the Withdrawal tab spends the expense table at the plan's own dates, year by year (D-41)
 
 **A MODELLING release** — METHODOLOGY gains *The Withdrawal tab spends the expense table year by year*. `docs/SCOPE_D41_ENGINE_D_SPENDING_V618.md`
@@ -73,7 +85,7 @@ no typed "v6.17" in a SETUP check. The shim exports `tableYearExpense`, `recompu
 **`t80` §A now skips by design** in a run folder without the v6.16 source (any pair after v6.16 → v6.17); it ran at the v6.17 ship. `t80` reads
 28 on each leg here.
 
-**Suite, run from the packaged copies:** **7,656 app checks across 80 app suites** (the eight `-spend617` attribution runs, 236 checks, included), 0 failed, 0 DIED; MC parity 10/10; tooling `t21` 64, `domdiff` 44, `sets` 12 + 12; **GRAND 7,798**. Against v6.17's line the counts that moved are `t14` 47 → 48, `t19` 68 → 71 and `t80` 42 → 28, and `t81` is new. Run from the PACKAGED copies in one pass: a run folder built by `mk_runfolder.sh v617 v618` from a fresh clone of `52fe385` carrying the package as cut (81 files); the documentation was finished after the run (no suite reads it but `METHODOLOGY.md`, which was final). An earlier pass on a first cut was stopped and discarded when the review's copy corrections changed the source.
+**Suite, run from the packaged copies:** **7,656 app checks across 80 app suites** (the eight `-spend617` attribution runs, 236 checks, included), 0 failed, 0 DIED; MC parity 10/10; tooling `t21` 64, `domdiff` 44, `sets` 12 + 12; **GRAND 7,798**. Against v6.17's line the counts that moved are `t14` 47 → 48, `t19` 68 → 71 and `t80` 42 → 28, and `t81` is new. Run from the PACKAGED copies in one pass: a run folder built by `mk_runfolder.sh v617 v618` from a fresh clone of `52fe385` carrying the package as cut (81 files); the documentation was finished after the run (no suite reads it but `METHODOLOGY.md`, which was final). An earlier pass on a first cut was stopped and discarded when the review's copy corrections changed the source. Source `208bf89d1bd83fc55d430f2eec60d202` · built `d228f1d3391231406848d2647cb97fec` (`smoke_built` 22 passed, 0 failed); v6.17 rebuilt first from its own source to its published `067c8740…`. *(This provenance line was missing from the entry as shipped and was added on 2026-10-18 by the ops entry above.)*
 
 **Limitations, disclosed:**
 - The inflation base is unchanged: Engine D inflates from the retirement year and starts from today's balances without growth (the v5.10 house rule).

@@ -299,7 +299,7 @@ console.log(pool.length,"files ·",hashed.size,"hashed rows ·",pool.filter(f=>!
 | `TESTING.md` | `d675394e1a25681b4f8dcddd28910afc` | `TESTING.md` |
 | `qa-baseline-README.md` | `9289a5b407061e76d94bc0c5812f8f71` | `qa/qa-baseline/README.md` — **rowed 2026-10-12** (ops, E-29 (c)): the pool flattens the path, so `package_check` E-1b resolves this name only through this cell. Pool copy verified byte-identical to the repo's before the row was written. |
 | `METHODOLOGY.md` | `97877c254d0c3f8c3b0f991ed8b2494e` | `METHODOLOGY.md` |
-| `CHANGELOG.md` | `f5bfd2b8e09c600b58e60b50110373b7` | `CHANGELOG.md` |
+| `CHANGELOG.md` | `ac4edd6c7af6ad36cd22063933406fbc` | `CHANGELOG.md` |
 | `MissingFeatures.md` | `f7e9df3c55b796321323e307efeddf76` | `docs/MissingFeatures.md` |
 | `README.md` | `eec58396f932b3209de79c2400dbfb88` | `README.md` |
 
@@ -1130,6 +1130,15 @@ retired and superseded. They get no row because there is no file. Checked 2026-0
 committed tree, so the next sweep does not re-open them.
 
 ## Retirement list (delete-first; nothing replaces these)
+
+### At the ops package of 2026-10-18 (the v6.18 provenance line) — DELETE THESE FIRST
+
+| Delete | Because |
+|---|---|
+| `CHANGELOG.md` | replaced — the v6.18 entry gains its provenance line; an ops entry records it |
+| `PROJECT_KNOWLEDGE_INDEX.md` | replaced — this edit; `CHANGELOG.md`'s row rolled last |
+
+**Pool stays 140.** Nothing arrives new.
 
 ### At the v6.18 ship (2026-10-18) — DELETE THESE FIRST
 
