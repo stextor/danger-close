@@ -1,5 +1,56 @@
 # Changelog
 
+## ops 2026-10-19 (second) — every qa/ file leaves project knowledge
+
+**KIND: ops** — documents and tooling; **v6.20 stays current** (source `8db224990e86ddcbe2180f96b6a52889`, built `2a0b45ea9c1425752ff8918862e15202`).
+No app source, suite logic or figure changes. The morning's trim left the meter at **1,816,951 of 2,000,000** (142 files); about half of it
+was test and harness code that no session could run from the pool. `docs/SCOPE_UNPOOL_QA_CODE.md` (repo-only, now FULFILLED): Steve took
+DC-1 to DC-4 as recommended, all (a) — every `qa/` file leaves, the hash table is archived, chat-only sessions accept losing the test files,
+and it ships now, before v6.21.
+
+**What changed.**
+- **126 files leave the pool** — every pooled file under `qa/`: the 83 suites, `runsuite.sh`, `mk_runfolder.sh`, the harness and shim, the
+  DOM entry, the fixtures, the oracles, the tools, `package_check` and its controls. 2,737,596 characters. **Pool 142 → 16**: the source,
+  eleven documents and the four build-scaffold files. Each leaving file is declared `RETIRE:` in the package's manifest.
+- **The manifest's test and harness hash table** moved verbatim to `docs/MANIFEST_ARCHIVE_test_hash_table_to_v6_20.md` (repo-only); a new
+  *Pooled file hashes* section keeps the ten pooled files' rows and the D-5 count block. Forty-five rows elsewhere that name a departing
+  file are marked repo-only (K-12's vocabulary).
+- **Every departing file's description** (118 hash-row descriptions: 83 suites, 35 harness and tool files) moved verbatim to `TESTING.md`,
+  *Every suite and harness file* — see the correction below.
+- **OPERATIONS:** §A2 (the suite comes from a full clone; the fallback table covers pooled files only), §G (*qa/ is repo-only*), §C4 (the
+  traps and rules that lived only in suite comments), §L (`knowledge/` carries no `qa/` file), and the rotation notes (no dom entry is pooled).
+- **`package_check`:** **B-4** fails a package that ships a `qa/` file to `knowledge/`; **J-6** fails a post-upload pool that still holds one
+  (pre-ship, every one still there must be declared `RETIRE:`). A name is a qa file when every repo path with its basename lies under `qa/`,
+  plus the dom-entry family and the two renamed pool names. J-4 (exactly one dom entry) is retired. K-12 reads *Pooled file hashes*. The OPEN
+  allowlist entry for the scope is removed, as its own expiry note required.
+- **`package_check_controls.sh`:** P76 and P77 (B-4 fires on a suite and on a dom entry in `knowledge/`), P78 (B-4 stays silent on
+  `README.md`, `package.json` and `index.html`, which also exist outside `qa/`); P71 re-pointed from J-4 to J-6; P32 and P33 retargeted to
+  the files that remain, and P43 to P32's derived row; P44/P45 and P72 retired, each printing its reason (no `.py` file and no renamed file
+  can be pooled now).
+  `controls_manifest_rows.py`: C2's target (it named `sel_census.cjs`) is derived from the pool.
+
+**The trace (OPERATIONS §G, for code).** The author read the open-thread keyword hits in all 126 files; **six independent readers then read
+every file in full** and checked each candidate against the sixteen documents that stay. Their findings: the traps and standing rules that
+no pooled document carried (Social Security through `.planned`, not `.amount`; `setPortfolio` does not rebuild the timeline; jsdom has no
+`location`; `t10`'s cent tolerance makes a rate a boolean; `runsuite.sh` never runs an unlisted suite; `t31`'s literal METHODOLOGY keys; and
+more) are **OPERATIONS §C4**; ten open threads and a list of stale statements are **`ARCHITECTUREIssues.md` E-31** (among them two TY2026
+state bracket schedules read from a draft and from preliminary rates, and an oracle frozen at v5.69's Rhode Island model); `TESTING.md`'s run note
+saying `t11`–`t16` and `t22` take no argument — the code says otherwise — is corrected. The hash table's own prose was traced line by line.
+
+⚠ **Owned — a false premise in the scope, caught before the build.** The scope's DC-3 (a) said `TESTING.md` "describes every suite". It
+does not: its per-suite table stops at `t30`, and `t31`–`t83` were described only in the hash table DC-2 archives. An independent reader
+found it; the build stopped and asked; Steve chose to move the descriptions to `TESTING.md` verbatim. The question quoted about 39,000
+characters for the suites; with the 35 harness and tool rows (several carried rules nothing else held) it is about 53,000. The scope's §0
+also called the hash table a "test-hash table" while it held ten pooled files' rows (and decision D-3, a rule still in force, now restated
+beside them), and missed seven controls that drew targets from pooled qa files — six in `package_check_controls.sh` (P43 among them, found running the
+controls) and C2 of `controls_manifest_rows.py`, which the package's independent review found failing; all were corrected before the package
+was cut, and its §6 records them.
+
+**Estimated effect:** about 2.75 million characters out of the pool, net — roughly 91% → 41–46% of the cap (the unit per character varies
+with content; the figure after upload is read from the listing).
+
+**Verified by:** results in the package's `MANIFEST.txt`.
+
 ## ops 2026-10-19 — project knowledge trimmed (the fourth time); a scope for un-pooling the test code
 
 **KIND: ops** — documents and one tool line; **v6.20 stays current** (source `8db224990e86ddcbe2180f96b6a52889`, built `2a0b45ea9c1425752ff8918862e15202`).
