@@ -841,6 +841,10 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
     //   Removed at v5.57.1 after re-verifying every premise by content against v5.57.
     const OPEN = new Set([
       "SCOPE_STANDING_AUDIT.md",                  // not a build scope at all (OPERATIONS §K)
+      // Added in the ops package of 2026-10-19 (the pool trimmed to ~90%). Un-pooling the qa code — OPEN-because-UNDECIDED: DC-1 to DC-4 are
+      // Steve's. ⚠ EXPIRES when that ops change is built (the scope FULFILLED with a build record AND this entry removed, in the same
+      // package) or declined (the scope RETIRED, same rule) — the two-halves rule in the removal notes below.
+      "SCOPE_UNPOOL_QA_CODE.md",
       // ── REMOVED at the v6.20 ship: "SCOPE_D40_MC_TAX_V620.md" — added at the v6.19 ship as OPEN-because-UNBUILT (decided, waiting one
       //    release for the calendar); v6.20 built it, marked it FULFILLED with its §7 build record, and removed this entry in the same
       //    package, as its own expiry note required.
