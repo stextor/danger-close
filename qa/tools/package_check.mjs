@@ -145,18 +145,18 @@ let b2bad = [], b2why = "";
 if (knIndex.length) {
   const ghIndex = join(GH, "index.html");
   const kIdx = join(KN, "index.html");
-  if (existsSync(ghIndex)) {
-    if (md5(kIdx) === md5(ghIndex)) {
-      b2bad = ["index.html"];
-      b2why = `knowledge/index.html is byte-identical to github/index.html (the BUILT artifact, ${statSync(ghIndex).size} bytes)`;
-    }
-  } else {
-    const txt = readFileSync(kIdx, "utf8");
+  // ⚠ v6.20 ship (2026-10-18): the byte comparison alone caught only THIS package's built artifact. A DIFFERENT built page — the prior
+  // release's, say, copied from the repo root — passed, because it is not byte-identical to github/index.html. package_check_controls P48
+  // plants exactly that (the clone's built page) and first ran on an app release at v6.20 (until then it was skipped without a pool); it
+  // went NOT CAUGHT. The content marker now applies whether or not the package ships a github/index.html.
+  const txt = readFileSync(kIdx, "utf8");
+  if (existsSync(ghIndex) && md5(kIdx) === md5(ghIndex)) {
+    b2bad = ["index.html"];
+    b2why = `knowledge/index.html is byte-identical to github/index.html (the BUILT artifact, ${statSync(ghIndex).size} bytes)`;
+  } else if (/<script\b[^>]*>[\s\S]{5000,}<\/script>/.test(txt)) {
     // The bundle is inlined into the artifact; the template only <script src=…>s its entry.
-    if (/<script\b[^>]*>[\s\S]{5000,}<\/script>/.test(txt)) {
-      b2bad = ["index.html"];
-      b2why = `knowledge/index.html carries an inlined <script> bundle (${txt.length} bytes) \u2014 it is the built artifact, not src/index.html`;
-    }
+    b2bad = ["index.html"];
+    b2why = `knowledge/index.html carries an inlined <script> bundle (${txt.length} bytes) \u2014 it is a built artifact, not src/index.html`;
   }
 }
 ck("B-2: knowledge/index.html is the src/ template, NOT the built artifact (output is not input \u2014 \u00a7G)",
@@ -841,11 +841,9 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
     //   Removed at v5.57.1 after re-verifying every premise by content against v5.57.
     const OPEN = new Set([
       "SCOPE_STANDING_AUDIT.md",                  // not a build scope at all (OPERATIONS §K)
-      // Added at the v6.19 ship (2026-10-18). D-40 / D-44 / D-45 — the Monte Carlo pays the Taxes tab's tax. All ten decisions taken
-      // the day it was written, so it is OPEN-because-UNBUILT, not OPEN-because-undecided; it waited one release for the calendar
-      // (D-46, v6.19), which Steve chose to fix first (its DC-0). ⚠ EXPIRES AT THE v6.20 BUILD: that release marks the scope FULFILLED
-      // with a build record AND removes this entry, in the same package — the two-halves rule in the removal notes below.
-      "SCOPE_D40_MC_TAX_V620.md",
+      // ── REMOVED at the v6.20 ship: "SCOPE_D40_MC_TAX_V620.md" — added at the v6.19 ship as OPEN-because-UNBUILT (decided, waiting one
+      //    release for the calendar); v6.20 built it, marked it FULFILLED with its §7 build record, and removed this entry in the same
+      //    package, as its own expiry note required.
       // ── REMOVED at the v5.95 ship: "SCOPE_D12_PLAN_TYPE_PER_PERSON.md" — FULFILLED (all three phases), un-pooled, repo-only; the removal
       //    shipped in the same package that marked it FULFILLED, as its own entry required.
       // ── REMOVED at the v5.74 ship: "SCOPE_TAXES_DRAWDOWN.md". The release built it: Engines B and C consume
