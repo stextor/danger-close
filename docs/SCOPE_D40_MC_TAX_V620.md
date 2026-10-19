@@ -1,6 +1,7 @@
 # SCOPE — v6.20 · D-40, D-44, D-45: the Monte Carlo pays the Taxes tab's tax, and charges one-time expenses in the quarter they fall, inflated
 
-**DECIDED — 2026-10-18; to be built as v6.20, after the calendar release.** Steve: *"Let's continue with your recommendations"* — all ten
+**FULFILLED — shipped as v6.20, 2026-10-18.** Build record in §7. *(Was: DECIDED — 2026-10-18; to be built as v6.20, after the calendar
+release.)* Steve: *"Let's continue with your recommendations"* — all ten
 decisions as recommended: DC-0 (a) (the quarter calendar is fixed first, in its own release — `docs/SCOPE_D46_MC_CALENDAR_V619.md`), DC-1
 to DC-9 (a). Drafted as a v6.19 scope; renumbered v6.20 by DC-0. Before the build, §0.2 and §0.3 are re-measured on the calendar release's
 build, and §2's line numbers re-run. **The calendar shipped as v6.19 on 2026-10-18** (source `35d3dcb4…`); this scope starts from it.
@@ -498,4 +499,96 @@ the findings note need no change (both already point forward to this work).
 
 ## 7 · Build record
 
-*(Filled at the build: the census re-run at the build's lines, every re-pin with its attribution, departures from this scope.)*
+**Built against v6.19** — a fresh clone of `origin/main` at `21dd782` (v6.19 and its chmod commit; source `35d3dcb436b7ad801b6c9588d5429cb0`,
+built `d9e0df4297fce9946417db5b9b322ee3`, verified post-ship the same day). **v6.20:** source `8db224990e86ddcbe2180f96b6a52889`, built `index.html` `2a0b45ea9c1425752ff8918862e15202`;
+`smoke_built` 22 of 22. Decisions: DC-0 to DC-9 all **(a)**. Edit script `v620_source.py` (session), every anchor asserted unique; v6.19 was
+first rebuilt from its own source to its published `d9e0df42…`.
+
+**Census at the build** (`census.cjs`, v6.19's lines, before the edit — §2's v6.18 lines re-run): `ROTH_TAX_DRAG_Q` 5 hits (L1179; L2598,
+L2661 in `runMonteCarlo`; L2780, L2890 in `runExtendedMC` — each now `× _fq`, the calendar's first-quarter share); `getOneTimeExpenses` at
+L2600, L2664, L2782, L2897; `getMonthlyExpense` at L2589, L2652, L2774, L2869; `runMonteCarlo` 1 caller (L6762); `runExtendedMC` 14 callers
+(seven in `runStressTests`, L2981–3021; five in the extended effect, L6783–6792; two in the mortgage what-if, L6817–6818); `runStressTests` 1
+caller (L6795); the effects' dependency lists at L6775, L6801 and L6829; copy at L8328–8330 (Income card), L11456 (the home-move line),
+L11901–11902 (Backtest), L12133 and L12146 (What-Breaks) and in `DOCS_HTML`. **After the edit:** `ROTH_TAX_DRAG_Q` 0 hits; neither engine calls
+`getOneTimeExpenses` or `getMonthlyExpense` (each is called once, in `mcQuarterSeries`); `mcTaxCharge` and `mcOneTimeCharge` 2 + 2 calls each;
+`mcIncomeTaxSchedule` called by `mcResolveTaxSchedule` and at the three effects. New module-level functions beside `tableYearExpense`:
+`mcIncomeTaxSchedule`, `mcTaxScheduleOf`, `mcTaxForYear`, `mcQuarterSeries`, `mcTaxCharge`, `mcOneTimeCharge`, `mcResolveTaxSchedule`.
+Version: four sites; registrar 345 sites; `t1`'s and `t4`'s version strings, `t33`'s PINS and the three Python suites by hand. The shim
+exports the new functions, `ROTH_TAX_DRAG_Q` (for the prior leg), `BASE_GROWTH`, `getMonthlyExpense` and `getOneTimeExpenses` (guarded).
+
+**§0.2 re-measured on v6.19's calendar** — with the build itself rather than a prototype: the shipped v6.19 against v6.20, 3,000 paths, the
+same seeds per row (METHODOLOGY, *The Monte Carlo pays the Taxes tab's tax (v6.20)*, carries both tables). **The premise holds:** every
+household reads lower under both presets; the range is slightly wider than §0.2's — 0.7 to 4.0 points above $500K under BULL (§0.2: 0.7 to
+3.4; the ×0.6 household moved most), 1.9 to 8.9 above $800K under BASE (§0.2: 2.6 to 7.2, on four households; the $150K slider row is new
+there). The example under BASE: 80.3% → 74.4% above $800K, median $1,565K → $1,392K. **Runtime** (§4's stop condition): the three 6-year runs
+at 10,000 paths take **0.32×** v6.19's time and one 30-year run **0.47×** — faster, because each run reads the expense table once instead of
+once per quarter of every path. Re-measured too, unchanged from the scope: the spouse-B taper's share of the tax ($7,037 + $7,442 = $14,479 —
+the schedule with and without a zero-amount income stream, which switches the taper off; session probe `probe_taper620.mjs`, log
+`probe620/taper.log`) and IRMAA ($0 on the example and ×1.6; $21,880 at a $250,000 slider — Engine C's lifetime surcharge; `probe_irmaa620.mjs`,
+log `probe620/irmaa.log`). The independent review reproduced both.
+
+**§0.3 re-probed** — the build with the suite as it stood (registrar applied; nothing else edited), one full run: GRAND 7,615 passed, 25
+failed, 1 DIED. **Predicted by §0.3:** parity 3 (`mc`, `extMC`, `stress`), `t20` 2 (its guards), `t42` D-4 on both runs (`-spend617` too),
+`t81` C2-2 and C2-3, `domdiff` 1. **Registration, by hand as every release:** `t1` 4 and `t4` 1 (version strings), `t33` DIED (no PINS entry),
+`t45`, `t47`, `t48` 1 each (their version lists), `t78` D-2a on both legs (the folder still held v6.19's built page). **Not predicted — each
+explained by the change, so not a stop:** `t81` E-6 and F-1 (copy matchers on the Backtest sentence and the Field Manual's Withdrawal
+sentence, which §1.4 rewrites; §2.2 listed only the first), and **`t82` G-1 / G-2** — they move spouse B's birth month to move her claim
+inside a quarter and read the planned path's difference as the benefit not paid; from v6.20 the claim month also moves Engine B's Social
+Security and so the schedule (measured: 1,419.41 against 1,426.85 — the tax on one month's benefit). Restated with the schedule held fixed,
+exactly as §3 G restates `t20` and `t56`. `t56` F-1 / F-3 stayed green unedited (the 6-year horizon, as §0.3 said) and were restated anyway.
+
+**Tests.** `t83`: **95** checks on v6.20, **15** on v6.19. Controls `qa/tools/controls_v620_mctax.py` **13 of 13 as expected**, every file restored and
+hash-checked. Full suite from the packaged copies: **7,871 app checks across 82 suites, 0 failed, 0 DIED**; MC parity
+10 of 10 (`mc`, `extMC` and `stress` intended); tooling `t21` 64, `domdiff` 37, `sets` 12 + 12 — GRAND
+**8,006 passed, 0 failed**. Every skip line read: each is a designed pair-pinned skip (`t65`, `t70`–`t72`, `t75`–`t83`), and `t83` takes none on the v6.20 leg (its four on the v6.19 leg are by design: no schedule there, no pair, no METHODOLOGY of its own).
+
+**Re-pin, with its attribution** (§3; `t83` R, every step exact on the planned path, in the same run): `t42` D-4, the married example's
+6-year planned path, **$2,128,443 → $2,083,910** (−$44,533): the drag removed **+$56,285** (the v6.19 oracle with `ROTH_TAX_DRAG_Q = 0`); the
+example's one-time rows removed from the oracle **$0** (v6.19 never charged the April rows — D-45); the monthly quarter read **−$375** (derived exactly
+as its own compounded series — the current home's $300 homeowners row, ending April 2029, counted for April in 2029 Q2 — and the same figure
+the scope's reviewer split out on v6.18's calendar); the one-time rows restored **−$34,995** (§3 C's compounded charge);
+the default schedule **−$65,449** (§3 B's compounded tax). §0.3's −$44,533 reproduced to the dollar. No other pinned Monte Carlo figure moved.
+**Hand pin** (§3 B): the example's 2029 row $20,506.62 (BASE, $70K) and BASE's expected inflation 2.74% (Σ prob × inflation over SCENARIOS)
+give $5,626.91 after 2029 Q1 and $11,355.67 after Q2 — computed in exact decimal arithmetic, independently of the engine, and matched to the cent.
+The 2029 row is itself the engine's (§3 A proves it is the Taxes tab's), so the hand pin checks the inflate-and-grow arithmetic. **Owned:**
+the first draft of these pins was written before measuring and was wrong — the 2029 row as $12,935.95, BASE's inflation as 3.24%, and the new
+D-4 figure as $2,076,914. The suite's first run turned all four red; the pins were then computed by hand (above) and compared with the
+engine, not copied from it.
+
+**Where the build departed from the scope, owned.**
+- **Names follow DC-0's renumbering:** the suite is `qa/t83_mc_tax.mjs` (`t82` is the calendar's), the controls `controls_v620_mctax.py`,
+  the METHODOLOGY section *(v6.20)*, the parity key `"v619→v620"`. §3 still says `t82` and v6.19 where the draft did; left as written.
+- **§1.4's "removed" sentence in the Field Manual's Withdrawal entry is rewritten, not deleted:** it now says what the Monte Carlo does from
+  v6.20 and keeps what it did through v6.19 as history (both true). Backtest's parenthesis is replaced by a sentence that says both engines
+  spend one-time expenses.
+- **The Income tab's card reads the schedule the 6-year runs were given** (stored with them), so it shows "…" until they finish — what the
+  Monte Carlo actually paid, not a second computation. Its line: "2029 in today's dollars: the Taxes tab's tax, year by year, at the $70K
+  conversion slider".
+- **§3 H's oracle differential** runs both engines on every fixture household and `runStressTests` (all seven runs) on the example and the
+  single household — the stress set is 35,000 paths a call.
+- **§3's three-step re-pin attribution is five steps** (above): splitting the drag from the one-time rows on the oracle side makes every step
+  exact, where three steps would have left the drag and v6.19's (non-)charge of the April rows in one term.
+- **The controls' "schedule taken from Engine A" mutation is replaced by "federal tax only"** (C9). Engine A needs a hand-built input object
+  (What-Breaks builds ~20 fields), which a one-line mutation cannot express; C9 plants the same defect class — a schedule that is not the Taxes
+  tab's row — and §3 A compares every year with Engine B's row. A tenth control was added: the tax charged before retirement (C10).
+- **`t82` G and `t81` F-1** were restated (above) — neither was in §2.2's list.
+- **D-47** (the Stress tab's `1.04^years` benchmark) was filed at v6.19 as "to be fixed with v6.20", but it was filed after this scope was
+  decided and is not in it, so it was not folded in; its register entry is corrected, and `runExtendedMC` now returns the planned path its fix
+  needs.
+- **Independent review before shipping** (an agent that had not seen the work, read-only, against the source, the logs and this scope).
+  Fixed in this release: **control C10 was an equivalent mutant** — the engines gate the tax on `retired` as well as the quarter read does,
+  so a schedule leaking into pre-retirement quarters changed no output and the first controls run read 10 of 11; `t83` F-6 now checks the
+  quarter read itself and C10 names it. **Nothing checked the app's 30-year wiring** (only the 6-year runs' schedule, through the DOM):
+  `t83` E-6 (the app's 9 engine calls and `runStressTests`' 7 each carry a schedule, the app's built from the four live inputs) and E-7 (the effects' dependencies
+  and the cache clear), with controls C11 and C12. The **Income card** named the live slider beside the last run's figure during a re-run; it
+  now names the slider its schedule was computed at. **METHODOLOGY** quoted a BASE range wider than its table (four rows added) and said the
+  stress set was proved on every household (two). The **part first quarter's tax** was untested (`t83` F-7). R-3 is now derived, not only
+  measured. Two v6.19-leg checks that asserted `true` became printed skip lines. The Field Manual's spouse-B sentence now says it applies to
+  plans with no income streams, and both it and METHODOLOGY say an expense row for income tax would be charged twice. Two older METHODOLOGY
+  sections (v6.14's payroll tax, v6.18's rule paragraph) gained pointers. Noted, not changed: Engine D takes growth from the preset it is
+  passed while `expectedInflation` reads the live weights — the Taxes tab mixes the same way and the app always passes its state.
+- **`package_check` B-2, found at packaging.** `package_check_controls` P48 (a built page shipped to `knowledge/`) went NOT CAUGHT: B-2
+  byte-compared `knowledge/index.html` only with this package's own built page, so the clone's (v6.19's) passed. P48 had never run on an app
+  release (it was skipped without a pool). B-2 now also applies its content marker; P48 caught, P49 silent, `t21` 64 of 64 on the changed file.
+- **Register IDs (§6):** the calendar was D-46 (closed at v6.19); the spouse-B taper is **D-49**, the mortgage what-if's Florida sentence **D-50**,
+  IRMAA not in the Monte Carlo **D-51**. `FlawsToFix-v5_73-Phase2.md` L495 (touched, not closed) was not edited.

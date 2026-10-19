@@ -55,17 +55,20 @@ items now carry their status; IDs are unchanged.
 | D-37 | **OPEN** (Low–Med, conservative) | two self-employment deductions not taken: half the self-employment tax (§164(f), above the line — it would lower AGI and every MAGI) and the QBI deduction (§199A). Disclosed in the Taxes tab's method note, the Field Manual and METHODOLOGY |
 | D-38 | **CLOSED v6.17** *(filed and fixed 2026-10-16)* | the cash from a home move at retirement is the My Data field `homeMoveCash` (signed; 0 = no move), read by the two Monte Carlo engines through one accessor — through v6.16 a fixed $130,000 constant was added to every plan, undisclosed. A plan saved before v6.17 reads $0 with a notice; the example keeps $130,000 |
 | D-39 | **OPEN** (Low–Med, either direction) | the Withdrawal, Taxes, IRMAA and Roth tabs do not see the home-move cash — only the Monte Carlo figures do. Disclosed in My Data, the Monte Carlo tab, the Field Manual and METHODOLOGY |
-| D-40 | **OPEN** (Med, either direction) | the Monte Carlo's only income tax is a flat $16,000 a year during the Roth ladder (`ROTH_TAX_DRAG_Q`), whatever the plan converts or owes, and none after it. Close to the example's own tax; optimistic for a larger or state-taxed household, conservative for a smaller one. Shown on the Income tab as "modeled in MC sim"; not otherwise disclosed |
+| D-40 | **CLOSED v6.20** | the Monte Carlo's only income tax was a flat $16,000 a year during the Roth ladder (`ROTH_TAX_DRAG_Q`), whatever the plan converted or owed, and none after it. From v6.20 both engines pay the Taxes tab's tax year by year (`mcIncomeTaxSchedule`), at the live conversion slider, QCD and yield, grown with each path's inflation |
 | D-41 | **CLOSED v6.18** *(filed and fixed 2026-10-18)* | the Withdrawal tab (and Backtest and What-Breaks) spent the expense table as it stood in June 2029 and June 2031 — the example's dates — for every plan; from v6.18 each year's own months and one-time rows (`tableYearExpense`), and the display figures follow the plan's dates |
 | D-42 | **OPEN** (Low–Med, conservative) | a $40,000 car every 8 years (`AUTO_REPLACE_COST`) in the Monte Carlo runs with auto-replacement, on every plan — disclosed in the Field Manual as a fixed example schedule; a household that enters car purchases as expenses pays twice |
 | D-43 | **OPEN** (Low, display only) | the Income tab's "Post-car draw" and "Monthly shortfall (car paid off)" subtract the example's $400 car payment from every plan's post-Medicare spending |
-| D-44 | **OPEN** (Low, optimistic) | one-time expenses: the Monte Carlo subtracts them in today's dollars (it inflates the monthly rows); the Withdrawal tab never sees one dated before the retirement year. Disclosed at v6.18 — the first in the Field Manual, the second on the Withdrawal tab |
-| D-45 | **OPEN** (Low–Med, optimistic) | the Monte Carlo charges a one-time row only when it is dated in March, June, September or December (it samples the table at each quarter's last month and the match is exact), so the example's April 2029 rows ($28,000) never reach it; rows added in My Data are dated June. Found at the v6.18 build; disclosed in the Field Manual. From v6.19 "a quarter's last month" is the quarter's TRUE last month (D-46); fix scheduled for v6.20 (`docs/SCOPE_D40_MC_TAX_V620.md`) |
+| D-44 | **OPEN — narrowed v6.20** (Low, optimistic) | the Withdrawal tab never sees a one-time row dated before the retirement year (disclosed on the tab since v6.18). *The Monte Carlo half — one-time rows charged in today's dollars — closed at v6.20* |
+| D-45 | **CLOSED v6.20** | the Monte Carlo charged a one-time row only when it was dated in a quarter's last month, so the example's April 2029 rows ($28,000) never reached it. From v6.20 one quarter read (`mcQuarterSeries`) charges a row in the quarter that contains its month, and monthly rows count their own months |
 | D-46 | **CLOSED v6.19** *(filed and fixed 2026-10-18)* | the Monte Carlo's quarter calendar: both engines dated quarter 0 "June of the as-of year" for every plan; the 6-year engine placed events by `round(months ÷ 3)` from the as-of month, the 30-year engine by quarters from January of the as-of year (ignoring the as-of month, and for an April–June as-of date retiring and claiming a quarter late); the year 2026 was typed into run A, the chart axis, the Stress table and the longevity ages; the run headers said runs B and C start at retirement. From v6.19 one calendar (`mcQuarterOf` / `mcQuarterDate`), a part first quarter, claims from their month, forced stress years on calendar years |
-| D-47 | **OPEN** (Low, display) | the Stress tab's "30-year guardrail boundaries" table compares the Monte Carlo median with a "planned" figure of `household × 1.04^years` — the benchmark the engines replaced because it ignores withdrawals. To be fixed with v6.20, where `runExtendedMC` returns its planned path |
+| D-47 | **OPEN** (Low, display) | the Stress tab's "30-year guardrail boundaries" table compares the Monte Carlo median with a "planned" figure of `household × 1.04^years` — the benchmark the engines replaced because it ignores withdrawals. Not in v6.20's scope (filed after it was decided); from v6.20 `runExtendedMC` returns its planned path, so the fix is ready to scope |
 | D-48 | **OPEN** (Low) | My Data's as-of date is the UTC date of saving (`toISOString`), so an evening save in the Americas on a quarter's last day falls in the next quarter — after v6.19 that moves the 30-year figures by about a quarter's accumulation. Disclosed in METHODOLOGY |
+| D-49 | **OPEN** (Low–Med, either direction by engine) | the built-in part-time work for spouse B (`spouseBWorkTaper`): every plan with no income streams — single ones included — gets $20,000, $18,000 and $15,000 of spouse-B wages in retirement years 0–2, credited and taxed by Engines A, B, C and D; from v6.20 the Monte Carlo pays that tax (through the schedule) without crediting the wages. Disclosed in the Field Manual and METHODOLOGY |
+| D-50 | **OPEN** (Low, display only) | the mortgage what-if on the Monte Carlo tab tells every plan "Mortgage interest isn't deductible for you (standard deduction + no FL income tax)" — the example's state, typed in |
+| D-51 | **OPEN** (Low–Med, optimistic for high-income plans) | IRMAA surcharges are not in the Monte Carlo's tax (it pays the Taxes tab's tax; IRMAA is a Medicare premium on its own tab) — $0 on the example, $21,880 lifetime at a $250,000 slider. Disclosed in the Field Manual and METHODOLOGY |
 
-**Open, in this file: D-4, D-11 (narrowed), D-13, D-15, D-16, D-18 (recurring), D-32, D-37, D-39, D-40, D-42, D-43, D-44, D-45, D-47, D-48; D-5 declined.** *(D-46 filed and closed, and D-47 and D-48 added, at v6.19; D-40 to D-43 filed from the v6.17 findings note, D-41 closed, and D-44 and D-45 added, at v6.18; D-38 filed and closed, and D-39 added, at v6.17; D-36 closed and D-37 added at v6.16; D-17 closed and D-36 added at v6.14; D-35 closed at v6.09; D-34 closed and D-35 added at v6.08; D-33 closed and D-34 added at v6.07; D-28 closed and D-33 added at v6.06.)* Non-tax open threads
+**Open, in this file: D-4, D-11 (narrowed), D-13, D-15, D-16, D-18 (recurring), D-32, D-37, D-39, D-42, D-43, D-44 (narrowed), D-47, D-48, D-49, D-50, D-51; D-5 declined.** *(D-40 and D-45 closed, D-44 narrowed, and D-49 to D-51 added, at v6.20; D-46 filed and closed, and D-47 and D-48 added, at v6.19; D-40 to D-43 filed from the v6.17 findings note, D-41 closed, and D-44 and D-45 added, at v6.18; D-38 filed and closed, and D-39 added, at v6.17; D-36 closed and D-37 added at v6.16; D-17 closed and D-36 added at v6.14; D-35 closed at v6.09; D-34 closed and D-35 added at v6.08; D-33 closed and D-34 added at v6.07; D-28 closed and D-33 added at v6.06.)* Non-tax open threads
 re-homed the same day are in `ARCHITECTUREIssues.md` **E-29**.
 
 | Field | Value |
@@ -1538,7 +1541,10 @@ Steve approved measuring `ROTH_TAX_DRAG_Q` and `AUTO_REPLACE_COST`. The §K2 swe
 first (v6.18, below), then D-40, then D-42 and D-43 together. Each will have its own scope, with its measurements re-run on the build it
 starts from.
 
-- **D-40 · The Monte Carlo's only income tax is a flat $16,000 a year during the Roth ladder — OPEN.** `ROTH_TAX_DRAG_Q = 4000` is subtracted
+- **D-40 · The Monte Carlo's only income tax was a flat $16,000 a year during the Roth ladder — ✅ CLOSED v6.20** (`docs/SCOPE_D40_MC_TAX_V620.md`,
+  fulfilled; `qa/t83_mc_tax.mjs`). From v6.20 both engines pay the Taxes tab's tax year by year, at the live conversion slider, QCD and yield,
+  grown with each path's inflation; the 30-year figures read lower on every household measured (METHODOLOGY, *The Monte Carlo pays the
+  Taxes tab's tax (v6.20)*). As filed: `ROTH_TAX_DRAG_Q = 4000` is subtracted
   every quarter up to the ladder's end in `runMonteCarlo` and `runExtendedMC`, on every plan, whatever it converts; the spending draw carries
   no tax term, and after the ladder nothing is charged (RMDs included). On the example it is close to the Taxes tab's own $215K ($192K);
   for the example's holdings ×1.6 in Georgia the Taxes tab says $368K and 30-year success reads 96.9% against 95.2% with that tax charged.
@@ -1569,6 +1575,10 @@ spending written as a table and reproduce every v6.17 figure exactly.
 
 ## D-44 · One-time expenses: the Monte Carlo charges them in today's dollars; the Withdrawal tab misses one dated before retirement — opened at v6.18, DISCLOSED
 
+> **NARROWED v6.20 (2026-10-18).** The Monte Carlo half is closed: both engines grow a one-time row with the run's inflation
+> (`docs/SCOPE_D40_MC_TAX_V620.md`; `qa/t83_mc_tax.mjs` C). **Still open:** the Withdrawal tab never sees a one-time row dated before the
+> retirement year — fixing it means taking the row out of `retireStartBalances`, which Engines A, B, C and D share (DC-5 (a)).
+
 Filed at the D-41 build. Both Monte Carlo engines subtract `getOneTimeExpenses(dateStr)` uninflated (`runMonteCarlo`, `runExtendedMC`) — when
 they charge it at all, see D-45 — while they inflate the monthly rows — optimistic by the inflation to the row's date (a $20,000 row ten years out at 2.7% is charged about $6,100
 too little). Engine D starts at retirement from today's balances, so a one-time row dated before the retirement year never reaches the
@@ -1577,7 +1587,11 @@ changed at v6.18: inflating the Monte Carlo's one-time rows moves every Monte Ca
 Monte Carlo half in the Field Manual's Withdrawal Strategy entry, the Withdrawal-tab half in that tab's note; both in METHODOLOGY (*The
 Withdrawal tab spends the expense table year by year*).
 
-## D-45 · The Monte Carlo charges a one-time row only when it is dated in a quarter's last month — opened at v6.18, DISCLOSED
+## D-45 · The Monte Carlo charges a one-time row only when it is dated in a quarter's last month — opened at v6.18, ✅ CLOSED v6.20
+
+> ✅ **CLOSED v6.20 (2026-10-18).** `docs/SCOPE_D40_MC_TAX_V620.md` (fulfilled, repo-only); `qa/t83_mc_tax.mjs` C (a $10,000 row in every
+> month of two years is charged once, in its own quarter, exact on both planned paths); `t81` C2-2 flipped to fixed. The v6.17 home-move note
+> ("closing costs … are already counted") is now true for the Monte Carlo.
 
 Found at the D-41 build by an independent review of the release, after the scope's premise (§0.1) and the v6.17 findings note had both said
 the Monte Carlo subtracts one-time rows "when they fall". It does not: `runMonteCarlo` and `runExtendedMC` read the table once a quarter, at
@@ -1610,7 +1624,8 @@ plan saved after it retired gets no home-move cash; 2026 comes from the plan; th
 
 The Stress tab's 30-year guardrail table shows "Lower (80%)", "Planned" and "Upper (120%)" columns computed as `household × 1.04^years` —
 the same benchmark `runExtendedMC`'s own comment says was replaced as its guardrail reference because it ignores withdrawals. Display only;
-the engines do not read it. **Low.** To be fixed with v6.20, where `runExtendedMC` returns its planned path (D-40's scope).
+the engines do not read it. **Low.** *Corrected at v6.20:* this said "to be fixed with v6.20", but D-47 was filed after v6.20's scope was
+decided and is not in it, so it was not folded in. From v6.20 `runExtendedMC` returns its planned path, so the fix is ready to scope.
 
 ## D-48 · My Data's as-of date is the UTC date — opened at v6.19
 
@@ -1618,3 +1633,26 @@ My Data stamps the plan's as-of date with `new Date().toISOString().slice(0, 10)
 on a quarter's last day is dated the next day, in the next quarter. From v6.19 the Monte Carlo counts accumulation from the as-of quarter,
 so that save reads about one quarter less accumulation in the 30-year figures. **Low.** Disclosed in METHODOLOGY (*The Monte Carlo's
 calendar*).
+
+## D-49 · The built-in part-time work for spouse B — opened at v6.20
+
+Found while scoping D-40 (`docs/SCOPE_D40_MC_TAX_V620.md` §0.1 item 2). `spouseBWorkTaper` gives every plan with no income streams
+$20,000, $18,000 and $15,000 of spouse-B wages in retirement years 0–2. Engines A, B, C and D credit and tax it (and the Roth tab's ladder
+table); neither Monte Carlo engine credits it. A single plan with no streams is taxed on a spouse B's wages ($20,000 / $18,000 / $15,000 of
+`work_y`, $1,530 / $1,377 / $1,148 of payroll tax, measured at the scope); it has no single-household test. METHODOLOGY described it as a
+feature. From v6.20 the Monte Carlo pays the Taxes tab's tax, so it pays the tax on these wages without crediting them — conservative by
+$14,479 on the example (BASE, $70K): $7,037 directly in 2029–2031 and $7,442 through Engine D's draws later (measured at the v6.20 build).
+**Either direction by engine; low–medium.** Kept as it is at v6.20 (DC-7 (a)); the taper is for its own release. Disclosed in the Field
+Manual's Monte Carlo entry and METHODOLOGY (*The Monte Carlo pays the Taxes tab's tax (v6.20)*).
+
+## D-50 · The mortgage what-if speaks to Florida — opened at v6.20
+
+The Monte Carlo tab's mortgage what-if tells every plan "Mortgage interest isn't deductible for you (standard deduction + no FL income
+tax)" — the example's state, typed in (`docs/SCOPE_D40_MC_TAX_V620.md` §0.1 item 4). Display only. **Low.** Not fixed at v6.20.
+
+## D-51 · IRMAA is not in the Monte Carlo's tax — opened at v6.20
+
+From v6.20 the Monte Carlo pays the Taxes tab's tax (DC-2 (a)); IRMAA — a Medicare premium surcharge, on the IRMAA tab (Engine C) — is not
+in it. $0 on the example and on the example's holdings ×1.6 in Georgia; $21,880 lifetime on the example at a $250,000 slider (BASE,
+measured at the v6.20 build). **Optimistic for high-income plans; low–medium.** Candidate fix: add Engine C's surcharge to the schedule
+(the scope's DC-2 (c)). Disclosed in the Field Manual's Monte Carlo entry and METHODOLOGY.
