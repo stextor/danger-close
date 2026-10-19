@@ -27,13 +27,13 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v618";
-const KNOWN_VERSIONS = ["v617", "v618", "v619"];
+const KNOWN_VERSIONS = ["v617", "v618", "v619", "v620"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v618", "v619"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v618", "v619", "v620"].includes(VER);   // an array, so the next registration widens it
 // The differential's pair — constants, NOT `VER === "v618"`, so the registrar cannot widen them (t76 records why).
 const D_PRIOR = "v617", D_CUR = "v618";
 const require = createRequire(import.meta.url);
@@ -273,8 +273,15 @@ console.log("  C2 — D-45: the Monte Carlo's one-time rows (pinned)");
   const noOnce = EX.filter(e => e.freq !== "once"), june = EX.map(e => e.freq === "once" ? { ...e, start: "2029-06", end: "2029-06" } : e);
   T(`C2-1 SETUP: the example's one-time rows are dated April 2029 ($28,000)`, EX.filter(e => e.freq === "once").every(e => String(e.start).slice(0, 7) === "2029-04") && oOnce(EX, "2029-04") === 28000);
   const base = mcOf(EX);
-  T(`C2-2 ${KD45} both Monte Carlo engines give byte-identical output with or without the April rows — they are never charged`, base === mcOf(noOnce));
-  T(`C2-3 CONTROL: the same rows dated June 2029 DO move both engines (so C2-2 discriminates)`, mcOf(june) !== base);
+  // v6.20 (D-45 fixed — docs/SCOPE_D40_MC_TAX_V620.md): a one-time row is charged in the quarter that contains its month, so the April
+  // rows now move both engines; C2-3's April-vs-June control no longer discriminates (they are the same quarter, charged identically) and
+  // is retired in favour of t83 C (every month of two years, exact on both planned paths). An array, so the registrar widens it.
+  const FIXED45 = ["v620"].includes(VER);
+  if (FIXED45) T("C2-2 [FIXED v6.20 — was KNOWN DEFECT 2026-10-18, D-45] the April rows now reach both Monte Carlo engines: output differs with and without them", base !== mcOf(noOnce));
+  else {
+    T(`C2-2 ${KD45} both Monte Carlo engines give byte-identical output with or without the April rows — they are never charged`, base === mcOf(noOnce));
+    T(`C2-3 CONTROL: the same rows dated June 2029 DO move both engines (so C2-2 discriminates)`, mcOf(june) !== base);
+  }
   load(BASE);
 }
 
@@ -387,7 +394,9 @@ console.log("  E — rendered: the Withdrawal tab, Backtest, What Breaks, the Ex
   T("E-4 SETUP: Backtest renders its worst start year", btWorst.length === 3, bt.slice(0, 200));
   if (POST) T("E-5 Backtest on the example: the worst start (1966) now ends $1.43M real — lower lifetime spending (the car paid off from 2034) outweighs 2029's one-time rows (measured at the build)", btWorst[1] === "1966" && btWorst[2] === "1.43", btWorst.slice(1).join(" / "));
   else T(`E-5 ${KD} Backtest on the example: the worst start (1966) ends $1.31M real on the snapshots`, btWorst[1] === "1966" && btWorst[2] === "1.31", btWorst.slice(1).join(" / "));
-  T("E-6 the Backtest comparison no longer says the backtest omits one-time expenses, and says when the MC charges one", POST ? /From v6\.18 this backtest spends your one-time expenses; the MC charges one only when it is dated in March, June, September or December\./.test(bt) && !/one-time expenses, and Roth-conversion tax drag that this backtest deliberately omits/.test(bt)
+  T("E-6 the Backtest comparison no longer says the backtest omits one-time expenses, and says when the MC charges one", ["v620"].includes(VER)
+    ? /\(Both spend your one-time expenses: this backtest from v6\.18, the MC in the quarter each one falls from v6\.20\.\)/.test(bt) && !/one-time expenses, and Roth-conversion tax drag/.test(bt)
+    : POST ? /From v6\.18 this backtest spends your one-time expenses; the MC charges one only when it is dated in March, June, September or December\./.test(bt) && !/one-time expenses, and Roth-conversion tax drag that this backtest deliberately omits/.test(bt)
     : /one-time expenses, and Roth-conversion tax drag that this backtest deliberately omits/.test(bt));
   const wb = await tab("what breaks");
   const spendX = (wb.match(/([\d.]+)× current spending/) || [])[1];
@@ -404,7 +413,7 @@ console.log("  F — the copy");
 {
   const docs = g.DOCS_HTML();
   if (POST) T("F-1 the Field Manual's Withdrawal Strategy entry says how spending is read, when the Monte Carlo charges a one-time row (D-45), and dates the fix",
-    /<strong>Spending<\/strong> is your expense table at each year's own dates/.test(docs) && /only when the row is dated in one of those months/.test(docs) && /never arrived \(v6\.18\)/.test(docs) && !/takes it from the portfolio when it falls/.test(docs));
+    /<strong>Spending<\/strong> is your expense table at each year's own dates/.test(docs) && (["v620"].includes(VER) ? /From v6\.20 the Monte Carlo charges a one-time row in the quarter that contains its month/.test(docs) && /only when the row was dated in one of those months/.test(docs) : /only when the row is dated in one of those months/.test(docs)) && /never arrived \(v6\.18\)/.test(docs) && !/takes it from the portfolio when it falls/.test(docs));
   else T(`F-1 ${KD} the Field Manual never says how the Withdrawal tab's spending is read`, !/each year's own dates/.test(docs));
   if (POST) T("F-2 the stale \"Defaults: $7,047 … $8,313\" comment is gone", !/Defaults: \$7,047 pre-retire, \$8,313 post-retire/.test(SRC));
   else T(`F-2 ${KD} the stale "Defaults: $7,047 … $8,313" comment is present`, /Defaults: \$7,047 pre-retire, \$8,313 post-retire/.test(SRC));

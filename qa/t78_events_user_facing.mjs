@@ -22,7 +22,7 @@ import { spawnSync } from "child_process";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v615";
-const KNOWN_VERSIONS = ["v614", "v615", "v616", "v617", "v618", "v619"];
+const KNOWN_VERSIONS = ["v614", "v615", "v616", "v617", "v618", "v619", "v620"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -57,7 +57,7 @@ if (process.env.T78_CHILD) {
 
 await import("./env_dom.mjs");
 console.error = () => {}; console.warn = () => {};
-const POST = ["v615", "v616", "v617", "v618", "v619"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v615", "v616", "v617", "v618", "v619", "v620"].includes(VER);   // an array, so the next registration widens it
 // §A / §C-3's pair. Two constants, NOT `VER === "v615"`: the registrar widens equality tests and arrays, and this comparison is true of
 // exactly one pair of builds (t76 records why).
 const D_PRIOR = "v614", D_CUR = "v615";

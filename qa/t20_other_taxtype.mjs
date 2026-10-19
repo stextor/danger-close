@@ -300,7 +300,12 @@ const HH = {
 };
 const FLIP = { taxable: "trad", trad: "taxable", roth: "hsa", hsa: "roth" };
 
-const runAll = (portfolio) => {
+// v6.20 (D-40 — docs/SCOPE_D40_MC_TAX_V620.md): from v6.20 both Monte Carlo engines pay Engine B's tax, and Engine B reads taxType, so
+// the mc / stress guards below hold on a NEW FOOTING — with the tax schedule HELD FIXED (`opts.taxSchedule`, the as-is household's
+// schedule). Without it the Monte Carlo moves with the permutation, by design, and the INVERSION block below asserts exactly that. On a
+// leg without mcIncomeTaxSchedule FIXED_TAX is null and the engines are called as before.
+let FIXED_TAX = null;
+const runAll = (portfolio, fixed = FIXED_TAX) => {
   g.applyLoadedData({ portfolio: JSON.parse(JSON.stringify(portfolio)) });
   const tl = g.buildPlanTimeline();
   const pos = g.PORTFOLIO().positions || [];
@@ -332,8 +337,8 @@ const runAll = (portfolio) => {
   const out = {};
   out.withdrawal = seeded(() => g.computeWithdrawalPlan({ retireYear: 2027, rothAmount: 0, scenarioPreset: "base" }));
   out.roth       = seeded(() => g.runRothStrategies(P));
-  out.mc         = seeded(() => g.runMonteCarlo(2027, 200));
-  out.stress     = seeded(() => g.runStressTests(2027));
+  out.mc         = seeded(() => fixed ? g.runMonteCarlo(2027, 200, { taxSchedule: fixed }) : g.runMonteCarlo(2027, 200));
+  out.stress     = seeded(() => fixed ? g.runStressTests(2027, { taxSchedule: fixed }) : g.runStressTests(2027));
   out.checks     = seeded(() => g.buildVerificationChecks());
   return JSON.stringify(out);
 };
@@ -348,8 +353,16 @@ ck("PRECONDITION: the permuted fixture really carries taxTypes (extinction is no
    JSON.stringify(g.PORTFOLIO().otherAccounts.map(a => `${a.name}=${a.taxType}`)));
 
 
+if (g.mcIncomeTaxSchedule) { g.applyLoadedData({ portfolio: JSON.parse(JSON.stringify(HH)) }); FIXED_TAX = g.mcIncomeTaxSchedule(2027); }
 const asIs = runAll(HH);
 const flipped = runAll({ ...HH, otherAccounts: _flipFixture });
+if (g.mcIncomeTaxSchedule) {
+  // v6.20: the converse of the restated guard — with the schedule computed from the plan (the app's way), the permutation moves the
+  // Monte Carlo, because its tax is Engine B's and Engine B reads taxType. Per engine, at its own basis, as below.
+  const fa = JSON.parse(runAll(HH, null)), fb = JSON.parse(runAll({ ...HH, otherAccounts: _flipFixture }, null));
+  ck('v6.20: with the tax schedule computed from the plan, "mc" MOVES under the permutation (its tax is Engine B\'s, which reads taxType)', JSON.stringify(fa.mc) !== JSON.stringify(fb.mc));
+  ck('v6.20: …and so does "stress"', JSON.stringify(fa.stress) !== JSON.stringify(fb.stress));
+}
 
 ck("INVERSION: permuting every taxType now CHANGES engine output",
    asIs !== flipped,
@@ -374,8 +387,8 @@ ck("the comparison is not vacuous (engines actually produced output)",
     //   stress  — runStressTests is runExtendedMC with forced scenario years. Same basis as mc.
     //   checks  — buildVerificationChecks compares published tax constants against IRS Rev. Proc.
     //             sources. It contains no household money at all.
-    const MUST_NOT_MOVE = { mc: "reads household and bucketActuals, not taxType",
-                            stress: "is the Monte Carlo under forced scenarios — same basis",
+    const MUST_NOT_MOVE = { mc: FIXED_TAX ? "with its tax schedule held fixed, reads household and bucketActuals, not taxType (v6.20)" : "reads household and bucketActuals, not taxType",
+                            stress: FIXED_TAX ? "is the Monte Carlo under forced scenarios — same basis, schedule held fixed (v6.20)" : "is the Monte Carlo under forced scenarios — same basis",
                             checks: "asserts IRS constants, not this household's money" };
     if (MUST_NOT_MOVE[k]) {
       ck(`GUARD: "${k}" does NOT move \u2014 ${MUST_NOT_MOVE[k]}`, !moved, "it moved; the fix has reached further than intended");

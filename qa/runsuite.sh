@@ -326,6 +326,16 @@ tally "t81-$CUR"   node t81_engine_d_spending.mjs "$CUR"
 # home-move cash; rendered. Both legs: the prior leg pins what is observable from outside as dated [KNOWN DEFECT] checks.
 tally "t82-$PRIOR" node t82_mc_calendar.mjs "$PRIOR"
 tally "t82-$CUR"   node t82_mc_calendar.mjs "$CUR"
+# t83 (v6.20) — the Monte Carlo pays the Taxes tab's tax and charges one-time expenses in the quarter they fall (D-40, D-44, D-45): the
+# schedule equals the Taxes tab's rows exactly on every household, preset and slider; both planned paths move by the compounded tax, exact,
+# with a hand pin to the cent; a one-time row in every month of two years charged once in its own quarter, inflated, exact; a year's four
+# quarters add to tableYearExpense; by AST the drag is gone, neither engine reads the table except through mcQuarterSeries, and every
+# outflow is named; the tail, timing, slider, state, QCD, and the t20 / t56 guards on their new footing with controls; Engines B, C, D
+# unmoved; an ORACLE MODULE from the v6.19 source with the drag at 0 bit-identical to v6.20 with a zero schedule (both engines on every
+# household, the stress set on two); the app's wiring by AST; t42 D-4's re-pin attributed step by step; rendered; METHODOLOGY. Both legs: the prior leg pins the old behaviour as
+# dated [KNOWN DEFECT] checks.
+tally "t83-$PRIOR" node t83_mc_tax.mjs "$PRIOR"
+tally "t83-$CUR"   node t83_mc_tax.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

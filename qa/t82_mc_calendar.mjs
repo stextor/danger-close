@@ -31,13 +31,13 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v619";
-const KNOWN_VERSIONS = ["v618", "v619"];
+const KNOWN_VERSIONS = ["v618", "v619", "v620"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v619"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v619", "v620"].includes(VER);   // an array, so the next registration widens it
 // The differential's pair — constants, NOT `VER === "v619"`, so the registrar cannot widen them (t76 records why).
 const D_PRIOR = "v618", D_CUR = "v619";
 const require = createRequire(import.meta.url);
@@ -301,7 +301,11 @@ console.log("  G — a claim pays from its own month");
 {
   // spouse B claims at 63 in the month of her birth: January 2029 on the example (retirement quarter, retired). February and March move
   // the claim inside that quarter. The planned path's difference one quarter later is the benefit not paid, grown one quarter.
-  const ppOf = mon => { const p = clone(BASE); p.dobB = ymd({ ...TL0.dobB, month: mon }); const t = load(p); _src = mulberry(1); return { pp: g.runMonteCarlo(t.targetRetireYear, 2).plannedPath, t }; };
+  // v6.20 (D-40): the Monte Carlo pays the Taxes tab's tax, and moving spouse B's claim month moves Engine B's Social Security and so the
+  // schedule — so "the difference is the benefit not paid" holds only with the tax schedule HELD FIXED (here: none). Through v6.19 there
+  // was no schedule to hold. Measured at the v6.20 build without it: G-1 1,419.41 against 1,426.85 (the tax on one month's benefit).
+  const _fixTax = g.mcIncomeTaxSchedule ? { taxSchedule: {} } : undefined;
+  const ppOf = mon => { const p = clone(BASE); p.dobB = ymd({ ...TL0.dobB, month: mon }); const t = load(p); _src = mulberry(1); return { pp: g.runMonteCarlo(t.targetRetireYear, 2, _fixTax).plannedPath, t }; };
   const j = ppOf(1), fe = ppOf(2), mr = ppOf(3);
   const rq = j.t.ssBQuarter;   // the January claim's quarter (the retirement quarter, 11)
   const infl = Math.pow(1 + g.expectedInflation() / 4, rq + 1);   // plannedInfl after quarter rq (every quarter full: April as-of)

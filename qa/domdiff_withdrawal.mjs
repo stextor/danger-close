@@ -202,7 +202,7 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   // refresh", v6.15 no banner; the STALE strip renders only from the January after the figures' year). For THIS pair only, the two
   // lines are set aside on BOTH sides and nothing else; on a run date with neither, the replaces are no-ops. The two checks keep the mask
   // honest: whatever v6.15 shows, its banner never names the tax notice and its STALE strip never carries the maintainer workflow.
-  const _p615 = VA === "v614" && (VB === "v615" || (VB === "v616" || (VB === "v617" || (VB === "v618" || VB === "v619"))));
+  const _p615 = VA === "v614" && (VB === "v615" || (VB === "v616" || (VB === "v617" || (VB === "v618" || (VB === "v619" || VB === "v620")))));
   const _STALE = /⌛ STALE DATA:[\s\S]{1,900}?(?:constant-update workflow\.|brings it across\.)/;
   const _n615 = (s) => !_p615 ? s : s.replace(_BAN, "").replace(_STALE, "");
   if (_p615) {
@@ -232,7 +232,7 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   // withdrawn and the 10-year average withdrawal rate are masked on BOTH sides; everything else must still be byte-identical (measured at
   // the build: nothing else differs). The checks after the identity keep the mask honest: each mask bit once a side, the masked text
   // differs, and 2029's Expenses cell is the June 2029 snapshot's $98K on v6.17 and $126K on v6.18. Engine-level figures are t81's and t40's.
-  const _p618 = VA === "v617" && (VB === "v618" || VB === "v619");
+  const _p618 = VA === "v617" && (VB === "v618" || (VB === "v619" || VB === "v620"));
   const _M618 = [[/EOY Portfolio[\s\S]*?Section B/, "EOY Portfolio#Section B"], [/Total withdrawn\$[\d.]+[KM]/, "Total withdrawn#"], [/Avg wr \(first 10 yr\)[\d.]+%/, "Avg wr (first 10 yr)#"]];
   const _n618 = (s) => !_p618 ? s : _cut(s, / ?Expenses are your expense table at each year's own dates[\s\S]*?for every plan\./, "v6.18 spending sentence");
   const _m618 = (s) => !_p618 ? s : _M618.reduce((t, [re, to]) => t.replace(re, to), s);
@@ -252,12 +252,23 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   // same stream (t82 C). MEASURED at the build: v6.19 with v6.18's run A length and draw-skipping restored renders this tab byte-identical
   // to v6.18 (DOM DIFF 32 of 32). For THIS pair only those Monte Carlo figures are masked on both sides; each mask must bite exactly as
   // often as stated, and everything else must still be byte-identical.
-  const _p619 = VA === "v618" && VB === "v619";
+  const _p619 = VA === "v618" && (VB === "v619" || VB === "v620");
   const _M619 = [[/Success rate\d+(?:\.\d)?%/g, "Success rate#", 1], [/(\d+-month gap before [^.]+\.)\d+(?:\.\d)?%median@retire: \$[\d.]+[KM]/g, "$1#median@retire: #", 3]];
   const _m619 = (s) => !_p619 ? s : _M619.reduce((t, [re, to]) => t.replace(re, to), s);
   if (_p619) for (const [re, , n] of _M619) for (const [V, w] of [[VA, A.withdrawal], [VB, B.withdrawal]])
     ck(`WITHDRAWAL (v618\u2192v619): the ${String(re).slice(1, 24)}\u2026 mask bites exactly ${n}\u00d7 on ${V} (the shared random stream; see above)`, (w.match(re) || []).length === n);
-  const wA = stripV(_m619(_m618(_n615(_m612(_n610(A.withdrawal)))))), wB = stripV(_m619(_m618(_n618(_n615(_m612(_n612(_n610(_n609(_n608(_n579(B.withdrawal)))))))))));
+  // v6.20 (D-40, D-44, D-45 — docs/SCOPE_D40_MC_TAX_V620.md): both Monte Carlo engines now pay the Taxes tab's tax and charge one-time
+  // rows in their own quarter, so the header's success rate and the three retirement cards' success rates and medians move BY DESIGN —
+  // the figures, not the stream this time. For THIS pair the same masks as v6.19's are applied on both sides; each must bite exactly as
+  // often as stated, and everything else on the tab must still be byte-identical (the Withdrawal tab's own figures do not move: Engine D
+  // is untouched, t83 H).
+  const _p620 = VA === "v619" && VB === "v620";
+  const _m620 = (s) => !_p620 ? s : _M619.reduce((t, [re, to]) => t.replace(re, to), s);
+  if (_p620) for (const [re, , n] of _M619) for (const [V, w] of [[VA, A.withdrawal], [VB, B.withdrawal]])
+    ck(`WITHDRAWAL (v619\u2192v620): the ${String(re).slice(1, 24)}\u2026 mask bites exactly ${n}\u00d7 on ${V} (the Monte Carlo pays the Taxes tab's tax)`, (w.match(re) || []).length === n);
+  if (_p620) ck("WITHDRAWAL (v619\u2192v620): \u2026and the header's success rate DIFFERS across the pair (a v6.20 still on the flat drag fails here)",
+    (A.withdrawal.match(/Success rate\d+(?:\.\d)?%/) || [""])[0] !== (B.withdrawal.match(/Success rate\d+(?:\.\d)?%/) || [""])[0]);
+  const wA = stripV(_m620(_m619(_m618(_n615(_m612(_n610(A.withdrawal))))))), wB = stripV(_m620(_m619(_m618(_n618(_n615(_m612(_n612(_n610(_n609(_n608(_n579(B.withdrawal))))))))))));
   ck("WITHDRAWAL: the tab is byte-identical across the pair (v5.40 is disclosure + mechanics; no rendered cell moves \u2014 measured)",
      wA === wB, firstDiff(wA, wB));
   // The v5.35 claims must still hold on BOTH sides — this is the assertion that would catch
@@ -314,7 +325,7 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   // v6.18 (D-41): Engine B is fed Engine D's draws through the bridge, and those move with the year-by-year spending read — so the Taxes
   // year table differs BY DESIGN at v617→v618. Bounded as C-8 was: it differs (a v6.18 still on the snapshots renders v6.17's table and
   // fails), and the same year rows render on both legs. Dollar figures are pinned in t40 (both legs, and the v6.17 table run).
-  if (VA === "v617" && (VB === "v618" || VB === "v619")) {
+  if (VA === "v617" && (VB === "v618" || (VB === "v619" || VB === "v620"))) {
     const rowsOf = s => (s.match(/20[2-6]\d(?=\d{2}\/\d{2})/g) || []).length;
     ck("TAXES: both legs still render the year table", figA.length > 0 && figB.length > 0);
     ck("TAXES (v617\u2192v618): the figures DIFFER \u2014 the year-by-year spending read reaches Engine B through the bridge", figA !== figB);
@@ -404,7 +415,7 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   // asserted (the v5.43 lesson); the blast radius is: same shape, every moved figure one $K step.
   // v6.18 (D-41): see the Taxes note above — Engine C takes the same bridge, so its MAGI table differs by design at v617→v618; no
   // direction is asserted (the draws rise in some years and fall in others).
-  if (VA === "v617" && (VB === "v618" || VB === "v619")) {
+  if (VA === "v617" && (VB === "v618" || (VB === "v619" || VB === "v620"))) {
     ck("IRMAA: both legs still render the MAGI table", magA.length > 0 && magB.length > 0);
     ck("IRMAA (v617\u2192v618): the MAGI figures DIFFER \u2014 the year-by-year spending read reaches Engine C through the bridge", magA !== magB);
     const cA = (magA.match(/\$[\d,]+K?/g) || []).length, cB = (magB.match(/\$[\d,]+K?/g) || []).length;
