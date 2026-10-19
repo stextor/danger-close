@@ -7,7 +7,7 @@
 
 ## Census at v5.97 (2026-10-08) — read this first
 
-*E-29 added 2026-10-11 (ops package, third): open threads whose only pooled record was a document leaving the pool. Statuses above are as of v5.97 except E-29's, which is as of the ops package of 2026-10-12: (d) and (k) closed by Steve's decisions, (e) and (f) fixed at v6.05, (b), (c), (g) and (i) fixed in that ops package. E-30 added 2026-10-19 (ops package, the fourth trim), on the same rule.*
+*E-29 added 2026-10-11 (ops package, third): open threads whose only pooled record was a document leaving the pool. Statuses above are as of v5.97 except E-29's, which is as of the ops package of 2026-10-12: (d) and (k) closed by Steve's decisions, (e) and (f) fixed at v6.05, (b), (c), (g) and (i) fixed in that ops package. E-30 added 2026-10-19 (ops package, the fourth trim), on the same rule. E-31 added the same day (the second ops package: `qa/` left the pool).*
 
 **Method.** One pass per register on 2026-10-08 against the shipped v5.97 (repo `2cfe5e2`, source `4157137a…`): every ID the register defines, what it says, what the CHANGELOG and archives record, and — for anything still open — the current source or suite, read by parser where a count is claimed. The body below is the record as written; where a marker in it disagrees with this table, **this table is current**.
 **E-15 is two items.** The ID was given twice: **E-15a** below is the MC-parity/ACA entry, **E-15b** the `taxOrd` entry. Cite them that way; neither is renumbered, because other documents cite both by the bare ID.
@@ -45,6 +45,7 @@
 | E-28 | **FIXED** (both passages) | — |
 | E-29 | **OPEN** (three of eleven threads, each Low: (a), (h), (j)) | re-homed 2026-10-11 from documents leaving the pool; (d) and (k) closed by decision, (e) and (f) fixed at v6.05, (b), (c), (g) and (i) fixed in the ops package of 2026-10-12 — see its entry |
 | E-30 | **OPEN** (seven threads, each Low; (c) is a decision for Steve) | re-homed 2026-10-19 from text leaving the pool — see its entry |
+| E-31 | **OPEN** (ten threads, each Low, and one list of stale statements, (e)) | re-homed 2026-10-19 from the `qa/` files' comments and the manifest's hash table, which left the pool — see its entry |
 
 **Stale figures below, left as written:** E-6 "imported by only four files"; E-7 "202"; E-11 "144,008" and "12,151 lines"; the summary table (frozen at the v5.30 additions, with E-14 still Open/High); E-15a "parity 9/9" and "scheduled to fold into the A3 release"; E-10 "CLOSED … must not be re-retired"; E-19's `qa/controls.sh`; E-21's annotation (omits v5.84); E-22 and E-25 (no fix notes). Line addresses in E-4, E-5, E-8, E-9, E-12, E-15a, E-23 and E-26 are v5.29/v5.73 addresses.
 
@@ -1098,7 +1099,7 @@ and found by an independent second read before the package shipped. Each is smal
   `jsdom`, `acorn`, `acorn-jsx`, `acorn-walk`, `esbuild` and the app's packages, and `package-lock.json` carries no `jsdom` entry, so two
   sessions can run the suite on different `jsdom` versions (observed 2026-09-11: `jsdom ^30.0.1` and `esbuild ^0.28.2` resolved on the day).
   OPERATIONS §N3a records the `--no-save` install as deliberate; the version drift itself has no remedy. *"The remedy needs a scope, not a flag."*
-- **(j) No Section A/B register stays in the pool.** With `FlawsToFix-v5_69-Phase1.md` repo-only (and the v5.10.1 Phase 1 already so),
+- *(2026-10-19: one item in (j)'s list is answered — `t36` and `t66` set a `location` global; E-31 (h).)* **(j) No Section A/B register stays in the pool.** With `FlawsToFix-v5_69-Phase1.md` repo-only (and the v5.10.1 Phase 1 already so),
   the pool holds no record of A-1 (holds, by design), B-1 (disclosed; not re-verified at v5.69), or that audit's *"Not examined, and therefore
   not cleared"* list: `GuidedWizard`'s save path, `startFresh` and `applyAndContinue`'s file-status branches; the export side of PF3 and B-1's
   Field Manual wording; checklist rendering with a real item id and inherited skin names other than `"constructor"`; anything in a real
@@ -1142,3 +1143,59 @@ independent second read before the package shipped** — the same shape as E-29'
   own comments; its other record (TESTING's v5.3x write-up) left the pool. Matters if the qa code leaves too (`docs/SCOPE_UNPOOL_QA_CODE.md`).
 
 **Severity: low** for all seven. (a), (b), (d) and (f) would each take a scope; (c) is Steve's to decide; (e) is a wording fix.
+
+## E-31 · Open threads re-homed 2026-10-19 from the qa/ files and the manifest's hash table
+
+Recorded here, not fixed. On 2026-10-19 every `qa/` file left the pool (`docs/SCOPE_UNPOOL_QA_CODE.md`; OPERATIONS §G, *qa/ is repo-only*),
+and the manifest's test and harness hash table went to `docs/MANIFEST_ARCHIVE_test_hash_table_to_v6_20.md`. The 126 files' comments were read
+by the author and, independently, by six readers covering all of them; the table's prose was read line by line. **Standing rules and harness
+traps went to OPERATIONS §C4**; the open threads are below. Each file still holds its thread at the cited line (in the repo).
+
+- **(a) `qa/tools/oracle_ri.py` is frozen at v5.69's Rhode Island model.** Its docstring (L16–21) lists as current, and "disclosed in RI's
+  note", a flat 5% rate, half of federally taxable SS, a household cap and IRA money qualifying — but RI carries brackets from v6.01, its SS
+  cliff and deduction from v6.02, and excludes IRA money from v5.95. Nothing records that the oracle describes a superseded model.
+- **(b) Two TY2026 state bracket schedules were read from non-final sources** — Nebraska's from a **draft**, Vermont's from **preliminary**
+  rates (`qa/t65_state_brackets_b2.mjs` L7–8). METHODOLOGY says each schedule was "read at its primary source for TY2026". A re-read is owed
+  when the final versions publish; it belongs with `MissingFeatures.md` D-18's refresh.
+- **(c) The `stateEstate` fixture waits for a D-7 release that will not come.** `qa/tools/fixture/households.mjs` L71–75: "the fixture waits
+  for the D-7 release, where it has something to measure" (decision D2 of the un-pooled `SCOPE_STATE_FIXTURES.md`); MissingFeatures D-7's
+  modelling half was **declined**. Keep the wait recorded or drop the fixture.
+- **(d) A delete-first list is checked in one direction only** (the manifest's hash-table prose, 2026-08-23): F-2 verifies that every
+  `knowledge/` file replacing a pool file is named for deletion; nothing verifies that every name on the list **exists in the pool** — a list
+  derived from the package rather than the pool silently adds files (the pool grew 89 → 90 that way). J-5 covers `RETIRE:` names only.
+- **(e) Stale statements found by the trace, left as written** — a list for the next document pass:
+  - `TESTING.md`: the `t24` row's "dated `[KNOWN DEFECT]` pin for the middle tier" (fixed v5.45; rewritten v5.77); the `t11` note's "requires
+    a new harness capability and is scoped separately" (superseded by §M's hoists; `t11` itself is still DOM-read); the "five-state in-law
+    list" (stage 1; membership is the `incomeLimitedInLaw` field from v5.72); the `t35` row's "agreement to the cent" (one-sided where a
+    per-person rule applies, since v5.95 — `t35` L555).
+  - `TESTING.md`'s per-file index (moved verbatim from the manifest): `t31`'s "key set deliberately two" (12 now); `t35`'s §D-7 set "must be
+    lowered by one as each converts" (empty since v5.73, the check gated); `t44`'s "every engine placed bit-for-bit" — Engine A's solver
+    loop is not (`t44` L21–22; OPERATIONS §C4). `FlawsToFix-v5_73-Phase2.md` L163 says the same about `t44`.
+  - `OPERATIONS.md`: §B's "the prior leg's `.jsx` is not in the repo … this repo has no tags" and the third argument "required" (stale since
+    `mk_runfolder.sh`'s git mode, 2026-09-28; the script's own header L33–37 says the same); §I's statement that `package_check`'s §H comment
+    "still says" Pages is unreachable (the comment was corrected 2026-09-14).
+  - In `qa/` comments (repo): `runsuite.sh` L4 ("scratch tooling for this session"); `t21` L23 (a pin "in A4", fixed v5.29) and L302
+    (`vercensus` "accepts only v5 tags"); `package_check.mjs` L349–357 (the extra-copy case "still uncovered" — D-3 is built);
+    `tools/state_sets.cjs` L14 (Maine "not yet conditioned" — conditioned v5.73); `tools/notes_probe.cjs`'s header (MD and ME; the code reads
+    KY and DE); `t2` L276 (the enhanced ACA regime "joins this guardrail with the A3 release" — A3 was declined, E-15a); `t52` L70 (D-24,
+    fixed v5.90); `domdiff_withdrawal.mjs`'s default pair (`v565 → v566`; harmless, `runsuite.sh` passes the pair).
+- **(f) `qa/tools/derive_rmd_expectations.mjs` produces figures v5.41 did not ship** (a dividend term in `nonSS`; a conversion allocation
+  not gated by each spouse's ladder window) and was left uncorrected on purpose, "to be corrected with the `div_y` release" (the manifest's
+  hash-table note). Dividends reached the ladder at v5.53; whether the script was corrected was not checked. Repo-only tool.
+- **(g) The MC-parity guardrail does not cover Engine B** (`t27` L24–28, v5.45): `computeTaxPlan` and the ladder's `taxableSS*` sit on no
+  fingerprinted path, so "parity green" was "not evidence of containment" for that release. Not re-measured at v6.20; `t2`'s fingerprint has
+  since gained keys (`stateTax` at v5.48).
+- **(h) No suite can observe the Reload navigation** (`t38` L57–58): jsdom's `location` is unforgeable, so `t38` B-6 asserts only that
+  pressing Reload changes no data. And **E-29 (j)'s "whether any suite sets a `location` global" is answered**: `t36` and `t66` do
+  (OPERATIONS §C4).
+- **(i) A disclosure on one surface only:** the Backtest tab tells the user the backtest "deliberately omits" the LTC shocks and the Taxes
+  tab's income tax that the Monte Carlo charges (`t83` I-6, L551); METHODOLOGY's backtest section does not say so.
+- **(j) Two recorded blind spots in controls:** with every in-law row conditioned, a SHRUNK `IN_LAW` list cannot move `unconverted()`, so
+  `t29`/`t35` stay green and only S-1 and the drift guard see it (`tools/controls_state_sets.py` L147–148); two of v5.43's five controls fire
+  `t1` STRUCT S-4 but not `t25` (`t25` L174–183; probably moot since the shared `taxableSS86`, v5.77).
+- **(k) Three Indiana, Kentucky and Michigan credits named only in the app's notes** (`t67` L120–125: Michigan's pre-1946 deduction, Indiana's
+  unified elderly credit, Kentucky's family-size credit) — MissingFeatures D-32 names Ohio's and Utah's. Immaterial as judged by the reader;
+  recorded so the next D-32 pass sees them.
+
+**Severity: low** for all ten threads. (a), (b), (d) and (f) are small fixes; (b) has a date attached; (e) is one documentation pass.
+

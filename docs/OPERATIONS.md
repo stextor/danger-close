@@ -54,12 +54,22 @@ like a current one until you hash it. Before any work:
 2. Hash the current `.jsx` in knowledge (`md5sum DangerClose-<current>.jsx`).
 3. Compare to the manifest's md5, and cross-check the manifest version against what `CHANGELOG.md` says is
    newest.
-4. **Hash the test and harness files too — see §A2. This step is not optional.**
+4. **The suite comes from a clone, never the pool** — no `qa/` file is pooled from 2026-10-19 (§A2's box, §G). Diff the pooled
+   documents and scaffold against a fresh clone; that is the step that is not optional.
 5. **Match → proceed. Mismatch → knowledge is stale; refresh it before doing anything else.**
 
 State the confirmed version + hash at the start of substantive work.
 
 ### A2. The freshness check covers the SUITE as well as the source (added v5.30)
+
+> ⚠ **From 2026-10-19 the pool holds no `qa/` file** (the second ops package that day; `docs/SCOPE_UNPOOL_QA_CODE.md`, Steve's DC-1 to
+> DC-4, all (a)). The suite, its harness and its tools are read from a clone — which every build already used, because `mk_runfolder.sh`
+> needs the repo's tree — so a stale pooled test can no longer exist. **The check is now:** hash the pooled source against the Current
+> table (steps 1–3), and diff the other pooled files (the documents and the four scaffold files) against a FULL clone — not `--depth 1`:
+> `mk_runfolder.sh` and `package_check` K-5b read history. The offline fallback table holds only the pooled files' rows (the manifest's
+> *Pooled file hashes*); the test and harness table is `docs/MANIFEST_ARCHIVE_test_hash_table_to_v6_20.md`, repo-only. **The narrative
+> below is the history of why the suite once had to be hashed in the pool**: the clone-and-diff block is the live check, and where a
+> passage below says the pool holds test or harness files (or `tools_fixture.jsx`), read it as true before 2026-10-19 only.
 
 **Why this exists.** Until v5.30 steps 1–3 above hashed the `.jsx` sources and nothing else. No test
 file had a recorded hash anywhere — not in the manifest, not in `TESTING.md`, not here. So a stale
@@ -76,8 +86,8 @@ one. Treat the suite as part of the build's identity, not as scaffolding around 
 **Primary check — clone and diff. Zero maintenance, and it is what actually found the drift.**
 
 ```bash
-git clone --depth 1 https://github.com/stextor/danger-close.git /tmp/ship
-# for each test/harness file in the pool, compare to its committed counterpart
+git clone https://github.com/stextor/danger-close.git /tmp/ship    # FULL: K-5b and mk_runfolder.sh read history (was --depth 1 until 2026-10-19)
+# for each file in the pool, compare to its committed counterpart
 ```
 
 Any file that differs is either legitimately being changed by this release or is stale. **Say which,
@@ -550,7 +560,7 @@ Two basenames are multi-path by design and long-standing, so E-1b cannot see the
 `validation/`). *(✓ **Closed in the ops package of 2026-10-12** (E-29 (c)): E-1b now resolves a name with zero or several basename
 candidates through the manifest's hash-row path cell — `index.html` → `src/index.html`, `README.md` → `README.md`,
 `tools_fixture.jsx` → `qa/tools/fixture/fixture.jsx`, `qa-baseline-README.md` → `qa/qa-baseline/README.md` (rowed that day) — and
-names anything still unresolved. Controls P72 and P73.)*
+names anything still unresolved. Controls P72 (retired 2026-10-19: no renamed pool file remains) and P73.)*
 
 ⚠ **THIRD INSTANCE — the v5.71 upload (recorded 2026-09-14), and the worst of the three.** Seventeen
 files — `qa/runsuite.sh`, `qa/smoke_built.mjs` and `qa/t23`–`qa/t37` — were committed at the repo root
@@ -580,6 +590,86 @@ post-upload verification while the pool is not mounted; re-uploading the `qa` fo
 because the run folder is flat — but they are real repo files at `qa/qa-baseline/`. A rule matching
 them would make the suite uncommittable. The first census of this ran to 68 candidates; **64 were
 that false positive.**
+
+### C4. Traps and rules that lived only in the suite's comments (re-homed 2026-10-19)
+
+When every `qa/` file left the pool (§G, *qa/ is repo-only*), each departing file's comments were read for traps and standing rules that no
+pooled document carried — by the author and, independently, by six readers covering all 126 files. The suite still holds each one at the
+cited line; this list is what a session reading only the pool now needs. **Open threads** from the same trace are in `ARCHITECTUREIssues.md`
+**E-31**. Short form here; the cited comment is the full record.
+
+**Fixtures that silently configure a different household**
+- **Social Security goes in through `incomeSources.ssA.planned` / `ssB.planned` (MONTHLY), not `.amount`.** Setting `.amount` is a silent
+  no-op that leaves the demo benefit in place (~$47K of phantom SS in every MAGI). `t17` L43, `t18` L41, `t27` L36, `tools/fixture/households.mjs` L14.
+- **`setPortfolio` does not rebuild `PLAN_TIMELINE`; only `applyLoadedData` does**, and Engines B, C and D read both — so a fixture set with
+  `setPortfolio` alone silently runs a stale timeline. Use `applyLoadedData({ portfolio: P })` (the wrapper, §C). `t17` L40, `t18` L39,
+  `t19` L219 (which cites §C for it; §C had only the wrapper half until this list).
+- **`t2` pins `taxableGainShare()` to 0 around every fingerprint run**, because the function reads module-level `PORTFOLIO`: a change to the
+  shipped default would otherwise move a "fully explicit" fingerprint and read as an engine regression. `t2` L144–156.
+- **The `state` fixture (`stateCode: "TS"`, not a `STATE_RULES` key) is the only legacy flat-rate-path fixture. Leave it alone.**
+  `tools/fixture/households.mjs` L45–49.
+
+**The jsdom environment**
+- **jsdom exposes no `location`, so `IS_CLAUDE_ARTIFACT` fails closed to true and every DOM suite runs the claude.ai branch** (no key panel).
+  A suite that needs the browser branch calls `dom.reconfigure({ url })` and sets `globalThis.location = window.location` — `t36` L10–13,
+  `t66` L38–40 do. jsdom's `location` is unforgeable, so no suite can observe the Reload navigation itself (`t38` L57; E-31 (h)).
+- **Never add synchronous `getItem`/`setItem`/`removeItem` aliases to a storage shim** (`t37`'s, `t5`/`t6`'s, or `src/main.jsx`): the suite
+  would agree with the A-3 defect and mask it. `t37` L27–30.
+- **`T38_SKIP_DOM=1` is for `qa/tools/controls_v572_import.py` only**; a run with it set says so on its summary line. `t38` L300.
+
+**Writing an assertion**
+- **`t10`'s `T` compares with EPS = $0.01, sized for dollars: assert a RATE as a boolean**, or it passes for anything within a cent (found by
+  control C1, which a reverted 4% build passed). `t10` L984–987.
+- **Anchor a regex structural pin at line start (`^\s*const …`)**: the app's own comments quote retired expressions, and *"a comment must
+  never be able to satisfy a structural pin."* `t1` L624–627, L698–701, L733, L808. `t19`'s `totalToWithdraw` extinction is a text scan with
+  comment lines filtered — a TRAILING comment naming the identifier would fail it (loudly). `t19` L289–296.
+- **`t4`'s over-escaping check must stay generic** — any attribute, not just `plain` — because the defect (UsabilityFlaws F-11) is a property
+  of how the literal is written. `t4` L334.
+- **`t31` pins METHODOLOGY and the Field Manual by literal key phrases (12 keys).** Change a key in the same edit as its copy; never "fix" a
+  failure by decoding `DOCS_HTML` — fix the copy. Its controls have fixed homes: "Uniform Lifetime Table divisors" in the app only, "Roth
+  break-even" in the raw manual only (`t76` L108 depends on it), "Seeded common-random-numbers" on neither surface. A release that models
+  Colorado's shared cap must INVERT that key, not expire it. `t31` L28, L141, L216–243.
+- **`t35`'s `_qual` falls back to `persons65`; with a household unit and 0 it yields nothing — the conservative degradation, and it must stay
+  so** (L229–232). RI-9 derives the Field Manual's count from the table: the next state given `incomeLimitedInLaw` fails RI-9 until the
+  manual says so (L584).
+- **A state that gains retirement relief must decide its annuity treatment in `t69`** — C-1 fails until it is classified (`t69` L13, L80).
+- **`d30_ref.mjs`'s DD-14 convention for derived pins**: a pin keeps its hand base and, on a D-30 leg, expects it after the state's
+  deductions via `d30Want` (NaN if the calculator built a different base). Utah's Social Security credit is not in it — a Utah pin with
+  taxable SS must add it; Maryland's 2% capital-gains tax needs the pin's own `capGains`. `d30_ref.mjs` L4–5, L110–137.
+- **The income-limited state set is DATA from v5.72:** each such `STATE_RULES` row carries `incomeLimitedInLaw: true`, set by hand in the
+  app; `state_sets.cjs`'s `IN_LAW_PRE_V572` is frozen and never extended; `state_sets_check` S-1b asserts the field from v572. A populate
+  release sets the field — it does not edit a list. (`tools/state_sets.cjs` L10–44; TESTING's "five-state in-law list" is stage 1.)
+- **Precision:** Engine A returns totals only, so its taxable Social Security resolves to about $10, not the cent (`t43` L21–26) — a caveat
+  §M's "dollar-exact" omits. `t44` cannot place Engine A's tier loop inside the taxable-sale funding solver on a threshold; that loop is
+  covered by the helper sweep and a parser check, not bit-for-bit (`t44` L21–22).
+
+**Running and extending the suite**
+- **A suite file not listed in `runsuite.sh` never runs, and nothing says so** — v5.75 reported 4,320 green with 39 checks unexecuted.
+  `tally` sums EVERY "N passed"/"N failed" a suite prints (only `t10` is special-cased), so a suite prints its count line once.
+  `runsuite.sh` L16, L116–120.
+- **Argument conventions** (`qa/qa-baseline/README.md` L110–121): `t11`–`t14` and `t16` take a module path, not a tag (`t15` takes a
+  version tag); `t22` the prior build's tag;
+  `t19` runs from `qa/`; `t21` needs `tools/`. TESTING.md's run notes said otherwise until this package.
+- **The DOM-leg entry shims are kept in the repo deliberately** (decision H-1, `qa/qa-baseline/README.md` L84–88): do not delete them as
+  clutter. They no longer enter the pool (§G); that is not permission to remove the repo copies.
+- **`domdiff_withdrawal.mjs`:** re-point its default pair every release, header and code together (L3–8; stale since v5.66 — harmless,
+  `runsuite.sh` passes the pair); each release's arm asserts what that release claims, every mask applies to one pair and must bite exactly
+  its stated count, both legs are pinned to BASE through `danger_close:scenario_v1`, only rendered text is captured (no `<style>`, no
+  `.dc-phone-only`), and a table that moves by design is bounded by rows, not by a count of figures (L17–21, L102–143).
+- **The browser suites** (`t45`, `t47`, `t48`): SVG text is measured by `fill`, not `color`; skins are chosen through the Skins tab and every
+  switch is asserted to have landed (a localStorage write silently did nothing); animations are frozen at their first keyframe; the pointer
+  is parked, because on a touch screen hover sticks where the last tap landed; the 120 s click timeout is deliberate ("Use example data" runs
+  the Monte Carlo on the main thread). `t48` L12–16, L194–206; `t45` L60–62.
+- **`smoke_built`'s survivor-disclosure check asserts only that the text is in the shipped bytes**; reachability under a widowed render is
+  `t31`'s. `smoke_built.mjs` L143–148.
+- **`package_check_controls.sh`'s fired-ID character class must cover every section `package_check` emits** — widen it the day a section is
+  added, or every new control prints NOT CAUGHT (L72–75).
+- **`package_check` itself:** pass it a FULL clone (K-5b skips on a shallow one and says so); a package that deletes a repo file declares it
+  with a line of its own in README-FIRST, `DELETE FROM REPO: <full repo path>`, or E-1b goes red on it (L468–477); if two tracked paths ever
+  legitimately hold identical bytes, D-3 gets an explicit exemption naming the pair, never a return to basenames; K-8's extension set stays an
+  explicit allowlist; K-7 is never the manifest's only guard; an OPEN-allowlist entry needs the content check a retirement does.
+- **The OBBBA senior-deduction sunset is NOT wired to `TAX_CONSTANTS_YEAR`** (decision D-3, `t1` L120–121): bumping the yearly constant must
+  never move a statutory expiry date. Read with *Annual data refreshes* (§I).
 
 ## D. Defect-pin discipline
 
@@ -713,8 +803,9 @@ not a real regression.
   written during packaging, so it costs nothing to maintain. Entries before v5.12 do not have it —
   for those, identify a retired source by reading it out of the commit that shipped it.
 - **Project knowledge:** the CURRENT versioned source (one — the prior build is read from the repo's history by its recorded md5,
-  from 2026-09-28) plus CHANGELOG, METHODOLOGY, TESTING, README, the test
-  files, harness, site census, active scope docs, this file, and the manifest.
+  from 2026-09-28) plus CHANGELOG, METHODOLOGY, TESTING, README, the registers and active audit documents, this file, and the
+  manifest. **No `qa/` file — suite, harness, tool, oracle, fixture or control — from 2026-10-19** (*qa/ is repo-only*, below); until
+  then the test files and harness were pooled too.
 - **Build scaffold (project knowledge, all four):** `src/index.html` (the Vite HTML entry template),
   `src/main.jsx` (the browser bootstrap), `vite.config.js`, and `package.json`. Without all four, a session
   working from knowledge **cannot produce the published `index.html`** — which is exactly what happened at
@@ -793,7 +884,31 @@ four repo only, each with a §0 trace. Eight threads had no other pooled record:
 ⚠ **the other seven were missed by the first trace and found by an independent second read** — they are `ARCHITECTUREIssues.md` **E-30**,
 AI-6 (Steve's open Ask AI model decision) among them. Run the second read every time; it has now caught misses on both trims that had one.
 ⚠ **This only buys a few releases.** Half the pool is test and harness code; whether that leaves the pool is
-`docs/SCOPE_UNPOOL_QA_CODE.md` (decisions open).
+`docs/SCOPE_UNPOOL_QA_CODE.md` (decisions open). *(It left the same day — Steve took DC-1 to DC-4 as recommended; see* qa/ is repo-only
+*below.)*
+
+### qa/ is repo-only (from 2026-10-19)
+
+**No file under `qa/` is pooled** — the suites, `runsuite.sh`, `mk_runfolder.sh`, the harness and its shim, the DOM entry, the fixtures, the
+oracles, the tools, `package_check` and its controls. 126 files left the pool in the second ops package of 2026-10-19
+(`docs/SCOPE_UNPOOL_QA_CODE.md`, FULFILLED): the meter read 1,816,951 of 2,000,000 after the morning's trim, and the qa code was about half of
+it. The pool keeps 16 files: the current source, the documents (CHANGELOG, METHODOLOGY, TESTING, README, this file, the manifest, the
+registers, the open audit documents) and the four build-scaffold files.
+
+**Why it is safe.** No build could run from the pool anyway: `mk_runfolder.sh` reads the repo's tree (`src/`, `qa/qa-baseline/`,
+`qa/tools/fixture/`) and its history, so every session that ran the suite already read it from a clone. The pooled copies were read for
+§A2's comparison (which existed because they drifted), the hash table, and reading a test in a chat-only session — DC-3 (a) accepted losing
+the last, with every file's description kept in `TESTING.md`'s per-file index.
+
+**What enforces it.** `package_check` **B-4** fails a package that ships a `qa/` file to `knowledge/`; **J-6** fails a post-upload pool that
+still holds one (pre-ship, any still there must be declared `RETIRE:` by the package). A name is a qa file when every repo path with that
+basename lies under `qa/`, plus the DOM-entry family and the two renamed pool names (`tools_fixture.jsx`, `qa-baseline-README.md`).
+`README.md`, `index.html` and `package.json` are multi-path and stay pooled. J-4 (one dom entry) is retired. Controls P71, P76–P78.
+
+**What it changed.** A release's `knowledge/` half is the source and the documents it changes; every `qa/` file ships to `github/` only, and a
+release's delete-first list no longer rotates a dom entry. The manifest's hash table keeps only pooled files (*Pooled file hashes*); the old
+one is `docs/MANIFEST_ARCHIVE_test_hash_table_to_v6_20.md`. The traps and rules that lived only in suite comments are §C4; the open threads,
+`ARCHITECTUREIssues.md` E-31.
 
 ### Release-pinned control scripts are repo-only (added 2026-09-28)
 
@@ -807,7 +922,7 @@ is not in `knowledge/`. The control scripts WITHOUT a release in their name stay
 `controls_t21_censusp1.sh`). Not all of them are version-free: `controls_source.sh` targets the v5.47 source; the others were not
 checked at this split. Whether they too belong repo-only is left for a later pass rather than asserted here. **`controls_source.sh` was
 un-pooled 2026-10-11** for that reason (it reverts fixes in the v5.47 source and cannot run against a later build); the other five were
-not re-examined.
+not re-examined. *(Settled 2026-10-19: every control script is repo-only, with the rest of `qa/` — §G, qa/ is repo-only.)*
 
 **Un-pooling a retired document** follows the three-place rule above with one difference: the repo copy **stays**.
 The manifest row is marked *un-pooled, repo-only*, and §G's decision check is run line by line first — anything still
@@ -837,8 +952,8 @@ Knowledge holds **exactly ONE** app source, `DangerClose-<current>.jsx` (from 20
 which was about half the pool). The prior build's source is **not** pooled: `mk_runfolder.sh` resolves it from the clone's
 history by the md5 the manifest records for its version, and a session that needs to read it runs
 `git show <commit>:src/DangerClose.jsx` (the Prior table names the commit). **A release rotation deletes ONE source** — the
-outgoing current becomes history — and one `dom_entry_*`. `package_check` J-3/J-4 assert exactly one of each; K-5b asserts
-the Prior md5 is held by a commit. From
+outgoing current becomes history. `package_check` J-3 asserts exactly one source; K-5b asserts the Prior md5 is held by a commit.
+*(Until 2026-10-19 a rotation also deleted one `dom_entry_*` and J-4 asserted exactly one; from then no dom entry is pooled — J-6.)* From
 v5.12 forward their identity is pinned by the provenance line at the end of that release's CHANGELOG
 entry (§G); for earlier releases there is no recorded md5, so identification means reading the file
 out of the commit that shipped it. Only
@@ -854,9 +969,9 @@ the POOL for space (§G, "Release-pinned control scripts are repo-only") and are
 evidence. ⚠ That ops package un-pooled them without noticing this section, which then still said the pool "keeps every
 `controls_v*.sh`" — two rules in one document, contradicting each other, found the next day and reconciled here.
 
-**`dom_entry_*.jsx` DOES rotate** with its source leg — `package_check` J-4 asserts exactly ONE (two until 2026-09-28) —
-and its row in the §A2 fallback hash table must be pruned in the same pass, or the table names a
-file the pool no longer holds (K-8).
+**`dom_entry_*.jsx` DID rotate** with its source leg until 2026-10-19 — `package_check` J-4 asserted exactly ONE (two until 2026-09-28) —
+and its row in the §A2 fallback hash table was pruned in the same pass. **From 2026-10-19 it is repo-only like the rest of `qa/`**: it never
+enters the pool, so there is nothing to rotate there; the repo keeps every one (decision H-1, §C4).
 
 Recorded because a v5.61 delivery note told the maintainer to delete `controls_v559.sh` as
 rotation. It was wrong, and the pool's own contents contradicted it in plain sight. The rule was
@@ -922,7 +1037,7 @@ file that was never there is a no-op that reads exactly like a clean retirement.
 confirm only a retirement that `MANIFEST.txt` declares with a `RETIRE:` line. At the v5.74 ship that line was never
 written, `J-5` reported nothing to check, and the retired scope stayed in the pool until files were counted by hand.
 `C-7` compares the package's own new retirement block(s) with the `RETIRE:` lines: every row that leaves **without a
-replacement** (no `knowledge/` copy; rotation legs excluded — `J-3`/`J-4` own those) must be declared. Controls `P62`/`P63`.
+replacement** (no `knowledge/` copy; rotation legs excluded — `J-3` owns the source; until 2026-10-19 `J-4` owned the dom entry) must be declared. Controls `P62`/`P63`.
 
 ### ⚠ Version registries come in FOUR shapes and a sweep sees only one (added 2026-09-14)
 
@@ -1048,7 +1163,7 @@ two destinations, with the suite re-run from the packaged copies before the zip 
 §A2 fallback hash table — in the same edit, computed from the copy the package is shipping.** A file
 gaining its first pool copy gets a row or an explicit reason it does not have one (the D-3 note in
 the manifest states the classes that are deliberately unrowed); a file leaving the pool by rotation
-has its row deleted in the same pass, which §G already requires for `dom_entry_*` and which is the
+has its row deleted in the same pass, which §G required for `dom_entry_*` while it was pooled and which is the
 same rule generalised.
 
 ⚠ **This step is stated here because nothing connected the two halves that already existed.** §L
@@ -1551,7 +1666,8 @@ takes the built zip and a fresh clone and verifies what this section requires: t
 are present; every `MANIFEST.txt` md5 matches the file it names; `github/` holds **exactly** the
 files that differ from the committed tree — so both a *missing* file and a needlessly-shipped
 *unchanged* one fail; `knowledge/` is flat, carries no built `index.html`, and holds exactly one
-`DangerClose-vN_NN.jsx` (any single-digit major — this read `v5_*` until 2026-10-11); and `MANIFEST.txt` records that the suite was run from the packaged copies.
+`DangerClose-vN_NN.jsx` (any single-digit major — this read `v5_*` until 2026-10-11) and **no `qa/` file** (B-4, from 2026-10-19 — every
+`qa/` file ships to `github/` only, §G); and `MANIFEST.txt` records that the suite was run from the packaged copies.
 Run it before sending — **on EVERY package, including ones that ship no app source.**
 
 **Ops packages (added 2026-08-26).** Not every zip is a release. A documentation or tooling package
