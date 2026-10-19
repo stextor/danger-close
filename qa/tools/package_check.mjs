@@ -162,6 +162,31 @@ if (knIndex.length) {
 ck("B-2: knowledge/index.html is the src/ template, NOT the built artifact (output is not input \u2014 \u00a7G)",
   b2bad.length === 0, b2why);
 const knSrc = knFiles.filter(f => /^DangerClose-v\d_\d+\.jsx$/.test(f));
+
+// ── B-4 · qa/ IS REPO-ONLY (ops package of 2026-10-19 (second), docs/SCOPE_UNPOOL_QA_CODE.md DC-1 (a)) ──────────────
+// Until 2026-10-19 the pool held every suite, tool and harness file — 126 files, about half of project knowledge — while no
+// build could run from the pool (mk_runfolder.sh needs the repo's tree), so every session that ran the suite read it from a
+// clone anyway. Steve: "Let's fix the size of the project knowledge pool"; DC-1 (a): every qa/ file leaves the pool.
+// A pool NAME is a qa file when every repo path carrying that basename lies under qa/ — read from the clone's tree and the
+// package's own github/ (a NEW qa file is in neither the clone nor the pool yet) — plus two families the basename cannot
+// see from the clone alone: the DOM-leg entry shims (`dom_entry_vNNN.jsx` — a NEW entry is in no clone yet, and a package
+// may not ship it to github/), and the two qa files the flat pool knew under another name until 2026-10-19 (RENAMED_QA). A
+// name that also lives OUTSIDE qa/ is not a qa file: README.md (root, validation/, and qa/qa-baseline/) and package.json
+// (root, and qa/harness/) stay pooled; index.html (root, src/) is not under qa/ at all.
+// Without a clone only github/ and the two families are known, and B-4 says so rather than passing blind.
+const RENAMED_QA = new Set(["tools_fixture.jsx", "qa-baseline-README.md"]);
+const _qaPaths = new Map();   // basename -> [repo paths]
+for (const f of [...(CLONE && existsSync(CLONE) ? walk(CLONE).filter(x => !x.startsWith(".git/")) : []), ...ghFiles]) {
+  const b = f.split("/").pop(); if (!_qaPaths.has(b)) _qaPaths.set(b, new Set()); _qaPaths.get(b).add(f);
+}
+const isQaName = n => RENAMED_QA.has(n) || /^dom_entry_v\d\d\d\.jsx$/.test(n) ||
+  (_qaPaths.has(n) && [..._qaPaths.get(n)].every(p => p.startsWith("qa/")));
+{
+  const qaIn = knFiles.filter(f => !f.includes("/") && isQaName(f));
+  if (!CLONE || !existsSync(CLONE)) console.log("     (B-4 judged from github/ and the name families only \u2014 no clone given)");
+  ck("B-4: no qa/ file ships to knowledge/ \u2014 qa/ is repo-only from 2026-10-19 (OPERATIONS \u00a7G)",
+    qaIn.length === 0, qaIn.join(", "));
+}
 if (KIND === "app-release") {
   ck("B-3: exactly one versioned app source in knowledge/ (the incoming half of the two-source rotation)",
     knSrc.length === 1, knSrc.join(", ") || "none");
@@ -841,10 +866,9 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
     //   Removed at v5.57.1 after re-verifying every premise by content against v5.57.
     const OPEN = new Set([
       "SCOPE_STANDING_AUDIT.md",                  // not a build scope at all (OPERATIONS §K)
-      // Added in the ops package of 2026-10-19 (the pool trimmed to ~90%). Un-pooling the qa code — OPEN-because-UNDECIDED: DC-1 to DC-4 are
-      // Steve's. ⚠ EXPIRES when that ops change is built (the scope FULFILLED with a build record AND this entry removed, in the same
-      // package) or declined (the scope RETIRED, same rule) — the two-halves rule in the removal notes below.
-      "SCOPE_UNPOOL_QA_CODE.md",
+      // ── REMOVED in the second ops package of 2026-10-19: "SCOPE_UNPOOL_QA_CODE.md" — added that morning as OPEN-because-UNDECIDED;
+      //    Steve took DC-1 to DC-4 as recommended the same day, the package built it, marked the scope FULFILLED with its §6 build
+      //    record, and removed this entry in the same package, as its own expiry note required.
       // ── REMOVED at the v6.20 ship: "SCOPE_D40_MC_TAX_V620.md" — added at the v6.19 ship as OPEN-because-UNBUILT (decided, waiting one
       //    release for the calendar); v6.20 built it, marked it FULFILLED with its §7 build record, and removed this entry in the same
       //    package, as its own expiry note required.
@@ -1016,10 +1040,11 @@ if (POOL && existsSync(POOL)) {
     // build is read from the repo's history by its recorded md5 (mk_runfolder.sh). Until then these asserted TWO of each.
     // A pool holding two sources now means the outgoing one was not deleted at the rotation.
     const legs = readdirSync(POOL).filter(f => /^DangerClose-v\d_\d+\.jsx$/.test(f)).sort();
-    const doms = readdirSync(POOL).filter(f => /^dom_entry_v\d\d\d\.jsx$/.test(f)).sort();
     ck("J-3: the pool holds exactly ONE source (the prior build lives in the repo's history)",
       legs.length === 1, legs.join(", ") || "none");
-    ck("J-4: and exactly one dom entry", doms.length === 1, doms.join(", ") || "none");
+    // ── J-4 RETIRED 2026-10-19 (second ops package of the day, docs/SCOPE_UNPOOL_QA_CODE.md). It asserted exactly ONE
+    //    dom entry in the pool; from that package no qa/ file is pooled, dom entries included, and J-6 below owns the
+    //    question. The ID is not reused.
 
     // ── J-5 · A FILE THAT SHOULD HAVE *LEFT* THE POOL (F-2, added 2026-09-14) ─────────────
     // J-1..J-4 assert PRESENCE and rotation. Nothing asserted ABSENCE, so a document retired
@@ -1059,6 +1084,23 @@ if (POOL && existsSync(POOL)) {
       }
     } else {
       console.log("     (informational: no RETIRE: lines in MANIFEST \u2014 nothing leaves the pool)");
+    }
+
+    // ── J-6 · NO qa/ FILE IN THE POOL (2026-10-19, with B-4; replaces J-4) ───────────────────────────────────────────
+    // B-4 stops a package shipping a qa file to knowledge/; this is the pool's half. Phase-split like J-5: POST-SHIP the
+    // pool holds no qa file at all. PRE-SHIP a qa file may still be there, but only if THIS package declares it RETIRE: —
+    // so the package that un-pools the suite is judged on whether it will leave the pool clean, and a later package that
+    // finds a stray qa file in the pool is red until it retires it.
+    {
+      const qaPool = readdirSync(POOL).filter(isQaName).sort();
+      if (PHASE === "post-ship") {
+        ck("J-6 (post-ship): the pool holds no qa/ file \u2014 qa/ is repo-only from 2026-10-19",
+          qaPool.length === 0, `${qaPool.length} still pooled: ${qaPool.join(", ")}`);
+      } else {
+        const undeclared = qaPool.filter(f => !retires.includes(f));
+        ck(`J-6 (pre-ship): every qa/ file still in the pool is declared RETIRE: by this package (${qaPool.length} in the pool)`,
+          undeclared.length === 0, `not declared, so the pool keeps them: ${undeclared.join(", ")}`);
+      }
     }
   }
 }
@@ -1263,7 +1305,9 @@ console.log("\nK. Manifest — PROJECT_KNOWLEDGE_INDEX.md vs the clone and the p
         // row that merely mentions the repo. ⚠ The ID K-10 that E-29 proposed is taken (TESTING's Current-build line), as is K-11.
         // Negative-controlled by P74 (an unmarked row for a file not in the pool must fire) and P75 (the same row marked must not).
         {
-          const SECS = ["## Test and harness file hashes", "## Everything else in knowledge", "## Audit findings and scopes"];
+          // 2026-10-19: "## Test and harness file hashes" moved to docs/MANIFEST_ARCHIVE_test_hash_table_to_v6_20.md (repo-only); its
+          // successor, holding only the pooled files' rows, is "## Pooled file hashes".
+          const SECS = ["## Pooled file hashes", "## Everything else in knowledge", "## Audit findings and scopes"];
           const poolSet = new Set(readdirSync(POOL)), stale = [];
           let inSec = false;
           for (const line of M.split("\n")) {

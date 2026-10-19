@@ -126,11 +126,27 @@ def revert_one_row(txt):
     return out, n >= 1
 
 
-C2_FILE = "sel_census.cjs"   # a pool file whose ONLY mention is its row; verified below
+def _c2_target():
+    """C2's target, DERIVED: the first pool file (sorted) with exactly ONE manifest row beginning with a cell holding only its name in backticks.
+
+    ⚠ Until 2026-10-19 this was the literal `sel_census.cjs`. That file left the pool with the rest of qa/ (the second ops package
+    of 2026-10-19), so the post-upload run reported "anchor did not match" — a FINDING about the control, not the gate (found by the
+    independent review of that package). Every mention is redacted below anyway, so one row is all the mutation needs."""
+    txt = open(os.path.join(PKG, MANS[0]), encoding="utf-8").read()
+    for f in sorted(os.listdir(POOL)):
+        if f == "PROJECT_KNOWLEDGE_INDEX.md" or re.fullmatch(r"DangerClose-v\d_\d+\.jsx", f):
+            continue
+        if len([l for l in txt.split("\n") if l.startswith("| `" + f + "` |")]) == 1:
+            return f
+    return None
+
+C2_FILE = _c2_target()
 
 def delete_added_row(txt):
     """C2: remove a pool file's only manifest mention. K-9 must fire and must name it."""
     lines = txt.split("\n")
+    if not C2_FILE:
+        return txt, False
     keep = [l for l in lines if not l.startswith("| `" + C2_FILE + "` |")]
     if len(keep) != len(lines) - 1:
         return txt, False

@@ -33,7 +33,7 @@ die () { echo "ABORT: $*" >&2; exit 2; }
 [ -n "$APP" ] && [ -d "$APP" ] || die "app-release package dir missing: '${APP:-<none>}'
   usage: $(basename "$0") <app-release-pkg-dir> <clone-dir> [ops-pkg-dir]"
 [ -n "$CLONE" ] && [ -d "$CLONE" ] || die "clone dir missing: '${CLONE:-<none>}'
-  git clone --depth 1 https://github.com/stextor/danger-close.git /tmp/ship"
+  git clone https://github.com/stextor/danger-close.git /tmp/ship   (FULL — K-5b reads history)"
 [ -d "$APP/github" ] && [ -d "$APP/knowledge" ] || die "'$APP' is not a release package (no github/ + knowledge/)"
 
 BASE="$(basename "$APP")"
@@ -463,10 +463,13 @@ wr(s[:a]+s[a:b].replace(m.group(1),'0'*28+'beef',1)+s[b:])
 # copies that MUST agree and EXCLUDES this one by name, so a future census reports it as
 # deliberate rather than as drift. Do not delete this comment; it is the reason the census is
 # allowed to ignore this line.
+# ⚠ 2026-10-19 (second ops package, qa/ un-pooled): the set gains md|json|js|jsx|html. From that day no .mjs, .cjs or .sh file is
+# pooled, so the narrow set found NO row and P32 could not run; the rows left are the pooled documents' and the build scaffold's.
+# Still not K-8's expression (no txt, no py) — it needs SOME corruptible row, as above.
 P32F=$(node -e '
   const {readFileSync,existsSync}=require("fs");const d=process.argv[1];
   const M=readFileSync(d+"/PROJECT_KNOWLEDGE_INDEX.md","utf8");
-  for(const m of M.matchAll(/\|\s*`?([A-Za-z0-9_.\-]+\.(?:mjs|cjs|sh))`?\s*\|\s*`?([0-9a-f]{32})`?/g))
+  for(const m of M.matchAll(/\|\s*`?([A-Za-z0-9_.\-]+\.(?:mjs|cjs|sh|md|json|js|jsx|html))`?\s*\|\s*`?([0-9a-f]{32})`?/g))
     if(existsSync(d+"/"+m[1])){console.log(m[1]);break;}' "$POOLARG")
 runk "P32 a fallback hash-table row goes stale ($P32F)" "K-8" "" "
 import re
@@ -480,7 +483,8 @@ wr(s[:m.start(1)]+'0'*32+s[m.end(1):])
 P33F=$(node -e '
   const {readFileSync,readdirSync}=require("fs");const d=process.argv[1];
   const M=readFileSync(d+"/PROJECT_KNOWLEDGE_INDEX.md","utf8");
-  for(const f of readdirSync(d)) if(/\.(cjs|mjs)$/.test(f) && M.includes(f)){console.log(f);break;}' "$POOLARG")
+  for(const f of readdirSync(d)) if(/\.(cjs|mjs|json|js)$/.test(f) && M.includes(f)){console.log(f);break;}' "$POOLARG")
+# ⚠ 2026-10-19: `json|js` added — from that day the pool holds no .cjs or .mjs file, so the old set found no target.
 runk "P33 a pool file loses its only manifest row ($P33F)" "K-9" "" "
 s=rd(); assert '$P33F' in s, 'name not in manifest'
 wr(s.replace('$P33F','REMOVED_BY_CONTROL.cjs'))
@@ -552,13 +556,16 @@ else
 fi
 rm -rf /tmp/pkpool /tmp/pkpkg
 
-runk "P43 A REAL HASH ROW STILL FIRES after the matcher was narrowed (D-C-1)" "K-8" "" "
+# ⚠ 2026-10-19 (second ops package): P43's target is DERIVED — P32's, the first hash row whose file is in the pool. It named
+# `t1_units.mjs`, whose row left the manifest with the rest of qa/ that day, so the mutation could not apply (found running the
+# controls for that package). P42 keeps `t1_units.mjs`: its planted row is prose about a name, and needs no pooled file.
+runk "P43 A REAL HASH ROW STILL FIRES after the matcher was narrowed (D-C-1) ($P32F)" "K-8" "" "
 s=rd()
 import re
-m=re.search(r'^\|\s*\`?(t1_units\.mjs)\`?\s*\|\s*\`?([0-9a-f]{32})\`?\s*\|', s, re.M)
-assert m, 'no real hash row for t1_units.mjs - control is INVALID'
+m=re.search(r'^\|\s*\`?('+re.escape('$P32F')+r')\`?\s*\|\s*\`?([0-9a-f]{32})\`?\s*\|', s, re.M)
+assert m, 'no real hash row for $P32F - control is INVALID'
 wr(s[:m.start(2)]+'deadbeef'+m.group(2)[8:]+s[m.end(2):])
-" "t1_units.mjs"
+" "$P32F"
 
 # ── P44 / P45 · D-1 (a): K-8 must now SEE a .py row ─────────────────────────────────────────────
 # ⚠ BOTH CONTROLS INJECT A ROW THAT IS NOT IN THE TREE, AND THAT IS THE WHOLE DESIGN. Measured
@@ -580,7 +587,10 @@ PYF=$(node -e '
   const f=readdirSync(process.argv[1]).filter(x=>x.endsWith(".py")).sort()[0];
   if(f) console.log(f);' "$POOLARG")
 if [ -z "$PYF" ]; then
-  SKIP=$((SKIP+1)); echo "  - SKIPPED: P44/P45 - no .py file in the pool to build a row from"
+  # RETIRED 2026-10-19 (second ops package): every .py file in the pool was a qa/ file, and qa/ is repo-only from that day, so no
+  # .py row can be pooled again and the case these two controlled cannot arise. Printed, not counted as a skip; the code below
+  # stays so the pair runs again unchanged if a pooled .py ever returns.
+  echo "  RETIRED  P44/P45 - no .py file can be pooled since qa/ became repo-only (2026-10-19); K-8's .py widening is moot"
 else
   runk "P44 a .py hash row goes STALE - the case the old matcher could not see ($PYF)" "K-8" "" "
 import hashlib, os, re
@@ -1010,18 +1020,17 @@ runDecl "P67 the manifest's newest ship note names an older version" FIRE "K-11"
   'stamp_v00 PROJECT_KNOWLEDGE_INDEX.md "\*\*v(\d+\.\d+) SHIPPED"'
 
 # ── P68..P71  one source in the pool (SCOPE_SINGLE_SOURCE_POOL, 2026-09-28) ──────────────────────────────────────────────
-# Each FIRST builds the post-upload pool state — only the Current table's source and dom entry — so a control is never
+# Each FIRST builds the post-upload pool state — only the Current table's source, and (from 2026-10-19) no dom entry — so a control is never
 # "caught" by a baseline that is already red before the upload (two sources pre-ship), then plants ONE defect.
 if [ -n "$POOLARG" ]; then
-  echo ""; echo "P68..P71  one source in the pool (J-3, J-4, K-6, K-5b)"
+  echo ""; echo "P68..P71  one source in the pool, and no qa/ file (J-3, K-6, K-5b, J-6)"
   ONE_SRC='
 import re, glob
 cur = re.search(r"## Current build.*?\| Source file in knowledge \| `([^`]+)`", rd(), re.S).group(1)
 for f in glob.glob("/tmp/pkpool/DangerClose-v[0-9]_*.jsx"):   # v5_* until 2026-10-11 (missed at v6.00)
     if not f.endswith("/" + cur): os.remove(f)
-curtag = "dom_entry_v" + cur.replace("DangerClose-v", "").replace("_", "").replace(".jsx", "") + ".jsx"
-for f in glob.glob("/tmp/pkpool/dom_entry_v[0-9]*.jsx"):
-    if not f.endswith("/" + curtag): os.remove(f)
+for f in glob.glob("/tmp/pkpool/dom_entry_v[0-9]*.jsx"):   # 2026-10-19: no dom entry is pooled (qa/ is repo-only)
+    os.remove(f)
 assert os.path.exists("/tmp/pkpool/" + cur), "the Current source is not in the pool copy"
 '
   runk "P68 a SECOND source left in the pool after the rotation" "J-3" "" "$ONE_SRC
@@ -1031,8 +1040,10 @@ os.rename('/tmp/pkpool/' + cur, '/tmp/pkpool/DangerClose-v5_02.jsx')" "DangerClo
   runk "P70 the Prior table names an md5 no commit holds" "K-5b" "" "$ONE_SRC
 s = rd(); i = s.index('## Prior build'); j = s.index('| Source md5 |', i)
 k = s.index('\`', j) + 1; wr(s[:k] + '0' * 32 + s[k + 32:])" "no commit has"
-  runk "P71 a SECOND dom entry left in the pool" "J-4" "" "$ONE_SRC
-import shutil; shutil.copy('/tmp/pkpool/' + curtag, '/tmp/pkpool/dom_entry_v501.jsx')" "dom_entry_v501.jsx"
+  # P71 RE-POINTED 2026-10-19 from J-4 (retired: exactly one dom entry) to J-6 (no qa/ file in the pool post-ship). The planted
+  # file is the same; what it must trip changed with the rule.
+  runk "P71 a dom entry (a qa/ file) left in the pool (J-6)" "J-6" "" "$ONE_SRC
+open('/tmp/pkpool/dom_entry_v501.jsx', 'w').write('// p71')" "dom_entry_v501.jsx"
 else
   echo "  - SKIPPED: P68..P71 - no pool dir given"; SKIP=$((SKIP+4))
 fi
@@ -1040,8 +1051,10 @@ fi
 # Through v6.07 E-1b skipped a renamed pool file silently and a multi-path one with a line, so a knowledge/ copy of either could
 # drift from the repo and ship to the pool alone. Each plants exactly that drift; the old matcher misses both (measured at the build).
 echo ""; echo "P72..P73  E-1b through the manifest's path cell"
-runDecl "P72 a RENAMED pool file (tools_fixture.jsx) differs from its repo path and is not in github/" FIRE "E-1b" "tools_fixture.jsx (differs from qa/tools/fixture/fixture.jsx" \
-  'printf "// drift p72\n" > knowledge/tools_fixture.jsx'
+# P72 RETIRED 2026-10-19 (second ops package): its target — a pool file renamed from its repo path — was one of the two qa/ files
+# the flat pool knew under another name (tools_fixture.jsx, qa-baseline-README.md), and both left the pool with qa/. No renamed
+# file remains, the manifest's path cell for them went to the archive, and a qa/ file in knowledge/ is now B-4's (P76).
+echo "  RETIRED  P72 - no renamed pool file remains (qa/ is repo-only from 2026-10-19); B-4 owns a qa/ file in knowledge/ (P76)"
 runDecl "P73 a MULTI-PATH pool file (index.html) differs from its manifest path and is not in github/" FIRE "E-1b" "index.html (differs from src/index.html" \
   'printf "<!-- drift p73 -->\n" > knowledge/index.html'
 
@@ -1096,6 +1109,25 @@ L.insert(j, '| \`p74_left_the_pool.md\` | a document that has left the pool, **r
 else
   echo "  - SKIPPED: P74..P75 - no pool dir given"; SKIP=$((SKIP+2))
 fi
+# ── P76..P78  qa/ is repo-only (2026-10-19, second ops package; docs/SCOPE_UNPOOL_QA_CODE.md) ────────────────────────────
+# B-4 must fire on a qa/ file shipped to knowledge/, by basename (P76) and by name family (P77, a dom entry), and must stay quiet
+# on the three pooled names that ALSO exist under qa/ (README.md, package.json) or elsewhere (index.html) — the multi-path names
+# a basename-only rule would wrongly call qa files (P78). P71 above is J-6's post-ship control.
+echo ""; echo "P76..P78  B-4 · no qa/ file ships to knowledge/"
+runDecl "P76 a suite (qa/t8_invariant.mjs) shipped to knowledge/" FIRE "B-4" "t8_invariant.mjs" \
+  "cp '$CLONE/qa/t8_invariant.mjs' knowledge/"
+runDecl "P77 a dom entry shipped to knowledge/" FIRE "B-4" "dom_entry_v501.jsx" \
+  'printf "// p77\n" > knowledge/dom_entry_v501.jsx'
+# P78 judges a knowledge/ half holding ONLY the three names, so B-4 is green unless one of them is misclassified — a package
+# whose knowledge/ carried a real qa file would make B-4 red at baseline and this control vacuous (found by review, 2026-10-19).
+rm -rf /tmp/pkgd && cp -r "$APP" /tmp/pkgd && rm -f /tmp/pkgd/knowledge/*
+for _f in README.md package.json src/index.html; do [ -f "$CLONE/$_f" ] && cp "$CLONE/$_f" "/tmp/pkgd/knowledge/$(basename $_f)"; done
+_o=$(node "$PKG_CHECK" /tmp/pkgd "$CLONE" "" 2>&1)
+if echo "$_o" | grep -q "✗ B-4:"; then MISS=$((MISS+1)); printf "  *** FINDING *** P78 B-4 fired on a multi-path pooled name\n"; echo "$_o" | grep "✗ B-4:" | head -1
+elif echo "$_o" | grep -q "✓ B-4:"; then PASS=$((PASS+1)); printf "  CORRECTLY SILENT   P78 README.md, package.json and index.html (pooled; not qa/ files)\n"
+else MISS=$((MISS+1)); printf "  *** VACUOUS *** P78 - B-4 did not run\n"; fi
+rm -rf /tmp/pkgd
+
 printf "\n  controls: %d behaved as designed, %d did not, %d skipped\n" "$PASS" "$MISS" "$SKIP"
 
 [ "$SKIP" -gt 0 ] && echo "  ⚠ A SKIPPED control is not a passing one."
