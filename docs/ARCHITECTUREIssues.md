@@ -7,7 +7,7 @@
 
 ## Census at v5.97 (2026-10-08) — read this first
 
-*E-29 added 2026-10-11 (ops package, third): open threads whose only pooled record was a document leaving the pool. Statuses above are as of v5.97 except E-29's, which is as of the ops package of 2026-10-12: (d) and (k) closed by Steve's decisions, (e) and (f) fixed at v6.05, (b), (c), (g) and (i) fixed in that ops package.*
+*E-29 added 2026-10-11 (ops package, third): open threads whose only pooled record was a document leaving the pool. Statuses above are as of v5.97 except E-29's, which is as of the ops package of 2026-10-12: (d) and (k) closed by Steve's decisions, (e) and (f) fixed at v6.05, (b), (c), (g) and (i) fixed in that ops package. E-30 added 2026-10-19 (ops package, the fourth trim), on the same rule.*
 
 **Method.** One pass per register on 2026-10-08 against the shipped v5.97 (repo `2cfe5e2`, source `4157137a…`): every ID the register defines, what it says, what the CHANGELOG and archives record, and — for anything still open — the current source or suite, read by parser where a count is claimed. The body below is the record as written; where a marker in it disagrees with this table, **this table is current**.
 **E-15 is two items.** The ID was given twice: **E-15a** below is the MC-parity/ACA entry, **E-15b** the `taxOrd` entry. Cite them that way; neither is renumbered, because other documents cite both by the bare ID.
@@ -44,6 +44,7 @@
 | E-27 | **ACCEPTED** | run the controls twice (OPERATIONS §I) |
 | E-28 | **FIXED** (both passages) | — |
 | E-29 | **OPEN** (three of eleven threads, each Low: (a), (h), (j)) | re-homed 2026-10-11 from documents leaving the pool; (d) and (k) closed by decision, (e) and (f) fixed at v6.05, (b), (c), (g) and (i) fixed in the ops package of 2026-10-12 — see its entry |
+| E-30 | **OPEN** (seven threads, each Low; (c) is a decision for Steve) | re-homed 2026-10-19 from text leaving the pool — see its entry |
 
 **Stale figures below, left as written:** E-6 "imported by only four files"; E-7 "202"; E-11 "144,008" and "12,151 lines"; the summary table (frozen at the v5.30 additions, with E-14 still Open/High); E-15a "parity 9/9" and "scheduled to fold into the A3 release"; E-10 "CLOSED … must not be re-retired"; E-19's `qa/controls.sh`; E-21's annotation (omits v5.84); E-22 and E-25 (no fix notes). Line addresses in E-4, E-5, E-8, E-9, E-12, E-15a, E-23 and E-26 are v5.29/v5.73 addresses.
 
@@ -1111,3 +1112,33 @@ and found by an independent second read before the package shipped. Each is smal
 
 **Severity: low** for all eleven. (a), (b), (g), (h) and (i) are the ones that would take a release or a scope. **Open at v6.05:** (a), (b), (c), (g),
 (h), (i), (j). **Open after the ops package of 2026-10-12:** (a), (h), (j).
+
+## E-30 · Open threads re-homed 2026-10-19 from text leaving the pool
+
+Recorded here, not fixed. Each had its only pooled record in text that left the pool on 2026-10-19 — `CHANGELOG.md`'s v6.00–v6.15 entries
+(now `docs/CHANGELOG_ARCHIVE_v6_00_to_v6_15.md`), `TESTING.md`'s write-ups to v5.40 (`docs/TESTING_ARCHIVE_release_notes_to_v5_40.md`) or
+`MissingFeatures.md`'s closed write-ups (`docs/MissingFeatures_ARCHIVE_closed_to_v6_20.md`). OPERATIONS §G: an open thread is re-homed in
+the package that un-pools its text. **The author's trace found only `t38`'s (re-homed to `TESTING.md`); all seven below were found by an
+independent second read before the package shipped** — the same shape as E-29's (g)–(j).
+
+- **(a) D-12's residuals.** D-12's closing banner re-homed from its scope's out-of-scope list: *"a public/private pension flag (WV's
+  public-pension offsets); inherited IRAs; 457(b)'s penalty exception; Roth subtypes; a second pension for a couple (P3-1: one pension, one
+  owner, disclosed); Iowa's survivor and disability paths."* Only the West Virginia flag is also held by METHODOLOGY. The rest: the model
+  cannot express them; none is scoped. Record: `docs/SCOPE_D12_PLAN_TYPE_PER_PERSON.md`.
+- **(b) The checklist suggests a 401(k)-to-IRA rollover**, which for a Rhode Island household below its income cliff forfeits the pension
+  modification (D-12's v5.69 finding: *"recorded so the scope that picks this up weighs it"*). No scope weighed it; the suggestion is still
+  in the source (the retirement-countdown event's instructions, `"401(k) rollover decisions"`).
+- **(c) AI-6 — which model Ask AI uses. A decision for Steve, open since v6.02.** The source still names `claude-sonnet-4-6`. v6.02's entry:
+  *"The model is unchanged (`claude-sonnet-4-6`); a newer, cheaper Sonnet is listed — Steve's call (scope AI-6)."* Record:
+  `docs/SCOPE_D30_DEDUCTIONS_V602.md` (AI-6). Whatever is listed now should be re-checked before deciding — the v6.02 listing is not current evidence.
+- **(d) A household with no holdings at all** is healed at load to `total401k` = its whole household, so Engine D holds every dollar in the
+  buckets. Seen at v6.08 while building fixtures and **not examined** (v6.09: *"still not examined"*); every fixture carries holdings.
+- **(e) The Ranking tab's "Which benchmark?" still calls Empower's engaged savers "the crowd you actually belong to"** — a verdict, against
+  v6.11's own "figures, not verdicts" rule; outside v6.11's scope and left as it was. Still in the source.
+- **(f) Engine A's ACA-premium and conversion-tax sales: their gain reached neither NIIT nor the state module's capital-gains input at v5.38**
+  — left *"tracked for its own release"*, held only by METHODOLOGY's v5.38 paragraph, never registered. **Not re-verified at v6.20:** v6.04 gave
+  the state calculator realized gains at all three call sites, which may have closed the state half; check by parser before scoping.
+- **(g) `t14`'s Engine A/B/C survivor checks are presence checks** whose drift is *"not zero. Recorded rather than fixed"* — held in `t14`'s
+  own comments; its other record (TESTING's v5.3x write-up) left the pool. Matters if the qa code leaves too (`docs/SCOPE_UNPOOL_QA_CODE.md`).
+
+**Severity: low** for all seven. (a), (b), (d) and (f) would each take a scope; (c) is Steve's to decide; (e) is a wording fix.

@@ -782,7 +782,18 @@ closing pointer and in this paragraph. **Done again 2026-09-28:** v5.60–v5.74 
 verbatim to **`docs/CHANGELOG_ARCHIVE_v5_60_to_v5_74.md`**, repo only; the pooled `CHANGELOG.md` holds **v5.75 onward**
 (315 KB → 33 KB). **Done a third time 2026-10-11:** v5.75–v5.99 moved verbatim to **`docs/CHANGELOG_ARCHIVE_v5_75_to_v5_99.md`**; the pooled file holds **v6.00
 onward**. The same day `TESTING.md`'s per-suite lines from v6.01 back to v5.53 moved verbatim to `docs/TESTING_ARCHIVE_per_suite_v5_53_to_v6_01.md`;
-`TESTING.md` keeps the newest three, and a release adding its line may move the oldest of those to the same kind of archive.
+`TESTING.md` keeps the newest three, and a release adding its line may move the oldest of those to the same kind of archive. **Done a fourth time
+2026-10-19** (the meter read 1,920,823 of 2,000,000): v6.00–v6.15, with the ops entries between them, moved verbatim to
+**`docs/CHANGELOG_ARCHIVE_v6_00_to_v6_15.md`** (the pooled file holds **v6.16 onward**); `TESTING.md`'s per-release write-ups to v5.40 to
+`docs/TESTING_ARCHIVE_release_notes_to_v5_40.md`; the manifest's ship notes and delete-first lists v6.04–v6.19 to
+`docs/MANIFEST_ARCHIVE_notes_and_lists_v6_04_to_v6_19.md`; and **`MissingFeatures.md`'s write-ups of closed and fixed items** to
+`docs/MissingFeatures_ARCHIVE_closed_to_v6_20.md` — selected by the index's status column, not by heading (a heading match on "CLOSED" also
+catches "DISCLOSED"), and never an item the register's own "Open, in this file" line names (D-18 recurs). Each item keeps its index row. All
+four repo only, each with a §0 trace. Eight threads had no other pooled record: `t38`'s unconfirmed storage-write timing went to `TESTING.md`;
+⚠ **the other seven were missed by the first trace and found by an independent second read** — they are `ARCHITECTUREIssues.md` **E-30**,
+AI-6 (Steve's open Ask AI model decision) among them. Run the second read every time; it has now caught misses on both trims that had one.
+⚠ **This only buys a few releases.** Half the pool is test and harness code; whether that leaves the pool is
+`docs/SCOPE_UNPOOL_QA_CODE.md` (decisions open).
 
 ### Release-pinned control scripts are repo-only (added 2026-09-28)
 
