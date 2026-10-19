@@ -70,6 +70,10 @@ Design decisions worth knowing:
   creates. A Markov regime-switching model with an estimated transition matrix would be the
   principled fix and is a candidate for future work.
 - 10,000 iterations per run by default.
+- **Income tax and the expense table** (v6.20). Every run pays, in each year of retirement, the income tax the Taxes tab computes for
+  that year, grown with the run's own inflation, and reads the expense table over each quarter's months — see *The Monte Carlo pays the
+  Taxes tab's tax (v6.20)* at the end of this document. Through v6.19 its only income tax was a flat $4,000 a quarter during the
+  conversion ladder.
 
 ## 2. Historical backtest
 
@@ -2453,7 +2457,8 @@ $250,000 job, +$2,250 (above $200,000). Two $60,000 jobs, and the example househ
 
 **What did not change.** The IRMAA, Withdrawal and Monte Carlo engines carry no payroll tax and are bit-identical (v6.14, and again at
 v6.16 on every household tested); the Roth tab's ladder has none either. Rental, annuity and other ordinary streams still pay no payroll
-tax (v5.63).
+tax (v5.63). *(From v6.20 the Monte Carlo pays the Taxes tab's tax, payroll tax on job income included — see* The Monte Carlo pays the
+Taxes tab's tax (v6.20) *at the end of this document.)*
 
 **Simplifications, stated.** Two self-employment deductions are **not taken** (MissingFeatures D-37), both conservative — income tax
 runs high: the **deduction for half the self-employment tax** (26 U.S.C. §164(f), taken above the line, so it would also lower AGI and every
@@ -2516,7 +2521,9 @@ plus that year's one-time rows (no survivor factor — a one-time row is a speci
 (today's); Engine D inflates it from the retirement year at the scenario's expected inflation, Backtest by each historical sequence's
 inflation, What-Breaks at its own rate. Backtest applies no survivor factor, as before. The two Monte Carlo engines read the same table
 once a quarter — `getMonthlyExpense` and `getOneTimeExpenses` at the quarter's last month (March, June, September, December) — and did not
-change; so they charge a one-time row only when it is dated in one of those months (MissingFeatures **D-45**, below).
+change; so they charge a one-time row only when it is dated in one of those months (MissingFeatures **D-45**, below). *(As of v6.18. From
+v6.20 both engines read every month of the quarter and charge a one-time row in its own quarter, inflated — the two bullets marked
+"Closed at v6.20" below.)*
 
 So, for the example household: 2029 is **$126,280** — $98,280 of monthly rows for the months they run (the current home's costs through
 March, the retirement rows from April) plus $28,000 of one-time rows (the golf cart and the closing costs); from May 2034 the $400 car
@@ -2566,9 +2573,13 @@ survivor factor after inflating and v6.18 before.
   Inflating only the spending from today would break that convention.
 - **A one-time row dated before the retirement year is not in the Withdrawal tab's schedule** (it starts at retirement, from today's
   balances). The tab says so. MissingFeatures **D-44**.
-- **The Monte Carlo subtracts one-time rows in today's dollars** while it inflates the monthly rows — optimistic by the inflation to that
-  date, small. Not changed here (it would move every Monte Carlo figure). MissingFeatures **D-44**; the Field Manual says so.
-- **The Monte Carlo samples one month per quarter** — the quarter's last — and Engine D, Backtest and What-Breaks sum all twelve. A monthly
+- **Closed at v6.20** *(D-44, the Monte Carlo half)*. **The Monte Carlo subtracted one-time rows in today's dollars** while it inflated
+  the monthly rows — optimistic by the inflation to that date, small. From v6.20 both engines grow a one-time row with the run's
+  inflation, like the monthly rows beside it (*The Monte Carlo pays the Taxes tab's tax (v6.20)*).
+- **Closed at v6.20** *(D-45, and the monthly read)*. **The Monte Carlo sampled one month per quarter** — the quarter's last — and Engine
+  D, Backtest and What-Breaks sum all twelve. From v6.20 both engines read every month of the quarter (a one-time row is charged in the quarter
+  that contains its month; a monthly row counts its own months), and a year's four quarters add up to `tableYearExpense` (t83 D). What it did
+  through v6.19, as recorded at v6.18: a monthly
   row that starts or ends inside a quarter is counted for a few more or fewer months there; and **a one-time row dated in any other month
   is never charged** by the Monte Carlo — the example's April 2029 golf cart and closing costs ($28,000) never reach it (measured: both
   engines byte-identical with or without them; dated June they move both). A row added in My Data is dated June, so it is charged; rows
@@ -2639,6 +2650,111 @@ which v6.18's did not, stepping by a quarter in some months and not at all in ot
 - **The first quarter's return is scaled linearly** (the regime return and its noise times the share), not compounded by the month.
 - **My Data's as-of date is the UTC date of saving**, so an evening save in the Americas on a quarter's last day falls in the next quarter
   (MissingFeatures, filed at v6.19).
-- **The Monte Carlo still reads one month per quarter** for the expense table and charges a one-time row only if it is dated in a quarter's
-  last month — now the quarter's true last month (D-45, to be fixed at v6.20 with D-40 and D-44).
+- **Closed at v6.20** *(D-45)*. **The Monte Carlo still read one month per quarter** for the expense table and charged a one-time row only if it
+  was dated in a quarter's last month — the quarter's true last month from v6.19 (D-45; fixed at v6.20 with D-40 and D-44).
 - **The Stress tab's 30-year table** compares the median with `household × 1.04^years`, a benchmark that ignores withdrawals (filed at v6.19).
+
+## The Monte Carlo pays the Taxes tab's tax (v6.20)
+
+**The rule.** Both Monte Carlo engines pay one income-tax schedule — `mcIncomeTaxSchedule`, the Taxes tab's `totalTax` (federal, capital
+gains, NIIT, AMT, payroll tax on job income and state) for each year of the plan, computed exactly as the Taxes tab computes it: Engine D's
+bridge (`withdrawalPlanSeries`) into Engine B (`computeTaxPlan`), at the **live conversion slider, QCD and dividend-yield settings** and the
+selected scenario preset. In each retirement quarter an engine subtracts a quarter of that calendar year's tax, **times the quarter's
+inflator** — the planned inflation on the planned path, the path's own cumulative inflation on a simulated path — times the share of the
+quarter the plan lives through (a part first quarter pays a twelfth of the year's tax per counted month). Nothing is charged before
+retirement (pre-retirement income tax is withheld from pay, and the contributions the engines add are net of it). A year after the
+schedule's last row — a survivor who outlives the plan's horizon under stochastic longevity — pays the last row's tax, inflated; a retired
+year before the first row pays nothing. The app computes the schedule once per retirement year whenever the slider, QCD, yield or preset
+changes, so the 6-year runs re-run about 300 ms after the control settles, on whatever tab is open (the header's success rate is on every
+tab and shows "…" meanwhile), and the 30-year runs, the stress set and the mortgage what-if re-run when their tabs are next opened. The
+slider is not saved, so every visit starts at $70,000, as the Taxes tab does. A caller that passes no inputs gets the Taxes tab's opening
+values under BASE — the weights the scenarios hold when the app loads.
+
+**The expense table, by the quarter (D-44, D-45).** One read, built once per run (`mcQuarterSeries`), for both engines: a quarter's
+**one-time** rows are the sum over its counted months — so a row is charged once, in the quarter that contains its month, whatever the month
+— grown with the quarter's inflator like the monthly rows; its **monthly** rows are the mean of its counted months, so a row that starts or
+ends inside a quarter counts only its own months. A year's four quarters add up to `tableYearExpense`, the year Engine D, Backtest and
+What-Breaks spend (t83 D). One-time rows are still charged before and after retirement, with no guardrail adjustment and no survivor factor
+(Engine D's rule for them).
+
+**What it did through v6.19.** The only income tax either engine charged was `ROTH_TAX_DRAG_Q`: a flat **$4,000 a quarter**, never inflated,
+in each retirement quarter through the Roth ladder's last year, whatever the plan converted or owed — and nothing after the ladder, RMD years
+included (D-40). On the example that is 48 quarters, $192,000 in nominal dollars over 2029–2040, against the Taxes tab's $214,590 in today's
+dollars over 2029–2053 at the $70,000 slider under BASE. The Income tab showed it as "Roth conversion tax drag · ~$16K/yr · $4K/quarter
+modeled in MC sim". Both engines read the expense table at each quarter's last month, so a one-time row dated in any other month was never
+charged (D-45 — the example's April 2029 golf cart and closing costs, $28,000, never reached either engine), one that was charged was charged
+in today's dollars (D-44), and a monthly row starting or ending inside a quarter was counted for the whole quarter.
+
+**The dollar basis — the conservative reading (DC-3 (a)).** Engine B holds Social Security, the pension and income streams in today's
+dollars, takes Engine D's draws deflated to today's dollars, and inflates its brackets; the RMDs and realized gains it taxes arrive in
+nominal dollars (*Where the engines still legitimately differ*, and approximation 1 of *The Taxes tab and the drawdown*). So a row's tax is,
+to that approximation, in today's dollars, and the engines grow it as they grow spending — the way What-Breaks already grows its engine tax.
+The part of the tax that comes from nominal inputs is grown twice: conservative. Charging Engine B's figures as they stand was measured at
+the scope as the optimistic alternative (on the BASE example, 79.4% above $800K against 75.3%, on v6.18's calendar).
+
+**What it moved** (measured at the v6.20 build: the shipped v6.19 against v6.20, 3,000 paths, the same seeds per row; run C's shape — 30
+years, deaths at life expectancy, one LTC shock, the car every 8 years; the tax at each row's slider):
+
+| Household (BULL-LEANING, the preset a first visit opens on) | Taxes tab tax, today's $ | 6-yr median | 30-yr >$500K | 30-yr median |
+|---|---|---|---|---|
+| Example (no state income tax) | $212K | $2,140K → $2,096K | 96.8% → 95.3% | $2,299K → $2,118K |
+| Example in Georgia | $217K | $2,140K → $2,089K | 96.8% → 95.2% | $2,299K → $2,104K |
+| Example, holdings ×1.6, Georgia | $369K | $3,326K → $3,273K | 99.7% → 99.0% | $5,002K → $4,467K |
+| Example, holdings ×0.6 | $142K | $1,354K → $1,307K | 55.3% → 51.3% | $564K → $515K |
+| Example, slider at $0 | $210K | $2,140K → $2,138K | 96.8% → 94.9% | $2,299K → $2,196K |
+| Example, slider at $150K | $267K | $2,140K → $2,027K | 96.8% → 94.3% | $2,299K → $1,912K |
+| Example, every date 3 years later | $220K | $2,525K → $2,523K | 98.2% → 97.4% | $3,077K → $2,824K |
+| Example as a single household | $244K | $2,078K → $1,997K | 98.4% → 97.2% | $1,854K → $1,601K |
+
+| Household (BASE) | 30-yr >$800K | 30-yr median |
+|---|---|---|
+| Example | 80.3% → 74.4% | $1,565K → $1,392K |
+| Example, holdings ×1.6, Georgia | 97.0% → 92.6% | $3,509K → $3,030K |
+| Example, holdings ×0.6 | 15.4% → 13.5% | $286K → $250K |
+| Example as a single household | 86.3% → 77.9% | $1,466K → $1,234K |
+| Example in Georgia | 80.3% → 74.2% | $1,565K → $1,381K |
+| Example, slider at $0 | 80.3% → 74.1% | $1,565K → $1,428K |
+| Example, slider at $150K | 80.3% → 71.4% | $1,565K → $1,265K |
+| Example, every date 3 years later | 84.8% → 80.4% | $2,037K → $1,800K |
+
+Every household tested reads lower: 0.7 to 4.0 points of 30-year success above $500K under BULL-LEANING, 1.9 to 8.9 points above $800K
+under BASE. The 6-year figures barely move where the retirement years fall mostly after the run's 24 quarters; the 30-year figures carry the
+change, because the flat figure stopped at the ladder's end and the Taxes tab's tax does not. **The slider now matters**: at $0 and $150K
+v6.19 read identically (it never saw the slider); v6.20 reads 94.9% and 94.3%, medians $2,196K and $1,912K — conversions move tax earlier,
+where it compounds against the portfolio longer, and at $150K the Taxes tab owes $57K more in total. The scope's measurements, on v6.18's
+calendar, had the same direction and a slightly smaller range (0.7 to 3.4 points; 2.6 to 7.2).
+
+**How the change is attributed.** On a table whose rows have integer amounts, start and end on quarter boundaries and carry no one-time
+rows, v6.20 with an all-zero schedule is **bit-identical** to a module built from the v6.19 source with `ROTH_TAX_DRAG_Q = 0` — both
+engines (runs B and C, stochastic longevity, sustained LTC, the mortgage what-if) on every fixture household, and all seven stress runs on
+the example and the single household (t83 H): the release changes the tax, the one-time rows and the quarter read, and nothing else. Each of those is then exact on the
+deterministic planned paths: the tax as its compounded series (t83 B, with a hand pin of the example's first two retirement quarters to the
+cent), a one-time row in every month of two years as one charge in its own quarter (t83 C). Engines A, B, C and D are bit-identical across
+v6.19 → v6.20 (t83 H, t2). The one pinned Monte Carlo figure that moved — t42 D-4, the married example's 6-year planned path, $2,128,443 →
+$2,083,910 — is re-pinned with a five-step attribution in the same run, each step exact (t83 R): the drag removed **+$56,285**, the April
+rows still uncharged by v6.19 **$0**, the monthly quarter read **−$375**, the one-time rows **−$34,995**, the tax **−$65,449**. With the
+schedule held fixed, permuting the Other accounts' tax types or setting every plan type to "employer" in Rhode Island moves no Monte Carlo
+figure (t83 G, t20, t56); computed from the plan, both move it, because both move Engine B.
+
+**Runtime.** Building the schedule takes a few milliseconds, and each run now reads the expense table once instead of once per quarter of
+every path: measured at the build, the three 6-year runs (10,000 paths) take 0.32× v6.19's time and one 30-year run 0.47×.
+
+**Simplifications, stated.**
+- **The tax does not follow the path.** One deterministic schedule, from the plan's own draws and its life expectancies, is paid on every
+  path. A path that cuts spending at a guardrail, draws more after a crash, loses a spouse early (the stress set's "dies at 70") or lives
+  longer under stochastic longevity pays the same tax; its filing status is the schedule's. Computing Engine B per path would be 10,000 tax
+  runs per run; not proposed.
+- **The Social Security cut toggle** reaches the Monte Carlo's income but neither Engine B nor the Engine D draws it taxes, so with the toggle
+  on the tax is computed on the full scheduled benefit and on draws that assume it — direction mixed, small.
+- **IRMAA is not in it** (DC-2 (a)): a Medicare premium surcharge, shown on the IRMAA tab — $0 on the example and on the ×1.6 household;
+  $21,880 on the example at a $250,000 slider (BASE; measured at the build). Optimistic for high-income plans. MissingFeatures **D-51**.
+- **The built-in part-time work for spouse B** (`spouseBWorkTaper`: $20,000, $18,000 and $15,000 of spouse-B wages in retirement years 0–2
+  for every plan with no income streams) is taxed by Engine B, so it is in the schedule, but neither Monte Carlo engine credits it as income
+  — conservative by $14,479 on the example (BASE, $70K): $7,037 of tax in 2029–2031 and $7,442 through Engine D's draws later (measured at
+  the build: the schedule with and without a zero-amount income stream, which switches the taper off). The taper itself — every such plan,
+  single ones included, gets the example's spouse-B wages in four engines — is filed for its own release. MissingFeatures **D-49**.
+- **An expense row for income tax would be charged twice** — the simulation now pays the tax itself. The Field Manual says so.
+- **The home-move cash** is not in Engines A–D (D-39), so not in the tax either; consistent with the Taxes tab.
+- **D-44's Withdrawal half** stays open: a one-time row dated before the retirement year is not in the Withdrawal tab's schedule (DC-5 (a)).
+- **What-Breaks' tax** stays the Roth tab's strategy engine's lifetime tax averaged per year (it is a deterministic projector); its copy now
+  names that engine, where it said "the Taxes engine", and no longer says it does not model taxes.

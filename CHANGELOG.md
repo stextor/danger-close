@@ -1,5 +1,108 @@
 # Changelog
 
+## v6.20 — the Monte Carlo pays the Taxes tab's tax, and charges one-time expenses in the quarter they fall (D-40, D-44, D-45)
+
+**A MODELLING release** — METHODOLOGY gains *The Monte Carlo pays the Taxes tab's tax (v6.20)*. `docs/SCOPE_D40_MC_TAX_V620.md` (repo-only,
+fulfilled): Steve, *"let's do D-40, making the Monte Carlo pay the Taxes tab's tax. And fold in D-44 and D-45"*, then *"Let's continue with
+your recommendations"* on its ten decisions — all (a), the first being to fix the quarter calendar first (v6.19). Built on v6.19's calendar.
+
+**What was wrong (v6.19, measured).** The only income tax either Monte Carlo engine charged was a flat **$4,000 a quarter**
+(`ROTH_TAX_DRAG_Q`), never inflated, through the Roth ladder's last year — whatever the plan converted or owed — and **nothing after it**, RMD
+years included (D-40). On the example that is $192,000 nominal over 2029–2040 against the Taxes tab's $214,590 in today's dollars over
+2029–2053; for a larger household it is far wider (the example's holdings ×1.6 in Georgia: $369K), and the conversion slider never reached
+the Monte Carlo at all. The
+Income tab showed it as "Roth conversion tax drag · ~$16K/yr · $4K/quarter modeled in MC sim". Both engines read the expense table at each
+quarter's last month, so **a one-time row dated in any other month was never charged** (D-45 — the example's April 2029 golf cart and closing
+costs, $28,000), one that was charged was charged in today's dollars beside inflated monthly rows (D-44, the Monte Carlo half), and a monthly
+row starting or ending inside a quarter was counted for the whole quarter. **Optimistic for most plans.**
+
+**What changed (DC-1 to DC-9, all (a)).**
+- **One tax schedule** (`mcIncomeTaxSchedule`): the Taxes tab's `totalTax` — federal, capital gains, NIIT, AMT, payroll tax on job income and
+  state — year by year, computed exactly as the Taxes tab computes it, at the **live conversion slider, QCD and dividend yield** (DC-1) and the
+  selected preset. Both engines pay a quarter of each retirement year's tax, **grown with each path's inflation** (DC-3 — conservative: the
+  parts from nominal RMDs and gains are grown twice), and the last row's tax past the schedule's end (DC-4). Nothing before retirement. The
+  flat drag is deleted. IRMAA is not added (DC-2).
+- **One quarter read** (`mcQuarterSeries`), built once per run: one-time rows summed over the quarter's months — charged once, in the quarter
+  that contains their month, grown with inflation (D-45, D-44) — and monthly rows averaged over them, so a row counts only its own months
+  (DC-6). A year's four quarters add up to `tableYearExpense`, the year Engine D, Backtest and What-Breaks spend.
+- **Moving the slider, QCD or yield re-runs the 6-year runs** about 300 ms after the control settles, on any tab (the header shows "…"
+  meanwhile); the 30-year runs, the stress set and the mortgage what-if re-run when their tabs are next opened. The engines take
+  `opts.taxInputs` or a precomputed `opts.taxSchedule`; `runExtendedMC` returns its planned path.
+- **What the user reads.** The Income tab's card is "Income tax the Monte Carlo pays" — the schedule's first year at the slider's value. The
+  Monte Carlo tab and the Field Manual (Monte Carlo entry, dated v6.20) say what the tax is, that it is the same on every path, what it leaves
+  out, and how one-time expenses are charged; the Withdrawal entry and Backtest's comparison say what the Monte Carlo does from v6.20.
+  What-Breaks names the engine its tax estimate comes from (the Roth tab's strategy engine — it said "the Taxes engine"), no longer says it
+  "does not model taxes", and no longer credits the Monte Carlo with IRMAA (DC-8). No in-app notice (DC-9).
+- **It moved the Monte Carlo's figures, downward on every household measured** (v6.19 → v6.20, 3,000 paths, the same seeds; a 6-year
+  success rate already near 100% can read the same): 30-year success
+  above $500K under BULL-LEANING, the preset a first visit opens on, 0.7 to 4.0 points lower — the example 96.8% → 95.3%, median $2,299K →
+  $2,118K; above $800K under BASE 1.9 to 8.9 points lower — the example 80.3% → 74.4%. The 6-year figures move least. The slider now matters:
+  the example reads 94.9% at $0 and 94.3% at $150K. Engines A–D (the Withdrawal, Taxes, IRMAA and Roth tabs) do not move.
+- **Faster:** each run reads the expense table once instead of once a quarter on every path — the three 6-year runs take 0.32× v6.19's time.
+
+**Tests.** New suite **`t83`** — **95** on v6.20, **15** on v6.19 (that leg pins the old behaviour as dated `[KNOWN DEFECT]`
+checks: the flat drag, an April row never charged, a June row charged uninflated, the Income card's $4K, the Field Manual's and What-Breaks'
+sentences). §A: the schedule equals the Taxes tab's row **exactly**, every year, on every fixture household, BASE and BULL, sliders $0 / $70K /
+$150K, QCD and yield set. §B: both planned paths move by the compounded tax series to 1e-6, with a **hand pin** of the example's first two
+retirement quarters computed independently in exact decimal arithmetic and matched to the cent (from the engine's 2029 row, so it checks the
+inflate-and-grow arithmetic). *Owned:* the first draft of these pins, and of the new `t42` D-4 figure, was written before measuring and
+was wrong ($12,935.95 for the 2029 row; $2,076,914); the suite caught both on its first run, and the pins were then computed by hand and
+checked against the engine — not copied from it. §C: a $10,000 one-time row in every month of a
+pre-retirement and a retired year is charged once, in its own quarter, × that quarter's inflator — exact on both planned paths; a row dated
+before the as-of month is never charged. §D: four quarters add to `tableYearExpense`. §E by AST: the drag is gone, neither engine reads the
+table except through `mcQuarterSeries`, and every subtraction from the portfolio in either engine is one of seven named outflows. §F: the tail,
+the timing, stochastic longevity. §G: the slider, the state and the QCD move it; tax type and plan type do not with the schedule held fixed —
+and do, with a control, when it is computed from the plan. §H: Engines B, C and D bit-identical, and **an ORACLE MODULE built from the v6.19
+source with the drag at $0 is bit-identical to v6.20 with a zero schedule** on a quarter-aligned table — both engines, the stress set, every
+household for the engines and the example and single household for the stress set: the release changes the tax, the one-time rows and the
+quarter read, and nothing else; by AST, every engine call in the app carries the live schedule and the effects re-run on it. §R: the re-pin's
+attribution, every step exact (the quarter read derived, not only measured). §I rendered (the slider moves the card). §J: METHODOLOGY.
+**Parity:** `t2`'s `INTENDED_DIFFS` gains `"v619→v620": ["mc", "extMC", "stress"]`; the seven non-Monte-Carlo keys identical.
+**Re-pin, with its attribution:** `t42` D-4, the married example's 6-year planned path, $2,128,443 → **$2,083,910** — five steps, each exact
+on the planned path, in the same run (`t83` R): the drag +$56,285; v6.19's charge of the April rows $0; the monthly quarter read −$375; the
+one-time rows −$34,995; the tax −$65,449.
+**Restated on their new footing** (premise false by design — the Monte Carlo now reads Engine B, which reads tax type, state, plan type and
+the claim month): `t20`'s guards that the Monte Carlo and stress set do not move when tax types are permuted, `t56` F-1 / F-3's Monte Carlo
+median and `t82` G-1 / G-2 — each now with the tax schedule held fixed, `t20` with the converse (computed from the plan, they move) asserted.
+`t81` C2-2 flips to fixed (D-45) and its C2-3 control is retired for `t83` C; `t81` E-6 and F-1 read the new Backtest and Field Manual copy.
+`domdiff` gains a v619 → v620 arm masking the header's and retirement cards' Monte Carlo figures, each mask bound to a count, and asserting the
+header's success rate differs.
+Controls `qa/tools/controls_v620_mctax.py` (repo-only): **13 of 13 as expected** — the flat drag back at one site, the tax or the one-time rows
+not inflated, the one-time or monthly read back at the quarter's last month, the engines or the app ignoring the slider, the tail charged as
+zero, federal tax only in the schedule, the tax put in pre-retirement quarters, a 30-year run called without the schedule, the slider out
+of the effect's dependencies, and the unmutated run; every file restored and hash-checked. **Independent review** before shipping, by an
+agent that had not seen the work: its findings are fixed in this release — a control that could not fire (the engines also gate the tax on
+retirement, so a schedule leaking into pre-retirement quarters changed no output; `t83` F-6 now checks the quarter read itself), no check on
+the app's 30-year wiring (`t83` E-6, E-7, controls C11, C12), the Income card naming the live slider beside the last run's figure, two
+overstated ranges in METHODOLOGY, and the hand-pin slip above.
+**Tooling:** `package_check`'s OPEN allowlist entry for `SCOPE_D40_MC_TAX_V620.md` is removed in this package, which marks the scope FULFILLED —
+the two halves its expiry note required. **`package_check` B-2 strengthened:** it caught a built page in `knowledge/` only by byte comparison
+with this package's own built page, so a different built page (the prior release's) passed; `package_check_controls` P48 plants exactly that,
+ran on an app release for the first time here (until now it was skipped without a pool) and went NOT CAUGHT. B-2 now also applies its
+size-free content marker (an inlined script bundle) whenever a `knowledge/index.html` ships. Changed after the suite run; `t21` re-run on the
+changed file: 64 passed, 0 failed; `package_check_controls` against this package with a simulated post-upload pool: 65 behaved as designed, 0
+did not, 2 skipped (P15 and P58–P61 need an ops or handover package — not this kind).
+**Registered:** `v620` by AST (345 sites), `t1`'s and `t4`'s version strings, `t33`'s PINS and the three Python suites by hand. The shim
+exports the schedule and quarter-read functions, `ROTH_TAX_DRAG_Q` (for the prior leg), `BASE_GROWTH`, `getMonthlyExpense` and
+`getOneTimeExpenses` (guarded).
+
+**Suite, run from the packaged copies:** **7,871 app checks across 82 app suites** (the eight `-spend617` attribution runs included), 0 failed, 0 DIED; MC parity 10/10; tooling `t21` 64, `domdiff` 37, `sets` 12 + 12; **GRAND 8,006**. Against v6.19's line the counts that moved are `t20` 100 → 102 (the restated guard's converse, two checks), `t81` 78 → 77 (C2-3 retired for `t83` C) and `t82` 105 → 59 (§C, §D, §H and J-3, the v6.18 → v6.19 pair, take their designed skip in a run folder without the v6.18 source — as `t81` did at v6.19), and `t83` is new. Every skip line read: each is a designed pair-pinned skip (`t65`, `t70`–`t72`, `t75`–`t83`), and `t83` takes none on the v6.20 leg (its four on the v6.19 leg are by design: no schedule there, no pair, no METHODOLOGY of its own). Run from the PACKAGED copies in one pass: a run folder built by `mk_runfolder.sh v619 v620` from a fresh clone of `21dd782` carrying the package as cut (79 files); the documentation was finished after the run (`CHANGELOG.md`, `TESTING.md`, its archive, `PROJECT_KNOWLEDGE_INDEX.md` and the scope's status line and build record — a run folder holds the source, `METHODOLOGY.md` and the built page, and `METHODOLOGY.md` was final). Source `8db224990e86ddcbe2180f96b6a52889` · built `2a0b45ea9c1425752ff8918862e15202` (`smoke_built` 22 passed, 0 failed); v6.19 rebuilt first from its own source to its published `d9e0df42…`.
+
+**Limitations, disclosed:**
+- The tax does not follow the path: one schedule, from the plan's own draws and life expectancies, is paid on every path — a path that cuts
+  spending at a guardrail, draws more after a crash, or loses a spouse early pays the same tax.
+- The Social Security cut toggle is not in the tax (it is computed on the full scheduled benefit); IRMAA is not in it (D-51); the home-move
+  cash is not in Engines A–D (D-39).
+- For a plan with no income streams, the Taxes tab taxes built-in part-time wages for spouse B, which the Monte Carlo does not credit —
+  conservative, $14,479 on the example (D-49, filed for its own release).
+- An expense row for income tax would be charged twice; the Field Manual says so.
+- The Withdrawal tab still never sees a one-time row dated before the retirement year (D-44, narrowed).
+- What-Breaks' tax is still the Roth tab's strategy engine's lifetime tax averaged per year.
+
+**Registered:** D-40 and D-45 closed; D-44 narrowed to its Withdrawal half; D-49 (the spouse-B work taper), D-50 (the mortgage what-if's
+Florida sentence) and D-51 (IRMAA not in the Monte Carlo) opened; D-47's entry corrected (it was not in this release's scope; the planned
+path its fix needs is now returned).
+
 ## v6.19 — the Monte Carlo's quarter calendar (D-46)
 
 **A MODELLING release** — METHODOLOGY gains *The Monte Carlo's calendar*. `docs/SCOPE_D46_MC_CALENDAR_V619.md` (repo-only, fulfilled). Found while
