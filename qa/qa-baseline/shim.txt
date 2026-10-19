@@ -61,6 +61,19 @@ export const __g = {
   applyScenarioProbs: _g("applyScenarioProbs"),
   PROB_PRESETS: () => _g("PROB_PRESETS"),
   snapshots: () => ({ pre: _g("PRE_MONTHLY"), early: _g("POST_MONTHLY_EARLY"), full: _g("POST_MONTHLY_FULL") }),
+  // v6.20 (D-40, D-44, D-45): the Monte Carlo's income-tax schedule and its one quarter read (t83). GUARDED: none exists before v6.20;
+  // ROTH_TAX_DRAG_Q, the flat drag they replace, exists only through v6.19 (t83 reads it on the prior leg and asserts it is gone on the current).
+  mcIncomeTaxSchedule: _g("mcIncomeTaxSchedule"),
+  mcTaxScheduleOf: _g("mcTaxScheduleOf"),
+  mcTaxForYear: _g("mcTaxForYear"),
+  mcQuarterSeries: _g("mcQuarterSeries"),
+  mcTaxCharge: _g("mcTaxCharge"),
+  mcOneTimeCharge: _g("mcOneTimeCharge"),
+  mcResolveTaxSchedule: _g("mcResolveTaxSchedule"),
+  ROTH_TAX_DRAG_Q: () => _g("ROTH_TAX_DRAG_Q"),
+  BASE_GROWTH: () => _g("BASE_GROWTH"),
+  getMonthlyExpense: _g("getMonthlyExpense"),
+  getOneTimeExpenses: _g("getOneTimeExpenses"),
   // v5.34 — THE shared realized-gain rule. GUARDED for the same reason: it does not exist on
   // any pre-v5.34 build, and mk_testable.sh splices this shim into EVERY leg including frozen
   // ones. E-5 unit-tests this directly instead of comparing two engines' figures and hoping

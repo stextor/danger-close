@@ -104,6 +104,10 @@ if (MODE === "compare") {
     // years. `mc` must NOT: on an April as-of date with January events the 6-year engine's labels and event quarters are v6.18's (t82 C proves
     // it on every qualifying household). The seven non-Monte-Carlo keys must not move.
     "v618→v619": ["extMC", "stress"],
+    // v6.20 (D-40, D-44, D-45 — docs/SCOPE_D40_MC_TAX_V620.md): both Monte Carlo engines pay the Taxes tab's tax (the flat $4,000 drag is
+    // gone) and charge one-time rows in their own quarter, inflated — so `mc`, `extMC` and `stress` MUST move. The seven other keys must
+    // not: Engine A's four fingerprints, `ssTable`, `stateTax` and `inflation` (t83 H proves Engines B, C and D bit-identical as well).
+    "v619→v620": ["mc", "extMC", "stress"],
   };
   const expectDiff = new Set(INTENDED_DIFFS[`${PRIOR}→${CUR}`] || []);
   for (const key of Object.keys(a)) {
