@@ -286,7 +286,12 @@ export function census(G) {
       let a = 0, b = 0, j = 0;
       for (const s of _streams) { if (yr < (+s.startYear || 0) || yr > (+s.endYear || 9999)) continue; const amt = s.monthly * 12;
         if (s.owner === "A") { if (aliveA) a += amt; } else if (s.owner === "B") { if (aliveB) b += amt; } else j += amt; }
-      if (!_streams.length && !single) { const k = yr - tl.targetRetireYear; b += k === 0 ? 20000 : k === 1 ? 18000 : k === 2 ? 15000 : 0; }   // spouseBWorkTaper (structural)
+      // the built-in spouse-B work: read from the app's own spouseBWorkTaper where exported (v6.23 pays it to the example alone — D-49).
+      // The shim exports it on the v6.22 leg too (its rule: every plan with no stream, single ones included), so from v6.23 that leg's row
+      // reads the app's own rule as well. The structural fallback is this row's pre-v6.23 reading, which left single plans out — kept for
+      // a leg with no export.
+      if (typeof G.spouseBWorkTaper === "function") b += G.spouseBWorkTaper(yr, tl.targetRetireYear);
+      else if (!_streams.length && !single) { const k = yr - tl.targetRetireYear; b += k === 0 ? 20000 : k === 1 ? 18000 : k === 2 ? 15000 : 0; }
       const W = a + b + j, thr = (single || yr > _d1) ? T.ADDL_MED_SGL : T.ADDL_MED_MFJ, base = T.SS_WAGE_BASE * Math.pow(1.02, yr - tl.asOfYear);
       maxW = Math.max(maxW, W); if (W > thr) overThr++;
       if (!one && (a + j / 2) > 0 && (b + j / 2) > 0 && W > base) pairOverBase++;
@@ -380,6 +385,18 @@ export function census(G) {
     "a prompt that is not the example's", _isDemo,
     _isDemo ? "the household holds the example's own prompt, whose facts are its own, so the example's facts reaching another plan cannot be seen here"
       : _mpHeld ? "reachable — a fact the plan lacks is read from its own prompt" : "reachable — no prompt: a fact the plan lacks is a placeholder");
+
+  // ── v6.23 (D-49 — SCOPE_D49_WORK_TAPER_V623) · the condition that hid it (§K1) ───────────────────────────────────────────
+  // 10. THE BUILT-IN SPOUSE-B WORK. Through v6.22 every plan with no income streams was paid $20,000, $18,000 and $15,000 of spouse-B wages
+  //    in its retirement year and the two after (spouseBWorkTaper), single plans included. The example's spouse B does work, so on the
+  //    example the wages are its own, and a fix that let them reach other plans again could not be seen there. Read from the app's own
+  //    function (exported on every leg), at the plan's retirement year.
+  const _tp = typeof G.spouseBWorkTaper === "function" ? G.spouseBWorkTaper(tl.targetRetireYear, tl.targetRetireYear) : null;
+  row("example_work", "built-in spouse-B work",
+    _tp === null ? "n/a (no export)" : _tp > 0 ? `$${_tp.toLocaleString()} in the retirement year` : "none",
+    "a household that is not paid it", _tp === null || _tp > 0,
+    _tp === null ? "this build exports no taper" : _tp > 0 ? "the household is paid the built-in work, so the example's wages reaching another plan cannot be seen here"
+      : "reachable — the household is paid no built-in work");
 
   return rows;
 }
