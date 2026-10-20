@@ -118,6 +118,9 @@ export const __g = {
   IMPORT_CONSTS: () => ({ FAIL: _g("IMPORT_FAIL_MSG"), NOT_BACKUP: _g("IMPORT_NOT_BACKUP_MSG"), TOO_LARGE: _g("IMPORT_TOO_LARGE_MSG"),
     UNREADABLE: _g("STORED_PLAN_UNREADABLE_MSG"), MAX_BYTES: _g("IMPORT_MAX_BYTES"), MAX_ROWS: _g("IMPORT_MAX_ROWS") }),
   DangerClose,
+  // v6.23 (D-49): the built-in spouse-B work, and whether it applies — on __g, because the census tools (qa/tools/boundaries.mjs) read __g (guarded: the v6.22 leg has the taper and no test of who gets it).
+  ...(typeof spouseBWorkTaper !== "undefined" ? { spouseBWorkTaper } : {}),
+  ...(typeof builtinWorkApplies !== "undefined" ? { builtinWorkApplies } : {}),
 };
 
 // ═══ Feature-suite surface (t7–t9). Live getters: applyLoadedData REASSIGNS the
