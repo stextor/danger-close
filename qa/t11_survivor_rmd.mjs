@@ -154,7 +154,10 @@ const configure = async ({ dobA, lifeExpA, dobB, lifeExpB }) => {
   const P = JSON.parse(JSON.stringify(T.PORTFOLIO));
   P.dobA = `${dobA}-06-15`; P.dobB = `${dobB}-06-15`;
   P.lifeExpA = lifeExpA; P.lifeExpB = lifeExpB;
-  await act(async () => { T.applyLoadedData({ portfolio: P }); });
+  // v6.21 (D-42): this suite's subject is not spending, so it runs on v6.20's table — the example's without its four car rows (a no-op on
+  // any build before v6.21, which has none). The rows would otherwise land in its fixtures' years (a car in the year after a death; draws
+  // that reach the example's own brokerage). t84 C proves v6.21 on that table reproduces v6.20 bit for bit.
+  await act(async () => { T.applyLoadedData({ portfolio: P, expenses: window.__g.EXPENSES().filter(e => !(e && e.label === "Replacement car")) }); });
   await flush(); await flush();
   await gotoTab("roth"); // park off Taxes so the next navigation forces a re-render
   const tl = T.PLAN_TIMELINE;

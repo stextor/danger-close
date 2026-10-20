@@ -113,6 +113,7 @@ tally "t39-$CUR"   node t39_me_mt.mjs "$CUR"
 tally "t40-$PRIOR" node t40_cross_tab_agreement.mjs "$PRIOR"
 tally "t40-$CUR"   node t40_cross_tab_agreement.mjs "$CUR"
 tally "t40-$CUR-spend617" env DC_V617_SPENDING=1 node t40_cross_tab_agreement.mjs "$CUR"   # v6.18 (D-41): v6.17's spending as a table — every v6.17 figure must come out exactly
+tally "t40-$CUR-table620" env DC_V620_TABLE=1 node t40_cross_tab_agreement.mjs "$CUR"   # v6.21 (D-42): the example's table without its four car rows (v6.20's) — every v6.20 figure must come out exactly
 # t41 (v5.75) runs on BOTH legs by construction: the prior leg PINS the survivor-age and unused-
 # deduction defects as dated known defects, the current leg asserts the statutory figures. A
 # current-leg-only run could not show that anything moved. ⚠ It was written and left UNWIRED at the
@@ -126,6 +127,7 @@ tally "t41-$CUR"   node t41_survivor_age_gains.mjs "$CUR"
 tally "t42-$PRIOR" node t42_single_spouse_b_ss.mjs "$PRIOR"
 tally "t42-$CUR"   node t42_single_spouse_b_ss.mjs "$CUR"
 tally "t42-$CUR-spend617" env DC_V617_SPENDING=1 node t42_single_spouse_b_ss.mjs "$CUR"   # v6.18 (D-41): v6.17's spending as a table — every v6.17 figure must come out exactly
+tally "t42-$CUR-table620" env DC_V620_TABLE=1 node t42_single_spouse_b_ss.mjs "$CUR"   # v6.21 (D-42): the example's table without its four car rows (v6.20's) — every v6.20 figure must come out exactly
 # t43 (v5.77) runs on BOTH legs: the v5.76 leg pins C-4 (Engine A drops worksheet line 14) and §1f (Engine C
 # taxes a single household on the joint thresholds) as dated known defects, and the four private copies of
 # §86; the current leg asserts the shared helper against two independent oracles, Engines A, B and C
@@ -133,6 +135,7 @@ tally "t42-$CUR-spend617" env DC_V617_SPENDING=1 node t42_single_spouse_b_ss.mjs
 tally "t43-$PRIOR" node t43_ss86_one_rule.mjs "$PRIOR"
 tally "t43-$CUR"   node t43_ss86_one_rule.mjs "$CUR"
 tally "t43-$CUR-spend617" env DC_V617_SPENDING=1 node t43_ss86_one_rule.mjs "$CUR"   # v6.18 (D-41): v6.17's spending as a table — every v6.17 figure must come out exactly
+tally "t43-$CUR-table620" env DC_V620_TABLE=1 node t43_ss86_one_rule.mjs "$CUR"   # v6.21 (D-42): the example's table without its four car rows (v6.20's) — every v6.20 figure must come out exactly
 # t44 (v5.78) runs on BOTH legs: the v5.77 leg pins C-1 (a MAGI of exactly the IRMAA top threshold billed one tier low) and
 # the three private tier loops; the current leg asserts the shared irmaaTierFor against the statute at, above and below every
 # threshold, every engine placed bit-for-bit on the top threshold, the lower edges unmoved, the headroom (D-1), the label,
@@ -194,6 +197,7 @@ tally "t57-$CUR"   node t57_attribution_carry.mjs "$CUR"
 tally "t58-$PRIOR" node t58_state_draw.mjs "$PRIOR"
 tally "t58-$CUR"   node t58_state_draw.mjs "$CUR"
 tally "t58-$CUR-spend617" env DC_V617_SPENDING=1 node t58_state_draw.mjs "$CUR"   # v6.18 (D-41): v6.17's spending as a table — every v6.17 figure must come out exactly
+tally "t58-$CUR-table620" env DC_V620_TABLE=1 node t58_state_draw.mjs "$CUR"   # v6.21 (D-42): the example's table without its four car rows (v6.20's) — every v6.20 figure must come out exactly
 # t59 (v5.95) — D-12 Phase 3: per-person, per-plan-type state rules (RI, IA, PA, MS, WV) and the survivor slot, to the dollar; without
 # byPerson every jurisdiction prices as v5.94 (v595 leg). Both legs; the v594 leg pins the pre-Phase-3 figures.
 # Controls: qa/tools/controls_v595_per_person.py (repo-only).
@@ -254,12 +258,14 @@ tally "t70-$CUR"   node t70_annuity_conversion.mjs "$CUR"
 tally "t71-$PRIOR" node t71_engine_d_other_ira.mjs "$PRIOR"
 tally "t71-$CUR"   node t71_engine_d_other_ira.mjs "$CUR"
 tally "t71-$CUR-spend617" env DC_V617_SPENDING=1 node t71_engine_d_other_ira.mjs "$CUR"   # v6.18 (D-41): v6.17's spending as a table — every v6.17 figure must come out exactly
+tally "t71-$CUR-table620" env DC_V620_TABLE=1 node t71_engine_d_other_ira.mjs "$CUR"   # v6.21 (D-42): the example's table without its four car rows (v6.20's) — every v6.20 figure must come out exactly
 # t72 (v6.09) — D-35: a Roth IRA entered under Other accounts is counted once in Engine D, as Roth money (out of the pool's gains part and out of
 # the buckets' Roth share); its brokerage twin, an independent oracle, and the Withdrawal tab's cards. Both legs: the prior leg pins the defect;
 # §D's differential reads app_v608.mjs when the run folder has it.
 tally "t72-$PRIOR" node t72_engine_d_other_roth.mjs "$PRIOR"
 tally "t72-$CUR"   node t72_engine_d_other_roth.mjs "$CUR"
 tally "t72-$CUR-spend617" env DC_V617_SPENDING=1 node t72_engine_d_other_roth.mjs "$CUR"   # v6.18 (D-41): v6.17's spending as a table — every v6.17 figure must come out exactly
+tally "t72-$CUR-table620" env DC_V620_TABLE=1 node t72_engine_d_other_roth.mjs "$CUR"   # v6.21 (D-42): the example's table without its four car rows (v6.20's) — every v6.20 figure must come out exactly
 # t73 (v6.10) — the Ranking tab's peer benchmarks: one module-level table on the 2025 SCF, no peer figure typed anywhere else (AST), every
 # tier cut-off priced from both sides on the rendered tab, the vintage copy and the Field Manual, and the refresh alarm. Both legs: the
 # prior leg pins what v6.09 shows.
@@ -317,6 +323,7 @@ tally "t80-$CUR"   node t80_home_move_cash.mjs "$CUR"
 # Both legs: the prior leg pins the snapshots as a dated [KNOWN DEFECT].
 tally "t81-$PRIOR" node t81_engine_d_spending.mjs "$PRIOR"
 tally "t81-$CUR"   node t81_engine_d_spending.mjs "$CUR"
+tally "t81-$CUR-table620" env DC_V620_TABLE=1 node t81_engine_d_spending.mjs "$CUR"   # v6.21 (D-42): the example's table without its four car rows (v6.20's) — every v6.20 figure must come out exactly
 # t82 (v6.19) — the Monte Carlo's quarter calendar (D-46): the calendar against an INDEPENDENT oracle written from dates, for an as-of date in
 # every month of two years and every event month; RETIRE_OPTIONS and the timeline take their quarters from it; by AST the old label formula,
 # the two old quarter rules and the literal 2026 are gone from the machinery; the example's 6-year run bit-identical across the pair; the
@@ -336,6 +343,14 @@ tally "t82-$CUR"   node t82_mc_calendar.mjs "$CUR"
 # dated [KNOWN DEFECT] checks.
 tally "t83-$PRIOR" node t83_mc_tax.mjs "$PRIOR"
 tally "t83-$CUR"   node t83_mc_tax.mjs "$CUR"
+# t84 (v6.21) — a car is an expense row; the "after the payments end" figure, the Stress tab's planned path and the state lines come from
+# the plan (D-42, D-43, D-47, D-50): by AST the fixed car, its switch, the six -400 subtractions and the 1.04 benchmark are gone; v6.21's
+# example equals v6.20 run on the same table with its car off (both engines, Engine D), and on v6.20's table v6.21 reproduces v6.20's Engines
+# A-D, the bridge and the tax schedule bit for bit (the attribution of every re-pin); a plan saved before v6.21 gains the old schedule as
+# visible rows, written only on Save & Apply; the payments rule against an oracle; rendered (Income, SS, Roth, Monte Carlo, Stress, My Data);
+# the Field Manual and METHODOLOGY. Both legs: the prior leg pins what v6.21 changes as dated [KNOWN DEFECT] checks.
+tally "t84-$PRIOR" node t84_car_rows.mjs "$PRIOR"
+tally "t84-$CUR"   node t84_car_rows.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

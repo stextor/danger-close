@@ -27,13 +27,13 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v618";
-const KNOWN_VERSIONS = ["v617", "v618", "v619", "v620"];
+const KNOWN_VERSIONS = ["v617", "v618", "v619", "v620", "v621"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v618", "v619", "v620"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v618", "v619", "v620", "v621"].includes(VER);   // an array, so the next registration widens it
 // The differential's pair — constants, NOT `VER === "v618"`, so the registrar cannot widen them (t76 records why).
 const D_PRIOR = "v617", D_CUR = "v618";
 const require = createRequire(import.meta.url);
@@ -41,6 +41,14 @@ const M = await import(pathToFileURL(join(HERE, `app_${VER}.mjs`)).href);
 const { __g: g } = M;
 const E = M.__engines;
 const SRC = readFileSync(join(HERE, "..", `${VER}.jsx`), "utf8");
+// v6.21 (D-42): the example's table carries four $40,000 car rows from 2037, which Engine D now spends, so every example figure here that
+// rides on its draws after 2036 moved. PIN21 picks the v6.21 figures (measured at the build). The v6.21 leg is ALSO run with
+// DC_V620_TABLE=1 — the example's table without its car rows, which is v6.20's — and there every v6.20 figure must come out exactly: that
+// second run attributes each move to the rows alone (runsuite.sh, "<suite>-<cur>-table620"; t84 C proves v6.21 on that table IS v6.20).
+const POST_D42 = ["v621"].includes(VER);   // an array, so the registrar widens it
+const TABLE620 = POST_D42 && process.env.DC_V620_TABLE === "1";
+const PIN21 = POST_D42 && !TABLE620;
+const P42 = (v620, v621) => PIN21 ? v621 : v620;
 const { Parser } = require("acorn"); const jsx = require("acorn-jsx"); const walk = require("acorn-walk");
 const JP = Parser.extend(jsx());
 const W = Object.assign({}, walk.base, {
@@ -59,7 +67,8 @@ const clone = o => JSON.parse(JSON.stringify(o));
 const KD = "[KNOWN DEFECT 2026-10-18, D-41 — flips at v6.18]";
 console.log(`t81 — THE WITHDRAWAL TAB'S SPENDING (${VER})\n`);
 
-const BASE = clone(g.PORTFOLIO()), EX = clone(g.EXPENSES());
+const BASE = clone(g.PORTFOLIO()), EX = clone(g.EXPENSES()).filter(e => !(TABLE620 && e && e.label === "Replacement car"));   // v6.21: TABLE620 → v6.20's table
+if (TABLE620) console.log("  (DC_V620_TABLE=1 — v6.20's table, the car rows removed: every v6.20 figure must come out exactly)");
 const load = (P, X = EX) => { g.applyLoadedData({ portfolio: clone(P), expenses: clone(X) }); return g.PLAN_TIMELINE(); };
 const TL0 = load(BASE);
 const ymd = o => `${o.year}-${String(o.month).padStart(2, "0")}-${String(o.day || 1).padStart(2, "0")}`;
@@ -271,12 +280,14 @@ console.log("  C2 — D-45: the Monte Carlo's one-time rows (pinned)");
     _src = mulberry(2027); const b = g.runExtendedMC(RY, 30, 60, { ltcShocks: true, autoReplace: true, mortality: true, rng: mulberry(11) });
     return JSON.stringify({ a: a.results, b: b.results }); };
   const noOnce = EX.filter(e => e.freq !== "once"), june = EX.map(e => e.freq === "once" ? { ...e, start: "2029-06", end: "2029-06" } : e);
-  T(`C2-1 SETUP: the example's one-time rows are dated April 2029 ($28,000)`, EX.filter(e => e.freq === "once").every(e => String(e.start).slice(0, 7) === "2029-04") && oOnce(EX, "2029-04") === 28000);
+  // v6.21 (D-42): the example's table also holds four one-time "Replacement car" rows (2037–2061); this section's subject is the 2029 rows.
+  const ONCE29 = EX.filter(e => e.freq === "once" && e.label !== "Replacement car");
+  T(`C2-1 SETUP: the example's one-time rows other than its cars are dated April 2029 ($28,000)`, ONCE29.length > 0 && ONCE29.every(e => String(e.start).slice(0, 7) === "2029-04") && oOnce(EX, "2029-04") === 28000);
   const base = mcOf(EX);
   // v6.20 (D-45 fixed — docs/SCOPE_D40_MC_TAX_V620.md): a one-time row is charged in the quarter that contains its month, so the April
   // rows now move both engines; C2-3's April-vs-June control no longer discriminates (they are the same quarter, charged identically) and
   // is retired in favour of t83 C (every month of two years, exact on both planned paths). An array, so the registrar widens it.
-  const FIXED45 = ["v620"].includes(VER);
+  const FIXED45 = ["v620", "v621"].includes(VER);
   if (FIXED45) T("C2-2 [FIXED v6.20 — was KNOWN DEFECT 2026-10-18, D-45] the April rows now reach both Monte Carlo engines: output differs with and without them", base !== mcOf(noOnce));
   else {
     T(`C2-2 ${KD45} both Monte Carlo engines give byte-identical output with or without the April rows — they are never charged`, base === mcOf(noOnce));
@@ -378,6 +389,7 @@ console.log("  E — rendered: the Withdrawal tab, Backtest, What Breaks, the Ex
     return null;
   };
   await render();
+  if (TABLE620) { await act(async () => { window.__g.applyLoadedData({ portfolio: JSON.parse(JSON.stringify(window.__g.PORTFOLIO())), expenses: window.__g.EXPENSES().filter(e => !(e && e.label === "Replacement car")) }); }); await flush(); await flush(); }
   const w = await tab("withdrawal");
   T("E-0 SETUP: the app renders the example and the Withdrawal tab", /WITHDRAWAL STRATEGY/i.test(w));
   const c29 = cellOf(2029, "Expenses"), c33 = cellOf(2033, "Expenses");
@@ -392,16 +404,16 @@ console.log("  E — rendered: the Withdrawal tab, Backtest, What Breaks, the Ex
   const bt = await tab("backtest");
   const btWorst = (bt.match(/Worst start year\s*(\d{4})\s*ended \$([\d.]+)M real/) || []);
   T("E-4 SETUP: Backtest renders its worst start year", btWorst.length === 3, bt.slice(0, 200));
-  if (POST) T("E-5 Backtest on the example: the worst start (1966) now ends $1.43M real — lower lifetime spending (the car paid off from 2034) outweighs 2029's one-time rows (measured at the build)", btWorst[1] === "1966" && btWorst[2] === "1.43", btWorst.slice(1).join(" / "));
+  if (POST) T(`E-5 Backtest on the example: the worst start (1966) now ends ${P42("$1.43M real — lower lifetime spending (the car paid off from 2034) outweighs 2029's one-time rows (measured at the build)", "$1.21M real (v6.21, D-42: the four car rows; $1.43M at v6.18–v6.20)")}`, btWorst[1] === "1966" && btWorst[2] === P42("1.43", "1.21"), btWorst.slice(1).join(" / "));
   else T(`E-5 ${KD} Backtest on the example: the worst start (1966) ends $1.31M real on the snapshots`, btWorst[1] === "1966" && btWorst[2] === "1.31", btWorst.slice(1).join(" / "));
-  T("E-6 the Backtest comparison no longer says the backtest omits one-time expenses, and says when the MC charges one", ["v620"].includes(VER)
+  T("E-6 the Backtest comparison no longer says the backtest omits one-time expenses, and says when the MC charges one", ["v620", "v621"].includes(VER)
     ? /\(Both spend your one-time expenses: this backtest from v6\.18, the MC in the quarter each one falls from v6\.20\.\)/.test(bt) && !/one-time expenses, and Roth-conversion tax drag/.test(bt)
     : POST ? /From v6\.18 this backtest spends your one-time expenses; the MC charges one only when it is dated in March, June, September or December\./.test(bt) && !/one-time expenses, and Roth-conversion tax drag that this backtest deliberately omits/.test(bt)
     : /one-time expenses, and Roth-conversion tax drag that this backtest deliberately omits/.test(bt));
   const wb = await tab("what breaks");
   const spendX = (wb.match(/([\d.]+)× current spending/) || [])[1];
   T("E-7 SETUP: What Breaks renders its spending headroom", !!spendX, wb.slice(0, 200));
-  if (POST) T("E-8 What Breaks on the example: 1.40× current spending (the car paid off from 2034; measured at the build)", spendX === "1.40", spendX);
+  if (POST) T(`E-8 What Breaks on the example: ${P42("1.40× current spending (the car paid off from 2034; measured at the build)", "1.35× current spending (v6.21, D-42: the four car rows; 1.40× at v6.18–v6.20)")}`, spendX === P42("1.40", "1.35"), spendX);
   else T(`E-8 ${KD} What Breaks on the example: 1.35× current spending on the snapshots`, spendX === "1.35", spendX);
   const xp = await tab("expenses");
   T("E-9 the Expenses tab's headers on the example are unchanged on both legs ($6,700 pre; $8,170 → $8,020 post)", /PRE-RETIREMENT — \$6,?700\/mo/i.test(xp) && /POST-RETIREMENT — \$8,?170\/mo → \$8,?020\/mo/i.test(xp), (xp.match(/PRE-RETIREMENT[^)]{0,80}/i) || [""])[0]);
@@ -413,7 +425,7 @@ console.log("  F — the copy");
 {
   const docs = g.DOCS_HTML();
   if (POST) T("F-1 the Field Manual's Withdrawal Strategy entry says how spending is read, when the Monte Carlo charges a one-time row (D-45), and dates the fix",
-    /<strong>Spending<\/strong> is your expense table at each year's own dates/.test(docs) && (["v620"].includes(VER) ? /From v6\.20 the Monte Carlo charges a one-time row in the quarter that contains its month/.test(docs) && /only when the row was dated in one of those months/.test(docs) : /only when the row is dated in one of those months/.test(docs)) && /never arrived \(v6\.18\)/.test(docs) && !/takes it from the portfolio when it falls/.test(docs));
+    /<strong>Spending<\/strong> is your expense table at each year's own dates/.test(docs) && (["v620", "v621"].includes(VER) ? /From v6\.20 the Monte Carlo charges a one-time row in the quarter that contains its month/.test(docs) && /only when the row was dated in one of those months/.test(docs) : /only when the row is dated in one of those months/.test(docs)) && /never arrived \(v6\.18\)/.test(docs) && !/takes it from the portfolio when it falls/.test(docs));
   else T(`F-1 ${KD} the Field Manual never says how the Withdrawal tab's spending is read`, !/each year's own dates/.test(docs));
   if (POST) T("F-2 the stale \"Defaults: $7,047 … $8,313\" comment is gone", !/Defaults: \$7,047 pre-retire, \$8,313 post-retire/.test(SRC));
   else T(`F-2 ${KD} the stale "Defaults: $7,047 … $8,313" comment is present`, /Defaults: \$7,047 pre-retire, \$8,313 post-retire/.test(SRC));

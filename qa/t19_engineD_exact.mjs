@@ -22,6 +22,10 @@ Math.random = () => { _s = (1103515245 * _s + 12345) % 2147483648; return _s / 2
 const { __g: g } = await import("./app_testable.mjs");
 // v6.18 (D-41): v6.17's spending as a table — the attribution tool for the figures v6.18's year-by-year read moved (qa/tools/v617_spending.mjs).
 const { withV617Spending } = await import("./tools/v617_spending.mjs");
+// v6.21 (D-42): this suite's subject is not spending, so it runs on v6.20's table — the example's without its four car rows (a no-op on
+// any build before v6.21, which has none). The rows would otherwise land in its fixtures' years (a car in the year after a death; draws
+// that reach the example's own brokerage). t84 C proves v6.21 on that table reproduces v6.20 bit for bit.
+g.applyLoadedData({ portfolio: JSON.parse(JSON.stringify(g.PORTFOLIO())), expenses: g.EXPENSES().filter(e => !(e && e.label === "Replacement car")) });
 
 let pass = 0, fail = 0;
 const ck = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; console.log(`  \u2717 ${n}${d ? " \u2014 " + d : ""}`); } };

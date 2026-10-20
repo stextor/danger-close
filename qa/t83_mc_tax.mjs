@@ -29,13 +29,13 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v620";
-const KNOWN_VERSIONS = ["v619", "v620"];
+const KNOWN_VERSIONS = ["v619", "v620", "v621"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v620"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v620", "v621"].includes(VER);   // an array, so the next registration widens it
 // The differential's pair — constants, NOT `VER === "v620"`, so the registrar cannot widen them (t76 records why).
 const D_PRIOR = "v619", D_CUR = "v620";
 const require = createRequire(import.meta.url);
@@ -286,9 +286,11 @@ const callsIn = (node, name) => { let c = 0; walk.simple(node, { CallExpression(
     const unknown = subs.filter(s => !s.kind), count = k => subs.filter(s => s.kind === k).length;
     T(`E-4 every one of the ${subs.length} subtractions from planned, _planned or portfolio in the two engines is a named outflow`, unknown.length === 0 && subs.length > 0,
       unknown.map(s => `${s.fn} L${s.line}: ${s.rhs}`).join(" | "));
-    T("E-5 …in the counts the scope names: draw 4, tax 4, one-time 4, mortgage 2, LTC shock 2, care 2, car 1",
+    // v6.21 (D-42): the fixed car is gone — a car is a one-time row, charged as "the one-time rows". An array, so the registrar widens it.
+    const CAR_N = ["v621"].includes(VER) ? 0 : 1;
+    T(`E-5 …in the counts the scope names: draw 4, tax 4, one-time 4, mortgage 2, LTC shock 2, care 2, car ${CAR_N}${CAR_N ? "" : " (v6.21: a car is an expense row)"}`,
       count("the spending draw") === 4 && count("the tax") === 4 && count("the one-time rows") === 4 && count("the mortgage payment") === 2
-      && count("the LTC shock") === 2 && count("the sustained-care term") === 2 && count("the car") === 1, KINDS.map(([k]) => `${k} ${count(k)}`).join(", "));
+      && count("the LTC shock") === 2 && count("the sustained-care term") === 2 && count("the car") === CAR_N, KINDS.map(([k]) => `${k} ${count(k)}`).join(", "));
     // THE APP'S WIRING (found by the release's independent review: only the 6-year runs' schedule was exercised, through the DOM). Every
     // call to the three engines inside DangerCloseMain must carry a schedule built from the live state, and the effects must re-run on it.
     const MAIN = fnNode("DangerCloseMain"), engineCalls = [], schedCalls = [], effects = [];
@@ -311,7 +313,7 @@ const callsIn = (node, name) => { let c = 0; walk.simple(node, { CallExpression(
     T("E-6 every engine call carries a schedule: the app's 9 (taxSchedule, ..._tx, or the mortgage what-if's base) and runStressTests' 7 (..._tax, resolved once from its options), and each of the app's 3 schedules is built from { rothAmount, qcdAnnual, taxYield, scenarioPreset }",
       engineCalls.length === 9 && engineCalls.every(carries) && stressCalls.length === 7 && stressCalls.every(callCarries)
       && /const _tax = \{ taxSchedule: mcResolveTaxSchedule\(retireYear, opts\) \};/.test(SRC) && schedCalls.length === 3 && schedCalls.every(a => a === "{ rothAmount, qcdAnnual, taxYield, scenarioPreset }")
-      && /const _tx = \{ taxSchedule: mcIncomeTaxSchedule\(retireYear, \{ rothAmount, qcdAnnual, taxYield, scenarioPreset \}\) \}/.test(SRC) && /base = \{ ltcShocks: true, autoReplace: true, mortality: true,\s+taxSchedule: mcIncomeTaxSchedule\(/.test(SRC),
+      && /const _tx = \{ taxSchedule: mcIncomeTaxSchedule\(retireYear, \{ rothAmount, qcdAnnual, taxYield, scenarioPreset \}\) \}/.test(SRC) && /base = \{ ltcShocks: true, (autoReplace: true, )?mortality: true,\s+taxSchedule: mcIncomeTaxSchedule\(/.test(SRC),   // v6.21 (D-42): the car switch is gone
       `${engineCalls.length} app calls, ${stressCalls.length} stress calls, ${engineCalls.filter(x => !carries(x)).map(x => SRC.slice(x.start, x.end).replace(/\s+/g, " ").slice(0, 90)).join(" | ")}; schedules: ${schedCalls.join(" | ")}`);
     const mainFx = effects.filter(e => /runMonteCarlo\(/.test(e.body)), mortFx = effects.filter(e => /futureHomeMortgage: vmPrincipal/.test(e.body)), has3 = d => ["rothAmount", "qcdAnnual", "taxYield"].every(k => d.includes(k));
     T("E-7 the 6-year runs' effect re-runs on the slider, QCD and yield and clears the extended and stress caches; the mortgage what-if re-runs on them too",

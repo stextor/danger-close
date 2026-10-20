@@ -37,6 +37,10 @@ const VER = process.argv[2] || null;
 const { __g: g } = await import(VER ? `./app_${VER}.mjs` : "./app_testable.mjs");
 // v6.18 (D-41): v6.17's spending as a table (qa/tools/v617_spending.mjs) — see the tax-type block below for why it is used there.
 const { withV617Spending } = await import("./tools/v617_spending.mjs");
+// v6.21 (D-42): this suite's subject is not spending, so it runs on v6.20's table — the example's without its four car rows (a no-op on
+// any build before v6.21, which has none). The rows would otherwise land in its fixtures' years (a car in the year after a death; draws
+// that reach the example's own brokerage). t84 C proves v6.21 on that table reproduces v6.20 bit for bit.
+g.applyLoadedData({ portfolio: JSON.parse(JSON.stringify(g.PORTFOLIO())), expenses: g.EXPENSES().filter(e => !(e && e.label === "Replacement car")) });
 
 let pass = 0, fail = 0; const fails = [];
 const ck = (n, ok, d = "") => {

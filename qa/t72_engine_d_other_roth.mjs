@@ -28,24 +28,33 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v609";
-const KNOWN_VERSIONS = ["v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620"];
+const KNOWN_VERSIONS = ["v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620"].includes(VER);   // an array, so register_tag2 widens it each release
+const POST = ["v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621"].includes(VER);   // an array, so register_tag2 widens it each release
 const { __g: g, __engines: E } = await import(pathToFileURL(join(HERE, `app_${VER}.mjs`)).href);
 // v6.18 (D-41): Engine D reads the expense table year by year, which moved two §A/§B figures (a lifetime RMD and a realized gain). PIN18 picks the v6.18 figures (measured at the build);
 // the v6.18 leg is ALSO run with DC_V617_SPENDING=1 — each plan loaded with v6.17's spending as a table (qa/tools/v617_spending.mjs, split
 // at that plan's own Medicare year) — where every v6.17 figure must still come out exactly: the attribution of each move to the read.
-const POST_D41 = ["v618", "v619", "v620"].includes(VER);   // an array, so the registrar widens it
+const POST_D41 = ["v618", "v619", "v620", "v621"].includes(VER);   // an array, so the registrar widens it
 const SPEND17 = POST_D41 && process.env.DC_V617_SPENDING === "1";
 const PIN18 = POST_D41 && !SPEND17;
 const P41 = (v617, v618) => PIN18 ? v618 : v617;
+// v6.21 (D-42): the example's table carries four $40,000 car rows from 2037, which Engine D now spends, so every example figure here that
+// rides on its draws after 2036 moved. PIN21 picks the v6.21 figures (measured at the build). The v6.21 leg is ALSO run with
+// DC_V620_TABLE=1 — the example's table without its car rows, which is v6.20's — and there every v6.20 figure must come out exactly: that
+// second run attributes each move to the rows alone (runsuite.sh, "<suite>-<cur>-table620"; t84 C proves v6.21 on that table IS v6.20).
+const POST_D42 = ["v621"].includes(VER);   // an array, so the registrar widens it
+const TABLE620 = POST_D42 && process.env.DC_V620_TABLE === "1";
+const PIN21 = POST_D42 && !TABLE620;
+const P42 = (v620, v621) => PIN21 ? v621 : v620;
 const { v617Table } = await import(pathToFileURL(join(HERE, "tools", "v617_spending.mjs")).href);
 if (SPEND17) console.log("  (DC_V617_SPENDING=1 — v6.17's spending, as a table: every v6.17 figure must come out exactly)");
-const EX0 = JSON.parse(JSON.stringify(g.EXPENSES()));
+if (TABLE620) console.log("  (DC_V620_TABLE=1 — v6.20's table, the car rows removed: every v6.20 figure must come out exactly)");
+const EX0 = JSON.parse(JSON.stringify(g.EXPENSES())).filter(e => !(TABLE620 && e && e.label === "Replacement car"));   // v6.21: TABLE620 → v6.20's table
 
 let pass = 0, fail = 0;
 const T = (n, ok, d = "") => { if (ok) pass++; else { fail++; console.log(`  ✗ ${n}${d ? " — " + d : ""}`); } };
@@ -146,9 +155,9 @@ for (const amt of [0, 70000]) {
 }
 {
   const r = plan(F.EX_ROTH200, 70000).W.schedule;
-  T(POST ? `A-3: the Roth fixture's lifetime RMD is EXACTLY ${P41("$470,488", "$479,123 (v6.18, D-41; $470,488 at v6.09–v6.17)")} at $70,000 — its brokerage twin's`
+  T(POST ? `A-3: the Roth fixture's lifetime RMD is EXACTLY ${P41("$470,488", P42("$479,123 (v6.18, D-41; $470,488 at v6.09–v6.17)", "$449,041 (v6.21, D-42: the car rows; $479,123 at v6.18–v6.20)"))} at $70,000 — its brokerage twin's`
          : "A-3 [KNOWN DEFECT D-35]: the Roth fixture's lifetime RMD is $343,192 at $70,000 — understated against its brokerage twin's $470,488",
-    Math.round(sum(r, "rmd_y")) === (POST ? P41(470488, 479123) : 343192), usd(sum(r, "rmd_y")));
+    Math.round(sum(r, "rmd_y")) === (POST ? P41(470488, P42(479123, 449041)) : 343192), usd(sum(r, "rmd_y")));
 }
 
 // ── §B · no capital gain on Roth money ─────────────────────────────────────────────────────────────────────────────────────────
@@ -158,9 +167,9 @@ for (const amt of [0, 70000]) {
          : "B-1 [KNOWN DEFECT D-35]: a pool that is all Roth IRA realizes capital gain — its growth is booked as gain when spent",
     POST ? o.every(x => (x.capGain_y || 0) === 0 && x.taxGainPool === 0) : sum(o, "capGain_y") > 1000, `lifetime gain ${usd(sum(o, "capGain_y"))}`);
   const r5 = plan(F.EX_ROTH500, 70000).W.schedule;
-  T(POST ? `B-2: $500,000 of Roth IRAs at $70,000 — lifetime realized gain ${P41("$4,909", "$3,249 (v6.18, D-41; $4,909 at v6.09–v6.17)")}, the example's own brokerage only`
+  T(POST ? `B-2: $500,000 of Roth IRAs at $70,000 — lifetime realized gain ${P41("$4,909", P42("$3,249 (v6.18, D-41; $4,909 at v6.09–v6.17)", "$6,195 (v6.21, D-42: the car rows; $3,249 at v6.18–v6.20)"))}, the example's own brokerage only`
          : "B-2 [KNOWN DEFECT D-35]: $500,000 of Roth IRAs at $70,000 — lifetime realized gain $196,853, nearly all of it on Roth money",
-    Math.round(sum(r5, "capGain_y")) === (POST ? P41(4909, 3249) : 196853), usd(sum(r5, "capGain_y")));
+    Math.round(sum(r5, "capGain_y")) === (POST ? P41(4909, P42(3249, 6195)) : 196853), usd(sum(r5, "capGain_y")));
 }
 
 // ── §C · THE ORACLE: each leg reproduced to the cent under its own rules, and missed under the other's ─────────────────────────────
