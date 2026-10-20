@@ -345,6 +345,29 @@ export function census(G) {
       : _hm === 130000 ? "the household's figure equals the old constant, so the field and the constant cannot be told apart here"
       : _hm === 0 ? "reachable — no move: nothing is added at retirement" : _hm < 0 ? "reachable — the next home costs more: cash is taken at retirement" : "reachable — a figure of the household's own");
 
+  // ── v6.21 (D-42 — SCOPE_D42_CAR_V621) · the condition that hid it (§K1) ──────────────────────────────────────────────────────────
+  // 8. THE CARS. Through v6.20 the 30-year runs bought every plan a $40,000 car in March of retirement years 8, 16, 24 and 32. The example's
+  //    table now carries exactly that schedule as rows (DC-1 (a)), so on the example the rows and the old fixed car are indistinguishable in
+  //    the Monte Carlo: a fix that silently restored the constant could not be seen there. Car rows are the table's one-time rows whose
+  //    label names a car; the old schedule is derived from the plan's own retirement year (the same rule the v6.21 migration uses). A build
+  //    without CAR_SCHEDULE_V620 reads "n/a" (ON). The 40,000 here is the old constant's value, read from the build, not typed.
+  const _cs = typeof G.CAR_SCHEDULE_V620 === "function" ? G.CAR_SCHEDULE_V620() : null;
+  let _cars = null, _old = null;
+  if (_cs) {
+    _cars = (G.EXPENSES() || []).filter(e => e && e.freq === "once" && /\bcars?\b/i.test(String(e.label || "")));
+    _old = [];
+    const _asK = tl.asOf.year * 12 + ((tl.asOf.month || 1) - 1);
+    for (let y = tl.retireDate.year + _cs.everyYears; y <= tl.asOf.year + 35; y += _cs.everyYears)
+      if (y * 12 + _cs.month - 1 >= _asK) _old.push(`${y}-${String(_cs.month).padStart(2, "0")}`);
+  }
+  const _same = !!_cars && _cars.length === _old.length && _cars.every((e, i) => e.start === _old[i] && Number(e.amount) === _cs.cost);
+  row("car_rows", "cars in the expense table",
+    _cs ? `${_cars.length} one-time car row${_cars.length === 1 ? "" : "s"}` : "n/a (pre-v6.21 build)",
+    "a car schedule other than the old fixed one", !_cs || _same,
+    !_cs ? "this build buys every plan a fixed $40,000 car every 8 years of retirement"
+      : _same ? "the table's cars are exactly the old fixed schedule, so the rows and the old constant cannot be told apart in the Monte Carlo here"
+      : _cars.length === 0 ? "reachable — no car in the table: none is charged" : "reachable — a car schedule of the household's own");
+
   return rows;
 }
 

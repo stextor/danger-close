@@ -23,10 +23,14 @@ export function v617Table(G, X = G.EXPENSES()) {
     { cat: "Housing", name: "v6.17 EARLY snapshot", amount: at(X, V617_MONTHS[0]), freq: "monthly", start: "1900-01", end: `${MB - 1}-12` },
     { cat: "Housing", name: "v6.17 FULL snapshot", amount: at(X, V617_MONTHS[1]), freq: "monthly", start: `${MB}-01`, end: "2199-12" }];
 }
+// v6.21 (D-42): every load here carries `carRowsV621: true`. Without it v6.21's migration reads a fixture loaded WITH a table as a plan
+// saved before v6.21 and adds the old fixed car schedule to the table as rows — v6.17's spending has no car, and the restore must put back
+// exactly the table that was loaded. On a build before v6.21 the field is ignored.
+const mark = P => ({ ...clone(P), carRowsV621: true });
 export function withV617Spending(G, P, fn) {
   const ex0 = clone(G.EXPENSES());
-  G.applyLoadedData({ portfolio: clone(P), expenses: clone(ex0) });
+  G.applyLoadedData({ portfolio: mark(P), expenses: clone(ex0) });
   const tbl = v617Table(G);
-  G.applyLoadedData({ portfolio: clone(P), expenses: tbl });
-  try { return fn(); } finally { G.applyLoadedData({ portfolio: clone(P), expenses: ex0 }); }
+  G.applyLoadedData({ portfolio: mark(P), expenses: tbl });
+  try { return fn(); } finally { G.applyLoadedData({ portfolio: mark(P), expenses: ex0 }); }
 }
