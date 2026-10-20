@@ -2827,6 +2827,53 @@ line, so the example's line reads as before).
   January to December and a one-time row in June. The first save moves an older plan's added cars from March to June of the same year — no
   change in Engine D, Backtest or What Breaks, which read the year; one quarter later in the Monte Carlo — and widens the example's Car
   Payment from April 2029 – April 2034 to January 2029 – December 2034.
-- **Its sibling, found at the build (D-53, open).** A new plan that chooses no state keeps the example's master prompt and is taxed as its
-  Florida; the Roth tab's line says what the Taxes tab says, so for such a plan it says Florida too.
+- **Its sibling, found at the build (D-53; closed at v6.22, next section).** A new plan that chose no state kept the example's master prompt
+  and was taxed as its Florida; the Roth tab's line said what the Taxes tab said, so for such a plan it said Florida too.
 
+## A plan's facts are its own (v6.22)
+
+**What was wrong (v6.21, measured).** The example household's facts — both dates of birth (1 January 1964 and 1966), its plan-to ages (80
+and 87), its retirement year (2029), Florida at 0%, and its home ($450,000 with a $120,000 mortgage at 4.25%) — lived only in its master
+prompt, the sample briefing Ask AI sends. Every reader fell back to the master prompt for a fact a plan did not carry: the plan timeline
+(dates of birth, retirement year, plan-to ages, the state), My Data's starting values, the Ranking tab's home and net worth. And a load
+that brought no master prompt kept the one already held — the example's at the landing screen. So a plan begun with Start Fresh was the
+example's household in all five timeline facts and its home; one begun with the guided setup, which writes its own dates, was the
+example's Florida when its state step was skipped, and its home. One Save & Apply stored them as the plan's own. The guided setup run from
+My Data, or a backup without a prompt, kept the previous plan's prompt the same way (measured: a plan with its own Oregon prompt, then a
+blank load, read Oregon). Two siblings: a plan with no Social Security or pension figure was paid the example's $3,300, $1,300 and $400 a
+month, and a backup with no expense table kept the table already held.
+
+**What changed.**
+- **The example describes itself.** `DEFAULT_PORTFOLIO` carries the ten facts as fields, each equal to what the parsers read from the demo
+  prompt (a test computes them live). The example's figures do not move: all ten of `t2`'s engine fingerprints are byte-identical at v6.21
+  and v6.22, its Withdrawal tab is byte-identical and its Taxes and IRMAA year-tables figure-identical (`domdiff`), and its My Data, Ranking
+  and Roth values are unchanged; the one deliberate change on its tabs is wording (the Taxes tab's 0% footnote, DC-3).
+- **A load without a master prompt holds none**, and storage drops the key to match. The example's own path holds the demo. The example's
+  own text arriving beside holdings that are not the example's — a key v6.21 could leave in storage after *Load sample data* and then the
+  guided setup or an import without a prompt, or an old backup — is not taken either (DC-8, decided at the build), and a stored key of that
+  kind is dropped.
+- **Placeholders are named, not presented as facts.** A plan with no date of birth, retirement year or plan-to age is modelled on the
+  timeline's placeholders — born September 1963 (and March 1966), retiring in 2029, planning to age 90 — which predate this release and are
+  not the example's. From v6.22 My Data shows those fields blank and says what the model is using until they are entered. A plan with no
+  state is modelled with no state income tax, and the Taxes tab, the Roth tab's rules box and My Data say so.
+- **Income a plan never entered is not paid.** A missing Social Security or pension figure is $0 (it was the example's), and the banner
+  names it whether or not a master prompt is held.
+- **A backup with no expense table is refused**, as a file that cannot be read is.
+
+**What moves.** The example: nothing. A plan saved through My Data: nothing — it stored its facts, including any it took from the example,
+and My Data now names example facts a plan carries (both dates of birth with both plan-to ages, the home, or Florida with no state chosen)
+when its holdings are not the example's. A Start Fresh or guided-setup plan from v6.21 or earlier that was never saved through My Data
+changes on its next load: a Start Fresh plan's dates of birth become the placeholders and its plan-to ages 90 and 90 (from 80 and 87) — a
+longer horizon, so more years to fund (the conservative direction); either plan loses Florida for no state (0% both ways, so no tax moves);
+the Ranking tab's home becomes its flagged fallback. A plan with a missing income figure — reachable only by a hand-made or old backup — is
+paid less, and every figure that reads income falls.
+
+**Simplifications, stated.**
+- **The placeholders remain the engines' values** until the user enters a fact; My Data names them.
+- **Example-valued defaults that remain (D-56):** the as-of date when a plan has none, Spouse B's claim age 63 when none is set, the 2029
+  placeholder, and the Roth tab's 5-year-rule lines.
+- **The example is recognised by its holdings** (tickers and balances). A plan that carries the example's demo text and exactly the
+  example's holdings is read as the example, and its facts come from that text where its own fields are missing — which is right for the
+  example, and for anything else would need a plan that kept the example's holdings to the dollar.
+- **Ask AI's ground rules reach only the example (D-55).** A plan's Ask AI sends its plan summary (from its last Save & Apply) and the
+  live context; a plan never saved sends the live context alone.

@@ -1,5 +1,105 @@
 # Changelog
 
+## v6.22 — a new plan keeps no one else's facts: the example's master prompt, income and expense table (D-53)
+
+**A MODELLING release** — METHODOLOGY gains *A plan's facts are its own (v6.22)*. `docs/SCOPE_D53_PROMPT_V622.md` (repo-only, fulfilled):
+Steve, *"let's go with d-53"*, then DC-1 *"Facts + clear"*, DC-2 to DC-5 *"All as recommended"*, DC-6 *"Pay none, say so"*, DC-7 *"Refuse
+the backup"* — all (a); DC-8, found by the build's review, *"Close it"* — (a). Built on v6.21 (source `f7802df1…`).
+
+**What was wrong (v6.21, measured).** The register said a new plan with no state was taxed as the example's Florida. It was wider. The
+example household's facts — both dates of birth, its plan-to ages (80, 87), its retirement year, Florida at 0%, its home ($450,000, a
+$120,000 mortgage at 4.25%) — lived only in its master prompt, and every reader fell back to the master prompt: the plan timeline, My Data's
+starting values, the Ranking tab's home and net worth, and Ask AI, whose system prompt begins with it. A load that brought no prompt kept the
+one already held — the example's at the landing screen. So a Start Fresh plan was the example's household in every timeline fact and its
+home; a guided-setup plan took its Florida (state step skipped) and its home; one Save & Apply stored them as the plan's own, and the state
+name has no input to retype. The guided setup run from My Data, or a backup without a prompt, kept the previous plan's prompt the same way
+(measured: an Oregon plan, then a blank load, read Oregon), and Start Fresh over an unreadable stored plan left its prompt key behind.
+**Siblings, same mechanism:** a plan with no Social Security or pension figure was paid the example's $3,300, $1,300 and $400 a month, the
+warning banner firing only while a prompt was held (so the fix above would have silenced it); a backup with no expense table kept the table
+already held (the example's 35 rows at the landing screen).
+
+**What changed.**
+- **The example describes itself (DC-1 (a)).** `DEFAULT_PORTFOLIO` carries the ten facts as fields, each equal to what the app's own parsers
+  read from the demo prompt (`t85` B-3 computes them live).
+- **A load without a prompt holds none**, the example's own path holds the demo (set by the loader, not left to what was held), and
+  storage keeps what memory keeps: the six plan-loading callers pass the loader's result, `""` deletes the key, an omitted argument leaves it.
+  The name extraction and the Social Security parse read the loader's result too.
+- **DC-8:** the example's own text arriving with holdings that are not the example's — a key v6.21 could leave in storage after *Load sample
+  data* then the guided setup or an import, or an old backup — is not taken, and a stored key of that kind is dropped.
+- **My Data names what is not entered (DC-2).** A placeholder date of birth or retirement year starts blank, and a notice says what the
+  model uses meanwhile: born September 1963 / March 1966, retiring 2029, planning to 90 (the timeline's placeholders, not the example's).
+- **No state, said plainly (DC-3)** on the Taxes tab (footnote and labels), the Roth tab's rules box and My Data's state control. No sentence
+  points at a master prompt any more — the 0% footnote, the Roth header, the Survivor tab and Ask AI's preview were reworded.
+- **The Field Manual (DC-4)** says what Ask AI is sent (§09), what the banner now means (§04), and what changed (§13). The finding that the
+  demo prompt's ground rules reach only the example is filed as D-55.
+- **A plan saved earlier with the example's facts is told so (DC-5)** in My Data — dates and plan-to ages, home, or Florida with no state
+  chosen — when its holdings are not the example's. Nothing is changed.
+- **Income a plan never entered is paid $0 (DC-6)**, named by the banner whether or not a prompt is held; a flagged block a past load stored
+  is zeroed.
+- **A backup with no expense table is refused (DC-7)** with a plain message; an empty table is accepted.
+
+**What it moved.** **The example: nothing** — all ten `t2` fingerprints byte-identical (parity 10/10, no intended difference declared), the
+Withdrawal tab byte-identical and the Taxes and IRMAA year-tables figure-identical (`domdiff`), its My Data, Ranking and Roth values
+unchanged; the one change on its tabs is the 0% footnote's wording. A plan saved through My Data: nothing (it keeps what it stored; DC-5
+names example facts). A Start Fresh or guided-setup plan from v6.21 or earlier never saved through My Data, on its next load: a Start Fresh
+plan's dates of birth become the placeholders and its plan-to ages 90 / 90 (from 80 / 87 — a longer horizon, the conservative direction);
+either loses Florida for no state (0% both ways); the Ranking tab's home becomes its flagged fallback. A plan missing an income figure (a
+hand-made or old backup) is paid less.
+
+**Found and filed, not fixed** (MissingFeatures): **D-55** — Ask AI's ground rules (*"Educational Only … do NOT recommend target asset
+allocations or specific securities"*) reach only the example. **D-56** — example-valued defaults that remain: the as-of date when a plan has
+none, Spouse B's claim age 63, the 2029 placeholder, the Roth tab's 5-year-rule lines. `ARCHITECTUREIssues.md` **E-32** — two dead load
+paths (`handleReload` with `STATE_CARRYOVER`; the landing screen's file statuses).
+
+**Tests.** New suite **`t85`** — **53** on v6.22, **48** on v6.21 (that leg pins each defect as a dated `[KNOWN DEFECT]`).
+§A the loader: Start Fresh, both guided-setup routes, a backup without a prompt, a prompt cut at the cap, both example paths, a non-string
+prompt, DC-8. §B by AST: the loader writes the prompt on every path, `saveToStorage` deletes for `""` and every plan-loading caller passes
+`MASTER_PROMPT`, the ten fields equal the parsers' reading of the demo prompt (each parser asserted to match), no getter or insert reads the
+example's income. §C the pair: the example's timeline, income and prompt the same at both. §D rendered: a first visit and Start Fresh (My
+Data blank, the notice, Save & Apply storing none of the example's facts, a reload), the no-state wording on three tabs and a manual rate,
+Ask AI's preview before any save, a stored Start Fresh plan reloading with placeholders, a pre-v6.22 example still whole (no migration), an
+unreadable stored plan under Start Fresh and *Use example data*, the DC-5 notice, DC-8 from storage, the income banner, backups (a non-string
+and an over-long prompt, no expense table, an empty one). §E income: blocks without amounts, absent, absent from the form, flagged and
+stored, and the example.
+**Existing suites.** `t37` A6-4 / A6-6: a non-string prompt is still rejected, and the plan then holds none (it was the previous plan's).
+⚠ **`t20`** had declared `incomeSources: {}` since v5.37 and so ran on the example's inserted income without saying so; DC-6 made that $0,
+and the fixture now states the same amounts — every `t20` figure unchanged on both legs. `t29` gains the `demo_prompt` census row (OPERATIONS
+§K1: on the example the held prompt is its own, so a leak cannot be seen there; ON on both legs) and C-prompt-1; `t33` PINS gains `v622`
+(unchanged, confirmed by running); `t84` G-3's name. `t84`'s §B/§C (the v6.20 → v6.21 pair) take their designed skip in a run folder without
+the v6.20 source, as `t83`'s did at v6.21: 51 on both legs (63 → 51).
+Controls `qa/tools/controls_v622_prompt.py` (repo-only): **24 of 24 as expected** — the loader's old rule, the example's path not setting the demo,
+the key never deleted, Import storing the raw argument, a field drifting from the demo prompt, a parser defaulting again, My Data pre-filling
+a placeholder, either notice never shown or shown on the example, each no-state sentence back, each income getter and insert back on the
+example, flagged blocks not zeroed, the banner keyed on a prompt, a backup without expenses accepted, the guided setup's save omitting the
+prompt, DC-8 off, and the unmutated run; every file restored and hash-checked.
+
+**Independent reviews.** The scope was reviewed before Steve saw it (22 findings, recorded as 16 in its §6, all taken: the income banner DC-1 would have silenced,
+the expense carry-over, the wording sites, the storage design, tests that could not have passed as written). The build was reviewed by an
+agent that had not seen it (18 findings): it confirmed the loader, storage, fields, parsers, notices, income, the refusal, the Field Manual,
+the four version sites and the registrar's tags, and found **DC-8** (asked and decided), the inserted Spouse B block's claim age moved
+63 → 67 against the scope's own out-of-scope list (reverted), three more master-prompt sentences, and stale comments and names — all fixed.
+
+⚠ **Owned.** (1) The scope's §0.9 said only an old backup could carry the demo text beside another plan; a stored key could, reachable in
+the app at v6.21 — the build's review found it, and DC-8 closes it. (2) The first build changed the inserted Spouse B block's claim age, which
+the scope had put out of scope; reverted. (3) `t85`'s first draft read the example after other plans in the same module, which the app never
+does (the landing's *Use example data* is only reached on a fresh page), and its D-7 pin on the v6.21 leg was `true`; both fixed before the
+run counted.
+
+**Registered:** `v622` by AST (366 sites), `t1`'s and `t4`'s version strings, `t33`'s PINS and the three Python suites by hand.
+`runsuite.sh` runs `t85` on both legs.
+
+**Suite, run from the packaged copies:** **8,339 app checks across 84 app suites** (the eight `-spend617` and seven `-table620` attribution runs included), 0 failed, 0 DIED; MC parity 10/10 (no intended difference); tooling `t21` 64, `domdiff` 32, `sets` 12 + 12; **GRAND 8,469**. Per-suite counts are `TESTING.md`'s v6.22 line; against v6.21's line the counts that moved are `t29` 85 → 88 (the `demo_prompt` row), `t84` 63 → 51 (the designed skip above) and `t85` is new (53; 48 on the v6.21 leg); every other current-leg count is unchanged. `domdiff` 41 → 32: its v6.20 → v6.21 arm does not apply to this pair, and on v6.21 → v6.22 every compared table is identical.
+
+**Limitations, disclosed** (METHODOLOGY *Simplifications, stated*; Field Manual): the placeholders remain the engines' values until a fact is
+entered; the example is recognised by its holdings; D-55 and D-56 above.
+
+**Provenance.** v6.22 · source `88d476c346ecb76bfe522487eb1b582e` · built `index.html` `5aaca5ba443a94faa4a8582ebd6d96b0` · `smoke_built` 22/22. Suite run from the packaged copies
+(`mk_runfolder.sh v621 v622` on a clone with the package applied): 8,339 app checks across 84 app suites, 0 failed, 0 DIED; MC parity 10/10; tooling `t21` 64, `domdiff` 32, `sets` 12 + 12 — GRAND 8,469.
+Controls 24 of 24 on a copy of that run folder, every file restored and hash-checked. `package_check` on the package, a fresh clone, the workspace and the live pool: every pre-upload check
+green (J-1, J-2, K-4 and K-6 wait for the upload); against a simulated post-upload pool and a clone carrying the commit and the mode fix, green
+except H-1 to H-3, which fetch the live repo. `package_check_controls` (pre-ship clone, simulated post-upload pool, the prior clone set, an ops
+package for P15): 66 behaved as designed, 0 did not, 1 skipped (P58–P61 need a handover package).
+
 ## v6.21 — a car is an expense row; the plan's own "after the payments end" figure, Stress benchmark and state line (D-42, D-43, D-47, D-50)
 
 **A MODELLING release** — METHODOLOGY gains *Cars are expense rows (v6.21)*. `docs/SCOPE_D42_CAR_V621.md` (repo-only, fulfilled): Steve,
