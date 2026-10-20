@@ -46,6 +46,7 @@
 | E-29 | **OPEN** (three of eleven threads, each Low: (a), (h), (j)) | re-homed 2026-10-11 from documents leaving the pool; (d) and (k) closed by decision, (e) and (f) fixed at v6.05, (b), (c), (g) and (i) fixed in the ops package of 2026-10-12 — see its entry |
 | E-30 | **OPEN** (seven threads, each Low; (c) is a decision for Steve) | re-homed 2026-10-19 from text leaving the pool — see its entry |
 | E-31 | **OPEN** (ten threads, each Low, and one list of stale statements, (e)) | re-homed 2026-10-19 from the `qa/` files' comments and the manifest's hash table, which left the pool — see its entry |
+| E-32 | **OPEN** (Low, no figure) *(added at v6.22)* | two dead load paths: `handleReload` with `STATE_CARRYOVER`, and the landing screen's file statuses — recorded, not removed |
 
 **Stale figures below, left as written:** E-6 "imported by only four files"; E-7 "202"; E-11 "144,008" and "12,151 lines"; the summary table (frozen at the v5.30 additions, with E-14 still Open/High); E-15a "parity 9/9" and "scheduled to fold into the A3 release"; E-10 "CLOSED … must not be re-retired"; E-19's `qa/controls.sh`; E-21's annotation (omits v5.84); E-22 and E-25 (no fix notes). Line addresses in E-4, E-5, E-8, E-9, E-12, E-15a, E-23 and E-26 are v5.29/v5.73 addresses.
 
@@ -1199,3 +1200,16 @@ traps went to OPERATIONS §C4**; the open threads are below. Each file still hol
 
 **Severity: low** for all ten threads. (a), (b), (d) and (f) are small fixes; (b) has a date attached; (e) is one documentation pass.
 
+## E-32 · Two dead load paths (found at the v6.22 scope)
+
+Recorded here, not removed (`docs/SCOPE_D53_PROMPT_V622.md` §4). Census at v6.21 (`qa/tools/census.cjs`):
+- **`handleReload` and `STATE_CARRYOVER`.** `DangerCloseRoot` passes `handleReload` to `DangerCloseMain` as `onReloadData`, which destructures
+  it as `_onReloadData` and never calls it (one AST hit, the destructuring). So the "Load New Data" path — clear storage, reset the bindings
+  to the example, return to the landing screen — and the only writer of `STATE_CARRYOVER` (a state of residence carried across that reload)
+  are unreachable; `applyAndContinue`'s carry-over branch reads a value nothing sets.
+- **The landing screen's file statuses.** `DataLoader` declares `const [xlsxStatus] = useState(null)` and `const [promptStatus] =
+  useState(null)` with no setter, so `applyAndContinue`'s spreadsheet and master-prompt branches never run: the app reads no spreadsheet and
+  no prompt file (as the Field Manual says).
+
+Neither changes a figure. Both make the load code look as if more paths reach the loader than do, which cost the D-53 scope a census of paths
+that cannot run. A removal belongs to a cleanup release with its own census and tests.

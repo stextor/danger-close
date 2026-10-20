@@ -309,6 +309,8 @@ asks the AI a question before saving gets an answer steered by that file's autho
 **Severity: LOW.** The model has no tools here and its answer is rendered as text; the realistic harm is misleading
 guidance from a shared file, plus an unbounded prompt sent whole on every request to the user's own key. User-side.
 
+> **2026-10-20, v6.22 (D-53, `docs/SCOPE_D53_PROMPT_V622.md`):** still the design — an imported prompt heads Ask AI until the next Save & Apply. Two things changed around it. A rejected (non-string) prompt now leaves the plan with **none** rather than the previous plan's (the previous one standing is how the example's prompt reached new plans; `t37` A6-4/A6-6 moved, `t85` A-10). And storage holds the loader's result, not the raw argument, so a rejected or over-long prompt is never stored as given (`t85` A-9).
+
 ---
 
 ## A-2 re-verified at v5.69 — still open, now reproduced
