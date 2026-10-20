@@ -644,6 +644,14 @@ cited line; this list is what a session reading only the pool now needs. **Open 
   covered by the helper sweep and a parser check, not bit-for-bit (`t44` L21–22).
 
 **Running and extending the suite**
+- **Never run two full suites (`runsuite.sh`), or two copies of `t2` or `t6`, at once — in two run folders or one.** `t2` writes its fingerprints to `/tmp/t2_<tag>_fingerprint.json` and `t6`
+  writes `/tmp/t6_demo_<tag>.json`, keyed by the version tag alone, and parity (`t2_engines.mjs compare`, `runsuite.sh`'s "parity" line) reads `t2`'s back. Two folders built for the same tag (a
+  prototype beside the build, a packaged copy beside the workspace) overwrite each other's files mid-run, and parity then compares one
+  folder's engines with the other's fingerprints. Found at the v6.23 scope: two prototypes run in parallel reported parity **10/10** where
+  the truth, re-run alone, was **3/10** — a false green. Run them one after another; a parity result from a parallel run is not evidence. A suite
+  that writes nothing to `/tmp` (most feature suites; `t86`) can run beside one, at the cost of time — the v6.23 build review did. (The
+  per-folder fix, keying the files by folder, is not made at v6.23: it is a harness change to two baseline suites, and the rule costs
+  nothing.)
 - **A suite file not listed in `runsuite.sh` never runs, and nothing says so** — v5.75 reported 4,320 green with 39 checks unexecuted.
   `tally` sums EVERY "N passed"/"N failed" a suite prints (only `t10` is special-cased), so a suite prints its count line once.
   `runsuite.sh` L16, L116–120.

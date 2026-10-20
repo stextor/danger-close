@@ -40,6 +40,7 @@
 > | F-11d, F-12d, F-13, F-14, F-15, F-17, F-18 | **FIXED v5.39** | `t4`'s Field Manual assertions |
 > | F-19s | **FIXED v5.39** — row added 2026-10-14 (it had none) | the skin registry had drifted ahead of both descriptions (13 skins, "Seven color palettes"); `docs/SCOPE_FIX_docs_v5_39.md` D-6, `docs/STATUS_v5_39_shipped.md` |
 > | F-19r | **FIXED v6.11** — filed at v6.10 as "F-19" (§H) | `t74`; `docs/SCOPE_F19R_RANKING_HEADLINE.md` |
+> | F-20 | **OPEN** — filed at v6.23 (§H) | the Income tab's stream list scrolls sideways at 390 px for a plan with income streams (scrollWidth 510); `t45` runs on the example, which has none |
 > | F-15b | **OPEN** | "Success (>$1,500K)" beside a sibling "Success Rate (>$1.25M)" — still in the source |
 > | F-16 | **FIXED v5.98** | the pair swapped; `t62` holds every term in order (was: "API Key" before "Agency MBS") |
 > | §E-1 / §E-2 | **OPEN** | no physical-device pass; no keyboard / screen-reader pass (4 `aria-label`s in the app) |
@@ -424,3 +425,14 @@ for ages 55–64. Income Replacement divides a couple's *combined* guaranteed in
 descriptive notes without a "TOP N%".
 (b) Drop the headline and the Bottom Line's percentile sentence; keep the per-dimension rows.
 (c) Keep both and disclose, next to the headline, that most of its inputs are fixed.
+
+### F-20 · The Income tab's stream list scrolls sideways on a phone — **LOW–MED (phone layout)**
+
+**Filed at v6.23** (`docs/SCOPE_D49_WORK_TAPER_V623.md` §0.4; not fixed). Measured at the scope: `t45` run on a prototype whose example
+carried three income-stream rows — so its Income tab rendered the stream list every v6.22 plan with streams renders — reads *"the page
+does not scroll sideways at 390 px"* failing, **scrollWidth 510 against 390**. `t45` never sees it on a shipped build because it runs on
+the example, which has no income streams. **Who it reaches:** any plan with an income stream (a job row, rental, an annuity), on a phone.
+**Why it matters beyond layout:** moving the example's built-in spouse-B work into visible rows — the way to close D-49's residual
+(MissingFeatures) — would put this list on the example's own Income tab, so the fix belongs before or with that release. Candidate fix: wrap
+the list's row grid at the phone breakpoint, as F-2 and F-8 did for the grids they named, and extend `t45` to a household with streams.
+

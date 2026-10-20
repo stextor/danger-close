@@ -75,6 +75,11 @@ running the engine and comparing to the dollar. The harness that makes this exec
     income stream with `monthly: 0` makes the array non-empty (suppressing the taper) while contributing $0
     (the sum skips `amt <= 0`, L468–469). This is the concrete form of the standing "neutralize global income
     streams" trap; omitting it silently adds ~$1,920 of tax at zero pension.
+    > **v6.23 (D-49):** from v6.23 the taper pays only a plan that holds the example's holdings, is married and has
+    > no streams (`builtinWorkApplies`). The `monthly: 0` neutraliser is still the way to switch it off for a
+    > fixture cloned from the example; a fixture whose holdings differ, or that is single, is paid no taper at
+    > all, and one that ran on the taper through v6.22 must now declare those wages as job rows
+    > (`qa/tools/example_work_rows.mjs`) to keep its figures. An empty `incomeStreams: []` never neutralised it.
   - State off (`stateCode: null`, `stateRate: 0`); no work income (no FICA); income kept below the 2026 AMT
     exemption (so AMT = $0); no MAGI two years prior inside a one-year window (so IRMAA = $0); `tradInit = 0`
     (so conversion headroom = 0 and every policy converts $0 — read the `none` strategy).
