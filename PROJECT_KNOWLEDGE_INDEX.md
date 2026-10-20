@@ -25,16 +25,20 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 
 | Field | Value |
 |---|---|
-| Version | **v6.20** |
-| Source file in knowledge | `DangerClose-v6_20.jsx` |
-| Source md5 | `8db224990e86ddcbe2180f96b6a52889` |
-| Built `index.html` md5 | `2a0b45ea9c1425752ff8918862e15202` |
-| Shipped | 2026-10-18 |
+| Version | **v6.21** |
+| Source file in knowledge | `DangerClose-v6_21.jsx` |
+| Source md5 | `f7802df1f14f52b0c2ca59ca898b0e9a` |
+| Built `index.html` md5 | `bbd56368ab21aee1b95b55c4aec94af1` |
+| Shipped | 2026-10-19 |
 
-> ⚠ **v6.20 SHIPPED (2026-10-18) — the Monte Carlo pays the Taxes tab's tax, and charges one-time expenses in the quarter they fall (D-40, D-44, D-45).** Source `8db22499…` · built `2a0b45ea…`.
+> ⚠ **v6.21 SHIPPED (2026-10-19) — a car is an expense row; the plan's own "after the payments end" figure, Stress benchmark and state line (D-42, D-43, D-47, D-50).** Source `f7802df1…` · built `bbd56368…`.
+> A MODELLING release (METHODOLOGY gains *Cars are expense rows (v6.21)*): the Monte Carlo's fixed $40,000 car every 8 retirement years (`AUTO_REPLACE_COST`, `autoReplace`) is deleted; the example's table carries four "Replacement car" rows, which every engine now charges (the planned path too); a plan saved before v6.21 has the old schedule added as visible rows at load (`carRowsV621`), written at its next Save & Apply, with notices on My Data and the Monte Carlo tab. The Income and SS tabs' "after the payments end" figure, the Stress tab's planned column and the Roth tab's state line read the plan; the Florida mortgage sentence is gone.
+> New suite `t84`; `v621` registered; `domdiff` gains a v620 → v621 arm; seven suites re-pinned, each with a `-table620` attribution run that reproduces v6.20 exactly. MissingFeatures D-42, D-43, D-47, D-50 closed (D-50 narrowed by D-53); D-52 to D-54 opened. **Rotation:** the pool loses `DangerClose-v6_20.jsx` (v6.20 read from history, commit `3d19b5c`) and gains `DangerClose-v6_21.jsx`. **Pool stays 16** (count from the Projects listing).
+>
+> *(**v6.20 SHIPPED (2026-10-18) — the Monte Carlo pays the Taxes tab's tax, and charges one-time expenses in the quarter they fall (D-40, D-44, D-45).** Source `8db22499…` · built `2a0b45ea…`.
 > A MODELLING release (METHODOLOGY gains *The Monte Carlo pays the Taxes tab's tax (v6.20)*): the flat $4,000-a-quarter drag during the ladder is gone; both engines pay the Taxes tab's tax year by year at the live slider, QCD and yield, grown with each path's inflation, and read the expense table over each quarter's months (one-time rows charged in their own quarter, inflated). Every Monte Carlo figure moved, downward on every household measured; Engines A–D did not.
 > New suite `t83` (an ORACLE MODULE from the v6.19 source with the drag at $0, bit-identical to v6.20 with a zero schedule); `v620` registered; the shim exports the schedule and quarter-read functions. `t42` D-4 re-pinned with a five-step attribution; `t20`, `t56` and `t82` G restated with the schedule held fixed. MissingFeatures D-40 and D-45 closed, D-44 narrowed, D-49 to D-51 opened. **Rotation:** the pool loses `DangerClose-v6_19.jsx` and `dom_entry_v619.jsx` (v6.19 read from history, commit `2dbaba7`) and gains `DangerClose-v6_20.jsx`, `dom_entry_v620.jsx`
-> and `t83_mc_tax.mjs`. **Pool 141 → 142** (count from the Projects listing).
+> and `t83_mc_tax.mjs`. **Pool 141 → 142** (count from the Projects listing).)*
 >
 > *(ops 2026-10-19 — v6.20 stays current. Project knowledge trimmed from 96% of its cap: old CHANGELOG entries (v6.00–v6.15), TESTING's write-ups to
 > v5.40, these notes and lists (v6.04–v6.19) and MissingFeatures' closed write-ups moved verbatim to four new repo-only archives, each with a §0
@@ -91,12 +95,12 @@ or a reason here (OPERATIONS §I).
 
 | Pool file | md5 | Repo path |
 |---|---|---|
-| `CHANGELOG.md` | `f6d087cb1f7953c64582c5d0dfccb6f8` | `CHANGELOG.md` |
-| `METHODOLOGY.md` | `4408d67760876f0d713deea533822e75` | `METHODOLOGY.md` |
-| `MissingFeatures.md` | `aa8691591a16aef984b66bfe8bd69856` | `docs/MissingFeatures.md` |
+| `CHANGELOG.md` | `e7185637c4c2f18dd8f3a4b3bee8ccf9` | `CHANGELOG.md` |
+| `METHODOLOGY.md` | `46a64a61485763491176a79057686a32` | `METHODOLOGY.md` |
+| `MissingFeatures.md` | `7b9ac55f06e557e35d113db5fd7be09b` | `docs/MissingFeatures.md` |
 | `OPERATIONS.md` | `166bd9e8cd43b1e8e771dc088cddd6ee` | `docs/OPERATIONS.md` — **rolled 2026-09-09** at the run-folder ops package: §B gained the `mk_runfolder.sh` pointer, and §D gained **D1** (the named existence-only assertion class) and **D2** (the `t29` F-6a/F-6b defect pin). *(Previously `f33c2e0cfd…`.)* |
 | `README.md` | `eec58396f932b3209de79c2400dbfb88` | `README.md` |
-| `TESTING.md` | `6adbe5b0a2c0b32a54e6a3c054423243` | `TESTING.md` |
+| `TESTING.md` | `c993c212ea524be4277cb32d6faaaf95` | `TESTING.md` |
 | `index.html` | `247816be583271d50cf13e0a02e18cdf` | `src/index.html` — the **Vite entry template**, **restored to the pool 2026-08-20** after being found absent (see the build-scaffold row below). ⚠ **Not the built app.** The published single-file `index.html` is repo-only output and never enters the pool; its md5 is in the Current build table and is different by construction |
 | `main.jsx` | `d9eca7b469a3fb7ec1c5325fd4bf8145` | `src/main.jsx` |
 | `package.json` | `9ee8d745bc9f32d6e8fa02e623603423` | `package.json` — The pinned toolchain, and a **build input** rather than a suite file — given a row 2026-08-23 for a measured reason: `npm i <pkg>` in a run folder rewrites it with resolved versions, so it drifts as a side effect of setting the folder up. That is why OPERATIONS §N3a installs jsdom with `--no-save`, and it is the drift `package_check`'s new G-1 caught on its first real use |
@@ -106,11 +110,13 @@ or a reason here (OPERATIONS §I).
 
 | Field | Value |
 |---|---|
-| Version | **v6.19** |
-| Source file in knowledge | — **not pooled**: repo history, commit `2dbaba7`, found by this md5 |
-| Source md5 | `35d3dcb436b7ad801b6c9588d5429cb0` |
-| Built `index.html` md5 | `d9e0df4297fce9946417db5b9b322ee3` |
+| Version | **v6.20** |
+| Source file in knowledge | — **not pooled**: repo history, commit `3d19b5c`, found by this md5 |
+| Source md5 | `8db224990e86ddcbe2180f96b6a52889` |
+| Built `index.html` md5 | `2a0b45ea9c1425752ff8918862e15202` |
 
+> **Rolled 2026-10-19 at the v6.21 ship.** The pair is now **v6.20 prior / v6.21 current**; both tables rolled in one edit (K-7, which counts 621 − 1 = 620).
+>
 > **Rolled 2026-10-18 at the v6.20 ship.** The pair is now **v6.19 prior / v6.20 current**; both tables rolled in one edit (K-7, which counts 620 − 1 = 619).
 >
 > **Rolled 2026-10-18 at the v6.19 ship.** The pair is now **v6.18 prior / v6.19 current**; both tables rolled in one edit (K-7, which counts 619 − 1 = 618).
@@ -606,6 +612,23 @@ retired and superseded. They get no row because there is no file. Checked 2026-0
 committed tree, so the next sweep does not re-open them.
 
 ## Retirement list (delete-first; nothing replaces these)
+
+### At the v6.21 ship (2026-10-19) — DELETE THESE FIRST
+
+**Rotation:** delete `DangerClose-v6_20.jsx`; `DangerClose-v6_21.jsx` arrives. **Pool stays 16.** Count from the Projects listing (OPERATIONS §I, no-mount note).
+
+| Delete | Because |
+|---|---|
+| `DangerClose-v6_20.jsx` | **rotated out** — v6.20 is read from the repo's history (commit `3d19b5c`) |
+| `CHANGELOG.md` | replaced — the v6.21 entry |
+| `METHODOLOGY.md` | replaced — *Cars are expense rows (v6.21)*; D-47's limitation closed |
+| `MissingFeatures.md` | replaced — D-42, D-43, D-47, D-50 closed; D-52 to D-54 opened |
+| `PROJECT_KNOWLEDGE_INDEX.md` | replaced — this edit; `CHANGELOG.md`'s row rolled last |
+| `TESTING.md` | replaced — the v6.21 per-suite line; `t84`'s and `dom_entry_v621.jsx`'s rows |
+
+**Arriving new:** `DangerClose-v6_21.jsx`. **Repo-only:** every `qa/` change (`t84_car_rows.mjs`, `dom_entry_v621.jsx`, `controls_v621_car.py`
+new; the registered and re-pinned suites, `shim.txt`, `runsuite.sh`, `domdiff_withdrawal.mjs`, `tools/boundaries.mjs`,
+`tools/v617_spending.mjs`), the scope (`docs/SCOPE_D42_CAR_V621.md`, fulfilled), the built `index.html`.
 
 ### At the ops package of 2026-10-19 (second) — DELETE THESE FIRST
 

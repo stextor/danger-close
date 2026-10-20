@@ -1,5 +1,125 @@
 # Changelog
 
+## v6.21 — a car is an expense row; the plan's own "after the payments end" figure, Stress benchmark and state line (D-42, D-43, D-47, D-50)
+
+**A MODELLING release** — METHODOLOGY gains *Cars are expense rows (v6.21)*. `docs/SCOPE_D42_CAR_V621.md` (repo-only, fulfilled): Steve,
+*"D-42+D-43, add D-47/D-50 (Recommended)"*, then DC-1 *"Expense rows"*, DC-2 *"Add visible rows"*, DC-3 *"No car rows"*, DC-4 to DC-7 *"All
+as recommended"* — all (a). Built on v6.20 (source `8db22499…`).
+
+**What was wrong (v6.20, measured).** The 30-year Monte Carlo bought **every** plan a $40,000 car (today's dollars, grown with the path's
+inflation) in the March quarter of retirement years 8, 16, 24 and 32 — `AUTO_REPLACE_COST`, switched on in run C (with and without LTC
+shocks), run D, four of the seven stress runs and the mortgage what-if — whatever the plan's expense table said (D-42). It was not in the
+planned path the guardrails steer by, so each car year pushed every path down against a line that did not move; the 6-year runs, three stress
+runs and Engines A–D never saw it; a household that entered its cars as expenses paid twice where it did. The Field Manual called it "a fixed
+example schedule". Six displays on the Income and Social Security tabs subtracted the example's $400 car payment from every plan's spending
+("Post-car shortfall", "car paid off") (D-43). The Stress tab's 30-year table measured the median against `household × 1.04^years`, a
+benchmark that ignores withdrawals, and marked the example's median LOW in most later years under the preset a first visit opens on (D-47).
+The mortgage what-if told every plan its interest "isn't deductible for you (standard deduction + no FL income tax)", and the Roth tab's rules
+box said "Florida — no state income tax" to every plan (D-50).
+
+**What changed.**
+- **A car is a one-time row in the expense table (DC-1 (a)).** The constant and the `autoReplace` option (sixteen sites) are deleted; every
+  engine charges a car only if the table holds one — the Monte Carlo in its quarter, inflated, on the planned path too; Engine D, Backtest and
+  What Breaks in its year; the Taxes, IRMAA and Roth tabs through Engine D's draws. The example's table gains four rows, *"Replacement car"*,
+  $40,000, March 2037, 2045, 2053 and 2061 (its retirement years 8, 16, 24, 32). Start Fresh and the wizard add none (DC-3).
+- **A plan saved before v6.21 keeps the old schedule as visible rows (DC-2 (a)).** Loaded with its table and without the new `carRowsV621`
+  field, it gains *"Replacement car (added by v6.21 — the model's old fixed schedule)"* rows from its own retirement year, from its as-of
+  month through the as-of year + 35, in a new array; nothing is written until Save & Apply, which stores the table and the field. My Data and
+  the Monte Carlo tab say which rows were added, that they now count on every tab, and that deleting them is the user's call.
+- **The "after the payments end" figure is read from the table (D-43, DC-4 (a)).** The monthly total the month after the last monthly row
+  running at the "after spouse B's Medicare" month that ends before the plan's last year; labelled with the row's name ("after Car Payment
+  ends") or "after N payments end"; left out when there is no such row or nothing is spent after them. On the example: $7,620 from May 2034 —
+  v6.20's figure.
+- **The Stress tab's *Planned* column is the engine's own planned path (D-47, DC-5 (a))**, with the guardrails' own bands in the headers.
+- **No Florida sentence for every plan (D-50, DC-6 (a)).** The mortgage what-if states the model's rule (no itemized deductions, so no
+  offset); the Roth tab's line names the plan's state as the Taxes tab does — a state chosen in My Data, or else the plan's named flat rate.
+- **The Field Manual** (honest limits, the Monte Carlo entry) says cars are rows and what changed; its spouse-B taper sentence is corrected
+  (DC-7: any income stream turns the taper off — D-49).
+- **What it moved** (3,000 paths, the same seeds; success above $500K | above $800K | median end, run C's shape): the example under
+  BULL-LEANING 95.3% → 95.1% · 91.0% → 90.6% · $2,112K → $2,048K; under BASE 85.0% → 84.5% · 74.4% → 73.9%. A plan with no car in its table
+  reads higher than v6.20 read it (BASE 85.0% → 88.6% above $500K). The example's other tabs see a car for the first time: the Withdrawal tab
+  spends $49,657 more in 2037 (40,000 × 1.0274^8), its 2053 balance is $268,904 lower, lifetime tax $1,993 higher; no IRMAA surcharge
+  appears. The 6-year runs do not move (no car falls in them). Full table in METHODOLOGY.
+
+**Found at the build and filed, not fixed** (each outside the scope; MissingFeatures):
+- **D-52** — My Data's editor keeps a row's years only: Save & Apply stores a monthly row January–December and a one-time row in June, so the
+  first save re-dates the added cars (March → June) and widens the example's Car Payment to January 2029 – December 2034. Pinned in `t84`
+  G-11 as a dated `[KNOWN DEFECT]`.
+- **D-53** — Start Fresh, and the wizard with the state skipped, keep the example's master prompt, so a new plan that chooses no state is
+  taxed as Florida (0%) and its Taxes and Roth tabs say Florida. It narrows D-50's closure. The scope's §0 had read this and not run it; the
+  build ran it.
+- **D-54** — the wizard ends its living-expense row in December 2079; a plan whose horizon runs past 2079 spends nothing in its last years.
+
+**Tests.** New suite **`t84`** — **63** on v6.21, **21** on v6.20 (that leg pins the old car, the $400, the 1.04 column and
+the Florida sentences as dated `[KNOWN DEFECT]` checks). §A by AST: the constant and option are gone, the rows are data, nothing subtracts
+$400, no `1.04` power, the Stress table reads `plannedPath` and `GUARDRAILS`, the marker written at exactly four sites. §B: v6.21 on the
+example equals v6.20 run on the same table with its own car switched off — both Monte Carlo engines and Engine D, bit for bit — and the
+planned path pays the car. §C, the attribution: on v6.20's table (the four rows removed) v6.21 reproduces v6.20's Engines A–D, the bridge
+and the Monte Carlo tax schedule bit for bit on four households, and Engine D's 2037 spending moves by exactly 40,000 × 1.0274^8 — computed
+by hand. §D, the migration: rows and dates (from the plan's own retirement year), the already-retired and February/late-as-of edges, a plan with
+the field and a load without a table gaining nothing, duplicates, the table passed in untouched.
+§E: the D-43 rule against an independent oracle on the example, a single plan, a later horizon and six edge tables. §F: the Stress
+benchmark (under BULL-LEANING the old column marks the median low in ≥ 10 years, the engine's path in none). §G rendered: the Income, Social
+Security, Roth, Monte Carlo and Stress tabs; Georgia and a named flat-rate state; an old plan's notices, Save & Apply, the notices gone.
+§H: the Field Manual and METHODOLOGY.
+**Re-pins, each attributed** — the suite's `<suite>-v621-table620` runs (`DC_V620_TABLE=1`: the example's table without its four car
+rows) reproduce every v6.20 figure: `t40` (A1, the Engines B–D lifetime RMD, A5, the W row), `t42` D-2/D-3, `t43` F-4, `t58` B-NC, `t71`
+D-2/D-3, `t72` A-3/B-2, `t81` E-5 (Backtest's 1966 start $1.43M → $1.21M) and E-8 (What Breaks 1.40× → 1.35×). `t11`, `t12`, `t19` and
+`t20`, whose subject is not spending, run on v6.20's table; `qa/tools/v617_spending.mjs` marks the portfolios it loads so the migration
+cannot add cars to v6.17's table (it did, at first, and `t20` caught it). `t81` C2-1 and `t83` E-5/E-6 read the example's 2029 rows and the
+new engine options. **Parity:** `t2` `INTENDED_DIFFS` gains `"v620→v621": ["extMC", "stress"]`; the six-year `mc` and the seven non-Monte
+Carlo keys identical. `domdiff` gains a v620 → v621 arm: on the Withdrawal tab every schedule row before 2037 is byte-identical and every
+row from 2037 is masked on both sides (the masked rows must differ, 2037's among them), with the two summary figures and the footer's count of
+expense lines (31 → 35) set aside exactly; on the Taxes and IRMAA tabs every row before 2037 is byte-identical and 2037's differs. `t29`
+gains the `car_rows` census row. `t48` G-1 found the one-time list's category column clipping "Transportation" on the new rows: widened to
+the monthly rows' 110 px.
+Controls `qa/tools/controls_v621_car.py` (repo-only): **17 of 17 as expected** — a car of the model's own restored, the rows out of the planned path,
+a row charged uninflated, the migration a year short / from the as-of year / appending to the table passed in / ignoring the field, either
+notice never shown, the D-43 figure back on `− 400` or ignoring the horizon, the Stress column back on 1.04 or its bands typed, the Florida
+sentence restored, Save & Apply not writing the field, the Roth line ignoring the plan's named state, and the unmutated run; every file
+restored and hash-checked. Their first run found two checks blind to their defect — `t84` B-4 (the planned path's car could be missing
+while the car's tax still moved the path) and A-7 (the *Planned* cell back on `1.04` while `_pp` stayed declared); both were strengthened
+and the controls re-run.
+
+**Independent review** before shipping, by an agent that had not seen the work. Confirmed the extinctions, the migration's edges and that no
+new plan migrates, the engine identity, METHODOLOGY's figures, D-43, D-47 and the four version sites. **Fixed from its findings:** the Roth
+line's Florida for new plans (filed as D-53, D-50 narrowed); the My Data notice claimed the added rows "keep this plan's figures where they
+were" — they now move every tab, and it says so; a $0 "after the payments end" figure (D-54); "2 payments ends"; the new figure not
+restored when a load is rejected; over-claiming check names; METHODOLOGY's IRMAA sentence ("does not move" → no surcharge appears), its list
+of runs and its D-43 sentence; D-52 widened to monthly rows; two controls added.
+
+⚠ **Owned.** (1) The scope's hand figure for the 2037 car, **$49,656**, was a truncation of $49,656.54 — **$49,657** to the dollar; the
+scope's own review confirmed it without catching the rounding, and `t84` C-3's first draft pinned it. Found when C-3 failed on its first
+run; the pin is now computed by hand from the rate and the years, and the scope and METHODOLOGY are corrected. (2) The scope's DC-6 wording
+for a plan with no state chosen rested on an incomplete premise — the example chooses none either; its Florida comes from its master prompt
+— and as written would have stopped the example's Roth line naming the state the model taxes it in. The build followed DC-6's intent (the
+line says what the Taxes tab says) and records the change in the scope's §7. (3) `t84` §G's first draft read the stored plan after "Use
+example data", which stores none; it now writes the plan from the live one.
+
+**Registered:** `v621` by AST (352 sites), `t1`'s and `t4`'s version strings, `t33`'s PINS (unchanged, confirmed by running) and the three
+Python suites by hand; `t2` `INTENDED_DIFFS`. The shim exports `POST_PAYMENTS`, `postPaymentsWhat`, `postPaymentsEnd`, `CAR_SCHEDULE_V620`,
+`GUARDRAILS` and, for the prior leg, `AUTO_REPLACE_COST` (guarded). `runsuite.sh` runs `t84` on both legs and the seven `-table620`
+attribution runs.
+
+**Suite, run from the packaged copies:** **8,214 app checks across 83 app suites** (the eight `-spend617` and seven `-table620` attribution
+runs included), 0 failed, 0 DIED; MC parity 10/10 (`extMC` and `stress` intended); tooling `t21` 64, `domdiff` 41, `sets` 12 + 12;
+**GRAND 8,353**. Per-suite counts are `TESTING.md`'s v6.21 line; against v6.20's line the counts that moved are `t29` 82 → 85 (the
+`car_rows` census row), `t83` 95 → 62 (§H and §R, the v6.19 → v6.20 pair, take their designed skip in a run folder without the v6.19
+source — as `t82` did at v6.20) and `t84` is new (63; 21 on the v6.20 leg); every other current-leg count is unchanged. The run was
+repeated after the controls strengthened `t84` B-4 and A-7, with the same counts.
+
+**Limitations, disclosed** (METHODOLOGY *Simplifications, stated*; Field Manual): rows sit on calendar dates and do not follow the
+retirement-year buttons; Engine D inflates a row from the retirement year, the Monte Carlo from the as-of date, so the same row reads
+differently in each; no car financing is modelled; D-52, D-53 and D-54 above.
+
+**Provenance.** v6.21 · source `f7802df1f14f52b0c2ca59ca898b0e9a` · built `index.html` `bbd56368ab21aee1b95b55c4aec94af1` · `smoke_built` 22/22. Suite run from the packaged copies
+(`mk_runfolder.sh v620 v621` on a clone with the package applied): 8,214 app checks across 83 app suites, 0 failed, 0 DIED; MC parity 10/10; tooling `t21` 64, `domdiff` 41, `sets` 12 + 12 — GRAND 8,353.
+`package_check` on the zip, a fresh clone, the workspace and the live pool: every pre-upload check green (J-1, J-2, K-4 and K-6 wait for
+the upload); against a simulated post-upload pool and a clone carrying the commit, green except H-1 to H-3, which fetch the live repo.
+`package_check_controls` (pre-ship clone, simulated post-upload pool, the prior clone set): 66 behaved as designed, 0 did not, 1 skipped
+(P58–P61 need a handover package). Run against the clone carrying the commit, P17 does not fire — that clone already holds the file the
+control removes, so the omission it plants cannot be seen there; it is a pre-upload control, and fires pre-upload.
+
 ## ops 2026-10-19 (second) — every qa/ file leaves project knowledge
 
 **KIND: ops** — documents and tooling; **v6.20 stays current** (source `8db224990e86ddcbe2180f96b6a52889`, built `2a0b45ea9c1425752ff8918862e15202`).

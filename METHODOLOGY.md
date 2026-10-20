@@ -2652,7 +2652,8 @@ which v6.18's did not, stepping by a quarter in some months and not at all in ot
   (MissingFeatures, filed at v6.19).
 - **Closed at v6.20** *(D-45)*. **The Monte Carlo still read one month per quarter** for the expense table and charged a one-time row only if it
   was dated in a quarter's last month — the quarter's true last month from v6.19 (D-45; fixed at v6.20 with D-40 and D-44).
-- **The Stress tab's 30-year table** compares the median with `household × 1.04^years`, a benchmark that ignores withdrawals (filed at v6.19).
+- **Closed at v6.21** *(D-47)*. **The Stress tab's 30-year table** compared the median with `household × 1.04^years`, a benchmark that ignored
+  withdrawals (filed at v6.19); from v6.21 its Planned column is the engine's own planned path (*Cars are expense rows (v6.21)*).
 
 ## The Monte Carlo pays the Taxes tab's tax (v6.20)
 
@@ -2693,7 +2694,8 @@ The part of the tax that comes from nominal inputs is grown twice: conservative.
 the scope as the optimistic alternative (on the BASE example, 79.4% above $800K against 75.3%, on v6.18's calendar).
 
 **What it moved** (measured at the v6.20 build: the shipped v6.19 against v6.20, 3,000 paths, the same seeds per row; run C's shape — 30
-years, deaths at life expectancy, one LTC shock, the car every 8 years; the tax at each row's slider):
+years, deaths at life expectancy, one LTC shock, the car every 8 years (v6.20's fixed schedule — from v6.21 the example's car rows, *Cars are
+expense rows*); the tax at each row's slider):
 
 | Household (BULL-LEANING, the preset a first visit opens on) | Taxes tab tax, today's $ | 6-yr median | 30-yr >$500K | 30-yr median |
 |---|---|---|---|---|
@@ -2758,3 +2760,73 @@ every path: measured at the build, the three 6-year runs (10,000 paths) take 0.3
 - **D-44's Withdrawal half** stays open: a one-time row dated before the retirement year is not in the Withdrawal tab's schedule (DC-5 (a)).
 - **What-Breaks' tax** stays the Roth tab's strategy engine's lifetime tax averaged per year (it is a deterministic projector); its copy now
   names that engine, where it said "the Taxes engine", and no longer says it does not model taxes.
+
+## Cars are expense rows (v6.21)
+
+**The rule.** A car is a one-time row in the plan's expense table, like any other one-time expense. The Monte Carlo charges it in the quarter
+that holds its month, grown with the path's inflation, and its planned path — the line the guardrails steer by — pays it too
+(`mcQuarterSeries`, v6.20); the Withdrawal tab spends it in its year through `tableYearExpense`, so Backtest, What-Breaks and, through Engine
+D's draws, the Taxes, IRMAA and Roth tabs see it as well. The example's table carries four rows — "Replacement car", $40,000 in today's
+dollars, March 2037, 2045, 2053 and 2061 (its retirement years 8, 16, 24 and 32). A new plan (Start Fresh, the guided wizard) starts with none.
+
+**What it did through v6.20 (D-42).** `AUTO_REPLACE_COST = 40000`: the 30-year runs whose `autoReplace` option was on (run C with and without
+LTC shocks, run D, four of the seven stress runs, the mortgage what-if) took $40,000 × the path's inflation in the March quarter of retirement years 8, 16, 24 and 32, on
+**every** plan, whatever its table said. It was not in the planned path the guardrails compare against, so each car year pushed every path
+down against a benchmark that did not move. The 6-year runs, runs A and B, three stress runs and Engines A–D never saw it, and a household that
+entered its cars as expenses paid twice in the runs that did. Disclosed only as "a fixed example schedule".
+
+**A plan saved before v6.21 (DC-2 (a)).** A plan loaded with its expense table and without the `carRowsV621` field — every plan saved before
+v6.21 — keeps the old schedule as visible rows: "Replacement car (added by v6.21 — the model's old fixed schedule)", $40,000, one-time, in
+March of each eighth year after its own retirement year, from its as-of month through its as-of year + 35 (the longest run). My Data and the
+Monte Carlo tab say which rows were added. Nothing is written until Save & Apply, which stores the table and the field; a row already present
+is not added twice. The conservative reading: such a plan keeps paying for its cars, now on every tab.
+
+**What it moved** (measured at the v6.21 build, v6.20 against v6.21, 3,000 paths, the same seeds per row; run C's shape — 30 years, deaths at
+life expectancy, one LTC shock; success above $500K | above $800K | median end):
+
+| Household | Preset | v6.20 → v6.21 |
+|---|---|---|
+| Example (the car now in its table) | BULL-LEANING | 95.3% → 95.1% · 91.0% → 90.6% · $2,112K → $2,048K |
+| Example | BASE | 85.0% → 84.5% · 74.4% → 73.9% · $1,392K → $1,353K |
+| Example as a single household | BULL-LEANING | 97.2% → 97.0% · 90.3% → 90.1% · $1,601K → $1,575K |
+| Example, holdings ×1.6 | BASE | 96.5% → 96.5% · 93.5% → 93.3% · $3,229K → $3,202K |
+| A plan saved from v6.21 with no car in its table | BULL-LEANING | 95.3% → 96.6% · 91.0% → 93.2% · $2,112K → $2,234K |
+| The same | BASE | 85.0% → 88.6% · 74.4% → 79.3% · $1,392K → $1,527K |
+
+The example's Monte Carlo moves a little — the planned path now pays the car, so the guardrails no longer cut spending against a line that
+ignored it, and Engine D's draws, which the tax schedule is built from, now include it. Its other tabs move more, because they see a car for the
+first time: on the example (BULL-LEANING, $70K slider) the Withdrawal tab spends $40,000 × its own inflator more in each car year ($49,657 in
+2037), its 2053 balance is $268,904 lower, and the Taxes tab's lifetime tax is $1,993 higher; no IRMAA surcharge appears (MAGI rises, but stays under the first tier). A plan without car rows
+reads higher than v6.20 read it, by about what its fixed car cost.
+
+**How the change is attributed.** v6.21 on the example equals v6.20 run on the same table with its own car switched off, bit for bit — both
+Monte Carlo engines and Engine D (`t84` B): the engine did not change, the table did. And v6.21 on v6.20's table (the four rows removed)
+reproduces v6.20's Engines A, B, C and D, the bridge and the Monte Carlo's tax schedule bit for bit on four households (`t84` C), so every
+re-pinned figure in the suite is the four rows.
+
+**Three display fixes in the same release.** *The figure after the payments end (D-43):* six displays on the Income and Social Security tabs
+subtracted the example's $400 car payment from every plan's spending; they now read the table — the monthly total the month after the last
+monthly row that is running at the "after spouse B's Medicare" month and ends before the plan's last year (on the example, $7,620 from May
+2034, after the Car Payment — the same figure as before); with no such row, or nothing spent after them, the figure is not
+shown. *The Stress tab's planned column (D-47):*
+it was `household × 1.04^years`; it is now the engine's own planned path, with the guardrails' own ±20% bands. Under BULL-LEANING the old
+column marked the example's median below its lower band in most later years, the engine's path in none; under BASE the median still falls
+below the band from about year 16, which is the honest reading. *Florida (D-50):* the mortgage what-if said mortgage interest "isn't
+deductible for you (standard deduction + no FL income tax)" to every plan; it now states the model's rule (no itemized deductions are
+modelled, so no offset). The Roth tab's rules box said "Florida — no state income tax" to every plan; it now names the plan's state as the Taxes tab does — the
+state chosen in My Data, or else the plan's named flat rate (the example chooses no state; its Florida, at 0%, is its master prompt's state
+line, so the example's line reads as before).
+
+**Simplifications, stated.**
+- **The rows sit on calendar dates.** The retirement-year buttons used to move the fixed car with the selected year; rows stay where they are,
+  as the rest of the table has since v6.18.
+- **Engine D inflates a row from the retirement year, the Monte Carlo from the as-of date** (the v5.10 house rule): the same $40,000 row reads
+  $49,657 in Engine D's 2037 and a different figure on each Monte Carlo path.
+- **A car loan** is the user's to enter as monthly rows; no financing is modelled.
+- **Saving re-dates rows to whole years (D-52, open).** My Data's editor keeps a row's years only: Save & Apply stores a monthly row from
+  January to December and a one-time row in June. The first save moves an older plan's added cars from March to June of the same year — no
+  change in Engine D, Backtest or What Breaks, which read the year; one quarter later in the Monte Carlo — and widens the example's Car
+  Payment from April 2029 – April 2034 to January 2029 – December 2034.
+- **Its sibling, found at the build (D-53, open).** A new plan that chooses no state keeps the example's master prompt and is taxed as its
+  Florida; the Roth tab's line says what the Taxes tab says, so for such a plan it says Florida too.
+
