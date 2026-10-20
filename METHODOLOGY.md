@@ -1032,10 +1032,13 @@ A gap called out in earlier revisions is now closed: **other income streams are 
 module.** Each stream (rental / job / annuity / other) carries a monthly amount in today's
 dollars, an inclusive start/end-year window, an owner (either spouse or joint — an owner's
 stream ends at that person's projected or sampled death), a COLA flag, and taxable vs tax-free
-treatment. Streams flow through every engine — planned trajectory, both Monte Carlo engines,
-what-breaks, the withdrawal schedule, the tax engine (job rows also pay payroll tax — an employee row as wages, per earner up to the
-wage base, with the Additional Medicare Tax; a self-employed row self-employment tax, both halves; see *Payroll tax on job income*, v6.14, v6.16), IRMAA MAGI, and the Roth optimizer. Entering any stream replaces the built-in example
-part-time taper, and the old negative-expense-row workaround is superseded (moving such rows
+treatment. Streams flow through every engine but two — planned trajectory, both Monte Carlo engines,
+the withdrawal schedule, the tax engine (job rows also pay payroll tax — an employee row as wages, per earner up to the
+wage base, with the Additional Medicare Tax; a self-employed row self-employment tax, both halves; see *Payroll tax on job income*, v6.14, v6.16), IRMAA MAGI, and the Roth optimizer. **Backtest and What-Breaks credit no stream** (corrected
+at v6.23; through v6.22 this paragraph listed What-Breaks among the engines): their income is Social Security and the pension, so a
+plan's rental or job income never lowers their draws, while What-Breaks' tax — the Roth tab's strategy engine's — does include the
+streams' tax. Conservative; MissingFeatures **D-57**. Entering any stream replaces the built-in part-time taper, which from v6.23
+only the example household carries (*Built-in work is the example's alone*, v6.23), and the old negative-expense-row workaround is superseded (moving such rows
 into the module lets the tax engines see the income). **From v5.63 the Roth optimizer charges FICA
 on job rows only, as the tax engine always has.** Through v5.62 it charged payroll tax on every
 ordinary stream, rental and annuity included; §6 sets out what that moved. One consequence of the
@@ -1644,9 +1647,12 @@ pension + spouseBWork + taxableSS + conv_y + rmd_y
 
 Term by term, the ladder **omits dividends and realized capital gains** — `div_y` and `capGain_y` —
 and its earned-income term is narrower again: Engine C's `work_y` covers the household's other
-income streams, while `spouseBWork` is one spouse's. v5.41 closed the RMD term only; the comment it
+income streams, while `spouseBWork` is one spouse's. *(Corrected at v6.23: that sentence was wrong when checked at v6.22. The
+ladder's `spouseBWork` is the built-in taper plus every ordinary stream — the same sum as Engine C's `work_y`. The one difference is the
+year the taper is keyed to: the ladder's is the plan's own retirement year (`rothLadderStart`), Engine C's the retirement year the buttons
+select. At the plan's own retirement year the two terms are identical.)* v5.41 closed the RMD term only; the comment it
 left in the source says Engine C "has always carried its `rmdTax_y` term; this render block did
-not, and the two disagreed." They still disagree, in two more terms.
+not, and the two disagreed." They still disagree, in two more terms (dividends and realized gains; v5.53 closed dividends, below).
 
 ### The consequence, measured
 
@@ -1714,13 +1720,14 @@ because its distance to the next cliff ran $98,000–$127,000. The near-cliff ho
 same omission and read tier 0 in five years where it was actually in tier 1 — failing to warn about
 $11,500 of surcharge. What decides whether the omission reaches a user is proximity to a threshold.
 
-### Two terms still differ, and both are disclosed
+### One term still differs, and it is disclosed (two were listed through v6.22)
 
 - **`capGain_y`** — realized capital gains, left out by the decision above.
-- **`work_y` vs `spouseBWork`** — Engine C counts the household's other income streams; the ladder
-  counts one spouse's earned income. Narrower, untouched by this release.
+- **`work_y` vs `spouseBWork`** — listed here through v6.22 as narrower: "Engine C counts the household's other income streams; the
+  ladder counts one spouse's earned income." Corrected at v6.23 — the two are the same sum (the taper plus every ordinary stream), and
+  differ only in the year the taper is keyed to, the plan's own retirement year on the ladder and the selected one in Engine C.
 
-Both can only add to MAGI, so the residual error remains **optimistic**, and the Roth tab's figure
+`capGain_y` can only add to MAGI, so the residual error remains **optimistic**, and the Roth tab's figure
 remains slightly below the IRMAA tab's. The IRMAA tab is the fuller figure.
 
 ### One disagreement disclosed rather than reconciled
@@ -2402,7 +2409,7 @@ and 6 (tax-exempt interest, adjustments) are not modelled, as in every engine.
 ## Payroll tax on job income (v6.14; self-employment from v6.16)
 
 **The rule.** An employee's job income — a job row of type "Job — employee (W-2)" under Other income streams, or the built-in part-time
-taper for spouse B when no stream is entered — is taxed as **wages**, the employee's half, in the Taxes tab (Engine B) and the Roth strategy comparison (Engine A, in its tax
+taper for spouse B (from v6.23 the example household's alone; through v6.22 any plan's when no stream was entered) — is taxed as **wages**, the employee's half, in the Taxes tab (Engine B) and the Roth strategy comparison (Engine A, in its tax
 and in its sale-gain estimate). One shared helper, `payrollTax`, applies 26 U.S.C. §3101 and §3121(a)(1):
 - **Social Security, 6.2%, on each earner's wages up to the year's wage base.** The cap is per person: two spouses each earning $150,000
   each pay on all of it. The 2026 base is $184,500 (SSA), indexed in the projection at 2%/yr like the other constants.
@@ -2453,7 +2460,7 @@ household, and **no** 0.9% — both errors taking too little tax (register items
 example plus job rows in the first five plan years: one $300,000 job, +$2,250 of tax over the five years (the 0.9%); two $150,000 jobs,
 **+$32,077** (+$29,827 of it the per-earner cap: in 2029 the household was taxed on $195,793 of Social Security wages where the law taxes
 $300,000), lowering the comparison's estate at the default slider by $88,757; two $120,000 jobs, +$11,227; a single household's
-$250,000 job, +$2,250 (above $200,000). Two $60,000 jobs, and the example household itself (whose taper peaks at $20,000), do not move.
+$250,000 job, +$2,250 (above $200,000). Two $60,000 jobs, and the example household itself (whose built-in work peaks at $20,000), do not move.
 
 **What did not change.** The IRMAA, Withdrawal and Monte Carlo engines carry no payroll tax and are bit-identical (v6.14, and again at
 v6.16 on every household tested); the Roth tab's ladder has none either. Rental, annuity and other ordinary streams still pay no payroll
@@ -2751,10 +2758,11 @@ every path: measured at the build, the three 6-year runs (10,000 paths) take 0.3
 - **IRMAA is not in it** (DC-2 (a)): a Medicare premium surcharge, shown on the IRMAA tab — $0 on the example and on the ×1.6 household;
   $21,880 on the example at a $250,000 slider (BASE; measured at the build). Optimistic for high-income plans. MissingFeatures **D-51**.
 - **The built-in part-time work for spouse B** (`spouseBWorkTaper`: $20,000, $18,000 and $15,000 of spouse-B wages in retirement years 0–2
-  for every plan with no income streams) is taxed by Engine B, so it is in the schedule, but neither Monte Carlo engine credits it as income
-  — conservative by $14,479 on the example (BASE, $70K): $7,037 of tax in 2029–2031 and $7,442 through Engine D's draws later (measured at
-  the build: the schedule with and without a zero-amount income stream, which switches the taper off). The taper itself — every such plan,
-  single ones included, gets the example's spouse-B wages in four engines — is filed for its own release. MissingFeatures **D-49**.
+  — from v6.23 for the example household alone; at this release, for every plan with no income streams) is taxed by Engine B, so it is in
+  the schedule, but neither Monte Carlo engine credits it as income — conservative by $14,479 on the example (BASE, $70K): $7,037 of tax in
+  2029–2031 and $7,442 through Engine D's draws later (measured at the build: the schedule with and without a zero-amount income stream,
+  which switches the taper off). The taper itself — every such plan, single ones included, got the example's spouse-B wages in four engines
+  — was corrected at v6.23 (*Built-in work is the example's alone*); what remains is about the example alone. MissingFeatures **D-49**.
 - **An expense row for income tax would be charged twice** — the simulation now pays the tax itself. The Field Manual says so.
 - **The home-move cash** is not in Engines A–D (D-39), so not in the tax either; consistent with the Taxes tab.
 - **D-44's Withdrawal half** stays open: a one-time row dated before the retirement year is not in the Withdrawal tab's schedule (DC-5 (a)).
@@ -2877,3 +2885,51 @@ paid less, and every figure that reads income falls.
   example, and for anything else would need a plan that kept the example's holdings to the dollar.
 - **Ask AI's ground rules reach only the example (D-55).** A plan's Ask AI sends its plan summary (from its last Save & Apply) and the
   live context; a plan never saved sends the live context alone.
+
+## Built-in work is the example's alone (v6.23)
+
+**What was wrong (v6.22, measured).** `spouseBWorkTaper` pays $20,000, $18,000 and $15,000 of spouse-B wages in the retirement year and
+the two after. Its one test was *no income streams*, so every such plan was paid them — Start Fresh, the guided setup, a backup, and single
+plans, which have no spouse B. The example's spouse B does work (its demo prompt says so), so on the example the wages are its own; on any
+other plan they were income the user never entered. The Withdrawal tab (Engine D) spent them as cash; Engines A, B and C and the Roth tab's
+ladder taxed them (Engines A and B with payroll tax); the Monte Carlo, from v6.20, paid their tax without receiving them; What-Breaks paid their
+tax through Engine A. The direction was split by tab: the Withdrawal tab optimistic by $53,000 of income, everything that taxes them
+conservative. Measured on v6.22 with the wages switched off by a $0 stream — which is exactly what v6.23 does to such a plan (`t86` §C
+proves the two bit-identical, every engine and both Monte Carlo engines): on the example's own figures used as another plan's, the
+Withdrawal tab's end balance falls $89K–$164K across four households and two presets, the Taxes tab's lifetime tax falls by about
+$7,000 (married) or $7,500 (single) in the three wage years — the wages' income tax plus $1,530, $1,377 and $1,148 of payroll tax — and
+the Monte Carlo's success rates rise slightly. IRMAA does not move on any of the four. On a single plan the Roth tab's best cell moves from
+*fill the 12% bracket* to *no conversions*, a near-tie either way ($264 one way, $658 the other, on about $2.8M) — the model's best cell
+under its own assumptions, not a recommendation.
+
+**What changed.**
+- **The taper pays only the example** (`builtinWorkApplies`): a plan that holds the example's holdings (tickers and balances, the rule
+  v6.22 uses for the example's text), is married and has no income streams. It is read on every call, not cached, because a load or
+  Save & Apply replaces the plan; the six engine reads are unchanged. A single plan is paid none, the example made single included — as
+  v5.76 already did for spouse B's Social Security.
+- **A plan saved before v6.23 that loses the wages is told so**, on My Data and the Monte Carlo tab, with how to enter work (a job row, with
+  the existing buttons). A new field, `workRowsV623: true`, written by the example, Start Fresh, the guided setup and Save & Apply, ends the
+  notice; nothing in the plan changes until the user saves.
+- **The wording.** The Taxes tab's line reads *Earned income (job rows)* — it is every job row, any owner, which v6.22 called spouse B's
+  earnings — and on the example *Earned income (job rows and the example's built-in work)*. The Withdrawal tab's Step 1 reads *Social
+  Security + pension + other income (income streams)*, and on the example *(income streams and the example's built-in work)*; its
+  Work-column note names the example's built-in work on the example. My Data and the Field Manual say the built-in work is the example's
+  alone. The Monte Carlo tab's notice says what that tab lost: the tax on wages it never paid in (its figures rise slightly).
+- **Two sentences that were false are corrected:** the streams paragraph listed What-Breaks among the engines that credit streams (it
+  credits none — D-57; the Field Manual's streams answer and My Data's streams note said streams reach every engine or projection, and now
+  name Backtest and What Breaks as the exceptions), and the Roth ladder's earned-income term was described as narrower than Engine C's (it is the same sum —
+  *The Roth tab's IRMAA MAGI is narrower than Engine C's*, v5.52).
+
+**What moves.** The example: no figure — every engine, the bridge, the tax schedule, the Roth strategies and both Monte Carlo engines are
+bit-identical to v6.22 (`t86` §B), and its Withdrawal, Taxes and IRMAA tables render the same figures (`domdiff`). Its wording changes on
+the Withdrawal tab (Step 1 and the Work-column note), the Taxes tab (the earned-income label), My Data (the streams note) and in the Field
+Manual. (At the scope, a prototype with this rule and v6.22's wording rendered all 26 tabs identically.) Every other plan
+with no income streams loses the wages: the figures above, in the directions above.
+
+**Simplifications, stated.**
+- **The example is recognised by its holdings.** A plan that kept the example's holdings to the dollar and changed anything else is read as
+  the example and keeps the wages.
+- **The example's wages are still built in** and not visible as rows. The Monte Carlo, the Income tab, Backtest and What-Breaks do not
+  credit them, and the Monte Carlo pays their tax: conservative by $14,479 on the example (measured at v6.20, above). Moving them into
+  visible rows needs a phase rule for the Income tab and a fix for its phone layout — its own release. MissingFeatures **D-49**.
+- **Backtest and What-Breaks credit no income stream** (MissingFeatures **D-57**) — conservative.

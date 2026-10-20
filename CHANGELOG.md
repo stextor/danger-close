@@ -1,5 +1,96 @@
 # Changelog
 
+## v6.23 — the built-in part-time work for spouse B is the example's alone (D-49)
+
+**A MODELLING release** — METHODOLOGY gains *Built-in work is the example's alone (v6.23)*. `docs/SCOPE_D49_WORK_TAPER_V623.md` (repo-only,
+fulfilled): Steve, *"yes"* (to scoping D-49), then DC-1 *"Example only"*, DC-2 *"Notice until saved"*, DC-3 *"Never"*, DC-4 *"Fix all now"* —
+all (a). Built on v6.22 (source `88d476c3…`).
+
+**What was wrong (v6.22, measured).** `spouseBWorkTaper` pays $20,000, $18,000 and $15,000 of spouse-B wages in the retirement year and the
+two after, and its one test was *no income streams* — so every such plan was paid them: Start Fresh, the guided setup, a backup, and single
+plans, which have no spouse B. Its comments said "EXAMPLE-DATA ONLY". The example's spouse B does work (its demo prompt says so); on any
+other plan the wages were income nobody entered. The Withdrawal tab (Engine D) spent them as cash — optimistic: its end balance $89K–$164K
+higher across four households and two presets. Engines A, B and C and the Roth tab's ladder taxed them (A and B with payroll tax), the
+Monte Carlo (from v6.20) paid their tax without receiving them, and What-Breaks paid it through Engine A — conservative: about $7,000
+(married) or $7,500 (single) of tax in the three wage years. On a single plan the Roth tab's best cell moved from *fill the 12% bracket*
+to *no conversions*, a near-tie either way. **Siblings, same family:** the Withdrawal tab's Step 1 told every plan it takes "Spouse B work
+income"; the Taxes tab named every job row, any owner, "spouse B's earned income"; MissingFeatures said Engines A–D "credit" the wages
+(only D does); METHODOLOGY said streams reach What-Breaks (they reach neither it nor Backtest — D-57) and that the Roth ladder's
+earned-income term is narrower than Engine C's (it is the same sum).
+
+**What changed.**
+- **The wages reach the example only (DC-1 (a)).** `builtinWorkApplies()` — no streams, married, the example's holdings (the rule v6.22 uses
+  for the example's text) — is the taper's first statement; the six engine reads are unchanged. It is read on each call, not cached, because
+  a load or `setPortfolio` replaces the plan (measured cost negligible).
+- **A single plan gets none (DC-3 (a)),** the example made single included.
+- **A plan saved before v6.23 that loses them is told so (DC-2 (a))** on My Data and the Monte Carlo tab, with how to enter work; the Monte
+  Carlo's notice says what that tab lost — the tax on wages it never paid in. `workRowsV623: true`, written by the example, Start Fresh, the
+  guided setup and Save & Apply, ends it; adding a job row in My Data's draft hides it at once. Nothing in the plan changes until it is saved.
+- **The wording (DC-4 (a)):** the Taxes tab's line *Earned income (job rows)* (on the example *…and the example's built-in work*); the
+  Withdrawal tab's Step 1 *other income (income streams)* (on the example *…and the example's built-in work*) and its Work-column note; My
+  Data's streams note (which also no longer says streams reach every projection); the Field Manual's limitations entry, Monte Carlo entry,
+  streams answer (Backtest and What Breaks named as the exceptions) and D-10 sentence; METHODOLOGY's streams paragraph, D-10 residual,
+  payroll section and v6.20 bullet; the source comments; the four version sites.
+
+**What it moved.** **The example: no figure** — all ten `t2` fingerprints byte-identical (parity 10/10, no intended difference
+declared); every engine, the bridge, the tax schedule, the Roth strategies and both Monte Carlo engines bit-identical (`t86` §B); its
+Withdrawal, Taxes and IRMAA tables figure-identical (`domdiff`, with the wording masked). Its wording changes on the Withdrawal tab, the
+Taxes tab, My Data and in the Field Manual. **Every other plan with no streams** loses the wages, exactly as v6.22 with a $0 stream
+(`t86` §C, every engine bit for bit): the Withdrawal tab's end balance falls, tax in the wage years falls, the Monte Carlo rises slightly.
+
+**Found and filed, not fixed:** MissingFeatures **D-57** — Backtest and What-Breaks credit no income stream (conservative). **D-49**'s
+residual, now the example's alone: its wages are built in, the Monte Carlo pays their tax without crediting them, and the Income tab holds a
+stream's first-month amount for a whole phase. UsabilityFlaws **F-20** — the Income tab's stream list scrolls sideways at 390 px for a plan
+with streams (`t45` runs on the example, which has none). OPERATIONS **§C4** — `t2` and `t6` write `/tmp` files keyed by tag alone, so two
+full suites at once corrupt parity (seen at the scope: 10/10 reported where 3/10 was true).
+
+**Tests.** New suite **`t86`** — **58** on v6.23, **25** on v6.22 (that leg pins each defect as a dated `[KNOWN DEFECT]`). §A who is paid,
+by execution and AST (the rule's three tests; the taper's only gate; six call sites; the marker's four writers, each named; the loader's
+flag). §B the example across the pair at two presets and three sliders, both Monte Carlo engines seeded. §C seven other plans on v6.23 equal
+v6.22 with a $0 stream. §D single plans. §F the fixture households, married and single. §E rendered: the notices (Start Fresh, single,
+ended by a draft job row and by Save & Apply, absent on the example, Start Fresh and a plan with a stream), the Roth ladder's MAGI (the
+sixth read, which only a render reaches), every wording site. §G the Field Manual and METHODOLOGY.
+**Existing suites, each change attributed.** ⚠ Five fixtures ran on the taper without saying so — an empty `incomeStreams: []` switched it
+ON — and moved when it stopped reaching them. The married ones **declare the wages they ran on** as job rows (`qa/tools/example_work_rows.mjs`,
+v6.22's DC-6 precedent), so every figure stays on both legs: `t20` (E2's exact $724,266), `t40` §C (its C0 residual now reads Engine D's
+`workAll_y`, where rows land), `t71`'s IRA households (D-1 to D-3). The single ones are **re-pinned**: `t16` case 2 — the single filer's
+tax is now compared with married figures on the same MAGI (2029: $6.6K shown against $4.4K; it was `> $9K`, a figure that carried the
+wages); `t43` F-3 / F-4, controls that move once — 2030 $81,701.22 → $78,594.39 and 2039 $104,896.41 → $104,055.33 (and on each
+attribution table), each equal to v6.22's with a $0 stream on all three tables, every Engine C row. `t83` I-8 and `t84` H-2 read the new
+Field Manual sentences on v6.23. `t29` gains the `example_work` census row (OPERATIONS §K1: on the example the wages are its own, so a leak
+could not be seen there; 88 → 91), and its payroll row reads the app's own taper — exported on both legs, so **the v6.22 leg's payroll row
+now reads that leg's own rule too** (single plans included; the structural copy it replaces left them out; both legs green).
+`domdiff` gains a v622 → v623 arm (Step 1, the Work-column note and the Taxes label masked, each exactly once; every figure identical).
+`t33` PINS gains `v623` (unchanged, confirmed by running).
+Controls `qa/tools/controls_v623_work.py` (repo-only): **27 of 27 as expected** — the rule without its holdings or single test, the taper on v6.22's
+test, the loader's flag never set, ignoring the marker or read from the example, either notice never shown or shown on the example, the
+notice kept after a draft job row, the old Monte Carlo wording, the marker missing from each of its four writers, each old wording back, and
+the unmutated run; every file restored and hash-checked.
+
+**Independent reviews.** The scope was reviewed before Steve saw it (18 findings, all taken — among them the recommendation's change from
+visible rows to the example only, after the review showed the rows moving the example's Income tab and its phone layout). The build was
+reviewed by an agent that had not seen it (12 findings, no blocker, all taken): the Monte Carlo notice said that tab lost work income when it
+only ever paid the tax; METHODOLOGY stated a prototype's "26 tabs identical" as the release's and carried the scope's wrong range; the D-10
+correction left "the last two terms" and a stale heading; four wording sites the scope missed (the streams answer, My Data's streams note, the
+Work-column note, Step 1 omitting the example's own work); `t86` reached neither the ladder nor each marker writer by name; the My Data
+notice outlived a draft job row; and smaller items. It confirmed by parser the six reads and the one gate, the four version sites, the Field
+Manual's changed sentences, and every save, load and Export path.
+
+⚠ **Owned.** (1) The scope's summary range for the Withdrawal tab, $94K–$163K, was wrong; its own table gives $89K–$164K (corrected in the
+scope's §7 and METHODOLOGY). (2) The first build's Monte Carlo notice told a plan its Monte Carlo figures had lost work income; they had only
+lost a tax, and rise. (3) The scope measured two prototypes' suites in parallel, and parity read the other's fingerprint (10/10 reported,
+3/10 true); re-run alone, and now a rule (§C4).
+
+**Registered:** `v623` by AST (370 sites), `t1`'s and `t4`'s version strings, `t33`'s PINS and the three Python suites by hand.
+`runsuite.sh` runs `t86` on both legs.
+
+**Suite, run from the packaged copies:** **8,427 app checks across 85 app suites** (the eight `-spend617` and seven `-table620` attribution runs included), 0 failed, 0 DIED; MC parity 10/10 (no intended difference); tooling `t21` 64, `domdiff` 35, `sets` 12 + 12; **GRAND 8,560**. Per-suite counts are `TESTING.md`'s v6.23 line; against v6.22's line the counts that moved are `t29` 88 → 91 (the `example_work` row), `t85` 53 → 50 (its §C, the v6.21 → v6.22 pair, takes its designed skip in a run folder without the v6.21 source, as `t84`'s did at v6.22) and `t86` is new (58; 25 on the v6.22 leg); every other current-leg count is unchanged — the five moved fixtures keep their counts. `domdiff` 32 → 35 (the v622 → v623 arm's three mask checks).
+
+**Limitations, disclosed** (METHODOLOGY *Simplifications, stated*; Field Manual): the example is recognised by its holdings; the example's
+wages are still built in and not credited by the Monte Carlo, the Income tab, Backtest or What-Breaks (D-49's residual); D-57.
+
+**Provenance.** v6.23 · source `a683637e75ce6816cd9a077644534542` · built `index.html` `34455a918eb2c65bb2d34841fcedafbf` · `smoke_built` 22/22. Suite run from the packaged copies (`mk_runfolder.sh v622 v623` on a fresh clone of `c870873` with the package applied): 8,427 app checks across 85 app suites, 0 failed, 0 DIED; MC parity 10/10; tooling `t21` 64, `domdiff` 35, `sets` 12 + 12 — GRAND 8,560. Controls 27 of 27 on a copy of a run folder built from the workspace, whose files equal the package's byte for byte; every file restored and hash-checked.
+
 ## v6.22 — a new plan keeps no one else's facts: the example's master prompt, income and expense table (D-53)
 
 **A MODELLING release** — METHODOLOGY gains *A plan's facts are its own (v6.22)*. `docs/SCOPE_D53_PROMPT_V622.md` (repo-only, fulfilled):
