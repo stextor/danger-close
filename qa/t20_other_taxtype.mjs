@@ -299,7 +299,11 @@ const HH = {
   bucketActuals: { 1: 0, 2: 0.4, 3: 0.6, 4: 0 },
   contributions: { monthly401k: 0, hsaMonthly: 0, spouseBMonthly: 0, contribPreTaxA: 0, contribRothA: 0, contribPreTaxB: 0, contribRothB: 0, allocations: {} },
   incomeStreams: [],  // engine tests must neutralise global income streams
-  incomeSources: {},
+  // v6.22 (D-53 sibling, DC-6): through v6.21 this was `incomeSources: {}`, and the loader silently inserted the example household's
+  // Social Security ($3,300 at 67, $1,300 at 63) and pension ($400) — so every t20 household ran on that income while declaring none.
+  // From v6.22 an absent block is paid $0. The household is DECLARED as it ran (the v5.37 precedent for the dates above): the same
+  // amounts, stated, unflagged. Measured: every t20 figure is unchanged on both legs.
+  incomeSources: { ssA: { tableByAge: {}, planned: 3300, plannedAge: 67 }, ssB: { tableByAge: {}, planned: 1300, plannedAge: 63 }, pension: { amount: 400 } },
   stateCode: null, stateTaxRate: 0,
 };
 const FLIP = { taxable: "trad", trad: "taxable", roth: "hsa", hsa: "roth" };

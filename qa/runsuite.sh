@@ -351,6 +351,14 @@ tally "t83-$CUR"   node t83_mc_tax.mjs "$CUR"
 # the Field Manual and METHODOLOGY. Both legs: the prior leg pins what v6.21 changes as dated [KNOWN DEFECT] checks.
 tally "t84-$PRIOR" node t84_car_rows.mjs "$PRIOR"
 tally "t84-$CUR"   node t84_car_rows.mjs "$CUR"
+# t85 (v6.22) — a new plan keeps no one else's facts (D-53 and siblings): a load without a master prompt holds none, the example's path
+# holds the demo, and storage keeps what memory keeps; DEFAULT_PORTFOLIO carries the example's ten facts, each equal to what the app's own
+# parsers read from the demo prompt (by AST, live); the example unmoved across the pair; income a plan never entered is paid $0 and named;
+# rendered (Start Fresh, My Data's placeholder and example-facts notices, the no-state wording on Taxes / Roth / My Data, Ask AI's preview,
+# reloads, an unreadable stored plan, backups — a non-string or over-long prompt, a backup with no expense table). Both legs: the prior leg
+# pins what v6.22 changes as dated [KNOWN DEFECT] checks. Controls: qa/tools/controls_v622_prompt.py (repo-only).
+tally "t85-$PRIOR" node t85_prompt_carryover.mjs "$PRIOR"
+tally "t85-$CUR"   node t85_prompt_carryover.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

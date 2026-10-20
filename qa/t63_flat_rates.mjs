@@ -14,7 +14,7 @@
 //            those rows' state-tax fields, never up; Engines C and D byte-identical; Engine A never rises; its estate-best cell does not change
 // BOTH LEGS; the v598 leg pins the old rates. Run: node t63_flat_rates.mjs <tag>
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621"];
+const KNOWN_VERSIONS = ["v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  ✓ ${n}`); } else { fail++; console.log(`  ✗ ${n}${d !== "" ? " — " + String(d).slice(0, 260) : ""}`); } };
 const EQ = (n, got, want, tol = 0.005) => CK(n, typeof got === "number" && Math.abs(got - want) <= tol, `got ${got}, want ${want}`);
@@ -30,7 +30,7 @@ const m = await import(`./app_${VER}.mjs`), g = m.__g, E = m.__engines, ST = E.s
 // zero band and Ohio's schedule are modelled. §B's pins keep their base and on this leg expect it after them (qa/d30_ref.mjs D30F, on the recorded
 // call). A version LIST.
 const { d30Pins } = await import("./d30_ref.mjs");
-const D30FL = ["v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621"].includes(VER), D30 = d30Pins(ST, SR, D30FL), B2T = D30FL ? " [v6.03: the same base after the state's deductions, schedule and credits]" : "";
+const D30FL = ["v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622"].includes(VER), D30 = d30Pins(ST, SR, D30FL), B2T = D30FL ? " [v6.03: the same base after the state's deductions, schedule and credits]" : "";
 
 // ── A · the thirteen rates ──
 const NEW = { AZ: 0.025, CO: 0.044, ID: 0.053, IL: 0.0495, IN: 0.0295, IA: 0.038, LA: 0.03, MA: 0.05, MI: 0.0425, MS: 0.04, NC: 0.0399, OH: 0.0275, PA: 0.0307 };
@@ -47,7 +47,7 @@ if (FIXED) {
   else CK("A-3 Ohio's note gives the statute's form ($332 plus 2.75 % above $26,050) and the overstatement ($384.38, conservative)",
      /\$332 plus 2\.75% of the excess above it/.test(SR.OH.note) && /\$26,050/.test(SR.OH.note) && /\$384\.38 a year above that line \(conservative\)/.test(SR.OH.note), SR.OH.note);
   // v6.00 (D-22 option 3): Mississippi's band is modelled from v6.00 (t64 A-7 owns that note); this leg asserts the old disclosure is gone. A LIST.
-  if (["v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621"].includes(VER)) CK("A-4 Mississippi's note no longer says its first $10,000 is taxed here — the band is modelled (v6.00)", !/taxed here, overstating tax by up to \$400/.test(SR.MS.note) && /first \$10,000 of taxable income is untaxed/.test(SR.MS.note), SR.MS.note);
+  if (["v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622"].includes(VER)) CK("A-4 Mississippi's note no longer says its first $10,000 is taxed here — the band is modelled (v6.00)", !/taxed here, overstating tax by up to \$400/.test(SR.MS.note) && /first \$10,000 of taxable income is untaxed/.test(SR.MS.note), SR.MS.note);
   else CK("A-4 Mississippi's note discloses its untaxed first $10,000 as taxed here (conservative)", /first \$10,000 of taxable income is untaxed in law and taxed here, overstating tax by up to \$400 a year \(conservative\)/.test(SR.MS.note), SR.MS.note);
   CK("A-5 the scheduled 2027 cuts (IN, MS, NC) are named as not applied", ["IN", "MS", "NC"].every(c => /2027, not applied here \(conservative\)|from 2027, not applied here \(conservative\)/.test(SR[c].note)), ["IN", "MS", "NC"].map(c => SR[c].note.slice(-90)).join(" | "));
 } else CK("A-2 PIN v5.98: Ohio's note still says ~3.1 %", /~3\.1%/.test(SR.OH.note), SR.OH.note);

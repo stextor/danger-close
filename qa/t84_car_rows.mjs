@@ -27,13 +27,13 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v621";
-const KNOWN_VERSIONS = ["v620", "v621"];
+const KNOWN_VERSIONS = ["v620", "v621", "v622"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v621"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v621", "v622"].includes(VER);   // an array, so the next registration widens it
 // The differential's pair — constants, NOT `VER === "v621"`, so the registrar cannot widen them (t76 records why).
 const D_PRIOR = "v620", D_CUR = "v621";
 const require = createRequire(import.meta.url);
@@ -332,9 +332,9 @@ console.log("  G — rendered (Income, Social Security, Stress, Roth, Monte Carl
     T(`G-2 ${KD}: the Social Security tab's card reads "Post-car shortfall"`, /Post-car shortfall/.test(txt()));
   }
   await go("roth");
-  // The example chooses no state in My Data (no stateCode): its Florida is the master prompt's state line, which the timeline reads and
-  // the Taxes tab names. The Roth line must say what the Taxes tab says.
-  T("G-3: the example (Florida, from its master prompt; no state chosen in My Data) — the Roth tab's rules box says Florida has no state income tax",
+  // The example chooses no state in My Data (no stateCode): its Florida is the master prompt's state line through v6.21, a field on
+  // DEFAULT_PORTFOLIO from v6.22 (D-53) — the timeline reads it and the Taxes tab names it. The Roth line must say what the Taxes tab says.
+  T("G-3: the example (Florida — its master prompt's state line through v6.21, a field from v6.22; no state chosen in My Data) — the Roth tab's rules box says Florida has no state income tax",
     !DG.PORTFOLIO().stateCode && DG.PLAN_TIMELINE().stateName === "Florida" && /Florida — no state income tax/.test(txt()));
   await go("monte carlo");
   const mcReady = await waitFor(/RUN C: FULL 30-YEAR/);
