@@ -57,18 +57,21 @@ items now carry their status; IDs are unchanged.
 | D-39 | **OPEN** (Low–Med, either direction) | the Withdrawal, Taxes, IRMAA and Roth tabs do not see the home-move cash — only the Monte Carlo figures do. Disclosed in My Data, the Monte Carlo tab, the Field Manual and METHODOLOGY |
 | D-40 | **CLOSED v6.20** | the Monte Carlo's only income tax was a flat $16,000 a year during the Roth ladder (`ROTH_TAX_DRAG_Q`), whatever the plan converted or owed, and none after it. From v6.20 both engines pay the Taxes tab's tax year by year (`mcIncomeTaxSchedule`), at the live conversion slider, QCD and yield, grown with each path's inflation |
 | D-41 | **CLOSED v6.18** *(filed and fixed 2026-10-18)* | the Withdrawal tab (and Backtest and What-Breaks) spent the expense table as it stood in June 2029 and June 2031 — the example's dates — for every plan; from v6.18 each year's own months and one-time rows (`tableYearExpense`), and the display figures follow the plan's dates |
-| D-42 | **OPEN** (Low–Med, conservative) | a $40,000 car every 8 years (`AUTO_REPLACE_COST`) in the Monte Carlo runs with auto-replacement, on every plan — disclosed in the Field Manual as a fixed example schedule; a household that enters car purchases as expenses pays twice |
-| D-43 | **OPEN** (Low, display only) | the Income tab's "Post-car draw" and "Monthly shortfall (car paid off)" subtract the example's $400 car payment from every plan's post-Medicare spending |
+| D-42 | **CLOSED v6.21** | a car is a one-time expense row: `AUTO_REPLACE_COST` and the `autoReplace` switch are gone; the example's table carries four $40,000 rows (2037, 2045, 2053, 2061); a plan saved before v6.21 has the old schedule added as visible rows when it loads, written to storage at its next Save & Apply (`docs/SCOPE_D42_CAR_V621.md`; `t84`). Found at the scope: the old car was left out of the planned path its guardrails steer by |
+| D-43 | **CLOSED v6.21** | the figure after the payments end is read from the table (the month after the last monthly row running at the Medicare month that ends before the horizon); the register said four sites on one tab — it was six on two (Income, Social Security) |
 | D-44 | **OPEN — narrowed v6.20** (Low, optimistic) | the Withdrawal tab never sees a one-time row dated before the retirement year (disclosed on the tab since v6.18). *The Monte Carlo half — one-time rows charged in today's dollars — closed at v6.20* |
 | D-45 | **CLOSED v6.20** | the Monte Carlo charged a one-time row only when it was dated in a quarter's last month, so the example's April 2029 rows ($28,000) never reached it. From v6.20 one quarter read (`mcQuarterSeries`) charges a row in the quarter that contains its month, and monthly rows count their own months |
 | D-46 | **CLOSED v6.19** *(filed and fixed 2026-10-18)* | the Monte Carlo's quarter calendar: both engines dated quarter 0 "June of the as-of year" for every plan; the 6-year engine placed events by `round(months ÷ 3)` from the as-of month, the 30-year engine by quarters from January of the as-of year (ignoring the as-of month, and for an April–June as-of date retiring and claiming a quarter late); the year 2026 was typed into run A, the chart axis, the Stress table and the longevity ages; the run headers said runs B and C start at retirement. From v6.19 one calendar (`mcQuarterOf` / `mcQuarterDate`), a part first quarter, claims from their month, forced stress years on calendar years |
-| D-47 | **OPEN** (Low, display) | the Stress tab's "30-year guardrail boundaries" table compares the Monte Carlo median with a "planned" figure of `household × 1.04^years` — the benchmark the engines replaced because it ignores withdrawals. Not in v6.20's scope (filed after it was decided); from v6.20 `runExtendedMC` returns its planned path, so the fix is ready to scope |
+| D-47 | **CLOSED v6.21** (was Low, display) | the Stress tab's "30-year guardrail boundaries" table compared the Monte Carlo median with a "planned" figure of `household × 1.04^years`, a benchmark that ignored withdrawals; it now reads `runExtendedMC`'s own planned path, with the guardrails' own bands (`t84` A-4, A-7, F) |
 | D-48 | **OPEN** (Low) | My Data's as-of date is the UTC date of saving (`toISOString`), so an evening save in the Americas on a quarter's last day falls in the next quarter — after v6.19 that moves the 30-year figures by about a quarter's accumulation. Disclosed in METHODOLOGY |
-| D-49 | **OPEN** (Low–Med, either direction by engine) | the built-in part-time work for spouse B (`spouseBWorkTaper`): every plan with no income streams — single ones included — gets $20,000, $18,000 and $15,000 of spouse-B wages in retirement years 0–2, credited and taxed by Engines A, B, C and D; from v6.20 the Monte Carlo pays that tax (through the schedule) without crediting the wages. Disclosed in the Field Manual and METHODOLOGY |
-| D-50 | **OPEN** (Low, display only) | the mortgage what-if on the Monte Carlo tab tells every plan "Mortgage interest isn't deductible for you (standard deduction + no FL income tax)" — the example's state, typed in |
+| D-49 | **OPEN** (Low–Med, either direction by engine; the Field Manual's "applies only to the demo data" sentence corrected at v6.21) | the built-in part-time work for spouse B (`spouseBWorkTaper`): every plan with no income streams — single ones included — gets $20,000, $18,000 and $15,000 of spouse-B wages in retirement years 0–2, credited and taxed by Engines A, B, C and D; from v6.20 the Monte Carlo pays that tax (through the schedule) without crediting the wages. Disclosed in the Field Manual and METHODOLOGY |
+| D-50 | **CLOSED v6.21** | the mortgage what-if states the model's rule (no itemized deductions, so no offset); a sibling found at the scope — the Roth tab's rules box said "Florida — no state income tax" to every plan — names the plan's state as the Taxes tab does. **Narrowed:** a new plan that chooses no state still reads Florida, because it keeps the example's master prompt (D-53) |
 | D-51 | **OPEN** (Low–Med, optimistic for high-income plans) | IRMAA surcharges are not in the Monte Carlo's tax (it pays the Taxes tab's tax; IRMAA is a Medicare premium on its own tab) — $0 on the example, $21,880 lifetime at a $250,000 slider. Disclosed in the Field Manual and METHODOLOGY |
+| D-52 | **OPEN** (Low–Med, either direction) | My Data's editor keeps a row's years only: Save & Apply stores a monthly row from January of its start year to December of its end year, and a one-time row in June. A plan from the example, an import or a backup is re-dated at its first save — the example's Car Payment (Apr 2029 – Apr 2034) becomes Jan 2029 – Dec 2034, the cars v6.21 adds to an older plan move from March to June. Found at v6.21 (`t84` G-11 pins the one-time half) |
+| D-53 | **OPEN** (Low–Med, optimistic in a taxed state) | Start Fresh, and the guided wizard with the state skipped, keep the example's master prompt (the loader ignores an empty one), so a new plan that chooses no state in My Data is taxed as the example's Florida (0% state tax), and the Taxes and Roth tabs say Florida. Found at the v6.21 build (the scope's §0 read it; the build ran it) |
+| D-54 | **OPEN** (Low, optimistic, rare) | the guided wizard ends its retirement living-expense row in December 2079, so a plan whose horizon runs past 2079 spends nothing in its last years. Found at the v6.21 review (a couple born 1975/1977 planning to 100/105: $78,000 in 2079, $0 from 2080). From v6.21 the "after the payments end" figure is left out in that case rather than shown as $0 |
 
-**Open, in this file: D-4, D-11 (narrowed), D-13, D-15, D-16, D-18 (recurring), D-32, D-37, D-39, D-42, D-43, D-44 (narrowed), D-47, D-48, D-49, D-50, D-51; D-5 declined.** *(D-40 and D-45 closed, D-44 narrowed, and D-49 to D-51 added, at v6.20; D-46 filed and closed, and D-47 and D-48 added, at v6.19; D-40 to D-43 filed from the v6.17 findings note, D-41 closed, and D-44 and D-45 added, at v6.18; D-38 filed and closed, and D-39 added, at v6.17; D-36 closed and D-37 added at v6.16; D-17 closed and D-36 added at v6.14; D-35 closed at v6.09; D-34 closed and D-35 added at v6.08; D-33 closed and D-34 added at v6.07; D-28 closed and D-33 added at v6.06.)* Non-tax open threads
+**Open, in this file: D-4, D-11 (narrowed), D-13, D-15, D-16, D-18 (recurring), D-32, D-37, D-39, D-44 (narrowed), D-48, D-49, D-51, D-52, D-53, D-54; D-5 declined.** *(D-42, D-43, D-47 and D-50 closed (D-50 narrowed by D-53), and D-52 to D-54 added, at v6.21; D-40 and D-45 closed, D-44 narrowed, and D-49 to D-51 added, at v6.20; D-46 filed and closed, and D-47 and D-48 added, at v6.19; D-40 to D-43 filed from the v6.17 findings note, D-41 closed, and D-44 and D-45 added, at v6.18; D-38 filed and closed, and D-39 added, at v6.17; D-36 closed and D-37 added at v6.16; D-17 closed and D-36 added at v6.14; D-35 closed at v6.09; D-34 closed and D-35 added at v6.08; D-33 closed and D-34 added at v6.07; D-28 closed and D-33 added at v6.06.)* Non-tax open threads
 re-homed the same day are in `ARCHITECTUREIssues.md` **E-29**.
 
 *The write-ups of the items closed or fixed by v6.20 — D-1, D-2, D-3, D-6, D-12, D-14, D-17, D-19, D-20, D-21, D-22, D-23, D-24, D-25, D-26, D-27, D-28, D-29, D-30, D-31, D-33, D-34, D-35, D-36, D-38, D-41, D-45, D-46 — moved verbatim on 2026-10-19 to `docs/MissingFeatures_ARCHIVE_closed_to_v6_20.md` (repo only) to recover project-knowledge space (OPERATIONS §G). Each keeps its row in the index above; their residual-open lines were traced first (that file's §0); two threads with no other pooled record went to `ARCHITECTUREIssues.md` **E-30** (a), (b). Open, disclosed and recurring items (D-18) keep their write-ups here.*
@@ -839,12 +842,12 @@ starts from.
   for the example's holdings ×1.6 in Georgia the Taxes tab says $368K and 30-year success reads 96.9% against 95.2% with that tax charged.
   **Either direction; medium.** Candidate fix: the Monte Carlo pays the tax the Taxes tab computes, at the plan's conversion setting —
   which is built on Engine D's draws, so it waited for D-41.
-- **D-42 · A $40,000 car every 8 years, on every plan — OPEN.** `AUTO_REPLACE_COST = 40000`, spent in March of retirement years 8, 16 and 24 by
+- **D-42 · A $40,000 car every 8 years, on every plan — ✅ CLOSED v6.21** (`docs/SCOPE_D42_CAR_V621.md`; `qa/t84_car_rows.mjs`): a car is an expense row; see METHODOLOGY, *Cars are expense rows (v6.21)*. As filed: `AUTO_REPLACE_COST = 40000`, spent in March of retirement years 8, 16 and 24 by
   `runExtendedMC` when auto-replacement is on (the Stress and Dashboard figures, the mortgage what-if). Disclosed in the Field Manual as a
   fixed example schedule. On the example, 30-year success 81.0% with it and 84.8% without. **Conservative; low–medium.** A household that
   enters car purchases in the expense table pays twice. Candidate fix: a My Data field (cost and interval, 0 = none), as v6.17 did for the
   home-move cash.
-- **D-43 · The Income tab subtracts the example's $400 car payment — OPEN.** "Post-car draw" and "Monthly shortfall (car paid off)" are
+- **D-43 · The Income tab subtracts the example's $400 car payment — ✅ CLOSED v6.21** (six sites on two tabs, not four; the figure is read from the table). As filed: "Post-car draw" and "Monthly shortfall (car paid off)" are
   `POST_MONTHLY_FULL − 400` (four sites). Display only. **Low.** To be fixed with D-42.
 
 ## D-44 · One-time expenses: the Monte Carlo charges them in today's dollars; the Withdrawal tab misses one dated before retirement — opened at v6.18, DISCLOSED
@@ -861,7 +864,10 @@ changed at v6.18: inflating the Monte Carlo's one-time rows moves every Monte Ca
 Monte Carlo half in the Field Manual's Withdrawal Strategy entry, the Withdrawal-tab half in that tab's note; both in METHODOLOGY (*The
 Withdrawal tab spends the expense table year by year*).
 
-## D-47 · The Stress tab's "planned" benchmark ignores withdrawals — opened at v6.19
+## D-47 · The Stress tab's "planned" benchmark ignores withdrawals — opened at v6.19 — ✅ CLOSED v6.21
+
+> **CLOSED v6.21:** the Planned column is `runExtendedMC`'s own planned path at each snapshot, with the guardrails' own bands (`t84` A-7, F). Under BULL-LEANING the old column marked the example's median low in 16 of 31 yearly snapshots, the engine's path in none.
+
 
 The Stress tab's 30-year guardrail table shows "Lower (80%)", "Planned" and "Upper (120%)" columns computed as `household × 1.04^years` —
 the same benchmark `runExtendedMC`'s own comment says was replaced as its guardrail reference because it ignores withdrawals. Display only;
@@ -886,7 +892,10 @@ $14,479 on the example (BASE, $70K): $7,037 directly in 2029–2031 and $7,442 t
 **Either direction by engine; low–medium.** Kept as it is at v6.20 (DC-7 (a)); the taper is for its own release. Disclosed in the Field
 Manual's Monte Carlo entry and METHODOLOGY (*The Monte Carlo pays the Taxes tab's tax (v6.20)*).
 
-## D-50 · The mortgage what-if speaks to Florida — opened at v6.20
+## D-50 · The mortgage what-if speaks to Florida — opened at v6.20 — ✅ CLOSED v6.21
+
+> **CLOSED v6.21:** the sentence states the model's rule; the Roth tab's rules box, which said "Florida — no state income tax" to every plan (found at the D-42 scope, never registered), names the plan's state (`t84` G-3, G-7, H-4).
+
 
 The Monte Carlo tab's mortgage what-if tells every plan "Mortgage interest isn't deductible for you (standard deduction + no FL income
 tax)" — the example's state, typed in (`docs/SCOPE_D40_MC_TAX_V620.md` §0.1 item 4). Display only. **Low.** Not fixed at v6.20.
@@ -897,3 +906,37 @@ From v6.20 the Monte Carlo pays the Taxes tab's tax (DC-2 (a)); IRMAA — a Medi
 in it. $0 on the example and on the example's holdings ×1.6 in Georgia; $21,880 lifetime on the example at a $250,000 slider (BASE,
 measured at the v6.20 build). **Optimistic for high-income plans; low–medium.** Candidate fix: add Engine C's surcharge to the schedule
 (the scope's DC-2 (c)). Disclosed in the Field Manual's Monte Carlo entry and METHODOLOGY.
+
+## D-52 · My Data keeps a row's years only — opened at v6.21
+
+My Data's expense editor shows each row by year (`startYr` / `endYr`, or `oneYr` for a one-time row) and `buildExpenses` writes it back
+as `${startYr}-01` to `${endYr}-12` for a monthly row and `${year}-06` for a one-time row. Any row dated by month — the example's, a
+spreadsheet import's, a hand-edited backup's, and the *"Replacement car (added by v6.21 …)"* rows v6.21 adds to an older plan — is re-dated
+at the next Save & Apply. On the example: the Car Payment (April 2029 to April 2034) becomes January 2029 to December 2034, so eleven more
+months of it are spent (three before, eight after) and the "after the payments end" figure moves to January 2035; the golf cart and closing costs (April 2029) and the
+added cars (March) move to June. Found at the v6.21 build by `t84` G-11 (the added rows were stored as 2037-06 … 2061-06), where the
+one-time half is pinned as a dated `[KNOWN DEFECT]` so a fix flips it. Engine D, Backtest and What Breaks read one-time rows by year, so
+those do not move them; the Monte Carlo charges a one-time row in the quarter that contains its month (v6.20), so a January–March row is
+charged one quarter later (optimistic) and a July–December row one or two quarters earlier (conservative). A monthly row widened to whole
+years is spent for more months (conservative for a cost, optimistic where a row's end is what the plan is waiting for). **Low–medium,
+either direction.** Candidate fix: keep each row's stored months when its years are unchanged in the editor, and show the months.
+Disclosed in METHODOLOGY's v6.21 section.
+
+## D-53 · A new plan keeps the example's master prompt — opened at v6.21
+
+Start Fresh passes an empty master prompt, which the loader ignores, so the example's prompt stays loaded; the guided wizard does the same
+when its state step is skipped. The plan timeline takes the state from My Data's fields when they are set, else from the master prompt's
+state line — so a new plan that chooses no state is the example's Florida, at 0% state tax: the engines tax it so, the Taxes tab's footnote
+and the Roth tab's rules box say Florida, and Ask AI's context is the example's. Measured at the v6.21 build (Start Fresh's blank plan:
+state name "Florida", rate 0, no state code; the wizard with the state skipped: the same). The scope read it and did not run it (its §0);
+the build ran it. **Optimistic for a new plan in a state with an income tax that has not chosen it; low–medium** (My Data's state field
+fixes it for that plan). Candidate fix: Start Fresh and the wizard clear the master prompt, or the timeline ignores the demo prompt for a
+plan that is not the example. It narrows D-50's closure: the Roth tab's line now says what the Taxes tab says, which for such a plan is
+Florida.
+
+## D-54 · The guided wizard ends its living-expense row in 2079 — opened at v6.21
+
+The wizard writes the household's retirement living expenses as one monthly row ending `2079-12`. A plan whose horizon (the later spouse's
+plan-to year) is after 2079 spends nothing from 2080 — measured at the v6.21 review on a couple born 1975 and 1977 planning to 100 and 105:
+$78,000 in 2079, $0 in 2080. **Optimistic, for few plans; low.** From v6.21 the D-43 figure ("after the payments end") treats a table that
+spends nothing afterwards as having no such figure, so it is not shown as $0. Candidate fix: end the row at the plan's horizon.
