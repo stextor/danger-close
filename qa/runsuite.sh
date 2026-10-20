@@ -359,6 +359,12 @@ tally "t84-$CUR"   node t84_car_rows.mjs "$CUR"
 # pins what v6.22 changes as dated [KNOWN DEFECT] checks. Controls: qa/tools/controls_v622_prompt.py (repo-only).
 tally "t85-$PRIOR" node t85_prompt_carryover.mjs "$PRIOR"
 tally "t85-$CUR"   node t85_prompt_carryover.mjs "$CUR"
+# t86 (v6.23) — the built-in part-time work for spouse B reaches the example only (D-49): a plan that is not the example by its holdings,
+# or is single, or has an income stream, is paid none; the example is unmoved (every engine, bit for bit, against v6.22); every other plan
+# equals v6.22 with the work switched off; the My Data and Monte Carlo notices and the workRowsV623 marker; the wording. The v6.22 leg pins
+# what v6.23 changes as dated [KNOWN DEFECT] checks. Controls: qa/tools/controls_v623_work.py (repo-only).
+tally "t86-$PRIOR" node t86_builtin_work.mjs "$PRIOR"
+tally "t86-$CUR"   node t86_builtin_work.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

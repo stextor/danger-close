@@ -37,6 +37,7 @@ const VER = process.argv[2] || null;
 const { __g: g } = await import(VER ? `./app_${VER}.mjs` : "./app_testable.mjs");
 // v6.18 (D-41): v6.17's spending as a table (qa/tools/v617_spending.mjs) — see the tax-type block below for why it is used there.
 const { withV617Spending } = await import("./tools/v617_spending.mjs");
+const { exampleWorkRows } = await import("./tools/example_work_rows.mjs");
 // v6.21 (D-42): this suite's subject is not spending, so it runs on v6.20's table — the example's without its four car rows (a no-op on
 // any build before v6.21, which has none). The rows would otherwise land in its fixtures' years (a car in the year after a death; draws
 // that reach the example's own brokerage). t84 C proves v6.21 on that table reproduces v6.20 bit for bit.
@@ -298,7 +299,11 @@ const HH = {
   retireYear: 2027, lifeExpA: 90, lifeExpB: 92,
   bucketActuals: { 1: 0, 2: 0.4, 3: 0.6, 4: 0 },
   contributions: { monthly401k: 0, hsaMonthly: 0, spouseBMonthly: 0, contribPreTaxA: 0, contribRothA: 0, contribPreTaxB: 0, contribRothB: 0, allocations: {} },
-  incomeStreams: [],  // engine tests must neutralise global income streams
+  // v6.23 (D-49): through v6.22 this was `incomeStreams: []`, which did not neutralise the built-in spouse-B work — it switched it ON, so
+  // every t20 household ran on $20,000, $18,000 and $15,000 of spouse-B wages in 2027–2029. From v6.23 only the example household by its
+  // holdings is paid them, and E2's exact $724,266 moved with the wages. The household is DECLARED as it ran (DC-6's precedent below):
+  // the same wages, as job rows (qa/tools/example_work_rows.mjs). Measured: every t20 figure is unchanged on both legs.
+  incomeStreams: exampleWorkRows(2027),
   // v6.22 (D-53 sibling, DC-6): through v6.21 this was `incomeSources: {}`, and the loader silently inserted the example household's
   // Social Security ($3,300 at 67, $1,300 at 63) and pension ($400) — so every t20 household ran on that income while declaring none.
   // From v6.22 an absent block is paid $0. The household is DECLARED as it ran (the v5.37 precedent for the dates above): the same

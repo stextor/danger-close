@@ -230,8 +230,17 @@ try {
     ck("case 2 [EXTINCTION]: federal tax matches an independent Single-bracket computation",
       Math.abs(r.fed * 1000 - tax) <= 500,
       `shown $${r.fed}K vs hand-computed $${(tax / 1000).toFixed(1)}K`);
-    ck("case 2: the correction RAISES the single filer's tax (non-conservative defect removed)",
-      r.fed > 9, `$${r.fed}K — pre-fix showed $6.7K`);
+    // v6.23 (D-49): RE-PINNED. Through v6.22 this asserted `r.fed > 9` against the v5.14 build's $6.7K — both figures measured on a
+    // household that ran on the built-in spouse-B wages (every plan with no streams was paid them, single plans included; 2029 is this
+    // household's retirement year, $20,000). From v6.23 a single plan is paid none, so the row's tax falls to ~$6.6K with the deduction and
+    // the brackets still Single (the three EXTINCTION checks above). The statement is unchanged — the fix RAISES a single filer's tax
+    // above what married figures would charge — and is now made on this build's own row: the pre-v5.15 reading (MFJ_STD indexed, no
+    // age-65 extra, MFJ brackets — hand reference, Rev. Proc. 2025-32) charged on the SAME MAGI, by more than the ±$500 display band.
+    const BR_M = [[0.10, 24800], [0.12, 100800], [0.22, 211400], [0.24, 403550]];
+    let tiM = Math.max(0, r.magi * 1000 - dedRefK(2029, false, 0) * 1000), taxM = 0, prevM = 0;
+    for (const [rate, up] of BR_M) { const u = up * infl; const seg = Math.min(tiM, u) - prevM; if (seg > 0) taxM += seg * rate; prevM = u; if (tiM <= u) break; }
+    ck("case 2: the correction RAISES the single filer's tax (non-conservative defect removed) — above the married-figures tax on the same MAGI",
+      r.fed * 1000 - taxM > 500, `shown $${r.fed}K vs $${(taxM / 1000).toFixed(1)}K on married figures (MAGI $${r.magi}K); v6.22's household, with the built-in wages, showed more than $9K`);
   }
 
   // ── CASE 3 — the shared IRMAA threshold helper, not a fifth private copy ────────────────────

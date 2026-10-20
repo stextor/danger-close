@@ -27,13 +27,14 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v621";
-const KNOWN_VERSIONS = ["v620", "v621", "v622"];
+const KNOWN_VERSIONS = ["v620", "v621", "v622", "v623"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v621", "v622"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v621", "v622", "v623"].includes(VER);   // an array, so the next registration widens it
+const POST_D49 = ["v623"].includes(VER);   // v6.23 (D-49): H-2's taper sentence. An array, so the registrar widens it
 // The differential's pair — constants, NOT `VER === "v621"`, so the registrar cannot widen them (t76 records why).
 const D_PRIOR = "v620", D_CUR = "v621";
 const require = createRequire(import.meta.url);
@@ -399,8 +400,10 @@ console.log("  H — the Field Manual, METHODOLOGY and the extinct sentences");
   const METH = existsSync(join(HERE, "..", "METHODOLOGY.md")) ? readFileSync(join(HERE, "..", "METHODOLOGY.md"), "utf8") : null;
   if (POST) {
     T("H-1: the Field Manual's Monte Carlo entry has its v6.21 cars paragraph", DOCS.includes("<strong>Its cars (v6.21).</strong> A car is a one-time row in your expense table"));
-    T("H-2: the honest-limits bullet: cars are expense rows, and the spouse-B taper applies to every plan with no income streams",
-      DOCS.includes("<strong>Cars are expense rows (v6.21).</strong>") && /applies to every plan with no income streams, single plans included; entering any income stream/.test(DOCS));
+    // v6.23 (D-49): the taper's half of the bullet follows its rule — every plan with no streams through v6.22, the example alone from v6.23 (t86 G-1)
+    T(`H-2: the honest-limits bullet: cars are expense rows, and the spouse-B taper ${POST_D49 ? "belongs to the example household alone (v6.23)" : "applies to every plan with no income streams"}`,
+      DOCS.includes("<strong>Cars are expense rows (v6.21).</strong>") && (POST_D49 ? /belongs to the example household alone; entering any income stream/.test(DOCS)
+        : /applies to every plan with no income streams, single plans included; entering any income stream/.test(DOCS)));
     T("H-3 [EXTINCTION]: no text says the taper applies only to the demo data, or that auto-replacement is a fixed example schedule",
       !/applies only to the demo data/.test(allText) && !/Auto-replacement is a fixed example schedule/.test(allText));
     T("H-4 [EXTINCTION]: no text tells every plan it lives in Florida (the mortgage what-if; the Roth rules box reads the plan)",

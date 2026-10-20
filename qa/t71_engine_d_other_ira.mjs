@@ -30,18 +30,18 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v608";
-const KNOWN_VERSIONS = ["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622"];
+const KNOWN_VERSIONS = ["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622"].includes(VER);   // an array, so register_tag2 widens it each release
+const POST = ["v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623"].includes(VER);   // an array, so register_tag2 widens it each release
 const { __g: g, __engines: E } = await import(pathToFileURL(join(HERE, `app_${VER}.mjs`)).href);
 // v6.18 (D-41): Engine D reads the expense table year by year, which moved three §D figures (lifetime RMDs and a cap-year conversion). PIN18 picks the v6.18 figures (measured at the build);
 // the v6.18 leg is ALSO run with DC_V617_SPENDING=1 — each plan loaded with v6.17's spending as a table (qa/tools/v617_spending.mjs, split
 // at that plan's own Medicare year) — where every v6.17 figure must still come out exactly: the attribution of each move to the read.
-const POST_D41 = ["v618", "v619", "v620", "v621", "v622"].includes(VER);   // an array, so the registrar widens it
+const POST_D41 = ["v618", "v619", "v620", "v621", "v622", "v623"].includes(VER);   // an array, so the registrar widens it
 const SPEND17 = POST_D41 && process.env.DC_V617_SPENDING === "1";
 const PIN18 = POST_D41 && !SPEND17;
 const P41 = (v617, v618) => PIN18 ? v618 : v617;
@@ -49,7 +49,7 @@ const P41 = (v617, v618) => PIN18 ? v618 : v617;
 // rides on its draws after 2036 moved. PIN21 picks the v6.21 figures (measured at the build). The v6.21 leg is ALSO run with
 // DC_V620_TABLE=1 — the example's table without its car rows, which is v6.20's — and there every v6.20 figure must come out exactly: that
 // second run attributes each move to the rows alone (runsuite.sh, "<suite>-<cur>-table620"; t84 C proves v6.21 on that table IS v6.20).
-const POST_D42 = ["v621", "v622"].includes(VER);   // an array, so the registrar widens it
+const POST_D42 = ["v621", "v622", "v623"].includes(VER);   // an array, so the registrar widens it
 const TABLE620 = POST_D42 && process.env.DC_V620_TABLE === "1";
 const PIN21 = POST_D42 && !TABLE620;
 const P42 = (v620, v621) => PIN21 ? v621 : v620;
@@ -72,7 +72,14 @@ const BASE = clone(g.PORTFOLIO());
 const consistent = p => { const t = (p.positions || []).reduce((s, r) => s + (r.balance || 0), 0), o = (p.otherAccounts || []).reduce((s, a) => s + (a.balance || 0), 0);
   const bs = { 1: 0, 2: 0, 3: 0, 4: 0 }; (p.positions || []).forEach(r => { if (r.bucket >= 1 && r.bucket <= 4) bs[r.bucket] += r.balance || 0; });
   return { ...p, total401k: t, household: t + o, bucketActuals: t > 0 ? { 1: bs[1] / t, 2: bs[2] / t, 3: bs[3] / t, 4: bs[4] / t } : p.bucketActuals }; };
-const NO_PRETAX = p => ({ ...p, contributions: { ...p.contributions, monthly401k: 0, spouseBMonthly: 0, contribPreTaxA: 0, contribPreTaxB: 0 } });
+// v6.23 (D-49): through v6.22 a plan with no streams was paid the built-in spouse-B work ($20,000, $18,000 and $15,000 in its retirement
+// year and the two after), so every fixture here ran on those wages. From v6.23 only a plan holding the example's holdings is paid them, and
+// §D's pins moved with the wages. NO_PRETAX's fixtures (none holds the example's holdings) therefore DECLARE the wages they ran on, as job
+// rows (qa/tools/example_work_rows.mjs). Measured: every t71 figure is unchanged on both legs. EXAMPLE and NO_OTHER_TRAD keep the example's
+// holdings and are still paid the built-in work; SINGLE is paid none from v6.23, which moves no figure here.
+const { exampleWorkRows } = await import("./tools/example_work_rows.mjs");
+const RY_EX = g.PLAN_TIMELINE().targetRetireYear;
+const NO_PRETAX = p => ({ ...p, incomeStreams: exampleWorkRows(RY_EX), contributions: { ...p.contributions, monthly401k: 0, spouseBMonthly: 0, contribPreTaxA: 0, contribPreTaxB: 0 } });
 const scale = f => BASE.positions.map(p => ({ ...p, balance: p.balance * f, trad: (p.trad || 0) * f, roth: (p.roth || 0) * f }));
 const F = {
   EXAMPLE: BASE,                                                        // $104,000 of Other-account IRA, spent before RMD age
