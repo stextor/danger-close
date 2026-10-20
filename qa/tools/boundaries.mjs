@@ -368,6 +368,19 @@ export function census(G) {
       : _same ? "the table's cars are exactly the old fixed schedule, so the rows and the old constant cannot be told apart in the Monte Carlo here"
       : _cars.length === 0 ? "reachable — no car in the table: none is charged" : "reachable — a car schedule of the household's own");
 
+  // ── v6.22 (D-53 — SCOPE_D53_PROMPT_V622) · the condition that hid it (§K1) ───────────────────────────────────────────────
+  // 9. THE MASTER PROMPT HELD. Through v6.21 a plan that arrived without a master prompt kept the one already held — the example's — and
+  //    read the example's dates of birth, plan-to ages, state and home from it. The example itself always holds its own prompt, whose facts
+  //    are its own (from v6.22 equal to its fields), so a fix that let the demo prompt reach other plans again could not be seen on it. The
+  //    demo prompt is recognised by its own "[DEMO / SAMPLE DATA]" title marker — a text marker read from the held prompt, not a figure.
+  const _mpHeld = typeof G.MASTER_PROMPT === "function" ? (G.MASTER_PROMPT() || "") : "";
+  const _isDemo = /\[DEMO \/ SAMPLE DATA\]/.test(_mpHeld);
+  row("demo_prompt", "the master prompt held",
+    _isDemo ? "the example's demo prompt" : _mpHeld ? "a prompt of the plan's own" : "none",
+    "a prompt that is not the example's", _isDemo,
+    _isDemo ? "the household holds the example's own prompt, whose facts are its own, so the example's facts reaching another plan cannot be seen here"
+      : _mpHeld ? "reachable — a fact the plan lacks is read from its own prompt" : "reachable — no prompt: a fact the plan lacks is a placeholder");
+
   return rows;
 }
 
