@@ -108,6 +108,7 @@ if (MODE === "compare") {
     // gone) and charge one-time rows in their own quarter, inflated — so `mc`, `extMC` and `stress` MUST move. The seven other keys must
     // not: Engine A's four fingerprints, `ssTable`, `stateTax` and `inflation` (t83 H proves Engines B, C and D bit-identical as well).
     "v619→v620": ["mc", "extMC", "stress"],
+    "v620→v621": ["extMC", "stress"],   // v6.21 (D-42): the car is an expense row — every 30-year run charges the example's rows (and the planned path pays them); the 6-year run holds no car
   };
   const expectDiff = new Set(INTENDED_DIFFS[`${PRIOR}→${CUR}`] || []);
   for (const key of Object.keys(a)) {
