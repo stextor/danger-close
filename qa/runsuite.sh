@@ -372,6 +372,11 @@ tally "t86-$CUR"   node t86_builtin_work.mjs "$CUR"
 # Controls: qa/tools/controls_v624_months.py (repo-only).
 tally "t87-$PRIOR" node t87_expense_months.mjs "$PRIOR"
 tally "t87-$CUR"   node t87_expense_months.mjs "$CUR"
+# t88 (v6.25) — My Data's holdings table, one control per cell (F-21): plan type in its own headed column (a dash for a Roth row), a divider
+# under each row, the footer's totals under their own columns, the plan type still saved. Structure only (jsdom does no layout); the v6.24 leg
+# pins both defects as dated [KNOWN DEFECT] checks. Controls: qa/tools/controls_v625_columns.py (repo-only).
+tally "t88-$PRIOR" node t88_holdings_columns.mjs "$PRIOR"
+tally "t88-$CUR"   node t88_holdings_columns.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

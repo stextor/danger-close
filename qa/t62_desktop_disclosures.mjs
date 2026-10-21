@@ -10,7 +10,7 @@
 //          B EXTINCTION: the glossary's terms in case-insensitive order, the "Authoritative sources" footer last (v5.97 pins the one pair)
 // BOTH LEGS. Reads the source by parser (DOCS_HTML is one string literal). Run: node t62_desktop_disclosures.mjs <tag>
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624"];
+const KNOWN_VERSIONS = ["v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  ✓ ${n}`); } else { fail++; console.log(`  ✗ ${n}${d !== "" ? " — " + String(d).slice(0, 260) : ""}`); } };
 const done = () => { console.log(`\nt62 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
