@@ -2831,10 +2831,12 @@ line, so the example's line reads as before).
 - **Engine D inflates a row from the retirement year, the Monte Carlo from the as-of date** (the v5.10 house rule): the same $40,000 row reads
   $49,657 in Engine D's 2037 and a different figure on each Monte Carlo path.
 - **A car loan** is the user's to enter as monthly rows; no financing is modelled.
-- **Saving re-dates rows to whole years (D-52, open).** My Data's editor keeps a row's years only: Save & Apply stores a monthly row from
-  January to December and a one-time row in June. The first save moves an older plan's added cars from March to June of the same year — no
-  change in Engine D, Backtest or What Breaks, which read the year; one quarter later in the Monte Carlo — and widens the example's Car
-  Payment from April 2029 – April 2034 to January 2029 – December 2034.
+- **Saving re-dated rows to whole years (D-52, closed at v6.24).** My Data's editor kept a row's years only: Save & Apply stored a monthly row
+  from January to December and a one-time row in June. The first save moved an older plan's added cars from March to June of the same year — no
+  change in Engine D, Backtest or What Breaks, which read the year; one quarter later in the Monte Carlo — and widened the example's Car
+  Payment from April 2029 – April 2034 to January 2029 – December 2034. *(Wider than this bullet said, measured at v6.24: the save re-dated
+  31 of the example's 35 rows and made 2029 pay for both homes, and the draft and Export Backup did the same — see* My Data keeps each
+  expense row's months (v6.24) *at the end of this document.)*
 - **Its sibling, found at the build (D-53; closed at v6.22, next section).** A new plan that chose no state kept the example's master prompt
   and was taxed as its Florida; the Roth tab's line said what the Taxes tab said, so for such a plan it said Florida too.
 
@@ -2933,3 +2935,54 @@ with no income streams loses the wages: the figures above, in the directions abo
   credit them, and the Monte Carlo pays their tax: conservative by $14,479 on the example (measured at v6.20, above). Moving them into
   visible rows needs a phase rule for the Income tab and a fix for its phone layout — its own release. MissingFeatures **D-49**.
 - **Backtest and What-Breaks credit no income stream** (MissingFeatures **D-57**) — conservative.
+
+## My Data keeps each expense row's months (v6.24)
+
+**What was wrong (v6.23, measured).** Every engine reads the expense table to the month (`tableYearExpense`, `getMonthlyExpense`, the Monte
+Carlo's quarter read). My Data's editor did not: it opened each row with its **year** only and wrote it back as January–December (a monthly
+row) or June (a one-time row). Every Save & Apply, every draft and every backup exported from My Data did this, edited or not. One unedited
+save of the example moved 31 of its 35 rows: the current home's costs ran to December 2029 and the next home's from January, so **2029 paid
+for both homes all year** ($126,280 → $157,720 of table spending, in today's dollars); primary Medicare started in January 2028; the Car
+Payment ran January 2029 – December 2034; the one-time rows and the v6.21 cars moved to June. With the portfolio held fixed, the Withdrawal
+tab's end balance fell $89,825 and the post-retirement monthly figure the header, Dashboard, Income tab and Ask AI quote rose from $8,170 to
+$10,810. A guided-setup plan (its rows split at June/July of the retirement year) ran both rows through that whole year: its retirement-year
+spending doubled. The loss was one-time and cannot be undone: the months are not in a saved table, and no backup exported from My Data keeps
+them. Mostly conservative (more months of spending); optimistic for a one-time row dated January–May (charged later by the Monte Carlo)
+and a negative-amount row. Two siblings: the editor's *Before retirement* default ran through December of the retirement year — the model
+retires on **1 January** (`buildPlanTimeline`) — so a table built in My Data paid its pre-retirement rows for the first twelve months of
+retirement as well; and the guided setup paid six months of pre-retirement living costs after retiring and stopped spending in December 2079
+(D-54).
+
+**What changed.**
+- **The editor shows and keeps months.** Each row has a month selector beside each year (one for a one-time row); a row opens with its stored
+  months and is written back with them, every other field passing through (`note`, any unknown field). An unedited save, draft or export
+  stores each well-formed row as it loaded: an unedited date is written back verbatim (a stored `"2029"` or `"2026-03-15"` included), and
+  an unedited numeric amount keeps its cents. The two exceptions are in the next bullet.
+- **What is still normalised**, for rows the editor cannot otherwise show: a blank label is named, a missing category is "Other", a missing
+  phase is "both", a row with no amount and no label is dropped, a missing start or end is filled (January of this year; December of the
+  horizon year — so a row that was never charged starts being charged, the conservative reading). Two apply to well-formed rows too: a
+  one-time row's phase follows its date (no engine reads `phase`), and the retired category name "Future Home Life" is saved as
+  "Retirement Life". A `deductible` key is written only when the row had one or the box is ticked. An amount typed or converted in the
+  editor, or stored as text, is saved as the nearest whole dollar a month (an annual $1,000 is $83 a month, $996 a year).
+- **The defaults split at the retirement date.** *Before retirement* runs from January of this year to December of the year before the
+  retirement year; *After retirement* from January of the retirement year; both read the editor's own retirement-year field, so a change
+  made in the same session counts. A plan already at or past its retirement year has no time before it: the default is the one month
+  before retirement, shown. "Retirement" is the household's date (spouse A's), as everywhere in the model.
+- **The guided setup** splits its two living-expense rows at the retirement date and runs the second to the plan's horizon — the later
+  spouse's plan-to year. A plan retiring this year gets one row.
+
+**What moves.** The example as it loads: nothing — no engine changed, and every engine, both Monte Carlo engines and every tab are identical
+to v6.23. After a save the expense table no longer moves anything. A row added from v6.24 with *Before retirement* costs twelve months less in
+the retirement year (they were a double count). A wizard plan built from v6.24 moves by six months of its pre/post difference in the
+retirement year, either way; its post-retirement monthly figure is its post amount; and it spends after 2079.
+
+**Simplifications, stated.**
+- **A plan saved before v6.24 keeps the dates it was given** — January to December, one-time costs in June. The editor's footnote says to
+  check them; nothing can tell a re-dated table from one entered in whole years. Plans the guided setup built before v6.24 keep their June
+  split and their 2079 end.
+- **An unedited Save & Apply also moves the plan's as-of date to today** and takes spouse A's pre-tax contribution from the per-paycheck
+  fields (a plan holding only a monthly total reads $0 there — the contribution-accrual section above). Not changed here (MissingFeatures **D-58**).
+- **A blank year falls back to today's year**, not the plan's as-of year (D-56). A retirement-year field that is not a year (blank, or
+  half-typed) falls back to the saved plan's for the *When* defaults. The horizon the defaults use is the saved plan's: a date of birth or
+  plan-to age changed in the same session counts from the next save.
+

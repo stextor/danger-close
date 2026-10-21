@@ -1,5 +1,151 @@
 # Changelog
 
+## v6.24 — My Data keeps each expense row's months (D-52); the leave dialog's save saves (D-59)
+
+**A MODELLING release.** METHODOLOGY gains *My Data keeps each expense row's months (v6.24)*; its v6.21 D-52 bullet is closed and corrected.
+The scope is `docs/SCOPE_D52_EXPENSE_MONTHS_V624.md` (repo-only, fulfilled). Steve, *"Let's do D-52."*, then all five decisions as
+recommended: DC-1 (a) *"Show them"*, DC-2 (a) *"Split at retirement"*, DC-3 (a) *"Split + end at horizon"*, DC-4 (c) and DC-5 (a). On
+D-59, found at the build: *"Fix it in v6.24"*. Built on v6.23 (source `a683637e…`).
+
+**What was wrong (v6.23, measured by driving the real Save & Apply).** Every engine reads the expense table to the month. My Data's editor
+read each row's year only. `buildExpenses` wrote a monthly row back as January–December and a one-time row as June. It did this on every
+Save & Apply, every draft and every Export Backup, edited or not.
+
+One unedited save of the example re-dated 31 of its 35 rows:
+- 2029 paid for both homes all year: table spending $126,280 → $157,720 (2028 $81,300 → $85,800, 2034 $93,040 → $96,240).
+- With the portfolio held fixed, the Withdrawal tab's end balance fell $89,825.
+- The post-retirement monthly figure rose from $8,170 to $10,810.
+
+A guided-setup table saved in My Data doubled its retirement-year spending ($81,000 → $162,000). The loss cannot be undone: a second save
+changes nothing more, and no exported backup keeps the months. The save also dropped each row's notes.
+
+Two siblings:
+- the editor's *Before retirement* default ran through December of the retirement year, but the model retires on 1 January;
+- the guided setup split its rows at June/July and stopped spending in 2079 (D-54).
+
+**What changed.**
+- **The editor shows and keeps months (DC-1 (a)).** A month selector sits beside each year, one for a one-time row. A row opens with its
+  stored months and is written back with them. Every other field passes through, notes and unknown fields included. An unedited save,
+  draft or export stores each well-formed row as it loaded: an unedited date is written back verbatim (`"2029"` and `"2026-03-15"`
+  included), and an unedited numeric amount keeps its cents. METHODOLOGY lists what is still normalised. One item applies to well-formed
+  rows too: a one-time row's phase follows its date (no engine reads it). A text amount becomes a number.
+- **The defaults split at the retirement date (DC-2 (a)).** *Before retirement* ends in December of the year before the retirement year;
+  *After retirement* starts in January of it. Both read the editor's live retirement-year field.
+- **The guided setup (DC-3 (a))** splits at the retirement date and runs its second row to the plan's horizon. A plan retiring this year
+  gets one row. D-54 is closed for new wizard plans.
+- **Plans already saved (DC-4 (c))** keep their re-dated rows. The editor's footnote now always carries a line telling a plan saved before
+  v6.24 to check its months. Older guided-setup plans are told they still split at June and stop in 2079, there and in Field Manual §13.
+- **A half-typed retirement year** (outside 1900–2200) no longer drives the *When* defaults; the saved plan's year does.
+- **Amounts (DC-5 (a))** typed or converted in the editor are whole dollars a month, as before, and the footnote says so. The footnote
+  also says where a one-time cost is charged: the Monte Carlo in its quarter, the year-by-year tabs in its year.
+- **The Field Manual's** My Data table says what is kept, and §13 records the change.
+- **The four version sites** read v6.24.
+
+**D-59 — found at the build, fixed (Steve's decision).** The unsaved-edits dialog's **SAVE & APPLY, THEN LEAVE** saved nothing from v5.9.2
+to v6.23. It switched tabs, then called the editor's save 40 ms later. By then the editor had unmounted and unregistered the save. Confirmed
+in Chromium on the live v6.23 page: the tab's own Save & Apply stored an edit; the dialog's button stored nothing, and the dashboard kept the
+old plan. The button now saves in its own handler, after setting the remembered tab to the target. The Field Manual §13 says so.
+
+**What it moved.** **The example as it loads: no figure.** No engine changed: `t2` parity 10/10 with no intended difference, and the
+Withdrawal tab is byte-identical in `domdiff`. An unedited save now stores the table exactly as loaded (`t87` A-1, A-8). §B restates that
+at the engine level, with the portfolio held fixed. On the example and the wizard table it compares, bit for bit:
+- `tableYearExpense` for 2026–2075;
+- Engine D's schedule;
+- the Monte Carlo's tax schedule;
+- both seeded Monte Carlo engines;
+- the headline monthly figures and the *after the payments end* figure.
+
+A row added from v6.24 with *Before retirement* costs twelve months less in the retirement year — they were a double count, so this is
+optimistic only against v6.23. A wizard plan built from v6.24 moves by six months of its pre/post difference in the retirement year, either
+way, and it spends after 2079, which is conservative.
+
+**Found and filed, not fixed:** MissingFeatures **D-58**. An unedited Save & Apply also stores spouse A's pre-tax contribution from the
+per-paycheck fields; the example's $2,500 a month becomes $0. This is conservative, and disclosed since v5.10. **D-56** is extended: a blank
+year falls back to today's year. OPERATIONS **§C4** gains two traps: an unedited save is not a no-op on the portfolio, and a DOM remount does
+not reset the plan.
+
+**Tests.** New suite **`t87`**, run on both legs. The v6.23 leg pins each defect as a dated `[KNOWN DEFECT]`; D-59 has its own tag.
+- **§A, the round trip**, through the real controls:
+  - on the example: Save & Apply and a second save, Export Backup, the draft autosave, and the draft's restore;
+  - on every fixture household: Save & Apply;
+  - the v6.21 car rows: their dates;
+  - a backup with cents, notes and an unknown field: Save & Apply and the leave dialog's save, which also lands on the chosen tab;
+  - the wizard's v6.23 table;
+  - by name: the edge rows the editor normalises, and dates it cannot have written (`"2029"`, `"2029-4"`, a day, a text amount);
+  - the stored Ask AI EXPENSES line.
+- **§B, nothing moves.** The engines before and after an unedited save, as listed under *What it moved*.
+- **§C, edits:** year and month edits, every *When* default, the live retirement year (and a half-typed one), a plan retiring this year,
+  and the preview read by month.
+- **§D, the guided setup** driven through its screens: the default, a horizon past 2079, single, and retiring this year.
+- **§E, rendered and by AST:** the footnote (with its older-plan and older-wizard lines), the header, the selectors, the preview; no date
+  template in `buildExpenses`; no year slice in the editor; the Field Manual and METHODOLOGY.
+
+**Counts**, from the full suite run from the packaged copies:
+- **8,548 app checks across 86 app suites, 0 failed, 0 DIED**;
+- MC parity 10/10, with no intended difference;
+- tooling: `t21` 64, `domdiff` 32, `sets` 12 + 12;
+- GRAND **8,678**.
+
+`t87` runs **73** current and **43** on the v6.23 leg. It ends with `A-9c`/`A-9d`, which pin the leave handler's order by AST.
+
+**Existing suites.** `v624` is registered by the registrar (378 sites) and by hand: `t1` and `t4` get their own value-map arms, `t33` PINS
+(unchanged, confirmed by running), and `t45`, `t47`, `t48`. `t84` G-11 flips from its June pin to March, as the scope said it would. Nothing
+else moved:
+- the ten suites that press Save & Apply are green with unchanged counts;
+- the layout suites `t45` (390 px) and `t48` (24 px targets) are green on the new selectors;
+- `t86` runs 44 on both legs, down from 58: its v6.22 → v6.23 pair sections take their designed, printed skip in a v6.23 → v6.24 run folder;
+- `domdiff` runs 32, down from 35: its v622 → v623 mask arm no longer applies.
+
+**Controls.** `qa/tools/controls_v624_months.py` (repo-only): **26 of 26 as expected**, each planting one defect back:
+- the January–December write, the June write, a year-only load;
+- the selectors hidden, the pass-through removed;
+- each old default and each old wizard boundary;
+- Export Backup, the draft and its restore through the old builder;
+- an unedited amount rounded, a text amount kept, a stored date losing its year, verbatim dates removed, a half-typed retirement year;
+- the preview by whole year;
+- each new disclosure sentence removed;
+- the leave dialog's old timer, and the remembered tab not set;
+- the unmutated run.
+
+Every file was restored and hash-checked. One control (C17) was MISSED on the first full run; that is owned item 3.
+
+**Independent reviews.** The scope was reviewed before Steve saw it: 13 findings, all taken. Among them was the portfolio move
+behind D-58, so §B holds the portfolio fixed.
+
+The build was reviewed by an agent that had not seen it: 15 findings, no blocker, all taken or recorded (scope §7). Three were code:
+- a stored date with no two-digit month (`"2029"`, `"2029-4"`) lost its year on save — now every unedited date is written back verbatim;
+- a text amount was kept as text — now saved as the number;
+- a half-typed retirement year drove the defaults.
+
+The rest:
+- one test (A-4b) could not see a re-dating, and control C1 reported it MISSED — it now compares with the table as loaded;
+- older wizard plans were said to be disclosed and were not — now they are;
+- the draft's restore and the month-aware preview were untested — now tested;
+- four undocumented normalisations — two removed, two stated;
+- the docs' coverage claims were reworded to what runs;
+- copy and cosmetics.
+
+Two items are recorded, not fixed: the wizard with a cleared retirement year (with D-56), and the leave path if a save were rejected
+(D-59's residual, unreachable in practice).
+
+The review confirmed by parser:
+- the three `buildExpenses` callers;
+- that no remaining path builds a date from the year alone;
+- the sibling census (0 deferred reads of an unregistered channel on v6.24);
+- the four version sites;
+- the −$89,825, by its own re-dating against the v6.23 module.
+
+⚠ **Owned.**
+1. The scope's first draft said an unedited save "moves nothing". It also moves the portfolio (D-58); found by its review.
+2. Three ships (v6.21, v6.22, v6.23) each added a `TESTING.md` per-suite line and moved none, so the page held six where it keeps three. The
+   four oldest move to the archive now. The archive's manifest row had also stopped at v6.07's line; corrected.
+3. The first D-59 fix saved and then landed back on My Data. `t87` passed it, because it checked only the stored table. A Chromium check of
+   the built page found it. The harness cannot see it either (jsdom flushes the effect that records the tab), so A-9d pins the handler's
+   order by AST, with control C17.
+
+**Provenance.** Source `2ff32ac0792535e62510afe3d881b5fb` · built `index.html` `8663f198ed4ff2c8153fe3414be1a097` (vite 5.4.21, `npm ci`;
+the immediately-prior v6.23 rebuilt byte-identically to `34455a91…`) · `smoke_built` 22/22.
+
 ## v6.23 — the built-in part-time work for spouse B is the example's alone (D-49)
 
 **A MODELLING release** — METHODOLOGY gains *Built-in work is the example's alone (v6.23)*. `docs/SCOPE_D49_WORK_TAPER_V623.md` (repo-only,
