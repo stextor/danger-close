@@ -28,18 +28,18 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v613";
-const KNOWN_VERSIONS = ["v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623"];
+const KNOWN_VERSIONS = ["v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624"].includes(VER);   // an array, so the next registration widens it
 // v6.18 (D-41): Engine A taxes the spending draw it gets from the bridge, and that draw moved with Engine D's year-by-year spending read —
 // so the recovered crossover in §E moved a year (2062 → 2061). PIN18 picks the v6.18 figure; the v6.18 leg is ALSO run with
 // DC_V617_SPENDING=1, where §E's households load v6.17's spending as a table (qa/tools/v617_spending.mjs) and the v6.17 figure must
 // come out exactly.
-const POST_D41 = ["v618", "v619", "v620", "v621", "v622", "v623"].includes(VER);   // an array, so the registrar widens it
+const POST_D41 = ["v618", "v619", "v620", "v621", "v622", "v623", "v624"].includes(VER);   // an array, so the registrar widens it
 const SPEND17 = POST_D41 && process.env.DC_V617_SPENDING === "1";
 const PIN18 = POST_D41 && !SPEND17;
 const { v617Table } = await import(pathToFileURL(join(dirname(fileURLToPath(import.meta.url)), "tools", "v617_spending.mjs")).href);

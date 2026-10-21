@@ -365,6 +365,13 @@ tally "t85-$CUR"   node t85_prompt_carryover.mjs "$CUR"
 # what v6.23 changes as dated [KNOWN DEFECT] checks. Controls: qa/tools/controls_v623_work.py (repo-only).
 tally "t86-$PRIOR" node t86_builtin_work.mjs "$PRIOR"
 tally "t86-$CUR"   node t86_builtin_work.mjs "$CUR"
+# t87 (v6.24) — My Data keeps each expense row's months (D-52): an unedited Save & Apply, Export Backup and the draft store the table as it
+# loaded; the engines are unmoved by a save (the portfolio held fixed); the When defaults split at the 1 January retirement, from the editor's
+# live retirement year; the guided setup splits there and runs to the plan's horizon (D-54). The v6.23 leg pins what v6.24 changes as dated
+# [KNOWN DEFECT] checks. Also D-59: the leave dialog's SAVE & APPLY, THEN LEAVE saves and lands on the chosen tab (A-9, A-9b, A-9d).
+# Controls: qa/tools/controls_v624_months.py (repo-only).
+tally "t87-$PRIOR" node t87_expense_months.mjs "$PRIOR"
+tally "t87-$CUR"   node t87_expense_months.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
