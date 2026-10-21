@@ -25,15 +25,19 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 
 | Field | Value |
 |---|---|
-| Version | **v6.24** |
-| Source file in knowledge | `DangerClose-v6_24.jsx` |
-| Source md5 | `2ff32ac0792535e62510afe3d881b5fb` |
-| Built `index.html` md5 | `8663f198ed4ff2c8153fe3414be1a097` |
-| Shipped | 2026-10-20 |
+| Version | **v6.25** |
+| Source file in knowledge | `DangerClose-v6_25.jsx` |
+| Source md5 | `d7df32a9a3091fc550eb1a56646c4270` |
+| Built `index.html` md5 | `a5d234feb1be2a58c584a72e14acd348` |
+| Shipped | 2026-10-21 |
 
-> ⚠ **v6.24 SHIPPED (2026-10-20) — My Data keeps each expense row's months (D-52); the leave dialog's save saves (D-59).** Source `2ff32ac0…` · built `8663f198…`.
+> ⚠ **v6.25 SHIPPED (2026-10-21) — My Data's holdings table gives plan type its own column (F-21).** Source `d7df32a9…` · built `a5d234fe…`.
+> A PRESENTATION release (no figure, engine or stored field changes; METHODOLOGY unchanged). Through v6.24 the Retirement holdings table's Tax type cell held the tax-type and plan-type dropdowns stacked, with no header for the second and no divider between rows, so the plan type read as the next holding's; and the footer's label spanned one column too many, so each total sat one column right. Plan type now has its own headed column (a dash for a Roth row), each row a divider, each total its own column.
+> New suite `t88`; `v625` registered (`t33` PINS unchanged). UsabilityFlaws F-21 filed and fixed. `TESTING.md`'s v6.22 per-suite line moved to the archive. **Rotation:** the pool loses `DangerClose-v6_24.jsx` (v6.24 is read from history, commit `115c051`) and gains `DangerClose-v6_25.jsx`. **Pool stays 16.**
+>
+> *(**v6.24 SHIPPED (2026-10-20) — My Data keeps each expense row's months (D-52); the leave dialog's save saves (D-59).** Source `2ff32ac0…` · built `8663f198…`.
 > A MODELLING release (METHODOLOGY gains *My Data keeps each expense row's months (v6.24)*). Through v6.23 My Data's editor read each row's year only, and every Save & Apply, draft and Export Backup wrote a monthly row as January–December and a one-time row as June: one unedited save of the example re-dated 31 of its 35 rows and made 2029 pay for both homes. The editor now shows and keeps months, writes an unedited date back verbatim, and passes every other field through. *Before retirement* ends in December of the year before the 1 January retirement. The guided setup splits there and runs to the plan's horizon (D-54 closed for new plans). D-59, found at the build: the unsaved-edits dialog's *Save & Apply, then leave* had saved nothing since v5.9.2. The example's figures do not move (`t2` 10/10 identical).
-> New suite `t87`; `v624` registered; `t84` G-11 flips from June to March. MissingFeatures D-52 and D-59 closed, D-54 closed for new wizard plans, D-56 extended, D-58 opened. OPERATIONS §C4 gains two traps. `TESTING.md`'s per-suite lines rotated, after three ships moved none. **Rotation:** the pool loses `DangerClose-v6_23.jsx` (v6.23 is read from history, commit `aced4a4`) and gains `DangerClose-v6_24.jsx`. **Pool stays 16.**
+> New suite `t87`; `v624` registered; `t84` G-11 flips from June to March. MissingFeatures D-52 and D-59 closed, D-54 closed for new wizard plans, D-56 extended, D-58 opened. OPERATIONS §C4 gains two traps. `TESTING.md`'s per-suite lines rotated, after three ships moved none. **Rotation:** the pool lost `DangerClose-v6_23.jsx` (commit `aced4a4`) and gained `DangerClose-v6_24.jsx`. **Pool stayed 16.**)*
 >
 > *(**v6.23 SHIPPED (2026-10-20) — the built-in part-time work for spouse B is the example's alone (D-49).** Source `a683637e…` · built `34455a91…`.
 > A MODELLING release (METHODOLOGY gains *Built-in work is the example's alone (v6.23)*): `spouseBWorkTaper`'s $20,000 / $18,000 / $15,000 of spouse-B wages, paid through v6.22 to every plan with no income streams (single plans included), now reaches only the example household (its holdings, married, no streams — `builtinWorkApplies`); a plan saved before v6.23 that loses them is told so on My Data and the Monte Carlo tab until Save & Apply writes `workRowsV623`. The wording that named spouse B's work for every plan is corrected, and two false sentences with it (What-Breaks credits no stream; the Roth ladder's earned-income term is not narrower). The example's figures do not move (`t2` 10/10 identical; `t86` §B).
@@ -107,12 +111,12 @@ or a reason here (OPERATIONS §I).
 
 | Pool file | md5 | Repo path |
 |---|---|---|
-| `CHANGELOG.md` | `13ee60380d2b5fbf8125dfa9de870c1a` | `CHANGELOG.md` |
+| `CHANGELOG.md` | `00392db341152b21e096896c6190f9ef` | `CHANGELOG.md` |
 | `METHODOLOGY.md` | `938dcf8dc4cc383fd56a7e2afeedec8e` | `METHODOLOGY.md` |
 | `MissingFeatures.md` | `8e99318ef2f9da5dd4cdd6b846fbba8a` | `docs/MissingFeatures.md` |
 | `OPERATIONS.md` | `0468ef1e62c1a445128d98d56ea1443f` | `docs/OPERATIONS.md` — **rolled 2026-09-09** at the run-folder ops package: §B gained the `mk_runfolder.sh` pointer, and §D gained **D1** (the named existence-only assertion class) and **D2** (the `t29` F-6a/F-6b defect pin). *(Previously `f33c2e0cfd…`.)* |
 | `README.md` | `eec58396f932b3209de79c2400dbfb88` | `README.md` |
-| `TESTING.md` | `d4895d7ac8cd5714f1de29c9ec78e85b` | `TESTING.md` |
+| `TESTING.md` | `b5b3a36393df556bd34b60928c011312` | `TESTING.md` |
 | `index.html` | `247816be583271d50cf13e0a02e18cdf` | `src/index.html` — the **Vite entry template**, **restored to the pool 2026-08-20** after being found absent (see the build-scaffold row below). ⚠ **Not the built app.** The published single-file `index.html` is repo-only output and never enters the pool; its md5 is in the Current build table and is different by construction |
 | `main.jsx` | `d9eca7b469a3fb7ec1c5325fd4bf8145` | `src/main.jsx` |
 | `package.json` | `9ee8d745bc9f32d6e8fa02e623603423` | `package.json` — The pinned toolchain, and a **build input** rather than a suite file — given a row 2026-08-23 for a measured reason: `npm i <pkg>` in a run folder rewrites it with resolved versions, so it drifts as a side effect of setting the folder up. That is why OPERATIONS §N3a installs jsdom with `--no-save`, and it is the drift `package_check`'s new G-1 caught on its first real use |
@@ -122,11 +126,13 @@ or a reason here (OPERATIONS §I).
 
 | Field | Value |
 |---|---|
-| Version | **v6.23** |
-| Source file in knowledge | — **not pooled**: repo history, commit `aced4a4`, found by this md5 |
-| Source md5 | `a683637e75ce6816cd9a077644534542` |
-| Built `index.html` md5 | `34455a918eb2c65bb2d34841fcedafbf` |
+| Version | **v6.24** |
+| Source file in knowledge | — **not pooled**: repo history, commit `115c051`, found by this md5 |
+| Source md5 | `2ff32ac0792535e62510afe3d881b5fb` |
+| Built `index.html` md5 | `8663f198ed4ff2c8153fe3414be1a097` |
 
+> **Rolled 2026-10-21 at the v6.25 ship.** The pair is now **v6.24 prior / v6.25 current**; both tables rolled in one edit (K-7, which counts 625 − 1 = 624). Commit `115c051` is the first to carry the v6.24 source (`aab7c3d` and `d3ba063`, earlier v6.24 uploads, carry v6.23's source beside v6.24's page).
+>
 > **Rolled 2026-10-20 at the v6.24 ship.** The pair is now **v6.23 prior / v6.24 current**; both tables rolled in one edit (K-7, which counts 624 − 1 = 623). Commit `aced4a4` is the first to carry the v6.23 source (`cf2803b` and `a03651a`, earlier v6.23 uploads, carry v6.22's).
 >
 > **Rolled 2026-10-20 at the v6.23 ship.** The pair is now **v6.22 prior / v6.23 current**; both tables rolled in one edit (K-7, which counts 623 − 1 = 622).
@@ -584,7 +590,7 @@ package, which is the failure mode the section above this one records twice.
 | `CHANGELOG_ARCHIVE_pre_v5_60.md` | — **repo-only, never pooled** — `docs/CHANGELOG_ARCHIVE_pre_v5_60.md`: every CHANGELOG entry for v5.59 and earlier, moved verbatim 2026-09-15 (§G). The provenance lines for those releases live here |
 | `CHANGELOG_ARCHIVE_v5_60_to_v5_74.md` | — **repo-only, never pooled** — `docs/CHANGELOG_ARCHIVE_v5_60_to_v5_74.md`: every CHANGELOG entry from v5.60 through v5.74, with the ops entries between them, moved verbatim 2026-09-28 (§G), checked byte for byte against the removed block. Never edited. |
 | `CHANGELOG_ARCHIVE_v5_75_to_v5_99.md` | — **repo-only, never pooled** — `docs/CHANGELOG_ARCHIVE_v5_75_to_v5_99.md`: every CHANGELOG entry from v5.75 through v5.99, with the ops entries between them, moved verbatim 2026-10-11 (§G), checked byte for byte against the removed block. Never edited. |
-| `TESTING_ARCHIVE_per_suite_v5_53_to_v6_01.md` | — **repo-only, never pooled** — `docs/TESTING_ARCHIVE_per_suite_v5_53_to_v6_01.md`: `TESTING.md`'s per-suite count lines from v6.21 back to v5.53, moved verbatim — v6.01 and earlier on 2026-10-11, checked byte for byte; v6.02's to v6.17's one per ship at the v6.05 to v6.20 ships; v6.18's to v6.21's together at the v6.24 ship, after the v6.21, v6.22 and v6.23 ships moved none. Its header's *Added since* rows record each. Lines are only ever added, verbatim (the name predates all of them). ⚠ *Corrected at v6.24: this row had stopped at v6.07's line since the v6.11 ship.* |
+| `TESTING_ARCHIVE_per_suite_v5_53_to_v6_01.md` | — **repo-only, never pooled** — `docs/TESTING_ARCHIVE_per_suite_v5_53_to_v6_01.md`: `TESTING.md`'s per-suite count lines from v6.22 back to v5.53, moved verbatim — v6.01 and earlier on 2026-10-11, checked byte for byte; v6.02's to v6.17's one per ship at the v6.05 to v6.20 ships; v6.18's to v6.21's together at the v6.24 ship, after the v6.21, v6.22 and v6.23 ships moved none. v6.22's at the v6.25 ship. Its header's *Added since* rows record each. Lines are only ever added, verbatim (the name predates all of them). ⚠ *Corrected at v6.24: this row had stopped at v6.07's line since the v6.11 ship.* |
 | `CHANGELOG_ARCHIVE_v6_00_to_v6_15.md` | — **repo-only, never pooled** — `docs/CHANGELOG_ARCHIVE_v6_00_to_v6_15.md`: every CHANGELOG entry from v6.00 through v6.15, with the four ops entries between them, moved verbatim 2026-10-19 (§G); §0 header names the one thread re-homed (`t38`, to `TESTING.md`). |
 | `TESTING_ARCHIVE_release_notes_to_v5_40.md` | — **repo-only, never pooled** — `docs/TESTING_ARCHIVE_release_notes_to_v5_40.md`: `TESTING.md`'s per-release write-ups to v5.40 (51 paragraphs of its opening section), moved verbatim 2026-10-19 (§G); §0 trace. |
 | `MANIFEST_ARCHIVE_test_hash_table_to_v6_20.md` | — **repo-only, never pooled** — `docs/MANIFEST_ARCHIVE_test_hash_table_to_v6_20.md`: this manifest's *Test and harness file hashes* section, moved verbatim 2026-10-19 when `qa/` left the pool (DC-2 (a)); §0 records what went where. |
@@ -630,6 +636,22 @@ retired and superseded. They get no row because there is no file. Checked 2026-0
 committed tree, so the next sweep does not re-open them.
 
 ## Retirement list (delete-first; nothing replaces these)
+
+### At the v6.25 ship (2026-10-21) — DELETE THESE FIRST
+
+**Rotation:** delete `DangerClose-v6_24.jsx`; `DangerClose-v6_25.jsx` arrives. **Pool stays 16.** Count from the Projects listing (OPERATIONS §I, no-mount note).
+
+| Delete | Because |
+|---|---|
+| `DangerClose-v6_24.jsx` | **rotated out** — v6.24 is read from the repo's history (commit `115c051`) |
+| `CHANGELOG.md` | replaced — the v6.25 entry |
+| `PROJECT_KNOWLEDGE_INDEX.md` | replaced — this edit; the per-suite archive's row; `CHANGELOG.md`'s row rolled last |
+| `TESTING.md` | replaced — the v6.25 per-suite line, v6.22's moved to the archive; `t88`'s and `dom_entry_v625.jsx`'s rows |
+| `UsabilityFlaws.md` | replaced — F-21 filed and fixed (its census row and §H entry) |
+
+**Arriving new:** `DangerClose-v6_25.jsx`. **Repo-only:** every `qa/` change (`t88_holdings_columns.mjs`, `dom_entry_v625.jsx`,
+`controls_v625_columns.py` new; the registered suites, `t33` PINS, `runsuite.sh`), `docs/TESTING_ARCHIVE_per_suite_v5_53_to_v6_01.md`
+(v6.22's line and note appended), the scope (`docs/SCOPE_F21_HOLDINGS_PLAN_TYPE_V625.md`, fulfilled), the built `index.html`.
 
 ### At the v6.24 ship (2026-10-20) — DELETE THESE FIRST
 

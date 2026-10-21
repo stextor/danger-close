@@ -1,5 +1,69 @@
 # Changelog
 
+## v6.25 — My Data's holdings table gives plan type its own column (F-21)
+
+**A PRESENTATION release.** No figure, engine or stored field changes, so METHODOLOGY does not change. The scope is
+`docs/SCOPE_F21_HOLDINGS_PLAN_TYPE_V625.md` (repo-only, fulfilled). Steve, with a screenshot of My Data: *"under the My data tab in the
+retirement, the fields don't line up (or it confusing what ticker the tax type belongs to. They don't line up"*; then DC-1 (a) *"Own
+column"*. Built on v6.24 (source `2ff32ac0…`).
+
+**What was wrong (v6.24, measured in Chromium on the built page at 1440 px).** My Data's *Retirement holdings* table had eleven columns.
+Its Tax type cell held two dropdowns stacked: the tax type and, for a row with Traditional dollars, the plan type (added at v5.91). The
+second had no column header, and rows had no divider. The spacing between a row's two dropdowns was about the spacing between rows (32 and
+34 CSS px, top to top), so the plan type read as the next ticker's.
+
+A sibling in the same table, found measuring it: the footer's *Total annual fees →* spanned nine columns where eight stood before
+*$/yr fee*. So the fee total ($652 on the example) sat under *Contrib split %*, the contribution total under the delete column, and a
+fourth footer cell ran past the table's last column (to x = 1403 against a header ending at 1097). It had been so since the footer was
+written.
+
+**What changed.**
+- **A *Plan type* column** after *Tax type*, headed, with the plan-type help as its tooltip. It holds the plan-type dropdown for a row with
+  Traditional dollars and a dash for a Roth row. The dropdown's label, options, value and handler are unchanged; only its cell moved.
+- **One control per cell**, and **a divider under each row**. Rows are one line high: 66–67 px → 35–36 px in Chromium.
+- **The footer's span stays nine**, which with the new column is the nine columns before *$/yr fee*: each total sits under its own column.
+- The table's minimum width grows by the new column (880 → 1000 px); on a narrow screen it already scrolls inside its own box.
+- **Field Manual §13** records the change. **The four version sites** read v6.25.
+
+**What it moved.** No figure. `t2` parity 10/10 with no intended difference; `t33` PINS for v6.25 equal v6.24's, confirmed by running.
+
+**Tests.** New suite **`t88`**, run on both legs, by structure (jsdom does no layout):
+- **§A, on the example:** a *Plan type* column after *Tax type*; every row as many cells as the header; no cell with more than one control;
+  the plan-type dropdown in its column on every row; a divider under each row; the footer's label spanning exactly the columns before
+  *$/yr fee*, each total under its own column, and the footer as wide as the header.
+- **§B:** a row switched to Roth has no dropdown and shows a dash; switched back to Traditional, its dropdown returns in its column with the
+  plan type it had. A plan type chosen in the new column is stored by Save & Apply and shown on return.
+- **§E:** the Field Manual sentence, read by AST.
+
+`t88` runs **19** current and **15** on the v6.24 leg, which pins the stacked cell, the missing header and the footer one column too wide
+as dated `[KNOWN DEFECT 2026-10-21, F-21]` checks. Row heights are a layout fact: measured in Chromium at the build (scope §6).
+
+**Counts**, from the full suite run from the packaged copies:
+- **8,612 app checks across 87 app suites, 0 failed, 0 DIED**;
+- MC parity 10/10, with no intended difference;
+- tooling: `t21` 64, `domdiff` 32, `sets` 12 + 12;
+- GRAND **8,742**.
+
+**Existing suites.** `v625` is registered by the registrar (381 sites) and by hand: `t1` and `t4` get their own value-map arms, `t33` PINS
+(unchanged), and `t45`, `t47`, `t48`. No existing suite's current-leg count moved. On the prior leg `t87` reads 73 where it read 43, because the prior leg is now
+v6.24, which carries the fix it pins. Every suite that touches a holdings dropdown finds it by its
+options or its label, never by position (the scope's census).
+
+**Controls.** `qa/tools/controls_v625_columns.py` (repo-only): **8 of 8 as expected**, each planting one defect back — the dropdown back
+under the tax type, the header removed, the footer one column too wide, no divider, the Roth cell empty, the handler dropped, the Field
+Manual sentence removed — and the unmutated run. Every file was restored and hash-checked.
+
+**Independent review.** The build was reviewed by an agent that had not seen it: no blocker; three should-fix and three notes, all taken
+(scope §7). Two were tests: nothing checked a Roth row made Traditional again (now `B-00`/`B-2b`; control C6 fires it), and the v6.24 leg
+did not pin the footer's extra column (now `A-7`). The rest were the scope's wording. The review confirmed by parser and in Chromium the cell
+counts on both builds and both branches, each total's column, the unchanged dropdown, that nothing else in the app or Field Manual says
+where the dropdown sits, the four version sites, and that every other `qa/` change is version registration.
+
+⚠ **Owned.** The scope's first draft said the v6.24 table had twelve columns; it had eleven. Found by the review.
+
+**Provenance.** Source `d7df32a9a3091fc550eb1a56646c4270` · built `index.html` `a5d234feb1be2a58c584a72e14acd348` (vite 5.4.21, `npm ci`;
+the immediately-prior v6.24 rebuilt byte-identically to `8663f198…`) · `smoke_built` 22/22.
+
 ## v6.24 — My Data keeps each expense row's months (D-52); the leave dialog's save saves (D-59)
 
 **A MODELLING release.** METHODOLOGY gains *My Data keeps each expense row's months (v6.24)*; its v6.21 D-52 bullet is closed and corrected.
