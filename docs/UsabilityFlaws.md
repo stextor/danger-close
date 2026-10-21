@@ -42,6 +42,7 @@
 > | F-19r | **FIXED v6.11** — filed at v6.10 as "F-19" (§H) | `t74`; `docs/SCOPE_F19R_RANKING_HEADLINE.md` |
 > | F-20 | **OPEN** — filed at v6.23 (§H) | the Income tab's stream list scrolls sideways at 390 px for a plan with income streams (scrollWidth 510); `t45` runs on the example, which has none |
 > | F-21 | **FIXED v6.25** — filed and fixed together (§H) | `t88`; `docs/SCOPE_F21_HOLDINGS_PLAN_TYPE_V625.md` |
+> | F-22 | **OPEN** — filed at v6.26 (§H) | the Grade tab's *RECOMMENDED ACTIONS* are directives (an LTC policy "for both spouses" on any plan whose expense table names no LTC row, "Execute Roth conversion ladder … (fill 22% bracket each year)" on every plan); found by the D-55 scope's review |
 > | F-15b | **OPEN** | "Success (>$1,500K)" beside a sibling "Success Rate (>$1.25M)" — still in the source |
 > | F-16 | **FIXED v5.98** | the pair swapped; `t62` holds every term in order (was: "API Key" before "Agency MBS") |
 > | §E-1 / §E-2 | **OPEN** | no physical-device pass; no keyboard / screen-reader pass (4 `aria-label`s in the app) |
@@ -447,4 +448,20 @@ footer's *Total annual fees →* spanned nine columns where eight stood before *
 footer cell ran past the table's last column — so since the footer was written. **Fixed:** plan type has its own headed column (a dash for a
 Roth row), each row has a divider, and each total sits under its own column; measured in Chromium at 1440 px (rows 66–67 px → 35–36 px).
 Nothing stored or computed changed. `t88` pins the structure on both legs.
+
+### F-22 · The Grade tab tells the user what to do — **MED (honesty of an output)** — OPEN
+
+**Filed at v6.26** (`docs/SCOPE_D55_AI_GROUND_RULES_V626.md` §0.3 item 4, found by its independent review; not fixed). The app reports what the
+model computes, never advice, and its comparisons say so (*"the model's best cell"*). From v6.26 Ask AI is told not to tell the user which
+financial decision to make. The Grade tab's *"PATH TO {grade} — RECOMMENDED ACTIONS"* panel does: read at v6.26, its list (`improvements`, in the
+Grade tab's render) is
+- *"Secure hybrid LTC insurance policy for both spouses"* — on any plan whose expense table has no row labelled LTC or long-term (a single plan
+  included), with a projected grade lift;
+- *"Execute Roth conversion ladder {start}–{end} (fill 22% bracket each year)"* — on every plan, whatever its brackets or the Roth tab's best cell;
+- *"Complete N survivor-critical estate item(s): …"* — from the checklist, an administrative task rather than a financial choice.
+
+Its own comment says *"No allocation/rebalancing actions in this build — … allocation decisions are the user's alone"*, so the line it draws is
+narrower than the one Ask AI now follows. **Who it reaches:** every user who opens the Grade tab. Candidate fix (its own scope, decisions for
+Steve): reword the panel as the model's findings (*"the model's grade rises if…"*) or drop the actions, and tie the Roth line to the Roth tab's
+best cell rather than a fixed 22% bracket.
 
