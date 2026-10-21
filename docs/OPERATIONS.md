@@ -616,10 +616,20 @@ cited line; this list is what a session reading only the pool now needs. **Open 
 - **Never add synchronous `getItem`/`setItem`/`removeItem` aliases to a storage shim** (`t37`'s, `t5`/`t6`'s, or `src/main.jsx`): the suite
   would agree with the A-3 defect and mask it. `t37` L27–30.
 - **`T38_SKIP_DOM=1` is for `qa/tools/controls_v572_import.py` only**; a run with it set says so on its summary line. `t38` L300.
+- **A DOM suite's remount does not reset the plan.** The DOM bundle's module-level globals (the loaded plan among them) survive
+  `window.__mount` again, so a suite that relies on the *Use example data* landing after an earlier section saved a plan sees that plan
+  instead and never reaches the landing. Seed storage with the plan the section needs and revisit the tab, and assert the seed landed
+  (`t87` §C/§E: `seed(PS, X0)`, C-00/E-0). Found at the v6.24 build, where §C first read the guided-setup table §A had just built.
 
 **Writing an assertion**
 - **`t10`'s `T` compares with EPS = $0.01, sized for dollars: assert a RATE as a boolean**, or it passes for anything within a cent (found by
   control C1, which a reverted 4% build passed). `t10` L984–987.
+- **An unedited Save & Apply on My Data is not a no-op on the portfolio** (v6.24 scope finding; MissingFeatures **D-58**): it re-stamps
+  `asOf` to today (intended) and, for a plan holding only a monthly pre-tax contribution with no per-paycheck figures, stores spouse A's
+  `contribPreTaxA` as 0 (the example's $2,500 a month → $0). A test that compares
+  figures before and after a save must hold the portfolio fixed and change only the table — or it measures D-58 and calls it the change
+  under test. `t87` §B holds `P0` fixed for exactly this reason. The v6.24 scope's first draft said "an unedited save moves nothing" and
+  was wrong on this point.
 - **Anchor a regex structural pin at line start (`^\s*const …`)**: the app's own comments quote retired expressions, and *"a comment must
   never be able to satisfy a structural pin."* `t1` L624–627, L698–701, L733, L808. `t19`'s `totalToWithdraw` extinction is a text scan with
   comment lines filtered — a TRAILING comment naming the identifier would fail it (loudly). `t19` L289–296.
