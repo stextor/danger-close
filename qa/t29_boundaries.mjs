@@ -34,7 +34,7 @@ let _s = 42; Math.random = () => { _s = (_s * 1103515245 + 12345) & 0x7fffffff; 
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v546";
-const KNOWN_VERSIONS = ["v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625"];
+const KNOWN_VERSIONS = ["v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -145,19 +145,19 @@ for (const [name, spec] of Object.entries(HOUSEHOLDS)) {
     const before = by(example, id), after = by(rows, id);
     // v6.08 (D-34): the IRA-RMD row reads Engine D's `rmdSleeve_y`, which builds before v6.08 do not publish — there it reads "n/a" on
     // every household, so the flip cannot happen and that is asserted instead (a gate, not a skip).
-    if (id === "oth_ira_rmd" && !["v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625"].includes(VER)) {
+    if (id === "oth_ira_rmd" && !["v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626"].includes(VER)) {
       T(`C-${name}/${id} (pre-v6.08 build): the row reads n/a on both households — the IRA's RMD is not published here`,
         !!after && before.value.startsWith("n/a") && after.value.startsWith("n/a"), after ? after.value : "row missing");
       continue;
     }
     // v6.16 (D-36): the self-employment row reads `SE_MIN_NET`, which builds before v6.16 do not have — "n/a" on every household there.
-    if (id === "self_employed" && !["v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625"].includes(VER)) {
+    if (id === "self_employed" && !["v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626"].includes(VER)) {
       T(`C-${name}/${id} (pre-v6.16 build): the row reads n/a on both households — self-employment is not modelled here`,
         !!after && before.value.startsWith("n/a") && after.value.startsWith("n/a"), after ? after.value : "row missing");
       continue;
     }
     // v6.17 (D-38): the home-move row reads the accessor, which builds before v6.17 do not have — "n/a" on every household there.
-    if (id === "home_move" && !["v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625"].includes(VER)) {
+    if (id === "home_move" && !["v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626"].includes(VER)) {
       T(`C-${name}/${id} (pre-v6.17 build): the row reads n/a on both households — the cash is a constant here`,
         !!after && before.value.startsWith("n/a") && after.value.startsWith("n/a"), after ? after.value : "row missing");
       continue;
@@ -196,9 +196,9 @@ T("C-reverse: 'ladder_windows' goes from clear to ON when both spouses share a b
 // -- C-se . the v6.16 row reads the §1402(b)(2) floor, not merely "a self-employed row exists": $430 of profit is $397.11 net, under $400.
 {
   const fl = by(at("selfEmployedFloor"), "self_employed");
-  T(["v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625"].includes(VER) ? "C-se-1: a self-employed row under the $400 floor leaves the row ON — the floor is read, not just the flag"
+  T(["v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626"].includes(VER) ? "C-se-1: a self-employed row under the $400 floor leaves the row ON — the floor is read, not just the flag"
                            : "C-se-1 (pre-v6.16 build): the row reads n/a under the floor too",
-    !!fl && fl.onBoundary && (["v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625"].includes(VER) ? /^0 yr/.test(fl.value) : fl.value.startsWith("n/a")), fl ? fl.value : "row missing");
+    !!fl && fl.onBoundary && (["v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626"].includes(VER) ? /^0 yr/.test(fl.value) : fl.value.startsWith("n/a")), fl ? fl.value : "row missing");
 }
 
 // -- C-car . the v6.21 row clears when the table's cars differ from the old schedule: none at all, and one moved by a year.
@@ -208,7 +208,7 @@ T("C-reverse: 'ladder_windows' goes from clear to ON when both spouses share a b
     G.applyLoadedData({ portfolio: JSON.parse(JSON.stringify(BASE)), expenses: JSON.parse(JSON.stringify(X0)) }); return by(r, "car_rows"); };
   const none = withTable(X0.filter(e => !/\bcars?\b/i.test(String(e.label || "")) || e.freq !== "once"));
   const moved = withTable(X0.map(e => e.freq === "once" && e.start === "2037-03" && /\bcars?\b/i.test(String(e.label || "")) ? { ...e, start: "2038-03", end: "2038-03" } : e));
-  const POST621 = ["v621", "v622", "v623", "v624", "v625"].includes(VER);
+  const POST621 = ["v621", "v622", "v623", "v624", "v625", "v626"].includes(VER);
   T(POST621 ? "C-car-1: a table with no car reads clear (none is charged), and one with a car a year later reads clear (the household's own)"
             : "C-car-1 (pre-v6.21 build): the row reads n/a whatever the table holds",
     !!none && !!moved && (POST621 ? !none.onBoundary && /^0 one-time car rows/.test(none.value) && !moved.onBoundary
@@ -219,7 +219,7 @@ T("C-reverse: 'ladder_windows' goes from clear to ON when both spouses share a b
 {
   G.applyLoadedData({ portfolio: JSON.parse(JSON.stringify(BASE)), expenses: JSON.parse(JSON.stringify(G.EXPENSES())) });   // no prompt passed
   const r = by(census(G), "demo_prompt");
-  const POST622 = ["v622", "v623", "v624", "v625"].includes(VER);   // an array, so the next registration widens it
+  const POST622 = ["v622", "v623", "v624", "v625", "v626"].includes(VER);   // an array, so the next registration widens it
   T(POST622 ? "C-prompt-1: a household loaded without a master prompt holds none — the row reads clear"
             : "C-prompt-1 [KNOWN DEFECT 2026-10-20, D-53 — flips at v6.22]: a household loaded without a prompt keeps the example's — the row stays ON",
     !!r && (POST622 ? !r.onBoundary && r.value === "none" : r.onBoundary), r && r.value);
@@ -234,7 +234,7 @@ T("C-reverse: 'ladder_windows' goes from clear to ON when both spouses share a b
   G.applyLoadedData({ portfolio: P1, expenses: JSON.parse(JSON.stringify(X0)) });
   const r = by(census(G), "example_work");
   G.applyLoadedData({ portfolio: JSON.parse(JSON.stringify(BASE)), expenses: JSON.parse(JSON.stringify(X0)), useDefaults: true });
-  const POST623 = ["v623", "v624", "v625"].includes(VER);   // an array, so the next registration widens it
+  const POST623 = ["v623", "v624", "v625", "v626"].includes(VER);   // an array, so the next registration widens it
   T(POST623 ? "C-work-1: a household whose holdings are not the example's is paid no built-in work — the row reads clear"
             : "C-work-1 [KNOWN DEFECT 2026-10-20, D-49 — flips at v6.23]: a household whose holdings are not the example's is still paid the built-in work — the row stays ON",
     !!r && (POST623 ? !r.onBoundary && r.value === "none" : r.onBoundary), r && r.value);
@@ -243,9 +243,9 @@ T("C-reverse: 'ladder_windows' goes from clear to ON when both spouses share a b
 // -- C-hm . the v6.17 row clears at $0 too: "no move" is a figure of the household's own, not the old constant.
 {
   const z = by(at("homeMoveNone"), "home_move");
-  T(["v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625"].includes(VER) ? "C-hm-1: a plan with no home move ($0) reads clear — it differs from the old constant"
+  T(["v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626"].includes(VER) ? "C-hm-1: a plan with no home move ($0) reads clear — it differs from the old constant"
                            : "C-hm-1 (pre-v6.17 build): the row reads n/a at $0 too",
-    !!z && (["v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625"].includes(VER) ? !z.onBoundary && /^\$0 at retirement/.test(z.value) : z.onBoundary && z.value.startsWith("n/a")), z ? z.value : "row missing");
+    !!z && (["v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626"].includes(VER) ? !z.onBoundary && /^\$0 at retirement/.test(z.value) : z.onBoundary && z.value.startsWith("n/a")), z ? z.value : "row missing");
 }
 
 // ── §D · the branch-report rows, which cannot flip within one household ──────────────────

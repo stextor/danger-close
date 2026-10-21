@@ -19,7 +19,7 @@ import { createRequire } from "module";
 import { d30Pins, d30Tax } from "./d30_ref.mjs";
 const require = createRequire(import.meta.url);
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625"];
+const KNOWN_VERSIONS = ["v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; console.log(`  \u2717 ${n}${d ? " \u2014 " + String(d).slice(0, 240) : ""}`); } };
 const done = () => { console.log(`\nt54 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
@@ -31,14 +31,14 @@ const g = window.__g; const SR = g.STATE_RULES();
 // v6.02 (D-30 batch 1 — docs/SCOPE_D30_DEDUCTIONS_V602.md, DD-14): WV, MD and ME take their deductions and exemptions (MD its senior credit).
 // Each pin keeps its BASE and on a D-30 leg expects it after them (qa/d30_ref.mjs, on the calculator's own record of the call). The grid
 // recovers each household's base from that record and holds its tax to the reference on it, so the relief stays measured. A version LIST.
-const D30L = ["v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625"].includes(VER), D30 = d30Pins((a) => g.stateTaxAnnual(a), SR, D30L);
+const D30L = ["v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626"].includes(VER), D30 = d30Pins((a) => g.stateTaxAnnual(a), SR, D30L);
 const EQ = (n, got, exp) => CK(n + D30.tag(), Math.abs(got - exp) <= 0.005, `engine ${Number(got).toFixed(4)}, hand ${Number(exp).toFixed(4)}`);
 const T = (code, o) => D30.S({ code, pen: 0, work: 0, capGains: 0, ssGrossA: 0, ssGrossB: 0, ageB: null, single: true, ...o });
 // v6.01 (D-22 batch 2, SCOPE_D22_BRACKETS_V601): West Virginia, Maryland and Maine move to their own schedules (Maryland with its 3.30 % county
 // tax). Every hand figure keeps its BASE — the modification arithmetic this suite pins — and, on the v6.01 leg, expects that base on the state's
 // schedule, computed here from t65 §A's transcription (`SX`, a v6.00 figure rate × base -> the base's tax). §X recovers the relief by inverting
 // the schedule (`SBASE`, bisection: each schedule is strictly increasing) instead of dividing by the rate. A version LIST.
-const BR2 = ["v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625"].includes(VER);
+const BR2 = ["v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626"].includes(VER);
 const _bs = (rows, x) => { let t = 0, lo = 0; for (const [u, r] of rows) { const hi = u === null ? Infinity : u; if (x <= lo) break; t += (Math.min(x, hi) - lo) * r; lo = hi; } return t; };
 const _S2 = { WV: [0.0482, [[10000, .0211], [25000, .0281], [40000, .0316], [60000, .0422], [null, .0458]], [[10000, .0211], [25000, .0281], [40000, .0316], [60000, .0422], [null, .0458]], 0],
   MD: [0.075, [[1000, .02], [2000, .03], [3000, .04], [100000, .0475], [125000, .05], [150000, .0525], [250000, .055], [500000, .0575], [1000000, .0625], [null, .065]],

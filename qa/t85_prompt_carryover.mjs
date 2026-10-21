@@ -29,13 +29,13 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v622";
-const KNOWN_VERSIONS = ["v621", "v622", "v623", "v624", "v625"];
+const KNOWN_VERSIONS = ["v621", "v622", "v623", "v624", "v625", "v626"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v622", "v623", "v624", "v625"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v622", "v623", "v624", "v625", "v626"].includes(VER);   // an array, so the next registration widens it
 // The differential's pair — constants, NOT `VER === "v622"`, so the registrar cannot widen them (t76 records why).
 const D_PRIOR = "v621", D_CUR = "v622";
 const require = createRequire(import.meta.url);
@@ -321,7 +321,9 @@ console.log("  D — rendered (Start Fresh, My Data, Taxes, Roth, Ask AI, Rankin
   const gotPre = await waitFor(() => !!pre(), 90000);
   T("D-7a: SETUP — Ask AI shows what it sends", gotPre);
   if (gotPre) {
-    if (POST) T("D-7: a plan begun with Start Fresh sends no demo briefing — the preview is its live context only", !pre().textContent.startsWith(demoHead) && !/Spouse A & Spouse B  \[DEMO/.test(pre().textContent), pre().textContent.slice(0, 80));
+    // v6.26 (D-55): the app's ground rules now come first, so startsWith(demoHead) alone would always pass; compare what follows them.
+    const _afterRules = t => t.replace(/^GROUND RULES — [^]*?\n\n/, "");
+    if (POST) T("D-7: a plan begun with Start Fresh sends no demo briefing — the preview is its live context only", !_afterRules(pre().textContent).startsWith(demoHead) && !/Spouse A & Spouse B  \[DEMO/.test(pre().textContent) && /^\n*═+\nLIVE PORTFOLIO CONTEXT/.test(_afterRules(pre().textContent)), _afterRules(pre().textContent).slice(0, 80));
     else T(`D-7 ${KD}: until its first save a Start Fresh plan sends the example's briefing`, pre().textContent.startsWith(demoHead), pre().textContent.slice(0, 80));
   }
   await go("my data");

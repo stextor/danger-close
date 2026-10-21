@@ -377,6 +377,11 @@ tally "t87-$CUR"   node t87_expense_months.mjs "$CUR"
 # pins both defects as dated [KNOWN DEFECT] checks. Controls: qa/tools/controls_v625_columns.py (repo-only).
 tally "t88-$PRIOR" node t88_holdings_columns.mjs "$PRIOR"
 tally "t88-$CUR"   node t88_holdings_columns.mjs "$CUR"
+# t89 (v6.26) — Ask AI's ground rules reach every plan (D-55): a fixed header first in the system text on every route and every way into a
+# plan, exactly once, stored nowhere; the live context's own lines; the copy. Both legs (the v6.25 leg pins the absence). Spawns itself once
+# with --claude for the claude.ai route; prints one count line.
+tally "t89-$PRIOR" node t89_ai_ground_rules.mjs "$PRIOR"
+tally "t89-$CUR"   node t89_ai_ground_rules.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
