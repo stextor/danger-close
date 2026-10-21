@@ -1,5 +1,134 @@
 # Changelog
 
+## v6.26 — Ask AI's ground rules reach every plan (D-55)
+
+**Not a modelling release.** No figure, engine or stored field changes. METHODOLOGY changes in one place only: §11's list of what Ask AI
+sends, which said *"nothing else"* and is now complete. The scope is `docs/SCOPE_D55_AI_GROUND_RULES_V626.md` (repo-only, fulfilled).
+Steve, *"go D-55"*; then all six decisions as recommended: DC-1 (a) *"Every plan"*, DC-2 (a) *"No directives"*, DC-3 (a) *"Leave it, header
+wins"*, DC-4 to DC-6 (a). Built on v6.25 (source `d7df32a9…`).
+
+**What was wrong (v6.25, measured in Chromium on the built page).** Ask AI's system text was the plan's briefing plus a live context. The
+only ground rules any request carried were the demo briefing's Section 1 (*"Educational Only … do NOT recommend target asset allocations or
+specific securities"*). So the unsaved example had them (16,166 characters sent), and every other plan had none:
+- the example after one Save & Apply (2,087 characters);
+- Start Fresh, before a save (1,258) and after (1,912);
+- the guided setup, and a backup with or without its own text.
+
+The one guard left was a clause on the asset-mix line. That is wider than the register's wording, which named only plans saved from My Data.
+
+Siblings in the same text:
+- the live context's header said it *"supersedes Section 2 balances"*, a section only the demo has;
+- it told every plan it held *"Hybrid LTC insurance per master prompt"*, which the app has no field for;
+- it stated the pension's joint-and-survivor option as the plan's election, when it is the model's assumption;
+- it sent a single household a spouse;
+- it gave each retirement year's *"success"* without saying it means ending above $800K;
+- it gave the Roth conversion years with no amount, so a plan at $0 was told it converts.
+
+**What changed.**
+- **A fixed ground-rules header** (`AI_GROUND_RULES`) goes first in the system text with every question, on every route: Anthropic with a
+  key, claude.ai without one, and a Local Model. It says it takes precedence over what follows and that answers are educational only, with
+  no financial directives. Results are to be described as *"the model's best cell"* and the decision left to the user. It also says the
+  assistant is not an adviser, must use the figures given and invent none, and must say which year a tax figure applies to.
+- It is added at send time and **stored nowhere** — not in the plan, a draft, the conversation or a backup. No saved data changes, and a
+  backup cannot remove it.
+- **The demo briefing is byte-identical** (DC-3). Its older *"Senior Portfolio Manager … fiduciary"* voice and its *"Run Section 6"*
+  plan requests are overridden by the header's precedence line. On the example, such a request now comes back as trade-offs.
+- **The live context** says *"supersedes any balances stated above"*. The LTC sentence is gone. The pension is *"(the model continues it
+  in full to a survivor)"*, and a single household has no survivor clause. A single household is named alone, with no spouse B income. Each
+  success rate reads *"success (ends above $800K)"*. The Roth line names the slider amount the results ran at, or says there are no
+  conversions at $0.
+- **Copy.** The Ask AI tab's *EXACTLY WHAT'S SENT* sentence names the ground rules. The Field Manual's master-prompt section names them, as
+  instructions a model can still ignore. §10's table gains a row for them. The cost passage is re-measured (below), and §13 records the
+  change. METHODOLOGY §11 lists everything Ask AI sends. The four version sites read v6.26.
+
+**What it moved.** No figure: MC parity 10/10 with no intended difference, and `t33` PINS for v6.26 equal v6.25's. What one question
+sends grew by the header's 1,263 characters. Measured as `t66` counts it (request characters ÷ 4):
+| Plan | v6.25 | v6.26 |
+|---|---|---|
+| The example | ≈ 4,137 | ≈ 4,480 |
+| A plan entered and saved | ≈ 564 | ≈ 907 |
+| The same plan, unsaved | ≈ 350 | ≈ 691 |
+
+So the Field Manual's *"roughly 1,000 to 5,000 tokens"* was already wrong at its lower end for every real plan. It now reads *"roughly 600
+to 1,500 tokens for a plan you entered yourself, and about 4,500 for the example's longer sample briefing"*. The 1,500 upper end is a margin
+for longer plans, not a measurement, and characters ÷ 4 is an estimate, not a tokenizer. The pinned *"about one to five cents"* still holds.
+
+**Found and filed, not fixed:** UsabilityFlaws **F-22**. The Grade tab's *"PATH TO {grade} — RECOMMENDED ACTIONS"* tells the user to *"Secure
+hybrid LTC insurance policy for both spouses"* (on any plan whose expense table names no LTC row) and to *"Execute Roth conversion ladder …
+(fill 22% bracket each year)"* (on every plan). Those are the app's own directives, which Ask AI is now told not to give. It needs its own scope.
+
+**Tests.** New suite **`t89`**, run on both legs. The v6.25 leg pins the absence and each sibling as dated `[KNOWN DEFECT 2026-10-21, D-55]`.
+- **§A, by AST:**
+  - the header is a module-level string;
+  - `aiSystemPrompt`'s own return starts with it, and is the only place it is read;
+  - exactly two model `fetch` calls exist, both sending `aiSystemPrompt`;
+  - the header's wording;
+  - the demo briefing equals v6.25's byte for byte.
+- **§B, rendered — every way into a plan:** the example as loaded, after LOAD SAMPLE DATA, and saved; Start Fresh before and after a save; a
+  stored plan with no prompt; a backup with its own text; a backup without one. In each, the rules come first, once, then the plan's text.
+  The stored summary and an exported backup carry none, and v6.22's demo-text rule still holds.
+- **§C, the request,** through a recording `fetch`: Anthropic with a key, and a follow-up (the conversation does not repeat the rules); a
+  Local Model; the claude.ai route, in a child process.
+- **§D:** the live context's lines.
+- **§E:** the copy, and the cost passage against measured request sizes for a saved, a single, a blank and an unsaved plan, and the example.
+
+`t89` runs **43** current and **34** on the v6.25 leg. It cannot show that a model obeys the rules; no live model is called.
+
+**Existing suites:**
+- `t85` D-7 compared the start of a Start Fresh preview with the demo's. With the rules first, that half would always pass. It now compares
+  what follows the rules, and also requires the live context to follow.
+- `t66` E-7 is gated: on v6.26 it holds the example's request to the new *"about 4,500"* (4,000–5,000), and `t89` E-6 holds the entered-plan
+  range.
+- `v626` is registered by the registrar (383 sites) and by hand: `t1` and `t4` get their own value-map arms, `t33` PINS (unchanged), and
+  `t45`, `t47`, `t48`.
+
+**Counts**, from the full suite run from the packaged copies:
+- **8,693 app checks across 88 app suites, 0 failed, 0 DIED**;
+- MC parity 10/10, with no intended difference;
+- tooling: `t21` 64, `domdiff` 32, `sets` 12 + 12;
+- GRAND **8,823**.
+
+Against v6.25, no existing suite's current-leg count moved, `t66` and `t85` included. On the prior leg `t88` reads 19 where it read 15, because
+the prior leg is now v6.25, which carries the column it pins.
+
+**Controls.** `qa/tools/controls_v626_ai_rules.py` (repo-only): **19 of 19 as expected**, each planting one defect back:
+- the rules dropped from the Anthropic request, or from a Local Model's;
+- the rules sent twice, or written into the stored summary;
+- the precedence line removed;
+- the old *Section 2* header, the LTC sentence, the survivor option as fact, a spouse for a single household, a single household's pension
+  given a survivor, the success threshold dropped, the Roth amount dropped;
+- each disclosure removed (the Ask AI tab, the master-prompt section, §10's row, §13, the cost range, METHODOLOGY §11);
+- the unmutated run.
+
+Every file was restored and hash-checked.
+
+**Independent reviews.**
+- **The scope** was reviewed before Steve saw it: no blocker; ten findings, all taken. Among them were the Grade tab's directives (F-22), the
+  example's directive sections, the cost passage's false lower end, two more `t66` pins and the weakened `t85` D-7, and the live context's
+  stated facts (DC-6).
+- **The build** was reviewed by an agent that had not seen it: no blocker; three should-fix and five notes, all taken or recorded:
+  - the Field Manual stated what the model *does*, where it can only say what the model is *told* — reworded;
+  - a single household's pension still had a survivor — removed, pinned (D-4) and controlled (C16);
+  - the live context's *"success="* and Roth line stated figures without their meaning — fixed (D-6, D-7, C17, C18);
+  - `t89` B-9 could pass with no preview, and A-7 with no v6.25 source — both tightened;
+  - the controls lacked two disclosures — added (C14, C15);
+  - METHODOLOGY §11's *"nothing else"* still omitted the conversation and the briefing's other forms — rewritten;
+  - the ÷ 4 token figure is unverified against a tokenizer — recorded above.
+
+  Two checks the review named still have no control of their own: `t89` D-5 (a couple named as two) and E-7 (the example's cost figure).
+- **What the review confirmed:** the two senders and nothing else; that the header is stored nowhere; that the preview equals what is sent,
+  byte for byte, on three plans; that the single flag cannot go stale after a save; the four version sites; and that every other `qa/`
+  change is version registration.
+
+⚠ **Owned.**
+1. The scope's first draft said a no-directives rule is *"the rule the app already follows"*. The Grade tab does not follow it (F-22). Found
+   by the scope's review.
+2. The first build's Field Manual sentence said the assistant *is* educational and *is not* an adviser — claims about a model's behaviour
+   that no test can make. Found by the build's review.
+
+**Provenance.** Source `6173cbbacee22df0896fd41351ce1314` · built `index.html` `23407af94f3b82197e7ddf1f09840264` (vite 5.4.21, `npm ci`; the immediately-prior v6.25 rebuilt byte-identically to
+`a5d234fe…`) · `smoke_built` 22/22.
+
 ## v6.25 — My Data's holdings table gives plan type its own column (F-21)
 
 **A PRESENTATION release.** No figure, engine or stored field changes, so METHODOLOGY does not change. The scope is

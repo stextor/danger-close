@@ -897,9 +897,13 @@ in the hands of whoever holds it.
 ## 11. Data architecture & privacy
 
 All computation is client-side. Data lives in browser storage only; the HTML/JSX file is never
-modified; exports are explicit JSON. The optional Ask AI call transmits a structured plan summary
-(names, ages, state, balances/mix, SS/pension, headline results), the typed question, and any
-explicitly attached files — nothing else — to the Anthropic API, authenticated by the platform
+modified; exports are explicit JSON. The optional Ask AI call transmits — from v6.26, first — the
+app's fixed ground rules (the same text for every plan: educational only, no financial directives;
+it carries nothing about the user), the plan's briefing (the structured plan summary written at
+Save & Apply — names, ages, state, balances/mix, SS/pension — or the example's sample briefing, or
+a backup's own text of up to 20,000 characters), the live context with headline results, the
+typed question, the conversation's last 12 messages, and any explicitly attached files — nothing
+else — to the Anthropic API, authenticated by the platform
 inside claude.ai or by a user-supplied key (browser-storage only, never in files or backups) when
 self-hosted. Two v5.5 additions: a persisted **Offline Mode** toggle hard-disables Ask AI entirely
 (fully air-gapped operation), and self-hosted copies can route Ask AI to a **local OpenAI-compatible
