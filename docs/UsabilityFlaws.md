@@ -41,6 +41,7 @@
 > | F-19s | **FIXED v5.39** — row added 2026-10-14 (it had none) | the skin registry had drifted ahead of both descriptions (13 skins, "Seven color palettes"); `docs/SCOPE_FIX_docs_v5_39.md` D-6, `docs/STATUS_v5_39_shipped.md` |
 > | F-19r | **FIXED v6.11** — filed at v6.10 as "F-19" (§H) | `t74`; `docs/SCOPE_F19R_RANKING_HEADLINE.md` |
 > | F-20 | **OPEN** — filed at v6.23 (§H) | the Income tab's stream list scrolls sideways at 390 px for a plan with income streams (scrollWidth 510); `t45` runs on the example, which has none |
+> | F-21 | **FIXED v6.25** — filed and fixed together (§H) | `t88`; `docs/SCOPE_F21_HOLDINGS_PLAN_TYPE_V625.md` |
 > | F-15b | **OPEN** | "Success (>$1,500K)" beside a sibling "Success Rate (>$1.25M)" — still in the source |
 > | F-16 | **FIXED v5.98** | the pair swapped; `t62` holds every term in order (was: "API Key" before "Agency MBS") |
 > | §E-1 / §E-2 | **OPEN** | no physical-device pass; no keyboard / screen-reader pass (4 `aria-label`s in the app) |
@@ -435,4 +436,15 @@ the example, which has no income streams. **Who it reaches:** any plan with an i
 **Why it matters beyond layout:** moving the example's built-in spouse-B work into visible rows — the way to close D-49's residual
 (MissingFeatures) — would put this list on the example's own Income tab, so the fix belongs before or with that release. Candidate fix: wrap
 the list's row grid at the phone breakpoint, as F-2 and F-8 did for the grids they named, and extend `t45` to a household with streams.
+
+### F-21 · My Data's holdings table: the plan type read as the next holding's, and the totals sat one column right — **LOW–MED (desktop layout)** — **FIXED v6.25**
+
+**Filed and fixed at v6.25** (`docs/SCOPE_F21_HOLDINGS_PLAN_TYPE_V625.md`; Steve, with a screenshot: *"under the My data tab in the
+retirement, the fields don't line up"*). Through v6.24 the *Retirement holdings* table's Tax type cell held two dropdowns stacked — the tax
+type and, for a row with Traditional dollars, the plan type (from v5.91) — with no header for the second and no divider between rows; the
+spacing within a pair was about the spacing between pairs, so the lower dropdown read as the next ticker's. A sibling in the same table: the
+footer's *Total annual fees →* spanned nine columns where eight stood before *$/yr fee*, so the fee total sat under *Contrib split %* and a
+footer cell ran past the table's last column — so since the footer was written. **Fixed:** plan type has its own headed column (a dash for a
+Roth row), each row has a divider, and each total sits under its own column; measured in Chromium at 1440 px (rows 66–67 px → 35–36 px).
+Nothing stored or computed changed. `t88` pins the structure on both legs.
 
