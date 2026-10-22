@@ -1,5 +1,184 @@
 # Changelog
 
+## v6.27 — the Grade tab reports the model's grading, not actions (F-22)
+
+**A presentation release.** No figure, engine, grade or stored field changes, and METHODOLOGY is unchanged. The scope is
+`docs/SCOPE_F22_GRADE_FINDINGS_V627.md` (repo-only, fulfilled). Steve, *"go F-22"*; then all five decisions as recommended: DG-1 (a) *"Remove
+it"*, DG-2 (a) *"Label them, keep"*, DG-3 (a) *"Fix all now"*, DG-4 (a) and DG-5 (a) *"Both as recommended"*. Built on v6.26 (source `6173cbba…`).
+
+**What was wrong (v6.26, rendered in jsdom from the packaged bundle).** The Grade tab's *"PATH TO {grade} — RECOMMENDED ACTIONS"* printed
+directives, and none of its numbers was something the model computes:
+- *"Secure hybrid LTC insurance policy for both spouses"* (+0.20) on any plan without an LTC expense row, single plans included. The LTC grade
+  is a literal C+, so no policy could move it, and an LTC premium row can in fact *lower* the grade: more spending, less sequence protection
+  (the couple fixture, 2.99 → 2.94).
+- *"Execute Roth conversion ladder … (fill 22% bracket each year)"* (+0.05) on every plan, against a Tax Efficiency grade that is a literal B+.
+- *"Complete N survivor-critical estate items … toward an A"* (+0.10). Rendered with the example's seven items done, the real lift is
+  **+0.21** (3.17 → 3.38), and Estate Readiness reaches **B**, not A. By hand: 2.0 × 8 / 78 = 0.205.
+- *"Projected MC success"* was the current rate plus 3–5 points, never simulated. On the example it read *"~95–97%, From 100%"*, an
+  "improvement" below the current figure.
+- *"Remaining risk to A"* described a grade no ladder on the tab can award.
+
+The category text stated things false for most plans:
+- *"Hybrid LTC insurance active"* on every plan, for which the app has no field. v6.11 removed the same claim from Ranking, and v6.26 from Ask AI.
+- The LTC and Monte Carlo drags blamed *"Monte Carlo failures"* on an LTC shock. The tab's success rate is the 6-year `runMonteCarlo`, which
+  carries no LTC event; only the 30-year engine and the Stress tests read the LTC constants (parser census).
+- *"Roth conversion plan: 2029–2040"* whatever the slider.
+- *"Conversion plan is well-designed"*.
+- The example household's *"International intentionally reduced … will revert when conditions warrant"*.
+- An invented *"dining frequency"* range.
+- An unsourced *"better than most advisor-managed portfolios"*.
+- *"for both spouses"* to single plans.
+
+Three grades are literals: LTC C+, Tax Efficiency B+ and Diversification B+, 20 of 78 weight points. Guardrail Readiness counts only rows
+labelled exactly *"golf"* and *"Amazon"*. Together they cap **every plan at B+** (277.5 / 78 = 3.56), and the tab said none of it. The Field
+Manual's Grade entry described *"a radar chart"* (none exists), listed "portfolio size" (not a category) and omitted three real categories.
+**Wider than registered.** F-22 named two directives; the scope's census, rendering and independent review found the rest.
+
+**What changed.**
+- **The panel is gone** (DG-1): the actions, Current → Projected, the GPA lift, *Projected MC success* and *Remaining risk to A*, and the
+  code behind them (`improvements`, `gpaLift`, `projectedGPA`, `projGrade`, `projColor`). *Top grade drags* stays, computed as before. The equity
+  share stays as a fact, saying what is graded: *"The equity share is not graded on its own; Sequence Protection reads the cash-and-bond share."*
+- **Labels** (DG-2). The three literal grades carry *"Fixed in this build — not computed from your plan"*, and Guardrail Readiness *"Graded from
+  two fixed expense labels"*. The grade list and *Top grade drags* mark them † and ‡, with a footnote. Under the overall grade: *"Highest any plan can score here: B+"*.
+  Weights and grades are unchanged.
+- **Copy** (DG-3, no grade changes):
+  - the LTC evidence says whether an LTC / long-term-care row is in the plan's expenses (the Stress tab's own test, `/ltc|long.?term/i`) and
+    that the app has no policy field;
+  - both drags say this rate's 6-year Monte Carlo carries no long-term-care event and the 30-year Monte Carlo and Stress tab model one,
+    *"for each spouse"* only for a couple;
+  - Tax Efficiency names the plan's own Roth slider from the selected retirement year (or *"no conversions modeled"* at $0) and drops the
+    judgment;
+  - Diversification drops the example's sentence;
+  - Guardrail states its rule (a plan without the two labels grades B-) and drops the invented range and the stale *AMX* sentence (no such
+    row exists);
+  - Cost Structure drops the unsourced comparison and the share-class nudge;
+  - Sequence Protection names hedge holdings only when there are some: through v6.26 every plan without them read *"Hedge holdings add $0K
+    convexity"*, which now sat beside *"No hedge positions held"*.
+- **The Field Manual's Grade entry** is rewritten to the tab as built (DG-4). §13 records the change, and the four version sites read v6.27.
+
+**Found while building.** The example's own golf row is *"Golf (monthly)"*, which the anchored `/^golf$/i` does not match, so even on the
+example only its *Amazon* row counts. The scope's *"the example's labels"* was half right; the shipped copy names the labels exactly.
+
+**Filed, not fixed** (DG-5):
+- UsabilityFlaws **F-23**: directive copy on other tabs, found by the scope's register sweep and its review. It covers the Withdrawal tab's
+  Step 7 (which also contradicts that tab's own note on the Conv column), the Guardrails tab's *ACTION:* lines, three Exit Plan items, and the
+  plan-events list's Roth instructions. Its scope starts with a full census.
+- UsabilityFlaws **F-24**: the Grade tab's remaining copy, found by the build review. *Top grade drags*' *"Lost ~X GPA points"* divides by
+  100 where the weights sum to 78, so every figure is understated by 22%; fixing it changes a displayed figure, so it is Steve's call. Also
+  Income Floor's editorial wording and its omission of income streams, the Estate drag's unsourced legal claims, *"Strong base-case
+  performance"*, and the LTC test matching a long-term-disability row.
+- MissingFeatures **D-56** is widened: computing the literal grades, or dropping them from the weighting, is open.
+
+**What it moved.** No figure and no grade. `t90` B-8 renders five plans on both builds under the same seed and finds every overall grade, GPA
+and category grade equal. MC parity 10/10 with no intended difference; `t33` PINS for v6.27 equal v6.26's.
+
+**Tests.** New suite **`t90`**, run on both legs. The v6.26 leg pins each defect as a dated `[KNOWN DEFECT 2026-10-21, F-22]`.
+`Math.random` is seeded before the bundle loads and re-seeded per plan (t11's trap).
+- **§A, by AST, against the Grade render:**
+  - none of the panel's identifiers or strings remains, and none of the false or example-only sentences;
+  - the nine categories and their top GPAs are read from the source;
+  - **extinction:** a category whose grade or GPA is a literal, or that can take only one GPA however it is written (a property, a spread or a
+    declaration), must carry `fixed: true`, and only Guardrail Readiness carries `labelKeyed`;
+  - the Roth line's $0 branch, and its years from `retireYear`;
+  - the ceiling: each category's top GPA is read from the source, then put through the overall ladder, which `t90` restates.
+- **§B, rendered on five plans** (the example; a couple, a single plan and the couple with an LTC row, each saved; and a plan below 90%
+  success, gated so the Monte Carlo drag's branch actually renders):
+  - no panel; the LTC evidence follows the row; no spouse for the single plan; no LTC blame;
+  - the labels, footnote and ceiling, which must equal the source-derived one;
+  - the equity sentence, the Roth slider line from the tab's own retirement year, the marks in *Top grade drags*, and no hedge sentence for a
+    plan without hedges;
+  - each overall GPA equals its nine rendered category GPAs weight-averaged;
+  - the three literals render at their v6.26 values;
+  - **B-8:** the v6.27 leg spawns the v6.26 leg with `--dump` and compares every plan's grades.
+- **§C, the Field Manual:** no radar, every category named, the fixed grades, the label rule and the ceiling, and §13's entry first.
+
+`t90` runs **46** current and **22** on the v6.26 leg.
+
+**Existing suites:**
+- `boundaries.mjs` gains two census rows (OPERATIONS §K1), both ON for the example:
+  - `ltc_row`: the example carries an LTC row, so the no-row directive never showed on it;
+  - `cut_rows`: it carries an *Amazon* row, so the $0 cut pool a plan without one shows cannot be seen on it (the grade is B- either way
+    there).
+- `t29` gains B-17, B-18 and two controls, each row clearing when its labels leave the table.
+- `v627` is registered by an AST registrar: 175 gate extensions, 209 ladder entries, and an arm prepended to each of `t1`'s and `t4`'s version
+  maps. None sat under `&&`, so none needed wrapping. `t33` PINS (unchanged) and `t45`, `t47` and `t48` are registered by hand. `vercensus`
+  for v627 equals v626's (71 files, 177 gated, 1 keyed; 209 ladder, `t89`'s command-line default left at v626).
+- **`t89` A-7 repaired** (a v6.26 suite). It compared the demo briefing with `../v625.jsx`, which only a v625 → v626 run folder holds, so it
+  went red on **both** legs the moment the folder rolled to v626 → v627 (the first full run: 8,910 passed, 2 failed). It now pins v6.25's
+  briefing md5, `0ace40a1…`, computed from commit `0859894`; v6.26's and v6.27's equal it. A parser search found no other suite that names a
+  specific prior source file.
+- No other assertion changes meaning: the census found no suite that reads the panel, its copy or the Grade entry. `t4`'s tab signature
+  stands, and `t45` and `t48` render the new label and footnote at every width and in every skin.
+
+**Counts**, from the full suite run from the packaged copies:
+- **8,782 app checks across 89 app suites, 0 failed, 0 DIED**;
+- MC parity 10/10, with no intended difference;
+- tooling: `t21` 64, `domdiff` 32, `sets` 12 + 12;
+- GRAND **8,912**.
+
+Against v6.26, the current-leg changes are `t90`, new (46), and `t29` 91 → 97. On the prior leg `t89` reads 43 where it read 34,
+because the prior leg is now v6.26, which carries the rules it pins.
+
+**Controls.** `qa/tools/controls_v627_grade.py` (repo-only): **21 of 21 as expected**, each planting one defect back:
+- the panel's identifier and header;
+- the LTC policy sentence;
+- the Monte Carlo drag's LTC blame;
+- `fixed: true` removed from one literal grade, and `labelKeyed` from Guardrail;
+- a category the Field Manual stops naming;
+- *"both spouses"* for a single plan;
+- the ceiling line removed;
+- the radar chart back;
+- §13's entry removed;
+- a hidden +0.05 on the overall GPA;
+- the conversion-plan claim back;
+- a literal grade changed;
+- the equity sentence pointing at *"the actions above"*;
+- the Roth line's $0 branch reworded, or its years from the target year again;
+- a grade hardcoded through a spread (the build review's mutant);
+- *Top grade drags* losing its marks;
+- the *"$0K convexity"* sentence back;
+- the Field Manual's guardrail sentence hedged again;
+- the unmutated run.
+
+Every file was restored and hash-checked.
+
+**Independent reviews.**
+- **The scope** was reviewed before Steve saw it: no blocker; nine should-fix findings and six notes, all taken. Among them:
+  - the suite census missed `t45` and `t48`;
+  - the below-90% Monte Carlo drag was never rendered by any planned fixture;
+  - a cross-leg grade comparison was unmeasurable without seeding;
+  - an LTC row lowers the grade rather than merely failing to raise it;
+  - the B+ ceiling;
+  - OPERATIONS §K1's maintenance rule had not been applied;
+  - more directive siblings existed (now F-23).
+- **The build** was reviewed by an agent that had not seen it: no blocker; six should-fix findings and eight notes.
+  - **Taken:**
+    - the first build's equity sentence, *"Allocation is not graded"*, was false (Sequence Protection reads the cash-and-bond share);
+    - *Top grade drags* showed the fixed LTC grade as the plan's weakness with no mark;
+    - the Roth line's years came from the target, not the selected, retirement year;
+    - `t90` A-6 could be dodged by a grade hardcoded through a spread — now A-6b, and control C16 is the review's mutant;
+    - the $0 Roth branch was untested — A-9;
+    - the guardrail's *"whenever a cut is needed"* (it always is), in the app and the Field Manual;
+    - the *"$0K convexity"* sentence contradicting the new *"No hedge positions held"* (a note, taken because it was a contradiction on the
+      same card);
+    - this entry's wording on the ceiling, the LTC row and *"computed"*.
+  - **Filed as F-24:** the understated *"Lost ~X GPA points"* and the remaining copy.
+  - **What the review confirmed:** no grade can move (the grade and GPA expressions and `weightedGPA` are untouched, and B-8's dumps are
+    equal on all five plans); the ceiling; the LTC shock figures and *"for each spouse"*; the 6-year engine and its $800K test; the anchored
+    labels; the Field Manual's weights and grades; and that none of the old sentences renders.
+
+⚠ **Owned.**
+1. The scope's first draft said t4 is the only suite that renders the Grade tab. `t45` and `t48` do too. Found by the scope's review.
+2. The first build's equity sentence, *"Allocation is not graded — the model takes it as held"*, replaced a directive with a false statement.
+   Found by the build review.
+3. **`t89` A-7, written at v6.26, could only pass in a v625 → v626 run folder.** It passed at its own ship and broke at the next, the
+   prior-pinned shape OPERATIONS warns about. Found by this release's first full run, and repaired above.
+4. The scope and the first build's copy called *"golf"* and *"Amazon"* *"the example's labels"*. The example's golf row does not match.
+   Found while building, by reading the example's expense table; the copy names the labels exactly.
+
+**Provenance.** Source `32b34771da6e55edc80a71519bbe01aa` · built `index.html` `deac8c16f4238d8b8519f656e5c646ff` (vite 5.4.21, `npm ci`; the immediately-prior v6.26 rebuilt byte-identically to
+`23407af9…`) · `smoke_built` 22/22.
+
 ## v6.26 — Ask AI's ground rules reach every plan (D-55)
 
 **Not a modelling release.** No figure, engine or stored field changes. METHODOLOGY changes in one place only: §11's list of what Ask AI
