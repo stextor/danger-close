@@ -779,12 +779,27 @@ the year each takes effect.
 
 ## 9. Withdrawal sequencing & guardrails
 
-Cash-first sleeve sequencing (cash → bonds → equity → hedge), RMDs treated as forced Traditional
-withdrawals, and Guyton-Klinger–style guardrails at 80%/120% of the planned balance path with
-spending adjustments on breach. The comparison table presents cash-first, tax-optimized, and
-fixed-real strategies descriptively.
+The Withdrawal tab's schedule (Engine D, `computeWithdrawalPlan`) draws the first-priority pool
+(taxable, HSA and everything entered under Other accounts) first, then the retirement buckets in
+sleeve order (cash → bonds → equity → hedge), with Traditional and Roth money drawn **in
+proportion within each sleeve**. RMDs are forced Traditional withdrawals from each spouse's own
+start age. The Roth slider's amount is converted each ladder year, capped at the Traditional money
+the buckets and convertible accounts hold. The schedule computes **no income tax** — on draws,
+RMDs, gains or conversions; the Taxes tab figures the tax from these draws — and it applies **no
+guardrails**.
 
-**Where the RMD comes from (v5.35).** Through v5.34 the sentence above was true of the tax
+**The guardrails are the Monte Carlo's (corrected at v6.28).** Through v6.27 this section said the
+schedule applied Guyton-Klinger guardrails; it applies none. The guardrails (80%/120% of the planned
+path; below the lower band monthly spending is cut 10%, above the upper band it is raised 5%, each
+change compounding, checked once a year) are applied by the 6-year and 30-year Monte Carlo engines
+only. The section also pointed to a comparison of cash-first, tax-optimized and fixed-real
+strategies. That was a descriptive table on the Withdrawal tab, closed by a "Recommendation" to blend
+the three, which said the schedule modelled that blend. The schedule draws in the one order above
+and converts the slider's amount; it models no strategy choice. The table was removed at v6.28. The
+Guardrails tab shows the bands and what the Monte Carlo does at each; no engine changes a Roth
+conversion in response to a band.
+
+**Where the RMD comes from (v5.35).** Through v5.34 this section's RMD sentence was true of the tax
 *treatment* and false of the *sourcing*: the engine folded the RMD into a single withdrawal need and
 satisfied the whole of it from the taxable sleeve first, then returned the unspent part to the same
 pool. Balance-neutral, and therefore invisible for many releases — but an RMD is a distribution from

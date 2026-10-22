@@ -1,5 +1,162 @@
 # Changelog
 
+## v6.28 — the app describes the model, it does not direct (F-23, F-24)
+
+**A presentation release with a METHODOLOGY correction.** No engine, no figure the engines compute, no grade and no stored field changes.
+Three displayed figures change by decision: the Grade tab's *"Lost ~X GPA points"* (DF-1), the Withdrawal tab's Priority-1 year (DF-7), and
+its holdings card's *Starting Traditional* (the build review). One is removed: the Grade tab's rough RMD estimate (DF-8). METHODOLOGY §9 is
+corrected. The scope is `docs/SCOPE_F23_F24_DIRECTIVES_V628.md` (repo-only, fulfilled). Steve, *"go"* (F-23 with F-24); on the census,
+*"Directives + F-24 (Recommended)"*; then all eight decisions as recommended: DF-1 (a) *"Real cost, weights as points"*, DF-3 and DF-4 (a),
+DF-5 (a) *"Keep the examples"*, DF-2, DF-6, DF-7 and DF-8 (a). Built on v6.27 (source `32b34771…`).
+
+**What was wrong (v6.27).** F-23 named four places where the app told the household what to do. **It was about ten times wider.**
+A parser census of every user-facing string and the Field Manual (13,177 pieces; 1,889 prose pieces read by six independent readers)
+flagged 283 entries: 39 directives, 52 borderline, 102 editorial claims and 151 specific claims about the model. Every directive and
+borderline entry was adjudicated against the source. Among them:
+- the Guardrails tab's three *"ACTION:"* lines, one of them *"Increase spending 5% or boost Roth conversions"*;
+- the Withdrawal tab's eight steps (*"Execute planned Roth conversion … to fill 22% bracket. Pay conversion taxes from Taxable account"*),
+  its *"Fill 12%/22% brackets opportunistically"* and *"Tap only when…"*, and a three-strategy comparison closed by a *"Recommendation:"*;
+- the Exit Plan's *"Elect the pension's joint-&-survivor option"*, *"Build 1–2 years of spending into…"*, *"Don't give notice until it isn't"*
+  and *"Often the highest-value move in the whole transition"*;
+- the Events tab's *"Convert the planned amount … Pay the tax from the taxable account"* and *"usually better to take it in…"*;
+- the SS tab's *"SURVIVOR BENEFIT — THE #1 OPTIMIZATION LEVER"* and *"HOUSEHOLD LIFETIME OPTIMIZER"*;
+- the Roth tab's *"22% (ideal) or 24% (ceiling)"*, *"The classic guideline says"* and *"the standard advice"*;
+- the Field Manual's Survivor entry, *"Argues for front-loading Roth conversions"*;
+- the Stress tab's *"Reserve defense"*, the checklist's *"Consider whether an irrevocable trust fits"*;
+- the Field Manual's *"PAY CONVERSION TAX FROM OUTSIDE FUNDS — NOT FROM RETIREMENT ASSETS"* and *"The safe move"*.
+
+**Twelve sentences were false about the model** (scope §0.3, V-1 to V-12, each checked in the source):
+- No engine changes a Roth conversion at a guardrail band (V-2).
+- The Withdrawal tab's schedule (Engine D) harvests nothing (V-3), converts the slider's amount rather than filling a bracket and pays no
+  conversion tax (V-4), applies no guardrail (V-5; the Monte Carlo engines do, on the whole monthly expense), and draws Traditional and Roth
+  **in proportion within each sleeve**, not Traditional then Roth (V-9). Its Priority-1 *"Years active"* was a fixed three years (V-6).
+- No engine moves money between sleeves; the Monte Carlo draws from one balance at the holdings' mix (V-7, V-8, V-10).
+- The Dashboard sent guardrail readers to a schedule that applies none (V-11).
+- The SS tab said Social Security is *"excluded from MAGI"*; taxable benefits are in IRMAA's MAGI, in law and in Engine C (V-1).
+- The SS tab's survivor card told every couple that spouse A is the higher earner, with typed pronouns (V-12).
+METHODOLOGY §9 said the schedule applied the guardrails and presented the strategy comparison.
+
+F-24 (the Grade tab, filed by the v6.27 build review): *"Lost ~X GPA points"* divided by 100 where the weights sum to 78, so every figure
+read 22% low (the example's Estate Readiness read 0.24; its real cost is 3 × 8 / 78 = 0.31); the *"Weight: 20%"* chips summed to 78%;
+Income Floor's drag was editorial and quoted a gap figure computed differently from the Income tab's; the Estate drag stated legal effects
+as fact; and the LTC test, `/ltc|long.?term/i`, also matched a *"Long-term disability"* row.
+
+**What changed.**
+- **Directives** are recast as what the model computes or assumes, the choice left to the household. The Guardrails tab gives the Monte
+  Carlo's rule from `GUARDRAILS` itself and *"MODEL: cuts / unchanged / raises"*; its status chips read the band. The Withdrawal tab's
+  subtitle is *"The order it draws from │ What the schedule models"*; its cards describe Priority 1 (*"Drawn first: reaches $0 in {year}"*,
+  the schedule's own year, with the $0 and refill edges — DF-7), the holdings (by sleeve, Traditional and Roth in proportion), and
+  conversions and tax; its seven steps say what the schedule does, including *"this schedule pays no income tax"* and *"Guardrails: this
+  schedule applies none"*; Section C, the comparison, is replaced by *"what this schedule models"* (DF-3). The Exit Plan is *"Exit plan —
+  the dates and paperwork"*: its logistics stay, its choices say what the model assumes, and the pension item appears only for a couple with
+  a pension (DF-4). The Events tab's alarm is *"Roth conversion deadline (if converting this year)"* (DF-6). The Field Manual's conversion-tax
+  section is *"Paying conversion tax: outside funds or withholding — what each costs"*, its three worked examples kept and its rules of
+  thumb removed (DF-5); Example 3's *"conversions still beat doing nothing"* is removed, not measured.
+- **The false statements** are corrected where they stood, in the app and the Field Manual. The SS survivor card names the spouse with the
+  larger benefit at full retirement age, by name, in either direction.
+- **The Grade tab** (DF-1, DF-2, DF-8): lost points ÷ 78, so they add to 4 − GPA; weights as *"20 of 78"*; the cut-off in raw points, so the
+  same drags show as at v6.27; *STATUS* only at GPA 4.0; Income Floor says it counts Social Security and the pension, not streams, and its
+  drag gives months, with no dollar figure; the Estate drag makes no legal claim; the Monte Carlo sentence names its engine; Tax Efficiency
+  gives each spouse's RMD start age, with no estimate. **One LTC test, `isLTCLabel`**, serves the Grade and Monte Carlo tabs and matches care
+  labels only.
+- **METHODOLOGY §9** says the schedule computes no income tax and applies no guardrails, and that the guardrails are the Monte Carlo's.
+- §13 records the change; the four version sites read v6.28.
+
+**The build review** (an agent that had not seen the build; scope §7) found **eight more blockers and eleven minor points**. Taken:
+- the Withdrawal tab's new holdings card printed *Starting Traditional* from a total that also counts the Traditional and Annuity money
+  entered under Other accounts, which Priority 1 already shows (the example: $111K in both cards); it now prints the holdings' own;
+- the Exit Plan's income line left out income streams; its conversion years were said to end *"before RMDs"* (a couple's window runs to the
+  second spouse's); its COBRA sentence said 18 months *"cannot span this gap"* whatever the gap's length;
+- *"Claiming earlier gives … a smaller survivor benefit"* is true only of the larger benefit (the survivor keeps the larger check), in the
+  Exit Plan and the checklist;
+- survivor and couple wording on single plans (the SS filing event, the trust item, two Withdrawal lines);
+- the in-app Events legend still read *"GREEN — window open: go"*; it now matches the Field Manual's;
+- *"Social security timing & optimization"*; the Roth tab's Step 2 note on where the tax comes from with no outside money (the model pays
+  from Roth, then Traditional); the IRMAA sentence's *"each year's MAGI"* (conversion years only); the conversion wording at a $0 slider;
+  the Events item's window, now *"from the target retirement year"*; the survivor card's *"unless the claim ages reverse the order"*; the
+  grade list's bare weight number (now *"20/78"*); METHODOLOGY §9's second paragraph;
+- one more found while fixing those: the Field Manual figure's *"convert at low brackets"*.
+The review's remaining points are filed in **F-25**.
+
+**Filed, not fixed — UsabilityFlaws F-25:** the census's editorial claims and its unchecked model claims (`docs/F25_CENSUS_V627.tsv`,
+repo-only), the gap-draw figure (with MissingFeatures D-57), and the review's remaining points: the Backtest tab's *"the MC headline success
+is 'ended above $500K' … charges LTC shocks"* (false); *"Medicare-eligible at retirement"* for a birthday later in the retirement year;
+*"Roth conversions have no withholding"*; the Events and Exit Plan windows from the target year where the schedule uses the selected one;
+the *DRAG* label on sentences the grade does not read; the *"CONFIRM THE MONEY WORKS"* title.
+
+**What it moved.** No figure the engines compute and no grade. `t90` B-8 renders five plans on both builds under one seed and finds every
+grade equal; `domdiff_withdrawal` finds the schedule table byte-identical across the pair with only Section B, the steps and Section C
+masked; MC parity 10/10 with no intended difference; `t33` PINS unchanged.
+
+**Tests.** New suite **`t91`**, run on both legs; the v6.27 leg pins each defect as a dated `[KNOWN DEFECT 2026-10-21, F-23]` or `[…, F-24]`.
+- **§D, by AST — the model the new copy states:** `GUARDRAILS`' figures read live; both Monte Carlo engines read `GUARDRAILS` and `spendingAdj`, Engine D
+  neither; Engine D converts `Math.min(rothAmount, …)` and draws Traditional by `tradFrac`; Engine C's `magi` includes `ssTaxable`; `isLTCLabel`
+  matches care labels and not *"Long-term disability"*, and the v6.27 pattern is gone.
+- **§A:** extinction of the 37 removed phrases across every string in the source (the AI-addressed texts and §13's release entries
+  excepted) and of the first draft's three false sentences; a **directive lint on rendered text** — 24 tabs on three plans and the Field
+  Manual by section — against a named allow-list, each entry with its reason, every entry used (A-4) and none a catch-all (A-4b).
+- **§B, the Grade tab on six plans:** *"N of 78"*; every rendered *"Lost ~X"* = (4 − rendered GPA) × w / 78; the drags shown (v6.27's set);
+  STATUS only at 4.0; the Monte Carlo, Income Floor and Estate copy; the disability row on the Grade and Monte Carlo tabs.
+- **§C, rendered:** Guardrails, Withdrawal (Priority 1's year against the rendered schedule; the holdings card; the steps), Exit Plan (and a
+  single plan), SS (V-1; V-12 on a couple whose spouse B has the larger benefit), Survivor, IRMAA, Stress, Income, Dashboard, Roth,
+  Checklist, the build review's fixes (C-13 to C-13f), and the Events items from the app module in a child process on fixed dates.
+- **§F:** the Field Manual's entries, §13's v6.28 entry first, and METHODOLOGY §9.
+
+`t91` runs **71** current and **28** on the v6.27 leg.
+
+**Existing suites:**
+- `boundaries.mjs` gains `ltc_disability` (OPERATIONS §K1: the example has no long-term row that is not care, so the false match could not
+  be seen on it), and `ltc_row` reads the leg's own `isLTCLabel` where it exists; `t29` gains B-19 and two controls (97 → 101).
+- `t90` B-8's prior leg is the tag before the current one, with a printed skip by design where that leg is absent (owned below).
+- `domdiff_withdrawal` gains a v627 → v628 arm: the subtitle and the Section B–C span masked, each bound to one hit a side and shown to have
+  changed; the schedule table and everything else byte-identical (32 → 34).
+- Re-gated for the copy this release corrects, each with its reason at the site: `t4` (the Field Manual's Withdrawal order, V-9), `t72`
+  E-0/E-2 (the Roth figure now on the holdings card), `t86` G-7, E-3 and E-7c (*"optimizer"*; the rewritten Step 1); `t19`'s engine
+  contract gains `_posTradW` and a check that a named IRA does not move it (71 → 72).
+- `v628` registered by the AST registrar (175 gate extensions, 211 ladder entries, two map arms); `t33` PINS (unchanged, confirmed by
+  running), `t45`, `t47` and `t48` by hand; `shim.txt` exposes `isLTCLabel`.
+
+**Counts**, from the full suite run from the packaged copies:
+- **8,908 app checks across 90 app suites, 0 failed, 0 DIED**;
+- MC parity 10/10, with no intended difference;
+- tooling: `t21` 64, `domdiff` 34, `sets` 12 + 12;
+- GRAND **9,040**.
+
+Against v6.27, the current-leg changes are `t91`, new (71), `t29` 97 → 101 and `t19` 71 → 72. On the prior leg `t90` reads 40, because B-8
+takes its designed skip there.
+
+**Controls.** `qa/tools/controls_v628_directives.py` (repo-only): **30 of 30 as expected**, each planting one defect back — an *ACTION:*
+band; *"boost Roth"*; a guardrail figure typed as a literal; weights as percents; ÷ 100; a fourth drag; STATUS below 4.0; the v6.27 LTC
+pattern; Income Floor's dollar figure; Estate's legal claim; the survivor card naming A on every couple; V-1; Priority 1's year off by two;
+Roth drawn last; Step 7 cutting spending; a single plan told of joint-and-survivor; the pension directive; the Events item's tax line;
+§13's entry; METHODOLOGY §9; the Field Manual's guardrail figures; Engine D reading `GUARDRAILS`; a new directive on the IRMAA tab; the
+Roth tab's *"ideal"*; the holdings card's double count; the unconditional COBRA sentence; the Events legend's *"go"*; a single plan's
+survivor wording; a catch-all allow-list entry hiding a planted directive (`t91` itself mutated); and the unmutated run. Every file was
+restored and hash-checked. The counted run is on a copy of the packaged run folder, uninterrupted. (An earlier run on the workspace's
+folder was cut by a container restart during C19, which left C19's mutant in that copy; a resumed run started on it before its md5 gave it
+away, was stopped, and re-ran from a restored, hash-checked copy — also all as expected.)
+
+⚠ **Owned.**
+1. The scope's first draft would have restated the Withdrawal tab's Traditional-then-Roth order as *"the model's order"*; it is not the
+   engine's (V-9). Found by the scope's review.
+2. The scope's recommended Income Floor text quoted a gap figure without checking how it is computed. Found by the scope's review.
+3. The scope's short-piece pass missed *"#1 OPTIMIZATION LEVER"*, and its suite census missed `domdiff_withdrawal`. Found by the scope's review.
+4. **`t90` B-8, written at v6.27, pinned its prior leg to `"v626"`** — the prior-pinned shape v6.27 repaired in `t89` A-7 the same week.
+   Found at this scope; B-8 now takes the tag before the current one, with a designed skip where that leg is absent.
+5. **The first build carried eight new false or misleading sentences** that the build review found: among them a holdings figure counting
+   Other-account money twice, an income floor without streams, conversion years said to end before RMDs, and couple wording on single plans.
+   Each was copy this release wrote or rewrote. They are fixed and pinned (`t91` C-13 to C-13f, A-1c).
+6. **Suites that pinned the copy this release corrects were found by running them, not by census.** The first full run (on the
+   pre-review build) found `t4`'s Field Manual check red: it pinned the Withdrawal entry's *"Taxable → Traditional → Roth"* order (V-9). A
+   parser census of every string and regex in `qa/` against both **sources** then found `t86` G-7 (*"Roth optimizer"*). It could not see
+   rendered-text checks (a pattern like `Starting balance: \$([\d,]+)K` matches no source), and a second census against the example's
+   **rendered** tabs found `t86` E-3 and could not see E-7c, a check made on another plan (found by running `t86`). The second full run found
+   `t72` E-0/E-2 reading the old Roth card and `t19`'s engine contract missing the new `_posTradW` key. All re-gated or extended, each with
+   its reason, before the counted run.
+
+**Provenance.** Source `6ff3561e3dd23d50b5fce16ad8c76704` · built `index.html` `b51ca85f4caf683326c77c2e70143a4c` (vite 5.4.21, `npm ci`; the immediately-prior v6.27 rebuilt byte-identically to
+`deac8c16…`) · `smoke_built` 22/22.
+
 ## v6.27 — the Grade tab reports the model's grading, not actions (F-22)
 
 **A presentation release.** No figure, engine, grade or stored field changes, and METHODOLOGY is unchanged. The scope is

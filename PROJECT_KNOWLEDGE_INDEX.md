@@ -25,15 +25,19 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 
 | Field | Value |
 |---|---|
-| Version | **v6.27** |
-| Source file in knowledge | `DangerClose-v6_27.jsx` |
-| Source md5 | `32b34771da6e55edc80a71519bbe01aa` |
-| Built `index.html` md5 | `deac8c16f4238d8b8519f656e5c646ff` |
-| Shipped | 2026-10-21 |
+| Version | **v6.28** |
+| Source file in knowledge | `DangerClose-v6_28.jsx` |
+| Source md5 | `6ff3561e3dd23d50b5fce16ad8c76704` |
+| Built `index.html` md5 | `b51ca85f4caf683326c77c2e70143a4c` |
+| Shipped | 2026-10-22 |
 
-> ⚠ **v6.27 SHIPPED (2026-10-21) — the Grade tab reports the model's grading, not actions (F-22).** Source `32b34771…` · built `deac8c16…`.
+> ⚠ **v6.28 SHIPPED (2026-10-22) — the app describes the model, it does not direct (F-23, F-24).** Source `6ff3561e…` · built `b51ca85f…`.
+> A PRESENTATION release with a METHODOLOGY correction (no engine, no figure the engines compute, no grade and no stored field changes). Through v6.27 many tabs told the household what to do — the Guardrails tab's *ACTION:* lines, the Withdrawal tab's steps and its *"Recommendation"*, the Exit Plan, the Events tab's Roth alarm, the SS tab's *"#1 OPTIMIZATION LEVER"*, the Roth tab's *"ideal"* bracket, the Field Manual's *"PAY CONVERSION TAX FROM OUTSIDE FUNDS"* — and twelve sentences were false about the model (the schedule applies no guardrail, harvests nothing, pays no income tax and draws Traditional and Roth in proportion; taxable SS is in IRMAA's MAGI; the survivor card called spouse A the higher earner on every couple). A six-reader parser census found 283 entries; every directive is recast as what the model computes or assumes (DF-1 to DF-8, all (a)); the false statements and eight more the build review found are corrected. The Grade tab's *"Lost ~X GPA points"* is each category's real cost (÷ 78, weights *"20 of 78"*), and one LTC test, `isLTCLabel`, no longer matches a long-term-disability row. METHODOLOGY §9: the guardrails are the Monte Carlo's. No grade moved (`t90` B-8).
+> New suite `t91`; `v628` registered (`t33` PINS unchanged); `boundaries.mjs` gains `ltc_disability` (`t29` B-19); `t90` B-8's prior leg derived, not pinned; `t4`, `t19`, `t72` and `t86` re-gated for the corrected copy. UsabilityFlaws F-23 and F-24 closed, F-25 filed (with `docs/F25_CENSUS_V627.tsv`); MissingFeatures D-57 notes the gap-draw figure. `TESTING.md`'s v6.25 per-suite line moved to the archive. **Rotation:** the pool loses `DangerClose-v6_27.jsx` (v6.27 is read from history, commit `35a1926`) and gains `DangerClose-v6_28.jsx`. **Pool stays 16.**
+>
+> *(**v6.27 SHIPPED (2026-10-21) — the Grade tab reports the model's grading, not actions (F-22).** Source `32b34771…` · built `deac8c16…`.
 > A PRESENTATION release (no figure, engine, grade or stored field changes; METHODOLOGY unchanged). Through v6.26 the Grade tab's *"PATH TO … — RECOMMENDED ACTIONS"* printed directives (an LTC policy "for both spouses" on single plans too, a Roth ladder "filling the 22% bracket" on every plan), grade lifts the grading cannot produce, a misstated estate lift and a "projected" success no simulation computed; its categories told every plan it held hybrid LTC insurance and blamed the 6-year Monte Carlo's failures on an LTC shock that engine does not carry. The panel is gone; the false and example-only sentences are corrected; the three literal grades (C+, B+, B+) and Guardrail Readiness (rows labelled exactly "golf" and "Amazon") are labelled, and the B+ ceiling every plan shares is stated; the Field Manual's Grade entry (it described a radar chart) is rewritten. No grade moved (`t90` B-8 compares both builds under one seed).
-> New suite `t90`; `v627` registered (`t33` PINS unchanged); `boundaries.mjs` gains `ltc_row` and `cut_rows` (`t29` B-17, B-18). UsabilityFlaws F-22 closed, F-23 and F-24 filed; MissingFeatures D-56 widened. `TESTING.md`'s v6.24 per-suite line moved to the archive. **Rotation:** the pool loses `DangerClose-v6_26.jsx` (v6.26 is read from history, commit `ac5c7d7`) and gains `DangerClose-v6_27.jsx`. **Pool stays 16.**
+> New suite `t90`; `v627` registered (`t33` PINS unchanged); `boundaries.mjs` gains `ltc_row` and `cut_rows` (`t29` B-17, B-18). UsabilityFlaws F-22 closed, F-23 and F-24 filed; MissingFeatures D-56 widened. `TESTING.md`'s v6.24 per-suite line moved to the archive. **Rotation:** the pool loses `DangerClose-v6_26.jsx` (v6.26 is read from history, commit `ac5c7d7`) and gains `DangerClose-v6_27.jsx`. **Pool stayed 16.**)*
 >
 > *(**v6.26 SHIPPED (2026-10-21) — Ask AI's ground rules reach every plan (D-55).** Source `6173cbba…` · built `23407af9…`.
 > Not a modelling release (no figure, engine or stored field changes; METHODOLOGY §11's list of what Ask AI sends is corrected). Through v6.25 the only ground rules Ask AI sent were the demo briefing's, so every plan a user entered — and the example after one Save & Apply — sent none. A fixed header (`AI_GROUND_RULES`) now goes first with every question on every route: educational only, no financial directives, not an adviser, use the figures given; it is stored nowhere, and the demo briefing is byte-identical and overridden by it. The live context stopped naming a *Section 2* most plans lack and stopped stating an LTC policy, a pension survivor option and a spouse for a single household; it now says what "success" measures and the Roth amount the results ran at.
@@ -119,12 +123,12 @@ or a reason here (OPERATIONS §I).
 
 | Pool file | md5 | Repo path |
 |---|---|---|
-| `CHANGELOG.md` | `09a9fe0a66cb8b0f292f471e0af48a11` | `CHANGELOG.md` |
-| `METHODOLOGY.md` | `96432a3df8ba6f93e8be836a054a99d0` | `METHODOLOGY.md` |
-| `MissingFeatures.md` | `4374be9170cfdbeb8de16c30c0cc1d52` | `docs/MissingFeatures.md` |
+| `CHANGELOG.md` | `023c1560471b1af4d8d039b6cc367290` | `CHANGELOG.md` |
+| `METHODOLOGY.md` | `95745cbdd34232e3756a724fe1aa7ac6` | `METHODOLOGY.md` |
+| `MissingFeatures.md` | `4146eeeb3bc48900a106e4b15ecfc0b4` | `docs/MissingFeatures.md` |
 | `OPERATIONS.md` | `0468ef1e62c1a445128d98d56ea1443f` | `docs/OPERATIONS.md` — **rolled 2026-09-09** at the run-folder ops package: §B gained the `mk_runfolder.sh` pointer, and §D gained **D1** (the named existence-only assertion class) and **D2** (the `t29` F-6a/F-6b defect pin). *(Previously `f33c2e0cfd…`.)* |
 | `README.md` | `eec58396f932b3209de79c2400dbfb88` | `README.md` |
-| `TESTING.md` | `275acebcf73c4e9aaf4d6ac3995f12b4` | `TESTING.md` |
+| `TESTING.md` | `1623852b2abec409c8db9ea2113c0d74` | `TESTING.md` |
 | `index.html` | `247816be583271d50cf13e0a02e18cdf` | `src/index.html` — the **Vite entry template**, **restored to the pool 2026-08-20** after being found absent (see the build-scaffold row below). ⚠ **Not the built app.** The published single-file `index.html` is repo-only output and never enters the pool; its md5 is in the Current build table and is different by construction |
 | `main.jsx` | `d9eca7b469a3fb7ec1c5325fd4bf8145` | `src/main.jsx` |
 | `package.json` | `9ee8d745bc9f32d6e8fa02e623603423` | `package.json` — The pinned toolchain, and a **build input** rather than a suite file — given a row 2026-08-23 for a measured reason: `npm i <pkg>` in a run folder rewrites it with resolved versions, so it drifts as a side effect of setting the folder up. That is why OPERATIONS §N3a installs jsdom with `--no-save`, and it is the drift `package_check`'s new G-1 caught on its first real use |
@@ -134,11 +138,13 @@ or a reason here (OPERATIONS §I).
 
 | Field | Value |
 |---|---|
-| Version | **v6.26** |
-| Source file in knowledge | — **not pooled**: repo history, commit `ac5c7d7`, found by this md5 |
-| Source md5 | `6173cbbacee22df0896fd41351ce1314` |
-| Built `index.html` md5 | `23407af94f3b82197e7ddf1f09840264` |
+| Version | **v6.27** |
+| Source file in knowledge | — **not pooled**: repo history, commit `35a1926`, found by this md5 |
+| Source md5 | `32b34771da6e55edc80a71519bbe01aa` |
+| Built `index.html` md5 | `deac8c16f4238d8b8519f656e5c646ff` |
 
+> **Rolled 2026-10-22 at the v6.28 ship.** The pair is now **v6.27 prior / v6.28 current**; both tables rolled in one edit (K-7, which counts 628 − 1 = 627). Commit `35a1926` is the first to carry the v6.27 source (`d1089c3` to `9255ba2`, earlier v6.27 uploads, carry v6.26's source beside v6.27's page); `310b134` set the executable bit `controls_v627_grade.py` landed without.
+>
 > **Rolled 2026-10-21 at the v6.27 ship.** The pair is now **v6.26 prior / v6.27 current**; both tables rolled in one edit (K-7, which counts 627 − 1 = 626). Commit `ac5c7d7` is the first to carry the v6.26 source (`b4782c7` to `396f894`, earlier v6.26 uploads, carry v6.25's source beside v6.26's page; `5b78999` also committed 70 stray top-level copies of `qa/` files, removed by `27961be`).
 >
 > **Rolled 2026-10-21 at the v6.26 ship.** The pair is now **v6.25 prior / v6.26 current**; both tables rolled in one edit (K-7, which counts 626 − 1 = 625). Commit `0859894` is the first to carry the v6.25 source (`2742310` to `c063009`, earlier v6.25 uploads, carry v6.24's source beside v6.25's page).
@@ -602,7 +608,7 @@ package, which is the failure mode the section above this one records twice.
 | `CHANGELOG_ARCHIVE_pre_v5_60.md` | — **repo-only, never pooled** — `docs/CHANGELOG_ARCHIVE_pre_v5_60.md`: every CHANGELOG entry for v5.59 and earlier, moved verbatim 2026-09-15 (§G). The provenance lines for those releases live here |
 | `CHANGELOG_ARCHIVE_v5_60_to_v5_74.md` | — **repo-only, never pooled** — `docs/CHANGELOG_ARCHIVE_v5_60_to_v5_74.md`: every CHANGELOG entry from v5.60 through v5.74, with the ops entries between them, moved verbatim 2026-09-28 (§G), checked byte for byte against the removed block. Never edited. |
 | `CHANGELOG_ARCHIVE_v5_75_to_v5_99.md` | — **repo-only, never pooled** — `docs/CHANGELOG_ARCHIVE_v5_75_to_v5_99.md`: every CHANGELOG entry from v5.75 through v5.99, with the ops entries between them, moved verbatim 2026-10-11 (§G), checked byte for byte against the removed block. Never edited. |
-| `TESTING_ARCHIVE_per_suite_v5_53_to_v6_01.md` | — **repo-only, never pooled** — `docs/TESTING_ARCHIVE_per_suite_v5_53_to_v6_01.md`: `TESTING.md`'s per-suite count lines from v6.24 back to v5.53, moved verbatim — v6.01 and earlier on 2026-10-11, checked byte for byte; v6.02's to v6.17's one per ship at the v6.05 to v6.20 ships; v6.18's to v6.21's together at the v6.24 ship, after the v6.21, v6.22 and v6.23 ships moved none. v6.22's at the v6.25 ship; v6.23's at the v6.26 ship; v6.24's at the v6.27 ship. Its header's *Added since* rows record each. Lines are only ever added, verbatim (the name predates all of them). ⚠ *Corrected at v6.24: this row had stopped at v6.07's line since the v6.11 ship.* |
+| `TESTING_ARCHIVE_per_suite_v5_53_to_v6_01.md` | — **repo-only, never pooled** — `docs/TESTING_ARCHIVE_per_suite_v5_53_to_v6_01.md`: `TESTING.md`'s per-suite count lines from v6.25 back to v5.53, moved verbatim — v6.01 and earlier on 2026-10-11, checked byte for byte; v6.02's to v6.17's one per ship at the v6.05 to v6.20 ships; v6.18's to v6.21's together at the v6.24 ship, after the v6.21, v6.22 and v6.23 ships moved none. v6.22's at the v6.25 ship; v6.23's at the v6.26 ship; v6.24's at the v6.27 ship; v6.25's at the v6.28 ship. Its header's *Added since* rows record each. Lines are only ever added, verbatim (the name predates all of them). ⚠ *Corrected at v6.24: this row had stopped at v6.07's line since the v6.11 ship.* |
 | `CHANGELOG_ARCHIVE_v6_00_to_v6_15.md` | — **repo-only, never pooled** — `docs/CHANGELOG_ARCHIVE_v6_00_to_v6_15.md`: every CHANGELOG entry from v6.00 through v6.15, with the four ops entries between them, moved verbatim 2026-10-19 (§G); §0 header names the one thread re-homed (`t38`, to `TESTING.md`). |
 | `TESTING_ARCHIVE_release_notes_to_v5_40.md` | — **repo-only, never pooled** — `docs/TESTING_ARCHIVE_release_notes_to_v5_40.md`: `TESTING.md`'s per-release write-ups to v5.40 (51 paragraphs of its opening section), moved verbatim 2026-10-19 (§G); §0 trace. |
 | `MANIFEST_ARCHIVE_test_hash_table_to_v6_20.md` | — **repo-only, never pooled** — `docs/MANIFEST_ARCHIVE_test_hash_table_to_v6_20.md`: this manifest's *Test and harness file hashes* section, moved verbatim 2026-10-19 when `qa/` left the pool (DC-2 (a)); §0 records what went where. |
@@ -648,6 +654,25 @@ retired and superseded. They get no row because there is no file. Checked 2026-0
 committed tree, so the next sweep does not re-open them.
 
 ## Retirement list (delete-first; nothing replaces these)
+
+### At the v6.28 ship (2026-10-22) — DELETE THESE FIRST
+
+**Rotation:** delete `DangerClose-v6_27.jsx`; `DangerClose-v6_28.jsx` arrives. **Pool stays 16.** Count from the Projects listing (OPERATIONS §I, no-mount note).
+
+| Delete | Because |
+|---|---|
+| `DangerClose-v6_27.jsx` | **rotated out** — v6.27 is read from the repo's history (commit `35a1926`) |
+| `CHANGELOG.md` | replaced — the v6.28 entry |
+| `METHODOLOGY.md` | replaced — §9: the schedule applies no guardrails and computes no income tax; the guardrails are the Monte Carlo's |
+| `MissingFeatures.md` | replaced — D-57 notes the gap-draw figure |
+| `PROJECT_KNOWLEDGE_INDEX.md` | replaced — this edit; the per-suite archive's row; `CHANGELOG.md`'s row rolled last |
+| `TESTING.md` | replaced — the v6.28 per-suite line, v6.25's moved to the archive; `t91`'s and `dom_entry_v628.jsx`'s rows; notes on `t4`, `t19`, `t29`, `t72`, `t86`, `t90`, `boundaries.mjs`, `domdiff` |
+| `UsabilityFlaws.md` | replaced — F-23 and F-24 closed; F-25 filed |
+
+**Arriving new:** `DangerClose-v6_28.jsx`. **Repo-only:** every `qa/` change (`t91_directives.mjs`, `dom_entry_v628.jsx`,
+`controls_v628_directives.py` new; the registered suites, `t33` PINS, `t4`, `t19`, `t29`, `t72`, `t86`, `t90`, `boundaries.mjs`, `shim.txt`,
+`domdiff_withdrawal.mjs`, `runsuite.sh`), `docs/TESTING_ARCHIVE_per_suite_v5_53_to_v6_01.md` (v6.25's line and note appended), the scope
+(`docs/SCOPE_F23_F24_DIRECTIVES_V628.md`, fulfilled), the census (`docs/F25_CENSUS_V627.tsv`), the built `index.html`.
 
 ### At the v6.27 ship (2026-10-21) — DELETE THESE FIRST
 
