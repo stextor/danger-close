@@ -27,14 +27,14 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v621";
-const KNOWN_VERSIONS = ["v620", "v621", "v622", "v623", "v624", "v625", "v626"];
+const KNOWN_VERSIONS = ["v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v621", "v622", "v623", "v624", "v625", "v626"].includes(VER);   // an array, so the next registration widens it
-const POST_D49 = ["v623", "v624", "v625", "v626"].includes(VER);   // v6.23 (D-49): H-2's taper sentence. An array, so the registrar widens it
+const POST = ["v621", "v622", "v623", "v624", "v625", "v626", "v627"].includes(VER);   // an array, so the next registration widens it
+const POST_D49 = ["v623", "v624", "v625", "v626", "v627"].includes(VER);   // v6.23 (D-49): H-2's taper sentence. An array, so the registrar widens it
 // The differential's pair — constants, NOT `VER === "v621"`, so the registrar cannot widen them (t76 records why).
 const D_PRIOR = "v620", D_CUR = "v621";
 const require = createRequire(import.meta.url);
@@ -385,7 +385,7 @@ console.log("  G — rendered (Income, Social Security, Stress, Roth, Monte Carl
     // harmless: My Data's save stores it as null (checked here); a backup import or restore can store the list itself, which the next load
     // recomputes.
     // v6.24 (D-52 fixed): My Data keeps each row's months, so the four rows stay in March. An array, so the registrar widens it.
-    const _carMo = ["v624", "v625", "v626"].includes(VER) ? "03" : "06";
+    const _carMo = ["v624", "v625", "v626", "v627"].includes(VER) ? "03" : "06";
     T(`G-11: Save & Apply stores the field (and no list of added rows) and the table with the four rows${_carMo === "03" ? ", in March, where v6.21 dated them" : " — [KNOWN DEFECT 2026-10-19, D-52] re-dated June"}`,
       !!P1 && P1.carRowsV621 === true && !P1._carRowsAdded && Array.isArray(X1)
       && X1.filter(e => /Replacement car \(added by v6\.21/.test(e.label)).map(e => e.start).join() === ["2037", "2045", "2053", "2061"].map(y => `${y}-${_carMo}`).join(), JSON.stringify(X1 && X1.filter(e => /Replacement/.test(e.label)).map(e => e.start)));

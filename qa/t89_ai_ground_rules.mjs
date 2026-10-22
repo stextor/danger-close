@@ -24,13 +24,13 @@ import { createHash } from "crypto";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v626";
 const CLAUDE = process.argv.includes("--claude");
-const KNOWN_VERSIONS = ["v625", "v626"];
+const KNOWN_VERSIONS = ["v625", "v626", "v627"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v626"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v626", "v627"].includes(VER);   // an array, so the next registration widens it
 const KD = "[KNOWN DEFECT 2026-10-21, D-55 — flips at v6.26]";
 const require = createRequire(import.meta.url);
 globalThis.IS_REACT_ACT_ENVIRONMENT = true; window.IS_REACT_ACT_ENVIRONMENT = true;
@@ -199,7 +199,9 @@ if (POST) {
   T(`A-4 ${KD}: aiSystemPrompt's text starts with the plan text (\${MASTER_PROMPT})`, !!retTpl && retTpl.expressions[0] && retTpl.expressions[0].name === "MASTER_PROMPT");
 }
 T("A-7: the demo briefing is byte-identical to v6.25's (DC-3: the header overrides it; the loader recognises it by equality)",
-  !!DEMO && (VER === "v625" || existsSync(join(HERE, "..", "v625.jsx")) && md5(DEMO) === md5((() => { const a = parse(readFileSync(join(HERE, "..", "v625.jsx"), "utf8")); const d = topDecl(a, "DEFAULT_MASTER_PROMPT"); return d ? tplText(d.init) : null; })())), DEMO && md5(DEMO));
+  // v6.27: pinned by md5. Through v6.26 this read ../v625.jsx, which exists only in a v625 -> v626 run folder, so the check went red on both
+  // legs the moment the folder rolled forward (found at the v6.27 build). 0ace40a1… is v6.25's DEFAULT_MASTER_PROMPT, computed from commit 0859894.
+  !!DEMO && md5(DEMO) === "0ace40a186f95e0ec594910418001b90", DEMO && md5(DEMO));
 
 // ── §B · rendered: every way into a plan ─────────────────────────────────────────────────────────────────────────────────────────
 console.log("  B — what the Ask AI tab says it sends, for every way into a plan");

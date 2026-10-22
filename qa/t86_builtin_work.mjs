@@ -27,13 +27,13 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v623";
-const KNOWN_VERSIONS = ["v622", "v623", "v624", "v625", "v626"];
+const KNOWN_VERSIONS = ["v622", "v623", "v624", "v625", "v626", "v627"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v623", "v624", "v625", "v626"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v623", "v624", "v625", "v626", "v627"].includes(VER);   // an array, so the next registration widens it
 // The differential's pair — constants, NOT `VER === "v623"`, so the registrar cannot widen them (t76 records why).
 const D_PRIOR = "v622", D_CUR = "v623";
 const require = createRequire(import.meta.url);

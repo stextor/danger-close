@@ -382,6 +382,11 @@ tally "t88-$CUR"   node t88_holdings_columns.mjs "$CUR"
 # with --claude for the claude.ai route; prints one count line.
 tally "t89-$PRIOR" node t89_ai_ground_rules.mjs "$PRIOR"
 tally "t89-$CUR"   node t89_ai_ground_rules.mjs "$CUR"
+# t90 (v6.27) — the Grade tab reports the model's grading, not actions (F-22): the panel's directives and invented projections gone, the
+# false and example-only sentences corrected, the literal grades and the B+ ceiling labelled, the Field Manual's entry rewritten. Both legs
+# (the v6.26 leg pins the defects); the v6.27 leg spawns the v6.26 leg once with --dump and checks no grade moves. Prints one count line.
+tally "t90-$PRIOR" node t90_grade_findings.mjs "$PRIOR"
+tally "t90-$CUR"   node t90_grade_findings.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
