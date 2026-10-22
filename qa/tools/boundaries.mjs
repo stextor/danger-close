@@ -31,6 +31,9 @@
 // ── the census ───────────────────────────────────────────────────────────────────────────
 // Pure function of the shim object `G`, so the suite can drive it directly with no CLI, no
 // module resolution and no environment. Returns rows; printing is somebody else's job.
+// v6.28 (F-24): the LTC label test — the leg's exported isLTCLabel where present, else the v6.27 pattern
+const ltcTest = (G) => (typeof G.isLTCLabel === "function" ? (l) => G.isLTCLabel(l) : (l) => /ltc|long.?term/i.test(String(l || "")));
+
 export function census(G) {
   const P = G.PORTFOLIO();
   const tl = G.PLAN_TIMELINE();
@@ -403,7 +406,9 @@ export function census(G) {
   //    insurance policy for both spouses", single plans included, with a +0.20 grade lift the grading could not produce. The example
   //    carries one ("Long-Term Care (Hybrid)"), so that directive never appeared on it. Read with the Grade and Stress tabs' own test,
   //    /ltc|long.?term/i, against the expense table's labels — a label pattern, not a figure.
-  const _ltcRows = (G.EXPENSES() || []).filter(e => e && /ltc|long.?term/i.test(String(e.label || "")));
+  // v6.28 (F-24): the leg's own shared test where it exports one (isLTCLabel, which no longer matches "long-term disability"); the
+  // v6.27 pattern otherwise. So the census row reads exactly what the app reads, on either leg.
+  const _ltcRows = (G.EXPENSES() || []).filter(e => e && ltcTest(G)(e.label));
   row("ltc_row", "an LTC expense row",
     _ltcRows.length ? `${_ltcRows.length} row${_ltcRows.length === 1 ? "" : "s"} (${String(_ltcRows[0].label)})` : "none",
     "a household with no LTC row", _ltcRows.length > 0,
@@ -420,6 +425,18 @@ export function census(G) {
     "a household with neither label", _cutRows.length > 0,
     _cutRows.length ? "the household carries a row the guardrail grade counts, so the $0 cut pool a plan without one shows cannot be seen here"
       : "reachable — no counted row: the guardrail grade has no cut pool");
+
+  // ── v6.28 (F-24 — SCOPE_F23_F24_DIRECTIVES_V628) · the condition that hid it (§K1) ────────────────────────────────────────────────
+  // 13. A LONG-TERM-DISABILITY ROW. Through v6.27 the Grade and Monte Carlo tabs' LTC test, /ltc|long.?term/i, also matched a
+  //    "Long-term disability" row and told the plan an LTC line was in its expenses. The example has no such row (nor does any fixture),
+  //    so the false match could not be seen there. ON when the household has NO label the v6.27 pattern matches and a care test does not.
+  const _oldLT = (l) => /ltc|long.?term/i.test(String(l || "")), _care = (l) => /\bltc|long[\s\-\u2013\u2014]?term[\s\-\u2013\u2014]?care/i.test(String(l || ""));
+  const _dis = (G.EXPENSES() || []).filter(e => e && _oldLT(e.label) && !_care(e.label));
+  row("ltc_disability", "a long-term row that is not care",
+    _dis.length ? _dis.map(e => String(e.label)).join(" + ") : "none",
+    "a household with a long-term-disability row", _dis.length === 0,
+    _dis.length ? "reachable — a long-term row that is not care: the v6.27 LTC test's false match shows"
+      : "the household has no long-term row that is not care, so the v6.27 LTC test's false match cannot be seen here");
 
   return rows;
 }
