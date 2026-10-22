@@ -42,7 +42,9 @@
 > | F-19r | **FIXED v6.11** — filed at v6.10 as "F-19" (§H) | `t74`; `docs/SCOPE_F19R_RANKING_HEADLINE.md` |
 > | F-20 | **OPEN** — filed at v6.23 (§H) | the Income tab's stream list scrolls sideways at 390 px for a plan with income streams (scrollWidth 510); `t45` runs on the example, which has none |
 > | F-21 | **FIXED v6.25** — filed and fixed together (§H) | `t88`; `docs/SCOPE_F21_HOLDINGS_PLAN_TYPE_V625.md` |
-> | F-22 | **OPEN** — filed at v6.26 (§H) | the Grade tab's *RECOMMENDED ACTIONS* are directives (an LTC policy "for both spouses" on any plan whose expense table names no LTC row, "Execute Roth conversion ladder … (fill 22% bracket each year)" on every plan); found by the D-55 scope's review |
+> | F-22 | **FIXED v6.27** — filed at v6.26 (§H); wider than registered | `t90`; `docs/SCOPE_F22_GRADE_FINDINGS_V627.md`. The panel's directives and invented projections are gone; the category text's false and example-only sentences corrected; the three literal grades, the guardrail grade's fixed labels and the B+ ceiling labelled; the Field Manual's Grade entry rewritten. No grade moved |
+> | F-24 | **OPEN** — filed at v6.27 (§H) | the Grade tab's remaining copy and one figure, found by the v6.27 build review: *"Lost ~X GPA points"* divides by 100 where the weights sum to 78 (understated by 22%; the *"Weight: 20%"* chips sum to 78%); Income Floor's editorial wording and its omission of income streams; the Estate drag's unsourced legal claims; *"Strong base-case performance"*; the LTC test matching a long-term-disability row |
+> | F-23 | **OPEN** — filed at v6.27 (§H) | directive copy on other tabs, found by the F-22 scope's §K2 sweep (not exhaustive): the Withdrawal tab's Step 7, the Guardrails tab's *ACTION:* lines, three Exit Plan items, the plan-events list's Roth instructions |
 > | F-15b | **OPEN** | "Success (>$1,500K)" beside a sibling "Success Rate (>$1.25M)" — still in the source |
 > | F-16 | **FIXED v5.98** | the pair swapped; `t62` holds every term in order (was: "API Key" before "Agency MBS") |
 > | §E-1 / §E-2 | **OPEN** | no physical-device pass; no keyboard / screen-reader pass (4 `aria-label`s in the app) |
@@ -449,7 +451,7 @@ footer cell ran past the table's last column — so since the footer was written
 Roth row), each row has a divider, and each total sits under its own column; measured in Chromium at 1440 px (rows 66–67 px → 35–36 px).
 Nothing stored or computed changed. `t88` pins the structure on both legs.
 
-### F-22 · The Grade tab tells the user what to do — **MED (honesty of an output)** — OPEN
+### F-22 · The Grade tab tells the user what to do — **MED (honesty of an output)** — **FIXED v6.27**
 
 **Filed at v6.26** (`docs/SCOPE_D55_AI_GROUND_RULES_V626.md` §0.3 item 4, found by its independent review; not fixed). The app reports what the
 model computes, never advice, and its comparisons say so (*"the model's best cell"*). From v6.26 Ask AI is told not to tell the user which
@@ -464,4 +466,58 @@ Its own comment says *"No allocation/rebalancing actions in this build — … a
 narrower than the one Ask AI now follows. **Who it reaches:** every user who opens the Grade tab. Candidate fix (its own scope, decisions for
 Steve): reword the panel as the model's findings (*"the model's grade rises if…"*) or drop the actions, and tie the Roth line to the Roth tab's
 best cell rather than a fixed 22% bracket.
+
+**Fixed at v6.27** (`docs/SCOPE_F22_GRADE_FINDINGS_V627.md`; DG-1 to DG-4, all (a)). **Wider than registered.** None of the panel's three
+grade lifts was what the model does: the LTC and Tax Efficiency grades are literals, so a policy (+0.20) or a ladder (+0.05) could not move them —
+an LTC premium row can in fact *lower* the grade (more spending; the couple fixture 2.99 → 2.94) — and the estate lift was understated (+0.21 and D → B on the example, not
+"+0.10 … toward an A"). Its *"Projected MC success"* was the current rate plus 3–5 points, never simulated (on the example, *"95–97%, From
+100%"*). The categories told every plan *"Hybrid LTC insurance active"*, blamed the 6-year Monte Carlo's failures on an LTC shock that engine
+does not carry, called every plan's conversion plan *"well-designed"*, and showed the example household's *"International intentionally
+reduced…"*. Three grades are literals and Guardrail Readiness reads rows labelled exactly "golf" and "Amazon", which caps every plan at
+**B+**; the tab said none of it, and the Field Manual described a radar chart that does not exist. **Fixed:** the panel is gone (the
+equity share stays, as a fact, saying what is graded — Sequence Protection reads the cash-and-bond share); the sentences are corrected, and
+three more the build review found (*"Hedge holdings add $0K convexity"* beside *"No hedge positions held"*, the Roth line's years from the
+target rather than the selected retirement year, the guardrail's *"whenever a cut is needed"* when it always is); the three literal grades carry *"Fixed in this build"*, Guardrail Readiness
+*"Graded from two fixed expense labels"* (the grade list and *Top grade drags* mark them † and ‡), and the ceiling is stated; the Field Manual's entry matches the tab. **No grade moved** — `t90`
+B-8 compares every plan's grades with the v6.26 leg's under the same seed. The candidate fix's Roth-best-cell line is superseded (the line is
+gone). Computing the literal grades is filed with D-56 (MissingFeatures); directive copy on other tabs is **F-23**; the Grade tab's remaining copy
+and its understated *"Lost ~X GPA points"* are **F-24**.
+
+### F-23 · Directive copy on other tabs — **LOW–MED (honesty of an output)** — OPEN
+
+**Filed at v6.27** (`docs/SCOPE_F22_GRADE_FINDINGS_V627.md` §4, from its §K2 sweep and its independent review; not fixed). The sweep was not
+exhaustive, so the fix starts with a full census of model-description copy. Found so far, read at v6.26:
+- **Withdrawal tab**, *ORDER OF OPERATIONS*, Step 7: *"Execute planned Roth conversion (if within …) to fill 22% bracket. Pay conversion taxes
+  from Taxable account, NOT from retirement assets."* An instruction — and a misdescription: the same tab says its Conv column is *"the annual
+  Roth conversion amount set by the slider on the Roth tab"*.
+- **Guardrails tab**: three *"ACTION: …"* lines describing the Guyton-Klinger rule (*"Cut next year spending by 10%"*, *"Continue as planned"*,
+  *"Increase spending 5% or boost Roth conversions"*). They describe the modelled rule; whether the engine "boosts Roth conversions" was not checked.
+- **Exit Plan tab**: *"Elect the pension's joint-&-survivor option in writing with the plan administrator."*; *"Build 1–2 years of spending into a
+  brokerage money-market / T-bills …"*; *"… Often the highest-value move in the whole transition."*
+- **The plan-events list** (`computePlanEvents`): *"execute {yr} conversion by Dec 31"* and *"Convert the planned amount (Roth-tab slider) …
+  Pay the tax from the taxable account."*
+
+**Who it reaches:** every user who opens those tabs. Candidate fix (its own scope): describe each as what the model does or assumes, and keep
+logistics (dates, deadlines) separate from financial choices, as the Exit Plan tab's own *"This is logistics — not financial, tax, or legal
+advice"* intends.
+
+### F-24 · The Grade tab's remaining copy, and its "Lost ~X GPA points" — **LOW–MED (honesty of an output)** — OPEN
+
+**Filed at v6.27** (the v6.27 build's independent review; not fixed — outside the decided scope, and one item changes a displayed figure).
+Read at v6.27:
+- **"Lost ~X GPA points (weight N%)"** in *Top grade drags* is `(4 − gpa) × weight / 100`, but the nine weights sum to **78**, so every figure is
+  understated by 22% (the example's Estate Readiness shows 0.24; its real cost to the overall GPA is 3 × 8 / 78 = 0.31). The *"Weight: N%"*
+  chips sum to 78%. A displayed figure, so its fix is Steve's call: divide by the weights' sum, or show weights as points rather than percents.
+- **Income Floor's drag**, *"requires ~$XK accelerated portfolio draw at peak sequence risk"*, is editorial, and the floor counts Social
+  Security and the pension only — a plan's income streams (the couple fixture's $1,200 rental) are in neither its *"covers N%"* nor its $ figure.
+- **Estate Readiness's drag** states legal effects as fact (*"an incapacity forces a court guardianship"* — many states have default
+  health-care surrogate laws; *"stale beneficiary designations override the will entirely"* — a designation governs that account).
+- **Monte Carlo**: *"Strong base-case performance"* at 90% or more is evaluative, and the rate is not a base case; between 88% and 90% the
+  below-90% sentence is labelled STATUS, not DRAG (the label follows the grade, B+ = 3.3).
+- **The LTC test** `/ltc|long.?term/i` (the Grade tab's and the Stress tab's) also matches a *"Long-term disability"* row, which would read as
+  an LTC line.
+- **Tax Efficiency's RMD estimate** grows the balance over the ladder's length rather than the years to RMDs and divides the household's
+  Traditional balance by spouse A's divisor — disclosed as rough.
+
+Candidate fix: its own scope, with the figure as a decision for Steve.
 
