@@ -24,13 +24,13 @@ import { createHash } from "crypto";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v626";
 const CLAUDE = process.argv.includes("--claude");
-const KNOWN_VERSIONS = ["v625", "v626", "v627", "v628"];
+const KNOWN_VERSIONS = ["v625", "v626", "v627", "v628", "v629"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v626", "v627", "v628"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v626", "v627", "v628", "v629"].includes(VER);   // an array, so the next registration widens it
 const KD = "[KNOWN DEFECT 2026-10-21, D-55 — flips at v6.26]";
 const require = createRequire(import.meta.url);
 globalThis.IS_REACT_ACT_ENVIRONMENT = true; window.IS_REACT_ACT_ENVIRONMENT = true;

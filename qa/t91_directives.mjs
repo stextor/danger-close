@@ -27,13 +27,13 @@ import { spawnSync } from "child_process";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v628";
-const KNOWN_VERSIONS = ["v627", "v628"];
+const KNOWN_VERSIONS = ["v627", "v628", "v629"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v628"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v628", "v629"].includes(VER);   // an array, so the next registration widens it
 const KD = "[KNOWN DEFECT 2026-10-21, F-23 — flips at v6.28]";
 const KD24 = "[KNOWN DEFECT 2026-10-21, F-24 — flips at v6.28]";
 
@@ -213,6 +213,7 @@ const example = async () => { await seed(); await click([...body().querySelector
 
 // ── reading the Grade card (t90's reader, plus the weight's denominator) ─────────────────────────────────────────
 const NAMES = ["Monte Carlo Success", "Income Floor", "Sequence Protection", "LTC / Tail Risk", "Tax Efficiency", "Cost Structure", "Guardrail Readiness", "Diversification", "Estate Readiness"];
+const FIXED_CATS = ["LTC / Tail Risk", "Tax Efficiency", "Diversification", "Income Floor"];   // v6.29: the three `fixed: true` grades (v6.27, F-22) and Income Floor, whose line (gap months) its grade does not read
 const readCard = t => {
   const m = t.match(/Overall grade([A-D][+-]?)GPA: (\d\.\d\d) \/ 4\.00/);
   const a0 = t.indexOf("Category detail"), b0 = t.indexOf("Top grade drags");
@@ -276,7 +277,7 @@ const ALLOW = [
   // the Field Manual
   [/^FM:⚠ READ BEFORE USING/, /^Do not rely on this app to make any financial decision\.$/, "the disclaimer"],
   [/^FM:What's new/, /./, "release history"],
-  [/^FM:Inflation assumptions/, /^where an assumption must be picked, pick the direction that makes the plan look slightly worse/, "the design rule, stated"],
+  [/^FM:Inflation assumptions/, /^[Ww]here an assumption must be picked, (the app picks|pick) the direction that makes the plan look slightly worse/, "the design rule, stated (v6.29: \"the app picks\")"],
   [/^FM:Taxes strategy/, /^(Convert too little|convert too much)/, "the trade-off, stated both ways, not a choice"],
   [/^FM:08 Entering Your Data/, /^Fill in what applies, then press Save & Apply/, "data entry"],
   [/^FM:09 The Master Prompt/, /^where it asks for a recommendation/, "describes the AI ground rules"],
@@ -337,12 +338,14 @@ if (POST) {
   T("B-3c: the overall GPA is still the weight-averaged category GPA over 78 (the denominator the drags use)",
     GK.every(k => Math.abs(NAMES.reduce((s, n) => s + GR_CARD[k].cats[n].gpa * GR_CARD[k].cats[n].w, 0) / 78 - GR_CARD[k].gpa) < 0.006));
   T("B-4: a category reads STATUS only at GPA 4.0, and DRAG otherwise, on every plan",
-    GK.every(k => NAMES.every(n => { const c = GR_CARD[k].cats[n]; return (c.gpa === 4.0) === /STATUS:/.test(c.seg) && (c.gpa < 4.0) === /DRAG:/.test(c.seg); })),
+    // v6.29 (F-25, DF-11 a): a FIXED category's sentence is one the grade does not read, so it is labelled NOTE, not DRAG
+    GK.every(k => NAMES.every(n => { const c = GR_CARD[k].cats[n]; const fx = ["v629"].includes(VER) && FIXED_CATS.includes(n);
+      return (c.gpa === 4.0) === /STATUS:/.test(c.seg) && (c.gpa < 4.0 && !fx) === /DRAG:/.test(c.seg) && (c.gpa < 4.0 && fx) === /NOTE:/.test(c.seg); })),
     GK.flatMap(k => NAMES.filter(n => { const c = GR_CARD[k].cats[n]; return (c.gpa === 4.0) !== /STATUS:/.test(c.seg); }).map(n => `${k}/${n} ${GR_CARD[k].cats[n].gpa}`)).join(", "));
   T("B-5: the Monte Carlo category says, on every plan, that its rate is the 6-year Monte Carlo's and that it carries no long-term-care event",
     GK.every(k => /This rate comes from the 6-year Monte Carlo, which carries no long-term-care event|the 6-year Monte Carlo, which carries no long-term-care event/.test(GR_CARD[k].cats["Monte Carlo Success"].seg)));
   T("B-6: Income Floor names what it counts (Social Security and the pension; income streams not counted), and its drag states months, not a dollar figure",
-    GK.every(k => { const s = GR_CARD[k].cats["Income Floor"].seg; const d = (s.split("DRAG:")[1] || ""); return /Social Security and the pension/.test(s) && /Income streams are not counted here/.test(s) && !/\$/.test(d); }),
+    GK.every(k => { const s = GR_CARD[k].cats["Income Floor"].seg; const d = (s.split(/DRAG:|NOTE:/)[1] || "");   /* v6.29: Income Floor's line is labelled NOTE */ return /Social Security and the pension/.test(s) && /Income streams are not counted here/.test(s) && !/\$/.test(d); }),
     GR_CARD.example.cats["Income Floor"].seg.slice(0, 300));
   T("B-7: Estate Readiness makes no legal claim (court guardianship, override the will, never locate) and no directive",
     GK.every(k => !/guardianship|override the will|never locate|real risk|Complete these/.test(GR_CARD[k].cats["Estate Readiness"].seg)));
@@ -423,7 +426,7 @@ if (POST) {
   T("C-6: IRMAA: the Roth slider sets the conversion amount in each conversion year's MAGI (not every year's)", /The Roth slider sets the conversion amount in the MAGI of each conversion year/.test(one("example", "irmaa")));
   T("C-7: Stress: the cash-and-bond share is a fact, and the Monte Carlo draws at its mix — no 'Reserve defense'", /the Monte Carlo draws from the whole portfolio at its mix/.test(one("example", "stress")) && !/Reserve defense/.test(one("example", "stress")));
   T("C-8: Income: the gap is drawn from the portfolio, and the draw source is each engine's", /the model draws it from the portfolio/.test(one("example", "income"))
-    && /in the Withdrawal tab's schedule from Other accounts first, then cash, bonds and equities; in the Monte Carlo from the whole portfolio at its mix/.test(one("example", "income")));
+    && /in the Withdrawal tab's schedule from Other accounts first, then cash, bonds(,| and) equities( and hedges)?; in the Monte Carlo from the whole portfolio at its mix/.test(one("example", "income")));   // v6.29 (F-25): "and hedges"
   T("C-9: Dashboard: the guardrails are the Monte Carlo's and the schedule applies none", /The Monte Carlo's guardrails cut monthly spending/.test(one("example", "dashboard")) && /the Withdrawal tab's year-by-year schedule applies none/.test(one("example", "dashboard")));
   T("C-10: Roth: the amount and the tax payment are the household's settings, not an ideal", /Conversion amount: the slider, \$/.test(one("example", "roth")) && /Tax payment: set in Step 2 below/.test(one("example", "roth"))
     && !/\(ideal\)|classic guideline|standard advice/.test(one("example", "roth")));
@@ -436,7 +439,7 @@ if (POST) {
   const stIds = stEl.length === 1 ? idents(stEl[0]) : new Set();
   T("C-13: the holdings card's Starting Traditional is the holdings' own (_posTradW), not _tradInit, which also counts Other-account money already in Priority 1",
     stEl.length === 1 && stIds.has("_posTradW") && !stIds.has("_tradInit") && /Starting Traditional: \$ ?\d+ ?K ?; Roth:/.test(wx), `${stEl.length} / ${[...stIds].filter(x => /trad/i.test(x)).join(",")}`);
-  T("C-13b: Exit Plan's income line counts income streams; its conversion years are not said to end before RMDs", /Guaranteed income in the model: Social Security.{0,60} and any income streams you entered\./.test(ex) && !/before RMDs\./.test(ex));
+  T("C-13b: Exit Plan's income line counts income streams; its conversion years are not said to end before RMDs", /Guaranteed income in the model: Social Security.{0,60} and any income streams you entered( \(the Backtest and What Breaks count Social Security and the pension only\))?\./.test(ex) && !/before RMDs\./.test(ex));
   const cobra = all(AST, n => n.type === "ConditionalExpression" && n.consequent.type === "Literal" && /cannot span this gap alone/.test(String(n.consequent.value)) && n.alternate.type === "Literal" && /can span this gap/.test(String(n.alternate.value)));
   T("C-13c: the COBRA sentence follows the gap's length (> 18 months: cannot span; otherwise can) — the example's 24-month gap reads 'cannot'",
     cobra.length === 1 && /COBRA lasts at most 18 months, so it cannot span this gap alone/.test(ex), cobra.length);

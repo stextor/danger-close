@@ -392,6 +392,12 @@ tally "t90-$CUR"   node t90_grade_findings.mjs "$CUR"
 # test. Both legs (the v6.27 leg pins the defects). Prints one count line.
 tally "t91-$PRIOR" node t91_directives.mjs "$PRIOR"
 tally "t91-$CUR"   node t91_directives.mjs "$CUR"
+# t92 (v6.29) — what the app says about its own model (F-25): the replaced sentences extinct by AST, no typed preset name in an in-app
+# sentence, every AMT constant checked on the Verify tab (by mutation), the computed sentences (Stress recovery, Backtest note, What Breaks'
+# history) against independent readings, the four figures, spouse B's RMD event, the Exit Plan's months, privacy parity, the Field Manual
+# and METHODOLOGY. Both legs (the v6.28 leg pins the defects); module facts in a child process. Prints one count line.
+tally "t92-$PRIOR" node t92_model_claims.mjs "$PRIOR"
+tally "t92-$CUR"   node t92_model_claims.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

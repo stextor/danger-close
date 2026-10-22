@@ -34,7 +34,7 @@ let _s = 42; Math.random = () => { _s = (_s * 1103515245 + 12345) & 0x7fffffff; 
 
 const VER = process.argv[2] || "v565";
 const _vt = Number(String(VER).replace(/[^0-9]/g, "")) || 0;
-const KNOWN_VERSIONS = ["v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628"];
+const KNOWN_VERSIONS = ["v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -49,7 +49,7 @@ const POPULATED = _v >= 565;   // v5.65 is the release that populates Connecticu
 // exclusions: each keeps its BASE and, on the v6.01 leg, expects that base on the state's schedule, computed HERE, independently of the app
 // (t65 §A's transcription). `CTX(flat)` turns a v6.00 figure (5 % × base) into the base's tax on Connecticut's schedule; §C recovers the
 // exclusion by inverting that schedule rather than dividing by 5 %. A version LIST.
-const BR2 = ["v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628"].includes(VER);
+const BR2 = ["v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);
 const _CTS = { single: [[10000, .02], [50000, .045], [100000, .055], [200000, .06], [250000, .065], [500000, .069], [null, .0699]],
                joint: [[20000, .02], [100000, .045], [200000, .055], [400000, .06], [500000, .065], [1000000, .069], [null, .0699]] };
 const _CTA = { single: [[56500, 5000, 25, 250], [105000, 5000, 25, 250], [200000, 5000, 90, 2700], [500000, 5000, 50, 450]],
@@ -63,7 +63,7 @@ const ctSched = (base, single = false) => { const k = single ? "single" : "joint
 // computed by qa/d30_ref.mjs (independent of the app) from the calculator's own record of the pinned call; a different base fails (NaN).
 // §C recovers the exclusion from that record's base and asserts the tax equals the reference on it, so the exclusion -> tax wiring stays
 // checked; RI-4 prices the no-exclusion base the same way. A version LIST.
-const D30L = ["v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628"].includes(VER);
+const D30L = ["v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);
 const CTX = (flat, single = false) => D30L ? d30Want(R, "CT", flat / 0.05, D30REC.last) : BR2 ? ctSched(flat / 0.05, single) : flat;
 // The schedule is strictly increasing in the base, so a tax names one base: bisection to a millionth of a dollar.
 const ctBase = (tax, single = false) => { let lo = 0, hi = 1e8; for (let i = 0; i < 200 && hi - lo > 1e-7; i++) { const m = (lo + hi) / 2; if (ctSched(m, single) < tax) lo = m; else hi = m; } return (lo + hi) / 2; };
@@ -299,10 +299,18 @@ const ctTax = (args) => (D30L ? D30REC.call : ST)({
     // ⚠ IT RECOGNISES A NEGATION WITHIN ~40 CHARACTERS OF "dividend", and no other phrasing — the
     // same deliberate narrowness as t10's `_AGE_NOTE`. A future rewording that negates some other
     // way would be invisible again; that limitation is recorded here rather than papered over.
+    // v6.29 (F-25): D-2 and D-3 locked a FALSE disclosure. Every in-app caller passes the taxable account's yield (dividends and interest,
+    // taxed together) in `capGains`, which both income bases carry, so the "omission" and its optimistic direction never existed. From v6.29
+    // the note says the measure carries the yield, and D-2/D-3 assert that and the absence of the old claim (OPERATIONS §B2 lock).
+    if (_vt >= 629) {
+      T("D-2 [v6.29]: the note says the income measure carries the taxable account's yield (dividends and interest)", /the taxable account's yield \(its dividends and interest, which the model taxes together\)/i.test(note));
+      T("D-3 [v6.29]: and no longer claims the measure omits dividends, nor an overstated exemption from it", !/\b(not|no|never|excludes?|excluding|without|omits?)\b[^.]{0,40}\bdividend/i.test(note) && !/overstat|too (large|generous)|lower on/i.test(note));
+    } else {
     T("D-2: and it discloses that the income measure carries NO dividend or interest income — asserted as a NEGATION, not merely as the words appearing",
       /\b(not|no|never|excludes?|excluding|without)\b[^.]{0,40}\bdividend/i.test(note) && /interest/i.test(note));
     T("D-3: and it names the DIRECTION of that error rather than merely noting the omission",
       /overstat|too (large|generous)|lower on/i.test(note));
+    }
     T("D-4: the note names the tax year the table is drawn from, so a stale table is visible",
       /TY2026|2026/.test(note));
     T("D-5: and it states there is no age test, which is the fact `exclAge: 0` encodes",
@@ -362,10 +370,15 @@ const ctTax = (args) => (D30L ? D30REC.call : ST)({
       // VA's note owes three disclosures. Each is asserted as a CLAIM, not as the presence of a noun
       // (the v5.65 D-2 lesson): a note saying the measure DOES carry dividends must fail D-10.
       const _van = R.VA.note || "";
+      if (_vt >= 629) {   // v6.29 (F-25): the omission D-10/D-11 locked never existed — see D-2
+        T("D-10 [v6.29]: VA's note says the measure carries the taxable account's yield", /the taxable account's yield \(its dividends and interest, which the model taxes together\)/i.test(_van));
+        T("D-11 [v6.29]: and no longer claims an omitted dividend term or an overstated deduction from it", !/\b(not|no|never|excludes?|excluding|without|omits?)\b[^.]{0,40}\bdividend/i.test(_van) && !/overstat/i.test(_van));
+      } else {
       T("D-10 [v5.68]: VA's note discloses that the measure carries NO dividend or interest income — asserted as a negation within ~40 characters",
         /\b(omits?|not|no|never|without|excluding)\b[^.]{0,40}\bdividend/i.test(_van) && /interest/i.test(_van));
       T("D-11 [v5.68]: and names the DIRECTION of that error — the deduction is overstated",
         /overstat/i.test(_van));
+      }
       T("D-12 [v5.68]: and states the reduction is taken ONCE, not once per spouse — the mechanic this release exists to get right",
         /\bonce\b/i.test(_van) && /not once per spouse|not per spouse/i.test(_van));
       T("D-13 [v5.68]: and no longer claims the deduction is applied unconditionally — the pre-v5.68 disclosure is now false (OPERATIONS §B2 lock)",
@@ -382,7 +395,7 @@ const ctTax = (args) => (D30L ? D30REC.call : ST)({
       T("D-15 [v5.69]: and states the cliff is EXCLUSIVE — AGI must be less than the threshold",
         /less than the threshold/i.test(_rin));
       // v5.95 (D-12 Phase 3): both gaps are CLOSED — the note now says IRA income stays taxable and each $50,000 is capped per person.
-      if ((VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || VER === "v628")))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || VER === "v628")))))))))))))))))) {
+      if ((VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629"))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629"))))))))))))))))))) {
         T("D-16 [v5.95]: the note says IRA distributions stay taxable (D-RI-1 closed)", /IRA distributions, which the statute does not cover, stay taxable/i.test(_rin));
         T("D-17 [v5.95]: and that each person's $50,000 is capped at that person's own income (D-RI-3 closed)", /capped at that person's own pension, annuity and employer-plan income/i.test(_rin));
       } else {
@@ -391,10 +404,15 @@ const ctTax = (args) => (D30L ? D30REC.call : ST)({
       T("D-17 [v5.69]: and that each person's $50,000 is NOT capped at their own income (D-RI-3)",
         /does not cap each person/i.test(_rin));
       }
+      if (_vt >= 629) {   // v6.29 (F-25): the omission D-18/D-19 locked never existed — see D-2
+        T("D-18 [v6.29]: RI's note says the AGI measure carries the taxable account's yield", /the taxable account's yield \(its dividends and interest, which the model taxes together\)/i.test(_rin));
+        T("D-19 [v6.29]: and no longer claims an omitted dividend term or an overstated exclusion from it", !/\b(not|no|never|excludes?|excluding|without|omits?)\b[^.]{0,40}\bdividend/i.test(_rin) && !/overstates the exclusion/i.test(_rin));
+      } else {
       T("D-18 [v5.69]: and that the measure carries NO dividend or interest income — a negation within ~40 characters",
         /\b(omits?|not|no|never|without|excluding)\b[^.]{0,40}\bdividend/i.test(_rin) && /interest/i.test(_rin));
       T("D-19 [v5.69]: and names the DIRECTION of those gaps — the exclusion is overstated",
         /overstates the exclusion/i.test(_rin));
+      }
       T("D-20 [v5.69]: and dates its thresholds — TY2026 figures expected November 2026 (parent B-3)",
         /TY2026 expected November 2026/i.test(_rin));
     }
@@ -554,7 +572,7 @@ const ctTax = (args) => (D30L ? D30REC.call : ST)({
     T(`RI-1: the engine priced Rhode Island rows to compare (compared ${compared})`, compared > 0);
     // v5.95 (D-12 Phase 3): the engine now passes byPerson, which this re-price cannot rebuild from row fields. Rows still match where
     // no per-person rule binds; where one does, RI's per-person caps and IRA exclusion can only REMOVE exclusion, so the engine is higher.
-    if ((VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || VER === "v628")))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || VER === "v628")))))))))))))))))) T(`RI-2 [v5.95]: rows re-price identically except where a per-person rule binds, and there the engine is HIGHER (mismatched ${mismatched} of ${compared}, lower ${lower})`, lower === 0 && mismatched > 0 && mismatched < compared);
+    if ((VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629"))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629"))))))))))))))))))) T(`RI-2 [v5.95]: rows re-price identically except where a per-person rule binds, and there the engine is HIGHER (mismatched ${mismatched} of ${compared}, lower ${lower})`, lower === 0 && mismatched > 0 && mismatched < compared);
     else T(`RI-2: every engine row re-prices identically through the module (mismatched ${mismatched} of ${compared})`, mismatched === 0);
     T(`RI-3: the household crosses the cliff \u2014 qualifying rows exist BOTH at/above it (${above}) and below it (${belowQual}), so the section can discriminate`,
       above > 0 && belowQual > 0);
@@ -593,7 +611,7 @@ const ctTax = (args) => (D30L ? D30REC.call : ST)({
     } else {
       T("RI-7 [v5.69]: and names Rhode Island among the conditioned states, with the IRA money it still over-grants",
         /Rhode Island at v5\.69/.test(DOCS) && /still applied to IRA money/i.test(DOCS));
-      if (["v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628"].includes(VER)) {   // single-build on purpose: the stale count is pinned only on the leg that ran beside its fix (v6.05)
+      if (["v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER)) {   // single-build on purpose: the stale count is pinned only on the leg that ran beside its fix (v6.05)
         const _nw = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
         const _nIL = Object.keys(R).filter(k => R[k] && R[k].incomeLimitedInLaw === true).length;
         const _cnt = [...DOCS.matchAll(/\b([a-z]+) (?:state )?exclusions known to be income-limited in law/gi)].map(m => m[1].toLowerCase());

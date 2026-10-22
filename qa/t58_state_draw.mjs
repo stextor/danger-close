@@ -14,7 +14,7 @@
 // BOTH LEGS. The v593 leg PINS the defect (A, B, D, E assert the pre-fix state); group C runs on the v594 leg only, because it
 // asserts what THIS release changed relative to its prior. Run: node t58_state_draw.mjs <tag>
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628"];
+const KNOWN_VERSIONS = ["v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; console.log(`  \u2717 ${n}${d !== "" ? " \u2014 " + String(d).slice(0, 260) : ""}`); } };
 const done = () => { console.log(`\nt58 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
@@ -31,7 +31,7 @@ const g = m.__g, E = m.__engines, SR = g.STATE_RULES();
 // v6.18 (D-41): Engine D reads the expense table year by year, which moved B-NC's lifetime draw. PIN18 picks the v6.18 figure; the
 // v6.18 leg is ALSO run with DC_V617_SPENDING=1 — v6.17's spending as a table (qa/tools/v617_spending.mjs) — where the v6.17 figure must
 // still come out exactly (every other check here is a hand marginal on the run's own rows, so it holds on either table).
-const POST_D41 = ["v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628"].includes(VER);   // an array, so the registrar widens it
+const POST_D41 = ["v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);   // an array, so the registrar widens it
 const SPEND17 = POST_D41 && process.env.DC_V617_SPENDING === "1";
 const PIN18 = POST_D41 && !SPEND17;
 const P41 = (v617, v618) => PIN18 ? v618 : v617;
@@ -39,7 +39,7 @@ const P41 = (v617, v618) => PIN18 ? v618 : v617;
 // rides on its draws after 2036 moved. PIN21 picks the v6.21 figures (measured at the build). The v6.21 leg is ALSO run with
 // DC_V620_TABLE=1 — the example's table without its car rows, which is v6.20's — and there every v6.20 figure must come out exactly: that
 // second run attributes each move to the rows alone (runsuite.sh, "<suite>-<cur>-table620"; t84 C proves v6.21 on that table IS v6.20).
-const POST_D42 = ["v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628"].includes(VER);   // an array, so the registrar widens it
+const POST_D42 = ["v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);   // an array, so the registrar widens it
 const TABLE620 = POST_D42 && process.env.DC_V620_TABLE === "1";
 const PIN21 = POST_D42 && !TABLE620;
 const P42 = (v620, v621) => PIN21 ? v621 : v620;
@@ -52,7 +52,7 @@ if (TABLE620) { g.applyLoadedData({ portfolio: JSON.parse(JSON.stringify(g.PORTF
 // formula keeps its base and on a D-30 leg prices it after them with qa/d30_ref.mjs, from the row's own fields (federal AGI, filing status,
 // ages); A-RI's gap is the reference's difference between its two bases. A version LIST.
 const { d30Tax } = await import("./d30_ref.mjs");
-const D30L = ["v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628"].includes(VER);
+const D30L = ["v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);
 const P0 = JSON.parse(JSON.stringify(g.PORTFOLIO()));
 
 // ── 0 · the rates the hand figures assume ──────────────────────────────────────────────────────────────────────────────────
@@ -60,7 +60,7 @@ const P0 = JSON.parse(JSON.stringify(g.PORTFOLIO()));
 // v6.00 (D-22 option 3, SCOPE_D22_BRACKETS_V600): California and New York are taxed on their own schedules from v6.00 (`rate` = the top
 // rate). The hand formula keeps its base and, on a bracket leg, prices it on the schedule — computed here, independently of the app, from
 // the sources t64 §A cites, with New York's recapture (worksheet 1 exactly; above its limit the bracket's rate on all of it). A version LIST.
-const BRACKET_LEGS = ["v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628"], BRK = BRACKET_LEGS.includes(VER);
+const BRACKET_LEGS = ["v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"], BRK = BRACKET_LEGS.includes(VER);
 const SCHED = !BRK ? {} : {
   CA: { single: [[11079, .01], [26264, .02], [41452, .04], [57542, .06], [72724, .08], [371479, .093], [445771, .103], [742953, .113], [1000000, .123], [null, .133]],
         joint: [[22158, .01], [52528, .02], [82904, .04], [115084, .06], [145448, .08], [742958, .093], [891542, .103], [1000000, .113], [1485906, .123], [null, .133]] },
@@ -71,7 +71,7 @@ const schedTax = (code, x, single) => { const rows = SCHED[code][single ? "singl
   if (code === "NY" && x > 107650) { const up = single ? 215400 : 161550, fl = single ? 0.059 : 0.054;
     t = x <= up ? t + (fl * x - t) * Math.min(1, Math.round((x - 107650) / 50000 * 1e4) / 1e4) : rows.find(([u]) => u === null || x <= u)[1] * x; }
   return t; };
-const RATE = { NC: 0.0399, CA: BRK ? 0.133 : 0.06, GA: (["v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628"].includes(VER) ? 0.0499 : 0.0519), NY: BRK ? 0.109 : 0.06 }, EXCL = { NC: 0, CA: 0, GA: 65000, NY: 20000 };
+const RATE = { NC: 0.0399, CA: BRK ? 0.133 : 0.06, GA: (["v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER) ? 0.0499 : 0.0519), NY: BRK ? 0.109 : 0.06 }, EXCL = { NC: 0, CA: 0, GA: 65000, NY: 20000 };
 CK(`0-1 NC 3.99 % / CA ${BRK ? "on its schedule, top 13.3 %" : "6 %"} / GA ${(RATE.GA * 100).toFixed(2)} % / NY ${BRK ? "on its schedule, top 10.9 %" : "6 %"}; exclusions 0 / 0 / $65,000 / $20,000 per person; no SS, exemption, test or age field`,
    Object.keys(RATE).every(c => SR[c].rate === RATE[c] && (SR[c].excl65 || 0) === EXCL[c] && !SR[c].ss && !SR[c].retExempt &&
      !SR[c].exclTest && SR[c].exclAge == null && !SR[c].ssRule && !SR[c].ssOffset && !!SR[c].brackets === !!SCHED[c]), Object.keys(RATE).map(c => JSON.stringify(SR[c])).join(" "));
@@ -105,7 +105,7 @@ CK(`0-1 NC 3.99 % / CA ${BRK ? "on its schedule, top 13.3 %" : "6 %"} / GA ${(RA
   //   ($16,450 single / $32,900 joint), so the draw costs no more than the pension here — the reference's own difference, $0; t59 A-1 and
   //   A-6 hold the per-person split at taxable incomes.
   const RI_GAP = D30L ? d30Tax(SR, "RI", { base: 10000, agi: 0, single: true }).tax - d30Tax(SR, "RI", { base: 2000, agi: 0, single: true }).tax
-               : ["v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628"].includes(VER) ? 300 : 400;
+               : ["v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER) ? 300 : 400;
   const RI_GAPJ = D30L ? d30Tax(SR, "RI", { base: 10000, agi: 0, single: false }).tax - d30Tax(SR, "RI", { base: 2000, agi: 0, single: false }).tax : RI_GAP;
   if (RI_SPLIT) CK(`A-RI (v5.95): Rhode Island, single and joint \u2014 the IRA draw costs exactly $${RI_GAP} more than the pension (${D30L ? `$2,000 vs $10,000 of base, both inside RI's deductions — v6.02; joint $${RI_GAPJ}` : `$8,000 at ${RI_GAP === 300 ? "the 3.75 % first bracket" : "5 %"}`}) (${riCases.map(x => x.toFixed(2)).join(", ")})`, riCases.length === 2 && Math.abs(riCases[0] - RI_GAP) < 0.5 && Math.abs(riCases[1] - RI_GAPJ) < 0.5, riCases.join(","));
   // v6.02: the progressive states' deductions now shelter the $10,000 increment entirely in a few low-rate cases (measured: 58 of 102)
@@ -156,7 +156,7 @@ CK(`0-1 NC 3.99 % / CA ${BRK ? "on its schedule, top 13.3 %" : "6 %"} / GA ${(RA
       const all = W.reduce((t, r) => t + (r.ordDraw_y || 0), 0), draw = iso.reduce((t, i) => t + W[i].ordDraw_y, 0), dS = iso.reduce((t, i) => t + W[i].stateTax - N[i].stateTax, 0);
       // v6.03 (D-30 batch 2, DD-14): North Carolina takes its standard deduction ($25,500 joint), which absorbs part of the draw in years whose other
       // income sits below it — so the lifetime Δ is no longer 3.99 % of the draw. It is the sum of the per-year hand marginals (B-2 holds each).
-      const B2L = ["v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628"].includes(VER), dHand = iso.reduce((t, i) => t + hand(W[i], true) - hand(N[i], true), 0);
+      const B2L = ["v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER), dHand = iso.reduce((t, i) => t + hand(W[i], true) - hand(N[i], true), 0);
       CK(`B-NC: lifetime draw $${Math.round(all).toLocaleString()} (= ${P41("$313,303", P42("$318,010 — v6.18, D-41; $313,303 through v6.17", "$350,148 — v6.21, D-42: the car rows; $318,010 at v6.18–v6.20"))}); ${iso.length} isolated years carry $${Math.round(draw).toLocaleString()} of it (≥ 99 %), state Δ $${Math.round(dS).toLocaleString()} ${!FIXED ? "= $0 (PIN v5.93)" : B2L ? `= the hand marginals after North Carolina's standard deduction, $${Math.round(dHand).toLocaleString()} (v6.03; 3.99 % of the draw would be $${Math.round(0.0399 * draw).toLocaleString()})` : "= 3.99 % of it"}`,
          Math.round(all) === P41(313303, P42(318010, 350148)) && draw >= 0.99 * all && Math.abs(dS - (!FIXED ? 0 : B2L ? dHand : 0.0399 * draw)) < 0.05 && (!B2L || dS < 0.0399 * draw), `${all} / ${draw} / ${dS}`);
     }

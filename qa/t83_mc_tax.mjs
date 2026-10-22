@@ -29,14 +29,14 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v620";
-const KNOWN_VERSIONS = ["v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628"];
+const KNOWN_VERSIONS = ["v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628"].includes(VER);   // an array, so the next registration widens it
-const POST_D49 = ["v623", "v624", "v625", "v626", "v627", "v628"].includes(VER);   // v6.23 (D-49): the Field Manual's Monte Carlo sentence on the built-in work (I-8). An array, so the registrar widens it
+const POST = ["v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);   // an array, so the next registration widens it
+const POST_D49 = ["v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);   // v6.23 (D-49): the Field Manual's Monte Carlo sentence on the built-in work (I-8). An array, so the registrar widens it
 // The differential's pair — constants, NOT `VER === "v620"`, so the registrar cannot widen them (t76 records why).
 const D_PRIOR = "v619", D_CUR = "v620";
 const require = createRequire(import.meta.url);
@@ -288,7 +288,7 @@ const callsIn = (node, name) => { let c = 0; walk.simple(node, { CallExpression(
     T(`E-4 every one of the ${subs.length} subtractions from planned, _planned or portfolio in the two engines is a named outflow`, unknown.length === 0 && subs.length > 0,
       unknown.map(s => `${s.fn} L${s.line}: ${s.rhs}`).join(" | "));
     // v6.21 (D-42): the fixed car is gone — a car is a one-time row, charged as "the one-time rows". An array, so the registrar widens it.
-    const CAR_N = ["v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628"].includes(VER) ? 0 : 1;
+    const CAR_N = ["v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER) ? 0 : 1;
     T(`E-5 …in the counts the scope names: draw 4, tax 4, one-time 4, mortgage 2, LTC shock 2, care 2, car ${CAR_N}${CAR_N ? "" : " (v6.21: a car is an expense row)"}`,
       count("the spending draw") === 4 && count("the tax") === 4 && count("the one-time rows") === 4 && count("the mortgage payment") === 2
       && count("the LTC shock") === 2 && count("the sustained-care term") === 2 && count("the car") === CAR_N, KINDS.map(([k]) => `${k} ${count(k)}`).join(", "));
@@ -533,7 +533,10 @@ console.log("  I — rendered: the Income card, the slider, the Monte Carlo tab,
     const want = r => `$${Math.round(DG.mcIncomeTaxSchedule(RY, { rothAmount: r, qcdAnnual: 0, taxYield: 2, scenarioPreset: "bull" }).byYr[RY]).toLocaleString()}/yr`;
     T("I-0 SETUP: the Income tab's card fills in (the 6-year runs finished)", ready, cardLine());
     T("I-1 the card is the schedule's first year at the opening $70K slider under BULL (the preset a first visit opens on), in today's dollars",
-      cardEl() && cardEl().textContent.trim() === want(70000) && /Income tax the Monte Carlo pays/i.test(cardLine()) && /2029 in today's dollars: the Taxes tab's tax, year by year, at the \$70K conversion slider/.test(cardLine()), `${cardLine()} vs ${want(70000)}`);
+      cardEl() && cardEl().textContent.trim() === want(70000) && /Income tax the Monte Carlo pays/i.test(cardLine())
+      // v6.29 (F-25, 375): "in today's dollars" is Engine B's approximation only; the line says the Monte Carlo treats the figure so and grows it
+      && (["v629"].includes(VER) ? /2029: the Taxes tab's tax at the \$70K conversion slider, which the Monte Carlo treats as today's dollars and grows with each path's inflation/
+                                 : /2029 in today's dollars: the Taxes tab's tax, year by year, at the \$70K conversion slider/).test(cardLine()), `${cardLine()} vs ${want(70000)}`);
     T("I-2 the old card is gone: no \"$4K/quarter modeled in MC sim\", no \"Roth conversion tax drag\"", !/4K\/quarter modeled in MC sim/.test(text()) && !/Roth conversion tax drag/i.test(text()));
     await tab("roth");
     const slider = () => [...body().querySelectorAll("input[type=range]")].find(s => s.max === "400000" && s.step === "5000");
@@ -551,7 +554,9 @@ console.log("  I — rendered: the Income card, the slider, the Monte Carlo tab,
   }
   const bt = await tab("backtest");
   if (POST) T("I-6 Backtest: the MC charges the Taxes tab's income tax, and both spend one-time expenses — the March/June/September/December sentence and \"tax drag\" are gone",
-    /the MC also charges LTC shocks and the Taxes tab's income tax, which this backtest deliberately omits\. \(Both spend your one-time expenses: this backtest from v6\.18, the MC in the quarter each one falls from v6\.20\.\)/.test(bt)
+    // v6.29 (F-25, 1071): the comparison names the Monte Carlo tab's 30-year runs (not "the MC headline") and the header's 6-year run
+    (["v629"].includes(VER) ? /they also charge long-term care and the Taxes tab's income tax, which this backtest omits\. The header's success rate is a different run again: the 6-year simulation, ending above \$800K\. \(Both spend your one-time expenses: this backtest from v6\.18, the MC in the quarter each one falls from v6\.20\.\)/
+                            : /the MC also charges LTC shocks and the Taxes tab's income tax, which this backtest deliberately omits\. \(Both spend your one-time expenses: this backtest from v6\.18, the MC in the quarter each one falls from v6\.20\.\)/).test(bt)
     && !/the MC charges one only when it is dated in March/.test(bt) && !/Roth-conversion tax drag/.test(bt));
   else T(`I-6 ${KD} Backtest says the MC charges a one-time expense only when dated in March, June, September or December`, /the MC charges one only when it is dated in March, June, September or December/.test(bt));
   const wb = await tab("what breaks");

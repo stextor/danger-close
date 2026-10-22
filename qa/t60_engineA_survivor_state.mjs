@@ -15,7 +15,7 @@
 //          E the Field Manual's dated line
 // BOTH LEGS; the v595 leg PINS the defect. Group C runs on the v596 leg only (it needs app_v595.mjs). Run: node t60_engineA_survivor_state.mjs <tag>
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628"];
+const KNOWN_VERSIONS = ["v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  ✓ ${n}`); } else { fail++; console.log(`  ✗ ${n}${d !== "" ? " — " + String(d).slice(0, 260) : ""}`); } };
 const done = () => { console.log(`\nt60 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
@@ -36,14 +36,14 @@ const g = m.__g, E = m.__engines, SR = g.STATE_RULES();
 // v6.02 (D-30 batch 1 — docs/SCOPE_D30_DEDUCTIONS_V602.md, DD-14): Maine takes its standard deduction and exemption. B-ME keeps its BASE and on a
 // D-30 leg expects it after them (qa/d30_ref.mjs, on the calculator's own record of the call); Georgia and Michigan are untouched. A version LIST.
 const { d30Pins } = await import("./d30_ref.mjs");
-const D30L = ["v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628"].includes(VER), D30 = d30Pins(E.stateTaxAnnual || g.stateTaxAnnual, SR, D30L), ST = D30.S;
+const D30L = ["v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER), D30 = d30Pins(E.stateTaxAnnual || g.stateTaxAnnual, SR, D30L), ST = D30.S;
 
 // ── 0 · rates and figures ──
 // v5.97 (D-22): Georgia is 4.99 % from TY2026 (HB 463); earlier legs keep 5.19 %.
-const R = { GA: (["v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628"].includes(VER) ? 0.0499 : 0.0519), ME: 0.0715, MI: 0.0425 };
+const R = { GA: (["v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER) ? 0.0499 : 0.0519), ME: 0.0715, MI: 0.0425 };
 // v6.01 (D-22 batch 2, SCOPE_D22_BRACKETS_V601): Maine moves to its own schedule (top 9.15 %, with the 2 % surcharge). B-ME keeps its BASE (the
 // survivor's relief this suite pins) and, on the v6.01 leg, prices it on Maine's single schedule — t65 §A's transcription, not the app's. A LIST.
-const BR2 = ["v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628"].includes(VER);
+const BR2 = ["v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);
 if (BR2) R.ME = 0.0915;
 const _bs = (rows, x) => { let t = 0, lo = 0; for (const [u, r] of rows) { const hi = u === null ? Infinity : u; if (x <= lo) break; t += (Math.min(x, hi) - lo) * r; lo = hi; } return t; };
 const taxOn = (code, base) => (BR2 && code === "ME") ? _bs([[27400, .058], [64850, .0675], [1000000, .0715], [null, .0915]], base) : R[code] * base;   // 2027: the survivor files single
@@ -90,7 +90,7 @@ const record = p => { globalThis.__T60 = []; const out = g.runRothStrategies(p);
     const { rec } = record(P({ stateCode: code })), c = rec.filter(x => x.code === code && (FIXED ? x.ageB === 72 : x.ageA === 77));
     const got = c.length ? ST(c[0]) : NaN;   // v6.02: the call first, so a D-30 expectation reads its record
     // v6.03 (D-30 batch 2, DD-14): Georgia and Michigan take theirs too — the same base, after the state's deductions (qa/d30_ref.mjs D30F). A version LIST.
-    const hand = (D30L && code === "ME") || (["v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628"].includes(VER) && (code === "GA" || code === "MI")) ? D30.B(code, Math.max(0, 100000 - relief)) : taxOn(code, Math.max(0, 100000 - relief));
+    const hand = (D30L && code === "ME") || (["v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER) && (code === "GA" || code === "MI")) ? D30.B(code, Math.max(0, 100000 - relief)) : taxOn(code, Math.max(0, 100000 - relief));
     const d30t = D30.tag();
     CK(`B-${code} 2027, to the cent through the calculator with Engine A's own arguments: $${got.toFixed(2)} = ${BR2 && code === "ME" ? "Maine's single schedule on" : `${R[code] * 100}% ×`} ($100,000 − $${relief.toLocaleString()}) = $${hand.toFixed(2)}${d30t}${FIXED ? "" : " (PIN v5.95: two people's relief)"}`,
        Math.abs(got - hand) < 0.005, `${got} vs ${hand}`);
