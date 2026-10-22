@@ -272,12 +272,13 @@ cell was unchanged for three and **changed for one** — with $2M of traditional
 *fill the 12% bracket* to the *current slider* strategy, with modelled lifetime tax $107,757 higher on the v5.68 winner. That is
 the model's best cell under its own assumptions, not a recommendation.
 
-Two properties of the measure are stated here rather than discovered later. **It carries no dividend
-or interest income**, because the state engine is never passed either — so a household whose state
-income is materially dividend-driven sits lower on a band table than the statute would put it, and
-receives a larger exemption than it should. For every populated state — Connecticut, New Mexico, New
-Jersey and Virginia — that is a live, disclosed error today, not a future one, and it is named in each
-state's own note. And **the band comparator is a
+Two properties of the measure are stated here rather than discovered later. **It carries the taxable
+account's yield** — the model's one figure for dividends and interest, taxed together — because every
+in-app call of the state engine passes it in `capGains` (Engine A `qdcgC`/`qdcg` = the year's dividends;
+Engine B `qdcg_y` = gains + dividends). *(Corrected at v6.29, F-25: from v5.65 this paragraph, the
+engine's comment and the Connecticut, New Jersey, New York, Rhode Island and Virginia notes said the
+measure carried no dividend or interest income and disclosed an optimistic error from it. The code
+never had that omission; the notes and `t35`'s locks were changed with this paragraph.)* And **the band comparator is a
 per-state property, not a convention**: four of the five statutes are inclusive at the top of a band
 while Connecticut is exclusive, so at exactly $150,000 of federal AGI a Connecticut couple's pension
 exemption is zero rather than 2.5%. New Mexico is one of the inclusive four — its tables read "not
@@ -958,9 +959,9 @@ first, then phaseout. A household at $300,000 joint with $30,000 and $20,000 of 
 **$23,216** (half of $18,216 + $28,216) on v5.73's figures; applying the phaseout first would leave $4,108. At v5.86's $49,824 the
 same household keeps **$24,824** (half of $19,824 + $29,824), and phaseout-first would leave $4,912.
 - *Measure:* the model's state AGI — retirement, pension, other ordinary income, gains and federally
-  taxable Social Security. It carries **no dividends or interest**, so a household whose income is
-  materially dividend- or interest-driven sits lower on the phaseout than the statute puts it
-  (**optimistic**, as for every conditioned state).
+  taxable Social Security, and the taxable account's yield (dividends and interest, taxed together).
+  *(v6.29, F-25: this said the measure carried no dividends or interest and was optimistic for it; every
+  call of the state engine passes the yield, so it does.)*
 - *Figures:* TY2025 throughout at v5.73 ($48,216 and both thresholds). Maine indexes the thresholds after 2025. *(Superseded
   at v5.86: the cap is $49,824, TY2026; the thresholds stay TY2025 because Maine had not published TY2026's — see *State dollar figures carry their tax year (v5.86)*.)*
 - *Still not modelled:* head-of-household and separate-filer thresholds (the model files joint or single),
@@ -1310,8 +1311,10 @@ its own after two years. A household that files one may pay less than the
 model projects, so the omission is conservative.
 
 **Where the engines still legitimately differ.** Engines B (Taxes) and C (IRMAA) hold Social
-Security flat in today's dollars while inflating brackets and thresholds — the deliberate
-bracket-creep conservatism described in §5. Engine D (Withdrawal) COLA-indexes it. All three model
+Security flat in today's dollars while inflating brackets and thresholds — a mixed dollar basis,
+described here through v6.28 as a deliberate bracket-creep conservatism; v6.29 measured which way it
+runs, and the answer depends on how the figures are read (*The dollar basis — measured, both readings
+(v6.29)*, below). Engine D (Withdrawal) COLA-indexes it. All three model
 the same survivor transition in the same year and keep the same check; they simply do not share a
 dollar basis, and the cross-engine test suite asserts the timing and the rule rather than a single
 figure.
@@ -1476,7 +1479,8 @@ the engine itself, so a term added to the total later cannot go unlisted without
 1. **Units — the draw is restated in today's dollars; the RMD is not.** Engine D is nominal (it
    COLAs Social Security and inflates expenses); Engine B deliberately holds Social Security and
    pension flat in today's dollars while inflating brackets 2%/yr, which its own comment calls its
-   bracket-creep conservatism. The imported draw is therefore divided by the cumulative inflator at
+   bracket-creep conservatism (v6.29: read as each year's own dollars its rows run low, not high — *The
+   dollar basis — measured, both readings (v6.29)*). The imported draw is therefore divided by the cumulative inflator at
    the call site, so it sits in the same units as the income beside it. **The RMD term is imported
    as Engine D computes it.** Deflating that as well was measured at $74,541 of lifetime tax — more
    than the whole defect — because Engine B's RMD comes off a balance compounding at a nominal 4.5%,
@@ -2421,8 +2425,10 @@ describe never appeared on this one.
 every other tab: asserted bit-identical to v6.11 on ten households at two conversion amounts (`t75` §C). The schedule's MAGI changes,
 because it carries the worksheet's taxable Social Security; nothing outside this column reads Engine D's MAGI.
 
-**Approximations kept.** Thresholds rise 2%/yr while the schedule's income rises with the scenario's inflation (about 2.7%), so some
-bracket creep remains — the conservative direction, as everywhere else in the app (§6). State tax is not in this column. Worksheet lines 4
+**Approximations kept.** Thresholds rise 2%/yr while the schedule's income rises with the scenario's inflation (about 2.5–2.7%, by prior), so some
+bracket creep remains — the conservative direction for this column, whose income is nominal. (Engines B and C hold income in today's dollars
+against the same 2% thresholds, which runs the other way when their rows are read as future dollars — *The dollar basis — measured, both
+readings (v6.29)*; v6.29 corrected "as everywhere else in the app" here.) State tax is not in this column. Worksheet lines 4
 and 6 (tax-exempt interest, adjustments) are not modelled, as in every engine.
 
 ## Payroll tax on job income (v6.14; self-employment from v6.16)
@@ -2718,6 +2724,21 @@ nominal dollars (*Where the engines still legitimately differ*, and approximatio
 to that approximation, in today's dollars, and the engines grow it as they grow spending — the way What-Breaks already grows its engine tax.
 The part of the tax that comes from nominal inputs is grown twice: conservative. Charging Engine B's figures as they stand was measured at
 the scope as the optimistic alternative (on the BASE example, 79.4% above $800K against 75.3%, on v6.18's calendar).
+
+**The dollar basis — measured, both readings (v6.29, F-25).** The paragraph above is right about the Monte Carlo and incomplete about
+the tabs. Measured at the v6.29 scope on the example (retiring 2029; a copy of Engine B with only Social Security grown at the plan's own
+inflation, 2.535% under the default BULL-LEANING prior; the draw bridge as the Taxes tab calls it): the Taxes tab's lifetime total is
+$212,552 at a $0 slider and $213,670 at $70,000, and a units-consistent nominal schedule is $283,375 and $254,334. Read as each year's own
+dollars — which the rows invite, with brackets "indexed 2%/yr" — the shipped rows run **low**, by $70,823 and $40,664. Read as today's
+dollars they run high, by $34,510 and $24,562. The Monte Carlo and What Breaks treat the schedule as today's dollars and grow it with
+inflation again, so the part from nominal RMDs is grown twice and they charge $62,400 and $38,358 **more** than the nominal benchmark. With
+the same seeds a units-consistent schedule raises 30-year success (above $500K) from 94.83% to 95.67% at $0 and from 95.15% to 95.73% at
+$70,000; the 6-year headline moves 99.70% → 99.78% at $0 and not at all at $70,000. So the success rates are very slightly pessimistic, as
+above, while the Taxes tab's rows, read as future dollars, are optimistic. From v6.29 the app says both — the Taxes tab, the Roth tab's
+rules box and the Field Manual's inflation map — where through v6.28 it said only "conservative". Making the units consistent is filed as
+its own scope (MissingFeatures): Engines A, B and C **and** the Monte Carlo's and What Breaks' re-inflation must move together, because
+fixing the engines alone would double the Social Security tax in the Monte Carlo. Two inflation clocks also differ: Engine D inflates from
+the retirement year, Engine B and the Monte Carlo from the as-of year.
 
 **What it moved** (measured at the v6.20 build: the shipped v6.19 against v6.20, 3,000 paths, the same seeds per row; run C's shape — 30
 years, deaths at life expectancy, one LTC shock, the car every 8 years (v6.20's fixed schedule — from v6.21 the example's car rows, *Cars are

@@ -1,5 +1,124 @@
 # Changelog
 
+## v6.29 — what the app says about its own model, checked (F-25)
+
+**A presentation release with display computations and a METHODOLOGY correction.** No engine, no figure the engines compute, no grade and
+no stored field changes (every engine, `stateTaxAnnual`'s arithmetic, `SCENARIOS`, `TAX_CONSTS` and `GUARDRAILS` are token-identical to
+v6.28 with comments removed; MC parity 10/10). Displayed figures that change by decision: the Income tab's gap draw, the mortgage what-if's
+return and sentence, Field Manual Example 2, and the Stress tab's recovery sentence (DF-2); six new Verify checks (72 → 78, DF-5 (b)); a
+spouse-B RMD event (DF-6); the Exit Plan's dates in months (DF-10). The scope is `docs/SCOPE_F25_MODEL_CLAIMS_V629.md` (repo-only,
+fulfilled; its ledger `docs/F25_LEDGER_V628.tsv`). Steve, *"Let's continue with F-25"*; on the scope, *"All as recommended"* — DF-1 to DF-11
+(a), DF-5 (b). Built on v6.28 (source `6ff3561e…`).
+
+**What was wrong (v6.28).** F-25 filed the v6.27 census's editorial and unchecked model claims. Re-resolved on v6.28 and read by two
+independent readers per entry against the code, 326 rows: **93 FALSE or PARTLY** (4 figures, 48 misleading, 47 imprecise), 16 editorial,
+40 claims about the world. Among them:
+- **Verdicts typed once and printed for every plan:** the Stress tab's *"Median portfolio recovers to pre-crash levels by Year 4–5"* (on
+  the example the median does not regain its pre-crash level within the run under BULL or BASE; about ten years under HISTORICAL); the
+  Backtest's *"almost no historical sequence breaks the plan"*; What Breaks' *"demands far worse than the worst of history"* and *"expect
+  these edges to be far away"*, printed for a plan failing at its baseline — with history figures the app's own 1928–2025 table contradicts
+  (worst decade 1999–2008 at −3.8%/yr real, not 2000–09 at −3.4%; weakest 20 years +0.6%, not "~+2%"; 98 years, not "150+").
+- **The presets:** the Field Manual and Dashboard named BASE as the conservative default (it has been BULL-LEANING since v5.80), and told
+  history-seekers to switch to the preset they were on (HISTORICAL is the history preset).
+- **What success means:** *"your savings lasted"* (the headline is the 6-year run ending above $800,000); the Backtest called the 30-year
+  run "the MC headline"; the header called it "the planned path".
+- **What Ask AI sends:** the privacy lists omitted the plan description (birth dates, plan-to ages, state, home, mortgage, home-move cash,
+  streams) and the last 12 messages; *"nothing leaves this browser"* (the page loads its fonts; Ask AI sends a summary).
+- **Where an input reaches:** the scenario (*"every tab re-runs"*), streams (*"in every simulation"*), the home-move cash, the SS trust-fund
+  cut and the Roth slider each named the wrong tabs.
+- **The Verify tab** promised *"every statutory constant"* while the six AMT figures were unchecked (E-23).
+- **Four figures:** the gap draw (B's Social Security subtracted for the whole gap), the mortgage what-if (Bull's ~4.5% for every preset;
+  a negative number before "pts lower"), Example 2 ($10,900 on a different method from Example 1's), the Stress recovery.
+- **The model, described wrongly in the Field Manual:** the regime draw "captures streaks" (each year is independent); variance "comes
+  mostly from regime-switching" (for a balanced mix the noise supplies more); an unclassified account "defaults to Traditional" (Taxable —
+  the optimistic direction); the ladder's MAGI misses "one term" (two); a missing income figure "uses an example value" ($0); and more.
+- **The dollar units:** the app called its 2% bracket indexing "the conservative direction". Measured, the tax engines mix units, and the
+  direction depends on the reading — below.
+- **Law and published figures:** *"Roth conversions have no withholding"*; QCDs *"never appear on your tax return"*; a ≈1.5% index yield;
+  the ACA *"Nov 1 – Jan 15 each year"* and *"often $10,000–$25,000"*; the SS *"legal default"* and *"$810-per-$1,000"*; LTC statistics from a
+  2005 study; a $5 rate-limit rule and *"¾ of a word"*; Fannie and Freddie as Treasury-level credit; Bengen's result understated.
+
+**What changed.**
+- **Every confirmed row reworded** to what the code does (DF-1 (a)); the editorial superlatives removed with their facts kept (DF-3 (a));
+  the world claims checked against primary sources or published research and corrected, comparisons with other tools removed (DF-4 (a)).
+- **Computed, not typed:** the Stress recovery (`stressRecovery`: the last snapshot before the crash year, the trough in the forced years and
+  the one after, the first snapshot back); the Backtest's survival note, shown only at ≥ 90% and naming what it leaves out; What Breaks'
+  history comparison from `HISTORICAL_RETURNS` (`historicalWorstRealWindow`, `historicalCumReturn`), shown only when the break-point is below
+  the weakest 20-year window, and its four items when the plan fails at its own return; the presets' expected returns
+  (`presetExpectedRealEquity`, `presetExpectedPortfolioReturn`) in every in-app sentence that names a preset.
+- **The figures:** the gap draw pays B from B's claim month (and the phase table agrees); the mortgage what-if quotes the active preset and
+  keys its sentence to the sign; Example 2 states Example 1's method ($10,400); the Stress recovery above.
+- **Verify:** six AMT checks against Rev. Proc. 2025-32 and §55(d)(4); the promise names what is checked and what is not (DF-5 (b), E-23
+  noted). **Events:** spouse B's RMD event (`"rmdB"`, couples), estimated-tax dates in every retirement year, the withholding sentence
+  corrected (W-4R, W-4V). **Exit Plan:** each spouse's coverage gap from their own retirement, in months; the SS gap in months; the
+  conversion window from the selected year; the first phase renamed *"CHECK THE NUMBERS THIS PLAN RESTS ON"* (DF-11); the RMD line per
+  person. **Grade:** *NOTE:* on the lines the grade does not read (the three fixed grades, Income Floor's months).
+- **The dollar units (DF-7 (a)):** the Taxes tab, the Roth tab's rules box, the Field Manual and METHODOLOGY say both directions: read as
+  each year's own dollars the Taxes tab's rows run **low** ($40,664 at the $70,000 slider on the example, $70,823 at $0); the Monte Carlo,
+  which grows the schedule again, charges slightly **more** than a units-consistent tax (30-year success 0.6–0.8 points low). The units fix
+  is filed (MissingFeatures **D-60**).
+- **Found at the build, fixed:** the CT, NJ, NY, RI and VA notes and METHODOLOGY said the state base carries no dividends or interest — it
+  carries the taxable yield at every call; `t35` had locked the false disclosure (D-2/D-3, D-10/D-11, D-18/D-19, re-gated). The Stress
+  scenario cards, What Breaks' 1929–32 figure, the Survivor tab's draw sentence, the Dashboard's crash card.
+- §13 records the change; the four version sites read v6.29.
+
+**The build review** (an agent that had not seen the build) found **2 blockers, 12 should-fix and 15 notes**; all blockers and should-fix
+items were taken, and ten of the notes (scope §7). The blockers: the new gap description named a "Spouse B" on single plans, and the suite
+had not yet run on the final source.
+
+**Filed, not fixed:** MissingFeatures **D-60** (the units fix), **D-61** (QCD eligibility after a death, Engines B and C), **D-62** (STAY
+UNDER IRMAA's own sale can cross the cliff), **D-63** (the Dashboard's crash card compares unlike runs); D-57 widened to the home-move cash
+(its gap-draw note closed); UsabilityFlaws **F-26** (claims the census did not reach: the Stress tab's other cards, the token estimates, the
+Roth ladder table's start year, the ACA status line, the Backtest's "1966", and the repo README's "every statutory constant" and stale
+counts).
+
+**Tests.** New suite **`t92`**, both legs; the v6.28 leg pins each defect as a dated `[KNOWN DEFECT 2026-10-22, F-25]`.
+- **§A:** extinction of 53 replaced phrases across every string (AI-addressed texts and §13's release entries excepted); no typed preset
+  name in an in-app sentence; DF-9's pin (`DEFAULT_SCENARIO_PRESET === "bull"` with the Field Manual's typed mentions); the Verify count, and
+  **each AMT key proved checked by mutation** (doubling it turns a check red).
+- **§B:** the history helpers against windows computed in the suite from the table, and the Field Manual's typed figures against them; the
+  preset returns; the Stress recovery against an independent reading of four runs (two presets, retiring 10 and 16 years later) and its dates
+  (pre-crash before the crash year, trough in the forced years); rendered — the Stress sentence, the Backtest note above and below 90%, What
+  Breaks on the example and on a plan failing at its own return, the MC and Dashboard preset lines, the Verify tab.
+- **§C:** the gap draw against month loops on three couples (B after, inside and at the gap) and a single plan; the phase table; the
+  mortgage sentence's return and sign; Example 2 by hand. **§D:** the events (17 for a couple, 13 single; `rmdB`; estimated tax); the Exit
+  Plan's months on a couple whose B retires later and whose A turns 65 after retiring. **§E:** privacy parity — the request's parts by AST
+  against the landing, My Data and Field Manual lists. **§F:** the Field Manual's corrected descriptions, the inflation and noise figures
+  against the code, and METHODOLOGY's measurement.
+
+`t92` runs **144** current and **86** on the v6.28 leg.
+
+**Existing suites:** `boundaries.mjs` gains `ss_claim_after_gap` (OPERATIONS §K1: the example's B claims at the gap's start, so the gap fix
+cannot be seen on it); `t29` gains B-20 and the `claim` fixture's flip (101 → 104). Re-gated for the copy this release corrects, each with
+its reason at the site: `t1` (Verify count 72 → 78), `t4` (the Exit Plan's title, the Taxable/HSA sentence, the accrual readout), `t35`
+(the dividend locks), `t78` F-1b (16 → 17 events), `t83` I-1 and I-6, `t86` G-5, `t90` B-5c, `t91` B-4, B-6, C-8, C-13b and the lint's
+inflation allowance. `v629` registered by the AST registrar (393 extensions) with `t1`'s and `t4`'s version ternaries by hand, `t33` PINS
+(unchanged, confirmed by running) and `t45`, `t47`, `t48` by hand; `shim.txt` exposes the five helpers and `DEFAULT_SCENARIO_PRESET`.
+`domdiff_withdrawal` gains a v628 → v629 arm: the header chip, the RMD clause, the Tax line and Step 6, each masked by an old/new pattern
+pair bound to one hit on its own side and none on the other; the schedule and everything else byte-identical (32 → 36 on this pair).
+
+**Counts**, from the full suite run from the packaged copies:
+- **9,187 app checks across 91 app suites, 0 failed, 0 DIED**;
+- MC parity 10/10, with no intended difference;
+- tooling: `t21` 64, `domdiff` 36, `sets` 12 + 12;
+- GRAND **9,321**.
+
+Against v6.28, the current-leg changes are `t92`, new (144), and `t29` 101 → 104; every other current-leg count is unchanged, the re-gated
+suites included. On the prior leg `t91` reads 71 where it read 28, because the prior leg is now v6.28, which carries the rules it pins;
+`t92`'s v6.28 leg adds 86 and `t29`'s prior leg 3. Together, 8,908 + 279 = 9,187.
+
+Controls: `qa/tools/controls_v629_model_claims.py` on a copy of that packaged run folder — 20 of 20 as expected, every file restored.
+
+**Owned.** The first counted run from the packaged copies had one red, in tooling: `domdiff`'s Withdrawal tab was not byte-identical
+v6.28 → v6.29, because this release changes four of its phrases and the tool had no arm for the pair. The arm was added and the whole suite
+re-run from a fresh run folder built from the packaged copies; the counts above are that run's. In the build, the Field Manual's §13
+entry was first written with a raw newline inside the one-line string, which broke the parse (caught by the build, fixed); the first
+census missed the VA and RI dividend notes (caught by the build's own re-census, fixed with the other three); and the first
+`stressRecovery` took the pre-crash peak inside the crash year (redefined before any figure shipped).
+
+**Provenance.** Source `2b1c24f145c10e5d5e2b8abfdf3a9db8` · built `index.html` `ce3605afdbafaa292bed443988f6ea33` (vite 5.4.21, `npm ci`; the immediately-prior v6.28 rebuilt byte-identically to
+`b51ca85f…`) · `smoke_built` 22/22.
+
 ## v6.28 — the app describes the model, it does not direct (F-23, F-24)
 
 **A presentation release with a METHODOLOGY correction.** No engine, no figure the engines compute, no grade and no stored field changes.

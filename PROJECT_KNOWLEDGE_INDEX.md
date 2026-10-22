@@ -25,15 +25,19 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 
 | Field | Value |
 |---|---|
-| Version | **v6.28** |
-| Source file in knowledge | `DangerClose-v6_28.jsx` |
-| Source md5 | `6ff3561e3dd23d50b5fce16ad8c76704` |
-| Built `index.html` md5 | `b51ca85f4caf683326c77c2e70143a4c` |
+| Version | **v6.29** |
+| Source file in knowledge | `DangerClose-v6_29.jsx` |
+| Source md5 | `2b1c24f145c10e5d5e2b8abfdf3a9db8` |
+| Built `index.html` md5 | `ce3605afdbafaa292bed443988f6ea33` |
 | Shipped | 2026-10-22 |
 
-> ⚠ **v6.28 SHIPPED (2026-10-22) — the app describes the model, it does not direct (F-23, F-24).** Source `6ff3561e…` · built `b51ca85f…`.
+> ⚠ **v6.29 SHIPPED (2026-10-22) — what the app says about its own model, checked (F-25).** Source `2b1c24f1…` · built `ce3605af…`.
+> A PRESENTATION release with display computations and a METHODOLOGY correction (no engine, no figure the engines compute, no grade and no stored field changes; engines token-identical to v6.28). The 326-row F-25 ledger (`docs/F25_LEDGER_V628.tsv`) was read against the code: 93 sentences false or imprecise, 16 editorial, 40 about the world — each reworded, or computed for the plan (the Stress recovery, the Backtest note, What Breaks' history from the app's own table). Four figures fixed (the gap draw, the mortgage what-if, Example 2, the Stress recovery); six AMT Verify checks (72 → 78); spouse B's RMD event (17 events for a couple); the Exit Plan in months; the dollar-units finding described both ways (MissingFeatures D-60).
+> New suite `t92`; `v629` registered (`t33` PINS unchanged); `boundaries.mjs` gains `ss_claim_after_gap` (`t29` B-20); `t1`, `t4`, `t35`, `t78`, `t83`, `t86`, `t90` and `t91` re-gated for the corrected copy. UsabilityFlaws F-25 closed, F-26 filed; MissingFeatures D-60 to D-63 added, D-57 widened; ARCHITECTUREIssues E-23 noted. `TESTING.md`'s v6.26 per-suite line moved to the archive. **Rotation:** the pool loses `DangerClose-v6_28.jsx` (v6.28 is read from history, commit `21a5dde`) and gains `DangerClose-v6_29.jsx`. **Pool stays 16.**
+>
+> *(**v6.28 SHIPPED (2026-10-22) — the app describes the model, it does not direct (F-23, F-24).** Source `6ff3561e…` · built `b51ca85f…`.
 > A PRESENTATION release with a METHODOLOGY correction (no engine, no figure the engines compute, no grade and no stored field changes). Through v6.27 many tabs told the household what to do — the Guardrails tab's *ACTION:* lines, the Withdrawal tab's steps and its *"Recommendation"*, the Exit Plan, the Events tab's Roth alarm, the SS tab's *"#1 OPTIMIZATION LEVER"*, the Roth tab's *"ideal"* bracket, the Field Manual's *"PAY CONVERSION TAX FROM OUTSIDE FUNDS"* — and twelve sentences were false about the model (the schedule applies no guardrail, harvests nothing, pays no income tax and draws Traditional and Roth in proportion; taxable SS is in IRMAA's MAGI; the survivor card called spouse A the higher earner on every couple). A six-reader parser census found 283 entries; every directive is recast as what the model computes or assumes (DF-1 to DF-8, all (a)); the false statements and eight more the build review found are corrected. The Grade tab's *"Lost ~X GPA points"* is each category's real cost (÷ 78, weights *"20 of 78"*), and one LTC test, `isLTCLabel`, no longer matches a long-term-disability row. METHODOLOGY §9: the guardrails are the Monte Carlo's. No grade moved (`t90` B-8).
-> New suite `t91`; `v628` registered (`t33` PINS unchanged); `boundaries.mjs` gains `ltc_disability` (`t29` B-19); `t90` B-8's prior leg derived, not pinned; `t4`, `t19`, `t72` and `t86` re-gated for the corrected copy. UsabilityFlaws F-23 and F-24 closed, F-25 filed (with `docs/F25_CENSUS_V627.tsv`); MissingFeatures D-57 notes the gap-draw figure. `TESTING.md`'s v6.25 per-suite line moved to the archive. **Rotation:** the pool loses `DangerClose-v6_27.jsx` (v6.27 is read from history, commit `35a1926`) and gains `DangerClose-v6_28.jsx`. **Pool stays 16.**
+> New suite `t91`; `v628` registered (`t33` PINS unchanged); `boundaries.mjs` gains `ltc_disability` (`t29` B-19); `t90` B-8's prior leg derived, not pinned; `t4`, `t19`, `t72` and `t86` re-gated for the corrected copy. UsabilityFlaws F-23 and F-24 closed, F-25 filed (with `docs/F25_CENSUS_V627.tsv`); MissingFeatures D-57 notes the gap-draw figure. `TESTING.md`'s v6.25 per-suite line moved to the archive. **Rotation:** the pool loses `DangerClose-v6_27.jsx` (v6.27 is read from history, commit `35a1926`) and gains `DangerClose-v6_28.jsx`. **Pool stays 16.**)*
 >
 > *(**v6.27 SHIPPED (2026-10-21) — the Grade tab reports the model's grading, not actions (F-22).** Source `32b34771…` · built `deac8c16…`.
 > A PRESENTATION release (no figure, engine, grade or stored field changes; METHODOLOGY unchanged). Through v6.26 the Grade tab's *"PATH TO … — RECOMMENDED ACTIONS"* printed directives (an LTC policy "for both spouses" on single plans too, a Roth ladder "filling the 22% bracket" on every plan), grade lifts the grading cannot produce, a misstated estate lift and a "projected" success no simulation computed; its categories told every plan it held hybrid LTC insurance and blamed the 6-year Monte Carlo's failures on an LTC shock that engine does not carry. The panel is gone; the false and example-only sentences are corrected; the three literal grades (C+, B+, B+) and Guardrail Readiness (rows labelled exactly "golf" and "Amazon") are labelled, and the B+ ceiling every plan shares is stated; the Field Manual's Grade entry (it described a radar chart) is rewritten. No grade moved (`t90` B-8 compares both builds under one seed).
@@ -123,12 +127,12 @@ or a reason here (OPERATIONS §I).
 
 | Pool file | md5 | Repo path |
 |---|---|---|
-| `CHANGELOG.md` | `023c1560471b1af4d8d039b6cc367290` | `CHANGELOG.md` |
-| `METHODOLOGY.md` | `95745cbdd34232e3756a724fe1aa7ac6` | `METHODOLOGY.md` |
-| `MissingFeatures.md` | `4146eeeb3bc48900a106e4b15ecfc0b4` | `docs/MissingFeatures.md` |
+| `CHANGELOG.md` | `ca9467331329394c093b8f824b85ae23` | `CHANGELOG.md` |
+| `METHODOLOGY.md` | `7cbd691e114ee20fb14fc8b65ff9bf5d` | `METHODOLOGY.md` |
+| `MissingFeatures.md` | `7625e3f823e5f08bc68d6cae9d43bde9` | `docs/MissingFeatures.md` |
 | `OPERATIONS.md` | `0468ef1e62c1a445128d98d56ea1443f` | `docs/OPERATIONS.md` — **rolled 2026-09-09** at the run-folder ops package: §B gained the `mk_runfolder.sh` pointer, and §D gained **D1** (the named existence-only assertion class) and **D2** (the `t29` F-6a/F-6b defect pin). *(Previously `f33c2e0cfd…`.)* |
 | `README.md` | `eec58396f932b3209de79c2400dbfb88` | `README.md` |
-| `TESTING.md` | `1623852b2abec409c8db9ea2113c0d74` | `TESTING.md` |
+| `TESTING.md` | `788017ca4b856206f58d5ac4378de776` | `TESTING.md` |
 | `index.html` | `247816be583271d50cf13e0a02e18cdf` | `src/index.html` — the **Vite entry template**, **restored to the pool 2026-08-20** after being found absent (see the build-scaffold row below). ⚠ **Not the built app.** The published single-file `index.html` is repo-only output and never enters the pool; its md5 is in the Current build table and is different by construction |
 | `main.jsx` | `d9eca7b469a3fb7ec1c5325fd4bf8145` | `src/main.jsx` |
 | `package.json` | `9ee8d745bc9f32d6e8fa02e623603423` | `package.json` — The pinned toolchain, and a **build input** rather than a suite file — given a row 2026-08-23 for a measured reason: `npm i <pkg>` in a run folder rewrites it with resolved versions, so it drifts as a side effect of setting the folder up. That is why OPERATIONS §N3a installs jsdom with `--no-save`, and it is the drift `package_check`'s new G-1 caught on its first real use |
@@ -138,10 +142,12 @@ or a reason here (OPERATIONS §I).
 
 | Field | Value |
 |---|---|
-| Version | **v6.27** |
-| Source file in knowledge | — **not pooled**: repo history, commit `35a1926`, found by this md5 |
-| Source md5 | `32b34771da6e55edc80a71519bbe01aa` |
-| Built `index.html` md5 | `deac8c16f4238d8b8519f656e5c646ff` |
+| Version | **v6.28** |
+| Source file in knowledge | — **not pooled**: repo history, commit `21a5dde`, found by this md5 |
+| Source md5 | `6ff3561e3dd23d50b5fce16ad8c76704` |
+| Built `index.html` md5 | `b51ca85f4caf683326c77c2e70143a4c` |
+
+> **Rolled 2026-10-22 at the v6.29 ship.** The pair is now **v6.28 prior / v6.29 current**; both tables rolled in one edit (K-7, which counts 629 − 1 = 628). Commit `21a5dde` is the first to carry the v6.28 source (`9a9756c` to `61604d5`, earlier v6.28 uploads, carry v6.27's source beside v6.28's page); `64dc251` set the executable bit `controls_v628_directives.py` landed without.
 
 > **Rolled 2026-10-22 at the v6.28 ship.** The pair is now **v6.27 prior / v6.28 current**; both tables rolled in one edit (K-7, which counts 628 − 1 = 627). Commit `35a1926` is the first to carry the v6.27 source (`d1089c3` to `9255ba2`, earlier v6.27 uploads, carry v6.26's source beside v6.27's page); `310b134` set the executable bit `controls_v627_grade.py` landed without.
 >
@@ -654,6 +660,26 @@ retired and superseded. They get no row because there is no file. Checked 2026-0
 committed tree, so the next sweep does not re-open them.
 
 ## Retirement list (delete-first; nothing replaces these)
+
+### At the v6.29 ship (2026-10-22) — DELETE THESE FIRST
+
+**Rotation:** delete `DangerClose-v6_28.jsx`; `DangerClose-v6_29.jsx` arrives. **Pool stays 16.** Count from the Projects listing (OPERATIONS §I, no-mount note).
+
+| Delete | Because |
+|---|---|
+| `DangerClose-v6_28.jsx` | **rotated out** — v6.28 is read from the repo's history (commit `21a5dde`) |
+| `ARCHITECTUREIssues.md` | replaced — E-23 notes the six AMT Verify checks |
+| `CHANGELOG.md` | replaced — the v6.29 entry |
+| `METHODOLOGY.md` | replaced — *The dollar basis — measured, both readings (v6.29)*; the state measure carries the taxable yield (two passages corrected); the bracket-creep generalisation corrected |
+| `MissingFeatures.md` | replaced — D-60 to D-63 added; D-57 widened, its gap-draw note closed |
+| `PROJECT_KNOWLEDGE_INDEX.md` | replaced — this edit; `CHANGELOG.md`'s row rolled last |
+| `TESTING.md` | replaced — the v6.29 per-suite line, v6.26's moved to the archive; `t92`'s and `dom_entry_v629.jsx`'s rows; notes on the re-gated suites |
+| `UsabilityFlaws.md` | replaced — F-25 closed; F-26 filed |
+
+**Arriving new:** `DangerClose-v6_29.jsx`. **Repo-only:** every `qa/` change (`t92_model_claims.mjs`, `dom_entry_v629.jsx`,
+`controls_v629_model_claims.py` new; the registered suites, `t33` PINS, `t1`, `t4`, `t29`, `t35`, `t78`, `t83`, `t86`, `t90`, `t91`,
+`boundaries.mjs`, `fixture/households.mjs`, `shim.txt`, `runsuite.sh`), `docs/TESTING_ARCHIVE_per_suite_v5_53_to_v6_01.md` (v6.26's line and
+note appended), the scope (`docs/SCOPE_F25_MODEL_CLAIMS_V629.md`, fulfilled) and its ledger (`docs/F25_LEDGER_V628.tsv`), the built `index.html`.
 
 ### At the v6.28 ship (2026-10-22) — DELETE THESE FIRST
 
