@@ -398,6 +398,29 @@ export function census(G) {
     _tp === null ? "this build exports no taper" : _tp > 0 ? "the household is paid the built-in work, so the example's wages reaching another plan cannot be seen here"
       : "reachable — the household is paid no built-in work");
 
+  // ── v6.27 (F-22 — SCOPE_F22_GRADE_FINDINGS_V627) · the conditions that hid it (§K1) ─────────────────────────────────────────────
+  // 11. AN LTC EXPENSE ROW. Through v6.26 the Grade tab told every plan WITHOUT an LTC / long-term-care expense row to "Secure hybrid LTC
+  //    insurance policy for both spouses", single plans included, with a +0.20 grade lift the grading could not produce. The example
+  //    carries one ("Long-Term Care (Hybrid)"), so that directive never appeared on it. Read with the Grade and Stress tabs' own test,
+  //    /ltc|long.?term/i, against the expense table's labels — a label pattern, not a figure.
+  const _ltcRows = (G.EXPENSES() || []).filter(e => e && /ltc|long.?term/i.test(String(e.label || "")));
+  row("ltc_row", "an LTC expense row",
+    _ltcRows.length ? `${_ltcRows.length} row${_ltcRows.length === 1 ? "" : "s"} (${String(_ltcRows[0].label)})` : "none",
+    "a household with no LTC row", _ltcRows.length > 0,
+    _ltcRows.length ? "the household carries an LTC expense row, so what the Grade tab says to a plan without one cannot be seen here"
+      : "reachable — no LTC row: the Grade tab's no-row text shows");
+
+  // 12. THE GUARDRAIL CUT POOL'S LABELS. The Grade tab's Guardrail Readiness counts rows labelled exactly "golf" and "Amazon" (anchored
+  //    regexes, the first row of each) as the spending a cut could come from. The example carries an "Amazon" row, so it shows a real
+  //    pool; a plan without either label shows "$0/mo" — which the example cannot show. The GRADE is B- either way on the example (its
+  //    $400 is short of the cut), so this row hides the text, not a grade. (The example's own golf row is "Golf (monthly)": no match.)
+  const _cutRows = (G.EXPENSES() || []).filter(e => e && /^(golf|amazon)$/i.test(String(e.label || "")));   // no trim: _amt does not trim
+  row("cut_rows", "golf / Amazon expense rows",
+    _cutRows.length ? _cutRows.map(e => String(e.label)).join(" + ") : "none",
+    "a household with neither label", _cutRows.length > 0,
+    _cutRows.length ? "the household carries a row the guardrail grade counts, so the $0 cut pool a plan without one shows cannot be seen here"
+      : "reachable — no counted row: the guardrail grade has no cut pool");
+
   return rows;
 }
 
