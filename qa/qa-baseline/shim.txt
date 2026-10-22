@@ -153,6 +153,13 @@ export const __test = {
   computePlanEvents: _g("computePlanEvents"),
   // v6.15 — the app-wide alert strip's tier rule, lifted out of the JSX (t78). GUARDED: it does not exist on the v6.14 leg.
   alertStripEvents: _g("alertStripEvents"),
+  // v6.29 (F-25) — the helpers behind the computed sentences (t92). GUARDED: none exists on the v6.28 leg, where t92 asserts their absence.
+  stressRecovery: _g("stressRecovery"),
+  historicalWorstRealWindow: _g("historicalWorstRealWindow"),
+  historicalCumReturn: _g("historicalCumReturn"),
+  presetExpectedRealEquity: _g("presetExpectedRealEquity"),
+  presetExpectedPortfolioReturn: _g("presetExpectedPortfolioReturn"),
+  DEFAULT_SCENARIO_PRESET: _g("DEFAULT_SCENARIO_PRESET"),
 };
 
 // v5.18: Engine C was hoisted to module level at v5.17; this exposes it to the harness.
