@@ -26,7 +26,7 @@ export const HOUSEHOLDS = {
   // Clears spouse B's claim-year row: B claims well after the ladder starts.
   claim: {
     why: "spouse B delays to 70 — the claim gate becomes reachable",
-    flips: ["ssB_claim"],
+    flips: ["ssB_claim", "ss_claim_after_gap"],   // v6.29 (F-25): B's claim also moves past the start of A's income gap
     apply: P => { P.incomeSources.ssB = { ...ssTable(2250), plannedAge: 70 }; },
   },
   // Clears both §86 ½-cap band rows: benefits small enough for the cap to bind.
