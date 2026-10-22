@@ -43,8 +43,9 @@
 > | F-20 | **OPEN** — filed at v6.23 (§H) | the Income tab's stream list scrolls sideways at 390 px for a plan with income streams (scrollWidth 510); `t45` runs on the example, which has none |
 > | F-21 | **FIXED v6.25** — filed and fixed together (§H) | `t88`; `docs/SCOPE_F21_HOLDINGS_PLAN_TYPE_V625.md` |
 > | F-22 | **FIXED v6.27** — filed at v6.26 (§H); wider than registered | `t90`; `docs/SCOPE_F22_GRADE_FINDINGS_V627.md`. The panel's directives and invented projections are gone; the category text's false and example-only sentences corrected; the three literal grades, the guardrail grade's fixed labels and the B+ ceiling labelled; the Field Manual's Grade entry rewritten. No grade moved |
-> | F-24 | **OPEN** — filed at v6.27 (§H) | the Grade tab's remaining copy and one figure, found by the v6.27 build review: *"Lost ~X GPA points"* divides by 100 where the weights sum to 78 (understated by 22%; the *"Weight: 20%"* chips sum to 78%); Income Floor's editorial wording and its omission of income streams; the Estate drag's unsourced legal claims; *"Strong base-case performance"*; the LTC test matching a long-term-disability row |
-> | F-23 | **OPEN** — filed at v6.27 (§H) | directive copy on other tabs, found by the F-22 scope's §K2 sweep (not exhaustive): the Withdrawal tab's Step 7, the Guardrails tab's *ACTION:* lines, three Exit Plan items, the plan-events list's Roth instructions |
+> | F-23 | **FIXED v6.28** — filed at v6.27 (§H); about ten times wider than registered | `t91`; `docs/SCOPE_F23_F24_DIRECTIVES_V628.md`. Every financial directive found by a six-reader census recast as what the model computes or assumes (DF-1 to DF-8, all (a)); twelve false statements about the model corrected (V-1 to V-12), and eight more the build review found |
+> | F-24 | **FIXED v6.28** — filed at v6.27 (§H) | `t91` §B. *"Lost ~X GPA points"* is each category's real cost (÷ 78); weights read as points of 78; Income Floor, Estate and Monte Carlo copy corrected; one LTC test, `isLTCLabel`, no longer matching a long-term-disability row; the rough RMD estimate removed. No grade moved |
+> | F-25 | **OPEN** — filed at v6.28 (§H) | the F-23 census's editorial claims (102 E-tagged) and unchecked model claims (151 V-tagged, less V-1 to V-12), the gap-draw figure, and the items the v6.28 build review left; `docs/F25_CENSUS_V627.tsv` |
 > | F-15b | **OPEN** | "Success (>$1,500K)" beside a sibling "Success Rate (>$1.25M)" — still in the source |
 > | F-16 | **FIXED v5.98** | the pair swapped; `t62` holds every term in order (was: "API Key" before "Agency MBS") |
 > | §E-1 / §E-2 | **OPEN** | no physical-device pass; no keyboard / screen-reader pass (4 `aria-label`s in the app) |
@@ -483,7 +484,7 @@ B-8 compares every plan's grades with the v6.26 leg's under the same seed. The c
 gone). Computing the literal grades is filed with D-56 (MissingFeatures); directive copy on other tabs is **F-23**; the Grade tab's remaining copy
 and its understated *"Lost ~X GPA points"* are **F-24**.
 
-### F-23 · Directive copy on other tabs — **LOW–MED (honesty of an output)** — OPEN
+### F-23 · Directive copy on other tabs — **LOW–MED (honesty of an output)** — **FIXED v6.28**
 
 **Filed at v6.27** (`docs/SCOPE_F22_GRADE_FINDINGS_V627.md` §4, from its §K2 sweep and its independent review; not fixed). The sweep was not
 exhaustive, so the fix starts with a full census of model-description copy. Found so far, read at v6.26:
@@ -501,7 +502,25 @@ exhaustive, so the fix starts with a full census of model-description copy. Foun
 logistics (dates, deadlines) separate from financial choices, as the Exit Plan tab's own *"This is logistics — not financial, tax, or legal
 advice"* intends.
 
-### F-24 · The Grade tab's remaining copy, and its "Lost ~X GPA points" — **LOW–MED (honesty of an output)** — OPEN
+**Fixed at v6.28** (`docs/SCOPE_F23_F24_DIRECTIVES_V628.md`; DF-1 to DF-8, all (a)). **About ten times wider than registered.** A parser
+census of every user-facing string and the Field Manual, read by six independent readers, flagged 283 entries (39 D, 52 D?, 102 E, 151 V);
+every D and D? was adjudicated against the source. Recast as what the model computes or assumes: the Guardrails tab (its *ACTION:* lines,
+one of which said the model *"boosts Roth conversions"*, which no engine does), the Withdrawal tab (its seven steps, its Priority-1 *"Years
+active"*, now the schedule's own year, and its three-strategy comparison with a *"Recommendation"*, removed), the Exit Plan (its directives
+and its header, *"Exit plan — the dates and paperwork"*), the Events tab's Roth alarm (*"if converting this year"*), the SS tab's
+*"#1 OPTIMIZATION LEVER"* and optimizer headings, the Roth tab's *"ideal"* bracket and *"classic guideline"*, the Survivor tab's case for
+converting, the Stress tab's *"Reserve defense"*, the checklist's trust and claiming lines, and the Field Manual's *"PAY CONVERSION TAX FROM
+OUTSIDE FUNDS"* (its worked examples kept, under *"Paying conversion tax: outside funds or withholding — what each costs"*). **Twelve
+statements false about the model were corrected** (scope §0.3): among them, the schedule applies no guardrail, harvests nothing and pays no
+income tax; it draws Traditional and Roth in proportion within each sleeve, not Roth last; taxable Social Security is part of IRMAA's MAGI;
+and the SS tab's survivor card no longer names spouse A the higher earner on every couple. **The build review found eight more**, all
+corrected: the Withdrawal tab's holdings card counted Other-account Traditional money already in Priority 1; the Exit Plan's income line left
+out income streams, its conversion years were said to end before RMDs, and its COBRA sentence ignored the gap's length; *"a smaller survivor
+benefit"* for either spouse's claim (only the larger benefit's sets it); survivor wording on single plans; the in-app Events legend's
+*"window open: go"*; and the Field Manual figure's *"convert at low brackets"*. METHODOLOGY §9 is corrected (the guardrails are the Monte
+Carlo's). No engine, figure the engines compute, grade or stored field changed. What the census found and this release did not fix is **F-25**.
+
+### F-24 · The Grade tab's remaining copy, and its "Lost ~X GPA points" — **LOW–MED (honesty of an output)** — **FIXED v6.28**
 
 **Filed at v6.27** (the v6.27 build's independent review; not fixed — outside the decided scope, and one item changes a displayed figure).
 Read at v6.27:
@@ -520,4 +539,42 @@ Read at v6.27:
   Traditional balance by spouse A's divisor — disclosed as rough.
 
 Candidate fix: its own scope, with the figure as a decision for Steve.
+
+**Fixed at v6.28** with F-23 (DF-1, DF-2 and DF-8, all (a)). *"Lost ~X GPA points"* divides by the weights' sum, 78, so each figure is the
+category's real cost to the overall GPA and they add to 4 − GPA (the example's Estate Readiness reads 0.31, where it read 0.24); the cut-off
+is set in raw points, so the same drags show as at v6.27; weights read *"20 of 78"*. A category reads *STATUS* only at GPA 4.0. Income Floor's
+evidence says it counts Social Security and the pension, not income streams (the Income tab's floor counts them), and its drag gives the gap
+in months, with no dollar figure (the gap figure both tabs show is wrong for a late-claiming spouse B, filed under F-25). The Estate drag
+makes no legal claim. The Monte Carlo sentence says its rate is the 6-year engine's, which carries no long-term-care event. One LTC test,
+`isLTCLabel`, serves the Grade and Monte Carlo tabs and no longer matches *"Long-term disability"*. Tax Efficiency's rough RMD estimate is
+removed; its drag gives each spouse's RMD start age. **No grade moved** (`t90` B-8 compares every plan's grades with the v6.27 leg's).
+
+### F-25 · Editorial and unchecked model claims across the app — **LOW–MED (honesty of an output)** — OPEN
+
+**Filed at v6.28** (`docs/SCOPE_F23_F24_DIRECTIVES_V628.md` §4; its census and its build review). Steve chose to fix directives and false
+statements at v6.28 and to file the rest. The census is kept in `docs/F25_CENSUS_V627.tsv` (283 entries, with id, line, tab, tags and text), so
+this item's scope starts from it. Open:
+- **The E-tagged entries (102), less those v6.28 rewrote:** editorial or unsourced claims, e.g. the checklist's legal *"why"* sentences,
+  *"Congress has always acted before a cut landed"*, unsourced market history, *"The single biggest lever"*, the IRMAA tab's *"the main
+  lever"*, the Withdrawal footer's *"actual tax planning requires a CPA"*, *"A Health Savings Account is the most tax-advantaged account there
+  is"*, the Monte Carlo tab's *"another tool might show 95%"*.
+- **The V-tagged entries (151), less V-1 to V-12:** specific claims about the model, to be checked one by one in the source.
+- **The gap-draw figure.** The Grade's (until v6.27) and the Income tab's gap draw subtract spouse B's Social Security for the whole gap,
+  even when B claims after A. A displayed figure; its fix is with D-57 (MissingFeatures).
+- **Found by the v6.28 build review, checked in the source, not fixed:**
+  - the Backtest tab says *"the MC headline success is 'ended above $500K', and the MC also charges LTC shocks"*; the header's rate is the
+    6-year Monte Carlo's above $800K, which carries no long-term-care event;
+  - the Exit Plan calls a spouse *"Medicare-eligible at retirement"* whenever they turn 65 in the retirement year, though retirement is
+    January and the birthday may be later;
+  - the estimated-tax event says *"Roth conversions have no withholding"* (withholding can be elected on a conversion, and the Exit Plan's
+    v6.28 line says so of distributions);
+  - the Events tab and the Exit Plan date the conversion window from the **target** retirement year, the Withdrawal schedule from the
+    **selected** one (±1 year);
+  - the SS survivor card orders the two benefits at full retirement age, while the model compares the claimed amounts (now worded *"unless
+    the claim ages reverse the order"*);
+  - the Grade tab's *DRAG* label sits on sentences its grade does not read (Income Floor's gap months, the fixed grades' notes);
+  - the Exit Plan's first phase is still titled *"CONFIRM THE MONEY WORKS"* (`t4` signs it), a verdict the model does not give;
+  - the Withdrawal tab's RMD line names spouse A's start only.
+
+Candidate fix: its own scope, from the census, with each V entry checked in the source first.
 
