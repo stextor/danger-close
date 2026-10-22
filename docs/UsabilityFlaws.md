@@ -549,7 +549,7 @@ makes no legal claim. The Monte Carlo sentence says its rate is the 6-year engin
 `isLTCLabel`, serves the Grade and Monte Carlo tabs and no longer matches *"Long-term disability"*. Tax Efficiency's rough RMD estimate is
 removed; its drag gives each spouse's RMD start age. **No grade moved** (`t90` B-8 compares every plan's grades with the v6.27 leg's).
 
-### F-25 · Editorial and unchecked model claims across the app — **LOW–MED (honesty of an output)** — OPEN
+### F-25 · Editorial and unchecked model claims across the app — **LOW–MED (honesty of an output)** — **FIXED v6.29**
 
 **Filed at v6.28** (`docs/SCOPE_F23_F24_DIRECTIVES_V628.md` §4; its census and its build review). Steve chose to fix directives and false
 statements at v6.28 and to file the rest. The census is kept in `docs/F25_CENSUS_V627.tsv` (283 entries, with id, line, tab, tags and text), so
@@ -577,4 +577,41 @@ this item's scope starts from it. Open:
   - the Withdrawal tab's RMD line names spouse A's start only.
 
 Candidate fix: its own scope, from the census, with each V entry checked in the source first.
+
+**Fixed at v6.29** (`docs/SCOPE_F25_MODEL_CLAIMS_V629.md`, all eleven decisions as recommended; the ledger is `docs/F25_LEDGER_V628.tsv`,
+326 rows). The census was re-resolved on v6.28 and every entry read by two independent readers against the code; 93 were confirmed FALSE or
+PARTLY (4 figures, 48 misleading, 47 imprecise after the verifiers' corrections), 16 editorial, 40 statements about the world. Each was
+reworded to what the code does or computed for the plan — the Stress recovery, the Backtest's survival note (shown only at ≥ 90%) and What
+Breaks' history comparison are now computed; the gap draw pays B from B's claim month; the mortgage what-if quotes the active preset and
+handles the sign; Example 2 states its method ($10,400). The world claims were checked against primary sources (IRS, CMS, SSA, HHS/ASPE,
+the 2026 Trustees Report, the statutes) and corrected or removed; comparisons with other tools are removed. The build-review items above:
+the Backtest comparison (fixed), *"Medicare-eligible at retirement"* (by month now), the withholding sentence (corrected, W-4R/W-4V), the
+Exit Plan's conversion window (the selected year; the Events tab's item keeps the target year and says so), the *DRAG* label (*NOTE:* on the
+three fixed grades and Income Floor's months), *"CONFIRM THE MONEY WORKS"* (renamed), the Withdrawal tab's RMD line (each person's). The
+SS survivor card's FRA ordering keeps its v6.28 wording. Pinned by `t92` (both legs). What remains is filed as **F-26**.
+
+### F-26 · Claims the F-25 census did not reach, found at the v6.29 build — **LOW (honesty of an output)** — OPEN
+
+**Filed at v6.29.** The F-25 build edited sentences beside the ledger's and found these, outside the census's flagged set. Fixed in the same
+build because they sat in edited cards: the Stress tab's two scenario descriptions (*"Tech/AI crashes 40–50% in Year 1"*, *"Inflation 6–8% …
+bonds down 10–15%"* — now the forced regimes' own figures from `SCENARIOS`), its *"At 7% inflation"* (the regime's 6.5%), What Breaks'
+*"1929–32 was ≈−80%"* (the app's annual data gives about −65%), the Survivor tab's *"the survivor's portfolio draw rises"* (keyed to
+percentages; now the draw itself), the CT, NJ, NY, RI and VA notes' claim that the state base carries no dividends (it carries the taxable
+yield; `t35` D-2/D-3, D-10/D-11, D-18/D-19 had locked the false claim), and the Dashboard's crash card (*"vs X% with no forced crash"*,
+an unlike pair — MissingFeatures D-63). **Open, not fixed:**
+- the Stress tab's other cards: *"Combined shock: $300K–$600K over 4–10 years"*; the sequence card's *"{B} must sustain for 20+ years
+  alone"* and *"Survivor SS benefit = {A}'s FRA + DRCs accrued"*, and its income line *"survivor SS ({A}'s check)+"* — written as if spouse A
+  has the larger benefit and dies first (the v6.28 V-12 shape, on another tab);
+- the Field Manual's Ask AI cost note gives token counts that look estimated at about four characters a token; Anthropic's figure is about
+  3½, so they may read about 14% low — not measured;
+- the Roth tab's ladder table and its strategy heading start at the **target** retirement year, while Engines A–C convert from the
+  **selected** one (±1 year) — the Exit Plan now says the selected year;
+- the Events tab's ACA status line prints *"Nov 1 – Jan 15"* for every year; the item's instructions now say the dates can change;
+- the Backtest's *"1966 is generally considered the worst real start year in US history"* — a market-history claim the app's own data could
+  settle, not checked;
+- the repo's `README.md` (the GitHub front page, outside the app and so outside the census) still says the Verify tab *"re-runs every
+  statutory constant the math depends on"* — the promise v6.29 corrects in-app, which now names what is checked and what is not — and
+  states *"562 checks"* and *"all 26 tabs"*, figures from an early build. Found at the v6.29 package check.
+**Lesson recorded in the scope (§7):** the census flagged sentences by tag; a sentence in an edited card that the census had not flagged
+still needed reading. Candidate fix: a short pass over the Stress tab's cards and the items above, each checked in the source.
 

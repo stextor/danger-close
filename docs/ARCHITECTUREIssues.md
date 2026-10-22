@@ -37,7 +37,7 @@
 | E-20 | **FIXED v5.36**; the rule stands | — |
 | E-21 | **NARROWED** (v5.74 Engines B/C; v5.84 Engine A taxes the draw) | the D-9 RMD gap is pinned by `t40` |
 | E-22 | **PARTLY FIXED** | §86 is one helper (v5.77) and every engine calls it from v6.12 (C-5: Engine D's flat 85% is gone; `t75` D-4 fails any `× 0.85` product outside the helper), IRMAA tiers one helper (v5.78), C-3/C-6 fixed (v5.75); still two LTCG copies and two federal-bracket copies (Engine D adds none — it reads `projectBracketsAt`'s table) |
-| E-23 | **NARROWED v6.14** *(row updated 2026-10-15)* | payroll rates and the Additional Medicare thresholds now live in `TAX_CONSTS`, read by one helper (`payrollTax`; `t77` B-2 fails any stray payroll literal); NIIT and AMT rates still inline at three sites each |
+| E-23 | **NARROWED v6.14** *(row updated 2026-10-15; note added v6.29)* | payroll rates and the Additional Medicare thresholds now live in `TAX_CONSTS`, read by one helper (`payrollTax`; `t77` B-2 fails any stray payroll literal); NIIT and AMT rates still inline at three sites each. *v6.29 (F-25, DF-5 (b)): the six AMT figures in `TAX_CONSTS` are now Verify-tab checks (72 → 78; `t92` A-5b proves each by mutation), and the tab says the inline AMT and NIIT rates are not checked — the rates themselves stay inline* |
 | E-24 | **OPEN** | Engine A exposes no bracket field |
 | E-25 | **FIXED v6.13** *(row updated 2026-10-15)* | all eight classes covered: `t40`–`t44` six; C-10's by `t72` (C-10 fixed v6.09); C-9's — the annuity share over a long horizon — by `t70` §C since v6.07 (an independent recursion carrying annuity dollars every year), and by `t76` §C, C-9's own extinction statement, from v6.13 |
 | E-26 | **OPEN** | no build identity in the export or the built page beyond the version |
@@ -982,7 +982,7 @@ against primary sources in Phase 2 §1. A parser census of numeric literals (v5.
 | `73`, `75` | SECURE 2.0 RMD ages | 3 and 15 literals, some unrelated (the census cannot tell an RMD age from another 75) |
 
 *Sites read one by one after the census, which had over-counted by value (corrected before shipping).* None is wrong today. Each is a place that must change in lock-step if the law changes, and none is covered by the
-Verify tab. **Severity: low–medium.** ⚠ The census is by literal value; distinguishing a statutory 75 from any other 75
+Verify tab. *(v6.29: the Verify tab now checks the six AMT figures in `TAX_CONSTS` — exemptions, phase-out starts, phase-out rate, 28% break — and states that the inline AMT and NIIT rates are not checked. Moving the rates into `TAX_CONSTS` was option DF-5 (a), an engine refactor; v6.29 took (b).)* **Severity: low–medium.** ⚠ The census is by literal value; distinguishing a statutory 75 from any other 75
 needs reading each site, which this pass did not do.
 
 ## E-24 · Tests that pass on amounts cannot see a $1 bracket-edge error
