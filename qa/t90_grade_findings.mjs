@@ -22,15 +22,15 @@ import { fileURLToPath } from "url";
 import { spawnSync } from "child_process";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const VER = process.argv[2] || "v627";
+const VER = process.argv[2] || "v628";
 const DUMP = process.argv.includes("--dump");
-const KNOWN_VERSIONS = ["v626", "v627"];
+const KNOWN_VERSIONS = ["v626", "v627", "v628"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v627"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v627", "v628"].includes(VER);   // an array, so the next registration widens it
 const KD = "[KNOWN DEFECT 2026-10-21, F-22 — flips at v6.27]";
 
 // ── TRAP 1 (t11's; do not "simplify" away): seed Math.random BEFORE the bundle loads — d3-random captures it at module load ──
@@ -285,9 +285,12 @@ T("B-7b: the three literal grades render at their v6.26 values on every plan (C+
     && r.cats["Diversification"].grade === "B+" && r.cats["Diversification"].gpa === 3.3));
 T("B-7c: no plan's overall grade exceeds the scoring's ceiling", Object.values(R).every(r => r.gpa <= CEIL + 1e-9));
 if (POST) {
-  // B-8: no grade moves — the v6.26 leg, same seed, same plans, in its own process
-  const prior = "v626";
-  if (!existsSync(join(HERE, `dom_${prior}.cjs`)) || !existsSync(join(HERE, "..", `${prior}.jsx`))) T(`B-8: SETUP — the ${prior} leg is present in this run folder`, false, `dom_${prior}.cjs / ${prior}.jsx missing`);
+  // B-8: no grade moves — the previous registered leg, same seed, same plans, in its own process.
+  // v6.28: the prior is the tag before VER in KNOWN_VERSIONS (it was pinned to "v626", so the v6.28 leg would have spawned a v6.26 leg that a
+  // v627 → v628 run folder does not hold — the prior-pinned shape t89 A-7 was repaired for at v6.27). Where that leg is absent the check
+  // takes a designed, printed skip: a run folder holds two legs, so the older leg's own B-8 cannot run.
+  const prior = KNOWN_VERSIONS[KNOWN_VERSIONS.indexOf(VER) - 1];
+  if (!prior || !existsSync(join(HERE, `dom_${prior}.cjs`)) || !existsSync(join(HERE, "..", `${prior}.jsx`))) console.log(`  ~ B-8 skipped by design: the ${prior || "previous"} leg is not in this run folder (it runs on the newer leg of a pair)`);
   else {
     const r = spawnSync(process.execPath, [fileURLToPath(import.meta.url), prior, "--dump"], { cwd: HERE, encoding: "utf8", maxBuffer: 1 << 24, timeout: 900000 });
     const line = (r.stdout || "").split("\n").find(l => l.startsWith("DUMP:"));

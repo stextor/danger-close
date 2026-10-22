@@ -47,20 +47,20 @@
 
 const VER = process.argv[2];
 const MODPATH = process.argv[3] || `./app_${VER}.mjs`;
-const KNOWN_VERSIONS = ["v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627"];
+const KNOWN_VERSIONS = ["v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   console.log("    Add it to KNOWN_VERSIONS and decide which leg's figures it owes BEFORE running.");
   process.exit(1);
 }
-const POST = (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627")))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627"))))))))))))))))));
+const POST = (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || VER === "v628")))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || VER === "v628"))))))))))))))))));
 // v6.07 (D-33 — docs/SCOPE_D33_ANNUITY_CONVERSION_V607.md): Engines B and C carry spouse B's $7,000 annuity dollars, so no RMD or
 // conversion drains them and B's RMD base is smaller in every later year; the pooled conversion also shifts toward A. Measured on this
 // household: B and C lifetime RMD $1,321,030 -> $1,318,959 (−$2,071); lifetime federal falls $445–$693 by view; the IRMAA peaks fall
 // $391 and $143. Engine D is unmoved (A3's second pin). The mechanism is reproduced to the dollar by t70 §C's independent recursion; the
 // figures here are this household's measurement. An array, so register_tag2 widens it each release.
-const POST_D33 = ["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627"].includes(VER);
+const POST_D33 = ["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628"].includes(VER);
 
 const m = await import(MODPATH);
 const { exampleWorkRows } = await import(new URL("./tools/example_work_rows.mjs", import.meta.url).href);   // v6.23 (D-49): section C
@@ -69,7 +69,7 @@ const g = m.__g, E = m.__engines;
 // the v6.18 figures (measured at the build). The v6.18 leg is ALSO run with DC_V617_SPENDING=1 — v6.17's spending written as a table
 // (qa/tools/v617_spending.mjs) — and there every v6.17 figure must still come out exactly: that second run is what attributes each move
 // to the spending read alone (runsuite.sh, "t40-<cur>-spend617").
-const POST_D41 = ["v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627"].includes(VER);   // an array, so the registrar widens it
+const POST_D41 = ["v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628"].includes(VER);   // an array, so the registrar widens it
 const SPEND17 = POST_D41 && process.env.DC_V617_SPENDING === "1";
 const PIN18 = POST_D41 && !SPEND17;
 const P41 = (v617, v618) => PIN18 ? v618 : v617;
@@ -77,7 +77,7 @@ const P41 = (v617, v618) => PIN18 ? v618 : v617;
 // rides on its draws after 2036 moved. PIN21 picks the v6.21 figures (measured at the build). The v6.21 leg is ALSO run with
 // DC_V620_TABLE=1 — the example's table without its car rows, which is v6.20's — and there every v6.20 figure must come out exactly: that
 // second run attributes each move to the rows alone (runsuite.sh, "<suite>-<cur>-table620"; t84 C proves v6.21 on that table IS v6.20).
-const POST_D42 = ["v621", "v622", "v623", "v624", "v625", "v626", "v627"].includes(VER);   // an array, so the registrar widens it
+const POST_D42 = ["v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628"].includes(VER);   // an array, so the registrar widens it
 const TABLE620 = POST_D42 && process.env.DC_V620_TABLE === "1";
 const PIN21 = POST_D42 && !TABLE620;
 const P42 = (v620, v621) => PIN21 ? v621 : v620;
@@ -124,7 +124,7 @@ const inflator = yr => Math.pow(1 + infl, Math.max(0, yr - retire));
 // leg sees a draw it never published. GATED PER LEG at v6.12 (C-5): through v6.11 Engine D's taxable SS was a flat 85% of benefits; from
 // v6.12 it is the §86 worksheet's share, published on the row as `ssTaxable`. Each leg subtracts its OWN rule — a v6.12 row without the
 // field reads NaN here and fails, rather than silently falling back. The draw itself does not move (t75 C-1).
-const C5 = ["v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627"].includes(VER);   // an array, so register_tag2 widens it each release
+const C5 = ["v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628"].includes(VER);   // an array, so register_tag2 widens it each release
 const ssOf = d => C5 ? d.ssTaxable : 0.85 * (d.ssA_y + d.ssB_y);
 const residual = d => Math.max(0, d.magi - (ssOf(d) + d.pen_y + d.work_y + d.rmd_y + d.conv_y + d.capGain_y));
 const lifeDraw = D.reduce((s, d) => s + residual(d), 0);

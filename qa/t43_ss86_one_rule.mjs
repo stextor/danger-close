@@ -49,12 +49,12 @@ import { fileURLToPath } from "url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2];
-const KNOWN_VERSIONS = ["v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627"];
+const KNOWN_VERSIONS = ["v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.\n    Registered: ${KNOWN_VERSIONS.join(", ")}`);
   process.exit(1);
 }
-const POST = VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627")))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627"))))))))))))))));
+const POST = VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || VER === "v628")))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || VER === "v628"))))))))))))))));
 
 // Optional third argument: a module path, for the negative controls (qa/tools/controls_v577_ss86.py). The parser
 // check reads the .jsx beside it, so a control's mutant is what the structural check sees too.
@@ -64,7 +64,7 @@ const G = mod.__g, E = mod.__engines;
 // v6.18 (D-41): Engine D reads the expense table year by year, which moved three §F figures (they ride on the example's draws). PIN18
 // picks the v6.18 figures (measured at the build); the v6.18 leg is ALSO run with DC_V617_SPENDING=1, where §F loads v6.17's spending as
 // a table (qa/tools/v617_spending.mjs) and every v6.17 figure must still come out exactly — the attribution of each move.
-const POST_D41 = ["v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627"].includes(VER);   // an array, so the registrar widens it
+const POST_D41 = ["v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628"].includes(VER);   // an array, so the registrar widens it
 const SPEND17 = POST_D41 && process.env.DC_V617_SPENDING === "1";
 const PIN18 = POST_D41 && !SPEND17;
 const P41 = (v617, v618) => PIN18 ? v618 : v617;
@@ -72,7 +72,7 @@ const P41 = (v617, v618) => PIN18 ? v618 : v617;
 // rides on its draws after 2036 moved. PIN21 picks the v6.21 figures (measured at the build). The v6.21 leg is ALSO run with
 // DC_V620_TABLE=1 — the example's table without its car rows, which is v6.20's — and there every v6.20 figure must come out exactly: that
 // second run attributes each move to the rows alone (runsuite.sh, "<suite>-<cur>-table620"; t84 C proves v6.21 on that table IS v6.20).
-const POST_D42 = ["v621", "v622", "v623", "v624", "v625", "v626", "v627"].includes(VER);   // an array, so the registrar widens it
+const POST_D42 = ["v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628"].includes(VER);   // an array, so the registrar widens it
 const TABLE620 = POST_D42 && process.env.DC_V620_TABLE === "1";
 const PIN21 = POST_D42 && !TABLE620;
 const P42 = (v620, v621) => PIN21 ? v621 : v620;
@@ -82,7 +82,7 @@ const P42 = (v620, v621) => PIN21 ? v621 : v620;
 // P49 picks the v6.23 figures; the v6.22 figures stay on the v6.22 leg. ATTRIBUTION, measured at the build: on each of the three tables
 // §F runs on, v6.23's Engine C rows equal v6.22's with the built-in work switched off (a $0 stream) — every row, bit for bit — so the whole
 // move is the wages (t86 §C proves the same across every engine). F-1, F-2 and F-5 do not move.
-const POST_D49 = ["v623", "v624", "v625", "v626", "v627"].includes(VER);   // an array, so the registrar widens it
+const POST_D49 = ["v623", "v624", "v625", "v626", "v627", "v628"].includes(VER);   // an array, so the registrar widens it
 const P49 = (v622, v623) => POST_D49 ? v623 : v622;
 const EX0 = JSON.parse(JSON.stringify(G.EXPENSES())).filter(e => !(TABLE620 && e && e.label === "Replacement car"));   // v6.21: TABLE620 → v6.20's table
 const { v617Table } = await import("./tools/v617_spending.mjs");
@@ -290,7 +290,7 @@ if (TOOL) {
       OK(`E-2 ${f} calls the shared helper`, callers.has(f), [...callers].join(","));
     // v6.12 (C-5): Engine D was the one engine outside the helper — it took a flat 85% of benefits, which E-1 cannot see (it reads no
     // threshold). Gated per leg; t75 D-4 adds the extinction that no `× 0.85` product survives outside the helper.
-    if (["v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627"].includes(VER)) OK("E-2 computeWithdrawalPlan calls the shared helper (v6.12, C-5)", callers.has("computeWithdrawalPlan"), [...callers].join(","));
+    if (["v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628"].includes(VER)) OK("E-2 computeWithdrawalPlan calls the shared helper (v6.12, C-5)", callers.has("computeWithdrawalPlan"), [...callers].join(","));
     else OK("E-2 [KNOWN DEFECT C-5, fixed v6.12] computeWithdrawalPlan does not call the helper (a flat 85%)", !callers.has("computeWithdrawalPlan"), [...callers].join(","));
     T("E-3 Engine A's private ssTaxF is gone", outer("ssTaxF", "any").length, 0);
   } else {

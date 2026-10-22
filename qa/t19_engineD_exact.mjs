@@ -46,8 +46,9 @@ const r = g.computeWithdrawalPlan(ARGS);
 
 // The names the Withdrawal tab's JSX destructures. If this set changes, the render breaks —
 // so this is the contract between the engine and its only consumer. v6.09 (D-35) adds `_rothOth` (the Roth money entered under
-// Other accounts, which the Roth card now subtracts so each dollar is shown once): 17 -> 18.
-const CONTRACT = ["_dobAYr","_horizonYr","_ladderEnd","_rmdAgeA_w","_rmdAgeB_w","_rmdStartYr",
+// Other accounts, which the Roth card now subtracts so each dollar is shown once): 17 -> 18. v6.28 (the build review of F-23) adds
+// `_posTradW` (the holdings' own Traditional, which the holdings card prints; `_tradInit` also counts Other-account money): 18 -> 19.
+const CONTRACT = ["_dobAYr","_horizonYr","_ladderEnd","_posTradW","_rmdAgeA_w","_rmdAgeB_w","_rmdStartYr",
   "_rothInit","_rothOth","_taxInit","_tlW","_tradInit","_wInfl","avgWR","growth","phaseColor","schedule",
   "totalConverted","totalDrawn"];
 const keys = Object.keys(r).sort();
@@ -148,6 +149,11 @@ if (namedIRA) {
   // longer spent TAX-FREE. Releases (a)-(c) never moved this money; they changed what it costs.
   ck("[FIXED v5.26] the extra IRA also raises the RMD basis by $100K (it is Traditional)",
      Math.round(after._tradInit - r._tradInit) === BUMP);
+  // v6.28: the holdings card prints _posTradW, the holdings' own Traditional. Money entered under Other accounts sits in Priority 1, and
+  // through the v6.28 draft the card printed _tradInit, counting it in both cards (the build review). It must not move with a named IRA.
+  ck("[v6.28] ...but not the holdings' own Traditional (_posTradW), which the holdings card prints — the named IRA is in Priority 1 only",
+     Math.round(after._posTradW - r._posTradW) === 0 && Math.round(r._tradInit - r._posTradW) > 0,
+     `${$(r._posTradW)} -> ${$(after._posTradW)}; _tradInit − _posTradW ${$(r._tradInit - r._posTradW)}`);
   g.setPortfolio(P0);
   const restored = g.computeWithdrawalPlan(ARGS);
   ck("fixture restored \u2014 figures return to baseline",

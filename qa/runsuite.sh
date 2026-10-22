@@ -387,6 +387,11 @@ tally "t89-$CUR"   node t89_ai_ground_rules.mjs "$CUR"
 # (the v6.26 leg pins the defects); the v6.27 leg spawns the v6.26 leg once with --dump and checks no grade moves. Prints one count line.
 tally "t90-$PRIOR" node t90_grade_findings.mjs "$PRIOR"
 tally "t90-$CUR"   node t90_grade_findings.mjs "$CUR"
+# t91 (v6.28) — the app describes the model, it does not direct (F-23, F-24): a directive lint over the rendered tabs and the Field Manual,
+# the removed phrases extinct, the Grade tab's real GPA cost, the corrected model descriptions held to the engines by AST, the LTC label
+# test. Both legs (the v6.27 leg pins the defects). Prints one count line.
+tally "t91-$PRIOR" node t91_directives.mjs "$PRIOR"
+tally "t91-$CUR"   node t91_directives.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
