@@ -438,6 +438,25 @@ export function census(G) {
     _dis.length ? "reachable — a long-term row that is not care: the v6.27 LTC test's false match shows"
       : "the household has no long-term row that is not care, so the v6.27 LTC test's false match cannot be seen here");
 
+  // ── v6.29 (F-25 — SCOPE_F25_MODEL_CLAIMS_V629) · the condition that hid it (§K1) ─────────────────────────────────────────────────
+  // 14. SPOUSE B CLAIMS AFTER A'S INCOME GAP STARTS. Through v6.28 the Income tab's gap draw subtracted spouse B's Social Security for every
+  //    month of A's gap, even when B claims later. The example's B claims in the retirement month — at the gap's start — so the
+  //    over-subtraction could not be seen there. ON when the plan is single, has no gap, or B's claim falls at or before the gap's start (the
+  //    Income tab's retirement month, January of the retirement year). Read from the timeline; no build feature, so both legs agree.
+  {
+    const _retYM = tl.targetRetireYear * 12 + 1;
+    const _aYM = tl.ssA_date.year * 12 + (tl.ssA_date.month || 1);
+    const _bYM = single ? null : tl.ssB_date.year * 12 + (tl.ssB_date.month || 1);
+    const _gap = _aYM > _retYM;
+    const _ym = (v) => `${Math.floor((v - 1) / 12)}-${String(((v - 1) % 12) + 1).padStart(2, "0")}`;
+    row("ss_claim_after_gap", "spouse B's claim vs A's income gap",
+      single ? "n/a" : !_gap ? "no gap" : `B claims ${_ym(_bYM)}; A's gap ${_ym(_retYM)} to ${_ym(_aYM - 1)}`,
+      "B claims after A's gap starts", single || !_gap || _bYM <= _retYM,
+      single ? "single filer — no spouse B" : !_gap ? "no income gap before A's Social Security, so the gap draw is not reached"
+        : _bYM <= _retYM ? "B's check flows for the whole gap, so subtracting it for every gap month is right here and the v6.28 over-subtraction cannot be seen"
+        : "reachable — B claims inside or after A's gap: the gap draw pays B only from B's claim month");
+  }
+
   return rows;
 }
 
