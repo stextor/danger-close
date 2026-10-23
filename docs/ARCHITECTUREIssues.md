@@ -22,7 +22,7 @@
 | E-6 | **OPEN** | **9** jsdom set-ups in `qa/` (8 inline + `env_dom.mjs`), **10** with `validation/run.cjs`; 29 files now import `env_dom`; the trap-by-trap audit has never run. ⚠ OPERATIONS §C1 said EIGHT — corrected in this package |
 | E-7 | **OPEN, grown** | **4,222** `VER` comparisons across 34 suite files (AST), not 202 |
 | E-8 | **OPEN** | the eight orphaned pre-v5.10 pins remain (`t3`, `t5`, `t6`) |
-| E-9 | **OPEN** | `TAX_INDEX_RATE` and `IRMAA_INDEX_RATE` are still two declarations of 1.02 |
+| E-9 | **CLOSED v6.30** (D-60) | both constants are gone: two rates, each named for its statute, read from one place — `chainedCpiRate()` (the §1(f)(3) family, the plan's inflation less 0.25 point) and `cpiuRate()` (IRMAA tiers, the poverty line, the wage base: the plan's inflation); `t93` H-1 fails on any numeric `1.02` in the source, H-2 on either old name |
 | E-10 | **RE-OPENED (pool)** | `t19` still cites `SCOPE_FIX_otherAccounts_tax_treatment_v5_21.md` and `SCOPE_ENGINE_D_MAGI_v5_24.md`; both are in the repo's `docs/`, **neither is in the pool** (Projects listing, 125 files), while the manifest rows say "retained deliberately" |
 | E-11 | **OPEN, accepted as procedure** | `DOCS_HTML` is 157,656 bytes / 156,483 characters at v5.97 (144,008 bytes at v5.29) |
 | E-12 | **OPEN** (no decision recorded) | three calling conventions remain |
@@ -36,8 +36,8 @@
 | E-19 | **PARTLY FIXED** | `qa/controls.sh`, named below, was deleted 2026-08-21; per-release controls now live in `qa/tools/controls_v5NN_*` |
 | E-20 | **FIXED v5.36**; the rule stands | — |
 | E-21 | **NARROWED** (v5.74 Engines B/C; v5.84 Engine A taxes the draw) | the D-9 RMD gap is pinned by `t40` |
-| E-22 | **PARTLY FIXED** | §86 is one helper (v5.77) and every engine calls it from v6.12 (C-5: Engine D's flat 85% is gone; `t75` D-4 fails any `× 0.85` product outside the helper), IRMAA tiers one helper (v5.78), C-3/C-6 fixed (v5.75); still two LTCG copies and two federal-bracket copies (Engine D adds none — it reads `projectBracketsAt`'s table) |
-| E-23 | **NARROWED v6.14** *(row updated 2026-10-15; note added v6.29)* | payroll rates and the Additional Medicare thresholds now live in `TAX_CONSTS`, read by one helper (`payrollTax`; `t77` B-2 fails any stray payroll literal); NIIT and AMT rates still inline at three sites each. *v6.29 (F-25, DF-5 (b)): the six AMT figures in `TAX_CONSTS` are now Verify-tab checks (72 → 78; `t92` A-5b proves each by mutation), and the tab says the inline AMT and NIIT rates are not checked — the rates themselves stay inline* |
+| E-22 | **PARTLY FIXED** | §86 is one helper (v5.77) and every engine calls it from v6.12 (C-5: Engine D's flat 85% is gone; `t75` D-4 fails any `× 0.85` product outside the helper), IRMAA tiers one helper (v5.78), C-3/C-6 fixed (v5.75); still two LTCG copies and two federal-bracket copies (Engine D adds none — it reads `projectBracketsAt`'s table). *v6.30 (D-60): narrowed — the four indexation lambdas (Engines A, B and C and `projectBracketsAt`) each delegate to one helper, `inflateTaxConst`; the bracket-walk copies stay* |
+| E-23 | **NARROWED v6.14** *(row updated 2026-10-15; note added v6.29)* | payroll rates and the Additional Medicare thresholds now live in `TAX_CONSTS`, read by one helper (`payrollTax`; `t77` B-2 fails any stray payroll literal); NIIT and AMT rates still inline at three sites each. *v6.29 (F-25, DF-5 (b)): the six AMT figures in `TAX_CONSTS` are now Verify-tab checks (72 → 78; `t92` A-5b proves each by mutation), and the tab says the inline AMT and NIIT rates are not checked — the rates themselves stay inline. v6.30 (D-60): `ACA_CONSTS.fplInflProxy` is gone (the poverty line grows at `cpiuRate()`); the NIIT and AMT rates stay inline* |
 | E-24 | **OPEN** | Engine A exposes no bracket field |
 | E-25 | **FIXED v6.13** *(row updated 2026-10-15)* | all eight classes covered: `t40`–`t44` six; C-10's by `t72` (C-10 fixed v6.09); C-9's — the annuity share over a long horizon — by `t70` §C since v6.07 (an independent recursion carrying annuity dollars every year), and by `t76` §C, C-9's own extinction statement, from v6.13 |
 | E-26 | **OPEN** | no build identity in the export or the built page beyond the version |
@@ -458,6 +458,12 @@ site "drifted to a different inflation rate entirely").
 than a merge.
 
 **Exposure.** **Creator-side.**
+
+**Closed at v6.30 (D-60, `docs/SCOPE_D60_DOLLAR_UNITS_V630.md`).** The assessment above was right that they are two facts: by statute the
+bracket family indexes by C-CPI-U (26 U.S.C. §1(f)(3)) and IRMAA tiers by CPI-U (42 U.S.C. §1395r(i)(5)(A)), about 0.25 point apart. Both
+constants were replaced by two rate helpers that read the plan's own inflation (`chainedCpiRate`, `cpiuRate`), and the indexation goes
+through `inflateTaxConst`, `irmaaThresholdFor`, `acaFplFor` and `inflateWageBase`. `t93` H-1/H-2 keep both the literal and the names extinct;
+`qa/tools/controls_v630_dollar_units.py` U5 puts a `1.02` back and shows them red.
 
 ---
 
@@ -966,6 +972,10 @@ Measured at v5.73:
 This is the pattern `E-9` and the v5.16 `taxFactsFor` extraction already named; it continues. **Severity: medium** —
 the cost is not the duplication but that a correction to one copy reads as closed. Suggested direction: shared pure
 functions for §86, LTCG stacking and tier selection, each with its own dollar-exact test, as `stateTaxAnnual` already is.
+
+*v6.30 (D-60): the indexation the copies share is now one helper — Engines A, B and C and `projectBracketsAt` each indexed at 2% through
+its own local inflator; each now delegates to `inflateTaxConst`. The bracket walks
+and LTCG copies themselves are unchanged, so this entry stays open.*
 
 ## E-23 · Law-dependent constants that live outside the constant blocks
 

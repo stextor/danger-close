@@ -75,7 +75,7 @@ ordinary income, though both were in its "Gross taxable" total; it now lists eve
 | **C-9** | The annuity RMD exclusion is a fixed share, so RMDs creep up as the pool drains (+$4,547 by 2050) | B (and C by the same code) | Low · **FIXED v6.07** (D-33) | pessimistic | No |
 | **C-11** | The break-even card calls a face-value cash measure "after-tax wealth" | Roth tab | Low · **FIXED v6.13** | — | — |
 | **C-12** | Engine C taxes a household SINGLE from the start on the joint §86 thresholds (hid a $1,150 IRMAA surcharge in the measured case) — found at the v5.77 build | C | Low–medium · **FIXED v5.77** | optimistic | No |
-| **C-13** | Projected IRMAA thresholds are not rounded to the nearest $1,000 as §1395r(i)(5)(B) rounds the published figures (2028 tier 1: $113,403.60) — recorded at the v5.78 scope, not fixed (decision D-2) | shared helper | Low | either | Partly — the 2%/yr proxy is disclosed; the missing rounding is not |
+| **C-13** | Projected IRMAA thresholds are not rounded to the nearest $1,000 as §1395r(i)(5)(B) rounds the published figures (2028 tier 1: $113,403.60) — recorded at the v5.78 scope, not fixed (decision D-2) | shared helper | Low | either | Partly — the projection rate is disclosed (CPI-U, the plan's inflation, from v6.30; a 2%/yr proxy before); the missing rounding is not |
 | **C-14** | Social Security payroll tax capped once per household instead of once per earner (two $150K earners: $6,461 a year) — found at the D-17 scope | A, B | Low–medium · **FIXED v6.14** | optimistic | No |
 | **D-1** | METHODOLOGY's §86 passage contradicts itself and omits Engine A | doc | Low · **FIXED v5.77** | — | — |
 | C-2 | IRMAA surcharges rounded to $10 | — | — | — | **Yes** — documented limitation, not a defect |
@@ -177,8 +177,10 @@ $300,000) and $29,827 over five years; two $120,000 jobs, $11,227. Invisible on 
 
 **C-13 · RECORDED at the v5.78 scope — projected IRMAA thresholds are not rounded to the nearest $1,000.** *Severity: low.
 User-side. Either direction (up to $500 per edge). Partly disclosed.* §1395r(i)(5)(B) rounds each indexed amount to the
-nearest $1,000; `irmaaThresholdFor` does not (premium year 2028, single tier 1: $113,403.60). The projection rests on a
-disclosed 2%/yr CPI-U proxy whose error is far larger. **Not fixed, by decision (D-2):** rounding moves every projected edge
+nearest $1,000; `irmaaThresholdFor` does not (premium year 2028, single tier 1: $113,403.60 at v5.78). The projection rests on an
+assumed inflation whose uncertainty is far larger than the rounding — through v6.29 a disclosed 2%/yr CPI-U proxy; from v6.30 (D-60) the
+plan's own inflation, the CPI-U §1395r(i)(5)(A) names, so the tier ten years out is only as good as that assumption. *Re-worded at v6.30;
+still open (D-60 scope, DU-6 (a)).* **Not fixed, by decision (D-2):** rounding moves every projected edge
 and would reach far more households than C-1 did, so it wants its own measurement — alongside the brackets, which pose the
 same question at $50.
 
