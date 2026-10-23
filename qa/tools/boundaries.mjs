@@ -246,7 +246,7 @@ export function census(G) {
   //    are structural — useState defaults the shim cannot read, like d_conv_cap's $70,000: the slider ($70,000), the taxable yield (2%),
   //    the conversion-tax funding ("taxable") with a 0% gain share, and the scenario the draw series is built on (DEFAULT_SCENARIO_PRESET,
   //    "bull"). If one moves in the component, E-3 goes red rather than this row going quietly stale.
-  let _xo = null;
+  let _xo = null, _curA = null;   // v6.30: the slider strategy's row, kept for the D-60 rows below
   if (G.runRothStrategies && G.rothCrossover && G.withdrawalPlanSeries) {
     const _ry = tl.targetRetireYear, _conv = 70000, _aca = P.acaBridge || {};
     const _PX = { single, asOfYr: tl.asOfYear, retireYr: _ry,
@@ -262,6 +262,7 @@ export function census(G) {
       ordDrawByYr: G.withdrawalPlanSeries({ retireYear: _ry, rothAmount: _conv, scenarioPreset: "bull" }).ordDrawByYr };
     const _res = G.runRothStrategies(_PX), _n = _res.find(r => r.key === "none"), _c = _res.find(r => r.key === "current");
     if (_n && _c) _xo = G.rothCrossover(_n.wealthByYr, _c.wealthByYr);
+    _curA = _c || null;
   }
   const _xoBranch = !_xo ? "n/a" : _xo.beYr !== null ? (_xo.beWasBehind ? "recovered" : "never behind")
     : (_xo.beWasBehind ? "does not break even" : "no measurable difference");
@@ -277,12 +278,15 @@ export function census(G) {
   //    above $200,000 single / $250,000 joint) and the Social Security wage cap applied PER EARNER. The example household has no job
   //    stream and B's built-in taper peaks at $20,000, so neither rule ever applied there. Read from the household's own job streams (or
   //    the taper when none is entered), joint rows split equally, over the plan years; thresholds and the 2026 base read live. The base is
-  //    indexed at 2%/yr — structural here (the engines' TAX_INDEX_RATE, not exported); t77 holds the engines to the same figure.
+  //    indexed at 2%/yr through v6.29 (the engines' TAX_INDEX_RATE) and at the plan's inflation from v6.30 (DU-3 (a)); t77 holds the engines to it.
   let _pay = null;
   if (T.ADDL_MED_SGL != null && T.ADDL_MED_MFJ != null) {
     const _streams = (P.incomeStreams || []).filter(s => (s.kind || "other") === "work" && (s.tax || "ordinary") === "ordinary" && (+s.monthly || 0) > 0);
     const _dA = tl.dobA.year + tl.lifeExpA, _dB = single ? Infinity : tl.dobB.year + tl.lifeExpB, _d1 = single ? Infinity : Math.min(_dA, _dB);
     const _end = Math.max(_dA, single ? 0 : _dB);
+    // v6.30 (D-60, DU-3 (a)): the base follows the wage index, modelled at the plan's inflation (Σ prob × inflation over the scenario table) on a
+    // build that indexes it so (marked by `inflateWageBase` on __g); 2%/yr before — the engines' old TAX_INDEX_RATE.
+    const _wbRate = typeof G.inflateWageBase === "function" ? Object.values(G.SCENARIOS()).reduce((t, sc) => t + sc.prob * sc.inflation, 0) : 0.02;
     let maxW = 0, overThr = 0, pairOverBase = 0;
     for (let yr = tl.targetRetireYear; yr <= _end; yr++) {
       const aliveA = yr < _dA, aliveB = !single && yr < _dB, one = single || yr >= _d1;
@@ -295,7 +299,7 @@ export function census(G) {
       // a leg with no export.
       if (typeof G.spouseBWorkTaper === "function") b += G.spouseBWorkTaper(yr, tl.targetRetireYear);
       else if (!_streams.length && !single) { const k = yr - tl.targetRetireYear; b += k === 0 ? 20000 : k === 1 ? 18000 : k === 2 ? 15000 : 0; }
-      const W = a + b + j, thr = (single || yr > _d1) ? T.ADDL_MED_SGL : T.ADDL_MED_MFJ, base = T.SS_WAGE_BASE * Math.pow(1.02, yr - tl.asOfYear);
+      const W = a + b + j, thr = (single || yr > _d1) ? T.ADDL_MED_SGL : T.ADDL_MED_MFJ, base = T.SS_WAGE_BASE * Math.pow(1 + _wbRate, yr - tl.asOfYear);
       maxW = Math.max(maxW, W); if (W > thr) overThr++;
       if (!one && (a + j / 2) > 0 && (b + j / 2) > 0 && W > base) pairOverBase++;
     }
@@ -455,6 +459,26 @@ export function census(G) {
       single ? "single filer — no spouse B" : !_gap ? "no income gap before A's Social Security, so the gap draw is not reached"
         : _bYM <= _retYM ? "B's check flows for the whole gap, so subtracting it for every gap month is right here and the v6.28 over-subtraction cannot be seen"
         : "reachable — B claims inside or after A's gap: the gap draw pays B only from B's claim month");
+  }
+
+  // ── v6.30 (D-60 — SCOPE_D60_DOLLAR_UNITS_V630) · the boundaries the units fix turns on (§K1) ───────────────────────────────────
+  // The fix changes figures only where a household reaches them, and the example household reaches three of these four not at all, so its own
+  // figures cannot evidence them (scope §0.8). 15 — the two inflation clocks coincide when the plan retires in its as-of year (reb = 1): there
+  // the v6.29 and v6.30 schedules are equal, so nothing about the clock can be seen. 16–18 read Engine A's slider strategy (the crossover
+  // row's own run): a year with NIIT (an unindexed threshold crossed), a year with an IRMAA surcharge (the CPI-U tiers and the surcharge's
+  // growth), and a bridge year with an ACA subsidy (the poverty line's CPI-U growth). Engine A exists on both legs, so both legs agree.
+  { const _ry = tl.targetRetireYear, _as = tl.asOfYear;
+    row("clock_coincide", "retirement year vs as-of year", `${_ry} vs ${_as}`, "retirement in the as-of year (the clocks coincide)", _ry === _as,
+      _ry === _as ? "DEGENERATE — the retirement and as-of clocks are the same clock here, so D-60's clock change moves nothing"
+        : `clear — ${_ry - _as} year(s) apart, so the clock moves Engine D and every fixed amount`);
+    const _ni = _curA ? (_curA.totNiit || 0) : null, _ir = _curA ? (_curA.totIrmaa || 0) : null;
+    const _sub = _curA ? Object.values(_curA.acaSubByYr || {}).filter(v => v > 0).length : null;
+    row("niit_year", "NIIT, slider strategy", _ni === null ? "n/a" : `$${Math.round(_ni).toLocaleString()}`, "a year over the (unindexed) NIIT threshold", !(_ni > 0),
+      _ni > 0 ? "reachable — an unindexed threshold is crossed" : "no NIIT year, so the unindexed threshold's creep cannot be seen here");
+    row("irmaa_year", "IRMAA, slider strategy", _ir === null ? "n/a" : `$${Math.round(_ir).toLocaleString()}`, "a year with an IRMAA surcharge", !(_ir > 0),
+      _ir > 0 ? "reachable — the CPI-U tiers and the surcharge's growth apply" : "no IRMAA year, so the tiers' indexing and the surcharge's growth cannot be seen here");
+    row("aca_subsidy", "ACA subsidy years, slider strategy", _sub === null ? "n/a" : `${_sub} year(s) with a subsidy`, "a bridge year under the 400% cliff", !(_sub > 0),
+      _sub > 0 ? "reachable — the poverty line's growth moves the subsidy" : "no subsidy year, so the poverty line's indexing cannot be seen here");
   }
 
   return rows;

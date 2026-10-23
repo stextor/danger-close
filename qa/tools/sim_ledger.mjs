@@ -15,6 +15,15 @@
 //   "v538" — the scope §3 design: the ACA-premium sale grosses up for its own LTCG,
 //            the gain's tax is charged, the contraction estimates the grossed-up sale,
 //            and the gain (whole-sale) enters the IRMAA lookback (decision 1).
+//   "v630" — v5.38's rules in v6.30's dollar units (D-60, docs/SCOPE_D60_DOLLAR_UNITS_V630.md), written from the scope's
+//            decisions, not from the engine: every year in its own dollars on one clock from the as-of year. Social Security
+//            × (1+i)^(yr − as-of); the pension and the built-in work fixed; today's balances carried to retirement ×
+//            (1+i)^(retire − as-of) with the cost basis left nominal; the §1(f)(3) family (brackets, LTCG bands, standard
+//            deduction and age-65 extra, AMT exemption, phase-out start and 28% break) at chained CPI-U = i − 0.25 points; the
+//            wage base, the IRMAA tiers and the FPL at CPI-U = i; the IRMAA surcharge × (1+i)^(premium year − as-of). `i` is
+//            this file's own transcription of the BASE prior's expected inflation (EXPECTED_INFL below), which the caller
+//            checks against the module's scenario table. Validated to the dollar against the v6.30 engine by
+//            validate_v630.mjs before anything is projected from it.
 //
 // SCOPE LIMITS (deliberate; the fixtures respect them):
 //   MFJ only · deathYr1 = Infinity · no annuity shares · fixed conv policies only
@@ -51,7 +60,13 @@ const RMD_DIV = { 72: 27.4, 73: 26.5, 74: 25.5, 75: 24.6, 76: 23.7, 77: 22.9, 78
 const WORK_TAPER = [20000, 18000, 15000]; // the app's built-in demo taper (active when no streams)
 
 // ── OWN ARITHMETIC (no code shared with the engine) ───────────────────────────────
-const idx = (v, yr, asOf) => v === Infinity ? Infinity : v * Math.pow(IDX, yr - asOf);
+// `idx` is the bracket family's index; `cpi` the CPI-U index (wage base, IRMAA, FPL); `kY` today's dollars → year yr's.
+// MODE is set per ledger() call — v630 swaps the rates, every other mode keeps the 2% proxy exactly as validated.
+let MODE = "v537";
+const CHAINED_GAP = 0.0025;   // CBO Budget Options, 12 December 2024
+const idx = (v, yr, asOf) => v === Infinity ? Infinity : v * Math.pow(MODE === "v630" ? 1 + EXPECTED_INFL - CHAINED_GAP : IDX, yr - asOf);
+const cpi = (v, yr, asOf) => v === Infinity ? Infinity : v * Math.pow(MODE === "v630" ? 1 + EXPECTED_INFL : IDX, yr - asOf);
+const kY = (yr, asOf) => MODE === "v630" ? Math.pow(1 + EXPECTED_INFL, yr - asOf) : 1;
 const rmdStartAge = (dob) => dob <= 1950 ? 72 : dob <= 1959 ? 73 : 75;
 const rmdDiv = (age) => RMD_DIV[age] ?? 6.4;
 
@@ -85,7 +100,7 @@ function fplFor(coverageYr, size) {
   const gy = coverageYr - 1;
   if (FPL[gy]) return FPL[gy][0] + FPL[gy][1] * (size - 1);
   const lastGy = Math.max(...Object.keys(FPL).map(Number));
-  return (FPL[lastGy][0] + FPL[lastGy][1] * (size - 1)) * Math.pow(1 + FPL_PROXY, gy - lastGy);
+  return (FPL[lastGy][0] + FPL[lastGy][1] * (size - 1)) * Math.pow(1 + (MODE === "v630" ? EXPECTED_INFL : FPL_PROXY), gy - lastGy);
 }
 function applicablePct(ratio) { // current regime only
   if (ratio < ACA_FLOOR) return null;
@@ -109,7 +124,7 @@ function sellFromPool(sale, pool, basis) {
 function irmaaThreshold(upper, isTop, premiumYr, asOf) {
   if (!Number.isFinite(upper)) return upper;
   const n = isTop ? Math.max(0, premiumYr - IRMAA_TOP_FROZEN_THROUGH) : premiumYr - asOf;
-  return upper * Math.pow(IDX, n);
+  return upper * Math.pow(MODE === "v630" ? 1 + EXPECTED_INFL : IDX, n);
 }
 function irmaaSurcharge(lookbackMagi, premiumYr, asOf, persons) {
   if (lookbackMagi == null || persons <= 0) return 0;
@@ -117,7 +132,7 @@ function irmaaSurcharge(lookbackMagi, premiumYr, asOf, persons) {
   for (let i = 0; i < IRMAA_MFJ.length; i++) {
     if (lookbackMagi <= irmaaThreshold(IRMAA_MFJ[i], i === IRMAA_MFJ.length - 2, premiumYr, asOf)) { tier = i; break; }
   }
-  return IRMAA_SUR[Math.min(tier, IRMAA_SUR.length - 1)] * persons;
+  return IRMAA_SUR[Math.min(tier, IRMAA_SUR.length - 1)] * persons * kY(premiumYr, asOf);
 }
 
 // ── THE LEDGER ────────────────────────────────────────────────────────────────────
@@ -126,9 +141,16 @@ export function ledger(P, convAmount, baselineSub, mode) {
   if (P.single || P.deathYr1 !== Infinity || P.stateCode || (P.stateRate || 0) !== 0 ||
       (P.annShareA || 0) !== 0 || (P.annShareB || 0) !== 0)
     throw new Error("fixture outside sim scope");
-  let tradA = P.tradInitA, tradB = P.tradInitB, rothA = P.rothInitA, rothB = P.rothInitB;
-  let taxBal = P.taxableInit;
-  let basis = Math.max(0, taxBal) * (1 - Math.max(0, Math.min(0.95, P.taxableGainFrac || 0)));
+  MODE = mode;
+  const v630 = mode === "v630";
+  // v6.30: today's balances carried to the retirement year; the basis opened on TODAY's pool and left nominal.
+  const RB = kY(P.retireYr, P.asOfYr);
+  // DU-7 (a): the holdings carried, the planned-contribution accrual at FACE value (the v5.10 rule; P's acc* fields, 0 when absent). The
+  // first v6.30 build — and this ledger with it — carried the accrual too; the build review found it (t93 §O).
+  const _ch = (amt, acc) => (amt - (acc || 0)) * RB + (acc || 0);
+  let tradA = _ch(P.tradInitA, P.accTradA), tradB = _ch(P.tradInitB, P.accTradB), rothA = _ch(P.rothInitA, P.accRothA), rothB = _ch(P.rothInitB, P.accRothB);
+  let taxBal = P.taxableInit * RB;
+  let basis = Math.max(0, P.taxableInit) * (1 - Math.max(0, Math.min(0.95, P.taxableGainFrac || 0)));
   const magiHist = {};
   let totTax = 0, totIrmaa = 0, totNiit = 0, totConv = 0, totAcaLoss = 0;
   const acaSubByYr = {}, acaFloorYrs = {}, wealthByYr = {}, trace = [];
@@ -139,7 +161,7 @@ export function ledger(P, convAmount, baselineSub, mode) {
     // Income legs
     const ssAy = yr > P.ssAYr ? P.ssA * 12 : yr === P.ssAYr ? P.ssA * Math.max(0, 13 - P.ssAMo) : 0;
     const ssBy = yr > P.ssBYr ? P.ssB * 12 : yr === P.ssBYr ? P.ssB * Math.max(0, 13 - P.ssBMo) : 0;
-    const ss = ssAy + ssBy;
+    const ss = (ssAy + ssBy) * kY(yr, P.asOfYr);   // v6.30: the year's own dollars (1 on earlier modes)
     const pen = P.pen * 12;
     const k = yr - P.retireYr;
     const work = k >= 0 && k < WORK_TAPER.length ? WORK_TAPER[k] : 0;
@@ -177,7 +199,7 @@ export function ledger(P, convAmount, baselineSub, mode) {
     const amtBase = Math.max(0, grossOrd - exEff), brk = idx(AMT28, yr, P.asOfYr);
     const tmt = Math.min(amtBase, brk) * 0.26 + Math.max(0, amtBase - brk) * 0.28 + ltcgStacked(div_y, amtBase, yr, P.asOfYr);
     const amt = Math.max(0, Math.round(tmt - (fed + qdcgTax)));
-    const fica = work > 0 ? Math.min(work, idx(SS_WAGE_BASE, yr, P.asOfYr)) * 0.062 + work * 0.0145 : 0;
+    const fica = work > 0 ? Math.min(work, cpi(SS_WAGE_BASE, yr, P.asOfYr)) * 0.062 + work * 0.0145 : 0;
     const tax = fed + qdcgTax + niit + amt + 0 /* state */ + fica;
     // IRMAA (both alive, MFJ throughout; persons = spouses 65+ this premium year)
     magiHist[yr] = magi;
@@ -233,7 +255,7 @@ export function ledger(P, convAmount, baselineSub, mode) {
         for (let p = 0; p < 3; p++) {
           const lostI = Math.max(0, (baselineSub[yr] || 0) - subY);
           let saleI = lostI;
-          if (mode === "v538") for (let i = 0; i < 4; i++)
+          if (mode === "v538" || v630) for (let i = 0; i < 4; i++)
             saleI = lostI + ltcgStacked(sellFromPool(saleI, taxBal, basis).gain, stack2, yr, P.asOfYr);
           acaMagi = magiBase + sellFromPool(saleI, taxBal, basis).gain;
           subY = subsidy(acaMagi, yr, P.acaSize, bench);
@@ -244,7 +266,7 @@ export function ledger(P, convAmount, baselineSub, mode) {
       if (baselineSub) {
         lost = (baselineSub[yr] || 0) - subY;
         totAcaLoss += lost;
-        if (mode === "v537") {
+        if (mode === "v537") {   // (v630 takes the v538 branch below)
           // Shipped behavior: sale of exactly `lost`; gain realized, basis leaves, NOT taxed.
           const r = sellFromPool(Math.max(0, lost), taxBal, basis);
           acaGain = r.gain; basis = r.basisAfter;
@@ -296,3 +318,5 @@ export function runHousehold(P, convAmount, mode) {
   const baseline = ledger(P, 0, null, mode);
   return { baseline, strat: ledger(P, convAmount, baseline.acaSubByYr, mode) };
 }
+// The ledger's own BASE-prior inflation, exported so a caller can check it against the module's scenario table (validate_v630.mjs).
+export const EXPECTED_INFL_SIM = EXPECTED_INFL;
