@@ -25,74 +25,19 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 
 | Field | Value |
 |---|---|
-| Version | **v6.29** |
-| Source file in knowledge | `DangerClose-v6_29.jsx` |
-| Source md5 | `2b1c24f145c10e5d5e2b8abfdf3a9db8` |
-| Built `index.html` md5 | `ce3605afdbafaa292bed443988f6ea33` |
-| Shipped | 2026-10-22 |
+| Version | **v6.30** |
+| Source file in knowledge | `DangerClose-v6_30.jsx` |
+| Source md5 | `f2d3f578492279eac501eef6bdda058f` |
+| Built `index.html` md5 | `3d013b092b612442b35e2ec02163010d` |
+| Shipped | 2026-10-23 |
 
-> ⚠ **v6.29 SHIPPED (2026-10-22) — what the app says about its own model, checked (F-25).** Source `2b1c24f1…` · built `ce3605af…`.
+> ⚠ **v6.30 SHIPPED (2026-10-23) — one dollar unit and one inflation clock for the tax engines (D-60).** Source `f2d3f578…` · built `3d013b09…`.
+> A MODELING release (`docs/SCOPE_D60_DOLLAR_UNITS_V630.md`, all nine decisions as recommended). Every tax engine computes each year in that year's own dollars on the Monte Carlo's as-of clock; today's holdings reach retirement at inflation (basis nominal, the contribution accrual at face value, `carryStartBalances`); the bracket family indexes at the plan's inflation less 0.25 point (C-CPI-U), IRMAA tiers, the poverty line and the wage base at the plan's inflation; surcharges grow to the premium year; year rows in each year's dollars and every lifetime total also in today's; the Monte Carlo and What Breaks are handed each year's tax in today's dollars. The example's lifetime tax (BULL-LEANING, $70,000) $213,670 → $201,181 in today's dollars; the 30-year Monte Carlo moves by up to two points, by household. v6.29's partial measurement of D-60 corrected; the build review's blocker (the accrual was carried with the holdings) fixed before release.
+> New suite `t93` (both legs); `qa/units_v630.mjs`, `qa/tools/fed_oracle_v630.mjs`, `qa/tools/validate_v630.mjs`, `controls_v630_dollar_units.py` new; `sim_ledger.mjs` gains a v6.30 mode; `boundaries.mjs` gains four rows (`t29` B-21–B-24); every suite pinning an engine, Monte Carlo or What Breaks figure re-gated by re-derivation, a few re-pinned by measurement (each listed in the CHANGELOG). MissingFeatures D-60 closed, D-64 filed; ARCHITECTUREIssues E-9 closed, E-22 narrowed, E-23 noted; FlawsToFix C-13 re-worded. **Rotation:** the pool loses `DangerClose-v6_29.jsx` (v6.29 is read from history, commit `be4b76f`) and gains `DangerClose-v6_30.jsx`. **Pool stays 16.**
+>
+> *(**v6.29 SHIPPED (2026-10-22) — what the app says about its own model, checked (F-25).** Source `2b1c24f1…` · built `ce3605af…`.
 > A PRESENTATION release with display computations and a METHODOLOGY correction (no engine, no figure the engines compute, no grade and no stored field changes; engines token-identical to v6.28). The 326-row F-25 ledger (`docs/F25_LEDGER_V628.tsv`) was read against the code: 93 sentences false or imprecise, 16 editorial, 40 about the world — each reworded, or computed for the plan (the Stress recovery, the Backtest note, What Breaks' history from the app's own table). Four figures fixed (the gap draw, the mortgage what-if, Example 2, the Stress recovery); six AMT Verify checks (72 → 78); spouse B's RMD event (17 events for a couple); the Exit Plan in months; the dollar-units finding described both ways (MissingFeatures D-60).
-> New suite `t92`; `v629` registered (`t33` PINS unchanged); `boundaries.mjs` gains `ss_claim_after_gap` (`t29` B-20); `t1`, `t4`, `t35`, `t78`, `t83`, `t86`, `t90` and `t91` re-gated for the corrected copy. UsabilityFlaws F-25 closed, F-26 filed; MissingFeatures D-60 to D-63 added, D-57 widened; ARCHITECTUREIssues E-23 noted. `TESTING.md`'s v6.26 per-suite line moved to the archive. **Rotation:** the pool loses `DangerClose-v6_28.jsx` (v6.28 is read from history, commit `21a5dde`) and gains `DangerClose-v6_29.jsx`. **Pool stays 16.**
->
-> *(**v6.28 SHIPPED (2026-10-22) — the app describes the model, it does not direct (F-23, F-24).** Source `6ff3561e…` · built `b51ca85f…`.
-> A PRESENTATION release with a METHODOLOGY correction (no engine, no figure the engines compute, no grade and no stored field changes). Through v6.27 many tabs told the household what to do — the Guardrails tab's *ACTION:* lines, the Withdrawal tab's steps and its *"Recommendation"*, the Exit Plan, the Events tab's Roth alarm, the SS tab's *"#1 OPTIMIZATION LEVER"*, the Roth tab's *"ideal"* bracket, the Field Manual's *"PAY CONVERSION TAX FROM OUTSIDE FUNDS"* — and twelve sentences were false about the model (the schedule applies no guardrail, harvests nothing, pays no income tax and draws Traditional and Roth in proportion; taxable SS is in IRMAA's MAGI; the survivor card called spouse A the higher earner on every couple). A six-reader parser census found 283 entries; every directive is recast as what the model computes or assumes (DF-1 to DF-8, all (a)); the false statements and eight more the build review found are corrected. The Grade tab's *"Lost ~X GPA points"* is each category's real cost (÷ 78, weights *"20 of 78"*), and one LTC test, `isLTCLabel`, no longer matches a long-term-disability row. METHODOLOGY §9: the guardrails are the Monte Carlo's. No grade moved (`t90` B-8).
-> New suite `t91`; `v628` registered (`t33` PINS unchanged); `boundaries.mjs` gains `ltc_disability` (`t29` B-19); `t90` B-8's prior leg derived, not pinned; `t4`, `t19`, `t72` and `t86` re-gated for the corrected copy. UsabilityFlaws F-23 and F-24 closed, F-25 filed (with `docs/F25_CENSUS_V627.tsv`); MissingFeatures D-57 notes the gap-draw figure. `TESTING.md`'s v6.25 per-suite line moved to the archive. **Rotation:** the pool loses `DangerClose-v6_27.jsx` (v6.27 is read from history, commit `35a1926`) and gains `DangerClose-v6_28.jsx`. **Pool stays 16.**)*
->
-> *(**v6.27 SHIPPED (2026-10-21) — the Grade tab reports the model's grading, not actions (F-22).** Source `32b34771…` · built `deac8c16…`.
-> A PRESENTATION release (no figure, engine, grade or stored field changes; METHODOLOGY unchanged). Through v6.26 the Grade tab's *"PATH TO … — RECOMMENDED ACTIONS"* printed directives (an LTC policy "for both spouses" on single plans too, a Roth ladder "filling the 22% bracket" on every plan), grade lifts the grading cannot produce, a misstated estate lift and a "projected" success no simulation computed; its categories told every plan it held hybrid LTC insurance and blamed the 6-year Monte Carlo's failures on an LTC shock that engine does not carry. The panel is gone; the false and example-only sentences are corrected; the three literal grades (C+, B+, B+) and Guardrail Readiness (rows labelled exactly "golf" and "Amazon") are labelled, and the B+ ceiling every plan shares is stated; the Field Manual's Grade entry (it described a radar chart) is rewritten. No grade moved (`t90` B-8 compares both builds under one seed).
-> New suite `t90`; `v627` registered (`t33` PINS unchanged); `boundaries.mjs` gains `ltc_row` and `cut_rows` (`t29` B-17, B-18). UsabilityFlaws F-22 closed, F-23 and F-24 filed; MissingFeatures D-56 widened. `TESTING.md`'s v6.24 per-suite line moved to the archive. **Rotation:** the pool loses `DangerClose-v6_26.jsx` (v6.26 is read from history, commit `ac5c7d7`) and gains `DangerClose-v6_27.jsx`. **Pool stayed 16.**)*
->
-> *(**v6.26 SHIPPED (2026-10-21) — Ask AI's ground rules reach every plan (D-55).** Source `6173cbba…` · built `23407af9…`.
-> Not a modelling release (no figure, engine or stored field changes; METHODOLOGY §11's list of what Ask AI sends is corrected). Through v6.25 the only ground rules Ask AI sent were the demo briefing's, so every plan a user entered — and the example after one Save & Apply — sent none. A fixed header (`AI_GROUND_RULES`) now goes first with every question on every route: educational only, no financial directives, not an adviser, use the figures given; it is stored nowhere, and the demo briefing is byte-identical and overridden by it. The live context stopped naming a *Section 2* most plans lack and stopped stating an LTC policy, a pension survivor option and a spouse for a single household; it now says what "success" measures and the Roth amount the results ran at.
-> New suite `t89`; `v626` registered; `t85` D-7 and `t66` E-7 re-gated. MissingFeatures D-55 closed; UsabilityFlaws F-22 opened (the Grade tab's own directives). `TESTING.md`'s v6.23 per-suite line moved to the archive. **Rotation:** the pool lost `DangerClose-v6_25.jsx` (commit `0859894`) and gained `DangerClose-v6_26.jsx`. **Pool stayed 16.**)*
->
-> *(**v6.25 SHIPPED (2026-10-21) — My Data's holdings table gives plan type its own column (F-21).** Source `d7df32a9…` · built `a5d234fe…`.
-> A PRESENTATION release (no figure, engine or stored field changes; METHODOLOGY unchanged). Through v6.24 the Retirement holdings table's Tax type cell held the tax-type and plan-type dropdowns stacked, with no header for the second and no divider between rows, so the plan type read as the next holding's; and the footer's label spanned one column too many, so each total sat one column right. Plan type now has its own headed column (a dash for a Roth row), each row a divider, each total its own column.
-> New suite `t88`; `v625` registered (`t33` PINS unchanged). UsabilityFlaws F-21 filed and fixed. `TESTING.md`'s v6.22 per-suite line moved to the archive. **Rotation:** the pool lost `DangerClose-v6_24.jsx` (commit `115c051`) and gained `DangerClose-v6_25.jsx`. **Pool stayed 16.**)*
->
-> *(**v6.24 SHIPPED (2026-10-20) — My Data keeps each expense row's months (D-52); the leave dialog's save saves (D-59).** Source `2ff32ac0…` · built `8663f198…`.
-> A MODELLING release (METHODOLOGY gains *My Data keeps each expense row's months (v6.24)*). Through v6.23 My Data's editor read each row's year only, and every Save & Apply, draft and Export Backup wrote a monthly row as January–December and a one-time row as June: one unedited save of the example re-dated 31 of its 35 rows and made 2029 pay for both homes. The editor now shows and keeps months, writes an unedited date back verbatim, and passes every other field through. *Before retirement* ends in December of the year before the 1 January retirement. The guided setup splits there and runs to the plan's horizon (D-54 closed for new plans). D-59, found at the build: the unsaved-edits dialog's *Save & Apply, then leave* had saved nothing since v5.9.2. The example's figures do not move (`t2` 10/10 identical).
-> New suite `t87`; `v624` registered; `t84` G-11 flips from June to March. MissingFeatures D-52 and D-59 closed, D-54 closed for new wizard plans, D-56 extended, D-58 opened. OPERATIONS §C4 gains two traps. `TESTING.md`'s per-suite lines rotated, after three ships moved none. **Rotation:** the pool lost `DangerClose-v6_23.jsx` (commit `aced4a4`) and gained `DangerClose-v6_24.jsx`. **Pool stayed 16.**)*
->
-> *(**v6.23 SHIPPED (2026-10-20) — the built-in part-time work for spouse B is the example's alone (D-49).** Source `a683637e…` · built `34455a91…`.
-> A MODELLING release (METHODOLOGY gains *Built-in work is the example's alone (v6.23)*): `spouseBWorkTaper`'s $20,000 / $18,000 / $15,000 of spouse-B wages, paid through v6.22 to every plan with no income streams (single plans included), now reaches only the example household (its holdings, married, no streams — `builtinWorkApplies`); a plan saved before v6.23 that loses them is told so on My Data and the Monte Carlo tab until Save & Apply writes `workRowsV623`. The wording that named spouse B's work for every plan is corrected, and two false sentences with it (What-Breaks credits no stream; the Roth ladder's earned-income term is not narrower). The example's figures do not move (`t2` 10/10 identical; `t86` §B).
-> New suite `t86`; `v623` registered; five fixtures declare the wages they ran on (`t20`, `t40`, `t71`, via `qa/tools/example_work_rows.mjs`) or are re-pinned with attribution (`t16`, `t43`); `t29` gains the `example_work` census row; `domdiff` gains a v622 → v623 arm. MissingFeatures D-49 narrowed to the example, D-10's residual (2) corrected, D-57 opened; UsabilityFlaws F-20; OPERATIONS §C4 (never two full suites at once). **Rotation:** the pool lost `DangerClose-v6_22.jsx` (v6.22 read from history, commit `4231562`) and gained `DangerClose-v6_23.jsx`. **Pool stayed 16.**)*
->
-> *(**v6.22 SHIPPED (2026-10-20) — a new plan keeps no one else's facts: the example's master prompt, income and expense table (D-53).** Source `88d476c3…` · built `5aaca5ba…`.
-> A MODELLING release (METHODOLOGY gains *A plan's facts are its own (v6.22)*): the example's ten household facts are fields on `DEFAULT_PORTFOLIO`; a load without a master prompt holds none (the example's path holds the demo) and storage keeps what memory keeps; the demo text beside holdings that are not the example's is not taken (DC-8); My Data blanks and names placeholders and names example facts an older plan carries; no state is said plainly; income a plan never entered is paid $0; a backup with no expense table is refused. The example's figures do not move (`t2` 10/10 identical).
-> New suite `t85`; `v622` registered; `t20`'s fixture states the income it ran on; `t29` gains the `demo_prompt` census row. MissingFeatures D-53 closed (D-50's narrowing lifted); D-55, D-56 opened; ARCHITECTUREIssues E-32. **Rotation:** the pool lost `DangerClose-v6_21.jsx` (commit `83d4d9b`) and gained `DangerClose-v6_22.jsx`. **Pool stayed 16.**)*
->
-> *(**v6.21 SHIPPED (2026-10-19) — a car is an expense row; the plan's own "after the payments end" figure, Stress benchmark and state line (D-42, D-43, D-47, D-50).** Source `f7802df1…` · built `bbd56368…`.
-> A MODELLING release (METHODOLOGY gains *Cars are expense rows (v6.21)*): the Monte Carlo's fixed $40,000 car every 8 retirement years (`AUTO_REPLACE_COST`, `autoReplace`) is deleted; the example's table carries four "Replacement car" rows, which every engine now charges (the planned path too); a plan saved before v6.21 has the old schedule added as visible rows at load (`carRowsV621`), written at its next Save & Apply, with notices on My Data and the Monte Carlo tab. The Income and SS tabs' "after the payments end" figure, the Stress tab's planned column and the Roth tab's state line read the plan; the Florida mortgage sentence is gone.
-> New suite `t84`; `v621` registered; `domdiff` gains a v620 → v621 arm; seven suites re-pinned, each with a `-table620` attribution run that reproduces v6.20 exactly. MissingFeatures D-42, D-43, D-47, D-50 closed (D-50 narrowed by D-53); D-52 to D-54 opened. **Rotation:** the pool loses `DangerClose-v6_20.jsx` (v6.20 read from history, commit `3d19b5c`) and gains `DangerClose-v6_21.jsx`. **Pool stays 16** (count from the Projects listing).)*
->
-> *(**v6.20 SHIPPED (2026-10-18) — the Monte Carlo pays the Taxes tab's tax, and charges one-time expenses in the quarter they fall (D-40, D-44, D-45).** Source `8db22499…` · built `2a0b45ea…`.
-> A MODELLING release (METHODOLOGY gains *The Monte Carlo pays the Taxes tab's tax (v6.20)*): the flat $4,000-a-quarter drag during the ladder is gone; both engines pay the Taxes tab's tax year by year at the live slider, QCD and yield, grown with each path's inflation, and read the expense table over each quarter's months (one-time rows charged in their own quarter, inflated). Every Monte Carlo figure moved, downward on every household measured; Engines A–D did not.
-> New suite `t83` (an ORACLE MODULE from the v6.19 source with the drag at $0, bit-identical to v6.20 with a zero schedule); `v620` registered; the shim exports the schedule and quarter-read functions. `t42` D-4 re-pinned with a five-step attribution; `t20`, `t56` and `t82` G restated with the schedule held fixed. MissingFeatures D-40 and D-45 closed, D-44 narrowed, D-49 to D-51 opened. **Rotation:** the pool loses `DangerClose-v6_19.jsx` and `dom_entry_v619.jsx` (v6.19 read from history, commit `2dbaba7`) and gains `DangerClose-v6_20.jsx`, `dom_entry_v620.jsx`
-> and `t83_mc_tax.mjs`. **Pool 141 → 142** (count from the Projects listing).)*
->
-> *(ops 2026-10-19 — v6.20 stays current. Project knowledge trimmed from 96% of its cap: old CHANGELOG entries (v6.00–v6.15), TESTING's write-ups to
-> v5.40, these notes and lists (v6.04–v6.19) and MissingFeatures' closed write-ups moved verbatim to four new repo-only archives, each with a §0
-> trace; eight open threads with no other pooled record re-homed (`t38` to TESTING, seven to `ARCHITECTUREIssues.md` E-30, AI-6 among them).
-> Seven pooled files replaced, nothing arrives, nothing leaves: **pool stays 142.** Un-pooling the qa code is scoped, decisions open:
-> `docs/SCOPE_UNPOOL_QA_CODE.md`.)*
->
-> *(ops 2026-10-19, second — v6.20 stays current. **Every `qa/` file left the pool** (Steve: DC-1 to DC-4, all (a); the scope FULFILLED):
-> 126 files, the suite, harness, tools and controls, about half of project knowledge. The test and harness hash table moved verbatim to
-> `docs/MANIFEST_ARCHIVE_test_hash_table_to_v6_20.md` (repo-only); *Pooled file hashes* keeps the ten pooled files' rows; every departing
-> file's description moved verbatim to `TESTING.md`'s per-file index. Traps and rules from the suite's comments → OPERATIONS §C4; open
-> threads → `ARCHITECTUREIssues.md` E-31. `package_check` B-4 and J-6 (J-4 retired). Five pooled files replaced, 126 leave, nothing arrives:
-> **pool 142 → 16.**)*
->
-> *(Older ship notes are in the repo, moved verbatim to recover project-knowledge space (OPERATIONS §G): v6.19 back to v6.04 on 2026-10-19 to
-> `docs/MANIFEST_ARCHIVE_notes_and_lists_v6_04_to_v6_19.md`; v6.03 back to v5.42, with the ops, handover and docs notes between them, on 2026-10-11
-> to `docs/MANIFEST_ARCHIVE_notes_and_lists_to_v6_03.md`. Their open threads were traced first: each file's §0 records where each went.)*
-
-**Any work — edits, verification, scope premises — is done against this file.** Confirm its
-md5 matches the value above before starting (see the pre-build freshness check in
-OPERATIONS.md §A). A mismatch means knowledge is stale — refresh before working.
-
+> New suite `t92`; `v629` registered (`t33` PINS unchanged); `boundaries.mjs` gains `ss_claim_after_gap` (`t29` B-20); `t1`, `t4`, `t35`, `t78`, `t83`, `t86`, `t90` and `t91` re-gated for the corrected copy. UsabilityFlaws F-25 closed, F-26 filed; MissingFeatures D-60 to D-63 added, D-57 widened; ARCHITECTUREIssues E-23 noted. `TESTING.md`'s v6.26 per-suite line moved to the archive. **Rotation:** the pool loses `DangerClose-v6_28.jsx` (v6.28 is read from history, commit `21a5dde`) and gains `DangerClose-v6_29.jsx`. **Pool stays 16.**)*
 ## Pooled file hashes (freshness fallback — OPERATIONS §A2)
 
 **From 2026-10-19 the pool holds no `qa/` file** (the second ops package that day; `docs/SCOPE_UNPOOL_QA_CODE.md`, DC-1 (a)). The suite, its
@@ -127,12 +72,12 @@ or a reason here (OPERATIONS §I).
 
 | Pool file | md5 | Repo path |
 |---|---|---|
-| `CHANGELOG.md` | `ca9467331329394c093b8f824b85ae23` | `CHANGELOG.md` |
-| `METHODOLOGY.md` | `7cbd691e114ee20fb14fc8b65ff9bf5d` | `METHODOLOGY.md` |
-| `MissingFeatures.md` | `7625e3f823e5f08bc68d6cae9d43bde9` | `docs/MissingFeatures.md` |
+| `CHANGELOG.md` | `615ce92f369b11faa94e66cbb4ea674e` | `CHANGELOG.md` |
+| `METHODOLOGY.md` | `fb57c5707e7fc2f6f0aec92c2b95c48d` | `METHODOLOGY.md` |
+| `MissingFeatures.md` | `305e8657d5471461fcba7b3169de8b76` | `docs/MissingFeatures.md` |
 | `OPERATIONS.md` | `0468ef1e62c1a445128d98d56ea1443f` | `docs/OPERATIONS.md` — **rolled 2026-09-09** at the run-folder ops package: §B gained the `mk_runfolder.sh` pointer, and §D gained **D1** (the named existence-only assertion class) and **D2** (the `t29` F-6a/F-6b defect pin). *(Previously `f33c2e0cfd…`.)* |
 | `README.md` | `eec58396f932b3209de79c2400dbfb88` | `README.md` |
-| `TESTING.md` | `788017ca4b856206f58d5ac4378de776` | `TESTING.md` |
+| `TESTING.md` | `96a63e8f95dec29b08628c640c46a878` | `TESTING.md` |
 | `index.html` | `247816be583271d50cf13e0a02e18cdf` | `src/index.html` — the **Vite entry template**, **restored to the pool 2026-08-20** after being found absent (see the build-scaffold row below). ⚠ **Not the built app.** The published single-file `index.html` is repo-only output and never enters the pool; its md5 is in the Current build table and is different by construction |
 | `main.jsx` | `d9eca7b469a3fb7ec1c5325fd4bf8145` | `src/main.jsx` |
 | `package.json` | `9ee8d745bc9f32d6e8fa02e623603423` | `package.json` — The pinned toolchain, and a **build input** rather than a suite file — given a row 2026-08-23 for a measured reason: `npm i <pkg>` in a run folder rewrites it with resolved versions, so it drifts as a side effect of setting the folder up. That is why OPERATIONS §N3a installs jsdom with `--no-save`, and it is the drift `package_check`'s new G-1 caught on its first real use |
@@ -142,10 +87,12 @@ or a reason here (OPERATIONS §I).
 
 | Field | Value |
 |---|---|
-| Version | **v6.28** |
-| Source file in knowledge | — **not pooled**: repo history, commit `21a5dde`, found by this md5 |
-| Source md5 | `6ff3561e3dd23d50b5fce16ad8c76704` |
-| Built `index.html` md5 | `b51ca85f4caf683326c77c2e70143a4c` |
+| Version | **v6.29** |
+| Source file in knowledge | — **not pooled**: repo history, commit `be4b76f`, found by this md5 |
+| Source md5 | `2b1c24f145c10e5d5e2b8abfdf3a9db8` |
+| Built `index.html` md5 | `ce3605afdbafaa292bed443988f6ea33` |
+
+> **Rolled 2026-10-23 at the v6.30 ship.** The pair is now **v6.29 prior / v6.30 current**; both tables rolled in one edit (K-7, which counts 630 − 1 = 629). Commit `be4b76f` is the first to carry the v6.29 source (`6a725de` to `8a585f9`, earlier v6.29 uploads, carry v6.28's source beside v6.29's page); `1dc0d49` set the executable bit `controls_v629_model_claims.py` landed without.
 
 > **Rolled 2026-10-22 at the v6.29 ship.** The pair is now **v6.28 prior / v6.29 current**; both tables rolled in one edit (K-7, which counts 629 − 1 = 628). Commit `21a5dde` is the first to carry the v6.28 source (`9a9756c` to `61604d5`, earlier v6.28 uploads, carry v6.27's source beside v6.28's page); `64dc251` set the executable bit `controls_v628_directives.py` landed without.
 
@@ -660,6 +607,26 @@ retired and superseded. They get no row because there is no file. Checked 2026-0
 committed tree, so the next sweep does not re-open them.
 
 ## Retirement list (delete-first; nothing replaces these)
+
+### At the v6.30 ship (2026-10-23) — DELETE THESE FIRST
+
+**Rotation:** delete `DangerClose-v6_29.jsx`; `DangerClose-v6_30.jsx` arrives. **Pool stays 16.** Count from the Projects listing (OPERATIONS §I, no-mount note).
+
+| Delete | Because |
+|---|---|
+| `DangerClose-v6_29.jsx` | **rotated out** — v6.29 is read from the repo's history (commit `be4b76f`) |
+| `ARCHITECTUREIssues.md` | replaced — E-9 closed; E-22 narrowed; E-23 noted |
+| `CHANGELOG.md` | replaced — the v6.30 entry |
+| `FlawsToFix-v5_73-Phase2.md` | replaced — C-13's reason re-worded (the 2% proxy it cited is gone) |
+| `METHODOLOGY.md` | replaced — *One dollar unit and one inflation clock for the tax engines (v6.30)*; the dollar-basis, indexation, wage-base and *no growth* passages re-worded; v6.29's both-readings figures withdrawn and corrected |
+| `MissingFeatures.md` | replaced — D-60 closed; D-64 added |
+| `PROJECT_KNOWLEDGE_INDEX.md` | replaced — this edit; `CHANGELOG.md`'s row rolled last |
+| `TESTING.md` | replaced — the v6.30 per-suite line, v6.27's moved to the archive; `t93`'s, `dom_entry_v630.jsx`'s and the new tools' rows |
+
+**Arriving new:** `DangerClose-v6_30.jsx`. **Repo-only:** every `qa/` change (`t93_dollar_units.mjs`, `units_v630.mjs`, `dom_entry_v630.jsx`,
+`tools/fed_oracle_v630.mjs`, `tools/validate_v630.mjs`, `tools/controls_v630_dollar_units.py` new; the re-gated and registered suites,
+`tools/sim_ledger.mjs`, `tools/boundaries.mjs`, `shim.txt`, `runsuite.sh`, `domdiff_withdrawal.mjs`), `docs/TESTING_ARCHIVE_per_suite_v5_53_to_v6_01.md`
+(v6.27's line and note appended), the scope (`docs/SCOPE_D60_DOLLAR_UNITS_V630.md`, fulfilled), the built `index.html`.
 
 ### At the v6.29 ship (2026-10-22) — DELETE THESE FIRST
 

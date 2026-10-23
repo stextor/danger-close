@@ -124,8 +124,9 @@ Two models, user-selectable on the Monte Carlo tab:
 
 ## 5. Federal tax engine
 
-Annual projection applying, per year: 2026 brackets and standard deductions (Rev. Proc. 2025-32,
-incl. OBBBA changes) inflated ~2%/yr; Social Security taxation via the provisional-income test
+Annual projection applying, per year, in that year's own dollars: 2026 brackets and standard deductions (Rev. Proc. 2025-32,
+incl. OBBBA changes) indexed at the plan's inflation less 0.25 point, the chained CPI the law indexes them by (v6.30; ~2%/yr through
+v6.29 — *One dollar unit and one inflation clock for the tax engines*); Social Security taxation via the provisional-income test
 (85%-cap tiers); LTCG/qualified-dividend stacking on top of ordinary income, **capped at taxable
 income (v5.75)**; NIIT (3.8%,
 statutorily unindexed thresholds); a simplified AMT check (standard-deduction add-back method);
@@ -618,7 +619,8 @@ retirement and each spouse's 65th birthday.
   4.19→6.60 to 200%; 6.60→8.44 to 250%; 8.44→9.96 to 300%; 9.96 flat to and *including*
   400%); FPL from the HHS/ASPE poverty guidelines (2025: $15,650 + $5,500/person; 2026:
   $15,960 + $5,680/person — so coverage years 2026 and 2027 use real vintages; later years
-  index at the same 2%/yr proxy as the tax brackets). The ENHANCED regime uses the actual
+  grow at the plan's inflation, the CPI-U that 42 U.S.C. §9902(2) revises them by — v6.30; through v6.29 a 2%/yr proxy
+  shared with the tax brackets). The ENHANCED regime uses the actual
   ARPA table from Rev. Proc. 2021-36 (0% below 150% FPL sliding to an 8.5% cap, no cliff),
   not a flat 8.5% approximation.
 - **ACA MAGI ≠ IRMAA MAGI:** the engine recombines components per §36B — AGI-side income
@@ -764,8 +766,9 @@ were wrong before v5.14:
   household sitting exactly on the line (finding C-1). Tier selection is now one shared helper, as
   threshold computation already was, and the IRMAA tab's headroom from tier 4 is one dollar less than
   the gap, because adding the full gap reaches the top tier. Projected thresholds are **not** rounded
-  to the nearest $1,000 as the statute rounds CMS's published figures; the 2%/yr CPI proxy they rest
-  on is a far larger approximation (recorded as C-13).
+  to the nearest $1,000 as the statute rounds CMS's published figures; projecting them at the plan's
+  assumed inflation (CPI-U, as §1395r(i)(5)(A) indexes them — v6.30; a 2%/yr proxy through v6.29) is a far larger
+  uncertainty than the rounding (recorded as C-13).
 
 Both rules now live in **one shared module-level helper**, called by every site that needs an IRMAA
 threshold. They were previously copied into four separate loops across two engines, which is how
@@ -1310,14 +1313,12 @@ shows from a conversion cannot be appealed away — though a one-off spike leave
 its own after two years. A household that files one may pay less than the
 model projects, so the omission is conservative.
 
-**Where the engines still legitimately differ.** Engines B (Taxes) and C (IRMAA) hold Social
-Security flat in today's dollars while inflating brackets and thresholds — a mixed dollar basis,
-described here through v6.28 as a deliberate bracket-creep conservatism; v6.29 measured which way it
-runs, and the answer depends on how the figures are read (*The dollar basis — measured, both readings
-(v6.29)*, below). Engine D (Withdrawal) COLA-indexes it. All three model
-the same survivor transition in the same year and keep the same check; they simply do not share a
-dollar basis, and the cross-engine test suite asserts the timing and the rule rather than a single
-figure.
+**Where the engines still legitimately differ.** From v6.30 they no longer differ in dollar basis: every engine COLA-indexes
+Social Security from the as-of year and computes each year in that year's own dollars (*One dollar unit and one inflation clock for
+the tax engines*, v6.30). Through v6.29 Engines B (Taxes) and C (IRMAA) held Social Security flat in today's dollars while inflating
+brackets and thresholds — a mixed dollar basis, described here through v6.28 as a deliberate bracket-creep conservatism — and Engine
+D (Withdrawal) COLA-indexed it. All model the same survivor transition in the same year and keep the same check; the cross-engine
+test suite asserts the timing and the rule, and from v6.30 the figures too.
 
 **Where federal tax facts live (v5.16).** Every filing-status-dependent federal figure — brackets,
 standard deduction, the age-65 extra, LTCG brackets, the NIIT threshold, both AMT figures and both
@@ -1384,6 +1385,14 @@ conservative house rule that governs every judgment call in this app — where a
 must be picked, pick the direction that makes the plan look slightly worse. Undercounting
 future growth on contributions understates the starting pools, which understates conversion
 headroom and overstates depletion risk. The error is bounded and one-sided.
+
+**"No growth" means no *real* growth (v6.30).** The rule above is about accrued contributions, and it is unchanged: they enter at face
+value. The balances held today are a different question once the engines run on one clock from the as-of year: Engine D carries them
+to retirement at the plan's inflation — the same real value on the retirement date, no real return — with their cost basis left at
+its nominal amount, so the inflation is a gain when a taxable holding is sold. Through v6.29 Engine D priced from the retirement year,
+where "no growth" in nominal dollars already meant no real growth; carrying the balances keeps that meaning on the new clock. Not
+carrying them would have cost every plan (1 + i)^(years to retirement) of real value before retirement — measured at the v6.30 scope as
+a 13.6% lower end balance on the example and 49.6% on a plan retiring twelve years out — which no other part of the app assumes.
 
 **Stop years.** Person A accrues to the selected retirement year — the same year the engines
 being seeded start from, so the snapshot and the engine agree by construction. Person B
@@ -1476,7 +1485,9 @@ the engine itself, so a term added to the total later cannot go unlisted without
 
 ### The five approximations this release ships with, each with its direction
 
-1. **Units — the draw is restated in today's dollars; the RMD is not.** Engine D is nominal (it
+1. **Units — the draw is restated in today's dollars; the RMD is not.** *(Superseded at v6.30: every engine computes each year in
+   that year's own dollars and the bridge hands Engine D's draw on unchanged — One dollar unit and one inflation clock for the tax
+   engines. The paragraph is kept as the record of v5.74–v6.29.)* Engine D is nominal (it
    COLAs Social Security and inflates expenses); Engine B deliberately holds Social Security and
    pension flat in today's dollars while inflating brackets 2%/yr, which its own comment calls its
    bracket-creep conservatism (v6.29: read as each year's own dollars its rows run low, not high — *The
@@ -2407,7 +2418,8 @@ It is a display: no dollar figure is computed from it, and nothing that sets a b
   (IRS Pub. 501). A single household files Single in every year. These are the same years Engines A, B and C use.
 - *The table and the deduction* come from the Roth tab's year-by-year projection: the 2026 table for the year's filing status (Rev. Proc.
   2025-32), the standard deduction plus the age-65 additional deduction for each person 65 or older on the return (on a Single return, the
-  filer only), both indexed 2%/yr. The temporary OBBBA senior deduction (2025–2028) is not applied, as on the Roth tab.
+  filer only), both indexed at the plan's inflation less 0.25 point (the chained CPI, §1(f)(3) and §63(c)(4); v6.30 — 2%/yr through
+  v6.29). The temporary OBBBA senior deduction (2025–2028) is not applied, as on the Roth tab.
 - *The rate* is read on ordinary taxable income: Social Security as taxed, plus the ordinary terms, less the deduction. Realized gain counts
   toward the §86 test and is part of the year's MAGI, but it is taxed at capital-gains rates on the Taxes tab, not at this rate. All seven
   bands can show.
@@ -2425,10 +2437,10 @@ describe never appeared on this one.
 every other tab: asserted bit-identical to v6.11 on ten households at two conversion amounts (`t75` §C). The schedule's MAGI changes,
 because it carries the worksheet's taxable Social Security; nothing outside this column reads Engine D's MAGI.
 
-**Approximations kept.** Thresholds rise 2%/yr while the schedule's income rises with the scenario's inflation (about 2.5–2.7%, by prior), so some
-bracket creep remains — the conservative direction for this column, whose income is nominal. (Engines B and C hold income in today's dollars
-against the same 2% thresholds, which runs the other way when their rows are read as future dollars — *The dollar basis — measured, both
-readings (v6.29)*; v6.29 corrected "as everywhere else in the app" here.) State tax is not in this column. Worksheet lines 4
+**Approximations kept.** Thresholds rise at the plan's inflation less 0.25 point, as the chained CPI does against the CPI the schedule's
+income grows by, so a quarter-point of bracket creep a year remains — the law's own, not the model's. Through v6.29 they rose 2%/yr
+against income rising 2.5–2.7%, and the column compared retirement-clock income with thresholds indexed from the as-of year; from v6.30
+both run on the as-of clock (*One dollar unit and one inflation clock for the tax engines*). State tax is not in this column. Worksheet lines 4
 and 6 (tax-exempt interest, adjustments) are not modelled, as in every engine.
 
 ## Payroll tax on job income (v6.14; self-employment from v6.16)
@@ -2437,7 +2449,8 @@ and 6 (tax-exempt interest, adjustments) are not modelled, as in every engine.
 taper for spouse B (from v6.23 the example household's alone; through v6.22 any plan's when no stream was entered) — is taxed as **wages**, the employee's half, in the Taxes tab (Engine B) and the Roth strategy comparison (Engine A, in its tax
 and in its sale-gain estimate). One shared helper, `payrollTax`, applies 26 U.S.C. §3101 and §3121(a)(1):
 - **Social Security, 6.2%, on each earner's wages up to the year's wage base.** The cap is per person: two spouses each earning $150,000
-  each pay on all of it. The 2026 base is $184,500 (SSA), indexed in the projection at 2%/yr like the other constants.
+  each pay on all of it. The 2026 base is $184,500 (SSA), projected at the plan's inflation (v6.30; 2%/yr through v6.29). The law
+  indexes it by the national average wage index (42 U.S.C. §430(b)), not by a price index — see the simplifications below.
 - **Medicare, 1.45%, on all wages.**
 - **The Additional Medicare Tax, 0.9%, on the household's wages above $200,000 (Single) or $250,000 (joint).** The thresholds are
   statutory and **not indexed** (IRS, Instructions for Form 8959), so a fixed nominal income crosses them more easily over time, as with
@@ -2498,8 +2511,10 @@ MAGI built on it — IRMAA, the ACA subsidy, the Social Security worksheet and s
 $509–$933 of federal tax a year at 12–22%), and the **qualified business income deduction** (§199A, up to 20% of a sole proprietor's net
 profit, limited for service businesses above the thresholds). Taking §164(f) correctly means changing MAGI in the IRMAA, Withdrawal and
 Roth-ladder engines too, or the tabs would disagree — a wider release. Net losses, the optional methods on Schedule SE, and Social Security
-credits earned by self-employment are not modelled. The wage base is indexed 2%/yr; SSA indexes it to the national average wage index, which has
-usually risen faster, so later-year caps likely run a little low — slightly optimistic, and reset at each annual refresh. Employer
+credits earned by self-employment are not modelled. The wage base is projected at the plan's inflation (v6.30; 2%/yr through v6.29); SSA indexes
+it to the national average wage index (42 U.S.C. §430(b)), which has usually risen faster than prices, so later-year caps likely run a little
+low — slightly optimistic, and reset at each annual refresh. It is the one indexed figure the model projects at a rate it knows to be off
+in a known direction; there is no wage assumption in the model to project it by. Employer
 withholding rules and the credit for excess Social Security withheld by two employers are timing, not liability, and are not modelled.
 
 ## Cash from a home move (v6.17)
@@ -2550,7 +2565,8 @@ the Roth tab's ladder never read the figure; they are bit-identical across v6.16
 **The rule.** Engine D (the Withdrawal tab), Backtest and What-Breaks spend one function, `tableYearExpense(yr, survivorFromYr)`: for a
 calendar year, the sum of every monthly row over the months it runs that year, times the survivor factor (0.75) from the first death on,
 plus that year's one-time rows (no survivor factor — a one-time row is a specific purchase). The amount is in the table's own dollars
-(today's); Engine D inflates it from the retirement year at the scenario's expected inflation, Backtest by each historical sequence's
+(today's); Engine D inflates it at the scenario's expected inflation — from the retirement year through v6.29, from the as-of year since
+v6.30 (D-60) — Backtest by each historical sequence's
 inflation, What-Breaks at its own rate. Backtest applies no survivor factor, as before. The two Monte Carlo engines read the same table
 once a quarter — `getMonthlyExpense` and `getOneTimeExpenses` at the quarter's last month (March, June, September, December) — and did not
 change; so they charge a one-time row only when it is dated in one of those months (MissingFeatures **D-45**, below). *(As of v6.18. From
@@ -2600,9 +2616,10 @@ across v6.17 → v6.18 (t81 D-2). The survivor years agree to the last bits of a
 survivor factor after inflating and v6.18 before.
 
 **Simplifications, stated.**
-- **The inflation base is unchanged.** Engine D inflates spending and Social Security from the retirement year (the pension is flat) and starts
-  from today's balances without growth — the v5.10 "nominal dollars, no growth" house rule (the retirement-start snapshot section above).
-  Inflating only the spending from today would break that convention.
+- **The inflation base is unchanged** *(true at v6.18; changed at v6.30)*. Engine D inflated spending and Social Security from the retirement
+  year (the pension flat) and started from today's balances without growth. From v6.30 it prices from the as-of year, as the Monte Carlo
+  does, and carries today's balances to retirement at the plan's inflation — the same real value, so v6.18's reading of "no growth" is kept
+  (*One dollar unit and one inflation clock for the tax engines*; the contribution-accrual section's *no real growth* note).
 - **A one-time row dated before the retirement year is not in the Withdrawal tab's schedule** (it starts at retirement, from today's
   balances). The tab says so. MissingFeatures **D-44**.
 - **Closed at v6.20** *(D-44, the Monte Carlo half)*. **The Monte Carlo subtracted one-time rows in today's dollars** while it inflated
@@ -2718,27 +2735,16 @@ modeled in MC sim". Both engines read the expense table at each quarter's last m
 charged (D-45 — the example's April 2029 golf cart and closing costs, $28,000, never reached either engine), one that was charged was charged
 in today's dollars (D-44), and a monthly row starting or ending inside a quarter was counted for the whole quarter.
 
-**The dollar basis — the conservative reading (DC-3 (a)).** Engine B holds Social Security, the pension and income streams in today's
-dollars, takes Engine D's draws deflated to today's dollars, and inflates its brackets; the RMDs and realized gains it taxes arrive in
-nominal dollars (*Where the engines still legitimately differ*, and approximation 1 of *The Taxes tab and the drawdown*). So a row's tax is,
-to that approximation, in today's dollars, and the engines grow it as they grow spending — the way What-Breaks already grows its engine tax.
-The part of the tax that comes from nominal inputs is grown twice: conservative. Charging Engine B's figures as they stand was measured at
-the scope as the optimistic alternative (on the BASE example, 79.4% above $800K against 75.3%, on v6.18's calendar).
-
-**The dollar basis — measured, both readings (v6.29, F-25).** The paragraph above is right about the Monte Carlo and incomplete about
-the tabs. Measured at the v6.29 scope on the example (retiring 2029; a copy of Engine B with only Social Security grown at the plan's own
-inflation, 2.535% under the default BULL-LEANING prior; the draw bridge as the Taxes tab calls it): the Taxes tab's lifetime total is
-$212,552 at a $0 slider and $213,670 at $70,000, and a units-consistent nominal schedule is $283,375 and $254,334. Read as each year's own
-dollars — which the rows invite, with brackets "indexed 2%/yr" — the shipped rows run **low**, by $70,823 and $40,664. Read as today's
-dollars they run high, by $34,510 and $24,562. The Monte Carlo and What Breaks treat the schedule as today's dollars and grow it with
-inflation again, so the part from nominal RMDs is grown twice and they charge $62,400 and $38,358 **more** than the nominal benchmark. With
-the same seeds a units-consistent schedule raises 30-year success (above $500K) from 94.83% to 95.67% at $0 and from 95.15% to 95.73% at
-$70,000; the 6-year headline moves 99.70% → 99.78% at $0 and not at all at $70,000. So the success rates are very slightly pessimistic, as
-above, while the Taxes tab's rows, read as future dollars, are optimistic. From v6.29 the app says both — the Taxes tab, the Roth tab's
-rules box and the Field Manual's inflation map — where through v6.28 it said only "conservative". Making the units consistent is filed as
-its own scope (MissingFeatures): Engines A, B and C **and** the Monte Carlo's and What Breaks' re-inflation must move together, because
-fixing the engines alone would double the Social Security tax in the Monte Carlo. Two inflation clocks also differ: Engine D inflates from
-the retirement year, Engine B and the Monte Carlo from the as-of year.
+**The dollar basis (v6.20–v6.29) — superseded at v6.30.** Through v6.29 Engine B held Social Security, the pension and income streams in
+today's dollars, took Engine D's draws deflated to today's dollars and inflated its brackets, while its RMDs and realized gains were
+nominal. v6.20 called a row's tax "to that approximation, in today's dollars" and charged it, grown with each path's inflation, as the
+conservative reading (DC-3 (a)). v6.29 measured two readings and said both in the app — but its benchmark grew **only Social Security**,
+so its figures were too small: with every unit made consistent at the same 2% index and clock, the shipped rows read as each year's own
+dollars ran low by $97,925 at a $0 slider and $72,837 at $70,000 (v6.29 said $70,823 and $40,664), and read as today's dollars high by
+$16,878 and $891 (it said $34,510 and $24,562); at $70,000 the Monte Carlo's charge was not measurably pessimistic (95.43% → 95.40%
+above $500K, where v6.29 said 0.6–0.8 points). Those sentences are gone from the app. From v6.30 every engine computes each year in its
+own dollars and the Monte Carlo is handed each year's tax in today's dollars (*One dollar unit and one inflation clock for the tax
+engines*); the mechanism below — schedule × the path's inflation × the quarter's fraction — is unchanged.
 
 **What it moved** (measured at the v6.20 build: the shipped v6.19 against v6.20, 3,000 paths, the same seeds per row; run C's shape — 30
 years, deaths at life expectancy, one LTC shock, the car every 8 years (v6.20's fixed schedule — from v6.21 the example's car rows, *Cars are
@@ -2868,8 +2874,9 @@ line, so the example's line reads as before).
 **Simplifications, stated.**
 - **The rows sit on calendar dates.** The retirement-year buttons used to move the fixed car with the selected year; rows stay where they are,
   as the rest of the table has since v6.18.
-- **Engine D inflates a row from the retirement year, the Monte Carlo from the as-of date** (the v5.10 house rule): the same $40,000 row reads
-  $49,657 in Engine D's 2037 and a different figure on each Monte Carlo path.
+- **Engine D inflated a row from the retirement year, the Monte Carlo from the as-of date** (true at v6.21; one clock from v6.30, D-60 — Engine D
+  now inflates from the as-of year too, so the same $40,000 row is $40,000 × (1 + i)^(2037 − as-of) in Engine D's 2037, and the Monte Carlo's
+  paths scatter around it).
 - **A car loan** is the user's to enter as monthly rows; no financing is modelled.
 - **Saving re-dated rows to whole years (D-52, closed at v6.24).** My Data's editor kept a row's years only: Save & Apply stored a monthly row
   from January to December and a one-time row in June. The first save moved an older plan's added cars from March to June of the same year — no
@@ -3026,3 +3033,123 @@ retirement year, either way; its post-retirement monthly figure is its post amou
   half-typed) falls back to the saved plan's for the *When* defaults. The horizon the defaults use is the saved plan's: a date of birth or
   plan-to age changed in the same session counts from the next save.
 
+
+## One dollar unit and one inflation clock for the tax engines (v6.30)
+
+**What was wrong (v6.29, measured at the scope — `docs/SCOPE_D60_DOLLAR_UNITS_V630.md`).** Engines A (the Roth tab), B (Taxes) and C (IRMAA)
+held Social Security, the pension, income streams and taxable-account dividends flat in today's dollars and took Engine D's spending draw
+deflated to today's dollars, while their RMDs came off balances growing in nominal dollars, Engine D's realized gains arrived undeflated,
+and their brackets, deductions and IRMAA tiers grew 2% a year. A row of the Taxes tab was therefore in neither today's dollars nor its own
+year's. Two clocks ran beside each other: the Monte Carlo, the Guardrails table and the engines' thresholds priced from the as-of date;
+Engine D (the Withdrawal tab), the bridge's deflator and What Breaks priced from the retirement year — so on Engine D a $900 pension in a
+plan retiring in five years was worth $900 × (1 + i)^5, and its balances could not see the years before retirement. And one fixed 2% stood
+in for two indexes the law names separately. Holding Social Security flat in today's dollars while the §86 thresholds, which the law never
+indexes, sat still in effect indexed those thresholds at full inflation: **optimistic exactly where §86 binds.** v6.29 had described
+this finding with a benchmark that grew only Social Security; its figures were too small (*The Monte Carlo pays the Taxes tab's tax*,
+above, gives the corrected ones).
+
+**What changed (DU-1 to DU-9, all as recommended).**
+- **One clock.** Every engine prices each year from the as-of year, as the Monte Carlo already did: spending, Social Security and COLA'd
+  streams grow from today at the plan's inflation, *i* — the probability-weighted inflation of the active preset (about 2.5% under the
+  default BULL-LEANING prior, 2.7% under BASE). A pension, a stream without COLA, the conversion slider, the example's built-in part-time
+  work and a QCD are the dollars paid in that year (DU-9: the built-in work is a fixed amount, the conservative reading).
+- **One unit.** Engines A, B, C and D compute each year in that year's own dollars. The bridge hands Engine D's draw and gain on unchanged
+  (`withdrawalPlanSeries` holds no inflation arithmetic).
+- **Today's balances reach retirement at inflation** (DU-7 (a)): every engine (A, B, C and D) carries them by
+  (1 + i)^(retirement − as-of) — the same real value, no real return, so the contribution-accrual section's *no growth* keeps its meaning
+  — and leave **cost basis at its nominal amount**, so the inflation a taxable holding gains before retirement is a realized gain when it
+  is sold. (The retirement clock priced today's basis as if it were at retirement and omitted that gain.) **The planned-contribution
+  accrual is not carried:** it is added at face value, the v5.10 rule (*Contribution accrual*, above), so only today's holdings grow with
+  inflation before retirement. One helper, `carryStartBalances`, does this for every engine and the Roth ladder. *(The first v6.30 build
+  carried the accrual with the holdings — against DU-7 (a), and in the scope's prototype too, so its oracles agreed; the build review found
+  it. On a plan retiring twelve years out that overstated the opening Traditional balance by $143,808 in 2038's dollars under the default prior — $410,400 of accrual × (1.02535¹² − 1).)*
+- **The rates follow the statutes** (DU-3 (a)), read from one helper, never a literal:
+
+| Figure | Projected at | The law (read on uscode.house.gov and Cornell LII at the v6.30 build) |
+|---|---|---|
+| Brackets, standard deduction and its age-65 extra, capital-gains breakpoints, AMT exemptions and phase-outs, the QCD limit | *i* − 0.25 point (`chainedCpiRate`) | the §1(f)(3) cost-of-living adjustment, which uses C-CPI-U (§1(f)(6)(A)); cited by §63(c)(4) and (c)(7)(B), §1(j)(5)(C), §55(d)(4)(B), §408(d)(8)(G). The 0.25 point is CBO's measured long-run gap (Budget Options, 12 December 2024) |
+| IRMAA tiers (the top tier frozen through 2027) | *i* (`cpiuRate`) | CPI-U, 12 months ending August (42 U.S.C. §1395r(i)(5)(A), (C)) |
+| The poverty line past its last published year (the ACA subsidy) | *i* | CPI-U (42 U.S.C. §9902(2)) |
+| The Social Security wage base | *i* (`inflateWageBase`) | the national average wage index (42 U.S.C. §430(b)) — see the simplifications |
+| §86 thresholds, the NIIT's, the Additional Medicare Tax's, the OBBBA senior deduction | fixed | not indexed in law |
+| State figures (DU-4 (a)) | fixed, as each statute states them | e.g. Georgia's $65,000 exclusion is a fixed figure in O.C.G.A. §48-7-27(a)(5)(A) |
+
+- **IRMAA surcharges** grow with *i* to their **premium** year (`irmaaYr` = the MAGI year + 2) — their 2026 value in today's dollars (DU-5 (a)).
+- **What the tables show** (DU-2 (a)). The Withdrawal, Taxes and IRMAA tabs' year rows are each year's own dollars, and say so. The Taxes
+  tab's lifetime cards and the IRMAA tab's total are also given in today's dollars (each row ÷ (1 + i)^(year − as-of), summed). The Roth tab's
+  strategy table is in today's dollars throughout: each year's tax restated at the plan's inflation, each ending balance divided by the
+  inflation to the last plan year — so its ranking by estate is the ranking in either unit.
+- **The Monte Carlo and What Breaks** are handed each year's tax in today's dollars (`mcIncomeTaxSchedule` keeps `totalTaxToday`) and grow it
+  with each path's inflation exactly as before; the charge is unchanged — the schedule × the path's inflation × the quarter's fraction.
+  What Breaks reads Engine A's tax in today's dollars and, being a real-terms projection from retirement, values a fixed pension at its
+  real worth then (the pension ÷ (1 + i)^(retirement − as-of)).
+
+**What it moved — measured at the v6.30 build** (the shipped v6.29 against the v6.30 build, both as modules; the Monte Carlo is the 30-year
+run, 3,000 paths, the same seeds within each row; Engine D's end balance in today's dollars on each build's own clock). Before the build
+review's accrual fix (above) these reproduced the scope's prototype to within $2 on every household; the figures here are after it.
+
+| Example household | Taxes tab, lifetime, today's $ (each year's $) | Monte Carlo, 30 years, above $500K / $800K | Engine D end, today's $ |
+|---|---|---|---|
+| BULL-LEANING, $70,000 slider | $213,670 → **$201,181** ($272,791) | 95.43% / 90.93% → 95.60% / 91.40% | $1,649,938 → $1,635,600 (−0.87%) |
+| BULL-LEANING, $0 | $212,552 → **$185,807** ($294,215) | 95.00% / 90.73% → 95.63% / 91.53% | −0.91% |
+| BASE, $70,000 | $216,230 → **$201,203** ($280,629) | 85.73% / 75.03% → 86.47% / 75.87% | $897,296 → $883,589 (−1.53%) |
+| BASE, $0 | $213,779 → **$180,578** ($296,084) | 84.67% / 74.70% → 86.63% / 76.57% | −1.50% |
+
+| Household (BULL-LEANING, $70,000) | Taxes tab, today's $ | IRMAA, today's $ (years) | Monte Carlo, 30 years, above $500K | Engine D end |
+|---|---|---|---|---|
+| The example, balances × 1.6, Georgia | $367,909 → $324,602 | $0 → $0 | 99.33% → 99.37% | −0.20% |
+| The example, balances × 3, New York | $1,040,557 → $781,537 | $41,580 (9) → $43,880 (10) | 99.73% → 99.90% | −0.09% |
+| The example, single | $236,175 → $228,767 | $9,780 (7) → $12,080 (9) | 97.10% → 97.13% | −0.45% |
+| The example, every date nine years later (retires 2038) | $236,742 → $235,040 | $0 → $0 | 99.57% → 99.57% | −3.14% |
+| A couple retiring 2031: $72,000/yr spending, $900 pension, a COLA rental, Ohio | $161,018 → **$175,551** | $0 → $0 | 79.33% → **78.23%** | −0.91% |
+
+**Which way it runs: both, by household.** Lifetime tax in today's dollars falls for the example, the scaled households, the single filer
+and (by $1,702) the late retiree, and rises for the Ohio couple. *(The scope's prototype, and the first build, showed the late retiree's
+rising — to $251,374 — because they carried its twelve years of planned contributions to retirement at inflation; see the balances bullet.)* Three things pull: indexing the bracket family nearer inflation lowers it (most of the change on the
+example); counting an RMD in its own year's dollars rather than beside today's-dollar income lowers it most for an RMD-heavy household;
+and the unindexed thresholds raise it — a household whose Social Security now grows past §86's fixed thresholds has more of it taxed every
+year. The Monte Carlo moved by up to two points, up on most runs and down 1.10 on the Ohio couple. Engine D's end balance fell on every
+household, most for the household furthest from retirement, which now realizes the gain inflation creates before it retires. The 6-year
+headline moved within its run-to-run noise — that run takes no seed, and repeated runs of one build differ by about ±0.2 point, as much as
+the measured moves. The scope
+also measured the Roth tab's best cell on the prototype: a near-tie on most households that changed on three of six, each time between
+cells within 1.5% of each other in estate — which is why the app says *"the model's best cell"* and nothing stronger. The build did not
+re-measure that ranking beyond the suites' pins.
+
+**Simplifications, stated, each with its direction.**
+- **The wage base at prices, not wages.** The law indexes it by average wages, which usually outpace prices, so the modelled cap runs a
+  little low and the payroll tax on a high earner a little low — **optimistic**, disclosed in the Field Manual. (The first v6.30 build
+  indexed it at the chained rate, against DU-3 (a); the payroll-tax suites' law oracles caught it before release.)
+- **State figures fixed.** True for fixed exclusions such as Georgia's; it **overstates** tax in states that index their brackets — the
+  conservative direction (DU-4 (a)). A per-state indexing flag is its own release.
+- **Projected IRMAA tiers and brackets are not rounded** to $1,000 and $50 as the statutes round them (FlawsToFix **C-13**, DU-6 (a)). A tier
+  ten years out at an assumed inflation is far less certain than the rounding.
+- **Part B premiums** set the IRMAA surcharges; the model grows them with the plan's inflation. Whether premiums outrun it is not modelled.
+- **The ACA applicable-percentage table** is re-indexed each year by the IRS; the model holds the 2026 table.
+- **The Monte Carlo scales the whole tax schedule by each path's inflation**, so on a high-inflation path the unindexed thresholds rise too
+  (DC-3 (a), unchanged).
+- **Quarterly and annual compounding.** The Monte Carlo compounds from the as-of month by quarter, the deterministic engines from the as-of
+  year by year; they agree to the year, not the quarter.
+- **The C-CPI-U gap is a fixed 0.25 point** under every preset; history has varied around it.
+- **A plan whose retirement year is already past** (the app allows it): the carry factor is then below 1, so today's holdings are
+  deflated to the retirement year — the same real value, as through v6.29, but undisclosed in the app and not separately tested.
+- **What Breaks values a fixed pension at its real worth on the retirement date** (it projects in real terms from there); the Income and
+  Monte Carlo tabs' steady-state draw line still quotes the pension at face. Neither is a tax figure.
+- **Not D-60's mechanism, found by its scope and filed** (MissingFeatures **D-64**): Engine D's balances do not carry the planned-contribution
+  accrual, while its Traditional share does — on a plan far from retirement the share passes 100%; What Breaks starts from the same balance.
+
+**Tests.** `t93_dollar_units.mjs`, both legs (the v6.29 leg pins each defect as a dated `[KNOWN DEFECT 2026-10-22, D-60]`): the rates,
+written out independently of the helpers; Engine B's units input by input; **the extinction invariant** — with every indexed rate forced to
+the plan's inflation through a test seam, a household of real income pays the same tax in today's dollars every year, to $2, which no
+mixed unit survives; one clock in each engine — B and D against hand figures, C through its MAGI (equal to B's every year on a household
+with a pension, a fixed annuity and a COLA rental), A through a read-only per-year seam (its Social Security, pension and streams) — and at
+the two-clock boundary (retiring in the as-of year) Engine D is v6.29's to the cent; the Monte Carlo's schedule to the cent and its
+quarterly charges against Engine B; IRMAA surcharges to the premium year; statute oracles for the NIIT's unindexed threshold and the
+IRMAA tiers; Engine B's and C's opening balances against raw holdings and contributions (the accrual at face value — Engine A's and the
+ladder's through the one helper, pinned by AST and by the ladder and Engine A recursions in `t23`–`t28` and `t70`) and the basis left
+nominal; What Breaks' rendered estimate; the Withdrawal tab's and the ladder's today's-dollar totals and the input labels; the source by AST (no `1.02`; the carry in one helper; the gain pool carried and never the basis; the bridge
+holds no inflation arithmetic; no unindexed figure reaches an inflator); copy; an ACA household under the 400% cliff; the rendered tabs.
+Moved figures elsewhere were re-derived by independent oracles — a federal-tax oracle to the cent on every Engine B row
+(`qa/tools/fed_oracle_v630.mjs`), the drawdown ledger in a v6.30 mode (`qa/tools/sim_ledger.mjs`, checked by `qa/tools/validate_v630.mjs`),
+an Engine C replica, ladder recursions — and the few no oracle reaches were re-pinned by measurement and listed in the CHANGELOG.
+`qa/tools/controls_v630_dollar_units.py` puts each removed defect back and shows its check turn red.

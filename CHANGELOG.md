@@ -1,5 +1,200 @@
 # Changelog
 
+## v6.30 — one dollar unit and one inflation clock for the tax engines (D-60)
+
+**A modeling release.** Every tax engine changes how it states and projects dollars, so the Taxes, IRMAA, Roth and Withdrawal tabs, the
+Monte Carlo and What Breaks all move. The scope is `docs/SCOPE_D60_DOLLAR_UNITS_V630.md` (repo-only, fulfilled; build record §7). Steve,
+*"D-60"*; on the scope, *"All as recommended"* — DU-1 to DU-9, all (a). Built on v6.29 (source `2b1c24f1…`). METHODOLOGY's new section
+*One dollar unit and one inflation clock for the tax engines (v6.30)* is the full account.
+
+**What was wrong (v6.29, measured at the scope).**
+- **Mixed units.** Engines A (Roth), B (Taxes) and C (IRMAA) held Social Security, the pension, income streams and dividends flat in today's
+  dollars and took Engine D's draw deflated to today's dollars, while their RMDs came off balances growing in nominal dollars, realized gains
+  arrived undeflated, and brackets and IRMAA tiers grew 2% a year. A Taxes-tab row was in neither today's dollars nor its own year's.
+  Holding Social Security flat while §86's thresholds — which the law never indexes — stood still in effect indexed those thresholds at full
+  inflation: optimistic exactly where §86 binds.
+- **Two clocks.** The Monte Carlo and the thresholds priced from the as-of date; Engine D (the Withdrawal tab), the bridge's deflator and
+  What Breaks from the retirement year. On Engine D a fixed pension was worth more than it pays, its balances could not see the years
+  before retirement, and a taxable account's pre-retirement inflation gain was never taxed.
+- **One rate for two indexes.** A fixed 2% stood in for both C-CPI-U (the brackets' index in law) and CPI-U (IRMAA's and the poverty line's),
+  declared twice (ARCHITECTUREIssues E-9).
+
+**Owned — v6.29 measured its own finding partially.** v6.29's description of D-60 (its scope, METHODOLOGY, the Taxes tab, the Field Manual's
+inflation map, MissingFeatures) quoted a units-consistent schedule that grew **only Social Security**. With every unit fixed (same 2% index,
+same clock), the shipped rows read as each year's dollars ran low by **$97,925** ($0 slider) and **$72,837** ($70,000), not $70,823 and
+$40,664; read as today's dollars high by $16,878 and $891, not $34,510 and $24,562; and at $70,000 the Monte Carlo's charge was **not**
+measurably pessimistic (95.43% → 95.40%), where the app said 0.6–0.8 points. Every sentence quoting those figures is gone; METHODOLOGY keeps
+a dated paragraph with the corrected ones.
+
+**What changed (DU-1 to DU-9).**
+- **One clock** (DU-1): every engine prices from the as-of year. Spending, Social Security and COLA'd streams grow from today; a pension, a
+  stream without COLA, the conversion slider, the example's built-in part-time work (DU-9) and a QCD are the dollars paid that year.
+- **One unit:** Engines A–D compute each year in that year's own dollars; the bridge (`withdrawalPlanSeries`) passes Engine D's draw and gain
+  through unchanged.
+- **Balances** (DU-7): today's holdings reach retirement at the plan's inflation in every engine — no real growth — with **cost basis left
+  nominal**, so the inflation a taxable holding gains before retirement is a realized gain when sold, and **the planned-contribution accrual
+  at face value** (the v5.10 rule), through one helper, `carryStartBalances`.
+- **Rates by statute** (DU-3), from one place and no literal: the bracket family (brackets, standard deduction and its age-65 extra, LTCG
+  breakpoints, AMT figures, the QCD limit) at the plan's inflation less 0.25 point (`chainedCpiRate`, C-CPI-U — §1(f)(3), cited by §63(c)(4),
+  §1(j)(5)(C), §55(d)(4)(B), §408(d)(8)(G)); IRMAA tiers and the poverty line at the plan's inflation (`cpiuRate`, CPI-U — 42 U.S.C.
+  §1395r(i)(5)(A), §9902(2)); the Social Security wage base at the plan's inflation (`inflateWageBase`; the law uses the wage index, §430(b) —
+  slightly optimistic, disclosed). §86, NIIT, Additional Medicare and the OBBBA deduction stay fixed, as in law; state figures stay as each
+  statute states them (DU-4 — Georgia's exclusion is a fixed $65,000). `TAX_INDEX_RATE`, `IRMAA_INDEX_RATE` and `ACA_CONSTS.fplInflProxy`
+  are gone. Each U.S.C. citation was read on uscode.house.gov or Cornell LII at the build.
+- **IRMAA surcharges** grow with the plan's inflation to their premium year (DU-5). Projected tiers stay unrounded (DU-6, C-13).
+- **Displays** (DU-2): the Withdrawal, Taxes and IRMAA tabs' and the Roth ladder's rows are each year's own dollars and say so; every
+  lifetime total also shows today's dollars (the Taxes tab's cards, the IRMAA total, the Withdrawal tab's *Total withdrawn* and *Roth
+  converted*, the ladder's *Total conversion* and *Total tax cost*); the Roth tab's strategy table is in today's dollars and says so. My
+  Data's pension field, the conversion slider and the QCD modeler say what kind of dollars they hold. The Verify tab's IRMAA checks compute their expected values from the scenario table and the statute rate written out.
+- **The Monte Carlo** (`mcIncomeTaxSchedule`) is handed each year's tax in today's dollars (`totalTaxToday`) and grows it with each path's
+  inflation as before; **What Breaks** reads Engine A's tax in today's dollars and values a fixed pension at its real worth at retirement
+  (and, in its last-year draw-rate line, at its real worth in that year).
+- **Copy:** the sentences the scope's copy census listed (§2.5) — the mixed units, the 2% proxy, v6.29's both-readings text — are replaced
+  with what the code does; `t93` §J holds eleven of the old phrases extinct and five new ones present, by AST over every string. The Field
+  Manual's inflation map and §13 say it. The four version sites read v6.30.
+
+**What it moved — measured at the build** (v6.29 against v6.30, module-level; Monte Carlo 30 years, 3,000 paths, the same seeds within each
+row). After the build review's accrual fix (below); before it the build reproduced the scope's prototype to within $2 on all six households.
+
+| Example household | Taxes tab, lifetime | Monte Carlo 30 yr, > $500K | Engine D end, today's $ |
+|---|---|---|---|
+| BULL-LEANING (default), $70,000 slider | $213,670 → **$201,181** today's $ ($272,791 each year's) | 95.43% → 95.60% | −0.87% |
+| BULL-LEANING, $0 | $212,552 → **$185,807** ($294,215) | 95.00% → 95.63% | −0.91% |
+| BASE, $70,000 | $216,230 → **$201,203** ($280,629) | 85.73% → 86.47% | −1.53% |
+| BASE, $0 | $213,779 → **$180,578** ($296,084) | 84.67% → 86.63% | −1.50% |
+
+Lifetime tax in today's dollars **fell** on the example, the scaled Georgia and New York households, the single filer and (by $1,702) a late
+retiree, and **rose** for a modest Ohio couple with a pension and a COLA rental ($161,018 → $175,551, whose 30-year success fell 79.33% →
+78.23%). IRMAA rose where it applies (single filer $9,780 → $12,080 in today's dollars; New York ×3 $41,580 → $43,880). Engine D's end balance
+fell on every household (−0.09% to −3.14%), most for the household furthest from retirement. The 6-year headline moved within its run-to-run
+noise: that run takes no seed, and repeated runs of one build differ by about ±0.2 point. The direction depends on the
+household; METHODOLOGY says why.
+
+**Found by the build review, fixed — the planned-contribution accrual was carried with the holdings.** The first build multiplied each
+engine's opening balances (`retireStartBalances`, which includes the accrual) by the carry factor, so a plan's future contributions were
+also inflated to retirement — against DU-7 (a) (*"keeps the v5.10 rule for accrued contributions"*) and against the METHODOLOGY text drafted
+for this release. The scope's prototype did the same, so its figures and every oracle built from them agreed, and the suite could not see it.
+On a plan retiring twelve years out it overstated the opening Traditional balance by $143,808 in 2038's dollars, and it turned that plan's
+lifetime tax from falling ($235,040) to rising ($251,374). Fixed to the decision as written — one helper, `carryStartBalances`, carries the
+holdings and adds the accrual at face, re-taking the annuity and employer shares; the oracles corrected (`units_v630.mjs` `carryHold`, `t23`,
+`t24`, `t25`, `t26`, `t28`, `t70`, `sim_ledger`); `t93` §O, H-10, control U11. *Steve: this follows DU-7 (a) as worded; if you meant the
+accrual to be carried too, that is a one-line change and a re-decision.*
+
+**Found at the build, fixed.**
+- **The wage base was indexed at the chained (bracket) rate** — the first implementation sent it through `inflateTaxConst`, against DU-3 (a).
+  The payroll-tax suites' law oracles (`t77`, `t79`) caught it; it now has its own helper, `inflateWageBase`, at CPI-U; `t93` A-4b and
+  control U8 keep it there. The Field Manual says the modeled cap runs slightly low.
+- **`t92`'s rental fixture was never taxed.** Its expense rows used field names the app does not read and its stream's tax type `"taxable"`
+  matched neither value the engines test, so the rent counted as income but was never taxed. Fixed (`cat`/`start`/`end`/`freq`, tax
+  `"ordinary"`); the comment owns it.
+- **The build's own census of the scope's §3 found tests missing** — the Monte Carlo against Engine B within a computed compounding gap,
+  statute oracles for the NIIT's unindexed threshold and the IRMAA tiers, What Breaks' rendered estimate. Added to `t93` (§M, §N, §W) with
+  controls U9 and U10. The build review then showed by mutation that Engine C's streams and Engine A's Social Security could be held flat
+  without `t93` noticing: added D-7 (Engine C's MAGI equals Engine B's every year), F-5/F-6 (Engine A through a new read-only per-year seam,
+  `incomeByYr`), I-2 (Engine A's opening taxable balance carried, its basis not), H-11 (no unindexed figure reaches an inflator; control U12),
+  and a tighter M-2.
+- **Smaller, from the review:** Engine A's dividend base subtracted today's HSA from a carried balance (now carried too); the Field Manual's
+  Withdrawal section still said spending was *"inflated from the retirement year"* and its FAQ that every stream is in today's dollars
+  (corrected); the Roth rules box and the comparator stated units differently (made consistent); What Breaks' last-year draw-rate line
+  priced the fixed pension at its retirement-year worth (optimistic; now that year's); a stale Verify label and comment.
+
+**Filed, not fixed:** MissingFeatures **D-64** — Engine D's balances do not carry the contribution accrual its Traditional share counts (on
+a plan retiring twelve years out the shares sum to 1.274); What Breaks starts from the same balance. **Closed:** MissingFeatures **D-60**;
+ARCHITECTUREIssues **E-9**. **Narrowed:** E-22 (the four indexation lambdas delegate to one helper). **Noted:** E-23 (`fplInflProxy` gone).
+FlawsToFix **C-13**'s reason re-worded (the proxy it cited is gone; still open).
+
+**Limitations, stated.** The wage base at prices, not wages (optimistic); state figures fixed (overstates tax where a state indexes —
+conservative); projected tiers and brackets unrounded (C-13); Part B premium growth not modeled beyond inflation; the 2026 ACA
+applicable-percentage table held; the Monte Carlo scales the whole schedule, unindexed thresholds included, by each path's inflation; the MC
+compounds by quarter from the as-of month and the engines by year, so they agree to the year, not the quarter; the 0.25-point gap is fixed
+under every preset. The scope measured the Roth tab's best cell on its prototype (a near-tie that changed on three of six households); the
+build did not re-measure that ranking beyond the suites' pins.
+
+**Tests.** New suite **`t93_dollar_units.mjs`**, both legs; the v6.29 leg pins each defect as a dated `[KNOWN DEFECT 2026-10-22, D-60]`.
+- **§A** the rates, written out independently (C-CPI-U = i − 0.25, CPI-U = i, the wage base at CPI-U, the top IRMAA tier frozen through 2027,
+  the poverty line, the Roth projection's brackets); **§B** Engine B's units input by input; **§C the extinction invariant** — with every
+  indexed rate forced to the plan's inflation through a test seam, a household of real income pays the same tax in today's dollars every
+  year, to $2; **§D** one clock in Engines B and D by hand and in Engine C through its MAGI, and at the two-clock boundary (retiring in the as-of year)
+  Engine D is v6.29's to the cent; **§E** the Monte Carlo's schedule to the cent; **§F** Engine A's today's-dollar fields and its own income
+  units through the per-year seam; **§G** surcharges to the premium year; **§H** the
+  source by AST (no `1.02`; the carry moves the gain pool and never the basis; the carry in one helper; the bridge holds no inflation
+  arithmetic; no unindexed figure reaches an inflator; What Breaks); **§I** basis (Engine A's opening balance carried, its basis not); **§J** copy; **§K** an ACA household under the 400% cliff; **§L** the rendered tabs, including the Withdrawal tab's
+  today's-dollar totals (exact), the ladder's (bounded) and the input labels; **§M** the Monte Carlo's quarterly
+  charges against Engine B within each year's computed compounding gap; **§N** statute oracles — the NIIT's unindexed $250,000/$200,000 on the
+  New York ×3 household and the IRMAA tiers at CPI-U on the single filer, to the dollar; **§O** Engine B's and C's opening Traditional
+  balances against raw holdings and contributions — the accrual at face (Engine A's and the ladder's go through the same helper, held there
+  by H-10 and pinned by the recursions in `t23`–`t28` and `t70`); **§W** What Breaks' rendered estimate. F-1 to F-4 and M-1 are restatement-consistency
+  checks, true by construction; the scope §7 lists what §3 promised and remains untested.
+
+`t93` runs **97** current and **53** on the v6.29 leg.
+
+**Re-gated, each moved figure re-derived — never pasted.** Every suite that pins a figure from Engines A–D, the Monte Carlo, What Breaks or
+the Verify tab's IRMAA rows re-derives it on the v6.30 leg from an independent model, keeping its v6.29 assertion on the v6.29 leg:
+- **Oracles built or extended for this:** `qa/tools/fed_oracle_v630.mjs` (new — federal tax, LTCG, MAGI and §86 per Engine B row, to the
+  cent; `t40`, `t42`, `t43`); `qa/tools/sim_ledger.mjs`'s v6.30 mode (the drawdown ledger in carried units; `t22`), checked by
+  `qa/tools/validate_v630.mjs` (new; 169/0 on six households, and its v5.38 mode still reproduces every old pin); `qa/units_v630.mjs` (new —
+  the unit facts the suites' models share, read from the scenario table, never the app's helpers); an Engine C replica (`t25`); ladder
+  recursions in carried units, the accrual at face (`t23`, `t24`, `t26`, `t28`, `t70`); `t19`'s ledger seeded in carried units with MAGI by the §86 statute
+  function; independent pool walks (`t20`, `t71`, `t72`).
+- **Re-gated suites:** `t1` (S-5, S-8 and S-9 read the one carry helper and the carried HSA), `t2` (the v629→v630 parity diff: the three Monte Carlo keys and Engine A's four, by design), `t8` (STEP-1 and the
+  per-person seed checks read the seed through the carry helper), `t10`, `t13`–`t20`, `t22`–`t26`, `t28`, `t29` (B-21 to B-24 for the four new census rows;
+  `boundaries.mjs`' payroll row at the plan's rate), `t32`, `t33`, `t35`, `t40`–`t44`, `t56`, `t58`,
+  `t60`, `t70`–`t72`, `t75`–`t77`, `t79`, `t81`, `t83`, `t92` (the DF-7 sentences now absent; METHODOLOGY's v6.30 text; the fixture fix).
+  `v630` registered across the suites; `t33` PINS v630 measured (below).
+- **Re-pinned by measurement, where no independent model reaches** (each listed so it can be re-derived later): `t33` E-3 738 → 753, E-4
+  60,035 → 60,062, F-3 50 → 68 (fixture $10,000 → $14,000 a month: at $10,000 no tier is crossed in v6.30 units), G-1 noStream 155,661 →
+  206,189 (a Georgia, 2052-death, streams household outside the ledger's scope; F-2/F-4 re-made as derived — the IRMAA delta is one tier step
+  × persons × (1+i)^(premium year − 2026)); `t40` A1 Engine D lifetime draw 393,327 → 433,413, A3 lifetime RMD B 1,281,806 → 1,332,039 and D
+  981,936 → 1,057,891, B3 Engine C RMD = A3 B, C0 no-portfolio gains residue 2,153.87 → 14,631.36, C1 checksum 5,185,167.5373 →
+  7,255,030.8304 (main leg; on the v6.18 and v6.21 attribution legs those five are skipped with a printed line — the legs reproduced old
+  tables, which the units end — and every derived check runs); `t42` D-2 married lifetime draws 1,567,766 → 1,703,565, D-4 the planned path
+  2,083,910 → 2,084,618 (main leg); `t58` B-NC lifetime draw 350,148 → 433,413 (= `t40` A1); `t76` E-2a the crossover 2061 → 2059 — age 95/93
+  at a $10,000 slider ($5,000 no longer recovers on the v6.17 table).
+- **`t58`'s NY 2031 row on the v6.17 table** is +$2.76 against the per-person relief: $102.72 of B's annuity money sits outside New York's
+  relief, so (15,000 + 537 + 481 + 102.72 − 16,050) × 3.9% = $2.76 — derived from the engine's per-person record and accepted as a
+  relief-reach row on v6.30.
+- **`domdiff_withdrawal`** gains a v629 → v630 arm: the same year rows render, every Expenses cell is v6.29's × (1+i)^(retirement − as-of) to
+  the $K rounding, the units sentence on v6.30 only; the Taxes and IRMAA tables differ with the same rows.
+- **`boundaries.mjs`** gains the four rows the scope named (OPERATIONS §K1): the two-clock coincidence, an NIIT year, an IRMAA year and an
+  ACA subsidy year under the cliff; on the example the clock row is clear (it retires three years after its as-of year) and the other three are ON (31 of 36 rows ON).
+
+**Counts**, from the full suite run from the packaged copies:
+- **9,423 app checks across 92 app suites, 0 failed, 0 DIED**;
+- MC parity 10/10 — the v6.29 → v6.30 pair moves seven fingerprints by design (the three Monte Carlo keys and Engine A's four), declared in
+  `t2`'s intended differences, and every other key is byte-identical;
+- tooling: `t21` 64, `domdiff` 40, `sets` 12 + 12;
+- GRAND **9,561**.
+
+Against v6.29, the current-leg changes are `t93`, new (97); `t29` 104 → 112 (B-21 to B-24); `t10` 358 → 361, `t43` 38 → 41, `t13` 53 → 55 and
+`t42` 34 → 36 (cases derived on the v6.30 leg); `t1`, `t16`, `t23`, `t25`, `t40`, `t75` and `t92` one more each. Every other current-leg count is
+unchanged, the re-gated suites included. The v6.29 leg counts 3,834. The two attribution runs — v6.18's spending table (eight suites) and v6.21's (seven) — count 234 and 237; in
+them `t40` and `t42` count 29 and 33 (they skip the measured v6.30 exacts, each printed) and `t43` 41, `t75` 47 (one more than v6.29's each).
+Together 5,118 + 3,834 + 234 + 237 = 9,423.
+
+Controls: `qa/tools/controls_v630_dollar_units.py` on a copy of that packaged run folder — 13 of 13 as expected (U0 silent, U1–U12 each firing), every file restored and hash-checked. Each control puts one removed defect back:
+a flat Social Security in Engine B, a deflating bridge, Engine D on the retirement clock, an inflated basis, `1.02` in the helper, a flat
+surcharge in Engine C, a fixed-rate poverty line, the wage base at the chained rate, the Monte Carlo handed each year's own figure, What
+Breaks on the each-year total, the contribution accrual carried, an indexed NIIT threshold.
+
+**The build review** (an agent that had not seen the build, given the source, the tests, the documents and the scope) found **1 blocker,
+3 should-fix and 10 notes**; every one was taken or answered (scope §7). The blocker — the contribution accrual carried with the holdings —
+is above. The should-fix items: Field Manual sentences untrue of v6.30 (corrected, and today's-dollar companions added to the four lifetime
+totals that had none); tests the scope promised and the build had not shipped, shown by mutation (D-7, F-5/F-6, I-2, H-11, a tighter M-2);
+dollar inputs that did not name their kind (the conversion slider and the QCD modeler). A second pass by the same reviewer, on the fixes,
+found no blocker and one should-fix — the new today's-dollar totals and labels had no test (added, `t93` L-7 to L-9) — and notes, taken:
+the Field Manual's Withdrawal section said Backtest and What Breaks read the table "the same way" (each has its own price path), the
+ladder's total read *"9-YR"* for a ladder of any length (now its own count of years), and two wordings here (the headline's noise; what §O
+covers). Noted and disclosed, not changed: a retirement year
+already past deflates today's holdings; What Breaks and the steady-state draw line read a fixed pension two ways (neither a tax figure).
+
+**Owned, in the build.** The first controls run's U3 named a variable outside Engine D's scope, so it crashed the suite instead of testing it
+(fixed and re-run); a first explanation of `t58`'s New York row was wrong (the suite's comment first said a per-person cap; corrected to the
+annuity money outside New York's relief); and a draft of the per-suite note mis-counted the attribution legs' skips (corrected from the log). Both packaged
+runs — before and after the reviewer's second pass — were green on their first pass.
+
+**Provenance.** Source `f2d3f578492279eac501eef6bdda058f` · built `index.html` `3d013b092b612442b35e2ec02163010d` (vite 5.4.21, `npm ci`; the immediately-prior v6.29 rebuilt byte-identically
+to `ce3605af…`) · `smoke_built` 22/22.
+
 ## v6.29 — what the app says about its own model, checked (F-25)
 
 **A presentation release with display computations and a METHODOLOGY correction.** No engine, no figure the engines compute, no grade and
