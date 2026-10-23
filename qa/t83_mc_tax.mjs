@@ -29,14 +29,14 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v620";
-const KNOWN_VERSIONS = ["v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"];
+const KNOWN_VERSIONS = ["v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);   // an array, so the next registration widens it
-const POST_D49 = ["v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);   // v6.23 (D-49): the Field Manual's Monte Carlo sentence on the built-in work (I-8). An array, so the registrar widens it
+const POST = ["v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER);   // an array, so the next registration widens it
+const POST_D49 = ["v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER);   // v6.23 (D-49): the Field Manual's Monte Carlo sentence on the built-in work (I-8). An array, so the registrar widens it
 // The differential's pair — constants, NOT `VER === "v620"`, so the registrar cannot widen them (t76 records why).
 const D_PRIOR = "v619", D_CUR = "v620";
 const require = createRequire(import.meta.url);
@@ -59,6 +59,11 @@ const T = (n, ok, d = "") => { if (ok) pass++; else { fail++; console.log(`  ✗
 process.on("exit", () => { if (!finished) { console.log(`t83 SUITE (${VER}): ${pass} passed, ${fail + 1} failed (DIED before the end)`); process.exitCode = 1; } });
 const clone = o => JSON.parse(JSON.stringify(o));
 const KD = "[KNOWN DEFECT 2026-10-18, D-40/D-44/D-45 — flips at v6.20]";
+// v6.30 (D-60; docs/SCOPE_D60_DOLLAR_UNITS_V630.md): the schedule is Engine B's tax restated in TODAY's dollars (`totalTaxToday` — the row's
+// own-year tax ÷ (1+i)^(yr − as-of)), which each path then grows with its own inflation; through v6.29 it took `totalTax`, whose units were
+// mixed. A-1 asserts the restatement against the row's own-year tax and the active preset's inflation (read from the SCENARIOS table), and
+// the B hand chain is the same arithmetic on the restated 2029 row. An array, so the registrar widens it.
+const U630 = ["v630"].includes(VER);
 console.log(`t83 — THE MONTE CARLO PAYS THE TAXES TAB'S TAX (${VER})\n`);
 
 // BEFORE anything applies a preset: what SCENARIOS holds when the module loads (the schedule's default preset must match it, §A)
@@ -125,12 +130,15 @@ if (POST) {
       const A = { retireYear: RY, rothAmount: ra, qcdAnnual: qcd, taxYield: ty, scenarioPreset: pr };
       const S = g.withdrawalPlanSeries(A), rows = E.computeTaxPlan({ ...A, gainByYr: S.gainByYr, ordDrawByYr: S.ordDrawByYr }).rows;
       const sc = g.mcIncomeTaxSchedule(RY, { rothAmount: ra, qcdAnnual: qcd, taxYield: ty, scenarioPreset: pr });
-      const ok = rows.length > 0 && Object.keys(sc.byYr).length === rows.length && rows.every(r => sc.byYr[r.yr] === r.totalTax)
-        && sc.firstYr === rows[0].yr && sc.lastYr === rows[rows.length - 1].yr && sc.last === rows[rows.length - 1].totalTax;
+      const _i = Object.values(g.SCENARIOS()).reduce((u, x) => u + x.prob * x.inflation, 0), _asOf = t.asOfYear;
+      const want = r => U630 ? r.totalTaxToday : r.totalTax;
+      const ok = rows.length > 0 && Object.keys(sc.byYr).length === rows.length && rows.every(r => sc.byYr[r.yr] === want(r))
+        && (!U630 || rows.every(r => Math.abs(r.totalTaxToday - r.totalTax / Math.pow(1 + _i, r.yr - _asOf)) <= 1e-6 * Math.max(1, r.totalTax)))
+        && sc.firstYr === rows[0].yr && sc.lastYr === rows[rows.length - 1].yr && sc.last === want(rows[rows.length - 1]);
       n++; if (!ok) bad.push(`${name}/${pr}/${ra}/${qcd}`);
     }
   }
-  T(`A-1 on ${HH.length} households × BASE and BULL × sliders $0 / $70K / $150K (and QCD $10,000 with a 3.5% yield on the example): every year's tax equals the Taxes tab's row exactly (${n} schedules)`,
+  T(`A-1 on ${HH.length} households × BASE and BULL × sliders $0 / $70K / $150K (and QCD $10,000 with a 3.5% yield on the example): every year's tax equals the Taxes tab's row exactly${U630 ? " — its own-year tax restated in today's dollars at the preset's inflation" : ""} (${n} schedules)`,
     bad.length === 0 && n >= HH.length * 6, bad.slice(0, 5).join(", "));
   const t = load(BASE); preset(g, "base");
   T("A-2 the default inputs are the Taxes tab's opening values under BASE: { $70,000, $0 QCD, 2.0% yield, \"base\" }",
@@ -168,12 +176,26 @@ if (POST) {
   // Hand-computed at the v6.20 build in exact decimal arithmetic, independently of the engine: BASE's expected inflation is
   // Σ prob × inflation over SCENARIOS = .45×.028 + .20×.02 + .15×.035 + .10×.01 + .07×.065 + .03×0 = 2.74%, so one quarter's step is
   // 1.00685 and twelve full quarters (April 2026 – March 2029) give 1.0853687; growth is 1 + 4.5% / 4 = 1.01125.
+  if (U630) {
+    // v6.30: the 2029 row is Engine B's own-year 2029 tax restated in today's dollars: totalTax(2029) ÷ 1.0274³ (as-of 2026). The chain below
+    // is the v6.20 hand arithmetic on that figure: 1.00685 per quarter, twelve quarters to 2029 Q1, 1.01125 growth. The v6.29 figures were
+    // $20,506.62 / $5,626.91 / $11,355.67 (Engine B's row then mixed units).
+    const rowB = E.computeTaxPlan({ retireYear: RY, rothAmount: 70000, qcdAnnual: 0, taxYield: 2.0, ...g.withdrawalPlanSeries({ retireYear: RY, rothAmount: 70000, scenarioPreset: "base" }) }).rows.find(r => r.yr === 2029);
+    const r29 = rowB.totalTax / Math.pow(1.0274, 2029 - t.asOfYear), d12 = r29 / 4 * Math.pow(1.00685, 12) * 1.01125, d13 = (d12 + r29 / 4 * Math.pow(1.00685, 13)) * 1.01125;
+    T(`B-3 HAND PIN: the example's 2029 row is Engine B's 2029 tax ($${rowB.totalTax.toFixed(2)}) ÷ 1.0274³ = $${r29.toFixed(2)} (BASE, $70K slider), and BASE's expected inflation is 2.74%`,
+      Math.abs(S.byYr[2029] - r29) < 0.005 && Math.abs(r29 - 20464.80) < 0.005 && Math.abs(ei - 0.0274) < 1e-12, `${S.byYr[2029]} / ${ei}`);
+    T(`B-4 HAND PIN: after 2029 Q1 the planned path is $${d12.toFixed(2)} lower — $${r29.toFixed(2)} / 4 × 1.00685^12 × 1.01125`,
+      Math.abs(HAND.d12 - d12) < 0.005, HAND.d12.toFixed(4));
+    T(`B-5 HAND PIN: after 2029 Q2, $${d13.toFixed(2)} lower — ($${d12.toFixed(2)} + $${r29.toFixed(2)} / 4 × 1.00685^13) × 1.01125`,
+      Math.abs(HAND.d13 - d13) < 0.005, HAND.d13.toFixed(4));
+  } else {
   T("B-3 HAND PIN: the example's 2029 row is $20,506.62 (BASE, $70K slider) and BASE's expected inflation 2.74% (the inputs below)",
     Math.abs(S.byYr[2029] - 20506.62) < 0.005 && Math.abs(ei - 0.0274) < 1e-12, `${S.byYr[2029]} / ${ei}`);
   T("B-4 HAND PIN: after 2029 Q1 the planned path is $5,626.91 lower — $20,506.62 / 4 × 1.00685^12 × 1.01125",
     Math.abs(HAND.d12 - 5626.91) < 0.005, HAND.d12.toFixed(4));
   T("B-5 HAND PIN: after 2029 Q2, $11,355.67 lower — ($5,626.91 + $20,506.62 / 4 × 1.00685^13) × 1.01125",
     Math.abs(HAND.d13 - 11355.67) < 0.005, HAND.d13.toFixed(4));
+  }
   load(BASE);
 } else T("B-0 the v6.19 leg takes no schedule (runMonteCarlo has no options)", !/function runMonteCarlo\(retireYear, iterations = 10000, opts = \{\}\)/.test(SRC));
 
@@ -288,7 +310,7 @@ const callsIn = (node, name) => { let c = 0; walk.simple(node, { CallExpression(
     T(`E-4 every one of the ${subs.length} subtractions from planned, _planned or portfolio in the two engines is a named outflow`, unknown.length === 0 && subs.length > 0,
       unknown.map(s => `${s.fn} L${s.line}: ${s.rhs}`).join(" | "));
     // v6.21 (D-42): the fixed car is gone — a car is a one-time row, charged as "the one-time rows". An array, so the registrar widens it.
-    const CAR_N = ["v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER) ? 0 : 1;
+    const CAR_N = ["v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER) ? 0 : 1;
     T(`E-5 …in the counts the scope names: draw 4, tax 4, one-time 4, mortgage 2, LTC shock 2, care 2, car ${CAR_N}${CAR_N ? "" : " (v6.21: a car is an expense row)"}`,
       count("the spending draw") === 4 && count("the tax") === 4 && count("the one-time rows") === 4 && count("the mortgage payment") === 2
       && count("the LTC shock") === 2 && count("the sustained-care term") === 2 && count("the car") === CAR_N, KINDS.map(([k]) => `${k} ${count(k)}`).join(", "));
@@ -535,7 +557,8 @@ console.log("  I — rendered: the Income card, the slider, the Monte Carlo tab,
     T("I-1 the card is the schedule's first year at the opening $70K slider under BULL (the preset a first visit opens on), in today's dollars",
       cardEl() && cardEl().textContent.trim() === want(70000) && /Income tax the Monte Carlo pays/i.test(cardLine())
       // v6.29 (F-25, 375): "in today's dollars" is Engine B's approximation only; the line says the Monte Carlo treats the figure so and grows it
-      && (["v629"].includes(VER) ? /2029: the Taxes tab's tax at the \$70K conversion slider, which the Monte Carlo treats as today's dollars and grows with each path's inflation/
+      && (U630 ? /2029: the Taxes tab's tax at the \$70K conversion slider, restated in today's dollars; the Monte Carlo grows it with each path's inflation/
+        : ["v629"].includes(VER) ? /2029: the Taxes tab's tax at the \$70K conversion slider, which the Monte Carlo treats as today's dollars and grows with each path's inflation/
                                  : /2029 in today's dollars: the Taxes tab's tax, year by year, at the \$70K conversion slider/).test(cardLine()), `${cardLine()} vs ${want(70000)}`);
     T("I-2 the old card is gone: no \"$4K/quarter modeled in MC sim\", no \"Roth conversion tax drag\"", !/4K\/quarter modeled in MC sim/.test(text()) && !/Roth conversion tax drag/i.test(text()));
     await tab("roth");
@@ -555,7 +578,7 @@ console.log("  I — rendered: the Income card, the slider, the Monte Carlo tab,
   const bt = await tab("backtest");
   if (POST) T("I-6 Backtest: the MC charges the Taxes tab's income tax, and both spend one-time expenses — the March/June/September/December sentence and \"tax drag\" are gone",
     // v6.29 (F-25, 1071): the comparison names the Monte Carlo tab's 30-year runs (not "the MC headline") and the header's 6-year run
-    (["v629"].includes(VER) ? /they also charge long-term care and the Taxes tab's income tax, which this backtest omits\. The header's success rate is a different run again: the 6-year simulation, ending above \$800K\. \(Both spend your one-time expenses: this backtest from v6\.18, the MC in the quarter each one falls from v6\.20\.\)/
+    (["v629", "v630"].includes(VER) ? /they also charge long-term care and the Taxes tab's income tax, which this backtest omits\. The header's success rate is a different run again: the 6-year simulation, ending above \$800K\. \(Both spend your one-time expenses: this backtest from v6\.18, the MC in the quarter each one falls from v6\.20\.\)/
                             : /the MC also charges LTC shocks and the Taxes tab's income tax, which this backtest deliberately omits\. \(Both spend your one-time expenses: this backtest from v6\.18, the MC in the quarter each one falls from v6\.20\.\)/).test(bt)
     && !/the MC charges one only when it is dated in March/.test(bt) && !/Roth-conversion tax drag/.test(bt));
   else T(`I-6 ${KD} Backtest says the MC charges a one-time expense only when dated in March, June, September or December`, /the MC charges one only when it is dated in March, June, September or December/.test(bt));
@@ -569,7 +592,7 @@ console.log("  I — rendered: the Income card, the slider, the Monte Carlo tab,
   if (POST) {
     T("I-8 Field Manual, Monte Carlo entry: the income-tax paragraph — the schedule, the inflation reading, the same tax on every path, the omissions, the one-time rows, and what it did through v6.19",
       /Its income tax \(v6\.20\)\. Every run pays, in each year of retirement, the income tax the Taxes tab computes for that year/.test(FM)
-      && /grows them with each run’s own inflation/.test(FM) && /The same yearly schedule is paid on every run/.test(FM)
+      && (U630 ? /hands the simulation the same tax restated in today’s dollars, which it grows with each run’s own inflation/ : /grows them with each run’s own inflation/).test(FM) && /The same yearly schedule is paid on every run/.test(FM)
       && /Not in it: IRMAA \(a Medicare premium, on its own tab\), the Social Security cut toggle/.test(FM)
       // v6.23 (D-49): the built-in wages are the example's alone, and the sentence says so (t86 G-3); through v6.22 it named every plan with no streams
       && (POST_D49 ? /For the example household, whose spouse B works part-time in its retirement year and the two after, the Taxes tab taxes those wages and the simulation does not credit them as income/.test(FM)

@@ -28,19 +28,19 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v612";
-const KNOWN_VERSIONS = ["v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"];
+const KNOWN_VERSIONS = ["v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER);   // an array, so the next registration widens it
 const require = createRequire(import.meta.url);
 const M = await import(pathToFileURL(join(HERE, `app_${VER}.mjs`)).href);
 // v6.18 (D-41): Engine D reads the expense table year by year, which moved one §B hand pin (2032's taxable Social Security). PIN18 picks the v6.18 figures (measured at the build);
 // the v6.18 leg is ALSO run with DC_V617_SPENDING=1 — each plan loaded with v6.17's spending as a table (qa/tools/v617_spending.mjs, split
 // at that plan's own Medicare year) — where every v6.17 figure must still come out exactly: the attribution of each move to the read.
-const POST_D41 = ["v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);   // an array, so the registrar widens it
+const POST_D41 = ["v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER);   // an array, so the registrar widens it
 const SPEND17 = POST_D41 && process.env.DC_V617_SPENDING === "1";
 const PIN18 = POST_D41 && !SPEND17;
 const P41 = (v617, v618) => PIN18 ? v618 : v617;
@@ -72,12 +72,17 @@ const BR26 = { mfj: [[0.10, 24800], [0.12, 100800], [0.22, 211400], [0.24, 40355
                sgl: [[0.10, 12400], [0.12, 50400], [0.22, 105700], [0.24, 201775], [0.32, 256225], [0.35, 640600], [0.37, Infinity]] };
 const STD26 = { mfj: 32200, sgl: 16100 }, X65 = { mfj: 1650, sgl: 2050 };
 const ordOf = r => r.pen_y + r.work_y + r.rmd_y + r.tradDraw + r.othOrdDraw + r.conv_y;   // the fixtures carry no ordinary income stream (A-0)
+// v6.30 (D-60; docs/SCOPE_D60_DOLLAR_UNITS_V630.md): the bracket column's table indexes at §1(f)(3)'s chained CPI-U — the plan's inflation
+// less 0.25 point — through `projectBracketsAt`; through v6.29 at a flat 2%. IDX_RATE is that rate on each leg; the module's inflation is
+// read from its SCENARIOS table (Σ prob × inflation), and §E re-sets it from the DOM bundle's live table before reading the page. An array.
+const U630 = ["v630"].includes(VER);
+let IDX_RATE = U630 ? Object.values(g.SCENARIOS()).reduce((t, sc) => t + sc.prob * sc.inflation, 0) - 0.0025 : 0.02;
 // THE FIX (v6.12's rule set). `gainInRate` is DC-1's other option, used only to prove a fixture exercises it.
 const oracleFix = (r, tl, gainInRate = false) => {
   const single = !!tl.single, d1 = single ? Infinity : Math.min(tl.dobA.year + tl.lifeExpA, tl.dobB.year + tl.lifeExpB);
   const survA = single || (tl.dobA.year + tl.lifeExpA) >= (tl.dobB.year + tl.lifeExpB);
   const fs = single || r.yr > d1;                                         // Pub. 501: joint for the death year, Single from the next
-  const ss = r.ssA_y + r.ssB_y, ord = ordOf(r), key = fs ? "sgl" : "mfj", k = Math.pow(1.02, r.yr - tl.asOfYear);
+  const ss = r.ssA_y + r.ssB_y, ord = ordOf(r), key = fs ? "sgl" : "mfj", k = Math.pow(1 + IDX_RATE, r.yr - tl.asOfYear);
   const ssT = worksheet(ss, ord + r.capGain_y, !fs);
   const n65 = fs ? ((survA ? r.ageA : r.ageB) >= 65 ? 1 : 0) : (r.ageA >= 65 ? 1 : 0) + (r.ageB >= 65 ? 1 : 0);
   const std = Math.round(STD26[key] * k) + n65 * Math.round(X65[key] * k);
@@ -172,7 +177,17 @@ console.log("  B — hand-verified pins (scope §0.3; base scenario, no conversi
   // 44,000) + 6,000 = 25,238.59 (under the 0.85 × benefits cap); taxable 4,800 + 31,902.18 + 25,238.59 − 39,978 = 21,962.77 ≤ 27,929, so
   // still 10%. (DC_V617_SPENDING=1 reproduces 24,993.39.)
   // 2045, survivor B 79, Single: line 16 63,389.20 > line 17 51,873.68; deduction 23,455 + 2,986 = 26,441; taxable 98,200.17 in (73,423, 153,985].
-  if (POST) {
+  if (U630) {
+    // v6.30: the same worksheet, on each row's own legs (benefits in the year's dollars); the hand figures above are v6.29's.
+    const w = r => worksheet(r.ssA_y + r.ssB_y, ordOf(r) + r.capGain_y, !(r.yr > 2044));
+    EQ(`B-1 2032 (joint): taxable SS by the worksheet on the row's own legs — $${cents(w(ex(2032))).toLocaleString()}`, cents(ex(2032).ssTaxable), cents(w(ex(2032))));
+    EQ("B-2 2032: bracket — the oracle's", ex(2032).bracket, oracleFix(ex(2032), AT.EXAMPLE.tl).rate);
+    EQ(`B-3 2045 (survivor, Single): taxable SS — the 85% cap binds: 0.85 × $${cents(ex(2045).ssA_y + ex(2045).ssB_y).toLocaleString()}`, cents(ex(2045).ssTaxable), cents(0.85 * (ex(2045).ssA_y + ex(2045).ssB_y)));
+    T("B-3b …and it binds: the worksheet's line 16 exceeds line 17 there", (() => { const r = ex(2045), L1 = r.ssA_y + r.ssB_y, L7 = 0.5 * L1 + ordOf(r) + r.capGain_y;
+      return Math.max(0, L7 - 25000 - 9000) * 0.85 + Math.min(0.5 * L1, 0.5 * Math.min(L7 - 25000, 9000)) > 0.85 * L1; })());
+    EQ("B-4 2045: bracket — the oracle's (Single filing — the widow's penalty)", ex(2045).bracket, oracleFix(ex(2045), AT.EXAMPLE.tl).rate);
+    EQ("B-5 MODEST couple 2042: bracket — the oracle's", mo(2042).bracket, oracleFix(mo(2042), AT["MODEST couple (×0.3)"].tl).rate);
+  } else if (POST) {
     EQ(`B-1 2032 (joint): taxable SS ${P41("$24,993.39", "$25,238.59 (v6.18, D-41)")} by the worksheet`, cents(ex(2032).ssTaxable), P41(24993.39, 25238.59));
     EQ("B-2 2032: bracket 10%", ex(2032).bracket, 10);
     EQ("B-3 2045 (survivor, Single): taxable SS $51,873.68 — the 85% cap binds", cents(ex(2045).ssTaxable), 51873.68);
@@ -274,6 +289,7 @@ console.log("  E — the rendered tabs (the example, as a user first sees it)");
   // ⚠ The DOM bundle carries its OWN copy of the app module: read the household it rendered through `window.__g`, never `g` (which
   // still holds the last fixture above — a first draft did, and compared a 25-row table with a 16-row single household).
   const gd = window.__g, tl = gd.buildPlanTimeline();
+  if (U630) IDX_RATE = Object.values(gd.SCENARIOS()).reduce((t, sc) => t + sc.prob * sc.inflation, 0) - 0.0025;   // the page's own prior
   const W = gd.computeWithdrawalPlan({ retireYear: tl.targetRetireYear, rothAmount: 70000, scenarioPreset: "bull" }).schedule;
   const eoyOk = rowsDom.length === W.length && rowsDom.every((c, i) => c[0] === String(W[i].yr) && c[10] === `$${(W[i].portfolioTotal / 1e6).toFixed(2)}M`);
   T("E-1 SETUP: the Withdrawal table is found and its Year and EOY Portfolio columns equal the engine's (slider $70,000, bull) in every row", eoyOk, `${rowsDom.length} rows vs ${W.length}`);
@@ -290,7 +306,8 @@ console.log("  E — the rendered tabs (the example, as a user first sees it)");
   await click(tab("roth")); await flush(); const ro = text();
   const OLD = { ir: "the simplified 85%-of-SS assumption", tx: "Federal brackets are MFJ inflated 2%/yr", ro: "SS taxation: 85% taxable when provisional income > $44K (MFJ)" };
   const NEW = { ir: "Social Security taxed by the IRS worksheet, plus every other taxable component the plan generates",
-                tx: "Federal brackets follow the filing status (joint, or Single for a single household and from the year after the first death), inflated 2%/yr",
+                tx: U630 ? "Federal brackets follow the filing status (joint, or Single for a single household and from the year after the first death), indexed at the plan's inflation less 0.25 point"
+                         : "Federal brackets follow the filing status (joint, or Single for a single household and from the year after the first death), inflated 2%/yr",
                 ro: "SS taxation: up to 85% taxable above $44K of provisional income (MFJ; IRS worksheet, thresholds not indexed)" };
   for (const [k, page, name] of [["ir", ir, "IRMAA footnote"], ["tx", tx, "Taxes footnote"], ["ro", ro, "Roth assumptions"]]) {
     if (POST) T(`E-5 ${name}: states the §86 rule as the engines apply it, and the old sentence is gone (DC-4)`, page.includes(NEW[k]) && !page.includes(OLD[k]),

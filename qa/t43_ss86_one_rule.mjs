@@ -49,22 +49,34 @@ import { fileURLToPath } from "url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2];
-const KNOWN_VERSIONS = ["v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"];
+const KNOWN_VERSIONS = ["v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.\n    Registered: ${KNOWN_VERSIONS.join(", ")}`);
   process.exit(1);
 }
-const POST = VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629"))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629")))))))))))))))));
+const POST = VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630")))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630"))))))))))))))))));
 
 // Optional third argument: a module path, for the negative controls (qa/tools/controls_v577_ss86.py). The parser
 // check reads the .jsx beside it, so a control's mutant is what the structural check sees too.
 const MODPATH = process.argv[3] || `./app_${VER}.mjs`;
 const mod = await import(MODPATH);
 const G = mod.__g, E = mod.__engines;
+// v6.30 (D-60; docs/SCOPE_D60_DOLLAR_UNITS_V630.md): the IRMAA tiers index at CPI-U (the plan's inflation) and Engine C states each year in
+// its own dollars. §D's household was a knife-edge at the 2% proxy (MAGI $113,500 against a 2028 tier-1 floor of $113,404); at CPI-U the floor
+// is above it and the household no longer discriminates, so on the v6.30 leg its pension is raised to $64,500 — the single reading lands in
+// tier 1, the joint-threshold defect would not — and every figure is derived. §F's MAGI figures (measured through v6.29) are derived on this
+// leg from the shared federal oracle's §86 MAGI (qa/tools/fed_oracle_v630.mjs) on Engine B's rows for the same run, with Engine C's own
+// legs checked against Engine B's. `i` is Σ prob × inflation over this module's SCENARIOS table (units_v630.mjs).
+const U630 = ["v630"].includes(VER);   // an array, so register_tag2 widens it each release
+const I30 = Object.values(G.SCENARIOS()).reduce((t, sc) => t + sc.prob * sc.inflation, 0);
+let FED30 = null;
+if (U630) { const { existsSync } = await import("fs");
+  const _f = [new URL("./tools/fed_oracle_v630.mjs", import.meta.url), new URL("./fed_oracle_v630.mjs", import.meta.url)].find(u => existsSync(u));
+  FED30 = (await import(_f.href)).makeFedOracle; }
 // v6.18 (D-41): Engine D reads the expense table year by year, which moved three §F figures (they ride on the example's draws). PIN18
 // picks the v6.18 figures (measured at the build); the v6.18 leg is ALSO run with DC_V617_SPENDING=1, where §F loads v6.17's spending as
 // a table (qa/tools/v617_spending.mjs) and every v6.17 figure must still come out exactly — the attribution of each move.
-const POST_D41 = ["v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);   // an array, so the registrar widens it
+const POST_D41 = ["v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER);   // an array, so the registrar widens it
 const SPEND17 = POST_D41 && process.env.DC_V617_SPENDING === "1";
 const PIN18 = POST_D41 && !SPEND17;
 const P41 = (v617, v618) => PIN18 ? v618 : v617;
@@ -72,7 +84,7 @@ const P41 = (v617, v618) => PIN18 ? v618 : v617;
 // rides on its draws after 2036 moved. PIN21 picks the v6.21 figures (measured at the build). The v6.21 leg is ALSO run with
 // DC_V620_TABLE=1 — the example's table without its car rows, which is v6.20's — and there every v6.20 figure must come out exactly: that
 // second run attributes each move to the rows alone (runsuite.sh, "<suite>-<cur>-table620"; t84 C proves v6.21 on that table IS v6.20).
-const POST_D42 = ["v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);   // an array, so the registrar widens it
+const POST_D42 = ["v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER);   // an array, so the registrar widens it
 const TABLE620 = POST_D42 && process.env.DC_V620_TABLE === "1";
 const PIN21 = POST_D42 && !TABLE620;
 const P42 = (v620, v621) => PIN21 ? v621 : v620;
@@ -82,7 +94,7 @@ const P42 = (v620, v621) => PIN21 ? v621 : v620;
 // P49 picks the v6.23 figures; the v6.22 figures stay on the v6.22 leg. ATTRIBUTION, measured at the build: on each of the three tables
 // §F runs on, v6.23's Engine C rows equal v6.22's with the built-in work switched off (a $0 stream) — every row, bit for bit — so the whole
 // move is the wages (t86 §C proves the same across every engine). F-1, F-2 and F-5 do not move.
-const POST_D49 = ["v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);   // an array, so the registrar widens it
+const POST_D49 = ["v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER);   // an array, so the registrar widens it
 const P49 = (v622, v623) => POST_D49 ? v623 : v622;
 const EX0 = JSON.parse(JSON.stringify(G.EXPENSES())).filter(e => !(TABLE620 && e && e.label === "Replacement car"));   // v6.21: TABLE620 → v6.20's table
 const { v617Table } = await import("./tools/v617_spending.mjs");
@@ -237,6 +249,19 @@ if (POST) {
 }
 
 // ── D · the IRMAA consequence of §1f (Engine C, single household) ─────────────────────────────
+if (U630) {
+  const PEN = 64500, SS = 60000, thr = 109000 * Math.pow(1 + I30, 2028 - 2026);          // CMS 2026 single tier-1 floor, CPI-U to premium year 2028
+  const single = PEN + Math.min(0.85 * SS, 0.85 * (PEN + SS / 2 - 34000) + 4500);         // §86, single pair: the 85% cap binds — 115,500
+  const joint = PEN + Math.min(0.85 * SS, 0.85 * (PEN + SS / 2 - 44000) + 6000);          // the §1f defect's joint pair — 113,425
+  load(SS, PEN, false); const C = E.computeIrmaaPlan(AA), r = C.rows.find(x => x.yr === 2026);
+  T(`D-0 (v6.30) the fixture straddles the 2028 single tier-1 floor ($${Math.round(thr).toLocaleString()}): single reading above it, the joint-threshold defect below`,
+    single > thr && joint <= thr, true);
+  T(`D-1 single SS 60,000 / pension 64,500 (v6.30 fixture): MAGI ${single.toLocaleString()} (hand-checked)`, Math.round(r.magi), single);
+  T("D-2 …which is tier 1 (derived: above the CPI-U-indexed floor, below tier 2's)", r.tier, single > thr && single <= 137000 * Math.pow(1 + I30, 2) ? 1 : -1);
+  const want = C.rows.filter(x => x.tier > 0).reduce((t, x) => t + [0, 1150, 2880, 4620, 6360, 6940][x.tier] * x.personsOnMedicare * Math.pow(1 + I30, x.irmaaYr - 2026), 0);
+  T(`D-3 …and lifetime IRMAA is each surcharged year's $1,150-a-person tier at its premium year's dollars — $${want.toFixed(2)}`, Math.round(C.totalIrmaa), Math.round(want));
+  T("D-3b …and it is not zero (the fixture surcharges at least 2028)", C.totalIrmaa > 1150, true);
+} else {
 load(60000, 62500, false); { const C = E.computeIrmaaPlan(AA), r = C.rows.find(x => x.yr === 2026);
   if (POST) {
     T("D-1 single SS 60,000 / pension 62,500: MAGI 113,500 (hand-checked)", Math.round(r.magi), 113500);
@@ -246,7 +271,7 @@ load(60000, 62500, false); { const C = E.computeIrmaaPlan(AA), r = C.rows.find(x
     T("D-1 [KNOWN DEFECT §1f] MAGI 109,725 — joint thresholds on a single return", Math.round(r.magi), 109725);
     T("D-2 [KNOWN DEFECT §1f] tier 0", r.tier, 0);
     T("D-3 [KNOWN DEFECT §1f] no surcharge", Math.round(C.totalIrmaa), 0);
-  } }
+  } } }
 
 // ── F · §1f on a realistic household: the shipped example, made SINGLE ────────────────────────
 // Added at the build, after measuring that v5.77 raises this household's Engine C MAGI in eight years
@@ -260,6 +285,17 @@ load(60000, 62500, false); { const C = E.computeIrmaaPlan(AA), r = C.rows.find(x
   const RY = G.PLAN_TIMELINE().targetRetireYear, AF = { retireYear: RY, rothAmount: 0, qcdAnnual: 0, taxYield: 0, scenarioPreset: "base" };
   const S = G.withdrawalPlanSeries(AF), C = E.computeIrmaaPlan({ ...AF, gainByYr: S.gainByYr, ordDrawByYr: S.ordDrawByYr });
   const mg = (y) => Math.round(C.rows.find(x => x.yr === y).magi * 100) / 100;
+  if (U630) {
+    const B = E.computeTaxPlan({ ...AF, gainByYr: S.gainByYr, ordDrawByYr: S.ordDrawByYr }).rows, O = FED30(I30, G.PLAN_TIMELINE());
+    const om = y => Math.round(O(B.find(x => x.yr === y)).magi * 100) / 100;
+    const legs = [2030, 2032, 2038, 2039].every(y => { const b = B.find(x => x.yr === y), c = C.rows.find(x => x.yr === y);
+      return Math.abs(b.rmdTax_y - c.rmdTax_y) < 0.005 && Math.abs(b.conv_y - c.conv_y) < 0.005 && Math.abs(b.ordDraw_y - c.ordDraw_y) < 0.005; });
+    T("F-0 (v6.30) Engine C's RMD, conversion and draw legs are Engine B's in the four years read (so B's rows carry the same income)", legs, true);
+    T(`F-1 example made single, 2032 Engine C MAGI — the oracle's single-pair §86 MAGI, $${om(2032).toLocaleString()} ($78,768.81 at v5.77–v6.29)`, mg(2032), om(2032));
+    T(`F-2 example made single, 2038 Engine C MAGI — the oracle's, $${om(2038).toLocaleString()}`, mg(2038), om(2038));
+    T(`F-3 control: 2030 — the oracle's, $${om(2030).toLocaleString()}`, mg(2030), om(2030));
+    T(`F-4 control: 2039 — the oracle's, $${om(2039).toLocaleString()} (the 85% cap binds under either pair)`, mg(2039), om(2039));
+  } else {
   T(`F-1 example made single, 2032 Engine C MAGI${POST ? "" : " [KNOWN DEFECT §1f — $7,000 low]"}`, mg(2032), POST ? 78768.81 : 71768.81);
   // v6.18 (D-41): 2038, 2030 and 2039 move with the year-by-year spending read (2030 carries the spouse's $600 ACA row, which v6.17's
   // single-household FULL snapshot never did; from 2034 the car is paid off). 2032 does not move. The v6.17 figures hold under
@@ -269,6 +305,7 @@ load(60000, 62500, false); { const C = E.computeIrmaaPlan(AA), r = C.rows.find(x
     mg(2030), P49(P41(79075.84, 81701.22), P41(75883.88, 78594.39)));
   T(`F-4 control: 2039 ${P49(P41("unchanged on every leg", P42("$105,193.31 from v6.18 (D-41; $109,408.26 through v6.17)", "$104,896.41 from v6.21 (D-42: the car rows; $105,193.31 at v6.18–v6.20)")), P41("$108,571.47 from v6.23 (D-49; $109,408.26 on v6.17's spending, through v6.22)", P42("$104,352.23 from v6.23 (D-49; $105,193.31 at v6.18–v6.22)", "$104,055.33 from v6.23 (D-49: no built-in wages for a single plan; $104,896.41 at v6.21–v6.22)")))} (the 85% cap binds under either pair)`,
     mg(2039), P49(P41(109408.26, P42(105193.31, 104896.41)), P41(108571.47, P42(104352.23, 104055.33))));
+  }
   T("F-5 lifetime IRMAA $0 on every leg — on this household the correction moves MAGI, not the surcharge", Math.round(C.totalIrmaa), 0);
   if (SPEND17) G.applyLoadedData({ portfolio: JSON.parse(JSON.stringify(X)), expenses: JSON.parse(JSON.stringify(EX0)) });
 }
@@ -290,7 +327,7 @@ if (TOOL) {
       OK(`E-2 ${f} calls the shared helper`, callers.has(f), [...callers].join(","));
     // v6.12 (C-5): Engine D was the one engine outside the helper — it took a flat 85% of benefits, which E-1 cannot see (it reads no
     // threshold). Gated per leg; t75 D-4 adds the extinction that no `× 0.85` product survives outside the helper.
-    if (["v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER)) OK("E-2 computeWithdrawalPlan calls the shared helper (v6.12, C-5)", callers.has("computeWithdrawalPlan"), [...callers].join(","));
+    if (["v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER)) OK("E-2 computeWithdrawalPlan calls the shared helper (v6.12, C-5)", callers.has("computeWithdrawalPlan"), [...callers].join(","));
     else OK("E-2 [KNOWN DEFECT C-5, fixed v6.12] computeWithdrawalPlan does not call the helper (a flat 85%)", !callers.has("computeWithdrawalPlan"), [...callers].join(","));
     T("E-3 Engine A's private ssTaxF is gone", outer("ssTaxF", "any").length, 0);
   } else {

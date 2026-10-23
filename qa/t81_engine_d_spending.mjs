@@ -27,13 +27,13 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v618";
-const KNOWN_VERSIONS = ["v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"];
+const KNOWN_VERSIONS = ["v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER);   // an array, so the next registration widens it
 // The differential's pair — constants, NOT `VER === "v618"`, so the registrar cannot widen them (t76 records why).
 const D_PRIOR = "v617", D_CUR = "v618";
 const require = createRequire(import.meta.url);
@@ -45,7 +45,7 @@ const SRC = readFileSync(join(HERE, "..", `${VER}.jsx`), "utf8");
 // rides on its draws after 2036 moved. PIN21 picks the v6.21 figures (measured at the build). The v6.21 leg is ALSO run with
 // DC_V620_TABLE=1 — the example's table without its car rows, which is v6.20's — and there every v6.20 figure must come out exactly: that
 // second run attributes each move to the rows alone (runsuite.sh, "<suite>-<cur>-table620"; t84 C proves v6.21 on that table IS v6.20).
-const POST_D42 = ["v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);   // an array, so the registrar widens it
+const POST_D42 = ["v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER);   // an array, so the registrar widens it
 const TABLE620 = POST_D42 && process.env.DC_V620_TABLE === "1";
 const PIN21 = POST_D42 && !TABLE620;
 const P42 = (v620, v621) => PIN21 ? v621 : v620;
@@ -116,7 +116,12 @@ HH.push(["stress table", { p: clone(BASE), ex: STRESS_EX }]);
 console.log("  A — Engine D's spending against an independent oracle");
 T("A-0: SETUP — SURVIVOR_SPEND_FACTOR read from the source", Number.isFinite(SURV) && SURV > 0 && SURV < 1, String(SURV));
 const infl = g.expectedInflation();
-const oracleSched = (X, t, RY) => yr => oYear(X, yr, deathYr1(t)) * Math.pow(1 + infl, Math.max(0, yr - RY));
+// v6.30 (D-60, DU-1 (a); docs/SCOPE_D60_DOLLAR_UNITS_V630.md): ONE inflation clock — Engine D now inflates the table from the as-of year, as
+// the Monte Carlo always has; through v6.29 it inflated from the retirement year (a second clock). The oracle's exponent follows the leg.
+// An array, so register_tag2 widens it each release.
+const U630 = ["v630"].includes(VER);
+const clock0 = (t, RY) => U630 ? t.asOfYear : RY;
+const oracleSched = (X, t, RY) => yr => oYear(X, yr, deathYr1(t)) * Math.pow(1 + infl, Math.max(0, yr - clock0(t, RY)));
 let hhDiffer = 0;
 for (const [name, { p, ex }] of HH) {
   const t = load(p, ex), RY = t.targetRetireYear, S = sched(RY), O = oracleSched(ex, t, RY);
@@ -142,17 +147,21 @@ if (!POST) T(`A-1 ${KD} the snapshots disagree with the oracle on most household
   T("A-4 hand: the example's 2029 one-time rows are $28,000 (golf cart $20,000 + closing costs $8,000)", oYear(EX, 2029) - [...Array(12)].reduce((s, _, i) => s + oMonth(EX, ymOf(2029, i + 1)), 0) === 28000);
   T("A-5 hand: 2033 is twelve months at $8,020 = $96,240; 2034 drops the car after April: $96,240 − 8 × $400 = $93,040", oYear(EX, 2033) === 96240 && oYear(EX, 2034) === 93040);
   if (POST) {
-    T("A-6 the example's first year (2029, no inflation yet) is $126,280: $98,280 of monthly rows for the months they run + $28,000 one-time", Math.abs(at(2029).exp_y - 126280) < 0.005, at(2029) && at(2029).exp_y);
+    const k29 = Math.pow(1 + infl, 2029 - clock0(t, t.targetRetireYear));
+    T(U630 ? `A-6 the example's first year (2029) is $126,280 — $98,280 of monthly rows for the months they run + $28,000 one-time — × (1+i)^3 from the as-of year: $${(126280 * k29).toFixed(2)}`
+           : "A-6 the example's first year (2029, no inflation yet) is $126,280: $98,280 of monthly rows for the months they run + $28,000 one-time", Math.abs(at(2029).exp_y - 126280 * k29) < 0.005, at(2029) && at(2029).exp_y);
     const s44 = at(2044), d1 = deathYr1(t);
     T(`A-7 the survivor year (${d1}): its monthly rows are $7,620 × 12 = $91,440 (the car long paid off), × the survivor factor ${SURV}, × inflation`,
-      d1 === 2044 && Math.abs(s44.exp_y - 91440 * SURV * Math.pow(1 + infl, 2044 - t.targetRetireYear)) < 0.005, s44 && s44.exp_y);
+      d1 === 2044 && Math.abs(s44.exp_y - 91440 * SURV * Math.pow(1 + infl, 2044 - clock0(t, t.targetRetireYear))) < 0.005, s44 && s44.exp_y);
   } else {
     T(`A-6 ${KD} the example's 2029 is the June 2029 snapshot × 12 = $98,040 (no one-time rows)`, Math.abs(at(2029).exp_y - 98040) < 0.005, at(2029) && at(2029).exp_y);
     const s34 = at(2034);
     T(`A-7 ${KD} 2034 still charges the car for twelve months: $8,020 × 12 × inflation`, Math.abs(s34.exp_y - 8020 * 12 * Math.pow(1 + infl, 2034 - t.targetRetireYear)) < 0.005, s34 && s34.exp_y);
   }
   const { p, ex } = shifted(3), t3 = load(p, ex), S3 = sched(t3.targetRetireYear);
-  if (POST) T("A-8 the same plan 3 years later spends the same first year: $126,280 in 2032", Math.abs(S3[0].exp_y - 126280) < 0.005, S3[0].exp_y);
+  if (U630) T(`A-8 the same plan 3 years later spends the same first year in today's dollars: $126,280 in 2032 — × (1+i)^6 from the as-of year, $${(126280 * Math.pow(1 + infl, 2032 - t3.asOfYear)).toFixed(2)}`,
+    Math.abs(S3[0].exp_y - 126280 * Math.pow(1 + infl, 2032 - t3.asOfYear)) < 0.005, S3[0].exp_y);
+  else if (POST) T("A-8 the same plan 3 years later spends the same first year: $126,280 in 2032", Math.abs(S3[0].exp_y - 126280) < 0.005, S3[0].exp_y);
   else T(`A-8 ${KD} the same plan 3 years later spends $6,700 × 12 = $80,400 in 2032 — the June 2029 table, still holding the current home`, Math.abs(S3[0].exp_y - 80400) < 0.005, S3[0].exp_y);
 }
 // The one function, unit-tested against the oracle across the table's whole range.
@@ -287,7 +296,7 @@ console.log("  C2 — D-45: the Monte Carlo's one-time rows (pinned)");
   // v6.20 (D-45 fixed — docs/SCOPE_D40_MC_TAX_V620.md): a one-time row is charged in the quarter that contains its month, so the April
   // rows now move both engines; C2-3's April-vs-June control no longer discriminates (they are the same quarter, charged identically) and
   // is retired in favour of t83 C (every month of two years, exact on both planned paths). An array, so the registrar widens it.
-  const FIXED45 = ["v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);
+  const FIXED45 = ["v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER);
   if (FIXED45) T("C2-2 [FIXED v6.20 — was KNOWN DEFECT 2026-10-18, D-45] the April rows now reach both Monte Carlo engines: output differs with and without them", base !== mcOf(noOnce));
   else {
     T(`C2-2 ${KD45} both Monte Carlo engines give byte-identical output with or without the April rows — they are never charged`, base === mcOf(noOnce));
@@ -393,20 +402,24 @@ console.log("  E — rendered: the Withdrawal tab, Backtest, What Breaks, the Ex
   const w = await tab("withdrawal");
   T("E-0 SETUP: the app renders the example and the Withdrawal tab", /WITHDRAWAL STRATEGY/i.test(w));
   const c29 = cellOf(2029, "Expenses"), c33 = cellOf(2033, "Expenses");
+  // v6.30: the page runs under its default prior; its inflation is read off the DOM bundle's live table (Σ prob × inflation)
+  const _iD = Object.values(window.__g.SCENARIOS()).reduce((u, x) => u + x.prob * x.inflation, 0), KD3 = y => Math.pow(1 + _iD, y - window.__g.PLAN_TIMELINE().asOfYear);
   if (POST) {
     T("E-1 the Withdrawal tab says where its spending comes from, and claims nothing about the Monte Carlo", !!body().querySelector("[data-dc-spend-source]") && /each year's own dates/.test(w) && /one-time row dated before 2029 is not in this schedule\./.test(w) && !/Monte Carlo takes it/.test(w));
-    T("E-2 the schedule's 2029 Expenses cell carries the one-time rows: $126K", c29 === "$126K", c29);
+    if (U630) T(`E-2 the schedule's 2029 Expenses cell carries the one-time rows: $126,280 × (1+i)^3 at the page's inflation = $${Math.round(126280 * KD3(2029) / 1000)}K`, c29 === `$${Math.round(126280 * KD3(2029) / 1000)}K`, c29);
+    else T("E-2 the schedule's 2029 Expenses cell carries the one-time rows: $126K", c29 === "$126K", c29);
   } else {
     T(`E-1 ${KD} the Withdrawal tab never says where its spending comes from`, !body().querySelector("[data-dc-spend-source]") && !/each year's own dates/.test(w));
     T(`E-2 ${KD} the schedule's 2029 Expenses cell is the June 2029 snapshot: $98K`, c29 === "$98K", c29);
   }
-  T("E-3 2033's Expenses cell is the same on both legs ($8,020 × 12 × inflation, the car still running): $106K", c33 === "$106K", c33);
+  if (U630) T(`E-3 2033's Expenses cell is $8,020 × 12 × (1+i)^7 from the as-of year at the page's inflation (the car still running): $${Math.round(96240 * KD3(2033) / 1000)}K`, c33 === `$${Math.round(96240 * KD3(2033) / 1000)}K`, c33);
+  else T("E-3 2033's Expenses cell is the same on both legs ($8,020 × 12 × inflation, the car still running): $106K", c33 === "$106K", c33);
   const bt = await tab("backtest");
   const btWorst = (bt.match(/Worst start year\s*(\d{4})\s*ended \$([\d.]+)M real/) || []);
   T("E-4 SETUP: Backtest renders its worst start year", btWorst.length === 3, bt.slice(0, 200));
   if (POST) T(`E-5 Backtest on the example: the worst start (1966) now ends ${P42("$1.43M real — lower lifetime spending (the car paid off from 2034) outweighs 2029's one-time rows (measured at the build)", "$1.21M real (v6.21, D-42: the four car rows; $1.43M at v6.18–v6.20)")}`, btWorst[1] === "1966" && btWorst[2] === P42("1.43", "1.21"), btWorst.slice(1).join(" / "));
   else T(`E-5 ${KD} Backtest on the example: the worst start (1966) ends $1.31M real on the snapshots`, btWorst[1] === "1966" && btWorst[2] === "1.31", btWorst.slice(1).join(" / "));
-  T("E-6 the Backtest comparison no longer says the backtest omits one-time expenses, and says when the MC charges one", ["v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER)
+  T("E-6 the Backtest comparison no longer says the backtest omits one-time expenses, and says when the MC charges one", ["v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER)
     ? /\(Both spend your one-time expenses: this backtest from v6\.18, the MC in the quarter each one falls from v6\.20\.\)/.test(bt) && !/one-time expenses, and Roth-conversion tax drag/.test(bt)
     : POST ? /From v6\.18 this backtest spends your one-time expenses; the MC charges one only when it is dated in March, June, September or December\./.test(bt) && !/one-time expenses, and Roth-conversion tax drag that this backtest deliberately omits/.test(bt)
     : /one-time expenses, and Roth-conversion tax drag that this backtest deliberately omits/.test(bt));
@@ -425,7 +438,7 @@ console.log("  F — the copy");
 {
   const docs = g.DOCS_HTML();
   if (POST) T("F-1 the Field Manual's Withdrawal Strategy entry says how spending is read, when the Monte Carlo charges a one-time row (D-45), and dates the fix",
-    /<strong>Spending<\/strong> is your expense table at each year's own dates/.test(docs) && (["v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER) ? /From v6\.20 the Monte Carlo charges a one-time row in the quarter that contains its month/.test(docs) && /only when the row was dated in one of those months/.test(docs) : /only when the row is dated in one of those months/.test(docs)) && /never arrived \(v6\.18\)/.test(docs) && !/takes it from the portfolio when it falls/.test(docs));
+    /<strong>Spending<\/strong> is your expense table at each year's own dates/.test(docs) && (["v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER) ? /From v6\.20 the Monte Carlo charges a one-time row in the quarter that contains its month/.test(docs) && /only when the row was dated in one of those months/.test(docs) : /only when the row is dated in one of those months/.test(docs)) && /never arrived \(v6\.18\)/.test(docs) && !/takes it from the portfolio when it falls/.test(docs));
   else T(`F-1 ${KD} the Field Manual never says how the Withdrawal tab's spending is read`, !/each year's own dates/.test(docs));
   if (POST) T("F-2 the stale \"Defaults: $7,047 … $8,313\" comment is gone", !/Defaults: \$7,047 pre-retire, \$8,313 post-retire/.test(SRC));
   else T(`F-2 ${KD} the stale "Defaults: $7,047 … $8,313" comment is present`, /Defaults: \$7,047 pre-retire, \$8,313 post-retire/.test(SRC));

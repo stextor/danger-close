@@ -77,10 +77,17 @@ const SGL_R = [109000, 137000, 171000, 205000, 500000, Infinity];
 const MFJ_R = [218000, 274000, 342000, 410000, 750000, Infinity];
 // The app's DISCLOSED approximate annual surcharge (see the header). Case A bounds it.
 const APP_SUR = [0, 1150, 2880, 4620, 6360, 6940];
-// Indexation rules. The 2%/yr proxy is the app's disclosed modeling assumption (METHODOLOGY §6);
-// WHICH YEAR it applies to, and the freeze, are statute and are the part asserted here.
-// BBA-2018 (P.L. 115-123) §53114 froze the top tier through 2027, indexing only from 2028.
-const IDX = 1.02, BASE_YR = 2026, TOP_FROZEN_THROUGH = 2027;
+// Indexation rules. v6.30 (D-60; docs/SCOPE_D60_DOLLAR_UNITS_V630.md): the tiers index with CPI-U (§1839(i)(5)), modelled as the
+// plan's inflation — Σ prob × inflation over the SCENARIOS table this module runs on (BASE weights), read from the table via
+// units_v630.mjs, never from the app's helper (through v6.29, a flat 2%/yr proxy). WHICH YEAR it applies to, and the freeze, are statute
+// and are the part asserted here. BBA-2018 (P.L. 115-123) §53114 froze the top tier through 2027, indexing only from 2028.
+// The SURCHARGE is a premium, billed in the premium year's dollars: the 2026 amounts × (1+i)^(premium year − 2026) (DU-5).
+// An explicit pre-v6.30 tag (a frozen leg) keeps the 2% proxy and today's-dollar surcharges it was built on.
+const { planInflation, factor, isV630 } = await import("./units_v630.mjs");
+const U630 = !VER || isV630(VER);
+const INF = U630 ? planInflation(G.SCENARIOS()) : 0.02;
+const IDX = 1 + INF, BASE_YR = 2026, TOP_FROZEN_THROUGH = 2027;
+const surRef = (tier, persons, premiumYr) => APP_SUR[tier] * persons * (U630 ? factor(INF, premiumYr, BASE_YR) : 1);
 const thrRef = (upper, isTop, premiumYr) => !Number.isFinite(upper) ? upper
   : upper * Math.pow(IDX, isTop ? Math.max(0, premiumYr - TOP_FROZEN_THROUGH) : premiumYr - BASE_YR);
 
@@ -136,7 +143,7 @@ for (const [label, uppers, single] of [["MFJ", MFJ_R, false], ["SGL", SGL_R, tru
     {
       const r = build({ magi: THR - 1, single }).rowAt(Y);
       T(`${label} tier ${i} border $${Math.round(THR)} \u2212 $1 stays in tier ${i}`, r.tier, i);
-      T(`${label} tier ${i} border \u2212 $1: surcharge`, r.surchargeAnnual, APP_SUR[i] * persons);
+      T(`${label} tier ${i} border \u2212 $1: surcharge`, r.surchargeAnnual, surRef(i, persons, PY), 0.01);
     }
     {
       const r = build({ magi: THR + 1, single }).rowAt(Y);
@@ -165,7 +172,7 @@ console.log("\n  case C \u2014 2-year lookback and premium-year indexation (F-2B
 // ══ CASE D — the top tier is frozen through 2027 (F-2B-2) ══
 console.log("\n  case D \u2014 top tier frozen through 2027, indexed only from 2028 (BBA-2018 \u00a753114)");
 {
-  const frozen = thrRef(MFJ_R[4], true, PY);            // 750000 * 1.02^(2033-2027)
+  const frozen = thrRef(MFJ_R[4], true, PY);            // 750000 * (1+i)^(2033-2027)
   const ifIndexed = MFJ_R[4] * Math.pow(IDX, PY - BASE_YR); // the pre-v5.14 (wrong) behaviour
   CK(`frozen base differs from a fully-indexed one by $${Math.round(ifIndexed - frozen)}`,
      ifIndexed - frozen > 10000);
@@ -188,7 +195,7 @@ console.log("\n  case E \u2014 per-person count, gated on the premium year");
   CK("there is a window where exactly one spouse is on Medicare", !!oneRow,
      `persons seen: ${[...new Set(plan.rows.map(r => r.personsOnMedicare))].join(",")}`);
   if (oneRow) T("...and in it the surcharge is charged once, not twice",
-                oneRow.surchargeAnnual, APP_SUR[oneRow.tier] * 1);
+                oneRow.surchargeAnnual, surRef(oneRow.tier, 1, oneRow.irmaaYr), 0.01);
   const zeroRow = plan.rows.find(r => r.irmaaYr < medA);
   CK("before either spouse is on Medicare nothing is charged", !zeroRow || zeroRow.surchargeAnnual === 0);
 }
@@ -211,7 +218,7 @@ console.log("\n  case F \u2014 survivor filing switch and the narrower Single ta
   CK(`the same MAGI lands in a higher tier once filed Single (${before.tier} -> ${after.tier})`,
      after.tier > before.tier, `before ${before.tier}, after ${after.tier}`);
   T("survivor is one person on Medicare", after.personsOnMedicare, 1);
-  T("survivor surcharge is that tier, charged once", after.surchargeAnnual, APP_SUR[after.tier] * 1);
+  T("survivor surcharge is that tier, charged once", after.surchargeAnnual, surRef(after.tier, 1, after.irmaaYr), 0.01);
 }
 
 // ══ CASE G — QCDs are excluded from MAGI, to the dollar ══

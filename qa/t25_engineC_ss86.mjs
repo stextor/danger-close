@@ -32,23 +32,23 @@ import { fileURLToPath, pathToFileURL } from "url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v543";
-const KNOWN_VERSIONS = ["v541", "v542", "v543", "v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"];
+const KNOWN_VERSIONS = ["v541", "v542", "v543", "v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST_FIX = VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629"))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629"))))))))))))))))))));
+const POST_FIX = VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630")))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630")))))))))))))))))))));
 // v5.47 — tidy-up item 5 held the HSA out of the dividend base, which lowers Engine C's MAGI on
 // this household by $300/yr. Legs v541-v546 keep asserting their own correct pre-item-5 figures.
-const POST_ITEM5 = VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629"))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629"))))))))))))))))))));
+const POST_ITEM5 = VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630")))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630")))))))))))))))))))));
 
 // v6.07 (D-33 — docs/SCOPE_D33_ANNUITY_CONVERSION_V607.md): the engines carry the annuity dollars, so no RMD or conversion drains spouse B's
 // $7,000 annuity. Spouse B's convertible balance is smaller, so more of each year's pooled conversion lands on spouse A, whose RMD from 2039
 // is therefore lower: Engine C's RMD falls $155 (2039), $175 (2040), $231, $251, $272 (2041-2043). MAGI follows one for one past §86
 // convergence and x1.85 inside the phase-in (−$428, −$465, −$504); headroom moves by the same amounts the other way. The RMDs are
 // reproduced by t70 §C's independent recursion. An array, so register_tag2 widens it each release.
-const POST_D33 = ["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);
+const POST_D33 = ["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER);
 
 // The repo keeps the oracle at qa/tools/hand_86.mjs; PROJECT KNOWLEDGE IS FLAT and holds it beside
 // the suites. Resolve rather than assume, and say which copy was used (the t21/t24 pattern).
@@ -78,6 +78,47 @@ for (const k of ["yr", "magi", "tier", "surchargeAnnual", "headroom", "filingSin
   T(`A-3: rows expose \`${k}\``, rows[0] && k in rows[0]);
 const by = Object.fromEntries(rows.map(r => [r.yr, r]));
 
+// ── v6.30 (D-60; docs/SCOPE_D60_DOLLAR_UNITS_V630.md) — Engine C in each year's own dollars ─────────────────────────────────────────
+// Every frozen figure below (§B, §C) is a v6.29-unit fact. On the v6.30 leg each is computed instead by an INDEPENDENT replica of this
+// run's MAGI, built from the rules and this module's primitives, never from Engine C's code: the Traditional recursion is t70 §C's
+// carried-annuity rule (RMD on the non-annuity dollars, prior-31-Dec basis, Pub. 590-B divisors; the conversion capped at the non-annuity
+// total less the RMD and split by it; 4.5 % growth), seeded × (1+i)^(2029 − as-of); Social Security from each claim date, × (1+i)^(yr −
+// as-of); the dividend on the HSA-held-out base, × the same factor, rounded; the pension and the built-in work fixed; §86 from the statute
+// oracle; headroom against the tier-0 MFJ threshold indexed at CPI-U to the premium year. `i` is Σ prob × inflation over this module's
+// SCENARIOS table (BASE weights), read through units_v630.mjs. No draw or gain series is passed, so neither enters (as on every leg).
+const { isV630, planInflation, factor, carryHold } = await import(pathToFileURL(join(HERE, "units_v630.mjs")).href);
+const U630 = isV630(VER);
+const REP = (() => {
+  if (!U630) return null;
+  const tl = __g.PLAN_TIMELINE(), i = planInflation(__g.SCENARIOS()), asOf = tl.asOfYear, k = y => factor(i, y, asOf);
+  const ULT = { 72: 27.4, 73: 26.5, 74: 25.5, 75: 24.6, 76: 23.7, 77: 22.9, 78: 22.0, 79: 21.1, 80: 20.2 };   // IRS Pub. 590-B
+  const r = __g.retireStartBalances(2029), RB = k(2029);
+  // DU-7 (a): holdings carried, the contribution accrual at face (carryHold); annuity money (tradInit − rmdInit) holds no accrual
+  let tA = carryHold(r.tradInitA, r.accTradA, RB), tB = carryHold(r.tradInitB, r.accTradB, RB), nA = (r.tradInitA - r.rmdInitA) * RB, nB = (r.tradInitB - r.rmdInitB) * RB;
+  const ssPaid = (amt, d, y) => y > d.year ? amt * 12 : y === d.year ? amt * Math.max(0, 13 - d.month) : 0;
+  const divBase = Math.max(0, __g.taxableInitAll() - (r.othHsa || 0));
+  const pen = __g.getPension() * 12, work = y => (y === 2029 ? 20000 : y === 2030 ? 18000 : y === 2031 ? 15000 : 0);
+  const out = {};
+  for (let yr = 2029; yr < Math.min(tl.dobA.year + tl.lifeExpA, tl.dobB.year + tl.lifeExpB); yr++) {
+    const ageA = yr - tl.dobA.year, ageB = yr - tl.dobB.year;
+    const qA = tA - nA, qB = tB - nB;
+    const rA = ageA >= __g.rmdStartAge(tl.dobA.year) && qA > 0 ? qA / ULT[ageA] : 0;
+    const rB = ageB >= __g.rmdStartAge(tl.dobB.year) && qB > 0 ? qB / ULT[ageB] : 0;
+    const win = yr <= tl.rothLadderEnd ? 70000 : 0;
+    const conv = Math.min(win, Math.max(0, qA + qB - (rA + rB)));
+    const xA = Math.max(0, qA - rA), xB = Math.max(0, qB - rB), fA = xA + xB > 0 ? xA / (xA + xB) : 0;
+    tA = Math.max(0, Math.max(0, tA - rA) - conv * fA) * 1.045; tB = Math.max(0, Math.max(0, tB - rB) - conv * (1 - fA)) * 1.045;
+    nA *= 1.045; nB *= 1.045;
+    const ss = (ssPaid(__g.getSSA(), tl.ssA_date, yr) + ssPaid(__g.getSSB(), tl.ssB_date, yr)) * k(yr);
+    const div = Math.round(divBase * 0.02 * k(yr)), divHsa = Math.round(__g.taxableInitAll() * 0.02 * k(yr));
+    const other = pen + work(yr) + rA + rB + conv;
+    const magi = statute86(ss, other + div, true) + other + div;
+    const magiPre5 = statute86(ss, other + divHsa, true) + other + divHsa;   // item 5's counterfactual: the HSA's dividend left in
+    out[yr] = { magi, magiPre5, dDiv: divHsa - div, headroom: 218000 * Math.pow(1 + i, yr + 2 - 2026) - magi, ss };
+  }
+  return { rows: out, i, k };
+})();
+
 // ── §B · the three years the correction moves, pinned TO THE DOLLAR ──────────────────────
 // Both the pre-fix and post-fix figures are named, so the pair is the before/after witness and
 // neither leg can drift onto the other's numbers.
@@ -102,8 +143,10 @@ const HEADROOM = POST_D33
   : POST_FIX
   ? { 2041: 211761, 2042: 214170, 2043: 216635 }
   : { 2041: 203505, 2042: 207612, 2043: 211806 };
+if (U630) { for (const y of Object.keys(MOVERS)) { MOVERS[y] = Math.round(REP.rows[y].magi); HEADROOM[y] = Math.round(REP.rows[y].headroom); }
+  console.log(`  (v6.30 replica: plan inflation ${(REP.i * 100).toFixed(3)}%; 2041–2043 MAGI ${Object.values(MOVERS).map(usd).join(" / ")})`); }
 for (const [yr, want] of Object.entries(MOVERS)) {
-  T(`B[${yr}]: MAGI is ${usd(want)} exactly${POST_FIX ? "" : " [KNOWN DEFECT \u2014 the flat-85% figure]"}`,
+  T(`B[${yr}]: MAGI is ${usd(want)} exactly${U630 ? " (the v6.30 replica's)" : ""}${POST_FIX ? "" : " [KNOWN DEFECT \u2014 the flat-85% figure]"}`,
     by[yr] && Math.round(by[yr].magi) === want, by[yr] ? usd(by[yr].magi) : "no row");
   T(`B[${yr}]: rendered headroom is ${usd(HEADROOM[yr])} exactly`,
     by[yr] && Math.round(by[yr].headroom) === HEADROOM[yr], by[yr] ? usd(by[yr].headroom) : "no row");
@@ -126,6 +169,7 @@ const UNCHANGED = POST_D33 ? {
   2029: 108780, 2030: 106780, 2031: 137440, 2032: 122440, 2033: 122440, 2034: 122440,
   2035: 122440, 2036: 122440, 2037: 122440, 2038: 122440, 2039: 166103, 2040: 165289,
 };
+if (U630) for (const y of Object.keys(UNCHANGED)) UNCHANGED[y] = Math.round(REP.rows[y].magi);
 let moved = [];
 for (const [yr, want] of Object.entries(UNCHANGED))
   if (!by[yr] || Math.round(by[yr].magi) !== want) moved.push(`${yr}: want ${usd(want)} got ${by[yr] ? usd(by[yr].magi) : "none"}`);
@@ -227,12 +271,27 @@ if (POST_ITEM5) {
     PRE_UNCHANGED = { 2029: _pre[2029], 2039: _pre[2039], 2040: _pre[2040] };
     PRE_MOVERS = { 2041: _pre[2041], 2042: _pre[2042], 2043: _pre[2043] };
   }
+  if (U630) {
+    // v6.30: the HSA's dividend is $300 TODAY and grows with the year (× (1+i)^(yr − as-of), rounded), so the two statements are made on
+    // each year's own figure, ΔD: past convergence the move is exactly ΔD; inside the phase-in it is ΔD × 1.85 (±$1 of rounding). The
+    // replica must agree with the engine's own counterfactual run to the dollar first.
+    const sameRep = Object.keys({ ...PRE_UNCHANGED, ...PRE_MOVERS }).every(y => Math.round(REP.rows[y].magiPre5) === Math.round(PRE_UNCHANGED[y] ?? PRE_MOVERS[y]));
+    T("E-2b (v6.30 units): the engine's HSA-as-taxable run is the replica's item-5 counterfactual, to the dollar, in all six years", sameRep,
+      Object.keys({ ...PRE_UNCHANGED, ...PRE_MOVERS }).map(y => `${y}: ${PRE_UNCHANGED[y] ?? PRE_MOVERS[y]}/${Math.round(REP.rows[y].magiPre5)}`).join(" "));
+    T("E-3 [EXTINCTION] (v6.30 units): past convergence, item 5 moves MAGI by exactly that year's HSA dividend \u2014 undamped",
+      Object.entries(PRE_UNCHANGED).every(([y, pre]) => by[y] && pre - Math.round(by[y].magi) === REP.rows[y].dDiv),
+      Object.entries(PRE_UNCHANGED).map(([y, pre]) => `${y}: ${pre - (by[y] ? Math.round(by[y].magi) : NaN)} vs ${REP.rows[y].dDiv}`).join(" "));
+    T("E-4 [EXTINCTION] (v6.30 units): inside the \u00a786 phase-in it moves 1.85 \u00d7 that dividend \u2014 the second-order term",
+      Object.entries(PRE_MOVERS).every(([y, pre]) => by[y] && Math.abs(pre - Math.round(by[y].magi) - 1.85 * REP.rows[y].dDiv) <= 1),
+      Object.entries(PRE_MOVERS).map(([y, pre]) => `${y}: ${pre - (by[y] ? Math.round(by[y].magi) : NaN)} vs ${(1.85 * REP.rows[y].dDiv).toFixed(2)}`).join(" "));
+  } else {
   T("E-3 [EXTINCTION]: past convergence, item 5 moves MAGI by exactly $300 \u2014 the dividend, undamped",
     Object.entries(PRE_UNCHANGED).every(([y, pre]) => by[y] && pre - Math.round(by[y].magi) === 300),
     Object.entries(PRE_UNCHANGED).map(([y, pre]) => `${y}: ${pre - (by[y] ? Math.round(by[y].magi) : NaN)}`).join(" "));
   T("E-4 [EXTINCTION]: inside the \u00a786 phase-in it moves $555 = $300 x 1.85 \u2014 the second-order term",
     Object.entries(PRE_MOVERS).every(([y, pre]) => by[y] && pre - Math.round(by[y].magi) === 555),
     Object.entries(PRE_MOVERS).map(([y, pre]) => `${y}: ${pre - (by[y] ? Math.round(by[y].magi) : NaN)}`).join(" "));
+  }
 
   // NEGATIVE CONTROL. $300/yr of MAGI is 2% of a $15,000 HSA, so the control that discriminates
   // is the SIZE: if the fix ever held out the wrong quantity — the whole Other-accounts pool,
@@ -316,8 +375,9 @@ if (POST_ITEM5) {
     const got = r.magi - z.magi;                   // the includible SS, isolated
     const mfj = !r.filingSingleI;
     checked++;
-    if ((other + 0.5 * SS_ANNUAL - THR1) > SS_ANNUAL) inBand++;
-    const want = statute86(SS_ANNUAL, other, mfj);
+    if ((other + 0.5 * (U630 ? SS_ANNUAL * REP.k(r.yr) : SS_ANNUAL) - THR1) > (U630 ? SS_ANNUAL * REP.k(r.yr) : SS_ANNUAL)) inBand++;
+    const ssY = U630 ? SS_ANNUAL * REP.k(r.yr) : SS_ANNUAL;   // v6.30: the benefit in the row's own dollars
+    const want = statute86(ssY, other, mfj);
     if (Math.abs(got - want) > 0.01) bad.push(`${r.yr}: want ${usd(want)} got ${usd(got)}`);
   }
   T("F-B-2: Engine C's includible SS matches the §86 statute TO THE CENT on this fixture",
@@ -362,11 +422,12 @@ if (POST_ITEM5) {
   for (const r of (gA.rows || [])) {
     const z = (gZ.rows || []).find(x => x.yr === r.yr);
     if (!z || r.ageA < 67 || r.yr >= gA._deathYr1) continue;
-    const other = z.magi, prov = other + 0.5 * SS_A;
+    const ssY = U630 ? SS_A * REP.k(r.yr) : SS_A;   // v6.30: the benefit in the row's own dollars
+    const other = z.magi, prov = other + 0.5 * ssY;
     checked++;
     if (prov > THR1G && prov <= THR2G) {
       mid++;
-      const want = statute86(SS_A, other, !r.filingSingleI);
+      const want = statute86(ssY, other, !r.filingSingleI);
       const got = r.magi - z.magi;
       if (Math.abs(got - want) > 0.01) bad.push(`${r.yr}: want ${usd(want)} got ${usd(got)}`);
     }

@@ -31,12 +31,12 @@ const require = createRequire(import.meta.url);
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2];
-const KNOWN_VERSIONS = ["v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"];
+const KNOWN_VERSIONS = ["v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.\n    Registered: ${KNOWN_VERSIONS.join(", ")}`);
   process.exit(1);
 }
-const POST = VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629"))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629")))))))))))))))));
+const POST = VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630")))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630"))))))))))))))))));
 const MODPATH = process.argv[3] || `./app_${VER}.mjs`;
 const mod = await import(MODPATH);
 const G = mod.__g, E = mod.__engines;
@@ -50,7 +50,13 @@ console.log(`t44 — THE IRMAA TOP TIER STARTS AT ITS THRESHOLD (${VER})`);
 
 const SGL = [109000, 137000, 171000, 205000, 500000, Infinity], MFJ = [218000, 274000, 342000, 410000, 750000, Infinity];
 const SUR = [0, 1150, 2880, 4620, 6360, 6940];
-const thrOf = (uppers, i, PY) => uppers[i] * Math.pow(1.02, i === 4 ? Math.max(0, PY - 2027) : PY - 2026);
+// v6.30 (D-60; docs/SCOPE_D60_DOLLAR_UNITS_V630.md): the tiers index at CPI-U, modelled as the plan's inflation (Σ prob × inflation over this
+// module's SCENARIOS table), and a surcharge is billed in its premium year's dollars, × (1+i)^(PY − 2026). Through v6.29 a flat 2% and
+// 2026-dollar surcharges; every earlier leg keeps exactly that. The statute's rule under test ("not more than" / "at least") is unchanged.
+const U630 = ["v630"].includes(VER);   // an array, so register_tag2 widens it each release
+const RATE = U630 ? Object.values(G.SCENARIOS()).reduce((t, sc) => t + sc.prob * sc.inflation, 0) : 0.02;
+const SF = PY => U630 ? Math.pow(1 + RATE, PY - 2026) : 1;
+const thrOf = (uppers, i, PY) => uppers[i] * Math.pow(1 + RATE, i === 4 ? Math.max(0, PY - 2027) : PY - 2026);
 const tierLaw = (magi, uppers, PY) => {                 // "not more than" for tiers 1–4, "at least" for the top
   for (let i = 0; i < 5; i++) { const t = thrOf(uppers, i, PY); if (i === 4 ? magi < t : magi <= t) return i; }
   return 5;
@@ -91,12 +97,28 @@ const baseA = (o) => ({ single: true, asOfYr: 2026, retireYr: 2026, horizonYr: 2
   dobAYr: 1955, dobBYr: 1955, survivor: "A", deathYr1: 2099, ssA: 0, ssB: 0, ssAYr: 2040, ssAMo: 1, ssBYr: 2040, ssBMo: 1,
   pen: 0, stateRate: 0, stateCode: null, convTaxFunding: "withhold", taxableGainFrac: 0, acaPremium: 0, acaSize: 0, taxYieldPct: 0,
   currentConv: 0, tradInit: 0, rothInit: 0, tradInitA: 0, rothInitA: 0, tradInitB: 0, rothInitB: 0, taxableInit: 0, ...o });
-const irmA = (magi, joint) => G.runRothStrategies(baseA({ single: !joint, pen: magi / 12 })).find(r => r.key === "none").totIrmaa;
+const irmA = (magi, joint) => G.runRothStrategies(baseA({ single: !joint, pen: (U630 ? exactMonthly(magi) : magi / 12) })).find(r => r.key === "none").totIrmaa;
+if (U630) {
+  // v6.30: the top thresholds are 500,000 / 750,000 × (1+i)^(PY − 2027) — not round numbers — so each is reached by a monthly pension whose
+  // × 12 equals the threshold bit for bit (exactMonthly, as §B's Engine C placement always did), in the first premium year from 2028 where
+  // such a figure exists. Engine A runs the three-year window ending in that premium year (t10's isolation).
+  const pick = ups => { for (let PY = 2028; PY <= 2040; PY++) { const t = thrOf(ups, 4, PY); if (exactMonthly(t) != null) return { PY, t }; } return null; };
+  const ps = pick(SGL), pj = pick(MFJ);
+  OK(`B-0 (v6.30) each top threshold can be reached bit for bit by a monthly pension in some premium year (single ${ps && ps.PY} $${ps && ps.t}, joint ${pj && pj.PY} $${pj && pj.t})`, !!ps && !!pj);
+  const irmAt = (magi, joint, PY) => G.runRothStrategies(baseA({ single: !joint, retireYr: PY - 2, horizonYr: PY, pen: exactMonthly(magi) ?? magi / 12 })).find(r => r.key === "none").totIrmaa;
+  if (ps && pj) {
+    T(`B-1 Engine A, single, MAGI exactly the top threshold: top tier, $6,940 in ${ps.PY}'s dollars`, irmAt(ps.t, false, ps.PY), Math.round(6940 * SF(ps.PY)));
+    T(`B-2 Engine A, joint, MAGI exactly the top threshold: top tier, 2 × $6,940 in ${pj.PY}'s dollars`, irmAt(pj.t, true, pj.PY), Math.round(2 * 6940 * SF(pj.PY)));
+    T("B-3 control: single, $1 under → tier 4 on every leg", irmAt(Math.floor(ps.t) - 1, false, ps.PY), Math.round(6360 * SF(ps.PY)));
+    T("B-4 control: single, $1 over → top tier on every leg", irmAt(Math.ceil(ps.t) + 1, false, ps.PY), Math.round(6940 * SF(ps.PY)));
+  }
+} else {
 T("B-0 the 2028 top thresholds are exact in floating point (500,000 × 1.02, 750,000 × 1.02)", `${thrOf(SGL, 4, 2028)}/${thrOf(MFJ, 4, 2028)}`, "510000/765000");
 T(`B-1 Engine A, single, MAGI exactly $510,000${POST ? ": top tier, $6,940" : " [KNOWN DEFECT 2026-09-25, C-1]: tier 4, $6,360"}`, irmA(510000, false), POST ? 6940 : 6360);
 T(`B-2 Engine A, joint, MAGI exactly $765,000${POST ? ": top tier, 2 × $6,940" : " [KNOWN DEFECT C-1]: 2 × $6,360"}`, irmA(765000, true), POST ? 13880 : 12720);
 T("B-3 control: single $509,999 → tier 4 on every leg", irmA(509999, false), 6360);
 T("B-4 control: single $510,001 → top tier on every leg", irmA(510001, false), 6940);
+}
 // Engine C: t17's purpose-built household (MAGI = pension; rows from the example's 2029 retirement).
 const BASE = JSON.parse(JSON.stringify(EXAMPLE));
 const buildC = (monthly, single) => { const P = JSON.parse(JSON.stringify(BASE));
@@ -117,7 +139,7 @@ for (const [lab, ups, single, persons] of [["single", SGL, true, 1], ["joint", M
   OK(`B-5 Engine C ${lab}: a MAGI bit-for-bit equal to the top threshold can be placed (search from ${from})`, !!c);
   if (c) {
     T(`B-6 Engine C ${lab} ${c.Y} at exactly the top threshold ${c.THR}: tier${POST ? "" : " [KNOWN DEFECT C-1]"}`, c.r.tier, POST ? 5 : 4);
-    T(`B-7 Engine C ${lab} ${c.Y}: surcharge`, c.r.surchargeAnnual, (POST ? SUR[5] : SUR[4]) * persons);
+    T(`B-7 Engine C ${lab} ${c.Y}: surcharge${U630 ? " (premium year " + c.r.irmaaYr + "'s dollars)" : ""}`, c.r.surchargeAnnual, (POST ? SUR[5] : SUR[4]) * persons * SF(c.r.irmaaYr));
   }
 }
 

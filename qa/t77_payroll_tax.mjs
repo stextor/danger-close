@@ -26,21 +26,26 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v614";
-const KNOWN_VERSIONS = ["v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"];
+const KNOWN_VERSIONS = ["v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER);   // an array, so the next registration widens it
 // v6.16 (D-36, docs/SCOPE_D36_SELF_EMPLOYMENT_V616.md): self-employment is modelled — the Verify tab gains a sixth payroll check (the
 // §1402(b)(2) floor) and the "not modelled" disclosure E-4 locked goes false. Gated per leg (§B2); an array, so the next registration widens it.
-const SE = ["v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);
+const SE = ["v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER);
 // The differential's pair — two constants, NOT `VER === "v614"`, so the registrar cannot widen it (t76 records why).
 const D_PRIOR = "v613", D_CUR = "v614";
 const require = createRequire(import.meta.url);
 const M = await import(pathToFileURL(join(HERE, `app_${VER}.mjs`)).href);
 const { __g: g, __engines: E } = M;
+// v6.30 (D-60; docs/SCOPE_D60_DOLLAR_UNITS_V630.md): the OASDI wage base (§230 of the Social Security Act) is indexed by the national average
+// wage index; the model now projects it at the plan's inflation (CPI-U as the proxy — DU-3 (a), disclosed as slightly optimistic, since wages
+// historically outrun prices), not a flat 2%. WBR is that rate: Σ prob × inflation over this module's SCENARIOS table (units_v630.mjs) on the
+// v6.30 leg, 2% on every earlier one. The §3101(b)(2) 0.9% thresholds are statutory and unindexed on every leg.
+const WBR = ["v630"].includes(VER) ? Object.values(g.SCENARIOS()).reduce((t, sc) => t + sc.prob * sc.inflation, 0) : 0.02;   // an array, so register_tag2 widens it
 const SRC = readFileSync(join(HERE, "..", `${VER}.jsx`), "utf8");
 const { Parser } = require("acorn"); const jsx = require("acorn-jsx"); const walk = require("acorn-walk");
 const JP = Parser.extend(jsx());
@@ -108,7 +113,7 @@ for (const [lbl, p, moves] of H) {
     if (Math.abs(Wh - (r.work_y || 0)) > 0.5) wagesOk = false;
     if (!(Wh > 0)) continue;
     n++; r.filingSingle ? single++ : joint++;
-    const base = BASE26 * Math.pow(1.02, r.yr - tl.asOfYear);
+    const base = BASE26 * Math.pow(1 + WBR, r.yr - tl.asOfYear);
     const law = lawTax(e, r.work_y, base, r.filingSingle), old = oldTax(r.work_y, base);
     const want = POST ? law : old, other = POST ? old : law;
     if (Math.abs(r.fica - want) >= 0.005) ownMiss.push(`${r.yr}: ${usd(r.fica)} vs ${usd(want)}`);
@@ -237,7 +242,7 @@ console.log("  E — copy, and the rendered Taxes tab");
   const streamsOk = (gd.PORTFOLIO().incomeStreams || []).length === 2;
   T("E-5: SETUP — the Taxes tab rendered the $150K + $150K household (read through window.__g) and its selected year is found", streamsOk && !!lbl && !!selYr, `${shown} @ ${selYr}`);
   const { rows } = planB(M, P2); const r = rows.find(x => x.yr === selYr);
-  const e = r ? earnersOf(P2, gd.buildPlanTimeline(), selYr) : [], base = r ? BASE26 * Math.pow(1.02, selYr - gd.buildPlanTimeline().asOfYear) : 0;
+  const e = r ? earnersOf(P2, gd.buildPlanTimeline(), selYr) : [], base = r ? BASE26 * Math.pow(1 + WBR, selYr - gd.buildPlanTimeline().asOfYear) : 0;
   const law = r ? lawTax(e, r.work_y, base, r.filingSingle) : 0, old = r ? oldTax(r.work_y, base) : 0;
   T(POST ? "E-6: the rendered FICA line is the law's figure for that year, in the panel's $K format (not v6.13's)"
          : `E-6 ${KD}: the rendered FICA line is v6.13's figure`,

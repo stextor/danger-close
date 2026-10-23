@@ -88,7 +88,14 @@ const base = (o = {}) => ({ single: false, asOfYr: 2026, retireYr: DEATH, horizo
   acaPremium: 0, acaSize: 0, taxYieldPct: 0, currentConv: 0,
   tradInit: 0, rothInit: 0, tradInitA: 0, rothInitA: 0, tradInitB: 0, rothInitB: 0, taxableInit: 0, ...o });
 const run = (P) => g.runRothStrategies(P).find(r => r.key === "none");
-const infl = (b, yr) => b * Math.pow(1.02, yr - 2026);
+// v6.30 (D-60; docs/SCOPE_D60_DOLLAR_UNITS_V630.md): the bracket family indexes at §1(f)(3)'s chained CPI-U — modelled as the plan's
+// inflation less 0.25 points — and IRMAA tiers at CPI-U (the plan's inflation), with the surcharge billed in the premium year's dollars.
+// `i` is Σ prob × inflation over this module's SCENARIOS table (BASE weights), read through units_v630.mjs, never the app's helper. Through
+// v6.29 both indexed at a flat 2% and the surcharge stayed in 2026 dollars; an explicit pre-v6.30 tag keeps exactly that.
+const { isV630, planInflation, chained, factor, CHAINED_GAP } = await import("./units_v630.mjs");
+const U630 = !VER || isV630(VER);
+const INF = planInflation(g.SCENARIOS());
+const infl = (b, yr) => b * (U630 ? chained(INF, yr, 2026) : Math.pow(1.02, yr - 2026));
 
 // Both spouses are 65+ in 2044 (born 1966 => age 78), so MFJ gets two senior deductions and
 // Single gets one. Deductions inflate at 2%/yr like the brackets.
@@ -138,6 +145,16 @@ console.log("\n  case 4 \u2014 IRMAA in the death year (person count follows the
   // $400K sits in MFJ tier 2 at premium year 2044, so the per-person multiply is visible:
   // two people => 2 x 2,880. Pre-fix this row was scored Single at ONE person (tier 4 => 6,360).
   const twoPeople = run(P(400000)).totIrmaa;
+  if (U630) {
+    // v6.30: $400K's MFJ tier at premium year 2044 is read off the CMS 2026 table indexed at CPI-U (tiers 1–4 unfrozen), and the bill is
+    // two people's surcharge at that tier in 2044's dollars. (At 2% it was tier 2, $5,760; at the plan's CPI-U the tier-2 floor has risen
+    // past $400K, so it is tier 1 — the per-person multiply is just as visible.)
+    const MFJ_UP = [218000, 274000, 342000, 410000], SURP = [0, 1150, 2880, 4620, 6360];
+    const tier = MFJ_UP.findIndex(u => 400000 <= u * Math.pow(1 + INF, 2044 - 2026));
+    const want = Math.round(2 * SURP[tier] * factor(INF, 2044, 2026)), one = Math.round(SURP[tier] * factor(INF, 2044, 2026));
+    CK(`[EXTINCTION] the death year bills TWO people (both alive in the premium year) — MFJ tier ${tier}, 2 x $${one} (v6.30 units)`,
+      tier > 0 && twoPeople === want, `totIrmaa ${twoPeople}, expected ${want} (one person would be ${one})`);
+  } else
   CK("[EXTINCTION] the death year bills TWO people (both alive in the premium year)",
     twoPeople === 5760, `totIrmaa ${twoPeople}, expected 2 x 2,880 = 5,760 (pre-fix 6,360 at one person)`);
   // Pre-fix this row was scored against SINGLE thresholds at ONE person. Post-fix: MFJ thresholds,

@@ -55,13 +55,13 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true; window.IS_REACT_ACT_ENVIRONMENT = tr
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v542";
-const KNOWN_VERSIONS = ["v540", "v541", "v542", "v543", "v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"];
+const KNOWN_VERSIONS = ["v540", "v541", "v542", "v543", "v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST_FIX = VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629"))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629"))))))))))))))))))));
+const POST_FIX = VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630")))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630")))))))))))))))))))));
 
 // The repo keeps the oracle at qa/tools/hand_86.mjs; PROJECT KNOWLEDGE IS FLAT and holds it
 // beside the suites. Resolve rather than assume, and say which copy was used, so a stale
@@ -89,7 +89,7 @@ const T = (name, ok, detail = "") => {
 const _appMod = await import(`./app_${VER}.mjs`);
 const _app = _appMod.__g;
 const _tlD = typeof _app.PLAN_TIMELINE === "function" ? _app.PLAN_TIMELINE() : _app.PLAN_TIMELINE;
-const DIV = (VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629"))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629"))))))))))))))))))))
+const DIV = (VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630")))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630")))))))))))))))))))))
   ? Math.round(Math.max(0, _app.taxableInitAll()
       - (_app.retireStartBalances(_tlD.rothLadderStart).othHsa || 0)) * (2.0 / 100))
   : 0;
@@ -109,7 +109,7 @@ const A0 = 1180000, B0 = 218600;
 // v6.07 (D-33 — docs/SCOPE_D33_ANNUITY_CONVERSION_V607.md): B0 includes the $7,000 "Spouse B - Annuity" row (tradInitB 218,600 less
 // rmdInitB 211,600). From v6.07 the ladder carries it: it takes no RMD, is never converted, and only grows. Zero on earlier legs, which
 // keeps their recursion exactly the v5.41 transcription. An array, so register_tag2 widens it each release.
-const POST_D33 = ["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);
+const POST_D33 = ["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER);
 const NB0 = POST_D33 ? 7000 : 0;
 const PEN = 4800, SSA = 39600, SSB = 15600;
 const SSA_YR = 2031, T1 = 32000, T2 = 44000;              // joint thresholds; example is MFJ
@@ -125,8 +125,15 @@ const bTerm = y => y > SSB_YR ? SSB : y === SSB_YR ? SSB / 12 * Math.max(0, 12 -
 const dobA = 1964, dobB = 1966, START = 2029, END = 2040, endA = 2038, endB = 2040;
 const taper = y => (y === 2029 ? 20000 : y === 2030 ? 18000 : y === 2031 ? 15000 : 0);
 
+// v6.30 (D-60): from v6.30 the ladder table is in each year's own dollars — the seed balances carried from the as-of year to the ladder start
+// at the plan's inflation (U.RB), Social Security and the dividend × (1+i)^(y − as-of); the pension, the taper and the slider are fixed amounts.
+// `i` is the DOM app's live plan inflation (its BULL-LEANING default), read after the Roth tab renders (U.set below); 1 on earlier legs.
+const U = { on: false, i: 0, asOf: 2026, RB: 1, k: () => 1, set(i, asOf) { this.on = true; this.i = i; this.asOf = asOf; this.RB = Math.pow(1 + i, START - asOf); this.k = y => Math.pow(1 + i, y - asOf); } };
 function ladder(rothAmount, ssFn) {
-  let a = A0, b = B0, nb = NB0; const out = [];
+  // v6.30 (D-60, DU-7 (a)): the holdings carried, the accrual inside A0/B0 at face value — the example's $2,500/mo (A) and $350/mo (B)
+  // pre-tax contributions over 2026–2028 (the build review's finding; t93 §O). With U off (RB = 1) this is A0/B0 as before.
+  const ACC_A = 2500 * 12 * 3, ACC_B = 350 * 12 * 3;
+  let a = (A0 - ACC_A) * U.RB + ACC_A, b = (B0 - ACC_B) * U.RB + ACC_B, nb = NB0 * U.RB; const out = [];
   for (let y = START; y <= END; y++) {
     const ageA = y - dobA, ageB = y - dobB;
     const rA = ageA >= 75 ? a / (ULT[ageA] || 6.4) : 0;    // prior 31 Dec basis (Pub. 590-B)
@@ -139,17 +146,18 @@ function ladder(rothAmount, ssFn) {
     const cA = (capA + capB) > 0 ? conv * (capA / (capA + capB)) : 0;
     a = Math.max(0, gA - cA - rA); b = Math.max(0, gB - (conv - cA) - rB); nb = Math.min(nb * (1 + G), b);
 
-    const ss = (y >= SSA_YR ? SSA : 0) + bTerm(y);
+    const ss = ((y >= SSA_YR ? SSA : 0) + bTerm(y)) * U.k(y);
     // v5.53 (D-10 modelling half): the taxable sleeve's DIVIDENDS enter both the §86 provisional
     // base and magi. Engine C's `_prov86` has always carried `div_y`; the ladder now does too, so
     // this statute model has to as well or it is asserting the PRE-FIX expression. Constant for
     // the plan (decision D-4) and the HSA is held out (v5.47), exactly as the app computes it.
     // ⚠ Gated: v5.52 and earlier legitimately carry no such term and must keep replaying green.
-    const nonSS = PEN + taper(y) + conv + rmd + DIV;
+    const DIVy = U.on ? Math.round(DIV * U.k(y)) : DIV;
+    const nonSS = PEN + taper(y) + conv + rmd + DIVy;
     const taxableSS = ssFn(ss, nonSS);
     out.push({
       y, prov: nonSS + ss * 0.5, ss, taxableSS,
-      magi: PEN + taper(y) + taxableSS + conv + rmd + DIV,
+      magi: PEN + taper(y) + taxableSS + conv + rmd + DIVy,
     });
   }
   return out;
@@ -183,6 +191,8 @@ const tab = [...body().querySelectorAll("button,div,span")]
   .find(el => (el.textContent || "").trim().toLowerCase() === "roth");
 T("SETUP: Roth tab reachable", !!tab);
 await click(tab); await flush(); await flush();
+{ const { isV630, planInflation } = await import("./units_v630.mjs");
+  if (isV630(VER)) U.set(planInflation(window.__g.SCENARIOS()), window.__g.PLAN_TIMELINE().asOfYear); }
 
 // ── §A · the slider, and the fact that it can be driven ──────────────────────────────────
 // TRAP: this is a REACT CONTROLLED input. Assigning `.value` does nothing — React's own
@@ -220,6 +230,9 @@ T("A-2: driving the slider actually re-renders the ladder (the native-setter rou
 // harmless: it must be IDENTICAL on both legs.
 const POSITIONS = [15000, 20000, 30000, 50000, 70000];
 const EXPECTED_MOVERS = { 15000: 10, 20000: 9, 30000: 8, 50000: 7, 70000: 0 };
+// v6.30 (D-60): in each year's dollars Social Security grows, so at $20K one more ladder year sits below §86's convergence (10, from the
+// statute and cliff models above, computed in this file). The other positions keep their counts. Swapped in once the leg is known (U.on).
+const EXPECTED_MOVERS_V630 = { 15000: 10, 20000: 10, 30000: 8, 50000: 7, 70000: 0 };
 for (const pos of POSITIONS) {
   await drive(pos);
   const rows = readRows();
@@ -237,8 +250,9 @@ for (const pos of POSITIONS) {
   // How many years the fix moves at this position — an independent shape check on the same
   // data. A fix that reached too far or not far enough lands on a different count.
   const moved = statuteLeg(pos).filter((r, i) => K(r.magi) !== K(cliffLeg(pos)[i].magi)).length;
-  T(`B[$${pos / 1000}K]: the \u00a786 correction moves ${EXPECTED_MOVERS[pos]} of 12 years`,
-    moved === EXPECTED_MOVERS[pos], `model says ${moved}`);
+  const _em = (U.on ? EXPECTED_MOVERS_V630 : EXPECTED_MOVERS)[pos];
+  T(`B[$${pos / 1000}K]: the \u00a786 correction moves ${_em} of 12 years`,
+    moved === _em, `model says ${moved}`);
 }
 
 // ── §C · EXTINCTION — the cliff's numbers must no longer appear where they differed ──────
@@ -248,15 +262,20 @@ if (POST_FIX) {
   await drive(15000);
   const by = Object.fromEntries(readRows().map(r => [r.year, r.magi]));
   // 2032–2038 plateau: the peak of the defect. Cliff $66,720 → $67K; statute $28,690 → $29K.
-  let allPlateau = [2032, 2033, 2034, 2035, 2036, 2037, 2038].every(y => by[y] === 29);
-  T("C-1 (V542): at $15K the 2032\u20132038 plateau reads $29K, not the cliff's $67K (\u2212$38,030)",
+  // v6.30 (D-60): in each year's own dollars the "plateau" rises with Social Security, so the frozen $29K/$67K become the two models' own
+  // figures for each year (computed above from the statute oracle and the cliff, not read from the app): every year reads the statute's
+  // and none the cliff's. The earlier legs keep their frozen figures.
+  const st15 = Object.fromEntries(statuteLeg(15000).map(r => [r.y, K(r.magi)])), cl15 = Object.fromEntries(cliffLeg(15000).map(r => [r.y, K(r.magi)]));
+  let allPlateau = [2032, 2033, 2034, 2035, 2036, 2037, 2038].every(y => U.on ? (by[y] === st15[y] && st15[y] !== cl15[y]) : by[y] === 29);
+  T(U.on ? "C-1 (V542, v6.30 units): at $15K every 2032\u20132038 year reads the statute model's MAGI, never the cliff's"
+         : "C-1 (V542): at $15K the 2032\u20132038 plateau reads $29K, not the cliff's $67K (\u2212$38,030)",
     allPlateau, JSON.stringify(by));
   // ⚠ These three are FROZEN K-FIGURES on rows the B-series statute model already validates to
   // ±$500. v5.53 adds the dividend term ($420 on this household), which pushes each of them over
   // a K boundary — a rendered figure moving by exactly the term that was added, not a regression.
   // The oracle, not this list, is the independent derivation; these are spot pins on its rows.
   // Gated per leg: v5.52 and earlier legitimately read the lower figure (OPERATIONS §B2).
-  const _k = (v553, older) => (VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629"))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629"))))))))))))))))))) ? v553 : older);
+  const _k = (v553, older) => (VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630")))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630")))))))))))))))))))) ? v553 : older);
   // ⚠ v5.74: this chain is a TERNARY, and that is why it was missed. The version-roll sweep for
   // this release matched chains ending in ";", ")" or "||" and silently left `? :` alone, so
   // `_k` returned the PRE-v5.53 figure while the DOM correctly rendered the current one — the
@@ -264,14 +283,15 @@ if (POST_FIX) {
   // Cost: one Roth-tab DOM diff on both bundles to prove the ladder had NOT changed. There are
   // exactly three of these ternaries in the suite (t1 `verStr`, t4 `_badge`, this one); a future
   // roll that greps for "|| VER === " will miss all three again.
-  T(`C-2 (V542): 2031 reads $${_k(57, 56)}K, not the cliff's $82K`, by[2031] === _k(57, 56), `$${by[2031]}K`);
-  T(`C-3 (V542): 2029 reads $${_k(50, 49)}K, not the cliff's $53K`, by[2029] === _k(50, 49), `$${by[2029]}K`);
-  T(`C-4 (V542): 2030 reads $${_k(46, 45)}K, not the cliff's $51K`, by[2030] === _k(46, 45), `$${by[2030]}K`);
+  const _kk = (y, frozen) => U.on ? st15[y] : frozen;   // v6.30: the statute model's figure for the year
+  T(`C-2 (V542): 2031 reads $${_kk(2031, _k(57, 56))}K, not the cliff's $${U.on ? cl15[2031] : 82}K`, by[2031] === _kk(2031, _k(57, 56)) && (!U.on || st15[2031] !== cl15[2031]), `$${by[2031]}K`);
+  T(`C-3 (V542): 2029 reads $${_kk(2029, _k(50, 49))}K, not the cliff's $${U.on ? cl15[2029] : 53}K`, by[2029] === _kk(2029, _k(50, 49)) && (!U.on || st15[2029] !== cl15[2029]), `$${by[2029]}K`);
+  T(`C-4 (V542): 2030 reads $${_kk(2030, _k(46, 45))}K, not the cliff's $${U.on ? cl15[2030] : 51}K`, by[2030] === _kk(2030, _k(46, 45)) && (!U.on || st15[2030] !== cl15[2030]), `$${by[2030]}K`);
   // The tail is PAST convergence even at this slider position, so it must NOT move. This is
-  // the guard against a fix that simply scaled everything down.
-  T("C-5 (V542): 2039 is unchanged at $135K \u2014 past convergence, the fix must not touch it",
-    by[2039] === 135, `$${by[2039]}K`);
-  T("C-6 (V542): 2040 is unchanged at $138K \u2014 past convergence", by[2040] === 138, `$${by[2040]}K`);
+  // the guard against a fix that simply scaled everything down. (v6.30: past convergence the two models agree — asserted, not assumed.)
+  T(`C-5 (V542): 2039 is unchanged at $${_kk(2039, 135)}K \u2014 past convergence, the fix must not touch it`,
+    by[2039] === _kk(2039, 135) && (!U.on || st15[2039] === cl15[2039]), `$${by[2039]}K`);
+  T(`C-6 (V542): 2040 is unchanged at $${_kk(2040, 138)}K \u2014 past convergence`, by[2040] === _kk(2040, 138) && (!U.on || st15[2040] === cl15[2040]), `$${by[2040]}K`);
   // DIRECTION. Every affected figure must FALL. A sign error still lands on some number.
   await drive(20000);
   const by20 = Object.fromEntries(readRows().map(r => [r.year, r.magi]));
@@ -305,7 +325,7 @@ if (POST_FIX) {
   // Gated on the VERSION, not on whether the helper is present: feature detection would let a v5.77+ build
   // without the helper take the "no helper" branch and pass — the silent-vacuity class §D itself once was.
   const H = _app.taxableSS86;
-  const V577 = VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629"))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629")))))))))))))))));   // a LADDER — widen it each release
+  const V577 = VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630")))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630"))))))))))))))))));   // a LADDER — widen it each release
   if (V577) {
     T("D-0 (V577): the shared §86 helper is exported by this build", typeof H === "function", typeof H);
     let diverged = 0, worstJ = 0, worstS = 0, cells = 0, halfBinds = 0;

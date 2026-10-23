@@ -30,7 +30,7 @@
 //
 // ══ WHAT IS INDEPENDENT ══
 // Brackets, standard deductions, the age-65 extra, FICA rates and wage base are typed here from IRS
-// Rev. Proc. 2025-32 / SSA figures, NOT read from the app. The 2%/yr indexation proxy is the app's
+// Rev. Proc. 2025-32 / SSA figures, NOT read from the app. The indexation rate (from v6.30 the chained CPI-U model, see IDX; a 2%/yr proxy before) is the app's
 // disclosed modeling assumption (METHODOLOGY §6); WHICH figures it applies to is statute and is what
 // is asserted. Case 10 compares two engines rather than an engine to a table, so it is independent
 // by construction.
@@ -71,7 +71,15 @@ const BR_REF  = {                                 // [rate, upper bound of band]
   S: [[0.10, 12400], [0.12, 50400], [0.22, 105700], [0.24, 201775], [0.32, 256225], [0.35, 640600], [0.37, Infinity]],
   M: [[0.10, 24800], [0.12, 100800], [0.22, 211400], [0.24, 403550], [0.32, 512450], [0.35, 768700], [0.37, Infinity]],
 };
-const IDX = (yr) => Math.pow(1.02, yr - 2026);
+// v6.30 (D-60; docs/SCOPE_D60_DOLLAR_UNITS_V630.md): the bracket family indexes as §1(f)(3) does — chained CPI-U, modelled as the plan's
+// inflation less 0.25 points — and a benefit stated today is paid in each year's own dollars, × (1+i)^(yr − 2026). `i` is Σ prob × inflation
+// over the SCENARIOS table this module runs on (BASE weights), read through units_v630.mjs, never from the app's helper. Through v6.29 the
+// index was a flat 2%/yr proxy and benefits stayed in today's dollars — an explicit pre-v6.30 tag (a frozen leg) keeps exactly that.
+const { planInflation, factor, chained, isV630 } = await import("./units_v630.mjs");
+const U630 = !VER || isV630(VER);
+const INF = planInflation(G.SCENARIOS());
+const IDX = (yr) => U630 ? chained(INF, yr, 2026) : Math.pow(1.02, yr - 2026);
+const KY = (yr) => U630 ? factor(INF, yr, 2026) : 1;   // today's dollars -> year yr's
 
 // Hand bracket walk — the same arithmetic t10 uses against Engine A, applied here to Engine B.
 const fedRef = (taxable, status, yr) => {
@@ -166,10 +174,10 @@ console.log("\n  case 2 \u2014 age-65 additional standard deduction (\u00a763(f)
 console.log("\n  case 3 \u2014 Social Security taxability, IRC \u00a786 (thresholds are statutorily UNINDEXED)");
 {
   // Spouse A claims at 67 => 2031. Read 2032 so a full year of benefit is running.
-  const ssMo = 3000, ssYr = ssMo * 12;
+  const ssMo = 3000, ssYr = ssMo * 12 * KY(2032);   // v6.30: the 2032 benefit in 2032's dollars
   const lo = build({ pension: 10000, ssMonthly: ssMo }).rowAt(2032);
   const hi = build({ pension: 120000, ssMonthly: ssMo }).rowAt(2032);
-  CK("a full year of benefit is running in the year read", lo && lo.ssTotal === ssYr,
+  CK("a full year of benefit is running in the year read", lo && Math.abs(lo.ssTotal - ssYr) < 0.01,
      `ssTotal=${lo && lo.ssTotal} expected ${ssYr}`);
   if (lo && hi) {
     const prov = (other, ss) => other + 0.5 * ss;
@@ -178,7 +186,7 @@ console.log("\n  case 3 \u2014 Social Security taxability, IRC \u00a786 (thresho
     T("...so none of the benefit is taxable", lo.ssTaxable, 0);
     CK(`high-income case: provisional $${prov(120000, ssYr).toLocaleString()} is far over the $44,000 tier`,
        prov(120000, ssYr) > 44000);
-    T("...so the 85% ceiling binds exactly", hi.ssTaxable, Math.round(0.85 * ssYr));
+    T("...so the 85% ceiling binds exactly", hi.ssTaxable, U630 ? 0.85 * ssYr : Math.round(0.85 * ssYr));
   }
 }
 
@@ -223,7 +231,7 @@ console.log("\n  case 10 [EXTINCTION] \u2014 Engine A and Engine B agree on the 
 //
 // STATUTE (OBBBA, tax years 2025-2028): $6,000 per individual aged 65+, reduced by 6% of MAGI above
 // $75,000 single / $150,000 MFJ. Those four figures are statutory and UNINDEXED. The §63(f) ordinary
-// age-65 extra beside it IS indexed, at the app's disclosed 2%/yr proxy.
+// age-65 extra beside it IS indexed, at the app's disclosed rate (IDX above).
 //
 // HAND-COMPUTED FIRST, THEN COMPARED (decision D-2). Household: MFJ, dobA 1958 / dobB 1959, so BOTH
 // spouses are 65+ in 2028 AND in 2029 — which is what makes case 11c a sunset proof rather than an
@@ -231,6 +239,8 @@ console.log("\n  case 10 [EXTINCTION] \u2014 Engine A and Engine B agree on the 
 //
 //   indexation      IDX(2028) = 1.02^2 = 1.0404      IDX(2029) = 1.02^3 = 1.061208
 //   §63(f) x2       round(1650*1.0404)=1717 x2 = 3434    round(1650*1.061208)=1751 x2 = 3502
+//   (v6.30: the figures above are the v6.29 2%-proxy arithmetic. From v6.30 the §63(f) extra is indexed by IDX — the chained rate — so
+//    SR28/SR29 below are computed from it; the $6,000 OBBBA bonus and its $150,000 phase-out start are statutory and UNINDEXED, unchanged.)
 //
 //   11a  2028, $100,000 MAGI <= $150,000  -> perPerson $6,000, x2 = $12,000  -> seniorExtra 15,434
 //   11b  2028, $200,000: 0.06*(200,000-150,000) = 3,000 reduction
@@ -256,8 +266,8 @@ console.log("\n  case 11 — OBBBA bonus senior deduction (Engine B models it; t
     const plan = E.computeTaxPlan({ retireYear: 2027, rothAmount: 0, qcdAnnual: 0, taxYield: 0 });
     return (yr) => plan.rows.find((r) => r.yr === yr);
   };
-  const SR28 = 2 * Math.round(1650 * Math.pow(1.02, 2));   // 3434
-  const SR29 = 2 * Math.round(1650 * Math.pow(1.02, 3));   // 3502
+  const SR28 = 2 * Math.round(1650 * IDX(2028));   // 3434 on the 2% proxy (v6.29)
+  const SR29 = 2 * Math.round(1650 * IDX(2029));   // 3502 on the 2% proxy (v6.29)
 
   const a = obbba(100000)(2028);
   T("11a 2028 MFJ, MAGI $100K below the $150K phase-out: full $6,000 x 2 on top of §63(f)",
@@ -355,7 +365,7 @@ console.log("\n  v5.36 \u2014 Engine B consumes the gain series (gainByYr)");
     CK("PRECONDITION: SS is only PARTIALLY taxable at base, so the gain has room to move it",
        ra.ssTaxable > 0 && ra.ssTaxable < Math.round(0.85 * ra.ssTotal), `taxable ${ra.ssTaxable} of ${ra.ssTotal}`);
     T("[FLIPPED v5.36] a $100K gain drives ssTaxable to EXACTLY the 85% statutory cap (IRC \u00a786(a)(2): round(0.85 \u00d7 ssTotal), from the row's own ssTotal)",
-      rb.ssTaxable, Math.round(0.85 * rb.ssTotal));
+      rb.ssTaxable, U630 ? 0.85 * rb.ssTotal : Math.round(0.85 * rb.ssTotal));   // v6.30: ssTotal is no longer whole dollars; §86 does not round
     CK("[FLIPPED v5.36] ...which is a strict INCREASE \u2014 provisional income sees the gain now",
        rb.ssTaxable > ra.ssTaxable, `${ra.ssTaxable} -> ${rb.ssTaxable}`);
     T("[FLIPPED v5.36] MAGI rises by EXACTLY gain + \u0394ssTaxable \u2014 the two enter once each, nothing double-counts",

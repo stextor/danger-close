@@ -37,7 +37,7 @@ const R = Math.round;
 // its expectation is that base on the state's schedule. `SCH` computes it here, independently of the app, from schedules transcribed from
 // the same primary sources as t64 §A (only the four states §2E prices are needed). `TB` labels the bracket figure, so a passing line never
 // claims "0.055 x ..." while asserting something else. A version LIST, so register_tag extends it each release.
-const STB_LEGS = ["v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"], STB = STB_LEGS.includes(VER);
+const STB_LEGS = ["v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"], STB = STB_LEGS.includes(VER);
 const _STB = { MS: [0.04, [[10000, 0], [null, 0.04]], [[10000, 0], [null, 0.04]]],
   NJ: [0.055, [[20000, .014], [35000, .0175], [40000, .035], [75000, .05525], [500000, .0637], [1000000, .0897], [null, .1075]],
               [[20000, .014], [50000, .0175], [70000, .0245], [80000, .035], [150000, .05525], [500000, .0637], [1000000, .0897], [null, .1075]]],
@@ -51,7 +51,7 @@ const TB = (name, got, code, flat, single = false) => D30L ? TD(name, got, code,
 // them at its v6.00 single rate keep their BASE (the exclusion arithmetic each exists to pin) and, on the v6.01 leg, expect that base on the
 // state's schedule — computed here, independently of the app, from t65 §A's transcription. Maryland adds its 3.30 % county tax on the same base
 // (no pin here reaches its $350,000 capital-gains test). `TB2` labels the schedule figure. A version LIST.
-const STB2_LEGS = ["v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"], STB2 = STB2_LEGS.includes(VER);
+const STB2_LEGS = ["v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"], STB2 = STB2_LEGS.includes(VER);
 const _STB2 = { AL: [0.045, [[500, .02], [3000, .04], [null, .05]], [[1000, .02], [6000, .04], [null, .05]]],
   DE: [0.055, [[2000, 0], [5000, .022], [10000, .039], [20000, .048], [25000, .052], [60000, .0555], [null, .066]], [[2000, 0], [5000, .022], [10000, .039], [20000, .048], [25000, .052], [60000, .0555], [null, .066]]],
   MD: [0.075, [[1000, .02], [2000, .03], [3000, .04], [100000, .0475], [125000, .05], [150000, .0525], [250000, .055], [500000, .0575], [1000000, .0625], [null, .065]],
@@ -70,7 +70,7 @@ const TB2 = (name, got, code, flat, single = false) => D30L ? TD(name, got, code
 // calculator's own record of the pinned call: its federal-AGI measure, filing status and ages. If the calculator built a different base the
 // expectation is NaN and the pin FAILS — its claim about the base is kept, not re-derived. `S` in §2E records every call; TB / TB2 read the
 // last one, which is the call that produced `got` (an argument evaluated before the wrapper runs). A version LIST.
-const D30_LEGS = ["v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"], D30L = D30_LEGS.includes(VER);
+const D30_LEGS = ["v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"], D30L = D30_LEGS.includes(VER);
 const D30REC = d30Recorder((a) => g.stateTaxAnnual(a));
 const TD = (name, got, code, flat) => { const x = flat / (_STB[code] || _STB2[code])[0], w = d30Want(g.STATE_RULES(), code, x, D30REC.last);
   T(`${name} [v6.02: the same base, $${x.toFixed(2)}, after the state's deductions and credits -> $${(+w).toFixed(2)}]`, got, w); };
@@ -81,7 +81,7 @@ const D30D = (name, code, f1, b1, f2, b2) => { const a = f1(), wa = D30B(code, b
 // v6.03 (D-30 batch 2 — docs/SCOPE_D30_DEDUCTIONS_V603.md, DD-14): the flat-rate states take theirs too. A pin that prices one at its flat rate keeps
 // its BASE (flat / rate — the arithmetic it exists to pin) and on a batch-2 leg expects that base after the state's deductions and credits, computed by
 // qa/d30_ref.mjs (D30F, independent of the app) from the recorded call. `TF` labels the after-deduction figure. A version LIST.
-const D30F_LEGS = ["v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"], D30FL = D30F_LEGS.includes(VER);
+const D30F_LEGS = ["v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"], D30FL = D30F_LEGS.includes(VER);
 const TF = (name, got, code, rate, flat) => { if (!D30FL) return T(name, got, flat); const x = flat / rate, w = d30Want(g.STATE_RULES(), code, x, D30REC.last);
   T(`${name} [v6.03: the same base, $${x.toFixed(2)}, after the state's deductions and credits -> $${(+w).toFixed(2)}]`, got, w); };
 
@@ -183,7 +183,7 @@ const SUR_R = [0,1150,2880,4620,6360,6940];
 // v5.78 (C-1): 42 U.S.C. §1395r(i)(3)(C)(i)(III) — tiers 1–4 are "not more than" their upper amount, the top tier is "at
 // least" its own. Through v5.77 BOTH reference oracles in this file used `<=` at every tier, the engines' own rule, so an
 // exact-top-threshold case compared the engine's C-1 against the oracle's C-1 and agreed. A LADDER — widen it each release.
-const C1_FIXED = VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629"))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629")))))))))))))))));
+const C1_FIXED = VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630")))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630"))))))))))))))))));
 const tierR = (magi, ups) => { for (let i=0;i<ups.length;i++) if (i === ups.length - 2 ? magi < ups[i] : magi <= ups[i]) return i; return ups.length-1; };
 const irmaaRef = (magi, single, persons) => SUR_R[tierR(magi, single?SGL_R:MFJ_R)] * persons;
 // IRMAA isolation builder: 3-year window ending at `premiumYr`, both 65+ that year, MAGI = pen.
@@ -200,7 +200,15 @@ const irmaaP = (single, magi, premiumYr=2028, o={}) =>
 // The reference below is an INDEPENDENT re-derivation of the CMS rule (premium-year indexing, plus
 // the BBA-2018 top-tier freeze), written from the statute — not a copy of the engine's helper. The
 // borders are taken at floor(threshold) so the ±$1 cliff test stays exact against a float boundary.
-const IDX_R = 1.02, TOP_FROZEN_R = 2027, BASE_YR_R = 2026;
+// v6.30 (D-60; docs/SCOPE_D60_DOLLAR_UNITS_V630.md): the tiers index with CPI-U (§1839(i)(5)) — modelled as the plan's inflation, Σ prob ×
+// inflation over this module's SCENARIOS table (BASE weights), read through units_v630.mjs and never from the app's helper — and the
+// surcharge, a premium, is billed in the premium year's dollars: the 2026 amount × (1+i)^(premium year − 2026) (DU-5). Through v6.29 the
+// index was a flat 2% and the surcharge stayed in 2026 dollars; every earlier leg keeps exactly that.
+const { isV630, planInflation, factor } = await import("./units_v630.mjs");
+const U630 = isV630(VER);
+const INF_R = U630 ? planInflation(g.SCENARIOS()) : 0.02;
+const SURF = py => U630 ? factor(INF_R, py, 2026) : 1;
+const IDX_R = 1 + INF_R, TOP_FROZEN_R = 2027, BASE_YR_R = 2026;
 const thrRef = (upper, isTop, premiumYr) => !isFinite(upper) ? upper
   : upper * Math.pow(IDX_R, isTop ? Math.max(0, premiumYr - TOP_FROZEN_R) : premiumYr - BASE_YR_R);
 const tierRefY = (magi, ups, premiumYr) => {
@@ -208,8 +216,9 @@ const tierRefY = (magi, ups, premiumYr) => {
     if (top ? magi < t : magi <= t) return i; }
   return ups.length - 1; };
 const irmaaRefY = (magi, single, persons, premiumYr) =>
-  SUR_R[tierRefY(magi, single ? SGL_R : MFJ_R, premiumYr)] * persons;
+  R(SUR_R[tierRefY(magi, single ? SGL_R : MFJ_R, premiumYr)] * persons * SURF(premiumYr));
 const PY = 2028;
+const CK_IR = (name, ok) => T(name, ok ? 1 : 0, 1);
 for (const [st, single, ups, persons] of [["SGL",true,SGL_R,1],["MFJ",false,MFJ_R,2]])
   for (let i = 0; i < 5; i++) {
     const edge = Math.floor(thrRef(ups[i], i === ups.length - 2, PY));
@@ -217,13 +226,13 @@ for (const [st, single, ups, persons] of [["SGL",true,SGL_R,1],["MFJ",false,MFJ_
       const got = noneIrmaa(irmaaP(single, magi, PY));
       // Exactly ON the top threshold (510,000 / 765,000 in 2028 — both exact in floating point): C-1's case.
       const onTop = i === 4 && magi === thrRef(ups[i], true, PY);
-      const exp = onTop && !C1_FIXED ? SUR_R[4] * persons : irmaaRefY(magi, single, persons, PY);
+      const exp = onTop && !C1_FIXED ? R(SUR_R[4] * persons * SURF(PY)) : irmaaRefY(magi, single, persons, PY);
       T(`IRMAA ${st} magi=${magi} (border, premiumYr ${PY})${onTop ? (C1_FIXED ? " — exactly the top threshold: TOP tier (C-1 fixed v5.78)" : " [KNOWN DEFECT 2026-09-25, C-1] exactly the top threshold: billed tier 4") : ""}`, got, exp);
       out[`IRMAA_${st}_${magi}`]={got,exp}; } }
 
 // ═══ 9. Per-person surcharge: MFJ one spouse <65 (×1), neither 65 (×0) ═══
 { const g1 = noneIrmaa(irmaaP(false, 300000, 2028, { dobBYr:1970 })); // B age 58 in 2028
-  T(`IRMAA MFJ one-65 magi=300000 (×1)`, g1, SUR_R[tierR(300000,MFJ_R)]*1); out.IRMAA_MFJ_one65={got:g1,exp:SUR_R[tierR(300000,MFJ_R)]};
+  T(`IRMAA MFJ one-65 magi=300000 (×1)`, g1, R(SUR_R[tierRefY(300000,MFJ_R,2028)]*1*SURF(2028))); out.IRMAA_MFJ_one65={got:g1,exp:R(SUR_R[tierRefY(300000,MFJ_R,2028)]*SURF(2028))};
   const g0 = noneIrmaa(irmaaP(false, 300000, 2028, { dobAYr:1970, dobBYr:1970 })); // both <65
   T(`IRMAA MFJ neither-65 magi=300000 (×0)`, g0, 0); out.IRMAA_MFJ_none65={got:g0,exp:0}; }
 
@@ -237,6 +246,31 @@ for (const [st, single, ups, persons] of [["SGL",true,SGL_R,1],["MFJ",false,MFJ_
 //   the INCOME, not the table. SGL tier-1 at premium year 2046 = 109000·1.02^20 = 161,968 (was
 //   109000·1.02^18 = 155,679). A household with 2044 MAGI of 158,000 sits between the two: it owed
 //   $1,150 under the defect and owes $0 under the law.
+if (U630) {
+  // v6.30: the same three statements, at the plan's CPI-U rate rather than 2%. Each income is placed by the reference's own thresholds:
+  // between the income-year and premium-year tables (F-2B-1), between the unfrozen and frozen top (F-2B-2), and $1 over the frozen base.
+  const t1Prem = thrRef(SGL_R[0], false, 2046), t1Inc = thrRef(SGL_R[0], false, 2044);
+  const mid1 = Math.round((t1Prem + t1Inc) / 2), at1 = Math.floor(t1Prem);
+  CK_IR(`IRMAA [FIXED F-2B-1] (v6.30 units) SGL premiumYr2046: the income-year table ($${Math.round(t1Inc)}) sits below the premium-year one ($${Math.round(t1Prem)})`, t1Inc < mid1 && mid1 < t1Prem);
+  { const got = noneIrmaa(irmaaP(true, mid1, 2046));
+    T(`IRMAA [FIXED F-2B-1] (v6.30 units) SGL premiumYr2046 magi=${mid1} => $0 (premium-year index)`, got, 0);
+    out.IRMAA_FIX_premise2 = { got, exp:0 };
+    T(`IRMAA [FIXED F-2B-1] (v6.30 units) SGL premiumYr2046 magi=${at1 + 1} (one $ over the correct thr) => ${R(1150 * SURF(2046))}`, noneIrmaa(irmaaP(true, at1 + 1, 2046)), R(1150 * SURF(2046)));
+    T(`IRMAA [FIXED F-2B-1] (v6.30 units) SGL premiumYr2046 magi=${at1} (AT the correct thr) => 0`, noneIrmaa(irmaaP(true, at1, 2046)), 0); }
+  const topFroz = thrRef(SGL_R[4], true, 2046), topUnfroz = SGL_R[4] * Math.pow(IDX_R, 2046 - BASE_YR_R);
+  const midT = Math.round((topFroz + topUnfroz) / 2), atT = Math.floor(topFroz);
+  CK_IR(`IRMAA [FIXED F-2B-2] (v6.30 units) the frozen top ($${Math.round(topFroz)}) sits below the unfrozen one ($${Math.round(topUnfroz)})`, topFroz < midT && midT < topUnfroz);
+  { const got = noneIrmaa(irmaaP(true, Math.round(topFroz) - 1000, 2046));
+    T(`IRMAA [FIXED F-2B-2] (v6.30 units) SGL premiumYr2046 magi=${Math.round(topFroz) - 1000} => ${R(6360 * SURF(2046))} (tier 4, not top)`, got, R(6360 * SURF(2046)));
+    out.IRMAA_FIX_premise1 = { got, exp:R(6360 * SURF(2046)) };
+    T(`IRMAA [FIXED F-2B-2] (v6.30 units) SGL premiumYr2046 magi=${atT + 1} (one $ over the correct top) => ${R(6940 * SURF(2046))}`, noneIrmaa(irmaaP(true, atT + 1, 2046)), R(6940 * SURF(2046)));
+    T(`IRMAA [FIXED F-2B-2] (v6.30 units) SGL premiumYr2046 magi=${midT} (above the frozen top, below the unfrozen) => ${R(6940 * SURF(2046))}`, noneIrmaa(irmaaP(true, midT, 2046)), R(6940 * SURF(2046))); }
+  { const at2027 = noneIrmaa(irmaaP(true, 500001, 2027));
+    T(`IRMAA [FIXED F-2B-2] (v6.30 units) top tier FROZEN at premiumYr2027: magi=500001 => ${R(6940 * SURF(2027))}`, at2027, R(6940 * SURF(2027)));
+    const at2029 = noneIrmaa(irmaaP(true, 500001, 2029));
+    T(`IRMAA [FIXED F-2B-2] (v6.30 units) top tier INDEXED by premiumYr2029: magi=500001 => ${R(6360 * SURF(2029))} (thr risen)`, at2029, R(6360 * SURF(2029)));
+    out.IRMAA_FIX_freeze = { at2027, at2029 }; }
+} else {
 { const got = noneIrmaa(irmaaP(true, 158000, 2046));
   T(`IRMAA [FIXED F-2B-1] SGL premiumYr2046 magi=158000 => $0 (premium-year index; was 1150)`, got, 0);
   out.IRMAA_FIX_premise2 = { got, exp:0, preFix:1150 };
@@ -263,6 +297,7 @@ for (const [st, single, ups, persons] of [["SGL",true,SGL_R,1],["MFJ",false,MFJ_
   const at2029 = noneIrmaa(irmaaP(true, 500001, 2029));
   T(`IRMAA [FIXED F-2B-2] top tier INDEXED by premiumYr2029: magi=500001 => 6360 (thr risen)`, at2029, 6360);
   out.IRMAA_FIX_freeze = { at2027, at2029 }; }
+}
 
 
 // ═══════════════════════════════════════════════════════════════════════════════════════════════
@@ -546,7 +581,7 @@ const pass2E = pass, fail2E = fail;
       S({ code: "MS", fallbackRate: 0, retIncome: 5e5, pen: 2e5, work: 0, capGains: 0,
           ssTaxableFed: 0, persons65: 2 }), 0);
     // Gated from v5.90 (a version LIST, so register_tag extends it each release; the prior leg, v5.89, has no gate to test).
-    if (["v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER)) TB("2E (v5.90): nobody counted 65+ — Mississippi taxes the withdrawals (0.04 × 500,000), not the pension in payment",
+    if (["v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER)) TB("2E (v5.90): nobody counted 65+ — Mississippi taxes the withdrawals (0.04 × 500,000), not the pension in payment",
       S({ code: "MS", fallbackRate: 0, retIncome: 5e5, pen: 2e5, work: 0, capGains: 0,
           ssTaxableFed: 0, persons65: 0 }), "MS", 20000);
 

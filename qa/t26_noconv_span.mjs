@@ -36,23 +36,23 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true; window.IS_REACT_ACT_ENVIRONMENT = tr
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v544";
-const KNOWN_VERSIONS = ["v542", "v543", "v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"];
+const KNOWN_VERSIONS = ["v542", "v543", "v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST_FIX = VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629"))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629"))))))))))))))))))));
+const POST_FIX = VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630")))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630")))))))))))))))))))));
 // v5.47 — tidy-up item 6. The Roth tab's RMD cards now scale by (1 - annShare), so the
 // no-conversion counterfactual sits on the RMD-BEARING balance instead of the whole
 // Traditional balance. Legs v542-v546 keep asserting their own correct pre-state.
-const POST_ITEM6 = VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629"))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629"))))))))))))))))))));
+const POST_ITEM6 = VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630")))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630")))))))))))))))))))));
 // v6.07 (D-33 — docs/SCOPE_D33_ANNUITY_CONVERSION_V607.md): the ladder carries each spouse's annuity dollars. The with-conversion cards
 // move — B's subtracts the carried annuity ($3,178 -> $2,962), A's falls $149 ($44,991 -> $44,842) because B's smaller convertible
 // balance moves conversion onto A. Both reproduced to the dollar by t70 §E's independent recursion. The NO-conversion cards do not move
 // (no outflow before RMD age, so the static share is exact there). An array, so register_tag2 widens it each release.
-const POST_D33 = ["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);
-const A_WITH = POST_D33 ? 44842 : 44991, B_WITH = POST_D33 ? 2962 : 3178;
+const POST_D33 = ["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER);
+let A_WITH = POST_D33 ? 44842 : 44991, B_WITH = POST_D33 ? 2962 : 3178;
 const { __g } = await import(pathToFileURL(join(HERE, `app_${VER}.mjs`)).href);
 
 let pass = 0, fail = 0;
@@ -139,6 +139,46 @@ const tab = [...body().querySelectorAll("button,div,span")].find(el => (el.textC
 await click(tab); await flush(); await flush();
 
 const txt = body().textContent || "";
+
+// ── v6.30 (D-60; docs/SCOPE_D60_DOLLAR_UNITS_V630.md) — the cards in their year's own dollars ──────────────────────────────────────────
+// From v6.30 the tab carries today's balances to the ladder start at the plan's inflation (DU-7 (a)), so both halves of every card scale by
+// RB = (1+i)^(rothLadderStart − asOf). §A above is the SPAN arithmetic and is unit-free (it compares two exponents on one seed), so it stays in
+// today's dollars. The rendered cards (§B–§E) are re-derived: the no-conversion half from the same primitives × RB, the with-conversion half
+// from an INDEPENDENT ladder recursion (t70 §E's carried-annuity rule: RMD on the non-annuity dollars, conversion capped at the non-annuity
+// balance and split by it, the annuity only grows). `i` is Σ prob × inflation over the DOM app's live SCENARIOS table (units_v630.mjs).
+const { isV630, planInflation, factor, carryHold } = await import("./units_v630.mjs");
+const V630 = isV630(VER);
+const RBd = V630 ? factor(planInflation(window.__g.SCENARIOS()), tl.rothLadderStart, tl.asOfYear) : 1;
+let WC = null;   // the with-conversion recursion's cards, v6.30 leg only
+if (V630) {
+  const r = rsb, Gr = 0.045, ann = { A: (r.tradInitA - r.rmdInitA) * RBd, B: (r.tradInitB - r.rmdInitB) * RBd };
+  // DU-7 (a): holdings carried, the contribution accrual at face (carryHold) — the annuity gap above holds no accrual
+  let bal = { A: carryHold(r.tradInitA, r.accTradA, RBd), B: carryHold(r.tradInitB, r.accTradB, RBd) }, an = { ...ann }; const rows = {};
+  for (let y = tl.rothLadderStart; y <= tl.rothLadderEnd; y++) {
+    const rmd = {}, grown = {}, cap = {};
+    for (const w of ["A", "B"]) {
+      const dob = w === "A" ? tl.dobA.year : tl.dobB.year, end = w === "A" ? tl.rothLadderEndA : tl.rothLadderEndB;
+      rmd[w] = y - dob >= __g.rmdStartAge(dob) ? Math.max(0, bal[w] - an[w]) / __g.rmdDivisor(y - dob) : 0;
+      grown[w] = Math.max(0, bal[w]) * (1 + Gr);
+      cap[w] = Math.max(0, (y <= end ? grown[w] - an[w] * (1 + Gr) : 0) - rmd[w]);
+    }
+    const conv = Math.min(70000, cap.A + cap.B), cA = cap.A + cap.B > 0 ? conv * cap.A / (cap.A + cap.B) : 0, cv = { A: cA, B: conv - cA };
+    for (const w of ["A", "B"]) { bal[w] = Math.max(0, grown[w] - cv[w] - rmd[w]); an[w] = Math.min(an[w] * (1 + Gr), bal[w]); }
+    rows[y] = { bal: { ...bal }, an: { ...an } };
+  }
+  const last = tl.rothLadderEnd;
+  const at = (w, yr, k) => rows[yr - 1] ? rows[yr - 1][k][w] : rows[last][k][w] * Math.pow(1 + Gr, Math.max(0, (yr - 1) - last));
+  const card = w => { const dob = w === "A" ? tl.dobA.year : tl.dobB.year, age = __g.rmdStartAge(dob), yr = dob + age;
+    return { yr, carried: Math.round(Math.max(0, at(w, yr, "bal") - at(w, yr, "an")) / __g.rmdDivisor(age)),
+             staticShare: Math.round(at(w, yr, "bal") * (1 - (w === "A" ? rsb.annShareA : rsb.annShareB)) / __g.rmdDivisor(age)) }; };
+  WC = { A: card("A"), B: card("B") };
+  A_WITH = WC.A.carried; B_WITH = WC.B.carried;
+  for (const p of CORRECT) {   // the no-conversion half, same primitives × RB
+    const t0 = p.who === "A" ? _seedA : _seedB;
+    p.rmd = Math.round(carryHold(t0, p.who === "A" ? rsb.accTradA : rsb.accTradB, RBd) * Math.pow(1 + G, p.yr - tl.rothLadderStart) / __g.rmdDivisor(p.age));
+  }
+  console.log(`  (v6.30: ladder-start carry ×${RBd.toFixed(5)}; no-conversion A ${usd(CORRECT[0].rmd)}, B ${usd(CORRECT[1].rmd)}; with-conversion A ${usd(A_WITH)}, B ${usd(B_WITH)})`);
+}
 const cardRe = /\$([\d,]+)\s*at\s*(\d+)\s*\((20\d\d)\)/g;
 const cards = []; let c;
 while ((c = cardRe.exec(txt)) !== null) cards.push({ amt: +c[1].replace(/,/g, ""), age: +c[2], yr: +c[3] });
@@ -157,7 +197,8 @@ for (const p of (POST_FIX ? CORRECT : OLD)) {
 // counterfactual's exponent, so the with-conversion cards are the thing that proves it did not
 // reach further. t23 pins their values; this pins that the two legs agree on them.
 {
-  T(`C-1: spouse A's WITH-conversion card is ${usd(A_WITH)} (t23's dollar-exact pin${POST_D33 ? "; D-33 moved it, see the header" : ", untouched"})`,
+  T(V630 ? `C-1 (v6.30 units): spouse A's WITH-conversion card is the ladder recursion's ${usd(A_WITH)}`
+         : `C-1: spouse A's WITH-conversion card is ${usd(A_WITH)} (t23's dollar-exact pin${POST_D33 ? "; D-33 moved it, see the header" : ", untouched"})`,
     lastFor(2039) === A_WITH, usd(lastFor(2039)));
   T("C-2: the with-conversion figure is BELOW the no-conversion one \u2014 converting reduces RMDs",
     lastFor(2039) < firstFor(2039));
@@ -170,7 +211,7 @@ for (const p of (POST_FIX ? CORRECT : OLD)) {
 // ── §D · direction, and what this release deliberately did not fix ──────────────────────
 if (POST_FIX) {
   T("D-1: this correction makes the plan look WORSE \u2014 conversions save less than the tab claimed",
-    sum(CORRECT) < sum(OLD));
+    sum(CORRECT) < sum(OLD) * RBd);   // v6.30: CORRECT is now in the cards' carried units, so OLD is carried by the same factor
   T("D-2: the no-conversion RMD still EXCEEDS the with-conversion one (the tab's core claim survives)",
     sum(CORRECT) > 0);
 }
@@ -209,11 +250,33 @@ if (POST_ITEM6) {
   const yrB = tl.dobB.year + __g.rmdStartAge(tl.dobB.year);
   // The whole-Traditional figures these cards used to render, recomputed here from the OLD
   // basis so a silent revert is caught by value and not merely by inequality.
-  const tradFig = (dobYr, t0) => {
+  // v6.30: `acc` is the contribution accrual inside t0, which stays at face value (DU-7 (a)); with RBd = 1 (the prior leg) it changes nothing
+  const tradFig = (dobYr, t0, acc = 0) => {
     const age = __g.rmdStartAge(dobYr), yr = dobYr + age;
-    return Math.round(t0 * Math.pow(1 + G, Math.max(0, yr - tl.rothLadderStart)) / __g.rmdDivisor(age));
+    return Math.round(((t0 - acc) * RBd + acc) * Math.pow(1 + G, Math.max(0, yr - tl.rothLadderStart)) / __g.rmdDivisor(age));
   };
-  const oldB = tradFig(tl.dobB.year, rsb.tradInitB);
+  const oldB = tradFig(tl.dobB.year, rsb.tradInitB, rsb.accTradB);
+  if (V630) {
+    // v6.30: the same five invariants, in the cards' own dollars. The $14,587 / $483 / $2,962 / $321 / $74,492 / $44,842 figures are v6.29-unit
+    // facts of the SAME rules; here each is the rule applied to the carried seed.
+    const rmdB = tradFig(tl.dobB.year, rsb.rmdInitB, rsb.accTradB), annGap = tradFig(tl.dobB.year, rsb.tradInitB - rsb.rmdInitB);
+    T(`E-4 [EXTINCTION] (v6.30 units): spouse B's no-conversion card is on the RMD-BEARING balance (${usd(rmdB)})`,
+      firstFor(yrB) === rmdB, `rendered ${usd(firstFor(yrB))}`);
+    T(`E-5 [EXTINCTION] (v6.30 units): it is the annuity dollars' own RMD (${usd(annGap)}, ±$1) below the whole-Traditional figure (${usd(oldB)})`,
+      Math.abs((oldB - firstFor(yrB)) - annGap) <= 1, `${usd(oldB)} - ${usd(firstFor(yrB))} = ${usd(oldB - firstFor(yrB))}`);
+    T(`E-6 [EXTINCTION] (v6.30 units): the WITH-conversion card is the carried-annuity recursion's (${usd(B_WITH)}) — both halves on ONE basis`,
+      lastFor(yrB) === B_WITH, `rendered ${usd(lastFor(yrB))}`);
+    T(`E-7 [EXTINCTION] (v6.30 units): and NOT the static-share figure (${usd(WC.B.staticShare)}) — the carried annuity, not a constant share`,
+      lastFor(yrB) !== WC.B.staticShare && Math.abs(WC.B.staticShare - B_WITH) > 50, `rendered ${usd(lastFor(yrB))}`);
+    T("E-8 [NEGATIVE CONTROL]: annShareA is exactly 0 — A holds no annuity", rsb.annShareA === 0, String(rsb.annShareA));
+    T(`E-9 [NEGATIVE CONTROL] (v6.30 units): A's no-conversion card is the whole-Traditional figure (${usd(tradFig(tl.dobA.year, rsb.tradInitA, rsb.accTradA))}) — no share applied to A`,
+      firstFor(yrA) === tradFig(tl.dobA.year, rsb.tradInitA, rsb.accTradA), `rendered ${usd(firstFor(yrA))}`);
+    T(`E-10 [NEGATIVE CONTROL] (v6.30 units): A's with-conversion card is the recursion's ${usd(A_WITH)}`, lastFor(yrA) === A_WITH, `rendered ${usd(lastFor(yrA))}`);
+    const ageA = __g.rmdStartAge(tl.dobA.year);
+    const wouldBe = Math.round(carryHold(rsb.tradInitA, rsb.accTradA, RBd) * (1 - rsb.annShareB) * Math.pow(1 + G, Math.max(0, yrA - tl.rothLadderStart)) / __g.rmdDivisor(ageA));
+    T("E-11 [NEGATIVE CONTROL IS LIVE]: had A carried B's share, A's card would have moved",
+      wouldBe !== firstFor(yrA) && firstFor(yrA) - wouldBe > 1000, `would be ${usd(wouldBe)} vs rendered ${usd(firstFor(yrA))}`);
+  } else {
 
   T("E-4 [EXTINCTION]: spouse B's no-conversion card is on the RMD-BEARING balance ($14,587)",
     firstFor(yrB) === 14587, `rendered ${usd(firstFor(yrB))}`);
@@ -251,6 +314,7 @@ if (POST_ITEM6) {
     T("E-11 [NEGATIVE CONTROL IS LIVE]: had A carried B's share, A's card would have moved",
       wouldBe !== firstFor(yrA) && firstFor(yrA) - wouldBe > 1000,
       `would be ${usd(wouldBe)} vs rendered ${usd(firstFor(yrA))}`);
+  }
   }
 }
 

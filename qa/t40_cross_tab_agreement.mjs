@@ -47,20 +47,20 @@
 
 const VER = process.argv[2];
 const MODPATH = process.argv[3] || `./app_${VER}.mjs`;
-const KNOWN_VERSIONS = ["v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"];
+const KNOWN_VERSIONS = ["v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   console.log("    Add it to KNOWN_VERSIONS and decide which leg's figures it owes BEFORE running.");
   process.exit(1);
 }
-const POST = (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629"))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629")))))))))))))))))));
+const POST = (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630")))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630"))))))))))))))))))));
 // v6.07 (D-33 — docs/SCOPE_D33_ANNUITY_CONVERSION_V607.md): Engines B and C carry spouse B's $7,000 annuity dollars, so no RMD or
 // conversion drains them and B's RMD base is smaller in every later year; the pooled conversion also shifts toward A. Measured on this
 // household: B and C lifetime RMD $1,321,030 -> $1,318,959 (−$2,071); lifetime federal falls $445–$693 by view; the IRMAA peaks fall
 // $391 and $143. Engine D is unmoved (A3's second pin). The mechanism is reproduced to the dollar by t70 §C's independent recursion; the
 // figures here are this household's measurement. An array, so register_tag2 widens it each release.
-const POST_D33 = ["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);
+const POST_D33 = ["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER);
 
 const m = await import(MODPATH);
 const { exampleWorkRows } = await import(new URL("./tools/example_work_rows.mjs", import.meta.url).href);   // v6.23 (D-49): section C
@@ -69,7 +69,7 @@ const g = m.__g, E = m.__engines;
 // the v6.18 figures (measured at the build). The v6.18 leg is ALSO run with DC_V617_SPENDING=1 — v6.17's spending written as a table
 // (qa/tools/v617_spending.mjs) — and there every v6.17 figure must still come out exactly: that second run is what attributes each move
 // to the spending read alone (runsuite.sh, "t40-<cur>-spend617").
-const POST_D41 = ["v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);   // an array, so the registrar widens it
+const POST_D41 = ["v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER);   // an array, so the registrar widens it
 const SPEND17 = POST_D41 && process.env.DC_V617_SPENDING === "1";
 const PIN18 = POST_D41 && !SPEND17;
 const P41 = (v617, v618) => PIN18 ? v618 : v617;
@@ -77,7 +77,7 @@ const P41 = (v617, v618) => PIN18 ? v618 : v617;
 // rides on its draws after 2036 moved. PIN21 picks the v6.21 figures (measured at the build). The v6.21 leg is ALSO run with
 // DC_V620_TABLE=1 — the example's table without its car rows, which is v6.20's — and there every v6.20 figure must come out exactly: that
 // second run attributes each move to the rows alone (runsuite.sh, "<suite>-<cur>-table620"; t84 C proves v6.21 on that table IS v6.20).
-const POST_D42 = ["v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);   // an array, so the registrar widens it
+const POST_D42 = ["v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER);   // an array, so the registrar widens it
 const TABLE620 = POST_D42 && process.env.DC_V620_TABLE === "1";
 const PIN21 = POST_D42 && !TABLE620;
 const P42 = (v620, v621) => PIN21 ? v621 : v620;
@@ -96,6 +96,28 @@ const $ = v => "$" + Math.round(v).toLocaleString("en-US");
 console.log(`t40 \u2014 CROSS-TAB AGREEMENT (${VER}${process.argv[3] ? " \u00b7 module " + MODPATH : ""})`);
 
 // ── independent statute reference (Rev. Proc. 2025-32; t18's constants, typed here, NOT read from the app)
+// v6.30 (D-60; docs/SCOPE_D60_DOLLAR_UNITS_V630.md): every tax engine states each year in its own dollars on one clock from the as-of year,
+// and the bridge from Engine D passes its draws and gains THROUGH (Engine D was already nominal), so nothing is restated between them. On
+// this leg the federal figures are DERIVED, not frozen: ORACLE30 below is an independent Rev. Proc. 2025-32 / §86 / LTCG-stacking federal
+// computation, written from the statutes, that takes each Engine B row's income legs (pension, work, the taxable RMD, the conversion, the
+// bridge's draw, dividends, gains, benefits — inputs, as the t19 ledger takes Engine D's draws) and indexes the §1(f)(3) family at chained
+// CPI-U = plan inflation − 0.25 points (plan inflation: Σ prob × inflation over this module's SCENARIOS table). Measured at the build it
+// reproduces every row's fedTax, capGainsTax and MAGI to the cent, on all four views. Engine D's own lifetime totals (A1, A3's D side, C0)
+// and the Engine B/C RMD totals and the C1 checksum have no such oracle and are RE-PINNED BY MEASUREMENT on the main leg — disclosed in
+// the CHANGELOG. The v6.17-spending and v6.20-table legs existed to reproduce those releases' exact figures; v6.30's units end that, so on
+// this build those legs run every DERIVED check and skip the measured exacts, saying so.
+const U630 = ["v630"].includes(VER);   // an array, so register_tag2 widens it each release
+const MAIN = !SPEND17 && !TABLE620;
+const SKIP = name => console.log(`  \u25cb SKIPPED (v6.30, ${SPEND17 ? "v6.17 spending" : "v6.20 table"} leg): ${name} — a measured exact of a pre-v6.30 build`);
+let ORACLE30 = null;
+if (U630) {
+  const { existsSync } = await import("fs");
+  const _f = [new URL("./tools/fed_oracle_v630.mjs", import.meta.url), new URL("./fed_oracle_v630.mjs", import.meta.url)].find(u => existsSync(u));
+  const { makeFedOracle } = await import(_f.href);
+  const { planInflation } = await import("./units_v630.mjs");
+  const _mk = makeFedOracle(planInflation(g.SCENARIOS()), g.PLAN_TIMELINE());   // built once on the example's timeline (the C block reloads later)
+  ORACLE30 = (r) => _mk(r);
+}
 const STD_M = 32200, SR_M = 1650;
 const BR_M = [[0.10, 24800], [0.12, 100800], [0.22, 211400], [0.24, 403550], [0.32, 512450], [0.35, 768700], [0.37, Infinity]];
 const IDX = yr => Math.pow(1.02, yr - 2026);
@@ -119,15 +141,16 @@ T("SETUP: the example household retires in 2029", retire === 2029, retire);
 const base = { retireYear: retire, rothAmount: 0, qcdAnnual: 0, taxYield: 0 };
 const D = g.computeWithdrawalPlan({ retireYear: retire, rothAmount: 0, scenarioPreset: "base" }).schedule;
 const infl = g.expectedInflation();
-const inflator = yr => Math.pow(1 + infl, Math.max(0, yr - retire));
+const inflator = yr => U630 ? 1 : Math.pow(1 + infl, Math.max(0, yr - retire));   // v6.30: the bridge restates nothing
 // This residual of Engine D's own `magi` identity is EXACT where streamsOrd_y is 0 — which it is on this household. It is how the v573
 // leg sees a draw it never published. GATED PER LEG at v6.12 (C-5): through v6.11 Engine D's taxable SS was a flat 85% of benefits; from
 // v6.12 it is the §86 worksheet's share, published on the row as `ssTaxable`. Each leg subtracts its OWN rule — a v6.12 row without the
 // field reads NaN here and fails, rather than silently falling back. The draw itself does not move (t75 C-1).
-const C5 = ["v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);   // an array, so register_tag2 widens it each release
+const C5 = ["v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER);   // an array, so register_tag2 widens it each release
 const ssOf = d => C5 ? d.ssTaxable : 0.85 * (d.ssA_y + d.ssB_y);
 const residual = d => Math.max(0, d.magi - (ssOf(d) + d.pen_y + d.work_y + d.rmd_y + d.conv_y + d.capGain_y));
 const lifeDraw = D.reduce((s, d) => s + residual(d), 0);
+if (U630) { if (MAIN) T("A1: Engine D draws $433,413 of ordinary income over the plan, in each year's own dollars (v6.30 — MEASURED, D-60; $393,327 at v6.21–v6.29)", Math.round(lifeDraw) === 433413, $(lifeDraw)); else SKIP("A1 lifetime draw"); } else
 T(`A1: Engine D draws ${P41("$352,485", P42("$353,430 (v6.18, D-41: the year-by-year read; $352,485 through v6.17)", "$393,327 (v6.21, D-42: the example's car rows; $353,430 at v6.18–v6.20)"))} of ordinary income over the plan (scope §3.1)`, Math.round(lifeDraw) === P41(352485, P42(353430, 393327)), $(lifeDraw));
 const lifeRmdD = D.reduce((s, d) => s + d.rmd_y, 0);
 
@@ -173,10 +196,15 @@ if (POST) {
     Bc.rows.reduce((s, r) => s + (r.ordDraw_y || 0), 0) > 250000, $(Bc.rows.reduce((s, r) => s + (r.ordDraw_y || 0), 0)));
 
   // A3 — PINNED KNOWN DIVERGENCE (restated §8 item 2; see header). The gap is D-9's growth choice.
+  if (U630) { if (MAIN) {
+    T("A3 [PINNED DIVERGENCE, D-9]: Engine B lifetime RMD is $1,332,039 (v6.30 — MEASURED, D-60: its holdings carried to retirement, the contribution accrual at face; $1,281,806 at v6.21–v6.29)", Math.round(lifeRmdB) === 1332039, $(lifeRmdB));
+    T("A3 [PINNED DIVERGENCE, D-9]: Engine D lifetime RMD is $1,057,891 (v6.30 — MEASURED, D-60; $981,936 at v6.21–v6.29)", Math.round(lifeRmdD) === 1057891, $(lifeRmdD));
+  } else SKIP("A3 lifetime RMDs"); } else {
   T(`A3 [PINNED DIVERGENCE, D-9]: Engine B lifetime RMD is ${PIN18 ? P42("$1,308,037 (v6.18, D-41: Engine D's draws moved with the spending read; $1,318,959 at v6.07–v6.17)", "$1,281,806 (v6.21, D-42: the car rows' draws; $1,308,037 at v6.18–v6.20)") : POST_D33 ? "$1,318,959" : "$1,321,030"} \u2014 its OWN 4.5% path minus D's draws${POST_D33 ? " (D-33: the annuity is no longer drained)" : ""}`,
     Math.round(lifeRmdB) === (PIN18 ? P42(1308037, 1281806) : POST_D33 ? 1318959 : 1321030), $(lifeRmdB));
   T(`A3 [PINNED DIVERGENCE, D-9]: Engine D lifetime RMD is ${P41("$1,021,349 \u2014 unmoved by this release", P42("$1,014,229 (v6.18, D-41; $1,021,349 through v6.17)", "$981,936 (v6.21, D-42; $1,014,229 at v6.18–v6.20)"))}`,
     Math.round(lifeRmdD) === P41(1021349, P42(1014229, 981936)), $(lifeRmdD));
+  }
 
   // A4 — the seven gap years, hand-verified against the independent statute oracle.
   let worstO = 0, worstOy = 0, zeroYrs = [];
@@ -184,7 +212,7 @@ if (POST) {
     const r = Bp.rows.find(x => x.yr === yr), d = D.find(x => x.yr === yr);
     const n65 = (r.ageA >= 65 ? 1 : 0) + (r.ageB >= 65 ? 1 : 0);
     const other = r.pen_y + r.work_y + (d.tradDraw + d.othOrdDraw) / inflator(yr);
-    const ref = fedRef(Math.max(0, other + ss86(r.ssA_y + r.ssB_y, other) - dedRef(yr, n65)), yr);
+    const ref = U630 ? ORACLE30(r).fed : fedRef(Math.max(0, other + ss86(r.ssA_y + r.ssB_y, other) - dedRef(yr, n65)), yr);
     if (!(r.fedTax > 0)) zeroYrs.push(yr);
     if (Math.abs(ref - r.fedTax) > worstO) { worstO = Math.abs(ref - r.fedTax); worstOy = yr; }
   }
@@ -193,6 +221,15 @@ if (POST) {
     worstO <= 0.01, `worst $${worstO.toFixed(2)} (${worstOy})`);
 
   // A5 — the headline, on both bases, each named.
+  if (U630) {
+    const sumO = R => R.rows.reduce((t, r) => t + ORACLE30(r).fed, 0);
+    T(`A5 (v6.30): lifetime federal on the probe basis (no gains) is the oracle's ${$(sumO(Bp))}, to the cent — each year's own dollars${MAIN ? " (the example's table: $288,603; $207,058 at v6.21–v6.29)" : ""}`,
+      Math.abs(Bp.totFed - sumO(Bp)) <= 0.01 && (!MAIN || Math.round(Bp.totFed) === 288603), $(Bp.totFed));
+    T(`A5 (v6.30): lifetime federal on the call-site basis, every input at zero (the yield too), is the oracle's ${$(sumO(Bc))}, to the cent${MAIN ? " ($288,603; $207,059 at v6.21–v6.29)" : ""}; see E`,
+      Math.abs(Bc.totFed - sumO(Bc)) <= 0.01 && (!MAIN || Math.round(Bc.totFed) === 288603), $(Bc.totFed));
+    T("A5 (v6.30): the today's-dollar total is the same years deflated by (1+i)^(yr − as-of) — Engine B's `today.totFed`",
+      Math.abs(Bp.today.totFed - Bp.rows.reduce((t, r) => t + r.fedTax / Math.pow(1 + infl, r.yr - tl.asOfYear), 0)) <= 0.01, $(Bp.today.totFed));
+  } else {
   T(PIN18 ? P42("A5: lifetime federal on the probe basis (no gains) is $205,422 \u2014 v6.18 (D-41: the year-by-year read); $207,971 at v6.07–v6.17", "A5: lifetime federal on the probe basis (no gains) is $207,058 \u2014 v6.21 (D-42: the car rows); $205,422 at v6.18–v6.20")
       : POST_D33 ? "A5: lifetime federal on the probe basis (no gains) is $207,971 \u2014 the v5.74 acceptance figure $208,416 less D-33's $445"
               : "A5: lifetime federal on the probe basis (no gains) is $208,416 \u2014 the scope's acceptance figure (\u2212$35,624)",
@@ -201,6 +238,7 @@ if (POST) {
       : POST_D33 ? "A5: lifetime federal on the call-site basis, every input at zero (the yield too), is $208,000 \u2014 $208,445 less D-33's $445; see E"
               : "A5: lifetime federal on the call-site basis, every input at zero (the yield too), is $208,445 (\u2212$35,595) \u2014 not a view the tab opens with; see E",
     Math.round(Bc.totFed) === (PIN18 ? P42(205423, 207059) : POST_D33 ? 208000 : 208445), $(Bc.totFed));
+  }
 } else {
   T("PRE-FIX [KNOWN DEFECT, fixed v5.74]: Engine D never published its draw terms",
     D.every(d => d.tradDraw === undefined && d.othOrdDraw === undefined && d.ordDraw_y === undefined));
@@ -232,6 +270,7 @@ if (POST) {
   for (let i = 0; i < Cc.rows.length; i++) if (Math.abs(Cc.rows[i].magi - Cg.rows[i].magi) > 0.5) moved++;
   T("B1: Engine C carries the same draw as Engine B \u2014 to the cent, every year", wd <= 0.01, `worst $${wd.toFixed(2)} (${wdy})`);
   T("B2: Engine C's RMD equals Engine B's \u2014 to the cent, every year (LIVE: same loop, same 4.5%)", wr <= 0.01, `worst $${wr.toFixed(2)} (${wry})`);
+  if (U630) { if (MAIN) T("B3: Engine C lifetime RMD $1,332,039 (v6.30 — MEASURED, D-60; $1,281,806 at v6.21–v6.29) — and B2 holds it to Engine B's, to the cent", Math.round(lifeRmdC) === 1332039, $(lifeRmdC)); else SKIP("B3 lifetime RMD"); } else
   T(`B3: Engine C lifetime RMD ${PIN18 ? P42("$1,308,037 (v6.18, D-41; $1,318,959 at v6.07–v6.17)", "$1,281,806 (v6.21, D-42; $1,308,037 at v6.18–v6.20)") : POST_D33 ? "$1,318,959 (D-33)" : "$1,321,030"}`, Math.round(lifeRmdC) === (PIN18 ? P42(1308037, 1281806) : POST_D33 ? 1318959 : 1321030), $(lifeRmdC));
   // Non-vacuity. On this household no IRMAA tier is crossed either way, so the surcharge alone cannot
   // show the change; MAGI can, and does, in every year.
@@ -341,6 +380,21 @@ const W = PIN21 && PIN18 ? { c: 207395, d: 211940, gap: 12928, pkC: 154776, pkD:
   : PIN18 ? { c: 205709, d: 210300, gap: 6305, pkC: 148352, pkD: 173328 }
   : POST_D33 ? { c: 208285, d: 210898, gap: 9575, pkC: 149266, pkD: 161805 }   // D-33: −$445, −$693, gap years unmoved, peaks −$391 / −$143
   : POST ? { c: 208730, d: 211591, gap: 9575, pkC: 149657, pkD: 161948 } : { c: 244040, d: 210051, gap: 0, pkC: 175224, pkD: 165803 };
+if (U630) {
+  // v6.30: every figure from ORACLE30 on the rows (each year's own dollars); the main leg also pins the oracle's figures.
+  const sumO = (R, f = () => true) => R.rows.filter(f).reduce((t, r) => t + ORACLE30(r).fed, 0);
+  const oc = sumO(Tc), od = sumO(Td), og = sumO(Tc, r => r.yr >= 2032 && r.yr <= 2038);
+  const opC = Math.max(...Tc.rows.map(r => ORACLE30(r).magi)), opD = Math.max(...Td.rows.map(r => ORACLE30(r).magi));
+  T(`E1 (v6.30): lifetime federal on the tab's as-is reading (no conversions, no QCD, 2% yield) is the oracle's ${$(oc)}${MAIN ? " ($289,059; $207,395 at v6.21–v6.29)" : ""}`,
+    Math.abs(Tc.totFed - oc) <= 0.01 && (!MAIN || Math.round(oc) === 289059), $(Tc.totFed));
+  T(`E2 (v6.30): lifetime federal as the tab first opens ($70,000/yr conversions, 2% yield) is the oracle's ${$(od)}${MAIN ? " ($275,579; $211,940 at v6.21–v6.29)" : ""}`,
+    Math.abs(Td.totFed - od) <= 0.01 && (!MAIN || Math.round(od) === 275579), $(Td.totFed));
+  T(`E3 (v6.30): federal tax in the seven gap years 2032\u20132038 on the as-is reading is the oracle's ${$(og)}${MAIN ? " ($28,194; $12,928 at v6.21–v6.29)" : ""}`,
+    Math.abs(gapC - og) <= 0.01 && (!MAIN || Math.round(og) === 28194), $(gapC));
+  T(`E4 (v6.30): IRMAA peak MAGI is the oracle's ${$(opC)} as-is and ${$(opD)} at first open${MAIN ? " ($196,324 / $185,718; $154,776 / $173,328 at v6.21–v6.29)" : ""}; no surcharge on either view`,
+    Math.abs(pkC - opC) <= 0.01 && Math.abs(pkD - opD) <= 0.01 && (!MAIN || (Math.round(opC) === 196324 && Math.round(opD) === 185718)) && Ic.totalIrmaa === 0 && Id.totalIrmaa === 0,
+    `${$(pkC)} / ${$(pkD)} / surcharge ${Ic.totalIrmaa} + ${Id.totalIrmaa}`);
+} else {
 T(`E1${POST ? "" : " PRE-FIX"}: lifetime federal on the tab's as-is reading (no conversions, no QCD, 2% yield) is ${$(W.c)}${PIN18 ? P42(" \u2014 v6.18's year-by-year spending read; $208,285 at v6.07–v6.17", " \u2014 v6.21 (D-42: the car rows); $205,709 at v6.18–v6.20") : POST_D33 ? " \u2014 v5.74's headline $208,730 less D-33's $445" : POST ? " \u2014 the headline, \u2212$35,309 (\u221214.5%)" : ""}`,
   Math.round(Tc.totFed) === W.c, $(Tc.totFed));
 T(`E2${POST ? "" : " PRE-FIX"}: lifetime federal as the tab first opens ($70,000/yr conversions, 2% yield) is ${$(W.d)}${PIN18 ? P42(" \u2014 v6.18 (D-41); $210,898 at v6.07–v6.17", " \u2014 v6.21 (D-42: the car rows); $210,300 at v6.18–v6.20") : POST_D33 ? " \u2014 $211,591 less D-33's $693" : POST ? " \u2014 +$1,540: the correction RAISES it here" : ""}`,
@@ -353,6 +407,7 @@ T(`E4${POST ? "" : " PRE-FIX"}: IRMAA peak MAGI ${$(W.pkC)} as-is and ${$(W.pkD)
 // ════ C · A NO-PORTFOLIO HOUSEHOLD: THE BRIDGE CONTRIBUTES $0 ══════════════════════════════════════════
 // Why t17/t18 are LEGITIMATELY unmoved: they drive Engine B with no draw series. On a household with no
 // pre-tax money, the app's real call site produces a zero series too, so the app's figure IS theirs.
+}
 console.log("\n  C \u2014 a no-portfolio household");
 {
   const P = JSON.parse(JSON.stringify(g.PORTFOLIO()));
@@ -375,6 +430,8 @@ console.log("\n  C \u2014 a no-portfolio household");
   if (POST) s2 = g.withdrawalPlanSeries({ retireYear: r2, rothAmount: 0, scenarioPreset: "base" });
   else { const gb = {}; for (const r of D2) gb[r.yr] = r.capGain_y || 0; s2 = { gainByYr: gb, ordDrawByYr: {} }; }
   const gainSum = Object.values(s2.gainByYr).reduce((a, b) => a + b, 0);
+  if (U630) { if (MAIN) T("C0 FIXTURE [KNOWN RESIDUE]: stripping positions does NOT empty Engine D's taxable sleeve \u2014 $14,631.36 of gains remain (v6.30 — MEASURED, D-60: the residue is carried to retirement and its basis is not; $2,153.87 at v6.18–v6.29)",
+    Math.abs(gainSum - 14631.36) < 0.005, gainSum.toFixed(2)); else SKIP("C0 residue"); } else
   T(`C0 FIXTURE [KNOWN RESIDUE]: stripping positions does NOT empty Engine D's taxable sleeve \u2014 ${P41("$4,414.03", "$2,153.87 (v6.18, D-41; $4,414.03 through v6.17)")} of gains remain`,
     Math.abs(gainSum - P41(4414.03, 2153.87)) < 0.005, gainSum.toFixed(2));
   const B2 = E.computeTaxPlan({ ...b2, gainByYr: s2.gainByYr, ordDrawByYr: s2.ordDrawByYr });
@@ -385,6 +442,8 @@ console.log("\n  C \u2014 a no-portfolio household");
   T("C1: lifetime total tax $4,054.50 \u2014 identical on both legs", Math.abs(B2.totAll - 4054.50) < 0.005, B2.totAll.toFixed(2));
   // v6.18 (D-41): the residual gains above moved, so this checksum is per leg from v6.18 (it was "identical on both legs" through v6.17;
   // the DC_V617_SPENDING=1 run still reproduces 5,198,499.9987).
+  if (U630) { if (MAIN) T("C1: every numeric field of every row sums to 7,255,030.8304 (v6.30 — MEASURED, D-60: a checksum, every field in its year's dollars; 5,185,167.5373 at v6.18–v6.29)",
+    Math.abs(chk - 7255030.8304) < 0.001, chk.toFixed(4)); else SKIP("C1 checksum"); } else
   T(`C1: every numeric field of every row sums to ${P41("5,198,499.9987 \u2014 identical on both legs", "5,185,167.5373 (v6.18, D-41; 5,198,499.9987 through v6.17)")}`,
     Math.abs(chk - P41(5198499.9987, 5185167.5373)) < 0.001, chk.toFixed(4));
   if (POST) {

@@ -99,12 +99,14 @@ console.log("t16 \u2014 ROTH LADDER FILING STATUS + AGE-65 DEDUCTION (C-2B-3 / v
 
 // Independent reference — IRS Rev. Proc. 2025-32, typed here, NOT read from the app's tables.
 // SR is the §63(f) age-65 ADDITIONAL standard deduction: per spouse for MFJ, single figure for
-// Single. Indexed at the app's disclosed 2%/yr proxy (METHODOLOGY §6).
+// Single. Indexed as the statute indexes it — v6.30 (D-60; docs/SCOPE_D60_DOLLAR_UNITS_V630.md): §1(f)(3)'s chained CPI-U, modelled
+// as the plan's inflation less 0.25 points, from the as-of year (through v6.29, a flat 2%/yr proxy). `i` is Σ prob × inflation over the
+// DOM app's live SCENARIOS table under its default preset (units_v630.mjs), read once the example data has loaded — never the app's helper.
 // NOT the OBBBA $6,000 bonus (2025-2028), which the ladder deliberately does not model — see the
 // note in projectBrackets(). Engine B does model it, so the Roth and Taxes tabs differ for any
 // ladder year <= 2028. That divergence is disclosed, not asserted here.
 const STD_REF = { S: 16100, M: 32200 }, SR_REF = { S: 2050, M: 1650 };
-const IDX_REF = (n) => Math.pow(1.02, n);
+let IDX_REF = (n) => Math.pow(1.02, n);   // replaced below, once the live table is readable
 // Expected deduction in $K for a given year, filing status and count of spouses aged 65+.
 const dedRefK = (year, single, n65) => {
   const i = IDX_REF(year - 2026);
@@ -147,6 +149,11 @@ try {
   await click(example); await flush(); await flush();
 
   const g = window.__g;
+  { const { planInflation, CHAINED_GAP } = await import("./units_v630.mjs");
+    const i = planInflation(g.SCENARIOS()), asOf = g.PLAN_TIMELINE().asOfYear;
+    ck("harness: the as-of year is 2026 (the reference's year offsets count from it)", asOf === 2026, String(asOf));
+    IDX_REF = (n) => Math.pow(1 + i - CHAINED_GAP, n);
+    console.log(`  (bracket-family index: chained ${((i - CHAINED_GAP) * 100).toFixed(3)}%/yr from ${asOf})`); }
   const TC = g.TAX_CONSTS();
   const IC = g.IRMAA_CONSTS();
   ck("constants: Single standard deduction is half MFJ (the gap the defect lived in)",
@@ -165,9 +172,17 @@ try {
     // The label used to read "unchanged by the fix", meaning the v5.15 FILING fix. v5.20's
     // deduction fix DID move these figures — 2029 taxable 74 -> 72, fed 8.3 -> 8.1 — so the
     // year is named explicitly to stop the next reader thinking something regressed.
-    ck("case 1: the couple's ladder is unchanged by the v5.15 FILING fix (no collateral movement)",
-      mfj[2029].taxable === 72 && mfj[2029].rate === 12 && Math.abs(mfj[2029].fed - 8.1) < 0.2,
-      `2029 taxable $${mfj[2029].taxable}K rate ${mfj[2029].rate}% fed $${mfj[2029].fed}K`);
+    // v6.30 (D-60): the frozen $72K / 12% / $8.1K were v6.29-unit figures (a flat 2% bracket index, the ladder's SS and seeds in today's
+    // dollars). From v6.30 the row is in 2029's own dollars, so the pin is re-derived rather than re-frozen: the couple's row is the MFJ
+    // reading of its own MAGI — the MFJ deduction with ONE age-65 extra, the MFJ brackets, both from the Rev. Proc. 2025-32 reference
+    // indexed as above. A filing-status leak (the collateral movement this check exists for) fails all three.
+    const BR_M1 = [[0.10, 24800], [0.12, 100800], [0.22, 211400], [0.24, 403550]], ix = IDX_REF(2029 - 2026);
+    const ti1 = mfj[2029].magi * 1000 - dedRefK(2029, false, 1) * 1000;
+    let tax1 = 0, prev1 = 0, rate1 = 0;
+    for (const [rate, up] of BR_M1) { const u = up * ix; const seg = Math.min(ti1, u) - prev1; if (seg > 0) { tax1 += seg * rate; rate1 = rate; } prev1 = u; if (ti1 <= u) break; }
+    ck("case 1: the couple's 2029 row is the MFJ reading of its own MAGI (no collateral movement from the v5.15 FILING fix)",
+      Math.abs(mfj[2029].taxable - ti1 / 1000) <= 1.5 && mfj[2029].rate === Math.round(rate1 * 100) && Math.abs(mfj[2029].fed - tax1 / 1000) <= 0.3,
+      `2029 taxable $${mfj[2029].taxable}K rate ${mfj[2029].rate}% fed $${mfj[2029].fed}K vs hand $${(ti1 / 1000).toFixed(1)}K ${Math.round(rate1 * 100)}% $${(tax1 / 1000).toFixed(2)}K`);
 
     // ── v5.20: the age-65 additional standard deduction ──────────────────────────────────────
     // Spouse A is 65 in 2029; spouse B (born two years later) not until 2031. So 2029 must carry
@@ -224,7 +239,7 @@ try {
       r.rate === 22, `rate ${r.rate}% on $${r.taxable}K taxable (pre-fix 12%, the MFJ band)`);
     // Independent hand reference from IRS Rev. Proc. 2025-32, NOT the app's own tables.
     const BR_S = [[0.10, 12400], [0.12, 50400], [0.22, 105700], [0.24, 201775]];
-    const infl = Math.pow(1.02, 3);
+    const infl = IDX_REF(3);
     let ti = r.taxable * 1000, tax = 0, prev = 0;
     for (const [rate, up] of BR_S) { const u = up * infl; const seg = Math.min(ti, u) - prev; if (seg > 0) tax += seg * rate; prev = u; if (ti <= u) break; }
     ck("case 2 [EXTINCTION]: federal tax matches an independent Single-bracket computation",

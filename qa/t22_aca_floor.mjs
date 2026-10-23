@@ -55,8 +55,8 @@ const PRIOR = process.argv[2] || "v532";
 const MOD = await import("./app_testable.mjs");
 const g = MOD.__g;
 
-let PRIOR_G = null, PRIOR_ERR = null;
-try { PRIOR_G = (await import(`./app_${PRIOR}.mjs`)).__g; }
+let PRIOR_G = null, PRIOR_ERR = null, PRIOR_UNITS = false;
+try { const _pm = await import(`./app_${PRIOR}.mjs`); PRIOR_G = _pm.__g; PRIOR_UNITS = typeof (_pm.__test || {}).planDollarFactor === "function"; }
 catch (e) { PRIOR_ERR = String(e).split("\n")[0]; }
 
 let pass = 0, fail = 0; const fails = [];
@@ -79,6 +79,15 @@ console.log("t22 \u2014 ACA 100% FPL ELIGIBILITY FLOOR (v5.32)");
 // Applicable percentages under current law from IRS Rev. Proc. 2025-25 §3.01 (2.10% below 133%).
 // HHS/ASPE 2025 poverty guidelines, used for 2026 coverage: $15,650 + $5,500 per extra person.
 const FPL_2026_COUPLE = 15650 + 5500;          // = 21150, typed from HHS, not read from the app
+// v6.30 (D-60; docs/SCOPE_D60_DOLLAR_UNITS_V630.md): past the last published guideline (2026: $15,960 + $5,680) the FPL grows at CPI-U
+// (42 U.S.C. §9902(2)), modelled as the plan's inflation — Σ prob × inflation over this module's SCENARIOS table, read here, never from
+// the app's helper. Through v6.29 a 2%/yr proxy. The v6.30 build is recognised by its units helper (a capability probe, as group F's
+// tracker probe is); every figure this file derives from the FPL path takes the rate from FPL_RATE.
+const U630 = typeof (MOD.__test || {}).planDollarFactor === "function";
+const PLAN_INF = Object.values(g.SCENARIOS()).reduce((t, sc) => t + sc.prob * sc.inflation, 0);
+const FPL_RATE = U630 ? PLAN_INF : 0.02;
+const FPL_2027_COUPLE = 15960 + 5680;          // the 2026 guideline (coverage year 2027), typed from HHS
+const fplRef = (coverageYr) => coverageYr <= 2026 ? FPL_2026_COUPLE : FPL_2027_COUPLE * Math.pow(1 + FPL_RATE, coverageYr - 1 - 2026);
 const PCT_BELOW_133 = 0.021;
 
 // ── GROUP A · the floor binds in BOTH regimes  [EXTINCTION] ────────────────────────────────
@@ -138,18 +147,21 @@ console.log("\n\u2500\u2500 C \u00b7 boundary at exactly 100% FPL, hand-computed
 }
 
 // ── GROUP D · the drift case — a household falls through the floor without changing ────────
-console.log("\n\u2500\u2500 D \u00b7 drift: FPL grows 2%/yr, a flat MAGI does not");
+console.log(`\n\u2500\u2500 D \u00b7 drift: FPL grows ${(FPL_RATE * 100).toFixed(2)}%/yr, a flat MAGI does not`);
 {
   const BENCH = 19200, MAGI = 24472;   // the trace from the scope, reproduced
-  const yrs = [2030, 2032, 2033, 2034, 2035];
-  const subs = yrs.map(y => g.acaSubsidyAnnual(MAGI, y, 2, BENCH, "current"));
-  CK("D: the same MAGI is eligible in 2033", subs[2] > 0, String(Math.round(subs[2])));
-  CK("D: and ineligible by 2034, with nothing about the household changed", subs[3] === 0, String(subs[3]));
-  CK("D: the year it crosses is flagged", g.acaBelowFloor(MAGI, 2034, 2) === true);
-  CK("D: the year before is not", g.acaBelowFloor(MAGI, 2033, 2) === false);
+  // The crossing year is DERIVED from the HHS figure and the index rate (2034 at the 2% proxy through v6.29; earlier at the plan's
+  // CPI-U from v6.30), not frozen: the first coverage year whose FPL exceeds this MAGI.
+  let X = 2028; while (X < 2080 && !(MAGI < fplRef(X))) X++;
+  CK(`D: PRECONDITION — the reference puts the crossing at ${X}, inside the plan`, X > 2028 && X < 2080, String(X));
+  const sub = y => g.acaSubsidyAnnual(MAGI, y, 2, BENCH, "current");
+  CK(`D: the same MAGI is eligible in ${X - 1}`, sub(X - 1) > 0, String(Math.round(sub(X - 1))));
+  CK(`D: and ineligible by ${X}, with nothing about the household changed`, sub(X) === 0, String(sub(X)));
+  CK("D: the year it crosses is flagged", g.acaBelowFloor(MAGI, X, 2) === true);
+  CK("D: the year before is not", g.acaBelowFloor(MAGI, X - 1, 2) === false);
   // Same drift under the enhanced regime — before v5.32 this household sailed on collecting the
   // full premium forever, because that branch had no floor to drift through.
-  CK("D: the drift now happens under the enhanced regime too", g.acaSubsidyAnnual(MAGI, 2034, 2, BENCH, "enhanced") === 0);
+  CK("D: the drift now happens under the enhanced regime too", g.acaSubsidyAnnual(MAGI, X, 2, BENCH, "enhanced") === 0);
 }
 
 // ── the bridge household used by E and F ───────────────────────────────────────────────────
@@ -232,7 +244,32 @@ console.log(`\n\u2500\u2500 F \u00b7 A2 moved no figure \u2014 byte identity vs 
       return G.runRothStrategies(PP, _m)[1].totTax > G.runRothStrategies({ ...PP, taxableGainFrac: 0 }, _m)[1].totTax + 1;
     };
     const _crossesGainTax = _acaGainTaxed(g) && !_acaGainTaxed(PRIOR_G);
-    if (_crossesGainTax) {
+    // v6.30 (D-60): a DECLARED boundary like v5.34's and v5.38's. The FPL index, Social Security's units and the carried balances all move
+    // ACA MAGI and the FPL by design, so byte identity with a pre-v6.30 build is not the claim. The claim is made against the VALIDATED
+    // reference ledger instead (qa/tools/sim_ledger.mjs, v630 mode; validate_v630.mjs proves it to the dollar on six households): the
+    // no-conversion row's whole subsidy map, its floor years and its totals are the ledger's, and the structure is unchanged.
+    const _crossesUnits = U630 && !PRIOR_UNITS;
+    if (_crossesUnits) {
+      const { existsSync } = await import("fs");
+      const _sim = [new URL("./tools/sim_ledger.mjs", import.meta.url), new URL("./sim_ledger.mjs", import.meta.url)].find(u => existsSync(u));
+      const { ledger } = await import(_sim.href);
+      const L = ledger(BRIDGE, 0, null, "v630"), n0 = now.find(r => r.key === "none");
+      CK("F[v6.30]: strategy set unchanged across the units boundary", JSON.stringify(now.map(r => r.key)) === JSON.stringify(was.map(r => r.key)));
+      CK("F[v6.30]: every row computes the SAME bridge years (subsidy-map keys) as the prior build",
+        now.every((r, i) => JSON.stringify(Object.keys(r.acaSubByYr || {})) === JSON.stringify(Object.keys(was[i].acaSubByYr || {}))));
+      CK("F[v6.30]: the no-conversion row's subsidy map is the reference ledger's, to the cent, every year",
+        Object.keys(L.acaSubByYr).length > 0 && Object.keys(n0.acaSubByYr).every(y => Math.abs(n0.acaSubByYr[y] - L.acaSubByYr[y]) < 0.01),
+        `${JSON.stringify(n0.acaSubByYr)} vs ${JSON.stringify(L.acaSubByYr)}`);
+      CK("F[v6.30]: ...and its floor years (keys and ratios) are the ledger's",
+        JSON.stringify(Object.keys(n0.acaFloorYrs)) === JSON.stringify(Object.keys(L.acaFloorYrs))
+        && Object.keys(L.acaFloorYrs).every(y => Math.abs(n0.acaFloorYrs[y] - L.acaFloorYrs[y]) < 1e-9),
+        `${JSON.stringify(n0.acaFloorYrs)} vs ${JSON.stringify(L.acaFloorYrs)}`);
+      CK("F[v6.30]: ...and its tax, IRMAA and estate are the ledger's (±$1)",
+        Math.abs(n0.totTax - L.totTax) <= 1 && Math.abs(n0.totIrmaa - L.totIrmaa) <= 1 && Math.abs(n0.estate - L.estate) <= 1,
+        `tax ${n0.totTax}/${L.totTax} irmaa ${n0.totIrmaa}/${L.totIrmaa} estate ${n0.estate}/${L.estate}`);
+      CK("F[v6.30]: every subsidy figure is finite and non-negative; totAcaLoss and estate stay finite on every row",
+        now.every(r => Object.values(r.acaSubByYr || {}).every(v => Number.isFinite(v) && v >= 0) && Number.isFinite(r.totAcaLoss) && Number.isFinite(r.estate) && r.estate > 0));
+    } else if (_crossesGainTax) {
       // ── The v5.38 statement (mirrors the v5.34 inversion below). Byte identity expires BY
       // DESIGN at this boundary: the premium sale's gain is now taxed and grossed up, so rows
       // whose sales realize 15%-band gains legitimately move (on this household: fill24's
@@ -308,9 +345,9 @@ console.log(`\n\u2500\u2500 F \u00b7 A2 moved no figure \u2014 byte identity vs 
     } else {
       // Same gate, same reason: the flag is keyed to ACA MAGI, so a release that moves ACA MAGI
       // moves it too. Present-and-populated survives the boundary; byte identity does not.
-      CK(`F: acaFloorYrs is present on BOTH builds${_crossesTracker || _crossesGainTax ? " (value identity waived across a declared boundary; keys asserted above)" : " and byte-identical"} (prior=${PRIOR})`,
+      CK(`F: acaFloorYrs is present on BOTH builds${_crossesTracker || _crossesGainTax || _crossesUnits ? " (value identity waived across a declared boundary; asserted above)" : " and byte-identical"} (prior=${PRIOR})`,
         was.every(r => r.acaFloorYrs !== undefined) && now.every(r => r.acaFloorYrs !== undefined)
-        && (_crossesTracker || _crossesGainTax || now.every((r, i) => JSON.stringify(r.acaFloorYrs) === JSON.stringify(was[i].acaFloorYrs))),
+        && (_crossesTracker || _crossesGainTax || _crossesUnits || now.every((r, i) => JSON.stringify(r.acaFloorYrs) === JSON.stringify(was[i].acaFloorYrs))),
         now.map((r, i) => `${r.key}:${JSON.stringify(r.acaFloorYrs)}/${JSON.stringify(was[i].acaFloorYrs)}`).join(" "));
     }
   }
@@ -373,7 +410,16 @@ console.log("\n\u2500\u2500 H \u00b7 v5.34 the ACA cliff solver under a tracked 
     return { sub, forfeit: Object.keys(row.acaSubByYr).filter(y => row.acaSubByYr[y] === 0), row };
   };
   // The anchor. v5.33 pays this on the same household and v5.34 must not lose it.
-  const ANCHOR = 39454, TOL = 60;
+  // v6.30 (D-60): DERIVED rather than frozen. It is exactly what a solver that lands on its target pays: in each bridge year the
+  // benchmark (the premium grown at plan inflation + 2 points, per covered head) less 9.96% (Rev. Proc. 2025-25's top band) of the
+  // target MAGI, 4 × FPL − the $500 solver margin. At the 2% FPL proxy that is $39,454 to the dollar — the v5.33 figure, reproduced;
+  // at the plan's CPI-U (v6.30) the FPL grows faster and the anchor is lower. A solver that crossed the cliff or stopped short fails.
+  const ANCHOR = Math.round([2027, 2028, 2029, 2030].reduce((t, y) => {
+    const heads = (y - BRIDGE.dobAYr < 65 ? 1 : 0) + (y - BRIDGE.dobBYr < 65 ? 1 : 0);
+    const bench = BRIDGE.acaPremium * 12 * Math.pow(1 + PLAN_INF + 0.02, y - BRIDGE.asOfYr) * heads / 2;
+    return t + bench - 0.0996 * (4 * fplRef(y) - 500); }, 0)), TOL = 60;
+  CK(`H: PRECONDITION — the derived anchor ($${ANCHOR}) is the v5.33 figure ($39,454) at the 2% proxy${U630 ? "; the plan's CPI-U moves it" : ""}`,
+    U630 ? ANCHOR !== 39454 : ANCHOR === 39454, String(ANCHOR));
   const near = (x, target = ANCHOR) => Math.abs(x - target) <= TOL;
 
   // ── case A · the contraction RUNS · declared share 0, the SHIPPED default ──
@@ -457,6 +503,31 @@ console.log(`\n\u2500\u2500 I \u00b7 v5.38 \u00b7 taxed premium-sale gain \u2014
     const BR60 = { ...CASE1, taxableGainFrac: 0.5, taxableInit: 250000, tradInitA: 600000, tradInitB: 300000 };
     const _menu = (a) => [{ key: "n", policy: { kind: "fixed", amount: 0 } }, { key: "c", policy: { kind: "fixed", amount: a } }];
     const c1 = g.runRothStrategies(CASE1, _menu(186000))[1];
+    if (U630) {
+      // v6.30 (D-60): the same pins RE-DERIVED by the same instrument. The reference ledger's v630 mode (validated to the dollar against this
+      // build on six households, these included — tools/validate_v630.mjs) gives each figure; its v538 mode still gives the v5.38–v6.29 pins
+      // exactly (314,708 / 1,150 / 8,908,031 / 108,353 / 5,110,052 / 313,665), which is the check that the ledger itself did not drift.
+      const { existsSync } = await import("fs");
+      const _sim = [new URL("./tools/sim_ledger.mjs", import.meta.url), new URL("./sim_ledger.mjs", import.meta.url)].find(u => existsSync(u));
+      const { runHousehold } = await import(_sim.href);
+      const S1 = runHousehold(CASE1, 186000, "v630").strat, S0 = runHousehold(BR60, 60000, "v630").strat, SN = runHousehold({ ...CASE1, acaPremium: 0, acaSize: 0 }, 186000, "v630").strat;
+      const O1 = runHousehold(CASE1, 186000, "v538").strat;
+      CK("I: the ledger's v538 mode still reproduces the v5.38 pins (the instrument has not drifted)",
+        O1.totTax === 314708 && O1.totIrmaa === 1150 && O1.estate === 8908031, `${O1.totTax} / ${O1.totIrmaa} / ${O1.estate}`);
+      CK("I: CASE1 totTax $376,579 (v6.30 units; $314,708 through v6.29) — the ledger's, the taxed-gain pin (C14's discriminator)",
+        c1.totTax === S1.totTax && S1.totTax === 376579, `engine $${c1.totTax} ledger $${S1.totTax}`);
+      CK("I: CASE1 totIrmaa $1,281 — the 2028 gain crosses tier 1 in the 2030 lookback, billed in 2030's dollars ($1,150 × (1+i)^4; C15's discriminator)",
+        c1.totIrmaa === S1.totIrmaa && S1.totIrmaa === 1281 && Math.round(1150 * Math.pow(1 + PLAN_INF, 4)) === 1281, `engine $${c1.totIrmaa} ledger $${S1.totIrmaa}`);
+      CK("I: CASE1 estate $9,076,103 (v6.30 units; $8,908,031 through v6.29) — the ledger's", c1.estate === S1.estate && S1.estate === 9076103, `engine $${c1.estate} ledger $${S1.estate}`);
+      const b60 = g.runRothStrategies(BR60, _menu(60000))[1];
+      const gainB = S0.trace.reduce((t, r) => t + r.acaGain, 0), gTaxB = S0.trace.reduce((t, r) => t + r.acaGainTax, 0);
+      CK("I: 0%-band household — the premium sale realizes gain and the LTCG on it is $0 (the 0% band), so its totTax $166,084 is the ledger's",
+        gainB > 0 && gTaxB === 0 && b60.totTax === S0.totTax && S0.totTax === 166084, `gain $${gainB}, its tax $${gTaxB}; engine $${b60.totTax} ledger $${S0.totTax}`);
+      CK("I: 0%-band household — estate $5,170,923, the ledger's", b60.estate === S0.estate && S0.estate === 5170923, `engine $${b60.estate} ledger $${S0.estate}`);
+      const noAca = g.runRothStrategies({ ...CASE1, acaPremium: 0, acaSize: 0 }, _menu(186000))[1];
+      CK("I: acaPremium-0 household — totTax $377,028, totIrmaa $0, the ledger's",
+        noAca.totTax === SN.totTax && SN.totTax === 377028 && noAca.totIrmaa === 0 && SN.totIrmaa === 0, `$${noAca.totTax} / $${noAca.totIrmaa}`);
+    } else {
     // Cases 1 + 1a — hand-derived: 2027 gain $12,887 \u2192 LTCG $1,933; 2028 gain $13,969 \u2192 $2,095
     // (flat 15%: stack\u2082 $195,439 already past the indexed 0% top $102,896). The aggregate \u0394 is
     // +$3,802, NOT \u03a3 gain taxes ($4,028): pool depletion trims later dividends \u2212$226 \u2014 measured,
@@ -474,6 +545,7 @@ console.log(`\n\u2500\u2500 I \u00b7 v5.38 \u00b7 taxed premium-sale gain \u2014
     const noAca = g.runRothStrategies({ ...CASE1, acaPremium: 0, acaSize: 0 }, _menu(186000))[1];
     CK("I: acaPremium-0 household untouched \u2014 totTax $313,665, totIrmaa $0",
       noAca.totTax === 313665 && noAca.totIrmaa === 0, `$${noAca.totTax} / $${noAca.totIrmaa}`);
+    }
     // The solver, one layer up: the mirror anticipates the grossed-up sale (D-34-4)
     const _all = g.runRothStrategies(CASE1);
     const _none = _all.find(r => r.key === "none"), _cliff = _all.find(r => r.key === "acaCliff");

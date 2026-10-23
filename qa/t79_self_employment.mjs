@@ -31,18 +31,23 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v616";
-const KNOWN_VERSIONS = ["v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"];
+const KNOWN_VERSIONS = ["v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER);   // an array, so the next registration widens it
 // The differential's pair — two constants, NOT `VER === "v616"`, so the registrar cannot widen it (t76 records why).
 const D_PRIOR = "v615", D_CUR = "v616";
 const require = createRequire(import.meta.url);
 const M = await import(pathToFileURL(join(HERE, `app_${VER}.mjs`)).href);
 const { __g: g } = M;
+// v6.30 (D-60; docs/SCOPE_D60_DOLLAR_UNITS_V630.md): the OASDI wage base (§230 of the Social Security Act) is indexed by the national average
+// wage index; the model now projects it at the plan's inflation (CPI-U as the proxy — DU-3 (a), disclosed as slightly optimistic, since wages
+// historically outrun prices), not a flat 2%. WBR is that rate: Σ prob × inflation over this module's SCENARIOS table (units_v630.mjs) on the
+// v6.30 leg, 2% on every earlier one. The §3101(b)(2) 0.9% thresholds are statutory and unindexed on every leg.
+const WBR = ["v630"].includes(VER) ? Object.values(g.SCENARIOS()).reduce((t, sc) => t + sc.prob * sc.inflation, 0) : 0.02;   // an array, so register_tag2 widens it
 const SRC = readFileSync(join(HERE, "..", `${VER}.jsx`), "utf8");
 const { Parser } = require("acorn"); const jsx = require("acorn-jsx"); const walk = require("acorn-walk");
 const JP = Parser.extend(jsx());
@@ -132,7 +137,7 @@ for (const [lbl, p, se] of H) {
     if (Math.abs(Wh - (r.work_y || 0)) > 0.5) wagesOk = false;
     if (!(Wh > 0)) continue;
     n++; r.filingSingle ? single++ : joint++;
-    const base = BASE26 * Math.pow(1.02, r.yr - tl.asOfYear);
+    const base = BASE26 * Math.pow(1 + WBR, r.yr - tl.asOfYear);
     const law = lawTax(ppl, base, r.filingSingle), old = oldTax(ppl, base, r.filingSingle);
     const want = POST ? law : old, other = POST ? old : law;
     if (Math.abs(r.fica - want) >= 0.005) ownMiss.push(`${r.yr}: ${usd(r.fica)} vs ${usd(want)}`);
@@ -154,10 +159,10 @@ for (const [lbl, p, se] of H) {
     j.some(r => !r.filingSingle) && j.some(r => r.filingSingle), j.map(r => `${r.yr}${r.filingSingle ? "S" : "J"}`).join(" "));
   // net 230,000 × 0.9235 = 212,405: under $250,000 while joint, over $200,000 once Single — the 0.9% appears at the crossing, on net earnings.
   const jr = j.find(r => !r.filingSingle), sr = j.find(r => r.filingSingle);
-  const add = r => r.fica - (Math.min(212405, BASE26 * Math.pow(1.02, r.yr - tl.asOfYear)) * SE_SS + 212405 * SE_MED);
+  const add = r => r.fica - (Math.min(212405, BASE26 * Math.pow(1 + WBR, r.yr - tl.asOfYear)) * SE_SS + 212405 * SE_MED);
   T(POST ? "A-4: and the 0.9% on net earnings appears exactly at the crossing — $0 while joint, 0.9% × $12,405 = $111.65 once Single"
          : `A-4 ${KD}: the survivor's 0.9% is charged on the full $230,000 as wages once Single`,
-    POST ? !!jr && !!sr && Math.abs(add(jr)) < 0.006 && Math.abs(add(sr) - 111.645) < 0.006 : !!sr && Math.abs(sr.fica - oldTax([{ w: 0, p: 230000 }], BASE26 * Math.pow(1.02, sr.yr - tl.asOfYear), true)) < 0.006,
+    POST ? !!jr && !!sr && Math.abs(add(jr)) < 0.006 && Math.abs(add(sr) - 111.645) < 0.006 : !!sr && Math.abs(sr.fica - oldTax([{ w: 0, p: 230000 }], BASE26 * Math.pow(1 + WBR, sr.yr - tl.asOfYear), true)) < 0.006,
     jr && sr ? `${usd(add(jr))} / ${usd(add(sr))}` : "no rows");
 }
 
@@ -252,13 +257,21 @@ console.log("  D — the hand pins");
   pin("D-1", "A self-employed $60K", 8477.73, 4590.00, "60,000 × 92.35% = 55,410 × 15.3%");
   // Wages 150,000 × 7.65% = 11,475.00; SS room 195,792.876 − 150,000 = 45,792.876 × 12.4% = 5,678.32; 55,410 × 2.9% = 1,606.89; 205,410 < 250,000.
   // = 18,760.21. v6.15: 195,792.876 × 6.2% + 210,000 × 1.45% = 12,139.16 + 3,045 = 15,184.16.
-  pin("D-2", "A employee $150K + A self-employed $60K", 18760.21, 15184.16, "the base shared with the same person's paycheck");
+  // v6.30: the same hand arithmetic on the 2029 base at the plan's rate, WB = 184,500 × (1 + WBR)³ (the three pins below that read the base).
+  const WB = BASE26 * Math.pow(1 + WBR, RY - 2026), U30 = WBR !== 0.02;
+  const d2 = 150000 * 0.0765 + Math.min(55410, WB - 150000) * 0.124 + 55410 * 0.029;
+  // D-3 at v6.30's rate: the 2029 base (≈ $200,085) now sits just ABOVE the $200,000 of wages, so a few dollars of Social Security room
+  // are left for the profit — the general form, not the 2% one's "no room left" (a first draft here kept that shortcut and was $5.29 short).
+  const d3 = Math.min(200000, WB) * 0.062 + Math.min(55410, Math.max(0, WB - 200000)) * 0.124 + 200000 * 0.0145 + 55410 * 0.029 + 0.009 * (200000 + 55410 - 250000);
+  const d4 = Math.min(230875, WB) * 0.124 + 230875 * 0.029 + 0.009 * (230875 - 200000);
+  if (U30) console.log(`    (v6.30: the ${RY} wage base at the plan's rate is ${WB.toFixed(3)}; D-2 ${d2.toFixed(2)}, D-3 ${d3.toFixed(2)}, D-4 ${d4.toFixed(2)})`);
+  pin("D-2", "A employee $150K + A self-employed $60K", U30 ? d2 : 18760.21, 15184.16, "the base shared with the same person's paycheck");
   // Wages 200,000 ≥ the base: 195,792.876 × 6.2% = 12,139.16, no SS room left for the profit; 200,000 × 1.45% = 2,900.00; 55,410 × 2.9% = 1,606.89;
   // 0.9% × (200,000 + 55,410 − 250,000) = 48.69. = 16,694.74. v6.15: 12,139.16 + 260,000 × 1.45% (3,770) + 0.9% × 10,000 (90) = 15,999.16.
-  pin("D-3", "A employee $200K + A self-employed $60K", 16694.74, 15999.16, "no Social Security room left after the wages; the 0.9% on wages + net earnings");
+  pin("D-3", "A employee $200K + A self-employed $60K", U30 ? d3 : 16694.74, 15999.16, U30 ? "the profit gets only the base's last dollars above the wages; the 0.9% on wages + net earnings" : "no Social Security room left after the wages; the 0.9% on wages + net earnings");
   // Single: 250,000 × 0.9235 = 230,875; 195,792.876 × 12.4% = 24,278.32; 230,875 × 2.9% = 6,695.38; 0.9% × (230,875 − 200,000) = 277.88. = 31,251.57.
   // v6.15: 12,139.16 + 3,625 + 0.9% × 50,000 (450) = 16,214.16.
-  pin("D-4", "single, A self-employed $250K", 31251.57, 16214.16, "the 0.9% on net earnings over $200,000");
+  pin("D-4", "single, A self-employed $250K", U30 ? d4 : 31251.57, 16214.16, "the 0.9% on net earnings over $200,000");
   // 430 × 0.9235 = 397.11 < 400 → no self-employment tax (§1402(b)(2)). v6.15: 430 × 7.65% = 32.895 → 32.90.
   pin("D-5", "A self-employed $430", 0, 32.895, "net earnings $397.11, under the $400 floor");
 }

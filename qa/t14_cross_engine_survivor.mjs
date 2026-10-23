@@ -273,6 +273,12 @@ try {
   const d = Math.min(tl.dobA.year + tl.lifeExpA, tl.dobB.year + tl.lifeExpB);
   ck("setup: the example household has a first death inside the horizon",
     Number.isFinite(d) && d > tl.asOfYear, `deathYr1 ${d}`);
+  // v6.30 (D-60; docs/SCOPE_D60_DOLLAR_UNITS_V630.md): Engines B and C pay Social Security in each year's own dollars — × (1+i)^(yr − as-of),
+  // the COLA at the plan's inflation — so "flat in today's dollars" (the header's v5.x description) is no longer their basis: B's retained
+  // check and C's lost MAGI are the death year's dollars. `i` is Σ prob × inflation over the DOM app's live SCENARIOS table under its default
+  // prior (units_v630.mjs), never the app's helper. Engine D always COLA-indexed and keeps its one-sided band.
+  const { planInflation, factor } = await import("./units_v630.mjs");
+  const kY = y => factor(planInflation(g.SCENARIOS()), y, tl.asOfYear);
 
   // ── ENGINE D — Withdrawal schedule, guaranteed income column.
   await gotoTab("withdrawal");
@@ -315,14 +321,14 @@ try {
   ck(`Engine B: year ${d - 1} selectable in the tax schedule`, await selectTaxYear(d - 1));
   const bBefore = readSSLines();
   ck(`Engine B: both checks are paid the year before the death`,
-    bBefore.reduce((s, v) => s + v, 0) * 1000 >= (ssA + ssB) - 1000,
-    `lines ${JSON.stringify(bBefore)} vs combined $${((ssA + ssB) / 1000).toFixed(1)}K`);
+    bBefore.reduce((s, v) => s + v, 0) * 1000 >= (ssA + ssB) * kY(d - 1) - 1000,
+    `lines ${JSON.stringify(bBefore)} vs combined $${((ssA + ssB) * kY(d - 1) / 1000).toFixed(1)}K (${d - 1}'s dollars)`);
   ck(`Engine B: year ${d} selectable in the tax schedule`, await selectTaxYear(d));
   const bAt = readSSLines();
   const bAtTotal = bAt.reduce((s, v) => s + v, 0) * 1000;
-  ck("Engine B [EXTINCTION]: the survivor keeps exactly the LARGER check in the death year",
-    Math.abs(bAtTotal - larger) <= 500,
-    `lines ${JSON.stringify(bAt)} = $${bAtTotal} vs larger $${larger}`);
+  ck("Engine B [EXTINCTION]: the survivor keeps exactly the LARGER check in the death year (in that year's dollars)",
+    Math.abs(bAtTotal - larger * kY(d)) <= 500,
+    `lines ${JSON.stringify(bAt)} = $${bAtTotal} vs larger $${Math.round(larger * kY(d))} ($${larger} today)`);
 
   // ── ENGINE C — IRMAA MAGI. Shares Engine B's flat-SS basis, so the magnitude must match.
   await gotoTab("irmaa");
@@ -339,7 +345,7 @@ try {
   ck("Engine C: IRMAA schedule parsed", !!cRows && !!cRows[d] && !!cRows[d - 1]);
   if (cRows && cRows[d] && cRows[d - 1]) {
     const cDrop = cRows[d - 1].magi - cRows[d].magi;
-    const expected = (smaller * 0.85) / 1000;
+    const expected = (smaller * 0.85 * kY(d)) / 1000;   // v6.30: in the death year's dollars
     // ── v5.47 — DRIFT-CORRECTED. Read this before touching the tolerance. ────────────────────
     // `cRows[d-1] - cRows[d]` is a RAW year-over-year difference, and this household's MAGI is
     // ALSO rising ~$4K/yr for reasons that have nothing to do with the death (RMD growth on a
@@ -392,9 +398,9 @@ try {
     // still passing: at the v5.47 build it had $80 of its $4,000 band left. It would have failed
     // on the next release to touch MAGI at all, and read as that release's regression.
     // Negative control (C-2C-5 disabled): off by $6,920 — fires.
-    ck("cross-engine [EXTINCTION]: Engines B and C reconcile on the same flat-SS basis",
-      Math.abs((ssA + ssB - bAtTotal) * 0.85 - cDropAdj * 1000) <= 4000,
-      `B implies smaller $${ssA + ssB - bAtTotal}; C lost $${cDropAdj}K of MAGI (drift-corrected)`);
+    ck("cross-engine [EXTINCTION]: Engines B and C reconcile on the same SS basis (the death year's dollars)",
+      Math.abs(((ssA + ssB) * kY(d) - bAtTotal) * 0.85 - cDropAdj * 1000) <= 4000,
+      `B implies smaller $${Math.round((ssA + ssB) * kY(d) - bAtTotal)}; C lost $${cDropAdj}K of MAGI (drift-corrected)`);
   }
 } catch (e) {
   fail++; console.log(`  \u2717 t14 run threw: ${String(e).slice(0, 400)}`);

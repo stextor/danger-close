@@ -25,13 +25,13 @@ import { spawnSync } from "child_process";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v629";
-const KNOWN_VERSIONS = ["v628", "v629"];
+const KNOWN_VERSIONS = ["v628", "v629", "v630"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v629"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v629", "v630"].includes(VER);   // an array, so the next registration widens it
 const KD = "[KNOWN DEFECT 2026-10-22, F-25 — flips at v6.29]";
 
 // ══ CHILD MODE (--module): the module-level facts — events, Verify, the history and preset helpers, the Stress recovery ══
@@ -325,9 +325,15 @@ const late = () => ({ ...blank(), nameA: "Ann", nameB: "Bo", dobA: "1966-06", do
               { ticker: "BND", name: "Total Bond", balance: 300000, bucket: 2, type: "bond", taxType: "trad", owner: "B", planType: "employer" }],
   otherAccounts: [{ name: "Brokerage", balance: 100000, owner: "joint", taxType: "taxable" }],
   incomeSources: { ssA: { tableByAge: {}, planned: 2800, plannedAge: 67 }, ssB: { tableByAge: {}, planned: 1600, plannedAge: 67 }, pension: { amount: 900 } },
-  incomeStreams: [{ id: "s1", label: "Rental", kind: "rental", owner: "joint", monthly: 1200, startYear: 2026, endYear: 2045, cola: true, tax: "taxable" }] });
-const EXP = [{ category: "Living", label: "Household", amount: 6000, startDate: "2026-01", endDate: "2060-12", kind: "monthly" }];
-const EXP_BROKE = [{ category: "Living", label: "Household", amount: 14000, startDate: "2026-01", endDate: "2060-12", kind: "monthly" }];
+  incomeStreams: [{ id: "s1", label: "Rental", kind: "rental", owner: "joint", monthly: 1200, startYear: 2026, endYear: 2045, cola: true, tax: "ordinary" }] });
+// v6.30 (harness fix, found while re-gating D-60): through v6.29 these two rows were written as { category, startDate, endDate, kind } —
+// field names the app does not read (its rows are { cat, start, end, freq, phase }). The Income tab's monthly figure took them by its defaults,
+// but Engine D's year read skips a row with no `start`, so the tabs saw different spending on one plan. Written in the app's own schema
+// now, and the rental stream's tax as "ordinary", one of the app's two values: "taxable" matched neither ("ordinary" | "taxfree"), so the
+// engines that filter on it counted the rent as income but never taxed it. Measured: every t92 check holds on both legs either way, so no
+// figure here was riding on either defect.
+const EXP = [{ cat: "Living", label: "Household", amount: 6000, start: "2026-01", end: "2060-12", freq: "monthly", phase: "both", deductible: false }];
+const EXP_BROKE = [{ cat: "Living", label: "Household", amount: 14000, start: "2026-01", end: "2060-12", freq: "monthly", phase: "both", deductible: false }];
 const example = async () => { await seed(); await click([...body().querySelectorAll("button, div")].filter(x => /use example data/i.test(x.textContent || "") && x.children.length === 0)[0]); for (let i = 0; i < 3; i++) await flush(); };
 
 const R = {};
@@ -509,7 +515,16 @@ if (POST) {
     ["the Social Security, Medicare and ACA events point at ssa.gov, medicare.gov or HealthCare.gov", "Events sources (1624)"],
     ["What the app says about its own model, checked (v6.29).", "§13 records the release"],
   ];
-  for (const [p, why] of FM_HAS) T(`F-1: the Field Manual says: ${why}`, DOCS.includes(p), p.slice(0, 80));
+  // v6.30 (D-60; docs/SCOPE_D60_DOLLAR_UNITS_V630.md): the two DF-7 sentences described the mixed dollar units, which v6.30 removes; their
+  // measured figures counted only Social Security and were too small. On that leg the Field Manual must no longer carry them, and must say so
+  // in the v6.29 entry's place. An array, so register_tag2 widens it each release.
+  const U630 = ["v630"].includes(VER), DF7 = [FM_HAS[6][0], FM_HAS[7][0]];
+  for (const [p, why] of FM_HAS) {
+    if (U630 && DF7.includes(p)) T(`F-1 (v6.30): the Field Manual no longer says: ${why} — the units it described are fixed`, !DOCS.includes(p), p.slice(0, 80));
+    else T(`F-1: the Field Manual says: ${why}`, DOCS.includes(p), p.slice(0, 80)); }
+  if (U630) T("F-1d (v6.30): …and §13 says why — the v6.30 entry, and the v6.29 description's figures withdrawn",
+    DOCS.includes("<strong>One dollar unit and one inflation clock for the tax engines (v6.30).</strong>")
+    && DOCS.includes("v6.29's description of this finding measured only Social Security, so the figures it quoted were too small; they are gone."));
   if (MD) { const inf = k => Object.entries(MD.PP[k].probs).reduce((s, [r, p]) => s + p * MD.SC[r].inflation, 0);
     T("F-1b: the Field Manual's expected inflation figures are the presets' own (computed here from PROB_PRESETS and SCENARIOS)",
       DOCS.includes(`probability-weighted ≈${(inf("bull") * 100).toFixed(1)}% under the default BULL-LEANING prior and ≈${(inf("base") * 100).toFixed(1)}% under BASE`), `${inf("bull")} / ${inf("base")}`);
@@ -517,11 +532,29 @@ if (POST) {
       SRC.split("const vol = 0.04 + (scenario === SCENARIOS.crisis ? 0.06 : 0);").length === 3 && DOCS.includes("(4% standard deviation, 10% in a crisis year)")); }
   const i29 = DOCS.search(/<li><strong>[^<]*\(v6\.29\)\.<\/strong>/), i28 = DOCS.search(/<li><strong>[^<]*\(v6\.28\)\.<\/strong>/);
   T("F-2: §13's v6.29 entry comes first in its release list", i29 >= 0 && i28 > i29, `${i29} / ${i28}`);
+  // v6.30 (D-60): ONE METHODOLOGY.md sits in a run folder, read by both legs — so the v6.30 leg requires v6.30's text and the v6.29 leg
+  // accepts whichever the folder ships (v6.29's, or v6.30's with the same checks the v6.30 leg makes). v6.29's measurement counted only
+  // Social Security (scope §0.6); v6.30 withdraws its figures and states the full construction's.
+  const M30 = METH.includes("## One dollar unit and one inflation clock for the tax engines (v6.30)"),
+    m30ok = M30 && METH.includes("**The dollar basis (v6.20–v6.29) — superseded at v6.30.**") && !METH.includes("**The dollar basis — measured, both readings")
+      && !METH.includes("the shipped rows run **low**, by $70,823 and $40,664") && METH.includes("ran low by $97,925 at a $0 slider and $72,837 at $70,000")
+      && METH.includes("high by\n$16,878 and $891") && !METH.includes("as everywhere else in the app (§6).");
+  if (U630 || M30)
+    T("F-3 (v6.30): METHODOLOGY describes one unit and one clock, and replaces v6.29's both-readings figures with the full construction's", m30ok, `v6.30 section ${M30}`);
+  else
   T("F-3: METHODOLOGY states the dollar basis both ways, with the measurement", METH.includes("**The dollar basis — measured, both readings (v6.29, F-25).**")
     && METH.includes("the shipped rows run **low**, by $70,823 and $40,664") && METH.includes("from 94.83% to 95.67% at $0 and from 95.15% to 95.73% at\n$70,000")
     && !METH.includes("as everywhere else in the app (§6).") , "");
-  // the measurement's arithmetic, re-done
+  // the measurement's arithmetic, re-done (v6.30: the full construction — scope §0.6, V1 schedule $310,477 / $286,507, today's $195,674 / $212,779)
+  if (U630 || M30) T("F-3b (v6.30): its arithmetic holds ($310,477 − $212,552, $286,507 − $213,670, $212,552 − $195,674, $213,670 − $212,779)",
+    310477 - 212552 === 97925 && 286507 - 213670 === 72837 && 212552 - 195674 === 16878 && 213670 - 212779 === 891);
+  else
   T("F-3b: its arithmetic holds ($283,375 − $212,552 and $254,334 − $213,670)", 283375 - 212552 === 70823 && 254334 - 213670 === 40664);
+  if (["v630"].includes(VER))
+    T("F-4 (v6.30): the in-app units sentences describe one unit — each year's own dollars — and the two-directions sentences are gone",
+      SRC.includes("Every figure is in that year's own dollars") && !SRC.includes("so read as each year's own dollars these rows run <strong>low</strong>")
+      && !SRC.includes("so read as future dollars their totals run <em>low</em>, and the Monte Carlo, which grows them with inflation again, runs slightly <em>high</em>"));
+  else
   T("F-4: the in-app units sentences (Taxes tab, Roth rules box) state both directions", SRC.includes("so read as each year's own dollars these rows run <strong>low</strong>")
     && SRC.includes("so read as future dollars their totals run <em>low</em>, and the Monte Carlo, which grows them with inflation again, runs slightly <em>high</em>"));
 } else {

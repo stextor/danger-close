@@ -27,13 +27,13 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v607";
-const KNOWN_VERSIONS = ["v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"];
+const KNOWN_VERSIONS = ["v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);   // an array, so register_tag2 widens it each release
+const POST = ["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER);   // an array, so register_tag2 widens it each release
 const { __g: g, __engines: E } = await import(pathToFileURL(join(HERE, `app_${VER}.mjs`)).href);
 
 let pass = 0, fail = 0;
@@ -43,6 +43,13 @@ const clone = o => JSON.parse(JSON.stringify(o));
 console.log(`t70 — ANNUITY MONEY IS NEVER CONVERTED (${VER})\n`);
 
 const BASE = clone(g.PORTFOLIO());
+// v6.30 (D-60; docs/SCOPE_D60_DOLLAR_UNITS_V630.md): every engine and the Roth tab carry today's balances to their first year at the plan's
+// inflation (DU-7 (a)), so each recursion below is seeded × (1+i)^(start − as-of). `i` is Σ prob × inflation over the SCENARIOS table the
+// code under test runs on — this ESM module's (BASE weights) for Engines A–C, the DOM app's live table for the Roth tab (§E) — read from the
+// table, never from the app's helper (units_v630.mjs). 1 on every earlier leg, which keeps their recursions exactly as they were.
+const { isV630, planInflation, factor, carryHold } = await import("./units_v630.mjs");
+const V630 = isV630(VER);
+const carry = (scen, yr, asOf) => V630 ? factor(planInflation(scen), yr, asOf) : 1;
 const load = p => { g.applyLoadedData({ portfolio: clone(p) }); return g.buildPlanTimeline(); };
 const engines = (p, o = {}) => {
   const tl = load(p), retireYear = tl.targetRetireYear;
@@ -125,11 +132,13 @@ const NO_ANN = { ...BASE, otherAccounts: BASE.otherAccounts.filter(a => a.taxTyp
 // MODE "share" is v6.06's rule (constant share, pooled pro-rata debit), reproduced so the prior leg pins the defect by the same method.
 for (const [FX, LBL] of [[EX150, "EX150"], [BASE, "the shipped example (t25's household)"]]) {
   const tl = load(FX); const ry = tl.targetRetireYear; const r = g.retireStartBalances(ry);
-  const nA0 = r.tradInitA - r.rmdInitA, nB0 = r.tradInitB - r.rmdInitB;
+  const RB = carry(g.SCENARIOS(), ry, tl.asOfYear);
+  const nA0 = (r.tradInitA - r.rmdInitA) * RB, nB0 = (r.tradInitB - r.rmdInitB) * RB;
   T(`C-0 ${LBL}: PRECONDITION — B holds annuity money and A holds none (the hand case exercises both)`, nB0 > 0 && Math.abs(nA0) < 1e-6, `${usd(nA0)} / ${usd(nB0)}`);
   const e = engines(FX, { noDraw: true });
   const replica = (mode) => {
-    let tA = r.tradInitA, tB = r.tradInitB, nA = nA0, nB = nB0; const sA = nA0 / r.tradInitA, sB = nB0 / r.tradInitB; const out = {};
+    // DU-7 (a): holdings carried, the contribution accrual at face (carryHold); the annuity (nA0/nB0) holds no accrual
+    let tA = carryHold(r.tradInitA, r.accTradA, RB), tB = carryHold(r.tradInitB, r.accTradB, RB), nA = nA0, nB = nB0; const sA = nA0 / tA, sB = nB0 / tB; const out = {};
     for (let yr = ry; yr < e.deathYr1; yr++) {
       const ageA = yr - tl.dobA.year, ageB = yr - tl.dobB.year;
       const qA = mode === "carry" ? tA - nA : tA * (1 - sA), qB = mode === "carry" ? tB - nB : tB * (1 - sB);
@@ -166,7 +175,7 @@ for (const [FX, LBL] of [[EX150, "EX150"], [BASE, "the shipped example (t25's ho
 // The strategy comparison's "none" strategy converts nothing, so its Traditional balances move only by RMD and growth — and Engine A taxes
 // the spending draw without draining it (v5.84). Run with no death (deathYr1 Infinity) so the recursion below is the whole of it.
 {
-  const tl = load(EX150), ry = tl.targetRetireYear, r = g.retireStartBalances(ry), H = ry + 30;
+  const tl = load(EX150), ry = tl.targetRetireYear, r = g.retireStartBalances(ry), H = ry + 30, RB = carry(g.SCENARIOS(), ry, tl.asOfYear);
   const P = { single: false, asOfYr: tl.asOfYear, retireYr: ry, horizonYr: H, ladderEnd: tl.rothLadderEnd, dobAYr: tl.dobA.year, dobBYr: tl.dobB.year,
     deathYr1: Infinity, survivor: "A", ssA: g.getSSA(), ssB: g.getSSB(), ssAYr: tl.ssA_date.year, ssAMo: tl.ssA_date.month, ssBYr: tl.ssB_date.year,
     ssBMo: tl.ssB_date.month, pen: g.getPension(), penOwner: "A", stateRate: 0, stateCode: null, convTaxFunding: "taxable", taxableGainFrac: 0,
@@ -174,8 +183,8 @@ for (const [FX, LBL] of [[EX150, "EX150"], [BASE, "the shipped example (t25's ho
   const none = g.runRothStrategies(P).find(x => x.key === "none");
   const rep = (mode) => {
     const out = {};
-    for (const [w, dob, t0, q0] of [["A", tl.dobA.year, r.tradInitA, r.rmdInitA], ["B", tl.dobB.year, r.tradInitB, r.rmdInitB]]) {
-      let t = t0, n = t0 - q0; const sh = t0 > 0 ? n / t0 : 0;
+    for (const [w, dob, t0, q0, acc] of [["A", tl.dobA.year, r.tradInitA, r.rmdInitA, r.accTradA], ["B", tl.dobB.year, r.tradInitB, r.rmdInitB, r.accTradB]]) {
+      let t = carryHold(t0, acc, RB), n = (t0 - q0) * RB; const sh = t0 > 0 ? n / t : 0;   // v6.30: the accrual at face (DU-7 (a))
       for (let yr = ry; yr <= H; yr++) {
         const age = yr - dob, q = mode === "carry" ? t - n : t * (1 - sh);
         const rmd = age >= g.rmdStartAge(dob) && q > 0 ? q / g.rmdDivisor(age) : 0;
@@ -227,9 +236,9 @@ if (POST && existsSync(PRIOR)) {
 // Two households: the shipped example (B's $7,000 annuity), and the example with a $150,000 annuity for spouse A too. The second is the
 // only one that exercises the ladder's OWN RMD on annuity money: A's first RMD year (2039) falls inside the ladder (which runs to B's
 // window end, 2040), while B's (2041) does not. A's in-ladder RMD then moves A's 2039–2040 cap, so B's conversion and B's card.
-const deriveCards = (tl, r) => {
+const deriveCards = (tl, r, RB = 1) => {
   const ann = { A: r.tradInitA - r.rmdInitA, B: r.tradInitB - r.rmdInitB }, G = 0.045;
-  let bal = { A: r.tradInitA, B: r.tradInitB }, an = { ...ann }; const rows = {};
+  let bal = { A: carryHold(r.tradInitA, r.accTradA, RB), B: carryHold(r.tradInitB, r.accTradB, RB) }, an = { A: ann.A * RB, B: ann.B * RB }; const rows = {};   // v6.30: the accrual at face (DU-7 (a))
   for (let y = tl.rothLadderStart; y <= tl.rothLadderEnd; y++) {
     const age = { A: y - tl.dobA.year, B: y - tl.dobB.year }, end = { A: tl.rothLadderEndA, B: tl.rothLadderEndB };
     const rmd = {}, grown = {}, cap = {};
@@ -255,8 +264,10 @@ const deriveCards = (tl, r) => {
 };
 const A_ANN = { ...BASE, otherAccounts: [...BASE.otherAccounts, { name: "Contract A", balance: 150000, owner: "A", taxType: "annuity" }] };
 const tl0 = load(BASE);
-const want0 = (() => { const tl = load(BASE); return deriveCards(tl, g.retireStartBalances(tl.rothLadderStart)); })();
-const want1 = (() => { const tl = load(A_ANN); return { tl, ...deriveCards(tl, g.retireStartBalances(tl.rothLadderStart)) }; })();
+// v6.30: the Roth tab runs on the DOM app's live table, so on that leg both are re-derived after the mount (`rederive` below).
+const mkWant = (RBfn = () => 1) => [(() => { const tl = load(BASE); return deriveCards(tl, g.retireStartBalances(tl.rothLadderStart), RBfn(tl)); })(),
+  (() => { const tl = load(A_ANN); return { tl, ...deriveCards(tl, g.retireStartBalances(tl.rothLadderStart), RBfn(tl)) }; })()];
+let [want0, want1] = mkWant();
 load(BASE);
 console.log(`  E: derived with-conversion cards — example A ${usd(want0.A.amt)} (${want0.A.yr}), B ${usd(want0.B.amt)} (${want0.B.yr}); ` +
   `with A's annuity A ${usd(want1.A.amt)}, B ${usd(want1.B.amt)}`);
@@ -286,6 +297,10 @@ T(`E-0b: the A-annuity fixture ${POST ? "leaves both cards where they are" : "mo
   const ex = [...body().querySelectorAll("button,[role=button],div")].filter(el => /use example data/i.test(el.textContent || "") && el.children.length === 0)[0];
   await click(ex); await flush(); await flush();
   await gotoTab("roth");
+  if (V630) {
+    [want0, want1] = mkWant(tl => carry(window.__g.SCENARIOS(), tl.rothLadderStart, tl.asOfYear)); load(BASE);
+    console.log(`  E (v6.30): re-derived in the Roth tab's units — example A ${usd(want0.A.amt)}, B ${usd(want0.B.amt)}; with A's annuity A ${usd(want1.A.amt)}, B ${usd(want1.B.amt)}`);
+  }
   const c0 = readCards(), L0 = readLadder();
   T("E-0: the four RMD cards render (no-conversion pair, then with-conversion pair)", c0.length >= 4, `got ${c0.length}`);
   T(`E-1: spouse B's WITH-conversion card is ${usd(want0.B.amt)} (${want0.B.yr}) — ${POST ? "the balance less the CARRIED annuity" : "the static share (v6.06)"}`,
@@ -323,7 +338,7 @@ T(`E-0b: the A-annuity fixture ${POST ? "leaves both cards where they are" : "mo
     JSON.stringify({ capB, capC, headA, attr }));
   // v6.08 (D-34) rewrote Engine D's conversion (docs/SCOPE_D34_ENGINE_D_OTHER_IRA_V608.md; t71 carries it): figured after the draws, bucket
   // money first, then a Traditional IRA entered under Other accounts — never annuity money, which is not in that IRA's tracker. Gated per leg.
-  const D34 = ["v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);   // an array, so register_tag2 widens it each release
+  const D34 = ["v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER);   // an array, so register_tag2 widens it each release
   const capD607 = /const conv_y = yr <= _ladderEnd \? Math\.min\(rothAmount, Math\.max\(0, tradNotional_boy - rmd_y\)\) : 0;/.test(SRC);
   const capD608 = /const _bucketConvCap = Math\.max\(0, tradNotional_boy - _bucketRmdTaken - _spendFromBuckets \* tradFrac\);/.test(SRC)
     && /const _sleeveConvCap = Math\.max\(0, taxRmdA \+ taxRmdB\);/.test(SRC);

@@ -22,6 +22,15 @@ Math.random = () => { _s = (1103515245 * _s + 12345) % 2147483648; return _s / 2
 const { __g: g } = await import("./app_testable.mjs");
 // v6.18 (D-41): v6.17's spending as a table — the attribution tool for the figures v6.18's year-by-year read moved (qa/tools/v617_spending.mjs).
 const { withV617Spending } = await import("./tools/v617_spending.mjs");
+// v6.30 (D-60; docs/SCOPE_D60_DOLLAR_UNITS_V630.md): Engine D carries today's balances to the retirement year at the plan's inflation
+// (DU-7 (a)) — the 401(k) buckets, the taxable pool and its ordinary, gains and RMD-bearing trackers — and leaves the cost BASIS nominal
+// (it is a historical figure, never revalued). Every hand computation below seeds that way. `i` is Σ prob × inflation over this module's
+// SCENARIOS table (BASE weights), read through units_v630.mjs, never from the app's helper.
+const { planInflation, factor } = await import("./units_v630.mjs");
+const carryRB = (retireYr) => factor(planInflation(g.SCENARIOS()), retireYr, g.PLAN_TIMELINE().asOfYear);
+// The §86 oracle (statute text, qa/tools/hand_86.mjs) for the mixed pool's independent MAGI — flat project knowledge holds it beside the suites.
+const { existsSync } = await import("fs");
+const { statute86 } = await import(existsSync(new URL("./hand_86.mjs", import.meta.url)) ? "./hand_86.mjs" : "./tools/hand_86.mjs");
 // v6.21 (D-42): this suite's subject is not spending, so it runs on v6.20's table — the example's without its four car rows (a no-op on
 // any build before v6.21, which has none). The rows would otherwise land in its fixtures' years (a car in the year after a death; draws
 // that reach the example's own brokerage). t84 C proves v6.21 on that table reproduces v6.20 bit for bit.
@@ -443,9 +452,12 @@ console.log("\n  v5.36 — gain on the SPENDING SALE only");
   const cl = planFor(PC);
   const y0 = cl.schedule[0];
   const _sale = y0.drawFromTaxable;               // no named IRA ⇒ the sleeve RMD is 0
+  // v6.30: the pool is carried to the retirement year (× RB); the basis is not. So the basis fraction at the first sale is
+  // 240,000 / (400,000 × RB) — below 0.60 — and more of each sale is gain: the inflation the pool has picked up is a gain for tax.
+  const _pool0 = 400000 * carryRB(RETIRE());
   const _basis0 = 400000 - 400000 * 0.40;
-  const _handGain = _sale * (1 - _basis0 / 400000);
-  const _handBasis = _basis0 - _sale * (_basis0 / 400000);
+  const _handGain = _sale * (1 - _basis0 / _pool0);
+  const _handBasis = _basis0 - _sale * (_basis0 / _pool0);
   ck("PRECONDITION: the clean household sells in its first year", _sale > 1000, `sale ${$(_sale)}`);
   ck("gain on a genuine sale matches the hand computation to the cent",
      Math.abs(y0.capGain_y - _handGain) < 0.01,
@@ -602,54 +614,13 @@ console.log("\n  v5.36 — gain on the SPENDING SALE only");
   ck("mixed pool: the gains-bearing share never exceeds 100% of the pool",
      mx.every(x => share(x) <= 1.000005), `max ${(100 * Math.max(...mx.map(share))).toFixed(2)}%`);
 
-  // ── (7) v5.37 — THE ORDINARY SUB-POOL GROWS, AND CONSERVATION IS REPORTED (scope §6-4/§8-3) ──
-  // v5.37 adds one line to Engine D: `taxOrd = min(taxable − taxGainPool, taxOrd × (1+growth.tax))`
-  // at the same point `taxGainPool` grows. The blast radius was measured by AST census before the
-  // edit: `taxOrd` is write-only into MAGI (its only consumers are `_ordFrac → othOrdDraw → magi`),
-  // so the GAINS side of this household cannot move — and did not, to the microdollar:
-  // v6.18 (D-41): $89,673 is the v6.17 figure, reproduced exactly on v6.17's spending; on the example's table read year by year the gain
-  // is $88,383 (measured at the build — less spending from 2034, so less brokerage sold).
-  ck("mixed pool [v6.18 D-41]: on v6.17's spending (a table) the lifetime realized gain is still EXACTLY $89,673",
-     sumOf(mx17, x => x.capGain_y || 0) === 89673, `$${sumOf(mx17, x => x.capGain_y || 0).toLocaleString()}`);
-  ck("mixed pool: lifetime realized gain is EXACTLY $88,383 (v6.18, the year-by-year read; $89,673 through v6.17) — UNCHANGED by v5.37 (census: gains side never reads taxOrd)",
-     Math.round(mx.reduce((s, x) => s + (x.capGain_y || 0), 0)) === 88383,
-     `$${Math.round(mx.reduce((s, x) => s + (x.capGain_y || 0), 0)).toLocaleString()}`);
-  // What DOES move is MAGI, through othOrdDraw: measured v5.36 → v5.37 on this exact household
-  // and these exact ARGS, 3,132,745.819315 → 3,162,820.292311 (+$30,074.47 of ordinary growth
-  // recognised over the plan). Pinned to the dollar; the v5.36 figure is recorded here so the
-  // next re-derivation has both ends.
-  // v6.08 (D-34) moves it again, and ONLY through the RMD: this household's $300,000 Other-account IRA is still standing at RMD age, and
-  // its RMD tracker now grows and gives up its RMD whole. Measured v6.07 → v6.08 on this household and these ARGS:
-  // 3,162,820.292311 → 3,191,209.308515 (+$28,389.02), and lifetime rmd_y 1,316,332.154880 → 1,344,721.171085 (+$28,389.02) — the same
-  // figure, while othOrdDraw (223,908.637430) and the gain do not move. The ledger below reproduces the IRA's RMD itself, every year.
-  // v6.12 (C-5) moves it a third time, and ONLY through taxable Social Security: Engine D now takes the §86 worksheet's share of benefits
-  // instead of a flat 85%. Measured v6.11 → v6.12 on this household and these ARGS: 3,191,209 → 2,960,678 — and the check after this one
-  // states the whole move as Social Security, from the rows' own benefits, so the new figure is a decomposition and not a number copied
-  // from the build. (t75 C-1 asserts every other schedule field bit-identical to v6.11 across ten households.)
-  // v6.18 (D-41) moves it a fourth time, and only through spending: on v6.17's spending (a table) it is still $2,960,678 exactly; on the
-  // example's table read year by year it is $2,939,343 (measured at the build).
-  ck("mixed pool [v6.18 D-41]: on v6.17's spending (a table) lifetime MAGI is still EXACTLY $2,960,678",
-     sumOf(mx17, x => x.magi || 0) === 2960678, `$${sumOf(mx17, x => x.magi || 0).toLocaleString()}`);
-  ck("mixed pool: lifetime MAGI is EXACTLY $2,939,343 — the year-by-year read (v6.18); $2,960,678 at v6.12–v6.17, $3,191,209 at v6.11, $3,162,820 at v6.07, $3,132,746 at v5.36",
-     Math.round(mx.reduce((s, x) => s + (x.magi || 0), 0)) === 2939343,
-     `$${Math.round(mx.reduce((s, x) => s + (x.magi || 0), 0)).toLocaleString()}`);
-  // The v6.12 decomposition is a statement about v6.17's spending, so it is made on that table (v6.18, D-41).
-  ck("mixed pool: …and the whole v6.12 move is Social Security — lifetime MAGI + Σ(0.85 × benefits − ssTaxable) is the v6.11 figure, $3,191,209 (on v6.17's spending, a table, from v6.18)",
-     sumOf(mx17, x => x.magi + 0.85 * (x.ssA_y + x.ssB_y) - x.ssTaxable) === 3191209,
-     `$${sumOf(mx17, x => x.magi + 0.85 * (x.ssA_y + x.ssB_y) - x.ssTaxable).toLocaleString()}`);
-  ck("mixed pool [v6.18 D-41]: on v6.17's spending (a table) lifetime othOrdDraw is still EXACTLY $223,909",
-     sumOf(mx17, x => x.othOrdDraw || 0) === 223909, `$${sumOf(mx17, x => x.othOrdDraw || 0).toLocaleString()}`);
-  ck("mixed pool: …and the whole move is the RMD — lifetime othOrdDraw is EXACTLY $224,434 (v6.18, the year-by-year read; $223,909 from v5.37 to v6.17)",
-     Math.round(mx.reduce((s, x) => s + (x.othOrdDraw || 0), 0)) === 224434,
-     `$${Math.round(mx.reduce((s, x) => s + (x.othOrdDraw || 0), 0)).toLocaleString()}`);
-
   // THE INDEPENDENT LEDGER — the same instrument that derived v5.37's exacts before the engine
   // was edited, carried here so the suite re-runs the derivation instead of trusting it. It
   // re-implements the whole taxable-sleeve arithmetic with its OWN copy of the IRS Uniform
   // Lifetime divisors (Pub 590-B) and SECURE 2.0 start ages, walks the engine's published
   // mechanical series, and must reproduce the published balances to the cent — only then is its
   // internal `taxOrd` (which the engine does not publish) trusted for the conservation report.
-  {
+  const ledgerOf = (mx) => {
     const DIV = { 72:27.4,73:26.5,74:25.5,75:24.6,76:23.7,77:22.9,78:22.0,79:21.1,80:20.2,81:19.4,
       82:18.5,83:17.7,84:16.8,85:16.0,86:15.2,87:14.4,88:13.7,89:12.9,90:12.2,91:11.5,92:10.8,
       93:10.1,94:9.5,95:8.9,96:8.4,97:7.8,98:7.3,99:6.8,100:6.4 };           // IRS Pub 590-B
@@ -664,11 +635,16 @@ console.log("\n  v5.36 — gain on the SPENDING SALE only");
     const ordInit = bal(a => a.taxType === "trad" || a.taxType === "annuity");
     const hsaInit = bal(a => a.taxType === "hsa");
     const shareOpen = (port.taxableGainPct != null ? port.taxableGainPct : 40) / 100;
-    let T = taxInit, taxOrd = Math.min(ordInit, taxInit);
-    let taxRmdA = bal(a => a.taxType === "trad" && a.owner === "A");
-    let taxRmdB = bal(a => a.taxType === "trad" && a.owner === "B");
-    let gp = Math.max(0, Math.min(taxInit, Math.max(0, taxInit - ordInit - hsaInit)));
-    let basis = Math.max(0, gp * (1 - shareOpen));
+    // v6.30: every tracker carried to the retirement year (× RB); the basis opened on today's gains-bearing money and left nominal.
+    const RB = carryRB(mxPlan._tlW.targetRetireYear);
+    let T = taxInit * RB, taxOrd = Math.min(ordInit, taxInit) * RB;
+    let taxRmdA = bal(a => a.taxType === "trad" && a.owner === "A") * RB;
+    let taxRmdB = bal(a => a.taxType === "trad" && a.owner === "B") * RB;
+    const gp0 = Math.max(0, Math.min(taxInit, Math.max(0, taxInit - ordInit - hsaInit)));
+    let gp = gp0 * RB;
+    let basis = Math.max(0, gp0 * (1 - shareOpen));
+    let sumGain = 0, sumOthOrd = 0, sumMagi = 0, sumMagi85 = 0;
+    const deathYr1 = single ? Infinity : Math.min(dobA + mxPlan._tlW.lifeExpA, dobB + mxPlan._tlW.lifeExpB);
     let worstT = 0, worstGp = 0, worstGain = 0, worstBasis = 0, worstRmdS = 0;
     const binds = [], viol = [];
     for (const R of mx) {
@@ -690,6 +666,13 @@ console.log("\n  v5.36 — gain on the SPENDING SALE only");
       basis = Math.max(0, basis - sale * basisFrac);
       gp = Math.max(0, gp - sale);
       taxOrd = Math.max(0, taxOrd - othOrd - sleeve);
+      // v6.30: the row's MAGI rebuilt here — the ledger's own gain and named-IRA spending, the §86 oracle on the year's filing status
+      // (Pub. 501: joint through the death year), and the published inputs the ledger also takes as given (pension, work, RMD, the
+      // 401(k) draw, the conversion). The fixture holds no income streams, so there is no other ordinary term.
+      { const other = R.pen_y + R.work_y + R.rmd_y + R.tradDraw + othOrd + R.conv_y, ss = R.ssA_y + R.ssB_y;
+        sumMagi += statute86(ss, other + gain, !(single || R.yr > deathYr1)) + other + gain;   // the oracle takes JOINT
+        sumMagi85 += other + gain + 0.85 * ss;
+        sumGain += gain; sumOthOrd += othOrd; }
       // v6.08 (D-34): the IRA's RMD leaves the IRA it was figured on (identified dollars); only the spending draw leaves pro rata, on
       // the post-RMD pool — `taxOrd`'s own two rules. (Through v6.07 both left pro rata, `drawFromTaxable / T_boy`.)
       const kR = rmdFromSleeve > 0 ? sleeve / rmdFromSleeve : 0;
@@ -721,6 +704,62 @@ console.log("\n  v5.36 — gain on the SPENDING SALE only");
       const basisPub = Math.max(0, Math.min(T, T - gp + basis));
       worstBasis = Math.max(worstBasis, Math.abs(basisPub - (R.taxBasis || 0)));
     }
+    return { worstT, worstGp, worstGain, worstBasis, worstRmdS, binds, viol, sumGain, sumOthOrd, sumMagi, sumMagi85 };
+  };
+  const LG = ledgerOf(mx), LG17 = ledgerOf(mx17);
+  console.log(`    ledger (v6.30 units): gain ${$(LG.sumGain)} / othOrd ${$(LG.sumOthOrd)} / MAGI ${$(LG.sumMagi)}; on v6.17's spending ${$(LG17.sumGain)} / ${$(LG17.sumOthOrd)} / ${$(LG17.sumMagi)}`);
+
+  // ── (7) v5.37 — THE ORDINARY SUB-POOL GROWS, AND CONSERVATION IS REPORTED (scope §6-4/§8-3) ──
+  // v5.37 adds one line to Engine D: `taxOrd = min(taxable − taxGainPool, taxOrd × (1+growth.tax))`
+  // at the same point `taxGainPool` grows. The blast radius was measured by AST census before the
+  // edit: `taxOrd` is write-only into MAGI (its only consumers are `_ordFrac → othOrdDraw → magi`),
+  // so the GAINS side of this household cannot move — and did not, to the microdollar:
+  // v6.18 (D-41): $89,673 is the v6.17 figure, reproduced exactly on v6.17's spending; on the example's table read year by year the gain
+  // is $88,383 (measured at the build — less spending from 2034, so less brokerage sold).
+  // History of these pins through v6.29 (kept verbatim):
+  // What DOES move is MAGI, through othOrdDraw: measured v5.36 → v5.37 on this exact household
+  // and these exact ARGS, 3,132,745.819315 → 3,162,820.292311 (+$30,074.47 of ordinary growth
+  // recognised over the plan). Pinned to the dollar; the v5.36 figure is recorded here so the
+  // next re-derivation has both ends.
+  // v6.08 (D-34) moves it again, and ONLY through the RMD: this household's $300,000 Other-account IRA is still standing at RMD age, and
+  // its RMD tracker now grows and gives up its RMD whole. Measured v6.07 → v6.08 on this household and these ARGS:
+  // 3,162,820.292311 → 3,191,209.308515 (+$28,389.02), and lifetime rmd_y 1,316,332.154880 → 1,344,721.171085 (+$28,389.02) — the same
+  // figure, while othOrdDraw (223,908.637430) and the gain do not move. The ledger below reproduces the IRA's RMD itself, every year.
+  // v6.12 (C-5) moves it a third time, and ONLY through taxable Social Security: Engine D now takes the §86 worksheet's share of benefits
+  // instead of a flat 85%. Measured v6.11 → v6.12 on this household and these ARGS: 3,191,209 → 2,960,678 — and the check after this one
+  // states the whole move as Social Security, from the rows' own benefits, so the new figure is a decomposition and not a number copied
+  // from the build. (t75 C-1 asserts every other schedule field bit-identical to v6.11 across ten households.)
+  // v6.18 (D-41) moves it a fourth time, and only through spending: on v6.17's spending (a table) it is still $2,960,678 exactly; on the
+  // example's table read year by year it is $2,939,343 (measured at the build).
+  // The v6.12 decomposition is a statement about v6.17's spending, so it is made on that table (v6.18, D-41).
+  // ── v6.30 (D-60) — THE PINS, RE-DERIVED ─────────────────────────────────────────────────────────────────────────────────────────
+  // Every figure below moved at v6.30, and every one for the same reason: the pool, its trackers and the 401(k) buckets now enter
+  // retirement carried at inflation while the basis stays nominal, and Social Security is paid in each year's own dollars. Through v6.29
+  // these were frozen measurements (history kept in the labels: gain $88,383 / $89,673 on v6.17's spending; MAGI $2,939,343 / $2,960,678;
+  // v6.11-rule MAGI $3,191,209; othOrdDraw $224,434 / $223,909). From v6.30 each is asserted against the INDEPENDENT LEDGER above — its
+  // own sub-pool arithmetic, Pub. 590-B divisors and the §86 statute oracle — on BOTH spending tables, and the ledger's figure is pinned
+  // beside it so a drift in the two together is still visible. Measured at the v6.30 build by the ledger, not by the engine.
+  const PIN30 = { gain: 105929, gain17: 107183, magi: 3212150, magi17: 3235431, magi85_17: 3456310, oth: 247659, oth17: 247089 };
+  const eq = (eng, led, pin) => Math.round(eng) === Math.round(led) && Math.round(led) === pin;
+  ck(`mixed pool [v6.18 D-41]: on v6.17's spending (a table) the lifetime realized gain is the ledger's — $${PIN30.gain17.toLocaleString()} (v6.30 units; $89,673 through v6.29)`,
+     eq(sumOf(mx17, x => x.capGain_y || 0), LG17.sumGain, PIN30.gain17), `engine $${sumOf(mx17, x => x.capGain_y || 0).toLocaleString()} ledger ${$(LG17.sumGain)}`);
+  ck(`mixed pool: lifetime realized gain is the ledger's — $${PIN30.gain.toLocaleString()} (v6.30 units; $88,383 at v6.18–v6.29) — the gains side never reads taxOrd (v5.37 census)`,
+     eq(mx.reduce((s, x) => s + (x.capGain_y || 0), 0), LG.sumGain, PIN30.gain), `engine $${Math.round(mx.reduce((s, x) => s + (x.capGain_y || 0), 0)).toLocaleString()} ledger ${$(LG.sumGain)}`);
+  ck(`mixed pool [v6.18 D-41]: on v6.17's spending (a table) lifetime MAGI is the ledger's — $${PIN30.magi17.toLocaleString()} (v6.30 units; $2,960,678 through v6.29)`,
+     eq(sumOf(mx17, x => x.magi || 0), LG17.sumMagi, PIN30.magi17), `engine $${sumOf(mx17, x => x.magi || 0).toLocaleString()} ledger ${$(LG17.sumMagi)}`);
+  ck(`mixed pool: lifetime MAGI is the ledger's — $${PIN30.magi.toLocaleString()} (v6.30 units); $2,939,343 at v6.18–v6.29, $2,960,678 at v6.12–v6.17, $3,191,209 at v6.11, $3,162,820 at v6.07, $3,132,746 at v5.36`,
+     eq(mx.reduce((s, x) => s + (x.magi || 0), 0), LG.sumMagi, PIN30.magi), `engine $${Math.round(mx.reduce((s, x) => s + (x.magi || 0), 0)).toLocaleString()} ledger ${$(LG.sumMagi)}`);
+  // The v6.12 decomposition is a statement about v6.17's spending, so it is made on that table (v6.18, D-41): the flat-85% reading.
+  ck(`mixed pool: …and the whole v6.12 move is Social Security — lifetime MAGI + Σ(0.85 × benefits − ssTaxable) is the ledger's flat-85% MAGI, $${PIN30.magi85_17.toLocaleString()} (v6.30 units; $3,191,209 through v6.29; on v6.17's spending)`,
+     eq(sumOf(mx17, x => x.magi + 0.85 * (x.ssA_y + x.ssB_y) - x.ssTaxable), LG17.sumMagi85, PIN30.magi85_17),
+     `engine $${sumOf(mx17, x => x.magi + 0.85 * (x.ssA_y + x.ssB_y) - x.ssTaxable).toLocaleString()} ledger ${$(LG17.sumMagi85)}`);
+  ck(`mixed pool [v6.18 D-41]: on v6.17's spending (a table) lifetime othOrdDraw is the ledger's — $${PIN30.oth17.toLocaleString()} (v6.30 units; $223,909 through v6.29)`,
+     eq(sumOf(mx17, x => x.othOrdDraw || 0), LG17.sumOthOrd, PIN30.oth17), `engine $${sumOf(mx17, x => x.othOrdDraw || 0).toLocaleString()} ledger ${$(LG17.sumOthOrd)}`);
+  ck(`mixed pool: …and lifetime othOrdDraw is the ledger's — $${PIN30.oth.toLocaleString()} (v6.30 units; $224,434 at v6.18–v6.29, $223,909 from v5.37 to v6.17)`,
+     eq(mx.reduce((s, x) => s + (x.othOrdDraw || 0), 0), LG.sumOthOrd, PIN30.oth), `engine $${Math.round(mx.reduce((s, x) => s + (x.othOrdDraw || 0), 0)).toLocaleString()} ledger ${$(LG.sumOthOrd)}`);
+
+  {
+    const { worstT, worstGp, worstGain, worstBasis, worstRmdS, binds, viol } = LG;
     ck("LEDGER: the independent re-computation reproduces the published pool to the cent every year",
        worstT < 0.01, `worst |Δ taxable| ${worstT.toFixed(6)}`);
     ck("LEDGER: ...and the gains sub-pool", worstGp < 0.01, `worst |Δ taxGainPool| ${worstGp.toFixed(6)}`);

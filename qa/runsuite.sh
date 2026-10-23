@@ -398,6 +398,13 @@ tally "t91-$CUR"   node t91_directives.mjs "$CUR"
 # and METHODOLOGY. Both legs (the v6.28 leg pins the defects); module facts in a child process. Prints one count line.
 tally "t92-$PRIOR" node t92_model_claims.mjs "$PRIOR"
 tally "t92-$CUR"   node t92_model_claims.mjs "$CUR"
+# t93 (v6.30) — one dollar unit and one inflation clock for the tax engines (D-60): the statute rates (C-CPI-U, CPI-U) against the scenario
+# table, Engine B's units input by input, the homogeneity invariant (real income, rates forced to the plan's inflation, the same tax in
+# today's dollars every year), one clock (a fixed amount is the amount paid; Engine D at the two-clock boundary equals v6.29), the Monte
+# Carlo's schedule, Engine A's today's-dollar fields, IRMAA surcharges to the premium year, basis, the source by AST, copy and the
+# rendered tabs. Both legs (the v6.29 leg pins the defects); module facts in a child process. Prints one count line.
+tally "t93-$PRIOR" node t93_dollar_units.mjs "$PRIOR"
+tally "t93-$CUR"   node t93_dollar_units.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

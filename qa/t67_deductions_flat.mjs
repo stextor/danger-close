@@ -21,7 +21,7 @@ import { existsSync, readFileSync } from "fs";
 import { d30Tax, D30_STATES, D30_FLAT_STATES } from "./d30_ref.mjs";
 const require = createRequire(import.meta.url);
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"];
+const KNOWN_VERSIONS = ["v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  ✓ ${n}`); } else { fail++; console.log(`  ✗ ${n}${d !== "" ? " — " + String(d).slice(0, 300) : ""}`); } };
 const EQ = (n, got, want, tol = 0.005) => CK(n, typeof got === "number" && Math.abs(got - want) <= tol, `got ${got}, want ${want}`);
@@ -31,7 +31,7 @@ if (!KNOWN_VERSIONS.includes(VER)) { CK(`0-0 version tag ${JSON.stringify(VER)} 
 const B2 = VER !== "v602";   // a version on which batch 2 is present
 // v6.04 (D-31, t68): nine rows gain a component (a federal-income-tax deduction or the federal senior deduction), appended last; this suite
 // keeps to its own components (`own` drops them) and t68 holds the new ones and the notes' new wording. A version LIST.
-const D31L = ["v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);
+const D31L = ["v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER);
 const own = l => (l || []).filter(x => !(D31L && (x.of !== undefined || x.years !== undefined)));
 const PREFIX = "dc:";
 window.storage = {

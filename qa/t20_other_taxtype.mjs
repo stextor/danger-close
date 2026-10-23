@@ -510,7 +510,7 @@ console.log("\nE2. The annuity carries NO RMD \u2014 in any engine");
     // income (an extra ordinary dollar can carry up to $0.85 of benefits into MAGI), so it is now subtracted explicitly, from the row's
     // own `ssTaxable`; the 0.85 fallback is the pre-v6.12 rule, for a module that does not publish the field.
     const ssT = r.schedule.reduce((s, x) => s + (x.ssTaxable ?? 0.85 * (x.ssA_y + x.ssB_y)), 0);
-    return { magi, gain, ord: magi - gain - ssT }; };
+    return { magi, gain, ord: magi - gain - ssT, r }; };
   const pTax = planOf(ownedA("taxable")), pTrad = planOf(ownedA("trad")), pAnn = planOf(ownedA("annuity"));
   const magiTax = pTax.magi, magiTrad = pTrad.magi, magiAnn = pAnn.magi;
   ck("Engine D: a TRADITIONAL Other account is taxed as ordinary income when spent",
@@ -527,8 +527,31 @@ console.log("\nE2. The annuity carries NO RMD \u2014 in any engine");
   // independent simulator (its own IRS Pub 590-B divisor table, its own ledger) BEFORE the
   // engine was edited, and matched by the edited engine to six decimals (724,266.004427 both).
   // If this reads 600000 again, E-15 is back — see the extinction below.
-  ck("Engine D: an ANNUITY's lifetime ORDINARY excess is the balance PLUS its growth \u2014 EXACTLY $724,266 (v5.37)",
-     Math.round(pAnn.ord - pTax.ord) === 724266, `delta ${Math.round(pAnn.ord - pTax.ord)}`);
+  // v6.30 (D-60; docs/SCOPE_D60_DOLLAR_UNITS_V630.md): Engine D now carries today's balances to the retirement year at the plan's
+  // inflation, so the $600,000 contract enters retirement as $600,000 × RB and the excess grows with it — $724,266 through v6.29. The
+  // figure is RE-DERIVED here, the v5.37 way: an independent walk of the Priority-1 pool (all of it ordinary money on this household —
+  // no gains-bearing share, no RMD tracker, the annuity carries none) that takes only the published draw and year-end pool as inputs,
+  // recognises each draw's ordinary share, banks any RMD surplus as full-basis brokerage cash, and grows both sides at the pool's rate.
+  // `i` is Σ prob × inflation over this module's SCENARIOS table (units_v630.mjs), never the app's helper. An explicit pre-v6.30 tag keeps
+  // the v5.37 pin. Measured at the v6.30 build by this walk: $740,706.
+  const { planInflation, factor, isV630 } = await import("./units_v630.mjs");
+  const U630 = !VER || isV630(VER);
+  let walkOrd = null;
+  if (U630) {
+    const R0 = pAnn.r, gr = R0.growth.tax, RB = factor(planInflation(g.SCENARIOS()), 2027, R0._tlW.asOfYear);
+    let T = 600000 * RB, ord = 600000 * RB, gp = 0, sum = 0;
+    for (const R of R0.schedule) {
+      const spend = R.drawFromTaxable, oth = T > 0 ? spend * Math.min(1, Math.max(0, ord) / T) : 0;
+      sum += oth; ord = Math.max(0, ord - oth); gp = Math.max(0, gp - spend * (T > 0 ? Math.min(1, gp / T) : 0));
+      T -= spend; const u = Math.max(0, R.taxable / (1 + gr) - T); T += u; gp += u;
+      T *= (1 + gr); gp = Math.min(T, gp * (1 + gr)); ord = Math.min(T - gp, ord * (1 + gr));
+    }
+    walkOrd = sum;
+  }
+  ck(U630 ? "Engine D: an ANNUITY's lifetime ORDINARY excess is the CARRIED balance PLUS its growth \u2014 the independent walk's, $740,706 (v6.30 units; $724,266 at v5.37\u2013v6.29)"
+          : "Engine D: an ANNUITY's lifetime ORDINARY excess is the balance PLUS its growth \u2014 EXACTLY $724,266 (v5.37)",
+     U630 ? Math.round(pAnn.ord - pTax.ord) === Math.round(walkOrd) && Math.round(walkOrd) === 740706 : Math.round(pAnn.ord - pTax.ord) === 724266,
+     `delta ${Math.round(pAnn.ord - pTax.ord)}${U630 ? ` walk ${Math.round(walkOrd)}` : ""}`);
   // THE E-15 EXTINCTION, as the inequality that survives future re-derivations: ordinary money
   // must recognise MORE than it started with, because it grew before it left. A release that
   // stops growing `taxOrd` collapses the excess back to exactly the opening balance and fails

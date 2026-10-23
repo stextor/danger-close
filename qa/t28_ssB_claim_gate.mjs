@@ -53,12 +53,12 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true; window.IS_REACT_ACT_ENVIRONMENT = tr
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v546";
-const KNOWN_VERSIONS = ["v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"];
+const KNOWN_VERSIONS = ["v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"];
 // The dividend term the ladder carries from v5.53, read from the app's own accessors rather than
 // hardcoded so it tracks the example household instead of freezing a figure into the model.
 const _appD = (await import(`./app_${VER}.mjs`)).__g;
 const _tlD = typeof _appD.PLAN_TIMELINE === "function" ? _appD.PLAN_TIMELINE() : _appD.PLAN_TIMELINE;
-const DIV = (VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629"))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629"))))))))))))))))))))
+const DIV = (VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630")))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630")))))))))))))))))))))
   ? Math.round(Math.max(0, _appD.taxableInitAll()
       - (_appD.retireStartBalances(_tlD.rothLadderStart).othHsa || 0)) * (2.0 / 100))
   : 0;
@@ -67,7 +67,7 @@ if (!KNOWN_VERSIONS.includes(VER)) {
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST_FIX = VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629"))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629"))))))))))))))))))));
+const POST_FIX = VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630")))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630")))))))))))))))))))));
 
 // The repo keeps the oracle at qa/tools/hand_86.mjs; PROJECT KNOWLEDGE IS FLAT and holds it
 // beside the suites. Resolve rather than assume, and say which copy was used (the t21/t24
@@ -94,27 +94,40 @@ const dobA = 1964, dobB = 1966, START = 2029, END = 2040, endA = 2038, endB = 20
 const taper = y => (y === 2029 ? 20000 : y === 2030 ? 18000 : y === 2031 ? 15000 : 0);
 const partialMonths = m => Math.max(0, 12 - m + 1);       // the app's own formula, mirrored
 
+// v6.30 (D-60; docs/SCOPE_D60_DOLLAR_UNITS_V630.md): from v6.30 the ladder table is in each year's own dollars — the seed balances carried
+// from the as-of year to the ladder start at the plan's inflation (U.RB), Social Security and the dividend × (1+i)^(y − as-of); the pension,
+// the taper and the slider are fixed amounts. `i` is the DOM app's live plan inflation (Σ prob × inflation over its SCENARIOS table under the
+// default preset, units_v630.mjs), read after the Roth tab renders (U.set below); 1 on earlier legs. The t24 model's units, applied here.
+const U = { on: false, RB: 1, k: () => 1, set(i, asOf) { this.on = true; this.RB = Math.pow(1 + i, START - asOf); this.k = y => Math.pow(1 + i, y - asOf); } };
+// v6.30: the D-33 annuity carve-out (t24's NB0 — B's $7,000 "Spouse B - Annuity" row takes no RMD, is never converted, only grows). Through
+// v6.29 this suite left it out and still matched at K precision (it moves A's 2039 RMD by $149); in v6.30's carried units it crosses a $1K
+// rounding edge in 2039, so the model now carries it — on the v6.30 leg only, which keeps every earlier leg's recursion exactly as it was.
+const NB0 = ["v630"].includes(VER) ? 7000 : 0;   // an array, so register_tag2 widens it each release
 function ladder(rothAmount, ssTerm) {
-  let a = A0, b = B0; const out = [];
+  // v6.30 (D-60, DU-7 (a)): the holdings carried, the accrual inside A0/B0 at face value — the example's $2,500/mo (A) and $350/mo (B)
+  // pre-tax contributions over 2026–2028 (the build review's finding; t93 §O). With U off (RB = 1) this is A0/B0 as before.
+  const ACC_A = 2500 * 12 * 3, ACC_B = 350 * 12 * 3;
+  let a = (A0 - ACC_A) * U.RB + ACC_A, b = (B0 - ACC_B) * U.RB + ACC_B, nb = NB0 * U.RB; const out = [];
   for (let y = START; y <= END; y++) {
     const ageA = y - dobA, ageB = y - dobB;
     const rA = ageA >= 75 ? a / (ULT[ageA] || 6.4) : 0;   // prior 31 Dec basis (Pub. 590-B)
-    const rB = ageB >= 75 ? b / (ULT[ageB] || 6.4) : 0;
+    const rB = ageB >= 75 ? Math.max(0, b - nb) / (ULT[ageB] || 6.4) : 0;
     const rmd = Math.round(rA + rB);
     const gA = a * (1 + G), gB = b * (1 + G);
     const capA = Math.max(0, (y <= endA ? gA : 0) - rA);
-    const capB = Math.max(0, (y <= endB ? gB : 0) - rB);
+    const capB = Math.max(0, (y <= endB ? gB - nb * (1 + G) : 0) - rB);
     const conv = Math.min(rothAmount, capA + capB);
     const cA = (capA + capB) > 0 ? conv * (capA / (capA + capB)) : 0;
-    a = Math.max(0, gA - cA - rA); b = Math.max(0, gB - (conv - cA) - rB);
-    const ss = ssTerm(y);
+    a = Math.max(0, gA - cA - rA); b = Math.max(0, gB - (conv - cA) - rB); nb = Math.min(nb * (1 + G), b);
+    const ss = ssTerm(y) * U.k(y);
     // v5.53 (D-10 modelling half): the taxable sleeve's DIVIDENDS enter the §86 provisional base
     // and magi. Engine C's `_prov86` has always carried `div_y`; the ladder does from v5.53, so
     // this model must too or it asserts the PRE-FIX expression. Same correction as t24's oracle.
     // ⚠ Gated: v5.52 and earlier legitimately carry no such term (OPERATIONS §B2).
-    const nonSS = PEN + taper(y) + conv + rmd + DIV;
+    const DIVy = U.on ? Math.round(DIV * U.k(y)) : DIV;
+    const nonSS = PEN + taper(y) + conv + rmd + DIVy;
     const taxableSS = Math.round(statute86(ss, nonSS, true));
-    out.push({ y, ss, magi: PEN + taper(y) + taxableSS + conv + rmd + DIV });
+    out.push({ y, ss, magi: PEN + taper(y) + taxableSS + conv + rmd + DIVy });
   }
   return out;
 }
@@ -161,6 +174,8 @@ T("SETUP: landing offers Use Example Data", !!ex);
 await click(ex); await flush(); await flush();
 T("SETUP: Roth tab reachable", !!tabBy("roth"));
 await click(tabBy("roth")); await flush(); await flush();
+{ const { isV630, planInflation } = await import("./units_v630.mjs");
+  if (isV630(VER)) U.set(planInflation(window.__g.SCENARIOS()), window.__g.PLAN_TIMELINE().asOfYear); }
 
 const Gx = window.__g;
 const BASE = JSON.parse(JSON.stringify(Gx.PORTFOLIO()));

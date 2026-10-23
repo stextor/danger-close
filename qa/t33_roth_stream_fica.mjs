@@ -40,7 +40,7 @@ const VER = process.argv[2] || "v563";
 // pre-fix like v5.62; only the two ABSOLUTE pins differ, because v5.62 raised state tax in the
 // Roth outputs (SCOPE_ENGINE_STATE_PARITY). Everything else here is a DELTA between two streams
 // on one build and is therefore version-independent by construction.
-const KNOWN_VERSIONS = ["v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"];
+const KNOWN_VERSIONS = ["v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is not registered in this suite.");
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -48,7 +48,7 @@ if (!KNOWN_VERSIONS.includes(VER)) {
   process.exit(1);
 }
 // The fix landed at v5.63. Every later tag is post-fix and must be added here as well.
-const POST_FIX = VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629"))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629")))))))))))))))))));
+const POST_FIX = VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630")))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630"))))))))))))))))))));
 
 // The only two build-specific ABSOLUTE figures in this suite. Kept in one table so a tag added to
 // KNOWN_VERSIONS without its pins fails CLOSED rather than reading someone else's numbers — the
@@ -244,6 +244,11 @@ const PINS = {
   v627: { noStream: 155661, acaConv: 1203137 },   // v6.27 (F-22): unchanged — Grade tab copy only; confirmed by running
   v628: { noStream: 155661, acaConv: 1203137 },   // v6.28 (F-23, F-24): unchanged — copy only; confirmed by running (t33 32/32 on both legs)
   v629: { noStream: 155661, acaConv: 1203137 },   // v6.29 (F-25): unchanged — copy and display computations only, no engine moved; confirmed by running
+  // v6.30 (D-60): the engines state each year in its own dollars, so the stream-free household's lifetime tax moves ($155,661 → $206,189).
+  // MEASURED at the v6.30 build, not independently derived: this household (Georgia tax, a 2052 death, income streams) is outside every
+  // reference ledger's scope. Disclosed as a measured re-pin in the CHANGELOG; its claim — the FICA fix leaves a stream-free household
+  // alone — is the cross-leg identity, which a units release necessarily breaks once. acaConv is read only on the pre-fix leg.
+  v630: { noStream: 206189, acaConv: 1203137 },
 };
 if (!PINS[VER]) {
   console.log("\n  \u2717 FATAL: version tag \"" + VER + "\" is registered but has no PINS entry.");
@@ -261,6 +266,11 @@ const T = (name, cond, detail = "") => {
 };
 
 console.log(`t33 — ROTH COMPARATOR FICA / EARNED-ONLY (${VER})`);
+// v6.30 (D-60; docs/SCOPE_D60_DOLLAR_UNITS_V630.md): Engine A states each year in its own dollars. Groups B–D are unit-free (the streams
+// are fixed amounts and the wage base, now at CPI-U, never binds on $24,000) and are untouched. The second-order pins in E and F are
+// MEASURED figures on a household no reference ledger reaches; their v6.30 values are re-measured and disclosed as such, and F's tier
+// crossing — the claim that IRMAA is not inert — is re-made on a fixture that crosses in v6.30's units, decomposed into one tier step.
+const U630 = ["v630"].includes(VER);   // an array, so register_tag2 widens it each release
 
 // ══ HOUSEHOLD ══
 // An explicit hand-built P, the t3 convention: version-neutral by construction, and it never
@@ -441,9 +451,9 @@ console.log("\n  E — the ACA-bridge path (second FICA site, via the cliff solv
     T("E-2: the cliff solver CONVERTS A DIFFERENT AMOUNT — only the sale sub-engine can do this",
       w.totConv !== r.totConv, `${w.totConv} vs ${r.totConv}`);
     T("E-3: conversions rise for the wage household, whose estimated bill is larger",
-      w.totConv - r.totConv === (["v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER) ? 738 : ["v597", "v598", "v599", "v600", "v601", "v602"].includes(VER) ? 739 : 738), `delta ${w.totConv - r.totConv}`);   // v5.97 (D-22): 739 MEASURED — Georgia's rate moves the cliff solver's estimate; v6.03 (D-30 batch 2): 738 MEASURED — Georgia's standard deduction moves it again
+      w.totConv - r.totConv === (U630 ? 753 : ["v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER) ? 738 : ["v597", "v598", "v599", "v600", "v601", "v602"].includes(VER) ? 739 : 738), `delta ${w.totConv - r.totConv}`);   // v5.97 (D-22): 739 MEASURED — Georgia's rate moves the cliff solver's estimate; v6.03 (D-30 batch 2): 738 MEASURED — Georgia's standard deduction moves it again
     T("E-4: lifetime tax on the cliff strategy falls for the non-work stream",
-      w.totTax - r.totTax === (["v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER) ? 60035 : ["v597", "v598", "v599", "v600", "v601", "v602"].includes(VER) ? 60036 : 60041), `delta ${w.totTax - r.totTax}`);   // v5.97 (D-22): 60,036 MEASURED, as E-3; v6.03: 60,035 MEASURED
+      w.totTax - r.totTax === (U630 ? 60062 : ["v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER) ? 60035 : ["v597", "v598", "v599", "v600", "v601", "v602"].includes(VER) ? 60036 : 60041), `delta ${w.totTax - r.totTax}`);   // v5.97 (D-22): 60,036 MEASURED, as E-3; v6.03: 60,035 MEASURED
   } else {
     T("E-2 [PRE-FIX]: the cliff solver converts the SAME amount either way",
       w.totConv === r.totConv, `${w.totConv} vs ${r.totConv}`);
@@ -462,13 +472,27 @@ console.log("\n  E — the ACA-bridge path (second FICA site, via the cliff solv
 console.log("\n  F — second-order: IRMAA and NIIT move on a tier-crossing household");
 {
   const IRM = { currentConv: 250000, taxableInit: 400000, taxYieldPct: 2.0 };
-  const w = rowOf(stream("work", 10000), IRM);
-  const r = rowOf(stream("rental", 10000), IRM);
+  // v6.30: at $10,000/mo this household no longer crosses a tier (the CPI-U-indexed tiers rise faster than its MAGI); at $14,000/mo it
+  // crosses one — tier 3 → 4 for both spouses in one premium year. Found by a sweep of $8,000–$14,000 at the build, recorded here.
+  const FM = U630 ? 14000 : 10000;
+  const w = rowOf(stream("work", FM), IRM);
+  const r = rowOf(stream("rental", FM), IRM);
   if (POST_FIX) {
     T("F-1: lifetime tax falls when the stream is non-work", r.totTax < w.totTax, `${r.totTax} vs ${w.totTax}`);
     T("F-2: IRMAA RISES — the surcharge is not inert, and not in the same direction as tax",
-      r.totIrmaa - w.totIrmaa === (["v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER) ? 560 : 2300), `delta ${r.totIrmaa - w.totIrmaa}`);   // v6.03 (D-30 batch 2): 560 MEASURED — this household is in Georgia; its standard deduction lowers the state bill and so the funding draw and the pool (still a rise; the size of the move was measured, not derived)
-    T("F-3: NIIT rises too", r.totNiit - w.totNiit === (["v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER) ? 50 : 48), `delta ${r.totNiit - w.totNiit}`);   // v6.03: 50 MEASURED, as F-2
+      U630 ? r.totIrmaa - w.totIrmaa > 0 : r.totIrmaa - w.totIrmaa === (["v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER) ? 560 : 2300), `delta ${r.totIrmaa - w.totIrmaa}`);   // v6.03 (D-30 batch 2): 560 MEASURED — this household is in Georgia; its standard deduction lowers the state bill and so the funding draw and the pool (still a rise; the size of the move was measured, not derived)
+    T("F-3: NIIT rises too", r.totNiit - w.totNiit === (U630 ? 68 : ["v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER) ? 50 : 48), `delta ${r.totNiit - w.totNiit}`);   // v6.03: 50 MEASURED, as F-2
+    if (U630) {
+      // v6.30: a surcharge is billed in its premium year's dollars, so a tier step is (per-person step × persons) × (1+i)^(py − 2026) —
+      // no longer a multiple of $10. The move must be exactly one such step in one premium year (±$1 of rounding).
+      const { planInflation } = await import("./units_v630.mjs");
+      const i = planInflation(g.SCENARIOS()), d = r.totIrmaa - w.totIrmaa, SUR = [0, 1150, 2880, 4620, 6360, 6940];
+      const steps = []; for (let t = 1; t < SUR.length; t++) for (let u = t; u < SUR.length; u++) steps.push(SUR[u] - SUR[t - 1]);
+      const hit = []; for (const st of steps) for (const n of [1, 2]) for (let py = 2027; py <= 2060; py++)
+        if (Math.abs(d - st * n * Math.pow(1 + i, py - 2026)) <= 1) hit.push(`${n} x $${st} in ${py}`);
+      T("F-4 (v6.30 units): the mechanism is the taxable pool, so IRMAA moves in tiers — one whole tier step, billed in its premium year's dollars",
+        hit.length > 0, `delta ${d}${hit.length ? " = " + hit.join(" or ") : ""}`);
+    } else
     T("F-4: the mechanism is the taxable pool, so IRMAA moves in tiers, not smoothly",
       (r.totIrmaa - w.totIrmaa) % 10 === 0, String(r.totIrmaa - w.totIrmaa));
   } else {

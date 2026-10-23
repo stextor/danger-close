@@ -24,7 +24,7 @@
 // calculator read byPerson, that statement goes and section C fails loudly here — it cannot pass vacuously.
 const VER = process.argv[2];
 const MODPATH = process.argv[3] || `./app_${VER}.mjs`;
-const KNOWN_VERSIONS = ["v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"];
+const KNOWN_VERSIONS = ["v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -73,7 +73,7 @@ if (typeof AR === "function") {
   // converted (IRC §408A(d)(3)) and every engine now takes the conversion from the non-annuity dollars. A5 is inverted on those legs:
   // the 10,000 splits by the employer share alone, 5,000 / 5,000. (A draw keeps the annuity share; t70 §A pins that.) An array, so
   // register_tag2 widens it each release.
-  if (["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER))
+  if (["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER))
     ck("A5 [D-33]: conversion 10,000, annuity 0.1, employer 0.5 \u2192 annuity 0, employer 5,000, IRA 5,000",
        near(r.A.annuity, 0) && near(r.A.employer, 5000) && near(r.A.ira, 5000), JSON.stringify(r.A));
   else

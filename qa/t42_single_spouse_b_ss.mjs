@@ -37,12 +37,12 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
 const VER = process.argv[2];
-const KNOWN_VERSIONS = ["v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"];
+const KNOWN_VERSIONS = ["v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.\n    Registered: ${KNOWN_VERSIONS.join(", ")}`);
   process.exit(1);
 }
-const POST = VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629"))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629")))))))))))))))));
+const POST = VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630")))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630"))))))))))))))))));
 
 // resettable seeded source, installed BEFORE the import (see the seeding trap above)
 const mulberry = (a) => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a);
@@ -61,7 +61,7 @@ const BASE = JSON.parse(JSON.stringify(G.PORTFOLIO()));
 // payment is paid off by then). PIN18 picks the v6.18 figures; the v6.18 leg is ALSO run with DC_V617_SPENDING=1 — every household here
 // loaded with v6.17's spending as a table (qa/tools/v617_spending.mjs, split at that household's own Medicare year) — where every v6.17
 // figure must still come out exactly. That run attributes each move to the spending read alone.
-const POST_D41 = ["v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);   // an array, so the registrar widens it
+const POST_D41 = ["v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER);   // an array, so the registrar widens it
 const SPEND17 = POST_D41 && process.env.DC_V617_SPENDING === "1";
 const PIN18 = POST_D41 && !SPEND17;
 const P41 = (v617, v618) => PIN18 ? v618 : v617;
@@ -69,7 +69,7 @@ const P41 = (v617, v618) => PIN18 ? v618 : v617;
 // rides on its draws after 2036 moved. PIN21 picks the v6.21 figures (measured at the build). The v6.21 leg is ALSO run with
 // DC_V620_TABLE=1 — the example's table without its car rows, which is v6.20's — and there every v6.20 figure must come out exactly: that
 // second run attributes each move to the rows alone (runsuite.sh, "<suite>-<cur>-table620"; t84 C proves v6.21 on that table IS v6.20).
-const POST_D42 = ["v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);   // an array, so the registrar widens it
+const POST_D42 = ["v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER);   // an array, so the registrar widens it
 const TABLE620 = POST_D42 && process.env.DC_V620_TABLE === "1";
 const PIN21 = POST_D42 && !TABLE620;
 const P42 = (v620, v621) => PIN21 ? v621 : v620;
@@ -78,6 +78,20 @@ const { v617Table } = await import("./tools/v617_spending.mjs");
 if (SPEND17) console.log("  (DC_V617_SPENDING=1 — v6.17's spending, as a table: every v6.17 figure must come out exactly)");
 if (TABLE620) console.log("  (DC_V620_TABLE=1 — v6.20's table, the car rows removed: every v6.20 figure must come out exactly)");
 const RY = G.PLAN_TIMELINE().targetRetireYear;
+// v6.30 (D-60; docs/SCOPE_D60_DOLLAR_UNITS_V630.md): Engine D's inflation clock starts at the as-of year (it started at retirement), and the
+// tax engines state each year in its own dollars. On the v6.30 leg the hand checks are re-derived on those rules: A-1 is the year's table
+// spending less the benefit, both × (1+i)^(2035 − as-of), less the fixed pension; A-2 and D-3 are the shared federal oracle
+// (qa/tools/fed_oracle_v630.mjs — Rev. Proc. 2025-32 at chained CPI-U, the §86 statute) on each Engine B row's own income legs; D-1 is
+// spouse B's check, × (1+i)^(y − as-of), summed over the years Engine D pays it. `i` is the base preset's inflation (this module's
+// SCENARIOS table). D-2 (Engine D's lifetime draw) and D-4 (the Monte Carlo planned path) have no oracle and are re-pinned BY MEASUREMENT,
+// disclosed in the CHANGELOG; the v6.17-spending and v6.20-table legs skip those two (the units end their exact reproduction).
+const U630 = ["v630"].includes(VER);   // an array, so register_tag2 widens it each release
+const I30 = Object.values(G.SCENARIOS()).reduce((t, sc) => t + sc.prob * sc.inflation, 0);
+const K30 = y => Math.pow(1 + I30, y - G.PLAN_TIMELINE().asOfYear);
+let FED30 = null;
+if (U630) { const { existsSync } = await import("fs");
+  const _f = [new URL("./tools/fed_oracle_v630.mjs", import.meta.url), new URL("./fed_oracle_v630.mjs", import.meta.url)].find(u => existsSync(u));
+  FED30 = (await import(_f.href)).makeFedOracle; }
 const A = { retireYear: RY, rothAmount: 0, qcdAnnual: 0, taxYield: 0, scenarioPreset: "base" };
 const sum = (r, k) => r.reduce((s, x) => s + (x[k] || 0), 0);
 const load = (edit) => { const P = JSON.parse(JSON.stringify(BASE)); edit(P); G.applyLoadedData({ portfolio: P, expenses: JSON.parse(JSON.stringify(EX0)) });
@@ -97,7 +111,10 @@ const figures = () => {
   if (_keep) G.applyLoadedData({ portfolio: _keep.P, expenses: _keep.X });
   const med = Math.round(arr.map(x => x[x.length - 1]).sort((a, b) => a - b)[arr.length >> 1]);
   const d35 = D.find(x => x.yr === 2035), b35 = B.find(x => x.yr === 2035);
-  return { ssB: Math.round(sum(D, "ssB_y")), draws: Math.round(sum(D, "totalDraw")), end: Math.round(D[D.length - 1].portfolioTotal),
+  const _o = FED30 ? FED30(I30, G.PLAN_TIMELINE()) : null;
+  return { b35o: _o ? Math.round(_o(b35).fed * 100) / 100 : null, fedO: _o ? Math.round(B.reduce((t, r) => t + _o(r).fed, 0)) : null,
+           ssBpaid: D.filter(x => x.ssB_y > 0).map(x => x.yr),
+           ssB: Math.round(sum(D, "ssB_y")), draws: Math.round(sum(D, "totalDraw")), end: Math.round(D[D.length - 1].portfolioTotal),
            fed: Math.round(sum(B, "fedTax")), irmaa: Math.round(sum(C, "surchargeAnnual")), pp: Math.round(pp[pp.length - 1]), med,
            d35need: Math.round(d35.drawNeeded), d35ssB: Math.round(d35.ssB_y), b35fed: Math.round(b35.fedTax * 100) / 100 };
 };
@@ -108,9 +125,18 @@ T("M-0 the seeded Monte Carlo harness is deterministic (two identical runs agree
 
 // ── A · the correct case, and the hand checks ────────────────────────────────────────────────────
 const OK = z1;
+if (U630) {
+  // 2035's table spending is $7,620/mo (v6.18's note above; the example's table, with or without the car rows, carries that in 2035);
+  // the v6.17 table's 2035 figure is 113,186 / 1.0274^6 a year in 2029 dollars — the same rule reads it from that leg's own table.
+  const spend35 = SPEND17 ? 113186 / Math.pow(1 + I30, 6) : 7620 * 12, need = Math.round((spend35 - G.getSSA() * 12) * K30(2035) - G.getPension() * 12);
+  T(`A-1 2035 Withdrawal plan (v6.30 units): draw needed = (${Math.round(spend35).toLocaleString()} − ${(G.getSSA() * 12).toLocaleString()}) × (1+i)^9 − ${(G.getPension() * 12).toLocaleString()} = ${need.toLocaleString()}, no spouse-B income`,
+    OK.d35need, need);
+  T(`A-2 2035 Taxes tab (v6.30 units): federal tax is the oracle's on the row's own legs — $${OK.b35o}`, OK.b35fed, OK.b35o);
+} else {
 T(P41("A-1 2035 Withdrawal plan: draw needed = 113,186 - (46,573 + 4,800), no spouse-B income",
         "A-1 2035 Withdrawal plan: draw needed = 107,541 - (46,573 + 4,800), no spouse-B income (v6.18, see header)"), OK.d35need, P41(61813, 56168));
 T("A-2 2035 Taxes tab: federal tax by hand (see header)", OK.b35fed, P41(6614.33, 5759.84));
+}
 
 // ── B · a single household WITH a stored spouse-B benefit ────────────────────────────────────────
 load(STORED); const st = figures();
@@ -144,16 +170,33 @@ if (POST) {
 
 // ── D · the married example household is untouched by this release (the control) ───────────────
 load(MARRIED); const mar = figures();
+if (U630) {
+  const want = Math.round(mar.ssBpaid.reduce((t, y) => t + G.getSSB() * 12 * K30(y), 0));
+  T(`D-1 married (v6.30 units): spouse-B SS still paid — $${(G.getSSB() * 12).toLocaleString()}/yr × (1+i)^(y − as-of) over ${mar.ssBpaid[0]}–${mar.ssBpaid[mar.ssBpaid.length - 1]} = $${want.toLocaleString()} ($284,676 at v6.29)`,
+    mar.ssB, want);
+  { const tlm = G.PLAN_TIMELINE(), d1 = Math.min(tlm.dobA.year + tlm.lifeExpA, tlm.dobB.year + tlm.lifeExpB);
+    T(`D-1b married: B's own check is paid every year from its claim year (${tlm.ssB_date.year}) to the year before the first death (${d1 - 1}), and only those`,
+      mar.ssBpaid.length > 0 && mar.ssBpaid[0] === tlm.ssB_date.year && mar.ssBpaid[mar.ssBpaid.length - 1] === d1 - 1
+      && mar.ssBpaid.every((y, k) => k === 0 || y === mar.ssBpaid[k - 1] + 1), true); }
+  if (!SPEND17 && !TABLE620) T("D-2 married: draws (v6.30 — MEASURED, D-60: Engine D's clock from the as-of year; 1,567,766 at v6.21–v6.29)", mar.draws, 1703565);
+  else console.log("  \u25cb SKIPPED (v6.30, measured exact of a pre-v6.30 build): D-2 draws");
+  T(`D-3 married (v6.30 units): lifetime federal is the oracle's, Σ over Engine B's rows — $${mar.fedO.toLocaleString()}${!SPEND17 && !TABLE620 ? " ($288,603 on the example's table; $207,059 at v6.21–v6.29)" : ""}`,
+    mar.fed, mar.fedO);
+  if (!SPEND17 && !TABLE620) T("D-3b married: the oracle's figure on the example's table is $288,603 (t40 A5's, the same household and basis)", mar.fedO, 288603);
+} else {
 T("D-1 married: spouse-B SS still paid", mar.ssB, 284676);
 T("D-2 married: draws" + (PIN18 ? P42(" (v6.18, D-41: the year-by-year read; 1,469,176 through v6.17)", " (v6.21, D-42: the car rows; 1,463,097 at v6.18–v6.20)") : ""), mar.draws, P41(1469176, P42(1463097, 1567766)));
 // v6.07 (D-33): the married example carries spouse B's $7,000 annuity, which no RMD or conversion drains from v6.07 — lifetime federal
 // $208,445 -> $208,000 (the same figure and basis as t40 A5's call-site pin). An array, so register_tag2 widens it each release.
-T("D-3 married: lifetime federal" + (["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER) ? (PIN18 ? P42(" (v6.18, D-41: $205,423; $208,000 at v6.07–v6.17)", " (v6.21, D-42: the car rows; $205,423 at v6.18–v6.20)") : " (D-33: −$445)") : ""), mar.fed, ["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER) ? P41(208000, P42(205423, 207059)) : 208445);
+T("D-3 married: lifetime federal" + (["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER) ? (PIN18 ? P42(" (v6.18, D-41: $205,423; $208,000 at v6.07–v6.17)", " (v6.21, D-42: the car rows; $205,423 at v6.18–v6.20)") : " (D-33: −$445)") : ""), mar.fed, ["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER) ? P41(208000, P42(205423, 207059)) : 208445);
 // v6.20 (D-40, D-44, D-45): the Monte Carlo pays the Taxes tab's tax (its default schedule: $70K, BASE) and the example's April 2029
 // one-time rows, inflated, so the 6-year planned path moves $2,128,443 → $2,083,910 (−$44,533). Re-pinned only with its attribution,
 // step by step and each exact, in the same run: t83 R (the drag +$56,285, the quarter read −$375, the one-time rows −$34,995, the tax
 // −$65,449). An array, so the registrar widens it.
-const POST_D40 = ["v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);
+}
+const POST_D40 = ["v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER);
+if (U630) { if (!SPEND17 && !TABLE620) T("D-4 married: Monte Carlo planned path (v6.30 — MEASURED, D-60: the MC tax schedule is Engine B's today's-dollar tax; $2,083,910 at v6.20–v6.29)", mar.pp, 2084618);
+  else console.log("  \u25cb SKIPPED (v6.30, measured exact of a pre-v6.30 build): D-4 planned path"); } else
 T("D-4 married: Monte Carlo planned path" + (POST_D40 ? " (v6.20, D-40/44/45: $2,128,443 through v6.19; attributed in t83 R)" : ""), mar.pp, POST_D40 ? 2083910 : 2128443);
 T("D-5 married: getSSB() returns the stored benefit", G.getSSB(), 1300);
 

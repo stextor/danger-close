@@ -213,7 +213,16 @@ try {
   // also carries the rollover's RMD change and a year's drift; §E at the end isolates each term at engine level, to the cent.
   const ssA = g.getSSA(), ssB = g.getSSB();
   const smallerAnnual = Math.min(ssA, ssB) * 12;
-  const expectedMagiDropK = (smallerAnnual * 0.85) / 1000;
+  // v6.30 (D-60; docs/SCOPE_D60_DOLLAR_UNITS_V630.md): Engine C states each year in that year's own dollars — Social Security × (1+i)^(yr −
+  // as-of), every IRMAA tier at CPI-U, and the surcharge, a premium, × (1+i)^(premium year − as-of). `i` is Σ prob × inflation over the DOM
+  // app's live SCENARIOS table under its default prior (units_v630.mjs), never the app's helper. Every expectation below is put in the row's
+  // own year that way; the v6.29 figures are kept in the labels. The SS check a survivor loses is therefore 85% × smaller × k(death year).
+  const { planInflation, factor } = await import("./units_v630.mjs");
+  const INFd = planInflation(g.SCENARIOS()), ASOF = g.PLAN_TIMELINE().asOfYear;
+  const kY = y => factor(INFd, y, ASOF);
+  const expectedMagiDropK = d => (smallerAnnual * 0.85 * kY(d)) / 1000;
+  const surOne = (t, premYr) => SUR[t] * kY(premYr);                // one person's surcharge, billed in the premium year's dollars
+  const mfjFloor = premYr => MFJ[0] * Math.pow(1 + INFd, premYr - 2026);   // the MFJ tier-1 floor of the premium year (tiers 1–4 unfrozen)
   ck("setup: the example household's two SS checks differ (a survivor rule needs two sizes)",
     ssA !== ssB && smallerAnnual > 0, `A $${ssA}/mo, B $${ssB}/mo`);
 
@@ -234,9 +243,13 @@ try {
     // Pre-fix MAGI drifted across this boundary by a couple of $K in either direction, so a bare
     // "MAGI drops" assertion would not discriminate — the MAGNITUDE is the test.
     const dropK = before.magi - at.magi;
-    ck(`${label} [EXTINCTION]: MAGI falls year over year at the first death by about the smaller SS check (85% taxable), ±$4K for the rollover's RMD change and a year's drift — §E isolates each to the cent`,
-      Math.abs(dropK - expectedMagiDropK) <= 4,
-      `${d - 1} $${before.magi}K -> ${d} $${at.magi}K = $${dropK}K, expected ~$${expectedMagiDropK.toFixed(1)}K`);
+    // v6.30: a year's drift now carries the benefits' own COLA (85% of the household's whole benefit × i, in the prior year's dollars), so
+    // the band is ±$4K plus that — stated, not widened by eye. §E ties this DOM drop to the engine's own year-over-year figure (±$1K) and
+    // decomposes the death effect to the cent, which is the magnitude test proper.
+    const colaK = 0.85 * (ssA + ssB) * 12 * kY(d - 1) * INFd / 1000;
+    ck(`${label} [EXTINCTION]: MAGI falls year over year at the first death by about the smaller SS check (85% taxable, in ${d}'s dollars), ±$4K for the rollover's RMD change and a year's drift plus the benefits' COLA ($${colaK.toFixed(1)}K) — §E isolates each to the cent`,
+      Math.abs(dropK - expectedMagiDropK(d)) <= 4 + colaK,
+      `${d - 1} $${before.magi}K -> ${d} $${at.magi}K = $${dropK}K, expected ~$${expectedMagiDropK(d).toFixed(1)}K`);
     ck(`${label}: MAGI does not collapse — the LARGER check is retained`,
       at.magi > before.magi * 0.7, `${d} $${at.magi}K vs prior $${before.magi}K`);
 
@@ -259,15 +272,15 @@ try {
       before.tier === "Standard" && after.tier !== "Standard",
       `${d - 1} ${before.tier} -> ${d + 1} ${after.tier} on MAGI $${before.magi}K -> $${after.magi}K`);
     // Under MFJ thresholds this MAGI would still be Standard — that is the whole omission.
-    ck(`${label} [EXTINCTION]: and MFJ thresholds would NOT have produced a tier at this MAGI`,
-      after.magi * 1000 < MFJ[0], `$${after.magi}K vs MFJ tier-1 floor $${MFJ[0]}`);
+    ck(`${label} [EXTINCTION]: and MFJ thresholds would NOT have produced a tier at this MAGI (the MFJ tier-1 floor of premium year ${after.premYr})`,
+      after.magi * 1000 < mfjFloor(after.premYr), `$${after.magi}K vs MFJ tier-1 floor $${Math.round(mfjFloor(after.premYr))}`);
 
     // ── OMISSION 3: the surcharge pins the PERSON COUNT. Read the one-person figure at whatever
     // tier the row actually landed in, so this tests "one person, not two" rather than "T1".
     const _tierIdx = Number(String(after.tier).replace(/\D/g, "")) || 1;
-    ck(`${label} [EXTINCTION]: the survivor surcharge is ONE person's, not two`,
-      Math.abs(after.surcharge - SUR[_tierIdx]) <= 60,
-      `${d + 1} ${after.tier} $${after.surcharge} vs one person $${SUR[_tierIdx]}, two would be $${SUR[_tierIdx] * 2}`);
+    ck(`${label} [EXTINCTION]: the survivor surcharge is ONE person's, not two (in premium year ${after.premYr}'s dollars)`,
+      Math.abs(after.surcharge - surOne(_tierIdx, after.premYr)) <= 60,
+      `${d + 1} ${after.tier} $${after.surcharge} vs one person $${Math.round(surOne(_tierIdx, after.premYr))}, two would be $${Math.round(2 * surOne(_tierIdx, after.premYr))}`);
 
     // The tier rise is NOT explained by MAGI growth — MAGI is lower after the death than before it.
     ck(`${label}: the tier rise comes from the threshold switch, not from rising MAGI`,
@@ -284,9 +297,9 @@ try {
     const yrs = Object.keys(rows).map(Number).filter(y => y > d).sort((a, b) => a - b);
     const last = rows[yrs[yrs.length - 1]];
     ck(`${label}: the survivor treatment persists to the end of the horizon`,
-      yrs.every(y => rows[y].marked === true) && Math.abs(last.surcharge - SUR[1]) <= 60,
-      `${yrs.length} survivor years, last $${last.surcharge}`);
-    DOMAT[d] = at.magi;
+      yrs.every(y => rows[y].marked === true) && Math.abs(last.surcharge - surOne(1, last.premYr)) <= 60,
+      `${yrs.length} survivor years, last $${last.surcharge} vs one person at T1 $${Math.round(surOne(1, last.premYr))}`);
+    DOMAT[d] = at.magi; DOMAT[`drop${d}`] = dropK;
     return { before, at, after, dropK };
   };
 
@@ -295,12 +308,8 @@ try {
   // CASE 2 — person B (the SMALLER check) dies first. The survivor keeps their own.
   const c2 = await runCase("case 2 (B dies)", { lifeExpA: 87, lifeExpB: 76, pension: 9600 }, 2042);
 
-  if (c1 && c2) {
-    // total - max = min whichever spouse dies, so the MAGI drop must MATCH across directions.
-    // An implementation that always zeroed the same spouse would break exactly one of the two.
-    ck("cross-check: both directions lose the same amount of MAGI (total minus larger = smaller)",
-      Math.abs(c1.dropK - c2.dropK) <= 4, `A-dies $${c1.dropK}K vs B-dies $${c2.dropK}K`);
-  }
+  // v6.30: the two deaths fall in different years (2044, 2042), so their drops are in different years' dollars and a year's COLA apart;
+  // "total minus larger = smaller, whichever spouse dies" is asserted where it is exact — §E's cross-check, in today's dollars, to the cent.
 
   // ── CASE 3 — the person count, ISOLATED with the tier held constant ──────────────────────
   // A higher pension puts the BOTH-ALIVE years into MFJ tier 1. Those rows cannot be touched by
@@ -317,26 +326,27 @@ try {
     if (early && pre && surv) {
       // A premium year BEFORE the death — both spouses alive to pay it, so still two people.
       ck("case 3: a premium year before the death still charges TWO people",
-        early.premYr === 2043 && Math.abs(early.surcharge - SUR[1] * 2) <= 60,
-        `${2041} affects ${early.premYr}, $${early.surcharge} vs two people $${SUR[1] * 2}`);
+        early.premYr === 2043 && Math.abs(early.surcharge - 2 * surOne(1, 2043)) <= 60,
+        `${2041} affects ${early.premYr}, $${early.surcharge} vs two people $${Math.round(2 * surOne(1, 2043))}`);
       // A premium year AFTER the death, on a MAGI year where both were alive: MFJ tier, unmarked,
       // but only one person left to bill. This is the row that isolates omission 3.
       ck("case 3 [EXTINCTION]: a premium year after the death charges ONE person, tier unchanged",
-        pre.tier === "T1" && pre.marked === false && Math.abs(pre.surcharge - SUR[1]) <= 60,
-        `${2043} affects ${pre.premYr}, tier ${pre.tier}, marked ${pre.marked}, $${pre.surcharge} (pre-fix $${SUR[1] * 2})`);
+        pre.tier === "T1" && pre.marked === false && Math.abs(pre.surcharge - surOne(1, pre.premYr)) <= 60,
+        `${2043} affects ${pre.premYr}, tier ${pre.tier}, marked ${pre.marked}, $${pre.surcharge} vs one person $${Math.round(surOne(1, pre.premYr))} (pre-fix two)`);
       // v5.26 moved this from $336K to $345K, +$9K. HAND-VERIFIED: the RMD-bearing Other accounts
       // ($104,000) entered Engine C's pre-tax basis, raising the RMD and therefore the MAGI it
       // feeds. The assertion's PURPOSE is unchanged — it pins the row so that a survivor-handling
       // regression, which would move MAGI far more than this, is still caught. The label now says
       // what it is rather than "unchanged by the fix", which stopped being true at v5.26.
-      ck("case 3: that row's MAGI is a both-alive-year figure ($345K at v5.26, was $336K)",
-        Math.abs(pre.magi - 345) <= 1, `$${pre.magi}K`);
+      // v6.30: the frozen $345K (v5.26–v6.29; $336K before) is a v6.29-unit figure. The statement it stood for — the row is a both-alive
+      // year the death cannot touch — is asserted directly in §E instead: this DOM row equals the SAME year of the no-death counterfactual.
+      DOMAT.c3pre = pre.magi;
       // And the survivor year moves up the SINGLE ladder, well past where MFJ would have put it.
       ck("case 3 [EXTINCTION]: the survivor year climbs the Single ladder (T1 -> T4)",
-        surv.marked === true && surv.tier === "T4" && Math.abs(surv.surcharge - SUR[4]) <= 60,
-        `${2045} tier ${surv.tier}, marked ${surv.marked}, $${surv.surcharge} vs one person $${SUR[4]}`);
+        surv.marked === true && surv.tier === "T4" && Math.abs(surv.surcharge - surOne(4, surv.premYr)) <= 60,
+        `${2045} tier ${surv.tier}, marked ${surv.marked}, $${surv.surcharge} vs one person $${Math.round(surOne(4, surv.premYr))}`);
       ck("case 3: the survivor surcharge is still ONE person's, not two, at the higher tier",
-        surv.surcharge < SUR[4] * 2 - 60, `$${surv.surcharge} vs two people $${SUR[4] * 2}`);
+        surv.surcharge < 2 * surOne(4, surv.premYr) - 60, `$${surv.surcharge} vs two people $${Math.round(2 * surOne(4, surv.premYr))}`);
     }
   }
 } catch (e) {
@@ -360,6 +370,10 @@ try {
   ck("E-0: the engine module beside this bundle exists (app_testable.mjs for dom_bundle.cjs)", existsSync(_mod), _mod.pathname);
   const { __g: G, __engines: EN } = await import(pathToFileURL(_mod.pathname).href);
   const BASE = JSON.parse(JSON.stringify(G.PORTFOLIO()));
+  // v6.30 (D-60): every tax engine now states each year in that year's own dollars at the PLAN's inflation, which follows the active prior.
+  // The tab runs under the DOM app's default prior; this module loads under BASE weights. So the module is put on the tab's own regime
+  // probabilities — read off the DOM's live table — before it is run, or "the engine run IS the tab's" would compare two inflations.
+  G.applyScenarioProbs(Object.fromEntries(Object.entries(window.__g.SCENARIOS()).map(([k, v]) => [k, v.prob])));
   const run = (cfg, zeroB) => {
     const P = JSON.parse(JSON.stringify(BASE));
     P.lifeExpA = cfg.lifeExpA; P.lifeExpB = cfg.lifeExpB;
@@ -372,22 +386,43 @@ try {
     return { by: Object.fromEntries(C.rows.map(r => [r.yr, r])), d: C._deathYr1, ssB: G.getSSB(), ssA: G.getSSA() };
   };
   const cents = x => Math.round(x * 100) / 100;
+  const { planInflation: _pi, factor: _fac } = await import("./units_v630.mjs");
+  const kE = y => _fac(_pi(G.SCENARIOS()), y, G.PLAN_TIMELINE().asOfYear);
+  const ssToday = {};
   for (const [label, cfg, d] of [["case 1 (A dies)", { lifeExpA: 80, lifeExpB: 87, pension: 9600 }, 2044], ["case 2 (B dies)", { lifeExpA: 87, lifeExpB: 76, pension: 9600 }, 2042]]) {
     const dead = run(cfg), alive = run({ ...cfg, lifeExpA: 99, lifeExpB: 99 }), noB = run({ ...cfg, lifeExpA: 99, lifeExpB: 99 }, true);
     const smaller = Math.min(dead.ssA, dead.ssB) * 12;
     ck(`${label} E-1: the engine's first death is ${d}, the counterfactual has none in it, and the smaller check is B's`,
       dead.d === d && alive.d > d && dead.ssB < dead.ssA && noB.ssB === 0, `death ${dead.d}, counterfactual ${alive.d}`);
-    const effect = alive.by[d].magi - dead.by[d].magi, ss = alive.by[d].magi - noB.by[d].magi, rmd = alive.by[d].rmd_y - dead.by[d].rmd_y;
-    ck(`${label} E-2: the SS term is 85% of the smaller annual check to the cent ($${cents(0.85 * smaller)}) — the household is past §86 convergence`,
-      Math.abs(ss - 0.85 * smaller) < 0.005, `$${cents(ss)}`);
+    // v6.30: the no-B counterfactual zeroes B's benefit for the WHOLE plan, so from v6.30 — when nominal spending draws more Traditional
+    // money in earlier years — it also moves the year's RMD a little. The SS term is that run's MAGI change NET of its own RMD change
+    // (identically zero through v6.29, when this read `alive − noB` alone and the RMD did not move).
+    const effect = alive.by[d].magi - dead.by[d].magi, ssRmd = alive.by[d].rmd_y - noB.by[d].rmd_y;
+    const ss = alive.by[d].magi - noB.by[d].magi - ssRmd, rmd = alive.by[d].rmd_y - dead.by[d].rmd_y;
+    ssToday[d] = ss / kE(d);
+    ck(`${label} E-2: the SS term is 85% of the smaller annual check, in ${d}'s dollars, to the cent ($${cents(0.85 * smaller * kE(d))}; $${cents(0.85 * smaller)} today) — the household is past §86 convergence`,
+      Math.abs(ss - 0.85 * smaller * kE(d)) < 0.005, `$${cents(ss)} (no-B run's own RMD change $${cents(ssRmd)} netted)`);
     ck(`${label} E-3: the death effect is EXACTLY the SS term plus the rollover's RMD change (to the cent)`,
       Math.abs(effect - (ss + rmd)) < 0.005, `$${cents(effect)} vs $${cents(ss)} + $${cents(rmd)}`);
     ck(`${label} E-4: the RMD term has the survivor's sign — ${d === 2044 ? "a younger survivor lowers the RMD (positive)" : "an older survivor raises it (negative)"}`,
       d === 2044 ? rmd > 0 : rmd < 0, `$${cents(rmd)}`);
     ck(`${label} E-5: the engine run IS the tab's — its death-year MAGI renders as the DOM row's $${DOMAT[d]}K`,
       DOMAT[d] !== undefined && Math.round(dead.by[d].magi / 1000) === DOMAT[d], `engine $${cents(dead.by[d].magi)}, DOM $${DOMAT[d]}K`);
+    ck(`${label} E-6: the DOM's year-over-year drop is the engine's ($${cents(dead.by[d - 1].magi - dead.by[d].magi)}), ±$1K of rounding`,
+      DOMAT[`drop${d}`] !== undefined && Math.abs(DOMAT[`drop${d}`] * 1000 - (dead.by[d - 1].magi - dead.by[d].magi)) <= 1000, `DOM $${DOMAT[`drop${d}`]}K`);
     console.log(`  · ${label}: death effect $${cents(effect)} = SS $${cents(ss)} + RMD $${cents(rmd)}; year over year $${cents(dead.by[d - 1].magi - dead.by[d].magi)}`);
   }
+  // The cross-check the DOM section used to make on two years' drops (total − larger = smaller, whichever spouse dies), made exact: each
+  // direction's SS term, deflated to today's dollars, is the same 85% of the smaller check — to the cent.
+  ck("cross-check: both directions lose the same Social Security, in today's dollars (total minus larger = smaller)",
+    ssToday[2044] !== undefined && ssToday[2042] !== undefined && Math.abs(ssToday[2044] - ssToday[2042]) < 0.005,
+    `A-dies $${cents(ssToday[2044])} vs B-dies $${cents(ssToday[2042])} (today's dollars)`);
+  // Case 3's 2043 row (both alive; the death is 2044): the DOM figure equals the SAME year of the no-death counterfactual — the death cannot
+  // reach a both-alive year. This replaces the frozen $345K (v6.29 units).
+  { const c3 = run({ lifeExpA: 80, lifeExpB: 87, pension: 20300 }), c3a = run({ lifeExpA: 99, lifeExpB: 99, pension: 20300 });
+    ck(`case 3: the 2043 row is a both-alive-year figure — the DOM's $${DOMAT.c3pre}K is the engine's, with and without the 2044 death ($${cents(c3.by[2043].magi)})`,
+      DOMAT.c3pre !== undefined && Math.round(c3.by[2043].magi / 1000) === DOMAT.c3pre && Math.abs(c3.by[2043].magi - c3a.by[2043].magi) < 0.005,
+      `DOM $${DOMAT.c3pre}K, engine $${cents(c3.by[2043].magi)}, no-death $${cents(c3a.by[2043].magi)}`); }
 } catch (e) {
   fail++; console.log(`  \u2717 t13 §E threw: ${String(e).slice(0, 400)}`);
 }

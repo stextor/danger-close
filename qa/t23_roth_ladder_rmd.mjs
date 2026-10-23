@@ -27,18 +27,18 @@ if (!window.URL.createObjectURL) window.URL.createObjectURL = () => "blob:stub";
 globalThis.IS_REACT_ACT_ENVIRONMENT = true; window.IS_REACT_ACT_ENVIRONMENT = true;
 
 const VER = process.argv[2] || "v541";
-const KNOWN_VERSIONS = ["v539", "v540", "v541", "v542", "v543", "v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"];
+const KNOWN_VERSIONS = ["v539", "v540", "v541", "v542", "v543", "v544", "v545", "v546", "v547", "v548", "v549", "v550", "v551", "v552", "v553", "v554", "v555", "v556", "v557", "v558", "v559", "v560", "v561", "v562", "v563", "v564", "v565", "v566", "v567", "v568", "v569", "v570", "v571", "v572", "v573", "v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST_FIX = VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629"))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629")))))))))))))))))))); // v5.42 carries v5.41's RMD term forward; the §86 fix is $0 at this suite's $70,000 default
+const POST_FIX = VER === "v541" || VER === "v542" || VER === "v543" || VER === "v544" || VER === "v545" || VER === "v546" || VER === "v547" || (VER === "v548" || VER === "v549" || VER === "v550" || VER === "v551" || VER === "v552" || VER === "v553" || VER === "v554" || VER === "v555" || VER === "v556" || VER === "v557" || VER === "v558" || VER === "v559" || VER === "v560" || VER === "v561" || VER === "v562" || VER === "v563" || VER === "v564" || VER === "v565" || VER === "v566" || VER === "v567" || VER === "v568" || VER === "v569" || VER === "v570" || VER === "v571" || VER === "v572" || VER === "v573" || (VER === "v574" || (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630")))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630"))))))))))))))))))))); // v5.42 carries v5.41's RMD term forward; the §86 fix is $0 at this suite's $70,000 default
 // v6.07 (D-33 — docs/SCOPE_D33_ANNUITY_CONVERSION_V607.md): the ladder no longer converts spouse B's $7,000 annuity, so B's convertible
 // balance is smaller and more of each year's conversion is allocated to spouse A — A's 31 Dec 2038 balance falls and the card with it,
 // $44,991 -> $44,842. A holds no annuity; this is the cross-person effect, reproduced to the dollar by t70 §E's independent ladder
 // recursion. An array, so register_tag2 widens it each release.
-const POST_D33 = ["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"].includes(VER);
+const POST_D33 = ["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER);
 const A_CARD = POST_D33 ? 44842 : 44991;
 
 let pass = 0, fail = 0;
@@ -80,15 +80,63 @@ while ((m = rowRe.exec(txt)) !== null)
 T("LADDER: 12 rows render (2029–2040)", rows.length === 12, `got ${rows.length}`);
 const byYear = Object.fromEntries(rows.map(r => [r.year, r]));
 
+// ─── v6.30 (D-60; docs/SCOPE_D60_DOLLAR_UNITS_V630.md) — the ladder in each year's own dollars ─────────────────────────────────────
+// From v6.30 the ladder table is in each year's own dollars: the seed balances are carried from the as-of year to the ladder start at the plan's
+// inflation, Social Security and the dividend × (1+i)^(y − as-of); the pension, the taper and the slider are fixed amounts. So the frozen K-figures
+// below are v6.29-unit facts. On the v6.30 leg every figure is computed instead by an INDEPENDENT ladder recursion written here (the t24 model:
+// Pub. 590-B prior-31-Dec basis, the §86 statute oracle in tools/hand_86.mjs, the D-33 annuity carve-out), with `i` read from the app's live
+// SCENARIOS table under its default preset (Σ prob × inflation, units_v630.mjs) — the inputs, never the app's own helpers or output.
+const L = { on: false };
+{ const { isV630, planInflation } = await import("./units_v630.mjs");
+  if (isV630(VER)) {
+    const { existsSync } = await import("fs"); const { join, dirname } = await import("path"); const { fileURLToPath, pathToFileURL } = await import("url");
+    const HERE = dirname(fileURLToPath(import.meta.url));
+    const ORACLE = [join(HERE, "hand_86.mjs"), join(HERE, "tools", "hand_86.mjs")].find(p => existsSync(p));
+    const { statute86 } = await import(pathToFileURL(ORACLE).href);
+    const _app = (await import(`./app_${VER}.mjs`)).__g;
+    const _tl = _app.PLAN_TIMELINE();
+    const DIV = Math.round(Math.max(0, _app.taxableInitAll() - (_app.retireStartBalances(_tl.rothLadderStart).othHsa || 0)) * (2.0 / 100));
+    const i = planInflation(window.__g.SCENARIOS()), asOf = window.__g.PLAN_TIMELINE().asOfYear;
+    const k = y => Math.pow(1 + i, y - asOf), START = 2029, END = 2040, RB = k(START);
+    // Example household (the t24 constants): tradInitA/B at the ladder start, the D-33 annuity row, pension/SS ×12, the spouse-B work taper.
+    const G = 0.045, ULT = { 75: 24.6, 76: 23.7 }, A0 = 1180000, B0 = 218600, NB0 = 7000, PEN = 4800, SSA = 39600, SSB = 15600, CONV = 70000;
+    const taper = y => (y === 2029 ? 20000 : y === 2030 ? 18000 : y === 2031 ? 15000 : 0);
+    // v6.30 (D-60, DU-7 (a)): the holdings are carried, the planned-contribution accrual inside A0/B0 stays at face value — the example's
+    // $2,500/mo (A) and $350/mo (B) pre-tax contributions over the three years 2026–2028 (the build review's finding; t93 §O).
+    const ACC_A = 2500 * 12 * 3, ACC_B = 350 * 12 * 3;
+    let a = (A0 - ACC_A) * RB + ACC_A, b = (B0 - ACC_B) * RB + ACC_B, nb = NB0 * RB; const rows = {};
+    for (let y = START; y <= END; y++) {
+      const rA = y - 1964 >= 75 ? a / ULT[y - 1964] : 0, rB = y - 1966 >= 75 ? Math.max(0, b - nb) / ULT[y - 1966] : 0;
+      const rmd = Math.round(rA + rB), aPrior = a;
+      const gA = a * (1 + G), gB = b * (1 + G);
+      const capA = Math.max(0, (y <= 2038 ? gA : 0) - rA), capB = Math.max(0, gB - nb * (1 + G) - rB);
+      const conv = Math.min(CONV, capA + capB), cA = (capA + capB) > 0 ? conv * (capA / (capA + capB)) : 0;
+      a = Math.max(0, gA - cA - rA); b = Math.max(0, gB - (conv - cA) - rB); nb = Math.min(nb * (1 + G), b);
+      const ss = ((y >= 2031 ? SSA : 0) + SSB) * k(y), divY = Math.round(DIV * k(y));
+      const nonSS = PEN + taper(y) + conv + rmd + divY;
+      const magi = nonSS + Math.round(statute86(ss, nonSS, true));
+      rows[y] = { magi, rmd, rA, aPrior, magiNoRmd: magi - rmd };
+    }
+    Object.assign(L, { on: true, i, asOf, rows, K: n => Math.round(n / 1000) });
+    console.log(`  (v6.30 model: plan inflation ${(i * 100).toFixed(3)}%, as-of ${asOf}, seed carry ×${RB.toFixed(5)})`);
+  } }
+
 // A-1 · NON-RMD YEARS ARE UNMOVED. This is what keeps the release honest about being the
 // RMD term ONLY: if these move, something else came along with it. Identical on both legs.
-for (const y of [2032, 2033, 2034, 2035, 2036, 2037, 2038]) {
-  T(`A-1: ${y} MAGI unmoved at $122K (pre-RMD year, both legs)`,
-    byYear[y] && byYear[y].magi === 122, byYear[y] ? `$${byYear[y].magi}K` : "row missing");
+if (L.on) {
+  // v6.30: no year before spouse A's 75th carries an RMD (the model's own term is zero there), and every one reads the model's MAGI.
+  for (let y = 2029; y <= 2038; y++)
+    T(`A-1 (v6.30 units): ${y} MAGI is the model's $${L.K(L.rows[y].magi)}K and carries no RMD`,
+      byYear[y] && byYear[y].magi === L.K(L.rows[y].magi) && L.rows[y].rmd === 0, byYear[y] ? `$${byYear[y].magi}K` : "row missing");
+} else {
+  for (const y of [2032, 2033, 2034, 2035, 2036, 2037, 2038]) {
+    T(`A-1: ${y} MAGI unmoved at $122K (pre-RMD year, both legs)`,
+      byYear[y] && byYear[y].magi === 122, byYear[y] ? `$${byYear[y].magi}K` : "row missing");
+  }
+  T("A-1: 2029 MAGI $108K (spouse-B work taper year, both legs)", byYear[2029] && byYear[2029].magi === 108);
+  T("A-1: 2030 MAGI $106K (both legs)", byYear[2030] && byYear[2030].magi === 106);
+  T("A-1: 2031 MAGI $137K (taper + spouse-A SS starts, both legs)", byYear[2031] && byYear[2031].magi === 137);
 }
-T("A-1: 2029 MAGI $108K (spouse-B work taper year, both legs)", byYear[2029] && byYear[2029].magi === 108);
-T("A-1: 2030 MAGI $106K (both legs)", byYear[2030] && byYear[2030].magi === 106);
-T("A-1: 2031 MAGI $137K (taper + spouse-A SS starts, both legs)", byYear[2031] && byYear[2031].magi === 137);
 
 // A-2 · THE TAIL YEARS — the defect itself.
 // Spouse A attains 75 in 2039 (dobA 1964, SECURE 2.0 §107: 75 for 1960+), so the RMD tail
@@ -96,7 +144,18 @@ T("A-1: 2031 MAGI $137K (taper + spouse-A SS starts, both legs)", byYear[2031] &
 //   post-fix 2039: $121,720 + $44,991 = $166,711 → renders $167K
 //   post-fix 2040: $121,720 + $46,902 = $168,622 → renders $169K
 //   pre-fix  both: $121,720                       → renders $122K
-if (POST_FIX) {
+if (L.on) {
+  for (const y of [2039, 2040]) {
+    T(`A-2 (v6.30 units): ${y} MAGI includes the RMD — the model's $${L.K(L.rows[y].magi)}K`,
+      byYear[y] && byYear[y].magi === L.K(L.rows[y].magi), byYear[y] ? `$${byYear[y].magi}K` : "row missing");
+    // Direction and size: the rendered tail exceeds the same year WITHOUT its RMD by the RMD (K rounding on both sides, ±$1K).
+    T(`A-2 (v6.30 units): ${y}'s MAGI exceeds its RMD-free figure by the RMD ($${L.K(L.rows[y].rmd)}K, ±$1K)`,
+      byYear[y] && L.rows[y].rmd > 0 && Math.abs((byYear[y].magi - L.K(L.rows[y].magiNoRmd)) - L.rows[y].rmd / 1000) <= 1,
+      byYear[y] ? `+$${byYear[y].magi - L.K(L.rows[y].magiNoRmd)}K vs $${(L.rows[y].rmd / 1000).toFixed(1)}K` : "");
+  }
+  T("A-2 (v6.30 units): 2040 exceeds 2039 (the second RMD year is larger, smaller divisor)",
+    byYear[2040] && byYear[2039] && byYear[2040].magi > byYear[2039].magi);
+} else if (POST_FIX) {
   T("A-2 (V541): 2039 MAGI includes the RMD — $167K (=$166,711 ±$500)",
     byYear[2039] && byYear[2039].magi === 167, byYear[2039] ? `$${byYear[2039].magi}K` : "row missing");
   T("A-2 (V541): 2040 MAGI includes the RMD — $169K (=$168,622 ±$500)",
@@ -147,7 +206,17 @@ T("CARDS: spouse A's RMD year is 2039 at age 75 (dobA 1964 → SECURE 2.0 age 75
 T("CARDS: spouse B's RMD year is 2041 at age 75 (dobB 1966)",
   b2041.length > 0 && b2041.every(x => x.age === 75));
 
-if (POST_FIX) {
+if (L.on) {
+  const withA = a2039.length ? a2039[a2039.length - 1].amt : null;
+  const want = Math.round(L.rows[2039].rA), grown = Math.round(L.rows[2039].aPrior * 1.045 / 24.6);
+  T(`B-1 (v6.30 units): spouse A's with-conversion RMD is EXACTLY the model's $${want.toLocaleString()} (31 Dec 2038 balance $${Math.round(L.rows[2039].aPrior).toLocaleString()} ÷ 24.6)`,
+    withA === want, `got ${withA}`);
+  T(`B-2 (v6.30 units): the card is NOT the grown-balance figure ($${grown.toLocaleString()})`, withA !== grown, `got ${withA}`);
+  // B-3: the card agrees with the ladder's own 2039 MAGI step over the same year's RMD-free figure (K precision on that side, ±$500 + rounding).
+  const step = byYear[2039] ? byYear[2039].magi * 1000 - L.rows[2039].magiNoRmd : null;
+  T("B-3 (v6.30 units): the card's RMD agrees with the ladder's own MAGI step (±$500, §M ceiling)",
+    step !== null && Math.abs(step - withA) <= 500, `card ${withA} vs step ${step}`);
+} else if (POST_FIX) {
   const withA = a2039.length ? a2039[a2039.length - 1].amt : null;
   // B-1 · DOLLAR-EXACT. $1,106,774 (spouse A's 31 Dec 2038 balance) / 24.6 = $44,991.
   // This single number pins THREE things at once:

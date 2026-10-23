@@ -52,13 +52,18 @@ ck("Roth ladder seeds use the constructor (census find #3)", SRC.includes("const
 ck("Taxes-tab schedule uses the constructor (census find #7)", /Portfolio for RMD calc[\s\S]{0,600}retireStartBalances\(_retireYr\)/.test(SRC));
 ck("IRMAA planner uses the constructor (census find #8)", /MAGI per year[\s\S]{0,600}retireStartBalances\(_retireYr\)/.test(SRC));
 ck("Taxes-tab schedule seeds PER-PERSON trad balances (v5.11, C-2C-3)",
-  /const _rsbB = retireStartBalances\(_retireYr\);[\s\S]{0,200}_rsbB\.tradInitA[\s\S]{0,80}_rsbB\.tradInitB/.test(SRC));
+  // v6.30 (D-60): the constructor's result is carried by `carryStartBalances` before the per-person seed is read; either form is per-person
+  /const _rsbB0? = retireStartBalances\(_retireYr\)[;,][\s\S]{0,200}_rsbB\.tradInitA[\s\S]{0,80}_rsbB\.tradInitB/.test(SRC));
 ck("IRMAA planner seeds PER-PERSON trad balances (v5.11, C-2C-3)",
-  /const _rsbC = retireStartBalances\(_retireYr\);[\s\S]{0,200}_rsbC\.tradInitA[\s\S]{0,80}_rsbC\.tradInitB/.test(SRC));
+  /const _rsbC0? = retireStartBalances\(_retireYr\)[;,][\s\S]{0,200}_rsbC\.tradInitA[\s\S]{0,80}_rsbC\.tradInitB/.test(SRC));
 
 // 4) Cross-tab agreement (Roth tab): STEP-1 cards and the ladder table share the SAME
 //    anchor (rothLadderStart) and the SAME helper, so they cannot quietly disagree.
-ck("STEP-1 RMD cards read t0 from the constructor", SRC.includes("const t0 = { A: _rsbC.tradInitA, B: _rsbC.tradInitB }"));
+// v6.30 (D-60): the seed is the constructor's balance carried to the ladder start at inflation (`_rbC0`, the same factor as the ladder's own
+// seed) — still the constructor, never a local positions reduce. The pre-v6.30 form is accepted too, so a run on an older source still reads it.
+// v6.30 (D-60, DU-7 (a)): …through the one carry helper (holdings carried, the accrual at face) — still the constructor, never a local reduce
+ck("STEP-1 RMD cards read t0 from the constructor", /const t0 = \{ A: _rsbC\.tradInitA, B: _rsbC\.tradInitB \}/.test(SRC)
+  || (/const _cC0 = carryStartBalances\(_rsbC, _rbC0\);/.test(SRC) && /const t0 = \{ A: _cC0\.tradInitA, B: _cC0\.tradInitB \}/.test(SRC)));
 ck("STEP-1 and ladder share the rothLadderStart anchor", SRC.includes("retireStartBalances(tl.rothLadderStart)") && SRC.includes("retireStartBalances(_tlRoth.rothLadderStart)"));
 
 // 5) Explicitly-unchanged consumers still read the SUM mirrors (MC parity by construction).

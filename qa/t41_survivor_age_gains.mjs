@@ -35,12 +35,12 @@
 import { createRequire } from "module";
 
 const VER = process.argv[2];
-const KNOWN_VERSIONS = ["v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629"];
+const KNOWN_VERSIONS = ["v574", "v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.\n    Registered: ${KNOWN_VERSIONS.join(", ")}`);
   process.exit(1);
 }
-const POST = (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629"))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || VER === "v629"))))))))))))))))));
+const POST = (VER === "v575" || VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630")))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630")))))))))))))))))));
 
 // argv[3] (optional) is a module path, so the negative controls can point this suite at a mutated
 // build while still gating its expectations by leg — the convention t40 uses.
@@ -57,6 +57,26 @@ console.log(`t41 \u2014 SURVIVOR AGE DEDUCTIONS / UNUSED DEDUCTION VS GAINS (${V
 
 // ── shared household construction (same shape the scope probe used) ──────────────────────────────
 const BASE = JSON.parse(JSON.stringify(G.PORTFOLIO()));
+// v6.30 (D-60; docs/SCOPE_D60_DOLLAR_UNITS_V630.md): the §1(f)(3) family — brackets, the standard deduction, the §63(f) age-65 extra —
+// indexes at chained CPI-U, modelled as the plan's inflation − 0.25 points (through v6.29 a flat 2%). Every hand figure below that indexed
+// at 2% is recomputed by H30 from the same Rev. Proc. 2025-32 constants at that rate; the OBBBA $6,000 bonus is statutory and unindexed.
+// The 2026 figures (A-1, the D block) carry no index and are unchanged. `i` is Σ prob × inflation over this module's SCENARIOS table.
+const { isV630, planInflation, chained } = await import("./units_v630.mjs");
+const U630 = isV630(VER);
+const H30 = (() => {
+  const i = planInflation(G.SCENARIOS()), IX = yr => chained(i, yr, 2026);
+  const BR = { M: [[0.10, 24800], [0.12, 100800], [0.22, 211400], [0.24, 403550]], S: [[0.10, 12400], [0.12, 50400], [0.22, 105700], [0.24, 201775]] };
+  const fed = (ti, st, yr) => { let t = 0, p = 0; for (const [r, u0] of BR[st]) { const u = u0 * IX(yr); if (ti <= p) break; t += (Math.min(ti, u) - p) * r; p = u; } return t; };
+  const sr = (st, yr) => Math.round((st === "S" ? 2050 : 1650) * IX(yr));
+  const std = (st, yr) => Math.round((st === "S" ? 16100 : 32200) * IX(yr));
+  // seniorExtra: §63(f) per qualifying person (indexed) + the OBBBA $6,000 per qualifying person through 2028 (MAGI under the phase-out here).
+  const extra = (st, yr, n65) => n65 * sr(st, yr) + (yr <= 2028 ? 6000 * n65 : 0);
+  // `taxA`: Engine A's reading — §63(f) only; the strategy comparator does not model the temporary OBBBA bonus (the v6.29 pin, $3,476, is
+  // exactly the no-bonus figure at 2%).
+  return { fed, sr, std, extra, tax: (inc, st, yr, n65) => fed(Math.max(0, inc - std(st, yr) - extra(st, yr, n65)), st, yr),
+    taxA: (inc, st, yr, n65) => fed(Math.max(0, inc - std(st, yr) - n65 * sr(st, yr)), st, yr) };
+})();
+const HV = (v629, v630) => U630 ? v630 : v629;
 const ss0 = { tableByAge: { 62: 0, 63: 0, 64: 0, 65: 0, 67: 0, 70: 0 }, planned: 0, plannedAge: 67 };
 const load = (o) => { const P = JSON.parse(JSON.stringify(BASE));
   Object.assign(P, { positions: [], otherAccounts: [], stateCode: null, _incomeFromForm: true,
@@ -71,17 +91,17 @@ const C3 = rowsB({ single: false, dobA: "1955-01-01", dobB: "1966-01-01", lifeEx
 const yB = (yr) => C3.find(r => r.yr === yr);
 // the joint years are unchanged by this release and pin that the fix did not touch them
 T("A-1 2026 MFJ, both alive: fedTax", yB(2026).fedTax, 1015.00);
-T("A-2 2027 MFJ, the DEATH YEAR files jointly (Pub. 501): fedTax", yB(2027).fedTax, 947.30);
-T("A-3 2027 the death year still grants both deductions: seniorExtra", yB(2027).seniorExtra, 7683);
-T("A-4 2031 the survivor has reached 65: fedTax", yB(2031).fedTax, 3321.51);
-T("A-5 2031 the survivor's own age grants it: seniorExtra", yB(2031).seniorExtra, 2263);
+T("A-2 2027 MFJ, the DEATH YEAR files jointly (Pub. 501): fedTax", yB(2027).fedTax, HV(947.30, H30.tax(50000, "M", 2027, 1)));
+T("A-3 2027 the death year still grants both deductions: seniorExtra", yB(2027).seniorExtra, HV(7683, H30.extra("M", 2027, 1)));
+T("A-4 2031 the survivor has reached 65: fedTax", yB(2031).fedTax, HV(3321.51, H30.tax(50000, "S", 2031, 1)));
+T("A-5 2031 the survivor's own age grants it: seniorExtra", yB(2031).seniorExtra, HV(2263, H30.extra("S", 2031, 1)));
 if (POST) {
   T("A-6 2028 survivor aged 62 takes NO 65+ deduction: seniorExtra", yB(2028).seniorExtra, 0);
   T("A-7 2029 survivor aged 63: seniorExtra", yB(2029).seniorExtra, 0);
   T("A-8 2030 survivor aged 64: seniorExtra", yB(2030).seniorExtra, 0);
-  T("A-9  2028 fedTax (hand: 0.12 x 33,250 - 0.02 x 12,900.96)", yB(2028).fedTax, 3731.98);
-  T("A-10 2029 fedTax (hand: 0.12 x 32,915 - 0.02 x 13,158.98)", yB(2029).fedTax, 3686.62);
-  T("A-11 2030 fedTax (hand: 0.12 x 32,573 - 0.02 x 13,422.16)", yB(2030).fedTax, 3640.32);
+  T(`A-9  2028 fedTax (hand${U630 ? ", v6.30 index" : ": 0.12 x 33,250 - 0.02 x 12,900.96"})`, yB(2028).fedTax, HV(3731.98, H30.tax(50000, "S", 2028, 0)));
+  T(`A-10 2029 fedTax (hand${U630 ? ", v6.30 index" : ": 0.12 x 32,915 - 0.02 x 13,158.98"})`, yB(2029).fedTax, HV(3686.62, H30.tax(50000, "S", 2029, 0)));
+  T(`A-11 2030 fedTax (hand${U630 ? ", v6.30 index" : ": 0.12 x 32,573 - 0.02 x 13,422.16"})`, yB(2030).fedTax, HV(3640.32, H30.tax(50000, "S", 2030, 0)));
 } else {
   //   v574: Math.max(ageA, ageB) grants the deduction through the DECEASED spouse's age, and 2028
   //   is inside the OBBBA bonus window, so 2028 carries the $2,050 + $6,000 (indexed) as well.
@@ -109,9 +129,9 @@ const baseA = (o = {}) => ({ single: false, asOfYr: 2026, retireYr: 2028, horizo
 const runA = (o) => G.runRothStrategies(baseA(o)).find(r => r.key === "none").totTax;
 // Engine A does not model the OBBBA bonus (disclosed simplification), so 2028 differs from Engine B
 // by the bonus alone: 3,731.98 rounds to 3,732 here.
-T("B-1 2028 survivor B aged 62 — Engine A", runA({}), POST ? 3732 : 3476);
-T("B-2 2028 control: B also born 1955, legitimately 65+ — unchanged by this release", runA({ dobBYr: 1955 }), 3476);
-T("B-3 2031 control: the survivor has reached 65 — unchanged", runA({ retireYr: 2031, horizonYr: 2031 }), 3322);
+T("B-1 2028 survivor B aged 62 — Engine A", runA({}), POST ? HV(3732, Math.round(H30.taxA(50000, "S", 2028, 0))) : 3476);
+T("B-2 2028 control: B also born 1955, legitimately 65+ — unchanged by this release", runA({ dobBYr: 1955 }), HV(3476, Math.round(H30.taxA(50000, "S", 2028, 1))));
+T("B-3 2031 control: the survivor has reached 65 — unchanged", runA({ retireYr: 2031, horizonYr: 2031 }), HV(3322, Math.round(H30.taxA(50000, "S", 2031, 1))));
 // A SINGLE household whose spouse-B birth date is stale: only the FILER's age may grant it.
 // Measured at build: live in Engine A on v574 ($246/yr = the $2,050 deduction at 12%), NOT in Engine B.
 const staleA = (dobBYr) => G.runRothStrategies(baseA({ single: true, retireYr: 2026, horizonYr: 2026,
@@ -127,8 +147,8 @@ if (POST) {
     { asOfYr: 2026, filingSingle: sgl, survivorIsA: false, ageA, ageB, irmaaUpper0: 218000 });
   //   2028 single: round(16,100 x 1.02^2) = 16,750, survivor aged 62 adds nothing
   //   2031 single: round(16,100 x 1.02^5) = 17,776 + round(2,050 x 1.02^5) = 2,263 -> 20,039
-  T("C-1 2028 the projection agrees with Engine B's deduction for a survivor aged 62", pb(2028, true, 68, 62).stdDed, 16750);
-  T("C-2 2031 the survivor's own age grants it: 17,776 + 2,263", pb(2031, true, 71, 65).stdDed, 20039);
+  T("C-1 2028 the projection agrees with Engine B's deduction for a survivor aged 62", pb(2028, true, 68, 62).stdDed, HV(16750, H30.std("S", 2028)));
+  T(`C-2 2031 the survivor's own age grants it: ${U630 ? "std + §63(f), v6.30 index" : "17,776 + 2,263"}`, pb(2031, true, 71, 65).stdDed, HV(20039, H30.std("S", 2031) + H30.sr("S", 2031)));
   T("C-3 the projection is reachable from the harness at all (the hoist's purpose)", typeof TEST.projectBracketsAt, "function");
 } else {
   T("C-1 [pre-v5.75] the projection is inline on the tab and unreachable", typeof (TEST || {}).projectBracketsAt, "undefined");
@@ -200,7 +220,7 @@ if (POST) {
 // (A-6 is the other half: a survivor under 65 in 2028 must receive neither.)
 const c3at65 = rowsB({ single: false, dobA: "1955-01-01", dobB: "1963-01-01", lifeExpA: 72, lifeExpB: 95,
   incomeSources: { ssA: ss0, ssB: ss0, pension: { amount: 50000 / 12 } } }).find(r => r.yr === 2028);
-T("X-2 2028 survivor aged 65 receives both deductions under one rule: 2,133 + 6,000", c3at65.seniorExtra, 8133);
+T(`X-2 2028 survivor aged 65 receives both deductions under one rule: ${U630 ? "§63(f) at the v6.30 index" : "2,133"} + 6,000`, c3at65.seniorExtra, HV(8133, H30.extra("S", 2028, 1)));
 
 console.log(`t41 SUITE (${VER}): ${pass} passed, ${fail} failed`);
 if (fails.length) console.log(fails.join("\n"));
