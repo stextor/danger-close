@@ -15,6 +15,10 @@ export const __g = {
   ACA_CONSTS: () => ACA_CONSTS,
   SKINS: () => SKINS,
   SCENARIOS: () => SCENARIOS,
+  // v6.30 (D-60) — the wage-base helper, on __g as a BUILD MARKER for harness tools that receive only __g (tools/boundaries.mjs's payroll
+  // row indexes the base at the plan's inflation where this exists, 2% where it does not). GUARDED: undefined on the v6.29 leg.
+  inflateWageBase: _g("inflateWageBase"),
+  carryStartBalances: _g("carryStartBalances"),
   STATE_RULES: () => STATE_RULES,
   HISTORICAL_RETURNS: () => HISTORICAL_RETURNS,
   DOCS_HTML: () => DOCS_HTML,
@@ -160,6 +164,18 @@ export const __test = {
   presetExpectedRealEquity: _g("presetExpectedRealEquity"),
   presetExpectedPortfolioReturn: _g("presetExpectedPortfolioReturn"),
   DEFAULT_SCENARIO_PRESET: _g("DEFAULT_SCENARIO_PRESET"),
+  // v6.30 (D-60) — the dollar factor and the statute rates (t93). GUARDED: none exists on the v6.29 leg, where t93 asserts their absence.
+  // `setChainedGap` is a TEST SEAM over the module's `let CHAINED_CPI_GAP` (t93 §C forces the bracket rate to the plan's inflation, so a
+  // household of real income must pay the same tax in today's dollars every year); it returns the gap it replaced.
+  planDollarFactor: _g("planDollarFactor"),
+  chainedCpiRate: _g("chainedCpiRate"),
+  cpiuRate: _g("cpiuRate"),
+  inflateTaxConst: _g("inflateTaxConst"),
+  inflateWageBase: _g("inflateWageBase"),
+  carryStartBalances: _g("carryStartBalances"),
+  irmaaThresholdFor: _g("irmaaThresholdFor"),
+  workEarners: _g("workEarners"),
+  setChainedGap: (typeof CHAINED_CPI_GAP !== "undefined") ? ((g) => { const was = CHAINED_CPI_GAP; CHAINED_CPI_GAP = g; return was; }) : undefined,
 };
 
 // v5.18: Engine C was hoisted to module level at v5.17; this exposes it to the harness.

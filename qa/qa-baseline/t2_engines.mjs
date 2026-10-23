@@ -109,6 +109,14 @@ if (MODE === "compare") {
     // not: Engine A's four fingerprints, `ssTable`, `stateTax` and `inflation` (t83 H proves Engines B, C and D bit-identical as well).
     "v619→v620": ["mc", "extMC", "stress"],
     "v620→v621": ["extMC", "stress"],   // v6.21 (D-42): the car is an expense row — every 30-year run charges the example's rows (and the planned path pays them); the 6-year run holds no car
+    // v6.30 (D-60 — docs/SCOPE_D60_DOLLAR_UNITS_V630.md): one dollar unit and one inflation clock for the tax engines. Engine A states each
+    // year in its own dollars (Social Security and dividends × (1+i)^(yr − as-of), balances carried to retirement at inflation, the bracket
+    // family at chained CPI-U, IRMAA at CPI-U, surcharges in the premium year's dollars), so all four of its fingerprints MUST move: `roth`,
+    // `rothCurrentEstate`, `rothAca` (the FPL now indexes at CPI-U, not a fixed proxy) and `rothOther`. The three Monte Carlo keys MUST move
+    // too: both engines' income-tax schedule is now Engine B's tax deflated to today's dollars (`totalTaxToday`), which on a plan with any
+    // inflation differs from the old mixed-unit figure. `ssTable`, `stateTax` and `inflation` must NOT: the state engines' figures are fixed
+    // (DU-4), the SS table is a claim-age lookup, and the inflation fingerprint is the scenario table this release reads but does not change.
+    "v629→v630": ["mc", "extMC", "stress", "roth", "rothCurrentEstate", "rothAca", "rothOther"],
   };
   const expectDiff = new Set(INTENDED_DIFFS[`${PRIOR}→${CUR}`] || []);
   for (const key of Object.keys(a)) {
