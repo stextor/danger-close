@@ -27,20 +27,20 @@
 // Math.random seeded before the bundle loads (t11's TRAP 1). Exits with process.exit (the app leaves timers).
 import { window, dom } from "./env_dom.mjs";
 import { createRequire } from "module";
-import { readFileSync } from "fs";
+import { readFileSync, existsSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath, pathToFileURL } from "url";
 import { spawnSync } from "child_process";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v630";
-const KNOWN_VERSIONS = ["v629", "v630"];
+const KNOWN_VERSIONS = ["v629", "v630", "v631"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v630"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v630", "v631"].includes(VER);   // an array, so the next registration widens it
 const KD = "[KNOWN DEFECT 2026-10-22, D-60 — flips at v6.30]";
 const GAP = 0.0025;   // C-CPI-U below CPI-U, CBO Budget Options 12 Dec 2024 — typed here, not read from the app
 
@@ -122,14 +122,19 @@ if (process.argv.includes("--module")) {
       Bmagi: Object.fromEntries(b.rows.map(r => [r.yr, r.magi_y])) };
   }
   // §D boundary — retirement in the as-of year: Engine D is v6.29's to the cent (only on the current leg; it imports the prior module)
-  if (POST) {
-    const MP = await import(pathToFileURL(join(HERE, "app_v629.mjs")).href); const GP = MP.__g;
+  // v6.31: a v6.30 → v6.31 run folder builds no v6.29 module. The v6.31 leg compares with v6.30's instead — Engine D is unchanged at v6.31, and
+  // v6.30's release run proved it equal to v6.29's here — and the v6.30 leg, now the PRIOR leg, prints a skip. A keyed map, so the next
+  // registration has to decide its entry rather than widen a condition.
+  const DREF_BY = { v631: "v630" };
+  const DREF = existsSync(join(HERE, "app_v629.mjs")) ? "v629" : (DREF_BY[VER] && existsSync(join(HERE, `app_${DREF_BY[VER]}.mjs`)) ? DREF_BY[VER] : null);
+  if (POST && DREF) {
+    const MP = await import(pathToFileURL(join(HERE, `app_${DREF}.mjs`)).href); const GP = MP.__g;
     const bHH = () => ({ ...JSON.parse(JSON.stringify(BASE)), retireYear: 2026 });
     load(bHH()); GP.applyLoadedData({ portfolio: bHH(), expenses: BASE_E });
     const Rn = G.PLAN_TIMELINE().targetRetireYear, Rp = GP.PLAN_TIMELINE().targetRetireYear;
     const dn = G.computeWithdrawalPlan({ retireYear: Rn, rothAmount: 70000, scenarioPreset: "base" }).schedule;
     const dp = GP.computeWithdrawalPlan({ retireYear: Rp, rothAmount: 70000, scenarioPreset: "base" }).schedule;
-    out.Dbound = { Rn, Rp, asOf: G.PLAN_TIMELINE().asOfYear, n: dn.map(r => [r.yr, r.portfolioTotal, r.exp_y, r.ordDraw_y]), p: dp.map(r => [r.yr, r.portfolioTotal, r.exp_y, r.ordDraw_y]) };
+    out.Dbound = { ref: DREF, Rn, Rp, asOf: G.PLAN_TIMELINE().asOfYear, n: dn.map(r => [r.yr, r.portfolioTotal, r.exp_y, r.ordDraw_y]), p: dp.map(r => [r.yr, r.portfolioTotal, r.exp_y, r.ordDraw_y]) };
   }
   // Engine A's inputs as the Roth tab builds them (stateless example plan; the household currently loaded)
   const pOfA = (R, roth) => { const tl = G.PLAN_TIMELINE();
@@ -315,9 +320,10 @@ console.log("§D — one clock: a fixed amount is the amount paid; Engine D pric
     T(`D-1 ${KD}: Engine B holds the COLA rental flat in today's dollars`, D.B.every(r => r.otherOrd_y === 14400));
     T(`D-4 ${KD}: Engine D prices from the retirement year`, D.Dsch.every(r => near(r.exp_y, r.tbl * Math.pow(1 + i, r.yr - D.R), 0.01)));
   }
-  if (POST) { const Bd = MD.Dbound;
+  if (POST && !MD.Dbound) console.log("  D-5/D-6 — skipped: this run folder has no v6.29 module and this leg has no reference module (the v6.31 leg runs them against v6.30)");
+  if (POST && MD.Dbound) { const Bd = MD.Dbound, refV = Bd.ref.replace(/^v(\d)(\d\d)$/, "v$1.$2");
     T("D-5 setup: the boundary household retires in the as-of year on both legs", Bd.Rn === Bd.asOf && Bd.Rp === Bd.asOf);
-    T("D-6 at the two-clock boundary Engine D is v6.29's to the cent (balance, expenses, ordinary draw, every year)",
+    T(`D-6 at the two-clock boundary Engine D is ${refV}'s to the cent (balance, expenses, ordinary draw, every year)`,
       Bd.n.length === Bd.p.length && Bd.n.every((r, j) => r.every((x, c) => near(x, Bd.p[j][c], 0.005))));
   }
 }
@@ -456,7 +462,10 @@ const srcOf = n => SRC.slice(n.start, n.end);
     T("H-5 … and never the gain basis", !carry.includes("gainBasis"));
     const bridge = topFn("withdrawalPlanSeries");
     T("H-6 the bridge passes Engine D's figures through (no inflation arithmetic)", bridge && all(bridge, n => n.type === "CallExpression" && /Math\.pow|planDollarFactor/.test(srcOf(n.callee))).length === 0);
-    T("H-7 What Breaks reads Engine A's tax in today's dollars", /estAnnualTax = _cT\.totTaxToday \/ planYears/.test(SRC));
+    // v6.31 (D-51, DS-3 (a)): What Breaks adds Engine A's IRMAA, also in today's dollars (t94 D-4 holds the rendered figure). An array, so the registrar widens it.
+    T("H-7 What Breaks reads Engine A's tax in today's dollars", ["v631"].includes(VER)
+      ? /estAnnualTax = \(_cT\.totTaxToday \+ \(Number\.isFinite\(_cT\.totIrmaaToday\) \? _cT\.totIrmaaToday : 0\)\) \/ planYears/.test(SRC)
+      : /estAnnualTax = _cT\.totTaxToday \/ planYears/.test(SRC));
     T("H-8 What Breaks values a fixed pension at its real worth at retirement", /const annualPenGuar = \(\) => _pen \* 12 \/ _rbWB;/.test(SRC));
     T("H-9 the Verify tab's IRMAA checks compute their expected values from the scenario table, not from the helper", /const _cpiuV = Object\.values\(SCENARIOS\)\.reduce/.test(SRC));
     // H-10 (added with §O): the carry has ONE home — no constructor balance is multiplied by a carry factor at a call site, and Engines A, B

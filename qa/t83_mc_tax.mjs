@@ -29,14 +29,14 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v620";
-const KNOWN_VERSIONS = ["v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"];
+const KNOWN_VERSIONS = ["v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER);   // an array, so the next registration widens it
-const POST_D49 = ["v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER);   // v6.23 (D-49): the Field Manual's Monte Carlo sentence on the built-in work (I-8). An array, so the registrar widens it
+const POST = ["v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631"].includes(VER);   // an array, so the next registration widens it
+const POST_D49 = ["v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631"].includes(VER);   // v6.23 (D-49): the Field Manual's Monte Carlo sentence on the built-in work (I-8). An array, so the registrar widens it
 // The differential's pair — constants, NOT `VER === "v620"`, so the registrar cannot widen them (t76 records why).
 const D_PRIOR = "v619", D_CUR = "v620";
 const require = createRequire(import.meta.url);
@@ -63,7 +63,11 @@ const KD = "[KNOWN DEFECT 2026-10-18, D-40/D-44/D-45 — flips at v6.20]";
 // own-year tax ÷ (1+i)^(yr − as-of)), which each path then grows with its own inflation; through v6.29 it took `totalTax`, whose units were
 // mixed. A-1 asserts the restatement against the row's own-year tax and the active preset's inflation (read from the SCENARIOS table), and
 // the B hand chain is the same arithmetic on the restated 2029 row. An array, so the registrar widens it.
-const U630 = ["v630"].includes(VER);
+const U630 = ["v630", "v631"].includes(VER);
+// v6.31 (D-51; docs/SCOPE_D51_AI6_V631.md): the schedule adds the IRMAA tab's surcharges in their premium years. A-1 compares the Taxes tab's
+// rows with the schedule's TAX part (`taxByYr`) — t94 §A holds the total and the surcharge part — and the copy checks read the new sentences.
+// An array, so the registrar widens it.
+const U631 = ["v631"].includes(VER);
 console.log(`t83 — THE MONTE CARLO PAYS THE TAXES TAB'S TAX (${VER})\n`);
 
 // BEFORE anything applies a preset: what SCENARIOS holds when the module loads (the schedule's default preset must match it, §A)
@@ -132,9 +136,12 @@ if (POST) {
       const sc = g.mcIncomeTaxSchedule(RY, { rothAmount: ra, qcdAnnual: qcd, taxYield: ty, scenarioPreset: pr });
       const _i = Object.values(g.SCENARIOS()).reduce((u, x) => u + x.prob * x.inflation, 0), _asOf = t.asOfYear;
       const want = r => U630 ? r.totalTaxToday : r.totalTax;
-      const ok = rows.length > 0 && Object.keys(sc.byYr).length === rows.length && rows.every(r => sc.byYr[r.yr] === want(r))
+      const part = U631 ? sc.taxByYr : sc.byYr;   // v6.31: the tax part; the total adds IRMAA (t94)
+      // v6.31 (review): and the total charged is the tax plus the surcharge part, every year, with the tail the last year's total
+      const ok = rows.length > 0 && Object.keys(sc.byYr).length === rows.length && rows.every(r => part[r.yr] === want(r))
+        && (!U631 || (rows.every(r => sc.byYr[r.yr] === want(r) + ((sc.irmaaByYr || {})[r.yr] || 0)) && sc.last === sc.byYr[sc.lastYr]))
         && (!U630 || rows.every(r => Math.abs(r.totalTaxToday - r.totalTax / Math.pow(1 + _i, r.yr - _asOf)) <= 1e-6 * Math.max(1, r.totalTax)))
-        && sc.firstYr === rows[0].yr && sc.lastYr === rows[rows.length - 1].yr && sc.last === want(rows[rows.length - 1]);
+        && sc.firstYr === rows[0].yr && sc.lastYr === rows[rows.length - 1].yr && (U631 ? part[sc.lastYr] : sc.last) === want(rows[rows.length - 1]);
       n++; if (!ok) bad.push(`${name}/${pr}/${ra}/${qcd}`);
     }
   }
@@ -310,7 +317,7 @@ const callsIn = (node, name) => { let c = 0; walk.simple(node, { CallExpression(
     T(`E-4 every one of the ${subs.length} subtractions from planned, _planned or portfolio in the two engines is a named outflow`, unknown.length === 0 && subs.length > 0,
       unknown.map(s => `${s.fn} L${s.line}: ${s.rhs}`).join(" | "));
     // v6.21 (D-42): the fixed car is gone — a car is a one-time row, charged as "the one-time rows". An array, so the registrar widens it.
-    const CAR_N = ["v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER) ? 0 : 1;
+    const CAR_N = ["v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631"].includes(VER) ? 0 : 1;
     T(`E-5 …in the counts the scope names: draw 4, tax 4, one-time 4, mortgage 2, LTC shock 2, care 2, car ${CAR_N}${CAR_N ? "" : " (v6.21: a car is an expense row)"}`,
       count("the spending draw") === 4 && count("the tax") === 4 && count("the one-time rows") === 4 && count("the mortgage payment") === 2
       && count("the LTC shock") === 2 && count("the sustained-care term") === 2 && count("the car") === CAR_N, KINDS.map(([k]) => `${k} ${count(k)}`).join(", "));
@@ -571,21 +578,27 @@ console.log("  I — rendered: the Income card, the slider, the Monte Carlo tab,
     T("I-4 moving the slider to $150K moves the card to the schedule at $150K, and its line says so", moved && /at the \$150K conversion slider/.test(cardLine()), `${cardLine()} vs ${want(150000)}`);
     const mc = await tab("monte carlo"); const sp = body().querySelector("[data-dc-mc-tax]");
     T("I-5 the Monte Carlo tab says every run pays the Taxes tab's tax at the current slider ($150K), grown with inflation, and one-time expenses in the quarter they fall",
-      !!sp && /Every run pays, in each year of retirement, the income tax the Taxes tab computes at the current conversion slider \(\$150K\), QCD and dividend-yield settings, grown with that run's inflation; one-time expenses are charged in the quarter they fall, grown the same way\. Before v6\.20 the simulation charged a flat \$4,000 a quarter during the conversion ladder and no income tax after it\./.test(sp.textContent.replace(/\s+/g, " ")), sp ? sp.textContent : "no span");
+      !!sp && (U631 ? /Every run pays, in each year of retirement, the income tax the Taxes tab computes at the current conversion slider \(\$150K\), QCD and dividend-yield settings, and the IRMAA tab's Medicare surcharges in the years Medicare bills them \(the first two years' premiums, which working-year income sets, are not charged\), grown with that run's inflation; one-time expenses are charged in the quarter they fall, grown the same way\. Before v6\.20 the simulation charged a flat \$4,000 a quarter during the conversion ladder and no income tax after it; before v6\.31 it charged no IRMAA\./
+        : /Every run pays, in each year of retirement, the income tax the Taxes tab computes at the current conversion slider \(\$150K\), QCD and dividend-yield settings, grown with that run's inflation; one-time expenses are charged in the quarter they fall, grown the same way\. Before v6\.20 the simulation charged a flat \$4,000 a quarter during the conversion ladder and no income tax after it\./).test(sp.textContent.replace(/\s+/g, " ")), sp ? sp.textContent : "no span");
   } else {
     T(`I-1 ${KD} the Income card says "Roth conversion tax drag · ~$16K/yr · $4K/quarter modeled in MC sim"`, /Roth conversion tax drag/i.test(inc) && /~\$16K\/yr/.test(inc) && /\$4K\/quarter modeled in MC sim/.test(inc));
   }
   const bt = await tab("backtest");
   if (POST) T("I-6 Backtest: the MC charges the Taxes tab's income tax, and both spend one-time expenses — the March/June/September/December sentence and \"tax drag\" are gone",
     // v6.29 (F-25, 1071): the comparison names the Monte Carlo tab's 30-year runs (not "the MC headline") and the header's 6-year run
-    (["v629", "v630"].includes(VER) ? /they also charge long-term care and the Taxes tab's income tax, which this backtest omits\. The header's success rate is a different run again: the 6-year simulation, ending above \$800K\. \(Both spend your one-time expenses: this backtest from v6\.18, the MC in the quarter each one falls from v6\.20\.\)/
+    (U631 ? /they also charge long-term care, the Taxes tab's income tax and the IRMAA tab's surcharges, which this backtest omits\. The header's success rate is a different run again: the 6-year simulation, ending above \$800K\. \(Both spend your one-time expenses: this backtest from v6\.18, the MC in the quarter each one falls from v6\.20\.\)/
+    : ["v629", "v630"].includes(VER) ? /they also charge long-term care and the Taxes tab's income tax, which this backtest omits\. The header's success rate is a different run again: the 6-year simulation, ending above \$800K\. \(Both spend your one-time expenses: this backtest from v6\.18, the MC in the quarter each one falls from v6\.20\.\)/
                             : /the MC also charges LTC shocks and the Taxes tab's income tax, which this backtest deliberately omits\. \(Both spend your one-time expenses: this backtest from v6\.18, the MC in the quarter each one falls from v6\.20\.\)/).test(bt)
     && !/the MC charges one only when it is dated in March/.test(bt) && !/Roth-conversion tax drag/.test(bt));
   else T(`I-6 ${KD} Backtest says the MC charges a one-time expense only when dated in March, June, September or December`, /the MC charges one only when it is dated in March, June, September or December/.test(bt));
   const wb = await tab("what breaks");
-  if (POST) T("I-7 What Breaks names the engine its tax comes from (the Roth tab's strategy engine), no longer says it does not model taxes, and does not credit the Monte Carlo with IRMAA",
+  if (POST) T(`I-7 What Breaks names the engine its tax comes from (the Roth tab's strategy engine), no longer says it does not model taxes, and says what the Monte Carlo pays${U631 ? " (from v6.31 IRMAA too, in both)" : " (not IRMAA)"}`,
     /average from the Roth tab's strategy engine, incl\. Roth-conversion taxes/.test(wb) && !/average from the Taxes engine/.test(wb) && !/It does not model taxes/.test(wb)
-    && /Its taxes are a yearly average from the Roth tab's strategy engine/.test(wb) && /the Monte Carlo models market sequence, not IRMAA/.test(wb));
+    && /Its taxes are a yearly average from the Roth tab's strategy engine/.test(wb)
+    // v6.31 (D-51, DS-3 (a)): What Breaks adds Engine A's IRMAA and no longer says the Monte Carlo leaves it out
+    && (U631 ? /incl\. Roth-conversion taxes and IRMAA surcharges — except the first two years' premiums, which working-year income sets; that engine projects its own income/.test(wb) && !/not IRMAA/.test(wb)
+      && /the Monte Carlo also pays the Taxes tab's tax and the IRMAA tab's surcharges year by year/.test(wb)
+      : /the Monte Carlo models market sequence, not IRMAA/.test(wb)));
   else T(`I-7 ${KD} What Breaks says it "does not model taxes" while adding a tax estimate`, /It does not model taxes/.test(wb) && /average from the Taxes engine/.test(wb));
   // the Field Manual (the DOCS_HTML string the Docs tab serves)
   const FM = String(DG.DOCS_HTML()).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
@@ -593,15 +606,19 @@ console.log("  I — rendered: the Income card, the slider, the Monte Carlo tab,
     T("I-8 Field Manual, Monte Carlo entry: the income-tax paragraph — the schedule, the inflation reading, the same tax on every path, the omissions, the one-time rows, and what it did through v6.19",
       /Its income tax \(v6\.20\)\. Every run pays, in each year of retirement, the income tax the Taxes tab computes for that year/.test(FM)
       && (U630 ? /hands the simulation the same tax restated in today’s dollars, which it grows with each run’s own inflation/ : /grows them with each run’s own inflation/).test(FM) && /The same yearly schedule is paid on every run/.test(FM)
-      && /Not in it: IRMAA \(a Medicare premium, on its own tab\), the Social Security cut toggle/.test(FM)
+      // v6.31 (D-51): IRMAA leaves the omissions — the run pays it from the second year after retirement (t94 G-10 holds the new sentence)
+      && (U631 ? /Not in it: the Social Security cut toggle \(the tax is computed on the full scheduled benefit\) and the cash from a home move\./.test(FM) && /From v6\.31 each run also pays the IRMAA tab’s Medicare surcharges/.test(FM)
+        : /Not in it: IRMAA \(a Medicare premium, on its own tab\), the Social Security cut toggle/.test(FM))
       // v6.23 (D-49): the built-in wages are the example's alone, and the sentence says so (t86 G-3); through v6.22 it named every plan with no streams
       && (POST_D49 ? /For the example household, whose spouse B works part-time in its retirement year and the two after, the Taxes tab taxes those wages and the simulation does not credit them as income/.test(FM)
                    : /built-in part-time wages for spouse B/.test(FM)) && /Through v6\.19 the only income tax was a flat, never-inflated \$4,000 a quarter during the conversion ladder/.test(FM));
     T("I-9 Field Manual, Withdrawal entry: the one-time disclosure says what the Monte Carlo does from v6.20, and keeps what it did as history",
       /From v6\.20 the Monte Carlo charges a one-time row in the quarter that contains its month, grown with each run’s inflation like the monthly rows; through v6\.19 it read the table once a quarter/.test(FM)
       && !/so it charges a one-time row only when the row is dated in one of those months/.test(FM));
-    T("I-10 Field Manual, What Breaks: the estimate's engine named, and the Monte Carlo no longer credited with IRMAA",
-      /an annual average from the Roth tab’s strategy engine/.test(FM) && /the Monte Carlo tab covers market sequence, though not IRMAA\./.test(FM) && !/an annual average from the Taxes engine/.test(FM));
+    T(`I-10 Field Manual, What Breaks: the estimate's engine named, and IRMAA stated as it is${U631 ? " — in the estimate and the Monte Carlo (v6.31)" : " — in neither"}`,
+      /an annual average from the Roth tab’s strategy engine/.test(FM) && !/an annual average from the Taxes engine/.test(FM)
+      && (U631 ? /the Monte Carlo tab covers market sequence\./.test(FM) && !/though not IRMAA/.test(FM) && /including Roth-conversion taxes and, from v6\.31, IRMAA surcharges/.test(FM)
+        : /the Monte Carlo tab covers market sequence, though not IRMAA\./.test(FM)));
   } else T(`I-8 ${KD} the Field Manual says the Monte Carlo charges a one-time row only when it is dated in a quarter's last month, in today's dollars`, /so it charges a one-time row only when the row is dated in one of those months/.test(FM));
   try { await act(async () => { root.unmount(); }); } catch (e) {}
 }

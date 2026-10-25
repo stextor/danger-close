@@ -20,7 +20,7 @@ import { existsSync, readFileSync } from "fs";
 import { d30Tax, d30Deductions, D30_STATES } from "./d30_ref.mjs";
 const require = createRequire(import.meta.url);
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"];
+const KNOWN_VERSIONS = ["v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  ✓ ${n}`); } else { fail++; console.log(`  ✗ ${n}${d !== "" ? " — " + String(d).slice(0, 300) : ""}`); } };
 const EQ = (n, got, want, tol = 0.005) => CK(n, typeof got === "number" && Math.abs(got - want) <= tol, `got ${got}, want ${want}`);
@@ -30,13 +30,16 @@ if (!KNOWN_VERSIONS.includes(VER)) { CK(`0-0 version tag ${JSON.stringify(VER)} 
 const DD = VER !== "v601";   // a version on which D-30 batch 1 and the Ask AI fix are present
 // v6.26 (D-55): every request now starts with the app's ground rules, and the Field Manual's cost sentence states two ranges (a plan the user
 // entered, the example's longer sample briefing). An array, so the next registration widens it. t89 measures the entered-plan range.
-const D55 = ["v626", "v627", "v628", "v629", "v630"].includes(VER);
+const D55 = ["v626", "v627", "v628", "v629", "v630", "v631"].includes(VER);
+// v6.31 (AI-6, AI-3; docs/SCOPE_D51_AI6_V631.md): Ask AI asks Claude Opus 4.8 at medium effort; the timeout is 180 s; the cost note is restated
+// at Opus 4.8's prices and its newer tokenizer (up to 1.35x the tokens). An array, so the registrar widens it.
+const A631 = ["v631"].includes(VER);
 // v6.03 (D-30 batch 2, t67): the fourteen flat-rate states take theirs too, and Idaho and Ohio gain schedules. This suite keeps to the 27 — its
 // group-wide checks read `withD` (the 27) and `progressive` (the batch-1 schedules) below; t67 holds batch 2. A version LIST.
 const B2 = !["v601", "v602"].includes(VER);
 // v6.04 (D-31, t68): nine rows gain a component (a federal-income-tax deduction or the federal senior deduction), appended last; this suite
 // keeps to its own components (`own` drops them) and t68 holds the new ones and the notes' new wording. A version LIST.
-const D31L = ["v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630"].includes(VER);
+const D31L = ["v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631"].includes(VER);
 const own = l => (l || []).filter(x => !(D31L && (x.of !== undefined || x.years !== undefined)));
 // Self-hosted branch for group E (t36's harness trap: without a `location` the bundle takes the claude.ai branch, which has no key panel).
 dom.reconfigure({ url: "https://stextor.github.io/danger-close/" });
@@ -327,7 +330,7 @@ else if (VER === "v602") {
 
 // ── E · Ask AI ──
 const AI = g.AI_CONSTS ? g.AI_CONSTS() : {};
-if (DD) CK("E-1 the cap and the timeout are one constant each: 4,096 tokens, 120 seconds", AI.MAX_TOKENS === 4096 && AI.TIMEOUT_MS === 120000 && typeof AI.CUTOFF === "string", JSON.stringify(AI));
+if (DD) CK(`E-1 the cap and the timeout are one constant each: 4,096 tokens, ${A631 ? 180 : 120} seconds`, AI.MAX_TOKENS === 4096 && AI.TIMEOUT_MS === (A631 ? 180000 : 120000) && typeof AI.CUTOFF === "string", JSON.stringify(AI));
 else CK("E-1 PIN v6.01: no constants (the literals 1000 and 45000 sat in askAI)", AI.MAX_TOKENS === undefined && AI.TIMEOUT_MS === undefined);
 const body = () => window.document.body;
 const QUESTION = "How does my plan look?";
@@ -386,7 +389,10 @@ const local = (fin) => () => ({ json: { choices: [{ message: { content: ANSWER }
   }
   // the size of what one question sends (the Field Manual's cost sentence)
   const sys = t1.call && t1.call.body ? JSON.stringify(t1.call.body).length : 0;
-  if (D55) CK(`E-7 the cost sentence's figure for the example holds: one question sends ${sys.toLocaleString("en-US")} characters, about ${Math.round(sys / 4).toLocaleString("en-US")} tokens — "about 4,500 for the example's longer sample briefing" (4,000–5,000)`,
+  // v6.31: the note's sizes restated for Opus 4.8 — characters ÷ 3.5, × 1.35 for the newer tokenizer (scope §0.6)
+  if (A631) CK(`E-7 the cost sentence's figure for the example holds on Opus 4.8: one question sends ${sys.toLocaleString("en-US")} characters, about ${Math.round(sys / 3.5 * 1.35).toLocaleString("en-US")} tokens — "about 7,000 for the example's longer sample briefing" (6,000–8,000)`,
+             sys / 3.5 * 1.35 >= 6000 && sys / 3.5 * 1.35 <= 8000 && g.DOCS_HTML().includes("and about 7,000 for the example\u2019s longer sample briefing"), sys);
+  else if (D55) CK(`E-7 the cost sentence's figure for the example holds: one question sends ${sys.toLocaleString("en-US")} characters, about ${Math.round(sys / 4).toLocaleString("en-US")} tokens — "about 4,500 for the example's longer sample briefing" (4,000–5,000)`,
              sys / 4 >= 4000 && sys / 4 <= 5000 && g.DOCS_HTML().includes("and about 4,500 for the example\u2019s longer sample briefing"), sys);
   else if (DD) CK(`E-7 the cost sentence's input range holds for the example plan: one question sends ${sys.toLocaleString("en-US")} characters, about ${Math.round(sys / 4).toLocaleString("en-US")} tokens — within "roughly 1,000 to 5,000"`,
              sys / 4 >= 1000 && sys / 4 <= 5000, sys);
@@ -431,17 +437,29 @@ const DOCS = g.DOCS_HTML().replace(/<[^>]+>/g, "").replace(/\s+/g, " ");
 const DOCS_C = g.DOCS_HTML().replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");   // table cells kept apart
 if (DD) {
   const k = AI.MAX_TOKENS.toLocaleString("en-US");
-  CK("E-15 the Ask AI entry states the cap (the constant, formatted) and the cut-off notice", DOCS.includes(`An answer can run to about 3,000 words (${k} tokens); one that reaches that limit ends with a notice saying it was cut off — type continue and EXECUTE for the rest.`));
+  CK("E-15 the Ask AI entry states the cap (the constant, formatted) and the cut-off notice", DOCS.includes(A631
+    ? `An answer can run to about 2,300 words (${k} tokens, on the newer tokenizer Claude Opus 4.8 uses); one that reaches that limit ends with a notice saying it was cut off — type continue and EXECUTE for the rest.`
+    : `An answer can run to about 3,000 words (${k} tokens); one that reaches that limit ends with a notice saying it was cut off — type continue and EXECUTE for the rest.`));
   CK("E-15b …and says a master prompt restored from an older backup keeps its own wording (AI-4) — the request's cap does not depend on it",
      DOCS.includes(`A master prompt restored from an older backup keeps its own wording, which may still mention a 1,000-token cap; the request asks for ${k} either way.`));
-  CK("E-16 the error table: the timeout row says (120s) — the constant — and a row explains the length-limit notice",
+  CK(`E-16 the error table: the timeout row says (${AI.TIMEOUT_MS / 1000}s) — the constant — and a row explains the length-limit notice`,
      DOCS_C.includes(`REQUEST TIMED OUT (${AI.TIMEOUT_MS / 1000}s) The question was very broad`) && !DOCS.includes("REQUEST TIMED OUT (45s)") && DOCS_C.includes(`An answer ends with the length-limit notice The answer reached the ${k}-token limit and was cut off Type continue and EXECUTE`));
-  // the cost sentence: its figures, held to arithmetic — 4,096 output tokens at $15 per million is about six cents
+  // the cost sentence: its figures, held to arithmetic — 4,096 output tokens at $15 per million is about six cents (through v6.30); at
+  // Opus 4.8's $25, 10.24 cents, so a full-length first question runs about 11 to 14 cents with its input (v6.31; t94 G-5..G-7 hold the rest)
+  if (A631) {
+    const full = AI.MAX_TOKENS * 25 / 1e6 * 100;
+    CK(`E-17 the cost sentence: Opus 4.8's rates and date stated, "up to ${k} tokens", "about 11 to 14 cents" for a full-length answer (output alone ${full.toFixed(2)}¢), and the glossary's Token entry agrees`,
+       DOCS.includes(`gets back an answer of up to ${k} tokens`) && DOCS.includes("At the Claude Opus 4.8 prices Anthropic listed in October 2026 ($5 per million input tokens, $25 per million output tokens)")
+       && DOCS.includes("and about 11 to 14 cents when it runs to the full 4,096") && full > 10 && full < 11 && !/well under a cent/.test(DOCS)
+       && DOCS.includes("A first Ask AI question and its answer run a few thousand tokens — about 3 to 10 cents at the October 2026 rates the Ask AI cost note gives."));
+    CK("E-18 …and the model id the request names is the one the sentence prices (claude-opus-4-8, one constant — AI-6)", /const AI_MODEL = "claude-opus-4-8";/.test(src) && /model: AI_MODEL,/.test(src));
+  } else {
   const six = Math.round(AI.MAX_TOKENS * 15 / 1e6 * 100);
   CK(`E-17 the cost sentence: rates and date stated, "up to ${k} tokens", "about six cents" for a full-length answer, and the glossary's Token entry agrees (= ${AI.MAX_TOKENS} × $15 / 1M = ${(AI.MAX_TOKENS * 15 / 1e4).toFixed(2)}¢)`,
      DOCS.includes(`gets back an answer of up to ${k} tokens`) && DOCS.includes("At the Claude Sonnet 4.6 prices Anthropic listed in October 2026 ($3 per million input tokens, $15 per million output tokens)")
      && DOCS.includes("an answer that runs to the full 4,096 tokens adds about six cents") && six === 6 && !/well under a cent/.test(DOCS) && DOCS.includes("A full Ask AI question and answer runs a few thousand tokens — about one to five cents at the October 2026 rates the Ask AI cost note gives."));
   CK("E-18 …and the model id the request names is the one the sentence prices (claude-sonnet-4-6 — AI-6: unchanged)", /model: "claude-sonnet-4-6"/.test(src));
+  }
 } else CK("E-15 PIN v6.01: the Field Manual says a question costs well under a cent and times out at 45 seconds", /well under a cent/.test(DOCS) && DOCS.includes("REQUEST TIMED OUT (45s)"));
 
 // ── F · the display and the Field Manual's state-tax sentences ──

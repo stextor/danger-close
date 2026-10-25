@@ -405,6 +405,13 @@ tally "t92-$CUR"   node t92_model_claims.mjs "$CUR"
 # rendered tabs. Both legs (the v6.29 leg pins the defects); module facts in a child process. Prints one count line.
 tally "t93-$PRIOR" node t93_dollar_units.mjs "$PRIOR"
 tally "t93-$CUR"   node t93_dollar_units.mjs "$CUR"
+# t94 (v6.31) — the Monte Carlo pays IRMAA, and Ask AI asks Claude Opus 4.8 at medium effort (D-51, AI-6): the schedule's parts against
+# Engines B and C exactly (premium year, edges, tail), the planned paths by the compounded surcharges with a hand pin, the extinction invariant
+# (surcharge table at zero → v6.30's schedule), What Breaks against Engine A and Engine A beside Engine C (D-66), the request by AST and through a
+# recording fetch on all three routes (model, effort, no thinking, refusals, the timeout), the rendered tabs, copy. Both legs (the v6.30 leg
+# pins the defects); the claude.ai route in a child process. Prints one count line.
+tally "t94-$PRIOR" node t94_mc_irmaa_ai.mjs "$PRIOR"
+tally "t94-$CUR"   node t94_mc_irmaa_ai.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

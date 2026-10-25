@@ -24,13 +24,13 @@ import { createHash } from "crypto";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v626";
 const CLAUDE = process.argv.includes("--claude");
-const KNOWN_VERSIONS = ["v625", "v626", "v627", "v628", "v629", "v630"];
+const KNOWN_VERSIONS = ["v625", "v626", "v627", "v628", "v629", "v630", "v631"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v626", "v627", "v628", "v629", "v630"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v626", "v627", "v628", "v629", "v630", "v631"].includes(VER);   // an array, so the next registration widens it
 const KD = "[KNOWN DEFECT 2026-10-21, D-55 — flips at v6.26]";
 const require = createRequire(import.meta.url);
 globalThis.IS_REACT_ACT_ENVIRONMENT = true; window.IS_REACT_ACT_ENVIRONMENT = true;
@@ -334,8 +334,11 @@ const METH = existsSync(join(HERE, "..", "METHODOLOGY.md")) ? readFileSync(join(
 T("E-0: SETUP — the Field Manual and METHODOLOGY are read", DOCS.length > 100000 && METH.length > 10000, `${DOCS.length} / ${METH.length}`);
 await go("ask AI");
 const tabText = txt();
-const tok = n => Math.round(n / 4);
-console.log(`    request sizes, characters ÷ 4: ${Object.entries(sizes).map(([k, v]) => `${k} ≈ ${tok(v).toLocaleString("en-US")}`).join(", ")}`);
+// v6.31 (AI-6; docs/SCOPE_D51_AI6_V631.md §0.6): Claude Opus 4.8's newer tokenizer — characters ÷ 3.5, × 1.35 (the migration guide's upper
+// figure). Through v6.30, characters ÷ 4. An array, so the registrar widens it.
+const A631 = ["v631"].includes(VER);
+const tok = n => Math.round(A631 ? n / 3.5 * 1.35 : n / 4);
+console.log(`    request sizes, ${A631 ? "characters ÷ 3.5 × 1.35" : "characters ÷ 4"}: ${Object.entries(sizes).map(([k, v]) => `${k} ≈ ${tok(v).toLocaleString("en-US")}`).join(", ")}`);
 if (POST) {
   T("E-1: the Ask AI tab says the ground rules are sent", /the app's fixed ground rules \(the same for everyone: educational only, no financial directives\)/.test(tabText));
   T("E-2: the Field Manual's master-prompt section names the rules and says the example's older briefing is overridden",
@@ -344,9 +347,11 @@ if (POST) {
     DOCS.includes("<tr><td><strong>The app’s ground rules</strong></td><td>YES</td>") && DOCS.includes("It carries nothing about you and is stored nowhere"));
   T("E-4: §13 records the change", DOCS.includes("<li><strong>Ask AI sends its ground rules with every plan (v6.26).</strong>"));
   T("E-5: METHODOLOGY §11 lists the rules among what is transmitted, so \"nothing else\" stays true", /transmits — from v6\.26, first — the\napp's fixed ground rules \(the same text for every plan: educational only, no financial directives;\nit carries nothing about the user\)/.test(METH) && /the conversation's last 12 messages, and any explicitly attached files — nothing\nelse —/.test(METH));
-  T(`E-6: the cost sentence's range for a plan a user entered holds — ${["entered", "single", "blank", "unsaved"].map(k => `${k} ≈ ${tok(sizes[k]).toLocaleString("en-US")}`).join(", ")} tokens — "roughly 600 to 1,500"`,
-    DOCS.includes("roughly 600 to 1,500 tokens for a plan you entered yourself") && ["entered", "single", "blank", "unsaved"].every(k => tok(sizes[k]) >= 600 && tok(sizes[k]) <= 1500), JSON.stringify(sizes));
-  T(`E-7: …and its figure for the example — ≈ ${tok(sizes.example).toLocaleString("en-US")} tokens — "about 4,500"`, DOCS.includes("and about 4,500 for the example’s longer sample briefing") && tok(sizes.example) >= 4000 && tok(sizes.example) <= 5000, sizes.example);
+  T(`E-6: the cost sentence's range for a plan a user entered holds — ${["entered", "single", "blank", "unsaved"].map(k => `${k} ≈ ${tok(sizes[k]).toLocaleString("en-US")}`).join(", ")} tokens — "${A631 ? "roughly 900 to 2,300" : "roughly 600 to 1,500"}"`,
+    DOCS.includes(A631 ? "roughly 900 to 2,300 tokens for a plan you entered yourself" : "roughly 600 to 1,500 tokens for a plan you entered yourself")
+    && ["entered", "single", "blank", "unsaved"].every(k => A631 ? tok(sizes[k]) >= 900 && tok(sizes[k]) <= 2300 : tok(sizes[k]) >= 600 && tok(sizes[k]) <= 1500), JSON.stringify(sizes));
+  T(`E-7: …and its figure for the example — ≈ ${tok(sizes.example).toLocaleString("en-US")} tokens — "${A631 ? "about 7,000" : "about 4,500"}"`, A631 ? DOCS.includes("and about 7,000 for the example’s longer sample briefing") && tok(sizes.example) >= 6000 && tok(sizes.example) <= 8000
+    : DOCS.includes("and about 4,500 for the example’s longer sample briefing") && tok(sizes.example) >= 4000 && tok(sizes.example) <= 5000, sizes.example);
 } else {
   T(`E-1 ${KD}: the Ask AI tab names only the plan summary and live context`, !/ground rules/.test(tabText) && /your plan summary/.test(tabText));
   T(`E-2 ${KD}: the Field Manual's master-prompt section names two parts and no rules`, DOCS.includes("It has two parts: a <strong>plan summary</strong>") && !DOCS.includes("fixed <strong>ground rules</strong>"));
