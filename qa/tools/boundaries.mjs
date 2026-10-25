@@ -481,6 +481,19 @@ export function census(G) {
       _sub > 0 ? "reachable — the poverty line's growth moves the subsidy" : "no subsidy year, so the poverty line's indexing cannot be seen here");
   }
 
+  // ── v6.31 (D-51 — SCOPE_D51_AI6_V631) · the condition that hid it (§K1) ─────────────────────────────────────────────────────────
+  // 19. THE MONTE CARLO'S SCHEDULE CARRIES A SURCHARGE. Through v6.30 the schedule both Monte Carlo engines pay was the Taxes tab's income tax
+  //    alone; from v6.31 it adds Engine C's IRMAA surcharges in their premium years. The example at its opening $70,000 slider crosses no tier,
+  //    so the fix moves nothing on it. ON when the schedule (the opening $70K slider, BULL — the preset a first visit opens on) has no premium
+  //    year with a surcharge; a build whose schedule has no IRMAA part reads "n/a" (ON), so the v6.30 leg is ON on every household.
+  { const _s = G.mcIncomeTaxSchedule ? G.mcIncomeTaxSchedule(tl.targetRetireYear, { rothAmount: 70000, qcdAnnual: 0, taxYield: 2.0, scenarioPreset: "bull" }) : null;
+    const _iy = _s && _s.irmaaByYr ? Object.keys(_s.irmaaByYr).map(Number).sort((a, b) => a - b) : null;
+    row("irmaa_in_mc", "IRMAA in the Monte Carlo's schedule", _iy === null ? "n/a — the schedule has no IRMAA part" : _iy.length ? `${_iy.length} premium year(s), from ${_iy[0]}` : "none",
+      "a premium year with a surcharge in the schedule", !(_iy && _iy.length > 0),
+      _iy === null ? "this build's Monte Carlo pays no IRMAA, so there is nothing to see"
+        : _iy.length ? "reachable — the Monte Carlo pays the IRMAA tab's surcharges in these years" : "no surcharge in the schedule, so the Monte Carlo's IRMAA charge cannot be seen here");
+  }
+
   return rows;
 }
 

@@ -64,9 +64,9 @@ const WORK_TAPER = [20000, 18000, 15000]; // the app's built-in demo taper (acti
 // MODE is set per ledger() call — v630 swaps the rates, every other mode keeps the 2% proxy exactly as validated.
 let MODE = "v537";
 const CHAINED_GAP = 0.0025;   // CBO Budget Options, 12 December 2024
-const idx = (v, yr, asOf) => v === Infinity ? Infinity : v * Math.pow(MODE === "v630" ? 1 + EXPECTED_INFL - CHAINED_GAP : IDX, yr - asOf);
-const cpi = (v, yr, asOf) => v === Infinity ? Infinity : v * Math.pow(MODE === "v630" ? 1 + EXPECTED_INFL : IDX, yr - asOf);
-const kY = (yr, asOf) => MODE === "v630" ? Math.pow(1 + EXPECTED_INFL, yr - asOf) : 1;
+const idx = (v, yr, asOf) => v === Infinity ? Infinity : v * Math.pow(MODE === "v630" || MODE === "v631" ? 1 + EXPECTED_INFL - CHAINED_GAP : IDX, yr - asOf);
+const cpi = (v, yr, asOf) => v === Infinity ? Infinity : v * Math.pow(MODE === "v630" || MODE === "v631" ? 1 + EXPECTED_INFL : IDX, yr - asOf);
+const kY = (yr, asOf) => MODE === "v630" || MODE === "v631" ? Math.pow(1 + EXPECTED_INFL, yr - asOf) : 1;
 const rmdStartAge = (dob) => dob <= 1950 ? 72 : dob <= 1959 ? 73 : 75;
 const rmdDiv = (age) => RMD_DIV[age] ?? 6.4;
 
@@ -100,7 +100,7 @@ function fplFor(coverageYr, size) {
   const gy = coverageYr - 1;
   if (FPL[gy]) return FPL[gy][0] + FPL[gy][1] * (size - 1);
   const lastGy = Math.max(...Object.keys(FPL).map(Number));
-  return (FPL[lastGy][0] + FPL[lastGy][1] * (size - 1)) * Math.pow(1 + (MODE === "v630" ? EXPECTED_INFL : FPL_PROXY), gy - lastGy);
+  return (FPL[lastGy][0] + FPL[lastGy][1] * (size - 1)) * Math.pow(1 + (MODE === "v630" || MODE === "v631" ? EXPECTED_INFL : FPL_PROXY), gy - lastGy);
 }
 function applicablePct(ratio) { // current regime only
   if (ratio < ACA_FLOOR) return null;
@@ -124,7 +124,7 @@ function sellFromPool(sale, pool, basis) {
 function irmaaThreshold(upper, isTop, premiumYr, asOf) {
   if (!Number.isFinite(upper)) return upper;
   const n = isTop ? Math.max(0, premiumYr - IRMAA_TOP_FROZEN_THROUGH) : premiumYr - asOf;
-  return upper * Math.pow(MODE === "v630" ? 1 + EXPECTED_INFL : IDX, n);
+  return upper * Math.pow(MODE === "v630" || MODE === "v631" ? 1 + EXPECTED_INFL : IDX, n);
 }
 function irmaaSurcharge(lookbackMagi, premiumYr, asOf, persons) {
   if (lookbackMagi == null || persons <= 0) return 0;
@@ -142,7 +142,7 @@ export function ledger(P, convAmount, baselineSub, mode) {
       (P.annShareA || 0) !== 0 || (P.annShareB || 0) !== 0)
     throw new Error("fixture outside sim scope");
   MODE = mode;
-  const v630 = mode === "v630";
+  const v630 = mode === "v630" || mode === "v631";
   // v6.30: today's balances carried to the retirement year; the basis opened on TODAY's pool and left nominal.
   const RB = kY(P.retireYr, P.asOfYr);
   // DU-7 (a): the holdings carried, the planned-contribution accrual at FACE value (the v5.10 rule; P's acc* fields, 0 when absent). The
