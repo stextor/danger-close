@@ -44,7 +44,7 @@
 | E-27 | **ACCEPTED** | run the controls twice (OPERATIONS §I) |
 | E-28 | **FIXED** (both passages) | — |
 | E-29 | **OPEN** (three of eleven threads, each Low: (a), (h), (j)) | re-homed 2026-10-11 from documents leaving the pool; (d) and (k) closed by decision, (e) and (f) fixed at v6.05, (b), (c), (g) and (i) fixed in the ops package of 2026-10-12 — see its entry |
-| E-30 | **OPEN** (seven threads, each Low; (c) is a decision for Steve) | re-homed 2026-10-19 from text leaving the pool — see its entry |
+| E-30 | **OPEN** (six threads, each Low; (c) closed v6.31) | re-homed 2026-10-19 from text leaving the pool — see its entry |
 | E-31 | **OPEN** (ten threads, each Low, and one list of stale statements, (e)) | re-homed 2026-10-19 from the `qa/` files' comments and the manifest's hash table, which left the pool — see its entry |
 | E-32 | **OPEN** (Low, no figure) *(added at v6.22)* | two dead load paths: `handleReload` with `STATE_CARRYOVER`, and the landing screen's file statuses — recorded, not removed |
 
@@ -1143,6 +1143,10 @@ independent second read before the package shipped** — the same shape as E-29'
 - **(c) AI-6 — which model Ask AI uses. A decision for Steve, open since v6.02.** The source still names `claude-sonnet-4-6`. v6.02's entry:
   *"The model is unchanged (`claude-sonnet-4-6`); a newer, cheaper Sonnet is listed — Steve's call (scope AI-6)."* Record:
   `docs/SCOPE_D30_DEDUCTIONS_V602.md` (AI-6). Whatever is listed now should be re-checked before deciding — the v6.02 listing is not current evidence.
+  **✅ Closed at v6.31** (Steve: *"Opus 4.8 in medium effort"*; `docs/SCOPE_D51_AI6_V631.md` AI-1 to AI-4): every Anthropic route asks
+  `claude-opus-4-8` with `output_config.effort` `"medium"` and no thinking field; text is read from blocks whose type is `"text"`; a refusal
+  says so; the timeout is 180 s; the Field Manual's cost note is restated at Opus 4.8's prices and tokenizer. One constant each (`AI_MODEL`,
+  `AI_EFFORT`, `AI_REFUSAL_NOTICE`). `t94` §E–§F.
 - **(d) A household with no holdings at all** is healed at load to `total401k` = its whole household, so Engine D holds every dollar in the
   buckets. Seen at v6.08 while building fixtures and **not examined** (v6.09: *"still not examined"*); every fixture carries holdings.
 - **(e) The Ranking tab's "Which benchmark?" still calls Empower's engaged savers "the crowd you actually belong to"** — a verdict, against
@@ -1153,7 +1157,7 @@ independent second read before the package shipped** — the same shape as E-29'
 - **(g) `t14`'s Engine A/B/C survivor checks are presence checks** whose drift is *"not zero. Recorded rather than fixed"* — held in `t14`'s
   own comments; its other record (TESTING's v5.3x write-up) left the pool. Matters if the qa code leaves too (`docs/SCOPE_UNPOOL_QA_CODE.md`).
 
-**Severity: low** for all seven. (a), (b), (d) and (f) would each take a scope; (c) is Steve's to decide; (e) is a wording fix.
+**Severity: low** for all seven. (a), (b), (d) and (f) would each take a scope; (c) was Steve's to decide (closed v6.31); (e) is a wording fix.
 
 ## E-31 · Open threads re-homed 2026-10-19 from the qa/ files and the manifest's hash table
 

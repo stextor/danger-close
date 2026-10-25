@@ -602,8 +602,11 @@ an unlike pair — MissingFeatures D-63). **Open, not fixed:**
 - the Stress tab's other cards: *"Combined shock: $300K–$600K over 4–10 years"*; the sequence card's *"{B} must sustain for 20+ years
   alone"* and *"Survivor SS benefit = {A}'s FRA + DRCs accrued"*, and its income line *"survivor SS ({A}'s check)+"* — written as if spouse A
   has the larger benefit and dies first (the v6.28 V-12 shape, on another tab);
-- the Field Manual's Ask AI cost note gives token counts that look estimated at about four characters a token; Anthropic's figure is about
-  3½, so they may read about 14% low — not measured;
+- ~~the Field Manual's Ask AI cost note gives token counts that look estimated at about four characters a token; Anthropic's figure is about
+  3½, so they may read about 14% low — not measured;~~ **addressed at v6.31** (`docs/SCOPE_D51_AI6_V631.md` §0.6): the counts were derived
+  at characters ÷ 4 (confirmed in `t66` and `t89`); the note now states them for Claude Opus 4.8 — characters ÷ 3.5, × 1.35 for the newer
+  tokenizer (900–2,300 for an entered plan, about 7,000 for the example), with prices and costs recomputed. Still computed, not measured
+  against a live bill;
 - the Roth tab's ladder table and its strategy heading start at the **target** retirement year, while Engines A–C convert from the
   **selected** one (±1 year) — the Exit Plan now says the selected year;
 - the Events tab's ACA status line prints *"Nov 1 – Jan 15"* for every year; the item's instructions now say the dates can change;
