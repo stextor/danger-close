@@ -1311,7 +1311,9 @@ stoppage or reduction is the trigger that applies to most newly retired househol
 conversion, a realized capital gain or a home sale is not among them**, so a surcharge this app
 shows from a conversion cannot be appealed away — though a one-off spike leaves the lookback on
 its own after two years. A household that files one may pay less than the
-model projects, so the omission is conservative.
+model projects for the years it projects. *(Corrected at v6.31: this said the omission is conservative without qualification. The
+work-stoppage case reassesses the first two premium years after retirement, and those the model does not charge at all — MissingFeatures
+**D-65**, and* The Monte Carlo pays IRMAA (v6.31) *below — so for them the model reads low, not high.)*
 
 **Where the engines still legitimately differ.** From v6.30 they no longer differ in dollar basis: every engine COLA-indexes
 Social Security from the as-of year and computes each year in that year's own dollars (*One dollar unit and one inflation clock for
@@ -2803,6 +2805,7 @@ every path: measured at the build, the three 6-year runs (10,000 paths) take 0.3
   on the tax is computed on the full scheduled benefit and on draws that assume it — direction mixed, small.
 - **IRMAA is not in it** (DC-2 (a)): a Medicare premium surcharge, shown on the IRMAA tab — $0 on the example and on the ×1.6 household;
   $21,880 on the example at a $250,000 slider (BASE; measured at the build). Optimistic for high-income plans. MissingFeatures **D-51**.
+  **Closed at v6.31** (*The Monte Carlo pays IRMAA*, below): the schedule now carries Engine C's surcharges in their premium years.
 - **The built-in part-time work for spouse B** (`spouseBWorkTaper`: $20,000, $18,000 and $15,000 of spouse-B wages in retirement years 0–2
   — from v6.23 for the example household alone; at this release, for every plan with no income streams) is taxed by Engine B, so it is in
   the schedule, but neither Monte Carlo engine credits it as income — conservative by $14,479 on the example (BASE, $70K): $7,037 of tax in
@@ -2813,7 +2816,7 @@ every path: measured at the build, the three 6-year runs (10,000 paths) take 0.3
 - **The home-move cash** is not in Engines A–D (D-39), so not in the tax either; consistent with the Taxes tab.
 - **D-44's Withdrawal half** stays open: a one-time row dated before the retirement year is not in the Withdrawal tab's schedule (DC-5 (a)).
 - **What-Breaks' tax** stays the Roth tab's strategy engine's lifetime tax averaged per year (it is a deterministic projector); its copy now
-  names that engine, where it said "the Taxes engine", and no longer says it does not model taxes.
+  names that engine, where it said "the Taxes engine", and no longer says it does not model taxes. From v6.31 it adds that engine's IRMAA (`totIrmaaToday`).
 
 ## Cars are expense rows (v6.21)
 
@@ -3153,3 +3156,69 @@ Moved figures elsewhere were re-derived by independent oracles — a federal-tax
 (`qa/tools/fed_oracle_v630.mjs`), the drawdown ledger in a v6.30 mode (`qa/tools/sim_ledger.mjs`, checked by `qa/tools/validate_v630.mjs`),
 an Engine C replica, ladder recursions — and the few no oracle reaches were re-pinned by measurement and listed in the CHANGELOG.
 `qa/tools/controls_v630_dollar_units.py` puts each removed defect back and shows its check turn red.
+
+## The Monte Carlo pays IRMAA (v6.31)
+
+**What was wrong (v6.30, measured at the scope — `docs/SCOPE_D51_AI6_V631.md`).** The yearly schedule both Monte Carlo engines pay
+(`mcIncomeTaxSchedule`, *The Monte Carlo pays the Taxes tab's tax*, above) was the Taxes tab's income tax alone. The Medicare surcharges the
+IRMAA tab projects were paid by no simulation, and What Breaks' tax estimate — Engine A's lifetime `totTaxToday` spread over the plan's years —
+left out Engine A's own `totIrmaaToday`, which it computes beside the tax and keeps apart. Both were disclosed (MissingFeatures **D-51**):
+optimistic for any plan whose income crosses a tier. The example at its opening $70,000 slider crosses none, which is why the gap could not be
+seen on it.
+
+**What changed (DS-1 to DS-5, all as recommended).**
+- **The schedule adds Engine C's surcharge in its premium year** (DS-1 (a)). Engine C's row for MAGI year *y* bills its surcharge in *y* + 2
+  (`irmaaYr`, the two-year lookback); its `surchargeToday` — the 2026 surcharge for the tier, × the people on Medicare in the premium year,
+  in today's dollars — is added to the Taxes tab's row for that premium year. The schedule keeps its two parts beside the total (`taxByYr`,
+  `irmaaByYr`), and the Monte Carlo grows the total with each path's inflation as before.
+- **The edges** (DS-2 (a)): nothing before retirement (Engine C starts at the retirement year); a premium year dated after the plan's last year
+  is not charged; and the tail — what a survivor who outlives the horizon pays under stochastic longevity — repeats the last year's total,
+  income tax plus that year's surcharge.
+- **What Breaks adds Engine A's IRMAA** (DS-3 (a)): its estimate is (`totTaxToday` + `totIrmaaToday`) ÷ the plan's years.
+- **The Income tab's card** keeps the first year's income tax and adds a line for the first surcharge year, its amount and the number of
+  years (DS-4 (a)); the Monte Carlo, Backtest and What Breaks tabs and the Field Manual say what the simulation now pays.
+
+**Measured at the build** (30-year runs, 3,000 paths, seeded, with and without the surcharges on the same paths; the 6-year headline runs are
+unseedable and not quoted):
+
+| Household | Surcharges paid, today's $ (years) | Above $800K, BULL-LEANING | Median ending, BULL-LEANING | Above $500K, BASE | Median ending, BASE |
+|---|---|---|---|---|---|
+| The example, $70,000 slider | $0 | 91.27% → 91.27% | $1,963K → $1,963K | 80.50% → 80.50% | $1,188K → $1,188K |
+| The example, $250,000 slider | $24,180 (6) | 85.87% → 84.77% | $1,675K → $1,619K | 75.13% → 74.03% | $1,038K → $983K |
+| The example made single, $70,000 | $12,080 (9) | 90.87% → 90.87% | $1,523K → $1,496K | 91.53% → 91.53% | $1,206K → $1,188K |
+| New York, every balance ×3, $70,000 | $34,640 (8) BULL; $32,340 (7) BASE | 100% → 100% | $10,290K → $10,231K | 100% → 100% | $6,303K → $6,261K |
+
+The surcharges are small beside the draws, so success rates move by about a point at most; the median moves by up to 5.3% (the example at
+$250,000 under BASE). The example as it opens is unchanged.
+
+**Simplifications, stated, each with its direction.**
+- **The first two premium years after retirement carry no surcharge anywhere** (MissingFeatures **D-65**, filed at this build). They are set
+  by the last two working years' income, which no engine projects: Engines A and C start at the retirement year. A household whose working
+  income was above a tier pays more than the model shows in those two years — **optimistic**. Form SSA-44 lets a new retiree ask SSA to
+  reassess them on current income (work stoppage is one of eight qualifying events; a Roth conversion is not). The IRMAA tab said through
+  v6.30 that these years "err high"; that sentence was false and is replaced, and the tab, the Monte Carlo tab and the Field Manual say so.
+- **The surcharges do not follow the path**, like the income tax: one schedule from the plan's own draws and life expectancies, paid on
+  every path. A path that spends less after a crash pays the same surcharges.
+- **Engine A and Engine C do not agree on every household** (MissingFeatures **D-66**, filed at this build). What Breaks reads Engine A, the
+  Monte Carlo Engine C (DS-3 (a)), and the two engines project income differently, so on some households they charge different surcharges.
+  Measured at the build (lifetime, today's dollars): equal on the example at $70,000 ($0) and at $250,000 ($24,180); the single example under
+  BASE, Engine A $10,930 against Engine C's $12,080; New York ×3 under BASE, Engine A $50,270 against Engine C's $32,340 inside the horizon
+  ($41,580 counting two premium years after it); the example at a $0 slider under BULL-LEANING, Engine A $8,050 against Engine C's $0. The
+  difference reaches What Breaks' estimate by its yearly average — on the largest of these, about $720 a year What Breaks' line and the Field
+  Manual say its IRMAA can differ from the IRMAA tab's.
+- **Premiums dated after the horizon are not charged**; under stochastic longevity a survivor who lives on pays the last year's total
+  instead, so a surcharge that starts after the horizon is missed — optimistic, and small.
+- **The surcharge is the 2026 table in today's dollars** (*One dollar unit*, above): Part B and D premiums grow with the plan's inflation,
+  not with Medicare's own cost growth.
+
+**Tests.** `t94_mc_irmaa_ai.mjs`, both legs (the v6.30 leg pins each defect as a dated `[KNOWN DEFECT 2026-10-24, D-51]`): on five households
+the schedule's tax part is Engine B's row and its surcharge part is Engine C's row moved to the premium year, exactly, with the edges and the
+tail (read on New York ×3, whose horizon year carries a surcharge); the planned paths of both engines move by the compounded surcharges and
+nothing else, with a hand pin of the example's first premium quarter at $250,000 ($1,669.23, from $2,880 × 2 people, 2.74% inflation and
+4.5% growth, in exact decimal arithmetic); **the extinction invariant** — with the surcharge table forced to zero, every household's schedule
+is v6.30's to the cent, and restored it differs exactly in the premium years that carry a surcharge; What Breaks' rendered estimate against
+Engine A; Engine A beside Engine C (D-66, the disagreement pinned); the source by AST; the Income card, the Monte Carlo and IRMAA tabs; and
+the replaced sentences, extinct across every string. `qa/tools/controls_v631_mc_irmaa_ai.py` puts each removed defect back and shows its
+check turn red. (The same release moved Ask AI to Claude Opus 4.8 at medium effort — a presentation change, recorded in the CHANGELOG, not a
+modeling one.)
+

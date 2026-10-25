@@ -1,5 +1,129 @@
 # Changelog
 
+## v6.31 — the Monte Carlo pays IRMAA (D-51); Ask AI asks Claude Opus 4.8 at medium effort (AI-6)
+
+**A modeling release, with an Ask AI change.** The Monte Carlo and What Breaks now charge Medicare's income-related surcharges (IRMAA), and
+Ask AI asks a different model. The scope is `docs/SCOPE_D51_AI6_V631.md` (repo-only, fulfilled; build record §7). Steve: *"D-51 and AI-6"*;
+on the model, *"Opus 4.8 in medium effort"*; on the scope, *"all as recommended"* — DS-1 to DS-5, AI-1, AI-3 and AI-4, all (a). Built on
+v6.30 (source `f2d3f578…`). METHODOLOGY's new section *The Monte Carlo pays IRMAA (v6.31)* is the full account.
+
+**What was wrong (v6.30, measured at the scope).**
+- **No simulation paid IRMAA.** The yearly schedule both Monte Carlo engines pay was the Taxes tab's income tax alone; the surcharges the
+  IRMAA tab projects were charged nowhere (MissingFeatures D-51, disclosed since v6.20). On the example at a $250,000 slider that is
+  $24,180 in today's dollars over six premium years. The example as it opens crosses no tier, which is why the gap could not be seen on it.
+- **What Breaks had the same gap**, found at the scope: its tax estimate took Engine A's lifetime tax, which Engine A keeps apart from its
+  own IRMAA figure.
+- **The IRMAA tab said something false.** It told a new retiree that the first two premium years — set by working-year income — *"err high"*
+  because the model charges every surcharge in full. No engine projects working-year income, so those years carry no surcharge at all
+  (filed as **D-65**). The Field Manual's IRMAA entry already said they are not projected.
+- **Ask AI asked Claude Sonnet 4.6** (ARCHITECTUREIssues E-30 (c), Steve's decision, open since v6.02).
+
+**What changed.**
+- **The schedule adds Engine C's surcharges in their premium years** (DS-1): a surcharge set by year *y*'s income is charged in *y* + 2, in
+  today's dollars, beside that year's income tax, and grown with each path's inflation like the tax. Nothing before retirement; a premium
+  year after the plan's last year is not charged; the tail a survivor pays past the horizon repeats the last year's tax and surcharge (DS-2).
+  The schedule keeps its two parts (`taxByYr`, `irmaaByYr`) beside the total.
+- **What Breaks adds Engine A's IRMAA** (DS-3) to its average annual tax.
+- **The Income tab's card** keeps the first year's income tax and adds a line: the first surcharge year, its amount and how many years within
+  the plan (DS-4). The Monte Carlo, Backtest and What Breaks tabs, the IRMAA tab and the Field Manual say what the simulation now pays, and
+  that the first two premium years are not charged anywhere (DS-5).
+- **Ask AI** (AI-1 to AI-4): every Anthropic route — claude.ai and a self-hosted key — asks `claude-opus-4-8` with `output_config.effort`
+  `"medium"` (Opus 4.8's default is high) and no thinking field; text is read only from text blocks; a reply the model refuses shows
+  *"The model declined to answer this question. Rephrasing it as a question about your plan's figures may help."*, and the declined question
+  and any text are left out of the conversation memory (Anthropic: after a refusal the turn must be removed or rephrased, or the model keeps
+  refusing); the timeout rises from 120 to 180 seconds on every route; the 4,096-token limit stays. One constant each (`AI_MODEL`,
+  `AI_EFFORT`, `AI_TIMEOUT_MS`, `AI_REFUSAL_NOTICE`).
+- **The Field Manual's cost note is restated** for Opus 4.8: $5 / $25 per million tokens; its tokenizer counts up to about a third more tokens
+  for the same text, so the request sizes are 900–2,300 tokens for an entered plan and about 7,000 for the example (the old sizes had been
+  derived at four characters a token — UsabilityFlaws F-26's item); a first question about 3 to 10 cents, a full-length answer about 11 to
+  14; a long conversation adds at most about 12 cents a question; $5 of credit roughly fifty to one hundred seventy first questions. Computed
+  from published prices, not measured against a bill. An answer of 4,096 tokens is now about 2,300 words, and the Field Manual says so.
+- **Copy:** the sentences the scope's census listed are replaced; `t94` holds 17 of the old phrases extinct by AST over every string. The
+  Field Manual's Monte Carlo, What Breaks, IRMAA and Ask AI entries, its cost note, troubleshooting row and glossary, and §13 say it. The
+  Field Manual warns that an expense row for the IRMAA part of a Medicare premium would now be charged twice. The four version sites read v6.31.
+
+**What it moved — measured at the build** (30-year Monte Carlo, 3,000 paths, seeded, with and without the surcharges on the same paths):
+
+| Household | Surcharges paid, today's $ | BULL-LEANING above $800K | median | BASE above $500K | median |
+|---|---|---|---|---|---|
+| The example, $70,000 (as it opens) | $0 | 91.27% → 91.27% | $1,963K → $1,963K | 80.50% → 80.50% | $1,188K → $1,188K |
+| The example, $250,000 | $24,180 (6 years) | 85.87% → 84.77% | $1,675K → $1,619K | 75.13% → 74.03% | $1,038K → $983K |
+| The example made single, $70,000 | $12,080 (9 years) | 90.87% → 90.87% | $1,523K → $1,496K | 91.53% → 91.53% | $1,206K → $1,188K |
+
+The example as it opens is unchanged everywhere (its figures are byte-identical to v6.30's; `t2`'s parity fingerprint holds). The 6-year
+headline takes no seed and is not quoted.
+
+**Found at the build, and disclosed.**
+- **Engines A and C disagree on IRMAA** on three of five test households (filed **D-66**): the single example under BASE, Engine A $10,930
+  against Engine C's $12,080; New York with every balance ×3, $50,270 against $32,340 inside the horizon; the example at a $0 slider under
+  BULL-LEANING, $8,050 against $0. Equal on the example at $70,000 and $250,000. What Breaks reads Engine A and the Monte Carlo Engine C
+  (DS-3 (a)), so they can carry different surcharges — at most about $720 a year in What Breaks' average on these households. What Breaks'
+  line and the Field Manual say so.
+- **The scope kept "about 3,000 words (4,096 tokens)" as true;** on Opus 4.8's tokenizer it is about 2,300 (corrected).
+- **`t93` could not run** in a v6.30 → v6.31 run folder (it imported the v6.29 module); its Engine D boundary check now uses v6.30's module on
+  the v6.31 leg and prints a skip on the prior leg.
+
+**Owned.** The scope's conversation-growth figure (*"15–25 ¢"* from *"30,000–50,000"* extra input tokens) assumed questions as long as
+answers; the memory is about six questions and six answers, so the honest bound is about 12 cents — found by the build review, corrected in
+the copy and the scope. The credit sentence was first written *"fifty to one hundred fifty"* against arithmetic giving 51 to 169 — caught by
+`t94`'s own check before the suite ran clean. A first expected list for control C2 named a check that cannot see a wrong year (corrected; the
+test was right).
+
+**Filed, not fixed:** MissingFeatures **D-65** (the first two premium years) and **D-66** (Engines A and C disagree). **Closed:**
+MissingFeatures **D-51**; ARCHITECTUREIssues **E-30 (c)**; UsabilityFlaws **F-26**'s token-count item.
+
+**Limitations, stated.** The surcharges do not follow the path (one schedule, like the tax); the first two premium years are uncharged
+(D-65, optimistic where working income was above a tier); premiums dated after the horizon are not charged; the surcharge is the 2026
+table grown with the plan's inflation; the two engines' IRMAA differ on some plans (D-66). Ask AI's cost, speed and answer quality on Opus
+4.8 are computed or assumed, not measured: no live model is called by the suite. Medium effort was Steve's choice; Anthropic's guidance for
+Opus 4.8 starts quality-sensitive work at high, and no quality comparison was run.
+
+**Tests.** New suite **`t94_mc_irmaa_ai.mjs`**, both legs; the v6.30 leg pins each defect as a dated `[KNOWN DEFECT 2026-10-24, D-51]` /
+`[…, AI-6]`. §A the schedule's parts against Engines B and C exactly on five households, the edges, the tail and D-65; §B both Monte Carlo
+engines' planned paths move by the compounded surcharges and nothing else, with a hand pin of the example's first premium quarter at
+$250,000 ($1,669.23 and $3,368.68, from $2,880 × 2 people, 2.74% and 4.5%, in exact decimal); §C **the extinction invariant** — with the
+surcharge table at zero every schedule is v6.30's to the cent, restored it differs exactly in the surcharge years; §D What Breaks' rendered
+estimate and its disclosure, Engine A beside Engine C; §E the request by AST; §F a recording fetch on all three routes — model, effort, no
+thinking, the thinking block hidden, the cut-off and refusal notices, the declined exchange left out of the next request, the 180-second
+timeout; §G the rendered tabs, the extinct phrases, the cost note from prices typed in the suite, the Field Manual and METHODOLOGY.
+- **`boundaries.mjs`** gains `irmaa_in_mc` (OPERATIONS §K1): ON when the schedule carries no surcharge — the example is ON, the reason D-51
+  was invisible on it (`t29` B-25); the example filed single clears on v6.31 (`t29` C-irmaa-1).
+- **Re-gated:** `t66` E-1, E-7, E-15–E-18; `t83` A-1 (the tax part, the total and the tail), I-5–I-8, I-10; `t89` E-6, E-7; `t93` H-7 and
+  its boundary reference. v631 registered (79 files by AST; `t33` PINS, values unchanged; the three `.py` suites by hand).
+
+**Counts**, from the full suite run from the packaged copies:
+- **9,640 app checks across 93 app suites, 0 failed, 0 DIED**;
+- MC parity 10/10 — every fingerprint byte-identical to v6.30 (the example pays no IRMAA at its opening slider, and the Ask AI change
+  touches no engine);
+- tooling: `t21` 64, `domdiff` 32, `sets` 12 + 12;
+- GRAND **9,770**.
+
+Against v6.30, the current-leg changes are `t94`, new (99); `t29` 112 → 115 (A-3, B-25, C-irmaa-1); `t22` 85 → 88 (it runs on the prior tag,
+now v6.30, whose pins it gates). Every other current-leg count is unchanged, the re-gated suites included. The v6.30 leg counts 3,946 (`t93`
+there prints its D-5/D-6 skip — 95 against 97); the two attribution runs count 234 and 237. Together 5,223 + 3,946 + 234 + 237 = 9,640.
+`domdiff` 40 → 32: its v6.29 → v6.30 arm does not apply to this pair.
+
+Controls: `qa/tools/controls_v631_mc_irmaa_ai.py` on a copy of that packaged run folder — **22 of 22 as expected** (C0 silent, C1–C21 each
+firing), every file restored and hash-checked. Each puts one removed defect back: the surcharge dropped from the total, charged in the MAGI
+year, not restated in today's dollars, kept past the horizon, left out of the tail; What Breaks without Engine A's IRMAA, or without its
+disclosure; the old model string, effort removed, a thinking field sent, a refusal read as no response, a declined exchange or question
+re-sent, a thinking block shown, the 120-second timeout; the Income card's IRMAA line, the IRMAA tab's false sentence, the Field Manual's
+sentence, the old cost figures, METHODOLOGY's heading.
+
+**The build review** (an agent that had not seen the build, given the sources, the diff, the scope, the new suite, its controls, the
+re-gates and METHODOLOGY) found **no blocker, 4 should-fix and 5 notes**; each was taken or answered (scope §7). The should-fix items: the
+refused question stayed in the memory (now left out, as Anthropic requires — *Steve: one step past AI-4's wording; say if you want the
+refused text kept*); the conversation-growth arithmetic (above); D-66 disclosed only in METHODOLOGY (now on What Breaks' line and in the
+Field Manual); `t83` A-1's re-gate checked the tax part only (it now checks the total and the tail). The notes: METHODOLOGY's SSA-44
+paragraph corrected for D-65; the scope's "charged before retirement" control recorded as inexpressible; the IRMAA expense-row warning; the
+Income card's *"within the plan"*; a source comment's arithmetic.
+
+**After the upload:** ask Ask AI one question in claude.ai, to confirm the platform accepts `claude-opus-4-8` with effort set — the suite
+cannot call a live model.
+
+**Provenance.** Source `d729d028d26f4c5b73996099dae4fd2f` · built `index.html` `7a52c128fa0c77029a63114f4db320f8` (vite 5.4.21, `npm ci`;
+v6.30 rebuilt byte-identically to `3d013b09…`) · `smoke_built` 22/22.
+
 ## v6.30 — one dollar unit and one inflation clock for the tax engines (D-60)
 
 **A modeling release.** Every tax engine changes how it states and projects dollars, so the Taxes, IRMAA, Roth and Withdrawal tabs, the
