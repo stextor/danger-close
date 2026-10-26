@@ -159,6 +159,8 @@ export const __test = {
   alertStripEvents: _g("alertStripEvents"),
   // v6.29 (F-25) — the helpers behind the computed sentences (t92). GUARDED: none exists on the v6.28 leg, where t92 asserts their absence.
   stressRecovery: _g("stressRecovery"),
+  // v6.32 (F-26) — the Stress tab's computed facts (t95 §S). GUARDED: it does not exist on the v6.31 leg, where t95 asserts its absence.
+  stressPlanFacts: _g("stressPlanFacts"),
   historicalWorstRealWindow: _g("historicalWorstRealWindow"),
   historicalCumReturn: _g("historicalCumReturn"),
   presetExpectedRealEquity: _g("presetExpectedRealEquity"),
