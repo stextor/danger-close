@@ -43,7 +43,9 @@ ck("retireStartBalances: 1 definition + 9 consumer call sites (comments excluded
 ck("constructor itself applies contribAccrual", /function retireStartBalances[\s\S]{0,400}contribAccrual\(retireYr\)/.test(SRC));
 
 // 3) The three census-found sites (missing from the scope's enumerated list) are wired.
-ck("Roth ladder seeds use the constructor (census find #3)", SRC.includes("const _rsbL = retireStartBalances(_tlRoth.rothLadderStart)"));
+// v6.32 (F-26, DF-3): the ladder starts at the SELECTED retirement year (`retireYear`), as the strategy engine beside it does — through
+// v6.31 at the target year (`_tlRoth.rothLadderStart`). t8 reads the current source only, so it pins the current form.
+ck("Roth ladder seeds use the constructor (census find #3), at the selected year (v6.32)", SRC.includes("const _rsbL = retireStartBalances(retireYear);"));
 // v5.11: Engines B and C still seed from the constructor, but now take the PER-PERSON
 // fields (tradInitA/tradInitB) instead of the pooled .tradInit, so RMDs can run on each
 // spouse's own age with a spousal rollover at first death (finding C-2C-3). The invariant
@@ -64,7 +66,8 @@ ck("IRMAA planner seeds PER-PERSON trad balances (v5.11, C-2C-3)",
 // v6.30 (D-60, DU-7 (a)): …through the one carry helper (holdings carried, the accrual at face) — still the constructor, never a local reduce
 ck("STEP-1 RMD cards read t0 from the constructor", /const t0 = \{ A: _rsbC\.tradInitA, B: _rsbC\.tradInitB \}/.test(SRC)
   || (/const _cC0 = carryStartBalances\(_rsbC, _rbC0\);/.test(SRC) && /const t0 = \{ A: _cC0\.tradInitA, B: _cC0\.tradInitB \}/.test(SRC)));
-ck("STEP-1 and ladder share the rothLadderStart anchor", SRC.includes("retireStartBalances(tl.rothLadderStart)") && SRC.includes("retireStartBalances(_tlRoth.rothLadderStart)"));
+ck("STEP-1 and ladder share one anchor — the selected retirement year (v6.32; was rothLadderStart)", SRC.includes("const _rsbC = retireStartBalances(retireYear);") && SRC.includes("const _rsbL = retireStartBalances(retireYear);")
+  && !SRC.includes("retireStartBalances(tl.rothLadderStart)") && !SRC.includes("retireStartBalances(_tlRoth.rothLadderStart)"));
 
 // 5) Explicitly-unchanged consumers still read the SUM mirrors (MC parity by construction).
 ck("MC accumulation still reads contributions.monthly401k (unchanged)", SRC.includes("const primaryContrib = PORTFOLIO.contributions.monthly401k + PORTFOLIO.contributions.hsaMonthly;"));

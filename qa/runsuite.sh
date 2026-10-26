@@ -412,6 +412,12 @@ tally "t93-$CUR"   node t93_dollar_units.mjs "$CUR"
 # pins the defects); the claude.ai route in a child process. Prints one count line.
 tally "t94-$PRIOR" node t94_mc_irmaa_ai.mjs "$PRIOR"
 tally "t94-$CUR"   node t94_mc_irmaa_ai.mjs "$CUR"
+# t95 (v6.32) — QCDs after a death, and five tabs say what the model does (D-61, F-26): Engines B and C's QCD against a head-count made in the
+# suite on nine households, the two engines equal every year, pre-death years v6.31's to the cent; stressPlanFacts against the Monte Carlo's
+# quarter calendar; the Stress tab rendered on six plans; the survivor grid; the Roth ladder at ±1 and byte-identical at the target year (child
+# processes); the Backtest's worst start; ACA dates at fixed clocks; the README; copy. Both legs (the v6.31 leg pins the defects). One count line.
+tally "t95-$PRIOR" node t95_f26_d61.mjs "$PRIOR"
+tally "t95-$CUR"   node t95_f26_d61.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

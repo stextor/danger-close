@@ -15,7 +15,7 @@ import { window } from "./env_dom.mjs";
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631"];
+const KNOWN_VERSIONS = ["v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; console.log(`  \u2717 ${n}${d ? " \u2014 " + String(d).slice(0, 240) : ""}`); } };
 const done = () => { console.log(`\nt53 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
@@ -31,7 +31,7 @@ const tax = (code, age) => g.stateTaxAnnual({ code, retIncome: 15000, pen: 0, wo
 // v6.02 (D-30 batch 1 — docs/SCOPE_D30_DEDUCTIONS_V602.md): the progressive rows' deductions shelter this $15,000 probe entirely, and several add
 // an amount at 65 — a SEPARATE rule (t66 A-10 holds those ages). On a D-30 leg the exclusion's onset is measured with the row's `deduct`
 // lifted for the probe and restored at once, so the probe still sees the exclusion and nothing else. A version LIST.
-const D30L = ["v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631"].includes(VER);
+const D30L = ["v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632"].includes(VER);
 const onset = (c) => { if (!D30L || !SR[c].deduct) return onset0(c); const d = SR[c].deduct; delete SR[c].deduct; try { return onset0(c); } finally { SR[c].deduct = d; } };
 const onset0 = (c) => { const t39 = tax(c, 39), t30 = tax(c, 30); if (t30 < tax(c, 80) + 1e-9 && t30 < t39 + 1e-9 && Math.abs(t30 - tax(c, 80)) < 0.005) return 0;
   for (let a = 40; a <= 80; a++) if (tax(c, a) < t39 - 0.005) return a; return null; };

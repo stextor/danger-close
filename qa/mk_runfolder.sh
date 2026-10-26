@@ -79,6 +79,7 @@ say "repo:   $REPO"
 [ -d "$REPO/qa/qa-baseline" ]      || die "no qa/qa-baseline/ under $REPO — this is not the danger-close tree."
 [ -d "$REPO/qa/tools/fixture" ]    || die "no qa/tools/fixture/ under $REPO."
 [ -f "$REPO/METHODOLOGY.md" ]      || die "no METHODOLOGY.md at the repo root — t31 reads it and fails closed."
+[ -f "$REPO/README.md" ]           || die "no README.md at the repo root — t95 reads it and fails closed."
 
 # ── the prior source: resolved by md5, never taken on trust ──
 PRIOR_DOT="$(printf '%s' "$PRIOR" | sed -n 's/^v\([0-9]\)\([0-9][0-9]\)$/v\1.\2/p')"
@@ -125,6 +126,8 @@ cp "$PRIOR_SRC"                "$OUT/$PRIOR.jsx"
 cp "$REPO/src/DangerClose.jsx" "$OUT/DangerClose.jsx"
 # t31 is the first suite to read METHODOLOGY.md, and exits loudly rather than skipping without it.
 cp "$REPO/METHODOLOGY.md"      "$OUT/METHODOLOGY.md"
+# v6.32: t95 §F reads the repo's README.md (the GitHub front page, F-26 DF-6), so the run folder carries it beside METHODOLOGY.md.
+cp "$REPO/README.md"           "$OUT/README.md"
 # v5.79: t45 drives Chromium against the BUILT page — jsdom does no layout. The tree's root index.html is that page; t45
 # checks its footer names the current tag, so a page left over from the previous release fails loudly, never passes.
 [ -f "$REPO/index.html" ] && cp "$REPO/index.html" "$OUT/index.html"
@@ -194,7 +197,7 @@ say "aliased app_testable.mjs + dom_bundle.cjs from the $CUR leg"
 
 # ── self-check: every input the suite reaches for, asserted present ──────────────────────────
 missing=0
-for f in "$CUR.jsx" "$PRIOR.jsx" DangerClose.jsx METHODOLOGY.md \
+for f in "$CUR.jsx" "$PRIOR.jsx" DangerClose.jsx METHODOLOGY.md README.md \
          "qa/app_$CUR.mjs" "qa/app_$PRIOR.mjs" "qa/dom_$CUR.cjs" "qa/dom_$PRIOR.cjs" \
          qa/app_testable.mjs qa/dom_bundle.cjs qa/runsuite.sh qa/env_dom.mjs \
          qa/t1_units.mjs qa/t6_single.mjs qa/t35_state_populate.mjs \

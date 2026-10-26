@@ -29,14 +29,14 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v620";
-const KNOWN_VERSIONS = ["v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631"];
+const KNOWN_VERSIONS = ["v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631"].includes(VER);   // an array, so the next registration widens it
-const POST_D49 = ["v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631"].includes(VER);   // v6.23 (D-49): the Field Manual's Monte Carlo sentence on the built-in work (I-8). An array, so the registrar widens it
+const POST = ["v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632"].includes(VER);   // an array, so the next registration widens it
+const POST_D49 = ["v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632"].includes(VER);   // v6.23 (D-49): the Field Manual's Monte Carlo sentence on the built-in work (I-8). An array, so the registrar widens it
 // The differential's pair — constants, NOT `VER === "v620"`, so the registrar cannot widen them (t76 records why).
 const D_PRIOR = "v619", D_CUR = "v620";
 const require = createRequire(import.meta.url);
@@ -63,11 +63,11 @@ const KD = "[KNOWN DEFECT 2026-10-18, D-40/D-44/D-45 — flips at v6.20]";
 // own-year tax ÷ (1+i)^(yr − as-of)), which each path then grows with its own inflation; through v6.29 it took `totalTax`, whose units were
 // mixed. A-1 asserts the restatement against the row's own-year tax and the active preset's inflation (read from the SCENARIOS table), and
 // the B hand chain is the same arithmetic on the restated 2029 row. An array, so the registrar widens it.
-const U630 = ["v630", "v631"].includes(VER);
+const U630 = ["v630", "v631", "v632"].includes(VER);
 // v6.31 (D-51; docs/SCOPE_D51_AI6_V631.md): the schedule adds the IRMAA tab's surcharges in their premium years. A-1 compares the Taxes tab's
 // rows with the schedule's TAX part (`taxByYr`) — t94 §A holds the total and the surcharge part — and the copy checks read the new sentences.
 // An array, so the registrar widens it.
-const U631 = ["v631"].includes(VER);
+const U631 = ["v631", "v632"].includes(VER);
 console.log(`t83 — THE MONTE CARLO PAYS THE TAXES TAB'S TAX (${VER})\n`);
 
 // BEFORE anything applies a preset: what SCENARIOS holds when the module loads (the schedule's default preset must match it, §A)
@@ -317,7 +317,7 @@ const callsIn = (node, name) => { let c = 0; walk.simple(node, { CallExpression(
     T(`E-4 every one of the ${subs.length} subtractions from planned, _planned or portfolio in the two engines is a named outflow`, unknown.length === 0 && subs.length > 0,
       unknown.map(s => `${s.fn} L${s.line}: ${s.rhs}`).join(" | "));
     // v6.21 (D-42): the fixed car is gone — a car is a one-time row, charged as "the one-time rows". An array, so the registrar widens it.
-    const CAR_N = ["v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631"].includes(VER) ? 0 : 1;
+    const CAR_N = ["v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632"].includes(VER) ? 0 : 1;
     T(`E-5 …in the counts the scope names: draw 4, tax 4, one-time 4, mortgage 2, LTC shock 2, care 2, car ${CAR_N}${CAR_N ? "" : " (v6.21: a car is an expense row)"}`,
       count("the spending draw") === 4 && count("the tax") === 4 && count("the one-time rows") === 4 && count("the mortgage payment") === 2
       && count("the LTC shock") === 2 && count("the sustained-care term") === 2 && count("the car") === CAR_N, KINDS.map(([k]) => `${k} ${count(k)}`).join(", "));
