@@ -134,7 +134,8 @@ FICA on earned income only — Social Security per earner up to the wage base, M
 0.9% Additional Medicare Tax, and on a self-employed job row self-employment tax, both halves (see *Payroll tax on job income*, v6.14, v6.16); RMDs from the Uniform Lifetime Table at the SECURE 2.0 start age;
 Roth conversions with bracket/IRMAA interaction; and QCDs (2026 cap $111,000/person, indexed —
 excluded from income and MAGI, counting toward the RMD, with the gifted dollars actually leaving
-the Traditional balance).
+the Traditional balance; from the year of the first projected death only the survivor gives, on the survivor's own age, with one
+cap — *QCDs after a death (v6.32)*).
 
 Known simplifications: the provisional-income thresholds are handled in simplified tiers; AMT is
 a screen, not a full Form 6251; itemized deductions are not modeled (standard deduction assumed); the temporary OBBBA senior bonus deduction (up to $6,000/person 65+, 2025–2028) IS modeled here, phased out at 6% of MAGI above $75,000 single / $150,000 married filing jointly against a MAGI proxy of gross ordinary income plus qualified dividends and capital gains — those four figures are statutory and unindexed, and the Roth conversion ladder deliberately does not model it (§7), so the two tabs differ for any ladder year at or before 2028. **From v5.31 those figures live in a named `OBBBA_CONSTS` block and are checked by the Verify tab against OBBBA (P.L. 119-21 §70103) on every load** — through v5.30 they were inline literals inside the tax engine, which no staleness mechanism could see, so the Verify tab rendered green on constants it had never checked. The deduction is fused to its statutory sunset: the engine applies it only for tax years through 2028. **That fuse fails safe in the conservative direction.** If the provision expires as written the model is correct; if Congress extends it, the model omits the deduction and therefore *overstates* tax, making the plan look slightly worse — the direction this project picks whenever an assumption must be chosen. The genuinely harmful direction, continuing to apply an expired deduction, is the one the fuse makes impossible. One consequence is worth naming because it touches recommendation-shaped output: an extension would overstate tax in conversion years, which feeds the Roth bracket-fill solver and would make conversions look slightly *less* attractive than they are;
@@ -1684,9 +1685,10 @@ pension + spouseBWork + taxableSS + conv_y + rmd_y
 Term by term, the ladder **omits dividends and realized capital gains** — `div_y` and `capGain_y` —
 and its earned-income term is narrower again: Engine C's `work_y` covers the household's other
 income streams, while `spouseBWork` is one spouse's. *(Corrected at v6.23: that sentence was wrong when checked at v6.22. The
-ladder's `spouseBWork` is the built-in taper plus every ordinary stream — the same sum as Engine C's `work_y`. The one difference is the
-year the taper is keyed to: the ladder's is the plan's own retirement year (`rothLadderStart`), Engine C's the retirement year the buttons
-select. At the plan's own retirement year the two terms are identical.)* v5.41 closed the RMD term only; the comment it
+ladder's `spouseBWork` is the built-in taper plus every ordinary stream — the same sum as Engine C's `work_y`. Through v6.31 the one
+difference was the year the taper is keyed to — the ladder's was the plan's target retirement year, Engine C's the retirement year the
+buttons select; from v6.32 the ladder starts at the selected year too (*QCDs after a death*, below, records the release), so the two terms
+are identical.)* v5.41 closed the RMD term only; the comment it
 left in the source says Engine C "has always carried its `rmdTax_y` term; this render block did
 not, and the two disagreed." They still disagree, in two more terms (dividends and realized gains; v5.53 closed dividends, below).
 
@@ -1760,8 +1762,9 @@ $11,500 of surcharge. What decides whether the omission reaches a user is proxim
 
 - **`capGain_y`** — realized capital gains, left out by the decision above.
 - **`work_y` vs `spouseBWork`** — listed here through v6.22 as narrower: "Engine C counts the household's other income streams; the
-  ladder counts one spouse's earned income." Corrected at v6.23 — the two are the same sum (the taper plus every ordinary stream), and
-  differ only in the year the taper is keyed to, the plan's own retirement year on the ladder and the selected one in Engine C.
+  ladder counts one spouse's earned income." Corrected at v6.23 — the two are the same sum (the taper plus every ordinary stream). Through
+  v6.31 they differed in the year the taper is keyed to (the target year on the ladder, the selected one in Engine C); from v6.32 both use
+  the selected year.
 
 `capGain_y` can only add to MAGI, so the residual error remains **optimistic**, and the Roth tab's figure
 remains slightly below the IRMAA tab's. The IRMAA tab is the fuller figure.
@@ -3222,3 +3225,57 @@ the replaced sentences, extinct across every string. `qa/tools/controls_v631_mc_
 check turn red. (The same release moved Ask AI to Claude Opus 4.8 at medium effort — a presentation change, recorded in the CHANGELOG, not a
 modeling one.)
 
+## QCDs after a death (v6.32)
+
+**What was wrong (v6.31, measured at the scope — `docs/SCOPE_F26_D61_V632.md` §0.6).** Two engines model a qualified charitable distribution
+(QCD), and both decided who could give after the first death wrongly. Engine B (`computeTaxPlan`, the Taxes tab and the Monte Carlo's tax
+schedule) counted, in widowed years, one person on the **older** of the two ages — the deceased's included, since the ages keep counting after a
+death — and in the death year itself both spouses. Engine C (`computeIrmaaPlan`, the IRMAA tab and the schedule's surcharges) counted **both**
+spouses, each on their own age, for the whole horizon. So a survivor under 71 gave from the IRA on the dead spouse's age, and Engine C gave a
+survivor two caps. Both errors are optimistic. The Taxes tab disclosed them as an approximation (MissingFeatures **D-61**). Engines A and D and
+the Roth tab's ladder model no QCD.
+
+**The rule in law.** The individual for whose benefit the IRA is maintained must have attained age 70½ when the distribution is made, and the
+annual limit applies per individual — a spouse filing jointly has their own (26 U.S.C. §408(d)(8): the age condition read in the statute's
+definition, §408(d)(8)(B)(ii), and the per-individual limit as summarised by the Congressional Research Service, IF11377, 2026-01-15; the IRS
+news release *Reminder to IRA owners age 70½ or over: Qualified charitable distributions…* states the per-spouse limit for a married couple.
+IRS Pub. 590-B was not read at this build — its page could not be fetched from the session). After a spousal rollover the survivor is the only owner, so
+the survivor's own age governs. The model keeps its existing conservative proxy for 70½: the calendar year a person turns 71.
+
+**What changed (DF-7 (a)).** From the year of the first projected death — the year both engines already roll the decedent's Traditional
+balance into the survivor's (`widowed`) — both engines count **one** person, the survivor, on the survivor's own age, with one cap:
+`_qcdPersons = single ? (A ≥ 71) : widowed ? (survivor's age ≥ 71) : (A ≥ 71) + (B ≥ 71)`. Married years before the death and plans single
+from the start are unchanged. The survivor is the spouse whose plan-to year is later (a tie leaves spouse A, the rule every engine already uses).
+
+**Measured at the build** (Engine B, lifetime tax in today's dollars; the example's holdings with the dates of birth and plan-to ages changed;
+conversions $70,000):
+
+| Household | First death | QCD years that change | Lifetime QCD | Lifetime tax (today's $) |
+|---|---|---|---|---|
+| The example, QCD $20,000 | 2044 (B is 78) | none | $380,000 → $380,000 | $147,750 → $147,750 |
+| A 1958 dies at 76 (2034), B 1966; QCD $20,000 | 2034 (B is 68) | 2034–2036 | $560,000 → $500,000 | $174,260 → $182,314 |
+| A 1955 dies at 75 (2030), B 1962; QCD $30,000 | 2030 (B is 68) | 2030–2032 | $780,000 → $690,000 | $151,628 → $166,734 |
+| A 1955 dies at 72 (2027, before retiring), B 1966; QCD $20,000 | 2027 (B is 61) | 2029–2036 | $560,000 → $400,000 | $206,430 → $231,658 |
+| B 1954 dies at 74 (2028), A 1964; QCD $25,000 | 2028 (A is 64) | 2029–2034 | $700,000 → $550,000 | $179,772 → $206,024 |
+
+Engine C's QCD moved in the same years on every household. In the years the QCD stops the survivor has no RMD yet, so that year's tax does
+not move; the lifetime tax rises later, as RMDs fall on the dollars no longer given away. The example cannot show any of this: its QCD slider
+opens at $0 and its survivor is 78 at the first death (the boundary census row `qcd_survivor`).
+
+**Simplifications, stated, each with its direction.**
+- **The death year counts the survivor alone** (DF-7 (a) rather than (b)). A deceased spouse could have made a QCD earlier in the year of death;
+  the model does not count it — **conservative**.
+- **70½ is modelled as the year of 71** — unchanged, conservative.
+- **The QCD is a what-if amount**, the same every year; the model does not give the money some other way in the years it cannot be a QCD.
+
+**Tests.** `t95_f26_d61.mjs` §A, both legs (the v6.31 leg pins the old rule as a dated `[KNOWN DEFECT 2026-10-25, D-61]`): on nine households —
+the five above, one where the QCD exceeds one indexed cap after the death, a tie, and two single plans — every year's QCD in Engines B and C
+equals `min(QCD, persons × the indexed cap)` with the persons counted in the suite from the dates of birth and plan-to ages; the two engines
+agree every year (**the extinction invariant**); every year before the first death, and every year of a single plan, is v6.31's to the cent; a
+hand pin of the 2034 household; the four lifetime-tax figures above; and the source by AST (one eligibility expression per engine, each reading
+the survivor's age). `qa/tools/controls_v632_f26_d61.py` puts each removed defect back and shows its check turn red.
+
+The same release (v6.32) also changed presentation: the Stress, Social Security, Roth, Events and Backtest tabs now state what the model computes
+for the plan (UsabilityFlaws F-26), and the Roth tab's conversion ladder starts at the selected retirement year, like the strategy table beside it,
+so its built-in work taper is keyed to the same year as Engine C's (above). Those are recorded in the CHANGELOG; the ladder's figures move only
+when −1 or +1 YEAR is selected — at the retirement year the app opens on they are v6.31's.

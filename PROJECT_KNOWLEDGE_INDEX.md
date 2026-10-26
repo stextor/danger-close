@@ -25,15 +25,19 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 
 | Field | Value |
 |---|---|
-| Version | **v6.31** |
-| Source file in knowledge | `DangerClose-v6_31.jsx` |
-| Source md5 | `d729d028d26f4c5b73996099dae4fd2f` |
-| Built `index.html` md5 | `7a52c128fa0c77029a63114f4db320f8` |
-| Shipped | 2026-10-24 |
+| Version | **v6.32** |
+| Source file in knowledge | `DangerClose-v6_32.jsx` |
+| Source md5 | `fe8188a567035ce5a00fda1f201cecd5` |
+| Built `index.html` md5 | `2cdbfc5479c0d7ff7f0d1a66a70827af` |
+| Shipped | 2026-10-25 |
 
-> ⚠ **v6.31 SHIPPED (2026-10-24) — the Monte Carlo pays IRMAA (D-51); Ask AI asks Claude Opus 4.8 at medium effort (AI-6).** Source `d729d028…` · built `7a52c128…`.
+> ⚠ **v6.32 SHIPPED (2026-10-25) — QCDs after a death (D-61); the Stress, Social Security, Roth, Events and Backtest tabs say what the model does (F-26).** Source `fe8188a5…` · built `2cdbfc54…`.
+> A MODELING release with a presentation pass (`docs/SCOPE_F26_D61_V632.md`, DF-1 to DF-8 all as recommended). From the first projected death only the survivor may make a QCD, on the survivor's own age, with one cap (Engines B and C); on four test households lifetime tax rises $8,054–$26,252, the example unchanged. The Stress tab's cards are computed for the plan (`stressPlanFacts`); the SS tab's survivor grid shows the larger benefit; the Roth ladder starts at the selected year (byte-identical at the target year); the ACA dates print only for 2027 coverage; the Backtest names the plan's own worst start; the README rewritten.
+> New suite `t95` (both legs); `controls_v632_f26_d61.py` new; `boundaries.mjs` gains `qcd_survivor` and `survivor_benefit_b` (`t29` B-26, B-27, C-d61-1 to -3); `t1` S-5 and `t8` STEP-1 re-gated; `v632` registered (`t33` PINS unchanged); `mk_runfolder.sh` copies `README.md`; the shim exports `stressPlanFacts`. MissingFeatures D-61 closed; UsabilityFlaws F-26 and F-15b closed, F-27 filed. `TESTING.md`'s v6.29 per-suite line moved to the archive. **Rotation:** the pool loses `DangerClose-v6_31.jsx` (v6.31 is read from history, commit `a018e1b`) and gains `DangerClose-v6_32.jsx`. **Pool stays 16.**
+>
+> *(**v6.31 SHIPPED (2026-10-24) — the Monte Carlo pays IRMAA (D-51); Ask AI asks Claude Opus 4.8 at medium effort (AI-6).** Source `d729d028…` · built `7a52c128…`.
 > A MODELING release with an Ask AI change (`docs/SCOPE_D51_AI6_V631.md`, all decisions as recommended). `mcIncomeTaxSchedule` adds Engine C's surcharges, each in its premium year (MAGI year + 2), to the Taxes tab's tax; nothing before retirement or after the horizon; the tail repeats the last year's total. What Breaks adds Engine A's IRMAA; the Income card adds an IRMAA line; the IRMAA tab's false "err high" sentence replaced (D-65). The example as it opens is unchanged; at a $250,000 slider $24,180 of surcharges, BASE 30-year success 75.13% → 74.03%. Ask AI: `claude-opus-4-8`, effort medium, no thinking, text blocks only, a refusal notice with the declined exchange left out of the memory, 180 s timeout, the cost note restated at $5 / $25 and the newer tokenizer.
-> New suite `t94` (both legs); `controls_v631_mc_irmaa_ai.py` new; `boundaries.mjs` gains `irmaa_in_mc` (`t29` B-25, C-irmaa-1); `t66`, `t83`, `t89` and `t93` re-gated; `v631` registered (`t33` PINS unchanged). MissingFeatures D-51 closed, D-65 and D-66 filed; ARCHITECTUREIssues E-30 (c) closed; UsabilityFlaws F-26's token item addressed. `TESTING.md`'s v6.28 per-suite line moved to the archive. **Rotation:** the pool loses `DangerClose-v6_30.jsx` (v6.30 is read from history, commit `9eee5a7`) and gains `DangerClose-v6_31.jsx`. **Pool stays 16.**
+> New suite `t94` (both legs); `controls_v631_mc_irmaa_ai.py` new; `boundaries.mjs` gains `irmaa_in_mc` (`t29` B-25, C-irmaa-1); `t66`, `t83`, `t89` and `t93` re-gated; `v631` registered (`t33` PINS unchanged). MissingFeatures D-51 closed, D-65 and D-66 filed; ARCHITECTUREIssues E-30 (c) closed; UsabilityFlaws F-26's token item addressed. `TESTING.md`'s v6.28 per-suite line moved to the archive. **Rotation:** the pool loses `DangerClose-v6_30.jsx` (v6.30 is read from history, commit `9eee5a7`) and gains `DangerClose-v6_31.jsx`. **Pool stays 16.**)*
 >
 > *(**v6.30 SHIPPED (2026-10-23) — one dollar unit and one inflation clock for the tax engines (D-60).** Source `f2d3f578…` · built `3d013b09…`.
 > A MODELING release (`docs/SCOPE_D60_DOLLAR_UNITS_V630.md`, all nine decisions as recommended). Every tax engine computes each year in that year's own dollars on the Monte Carlo's as-of clock; today's holdings reach retirement at inflation (basis nominal, the contribution accrual at face value, `carryStartBalances`); the bracket family indexes at the plan's inflation less 0.25 point (C-CPI-U), IRMAA tiers, the poverty line and the wage base at the plan's inflation; surcharges grow to the premium year; year rows in each year's dollars and every lifetime total also in today's; the Monte Carlo and What Breaks are handed each year's tax in today's dollars. The example's lifetime tax (BULL-LEANING, $70,000) $213,670 → $201,181 in today's dollars; the 30-year Monte Carlo moves by up to two points, by household. v6.29's partial measurement of D-60 corrected; the build review's blocker (the accrual was carried with the holdings) fixed before release.
@@ -72,12 +76,12 @@ or a reason here (OPERATIONS §I).
 
 | Pool file | md5 | Repo path |
 |---|---|---|
-| `CHANGELOG.md` | `f1271b57fe4c5f2e2d72e8a2bc08c6eb` | `CHANGELOG.md` |
-| `METHODOLOGY.md` | `6da344d92c242222a024cd4efadcece4` | `METHODOLOGY.md` |
-| `MissingFeatures.md` | `333edd3f77447bd41394b9c368ca2ff8` | `docs/MissingFeatures.md` |
+| `CHANGELOG.md` | `66e71bd4dcb871dd4f4335d501902c2a` | `CHANGELOG.md` |
+| `METHODOLOGY.md` | `ff554eb762739e58afe0fc28bd99ee63` | `METHODOLOGY.md` |
+| `MissingFeatures.md` | `ff67d5a01b2d86035679ddcc44b02662` | `docs/MissingFeatures.md` |
 | `OPERATIONS.md` | `0468ef1e62c1a445128d98d56ea1443f` | `docs/OPERATIONS.md` — **rolled 2026-09-09** at the run-folder ops package: §B gained the `mk_runfolder.sh` pointer, and §D gained **D1** (the named existence-only assertion class) and **D2** (the `t29` F-6a/F-6b defect pin). *(Previously `f33c2e0cfd…`.)* |
-| `README.md` | `eec58396f932b3209de79c2400dbfb88` | `README.md` |
-| `TESTING.md` | `e94384c7e3e42fdfd9bb20aa4640bdcb` | `TESTING.md` |
+| `README.md` | `2757b43ee6b39d0f34496c1cf639d688` | `README.md` |
+| `TESTING.md` | `bfc417988e240c72bc1460e112412411` | `TESTING.md` |
 | `index.html` | `247816be583271d50cf13e0a02e18cdf` | `src/index.html` — the **Vite entry template**, **restored to the pool 2026-08-20** after being found absent (see the build-scaffold row below). ⚠ **Not the built app.** The published single-file `index.html` is repo-only output and never enters the pool; its md5 is in the Current build table and is different by construction |
 | `main.jsx` | `d9eca7b469a3fb7ec1c5325fd4bf8145` | `src/main.jsx` |
 | `package.json` | `9ee8d745bc9f32d6e8fa02e623603423` | `package.json` — The pinned toolchain, and a **build input** rather than a suite file — given a row 2026-08-23 for a measured reason: `npm i <pkg>` in a run folder rewrites it with resolved versions, so it drifts as a side effect of setting the folder up. That is why OPERATIONS §N3a installs jsdom with `--no-save`, and it is the drift `package_check`'s new G-1 caught on its first real use |
@@ -87,10 +91,12 @@ or a reason here (OPERATIONS §I).
 
 | Field | Value |
 |---|---|
-| Version | **v6.30** |
-| Source file in knowledge | — **not pooled**: repo history, commit `9eee5a7`, found by this md5 |
-| Source md5 | `f2d3f578492279eac501eef6bdda058f` |
-| Built `index.html` md5 | `3d013b092b612442b35e2ec02163010d` |
+| Version | **v6.31** |
+| Source file in knowledge | — **not pooled**: repo history, commit `a018e1b`, found by this md5 |
+| Source md5 | `d729d028d26f4c5b73996099dae4fd2f` |
+| Built `index.html` md5 | `7a52c128fa0c77029a63114f4db320f8` |
+
+> **Rolled 2026-10-25 at the v6.32 ship.** The pair is now **v6.31 prior / v6.32 current**; both tables rolled in one edit (K-7, which counts 632 − 1 = 631). Commit `a018e1b` is the first to carry the v6.31 source (`67f2eae` to `91c221d`, earlier v6.31 uploads, carry v6.30's source beside v6.31's page); `7ebd0e7` set the executable bit `controls_v631_mc_irmaa_ai.py` landed without.
 
 > **Rolled 2026-10-24 at the v6.31 ship.** The pair is now **v6.30 prior / v6.31 current**; both tables rolled in one edit (K-7, which counts 631 − 1 = 630). Commit `9eee5a7` is the first to carry the v6.30 source (`ca8ddc6` to `4a3ebe7`, earlier v6.30 uploads, carry v6.29's source beside v6.30's page); `2d41b26` set the executable bit `controls_v630_dollar_units.py` landed without.
 
@@ -609,6 +615,26 @@ retired and superseded. They get no row because there is no file. Checked 2026-0
 committed tree, so the next sweep does not re-open them.
 
 ## Retirement list (delete-first; nothing replaces these)
+
+### At the v6.32 ship (2026-10-25) — DELETE THESE FIRST
+
+**Rotation:** delete `DangerClose-v6_31.jsx`; `DangerClose-v6_32.jsx` arrives. **Pool stays 16.** Count from the Projects listing (OPERATIONS §I, no-mount note).
+
+| Delete | Because |
+|---|---|
+| `DangerClose-v6_31.jsx` | **rotated out** — v6.31 is read from the repo's history (commit `a018e1b`) |
+| `CHANGELOG.md` | replaced — the v6.32 entry |
+| `METHODOLOGY.md` | replaced — *QCDs after a death (v6.32)*; the QCD summary; the ladder's taper-year sentences |
+| `MissingFeatures.md` | replaced — D-61 closed |
+| `PROJECT_KNOWLEDGE_INDEX.md` | replaced — this edit; `CHANGELOG.md`'s row rolled last |
+| `README.md` | replaced — DF-6: every stale claim rewritten |
+| `TESTING.md` | replaced — the v6.32 per-suite line, v6.29's moved to the archive; `t95`'s, `dom_entry_v632.jsx`'s and the census rows' entries |
+| `UsabilityFlaws.md` | replaced — F-26 and F-15b closed; F-27 filed |
+
+**Arriving new:** `DangerClose-v6_32.jsx`. **Repo-only:** every `qa/` change (`t95_f26_d61.mjs`, `qa-baseline/dom_entry_v632.jsx`,
+`tools/controls_v632_f26_d61.py` new; the re-gated and registered suites, `tools/boundaries.mjs`, `t29`, `mk_runfolder.sh`, the shim),
+`docs/TESTING_ARCHIVE_per_suite_v5_53_to_v6_01.md` (v6.29's line and note appended), the scope (`docs/SCOPE_F26_D61_V632.md`, fulfilled),
+the built `index.html`.
 
 ### At the v6.31 ship (2026-10-24) — DELETE THESE FIRST
 

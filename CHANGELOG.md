@@ -1,5 +1,132 @@
 # Changelog
 
+## v6.32 — QCDs after a death (D-61); the Stress, Social Security, Roth, Events and Backtest tabs say what the model does (F-26)
+
+**A modeling release, with a presentation pass.** From the year of the first death only the survivor may make a QCD, and five tabs now state
+what the model computes for the plan. The scope is `docs/SCOPE_F26_D61_V632.md` (repo-only, fulfilled; build record §7). Steve: *"I agree,
+write the scope for v6.32 (F-26 plus D-61)"*; on the decisions, *"all as recommended"* — DF-1 to DF-8, all (a). Built on v6.31 (source
+`d729d028…`). METHODOLOGY's new section *QCDs after a death (v6.32)* is the full account of the modeling change.
+
+**What was wrong (v6.31, measured at the scope).**
+- **A survivor could give on the deceased's age** (MissingFeatures D-61). Engine B (the Taxes tab and the Monte Carlo's tax) tested the
+  older of the two ages in widowed years and counted both spouses in the death year; Engine C (the IRMAA tab) counted both spouses for the
+  whole horizon — two caps for one survivor. Optimistic, and invisible on the example (QCD $0, survivor 78 at the first death) and to every
+  existing suite.
+- **The Stress tab's cards described a different model** (UsabilityFlaws F-26): *"Combined shock: $300K–$600K over 4–10 years"* for two
+  one-time charges; *"20+ years alone"* where the example gives 19; *"Survivor SS benefit = A's FRA + DRCs"* and an income line on spouse A's
+  benefit, where the engine pays the larger of the two (with the benefits swapped the card showed $1,300 against the engine's $3,300); spouse
+  B named on single plans; *"Tech −40%"* and *"6-8% infl"* in the headers (the regimes are −35% / −40% and 6.5%); F-15b's *"Success
+  (>$1,500K)"*.
+- **The Social Security tab's survivor grid** showed spouse A's benefit alone (found by the scope's review).
+- **The Roth tab's ladder started at the target year** whatever year was selected, while the strategy table beside it started at the
+  selected one; Ask AI was told the target year's window.
+- **The Events tab printed Nov 1 – Jan 15 for every coverage year**; **the Backtest** called 1966 *"generally considered the worst real start
+  year in US history"*, and its own "worst" card kept the earliest depleting start rather than the one that ran out soonest; **the README**
+  carried eleven stale claims (*"no data leaves your machine"*, *"562 checks"*, *"every statutory constant"*, …).
+
+**What changed.**
+- **QCDs** (DF-7): from the year of the first projected death both engines count one person, the survivor, on the survivor's own age, with
+  one cap. Married years before the death and single plans are unchanged. The Taxes and IRMAA tabs, the Field Manual and METHODOLOGY say so.
+- **The Stress tab** (DF-1, DF-2): one helper, `stressPlanFacts`, computes what the cards state from the rules the Monte Carlo applies. The
+  LTC card gives each one-time charge's year and age (or why there is none — dead by then, before retirement, after the run), the $150K–$300K
+  range in today's dollars grown with inflation, and the gap between them; the marathon card says whose care years fall after the first death;
+  the early-death half computes the years alone, names the survivor (spouse A when B's plan-to year comes first; spouse B alone from the start
+  when A is already past 70), prints the survivor's Social Security as the larger benefit with the pension and income streams, notes the
+  trust-fund cut, and says the run includes the care charges; a single plan's cards name one person and the early-death case ends the run at
+  that death. Headers from `SCENARIOS` and the household; *"Success (>$1.5M)"*. The LTC ages and marathon years are named constants the engine
+  and the cards share (same values).
+- **The Social Security tab** (DF-8): each survivor cell is the larger of A's benefit at that claim age and B's own.
+- **The Roth tab** (DF-3): the ladder, its heading, total, bracket card and RMD cards start at the selected year; at the year the app opens on
+  they are byte-identical to v6.31's. A selected year past the conversion window says *"no conversion years"*. Ask AI's context names the
+  selected year's window.
+- **The Events tab** (DF-5): the ACA dates print only for 2027 coverage, the year checked (HealthCare.gov, read 2026-10-25); a later year
+  points to HealthCare.gov or the state's marketplace.
+- **The Backtest** (DF-4): "worst" is the start that runs out soonest, or if none does the lowest real end balance; the header names the
+  plan's own worst; the labels drop *"worst US start"*, *"best case"* and *"(the stress case)"*.
+- **The README** (DF-6): every stale claim rewritten against the source; no typed check count; `qa/` and `docs/` listed; `npm ci`.
+- **Field Manual:** the Taxes, Stress, Backtest and Roth entries, the LTC distribution note, the honest-limits QCD line and §13. The four
+  version sites read v6.32.
+
+**What it moved — measured at the build** (Engine B, lifetime tax in today's dollars, $70,000 conversions; the example's holdings with the
+dates changed):
+
+| Household | QCD years that change | Lifetime tax (today's $) |
+|---|---|---|
+| The example, QCD $20,000 or $150,000 | none | unchanged |
+| A 1958 dies at 76 (2034), B 1966; QCD $20,000 | 2034–2036 | $174,260 → $182,314 |
+| A 1955 dies at 75 (2030), B 1962; QCD $30,000 | 2030–2032 | $151,628 → $166,734 |
+| A 1955 dies at 72 (2027), B 1966; QCD $20,000 | 2029–2036 | $206,430 → $231,658 |
+| B 1954 dies at 74 (2028), A 1964; QCD $25,000 | 2029–2034 | $179,772 → $206,024 |
+
+Every change is upward (conservative). The example as it opens moves nowhere; MC parity's fingerprints are v6.31's.
+
+**Found at the build, and fixed.** The Roth tab's RMD cards read an empty ladder (a selected year past the window) as a $0 balance — a 100%
+"reduction"; and, found by the build review, they read the ladder's *last* row whenever a person's first RMD came before the ladder's first row
+(a selected year after that person's own window — reachable at +1 YEAR; the same pattern existed at v6.31 for a target year past spouse A's
+window, which this fix also corrects). Both now carry the seed forward.
+
+**Owned.** Two registrations were missed until the first packaged run: `runsuite.sh` did not list `t95` (the suite ran, but outside the
+runner's tally), and `t93`'s Engine D boundary reference had no v6.32 entry (it printed its skip on the current leg too); both were added,
+the packaged run was restarted from scratch, and the counts below are from that run. The first draft edited the RMD card expressions, which `t1` STRUCT S-8 pins by exact text, and S-8 went red in the full run; the fix
+moved into `balAt`/`annAt`, and S-8's pins hold unchanged. The build review caught five more: a charge one quarter past the run (from an April
+as-of date — the example's) explained as *"before the plan starts"*; the survivor sentence printed when no one is alone; the Field Manual's LTC
+distribution note keeping *"one Social Security check already gone"*; the README overclaiming what the Verify tab catches; and the scope's
+status line. All fixed before the packaged run.
+
+**Filed, not fixed:** UsabilityFlaws **F-27** — the example's sample briefing repeats the Stress tab's old figures; v6.26's decision DC-3 and
+`t89` A-7 keep it byte-identical, so changing it is your call. **Closed:** MissingFeatures **D-61**; UsabilityFlaws **F-26** and **F-15b**.
+
+**Limitations, stated.** The death year counts the survivor alone (a QCD the deceased made before dying is not counted — conservative); 70½
+is still modelled as the year of 71. The Stress tab's figures beside the cards are unchanged (the model is unchanged — only the copy says what
+it does); the LTC ages and costs and the marathon's 2 and 4 years stay fixed. The ACA dates need the yearly refresh to print the next year's.
+IRS Pub. 590-B could not be fetched from the session; the QCD rule rests on the statute's age condition, CRS IF11377 and an IRS news release.
+
+**Tests.** New suite **`t95_f26_d61.mjs`**, both legs; the v6.31 leg pins each defect as a dated `[KNOWN DEFECT 2026-10-25, D-61]` /
+`[…, F-26]`. §A D-61 on nine households (the four above, the example, one where the QCD exceeds one cap after the death, a tie, two single
+plans): every year's QCD in Engines B and C against a head-count made in the suite from the dates of birth and plan-to ages; **the extinction
+invariant** — the two engines agree every year; years before the first death and single plans v6.31's to the cent; a hand pin; the four
+lifetime figures; the source by AST. §S `stressPlanFacts` against the Monte Carlo's quarter calendar re-derived in the suite, on eight plans
+(two with a May as-of date). §B the typed Stress claims extinct by AST, and the tab rendered on six plans (the example, single, benefits
+swapped, A past 70, B first, a tie). §B2 the survivor grid against SSA's reduction and credit rates typed in the suite. §C the Roth ladder at
+±1 (heading, year count, the RMD card at the selected year, Ask AI's context), a past-window plan, the review's per-person case, and
+byte-identity at the target year in two child processes. §D the Backtest on three plans. §E ACA dates at seven fixed clocks. §F the README.
+§G the copy. **What §3 of the scope promised and the suite does not do:** an independent ladder recursion at ±1 (the RMD card is re-derived
+with the app's own seed helpers; no ladder row is checked at ±1), and §D's soonest-start check is against the tab's named-year table (the sweep
+is component-inline).
+- **`boundaries.mjs`** gains `qcd_survivor` and `survivor_benefit_b` (OPERATIONS §K1): both ON for the example — the reasons D-61 and the
+  survivor-check sentence were invisible on it (`t29` B-26, B-27); fixtures clear each (`t29` C-d61-1 to C-d61-3).
+- **Re-gated:** `t1` STRUCT S-5 (the ladder's span, seed and carry factor now read `retireYear`); `t8` STEP-1 (the two seeds share the
+  selected year). `v632` registered (438 sites by AST; `t1` and `t4` value maps, `t33` PINS (values unchanged) and the three `.py` suites by
+  hand). `mk_runfolder.sh` copies `README.md` into the run folder (`t95` §F reads it). The shim exports `stressPlanFacts`.
+
+**Counts**, from the full suite run from the packaged copies:
+- **9,912 app checks across 94 app suites, 0 failed, 0 DIED**;
+- MC parity 10/10 — every fingerprint byte-identical to v6.31 (no intended difference: the fingerprints run with QCD $0 at the target year);
+- tooling: `t21` 64, `domdiff` 32, `sets` 12 + 12;
+- GRAND **10,042**.
+
+Against v6.31, the current-leg changes are `t95`, new (163), and `t29` 115 → 122 (A-3's two rows, B-26, B-27, C-d61-1 to C-d61-3). Every
+other current-leg count is unchanged, the re-gated `t1` (182) and `t8` (42) included. The v6.31 leg counts 4,048 (`t95` there 49; `t93` there
+prints its D-5/D-6 skip — 95 against 97 on v6.32); the two attribution runs count 234 and 237. Together 5,393 + 4,048 + 234 + 237 = 9,912.
+
+Controls: `qa/tools/controls_v632_f26_d61.py` on a copy of the packaged run folder — **29 of 29 as expected** (C0 silent, C1–C28 each
+firing), every file restored and hash-checked. In the full pass C7's target was stale (the review's whole-year edit had changed its line) and
+it reported itself INVALID rather than passing; its target was corrected and C7 re-run alone, firing. Each control puts one removed defect
+back: Engine B's or Engine C's v6.31 eligibility, the death year counted twice, the older age for the survivor's; *"Combined shock"*, *"20+
+years alone"*, *"Tech −40%"*; the survivor check on A's benefit; the years alone without the B-first branch; single plans worded for a
+couple; the survivor sentence with no one alone; "after the run" by calendar year; the SS grid on A's benefit; the ladder, the RMD cards or
+Ask AI on the target year; the RMD cards reading the last row; the Backtest's strict-< tie-break and its typed sentence; ACA dates for every
+year; three README claims; the Taxes tab's survivor clause; the Field Manual's single-plan sentence; METHODOLOGY's heading; and the census
+row (through `t29`).
+
+**The build review** (an agent that had not seen the build, given the scope, the diff, the new suite and its controls) found **no blocker, 7
+should-fix and notes**; every one was checked and taken (scope §7): the four copy and arithmetic items under *Owned*, the per-person RMD case
+under *Found at the build*, the tests' shortfall against §3 (now stated above), and the scope's status. Its notes: an early death after the
+run's end now says the run never reaches it; METHODOLOGY names what was read for the law.
+
+**Provenance.** Source `fe8188a567035ce5a00fda1f201cecd5` · built `index.html` `2cdbfc5479c0d7ff7f0d1a66a70827af` (vite 5.4.21, `npm ci`;
+v6.31 rebuilt byte-identically to `7a52c128…`) · `smoke_built` 22/22.
+
 ## v6.31 — the Monte Carlo pays IRMAA (D-51); Ask AI asks Claude Opus 4.8 at medium effort (AI-6)
 
 **A modeling release, with an Ask AI change.** The Monte Carlo and What Breaks now charge Medicare's income-related surcharges (IRMAA), and
