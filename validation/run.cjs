@@ -47,4 +47,15 @@ window.storage = {
   async delete(k){ mem.delete(k); return { key: k, deleted: true }; },
   async list(p=""){ return { keys: [...mem.keys()].filter(k => k.startsWith(p)) }; },
 };
-require(process.argv[2] || "./bundle.js");
+const path = require("path");
+const bundleArg = process.argv[2];
+let bundlePath = path.resolve(__dirname, "./bundle.js");
+if (bundleArg) {
+  const resolved = path.resolve(process.cwd(), bundleArg);
+  const allowedRoot = process.cwd() + path.sep;
+  if (!resolved.startsWith(allowedRoot) || path.extname(resolved) !== ".js") {
+    throw new Error("Invalid bundle path: must be a .js file within the project directory");
+  }
+  bundlePath = resolved;
+}
+require(bundlePath);
