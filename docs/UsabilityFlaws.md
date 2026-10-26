@@ -46,7 +46,9 @@
 > | F-23 | **FIXED v6.28** — filed at v6.27 (§H); about ten times wider than registered | `t91`; `docs/SCOPE_F23_F24_DIRECTIVES_V628.md`. Every financial directive found by a six-reader census recast as what the model computes or assumes (DF-1 to DF-8, all (a)); twelve false statements about the model corrected (V-1 to V-12), and eight more the build review found |
 > | F-24 | **FIXED v6.28** — filed at v6.27 (§H) | `t91` §B. *"Lost ~X GPA points"* is each category's real cost (÷ 78); weights read as points of 78; Income Floor, Estate and Monte Carlo copy corrected; one LTC test, `isLTCLabel`, no longer matching a long-term-disability row; the rough RMD estimate removed. No grade moved |
 > | F-25 | **OPEN** — filed at v6.28 (§H) | the F-23 census's editorial claims (102 E-tagged) and unchecked model claims (151 V-tagged, less V-1 to V-12), the gap-draw figure, and the items the v6.28 build review left; `docs/F25_CENSUS_V627.tsv` |
-> | F-15b | **OPEN** | "Success (>$1,500K)" beside a sibling "Success Rate (>$1.25M)" — still in the source |
+> | F-26 | **FIXED v6.32** — filed at v6.29 | `t95`; `docs/SCOPE_F26_D61_V632.md` (DF-1 to DF-6 and DF-8, all (a)). The Stress tab's cards computed for the plan, the SS tab's survivor grid, the Roth ladder from the selected year, the ACA dates, the Backtest's worst start, the README |
+> | F-27 | **OPEN** — filed at v6.32 | the example's sample briefing (`DEFAULT_MASTER_PROMPT`) repeats the Stress tab's old figures; pinned by v6.26's decision DC-3 and `t89` A-7 — a re-decision for Steve |
+> | F-15b | **FIXED v6.32** | the Stress table's label reads "Success (>$1.5M)" (`t95` B-1, B-3; folded into F-26 under DF-1) |
 > | F-16 | **FIXED v5.98** | the pair swapped; `t62` holds every term in order (was: "API Key" before "Agency MBS") |
 > | §E-1 / §E-2 | **OPEN** | no physical-device pass; no keyboard / screen-reader pass (4 `aria-label`s in the app) |
 > | §E-3 | **DONE v5.82–v5.83** | all 13 skins measured by `t48` |
@@ -590,7 +592,7 @@ Exit Plan's conversion window (the selected year; the Events tab's item keeps th
 three fixed grades and Income Floor's months), *"CONFIRM THE MONEY WORKS"* (renamed), the Withdrawal tab's RMD line (each person's). The
 SS survivor card's FRA ordering keeps its v6.28 wording. Pinned by `t92` (both legs). What remains is filed as **F-26**.
 
-### F-26 · Claims the F-25 census did not reach, found at the v6.29 build — **LOW (honesty of an output)** — OPEN
+### F-26 · Claims the F-25 census did not reach, found at the v6.29 build — **LOW (honesty of an output)** — FIXED v6.32
 
 **Filed at v6.29.** The F-25 build edited sentences beside the ledger's and found these, outside the census's flagged set. Fixed in the same
 build because they sat in edited cards: the Stress tab's two scenario descriptions (*"Tech/AI crashes 40–50% in Year 1"*, *"Inflation 6–8% …
@@ -618,3 +620,31 @@ an unlike pair — MissingFeatures D-63). **Open, not fixed:**
 **Lesson recorded in the scope (§7):** the census flagged sentences by tag; a sentence in an edited card that the census had not flagged
 still needed reading. Candidate fix: a short pass over the Stress tab's cards and the items above, each checked in the source.
 
+**Fixed at v6.32** (`docs/SCOPE_F26_D61_V632.md`; Steve: *"all as recommended"* — DF-1 to DF-8, all (a)). Every open item above, each checked in
+the source first, and what the scope's census and review found beside them:
+- **The Stress tab** (DF-1, DF-2): the LTC card states the one-time charge per person — the year and age, between $150K and $300K in today's
+  dollars grown with the path's inflation, only if the person is alive and the year falls in retirement inside the run, and the gap between the
+  two; the marathon card names whose care years fall after the first death; the early-death half computes the years alone (19 on the example,
+  not "20+"), names the survivor (spouse A when B's plan-to year comes first; spouse B alone from the start when A is already past 70), says
+  the survivor keeps the larger of the two claimed benefits and prints it with the pension and income streams, notes the trust-fund cut, and
+  says the run includes the care charges; a single plan's cards name one person and the early-death case ends the run at that death. The four
+  column headers come from `SCENARIOS` and the household; *"one bounded early shock"*, *"one SS check"* and *"The worst timing"* are replaced;
+  F-15b's label reads *"Success (>$1.5M)"*. One helper, `stressPlanFacts`, computes what the cards say from the rules `runExtendedMC` applies.
+- **The SS tab's survivor grid** (DF-8, found by the scope's review): each cell is the larger of A's benefit at that claim age and B's own.
+- **The Roth tab** (DF-3): the ladder, its heading, its conversion total, the bracket card and the RMD cards start at the selected year; a
+  selected year past the window says *"no conversion years"*. Ask AI's live context names the selected year's window (it was wrong at ±1).
+- **The Events tab** (DF-5): the ACA dates print only for the coverage year checked (2027); a later year points to HealthCare.gov.
+- **The Backtest** (DF-4): "worst" is defined (the start that runs out soonest; if none does, the lowest real end balance) — through v6.31 a
+  plan where several starts ran out got the earliest such start, not the soonest; the header sentence names the plan's own worst; the labels
+  drop *"worst US start"*, *"best case"* and *"(the stress case)"*.
+- **The README** (DF-6): eleven stale claims rewritten; no typed check count.
+`t95` holds each typed claim extinct by AST and renders each tab on plans built to reach it (`t29` gains two census rows:
+`survivor_benefit_b`, and `qcd_survivor` for D-61). **Kept out on purpose:** the example's sample briefing — filed as **F-27**.
+
+### F-27 · The example's sample briefing repeats the Stress tab's old figures — **LOW (honesty of an output)** — OPEN
+
+**Filed at v6.32** (found by the v6.32 scope's review, §0.8). The example household's Ask AI briefing (`DEFAULT_MASTER_PROMPT`) describes the
+stress scenarios with figures the Stress tab no longer uses — *"Tech/AI -40/-50%"*, *"Inflation 6–8% for 3 yrs … bonds -10/-15%"*, *"Spouse A
+assisted living at 78"*. It is the example's live AI context. v6.26's decision DC-3 kept the briefing byte-identical and `t89` A-7 pins its md5
+(`0ace40a186f95e0ec594910418001b90`); since v6.26 the ground-rules header goes first and tells the model the briefing's figures may be
+superseded by the live context. Changing it means reversing DC-3 — Steve's decision. **Low.**
