@@ -494,6 +494,25 @@ export function census(G) {
         : _iy.length ? "reachable — the Monte Carlo pays the IRMAA tab's surcharges in these years" : "no surcharge in the schedule, so the Monte Carlo's IRMAA charge cannot be seen here");
   }
 
+  // ── v6.32 (D-61, F-26 — SCOPE_F26_D61_V632) · the conditions that hid them (§K1) ───────────────────────────────────────────────────────
+  // 20. A SURVIVOR UNDER 71 AT THE FIRST DEATH. Through v6.31 a survivor could give from the IRA (a QCD) on the DECEASED spouse's age, and
+  //    the IRMAA engine gave a survivor two caps. Both errors need a first death that leaves a survivor under 71 (or, for the second, a QCD
+  //    above one indexed cap). The example's first death leaves a survivor already past 71 — and its QCD slider opens at $0 — so D-61 moves
+  //    nothing on it. ON when the survivor is 71 or older in the first death year (the year the engines roll the IRA over).
+  if (single) row("qcd_survivor", "survivor age at first death (QCD)", "n/a", "under 71 in the death year", false, "single filer — no survivor transition");
+  else {
+    const _survIsA = (tl.dobA.year + tl.lifeExpA) >= (tl.dobB.year + tl.lifeExpB);
+    const _age = firstDeathYr - (_survIsA ? tl.dobA.year : tl.dobB.year);
+    row("qcd_survivor", "survivor age at first death (QCD)", `${_age} (${_survIsA ? "A" : "B"}, in ${firstDeathYr})`, "under 71 in the death year", _age >= 71,
+      _age >= 71 ? "DEGENERATE for D-61's age rule — the survivor may already give, so only a QCD above one cap could show the fix (the QCD slider opens at $0)"
+                 : "exercises the survivor's own-age QCD rule (with a QCD above $0)");
+  }
+  // 21. SPOUSE B'S BENEFIT IS THE LARGER. Through v6.31 the Stress tab's early-death card and the Social Security tab's survivor grid showed
+  //    the survivor keeping spouse A's benefit; the engines pay the LARGER of the two. On the example A's is the larger, so the two agree.
+  if (single) row("survivor_benefit_b", "the larger Social Security benefit", "n/a", "spouse B's the larger", false, "single filer — no spouse B");
+  else row("survivor_benefit_b", "the larger Social Security benefit", `A $${(ssA / 12).toLocaleString()}, B $${(ssB / 12).toLocaleString()} /mo`, "spouse B's the larger", ssB <= ssA,
+    ssB <= ssA ? "DEGENERATE — spouse A's benefit is the larger, so naming A's as the survivor's check reads right here" : "exercises the larger-benefit survivor rule");
+
   return rows;
 }
 
