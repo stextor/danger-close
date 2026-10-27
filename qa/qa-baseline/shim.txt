@@ -126,6 +126,21 @@ export const __g = {
   ...(typeof spouseBWorkTaper !== "undefined" ? { spouseBWorkTaper } : {}),
   ...(typeof builtinWorkApplies !== "undefined" ? { builtinWorkApplies } : {}),
   ...(typeof isLTCLabel !== "undefined" ? { isLTCLabel } : {}),   // v6.28 (F-24): the shared LTC label test; absent on earlier legs
+  // v6.33 (D-67) — the year-keyed tables and their accessors (t96, boundaries.mjs). GUARDED (_g): absent through v6.32, where they read undefined.
+  heldTableYear: _g("heldTableYear"),
+  FED_TABLES: () => _g("FED_TABLES"),
+  fedTableYear: _g("fedTableYear"),
+  fedTableFor: _g("fedTableFor"),
+  taxFactsFor: _g("taxFactsFor"),
+  seniorExtraFor: _g("seniorExtraFor"),
+  WAGE_BASE_TABLES: () => _g("WAGE_BASE_TABLES"),
+  wageBaseFor: _g("wageBaseFor"),
+  IRMAA_TABLES: () => _g("IRMAA_TABLES"),
+  irmaaTableYear: _g("irmaaTableYear"),
+  irmaaTableFor: _g("irmaaTableFor"),
+  irmaaSurchargeFor: _g("irmaaSurchargeFor"),
+  acaTableYear: _g("acaTableYear"),
+  TAX_CONSTANTS_YEAR: () => _g("TAX_CONSTANTS_YEAR"),
 };
 
 // ═══ Feature-suite surface (t7–t9). Live getters: applyLoadedData REASSIGNS the
