@@ -47,7 +47,8 @@
 > | F-24 | **FIXED v6.28** — filed at v6.27 (§H) | `t91` §B. *"Lost ~X GPA points"* is each category's real cost (÷ 78); weights read as points of 78; Income Floor, Estate and Monte Carlo copy corrected; one LTC test, `isLTCLabel`, no longer matching a long-term-disability row; the rough RMD estimate removed. No grade moved |
 > | F-25 | **OPEN** — filed at v6.28 (§H) | the F-23 census's editorial claims (102 E-tagged) and unchecked model claims (151 V-tagged, less V-1 to V-12), the gap-draw figure, and the items the v6.28 build review left; `docs/F25_CENSUS_V627.tsv` |
 > | F-26 | **FIXED v6.32** — filed at v6.29 | `t95`; `docs/SCOPE_F26_D61_V632.md` (DF-1 to DF-6 and DF-8, all (a)). The Stress tab's cards computed for the plan, the SS tab's survivor grid, the Roth ladder from the selected year, the ACA dates, the Backtest's worst start, the README |
-> | F-27 | **OPEN** — filed at v6.32 | the example's sample briefing (`DEFAULT_MASTER_PROMPT`) repeats the Stress tab's old figures; pinned by v6.26's decision DC-3 and `t89` A-7 — a re-decision for Steve |
+> | F-27 | **CLOSED BY DECISION** (Steve, 2026-10-26) — filed at v6.32 | not changed: the briefing's stress figures are the example household's own requests to an AI, not a description of the model (where they overlap the model, they agree), and changing the text would mean recognising the old text too (the loader's DC-8 check matches it exactly); `t89` A-7 keeps pinning it |
+> | F-28 | **FIXED v6.33** — filed and fixed together | two drawings of the brackets read the wrong table: the Taxes tab's bracket-by-bracket panel (the 2026 table at the plan's last-year filing status, through Engine B's as-of `inflate`) and the Roth tab's BRACKET UTILIZATION bar (the 2026 table unindexed); `t96` A-9, F-1 to F-3; `docs/SCOPE_TY2027_REFRESH_V633_V634.md` §7 |
 > | F-15b | **FIXED v6.32** | the Stress table's label reads "Success (>$1.5M)" (`t95` B-1, B-3; folded into F-26 under DF-1) |
 > | F-16 | **FIXED v5.98** | the pair swapped; `t62` holds every term in order (was: "API Key" before "Agency MBS") |
 > | §E-1 / §E-2 | **OPEN** | no physical-device pass; no keyboard / screen-reader pass (4 `aria-label`s in the app) |
@@ -641,10 +642,28 @@ the source first, and what the scope's census and review found beside them:
 `t95` holds each typed claim extinct by AST and renders each tab on plans built to reach it (`t29` gains two census rows:
 `survivor_benefit_b`, and `qcd_survivor` for D-61). **Kept out on purpose:** the example's sample briefing — filed as **F-27**.
 
-### F-27 · The example's sample briefing repeats the Stress tab's old figures — **LOW (honesty of an output)** — OPEN
+### F-27 · The example's sample briefing repeats the Stress tab's old figures — **LOW (honesty of an output)** — CLOSED BY DECISION v6.33
 
 **Filed at v6.32** (found by the v6.32 scope's review, §0.8). The example household's Ask AI briefing (`DEFAULT_MASTER_PROMPT`) describes the
 stress scenarios with figures the Stress tab no longer uses — *"Tech/AI -40/-50%"*, *"Inflation 6–8% for 3 yrs … bonds -10/-15%"*, *"Spouse A
 assisted living at 78"*. It is the example's live AI context. v6.26's decision DC-3 kept the briefing byte-identical and `t89` A-7 pins its md5
 (`0ace40a186f95e0ec594910418001b90`); since v6.26 the ground-rules header goes first and tells the model the briefing's figures may be
 superseded by the live context. Changing it means reversing DC-3 — Steve's decision. **Low.**
+
+**Closed by decision at v6.33** (Steve, 2026-10-26: *"Yes take the 'close by decision' route and fold it into the tax-refresh scope"*;
+`docs/SCOPE_TY2027_REFRESH_V633_V634.md` §0.7). Not changed: the briefing's stress figures are the example household's own requests to an AI —
+what that household asks an assistant to stress — not a description of the model, and where they overlap the model they agree; changing the
+text would also mean recognising the old text, because the loader's DC-8 check matches it exactly to tell the example's prompt from a user's.
+`t89` A-7 keeps pinning it byte-identical. *(The scope's first reading said the ground-rules header "already outranks" the briefing's figures;
+it does not — the header says to use the figures given, and supersedes only balances. Corrected in the scope before the decision.)*
+
+### F-28 · Two drawings of the brackets read the wrong table — **LOW–MED (honesty of an output)** — FIXED v6.33
+
+**Filed and fixed at v6.33** (found at the build, at a D-67 site; the second drawing by the build review). The Taxes tab's *net taxable income
+by federal bracket* panel drew the selected year against Engine B's `brackets2026` — the 2026 table at the filing status of the plan's
+**last** year — indexed by Engine B's as-of `inflate`. On a plan that ends with a survivor every joint year was drawn against Single bounds: on
+the example's opening view, 2029's $144,646 of taxable income, in the 22% bracket, showed about $31K in 24%. The Roth tab's BRACKET
+UTILIZATION bar drew the first ladder year's taxable income, in that year's dollars, against the 2026 table unindexed, so it ran ahead of the
+*"headroom to 24%"* printed beside it. Each now reads its year's own table and filing status (`taxFactsFor(sel.filingSingle, sel.yr)`; the
+ladder's own `projectBrackets(year)`). No engine figure moved. Tests: `t96` A-9 and F-1 to F-3, both legs (the v6.32 leg pins each drawing as
+`[KNOWN DEFECT 2026-10-27, F-28]`).

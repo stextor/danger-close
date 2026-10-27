@@ -686,8 +686,9 @@ cited line; this list is what a session reading only the pool now needs. **Open 
   with a line of its own in README-FIRST, `DELETE FROM REPO: <full repo path>`, or E-1b goes red on it (L468–477); if two tracked paths ever
   legitimately hold identical bytes, D-3 gets an explicit exemption naming the pair, never a return to basenames; K-8's extension set stays an
   explicit allowlist; K-7 is never the manifest's only guard; an OPEN-allowlist entry needs the content check a retirement does.
-- **The OBBBA senior-deduction sunset is NOT wired to `TAX_CONSTANTS_YEAR`** (decision D-3, `t1` L120–121): bumping the yearly constant must
-  never move a statutory expiry date. Read with *Annual data refreshes* (§I).
+- **The OBBBA senior-deduction sunset is NOT wired to `TAX_CONSTANTS_YEAR`** (decision D-3, `t1` L120–121): adding a year's federal table
+  (which moves `TAX_CONSTANTS_YEAR`, read from `FED_TABLES` from v6.33) must never move a statutory expiry date. Read with *Annual data
+  refreshes* (§I).
 
 ## D. Defect-pin discipline
 
@@ -1538,7 +1539,7 @@ the alarm clock** — a task can be deleted, a section here cannot silently disa
 
 | Cycle | When | Primary sources | What changes in the source | Reminder (research-only) |
 |---|---|---|---|---|
-| **Tax and IRMAA figures** | yearly; research from mid-November, **ship before January 1** | IRS Rev. Proc. for the year (late Oct: brackets, deductions, §63(f), LTCG, AMT, QCD); IRS retirement-plan limits notice (Nov: §402(g)); SSA COLA fact sheet (Oct: wage base); CMS Part B/D income-related premiums (mid-Nov: IRMAA tiers, surcharges); the statutes for the unindexed items | `TAX_CONSTANTS_YEAR`, `TAX_CONSTS`, `IRMAA_CONSTS`; state figures per `docs/MissingFeatures.md` D-18 | "Danger Close — yearly tax figures research", every Nov 15 |
+| **Tax and IRMAA figures** | yearly; research from mid-November, **ship before January 1** | IRS Rev. Proc. for the year (late Oct: brackets, deductions, §63(f), LTCG, AMT, QCD); IRS retirement-plan limits notice (Nov: §402(g)); SSA COLA fact sheet (Oct: wage base); CMS Part B/D income-related premiums (mid-Nov: IRMAA tiers, surcharges); the statutes for the unindexed items | from v6.33 (D-67) a new year's entry in each year-keyed table — `FED_TABLES`, `IRMAA_TABLES`, `WAGE_BASE_TABLES`, `ACA_CONSTS.tableCurrentByCoverageYear` — never an edit to last year's; `TAX_CONSTANTS_YEAR` is read from `FED_TABLES` and is not bumped by hand; state figures per `docs/MissingFeatures.md` D-18 | "Danger Close — yearly tax figures research", every Nov 15 |
 | **Historical returns row** | yearly, January | Damodaran (NYU Stern), *Historical Returns on Stocks, Bonds and Bills* — S&P 500 incl. dividends, 10-year T-bond, 3-month T-bill; BLS CPI-U all items, NSA (`CUUR0000SA0`), December over December | one row appended to `HISTORICAL_RETURNS` | "Danger Close — January returns row research", every Jan 20 |
 | **Peer benchmarks** | triennial: the Fed SCF, published the fall after the survey (the 2028 survey ~Oct 2029) | Federal Reserve SCF Summary Extract Public Data (`qa/tools/peer_scf.py` computes the figures); the other peer sources the Ranking tab names | `PEER_DATA_SCF_YEAR`, `PEER_BENCHMARKS` | "Danger Close — 2028 SCF peer data check", once, 2029-10-22 |
 
