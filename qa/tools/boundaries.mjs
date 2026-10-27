@@ -513,6 +513,20 @@ export function census(G) {
   else row("survivor_benefit_b", "the larger Social Security benefit", `A $${(ssA / 12).toLocaleString()}, B $${(ssB / 12).toLocaleString()} /mo`, "spouse B's the larger", ssB <= ssA,
     ssB <= ssA ? "DEGENERATE — spouse A's benefit is the larger, so naming A's as the survivor's check reads right here" : "exercises the larger-benefit survivor rule");
 
+  // ── v6.33 (D-67 — SCOPE_TY2027_REFRESH_V633_V634) · the condition that hid it (§K1) ─────────────────────────────────────────────────────
+  // 22. THE AS-OF YEAR IS THE TABLE'S YEAR. Through v6.32 every engine indexed the published tables (brackets, deductions, IRMAA tiers and
+  //    surcharges, the wage base) from the plan's as-of year, as if they had been published that year. Where the as-of year IS the year of
+  //    the federal table the plan's first row reads, the two bases are the same number and D-67 moves nothing — the example is dated 2026
+  //    and reads 2026's table. ON when they are equal. The table's year is the leg's own accessor (`fedTableYear`, v6.33); a leg without it
+  //    indexes from the as-of year by construction, so on it every household is ON — the defect, seen from the census.
+  { const _first = tl.targetRetireYear, _as = tl.asOfYear;
+    const _ty = typeof G.fedTableYear === "function" ? G.fedTableYear(_first) : _as;
+    row("asof_table_year", "as-of year vs the federal table's year", `${_as} vs ${_ty}`, "the as-of year is the year of the table the first row reads", _as === _ty,
+      _as === _ty ? (typeof G.fedTableYear === "function" ? "DEGENERATE — the plan is dated in its table's year, so indexing from the as-of year and from the table's year agree here"
+                                                          : "DEGENERATE — this leg indexes every table from the as-of year, so no household can tell the two bases apart")
+                  : `clear — dated ${_as}, reading the ${_ty} table: the base year matters by ${Math.abs(_as - _ty)} year(s) of indexing`);
+  }
+
   return rows;
 }
 

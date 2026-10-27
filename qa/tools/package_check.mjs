@@ -866,6 +866,10 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
     //   Removed at v5.57.1 after re-verifying every premise by content against v5.57.
     const OPEN = new Set([
       "SCOPE_STANDING_AUDIT.md",                  // not a build scope at all (OPERATIONS §K)
+      "SCOPE_TY2027_REFRESH_V633_V634.md",        // added at the v6.33 ship as OPEN-because-HALF-BUILT: v6.33 (the tables index from their own
+      //    year) is built, its §7 the record; v6.34 (the 2027 figures) waits on the IRS TY2027 Rev. Proc., the §402(g) notice and CMS's 2027
+      //    IRMAA figures (DT-7: by 15 December). EXPIRES AT THE v6.34 BUILD, which marks the scope FULFILLED with its build record and
+      //    removes this entry in the same package — a person removes it; I-3 fires only on an entry naming a file that is gone.
       // ── REMOVED in the second ops package of 2026-10-19: "SCOPE_UNPOOL_QA_CODE.md" — added that morning as OPEN-because-UNDECIDED;
       //    Steve took DC-1 to DC-4 as recommended the same day, the package built it, marked the scope FULFILLED with its §6 build
       //    record, and removed this entry in the same package, as its own expiry note required.

@@ -18,7 +18,8 @@ const BR = { M: [[0.10, 24800], [0.12, 100800], [0.22, 211400], [0.24, 403550], 
 const LT = { M: [[0, 98900], [0.15, 613700], [0.20, Infinity]], S: [[0, 49450], [0.15, 545500], [0.20, Infinity]] };                     // §2.03
 const STD = { M: 32200, S: 16100 }, SR = { M: 1650, S: 2050 };                                                                           // §2.15
 
-// i: the plan's inflation; tl: { dobA:{year}, dobB:{year}, lifeExpA, lifeExpB, single }; asOf: the constants' base year (2026).
+// i: the plan's inflation; tl: { dobA:{year}, dobB:{year}, lifeExpA, lifeExpB, single }; asOf: the constants' base year (2026) — the year
+// the tables above were published for, NOT the plan's as-of date (v6.33, D-67: t96 §D passes 2026 for a plan dated 2027).
 export function makeFedOracle(i, tl, asOf = 2026) {
   const IX = yr => Math.pow(1 + i - 0.0025, yr - asOf);
   const prog = (ti, tbl, yr) => { let t = 0, p = 0; for (const [r, u0] of tbl) { const u = u0 === Infinity ? Infinity : u0 * IX(yr); if (ti <= p) break; t += (Math.min(ti, u) - p) * r; p = u; } return t; };
