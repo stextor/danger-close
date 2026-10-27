@@ -42,13 +42,13 @@ console.error = () => {}; console.warn = () => {};
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v632";
 const DUMP = process.argv.includes("--roth-dump");
-const KNOWN_VERSIONS = ["v631", "v632"];
+const KNOWN_VERSIONS = ["v631", "v632", "v633"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v632"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v632", "v633"].includes(VER);   // an array, so the next registration widens it
 const KQ = "[KNOWN DEFECT 2026-10-25, D-61 — flips at v6.32]";
 const KF = "[KNOWN DEFECT 2026-10-25, F-26 — flips at v6.32]";
 dom.reconfigure({ url: "https://stextor.github.io/danger-close/" }); globalThis.location = window.location;   // the self-hosted branch
@@ -428,9 +428,13 @@ console.log("  C — the Roth ladder starts at the selected year");
     // routes to that screen reset the plan to the defaults first), so a same-process render would compare different plans.
     const dumpOf = v => { const ch = spawnSync(process.execPath, [fileURLToPath(import.meta.url), v, "--roth-dump"], { cwd: HERE, encoding: "utf8", timeout: 900000, maxBuffer: 1 << 26 });
       const m = (ch.stdout || "").match(/^ROTH_DUMP (.*)$/m); return m ? JSON.parse(m[1]) : null; };
-    const mine = dumpOf(VER), theirs = existsSync(join(HERE, "dom_v631.cjs")) ? dumpOf("v631") : null;
-    T("C-5 at the target year the Roth tab's ladder card is byte-identical to v6.31's (two child processes)", !!mine && !!theirs && theirs === mine && /ROTH CONVERSION STRATEGY — 2029–2040/.test(mine),
-      !mine || !theirs ? "a child printed nothing" : `${mine.length} vs ${theirs.length} chars`);
+    // v6.33: the comparison needs v6.31's DOM bundle, which only a v6.31 → v6.32 run folder builds. In a later release's run (v6.32 → v6.33,
+    // where neither leg is v6.31) it prints a skip — as t93 §D did for its v6.29 reference — rather than reading the absent bundle as a fail.
+    if (existsSync(join(HERE, "dom_v631.cjs"))) {
+      const mine = dumpOf(VER), theirs = dumpOf("v631");
+      T("C-5 at the target year the Roth tab's ladder card is byte-identical to v6.31's (two child processes)", !!mine && !!theirs && theirs === mine && /ROTH CONVERSION STRATEGY — 2029–2040/.test(mine),
+        !mine || !theirs ? "a child printed nothing" : `${mine.length} vs ${theirs.length} chars`);
+    } else console.log("    (C-5 skipped: this run folder has no dom_v631.cjs — a later release's run)");
   }
 }
 

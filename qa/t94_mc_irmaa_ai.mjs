@@ -36,13 +36,13 @@ console.error = () => {}; console.warn = () => {};
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v631";
 const CLAUDE = process.argv.includes("--claude");
-const KNOWN_VERSIONS = ["v630", "v631", "v632"];
+const KNOWN_VERSIONS = ["v630", "v631", "v632", "v633"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v631", "v632"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v631", "v632", "v633"].includes(VER);   // an array, so the next registration widens it
 const KD = "[KNOWN DEFECT 2026-10-24, D-51 — flips at v6.31]";
 const KA = "[KNOWN DEFECT 2026-10-24, AI-6 — flips at v6.31]";
 // Typed here from Anthropic's pricing page (platform.claude.com, read 2026-10-24), NOT read from the app: Claude Opus 4.8, $ per million tokens.

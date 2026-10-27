@@ -418,6 +418,13 @@ tally "t94-$CUR"   node t94_mc_irmaa_ai.mjs "$CUR"
 # processes); the Backtest's worst start; ACA dates at fixed clocks; the README; copy. Both legs (the v6.31 leg pins the defects). One count line.
 tally "t95-$PRIOR" node t95_f26_d61.mjs "$PRIOR"
 tally "t95-$CUR"   node t95_f26_d61.mjs "$CUR"
+# t96 (v6.33) — the tables index from their own year (D-67, F-28): the source by AST (no helper takes a base year, no call passes an as-of
+# year, no surcharge grown by the dollar clock, no engine reading the 2026 table directly); the extinction invariant (one household dated 2025,
+# 2026, 2027 and 2028: Engines A, B, C and projectBracketsAt the same in all four, and a MAGI in the tier gap); the Roth tab's rendered threshold
+# against a typed oracle; nothing moves for a plan dated 2026 (byte-identical JSON and the rendered ladder, against the v6.32 module); Engine B
+# against the statute oracle; the copy; the Taxes tab's bracket panel. Both legs (the v6.32 leg pins the defects). One count line.
+tally "t96-$PRIOR" node t96_table_year.mjs "$PRIOR"
+tally "t96-$CUR"   node t96_table_year.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

@@ -22,7 +22,7 @@ import { spawnSync } from "child_process";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v615";
-const KNOWN_VERSIONS = ["v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632"];
+const KNOWN_VERSIONS = ["v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -57,7 +57,7 @@ if (process.env.T78_CHILD) {
 
 await import("./env_dom.mjs");
 console.error = () => {}; console.warn = () => {};
-const POST = ["v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633"].includes(VER);   // an array, so the next registration widens it
 // §A / §C-3's pair. Two constants, NOT `VER === "v615"`: the registrar widens equality tests and arrays, and this comparison is true of
 // exactly one pair of builds (t76 records why).
 const D_PRIOR = "v614", D_CUR = "v615";
@@ -97,7 +97,10 @@ const byKey = (d, k, mod = X) => ev(d, mod).find(e => e.key === k);
 const inlineStrip = evs => { const tier = ["red", "green", "yellow"].find(t => evs.some(e => e.state === t)) || null;   // v6.14's JSX rule, verbatim
   return { tier, hits: tier ? evs.filter(e => e.state === tier) : [] }; };
 const SOURCE_NAMES = /src\/DangerClose\.jsx|TAX_CONSTS|IRMAA_CONSTS|HISTORICAL_RETURNS|PEER_DATA_SCF_YEAR|TAX_CONSTANTS_YEAR/;
-const TCY = Number((SRC.match(/const TAX_CONSTANTS_YEAR = (\d{4})/) || [])[1]);
+// v6.33 (D-67, DT-8 (a)): TAX_CONSTANTS_YEAR is no longer a typed literal — it is the newest federal table's year, read from the table — so
+// the leg's value is read from the module where the shim exports it (v6.33 on), and from the typed literal before that.
+const TCY = typeof g.TAX_CONSTANTS_YEAR === "function" && g.TAX_CONSTANTS_YEAR() !== undefined ? g.TAX_CONSTANTS_YEAR()
+  : Number((SRC.match(/const TAX_CONSTANTS_YEAR = (\d{4})/) || [])[1]);
 T("0-1 SETUP — the leg's TAX_CONSTANTS_YEAR is 2026 (every dated expectation below assumes it)", TCY === 2026, String(TCY));
 T("0-2 SETUP — the example household carries no expense-horizon alarm on these dates (the counts below are its fixed set)",
   DATES.every(d => !byKey(d, "exphorizon")));
@@ -249,7 +252,7 @@ console.log("  F — the Field Manual");
   T("F-0 SETUP — the Field Manual is found and its Events entry states a count", DOCS.length > 100000 && !!m, m ? m[1] : "no count");
   T(`F-1 the Events entry's count (${m ? m[1] : "?"}) equals the events the example two-person household actually has (${n})`, !!m && WORDS[m[1]] === n, `${m ? m[1] : "?"} vs ${n}`);
   // v6.29 (F-25, DF-6 a): spouse B gets an RMD event of their own ("rmdB"), so the example couple has seventeen
-  EQ(`F-1b ${POST ? "" : "[v6.14] "}that number`, n, POST ? (["v629", "v630", "v631", "v632"].includes(VER) ? 17 : 16) : 18);
+  EQ(`F-1b ${POST ? "" : "[v6.14] "}that number`, n, POST ? (["v629", "v630", "v631", "v632", "v633"].includes(VER) ? 17 : 16) : 18);
   if (POST) {
     T("F-2 the Ranking entry no longer says the Events tab flags the benchmarks; a later version carries the 2028 survey",
       !DOCS.includes("when the Events tab flags these benchmarks") && DOCS.includes("the 2028 survey publishes ~fall 2029, and a later version of the app will carry it."));

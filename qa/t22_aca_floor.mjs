@@ -93,7 +93,9 @@ const PCT_BELOW_133 = 0.021;
 // ── GROUP A · the floor binds in BOTH regimes  [EXTINCTION] ────────────────────────────────
 console.log("\n\u2500\u2500 A \u00b7 the floor binds in both regimes [EXTINCTION: D-B]");
 {
-  const P = g.acaApplicablePct;
+  // v6.33 (D-67, DT-3 (a)): the applicable-percentage table is keyed by coverage year, and the function takes it as a third argument —
+  // 2026 here, the table these figures are typed from. A two-argument function (every leg through v6.32) ignores it.
+  const P = (r, reg) => g.acaApplicablePct(r, reg, 2026);
   for (const r of [1.001, 1.0]) {
     EQ(`A: ratio ${r} \u2014 current law is eligible at ${(PCT_BELOW_133 * 100).toFixed(2)}%`, P(r, "current"), PCT_BELOW_133);
     CK(`A: ratio ${r} \u2014 enhanced is eligible (0% applicable pct below 150% FPL)`, P(r, "enhanced") === 0, String(P(r, "enhanced")));
@@ -364,14 +366,14 @@ console.log("\n\u2500\u2500 G \u00b7 negative controls (if one does NOT fire, th
     try { stillTrue = probe(); } finally { C.floorMult = saved; }
     CK(`G: control fires \u2014 ${name}`, stillTrue === false, "assertion survived a corrupted floorMult");
   };
-  neg("current-law ineligibility below 100% FPL", () => g.acaApplicablePct(0.999, "current") === null);
-  neg("enhanced-regime ineligibility below 100% FPL (this is D-B's control)", () => g.acaApplicablePct(0.999, "enhanced") === null);
+  neg("current-law ineligibility below 100% FPL", () => g.acaApplicablePct(0.999, "current", 2026) === null);
+  neg("enhanced-regime ineligibility below 100% FPL (this is D-B's control)", () => g.acaApplicablePct(0.999, "enhanced", 2026) === null);
   neg("the sub-floor $0 payout", () => g.acaSubsidyAnnual(0.95 * FPL_2026_COUPLE, 2026, 2, 19200, "current") === 0);
   neg("acaBelowFloor's predicate", () => g.acaBelowFloor(FPL_2026_COUPLE - 1, 2026, 2) === true);
   neg("the A2 flag set on the bridge household",
     () => Object.keys(g.runRothStrategies(BRIDGE).find(r => r.key === "none").acaFloorYrs).length > 0);
   CK("G: floorMult was restored after the controls", g.ACA_CONSTS().floorMult === saved, String(g.ACA_CONSTS().floorMult));
-  CK("G: and the floor works again", g.acaApplicablePct(0.999, "enhanced") === null);
+  CK("G: and the floor works again", g.acaApplicablePct(0.999, "enhanced", 2026) === null);
 }
 
 // ── GROUP H · v5.34 (S-6 + d-iv) · the ACA cliff SOLVER under a tracked basis ───────────────

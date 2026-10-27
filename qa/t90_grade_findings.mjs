@@ -24,13 +24,13 @@ import { spawnSync } from "child_process";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v628";
 const DUMP = process.argv.includes("--dump");
-const KNOWN_VERSIONS = ["v626", "v627", "v628", "v629", "v630", "v631", "v632"];
+const KNOWN_VERSIONS = ["v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v627", "v628", "v629", "v630", "v631", "v632"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v627", "v628", "v629", "v630", "v631", "v632", "v633"].includes(VER);   // an array, so the next registration widens it
 const KD = "[KNOWN DEFECT 2026-10-21, F-22 — flips at v6.27]";
 
 // ── TRAP 1 (t11's; do not "simplify" away): seed Math.random BEFORE the bundle loads — d3-random captures it at module load ──
@@ -253,7 +253,7 @@ if (POST) {
       && ["Monte Carlo Success", "Income Floor", "Sequence Protection", "Cost Structure", "Estate Readiness"].every(n => !/Fixed in this build|Graded from two fixed/.test(r.cats[n].seg))));
   T(`B-5b: the ceiling is stated under the overall grade and in the footnote, and it is the source's own (${ladder(CEIL)})`,
     Object.values(R).every(r => r.text.includes(`Highest any plan can score here: ${ladder(CEIL)}`) && r.text.includes(`the highest overall grade any plan can reach is ${ladder(CEIL)}`)));
-  T("B-5c: the footnote explains both marks", Object.values(R).every(r => /† Fixed in this build — the same grade for every plan/.test(r.text) && (["v629", "v630", "v631", "v632"].includes(VER) ? /‡ Graded from the first expense row labelled “golf” and the first labelled “Amazon” \(any case\)/ : /‡ Graded from expense rows labelled exactly “golf” and “Amazon”/).test(r.text)));
+  T("B-5c: the footnote explains both marks", Object.values(R).every(r => /† Fixed in this build — the same grade for every plan/.test(r.text) && (["v629", "v630", "v631", "v632", "v633"].includes(VER) ? /‡ Graded from the first expense row labelled “golf” and the first labelled “Amazon” \(any case\)/ : /‡ Graded from expense rows labelled exactly “golf” and “Amazon”/).test(r.text)));
   T("B-9: the equity share stays, as a fact, and says what IS graded (Sequence Protection reads the cash-and-bond share)",
     Object.values(R).every(r => /Current equity share\d+\.\d%Of retirement accounts, as held\. The equity share is not graded on its own; Sequence Protection reads the cash-and-bond share\./.test(r.text)));
   T("B-10: no plan shows the false or example-only sentences", FALSE_TXT.every(re => allText.every(t => !re.test(t))), FALSE_TXT.filter(re => allText.some(t => re.test(t))).map(String).join(", "));

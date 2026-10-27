@@ -34,13 +34,13 @@ import { spawnSync } from "child_process";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v630";
-const KNOWN_VERSIONS = ["v629", "v630", "v631", "v632"];
+const KNOWN_VERSIONS = ["v629", "v630", "v631", "v632", "v633"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v630", "v631", "v632"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v630", "v631", "v632", "v633"].includes(VER);   // an array, so the next registration widens it
 const KD = "[KNOWN DEFECT 2026-10-22, D-60 — flips at v6.30]";
 const GAP = 0.0025;   // C-CPI-U below CPI-U, CBO Budget Options 12 Dec 2024 — typed here, not read from the app
 
@@ -126,7 +126,9 @@ if (process.argv.includes("--module")) {
   // v6.30's release run proved it equal to v6.29's here — and the v6.30 leg, now the PRIOR leg, prints a skip. A keyed map, so the next
   // registration has to decide its entry rather than widen a condition.
   // v6.32: Engine D is unchanged at v6.32 too (D-61 touches Engines B and C; F-26 no engine), so the v6.32 leg compares with v6.31's module.
-  const DREF_BY = { v631: "v630", v632: "v631" };
+  // v6.33: Engine D's Bracket column now reads each year's own table (D-67), which for this household — dated 2026, retiring in 2026 — is
+  // the same figure to the bit, so the v6.33 leg compares with v6.32's module.
+  const DREF_BY = { v631: "v630", v632: "v631", v633: "v632" };
   const DREF = existsSync(join(HERE, "app_v629.mjs")) ? "v629" : (DREF_BY[VER] && existsSync(join(HERE, `app_${DREF_BY[VER]}.mjs`)) ? DREF_BY[VER] : null);
   if (POST && DREF) {
     const MP = await import(pathToFileURL(join(HERE, `app_${DREF}.mjs`)).href); const GP = MP.__g;
@@ -464,7 +466,7 @@ const srcOf = n => SRC.slice(n.start, n.end);
     const bridge = topFn("withdrawalPlanSeries");
     T("H-6 the bridge passes Engine D's figures through (no inflation arithmetic)", bridge && all(bridge, n => n.type === "CallExpression" && /Math\.pow|planDollarFactor/.test(srcOf(n.callee))).length === 0);
     // v6.31 (D-51, DS-3 (a)): What Breaks adds Engine A's IRMAA, also in today's dollars (t94 D-4 holds the rendered figure). An array, so the registrar widens it.
-    T("H-7 What Breaks reads Engine A's tax in today's dollars", ["v631", "v632"].includes(VER)
+    T("H-7 What Breaks reads Engine A's tax in today's dollars", ["v631", "v632", "v633"].includes(VER)
       ? /estAnnualTax = \(_cT\.totTaxToday \+ \(Number\.isFinite\(_cT\.totIrmaaToday\) \? _cT\.totIrmaaToday : 0\)\) \/ planYears/.test(SRC)
       : /estAnnualTax = _cT\.totTaxToday \/ planYears/.test(SRC));
     T("H-8 What Breaks values a fixed pension at its real worth at retirement", /const annualPenGuar = \(\) => _pen \* 12 \/ _rbWB;/.test(SRC));

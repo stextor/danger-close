@@ -27,19 +27,19 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v610";
-const KNOWN_VERSIONS = ["v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632"];
+const KNOWN_VERSIONS = ["v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632"].includes(VER);   // an array, so register_tag2 widens it each release
+const POST = ["v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633"].includes(VER);   // an array, so register_tag2 widens it each release
 // v6.11 (F-19r DF-4): the Portfolio Size row has no floor band any more — at or below the 90th percentile it reads "Below the top 10%",
 // where v6.10 read "TOP 25%". Gated per leg (§B2), an array so the next registration widens it.
-const NOFLOOR = ["v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632"].includes(VER);
+const NOFLOOR = ["v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633"].includes(VER);
 // v6.15 (docs/SCOPE_EVENTS_USER_FACING_V615.md): the Events tab no longer carries the peer-benchmark refresh alarm — a maintainer's
 // chore shown to every user. §E asserts its absence on those legs. An array, so the next registration widens it.
-const NOPEER = ["v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632"].includes(VER);
+const NOPEER = ["v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633"].includes(VER);
 const require = createRequire(import.meta.url);
 const { __g: g, __test: X } = await import(pathToFileURL(join(HERE, `app_${VER}.mjs`)).href);
 const SRC = readFileSync(join(HERE, "..", `${VER}.jsx`), "utf8");
