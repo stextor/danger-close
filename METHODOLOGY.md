@@ -3059,6 +3059,9 @@ above, gives the corrected ones).
   streams grow from today at the plan's inflation, *i* — the probability-weighted inflation of the active preset (about 2.5% under the
   default BULL-LEANING prior, 2.7% under BASE). A pension, a stream without COLA, the conversion slider, the example's built-in part-time
   work and a QCD are the dollars paid in that year (DU-9: the built-in work is a fixed amount, the conservative reading).
+  *(v6.33: the one clock is for dollars, not for the published tables. Through v6.32 the engines also indexed the 2026 tables from the
+  as-of year, which for a plan dated after 2026 left every threshold short; from v6.33 each table indexes from its own year — The tables
+  index from their own year (v6.33), below.)*
 - **One unit.** Engines A, B, C and D compute each year in that year's own dollars. The bridge hands Engine D's draw and gain on unchanged
   (`withdrawalPlanSeries` holds no inflation arithmetic).
 - **Today's balances reach retirement at inflation** (DU-7 (a)): every engine (A, B, C and D) carries them by
@@ -3081,6 +3084,8 @@ above, gives the corrected ones).
 | State figures (DU-4 (a)) | fixed, as each statute states them | e.g. Georgia's $65,000 exclusion is a fixed figure in O.C.G.A. §48-7-27(a)(5)(A) |
 
 - **IRMAA surcharges** grow with *i* to their **premium** year (`irmaaYr` = the MAGI year + 2) — their 2026 value in today's dollars (DU-5 (a)).
+  *(From v6.33 they grow from their table's year, not the as-of year — so a surcharge keeps its 2026 value in 2026's dollars; for a plan dated
+  2026 that is today's dollars, as before.)*
 - **What the tables show** (DU-2 (a)). The Withdrawal, Taxes and IRMAA tabs' year rows are each year's own dollars, and say so. The Taxes
   tab's lifetime cards and the IRMAA tab's total are also given in today's dollars (each row ÷ (1 + i)^(year − as-of), summed). The Roth tab's
   strategy table is in today's dollars throughout: each year's tax restated at the plan's inflation, each ending balance divided by the
@@ -3279,3 +3284,100 @@ The same release (v6.32) also changed presentation: the Stress, Social Security,
 for the plan (UsabilityFlaws F-26), and the Roth tab's conversion ladder starts at the selected retirement year, like the strategy table beside it,
 so its built-in work taper is keyed to the same year as Engine C's (above). Those are recorded in the CHANGELOG; the ladder's figures move only
 when −1 or +1 YEAR is selected — at the retirement year the app opens on they are v6.31's.
+
+## The tables index from their own year (v6.33)
+
+**What was wrong (v6.32, measured at the scope — `docs/SCOPE_TY2027_REFRESH_V633_V634.md` §0.3; MissingFeatures D-67).** The published figures
+— the federal brackets, standard deduction and its age-65 extra, capital-gains breakpoints, AMT figures and QCD limit (IRS Rev. Proc. 2025-32,
+*for taxable years beginning in 2026*), the IRMAA tiers and surcharges (CMS, for the 2026 premium year) and the Social Security wage base (SSA,
+for 2026) — are each a year's figures. Every engine indexed them from the **plan's as-of year** instead: `inflateTaxConst(base, yr, asOfYr)` and
+its four siblings at 18 call sites, and the IRMAA surcharge grown with the dollar clock, `SUR × (1 + i)^(premium year − as-of)`, at three more.
+For a plan dated 2026 the two bases are the same number, which is why no test saw it — every fixture was dated 2026. For a plan dated 2027 every
+year was priced with one year of indexing missing: thresholds about one year's inflation low, so tax read high — and the surcharges, grown from
+2027 rather than 2026, one year's inflation low. For a plan dated 2025, the reverse. Every plan becomes "dated 2027" on 1 January.
+
+**The rule.** A published figure belongs to the year it was published for, whatever date the plan carries. Each table now carries its year,
+and a year reads (DT-2 (a)):
+
+- **its own table**, when one is held;
+- **the newest held table before it, indexed forward from that table's year** — every year after the newest table, at the rates of *One dollar
+  unit and one inflation clock* (above): *i* − 0.25 point for the §1(f)(3) family, *i* for the IRMAA tiers, surcharges and the wage base;
+- **the oldest table deflated from its year**, for a year before every held table — what v6.32 did for such a row on a plan dated 2026. Such
+  rows belong to a plan dated before 2026 or to one already retired (a 2024 retirement year on a plan dated 2026 has 2024 and 2025 rows).
+  *(The scope's DT-2 (a) first said "as it stands, no deflation", on two premises the build review found false: that only a plan dated before
+  2026 reaches such a row, and that v6.32 did not deflate there. It did, for every already-retired plan. Steve, 2026-10-27: "Deflate before
+  2026" — so every plan dated 2026, retired or not, prices to the bit what it did.)*
+
+The IRMAA top tier keeps its statutory carve-out unchanged: frozen at $500,000 / $750,000 through 2027 and indexed from that frozen base after
+(BBA-2018 §53114), whatever table it is read from. The NIIT, §86, Additional Medicare and OBBBA senior-deduction figures are not indexed in
+law and do not change.
+
+**What changed.**
+- **Year-keyed tables.** `FED_TABLES` (the federal family; `TAX_CONSTS` is its 2026 entry), `IRMAA_TABLES` (by premium year; `IRMAA_CONSTS` is
+  2026's), `WAGE_BASE_TABLES`, and the ACA applicable-percentage table keyed by coverage year (`tableCurrentByCoverageYear`, DT-3 (a)). One
+  rule picks a table for any year, `heldTableYear`. In v6.33 each holds 2026 alone, so no figure changes; v6.34 adds 2027.
+- **The five helpers lose their base-year parameter.** `inflateTaxConst(base, yr)`, `inflateWageBase(base, yr)` (through `wageBaseFor(yr)`),
+  `seniorExtraFor(filingSingle, ageA, ageB, yr, filerIsA)`, `irmaaThresholdFor(upper, isTopTier, premiumYr)` and
+  `irmaaTierFor(magi, uppers, premiumYr)` each index from the table held for the year they are given, so no caller can pass the as-of year
+  again. A surcharge comes from one helper, `irmaaSurchargeFor(tier, persons, premiumYr)`, grown from its table's year. The engines read
+  their figures per year — `taxFactsFor(filingSingle, yr)` gives that year's table and its year; without a year it gives only the statutory
+  figures, so a call that forgets the year cannot quietly read 2026's table.
+- **`TAX_CONSTANTS_YEAR`** — the year the staleness strip and Docs §13 report — is the newest federal table's year, read from the table
+  (DT-8 (a)). The Events tab's tax notice names each family's year when they differ (CMS publishes after the IRS, so for a few weeks a copy can
+  hold next year's federal figures and this year's IRMAA tiers); the strip keys on the federal year alone.
+- **The dollar clock is unchanged.** `planDollarFactor(yr, asOfYr)` turns the plan's today's dollars into year `yr`'s and still runs from the
+  as-of year (D-60): it is the plan's own clock, not a published table.
+
+**What it moved — measured at the build** (the shipped v6.32 against v6.33, both as modules; the example with only its as-of date changed, as
+the Taxes and IRMAA tabs open — the drawdown series under the opening scenario passed in, as both tabs pass it; lifetime totals in today's
+dollars):
+
+| The example dated | Conversions | Lifetime tax | IRMAA |
+|---|---|---|---|
+| 2026-04-18 (as shipped), or any date in 2026 | $70,000 / $250,000 | unchanged / unchanged | unchanged / unchanged |
+| 2025-06-15 | $70,000 / $250,000 | **+$4,416** / **+$3,440** | $0 / **−$645** |
+| 2027-01-15 | $70,000 / $250,000 | **−$4,109** / **−$3,306** | $0 / **+$600** |
+| 2028-01-15 | $70,000 / $250,000 | **−$7,773** / **−$6,034** | $0 / **+$1,215** |
+
+Dated 2027 or later, every threshold rises by the indexing that was missing, so tax falls. IRMAA moves the other way here: the surcharges
+now grow from 2026 too, and where a year's MAGI stays in the same tier the larger surcharge outweighs the higher threshold. Dated 2025 the
+reverse on both. *(The scope's §0.3 measured these without the drawdown series the tabs pass in — −$4,026 / −$3,806 and IRMAA −$3,082 for 2027
+— and so had IRMAA's direction backwards; the build review found it, and the table above is from the tabs' own call.)* The Withdrawal tab's Bracket column and the Roth
+tab's ladder read `projectBracketsAt`, which moves the same way — its 2030 figures for a joint return with one spouse 65 or older:
+
+| `projectBracketsAt(2030)`, v6.32, plan dated | Standard deduction | 12% bracket top | IRMAA tier-1 threshold (2032 premium) |
+|---|---|---|---|
+| 2025 | $38,280 | $113,990 | $263,411 |
+| 2026 (and every date from v6.33) | $37,350 | $111,221 | $256,386 |
+| 2027 | $36,442 | $108,519 | $249,548 |
+
+**Nothing moves for a plan dated 2026** — Engines A to D, the bridge, the Monte Carlo's tax schedule, both seeded Monte Carlo engines, the
+Verify checks and the rendered Roth ladder are bit-identical, v6.32 → v6.33, on the example and six more plans dated 2026, one of them
+already retired (`t96` §C).
+
+**Two drawings of the brackets (UsabilityFlaws F-28).** The Taxes tab's bracket-by-bracket panel drew the selected year against Engine B's
+`brackets2026` — the 2026 table at the filing status of the plan's **last** year — through Engine B's as-of `inflate`. On a plan that ends
+with a survivor every joint year was drawn against Single bounds: on the example's opening view, 2029's $144,646 of taxable income, in the 22%
+bracket, was drawn with about $31K in 24%. The Roth tab's BRACKET UTILIZATION bar drew the first ladder year's income against the 2026 table
+unindexed, so it ran ahead of the "headroom to 24%" printed beside it (found by the build review). Each now reads its year's own table and
+filing status. No engine figure moved; only the drawings did.
+
+**Simplifications, stated, each with its direction.**
+- **A year before every held table is the oldest table deflated** (DT-2, revised) — today, 2026's figures deflated to 2025 or 2024. That is
+  not the year's real figure (OBBBA reset several by more than inflation; 2024's real joint standard deduction was $29,200 against the
+  deflated $30,654) — the real 2024 and 2025 tables are not held. Deductions and brackets read slightly high on such a row (**optimistic**, small), exactly as through v6.32.
+- **A year after the newest table is the newest indexed forward**, at the plan's rates — not the figure the IRS, CMS or SSA will publish. The
+  difference shows each autumn, when a year's real figures replace its projection (v6.34 for 2027).
+- **The ACA applicable-percentage table is held as published**, never indexed: the IRS re-sets it each year by §36B(b)(3)(A)(ii)'s premium-growth
+  adjustment, which the model does not project, so the newest published table stands for every coverage year after it (as through v6.32).
+
+**Tests.** `t96_table_year.mjs`, both legs (the v6.32 leg pins each defect as a dated `[KNOWN DEFECT 2026-10-26, D-67]` or
+`[KNOWN DEFECT 2026-10-27, F-28]`): §A the source by AST — no helper takes a base year, no call passes an as-of year, no surcharge is grown by
+the dollar clock, no engine reads an indexed figure from the 2026 table directly, `TAX_CONSTANTS_YEAR` read from the table, the ACA table keyed
+by coverage year, the panel's table; §B **the extinction invariant** — one household dated 2025, 2026, 2027 and 2028 with every other input
+fixed in nominal dollars gives the same standard deduction, §63(f) extra, ordinary, capital-gains and minimum tax, payroll tax, QCD, IRMAA
+tier, surcharge and threshold in Engines A, B and C and `projectBracketsAt` in all four runs (on v6.32 each moves), and a MAGI placed between
+the as-of-indexed and the table-indexed tier-1 threshold is billed the same tier in every run; §B2 the Roth tab's rendered IRMAA threshold,
+dated 2026 and 2027, against $218,000 × (1 + *i*)^(premium year − 2026); §C nothing moves for a plan dated 2026; §D Engine B against the
+statute oracle with its base year typed as the table's, and this section's measured moves; §E the copy; §F the two drawings. `t29` gains the boundary row `asof_table_year` (the example
+is ON: dated in its table's year). `qa/tools/controls_v633_table_year.py` puts each removed defect back and shows its check turn red.

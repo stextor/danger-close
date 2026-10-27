@@ -1,5 +1,170 @@
 # Changelog
 
+## v6.33 — the published tax tables index from their own year (D-67); two bracket drawings read the right table (F-28)
+
+**A modeling release that moves nothing for a plan dated 2026.** Each published table — the federal brackets and deductions, the IRMAA tiers
+and surcharges, the Social Security wage base, the ACA applicable percentages — now carries its year, and every engine indexes it from that
+year instead of from the date the plan carries. It is the structural half of the 2027 tax-figure refresh. The 2027 figures follow in v6.34,
+once the IRS and CMS have published. The scope is `docs/SCOPE_TY2027_REFRESH_V633_V634.md` (repo-only; build record §7). Steve: *"Yes take the
+'close by decision' route and fold it into the tax-refresh scope"*; on the decisions, DT-1 to DT-8 all as recommended. **DT-2 was revised at
+the build** (below): *"Deflate before 2026"*. Built on v6.32 (source `fe8188a5…`). METHODOLOGY's new section *The tables index from their own
+year (v6.33)* is the full account.
+
+**What was wrong (v6.32, measured at the scope and corrected at the build).**
+- **The tables were indexed from the plan's as-of year** (MissingFeatures D-67, filed and closed here). Engines A, B and C, `projectBracketsAt`
+  (Engine D's bracket column and the Roth ladder) and the Roth tab's IRMAA calendar grew the 2026 figures from the plan's date, at 18 calls to
+  five helpers, and grew the IRMAA surcharge with the dollar clock at 3 more sites. For a plan dated 2026 the two bases are the same number,
+  so no test saw it — every fixture was dated 2026. From 1 January every plan saved is dated 2027. On the example dated 2027, as the tabs open,
+  lifetime tax read **$4,109 high** at $70,000 conversions and $3,306 high at $250,000, and IRMAA read **$600 low** at $250,000 (today's
+  dollars). Dated 2025, the reverse.
+- **Two drawings of the brackets read the wrong table** (UsabilityFlaws F-28, filed and fixed here). The Taxes tab's bracket-by-bracket panel
+  drew the selected year against the 2026 table at the filing status of the plan's last year. On a plan ending with a survivor, every joint
+  year was drawn on Single bounds: the example's 2029, $144,646 of taxable income in the 22% bracket, showed about $31K in 24%. The Roth
+  tab's BRACKET UTILIZATION bar drew the first ladder year against the 2026 table unindexed, ahead of the "headroom to 24%" beside it.
+
+**What changed.**
+- **Year-keyed tables.** Each table is keyed by its year:
+  - `FED_TABLES`, the federal family; `TAX_CONSTS` is its 2026 entry.
+  - `IRMAA_TABLES`, keyed by premium year.
+  - `WAGE_BASE_TABLES`.
+  - The ACA applicable-percentage table, keyed by coverage year (DT-3 (a)).
+
+  One rule picks the table for any year. A year reads its own table if one is held. A later year indexes forward from the newest table. A year
+  before every held table deflates from the oldest. Each table holds 2026 alone for now.
+- **The five helpers lose their base-year parameter.** They are `inflateTaxConst`, `inflateWageBase`, `seniorExtraFor`, `irmaaThresholdFor`
+  and `irmaaTierFor`, and each now indexes from the table held for the year it is given. Two new helpers:
+  - `irmaaSurchargeFor` grows a surcharge from its table's year.
+  - `taxFactsFor(filingSingle, yr)` gives a year's table and its year. Without a year it gives only the statutory figures, so a forgotten
+    year turns into NaN rather than quietly reading 2026's figures.
+- **The IRMAA top tier's freeze** stays a carve-out. It now indexes from the later of the freeze year and its table's year, so a table
+  published for 2028 or later is not indexed again.
+- **`TAX_CONSTANTS_YEAR`** is read from `FED_TABLES` (DT-8 (a)). The Events tab's tax notice names each family's year when they differ; the
+  staleness strip keys on the federal year.
+- **The two bracket drawings** each read their year's own table and filing status (F-28).
+- **Copy.**
+  - The Taxes tab says the indexed figures are the published ones and grow from their year, whatever date the plan carries.
+  - The IRMAA tab's surcharge note now says *"2026's dollars"*.
+  - The Field Manual's §6 indexing paragraph and a §13 entry.
+  - METHODOLOGY: the new section, plus a note in *One dollar unit…* that the one clock is for dollars, not for published tables.
+  - OPERATIONS §I: next year's refresh adds a table entry and bumps nothing by hand.
+  - The four version sites read v6.33.
+
+**What it moved, measured at the build.** The example with only its as-of date changed, as the tabs open, in today's dollars:
+
+| Example dated | Tax, $70K | Tax, $250K | IRMAA, $70K | IRMAA, $250K |
+|---|---|---|---|---|
+| any date in 2026 | unchanged | unchanged | unchanged | unchanged |
+| 2025-06-15 | +$4,416 | +$3,440 | $0 | −$645 |
+| 2027-01-15 | −$4,109 | −$3,306 | $0 | +$600 |
+| 2028-01-15 | −$7,773 | −$6,034 | $0 | +$1,215 |
+
+Nothing moves for a plan dated 2026, already-retired ones included: `t96` §C finds seven such plans bit-identical. MC parity holds with no
+intended difference.
+
+**Revised at the build, with Steve.** DT-2 (a) said a year before every held table should use the oldest table *"as it stands, no deflation"*.
+It rested on two premises, and the build review found both false. The first was that only a plan dated before 2026 reaches such a year: an
+already-retired plan dated 2026, retiring in 2024, has rows in 2024 and 2025. The second was that v6.32 did not deflate there: it did. As first
+built, that plan's 2024 standard deduction went from $30,654 to $32,200 and its lifetime tax fell $1,336 (optimistic). Steve, asked:
+*"Deflate before 2026."* Every plan dated 2026 now prices to the bit what it did.
+
+**Owned.**
+- The scope's measured deltas (§0.3) called Engines B and C without the drawdown series both tabs pass in. As a result its IRMAA direction
+  was backwards: dated 2027, v6.32 read IRMAA $600 *low* at $250,000, not $3,082 high. Both the first METHODOLOGY draft and the first Field
+  Manual draft carried the wrong figures. The build review found it, every figure above is re-measured from the tabs' own call, and scope
+  §0.3 carries a correction note.
+- The first `t96` §A could not see a base year brought back with a default value (`baseYr = …`). Five of its own controls would have
+  reported MISSED; the review found it before any control ran.
+- The first packaged run had three red checks, and both causes were fixed before the run was repeated from scratch:
+  - `t95` C-5, on both legs. It compares with v6.31's bundle, which this run folder does not build.
+  - `domdiff` TAXES. The bracket panel's intended change was not yet declared for the pair.
+
+**Not changed, by decision:** UsabilityFlaws **F-27** is closed by decision (Steve, 2026-10-26). The example's sample briefing keeps its stress
+figures. They are the example household's own requests to an AI, not a description of the model, and changing them would mean also
+recognising the old text (the loader's DC-8 check). `t89` A-7 keeps pinning it.
+
+**Limitations, stated.**
+- A year before 2026 deflates the 2026 figures, which are not that year's real ones: 2024's real joint standard deduction was $29,200, against
+  the deflated $30,654. This is optimistic and small, exactly as v6.32 had it.
+- A year after the newest table is a projection, not the published figure.
+- The ACA table is held as published and never indexed (as before).
+- The 2027 figures are not in this build. The IRS's TY2027 Rev. Proc., the §402(g) notice and CMS's 2027 IRMAA figures are unpublished as of
+  this build. SSA's $192,300 wage base and Rev. Proc. 2026-26's ACA table are published and wait for v6.34 (DT-1).
+- Two v6.34 obligations are recorded in scope §7:
+  - The Verify tab's typed IRMAA expectations must be re-derived.
+  - The IRMAA tab's "2026 IRMAA TIERS" heading must be read from the table.
+
+**Tests.** New suite **`t96_table_year.mjs`**, run on both legs. The v6.32 leg pins each defect as a dated `[KNOWN DEFECT 2026-10-26, D-67]`
+or `[KNOWN DEFECT 2026-10-27, F-28]`.
+- **§A, the source by AST:**
+  - No helper takes a base year, defaults included.
+  - No call passes an as-of year: 18 on v6.32.
+  - No surcharge is grown by the dollar clock: 3 on v6.32.
+  - No engine reads an indexed figure from the 2026 table directly: 47 on v6.32.
+  - The component reads the 2026 table only for labels.
+  - `TAX_CONSTANTS_YEAR` is read from the table, and the ACA table is keyed by year.
+- **§B, the extinction invariant.** One household is dated 2025, 2026, 2027 and 2028, with every other input fixed in nominal dollars. It
+  gets the same standard deduction, §63(f) extra, ordinary tax, capital-gains tax and AMT, payroll tax, QCD, IRMAA tier, surcharge and
+  threshold in Engines A, B and C and `projectBracketsAt` in all four runs. A MAGI placed in the gap between the two tier-1 thresholds is
+  billed the same tier every time. On v6.32 each moves.
+- **§B2:** the Roth tab's rendered IRMAA calendar is checked against $218,000 × (1+i)^(premium year − 2026).
+- **§C, bit-identity:** Engines A–D, the bridge, the Monte Carlo's schedule, both seeded Monte Carlo engines, `projectBracketsAt` 2026–2060,
+  the Verify checks and the rendered Roth ladder are byte-identical on seven plans dated 2026, one of them already retired.
+- **§D:** Engine B against the statute oracle, with its base year typed as the table's; the deltas above are reproduced (measured).
+- **§E:** copy and the Events notice, with a wage-base table one year ahead.
+- **§F:** the two drawings.
+- **`boundaries.mjs`** gains `asof_table_year`. The example is ON, `t29` B-28; dated 2027 it clears on v6.33, `t29` C-table-1.
+- **Re-gated:**
+  - `t22` passes the coverage year.
+  - `t78` reads `TAX_CONSTANTS_YEAR` from the module.
+  - `t95` C-5 prints a skip where the run folder has no v6.31 bundle.
+  - `domdiff_withdrawal.mjs` bounds the v632 → v633 pair: the year table is identical and the bracket panel differs.
+- **Registered:** `v633` — 443 sites by AST (261 ladder entries, 180 gates, 2 version maps). Done by hand: `t33` PINS (values unchanged),
+  `t93`'s Engine D reference and the three `.py` suites.
+- The shim exports the table accessors. The federal oracle's base-year parameter is documented as the table's year.
+- `package_check`'s OPEN allowlist carries the scope, which is half built, until the v6.34 build marks it FULFILLED (I-2). This is tooling
+  that no suite runs, and it was edited after the packaged run.
+
+**Counts**, from the full suite run from the packaged copies:
+- **10,133 app checks across 95 app suites, 0 failed, 0 DIED**;
+- MC parity 10/10 — every fingerprint byte-identical to v6.32 (no intended difference: the fingerprints are dated 2026);
+- tooling: `t21` 64, `domdiff` 33, `sets` 12 + 12;
+- GRAND **10,264**.
+
+Against v6.32, the current-leg changes are:
+- `t96`, new: 83.
+- `t29`: 122 → 124 (B-28, C-table-1).
+- `t95`: 163 → 153. Ten of its checks compare with v6.31's own module, which a v6.32 → v6.33 run does not build. A-4, on nine households, is
+  skipped silently by its `if (REF)`; C-5, the rendered ladder's identity, now prints its skip.
+
+Every other current-leg count is unchanged. `domdiff` goes 32 → 33 (the panel's bounded difference). The v6.32 leg counts 4,194: `t96` there
+40, and `t93` 95 with its D-5/D-6 skip. The two attribution runs count 234 and 237. Together 5,468 + 4,194 + 234 + 237 = 10,133.
+
+**Controls.** `qa/tools/controls_v633_table_year.py`, on a copy of the packaged run folder: **22 of 22 as expected** (C0 silent; C1–C20 and C9b each firing), every file restored and hash-checked. Each puts one removed defect
+back:
+- a base year on each of the five helpers, with an as-of argument at one site in Engine A, B or C, `projectBracketsAt`, the Roth tab, an
+  `irmaaTierFor` caller and the wage base;
+- a surcharge grown by the dollar clock;
+- the top tier's freeze removed (`t96` and `t44`), and the top tier indexed from 2027 whatever its table;
+- the no-deflation clamp;
+- `TAX_CONSTANTS_YEAR` typed;
+- the Taxes sentence, METHODOLOGY's heading, the Events notice, the ACA table fixed at 2026;
+- the two drawings;
+- the census row, via `t29`.
+
+**The build review.** An agent that had not seen the build was given the scope, the diff, the new suite and its controls. It found **2
+blockers, 4 should-fix and notes**, and every one was checked and taken (scope §7.3):
+- the DT-2 premise (above);
+- `t96` A-1 blind to a defaulted base year;
+- the measured figures taken without the tabs' series;
+- the Roth tab's bracket bar (now part of F-28);
+- the IRMAA tab's surcharge note;
+- the coverage gaps: a `seniorExtraFor` control and the tolerance wording. Engine A's LTCG and AMT and Engine C's QCD are covered by §A and
+  §C only, and the suite header says so.
+- Its v6.34 notes are recorded in scope §7.4. One of them is taken now: the top tier's freeze is v6.34-ready.
+
+**Provenance.** Source `5fd4f025c3aacda999989ce3395b73ee` · built `index.html` `64296d15860bd5756ab5e3376d5c57d2` (vite 5.4.21, `npm ci`; v6.32 rebuilt byte-identically to `2cdbfc54…`) ·
+`smoke_built` 22/22.
+
 ## v6.32 — QCDs after a death (D-61); the Stress, Social Security, Roth, Events and Backtest tabs say what the model does (F-26)
 
 **A modeling release, with a presentation pass.** From the year of the first death only the survivor may make a QCD, and five tabs now state
