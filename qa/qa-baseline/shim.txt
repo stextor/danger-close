@@ -176,6 +176,7 @@ export const __test = {
   stressRecovery: _g("stressRecovery"),
   // v6.32 (F-26) — the Stress tab's computed facts (t95 §S). GUARDED: it does not exist on the v6.31 leg, where t95 asserts its absence.
   stressPlanFacts: _g("stressPlanFacts"),
+  effectivePreTaxA: _g("effectivePreTaxA"),   // v6.34 (D-58): My Data's rule for spouse A's pre-tax figure (absent before v6.34 — guarded)
   historicalWorstRealWindow: _g("historicalWorstRealWindow"),
   historicalCumReturn: _g("historicalCumReturn"),
   presetExpectedRealEquity: _g("presetExpectedRealEquity"),
