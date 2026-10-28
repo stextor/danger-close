@@ -1,4 +1,9 @@
-# SCOPE — the 2027 tax-figure refresh: tables index from their own year (v6.33), then the 2027 figures (v6.34) · F-27 closed by decision
+# SCOPE — the 2027 tax-figure refresh: tables index from their own year (v6.33), then the 2027 figures (v6.35 — was v6.34) · F-27 closed by decision
+
+> **RENUMBERED 2026-10-27, at the v6.34 build** (decision DC-4 (a) of `docs/SCOPE_D58_CONTRIB_SAVE_V634.md`; Steve: *"Let's go with your
+> recommendations"*). v6.34 is the D-58 release, built while the 2027 figures were unpublished. **The 2027 figures ship as v6.35** (tag `v635`), and
+> their suite is **`t98_ty2027.mjs`** (`t97` is D-58's). Every *"v6.34"* below that names the 2027-figures release now means v6.35; the file
+> keeps its name so its citations hold. DT-7's 15 December date is unchanged.
 
 | Field | Value |
 |---|---|
@@ -196,7 +201,7 @@ clears it on v6.33.
   model (where they overlap the model, they agree), and changing the text would mean recognising the old text too (the loader's DC-8 check
   matches it exactly); `t89` A-7 keeps pinning it"*, with the same reason in its §H entry.
 
-### v6.34 — the 2027 figures (a data release on v6.33's structure)
+### v6.35 (was v6.34) — the 2027 figures (a data release on v6.33's structure)
 
 - **Adds a 2027 entry to each table**, each figure typed from its primary source and checked against it: the federal family from the
   TY2027 Rev. Proc.; IRMAA tiers and surcharges from CMS's 2027 fact sheet (the top tier stays $500,000 / $750,000, frozen through 2027); the
@@ -268,7 +273,7 @@ as-of year; the Field Manual §13. **Not touched:** `OBBBA_CONSTS` (statutory, u
   Roth tab §B2); the top-tier carve-out removed (must fire §C's `t44`); the Taxes sentence reverted; METHODOLOGY's heading removed; the
   unmutated run.
 
-### v6.34 — `t97_ty2027.mjs`, both legs
+### v6.35 (was v6.34) — `t98_ty2027.mjs` (was `t97`), both legs
 
 - Every 2027 figure against its source, **typed in the suite from the document**, never read from the app; the Verify tab's 2027 rows (DT-6).
 - Statute oracles for 2027: `fed_oracle` gains the 2027 table, typed; Engine B's 2027 and 2028 rows to the cent on three households; IRMAA at
@@ -425,7 +430,7 @@ An agent that had not seen the build was given this scope, the source diff, the 
 | **N7** v6.34 readiness | The top tier's freeze now indexes from the later of the freeze and its table's year (`t96` A-4j, control C19). The rest is §7.4 |
 | **N8, N9** completeness and bit-identity otherwise confirmed; the Taxes sentence and §6 said nothing of rows before 2026 | Both now say a row before 2026 deflates the figures |
 
-### 7.4 Carried to v6.34
+### 7.4 Carried to v6.35 (was v6.34)
 
 - **Verify tab.** The rows typed as 2026 expectations (the IRMAA indexing rows, from 109,000 and 500,000) must be re-derived for the 2027 table
   (DT-6). They fail loudly when the 2027 table lands.

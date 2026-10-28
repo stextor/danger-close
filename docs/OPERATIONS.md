@@ -625,10 +625,13 @@ cited line; this list is what a session reading only the pool now needs. **Open 
 - **`t10`'s `T` compares with EPS = $0.01, sized for dollars: assert a RATE as a boolean**, or it passes for anything within a cent (found by
   control C1, which a reverted 4% build passed). `t10` L984–987.
 - **An unedited Save & Apply on My Data is not a no-op on the portfolio** (v6.24 scope finding; MissingFeatures **D-58**): it re-stamps
-  `asOf` to today (intended) and, for a plan holding only a monthly pre-tax contribution with no per-paycheck figures, stores spouse A's
-  `contribPreTaxA` as 0 (the example's $2,500 a month → $0). A test that compares
-  figures before and after a save must hold the portfolio fixed and change only the table — or it measures D-58 and calls it the change
-  under test. `t87` §B holds `P0` fixed for exactly this reason. The v6.24 scope's first draft said "an unedited save moves nothing" and
+  `asOf` to today (intended). Through v6.33 it also stored spouse A's `contribPreTaxA` as 0 for a plan holding only a monthly pre-tax
+  contribution with no per-paycheck figures (the example's $2,500 a month → $0); v6.34 closed that (D-58), so from v6.34, on the example, the
+  as-of date is the one thing an unedited save moves that an engine reads (`t97` C-1) — and a run on the v6.33 leg still moves both. The
+  save still normalises other fields (a blank paycheck row written as 0, contribution percentages rounded to 0.1%, the SS table re-keyed);
+  none moves an engine figure on the example, but a hand-made plan is not the example, so compare figures, not the stored JSON. A test that compares
+  figures before and after a save must hold the portfolio fixed and change only the table — or it measures the as-of move (and, on the
+  v6.33 leg, D-58) and calls it the change under test. `t87` §B holds `P0` fixed for exactly this reason. The v6.24 scope's first draft said "an unedited save moves nothing" and
   was wrong on this point.
 - **Anchor a regex structural pin at line start (`^\s*const …`)**: the app's own comments quote retired expressions, and *"a comment must
   never be able to satisfy a structural pin."* `t1` L624–627, L698–701, L733, L808. `t19`'s `totalToWithdraw` extinction is a text scan with
