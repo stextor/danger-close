@@ -1314,7 +1314,9 @@ shows from a conversion cannot be appealed away — though a one-off spike leave
 its own after two years. A household that files one may pay less than the
 model projects for the years it projects. *(Corrected at v6.31: this said the omission is conservative without qualification. The
 work-stoppage case reassesses the first two premium years after retirement, and those the model does not charge at all — MissingFeatures
-**D-65**, and* The Monte Carlo pays IRMAA (v6.31) *below — so for them the model reads low, not high.)*
+**D-65**, and* The Monte Carlo pays IRMAA (v6.31) *below — so for them the model reads low, not high.) (From v6.35 those two years are
+charged when My Data states the last working years' MAGI — see* STAY UNDER IRMAA, the last working years, and one-time rows before
+retirement (v6.35) *below; left blank, they still are not.)*
 
 **Where the engines still legitimately differ.** From v6.30 they no longer differ in dollar basis: every engine COLA-indexes
 Social Security from the as-of year and computes each year in that year's own dollars (*One dollar unit and one inflation clock for
@@ -2631,8 +2633,9 @@ survivor factor after inflating and v6.18 before.
   year (the pension flat) and started from today's balances without growth. From v6.30 it prices from the as-of year, as the Monte Carlo
   does, and carries today's balances to retirement at the plan's inflation — the same real value, so v6.18's reading of "no growth" is kept
   (*One dollar unit and one inflation clock for the tax engines*; the contribution-accrual section's *no real growth* note).
-- **A one-time row dated before the retirement year is not in the Withdrawal tab's schedule** (it starts at retirement, from today's
-  balances). The tab says so. MissingFeatures **D-44**.
+- **Closed at v6.35** *(D-44)*. **A one-time row dated before the retirement year was not in the Withdrawal tab's schedule** (it starts at
+  retirement, from today's balances), nor in Backtest's or What Breaks'. From v6.35 all three start from today's holdings less those rows
+  (*STAY UNDER IRMAA, the last working years, and one-time rows before retirement (v6.35)*). MissingFeatures **D-44**.
 - **Closed at v6.20** *(D-44, the Monte Carlo half)*. **The Monte Carlo subtracted one-time rows in today's dollars** while it inflated
   the monthly rows — optimistic by the inflation to that date, small. From v6.20 both engines grow a one-time row with the run's
   inflation, like the monthly rows beside it (*The Monte Carlo pays the Taxes tab's tax (v6.20)*).
@@ -2823,7 +2826,9 @@ every path: measured at the build, the three 6-year runs (10,000 paths) take 0.3
   — was corrected at v6.23 (*Built-in work is the example's alone*); what remains is about the example alone. MissingFeatures **D-49**.
 - **An expense row for income tax would be charged twice** — the simulation now pays the tax itself. The Field Manual says so.
 - **The home-move cash** is not in Engines A–D (D-39), so not in the tax either; consistent with the Taxes tab.
-- **D-44's Withdrawal half** stays open: a one-time row dated before the retirement year is not in the Withdrawal tab's schedule (DC-5 (a)).
+- **D-44's Withdrawal half** was left open here (DC-5 (a)): a one-time row dated before the retirement year was not in the Withdrawal tab's
+  schedule. Closed at v6.35, with Backtest and What Breaks, which had the same gap (*STAY UNDER IRMAA, the last working years, and one-time
+  rows before retirement (v6.35)*).
 - **What-Breaks' tax** stays the Roth tab's strategy engine's lifetime tax averaged per year (it is a deterministic projector); its copy now
   names that engine, where it said "the Taxes engine", and no longer says it does not model taxes. From v6.31 it adds that engine's IRMAA (`totIrmaaToday`).
 
@@ -3207,9 +3212,10 @@ The surcharges are small beside the draws, so success rates move by about a poin
 $250,000 under BASE). The example as it opens is unchanged.
 
 **Simplifications, stated, each with its direction.**
-- **The first two premium years after retirement carry no surcharge anywhere** (MissingFeatures **D-65**, filed at this build). They are set
-  by the last two working years' income, which no engine projects: Engines A and C start at the retirement year. A household whose working
-  income was above a tier pays more than the model shows in those two years — **optimistic**. Form SSA-44 lets a new retiree ask SSA to
+- **The first two premium years after retirement carried no surcharge anywhere** (MissingFeatures **D-65**, filed at this build; from v6.35
+  charged when My Data states the last working years' MAGI, below). They are set by the last two working years' income, which no engine
+  projects: Engines A and C start at the retirement year. A household whose working income was above a tier pays more than the model shows
+  in those two years — **optimistic**, and still so from v6.35 when the field is left blank. Form SSA-44 lets a new retiree ask SSA to
   reassess them on current income (work stoppage is one of eight qualifying events; a Roth conversion is not). The IRMAA tab said through
   v6.30 that these years "err high"; that sentence was false and is replaced, and the tab, the Monte Carlo tab and the Field Manual say so.
 - **The surcharges do not follow the path**, like the income tax: one schedule from the plan's own draws and life expectancies, paid on
@@ -3422,3 +3428,82 @@ through the real controls — Export Backup, Save & Apply, the draft and its res
 plans with a breakdown, a disagreeing one and a frequency change; the extinction invariant (after an unedited save, with the as-of date held,
 the engines and both seeded Monte Carlo engines are bit-identical to the plan as loaded); edits; the 402(g) sentence; one rule read by every
 display site; the copy. `qa/tools/controls_v634_contrib.py` puts each removed defect back and shows its check turn red.
+
+## STAY UNDER IRMAA, the last working years, and one-time rows before retirement (v6.35)
+
+Three corrections, scoped together (`docs/SCOPE_D62_D65_D44_V635.md`; decisions of 2026-10-28, all as recommended). D-65 and D-44 made
+plans look better than they are; D-62 did not — its cost was always charged — but a strategy did not do what its name says.
+
+**STAY UNDER IRMAA (D-62).** The strategy solved each year's conversion so that the year's income landed on the first IRMAA threshold of
+the premium year two years out, with two errors. *Cause 1:* the year's tax is then paid by selling from the brokerage, and that sale's
+realized gain (and, on an ACA bridge year, the ACA-premium sale's) goes into the lookback MAGI the surcharge reads — the solve left it out.
+It happens at a declared gain of 0%: Engine A carries the brokerage to retirement at inflation but not its basis (v6.30). *Cause 2:* the
+answer was rounded to the nearest dollar, and a solve landing exactly on the threshold could round up and cross it by cents — which costs
+a full tier. Measured at the scope on v6.34: every one of the 17 fixtures crossed in 1 to 8 conversion years; the example at the shipped
+defaults in 6 of 10 (4 of them by under a dollar), by up to $2,916; with the tax withheld from the conversion every crossing was under a
+dollar, and on `t3`'s household those two crossings cost $3,986. From v6.35 the strategy takes the **largest whole-dollar conversion**
+whose estimated lookback MAGI is at least `IRMAA_SOLVER_MARGIN` ($500, a constant of its own, not the ACA strategy's) under the cliff,
+found by bisection. The estimate is the ACA strategy's (`_estSaleGain`, v5.10.1 onward), lifted to year scope unchanged in body and
+shared; the ACA strategy is bit-identical. Why a search and not the ACA strategy's fixed point: on a bridge year the estimate jumps where a
+candidate crosses the ACA cliff, and a fixed point there cycles with period 2 (found at the scope's review: 53 of 192 single-filer ACA
+households of 3–4). A bisection needs only that the acceptable conversions form one range: the estimate almost always rises with the
+conversion, and where it falls — a candidate lifting MAGI over the ACA 100%-of-FPL floor, so a subsidy appears and the ACA-premium sale
+shrinks — it is far below any IRMAA threshold (once in 624 tested year-grids, $209,459 under the target; the scope had said it never
+falls, and the build stopped on finding it — decided 2026-10-28). Why the estimate makes **four** ACA subsidy evaluations for this strategy (the ACA strategy keeps its three): the
+engine evaluates the subsidy once before its 3-pass loop and sells for the loss its last pass leaves, so a 3-pass estimate stopped one step
+short — up to $14 of MAGI near the ACA cliff. The search can settle just under the ACA cliff, where that gap flipped the subsidy, forced
+the sale and put the lookback MAGI $20,000–$49,000 over the IRMAA cliff on single filers in an ACA household of 3 (found at the build; a
+first fix there — a second, unscoped margin — was withdrawn at the build review, which found this cause). With four the estimate equals
+the engine's figure to the cent. Effect on the strategy row at the defaults: the example's STAY UNDER IRMAA pays $0 of IRMAA in today's
+dollars, against $13,800 on v6.34, converts $822 more in today's dollars over the plan and leaves an estate $19,817 higher; `t3`'s
+household, $10,645 → $0. Every other strategy is unchanged.
+
+*Simplifications, stated:* the strategy stays under the first cliff only; it does not weigh whether a higher tier would pay. And the
+Monte Carlo charges a retirement-year premium, like that year's tax, for the retirement quarters only — a mid-year retiree's first working-
+year premium is charged in part (the example retires in January).
+
+**The last working years (D-65).** Medicare sets a year's premium from the MAGI of two years before (SSA POMS HI 01101.010: adjusted gross
+income, Form 1040 line 11, plus tax-exempt interest, line 2a), so the first two premium years after retirement are set by the last two
+working years, which no engine projects. Through v6.34 they carried no surcharge anywhere. From v6.35 My Data takes one optional figure,
+*Household MAGI in your last working years* (`workMagi`, today's dollars; read through `workMagi()`, which clamps it — blank, text and
+negative read 0; ceiling $10,000,000), used for both tax years before the retirement year: a year after the as-of year is carried forward at
+the plan's inflation (`workMagiFor`); a year at or before it is taken as entered — its return is filed, or nearly, and is in its own year's
+dollars (DW-4 (a)). Engine A seeds its lookback with the two years (every P builder passes it; a P object without it, as in every engine
+test, seeds nothing); Engine C prepends two rows for them, marked `working`, scored and billed by the same rule as every other row; the
+Monte Carlo bills every Engine C row in its premium year, so it pays them too. When the field is set it is charged in full (DW-2 (a)); Form
+SSA-44 (work stoppage is a qualifying event) can remove it, and the IRMAA tab still says so. Measured on the example's calendar (A on
+Medicare in both premium years, B not): $250,000 entered → $2,300 over the two years in today's dollars; $300,000 → $5,760; $400,000 →
+$9,240; $600,000 → $12,720; a couple both on Medicare pays twice that.
+
+*Simplifications, stated:* one figure for both years (DW-1 (a)); the plan's filing status for both. **Blank is still optimistic** for a
+household whose working income was above a tier — so when the field is blank, someone is on Medicare in the retirement year or the next,
+and the salaries My Data holds, carried to the first lookback year as the field would be, sit above the first premium year's threshold for
+the plan's filing status, the IRMAA tab and My Data say so in one line (DW-5 (b)); the flag changes no figure (salaries are gross pay, not
+MAGI). The example states no working MAGI and holds no salaries: nothing moves on it.
+
+**One-time rows before retirement (D-44).** Three engines start at the retirement date from today's holdings and spend the expense table
+from there: Engine D (the Withdrawal tab), Backtest and What Breaks. Through v6.34 none of them charged a one-time row dated between today
+and the retirement year; the two Monte Carlo engines, which run from the as-of month, always did. From v6.35 one helper,
+`preRetireOneTime(retireYear)`, sums the one-time rows from the as-of month through December of the year before the selected retirement
+year, in today's dollars (rows before the as-of month are history). Backtest and What Breaks start from `household` less that sum
+(clamped at 0; both run in today's prices). Engine D takes it before its carry to the retirement year: first from the after-tax,
+gain-bearing part of its first pool (`taxGainPool`, with its basis scaled pro rata so the gain share is unchanged), then from the buckets
+pro rata — Traditional and Roth money in their own shares — never from the pool's Traditional IRA, annuity, HSA or Roth money; `tradFrac`
+and `rothFrac` are unchanged. Engines A, B and C keep their own after-tax pool (it sets dividends and pays conversion tax); they move
+through Engine D's draws (the gains bridge and `ordDrawByYr`). Measured: a $30,000 row in May 2027 on the example takes all $21,000 of its
+after-tax brokerage and $9,000 from the buckets; the example itself is unchanged at its planned year, and at the **+1 YEAR** button (2030)
+its April 2029 golf cart and closing costs ($28,000) now come out of the start — the Withdrawal tab's end balance $2,098,139 → $2,021,124.
+
+*Simplification, stated:* no tax is charged on money taken from the buckets before retirement (the model does not project working years),
+the same simplification the Monte Carlo makes by spending the row from one total; a household that pays such a purchase from salary keeps
+more than the model shows.
+
+**Tests.** `qa/t98_irmaa_onetime.mjs`, both legs (the v6.34 leg pins each defect as a dated `[KNOWN DEFECT 2026-10-28, …]`): §A the
+solver's invariants in all 996 conversion years of 56 households, the strategy's and the optimizer's UNDER IRMAA cell's — under the cliff less $500, the largest such conversion, the estimate
+equal to the engine, the acceptable conversions one range on every year-grid, the single-filer bridge households under — every other strategy bit-identical
+to v6.34, one year by hand, the margin its own, the copy; §B blank bit-identical to v6.34 on the example and every fixture, the working years
+by hand in Engine A and Engine C, the tier edge, A and C agreeing, the Monte Carlo's schedule, every P builder by AST, the round trip through
+the real controls, the copy on four surfaces and the Field Manual, the flag, Ask AI's line; §C Engine D's opening state by hand, which rows
+count, the overflow, the example at +1 YEAR on the three tabs, the Monte Carlo unchanged, the bridge, the copy. `t29` gains the boundary rows
+`pre_retire_once` and `work_magi` (the example is ON for both). `qa/tools/controls_v635_irmaa_onetime.py` puts each removed defect back and
+shows its check turn red.
