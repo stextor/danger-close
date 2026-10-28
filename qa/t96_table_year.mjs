@@ -57,13 +57,13 @@ console.error = () => {}; console.warn = () => {};
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v633";
 const MODULE = process.argv.includes("--module"), DUMP = process.argv.includes("--roth-dump");
-const KNOWN_VERSIONS = ["v632", "v633", "v634"];
+const KNOWN_VERSIONS = ["v632", "v633", "v634", "v635"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v633", "v634"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v633", "v634", "v635"].includes(VER);   // an array, so the next registration widens it
 const KD = "[KNOWN DEFECT 2026-10-26, D-67 — flips at v6.33]";
 const KP = "[KNOWN DEFECT 2026-10-27, F-28 — flips at v6.33]";
 const PRIOR_TAG = "v632";   // §C's reference build: the last one that indexed from the as-of year
@@ -417,7 +417,7 @@ console.log("  D — a household dated 2027 against the federal oracle (base yea
 
 // ════ §C · nothing moves for a plan dated 2026 ════════════════════════════════════════════════════════════════════════════════════════
 if (POST) {
-  if (!MD.C) console.log(`  C — skipped: this run folder has no app_${PRIOR_TAG}.mjs (a later release's run, where ${VER} is the prior leg)`);
+  if (!MD.C) console.log(`  C — skipped: this run folder has no app_${PRIOR_TAG}.mjs (a later release's run folder, which holds only its own two legs — v6.35: the line said ${VER} "is the prior leg" whichever leg ran)`);
   else {
     console.log(`  C — ${PRIOR_TAG} → ${VER}, plans dated 2026: bit-identical`);
     for (const c of MD.C) T(`C-1 ${c.lab}: Engines A–D, the bridge, the Monte Carlo's schedule, both seeded Monte Carlo engines and projectBracketsAt (2026–2060) — byte-identical JSON`,

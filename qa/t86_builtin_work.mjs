@@ -27,13 +27,13 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v623";
-const KNOWN_VERSIONS = ["v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634"];
+const KNOWN_VERSIONS = ["v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635"].includes(VER);   // an array, so the next registration widens it
 // The differential's pair — constants, NOT `VER === "v623"`, so the registrar cannot widen them (t76 records why).
 const D_PRIOR = "v622", D_CUR = "v623";
 const require = createRequire(import.meta.url);
@@ -258,7 +258,7 @@ console.log("  E — rendered (the example first; the notices; Save & Apply; the
   await go("withdrawal");
   if (POST) T("E-3: the example's Withdrawal tab Step 1 names its income streams and its built-in work, not spouse B's work income",
     // v6.28 (F-23): the steps were rewritten; Step 1 still names the streams and the example's built-in work
-    (["v628", "v629", "v630", "v631", "v632", "v633", "v634"].includes(VER) ? /Step 1: Income — Social Security, the pension and income streams \(and the example's built-in work\) — covers what it can\./
+    (["v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635"].includes(VER) ? /Step 1: Income — Social Security, the pension and income streams \(and the example's built-in work\) — covers what it can\./
       : /Take Social Security \+ pension \+ other income \(income streams and the example's built-in work\) — guaranteed floor/).test(txt()) && !/Spouse B work income/.test(txt())
     && /column itemizes post-retirement job income \(from My Data → Other Income Streams, and the example household's built-in part-time work for spouse B\)/.test(txt()));
   else T(`E-3 ${KD}: the Withdrawal tab's Step 1 tells every plan it takes "Spouse B work income"`, /Spouse B work income — guaranteed floor/.test(txt()));
@@ -295,7 +295,7 @@ console.log("  E — rendered (the example first; the notices; Save & Apply; the
   if (POST) T("E-7: its Taxes tab shows no built-in-work line (the line lists only figures above zero)", !/built-in work\)/.test(txt()) && !/Spouse B earned income/.test(txt()));
   await go("withdrawal");
   if (POST) T("E-7c: its Withdrawal tab's Step 1 names income streams only, and the Work column note no built-in work",
-    (["v628", "v629", "v630", "v631", "v632", "v633", "v634"].includes(VER) ? /Step 1: Income — Social Security, the pension and income streams — covers what it can\./   // v6.28 (F-23): Step 1 rewritten
+    (["v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635"].includes(VER) ? /Step 1: Income — Social Security, the pension and income streams — covers what it can\./   // v6.28 (F-23): Step 1 rewritten
       : /Take Social Security \+ pension \+ other income \(income streams\) — guaranteed floor/).test(txt()) && /column itemizes post-retirement job income \(from My Data → Other Income Streams\) separately/.test(txt()));
   await go("monte carlo");
   const nmc = q('[data-dc-builtin-work-notice="mc"]');
@@ -347,7 +347,7 @@ console.log("  G — the Field Manual and METHODOLOGY");
     T("G-2: …and no longer says it applies to every plan", !/applies to every plan with no income streams, single plans included/.test(SRC));
     T("G-3: the Monte Carlo entry speaks of the example household only", /For the example household, whose spouse B works part-time in its retirement year and the two after/.test(SRC) && !/For a plan with no other income streams entered, the Taxes tab also taxes/.test(SRC));
     T("G-4: the Field Manual says Backtest and What Breaks count no income stream (D-57)", /Backtest and What Breaks count no income stream/.test(SRC));
-    T("G-5: the Field Manual's D-10 sentence no longer says the ladder reads one spouse's earned income as a live gap", (["v629", "v630", "v631", "v632", "v633", "v634"].includes(VER)   // v6.29 (F-25, 1749): the ladder's MAGI misses TWO terms — the spending draw's ordinary income (Engine C's since v5.74) and gains
+    T("G-5: the Field Manual's D-10 sentence no longer says the ladder reads one spouse's earned income as a live gap", (["v629", "v630", "v631", "v632", "v633", "v634", "v635"].includes(VER)   // v6.29 (F-25, 1749): the ladder's MAGI misses TWO terms — the spending draw's ordinary income (Engine C's since v5.74) and gains
       ? /<strong>Two terms are still missing<\/strong>: the ordinary-income dollars the withdrawal plan spends each year/.test(SRC) && !/One smaller term is still missing/.test(SRC)
       : /One smaller term is still missing<\/strong>: realized capital gains/.test(SRC)) && !/Two smaller terms are still missing/.test(SRC));
     T("G-6: METHODOLOGY has the v6.23 section and no longer says streams flow through What-Breaks", /## Built-in work is the example's alone \(v6\.23\)/.test(meth)

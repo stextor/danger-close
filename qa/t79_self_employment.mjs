@@ -31,13 +31,13 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v616";
-const KNOWN_VERSIONS = ["v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634"];
+const KNOWN_VERSIONS = ["v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635"].includes(VER);   // an array, so the next registration widens it
 // The differential's pair — two constants, NOT `VER === "v616"`, so the registrar cannot widen it (t76 records why).
 const D_PRIOR = "v615", D_CUR = "v616";
 const require = createRequire(import.meta.url);
@@ -47,7 +47,7 @@ const { __g: g } = M;
 // wage index; the model now projects it at the plan's inflation (CPI-U as the proxy — DU-3 (a), disclosed as slightly optimistic, since wages
 // historically outrun prices), not a flat 2%. WBR is that rate: Σ prob × inflation over this module's SCENARIOS table (units_v630.mjs) on the
 // v6.30 leg, 2% on every earlier one. The §3101(b)(2) 0.9% thresholds are statutory and unindexed on every leg.
-const WBR = ["v630", "v631", "v632", "v633", "v634"].includes(VER) ? Object.values(g.SCENARIOS()).reduce((t, sc) => t + sc.prob * sc.inflation, 0) : 0.02;   // an array, so register_tag2 widens it
+const WBR = ["v630", "v631", "v632", "v633", "v634", "v635"].includes(VER) ? Object.values(g.SCENARIOS()).reduce((t, sc) => t + sc.prob * sc.inflation, 0) : 0.02;   // an array, so register_tag2 widens it
 const SRC = readFileSync(join(HERE, "..", `${VER}.jsx`), "utf8");
 const { Parser } = require("acorn"); const jsx = require("acorn-jsx"); const walk = require("acorn-walk");
 const JP = Parser.extend(jsx());

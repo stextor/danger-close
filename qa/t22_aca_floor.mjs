@@ -305,8 +305,14 @@ console.log(`\n\u2500\u2500 F \u00b7 A2 moved no figure \u2014 byte identity vs 
       CK("F: totAcaLoss is unchanged on every row (A2 is a DISPLAY exclusion, not an engine one)",
         now.every((r, i) => r.totAcaLoss === was[i].totAcaLoss),
         now.map((r, i) => `${r.key}:${r.totAcaLoss}/${was[i].totAcaLoss}`).join(" "));
-      CK("F: estate is unchanged on every row (it feeds the parity fingerprint)",
-        now.every((r, i) => r.estate === was[i].estate));
+      // v6.35 (D-62): a DECLARED boundary, by capability (the v6.35 margin constant, exported guarded): STAY UNDER IRMAA solves with the
+      // funding sale's gain and rounds down, so its estate legitimately moves across this pair; every other row's must not, and STAY UNDER
+      // IRMAA's subsidy map and totAcaLoss (asserted above, on every row) do not.
+      const _crossesD62 = g.IRMAA_SOLVER_MARGIN !== undefined && PRIOR_G.IRMAA_SOLVER_MARGIN === undefined;
+      CK(_crossesD62 ? "F: estate is unchanged on every row but STAY UNDER IRMAA's (v6.35, D-62: it moves by design — t98 §A)"
+                     : "F: estate is unchanged on every row (it feeds the parity fingerprint)",
+        now.every((r, i) => (_crossesD62 && r.key === "irmaa1") || r.estate === was[i].estate),
+        now.filter((r, i) => r.estate !== was[i].estate).map(r => r.key).join(", "));
     } else {
       // The v5.34 statement. Deliberately NOT "some number changed" — that would go green on
       // any drift at all. It names WHICH rows may move and WHICH must not, and it asserts the

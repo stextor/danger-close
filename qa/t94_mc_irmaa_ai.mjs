@@ -36,13 +36,14 @@ console.error = () => {}; console.warn = () => {};
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v631";
 const CLAUDE = process.argv.includes("--claude");
-const KNOWN_VERSIONS = ["v630", "v631", "v632", "v633", "v634"];
+const KNOWN_VERSIONS = ["v630", "v631", "v632", "v633", "v634", "v635"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v631", "v632", "v633", "v634"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v631", "v632", "v633", "v634", "v635"].includes(VER);   // an array, so the next registration widens it
+const U635 = ["v635"].includes(VER);   // v6.35 (D-65): the copy names the My Data field — the blank-field wording; an array, so the registrar widens it
 const KD = "[KNOWN DEFECT 2026-10-24, D-51 — flips at v6.31]";
 const KA = "[KNOWN DEFECT 2026-10-24, AI-6 — flips at v6.31]";
 // Typed here from Anthropic's pricing page (platform.claude.com, read 2026-10-24), NOT read from the app: Claude Opus 4.8, $ per million tokens.
@@ -437,7 +438,8 @@ console.log("  D/G — rendered: What Breaks, the Income card, the Monte Carlo t
   } else T(`G-1 ${KD}: the Income card has no IRMAA line`, !!card() && !icard());
   const mc = (await D.go("monte carlo"), D.body().querySelector("[data-dc-mc-tax]"));
   if (POST) T("G-2 the Monte Carlo tab says every run pays the IRMAA tab's surcharges when Medicare bills them, and that the first two years' premiums are not charged",
-    !!mc && /and the IRMAA tab's Medicare surcharges in the years Medicare bills them \(the first two years' premiums, which working-year income sets, are not charged\)/.test(mc.textContent.replace(/\s+/g, " "))
+    !!mc && (U635 ? /and the IRMAA tab's Medicare surcharges in the years Medicare bills them \(the first two years' premiums, which working-year income sets, are not charged unless you enter it on My Data\)/
+           : /and the IRMAA tab's Medicare surcharges in the years Medicare bills them \(the first two years' premiums, which working-year income sets, are not charged\)/).test(mc.textContent.replace(/\s+/g, " "))
     && /before v6\.31 it charged no IRMAA\./.test(mc.textContent), mc && mc.textContent.slice(0, 300));
   else T(`G-2 ${KD}: the Monte Carlo tab's tax sentence names no IRMAA`, !!mc && !/IRMAA/.test(mc.textContent));
   await D.go("irmaa"); const ir = D.txt();
@@ -481,7 +483,8 @@ console.log("  G — copy");
     T("G-9 the troubleshooting row says (180s) and the glossary's Token entry gives the new rate", DOCS.includes("<code>REQUEST TIMED OUT (180s)</code>") && DOCS.includes("about 3 to 10 cents at the October 2026 rates the Ask AI cost note gives"));
     T("G-10 Field Manual, Monte Carlo entry: IRMAA paid in the year Medicare bills it, and the first two years' premiums not charged anywhere (D-65)",
       DOCS.includes("From v6.31 each run also pays the IRMAA tab’s Medicare surcharges (IRMAA), each in the year Medicare bills it")
-      && DOCS.includes("so they are not charged here, on the IRMAA tab or in What Breaks; if your working income was above a tier, the model reads low for those two years"));
+      && (U635 ? DOCS.includes("they are charged here, on the IRMAA tab and in What Breaks only if you enter that income on My Data (from v6.35); left blank, they are not charged, and if your working income was above a tier, the model reads low for those two years")
+           : DOCS.includes("so they are not charged here, on the IRMAA tab or in What Breaks; if your working income was above a tier, the model reads low for those two years")));
     T("G-11 Field Manual, What Breaks entry and §13: IRMAA in the estimate; the v6.31 entry names both changes",
       DOCS.includes("including Roth-conversion taxes and, from v6.31, IRMAA surcharges") && DOCS.includes("The Monte Carlo and What Breaks pay IRMAA; Ask AI asks Claude Opus 4.8 (v6.31)."));
     const MP = join(HERE, "..", "METHODOLOGY.md"), MD = existsSync(MP) ? readFileSync(MP, "utf8") : "";

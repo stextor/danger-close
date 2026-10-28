@@ -431,6 +431,14 @@ tally "t96-$CUR"   node t96_table_year.mjs "$CUR"
 # sites; the 402(g) line; one rule (effectivePreTaxA) by unit cases, AST and behaviour; the copy. Both legs (the v6.33 leg pins the defect).
 tally "t97-$PRIOR" node t97_contrib_save.mjs "$PRIOR"
 tally "t97-$CUR"   node t97_contrib_save.mjs "$CUR"
+# t98 (v6.35) — STAY UNDER IRMAA stays under (D-62), the last working years' MAGI (D-65), one-time rows before retirement (D-44): the
+# solver's invariants (under the cliff less the margin; the largest such conversion; the estimate equals the engine; monotone; no phases) on
+# every fixture, the example and the single-filer ACA-bridge households that cycled a fixed point; every other strategy bit-identical; one
+# year by hand; the working rows by hand, Engines A and C agreeing, the Monte Carlo paying them, the AST rule on every P builder, the round
+# trip through the real controls, the flag; Engine D's opening pools by hand, which rows count, the overflow, the +1 YEAR button; the copy.
+# Both legs (the v6.34 leg pins each defect).
+tally "t98-$PRIOR" node t98_irmaa_onetime.mjs "$PRIOR"
+tally "t98-$CUR"   node t98_irmaa_onetime.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
