@@ -425,6 +425,12 @@ tally "t95-$CUR"   node t95_f26_d61.mjs "$CUR"
 # against the statute oracle; the copy; the Taxes tab's bracket panel. Both legs (the v6.32 leg pins the defects). One count line.
 tally "t96-$PRIOR" node t96_table_year.mjs "$PRIOR"
 tally "t96-$CUR"   node t96_table_year.mjs "$CUR"
+# t97 (v6.34) — My Data keeps spouse A's stored pre-tax contribution (D-58): the round trip through the real controls (Export Backup,
+# the draft and its restore, Save & Apply) on the example, a hand-made backup with cents and a single plan; plans with a paycheck breakdown
+# (consistent, disagreeing, an amount edit, a frequency edit); the extinction invariant (an unedited save moves no engine figure); the display
+# sites; the 402(g) line; one rule (effectivePreTaxA) by unit cases, AST and behaviour; the copy. Both legs (the v6.33 leg pins the defect).
+tally "t97-$PRIOR" node t97_contrib_save.mjs "$PRIOR"
+tally "t97-$CUR"   node t97_contrib_save.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

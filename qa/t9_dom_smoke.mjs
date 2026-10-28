@@ -76,14 +76,19 @@ try {
   // Verify readout figures agree with contribAccrual for the demo's target year.
   const tl = T.PLAN_TIMELINE;
   // The readout previews what SAVE would produce from current form state. The demo household
-  // stores monthly401k/contribPreTaxA=2500 but no per-paycheck fields, so the A-side rollup
-  // (pre-existing v5.9.2 machinery, deliberately unchanged) reads $0 — the readout must say $0K
-  // for A. B has a direct monthly field, so B must show 12 * contribPreTaxB * yearsB.
-  const asOfYear = new Date().getFullYear();
+  // stores monthly401k/contribPreTaxA=2500 but no per-paycheck fields. Through v6.33 the A-side
+  // figure was the paycheck rollup alone and read $0 — this check pinned that ($0K), which was
+  // MissingFeatures D-58. From v6.34 (docs/SCOPE_D58_CONTRIB_SAVE_V634.md) the form keeps the
+  // stored figure until the paycheck row is edited, so A shows 12 * contribPreTaxA * yearsA, the
+  // same convention as B's direct monthly field. Years count from the PLAN's as-of year, as the
+  // readout does (through v6.33 this suite read the clock, which would have broken it from 2027).
+  const asOfYear = tl.asOfYear;
+  const yearsA = Math.max(0, tl.targetRetireYear - asOfYear);
   const yearsB = Math.max(0, (tl.targetRetireYearB || tl.targetRetireYear) - asOfYear);
   const c = T.PORTFOLIO.contributions;
+  const kA = `$${Math.round(12 * (c.contribPreTaxA || 0) * yearsA / 1000).toLocaleString()}K`;
   const kB = `$${Math.round(12 * (c.contribPreTaxB || 0) * yearsB / 1000).toLocaleString()}K`;
-  ck("readout Trad-A previews form state ($0K — demo lacks per-paycheck fields)", /\$0K Trad/.test(t.slice(t.indexOf("Projected added by retirement:"), t.indexOf("Projected added by retirement:") + 120)));
+  ck(`readout Trad-A shows the stored figure (${kA}; D-58 fixed at v6.34 — the demo has no paycheck breakdown)`, (c.contribPreTaxA || 0) > 0 && t.slice(t.indexOf("Projected added by retirement:"), t.indexOf("Projected added by retirement:") + 120).includes(`${kA} Trad`));
   ck(`readout Trad-B figure matches helper convention (${kB})`, t.includes(`${kB} Trad`), `expected "${kB} Trad" in page`);
   ck("hybrid pre-tax label renders", t.includes("Pre-tax (Traditional 401k/IRA)"));
   ck("Roth monthly inputs render", t.includes("Roth (401k/IRA) $/month"));

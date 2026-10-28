@@ -73,7 +73,7 @@ ck("STEP-1 and ladder share one anchor — the selected retirement year (v6.32; 
 ck("MC accumulation still reads contributions.monthly401k (unchanged)", SRC.includes("const primaryContrib = PORTFOLIO.contributions.monthly401k + PORTFOLIO.contributions.hsaMonthly;"));
 ck("extended MC still reads the mirrors (unchanged)", SRC.includes("const _primaryContrib = (PORTFOLIO.contributions.monthly401k + PORTFOLIO.contributions.hsaMonthly) * contribRate;"));
 ck("mirrors maintained in applyLoadedData", SRC.includes("c.monthly401k = c.contribPreTaxA + c.contribRothA;"));
-ck("mirrors maintained on Save & Apply", SRC.includes("monthly401k: Math.round(monthly401k) + num(rothAMo),"));
+ck("mirrors maintained on Save & Apply (v6.34, D-58: the saved A figure + A's Roth)", SRC.includes("contribPreTaxA: _preTaxA.save,") && SRC.includes("monthly401k: _preTaxA.save + num(rothAMo),"));
 
 // 6) The form readout is the ONE whitelisted inline accrual computation — it previews UNSAVED
 //    form state (PORTFOLIO isn't updated until Save & Apply) so it cannot call the helper;
