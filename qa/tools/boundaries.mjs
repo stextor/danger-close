@@ -527,6 +527,34 @@ export function census(G) {
                   : `clear — dated ${_as}, reading the ${_ty} table: the base year matters by ${Math.abs(_as - _ty)} year(s) of indexing`);
   }
 
+
+  // ── v6.35 (D-44, D-65 — SCOPE_D62_D65_D44_V635) · the conditions that hid them (§K1) ─────────────────────────────────────────
+  // 23. A ONE-TIME ROW BETWEEN TODAY AND RETIREMENT. Through v6.34 the Withdrawal tab, Backtest and What Breaks never charged such a row.
+  //    The example has none at its planned retirement year (its April 2029 rows fall in the retirement year itself), so the defect was $0
+  //    there. Read through the leg's own helper; a leg without it reads the table directly (the as-of month through the December before the
+  //    planned retirement year) — the rows the three engines skipped. ON when the sum is 0.
+  { const _ry = tl.targetRetireYear;
+    let _pre = 0;
+    if (typeof G.preRetireOneTime === "function") _pre = G.preRetireOneTime(_ry);
+    else { let y = tl.asOf.year, m = tl.asOf.month || 1;
+      while (y < _ry) { const d = `${y}-${String(m).padStart(2, "0")}`;
+        _pre += (G.EXPENSES() || []).filter(e => e && e.freq === "once" && String(e.start).slice(0, 7) === d).reduce((t, e) => t + (Number(e.amount) || 0), 0);
+        if (++m > 12) { m = 1; y++; } } }
+    row("pre_retire_once", "one-time rows before retirement", `$${Math.round(_pre).toLocaleString()} (as-of month to Dec ${_ry - 1})`,
+      "a one-time row dated between the as-of date and the planned retirement year", _pre === 0,
+      _pre === 0 ? "DEGENERATE — no one-time row falls before retirement, so whether the Withdrawal tab, Backtest and What Breaks charge one cannot be seen here (the +1 YEAR button can show it)"
+                 : "reachable — the three engines that start at retirement must take these rows out of their starting money");
+  }
+  // 24. THE LAST WORKING YEARS' MAGI. Through v6.34 the first two premium years after retirement carried no surcharge anywhere. The example
+  //    states no working MAGI, so with the fix those two years still carry nothing there. ON when the plan states none (or the leg has no
+  //    field — every plan is then blank).
+  { const _wm = typeof G.workMagi === "function" ? G.workMagi() : 0;
+    row("work_magi", "last working years' MAGI", typeof G.workMagi === "function" ? (_wm > 0 ? `$${Math.round(_wm).toLocaleString()} (today's $)` : "blank") : "n/a (pre-v6.35 build)",
+      "a stated working-years MAGI", _wm === 0,
+      _wm === 0 ? "DEGENERATE — no working MAGI is stated, so the first two premium years after retirement carry no surcharge here whatever the code does"
+                : "reachable — the IRMAA tab, the Monte Carlo, What Breaks and the Roth tab charge the first two premium years");
+  }
+
   return rows;
 }
 
