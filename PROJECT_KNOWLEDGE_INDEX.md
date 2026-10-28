@@ -25,15 +25,19 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 
 | Field | Value |
 |---|---|
-| Version | **v6.33** |
-| Source file in knowledge | `DangerClose-v6_33.jsx` |
-| Source md5 | `5fd4f025c3aacda999989ce3395b73ee` |
-| Built `index.html` md5 | `64296d15860bd5756ab5e3376d5c57d2` |
+| Version | **v6.34** |
+| Source file in knowledge | `DangerClose-v6_34.jsx` |
+| Source md5 | `5ca11d612ffda0a870b93580f91b60aa` |
+| Built `index.html` md5 | `04e87d95a660eb7111bbf6c39afaadaa` |
 | Shipped | 2026-10-27 |
 
-> ⚠ **v6.33 SHIPPED (2026-10-27) — the published tax tables index from their own year (D-67); two bracket drawings read the right table (F-28).** Source `5fd4f025…` · built `64296d15…`.
+> ⚠ **v6.34 SHIPPED (2026-10-27) — My Data keeps spouse A's stored pre-tax contribution (D-58).** Source `5ca11d61…` · built `04e87d95…`.
+> A DATA-HANDLING and display release; no engine changed (`docs/SCOPE_D58_CONTRIB_SAVE_V634.md`, DC-1 to DC-4 all as recommended; build record §7). My Data showed $0 for spouse A's pre-tax contribution on a plan holding a monthly figure with no paycheck breakdown (the example's $2,500 a month, or a backup written outside My Data), and one unedited Save & Apply, draft or Export Backup stored the $0 (the example: A's Traditional at retirement −$90,000). One rule, `effectivePreTaxA`, now gives the figure: the stored one until the paycheck row is edited, then the rollup; every display site and the save read it; a saved all-zero row beside a stored figure opens blank; while the stored figure is in use the 402(g) check counts no paycheck deferral and says so. No notice for plans saved earlier (DC-3 (c)). **Under DC-4 the 2027 tax figures are v6.35** (`docs/SCOPE_TY2027_REFRESH_V633_V634.md`, renumbered; OPEN — it waits on the IRS TY2027 Rev. Proc., the §402(g) notice and CMS's 2027 IRMAA figures, to ship by 15 December, DT-7).
+> New suite `t97` (both legs); `controls_v634_contrib.py` new (22 of 22); `t8`'s mirror pin and `t9`'s readout check re-gated; `v634` registered (`t33` PINS unchanged; `t93`'s Engine D reference v633); the shim exports `effectivePreTaxA`. MissingFeatures D-58 closed; METHODOLOGY's two false contribution sentences corrected; OPERATIONS §C4's save trap keeps only the as-of move. `TESTING.md`'s v6.31 per-suite line moved to the archive. **Rotation:** the pool loses `DangerClose-v6_33.jsx` (v6.33 is read from history, commit `045de6b`) and gains `DangerClose-v6_34.jsx`. **Pool stays 16.**
+>
+> *(**v6.33 SHIPPED (2026-10-27) — the published tax tables index from their own year (D-67); two bracket drawings read the right table (F-28).** Source `5fd4f025…` · built `64296d15…`.
 > A MODELING release that moves nothing for a plan dated 2026 (`docs/SCOPE_TY2027_REFRESH_V633_V634.md` — v6.33 built, §7 its record; **v6.34, the 2027 figures, OPEN**: it waits on the IRS TY2027 Rev. Proc., the §402(g) notice and CMS's 2027 IRMAA figures, to ship by 15 December — DT-7). Each published table carries its year (`FED_TABLES`, `IRMAA_TABLES`, `WAGE_BASE_TABLES`, the ACA table by coverage year); the five indexing helpers lost their base-year parameter; a year reads its own table, the newest indexed forward after it, or the oldest deflated before it (DT-2 revised at the build, Steve: *"Deflate before 2026"*). `TAX_CONSTANTS_YEAR` is read from the table. On the example dated 2027 lifetime tax falls $4,109 (at $70K) and IRMAA rises $600 (at $250K); plans dated 2026 are bit-identical. The Taxes tab's bracket panel and the Roth tab's bracket bar read their year's own table (F-28).
-> New suite `t96` (both legs); `controls_v633_table_year.py` new (22 of 22); `boundaries.mjs` gains `asof_table_year` (`t29` B-28, C-table-1); `t22`, `t78` and `t95` C-5 re-gated, `domdiff` bounds the pair; `v633` registered (`t33` PINS unchanged; `t93`'s Engine D reference v632); the shim exports the table accessors. MissingFeatures D-67 filed and closed; UsabilityFlaws F-27 closed by decision, F-28 filed and fixed; OPERATIONS §I's refresh row and the OBBBA bullet name the year-keyed tables. `TESTING.md`'s v6.30 per-suite line moved to the archive. **Rotation:** the pool loses `DangerClose-v6_32.jsx` (v6.32 is read from history, commit `b781d7f`) and gains `DangerClose-v6_33.jsx`. **Pool stays 16.**
+> New suite `t96` (both legs); `controls_v633_table_year.py` new (22 of 22); `boundaries.mjs` gains `asof_table_year` (`t29` B-28, C-table-1); `t22`, `t78` and `t95` C-5 re-gated, `domdiff` bounds the pair; `v633` registered (`t33` PINS unchanged; `t93`'s Engine D reference v632); the shim exports the table accessors. MissingFeatures D-67 filed and closed; UsabilityFlaws F-27 closed by decision, F-28 filed and fixed; OPERATIONS §I's refresh row and the OBBBA bullet name the year-keyed tables. `TESTING.md`'s v6.30 per-suite line moved to the archive. **Rotation:** the pool loses `DangerClose-v6_32.jsx` (v6.32 is read from history, commit `b781d7f`) and gains `DangerClose-v6_33.jsx`. **Pool stays 16.**)*
 >
 > *(**v6.32 SHIPPED (2026-10-25) — QCDs after a death (D-61); the Stress, Social Security, Roth, Events and Backtest tabs say what the model does (F-26).** Source `fe8188a5…` · built `2cdbfc54…`.
 > A MODELING release with a presentation pass (`docs/SCOPE_F26_D61_V632.md`, DF-1 to DF-8 all as recommended). From the first projected death only the survivor may make a QCD, on the survivor's own age, with one cap (Engines B and C); on four test households lifetime tax rises $8,054–$26,252, the example unchanged. The Stress tab's cards are computed for the plan (`stressPlanFacts`); the SS tab's survivor grid shows the larger benefit; the Roth ladder starts at the selected year (byte-identical at the target year); the ACA dates print only for 2027 coverage; the Backtest names the plan's own worst start; the README rewritten.
@@ -80,12 +84,12 @@ or a reason here (OPERATIONS §I).
 
 | Pool file | md5 | Repo path |
 |---|---|---|
-| `CHANGELOG.md` | `6f33af4ff975632c282464b6a0e7f701` | `CHANGELOG.md` |
-| `METHODOLOGY.md` | `ba345bc99074e1fe62086ac301ea71b9` | `METHODOLOGY.md` |
-| `MissingFeatures.md` | `914ef9be1b40d10822630f11f8d2eb61` | `docs/MissingFeatures.md` |
-| `OPERATIONS.md` | `a127f4a4ffeb6474e8ba7359598cc191` | `docs/OPERATIONS.md` — **rolled 2026-10-27 at the v6.33 ship:** §I's *Annual data refreshes* row names the year-keyed tables (a new year's entry, nothing bumped by hand) and §C's OBBBA bullet says `TAX_CONSTANTS_YEAR` is read from `FED_TABLES`. *(Previously `0468ef1e62…`.)* Before that, **rolled 2026-09-09** at the run-folder ops package: §B gained the `mk_runfolder.sh` pointer, and §D gained **D1** (the named existence-only assertion class) and **D2** (the `t29` F-6a/F-6b defect pin). *(Previously `f33c2e0cfd…`.)* |
+| `CHANGELOG.md` | `6028ecb697947be97e1a5948a5a5e136` | `CHANGELOG.md` |
+| `METHODOLOGY.md` | `ddd31c50ba16d73e8641c32e140bea39` | `METHODOLOGY.md` |
+| `MissingFeatures.md` | `5b3e8e6fb955e968cec8dd32633cded3` | `docs/MissingFeatures.md` |
+| `OPERATIONS.md` | `7675168d93b27012a5314b5c739927a1` | `docs/OPERATIONS.md` — **rolled 2026-10-27 at the v6.34 ship:** §C4's *An unedited Save & Apply* trap keeps only the as-of move (D-58 closed) and names the save's other normalisations. *(Previously `a127f4a4ff…`.)* Before that, **rolled 2026-10-27 at the v6.33 ship:** §I's *Annual data refreshes* row names the year-keyed tables (a new year's entry, nothing bumped by hand) and §C's OBBBA bullet says `TAX_CONSTANTS_YEAR` is read from `FED_TABLES`. *(Previously `0468ef1e62…`.)* Before that, **rolled 2026-09-09** at the run-folder ops package: §B gained the `mk_runfolder.sh` pointer, and §D gained **D1** (the named existence-only assertion class) and **D2** (the `t29` F-6a/F-6b defect pin). *(Previously `f33c2e0cfd…`.)* |
 | `README.md` | `2757b43ee6b39d0f34496c1cf639d688` | `README.md` |
-| `TESTING.md` | `d58c7da8589d421fd10f264c5af7886a` | `TESTING.md` |
+| `TESTING.md` | `40d0cc576e79fd91e71e4e6b880ad8ff` | `TESTING.md` |
 | `index.html` | `247816be583271d50cf13e0a02e18cdf` | `src/index.html` — the **Vite entry template**, **restored to the pool 2026-08-20** after being found absent (see the build-scaffold row below). ⚠ **Not the built app.** The published single-file `index.html` is repo-only output and never enters the pool; its md5 is in the Current build table and is different by construction |
 | `main.jsx` | `d9eca7b469a3fb7ec1c5325fd4bf8145` | `src/main.jsx` |
 | `package.json` | `9ee8d745bc9f32d6e8fa02e623603423` | `package.json` — The pinned toolchain, and a **build input** rather than a suite file — given a row 2026-08-23 for a measured reason: `npm i <pkg>` in a run folder rewrites it with resolved versions, so it drifts as a side effect of setting the folder up. That is why OPERATIONS §N3a installs jsdom with `--no-save`, and it is the drift `package_check`'s new G-1 caught on its first real use |
@@ -95,10 +99,12 @@ or a reason here (OPERATIONS §I).
 
 | Field | Value |
 |---|---|
-| Version | **v6.32** |
-| Source file in knowledge | — **not pooled**: repo history, commit `b781d7f`, found by this md5 |
-| Source md5 | `fe8188a567035ce5a00fda1f201cecd5` |
-| Built `index.html` md5 | `2cdbfc5479c0d7ff7f0d1a66a70827af` |
+| Version | **v6.33** |
+| Source file in knowledge | — **not pooled**: repo history, commit `045de6b`, found by this md5 |
+| Source md5 | `5fd4f025c3aacda999989ce3395b73ee` |
+| Built `index.html` md5 | `64296d15860bd5756ab5e3376d5c57d2` |
+
+> **Rolled 2026-10-27 at the v6.34 ship.** The pair is now **v6.33 prior / v6.34 current**; both tables rolled in one edit (K-7, which counts 634 − 1 = 633). Commit `045de6b` is the first to carry the v6.33 source (`182b2d3` to `d5702aa`, earlier v6.33 uploads, carry v6.32's source beside v6.33's page); `956ac7f` set the executable bit `controls_v633_table_year.py` landed without.
 
 > **Rolled 2026-10-27 at the v6.33 ship.** The pair is now **v6.32 prior / v6.33 current**; both tables rolled in one edit (K-7, which counts 633 − 1 = 632). Commit `b781d7f` is the first to carry the v6.32 source (`06c6f88` to `1946ccf`, earlier v6.32 uploads, carry v6.31's source beside v6.32's page); `cc8b7e8` set the executable bit `controls_v632_f26_d61.py` landed without.
 
@@ -621,6 +627,26 @@ retired and superseded. They get no row because there is no file. Checked 2026-0
 committed tree, so the next sweep does not re-open them.
 
 ## Retirement list (delete-first; nothing replaces these)
+
+### At the v6.34 ship (2026-10-27) — DELETE THESE FIRST
+
+**Rotation:** delete `DangerClose-v6_33.jsx`; `DangerClose-v6_34.jsx` arrives. **Pool stays 16.** Count from the Projects listing (OPERATIONS §I, no-mount note).
+
+| Delete | Because |
+|---|---|
+| `DangerClose-v6_33.jsx` | **rotated out** — v6.33 is read from the repo's history (commit `045de6b`) |
+| `CHANGELOG.md` | replaced — the v6.34 entry |
+| `METHODOLOGY.md` | replaced — *My Data keeps spouse A's stored pre-tax contribution (v6.34)*; two false contribution sentences corrected; the v6.24 bullet closed |
+| `MissingFeatures.md` | replaced — D-58 closed |
+| `OPERATIONS.md` | replaced — §C4's save trap keeps only the as-of move |
+| `PROJECT_KNOWLEDGE_INDEX.md` | replaced — this edit; `CHANGELOG.md`'s row rolled last |
+| `TESTING.md` | replaced — the v6.34 per-suite line, v6.31's moved to the archive; `t97`'s and `dom_entry_v634.jsx`'s entries |
+
+**Arriving new:** `DangerClose-v6_34.jsx`. **Repo-only:** every `qa/` change (`t97_contrib_save.mjs`, `qa-baseline/dom_entry_v634.jsx`,
+`tools/controls_v634_contrib.py` new; the registered suites, `t8` and `t9` (re-gated), `t33`, `t93`, `t45`/`t47`/`t48`, `runsuite.sh`, the shim,
+`tools/package_check.mjs`'s OPEN allowlist reason (the TY2027 scope, now v6.35), `domdiff_withdrawal.mjs`, `units_v630.mjs`),
+`docs/TESTING_ARCHIVE_per_suite_v5_53_to_v6_01.md` (v6.31's line and note appended), the D-58 scope (`docs/SCOPE_D58_CONTRIB_SAVE_V634.md`, new
+— built, §7 its record), the TY2027 scope (renumbered v6.35), the built `index.html`.
 
 ### At the v6.33 ship (2026-10-27) — DELETE THESE FIRST
 

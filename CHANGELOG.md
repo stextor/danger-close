@@ -1,5 +1,117 @@
 # Changelog
 
+## v6.34 — My Data keeps spouse A's stored pre-tax contribution (D-58)
+
+**A data-handling and display release; no engine changed.** My Data now shows and keeps the pre-tax contribution a plan holds for spouse A,
+where through v6.33 it showed $0 and a save, a draft or Export Backup wrote the $0. The scope is `docs/SCOPE_D58_CONTRIB_SAVE_V634.md`
+(repo-only; build record §7). Steve, on the four decisions: *"Let's go with your recommendations"* — DC-1 (a), DC-2 (a), DC-3 (c), DC-4 (a).
+Under DC-4 this release is v6.34 and **the 2027 tax figures become v6.35** (`docs/SCOPE_TY2027_REFRESH_V633_V634.md` renumbered; the v6.33
+entry below, which says v6.34, is left as written). Built on v6.33 (source `5fd4f025…`). METHODOLOGY's new section *My Data keeps spouse A's
+stored pre-tax contribution (v6.34)* is the full account.
+
+**What was wrong (v6.33, measured at the scope).**
+- **My Data read spouse A's pre-tax contribution from the paycheck row alone** (MissingFeatures D-58, opened at v6.24, narrower than
+  registered). The form has no field for that figure: it derives it from three per-paycheck amounts and a pay frequency. A plan holding a
+  monthly figure with no breakdown — the example's $2,500 a month, or a backup written outside My Data — showed $0 for spouse A while every
+  engine accrued the stored figure, and one unedited Save & Apply, draft autosave or Export Backup stored the $0.
+- **What one save did to the example** (as-of date held): spouse A's Traditional balance at retirement fell $90,000 (12 × $2,500 × 3 years);
+  lifetime tax in today's dollars $197,987 → $185,192; the 30-year Monte Carlo above $500K went 95.37% → 94.43% (BULL-LEANING) and
+  85.13% → 82.63% (BASE).
+- **Who was affected.** My Data has written the paycheck breakdown since the first commit, so a plan saved or exported through it in any
+  version was never affected: its stored figure was that breakdown's rollup. The plans affected were the example and backups written outside
+  My Data. Spouse B's fields, spouse A's Roth and the bonus lump are direct entries and were never affected.
+
+**What changed.**
+- **One rule for spouse A's figure,** `effectivePreTaxA(stored, rollup, edited)`. Until the paycheck row is edited in the session (any of the
+  three amounts, a typed 0, or the pay frequency) it is the stored figure, cents kept — unless the breakdown's rounded rollup equals the
+  stored figure within $0.50, when it is the rollup as before. After an edit it is the rollup, saved rounded as before.
+- **Every reader uses it:** *Pre-tax monthly*, *Annual total*, the accrual readout, the *WHERE CONTRIBUTIONS LAND* total, and what Save & Apply,
+  the draft and Export Backup write (`contribPreTaxA` and its mirror `monthly401k`). *Per-paycheck total* shows "—" when no breakdown is
+  entered.
+- **A sentence under the paycheck row** names the stored figure and how to replace it; where a breakdown is present and disagrees, it gives
+  both figures.
+- **A saved all-zero paycheck row beside a stored figure opens blank** (from the build review). My Data saves a blank row as 0, 0, 0, and a
+  typed 0 in a field already reading 0 is not a change; blank, a typed 0 clears the figure as the sentence says.
+- **The 402(g) check (DC-2 (a)).** While the stored figure is in use it counts spouse A's Roth and the bonus deferral but no paycheck
+  deferral — the stored figure has no employee/employer split — and says so; both warnings work as before.
+- **No notice for plans saved earlier (DC-3 (c)).** A $0 written by the old rule cannot be told from a real $0, and nobody using My Data saw a
+  non-zero figure that a save then removed: the form showed $0 first.
+- **Copy.** Field Manual §13 entry; METHODOLOGY's new section, two sentences that were false since the first published source (no
+  employer-match field; a match folded into a pre-tax monthly amount) corrected, and the v6.24 bullet closed; OPERATIONS §C4's save trap
+  keeps only the as-of move; MissingFeatures D-58 closed. The four version sites read v6.34.
+
+**What it moved.** On the example, an unedited save is now bit-identical, with the as-of date held, across `retireStartBalances`, Engines B and
+C and both seeded Monte Carlo engines (`t97` C-1). Nothing moves for a plan saved through My Data, and the example as it opens is unchanged —
+every engine already read the stored figure. MC parity holds with no intended difference.
+
+**Owned.**
+- My chat summary before the scope said users "lose a number they entered". It was wrong for the example: nobody typed it.
+- The scope's first draft asserted, rather than checked, that pre-v5.10 plans were affected; its review caught it, and history shows the
+  breakdown has been written since `f8e21ce`.
+- As first built, the 402(g) check still counted the employee share of a breakdown the plan was not using, and the example reopened after a
+  save showed 0, 0, 0 beside "no paycheck breakdown is entered … enter 0 to clear it". The build review found both; both are fixed and tested.
+
+**Limitations, stated.**
+- A plan saved through My Data before v6.34 keeps what it saved, a $0 included.
+- A stored figure within $0.50 of its breakdown's rollup is saved as that rollup, rounded: an unedited save can drop its cents.
+- A negative stored figure (possible only in a hand-made backup; the loader does not clamp it) is now shown and kept as loaded, where v6.33
+  zeroed it on the first save.
+- While the stored figure is in use, the 402(g) check under-counts spouse A's deferral by whatever employee share it contains, and says so.
+- The as-of date still moves to today on every save (D-48), and the save still normalises fields the engines read alike on the example.
+
+**Tests.** New suite **`t97_contrib_save.mjs`**, run on both legs; the v6.33 leg pins each defect as a dated
+`[KNOWN DEFECT 2026-10-27, D-58 — flips at v6.34]`.
+- **§A, the round trip through the real controls:** Export Backup before any save, two unedited saves, the draft autosave and its restore on the
+  example; a hand-made backup with $2,500.50 (cents and mirror kept); a single plan.
+- **§B, plans with a breakdown:** consistent at three frequencies (unchanged on both legs); a disagreeing one (both figures shown, the stored
+  one kept); an amount edit and a frequency-only change (the rollup).
+- **§C, the extinction invariant:** the example and a hand-made backup, figures before and after an unedited save, bit-identical.
+- **§D, edits and the display sites:** each site; a typed 0; a blank after an edit; the example saved and reopened (a blank row, a typed 0 that
+  clears it); an edit of A's Roth leaving the figure alone.
+- **§E, the 402(g) line:** the sentence; Roth and a bonus deferral above the limit still warn; a breakdown not in use is not counted until
+  edited; a breakdown in use is.
+- **§F, one rule:** by AST (the helper, the readers, every `setPaycheckEdited` call in one of the four controls); the helper's cases; four
+  plans on which every display site and the saved figure agree.
+- **§G, the copy:** Field Manual §13 and METHODOLOGY.
+- **Re-gated:** `t9`'s readout check reads the stored figure (and the plan's as-of year, not the clock); `t8`'s mirror pin reads `_preTaxA.save`.
+- **Registered:** `v634` by AST across 80 files; `vercensus.cjs v634` now prices the next bump at 266 ladder entries, 184 gated
+  expressions and 2 keyed registries. By hand: `t33` PINS, `t93`'s Engine D reference (v633), `t45`/`t47`/`t48`'s
+  `KNOWN_VERSIONS`; `runsuite.sh` lists `t97`; the shim exports `effectivePreTaxA`.
+- `package_check`'s OPEN allowlist keeps the TY2027 scope until the v6.35 build.
+- **Noted, not changed:** `t96`'s §C skip line says the current tag "is the prior leg" when it runs on the current leg. The skip is right
+  and the wording is wrong; it is left for v6.35 rather than edited after the packaged run.
+- **No census row (OPERATIONS §K1):** the defect was not hidden by the example's data — the example is the plan it struck.
+
+**Counts**, from the full suite run from the packaged copies:
+- **10,265 app checks across 96 app suites, 0 failed, 0 DIED**;
+- MC parity 10/10 — every fingerprint byte-identical to v6.33 (no intended difference);
+- tooling: `t21` 64, `domdiff` 32, `sets` 12 + 12;
+- GRAND **10,385**.
+
+Against v6.33, the current-leg changes are:
+- `t97`, new: 63.
+- `t96`: 83 → 72. Its §C, eleven checks, compares with v6.32's own module, which a v6.33 → v6.34 run does not build, and prints its skip.
+
+Every other current-leg count is unchanged. `domdiff` goes 33 → 32 (v6.33's bounded bracket-panel difference is not in this pair). The v6.33
+leg counts 4,264: `t97` there 38, `t96` 72 (less its §C, as on the current leg), and `t93` 95 with its D-5/D-6 skip. The two attribution runs
+count 234 and 237. Together 5,530 + 4,264 + 234 + 237 = 10,265.
+
+**Controls.** `qa/tools/controls_v634_contrib.py`, on a copy of the packaged run folder: **22 of 22 as expected** (C0 silent; K1–K21 each firing), every file restored and hash-checked. Each puts one removed defect back:
+- `buildPortfolio`, the draft alone or Export Backup alone writing the rollup; the mirror rounded;
+- the edit ignored; the frequency, a typed 0 or A's Roth mis-marking the row;
+- *Pre-tax monthly*, *Annual total*, *Per-paycheck total*, the readout or the totals line read from the rollup; the both-figures sentence
+  missing; a saved zero row reopening as 0, 0, 0;
+- the 402(g) sentence missing, the Roth/bonus warning suppressed, the bonus or an unused breakdown mis-counted;
+- METHODOLOGY's false sentence back; the Field Manual entry gone.
+
+**The build review.** An agent that had not seen the build was given the scope, the diff, `t97` and its controls. It found **no blocker,
+3 should-fix and 8 notes**; every one was checked against the source and taken (scope §7.2): the 402(g) check counting a breakdown not in
+use; the 0, 0, 0 row after a save; `t97` F-4 blind to a stray marker; and the notes — two overclaiming sentences, the negative-figure
+simplification, a stale comment, the bonus case and three display controls.
+
+**Provenance.** Source `5ca11d612ffda0a870b93580f91b60aa` · built `index.html` `04e87d95a660eb7111bbf6c39afaadaa` (vite 5.4.21, `npm ci`; v6.33 rebuilt byte-identically to `64296d15…`) ·
+`smoke_built` 22/22.
+
 ## v6.33 — the published tax tables index from their own year (D-67); two bracket drawings read the right table (F-28)
 
 **A modeling release that moves nothing for a plan dated 2026.** Each published table — the federal brackets and deductions, the IRMAA tiers

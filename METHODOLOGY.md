@@ -1421,18 +1421,24 @@ purpose — the HSA is not part of the Traditional/Roth conversion arithmetic th
 run, and its Medicare-linked contribution cutoff has its own machinery. Working-year taxation
 of the contributions themselves is not modeled (the model still taxes nothing before
 retirement). Roth 401(k) and Roth IRA money share one Roth bucket, as everywhere else in the
-app. There is no employer-match field beyond the existing bonus-deferral machinery; matches
-can be folded into the pre-tax monthly amount by hand. The 402(g) elective-deferral limit is
-a soft warning with a Verify-tab citation — the model does not enforce it, because catch-up
-eligibility and plan specifics are outside its knowledge.
+app. Spouse A's pre-tax contribution is entered as three per-paycheck amounts — the employee's
+own, the employer match and any employer supplemental — and a pay frequency; the bonus lump has
+its own deferral and match percentages. *(Corrected at v6.34: this sentence said there was no
+employer-match field and that a match could be folded into a pre-tax monthly amount; the form
+has had both employer fields since the first published source, and spouse A has no pre-tax monthly field.)* The
+402(g) elective-deferral limit is a soft warning with a Verify-tab citation — the model does not
+enforce it, because catch-up eligibility and plan specifics are outside its knowledge. It counts
+spouse A's own paycheck deferral, A's Roth and the bonus deferral; while a stored pre-tax figure
+is in use (no paycheck breakdown, or one the plan is not using) it counts no paycheck deferral —
+the stored figure has no employee/employer split — and says so (v6.34).
 
 **Migration.** Plans predating v5.10 carry only the old combined monthly amounts. On load
 they map to 100% pre-tax (the historically correct reading — the old fields fed a pre-tax
-engine), and a one-time notice in My Data says so; saving writes the explicit split. One
-pre-existing behavior carried forward unchanged: the form's Person-A pre-tax amount derives
-from the per-paycheck entry machinery (v5.9.1), so a plan holding only a monthly total and no
-per-paycheck detail shows $0 in that rollup until the paycheck fields are entered — true in
-v5.9.2, true now, and now visible in the accrual readout rather than silent.
+engine), and a one-time notice in My Data says so; saving writes the explicit split. Through
+v6.33 the form's Person-A pre-tax amount was the per-paycheck rollup alone, so a plan holding
+only a monthly total and no per-paycheck detail showed $0 there — and one Save & Apply, draft or
+Export Backup stored the $0. From v6.34 the form shows and keeps the stored figure until the
+paycheck row is edited (*My Data keeps spouse A's stored pre-tax contribution (v6.34)*, below).
 
 ## The Taxes tab and the drawdown (v5.74)
 
@@ -3033,8 +3039,9 @@ retirement year, either way; its post-retirement monthly figure is its post amou
 - **A plan saved before v6.24 keeps the dates it was given** — January to December, one-time costs in June. The editor's footnote says to
   check them; nothing can tell a re-dated table from one entered in whole years. Plans the guided setup built before v6.24 keep their June
   split and their 2079 end.
-- **An unedited Save & Apply also moves the plan's as-of date to today** and takes spouse A's pre-tax contribution from the per-paycheck
-  fields (a plan holding only a monthly total reads $0 there — the contribution-accrual section above). Not changed here (MissingFeatures **D-58**).
+- **An unedited Save & Apply also moves the plan's as-of date to today** (intended; its UTC date is D-48). Through v6.33 it also took
+  spouse A's pre-tax contribution from the per-paycheck fields, so a plan holding only a monthly total stored $0 — MissingFeatures **D-58**,
+  closed at v6.34 (*My Data keeps spouse A's stored pre-tax contribution (v6.34)*, below).
 - **A blank year falls back to today's year**, not the plan's as-of year (D-56). A retirement-year field that is not a year (blank, or
   half-typed) falls back to the saved plan's for the *When* defaults. The horizon the defaults use is the saved plan's: a date of birth or
   plan-to age changed in the same session counts from the next save.
@@ -3381,3 +3388,37 @@ the as-of-indexed and the table-indexed tier-1 threshold is billed the same tier
 dated 2026 and 2027, against $218,000 × (1 + *i*)^(premium year − 2026); §C nothing moves for a plan dated 2026; §D Engine B against the
 statute oracle with its base year typed as the table's, and this section's measured moves; §E the copy; §F the two drawings. `t29` gains the boundary row `asof_table_year` (the example
 is ON: dated in its table's year). `qa/tools/controls_v633_table_year.py` puts each removed defect back and shows its check turn red.
+
+## My Data keeps spouse A's stored pre-tax contribution (v6.34)
+
+**What was wrong (v6.33, measured at the scope — `docs/SCOPE_D58_CONTRIB_SAVE_V634.md` §0; MissingFeatures D-58).** Spouse A's pre-tax
+contribution has no field of its own in My Data: the form derives it from three per-paycheck amounts and a pay frequency, and through v6.33
+it read nothing else. A plan holding a stored monthly figure with no paycheck breakdown — the example's $2,500 a month, or a backup written
+outside My Data — therefore showed $0 for spouse A (*Pre-tax monthly $0/mo*; *Projected added by retirement: Spouse A $0K Trad*) while every
+engine accrued the stored figure, and one unedited Save & Apply, draft or Export Backup stored the $0. On the example (as-of date held), spouse
+A's Traditional balance at retirement fell $90,000 (12 × $2,500 × 3 years); the 30-year Monte Carlo above $500K went 95.37% → 94.43% under
+BULL-LEANING and 85.13% → 82.63% under BASE; lifetime tax in today's dollars $197,987 → $185,192. My Data has written the paycheck
+breakdown since the first commit, so a plan saved or exported through My Data in any version was never affected: the stored figure was
+that breakdown's rollup. Spouse B's two fields, spouse A's Roth and the bonus lump are direct entries and were never affected either.
+
+**What changed.** One rule (`effectivePreTaxA`) gives the form's figure. Once the paycheck row has been edited in the session — any of the
+three amounts, a typed 0, or the pay frequency — it is the rollup, saved rounded as before. Otherwise it is the rollup when the breakdown's
+rounded rollup equals the stored figure within $0.50 (a plan saved in My Data: nothing changes), and the stored figure, cents kept, when it
+does not. The *Pre-tax monthly* and *Annual total* figures, the accrual readout, the *WHERE CONTRIBUTIONS LAND* total and what Save & Apply,
+the draft and Export Backup write all read that figure, so an unedited save stores the contribution figures as loaded (a stored figure
+within $0.50 of a breakdown's rollup is that rollup, rounded; the save's other normalisations — the as-of date, the paycheck row written as
+0 where blank, contribution percentages rounded to 0.1% — are unchanged). A sentence under the paycheck row names the stored figure and how to replace it;
+where a breakdown is present and disagrees, it gives both. A plan whose paycheck row is all zero beside a stored figure (every such plan My
+Data saves) opens with the row blank, so a typed 0 there counts as an edit. While the stored figure is in use, the 402(g) check counts A's
+Roth and the bonus deferral but no paycheck deferral, and says so. No engine changed.
+
+**Simplifications, stated.** A plan saved in My Data before v6.34 keeps what it saved — a $0 written by the old rule cannot be told from a
+real $0, and no notice is shown (decision DC-3 (c)): nobody using My Data saw a non-zero figure for spouse A that a save then removed,
+because the form showed $0 first. The as-of date still moves to today on every save (D-48). A negative stored figure (possible only in a
+hand-made backup; the loader does not clamp it) is now shown and kept as it loaded, where v6.33 zeroed it on the first save.
+
+**Tests.** `qa/t97_contrib_save.mjs`, both legs (the v6.33 leg pins each defect as a dated `[KNOWN DEFECT 2026-10-27, D-58]`): the round trip
+through the real controls — Export Backup, Save & Apply, the draft and its restore — on the example, a backup with cents and a single plan;
+plans with a breakdown, a disagreeing one and a frequency change; the extinction invariant (after an unedited save, with the as-of date held,
+the engines and both seeded Monte Carlo engines are bit-identical to the plan as loaded); edits; the 402(g) sentence; one rule read by every
+display site; the copy. `qa/tools/controls_v634_contrib.py` puts each removed defect back and shows its check turn red.
