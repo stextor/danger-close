@@ -48,6 +48,13 @@ export const __g = {
   // v6.17 (D-38) — the home-move cash accessor that replaced HOME_SALE_PROCEEDS. GUARDED: absent before v6.17 (t80 reads `undefined`
   // on the v6.16 leg and asserts the constant's state there).
   homeMoveCash: _g("homeMoveCash"),
+  // v6.35 (D-62, D-65, D-44) — t98 and the boundary census (on __g, where census(G) reads — the build review). GUARDED: none exists on
+  // the v6.34 leg, where t98 asserts their absence.
+  workMagi: _g("workMagi"),
+  workMagiFor: _g("workMagiFor"),
+  workMagiFlag: _g("workMagiFlag"),
+  preRetireOneTime: _g("preRetireOneTime"),
+  IRMAA_SOLVER_MARGIN: _g("IRMAA_SOLVER_MARGIN"),
   // v6.18 (D-41) — the one year-by-year read of the expense table that Engine D, Backtest and What-Breaks share, and the three display
   // snapshots, read LIVE (recomputeDerivedExpenses reassigns them). GUARDED: tableYearExpense does not exist before v6.18 (t81 reads
   // `undefined` on the v6.17 leg); recomputeDerivedExpenses and the snapshots exist on every leg.

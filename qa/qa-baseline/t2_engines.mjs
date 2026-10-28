@@ -117,6 +117,13 @@ if (MODE === "compare") {
     // inflation differs from the old mixed-unit figure. `ssTable`, `stateTax` and `inflation` must NOT: the state engines' figures are fixed
     // (DU-4), the SS table is a claim-age lookup, and the inflation fingerprint is the scenario table this release reads but does not change.
     "v629→v630": ["mc", "extMC", "stress", "roth", "rothCurrentEstate", "rothAca", "rothOther"],
+    // v6.35 (D-62 — docs/SCOPE_D62_D65_D44_V635.md): STAY UNDER IRMAA solves with the funding sale's gain, rounds down and keeps $500 under
+    // the cliff, so its row MUST move on every household that runs it: `roth`, `rothAca` and `rothOther`. MEASURED at the build: in each,
+    // exactly ONE value moved — `roth`'s sorted estates lose $4,161,511 and gain $4,189,065; `rothOther`'s lose $6,364,937 and gain $6,433,971;
+    // `rothAca` differs in irmaa1's estate alone. Every other strategy is bit-identical (t98 A-2), and so is `rothCurrentEstate`, the three
+    // Monte Carlo keys, `ssTable`, `stateTax` and `inflation` (D-65 and D-44 change nothing on a plan with a blank field and no row before
+    // retirement, which is every fingerprint household).
+    "v634→v635": ["roth", "rothAca", "rothOther"],
   };
   const expectDiff = new Set(INTENDED_DIFFS[`${PRIOR}→${CUR}`] || []);
   for (const key of Object.keys(a)) {
