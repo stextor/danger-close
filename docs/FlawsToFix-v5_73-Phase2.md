@@ -52,7 +52,7 @@ ordinary income, though both were in its "Gross taxable" total; it now lists eve
 | D-1 | **FIXED v5.77** | METHODOLOGY's §86 passage rewritten |
 | D-4 *(follow-up)* | **MEASURED, DISCLOSED v5.84** | METHODOLOGY §7; the caps still differ in the source |
 | D-7 *(follow-up)* | **FIXED v5.84** (tax half) | Engine A taxes the draw (`t49`) |
-| D-7b *(follow-up)* | **OPEN, disclosed** | Engine A taxes the draw but does not drain it (Field Manual, METHODOLOGY) |
+| D-7b *(follow-up)* | **OPEN, disclosed** — *carried to MissingFeatures **D-68** at v6.36, which tracks it from there* | Engine A taxes the draw but does not drain it (Field Manual, METHODOLOGY) |
 
 **Stale passages below, left as written:** the "two open follow-ups" paragraph (D-4 is now measured, D-7 fixed); §2's heading "READ, NOT YET EXECUTED" (all were executed); the C-8 note sits at the end of C-7's text; §3's "top-five summary … only after the final phase" (written 2026-09-15, `AUDIT_TOP_FIVE_SUMMARY.md`); §4's three "not covered" lines (Engine C's §86 was executed at v5.77, the bracket projection checked to the dollar at v5.75, C-8 computed to the dollar at v5.74).
 **IDs to read with care:** this register's D-1, D-4, D-7, D-9 are not `MissingFeatures.md`'s D-1, D-4, D-7, D-9 (different items with the same labels).
