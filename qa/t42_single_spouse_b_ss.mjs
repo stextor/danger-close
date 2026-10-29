@@ -37,12 +37,12 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
 const VER = process.argv[2];
-const KNOWN_VERSIONS = ["v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636"];
+const KNOWN_VERSIONS = ["v575", "v576", "v577", "v578", "v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  \u2717 FATAL: version tag "${VER}" is not registered in this suite.\n    Registered: ${KNOWN_VERSIONS.join(", ")}`);
   process.exit(1);
 }
-const POST = VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630" || (VER === "v631" || VER === "v632" || VER === "v633" || VER === "v634" || VER === "v635" || VER === "v636"))))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630" || (VER === "v631" || VER === "v632" || VER === "v633" || VER === "v634" || VER === "v635" || VER === "v636")))))))))))))))))));
+const POST = VER === "v576" || VER === "v577" || VER === "v578" || VER === "v579" || VER === "v580" || VER === "v581" || VER === "v582" || VER === "v583" || VER === "v584" || VER === "v585" || VER === "v586" || VER === "v587" || VER === "v588" || VER === "v589" || VER === "v590" || VER === "v591" || VER === "v593" || VER === "v594" || VER === "v595" || VER === "v596" || VER === "v597" || VER === "v598" || VER === "v599" || VER === "v600" || VER === "v601" || VER === "v602" || VER === "v603" || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630" || (VER === "v631" || VER === "v632" || VER === "v633" || VER === "v634" || VER === "v635" || VER === "v636" || VER === "v637"))))))))))))))))))) || VER === "v604" || VER === "v605" || VER === "v606" || VER === "v607" || VER === "v608" || VER === "v609" || (VER === "v610" || (VER === "v611" || (VER === "v612" || (VER === "v613" || (VER === "v614" || (VER === "v615" || (VER === "v616" || (VER === "v617" || (VER === "v618" || (VER === "v619" || (VER === "v620" || (VER === "v621" || (VER === "v622" || (VER === "v623" || (VER === "v624" || (VER === "v625" || VER === "v626" || VER === "v627" || (VER === "v628" || (VER === "v629" || VER === "v630" || (VER === "v631" || VER === "v632" || VER === "v633" || VER === "v634" || VER === "v635" || VER === "v636" || VER === "v637")))))))))))))))))));
 
 // resettable seeded source, installed BEFORE the import (see the seeding trap above)
 const mulberry = (a) => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a);
@@ -61,7 +61,7 @@ const BASE = JSON.parse(JSON.stringify(G.PORTFOLIO()));
 // payment is paid off by then). PIN18 picks the v6.18 figures; the v6.18 leg is ALSO run with DC_V617_SPENDING=1 — every household here
 // loaded with v6.17's spending as a table (qa/tools/v617_spending.mjs, split at that household's own Medicare year) — where every v6.17
 // figure must still come out exactly. That run attributes each move to the spending read alone.
-const POST_D41 = ["v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636"].includes(VER);   // an array, so the registrar widens it
+const POST_D41 = ["v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637"].includes(VER);   // an array, so the registrar widens it
 const SPEND17 = POST_D41 && process.env.DC_V617_SPENDING === "1";
 const PIN18 = POST_D41 && !SPEND17;
 const P41 = (v617, v618) => PIN18 ? v618 : v617;
@@ -69,7 +69,7 @@ const P41 = (v617, v618) => PIN18 ? v618 : v617;
 // rides on its draws after 2036 moved. PIN21 picks the v6.21 figures (measured at the build). The v6.21 leg is ALSO run with
 // DC_V620_TABLE=1 — the example's table without its car rows, which is v6.20's — and there every v6.20 figure must come out exactly: that
 // second run attributes each move to the rows alone (runsuite.sh, "<suite>-<cur>-table620"; t84 C proves v6.21 on that table IS v6.20).
-const POST_D42 = ["v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636"].includes(VER);   // an array, so the registrar widens it
+const POST_D42 = ["v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637"].includes(VER);   // an array, so the registrar widens it
 const TABLE620 = POST_D42 && process.env.DC_V620_TABLE === "1";
 const PIN21 = POST_D42 && !TABLE620;
 const P42 = (v620, v621) => PIN21 ? v621 : v620;
@@ -85,7 +85,7 @@ const RY = G.PLAN_TIMELINE().targetRetireYear;
 // spouse B's check, × (1+i)^(y − as-of), summed over the years Engine D pays it. `i` is the base preset's inflation (this module's
 // SCENARIOS table). D-2 (Engine D's lifetime draw) and D-4 (the Monte Carlo planned path) have no oracle and are re-pinned BY MEASUREMENT,
 // disclosed in the CHANGELOG; the v6.17-spending and v6.20-table legs skip those two (the units end their exact reproduction).
-const U630 = ["v630", "v631", "v632", "v633", "v634", "v635", "v636"].includes(VER);   // an array, so register_tag2 widens it each release
+const U630 = ["v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637"].includes(VER);   // an array, so register_tag2 widens it each release
 const I30 = Object.values(G.SCENARIOS()).reduce((t, sc) => t + sc.prob * sc.inflation, 0);
 const K30 = y => Math.pow(1 + I30, y - G.PLAN_TIMELINE().asOfYear);
 let FED30 = null;
@@ -188,13 +188,13 @@ T("D-1 married: spouse-B SS still paid", mar.ssB, 284676);
 T("D-2 married: draws" + (PIN18 ? P42(" (v6.18, D-41: the year-by-year read; 1,469,176 through v6.17)", " (v6.21, D-42: the car rows; 1,463,097 at v6.18–v6.20)") : ""), mar.draws, P41(1469176, P42(1463097, 1567766)));
 // v6.07 (D-33): the married example carries spouse B's $7,000 annuity, which no RMD or conversion drains from v6.07 — lifetime federal
 // $208,445 -> $208,000 (the same figure and basis as t40 A5's call-site pin). An array, so register_tag2 widens it each release.
-T("D-3 married: lifetime federal" + (["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636"].includes(VER) ? (PIN18 ? P42(" (v6.18, D-41: $205,423; $208,000 at v6.07–v6.17)", " (v6.21, D-42: the car rows; $205,423 at v6.18–v6.20)") : " (D-33: −$445)") : ""), mar.fed, ["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636"].includes(VER) ? P41(208000, P42(205423, 207059)) : 208445);
+T("D-3 married: lifetime federal" + (["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637"].includes(VER) ? (PIN18 ? P42(" (v6.18, D-41: $205,423; $208,000 at v6.07–v6.17)", " (v6.21, D-42: the car rows; $205,423 at v6.18–v6.20)") : " (D-33: −$445)") : ""), mar.fed, ["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637"].includes(VER) ? P41(208000, P42(205423, 207059)) : 208445);
 // v6.20 (D-40, D-44, D-45): the Monte Carlo pays the Taxes tab's tax (its default schedule: $70K, BASE) and the example's April 2029
 // one-time rows, inflated, so the 6-year planned path moves $2,128,443 → $2,083,910 (−$44,533). Re-pinned only with its attribution,
 // step by step and each exact, in the same run: t83 R (the drag +$56,285, the quarter read −$375, the one-time rows −$34,995, the tax
 // −$65,449). An array, so the registrar widens it.
 }
-const POST_D40 = ["v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636"].includes(VER);
+const POST_D40 = ["v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637"].includes(VER);
 if (U630) { if (!SPEND17 && !TABLE620) T("D-4 married: Monte Carlo planned path (v6.30 — MEASURED, D-60: the MC tax schedule is Engine B's today's-dollar tax; $2,083,910 at v6.20–v6.29)", mar.pp, 2084618);
   else console.log("  \u25cb SKIPPED (v6.30, measured exact of a pre-v6.30 build): D-4 planned path"); } else
 T("D-4 married: Monte Carlo planned path" + (POST_D40 ? " (v6.20, D-40/44/45: $2,128,443 through v6.19; attributed in t83 R)" : ""), mar.pp, POST_D40 ? 2083910 : 2128443);

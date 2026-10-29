@@ -42,13 +42,13 @@ console.error = () => {}; console.warn = () => {};
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v632";
 const DUMP = process.argv.includes("--roth-dump");
-const KNOWN_VERSIONS = ["v631", "v632", "v633", "v634", "v635", "v636"];
+const KNOWN_VERSIONS = ["v631", "v632", "v633", "v634", "v635", "v636", "v637"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v632", "v633", "v634", "v635", "v636"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v632", "v633", "v634", "v635", "v636", "v637"].includes(VER);   // an array, so the next registration widens it
 const KQ = "[KNOWN DEFECT 2026-10-25, D-61 — flips at v6.32]";
 const KF = "[KNOWN DEFECT 2026-10-25, F-26 — flips at v6.32]";
 dom.reconfigure({ url: "https://stextor.github.io/danger-close/" }); globalThis.location = window.location;   // the self-hosted branch

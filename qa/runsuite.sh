@@ -445,6 +445,12 @@ tally "t98-$CUR"   node t98_irmaa_onetime.mjs "$CUR"
 # leg pins the defect).
 tally "t100-$PRIOR" node t100_whatbreaks_tax.mjs "$PRIOR"
 tally "t100-$CUR"   node t100_whatbreaks_tax.mjs "$CUR"
+# t101 (v6.37) — the SS tab's claim-age explorer starts at the plan and compares against it (F-29): both sliders' states by AST; eight
+# plans at the opening position; the slider moved, every figure computed in the suite (the reported plan, a July birth month, a claim
+# before retirement, an early claim, a window past retirement + 8); the extinction check — 72 plan × position cells, one series; spouse
+# B's grid and shortfall card; the single household; the engines unmoved; the Field Manual. Both legs (the v6.36 leg pins the defect).
+tally "t101-$PRIOR" node t101_ss_slider_start.mjs "$PRIOR"
+tally "t101-$CUR"   node t101_ss_slider_start.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
