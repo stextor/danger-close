@@ -1060,8 +1060,8 @@ treatment. Streams flow through every engine but two — planned trajectory, bot
 the withdrawal schedule, the tax engine (job rows also pay payroll tax — an employee row as wages, per earner up to the
 wage base, with the Additional Medicare Tax; a self-employed row self-employment tax, both halves; see *Payroll tax on job income*, v6.14, v6.16), IRMAA MAGI, and the Roth optimizer. **Backtest and What-Breaks credit no stream** (corrected
 at v6.23; through v6.22 this paragraph listed What-Breaks among the engines): their income is Social Security and the pension, so a
-plan's rental or job income never lowers their draws, while What-Breaks' tax — the Roth tab's strategy engine's — does include the
-streams' tax. Conservative; MissingFeatures **D-57**. Entering any stream replaces the built-in part-time taper, which from v6.23
+plan's rental or job income never lowers their draws, while What-Breaks' tax does include the streams' tax (through v6.35 the Roth
+tab's strategy engine's; from v6.36 the Monte Carlo's schedule, *What Breaks pays the Monte Carlo's tax*, v6.36). Conservative; MissingFeatures **D-57**. Entering any stream replaces the built-in part-time taper, which from v6.23
 only the example household carries (*Built-in work is the example's alone*, v6.23), and the old negative-expense-row workaround is superseded (moving such rows
 into the module lets the tax engines see the income). **From v5.63 the Roth optimizer charges FICA
 on job rows only, as the tax engine always has.** Through v5.62 it charged payroll tax on every
@@ -2831,6 +2831,7 @@ every path: measured at the build, the three 6-year runs (10,000 paths) take 0.3
   rows before retirement (v6.35)*).
 - **What-Breaks' tax** stays the Roth tab's strategy engine's lifetime tax averaged per year (it is a deterministic projector); its copy now
   names that engine, where it said "the Taxes engine", and no longer says it does not model taxes. From v6.31 it adds that engine's IRMAA (`totIrmaaToday`).
+  *(Superseded at v6.36: What Breaks averages this section's schedule instead — “What Breaks pays the Monte Carlo's tax” (v6.36).)*
 
 ## Cars are expense rows (v6.21)
 
@@ -3104,8 +3105,8 @@ above, gives the corrected ones).
   inflation to the last plan year — so its ranking by estate is the ranking in either unit.
 - **The Monte Carlo and What Breaks** are handed each year's tax in today's dollars (`mcIncomeTaxSchedule` keeps `totalTaxToday`) and grow it
   with each path's inflation exactly as before; the charge is unchanged — the schedule × the path's inflation × the quarter's fraction.
-  What Breaks reads Engine A's tax in today's dollars and, being a real-terms projection from retirement, values a fixed pension at its
-  real worth then (the pension ÷ (1 + i)^(retirement − as-of)).
+  What Breaks reads Engine A's tax in today's dollars (from v6.36 the Monte Carlo's schedule, also in today's dollars) and, being a
+  real-terms projection from retirement, values a fixed pension at its real worth then (the pension ÷ (1 + i)^(retirement − as-of)).
 
 **What it moved — measured at the v6.30 build** (the shipped v6.29 against the v6.30 build, both as modules; the Monte Carlo is the 30-year
 run, 3,000 paths, the same seeds within each row; Engine D's end balance in today's dollars on each build's own clock). Before the build
@@ -3194,7 +3195,8 @@ seen on it.
 - **The edges** (DS-2 (a)): nothing before retirement (Engine C starts at the retirement year); a premium year dated after the plan's last year
   is not charged; and the tail — what a survivor who outlives the horizon pays under stochastic longevity — repeats the last year's total,
   income tax plus that year's surcharge.
-- **What Breaks adds Engine A's IRMAA** (DS-3 (a)): its estimate is (`totTaxToday` + `totIrmaaToday`) ÷ the plan's years.
+- **What Breaks adds Engine A's IRMAA** (DS-3 (a)): its estimate is (`totTaxToday` + `totIrmaaToday`) ÷ the plan's years. *(Superseded at
+  v6.36: What Breaks averages the Monte Carlo's schedule instead — “What Breaks pays the Monte Carlo's tax” (v6.36).)*
 - **The Income tab's card** keeps the first year's income tax and adds a line for the first surcharge year, its amount and the number of
   years (DS-4 (a)); the Monte Carlo, Backtest and What Breaks tabs and the Field Manual say what the simulation now pays.
 
@@ -3226,7 +3228,9 @@ $250,000 under BASE). The example as it opens is unchanged.
   BASE, Engine A $10,930 against Engine C's $12,080; New York ×3 under BASE, Engine A $50,270 against Engine C's $32,340 inside the horizon
   ($41,580 counting two premium years after it); the example at a $0 slider under BULL-LEANING, Engine A $8,050 against Engine C's $0. The
   difference reaches What Breaks' estimate by its yearly average — on the largest of these, about $720 a year What Breaks' line and the Field
-  Manual say its IRMAA can differ from the IRMAA tab's.
+  Manual say its IRMAA can differ from the IRMAA tab's. *(Closed at v6.36 for What Breaks, which now reads the Monte Carlo's schedule; the
+  cause, and a tax gap larger than this IRMAA one, are in “What Breaks pays the Monte Carlo's tax” (v6.36). Engine A still differs; that is
+  MissingFeatures D-68, on the Roth tab.)*
 - **Premiums dated after the horizon are not charged**; under stochastic longevity a survivor who lives on pays the last year's total
   instead, so a surcharge that starts after the horizon is missed — optimistic, and small.
 - **The surcharge is the 2026 table in today's dollars** (*One dollar unit*, above): Part B and D premiums grow with the plan's inflation,
@@ -3507,3 +3511,65 @@ the real controls, the copy on four surfaces and the Field Manual, the flag, Ask
 count, the overflow, the example at +1 YEAR on the three tabs, the Monte Carlo unchanged, the bridge, the copy. `t29` gains the boundary rows
 `pre_retire_once` and `work_magi` (the example is ON for both). `qa/tools/controls_v635_irmaa_onetime.py` puts each removed defect back and
 shows its check turn red.
+
+## What Breaks pays the Monte Carlo's tax (v6.36)
+
+One correction (`docs/SCOPE_D66_WHATBREAKS_TAX.md`; decisions of 2026-10-28, all as recommended). MissingFeatures **D-66**, wider than
+registered.
+
+**What was wrong.** What Breaks charged a yearly tax averaged from Engine A, the Roth tab's strategy engine: its current-slider row's
+`totTaxToday + totIrmaaToday` over the plan's years (v6.31, DS-3 (a)). The Monte Carlo charged `mcIncomeTaxSchedule`: Engine B's
+`totalTaxToday` each year, plus Engine C's `surchargeToday` in each premium year inside the horizon. The two stress views disagreed. D-66
+registered the IRMAA half (about $720 a year at most); the income-tax half, from the same cause, was larger. Measured at the scope on v6.35
+(yearly, today's dollars, yield 2%, QCD $0):
+
+| Household | What Breaks (Engine A) | The Monte Carlo's schedule | Difference |
+|---|---|---|---|
+| Example $70K BASE | $10,528 | $8,048 | +$2,480 |
+| Example $250K BASE | $13,352 | $12,241 | +$1,111 |
+| Single $70K BASE | $16,284 | $14,931 | +$1,352 |
+| New York ×3 $70K BASE | $38,441 | $31,526 | +$6,915 |
+| Example $0 BULL-LEANING | $10,533 | $7,432 | +$3,101 |
+
+Across the 102 fixture cases (17 households × BASE/BULL × $0/$70K/$250K) Engine A's figure was above the schedule in 100 and below in 2;
+IRMAA alone differed in 44 (Engine A higher in 40).
+
+**Why Engine A differs.** Three simplifications, measured at the scope by switching each to Engine C's treatment in a scratch copy:
+1. **It taxes the spending draw from Traditional but never drains it** (v5.84, disclosed in the Field Manual; FlawsToFix Phase 2 D-7b). Its
+   Traditional balance and so its RMDs run high once RMDs start: on the example at $70K, $1,443,115 against Engine C's $991,330 at the start
+   of 2039, and an RMD of $49,327 against $33,853.
+2. **Its dividend base is its own taxable pool,** which pays the conversion tax, then receives every gross RMD and is never spent. Its
+   dividend is $0 from 2031, once the pool has been emptied paying the conversion tax, and $19,110 by 2053 on the example, where Engine C's (today's taxable balance grown with
+   inflation) is $455–$871. Not disclosed before this release.
+3. **It ends each spouse's conversions at that spouse's own ladder year,** where Engine C uses the household's. Not disclosed before this
+   release.
+
+With 1 and 2 replaced, Engine A's IRMAA equals Engine C's on every registered household and on 99 of the 102 fixture cases; the other three
+are cause 3. Its income tax lands within $389 of Engine B on the example, but −$18,541 to +$6,638 lifetime across the fixtures; that
+residual is not fully decomposed. The growth rate is not a cause (both 4.5%), and the persons billed, the filing status and the tier tables
+agree.
+
+**What changed.** A module-level helper, `whatBreaksAnnualTax(retireYear, horizonYr, inputs)`, averages the Monte Carlo's own schedule
+(`mcTaxForYear` over What Breaks' years) at the Monte Carlo's four inputs — the slider, the QCD, the dividend yield and the scenario
+(DB-2 (a)). What Breaks charges that average each year, grown with the projection's inflation as before (DB-3 (a): the average, not each
+year's figure). The two stress views now charge one projection. Engines A, B, C and D do not change; the Roth tab does not move.
+
+**Effect, rendered** (the example, the page's default slider and settings; shipped → v6.36):
+- under BASE: the estimate $10,528 → $8,048 a year; spending headroom 1.20× → 1.25×; the shock absorbed $0.50M → $0.55M; the return
+  break-point −2.2% and the crash years (1) unchanged;
+- under BULL-LEANING (the page's default prior): headroom 1.35× unchanged; the shock $0.85M → $0.90M.
+
+**Direction: optimistic on most plans.** The project's default is the conservative direction when an assumption must be picked. This is not
+an assumption being picked: What Breaks was high because Engine A keeps money the household has already spent, and none of the three
+causes is a margin anyone chose. On two fixture cases (`rmd73` at $250K) the same causes made it low, and those two now rise.
+
+**Social Security cut.** Engine A applies the trust-fund cut (`ssDepletionFactor`); Engines B and C, and so the schedule, keep scheduled
+benefits. So under a cut What Breaks' estimate no longer falls with the cut. On the example with a 78% cut from 2033 it was $9,315 (Engine
+A, cut) and is $8,048 (the schedule, either way). The Field Manual's cut paragraph lost its What Breaks exception.
+
+**Simplifications, stated.**
+- The average spreads the conversion years' tax across the plan. Charging each year's figure moves the break-points both ways (measured at
+  the scope; not adopted).
+- The QCD lowers What Breaks' tax as it lowers the Monte Carlo's, and the gift itself is not charged in either (*The Taxes tab and the
+  drawdown*, item 3).
+- The Roth tab's figures still come from Engine A and run high on most plans (MissingFeatures **D-68**, filed at this release).

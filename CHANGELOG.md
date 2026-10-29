@@ -1,5 +1,120 @@
 # Changelog
 
+## v6.36 — What Breaks pays the Monte Carlo's tax (D-66)
+
+**A modeling release, for What Breaks only.** Scoped in `docs/SCOPE_D66_WHATBREAKS_TAX.md` (repo-only; build record §7). Steve, on the five
+decisions: *"Let's use your recommendations on the decisions"*. Built on v6.35 (source `853e311a…`). METHODOLOGY's new section *What Breaks
+pays the Monte Carlo's tax (v6.36)* is the full account. Under DB-5 (a) this release took v6.36 because none of the three 2027 sources had
+published; **the 2027 tax figures become v6.37** (`docs/SCOPE_TY2027_REFRESH_V633_V634.md` renumbered a third time; its suite stays
+`t99_ty2027.mjs`). The deadline still outranks any model release.
+
+**What was wrong (v6.35, measured at the scope).**
+- **What Breaks and the Monte Carlo charged different tax and IRMAA** (D-66, wider than registered). What Breaks averaged the Roth tab's
+  strategy engine (Engine A); the Monte Carlo charged the Taxes tab's tax (Engine B) and the IRMAA tab's surcharges (Engine C). D-66 was
+  registered as IRMAA alone, about $720 a year at most. The income tax differed more: on the example at the defaults (BASE) What Breaks charged
+  $10,528 a year against the Monte Carlo's $8,048 (+$2,480, with no IRMAA difference); on New York ×3, +$6,915. Across 102 fixture cases it
+  was above the Monte Carlo's in 100 and below in 2. One household the register did not list also differed: the example at $0 under BASE,
+  Engine A $5,750 of lifetime IRMAA against Engine C's $0.
+- **Why.** Engine A, built to compare strategies, makes three simplifications the other tabs do not: it taxes the spending draw without
+  taking it out of Traditional (disclosed since v5.84), so its RMDs run high once they start; it figures dividends on a pool that collects
+  every RMD and is never spent; and it ends each spouse's conversions at that spouse's own year. The last two were not disclosed. With the
+  first two replaced by Engine C's treatment in a scratch copy, Engine A's IRMAA equalled Engine C's on every registered household and on 99
+  of 102 fixture cases (the other three are the ladder end). Its income tax did not close as neatly (−$18,541 to +$6,638 lifetime across the
+  fixtures), and that residual is not fully decomposed.
+
+**What changed.**
+- **What Breaks averages the Monte Carlo's own schedule** — `whatBreaksAnnualTax`, a new module-level helper over `mcIncomeTaxSchedule`, at
+  the Monte Carlo's four inputs (the slider, the QCD, the dividend yield, the scenario). The two stress views charge one projection.
+  Engines A, B, C and D are untouched; the Roth tab and the Monte Carlo do not move.
+- **The effect is mostly in the plan's favour.** On the example under BASE the estimate falls $10,528 → $8,048 a year, spending headroom rises
+  1.20× → 1.25×, and the shock absorbed $0.50M → $0.55M; the return break-point (−2.2%) and crash years (1) do not move. Under BULL-LEANING,
+  the page's default, the shock rises $0.85M → $0.90M. On two fixture cases the estimate rises. Under a Social Security cut the estimate no
+  longer falls with the cut (the schedule keeps scheduled benefits, as it always has for the Monte Carlo).
+- **Copy and documents.** What Breaks' basis line and footer name the Monte Carlo's tax; the Field Manual's What Breaks entry, its Social
+  Security cut paragraph and the trust-fund FAQ agree, and §13 has a v6.36 note. The Roth comparator no longer says it uses the *"same tax
+  engine as the Taxes tab"*: its rules are that tab's, its income projection its own, and its lifetime tax and IRMAA run above those tabs' on
+  most plans. METHODOLOGY's new section, and four passages closed or
+  marked superseded. MissingFeatures **D-66 closed**, and **D-68 filed**: Engine A's three differences, which the Roth tab still shows
+  (`FlawsToFix-v5_73-Phase2.md`'s D-7b points to it). The four version sites read v6.36.
+
+**Owned.**
+- **The scope's first draft measured the rendered effect under the wrong prior.** Its "BASE" rows were rendered with the page still on its
+  default BULL-LEANING prior, because the probe set the weights without setting the page's preset and did not check the header's label.
+  The independent review found it; every rendered figure in the scope, METHODOLOGY and this entry is from a probe that sets the preset by its
+  button and checks the label, and `t100` C-4 checks the label too.
+- **The draft also overclaimed its cause** ("drain plus dividend closes every gap") on the five registered households alone. The review ran
+  the fixtures, found the third cause, and the draft was corrected before Steve decided.
+- **The scope's suite census was wrong in five places**, all found by the first full run (19 failures in eight suites): `t8` (call-site
+  counts of `retireStartBalances` and `taxableInitAll`, 9 → 8 and 8 → 7) and `t57` D4 (Engine A P builders, now three) were missing; `t93`
+  W-0 and `t94` D-3, which the scope said would stay green, read the estimate with a regex ending in "K/yr average", which the new copy no
+  longer has; `t81` E-8's v6.20-table run moved (1.40× → 1.45×), where the scope expected it to hold; `t98` B-6 and its v6.34 differentials,
+  which a v635 → v636 folder cannot run, were not anticipated; `t94` G-11 read the old Field Manual phrase. Each is re-gated (below).
+- **A test the scope promised was dropped, and the build review caught it.** §3 B named a trust-fund-cut case; there is no setter for the cut
+  in the shim, and the build left it out without saying so. `t100` C-10 now tests it through the page (the SS tab's *2033 → 78%* preset):
+  What Breaks' estimate stays $8K on v6.36, and falls $11K → $9K on v6.35. The same review found the dividend sentence in METHODOLOGY and
+  D-68 wrong for 2029–30, the Field Manual's "$1,000 to $7,000" range too narrow (New York ×3 reaches $8,164), the Roth comparator's
+  "same tax engine" sentence contradicted by D-68, and `t98` skipping one check (B-1b) that needed no prior module; all corrected (scope
+  §7.2).
+
+**Limitations, stated.**
+- What Breaks still charges a yearly average; the conversion years' tax is spread across the plan. Charging each year's figure moved the
+  break-points both ways when measured, and was not adopted (DB-3).
+- A QCD lowers What Breaks' tax as it lowers the Monte Carlo's; the gift itself is charged in neither.
+- The Roth tab still shows Engine A's figures, which run high on most plans (D-68).
+
+**Tests.** New suite **`t100_whatbreaks_tax.mjs`**, run on both legs; the v6.35 leg pins the defect as a dated
+`[KNOWN DEFECT 2026-10-28, D-66 — flips at v6.36]`.
+- **§A, the source by AST:** the helper is module-level and calls only the schedule; What Breaks calls it once with `_retireYr`,
+  `_horizonYr` and exactly the Monte Carlo's four inputs, the same key set as the Monte Carlo's three schedule calls; `runRothStrategies` has
+  three callers, none in What Breaks; Engine A's totals are read only on the Roth tab.
+- **§B, the extinction invariant:** on 138 cases (every fixture household, the D-66 households, a QCD, working-year MAGI and a retirement in
+  the as-of year; BASE and BULL; $0, $70K, $250K), the helper's average equals Engine B's tax plus Engine C's in-horizon surcharges, summed
+  in the suite from the engines' rows, to the cent; its IRMAA part is Engine C's; an anti-vacuity check that the cases reach the change.
+- **§D:** Engine A's rows (every strategy, with its lookback seam) and the Monte Carlo's schedule bit-identical to v6.35's module on 92
+  cases.
+- **§C:** the estimate printed on three plans under BASE (the header label checked); the basis line and footer; the four answers on the
+  example under BASE, as measured; the estimate with the Social Security cut on (C-10); the Field Manual's three passages and note;
+  METHODOLOGY's section. §A also checks the Roth comparator's reworded sentence (A-8).
+- **Re-gated:** `t8`'s two call-site counts; `t49` X-2 and `t57` D4 (three Engine A builders, all on the Roth tab); `t81` E-8 on the v6.20
+  table (1.45×); `t83` I-7 and I-10, `t93` H-7, W-0 and W-1, `t94` D-3, D-4, D-5 and G-11 read the new source and copy; `t94` §D's header,
+  D-1 and D-2 keep pinning Engine A against Engine C, relabelled as Roth-tab facts (D-68); `t98` B-6 (three builders), and its six v6.34
+  differentials (A-2, A-2b, B-1, C-3b, C-4, C-5) print a skip line outside a v634 → v635 folder, which builds no v6.34 module.
+- **Registered:** `v636` in 84 changed `qa/` files (counted from the diff) and the three new ones, most by the AST registration. By hand: `t33` PINS (unchanged),
+  `t93`'s Engine D reference (v635), `t45`/`t47`/`t48`'s `KNOWN_VERSIONS`; `runsuite.sh` lists `t100`; the shim exports
+  `whatBreaksAnnualTax` on `__g`. No boundary-census row: the defect showed on the example at the defaults (OPERATIONS §K1).
+
+**Counts**, from the full suite run from the packaged copies (green on its first run):
+- **10,472 app checks across 98 app suites, 0 failed, 0 DIED**;
+- MC parity 10/10 — `t2` compare's fingerprints identical to v6.35, with no intended differences (no engine changed);
+- tooling: `t21` 64, `domdiff` 32, `sets` 12 + 12;
+- GRAND **10,592**.
+
+Against v6.35, the current-leg changes are:
+- `t100`, new: 27.
+- `t98`: 72 → 66 (its six v6.34 differentials print a skip line outside a v634 → v635 folder).
+
+Every other current-leg count is unchanged; `t8`, `t49`, `t57`, `t81`, `t83`, `t93` and `t94` were re-gated at the same count. The v6.35
+leg counts 4,372: `t100` there 11, `t98` 66, `t93` 95 and `t96` 72 with their skips. The two attribution runs count 234 and 237. Together
+5,619 + 4,372 + 234 + 237 + 10 (parity) = 10,472.
+
+**Controls.** `qa/tools/controls_v636_whatbreaks.py`, on a copy of the packaged run folder: **17 of 17 as expected** (C0 silent; K1–K16 each
+firing), every file restored and hash-checked. Each puts one removed defect back: What Breaks on Engine A's estimate; the helper without
+its surcharges, dividing by one year too many, or starting two years late; What Breaks handing the schedule QCD $0 or a fixed slider;
+Engine A or the schedule perturbed (§D); the helper applying the Social Security cut; each piece of copy back to v6.35's, the Roth
+comparator's sentence included; METHODOLOGY's section removed.
+Its first run, on the build workspace before the review, was 15 of 15; K15 and K16 came with C-10 and A-8.
+
+**The reviews.** The scope was reviewed once before Steve decided (3 must-fix, 8 should-fix, 7 notes; scope §6). The build was reviewed by
+an agent that had not seen it, given the workspace diff and the run folder: **no blockers, 6 should-fix and 10 notes**, every one checked
+and taken or recorded (scope §7.2) — the Social Security cut left untested; `t98` B-1b skipped with the differentials; the dividend wording;
+the Roth comparator's "same tax engine" sentence; the Field Manual's range; this entry's own account of the census, which named one missed
+suite where there were five; stale labels and markers. It confirmed by AST that only `DataLoader` (the version), `DOCS_HTML` and
+`DangerCloseMain` differ from v6.35 besides the new helper.
+
+**Provenance.** Source `9c470b5a6e7571dd44c80d2e83e35133` · built `index.html` `ee554293faaee8a2716459daf697e2c8` (vite 5.4.21, `npm ci`; v6.35 rebuilt byte-identically to `1f5a4cb5…`) ·
+`smoke_built` 22/22.
+
+
 ## v6.35 — STAY UNDER IRMAA stays under (D-62); the last working years' income (D-65); one-time costs before retirement (D-44)
 
 **A modeling release.** Three corrections, scoped together in `docs/SCOPE_D62_D65_D44_V635.md` (repo-only; build record §7). Steve, on the
