@@ -49,6 +49,7 @@
 > | F-26 | **FIXED v6.32** — filed at v6.29 | `t95`; `docs/SCOPE_F26_D61_V632.md` (DF-1 to DF-6 and DF-8, all (a)). The Stress tab's cards computed for the plan, the SS tab's survivor grid, the Roth ladder from the selected year, the ACA dates, the Backtest's worst start, the README |
 > | F-27 | **CLOSED BY DECISION** (Steve, 2026-10-26) — filed at v6.32 | not changed: the briefing's stress figures are the example household's own requests to an AI, not a description of the model (where they overlap the model, they agree), and changing the text would mean recognising the old text too (the loader's DC-8 check matches it exactly); `t89` A-7 keeps pinning it |
 > | F-28 | **FIXED v6.33** — filed and fixed together | two drawings of the brackets read the wrong table: the Taxes tab's bracket-by-bracket panel (the 2026 table at the plan's last-year filing status, through Engine B's as-of `inflate`) and the Roth tab's BRACKET UTILIZATION bar (the 2026 table unindexed); `t96` A-9, F-1 to F-3; `docs/SCOPE_TY2027_REFRESH_V633_V634.md` §7 |
+> | F-29 | **FIXED v6.37** — filed and fixed together; wider than reported | the SS tab's claim-age explorer opened spouse A's slider at 67 for every plan and measured its draw comparison against three different baselines; spouse B's grid, note and shortfall card read her age in the retirement year; a single household's table counted a second check. `t101`; `docs/SCOPE_F29_SS_SLIDER_START.md` (DS-1 to DS-6, all (a)) |
 > | F-15b | **FIXED v6.32** | the Stress table's label reads "Success (>$1.5M)" (`t95` B-1, B-3; folded into F-26 under DF-1) |
 > | F-16 | **FIXED v5.98** | the pair swapped; `t62` holds every term in order (was: "API Key" before "Agency MBS") |
 > | §E-1 / §E-2 | **OPEN** | no physical-device pass; no keyboard / screen-reader pass (4 `aria-label`s in the app) |
@@ -667,3 +668,32 @@ UTILIZATION bar drew the first ladder year's taxable income, in that year's doll
 *"headroom to 24%"* printed beside it. Each now reads its year's own table and filing status (`taxFactsFor(sel.filingSingle, sel.yr)`; the
 ladder's own `projectBrackets(year)`). No engine figure moved. Tests: `t96` A-9 and F-1 to F-3, both legs (the v6.32 leg pins each drawing as
 `[KNOWN DEFECT 2026-10-27, F-28]`).
+
+### F-29 · The SS tab's claim-age explorer opened at 67 and compared against a baseline that doesn't exist — **LOW–MED (honesty of an output)** — FIXED v6.37
+
+**Filed and fixed at v6.37** (reported by the maintainer from his own plan; `docs/SCOPE_F29_SS_SLIDER_START.md`). On the SS tab's *Social
+security timing & claiming ages* section, spouse A's what-if slider opened at a literal 67 for every plan, while spouse B's opened at her claim
+age from My Data — so a plan claiming at 65 opened on a choice it did not make. The draw comparison under the sliders had three baselines: the
+*"Portfolio draw delta vs FRA"* card compared the slider with the plan; the yearly table's *"DRAW (FRA)"* column paid the full-retirement-age
+amount from the plan's claim date, a check nobody receives; the *"Monthly income gain (permanent)"* card compared with FRA. The card also counted
+months before retirement that the table did not. On a plan claiming at 65 ($3,322), the tab opened on *"+$80K"* of extra draws beside a table
+summing to +$92K, and *"$0"* of permanent gain, though moving 65 → 67 adds $511 a month for life. Found at the scope: the shortfall card took
+spouse B's benefit at her age in the retirement year. Found at the build: spouse B's grid tagged that age *"Modeled"*, though the engines pay
+her from her planned age; a note told a plan claiming before retirement that *"the Monte Carlo understates her income … success rates slightly
+conservative"*, which was false (DS-6, Steve: fold it in); a single household's table counted the placeholder spouse B's check ($1,944 a month
+from the year spouse A turned 67). Every one was invisible on the example, whose spouse A plans 67 and whose spouse B claims in the retirement
+year — census rows `ss_claim_a_planned_67` and `ss_claim_b_at_retire` (`t29` B-31, B-32, C-f29-1, C-f29-2).
+
+From v6.37 both sliders open at the plan (`ssTabClaimAge`: the plan's claim age, rounded and clamped to 62–70, so a backup carrying 65.5
+cannot throw — a crash path the build review found in the first fix); one monthly series, from the retirement month, compares spouse A's
+slider with the plan (spouse A at the planned age, at the tab's own benefit for that age; spouse B at her slider in both columns), and the
+delay card, the table and the permanent card all read it; the table runs until both of spouse A's compared claims have started (at least
+retirement + 8); the shortfall card and its SWR line count each check once it has started; spouse B's grid tags her planned age; the note is
+gone; a single household counts one check. Display only: no engine reads the sliders (`t101` D-1). Tests: `t101`, both legs
+(the v6.36 leg pins each defect as `[KNOWN DEFECT 2026-10-29, F-29]`); controls `qa/tools/controls_v637_ss_slider.py`.
+
+**Recorded, not changed** (scope §6). The tab computes every age's benefit from the plan's age-67 figure at SSA's rates; the engines pay the
+plan's own figure. For a plan written by My Data they agree; for the example, whose benefit table carries statement figures, spouse B at 63 is
+$1,350 on the tab and $1,300 in the plan (so from v6.37 the example's shortfall card reads $2,570, was $2,620, taking her check as the table
+beside it already did). And `spouseBFRAest` falls back to a typed $1,944 when a plan's table has no age-67 entry — whether a married plan can
+reach it was not measured (a MissingFeatures D-56-type default).
