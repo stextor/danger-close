@@ -555,6 +555,26 @@ export function census(G) {
                 : "reachable — the IRMAA tab, the Monte Carlo, What Breaks and the Roth tab charge the first two premium years");
   }
 
+  // ── v6.37 (F-29 — SCOPE_F29_SS_SLIDER_START) · the conditions that hid it (§K1) ───────────────────────────────────────────────
+  // 21. SPOUSE A PLANS TO CLAIM AT 67. Through v6.36 the SS tab's spouse-A slider opened at a literal 67 and its draw table paid the FRA
+  //    amount from the plan's claim date — both coincide with the plan when it claims at 67, as the example's spouse A does. ON when the
+  //    planned claim age is 67. Read from the plan; no build feature, so both legs agree.
+  // The claim ages as the SS tab reads them (ssTabClaimAge from v6.37: PLAN_TIMELINE's fallbacks, 67 for A and 63 for B, rounded, 62–70).
+  const _ca = (k, d) => { const n = Math.round(Number(P.incomeSources && P.incomeSources[k] && P.incomeSources[k].plannedAge)); return Math.min(70, Math.max(62, Number.isFinite(n) && n > 0 ? n : d)); };
+  { const _a = _ca("ssA", 67);
+    row("ss_claim_a_planned_67", "spouse A's planned claim age vs 67", `age ${_a}`, "spouse A plans a claim age other than 67", _a === 67,
+      _a === 67 ? "DEGENERATE — the SS tab's old opening position (67) and its FRA baseline equal this plan, so v6.36's F-29 cannot be seen here"
+                : "reachable — the SS tab's slider must open at the plan, and its draw comparison must measure against it"); }
+  // 22. SPOUSE B CLAIMS IN THE RETIREMENT YEAR AT HER PLANNED AGE. Through v6.36 the SS tab took spouse B's age in the retirement year as
+  //    her claim (the grid's "Modeled" tag, a note, the shortfall card); on the example the two coincide (63, 2029). ON when single (no
+  //    spouse B) or when her planned claim age equals her age in the retirement year.
+  { const _b = single ? null : _ca("ssB", 63);
+    const _bAge = single ? null : tl.targetRetireYear - tl.dobB.year;
+    row("ss_claim_b_at_retire", "spouse B's planned claim age vs her age at retirement", single ? "n/a" : `claims at ${_b}; ${_bAge} at retirement`,
+      "spouse B's planned claim age differs from her age in the retirement year", single || _b === _bAge,
+      single ? "single filer — no spouse B" : _b === _bAge ? "DEGENERATE — her claim falls in the retirement year, so the SS tab's v6.36 use of her retirement-year age cannot be seen here"
+        : "reachable — the SS tab must tag her planned age Modeled and take her benefit at her slider's age"); }
+
   return rows;
 }
 
