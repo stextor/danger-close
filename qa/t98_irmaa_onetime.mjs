@@ -24,7 +24,7 @@
 // a grid of the estimate); computeWithdrawalPlan's non-enumerable `_opening`.
 // Controls: qa/tools/controls_v635_irmaa_onetime.py (repo-only). Exits with process.exit (the rendered app leaves timers running).
 import { createRequire } from "module";
-import { existsSync, readFileSync } from "fs";
+import { existsSync, readFileSync, readdirSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath, pathToFileURL } from "url";
 import "./env_dom.mjs";
@@ -37,13 +37,13 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v635";
-const KNOWN_VERSIONS = ["v634", "v635"];
+const KNOWN_VERSIONS = ["v634", "v635", "v636"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v635"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v635", "v636"].includes(VER);   // an array, so the next registration widens it
 const D_PRIOR = "v634";                // the differential's prior leg — a constant, so the registrar cannot widen it (t76 records why)
 const KD = "[KNOWN DEFECT 2026-10-28, D-62 — flips at v6.35]", KW = "[KNOWN DEFECT 2026-10-28, D-65 — flips at v6.35]", KO = "[KNOWN DEFECT 2026-10-28, D-44 — flips at v6.35]";
 const require = createRequire(import.meta.url);
@@ -52,6 +52,13 @@ const g = M.__g, E = M.__engines, TS = M.__test || {};
 const X = n => (g[n] !== undefined ? g[n] : TS[n]);   // the v6.35 helpers live in the shim's __test object
 const PRIOR_PATH = join(HERE, `app_${D_PRIOR}.mjs`);
 const PM = POST && existsSync(PRIOR_PATH) ? await import(pathToFileURL(PRIOR_PATH).href) : null;
+// v6.36: in a LATER pair's run folder (v635 → v636) no v6.34 module is built, so the differentials against it are skipped with a printed
+// line rather than failed — the v634 → v635 folder they belong to is the one that must hold it (t93's and t96's skips, the same shape).
+const LATER = readdirSync(HERE).some(f => { const m = /^app_v(\d)(\d\d)\.mjs$/.exec(f); return m && +(m[1] + m[2]) > +VER.slice(1); });
+// The differentials belong to the v634 → v635 pair: they are REQUIRED on the v6.35 leg of that pair's folder, and skipped on any later build's
+// leg (v6.36 on) and on v6.35 as the prior leg of a later pair.
+const SKIP_PM = POST && !PM && (VER !== "v635" || LATER);
+if (SKIP_PM) console.log(`     (the v6.34 differentials — A-2, A-2b, B-1, C-3b, C-4, C-5 — skipped: ${VER}${LATER ? " as the prior leg of a later pair" : ", a later build"}; this run folder builds no app_v634.mjs)`);
 const SRC = readFileSync(join(HERE, "..", `${VER}.jsx`), "utf8");
 const { Parser } = require("acorn"); const jsx = require("acorn-jsx"); const walk = require("acorn-walk");
 const AST = Parser.extend(jsx()).parse(SRC, { ecmaVersion: 2022, sourceType: "module", locations: true, ranges: true });
@@ -208,7 +215,7 @@ if (POST && PM) {
   const acaRows = (() => { const a = g.runRothStrategies(BRIDGE), b = pg.runRothStrategies(BRIDGE); const x = a.find(r => r.key === "acaCliff"), y = b.find(r => r.key === "acaCliff");
     return x && y && JSON.stringify(x) === JSON.stringify(y) && x.totConv > 0; })();
   T("A-2b: STAY UNDER ACA CLIFF — the strategy whose estimate was lifted out — runs and is bit-identical on the ACA-bridge household", acaRows);
-} else if (POST) T("A-2: SETUP — the v6.34 module is beside this one", false, PRIOR_PATH);
+} else if (POST && !SKIP_PM) T("A-2: SETUP — the v6.34 module is beside this one", false, PRIOR_PATH);
 
 // the hand cases run with a plan that is NOT the example loaded: Engine A's work income reads the example's built-in spouse-B work (D-49)
 // from the loaded plan, so a hand-built P run beside the example gets $20,000 of wages in its first year (t33 records the same)
@@ -277,9 +284,10 @@ if (POST && PM) {
   T(`B-1: with the field blank, Engine C's rows and totals, the Monte Carlo's schedule and Engine D's schedule are bit-identical to v6.34 on the example and every fixture (${ok}/${n})`,
     n >= 54 && ok === n, bad.slice(0, 4).join(", "));
   // Engine A with the field blank: covered by A-2 (every strategy but irmaa1, both modules' own P builders, workMagi 0 on this leg)
-  T("B-1b: a P object without workMagi seeds nothing: STAY UNDER IRMAA's lookback holds no year before retirement", (() => {
-    const r = g.runRothStrategies(T3()).find(x => x.key === "irmaa1"); return Object.keys(r.magiByYr).every(y => +y >= 2027); })());
 }
+// B-1b reads this leg's module only, so it runs whether or not the v6.34 module is beside it (v6.36: moved out of the block above)
+if (POST) T("B-1b: a P object without workMagi seeds nothing: STAY UNDER IRMAA's lookback holds no year before retirement", (() => {
+    const r = g.runRothStrategies(T3()).find(x => x.key === "irmaa1"); return Object.keys(r.magiByYr).every(y => +y >= 2027); })());
 load(g, notExample(P0));   // see A-3's note
 // B-2: by hand — Engine A, a household whose last two working years are filed returns (DW-4 (a): taken as entered), both spouses on Medicare,
 // nothing else near a tier: the two premium years' surcharges are the published tier-2 figure × 2 persons × the index to the premium year
@@ -354,7 +362,9 @@ if (POST) {
   const carries = call => { const a = call.arguments[0]; if (!a) return false;
     const obj = a.type === "ObjectExpression" ? a : a.type === "Identifier" ? decls.filter(d => d.id.name === a.name && d.start < call.start).sort((x, y) => y.start - x.start)[0]?.init : null;
     return !!obj && obj.properties.some(p => p.type === "Property" && ((p.key.type === "Identifier" && p.key.name === "workMagi") || p.key.value === "workMagi")); };
-  if (POST) T(`B-6: every object passed to runRothStrategies carries workMagi — ${calls.length} call sites (a fifth builder without it fails here)`, calls.length === 4 && calls.every(carries),
+  // v6.36 (D-66): What Breaks' builder left with its call (it reads the Monte Carlo's schedule), so three sites from v6.36. An array, so the registrar widens it.
+  const B6_N = ["v636"].includes(VER) ? 3 : 4;
+  if (POST) T(`B-6: every object passed to runRothStrategies carries workMagi — ${calls.length} call sites (${B6_N} expected; one more builder without it fails here)`, calls.length === B6_N && calls.every(carries),
     calls.filter(c => !carries(c)).map(c => `L${c.loc.start.line}`).join(", "));
   else T(`B-6 ${KW}: no object passed to runRothStrategies carries workMagi (${calls.length} call sites)`, calls.length === 4 && !calls.some(carries));
 }
@@ -477,7 +487,7 @@ if (POST) {
   // the Field Manual and METHODOLOGY
   const DOCS = String((POST ? DG : g).DOCS_HTML());
   if (POST) {
-    T("B-8g: the Field Manual's three passages describe both cases, and the v6.35 entry is first in §13", DOCS.includes("so the premiums priced off your last working years are charged only if you enter that income on My Data (<strong>Household MAGI in your last working years</strong>, from v6.35)")
+    T("B-8g: the Field Manual's three passages describe both cases, and §13's v6.35 entry comes before v6.34's", DOCS.includes("so the premiums priced off your last working years are charged only if you enter that income on My Data (<strong>Household MAGI in your last working years</strong>, from v6.35)")
       && DOCS.includes("they are charged here, on the IRMAA tab and in What Breaks only if you enter that income on My Data (from v6.35)") && DOCS.includes("the first two years’ premiums, which working-year income sets, only if you enter that income on My Data (from v6.35)")
       && DOCS.indexOf("(v6.35).</strong>") > 0 && DOCS.indexOf("(v6.35).</strong>") < DOCS.indexOf("(v6.34).</strong>"));
     T("B-8h: EXTINCTION — the Field Manual's v6.31 current-behaviour wording is gone; its v6.31 history entry stays", !DOCS.includes("which no tab projects, so they are not charged here, on the IRMAA tab or in What Breaks")
@@ -521,6 +531,7 @@ if (POST) {
     pre([...X0, ROW(1000, `${RY - 1}-12`)]) === 1000 && pre(X0) === 0 && pre([...X0, ROW(1000, `${RY}-01`)]) === 0);
   // C-3: the example at +1 YEAR — the April 2029 rows ($20,000 + $8,000) now fall before retirement
   T("C-3: at the +1 YEAR year the helper reads the April rows: $28,000", pre(X0, RY + 1) === 28000, String(pre(X0, RY + 1)));
+  if (PM) {
   load(g, P0); load(PM.__g, P0);
   { const a = sched(g, RY + 1).schedule, b = sched(PM.__g, RY + 1).schedule;
     T(`C-3b: …and Engine D's schedule at ${RY + 1} ends lower than v6.34's (which never charged them)`, a[a.length - 1].portfolioTotal < b[b.length - 1].portfolioTotal - 20000, `${Math.round(a[a.length - 1].portfolioTotal)} vs ${Math.round(b[b.length - 1].portfolioTotal)}`); }
@@ -540,6 +551,7 @@ if (POST) {
     T("C-5: Engines B and C, handed v6.34's bridge, are bit-identical to v6.34; handed v6.35's own, they differ (the bridge carries the change)",
       same(c1.rows, c0.rows) && same(t1.rows, t0.rows) && !same(nb, bridge)); }
   load(g, P0); load(PM.__g, P0);
+  } else if (!SKIP_PM) T("C-3b: SETUP — the v6.34 module is beside this one", false, PRIOR_PATH);
 } else {
   load(g, P0); const RY = g.PLAN_TIMELINE().targetRetireYear;
   const a = sched(g, RY).schedule; load(g, P0, [...X0, ROW(30000, "2027-05")]); const b = sched(g, RY).schedule; load(g, P0);

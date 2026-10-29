@@ -34,13 +34,13 @@ import { spawnSync } from "child_process";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v630";
-const KNOWN_VERSIONS = ["v629", "v630", "v631", "v632", "v633", "v634", "v635"];
+const KNOWN_VERSIONS = ["v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v630", "v631", "v632", "v633", "v634", "v635"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v630", "v631", "v632", "v633", "v634", "v635", "v636"].includes(VER);   // an array, so the next registration widens it
 const KD = "[KNOWN DEFECT 2026-10-22, D-60 — flips at v6.30]";
 const GAP = 0.0025;   // C-CPI-U below CPI-U, CBO Budget Options 12 Dec 2024 — typed here, not read from the app
 
@@ -128,7 +128,8 @@ if (process.argv.includes("--module")) {
   // v6.32: Engine D is unchanged at v6.32 too (D-61 touches Engines B and C; F-26 no engine), so the v6.32 leg compares with v6.31's module.
   // v6.33: Engine D's Bracket column now reads each year's own table (D-67), which for this household — dated 2026, retiring in 2026 — is
   // the same figure to the bit, so the v6.33 leg compares with v6.32's module.
-  const DREF_BY = { v631: "v630", v632: "v631", v633: "v632", v634: "v633", v635: "v634" };
+  // v6.36: Engine D is untouched (D-66 changes What Breaks only), so the v6.36 leg compares with v6.35's module.
+  const DREF_BY = { v631: "v630", v632: "v631", v633: "v632", v634: "v633", v635: "v634", v636: "v635" };
   const DREF = existsSync(join(HERE, "app_v629.mjs")) ? "v629" : (DREF_BY[VER] && existsSync(join(HERE, `app_${DREF_BY[VER]}.mjs`)) ? DREF_BY[VER] : null);
   if (POST && DREF) {
     const MP = await import(pathToFileURL(join(HERE, `app_${DREF}.mjs`)).href); const GP = MP.__g;
@@ -469,7 +470,10 @@ const srcOf = n => SRC.slice(n.start, n.end);
     const bridge = topFn("withdrawalPlanSeries");
     T("H-6 the bridge passes Engine D's figures through (no inflation arithmetic)", bridge && all(bridge, n => n.type === "CallExpression" && /Math\.pow|planDollarFactor/.test(srcOf(n.callee))).length === 0);
     // v6.31 (D-51, DS-3 (a)): What Breaks adds Engine A's IRMAA, also in today's dollars (t94 D-4 holds the rendered figure). An array, so the registrar widens it.
-    T("H-7 What Breaks reads Engine A's tax in today's dollars", ["v631", "v632", "v633", "v634", "v635"].includes(VER)
+    // v6.36 (D-66): What Breaks reads the Monte Carlo's schedule instead — `whatBreaksAnnualTax`, in today's dollars (t100 holds it).
+    T(`H-7 What Breaks reads ${["v636"].includes(VER) ? "the Monte Carlo's schedule" : "Engine A's tax"} in today's dollars`, ["v636"].includes(VER)
+      ? /const _wbT = whatBreaksAnnualTax\(_retireYr, _horizonYr, \{ rothAmount, qcdAnnual, taxYield, scenarioPreset \}\);/.test(SRC) && /estAnnualTax = _wbT\.annual;/.test(SRC)
+      : ["v631", "v632", "v633", "v634", "v635"].includes(VER)
       ? /estAnnualTax = \(_cT\.totTaxToday \+ \(Number\.isFinite\(_cT\.totIrmaaToday\) \? _cT\.totIrmaaToday : 0\)\) \/ planYears/.test(SRC)
       : /estAnnualTax = _cT\.totTaxToday \/ planYears/.test(SRC));
     T("H-8 What Breaks values a fixed pension at its real worth at retirement", /const annualPenGuar = \(\) => _pen \* 12 \/ _rbWB;/.test(SRC));
@@ -551,8 +555,10 @@ const wbExp = (() => { try { const g = window.__g, tl = g.PLAN_TIMELINE(), P = g
     taxableInit: g.taxableInitAll(), taxYieldPct: 2.0, currentConv: 70000,
     ordDrawByYr: g.withdrawalPlanSeries({ retireYear: R, rothAmount: 70000, scenarioPreset: "bull" }).ordDrawByYr };
   const c = g.runRothStrategies(pT).find(r => r.key === "current");
-  return { planYears, today: c.totTaxToday, each: c.totTax }; } catch (e) { return { err: String(e) }; } })();
-const wbShown = (wbTxt.match(/estimated taxes \(~\$(\d+)K\/yr average/) || [])[1];
+  // v6.36 (D-66): what What Breaks now charges — the Monte Carlo's schedule at the page's settings (the DOM opens on BULL-LEANING)
+  const sch = g.whatBreaksAnnualTax ? g.whatBreaksAnnualTax(R, hz, { rothAmount: 70000, qcdAnnual: 0, taxYield: 2.0, scenarioPreset: "bull" }).annual : null;
+  return { planYears, today: c.totTaxToday, each: c.totTax, sch }; } catch (e) { return { err: String(e) }; } })();
+const wbShown = (wbTxt.match(/estimated taxes \(~\$(\d+)K\/yr/) || [])[1];   // v6.36: no longer followed by "average" (the copy reads "K/yr, the average of…")
 if (POST) {
   // the NIIT card carries no today's line when the plan pays no NIIT (the example pays none), so five or six
   T("L-1 the Taxes tab's lifetime cards give today's dollars (the NIIT card only when there is NIIT)", todayCards >= 5, `${todayCards}`);
@@ -575,7 +581,9 @@ if (POST) {
   T("L-9 the conversion slider and the QCD modeler say what kind of dollars they hold", convUnits && qcdUnits, `${convUnits} / ${qcdUnits}`);
   const kToday = Math.round(wbExp.today / wbExp.planYears / 1000), kEach = Math.round(wbExp.each / wbExp.planYears / 1000);
   T("W-0 setup: What Breaks renders its tax estimate, and today's and each year's readings differ by at least $1K a year", wbShown !== undefined && kToday !== kEach, `${wbShown} / ${kToday} / ${kEach} ${wbExp.err || ""}`);
-  T(`W-1 What Breaks' estimate is Engine A's lifetime tax in today's dollars over the plan years (~$${kToday}K/yr, ±$500 — the display rounds to $1K)`, +wbShown === kToday, `shown ${wbShown}`);
+  if (["v636"].includes(VER)) T(`W-1 What Breaks' estimate is the Monte Carlo's schedule, in today's dollars, averaged over the plan years (~$${Math.round(wbExp.sch / 1000)}K/yr, ±$500 — the display rounds to $1K; v6.36, D-66)`,
+    wbExp.sch != null && +wbShown === Math.round(wbExp.sch / 1000), `shown ${wbShown}`);
+  else T(`W-1 What Breaks' estimate is Engine A's lifetime tax in today's dollars over the plan years (~$${kToday}K/yr, ±$500 — the display rounds to $1K)`, +wbShown === kToday, `shown ${wbShown}`);
 } else {
   T(`L-2 ${KD}: the Taxes tab describes two readings of one figure`, tx.includes("read as each year's own dollars these rows run") || tx.replace(/\s/g, "").includes("readaseachyear'sowndollarstheserowsrun"));
   T("L-1 no today's-dollar cards on the prior leg", todayCards === 0);

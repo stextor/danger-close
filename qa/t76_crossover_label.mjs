@@ -28,18 +28,18 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v613";
-const KNOWN_VERSIONS = ["v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635"];
+const KNOWN_VERSIONS = ["v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636"].includes(VER);   // an array, so the next registration widens it
 // v6.18 (D-41): Engine A taxes the spending draw it gets from the bridge, and that draw moved with Engine D's year-by-year spending read —
 // so the recovered crossover in §E moved a year (2062 → 2061). PIN18 picks the v6.18 figure; the v6.18 leg is ALSO run with
 // DC_V617_SPENDING=1, where §E's households load v6.17's spending as a table (qa/tools/v617_spending.mjs) and the v6.17 figure must
 // come out exactly.
-const POST_D41 = ["v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635"].includes(VER);   // an array, so the registrar widens it
+const POST_D41 = ["v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636"].includes(VER);   // an array, so the registrar widens it
 const SPEND17 = POST_D41 && process.env.DC_V617_SPENDING === "1";
 const PIN18 = POST_D41 && !SPEND17;
 const { v617Table } = await import(pathToFileURL(join(dirname(fileURLToPath(import.meta.url)), "tools", "v617_spending.mjs")).href);
@@ -172,7 +172,7 @@ console.log("  C — C-9: the annuity is carried, not a fixed share");
   // v6.30 (D-60; docs/SCOPE_D60_DOLLAR_UNITS_V630.md): Engine A carries today's balances to the retirement year at the plan's inflation, so the
   // annuity enters retirement as $100,000 × (1+i)^(retire − as-of) — i the module's plan inflation, Σ prob × inflation over its SCENARIOS
   // table — and then compounds untouched. 1 on every earlier leg. An array, so register_tag2 widens it.
-  const RB76 = ["v630", "v631", "v632", "v633", "v634", "v635"].includes(VER) ? Math.pow(1 + Object.values(g.SCENARIOS()).reduce((t, sc) => t + sc.prob * sc.inflation, 0), rb.P.retireYr - rb.P.asOfYr) : 1;
+  const RB76 = ["v630", "v631", "v632", "v633", "v634", "v635", "v636"].includes(VER) ? Math.pow(1 + Object.values(g.SCENARIOS()).reduce((t, sc) => t + sc.prob * sc.inflation, 0), rb.P.retireYr - rb.P.asOfYr) : 1;
   const want = GROWTH === null ? NaN : 100000 * RB76 * Math.pow(1 + GROWTH, n);
   T(`C-${k++} [EXTINCTION C-9]: Engine A — the annuity rides to ${rb.P.horizonYr} untouched: end Traditional exceeds the no-annuity run's by $100,000${RB76 !== 1 ? " × " + RB76.toFixed(5) + " (carried to retirement)" : ""} × (1 + ${GROWTH})^${n}, within $1`,
     GROWTH !== null && Math.abs((rb.r.endTrad - ra.r.endTrad) - want) <= 1, `${usd(rb.r.endTrad - ra.r.endTrad)} vs ${usd(want)}`);
@@ -250,7 +250,7 @@ console.log("  E — the rendered card");
   // v6.30 (D-60): at $5,000 the v6.17-table leg no longer recovers inside the plan (measured: it does from $10,000 on both legs), so the
   // v6.30 leg drives $10,000. The year is MEASURED at the build on the main leg (2059 — age 95 / 93; 2060 — age 96 / 94 before the build review's accrual fix) and only the outcome is asserted on the
   // v6.17-table leg (the census row is fixed at $70,000, so it cannot second-check a $10,000 card). An array, so register_tag2 widens it.
-  const U76 = ["v630", "v631", "v632", "v633", "v634", "v635"].includes(VER), AMT76 = U76 ? 10000 : 5000;
+  const U76 = ["v630", "v631", "v632", "v633", "v634", "v635", "v636"].includes(VER), AMT76 = U76 ? 10000 : 5000;
   await drive(AMT76);
   const tlL = gd.buildPlanTimeline(), cL = card() || "";
   T(`E-0c: SETUP — both spouses to 100 are rendered and the slider moved to $${AMT76.toLocaleString()} (the native-setter route, t24)`,

@@ -57,13 +57,13 @@ console.error = () => {}; console.warn = () => {};
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v633";
 const MODULE = process.argv.includes("--module"), DUMP = process.argv.includes("--roth-dump");
-const KNOWN_VERSIONS = ["v632", "v633", "v634", "v635"];
+const KNOWN_VERSIONS = ["v632", "v633", "v634", "v635", "v636"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v633", "v634", "v635"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v633", "v634", "v635", "v636"].includes(VER);   // an array, so the next registration widens it
 const KD = "[KNOWN DEFECT 2026-10-26, D-67 — flips at v6.33]";
 const KP = "[KNOWN DEFECT 2026-10-27, F-28 — flips at v6.33]";
 const PRIOR_TAG = "v632";   // §C's reference build: the last one that indexed from the as-of year

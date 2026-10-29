@@ -36,14 +36,15 @@ console.error = () => {}; console.warn = () => {};
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v631";
 const CLAUDE = process.argv.includes("--claude");
-const KNOWN_VERSIONS = ["v630", "v631", "v632", "v633", "v634", "v635"];
+const KNOWN_VERSIONS = ["v630", "v631", "v632", "v633", "v634", "v635", "v636"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v631", "v632", "v633", "v634", "v635"].includes(VER);   // an array, so the next registration widens it
-const U635 = ["v635"].includes(VER);   // v6.35 (D-65): the copy names the My Data field — the blank-field wording; an array, so the registrar widens it
+const POST = ["v631", "v632", "v633", "v634", "v635", "v636"].includes(VER);   // an array, so the next registration widens it
+const U636 = ["v636"].includes(VER);   // v6.36 (D-66): What Breaks reads the Monte Carlo's schedule, not Engine A (t100); an array, so the registrar widens it
+const U635 = ["v635", "v636"].includes(VER);   // v6.35 (D-65): the copy names the My Data field — the blank-field wording; an array, so the registrar widens it
 const KD = "[KNOWN DEFECT 2026-10-24, D-51 — flips at v6.31]";
 const KA = "[KNOWN DEFECT 2026-10-24, AI-6 — flips at v6.31]";
 // Typed here from Anthropic's pricing page (platform.claude.com, read 2026-10-24), NOT read from the app: Claude Opus 4.8, $ per million tokens.
@@ -214,7 +215,7 @@ console.log("  C — with the surcharge table at zero the schedule is the income
 }
 
 // ── §D · What Breaks (the module half): Engine A's IRMAA beside Engine C's ─────────────────────────────────────────────────────────────
-console.log("  D — What Breaks adds Engine A's IRMAA; Engine A beside Engine C");
+console.log(U636 ? "  D — Engine A (the Roth tab's engine, D-68) beside Engine C; What Breaks reads the Monte Carlo's schedule from v6.36 (t100)" : "  D — What Breaks adds Engine A's IRMAA; Engine A beside Engine C");
 const engineA = (roth, pre) => { const tl = g.PLAN_TIMELINE(), P = g.PORTFOLIO(); const R = tl.targetRetireYear;
   const hz = Math.max(tl.dobA.year + tl.lifeExpA, tl.dobB.year + tl.lifeExpB);   // What Breaks' own horizon (L12406 shape)
   const pT = { single: !!tl.single, asOfYr: tl.asOfYear, retireYr: R, horizonYr: hz, ladderEnd: tl.rothLadderEnd, dobAYr: tl.dobA.year, dobBYr: tl.dobB.year,
@@ -228,15 +229,17 @@ const engineA = (roth, pre) => { const tl = g.PLAN_TIMELINE(), P = g.PORTFOLIO()
 const AvsC = HH.map(([lab, P, roth, pre], k) => { load(P); preset(pre); const a = engineA(roth, pre); const f = F[k];
   const cIn = Object.values(f.irm).reduce((s, v) => s + v, 0); return { lab, a: a.irmaa, cAll: f.C.totalIrmaaToday, cIn }; });
 for (const r of [AvsC[0], AvsC[1]])
-  T(`D-1 ${r.lab}: Engine A's lifetime IRMAA in today's dollars equals Engine C's ($${r.a.toFixed(2)})`, Math.abs(r.a - r.cAll) < 0.005 && Math.abs(r.cAll - r.cIn) < 0.005, `${r.a} / ${r.cAll} / ${r.cIn}`);
+  T(`D-1${U636 ? " (the Roth tab's engine)" : ""} ${r.lab}: Engine A's lifetime IRMAA in today's dollars equals Engine C's ($${r.a.toFixed(2)})`, Math.abs(r.a - r.cAll) < 0.005 && Math.abs(r.cAll - r.cIn) < 0.005, `${r.a} / ${r.cAll} / ${r.cIn}`);
 // DISCLOSED (CHANGELOG v6.31, METHODOLOGY, scope §7): on the other three households the two engines project different incomes, so What Breaks
 // (Engine A's IRMAA) and the Monte Carlo (Engine C's, inside the horizon) carry different surcharges — on the example at $0 under BULL, Engine
 // A charges a surcharge Engine C never reaches. Pinned to the dollar so a change in either engine is seen; MEASURED at the build (engine output),
 // not hand-derived — the claim pinned is the disagreement, which DS-3 (a) accepted by reading What Breaks from Engine A.
+// v6.36 (D-66 closed): What Breaks no longer reads Engine A (t100), so these pins are now facts about the Roth tab's engine alone —
+// MissingFeatures D-68. Engine A is untouched at v6.36, so the figures stand.
 const DISC = [[2, 10930, 12080, 12080], [3, 50270, 41580, 32340], [4, 8050, 0, 0]];
 for (const [k, a, cAll, cIn] of DISC) { const r = AvsC[k];
   console.log(`     ${r.lab}: Engine A $${r.a.toFixed(2)} · Engine C $${r.cAll.toFixed(2)} in all, $${r.cIn.toFixed(2)} inside the horizon`);
-  T(`D-2 DISCLOSED ${r.lab}: Engine A's lifetime IRMAA ($${a.toLocaleString()}) is not Engine C's ($${cIn.toLocaleString()} inside the horizon, $${cAll.toLocaleString()} in all) — measured`,
+  T(`D-2 DISCLOSED${U636 ? " (the Roth tab's engine, D-68)" : ""} ${r.lab}: Engine A's lifetime IRMAA ($${a.toLocaleString()}) is not Engine C's ($${cIn.toLocaleString()} inside the horizon, $${cAll.toLocaleString()} in all) — measured`,
     Math.abs(r.a - a) < 0.5 && Math.abs(r.cAll - cAll) < 0.5 && Math.abs(r.cIn - cIn) < 0.5, `${r.a} / ${r.cAll} / ${r.cIn}`); }
 load(BASE); preset("base");
 
@@ -406,7 +409,7 @@ console.log("  D/G — rendered: What Breaks, the Income card, the Monte Carlo t
   const RY = DG.PLAN_TIMELINE().targetRetireYear;
   await D.go("what breaks"); for (let k = 0; k < 40 && !/estimated taxes/.test(D.txt()); k++) await D.flush(250);
   const wb = D.txt();
-  const shown = (wb.match(/estimated taxes \(~\$(\d+)K\/yr average/) || [])[1];
+  const shown = (wb.match(/estimated taxes \(~\$(\d+)K\/yr/) || [])[1];   // v6.36: the copy reads "K/yr, the average of…" 
   // Engine A, in this window, on the inputs What Breaks passes (t93 §W's builder; the DOM opens on BULL-LEANING)
   const gA = window.__g; const tlA = gA.PLAN_TIMELINE(), PA = gA.PORTFOLIO(); const hzA = Math.max(tlA.dobA.year + tlA.lifeExpA, tlA.dobB.year + tlA.lifeExpB), pyA = hzA - RY + 1;
   const pT = { single: !!tlA.single, asOfYr: tlA.asOfYear, retireYr: RY, horizonYr: hzA, ladderEnd: tlA.rothLadderEnd, dobAYr: tlA.dobA.year, dobBYr: tlA.dobB.year,
@@ -420,10 +423,14 @@ console.log("  D/G — rendered: What Breaks, the Income card, the Monte Carlo t
   const kWith = Math.round((cA.totTaxToday + cA.totIrmaaToday) / pyA / 1000), kWithout = Math.round(cA.totTaxToday / pyA / 1000);
   T(`D-3 SETUP: the single example's What Breaks estimate renders, and with and without Engine A's IRMAA ($${Math.round(cA.totIrmaaToday).toLocaleString()}) it reads differently ($${kWith}K vs $${kWithout}K)`,
     shown !== undefined && kWith !== kWithout, `${shown} / ${kWith} / ${kWithout}`);
-  if (POST) T(`D-4 What Breaks' estimate is (Engine A's totTaxToday + totIrmaaToday) ÷ the plan's years: ~$${kWith}K/yr`, +shown === kWith, `shown ${shown}`);
-  if (POST) T("D-5 What Breaks says its IRMAA is the Roth tab's engine's, which can differ from the IRMAA tab's (D-66, disclosed in-app)",
+  const kSch = U636 ? Math.round(gA.whatBreaksAnnualTax(RY, hzA, { rothAmount: 70000, qcdAnnual: 0, taxYield: 2.0, scenarioPreset: "bull" }).annual / 1000) : null;
+  if (U636) T(`D-4 What Breaks' estimate is the Monte Carlo's schedule averaged — no longer Engine A's (~$${kWith}K/yr): ~$${kSch}K/yr (v6.36, D-66)`, +shown === kSch && kSch !== kWith, `shown ${shown}`);
+  if (U636) T("D-5 What Breaks names the Monte Carlo's tax and IRMAA, and no longer says its IRMAA can differ from the IRMAA tab's (D-66 closed)",
+    /the average of what the Monte Carlo pays at your current settings: the Taxes tab's income tax, Roth-conversion taxes included, and the IRMAA tab's surcharges/.test(wb) && !/its IRMAA differs from the IRMAA tab's/.test(wb));
+  if (POST && !U636) T(`D-4 What Breaks' estimate is (Engine A's totTaxToday + totIrmaaToday) ÷ the plan's years: ~$${kWith}K/yr`, +shown === kWith, `shown ${shown}`);
+  if (POST && !U636) T("D-5 What Breaks says its IRMAA is the Roth tab's engine's, which can differ from the IRMAA tab's (D-66, disclosed in-app)",
     /that engine projects its own income, so on some plans its IRMAA differs from the IRMAA tab's\)/.test(wb));
-  else T(`D-4 ${KD}: What Breaks' estimate leaves out Engine A's IRMAA (~$${kWithout}K/yr)`, +shown === kWithout, `shown ${shown}`);
+  if (!POST) T(`D-4 ${KD}: What Breaks' estimate leaves out Engine A's IRMAA (~$${kWithout}K/yr)`, +shown === kWithout, `shown ${shown}`);
   // the Income card (DS-4 (a))
   await D.go("income");
   const card = () => D.body().querySelector("[data-dc-mc-tax-card]"), icard = () => D.body().querySelector("[data-dc-mc-irmaa-card]");
@@ -486,7 +493,9 @@ console.log("  G — copy");
       && (U635 ? DOCS.includes("they are charged here, on the IRMAA tab and in What Breaks only if you enter that income on My Data (from v6.35); left blank, they are not charged, and if your working income was above a tier, the model reads low for those two years")
            : DOCS.includes("so they are not charged here, on the IRMAA tab or in What Breaks; if your working income was above a tier, the model reads low for those two years")));
     T("G-11 Field Manual, What Breaks entry and §13: IRMAA in the estimate; the v6.31 entry names both changes",
-      DOCS.includes("including Roth-conversion taxes and, from v6.31, IRMAA surcharges") && DOCS.includes("The Monte Carlo and What Breaks pay IRMAA; Ask AI asks Claude Opus 4.8 (v6.31)."));
+      // v6.36 (D-66): the entry now names the Monte Carlo's tax, IRMAA included (t100 C-1 holds it); the v6.31 history note stands
+      (U636 ? DOCS.includes("Roth-conversion taxes included, and the IRMAA tab’s surcharges") : DOCS.includes("including Roth-conversion taxes and, from v6.31, IRMAA surcharges"))
+      && DOCS.includes("The Monte Carlo and What Breaks pay IRMAA; Ask AI asks Claude Opus 4.8 (v6.31)."));
     const MP = join(HERE, "..", "METHODOLOGY.md"), MD = existsSync(MP) ? readFileSync(MP, "utf8") : "";
     T("G-12 METHODOLOGY has the section \"The Monte Carlo pays IRMAA (v6.31)\", naming D-65", /^## The Monte Carlo pays IRMAA \(v6\.31\)$/m.test(MD) && /D-65/.test((MD.split(/^## The Monte Carlo pays IRMAA \(v6\.31\)$/m)[1] || "").split(/^## /m)[0]), MP);
   } else console.log("  G-5..G-12 — skipped by design on the v6.30 leg (the new copy does not exist; G-4 pins the old)");

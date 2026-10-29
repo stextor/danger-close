@@ -439,6 +439,12 @@ tally "t97-$CUR"   node t97_contrib_save.mjs "$CUR"
 # Both legs (the v6.34 leg pins each defect).
 tally "t98-$PRIOR" node t98_irmaa_onetime.mjs "$PRIOR"
 tally "t98-$CUR"   node t98_irmaa_onetime.mjs "$CUR"
+# t100 (v6.36) — What Breaks pays the Monte Carlo's tax (D-66): the source by AST (the helper, its four inputs, Engine A's callers); the
+# extinction invariant (the helper's average equals Engine B's tax plus Engine C's in-horizon surcharges, summed independently, on every
+# fixture and the D-66 households); Engine A untouched; the rendered estimate, copy and four answers; the Field Manual. Both legs (the v6.35
+# leg pins the defect).
+tally "t100-$PRIOR" node t100_whatbreaks_tax.mjs "$PRIOR"
+tally "t100-$CUR"   node t100_whatbreaks_tax.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

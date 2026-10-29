@@ -28,19 +28,19 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v612";
-const KNOWN_VERSIONS = ["v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635"];
+const KNOWN_VERSIONS = ["v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636"].includes(VER);   // an array, so the next registration widens it
 const require = createRequire(import.meta.url);
 const M = await import(pathToFileURL(join(HERE, `app_${VER}.mjs`)).href);
 // v6.18 (D-41): Engine D reads the expense table year by year, which moved one §B hand pin (2032's taxable Social Security). PIN18 picks the v6.18 figures (measured at the build);
 // the v6.18 leg is ALSO run with DC_V617_SPENDING=1 — each plan loaded with v6.17's spending as a table (qa/tools/v617_spending.mjs, split
 // at that plan's own Medicare year) — where every v6.17 figure must still come out exactly: the attribution of each move to the read.
-const POST_D41 = ["v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635"].includes(VER);   // an array, so the registrar widens it
+const POST_D41 = ["v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636"].includes(VER);   // an array, so the registrar widens it
 const SPEND17 = POST_D41 && process.env.DC_V617_SPENDING === "1";
 const PIN18 = POST_D41 && !SPEND17;
 const P41 = (v617, v618) => PIN18 ? v618 : v617;
@@ -75,7 +75,7 @@ const ordOf = r => r.pen_y + r.work_y + r.rmd_y + r.tradDraw + r.othOrdDraw + r.
 // v6.30 (D-60; docs/SCOPE_D60_DOLLAR_UNITS_V630.md): the bracket column's table indexes at §1(f)(3)'s chained CPI-U — the plan's inflation
 // less 0.25 point — through `projectBracketsAt`; through v6.29 at a flat 2%. IDX_RATE is that rate on each leg; the module's inflation is
 // read from its SCENARIOS table (Σ prob × inflation), and §E re-sets it from the DOM bundle's live table before reading the page. An array.
-const U630 = ["v630", "v631", "v632", "v633", "v634", "v635"].includes(VER);
+const U630 = ["v630", "v631", "v632", "v633", "v634", "v635", "v636"].includes(VER);
 let IDX_RATE = U630 ? Object.values(g.SCENARIOS()).reduce((t, sc) => t + sc.prob * sc.inflation, 0) - 0.0025 : 0.02;
 // THE FIX (v6.12's rule set). `gainInRate` is DC-1's other option, used only to prove a fixture exercises it.
 const oracleFix = (r, tl, gainInRate = false) => {

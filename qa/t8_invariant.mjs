@@ -38,7 +38,9 @@ const SRC_NOCOMMENT = SRC
   .replace(/([^:])\/\/[^\n"'`]*$/gm, "$1");   // trailing comments (not URLs, which carry ://)
 const calls = (SRC_NOCOMMENT.match(/retireStartBalances\(/g) || []).length;
 const callsRaw = (SRC.match(/retireStartBalances\(/g) || []).length;
-ck("retireStartBalances: 1 definition + 9 consumer call sites (comments excluded)", calls === 10,
+// v6.36 (D-66): What Breaks no longer builds an Engine A P object (it reads the Monte Carlo's schedule), so one consumer of each of
+// retireStartBalances and taxableInitAll left with it: 9 → 8 and 8 → 7 (measured at the v6.36 build).
+ck("retireStartBalances: 1 definition + 8 consumer call sites (comments excluded)", calls === 9,
    `found ${calls} in code (${callsRaw} including comments)`);
 ck("constructor itself applies contribAccrual", /function retireStartBalances[\s\S]{0,400}contribAccrual\(retireYr\)/.test(SRC));
 
@@ -164,7 +166,7 @@ T.applyLoadedData({ portfolio: port, expenses: [], incomeFromForm: true });
   const uses = (SRC.match(/taxableInitFromPositions\(/g) || []).length;
   ck("taxableInitFromPositions: 1 definition + exactly 1 caller (taxableInitAll)", uses === 2, `found ${uses}`);
   const usesAll = (SRC.match(/taxableInitAll\(/g) || []).length;
-  ck("taxableInitAll: 1 definition + 8 call sites", usesAll === 9, `found ${usesAll}`);
+  ck("taxableInitAll: 1 definition + 7 call sites (v6.36: What Breaks' left with its Engine A call)", usesAll === 8, `found ${usesAll}`);
   // v5.53 (D-10 modelling half) added the eighth call: the Roth ladder's `_divLadder` reads the
   // same taxable base Engine C does, which is the point of the release. This census pin CAUGHT
   // that addition and went red — working as intended. ⚠ t8 takes no version tag; it reads the
