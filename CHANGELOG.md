@@ -1,5 +1,135 @@
 # Changelog
 
+## v6.37 — the SS tab's claim-age explorer starts at your plan (F-29)
+
+**A presentation release, for the SS tab only.** Scoped in `docs/SCOPE_F29_SS_SLIDER_START.md` (repo-only; build record §7), from a report
+by the maintainer on his own plan. Steve, on the five decisions: *"yes, do the five recommendations for me"*; on a sixth found at the build:
+*"Fold into F-29"*. Built on v6.36 (source `9c470b5a…`). No engine, table or other tab changes, so METHODOLOGY does not change. Under DS-5 (a)
+this release took v6.37 because CMS's 2027 Medicare premiums and IRMAA figures had not published (searched 2026-10-29: projections only);
+**the 2027 tax figures become v6.38** (`docs/SCOPE_TY2027_REFRESH_V633_V634.md` renumbered a fourth time; its suite stays `t99_ty2027.mjs`).
+The 15 December deadline still outranks any model release.
+
+**What was wrong (v6.36, rendered at the scope).**
+- **Spouse A's claim-age slider opened at 67 for every plan.** Spouse B's opened at her claim age from My Data. Spouse A's was a literal
+  `useState(67)` from the first commit. On a plan claiming at 65, the tab opened on a choice the plan did not make.
+- **The draw comparison under the sliders had three baselines.**
+  - The *"Portfolio draw delta vs FRA"* card compared the slider with the plan.
+  - The yearly table's *"DRAW (FRA)"* column paid the full-retirement-age amount from the plan's claim date. Nobody receives that check.
+  - The *"Monthly income gain (permanent)"* card compared with FRA.
+  - The card also counted months before retirement, which the table did not.
+  - On a plan claiming at 65 ($3,322), the tab opened on *"+$80K"* of extra draws beside a table summing to +$92K, and *"$0"* of permanent
+    gain. Moving 65 → 67 adds $511 a month for life.
+  - At 62, the card read +$156K against the table's +$90K.
+- **Spouse B's section read her age in the retirement year as her claim.**
+  - The shortfall card subtracted her benefit at that age.
+  - Her grid tagged that age *"Modeled"*. The engines pay her from her planned age.
+  - When the two differed, a note said the Monte Carlo *"understates Spouse B's income … success rates slightly conservative"*. That was
+    false (DS-6, found at the build).
+- **A single household's draw table counted a second check.** This was the placeholder spouse B's $1,944 a month, from the year spouse A
+  turned 67. Found at the build.
+- **None of it showed on the example.** Its spouse A plans 67, and its spouse B claims in the retirement year.
+
+**What changed.**
+- **Both sliders open at the plan.** `ssTabClaimAge` is one rule: the plan's claim age, rounded and clamped to 62–70, falling back as the
+  timeline does.
+- **One monthly series, from the retirement month, compares spouse A's slider with the plan.**
+  - Spouse A is at the planned age, at the tab's own benefit for that age. Spouse B is at her slider in both columns.
+  - The table shows each year's sum and runs until both of spouse A's compared claims have started, at least retirement + 8.
+  - The two delay cards show the total until spouse A's later claim and name its months.
+  - The permanent card is the slider's benefit less the planned one.
+- **The other cards.**
+  - The shortfall card and its SWR line count each check once it has started.
+  - Spouse B's grid tags her planned age, and the note is gone.
+  - A single household counts one check.
+- **The copy names spouse A**, e.g. *"Spouse A's slider = your plan (age 65)"*, *"DRAW (SPOUSE A AT PLAN, 65)"*.
+- **Field Manual.** The slider entry says where each slider starts and what the comparison measures; §13 has a v6.37 note.
+- **Registers.** UsabilityFlaws **F-29 filed and fixed**. Two census rows added: `ss_claim_a_planned_67` and `ss_claim_b_at_retire`. The four
+  version sites read v6.37.
+
+**Owned.**
+- **The scope's DS-3 said the card shows "the table's total", but the table also shows years after both claims have started.** There the
+  permanent difference continues. The build gives the card the total until spouse A's later claim instead. That is what the card has always
+  been labelled, and what the scope's own worked figure ($79,728 = 24 × $3,322) assumes. The build names the window on screen. Recorded in
+  scope §7.3.
+- **The first build had a crash path the old code did not.** Spouse A's slider took the stored claim age as it was. A backup carrying 65.5
+  (the import clamps the range, not the type) would have made the tab's age lookup return nothing and thrown into the app's error screen.
+  The independent build review found it. `ssTabClaimAge` now rounds and clamps both sliders and both planned ages, and `t101` B-8 renders
+  65.4 and "65".
+- **The same review found four more problems, all fixed.**
+  - *"Plan"* and *"both claims"* read wrong once spouse B's slider moved. The copy now names spouse A.
+  - The §13 note overclaimed.
+  - The SWR line computed its own copy of the shortfall.
+  - Spouse B's fallback age was 67 where the engines use 63.
+  - Four things the build did beyond the scope's words are recorded in scope §7.2: the single-household check, the "once started" rule
+    applied to spouse A's check too, the December check in the table's SS columns, and the window counted from January.
+- **A first `t101` run reported nothing past §C and printed no total.** It died with no output. It ran clean on the next run. A stray
+  process from an earlier timed-out command was probably running beside it; that was not confirmed.
+
+**Limitations, stated.**
+- **The tab works out every age's benefit from the plan's age-67 figure at SSA's rates. The engines pay the plan's own figure.**
+  - For a plan written by My Data the two agree.
+  - On the example, whose benefit table carries statement figures, spouse B at 63 is $1,350 on the tab and $1,300 in the plan.
+  - So the example's shortfall card now reads **$2,570**, where v6.36 read $2,620, and the Income tab still reads $2,620. v6.36's
+    retirement-age lookup happened to hide this on the example.
+  - Not changed here. Recorded in F-29 and scope §6.
+- The typed $1,944 fallback for spouse B's age-67 benefit, when a plan's table has none, is recorded and not changed. Whether a married plan
+  can reach it was not measured.
+- The breakeven section still compares the slider with FRA, and says so.
+
+**Tests.** New suite **`t101_ss_slider_start.mjs`**, run on both legs. The v6.36 leg pins each defect as a dated
+`[KNOWN DEFECT 2026-10-29, F-29 — flips at v6.37]`.
+- **§A, by AST:** both sliders start from `ssTabClaimAge`, which rounds, clamps and falls back as stated. The old baselines' identifiers
+  are gone.
+- **§B, the opening position on eight plans:** the example; spouse A at 62, 65 and 70; a couple with B at 67; a July birth month; a
+  spouse born 1972; a single plan. On each:
+  - the sliders sit at the plan's ages;
+  - the cards show the planned benefits at BASELINE, and every delta is —;
+  - the plan column matches a draw computed in the suite;
+  - the survivor card is correct;
+  - the shortfall card and its SWR line are correct;
+  - the window line is right (B-7);
+  - two crash cases render (B-8).
+- **§C, moved.** Every figure is computed in the suite from the plan at SSA's rates, never read from the app.
+  - The reported plan 65 → 67: +$79,728 and +$511/mo.
+  - A July birth month: the rows split by month.
+  - A claim before retirement: $62,400, not five years' worth.
+  - An early claim, 70 → 67: −$133,560 and −$890/mo.
+  - A window running to 2042.
+  - **The extinction check: 72 plan × position cells, each row, card and the shortfall from one series.**
+  - Spouse B's grid and the gone note; her slider moving the shortfall; the single household's one check.
+- **§D:** Engine D's series, Engines B and C, the Monte Carlo's schedule and What Breaks' tax are bit-identical to v6.36's on 16 cases.
+- **§E:** the Field Manual's entry and note.
+- **Census.** `t29` gains B-31, B-32, C-f29-1 and C-f29-2: the example is ON for both new rows, and a plan at 65 or spouse B at 62 clears them.
+- **Re-gated:** `t6`'s single-household shortfall invariant now reads the one gated rule.
+- **Registered:** `v637` by the AST registration (182 gate extensions, 282 array entries, 2 map arms). By hand: `t33` PINS (unchanged
+  figures), `t93`'s Engine D reference (v636), and `t45`/`t47`/`t48`. `runsuite.sh` lists `t101`.
+- **No shim change:** the explorer is component-inline, so `t101` reads the rendered tab.
+
+**Counts**, from the full suite run from the packaged copies:
+- **10,595 app checks across 99 app suites, 0 failed, 0 DIED** — green on its first run;
+- MC parity 10/10 — `t2` compare's fingerprints identical to v6.36's (no engine changed);
+- tooling: `t21` 64, `domdiff` 32 (the Withdrawal tab byte-identical across the pair), `sets` 12 + 12;
+- GRAND **10,715**.
+
+Against v6.36, the current-leg changes are:
+- `t101`, new: 82.
+- `t29`: 130 → 136 (the two census rows).
+- `t100`: 27 → 25 (its §D compares with v6.35's module, which a v636 → v637 folder does not build; it prints its skip).
+
+Every other current-leg count is unchanged (`t6` re-gated at the same count). The v6.36 leg counts 4,409: `t101` there 17, `t100` 25 (a
+current-leg suite there now, was the v6.35-pinning 11), `t93` 95 and `t96` 72 with their skips. The two attribution runs count 234 and
+237. Together 5,705 + 4,409 + 234 + 237 + 10 (parity) = 10,595.
+
+**Controls.** `qa/tools/controls_v637_ss_slider.py`, on a copy of the run folder: **15 of 15 as expected** (C0 silent; K1–K14 each firing), every file restored and
+hash-checked. Each puts one removed defect back: spouse A's slider at 67; the FRA amount from the plan's date; the delay counted from the
+earlier claim; the permanent card against FRA; the table stopping at retirement + 8; claim months taken as January; the shortfall card's
+retirement-year spouse B; her retirement-year age tagged Modeled; the note's words; a single household's second check; the top card's old
+label; the Field Manual's old entry and a missing note; an unrounded claim age. The first run was 14 of 15: K7 did not fire its named check,
+because `t101` C-12 moved spouse B to 63, her age in the retirement year, the one age where the old rule and the new give the same check.
+C-12 now moves her to 64; C0 and K7 re-run green..
+
+**Provenance.** Source `0b63ca625d314237720d17252f9445d3` · built `index.html` `bbe3987fdb9af1a8eef43bc5b1bf1f8b` (vite 5.4.21, `npm ci`; v6.36 rebuilt byte-identically to `ee554293…`) · `smoke_built` 22/22.
+
 ## v6.36 — What Breaks pays the Monte Carlo's tax (D-66)
 
 **A modeling release, for What Breaks only.** Scoped in `docs/SCOPE_D66_WHATBREAKS_TAX.md` (repo-only; build record §7). Steve, on the five

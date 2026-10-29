@@ -25,15 +25,19 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 
 | Field | Value |
 |---|---|
-| Version | **v6.36** |
-| Source file in knowledge | `DangerClose-v6_36.jsx` |
-| Source md5 | `9c470b5a6e7571dd44c80d2e83e35133` |
-| Built `index.html` md5 | `ee554293faaee8a2716459daf697e2c8` |
-| Shipped | 2026-10-28 |
+| Version | **v6.37** |
+| Source file in knowledge | `DangerClose-v6_37.jsx` |
+| Source md5 | `0b63ca625d314237720d17252f9445d3` |
+| Built `index.html` md5 | `bbe3987fdb9af1a8eef43bc5b1bf1f8b` |
+| Shipped | 2026-10-29 |
 
-> ⚠ **v6.36 SHIPPED (2026-10-28) — What Breaks pays the Monte Carlo's tax (D-66).** Source `9c470b5a…` · built `ee554293…`.
+> ⚠ **v6.37 SHIPPED (2026-10-29) — the SS tab's claim-age explorer starts at your plan (F-29).** Source `0b63ca62…` · built `bbe3987f…`.
+> A PRESENTATION release for the SS tab only (`docs/SCOPE_F29_SS_SLIDER_START.md`, DS-1 to DS-6 all as recommended — DS-6 added at the build; build record §7). Spouse A's what-if slider opened at a literal 67 for every plan (spouse B's at her plan), and the draw comparison under the sliders had three baselines (the card against the plan, the table's FRA amount from the plan's date, the permanent card against FRA); spouse B's section read her age in the retirement year as her claim (the shortfall card, a *"Modeled"* tag, a false note that the Monte Carlo understated her income); a single household's table counted the placeholder spouse B's check. All invisible on the example (spouse A plans 67; spouse B claims in the retirement year). From v6.37 both sliders open at `ssTabClaimAge` (the plan's age, rounded, clamped 62–70) and one monthly series from retirement compares spouse A's slider with the plan. No engine changed (parity 10/10; METHODOLOGY unchanged). UsabilityFlaws F-29 filed and fixed. **Under DS-5 (a) the 2027 tax figures are v6.38** (`docs/SCOPE_TY2027_REFRESH_V633_V634.md`, renumbered a fourth time; suite still `t99`; OPEN — it waits on the IRS TY2027 Rev. Proc., the §402(g) notice and CMS's 2027 IRMAA figures, to ship by 15 December, DT-7).
+> New suite `t101` (both legs); `controls_v637_ss_slider.py` new (15 of 15); `boundaries.mjs` gains `ss_claim_a_planned_67` and `ss_claim_b_at_retire` (`t29` B-31, B-32, C-f29-1, C-f29-2); `t6`'s single-household shortfall invariant re-gated; `v637` registered (`t33` PINS unchanged; `t93`'s Engine D reference v636); no shim change. `TESTING.md`'s v6.34 per-suite line moved to the archive. **Rotation:** the pool loses `DangerClose-v6_36.jsx` (v6.36 is read from history, commit `c3c72f0`) and gains `DangerClose-v6_37.jsx`. **Pool stays 16.**
+>
+> *(**v6.36 SHIPPED (2026-10-28) — What Breaks pays the Monte Carlo's tax (D-66).** Source `9c470b5a…` · built `ee554293…`.
 > A MODELING release for What Breaks only (`docs/SCOPE_D66_WHATBREAKS_TAX.md`, DB-1 to DB-5 all as recommended; build record §7). What Breaks averaged the Roth tab's strategy engine (Engine A) while the Monte Carlo charged the Taxes tab's tax and the IRMAA tab's surcharges; D-66 was registered as IRMAA alone, and the income tax differed more (+$2,480 a year on the example at the defaults; above the Monte Carlo on 100 of 102 fixture cases). From v6.36 What Breaks calls `whatBreaksAnnualTax`, which averages `mcIncomeTaxSchedule` at the Monte Carlo's four inputs; Engines A–D, the Monte Carlo and the Roth tab do not move (parity 10/10). Mostly optimistic: on the example under BASE the estimate $10,528 → $8,048 a year, headroom 1.20× → 1.25×. Engine A's three differences (the undrained draw, the unspent dividend pool, the per-spouse ladder end) filed as MissingFeatures D-68. **Under DB-5 (a) the 2027 tax figures are v6.37** (`docs/SCOPE_TY2027_REFRESH_V633_V634.md`, renumbered a third time; suite still `t99`; OPEN — it waits on the IRS TY2027 Rev. Proc., the §402(g) notice and CMS's 2027 IRMAA figures, to ship by 15 December, DT-7).
-> New suite `t100` (both legs); `controls_v636_whatbreaks.py` new (17 of 17); `t8`, `t49` X-2, `t57` D4, `t81` E-8 (the v6.20-table run), `t83`, `t93`, `t94` and `t98` re-gated (`t98`'s six v6.34 differentials skip outside a v634 → v635 folder); the Roth comparator's “same tax engine” sentence reworded; `v636` registered (`t33` PINS unchanged; `t93`'s Engine D reference v635); the shim exports `whatBreaksAnnualTax`. MissingFeatures D-66 closed, D-68 filed, D-57 updated; `FlawsToFix-v5_73-Phase2.md`'s D-7b points to D-68. `TESTING.md`'s v6.33 per-suite line moved to the archive. **Rotation:** the pool loses `DangerClose-v6_35.jsx` (v6.35 is read from history, commit `2762bf7`) and gains `DangerClose-v6_36.jsx`. **Pool stays 16.**
+> New suite `t100` (both legs); `controls_v636_whatbreaks.py` new (17 of 17); `t8`, `t49` X-2, `t57` D4, `t81` E-8 (the v6.20-table run), `t83`, `t93`, `t94` and `t98` re-gated (`t98`'s six v6.34 differentials skip outside a v634 → v635 folder); the Roth comparator's “same tax engine” sentence reworded; `v636` registered (`t33` PINS unchanged; `t93`'s Engine D reference v635); the shim exports `whatBreaksAnnualTax`. MissingFeatures D-66 closed, D-68 filed, D-57 updated; `FlawsToFix-v5_73-Phase2.md`'s D-7b points to D-68. `TESTING.md`'s v6.33 per-suite line moved to the archive. **Rotation:** the pool loses `DangerClose-v6_35.jsx` (v6.35 is read from history, commit `2762bf7`) and gains `DangerClose-v6_36.jsx`. **Pool stays 16.**)*
 >
 > *(**v6.35 SHIPPED (2026-10-28) — STAY UNDER IRMAA stays under (D-62); the last working years' income (D-65); one-time costs before retirement (D-44).** Source `853e311a…` · built `1f5a4cb5…`.
 > A MODELING release (`docs/SCOPE_D62_D65_D44_V635.md`, all twelve decisions as recommended; build record §7). STAY UNDER IRMAA takes the largest whole-dollar conversion whose lookback MAGI, the funding sale's gain included, is $500 under the first cliff (`IRMAA_SOLVER_MARGIN`); it had crossed the cliff in some year on every fixture household (the example $13,800 of IRMAA → $0, estate +$19,817). My Data takes the last working years' MAGI (`workMagi`, optional, today's dollars), charged in the first two premium years by Engines A and C and so the Monte Carlo; blank charges nothing, as before, with a flag when the salaries are above the first tier and someone is on Medicare then. The Withdrawal tab, Backtest and What Breaks start from today's holdings less the one-time rows dated before retirement (`preRetireOneTime`). One scope premise was false (the estimate can fall as the conversion grows, once in 624 grids); the build stopped and Steve chose *"Test the real need"* (scope §7.5). **Under DV-1 (a) the 2027 tax figures are v6.36** (`docs/SCOPE_TY2027_REFRESH_V633_V634.md`, renumbered; OPEN — it waits on the IRS TY2027 Rev. Proc., the §402(g) notice and CMS's 2027 IRMAA figures, to ship by 15 December, DT-7).
@@ -92,12 +96,12 @@ or a reason here (OPERATIONS §I).
 
 | Pool file | md5 | Repo path |
 |---|---|---|
-| `CHANGELOG.md` | `379e278a81a6272bd2adc990f0140cfa` | `CHANGELOG.md` |
+| `CHANGELOG.md` | `3978af33828f81856ea74c5961fc4b26` | `CHANGELOG.md` |
 | `METHODOLOGY.md` | `d39112682f87072f2cbda1e03d841e3d` | `METHODOLOGY.md` |
 | `MissingFeatures.md` | `0209e51256e162ec8dfaaa6b5665c236` | `docs/MissingFeatures.md` |
 | `OPERATIONS.md` | `7675168d93b27012a5314b5c739927a1` | `docs/OPERATIONS.md` — **rolled 2026-10-27 at the v6.34 ship:** §C4's *An unedited Save & Apply* trap keeps only the as-of move (D-58 closed) and names the save's other normalisations. *(Previously `a127f4a4ff…`.)* Before that, **rolled 2026-10-27 at the v6.33 ship:** §I's *Annual data refreshes* row names the year-keyed tables (a new year's entry, nothing bumped by hand) and §C's OBBBA bullet says `TAX_CONSTANTS_YEAR` is read from `FED_TABLES`. *(Previously `0468ef1e62…`.)* Before that, **rolled 2026-09-09** at the run-folder ops package: §B gained the `mk_runfolder.sh` pointer, and §D gained **D1** (the named existence-only assertion class) and **D2** (the `t29` F-6a/F-6b defect pin). *(Previously `f33c2e0cfd…`.)* |
 | `README.md` | `2757b43ee6b39d0f34496c1cf639d688` | `README.md` |
-| `TESTING.md` | `51e0642f8e1d3543d354eb2e12961e20` | `TESTING.md` |
+| `TESTING.md` | `c538e3b3f470d1e0c3e4aa4c0ee00391` | `TESTING.md` |
 | `index.html` | `247816be583271d50cf13e0a02e18cdf` | `src/index.html` — the **Vite entry template**, **restored to the pool 2026-08-20** after being found absent (see the build-scaffold row below). ⚠ **Not the built app.** The published single-file `index.html` is repo-only output and never enters the pool; its md5 is in the Current build table and is different by construction |
 | `main.jsx` | `d9eca7b469a3fb7ec1c5325fd4bf8145` | `src/main.jsx` |
 | `package.json` | `9ee8d745bc9f32d6e8fa02e623603423` | `package.json` — The pinned toolchain, and a **build input** rather than a suite file — given a row 2026-08-23 for a measured reason: `npm i <pkg>` in a run folder rewrites it with resolved versions, so it drifts as a side effect of setting the folder up. That is why OPERATIONS §N3a installs jsdom with `--no-save`, and it is the drift `package_check`'s new G-1 caught on its first real use |
@@ -107,10 +111,12 @@ or a reason here (OPERATIONS §I).
 
 | Field | Value |
 |---|---|
-| Version | **v6.35** |
-| Source file in knowledge | — **not pooled**: repo history, commit `2762bf7`, found by this md5 |
-| Source md5 | `853e311ab5704c5d722e439f6ccd590c` |
-| Built `index.html` md5 | `1f5a4cb514d71e0c2a7bf02c18561b0f` |
+| Version | **v6.36** |
+| Source file in knowledge | — **not pooled**: repo history, commit `c3c72f0`, found by this md5 |
+| Source md5 | `9c470b5a6e7571dd44c80d2e83e35133` |
+| Built `index.html` md5 | `ee554293faaee8a2716459daf697e2c8` |
+
+> **Rolled 2026-10-29 at the v6.37 ship.** The pair is now **v6.36 prior / v6.37 current**; both tables rolled in one edit (K-7, which counts 637 − 1 = 636). Commit `c3c72f0` is the first to carry the v6.36 source (`4a9af8d` to `5e14d8d`, earlier v6.36 uploads, carry v6.35's source beside v6.36's page); `10efc40` set the executable bit `controls_v636_whatbreaks.py` landed without.
 
 > **Rolled 2026-10-28 at the v6.36 ship.** The pair is now **v6.35 prior / v6.36 current**; both tables rolled in one edit (K-7, which counts 636 − 1 = 635). Commit `2762bf7` is the first to carry the v6.35 source (`844f452` to `133c435`, earlier v6.35 uploads, carry v6.34's source beside v6.35's page); `59b8dc4` set the executable bit `controls_v635_irmaa_onetime.py` landed without.
 
@@ -639,6 +645,24 @@ retired and superseded. They get no row because there is no file. Checked 2026-0
 committed tree, so the next sweep does not re-open them.
 
 ## Retirement list (delete-first; nothing replaces these)
+
+### At the v6.37 ship (2026-10-29) — DELETE THESE FIRST
+
+**Rotation:** delete `DangerClose-v6_36.jsx`; `DangerClose-v6_37.jsx` arrives. **Pool stays 16** documents. Count from the Projects listing (OPERATIONS §I, no-mount note).
+
+| Delete | Because |
+|---|---|
+| `DangerClose-v6_36.jsx` | **rotated out** — v6.36 is read from the repo's history (commit `c3c72f0`) |
+| `CHANGELOG.md` | replaced — the v6.37 entry |
+| `PROJECT_KNOWLEDGE_INDEX.md` | replaced — this edit; `CHANGELOG.md`'s row rolled last |
+| `TESTING.md` | replaced — the v6.37 per-suite line, v6.34's moved to the archive; `t101`'s, `dom_entry_v637.jsx`'s and the census rows' entries |
+| `UsabilityFlaws.md` | replaced — F-29 filed and fixed (its census row and §H entry) |
+
+**Arriving new:** `DangerClose-v6_37.jsx`. **Not changed, stays:** `METHODOLOGY.md` (a presentation release), `MissingFeatures.md`, `FlawsToFix-v5_73-Phase2.md`. **Repo-only:** every `qa/` change (`t101_ss_slider_start.mjs`,
+`qa-baseline/dom_entry_v637.jsx`, `tools/controls_v637_ss_slider.py` new; the registered suites, `t6` (re-gated), `t29` and `tools/boundaries.mjs` (the two rows),
+`t33`, `t93`, `t45`/`t47`/`t48`, `runsuite.sh`, `tools/package_check.mjs`'s OPEN allowlist reason (the TY2027 scope, now v6.38)),
+`docs/TESTING_ARCHIVE_per_suite_v5_53_to_v6_01.md` (v6.34's line and note appended), the F-29 scope (`docs/SCOPE_F29_SS_SLIDER_START.md`, new —
+built, §7 its record), the TY2027 scope (renumbered v6.38), the built `index.html`. (`docs/UsabilityFlaws.md` ships to both, as `UsabilityFlaws.md` in the pool.)
 
 ### At the v6.36 ship (2026-10-28) — DELETE THESE FIRST
 
