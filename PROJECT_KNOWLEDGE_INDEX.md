@@ -25,15 +25,19 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 
 | Field | Value |
 |---|---|
-| Version | **v6.38** |
-| Source file in knowledge | `DangerClose-v6_38.jsx` |
-| Source md5 | `b82ede24ad13456587358fc2e272c323` |
-| Built `index.html` md5 | `a405b665d7b33d70a5f6afe31fdea805` |
-| Shipped | 2026-10-29 |
+| Version | **v6.39** |
+| Source file in knowledge | `DangerClose-v6_39.jsx` |
+| Source md5 | `5a948ff4ca43908c8fdffe948780519b` |
+| Built `index.html` md5 | `f8df7ca2f6d70871bbf7ea6cb87f2a52` |
+| Shipped | 2026-10-30 |
 
-> ⚠ **v6.38 SHIPPED (2026-10-29) — the Income tab on a phone, and what it says when income covers spending (F-20).** Source `b82ede24…` · built `a405b665…`.
+> ⚠ **v6.39 SHIPPED (2026-10-30) — Ask AI is told what accounts the plan holds and what it contributes (D-69).** Source `5a948ff4…` · built `f8df7ca2…`.
+> An ASK AI release (`docs/SCOPE_D69_AI_CONTEXT_V639.md`, DA-1 to DA-6 all as recommended; build record §8, which includes six fixes the independent build review found — Steve: *"Fix 1–6, file the RMD one"*). Through v6.38 the request carried the plan's accounts as two totals and one contribution figure, so an HSA, a Roth balance or a rollover IRA was invisible to Ask AI, and the ground rules' *"if something you need is missing, say so"* let it tell a plan holding an HSA that it had none. From v6.39 one helper, `aiPlanFacts`, adds every account type totalled by owner (never by name), every contribution, the salaries, the pension's owner, the ACA bridge and the gain share to the live context on every question; the rule says a fact not sent is to be named as such and asked for; the five lists of what is sent name the new facts. No computed figure changed (parity 10/10). METHODOLOGY §11: what is sent. MissingFeatures D-69 filed and closed, **D-70 filed** (a single plan's money stored under spouse B gets no RMD). UsabilityFlaws F-30's stale *"My Data 21"* corrected. **Under DA-6 (a) the 2027 tax figures are v6.40** (`docs/SCOPE_TY2027_REFRESH_V633_V634.md`, renumbered a sixth time; suite still `t99`; OPEN — it waits on the IRS TY2027 Rev. Proc., the §402(g) notice and CMS's 2027 IRMAA figures, to ship by 15 December, DT-7).
+> New suite `t103` (both legs); `controls_v639_ai_context.py` new; `boundaries.mjs` gains `ai_account_types` (`t29` B-34, C-d69-1); `t92` E-2/E-3 re-gated; the shim exports `aiPlanFacts`; `v639` registered (`t33` PINS unchanged; `t93`'s Engine D reference v638). `TESTING.md`'s v6.36 per-suite line moved to the archive. **Rotation:** the pool loses `DangerClose-v6_38.jsx` (v6.38 is read from history, commit `65c6b10`) and gains `DangerClose-v6_39.jsx`. **Pool stays 16.**
+>
+> *(**v6.38 SHIPPED (2026-10-29) — the Income tab on a phone, and what it says when income covers spending (F-20).** Source `b82ede24…` · built `a405b665…`.
 > A PRESENTATION release for the Income tab (`docs/SCOPE_F20_INCOME_TAB_PHONE_V638.md`, DF-1 to DF-6 all as recommended; build record §8, which includes five fixes the independent build review found — Steve: *"Fix in v6.38"*). With an income stream the Income tab scrolled sideways on a phone (504–627 px at 390), and on every plan its three income cards and each phase card's figures printed over each other there; a plan whose income covers spending read *"-$-1,302"* in six places and was told the shortfall came from the portfolio; the coverage before spouse A's Social Security counted spouse B before B claimed. From v6.38: phone-only rules in the v5.81 block (desktop and tablet identical by construction, proved against a build without them); the covered wording; the after-payments figure counts the streams running then; draw figures to the dollar. No engine changed (parity 10/10). METHODOLOGY: one sentence (D-49's phone-layout precondition met). UsabilityFlaws F-20 fixed, **F-30 filed and disclosed in §13** (six other tabs overprint on a phone). **Under DF-6 (a) the 2027 tax figures are v6.39** (`docs/SCOPE_TY2027_REFRESH_V633_V634.md`, renumbered a fifth time; suite still `t99`; OPEN — it waits on the IRS TY2027 Rev. Proc., the §402(g) notice and CMS's 2027 IRMAA figures, to ship by 15 December, DT-7).
-> New suite `t102` (both legs); `t45` gains §S (a stream plan; an overlap check on the Income tab); `controls_v638_income.py` new; `boundaries.mjs` gains `income_covers_spend` (`t29` B-33, C-f20-1); fixture `qa/tools/fixture/f20_streams_plan.json` new; `v638` registered (`t33` PINS unchanged; `t93`'s Engine D reference v637); no shim change. `TESTING.md`'s v6.35 per-suite line moved to the archive. **Rotation:** the pool loses `DangerClose-v6_37.jsx` (v6.37 is read from history, commit `ecde3ff`) and gains `DangerClose-v6_38.jsx`. **Pool stays 16.**
+> New suite `t102` (both legs); `t45` gains §S (a stream plan; an overlap check on the Income tab); `controls_v638_income.py` new; `boundaries.mjs` gains `income_covers_spend` (`t29` B-33, C-f20-1); fixture `qa/tools/fixture/f20_streams_plan.json` new; `v638` registered (`t33` PINS unchanged; `t93`'s Engine D reference v637); no shim change. `TESTING.md`'s v6.35 per-suite line moved to the archive. **Rotation:** the pool loses `DangerClose-v6_37.jsx` (v6.37 is read from history, commit `ecde3ff`) and gains `DangerClose-v6_38.jsx`. **Pool stays 16.**)*
 >
 > *(**v6.37 SHIPPED (2026-10-29) — the SS tab's claim-age explorer starts at your plan (F-29).** Source `0b63ca62…` · built `bbe3987f…`.
 > A PRESENTATION release for the SS tab only (`docs/SCOPE_F29_SS_SLIDER_START.md`, DS-1 to DS-6 all as recommended — DS-6 added at the build; build record §7). Spouse A's what-if slider opened at a literal 67 for every plan (spouse B's at her plan), and the draw comparison under the sliders had three baselines (the card against the plan, the table's FRA amount from the plan's date, the permanent card against FRA); spouse B's section read her age in the retirement year as her claim (the shortfall card, a *"Modeled"* tag, a false note that the Monte Carlo understated her income); a single household's table counted the placeholder spouse B's check. All invisible on the example (spouse A plans 67; spouse B claims in the retirement year). From v6.37 both sliders open at `ssTabClaimAge` (the plan's age, rounded, clamped 62–70) and one monthly series from retirement compares spouse A's slider with the plan. No engine changed (parity 10/10; METHODOLOGY unchanged). UsabilityFlaws F-29 filed and fixed. **Under DS-5 (a) the 2027 tax figures are v6.38** (`docs/SCOPE_TY2027_REFRESH_V633_V634.md`, renumbered a fourth time; suite still `t99`; OPEN — it waits on the IRS TY2027 Rev. Proc., the §402(g) notice and CMS's 2027 IRMAA figures, to ship by 15 December, DT-7).
@@ -100,12 +104,12 @@ or a reason here (OPERATIONS §I).
 
 | Pool file | md5 | Repo path |
 |---|---|---|
-| `CHANGELOG.md` | `a68b790fc54555b5b4415ae18f47704e` | `CHANGELOG.md` |
-| `METHODOLOGY.md` | `4cd6b787237157ff35c163785c4844e0` | `METHODOLOGY.md` |
-| `MissingFeatures.md` | `9982c640cc71bd1d92a835714d500beb` | `docs/MissingFeatures.md` |
+| `CHANGELOG.md` | `e00916da4c3a5818285b43603a13fb3e` | `CHANGELOG.md` |
+| `METHODOLOGY.md` | `523bf6319d76f5e1c8107059ba761d38` | `METHODOLOGY.md` |
+| `MissingFeatures.md` | `a6048725f352e683d29f8e9fb08bd046` | `docs/MissingFeatures.md` |
 | `OPERATIONS.md` | `7675168d93b27012a5314b5c739927a1` | `docs/OPERATIONS.md` — **rolled 2026-10-27 at the v6.34 ship:** §C4's *An unedited Save & Apply* trap keeps only the as-of move (D-58 closed) and names the save's other normalisations. *(Previously `a127f4a4ff…`.)* Before that, **rolled 2026-10-27 at the v6.33 ship:** §I's *Annual data refreshes* row names the year-keyed tables (a new year's entry, nothing bumped by hand) and §C's OBBBA bullet says `TAX_CONSTANTS_YEAR` is read from `FED_TABLES`. *(Previously `0468ef1e62…`.)* Before that, **rolled 2026-09-09** at the run-folder ops package: §B gained the `mk_runfolder.sh` pointer, and §D gained **D1** (the named existence-only assertion class) and **D2** (the `t29` F-6a/F-6b defect pin). *(Previously `f33c2e0cfd…`.)* |
 | `README.md` | `2757b43ee6b39d0f34496c1cf639d688` | `README.md` |
-| `TESTING.md` | `ea21556ab6a1b5c32c45d0177af13e72` | `TESTING.md` |
+| `TESTING.md` | `bccae6e094f305133d01e840d547427f` | `TESTING.md` |
 | `index.html` | `247816be583271d50cf13e0a02e18cdf` | `src/index.html` — the **Vite entry template**, **restored to the pool 2026-08-20** after being found absent (see the build-scaffold row below). ⚠ **Not the built app.** The published single-file `index.html` is repo-only output and never enters the pool; its md5 is in the Current build table and is different by construction |
 | `main.jsx` | `d9eca7b469a3fb7ec1c5325fd4bf8145` | `src/main.jsx` |
 | `package.json` | `9ee8d745bc9f32d6e8fa02e623603423` | `package.json` — The pinned toolchain, and a **build input** rather than a suite file — given a row 2026-08-23 for a measured reason: `npm i <pkg>` in a run folder rewrites it with resolved versions, so it drifts as a side effect of setting the folder up. That is why OPERATIONS §N3a installs jsdom with `--no-save`, and it is the drift `package_check`'s new G-1 caught on its first real use |
@@ -115,10 +119,12 @@ or a reason here (OPERATIONS §I).
 
 | Field | Value |
 |---|---|
-| Version | **v6.37** |
-| Source file in knowledge | — **not pooled**: repo history, commit `ecde3ff`, found by this md5 |
-| Source md5 | `0b63ca625d314237720d17252f9445d3` |
-| Built `index.html` md5 | `bbe3987fdb9af1a8eef43bc5b1bf1f8b` |
+| Version | **v6.38** |
+| Source file in knowledge | — **not pooled**: repo history, commit `65c6b10`, found by this md5 |
+| Source md5 | `b82ede24ad13456587358fc2e272c323` |
+| Built `index.html` md5 | `a405b665d7b33d70a5f6afe31fdea805` |
+
+> **Rolled 2026-10-30 at the v6.39 ship.** The pair is now **v6.38 prior / v6.39 current**; both tables rolled in one edit (K-7, which counts 639 − 1 = 638). Commit `65c6b10` is the first to carry the v6.38 source (`e8b054a` to `dcdfa69`, earlier v6.38 uploads, carry v6.37's source beside v6.38's page); `f291975` set the executable bit `controls_v638_income.py` landed without.
 
 > **Rolled 2026-10-29 at the v6.38 ship.** The pair is now **v6.37 prior / v6.38 current**; both tables rolled in one edit (K-7, which counts 638 − 1 = 637). Commit `ecde3ff` is the first to carry the v6.37 source (`789ea5c` to `cec4475`, earlier v6.37 uploads, carry v6.36's source beside v6.37's page); `e72757d` set the executable bit `controls_v637_ss_slider.py` landed without.
 
@@ -651,6 +657,26 @@ retired and superseded. They get no row because there is no file. Checked 2026-0
 committed tree, so the next sweep does not re-open them.
 
 ## Retirement list (delete-first; nothing replaces these)
+
+### At the v6.39 ship (2026-10-30) — DELETE THESE FIRST
+
+**Rotation:** delete `DangerClose-v6_38.jsx`; `DangerClose-v6_39.jsx` arrives. **Pool stays 16** documents. Count from the Projects listing (OPERATIONS §I, no-mount note).
+
+| Delete | Because |
+|---|---|
+| `DangerClose-v6_38.jsx` | **rotated out** — v6.38 is read from the repo's history (commit `65c6b10`) |
+| `CHANGELOG.md` | replaced — the v6.39 entry |
+| `METHODOLOGY.md` | replaced — §11: the live context carries the accounts by tax type and owner, the contributions, salaries, pension owner, ACA bridge and gain share |
+| `MissingFeatures.md` | replaced — D-69 filed and closed; D-70 filed |
+| `PROJECT_KNOWLEDGE_INDEX.md` | replaced — this edit; `CHANGELOG.md`'s row rolled last |
+| `TESTING.md` | replaced — the v6.39 per-suite line, v6.36's moved to the archive; `t103`'s, `dom_entry_v639.jsx`'s and the census row's entries; `t92`'s re-gate |
+| `UsabilityFlaws.md` | replaced — F-30's list said *"My Data 21"* where its census row and note say 8 (corrected) |
+
+**Arriving new:** `DangerClose-v6_39.jsx`. **Not changed, stays:** `FlawsToFix-v5_73-Phase2.md`, `ARCHITECTUREIssues.md`, `OPERATIONS.md`, `README.md`, the four scaffold files, `SCOPE_STANDING_AUDIT.md`. **Repo-only:** every `qa/` change (`t103_ai_context.mjs`,
+`qa-baseline/dom_entry_v639.jsx`, `tools/controls_v639_ai_context.py` new; the registered suites, `t92` (E-2/E-3), `t29` and `tools/boundaries.mjs` (the row), `t33`, `t93`,
+`t45`/`t47`/`t48`, `runsuite.sh`, the shim, `tools/package_check.mjs`'s OPEN allowlist reason (the TY2027 scope, now v6.40)),
+`docs/TESTING_ARCHIVE_per_suite_v5_53_to_v6_01.md` (v6.36's line and note appended), the D-69 scope (`docs/SCOPE_D69_AI_CONTEXT_V639.md`, new — built, §8 its record),
+the TY2027 scope (renumbered v6.40), the built `index.html`. (`docs/UsabilityFlaws.md` and `docs/MissingFeatures.md` ship to both, under their pool names.)
 
 ### At the v6.38 ship (2026-10-29) — DELETE THESE FIRST
 

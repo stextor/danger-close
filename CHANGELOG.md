@@ -1,5 +1,104 @@
 # Changelog
 
+## v6.39 — Ask AI is told what accounts the plan holds and what it contributes (D-69)
+
+**An Ask AI release.** Scoped in `docs/SCOPE_D69_AI_CONTEXT_V639.md` (repo-only; build record §8), from a report by the maintainer on his own
+plan. Steve's decisions: DA-1 to DA-6 as recommended (*"Live context"*, *"All, by type"*, *"Reword"*, *"v6.39; tax → v6.40"*). On the six
+problems the independent build review found: *"Fix 1–6, file the RMD one"*. Built on v6.38 (source `b82ede24…`). No engine, table, stored field or
+computed figure changes (parity 10/10). METHODOLOGY §11 says what is now sent. Under DA-6 (a) **the 2027 tax figures become v6.40**
+(`docs/SCOPE_TY2027_REFRESH_V633_V634.md` renumbered a sixth time; its suite stays `t99_ty2027.mjs`). None of the three 2027 publications had
+appeared when this was built (searched 2026-10-30: only projections). The 15 December deadline still outranks any model release.
+
+**What was wrong (v6.38, measured in the DOM harness on the text Ask AI sends).**
+- **Asked whether to keep contributing to an HSA, Ask AI told a plan holding one: *"Your plan as entered doesn't mention an HSA at all."*** The
+  model described what it was sent correctly:
+  - On a plan with a $40,000 HSA and $650 a month going into it, the request carried the word "HSA" zero times.
+  - The balance was folded into *"$140,000 other"*, and the contribution was not sent at all.
+- **The request described the plan's accounts as three totals.** It said *"in retirement accounts"*, *"other"* and *"401(k) contribs"* (which was
+  spouse A's pre-tax plus Roth, under a 401(k) label). By a parser census, these never reached it:
+  - the Other accounts' types and owners;
+  - the holdings' Traditional/Roth split and plan type;
+  - the HSA contribution, spouse B's contributions and the bonus;
+  - the salaries, the pension's owner, the ACA bridge and the taxable gain share.
+- **The example sent its HSA only until its first Save & Apply.** Its sample briefing names the HSA. My Data's own summary, which replaces the
+  briefing at the first save, did not.
+- **The ground rules turned the gap into a false statement.** They said *"if something you need is missing, say so"*, and the model said the plan
+  had no HSA.
+
+**What changed.**
+- **The live context** (rebuilt from the saved plan on every question, so every plan has it from the first question after this upload) carries two new lines from one helper, `aiPlanFacts`.
+  - **An Accounts line:**
+    - each spouse's Traditional (by plan type) and Roth;
+    - each Other-account type — Taxable, Traditional IRA or employer plan, Roth, HSA, annuity — totalled by owner, **never by an account's or a fund's name**;
+    - a holding with no Traditional/Roth split, described as the taxable money the engines take it to be.
+  - **A Contributions line:** each person's pre-tax and Roth per month, the HSA contribution until spouse A retires (as the Monte Carlo adds it), and the bonus with its deferral and match.
+  - **Where set:** the salaries, the pension's owner, the ACA bridge (a household size left at 0 is named as the model's automatic 1 or 2), and the share of taxable money taken to be gain.
+  - Both sections always print, and an empty one says *"none"*.
+  - *"401(k) contribs"* is gone, and so are *"401k subtotal"* and *"401k-relative"*.
+- **The ground rules:** *"If something you need is not in what you were sent, say that it was not sent and ask for it; do not conclude that the
+  plan lacks it."* *"Use the figures given"* stays.
+- **The five lists that say what is sent name the new facts.** They are the landing screen, My Data's note, the Field Manual's §09 table and §10 row, and METHODOLOGY §11. My Data's *"Nothing else from your plan is transmitted"* stays true.
+- **Field Manual §13.** A v6.39 note.
+- **Request size.** An entered plan now sends about 1,265–1,590 tokens (was about 1,080–1,412), and the example about 7,109 (was 6,924). Both are within the cost note's stated ranges, so the note is unchanged.
+- **Registers.**
+  - MissingFeatures **D-69** filed and closed.
+  - MissingFeatures **D-70 filed** (below).
+  - UsabilityFlaws **F-30**'s list said *"My Data 21"* where its census row and its own note say 8; corrected (the v6.38 entry's error, found at the v6.38 upload check).
+  - The four version sites read v6.39.
+
+**D-70, filed, not fixed: a single plan's money stored under spouse B gets no RMD.**
+- How it happens: a married plan switched to Single in My Data keeps any row stored as spouse B's.
+- `retireStartBalances` counts that row as B's, and Engines A, B and C take spouse B's RMD only on a married plan, so no RMD is ever taken on it.
+- Low and optimistic. Read in the source, not measured on a household.
+- A modelling change, so it gets its own release. Ask AI's text reports the money as the one person's.
+
+**Owned.**
+- **The first build's block said three things that were not true of the model, and left facts out of the lists.** The independent review found:
+  - an ACA household size of 0 sent as *"household of 0"*;
+  - a holding with no split called *"no tax type recorded"* (the engines tax it as after-tax money);
+  - the HSA contribution labelled the household's, though the model stops it at spouse A's retirement;
+  - the *"401k subtotal"* label left beside the new block;
+  - the lists missing the household size, the bonus and the plan type, and a fifth list (the Field Manual §09 table) missing from the census altogether;
+  - `t103`'s completeness check blind to a field added inside an account row.
+
+  All six were fixed before the packaged run (Steve: *"Fix 1–6"*).
+- **The scope's census-row line had the row's meaning inverted.** In this census ON means degenerate. Corrected in scope §4.
+- **Scope §0.4 said the salaries are read for payroll tax.** Only the D-65 flag reads them. Corrected in place.
+- **§F of `t103` does not run the two seeded Monte Carlo engines the scope named.** Their identity rests on the source diff and on MC parity. Recorded in scope §8.2.
+
+**Limitations, stated.**
+- **Still not sent:** the expense table's rows (only the before and after monthly figures), the plan events (the HSA cutoff among them), the app's own comparisons (the Roth tab's best cell), and anything the app does not collect, such as HDHP coverage, on which HSA eligibility turns. The reworded rule is what keeps the model from reading those absences as facts about the plan.
+- **The optional lines appear only when set.**
+- **Names that collide** (a spouse named "joint", two spouses with one name) make owners hard to tell apart.
+- **Whether a model follows the reworded rule no test can show.**
+
+**Tests.** New suite **`t103_ai_context.mjs`**, run on both legs. The v6.38 leg pins each defect as `[KNOWN DEFECT 2026-10-30, D-69 — flips at v6.39]`.
+- **§A, the source (AST):** the helper is module-level, reads its parameters only, and is called once, from `aiSystemPrompt`, on the saved plan. The old labels are gone, and the rule is as decided.
+- **§B, the extinction check for the class:**
+  - Every key My Data's `buildPortfolio` saves, each account row's fields included (enumerated by AST, so a field added later is seen), is either reached in the text sent or on a named exclusion list with its reason.
+  - "Reached" is shown on a fixture whose every value is distinct and typed in the suite.
+  - On the v6.38 leg exactly 23 saved fields never reach the text, the HSA's among them.
+- **§C, rendered:**
+  - plans: the reported plan, a single plan, the example as loaded and after a save, and a blank plan;
+  - the helper on edge inputs: missing and joint owners, no plan type, a holding with no split, a name with "|", a single plan's spouse-B rows, and an ACA household left at 0.
+- **§D, the request:** checked on the key route and the Local Model route.
+- **§E, the copy:** the five lists and §13.
+- **§F:** Engines B and C, Engine D's series, the Monte Carlo's tax schedule and the opening balances are bit-identical to v6.38's module (run in a child process).
+- **Census:** row `ai_account_types` (`t29` B-34: the example is clear; C-d69-1: a plan whose accounts are all taxable or Traditional reads ON).
+- **Re-gated:** `t92` E-2/E-3 (the lists must name the account types, owners, salaries and bonus; the live context's contributions item is the helper's call).
+- **Registered:** `v639` by the AST registration (182 gate extensions, 287 array entries, 2 map arms). By hand: `t33` PINS (unchanged figures), `t93`'s Engine D reference (v638), and `t45`/`t47`/`t48`. `runsuite.sh` lists `t103`.
+- **The shim** exports `aiPlanFacts`.
+
+**Counts**, from the full suite run from the packaged copies:
+- **10,850 app checks across 101 app suites, 0 failed, 0 DIED**: 5,828 current-leg, 4,541 prior-leg (v6.38), 234 and 237 in the two attribution runs, MC parity 10/10 (no engine changed).
+- Tooling: `t21` 64, `domdiff` 32, `sets` 12 + 12. GRAND **10,970**, 0 failed.
+- Against v6.38, the current leg: `t103` new (39; 19 on the v6.38 leg); `t29` 139 → 142 (A-3 +1, B-34, C-d69-1); `t102` 44 → 43 (its §B needs v6.37's module, which a v6.38 → v6.39 run does not build, and prints its skip). Every other count is unchanged. Per-suite figures are in `TESTING.md`.
+- **The run was made in two parts.** The container this session runs in restarted twice; the first restart killed the run part-way, so it was started again, and the second stopped it after `t96`. It was resumed from `t97` in the same run folder, from the same packaged copies, and every suite ran exactly once across the two parts (checked: no row appears twice, and the rows are the v6.38 run's 195 plus `t103`'s two). The runner's own GRAND line covers the second part only; the totals above are summed from both logs.
+
+**Controls.** `qa/tools/controls_v639_ai_context.py`, on a copy of the run folder: **17 of 17 as expected** — C0 silent; K1–K16 each mutate the source and turn their named `t103` checks red. Every file restored and hash-checked. On the development run it was 16 of 17: K7's target text occurred twice in the source, so the harness refused it as an invalid control; its anchor was lengthened to be unique, and the test was not changed.
+
+**Provenance.** Source `5a948ff4ca43908c8fdffe948780519b` · built `index.html` `f8df7ca2f6d70871bbf7ea6cb87f2a52` (vite 5.4.21, `npm ci`; v6.38 rebuilt byte-identically to `a405b665…` on the same toolchain) · `smoke_built` 22 of 22 on the packaged page.
+
 ## v6.38 — the Income tab on a phone, and what it says when income covers spending (F-20)
 
 **A presentation release, for the Income tab.** Scoped in `docs/SCOPE_F20_INCOME_TAB_PHONE_V638.md` (repo-only; build record §8). Steve, on
