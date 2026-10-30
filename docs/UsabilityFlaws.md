@@ -468,11 +468,12 @@ census row `income_covers_spend` (`t29` B-33, C-f20-1). Its sibling on other tab
 **Filed at v6.38** (`docs/SCOPE_F20_INCOME_TAB_PHONE_V638.md` §5, DF-5 (a); not fixed). Measured on the built v6.37 page, the example as
 it opens: pairs of visible text boxes from different elements overlapping by more than 3 px each way (SVG text and collapsed panels
 skipped; boxes clipped to their scrolling ancestors). At 390: **Roth 70** (the IRMAA lookback calendar — *"CONVERT"* over *"CONVERT"*,
-years over years, unreadable), **Stress 30** (the scenario table's heads and figure rows), **My Data 21** (the household totals,
+years over years, unreadable), **Stress 30** (the scenario table's heads and figure rows), **My Data 8** (the household totals,
 *"$1,647,000"* over *"$1,500,000"*; the Traditional/Roth class cards), **Social Security 10** (the claiming grids, the survivor cards),
 **Expenses 4** (a figure over its label), **Taxes 2** (the lifetime-tax tiles); the Grade tab's one hit is its large letter's glyph box, a
 false positive. *(The scope's first census read My Data 21: its detector did not clip text to its own scrolling `<pre>`. **8** is `t45`
-§S's detector, which does; every figure here is that detector's, on v6.38.)* At 600 and 640 px the Stress table still overprints (1 pair);
+§S's detector, which does; every figure here is that detector's, on v6.38. Corrected at v6.39: this list itself still read *"My Data
+21"* as shipped at v6.38, contradicting this note and the census row — found when the v6.38 upload was verified.)* At 600 and 640 px the Stress table still overprints (1 pair);
 from 680 px the only real overlap is on Expenses: the category *"Transportation"* runs under *"Car Payment"*, at every width measured
 (600–1440). **Also on the Income tab, not overprinting:** each phase card's bar (22 px high, `overflow: hidden`) clips a label that wraps at
 390 (*"INCOME $1,700"*, *"DRAW −$3,020/mo"* on the example) — clipping, which the overlap check cannot see. **A lead, read in the source and not
