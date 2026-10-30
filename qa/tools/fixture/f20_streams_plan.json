@@ -1,0 +1,599 @@
+{
+ "note": "t45 (v6.38, F-20): the example's portfolio and expenses with four income streams — a long label, an unbroken 43-character label, a stream that covers spending. Generated from the v6.38 module; a plan, not a release figure.",
+ "P": {
+  "acaBridge": {
+   "premium": 1600,
+   "size": 2
+  },
+  "asOf": "2026-04-18",
+  "dobA": "1964-01-01",
+  "dobB": "1966-01-01",
+  "retireYear": 2029,
+  "lifeExpA": 80,
+  "lifeExpB": 87,
+  "stateName": "Florida",
+  "stateTaxRate": 0,
+  "homeValue": 450000,
+  "mortgageBal": 120000,
+  "mortgageRate": 4.25,
+  "household": 1647000,
+  "taxableGainPct": 0,
+  "homeMoveCash": 130000,
+  "carRowsV621": true,
+  "workRowsV623": true,
+  "positions": [
+   {
+    "ticker": "VMFXX",
+    "owner": "A",
+    "name": "Federal Money Market",
+    "balance": 150000,
+    "bucket": 1,
+    "type": "cash",
+    "roth": 0,
+    "trad": 150000,
+    "er": 0.11,
+    "planType": "ira"
+   },
+   {
+    "ticker": "BND",
+    "owner": "A",
+    "name": "Total Bond Market",
+    "balance": 450000,
+    "bucket": 2,
+    "type": "bond",
+    "roth": 0,
+    "trad": 450000,
+    "er": 0.03,
+    "planType": "ira"
+   },
+   {
+    "ticker": "VTI",
+    "owner": "A",
+    "name": "Total US Stock Market",
+    "balance": 600000,
+    "bucket": 3,
+    "type": "equity-lb",
+    "roth": 200000,
+    "trad": 400000,
+    "er": 0.03,
+    "planType": "ira"
+   },
+   {
+    "ticker": "VXUS",
+    "owner": "B",
+    "name": "Total International Stock",
+    "balance": 225000,
+    "bucket": 3,
+    "type": "equity-intl",
+    "roth": 85000,
+    "trad": 140000,
+    "er": 0.05,
+    "planType": "ira"
+   },
+   {
+    "ticker": "VWO",
+    "owner": "B",
+    "name": "FTSE Emerging Markets",
+    "balance": 75000,
+    "bucket": 3,
+    "type": "equity-intl",
+    "roth": 30000,
+    "trad": 45000,
+    "er": 0.08,
+    "planType": "ira"
+   }
+  ],
+  "otherAccounts": [
+   {
+    "name": "Rollover IRA (A)",
+    "balance": 70000,
+    "owner": "A",
+    "taxType": "trad",
+    "planType": "ira"
+   },
+   {
+    "name": "Traditional IRA (A)",
+    "balance": 20000,
+    "owner": "A",
+    "taxType": "trad",
+    "planType": "ira"
+   },
+   {
+    "name": "Brokerage - Growth",
+    "balance": 5000,
+    "owner": "JT",
+    "taxType": "taxable"
+   },
+   {
+    "name": "Brokerage - Speculative",
+    "balance": 5000,
+    "owner": "JT",
+    "taxType": "taxable"
+   },
+   {
+    "name": "Brokerage - Reserve",
+    "balance": 5000,
+    "owner": "JT",
+    "taxType": "taxable"
+   },
+   {
+    "name": "HSA",
+    "balance": 15000,
+    "owner": "JT",
+    "taxType": "hsa"
+   },
+   {
+    "name": "Taxable Brokerage",
+    "balance": 6000,
+    "owner": "JT",
+    "taxType": "taxable"
+   },
+   {
+    "name": "Spouse B - Annuity",
+    "balance": 7000,
+    "owner": "B",
+    "taxType": "annuity"
+   },
+   {
+    "name": "Spouse B - State Plan",
+    "balance": 14000,
+    "owner": "B",
+    "taxType": "trad",
+    "planType": "ira"
+   }
+  ],
+  "contributions": {
+   "monthly401k": 2500,
+   "hsaMonthly": 300,
+   "spouseBMonthly": 350,
+   "contribPreTaxA": 2500,
+   "contribRothA": 0,
+   "contribPreTaxB": 350,
+   "contribRothB": 0,
+   "allocations": {
+    "VTI": 0.5,
+    "VXUS": 0.15,
+    "VWO": 0.05,
+    "BND": 0.3
+   }
+  },
+  "bucketActuals": {
+   "1": 0.1,
+   "2": 0.3,
+   "3": 0.6,
+   "4": 0
+  },
+  "total401k": 1500000,
+  "nameA": "Spouse A",
+  "nameB": "Spouse B",
+  "incomeSources": {
+   "ssA": {
+    "tableByAge": {
+     "62": 2200,
+     "63": 2400,
+     "64": 2600,
+     "65": 2850,
+     "67": 3300,
+     "70": 4100
+    },
+    "planned": 3300,
+    "plannedAge": 67
+   },
+   "ssB": {
+    "tableByAge": {
+     "62": 1200,
+     "63": 1300,
+     "64": 1400,
+     "65": 1550,
+     "67": 1800,
+     "70": 2250
+    },
+    "planned": 1300,
+    "plannedAge": 63
+   },
+   "pension": {
+    "amount": 400,
+    "note": "joint & survivor — full to survivor",
+    "owner": "A"
+   }
+  },
+  "incomeStreams": [
+   {
+    "label": "Rental — duplex on 5th Street",
+    "kind": "rental",
+    "owner": "joint",
+    "monthly": 1200,
+    "startYear": 2029,
+    "endYear": 9999,
+    "cola": true,
+    "tax": "ordinary"
+   },
+   {
+    "label": "Consulting (1099)",
+    "kind": "work",
+    "owner": "A",
+    "monthly": 2500,
+    "startYear": 2029,
+    "endYear": 2032,
+    "cola": false,
+    "tax": "ordinary",
+    "selfEmployed": true
+   },
+   {
+    "label": "Board seat — Acme Regional Hospital Foundation",
+    "kind": "other",
+    "owner": "B",
+    "monthly": 12500,
+    "startYear": 2031,
+    "endYear": 2040,
+    "cola": false,
+    "tax": "taxfree"
+   },
+   {
+    "label": "SupercalifragilisticexpialidociousRentalLLC",
+    "kind": "rental",
+    "owner": "joint",
+    "monthly": 600,
+    "startYear": 2030,
+    "endYear": 9999,
+    "cola": false,
+    "tax": "ordinary"
+   }
+  ]
+ },
+ "X": [
+  {
+   "cat": "Housing",
+   "label": "Mortgage (Current Home)",
+   "amount": 1400,
+   "freq": "monthly",
+   "start": "2002-01",
+   "end": "2029-03",
+   "deductible": true,
+   "phase": "pre"
+  },
+  {
+   "cat": "Housing",
+   "label": "Future Home Mortgage",
+   "amount": 0,
+   "freq": "monthly",
+   "start": "2029-04",
+   "end": "2070-12",
+   "deductible": true,
+   "phase": "post",
+   "note": "Cash purchase — no mortgage"
+  },
+  {
+   "cat": "Housing",
+   "label": "Property Tax (Current Home)",
+   "amount": 300,
+   "freq": "monthly",
+   "start": "2002-01",
+   "end": "2029-03",
+   "deductible": false,
+   "phase": "pre"
+  },
+  {
+   "cat": "Housing",
+   "label": "HOA (Current Home)",
+   "amount": 150,
+   "freq": "monthly",
+   "start": "2002-01",
+   "end": "2029-03",
+   "deductible": false,
+   "phase": "pre"
+  },
+  {
+   "cat": "Housing",
+   "label": "Property Tax (Future Home)",
+   "amount": 300,
+   "freq": "monthly",
+   "start": "2029-04",
+   "end": "2070-12",
+   "deductible": false,
+   "phase": "post"
+  },
+  {
+   "cat": "Housing",
+   "label": "Bond + Maintenance + Fire (Future Home)",
+   "amount": 375,
+   "freq": "monthly",
+   "start": "2029-04",
+   "end": "2070-12",
+   "deductible": false,
+   "phase": "post"
+  },
+  {
+   "cat": "Housing",
+   "label": "Amenity Fee (Future Home)",
+   "amount": 200,
+   "freq": "monthly",
+   "start": "2029-04",
+   "end": "2070-12",
+   "deductible": false,
+   "phase": "post"
+  },
+  {
+   "cat": "Utilities",
+   "label": "Water/Trash/Sewer (Current Home)",
+   "amount": 60,
+   "freq": "monthly",
+   "start": "2002-01",
+   "end": "2029-03",
+   "deductible": false,
+   "phase": "pre"
+  },
+  {
+   "cat": "Utilities",
+   "label": "Electricity (Current Home)",
+   "amount": 175,
+   "freq": "monthly",
+   "start": "2002-01",
+   "end": "2029-03",
+   "deductible": false,
+   "phase": "pre"
+  },
+  {
+   "cat": "Utilities",
+   "label": "Cable (Current Home)",
+   "amount": 75,
+   "freq": "monthly",
+   "start": "2002-01",
+   "end": "2029-03",
+   "deductible": false,
+   "phase": "pre"
+  },
+  {
+   "cat": "Utilities",
+   "label": "Cell Phones",
+   "amount": 160,
+   "freq": "monthly",
+   "start": "2002-01",
+   "end": "2070-12",
+   "deductible": false,
+   "phase": "both"
+  },
+  {
+   "cat": "Utilities",
+   "label": "Water/Sewer (Future Home)",
+   "amount": 100,
+   "freq": "monthly",
+   "start": "2029-04",
+   "end": "2070-12",
+   "deductible": false,
+   "phase": "post"
+  },
+  {
+   "cat": "Utilities",
+   "label": "Trash Collection (Future Home)",
+   "amount": 35,
+   "freq": "monthly",
+   "start": "2029-04",
+   "end": "2070-12",
+   "deductible": false,
+   "phase": "post"
+  },
+  {
+   "cat": "Utilities",
+   "label": "Gas/Electric (Future Home)",
+   "amount": 240,
+   "freq": "monthly",
+   "start": "2029-04",
+   "end": "2070-12",
+   "deductible": false,
+   "phase": "post"
+  },
+  {
+   "cat": "Utilities",
+   "label": "Cable (Future Home)",
+   "amount": 75,
+   "freq": "monthly",
+   "start": "2029-04",
+   "end": "2070-12",
+   "deductible": false,
+   "phase": "post"
+  },
+  {
+   "cat": "Utilities",
+   "label": "Internet (Future Home)",
+   "amount": 75,
+   "freq": "monthly",
+   "start": "2029-04",
+   "end": "2070-12",
+   "deductible": false,
+   "phase": "post"
+  },
+  {
+   "cat": "Family",
+   "label": "Amazon",
+   "amount": 400,
+   "freq": "monthly",
+   "start": "2002-01",
+   "end": "2070-12",
+   "deductible": false,
+   "phase": "both"
+  },
+  {
+   "cat": "Family",
+   "label": "Credit Card (groceries, gas, dining)",
+   "amount": 3500,
+   "freq": "monthly",
+   "start": "2002-01",
+   "end": "2070-12",
+   "deductible": false,
+   "phase": "both",
+   "note": "Illustrative household spend"
+  },
+  {
+   "cat": "Insurance",
+   "label": "Auto — 2 Cars",
+   "amount": 180,
+   "freq": "monthly",
+   "start": "2002-01",
+   "end": "2029-03",
+   "deductible": false,
+   "phase": "pre"
+  },
+  {
+   "cat": "Insurance",
+   "label": "Homeowners (Current Home)",
+   "amount": 300,
+   "freq": "monthly",
+   "start": "2002-01",
+   "end": "2029-04",
+   "deductible": false,
+   "phase": "pre"
+  },
+  {
+   "cat": "Insurance",
+   "label": "Auto — 1 Car",
+   "amount": 120,
+   "freq": "monthly",
+   "start": "2029-04",
+   "end": "2070-12",
+   "deductible": false,
+   "phase": "post"
+  },
+  {
+   "cat": "Insurance",
+   "label": "Homeowners (Future Home)",
+   "amount": 250,
+   "freq": "monthly",
+   "start": "2029-04",
+   "end": "2070-12",
+   "deductible": false,
+   "phase": "post"
+  },
+  {
+   "cat": "Insurance",
+   "label": "Long-Term Care (Hybrid)",
+   "amount": 400,
+   "freq": "monthly",
+   "start": "2029-01",
+   "end": "2070-12",
+   "deductible": false,
+   "phase": "post"
+  },
+  {
+   "cat": "Healthcare",
+   "label": "Medicare — primary",
+   "amount": 450,
+   "freq": "monthly",
+   "start": "2028-11",
+   "end": "2070-12",
+   "deductible": true,
+   "phase": "post"
+  },
+  {
+   "cat": "Healthcare",
+   "label": "ACA bridge (spouse)",
+   "amount": 600,
+   "freq": "monthly",
+   "start": "2029-01",
+   "end": "2030-12",
+   "deductible": true,
+   "phase": "post",
+   "note": "Until spouse Medicare 2031"
+  },
+  {
+   "cat": "Healthcare",
+   "label": "Medicare — spouse",
+   "amount": 450,
+   "freq": "monthly",
+   "start": "2031-01",
+   "end": "2070-12",
+   "deductible": true,
+   "phase": "post"
+  },
+  {
+   "cat": "Retirement Life",
+   "label": "Golf Cart",
+   "amount": 20000,
+   "freq": "once",
+   "start": "2029-04",
+   "end": "2029-04",
+   "deductible": false,
+   "phase": "post"
+  },
+  {
+   "cat": "Retirement Life",
+   "label": "Closing Costs (Future Home)",
+   "amount": 8000,
+   "freq": "once",
+   "start": "2029-04",
+   "end": "2029-04",
+   "deductible": false,
+   "phase": "post"
+  },
+  {
+   "cat": "Retirement Life",
+   "label": "Golf (monthly)",
+   "amount": 450,
+   "freq": "monthly",
+   "start": "2029-04",
+   "end": "2070-12",
+   "deductible": false,
+   "phase": "post"
+  },
+  {
+   "cat": "Retirement Life",
+   "label": "Golf Cart Ins/Maint/Elec",
+   "amount": 40,
+   "freq": "monthly",
+   "start": "2029-04",
+   "end": "2070-12",
+   "deductible": false,
+   "phase": "post"
+  },
+  {
+   "cat": "Transportation",
+   "label": "Car Payment",
+   "amount": 400,
+   "freq": "monthly",
+   "start": "2029-04",
+   "end": "2034-04",
+   "deductible": false,
+   "phase": "post"
+  },
+  {
+   "cat": "Transportation",
+   "label": "Replacement car",
+   "amount": 40000,
+   "freq": "once",
+   "start": "2037-03",
+   "end": "2037-03",
+   "deductible": false,
+   "phase": "post"
+  },
+  {
+   "cat": "Transportation",
+   "label": "Replacement car",
+   "amount": 40000,
+   "freq": "once",
+   "start": "2045-03",
+   "end": "2045-03",
+   "deductible": false,
+   "phase": "post"
+  },
+  {
+   "cat": "Transportation",
+   "label": "Replacement car",
+   "amount": 40000,
+   "freq": "once",
+   "start": "2053-03",
+   "end": "2053-03",
+   "deductible": false,
+   "phase": "post"
+  },
+  {
+   "cat": "Transportation",
+   "label": "Replacement car",
+   "amount": 40000,
+   "freq": "once",
+   "start": "2061-03",
+   "end": "2061-03",
+   "deductible": false,
+   "phase": "post"
+  }
+ ]
+}
