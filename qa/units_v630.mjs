@@ -7,7 +7,7 @@
 // table under the active prior — read here from the SCENARIOS a suite passes in (the DOM app's live table under its BULL-LEANING default, or an
 // ESM module's at load, BASE), never from the app's own helpers, so a model built on these is independent of the code it checks.
 // An array of tags, so register_tag2 widens it each release.
-export const V630_TAGS = ["v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638"];
+export const V630_TAGS = ["v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639"];
 export const isV630 = VER => V630_TAGS.includes(VER);
 export const CHAINED_GAP = 0.0025;   // C-CPI-U below CPI-U, CBO Budget Options, 12 December 2024
 export const planInflation = scenarios => Object.values(scenarios).reduce((s, sc) => s + sc.prob * sc.inflation, 0);

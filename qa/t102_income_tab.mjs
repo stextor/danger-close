@@ -41,13 +41,13 @@ console.error = () => {}; console.warn = () => {};
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v638";
 const DUMP = process.argv.includes("--dump");
-const KNOWN_VERSIONS = ["v637", "v638"];
+const KNOWN_VERSIONS = ["v637", "v638", "v639"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v638"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v638", "v639"].includes(VER);   // an array, so the next registration widens it
 const B_PRIOR = "v637";                // §B's prior leg — a constant, so the registrar cannot widen it (t76 records why)
 const KD = "[KNOWN DEFECT 2026-10-29, F-20 — flips at v6.38]";
 dom.reconfigure({ url: "https://stextor.github.io/danger-close/" }); globalThis.location = window.location;

@@ -14,7 +14,7 @@
 // Run: node t50_ss_states.mjs <tag>        Current leg only (the rules do not exist on the prior leg).
 import { d30Pins } from "./d30_ref.mjs";
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638"];
+const KNOWN_VERSIONS = ["v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639"];
 let pass = 0, fail = 0; const fails = [];
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; const m = `  \u2717 ${n}${d ? " \u2014 " + d : ""}`; console.log(m); fails.push(m); } };
 const done = () => { console.log(`\nt50 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
@@ -24,7 +24,7 @@ const g = (await import(`./app_${VER}.mjs`)).__g;
 // v6.02 (D-30 batch 1 — docs/SCOPE_D30_DEDUCTIONS_V602.md, DD-14): CT, MN, NM, RI and VT take their deductions, exemptions and credits. Each
 // pin keeps its BASE and on a D-30 leg expects it after them (qa/d30_ref.mjs, on the calculator's own record of the call; a different base
 // fails). A version LIST.
-const D30L = ["v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638"].includes(VER), D30 = d30Pins(g.stateTaxAnnual, g.STATE_RULES(), D30L);
+const D30L = ["v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639"].includes(VER), D30 = d30Pins(g.stateTaxAnnual, g.STATE_RULES(), D30L);
 const tax = o => D30.S({ retIncome: 0, pen: 0, work: 0, capGains: 0, ssGrossA: 0, ssGrossB: 0, ageA: 70, ageB: 70, single: false, ...o });
 const EQ = (n, got, exp) => CK(n + D30.tag(), Math.abs(got - exp) <= 0.01, `engine ${got.toFixed(2)}, statute ${exp.toFixed(2)}`);
 // a household with AGI m, federally taxable SS s, gross G split equally: work = m − s
@@ -32,7 +32,7 @@ const H = (code, m, s, G, extra = {}) => tax({ code, work: m - s, ssTaxableFed: 
 // v6.03 (D-30 batch 2 — docs/SCOPE_D30_DEDUCTIONS_V603.md, DD-14): Colorado and Utah take theirs too. Each pin keeps its base (Colorado) or its
 // base and Social Security credit (Utah, whose taxpayer credit is applied before the SS credit) and on a batch-2 leg expects them after the state's
 // deductions and credits (qa/d30_ref.mjs D30F, on the recorded call). A version LIST.
-const D30FL = ["v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638"].includes(VER);
+const D30FL = ["v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639"].includes(VER);
 const FB = (code, rate, x) => D30FL ? D30.B(code, x) : rate * x;
 const UTW = (m, exp) => D30FL ? Math.max(0, D30.B("UT", m) - (0.0445 * m - exp)) : exp;   // exp = rate × m − the SS credit
 
@@ -53,7 +53,7 @@ EQ("CO-5 joint, both 70, pension $40,000, SS $30,000 → SS consumes the $24,000
 // v6.01 (D-22 batch 2, SCOPE_D22_BRACKETS_V601): Connecticut, New Mexico, Rhode Island and Vermont move to their own schedules. Like Minnesota's
 // cells below, these pin the SS rule: each keeps its taxable amount and, on the v6.01 leg, prices it on the state's schedule (Connecticut with its
 // phase-out and recapture amounts) — computed here from t65 §A's transcription, not the app's. `B2(code, x)` is rate × x on earlier legs. A LIST.
-const BR2 = ["v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638"].includes(VER);
+const BR2 = ["v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639"].includes(VER);
 const _bs = (rows, x) => { let t = 0, lo = 0; for (const [u, r] of rows) { const hi = u === null ? Infinity : u; if (x <= lo) break; t += (Math.min(x, hi) - lo) * r; lo = hi; } return t; };
 const _S2 = { CT: [0.05, [[10000, .02], [50000, .045], [100000, .055], [200000, .06], [250000, .065], [500000, .069], [null, .0699]], [[20000, .02], [100000, .045], [200000, .055], [400000, .06], [500000, .065], [1000000, .069], [null, .0699]]],
   NM: [0.049, [[5500, .015], [16500, .032], [33500, .043], [66500, .047], [210000, .049], [null, .059]], [[8000, .015], [25000, .032], [50000, .043], [100000, .047], [315000, .049], [null, .059]]],
@@ -73,7 +73,7 @@ EQ2("CT-4 single AGI $75,000, taxable SS $5,000 < 25 % of $30,000 → all $5,000
 // ── MN · all subtracted if AGI ≤ $110,780 joint / $86,410 single (TY2026); −10 % per $4,000 or fraction above ──────────────────
 // v6.00 (D-22 option 3, SCOPE_D22_BRACKETS_V600): Minnesota is taxed on its own TY2026 schedule from v6.00. These cells pin the SS rule, so
 // each keeps its taxable amount and, on a bracket leg, prices it on the schedule (computed here from the MN DOR table, not the app's). A LIST.
-const MN_BRK = ["v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638"].includes(VER);
+const MN_BRK = ["v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639"].includes(VER);
 const MNS = { single: [[33310, .0535], [109430, .068], [203150, .0785], [null, .0985]], joint: [[48700, .0535], [193480, .068], [337930, .0785], [null, .0985]] };
 const mn = (x, single = false) => { if (D30L) return D30.B("MN", x); if (!MN_BRK) return 0.068 * x; let t = 0, lo = 0;
   for (const [u, r] of MNS[single ? "single" : "joint"]) { const hi = u === null ? Infinity : u; if (x <= lo) break; t += (Math.min(x, hi) - lo) * r; lo = hi; } return t; };

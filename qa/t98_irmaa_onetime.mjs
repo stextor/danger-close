@@ -37,13 +37,13 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v635";
-const KNOWN_VERSIONS = ["v634", "v635", "v636", "v637", "v638"];
+const KNOWN_VERSIONS = ["v634", "v635", "v636", "v637", "v638", "v639"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v635", "v636", "v637", "v638"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v635", "v636", "v637", "v638", "v639"].includes(VER);   // an array, so the next registration widens it
 const D_PRIOR = "v634";                // the differential's prior leg — a constant, so the registrar cannot widen it (t76 records why)
 const KD = "[KNOWN DEFECT 2026-10-28, D-62 — flips at v6.35]", KW = "[KNOWN DEFECT 2026-10-28, D-65 — flips at v6.35]", KO = "[KNOWN DEFECT 2026-10-28, D-44 — flips at v6.35]";
 const require = createRequire(import.meta.url);
@@ -363,7 +363,7 @@ if (POST) {
     const obj = a.type === "ObjectExpression" ? a : a.type === "Identifier" ? decls.filter(d => d.id.name === a.name && d.start < call.start).sort((x, y) => y.start - x.start)[0]?.init : null;
     return !!obj && obj.properties.some(p => p.type === "Property" && ((p.key.type === "Identifier" && p.key.name === "workMagi") || p.key.value === "workMagi")); };
   // v6.36 (D-66): What Breaks' builder left with its call (it reads the Monte Carlo's schedule), so three sites from v6.36. An array, so the registrar widens it.
-  const B6_N = ["v636", "v637", "v638"].includes(VER) ? 3 : 4;
+  const B6_N = ["v636", "v637", "v638", "v639"].includes(VER) ? 3 : 4;
   if (POST) T(`B-6: every object passed to runRothStrategies carries workMagi — ${calls.length} call sites (${B6_N} expected; one more builder without it fails here)`, calls.length === B6_N && calls.every(carries),
     calls.filter(c => !carries(c)).map(c => `L${c.loc.start.line}`).join(", "));
   else T(`B-6 ${KW}: no object passed to runRothStrategies carries workMagi (${calls.length} call sites)`, calls.length === 4 && !calls.some(carries));

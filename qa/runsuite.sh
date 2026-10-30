@@ -457,6 +457,12 @@ tally "t101-$CUR"   node t101_ss_slider_start.mjs "$CUR"
 # t45's (a browser); this suite reads structure and text.
 tally "t102-$PRIOR" node t102_income_tab.mjs "$PRIOR"
 tally "t102-$CUR"   node t102_income_tab.mjs "$CUR"
+# t103 (v6.39) — what Ask AI is told about the plan's accounts and contributions (D-69): the helper by source (module-level, the saved plan
+# only, called once); EXTINCTION — every key My Data saves is sent or excluded with a reason, on a fixture of distinct values; the reported
+# plan (an HSA), a single plan, the example as loaded and after a save, a blank plan; the request on two routes; the four lists; the
+# engines unmoved (a child process, against the prior module). Both legs (the v6.38 leg pins the defects).
+tally "t103-$PRIOR" node t103_ai_context.mjs "$PRIOR"
+tally "t103-$CUR"   node t103_ai_context.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

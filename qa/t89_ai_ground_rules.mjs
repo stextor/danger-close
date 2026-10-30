@@ -24,13 +24,13 @@ import { createHash } from "crypto";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v626";
 const CLAUDE = process.argv.includes("--claude");
-const KNOWN_VERSIONS = ["v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638"];
+const KNOWN_VERSIONS = ["v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639"].includes(VER);   // an array, so the next registration widens it
 const KD = "[KNOWN DEFECT 2026-10-21, D-55 — flips at v6.26]";
 const require = createRequire(import.meta.url);
 globalThis.IS_REACT_ACT_ENVIRONMENT = true; window.IS_REACT_ACT_ENVIRONMENT = true;
@@ -336,7 +336,7 @@ await go("ask AI");
 const tabText = txt();
 // v6.31 (AI-6; docs/SCOPE_D51_AI6_V631.md §0.6): Claude Opus 4.8's newer tokenizer — characters ÷ 3.5, × 1.35 (the migration guide's upper
 // figure). Through v6.30, characters ÷ 4. An array, so the registrar widens it.
-const A631 = ["v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638"].includes(VER);
+const A631 = ["v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639"].includes(VER);
 const tok = n => Math.round(A631 ? n / 3.5 * 1.35 : n / 4);
 console.log(`    request sizes, ${A631 ? "characters ÷ 3.5 × 1.35" : "characters ÷ 4"}: ${Object.entries(sizes).map(([k, v]) => `${k} ≈ ${tok(v).toLocaleString("en-US")}`).join(", ")}`);
 if (POST) {
