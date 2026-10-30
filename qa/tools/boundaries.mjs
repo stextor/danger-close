@@ -591,6 +591,18 @@ export function census(G) {
       _inc < _full ? "DEGENERATE — income is below spending, so the Income tab's covered-spending wording (v6.38) never runs here"
                    : "reachable — the Income tab must say income exceeds spending, never print a negative shortfall"); }
 
+  // ── v6.39 (D-69 — SCOPE_D69_AI_CONTEXT_V639) · the condition that would hide Ask AI's missing account types (§K1) ──────────────────
+  // 26. ACCOUNT TYPES BEYOND TAXABLE. Through v6.38 Ask AI was sent the accounts as totals, so an HSA, a Traditional or Roth IRA under
+  //    Other accounts, an annuity or a Roth balance in the holdings was invisible to it. A plan holding none of those (taxable Other
+  //    accounts only, Traditional-only holdings) cannot show the loss. ON (degenerate) when it holds none; the value lists what it holds.
+  { const P = G.PORTFOLIO() || {};
+    const kinds = [...new Set((P.otherAccounts || []).filter(a => (a.balance || 0) > 0 && a.taxType && a.taxType !== "taxable").map(a => a.taxType))].sort();
+    if ((P.positions || []).some(p => (p.roth || 0) > 0)) kinds.push("roth holdings");
+    row("ai_account_types", "account types beyond taxable (Ask AI's accounts block)", kinds.length ? kinds.join(", ") : "none",
+      "an HSA, Traditional, Roth or annuity Other account, or Roth holdings", kinds.length === 0,
+      kinds.length === 0 ? "DEGENERATE — every account is taxable or Traditional holdings, so Ask AI's per-type block (v6.39) shows nothing a total hid"
+                         : "reachable — Ask AI must be told each type, by owner"); }
+
   return rows;
 }
 
