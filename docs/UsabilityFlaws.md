@@ -40,7 +40,7 @@
 > | F-11d, F-12d, F-13, F-14, F-15, F-17, F-18 | **FIXED v5.39** | `t4`'s Field Manual assertions |
 > | F-19s | **FIXED v5.39** — row added 2026-10-14 (it had none) | the skin registry had drifted ahead of both descriptions (13 skins, "Seven color palettes"); `docs/SCOPE_FIX_docs_v5_39.md` D-6, `docs/STATUS_v5_39_shipped.md` |
 > | F-19r | **FIXED v6.11** — filed at v6.10 as "F-19" (§H) | `t74`; `docs/SCOPE_F19R_RANKING_HEADLINE.md` |
-> | F-20 | **OPEN** — filed at v6.23 (§H) | the Income tab's stream list scrolls sideways at 390 px for a plan with income streams (scrollWidth 510); `t45` runs on the example, which has none |
+> | F-20 | **FIXED v6.38** — filed at v6.23 (§H); wider than registered | the Income tab's stream list scrolled sideways at 390 px for a plan with income streams (504–627 px measured at v6.37); on every plan the tab's three income cards and each phase card's figures printed over each other at 390; a plan whose income covers spending read *"-$-1,302"* in six places; the coverage before spouse A's Social Security counted spouse B before B claimed and no stream. `t102`, `t45` §S; `docs/SCOPE_F20_INCOME_TAB_PHONE_V638.md` (DF-1 to DF-6, all (a)) |
 > | F-21 | **FIXED v6.25** — filed and fixed together (§H) | `t88`; `docs/SCOPE_F21_HOLDINGS_PLAN_TYPE_V625.md` |
 > | F-22 | **FIXED v6.27** — filed at v6.26 (§H); wider than registered | `t90`; `docs/SCOPE_F22_GRADE_FINDINGS_V627.md`. The panel's directives and invented projections are gone; the category text's false and example-only sentences corrected; the three literal grades, the guardrail grade's fixed labels and the B+ ceiling labelled; the Field Manual's Grade entry rewritten. No grade moved |
 > | F-23 | **FIXED v6.28** — filed at v6.27 (§H); about ten times wider than registered | `t91`; `docs/SCOPE_F23_F24_DIRECTIVES_V628.md`. Every financial directive found by a six-reader census recast as what the model computes or assumes (DF-1 to DF-8, all (a)); twelve false statements about the model corrected (V-1 to V-12), and eight more the build review found |
@@ -49,6 +49,7 @@
 > | F-26 | **FIXED v6.32** — filed at v6.29 | `t95`; `docs/SCOPE_F26_D61_V632.md` (DF-1 to DF-6 and DF-8, all (a)). The Stress tab's cards computed for the plan, the SS tab's survivor grid, the Roth ladder from the selected year, the ACA dates, the Backtest's worst start, the README |
 > | F-27 | **CLOSED BY DECISION** (Steve, 2026-10-26) — filed at v6.32 | not changed: the briefing's stress figures are the example household's own requests to an AI, not a description of the model (where they overlap the model, they agree), and changing the text would mean recognising the old text too (the loader's DC-8 check matches it exactly); `t89` A-7 keeps pinning it |
 > | F-28 | **FIXED v6.33** — filed and fixed together | two drawings of the brackets read the wrong table: the Taxes tab's bracket-by-bracket panel (the 2026 table at the plan's last-year filing status, through Engine B's as-of `inflate`) and the Roth tab's BRACKET UTILIZATION bar (the 2026 table unindexed); `t96` A-9, F-1 to F-3; `docs/SCOPE_TY2027_REFRESH_V633_V634.md` §7 |
+> | F-30 | **OPEN, DISCLOSED v6.38** — filed at v6.38 (§H) | on a phone, text prints over other text on six tabs (pairs of overlapping text boxes on the example at 390, `t45` §S's detector: Roth 70, Stress 30, Social Security 10, My Data 8, Expenses 4, Taxes 2); Stress also at 600–640 px; from 680 px only one Expenses label. Field Manual §13 says so; `t45` §S holds the Income tab at zero |
 > | F-29 | **FIXED v6.37** — filed and fixed together; wider than reported | the SS tab's claim-age explorer opened spouse A's slider at 67 for every plan and measured its draw comparison against three different baselines; spouse B's grid, note and shortfall card read her age in the retirement year; a single household's table counted a second check. `t101`; `docs/SCOPE_F29_SS_SLIDER_START.md` (DS-1 to DS-6, all (a)) |
 > | F-15b | **FIXED v6.32** | the Stress table's label reads "Success (>$1.5M)" (`t95` B-1, B-3; folded into F-26 under DF-1) |
 > | F-16 | **FIXED v5.98** | the pair swapped; `t62` holds every term in order (was: "API Key" before "Agency MBS") |
@@ -444,6 +445,44 @@ the example, which has no income streams. **Who it reaches:** any plan with an i
 **Why it matters beyond layout:** moving the example's built-in spouse-B work into visible rows — the way to close D-49's residual
 (MissingFeatures) — would put this list on the example's own Income tab, so the fix belongs before or with that release. Candidate fix: wrap
 the list's row grid at the phone breakpoint, as F-2 and F-8 did for the grids they named, and extend `t45` to a household with streams.
+
+**Fixed at v6.38** (`docs/SCOPE_F20_INCOME_TAB_PHONE_V638.md`; Steve: all six decisions as recommended). **Wider than registered**, measured
+in Chromium on the built v6.37 page: with streams the Income tab was the only one of 26 tabs to scroll sideways (504 px with three
+streams, 449 with one, 627 with a long label, 604 with an unbroken one); and on **every** plan, the example included, the tab's text
+overprinted at 390 — the three income cards (96 px each) and each phase card's five-column figure row; 29 overlapping text pairs on the
+example. `t45` measured only whether the page scrolled sideways, so it saw neither. Two wording defects on the same tab, both in no
+register: a plan whose income covers its spending was shown *"-$-1,302"*, *"$-1,302/mo shortfall × 12"* and told the shortfall *"comes
+from portfolio withdrawals"* (six sites); and *Income Coverage (pre-Spouse A SS)* counted spouse B whether or not B had claimed, no stream,
+and showed a percentage with no gap. **Fixed:** the stream rows wrap, the cards stack and the phase figures sit two to a row, by rules that
+exist only inside the v5.81 phone block (DF-1 (a), DF-2 (a)) — every Income-tab box at 820 and 1440 was compared with a build carrying
+no phone rule and is identical; a covered plan reads *"$0"* and *"income exceeds spending by $X/mo"* (DF-3 (a)); the coverage metric
+counts what the gap card counts and shows *"—"* with no gap (DF-4 (a)). A space the floor had lost since v6.21 is restored (*"mix.From"*).
+**The independent build review found five more, fixed in the same release** (Steve: *"Fix in v6.38"*): the after-payments figure counted the
+streams of the last Medicare month, so a stream that had ended still counted (it now counts the streams running on that date, and the floor
+names the first counted stream that ends); the gap card, the first phase's note and the floor's gap sentence said the portfolio draws a gap
+that costs $0; *"$0"* ran into its sub-line; a plan carrying cents printed them in the draw figures (now to the dollar). Tests: `t102` (both legs; the v6.37 leg pins each defect), `t45` §S (a stream plan, an overlap check on the Income tab);
+census row `income_covers_spend` (`t29` B-33, C-f20-1). Its sibling on other tabs is **F-30**.
+
+### F-30 · On a phone, text prints over other text on six tabs — **MED (phone layout)** — OPEN, DISCLOSED v6.38
+
+**Filed at v6.38** (`docs/SCOPE_F20_INCOME_TAB_PHONE_V638.md` §5, DF-5 (a); not fixed). Measured on the built v6.37 page, the example as
+it opens: pairs of visible text boxes from different elements overlapping by more than 3 px each way (SVG text and collapsed panels
+skipped; boxes clipped to their scrolling ancestors). At 390: **Roth 70** (the IRMAA lookback calendar — *"CONVERT"* over *"CONVERT"*,
+years over years, unreadable), **Stress 30** (the scenario table's heads and figure rows), **My Data 21** (the household totals,
+*"$1,647,000"* over *"$1,500,000"*; the Traditional/Roth class cards), **Social Security 10** (the claiming grids, the survivor cards),
+**Expenses 4** (a figure over its label), **Taxes 2** (the lifetime-tax tiles); the Grade tab's one hit is its large letter's glyph box, a
+false positive. *(The scope's first census read My Data 21: its detector did not clip text to its own scrolling `<pre>`. **8** is `t45`
+§S's detector, which does; every figure here is that detector's, on v6.38.)* At 600 and 640 px the Stress table still overprints (1 pair);
+from 680 px the only real overlap is on Expenses: the category *"Transportation"* runs under *"Car Payment"*, at every width measured
+(600–1440). **Also on the Income tab, not overprinting:** each phase card's bar (22 px high, `overflow: hidden`) clips a label that wraps at
+390 (*"INCOME $1,700"*, *"DRAW −$3,020/mo"* on the example) — clipping, which the overlap check cannot see. **A lead, read in the source and not
+rendered:** the SS tab's *"Shortfall after Car Payment ends"* card subtracts no income stream (`POST_PAYMENTS.monthly - _bIncAt(_ppM) - pension -
+_aSelAt(_ppM)`), where the Income tab's counts the streams running then.
+`t45` measures sideways scroll and `t48` G-1 clipping in three row classes at 1440, so nothing in the suite saw this. Field Manual §13
+said *"On a phone the page itself no longer scrolls sideways (v5.79)"* and nothing about overprinting — undisclosed until v6.38, which
+added a sentence naming the tabs. The cause on each tab was **not traced** (the Income tab's were three grids too narrow for their
+content at 390; whether the other six share that shape is a scope question). **Candidate fix:** its own release, tab by tab, with `t45`
+§S's overlap check extended to each tab it fixes; the Expenses label needs a desktop fix too.
 
 ### F-21 · My Data's holdings table: the plan type read as the next holding's, and the totals sat one column right — **LOW–MED (desktop layout)** — **FIXED v6.25**
 
