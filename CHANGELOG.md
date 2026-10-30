@@ -1,5 +1,136 @@
 # Changelog
 
+## v6.38 — the Income tab on a phone, and what it says when income covers spending (F-20)
+
+**A presentation release, for the Income tab.** Scoped in `docs/SCOPE_F20_INCOME_TAB_PHONE_V638.md` (repo-only; build record §8). Steve, on
+the six decisions: *"Whole tab"*, *"Fix both"*, *"File F-30 + disclose"*, *"v6.38; tax → v6.39"*. On five more problems the independent build
+review found: *"Fix in v6.38"*. Built on v6.37 (source `0b63ca62…`). No engine or table changes (parity 10/10). METHODOLOGY changes in one
+sentence (below). Under DF-6 (a) **the 2027 tax figures become v6.39** (`docs/SCOPE_TY2027_REFRESH_V633_V634.md` renumbered a fifth
+time; its suite stays `t99_ty2027.mjs`). None of the three 2027 publications had appeared when this was built (searched 2026-10-29). The 15
+December deadline still outranks any model release.
+
+**What was wrong (v6.37, measured in Chromium on the built page).**
+- **With an income stream, the Income tab scrolled sideways on a phone (F-20).**
+  - It was the only one of 26 tabs to do so, at 390 px.
+  - The page measured 504 px with three streams, 449 with one, 627 with a long label and 604 with an unbroken one.
+  - Each stream row was one line with a 170 px label and a 96 px date range that could not shrink.
+  - `t45` never saw it, because it runs on the example, which has no stream.
+- **On every plan, the example included, the tab's text printed over itself on a phone.**
+  - The three income cards were 96 px wide, and each phase card's five figures sat in five columns.
+  - That gave 29 overlapping pairs of text on the example: *"$1,300/mo"* over *"62%"*, and *"$36,240/yr from portfolio"* running into the gap
+    card.
+  - The page did not scroll sideways, so `t45`, which measured only that, passed.
+- **A plan whose income covers its spending was shown a negative shortfall, in six places.**
+  - It read *"-$-1,302"* and *"$-1,302/mo shortfall × 12"*.
+  - It was told *"The $-1,302/mo shortfall comes from portfolio withdrawals"*, after being told its income covers 116% of expenses.
+  - No other tab printed a negative figure (all 26 searched).
+- **"Income Coverage (pre-Spouse A SS)" counted spouse B's check before B had claimed, and left out income streams.**
+  - It also showed a percentage when there was no gap at all.
+  - The gap card beside it has used the right rule since v6.29.
+- **Found by the build review, and fixed here.**
+  - **The after-payments figure counted streams that had already ended.** It reused the streams running once all Social Security flows. On the
+    test plan, *"From May 2034 … income exceeds spending by $14,180/mo"* counted consulting that ended in 2032.
+  - **Three sentences said the portfolio draws a gap that costs $0:** the gap card, the first phase's note (*"Maximum vulnerability — portfolio
+    covers the shortfall"*) and the floor's gap sentence.
+  - **"$0" ran into its explanation:** the row read *"$0income exceeds…"*.
+  - **A plan carrying cents printed them in its draw figures:** *"-$3,019.6"*, *"$36,235.2/yr"*, *"$155,270.4"*.
+
+**What changed.**
+- **On a phone (below 600 px), the Income tab reflows.**
+  - Each stream row wraps: the label on top, then the description and the amount at the right.
+  - The three income cards stack.
+  - A phase card's five figures sit two to a row.
+  - The rules live only inside the v5.81 phone block, so nothing at 600 px and up can move. This was checked: every Income-tab box at 820 and
+    1440 is identical with or without the rules. The independent review compared every element box on all 26 tabs with v6.37; outside the
+    Income tab only the footer's version text differs.
+- **When income covers spending, each of the six places says so.**
+  - The shortfall reads **$0**, with *"income exceeds spending by $X/mo"* (or *"income equals spending"*).
+  - The floor says *"so at that point there is no shortfall to draw from the portfolio."*
+- **The after-payments figure counts the streams running on the date the payments end.**
+  - The floor names the first counted stream that ends: *"The figures above count Consulting, which ends in 2032; after that this tab's
+    income is lower."*
+- **The gap sentences follow the figure.** When income covers the gap, the card says *"on this tab's figures income covers it, so nothing is
+  drawn"*, and the first phase says income covers spending.
+- **The coverage figure before spouse A's Social Security counts what the gap card counts.**
+  - It counts the pension, the streams running at retirement, and spouse B's check only once it has started. It names the month when B claims
+    inside the gap.
+  - With no gap it shows **—** and says why.
+  - It is red only when income falls short.
+- **The tab's draw figures print to the dollar.** Income as entered still prints as entered.
+- **Field Manual §13.** A v6.38 note. The *"Designed for a desktop browser"* item now says that on a phone some figures still print over
+  their neighbours, names the tabs, and says a screen 680 px wide or more shows them apart except for one Expenses label. That was undisclosed
+  until now.
+- **Registers.**
+  - UsabilityFlaws **F-20 fixed**, wider than registered; **F-30 filed** (below).
+  - MissingFeatures D-49: one of its two preconditions (the phone layout) is met.
+  - Census row `income_covers_spend`.
+  - The four version sites read v6.38.
+- **METHODOLOGY.** The D-49 paragraph said moving the example's wages into visible rows needed *"a fix for its phone layout"*; it now says
+  that precondition was met at v6.38.
+
+**F-30, filed and disclosed, not fixed: on a phone, text prints over other text on six other tabs.**
+- Pairs of overlapping text at 390 px on the example (`t45` §S's detector): Roth 70 (the IRMAA calendar is unreadable), Stress 30, Social
+  Security 10, My Data 8, Expenses 4, Taxes 2.
+- The Stress table also overprints at 600–640 px.
+- From 680 px wide, only one Expenses label overlaps: a long category runs under its item, at every width measured (600–1440).
+- The causes were not traced tab by tab. It needs its own release.
+
+**Owned.**
+- **My first census of the other tabs gave My Data 21.** Its detector clipped text to the boxes around it but not to its own element, so a
+  scrolling `<pre>`'s hidden lines counted. The figure is 8. The scope's §5 is annotated, and every figure above comes from the corrected
+  detector `t45` now uses.
+- **The first edit dropped a space** (*"expenses.The"*). It was found by comparing the tab's boxes with v6.37. Restoring it showed the next
+  sentence had run on since v6.21 (*"mix.From May 2034"*), so that is spaced too. On the example the Income tab's text differs from v6.37 by
+  that one space, and its floor paragraph reflows by a line at 820. `t102` B-4 holds the rest of the text identical.
+- **The scope's DF-4 label was not adopted.** The build kept *"Income Coverage (pre-Spouse A SS)"* so the example reads as before; the
+  change is in the value and the line under it. Recorded in scope §8.2.
+- **The first build's new sentences overclaimed.** *"There is no shortfall to draw"* is true only while the counted streams run. The Field
+  Manual's *"A tablet or desktop screen shows them apart"* was false at 600–640 px. The independent review found both, and both are
+  corrected (Steve: *"Fix in v6.38"*).
+- **The container restarted mid-build** and took two background runs with it: an earlier full suite and its controls, both on a superseded
+  source. Nothing was lost from the release. Every count below comes from runs started after the restart, on the final source.
+
+**Limitations, stated.**
+- Six tabs still overprint on a phone (F-30, disclosed in §13).
+- On the Income tab, each phase card's bar (22 px high) clips a label that wraps at 390 px (*"INCOME $1,700"* on the example). That is
+  clipping, not overprinting, and the overlap check cannot see it. Filed with F-30.
+- The Income tab still holds a stream's first-month amount for a whole phase (D-49).
+- The SS tab's *"Shortfall after Car Payment ends"* card subtracts no income stream (read in the source; filed with F-30 as a lead).
+- The overlap check cannot see a phone rule leaking to 600 px and up on the fixture plans, whose rows fit one line either way. `t102` A-1b
+  holds that by source.
+
+**Tests.** New suite **`t102_income_tab.mjs`**, run on both legs. The v6.37 leg pins each defect as a dated
+`[KNOWN DEFECT 2026-10-29, F-20 — flips at v6.38]`.
+- **§A, the source:** the six phone rules sit only inside the phone block, and no class is styled outside it. The classes are on the right
+  elements. **Extinction:** spending less income is computed in exactly two places, each rounded and named. The after-payments income
+  counts the streams on its own date, and the coverage rule matches the gap card's.
+- **§B, the example:** its figures, typed in the suite. The positive-shortfall wording is kept. Its Income tab text equals v6.37's apart
+  from the one space (the v6.37 leg dumped in a child process).
+- **§C, plans at or above spending** (a $9,000 rental, a $9,000 pension, exactly at spending). Every surplus is typed in the suite. No
+  negative figure appears, and each site reads in its covered form. A gap that costs $0 is never "drawn". A stream that ends is not counted
+  after the car payment, and it is named. Cents print to the dollar.
+- **§D, the coverage metric:** the example, a stream at retirement, spouse B claiming inside the gap, and no gap.
+- **§E, the Field Manual.** **§F, rendered structure.**
+- **`t45` §S (Chromium):**
+  - A stream plan on every tab at 390.
+  - **No overlapping text on the Income tab** at 390 (the example and the stream plan) and at 820/1440.
+  - At 820/1440, each stream row on one line.
+  - Builds before v6.38 skip §S. Run against the v6.37 page, §S goes red where it should: Income 627 px; 28 and 29 overlapping pairs.
+- **Census:** `t29` B-33 (the example sits below spending) and C-f20-1 (a $9,000 rental, and exactly at spending, clear it).
+- **Registered:** `v638` by the AST registration (182 gate extensions, 285 array entries, 2 map arms). By hand: `t33` PINS (unchanged
+  figures), `t93`'s Engine D reference (v637), and `t45`/`t47`/`t48`. `runsuite.sh` lists `t102`.
+- **No shim change.**
+
+**Counts**, from the full suite run from the packaged copies:
+- **10,770 app checks across 100 app suites, 0 failed, 0 DIED**: 5,787 current-leg, 4,502 prior-leg (v6.37), 234 and 237 in the two attribution runs, MC parity 10/10 (no engine changed).
+- Tooling: `t21` 64, `domdiff` 32, `sets` 12 + 12. GRAND **10,890**, 0 failed.
+- Against v6.37, the current leg: `t102` new (44; 26 on the v6.37 leg); `t45` 88 → 124 (§S); `t29` 136 → 139 (A-3 +1, B-33, C-f20-1); `t101` 82 → 81 (its §D needs v6.36's module, which a v6.37 → v6.38 run does not build, and prints its skip). Every other count is unchanged. Per-suite figures are in `TESTING.md`.
+
+**Controls.** `qa/tools/controls_v638_income.py`, on a copy of the run folder: **26 of 26 as expected** — C0 silent; K1–K22 mutate the source and each turns `t102` red; P1–P3 delete each phone rule from a copy of the built page and each turns `t45` §S red. Every file restored and hash-checked.
+
+**Provenance.** Source `b82ede24ad13456587358fc2e272c323` · built `index.html` `a405b665d7b33d70a5f6afe31fdea805` (vite 5.4.21, `npm ci`;
+v6.37 rebuilt byte-identically to `bbe3987f…` on the same toolchain) · `smoke_built` 22 of 22 on the packaged page.
+
 ## v6.37 — the SS tab's claim-age explorer starts at your plan (F-29)
 
 **A presentation release, for the SS tab only.** Scoped in `docs/SCOPE_F29_SS_SLIDER_START.md` (repo-only; build record §7), from a report

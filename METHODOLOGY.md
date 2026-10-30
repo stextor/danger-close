@@ -2998,7 +2998,8 @@ with no income streams loses the wages: the figures above, in the directions abo
   the example and keeps the wages.
 - **The example's wages are still built in** and not visible as rows. The Monte Carlo, the Income tab, Backtest and What-Breaks do not
   credit them, and the Monte Carlo pays their tax: conservative by $14,479 on the example (measured at v6.20, above). Moving them into
-  visible rows needs a phase rule for the Income tab and a fix for its phone layout — its own release. MissingFeatures **D-49**.
+  visible rows needs a phase rule for the Income tab — its own release (the other precondition, the tab's phone layout, was met at v6.38:
+  UsabilityFlaws **F-20**). MissingFeatures **D-49**.
 - **Backtest and What-Breaks credit no income stream** (MissingFeatures **D-57**) — conservative.
 
 ## My Data keeps each expense row's months (v6.24)
