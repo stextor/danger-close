@@ -58,6 +58,8 @@ export const __g = {
   // v6.36 (D-66) — What Breaks' yearly tax, the Monte Carlo's schedule averaged (t100). GUARDED: it does not exist on the v6.35 leg, where
   // t100 asserts its absence.
   whatBreaksAnnualTax: _g("whatBreaksAnnualTax"),
+  // v6.39 (D-69) — what Ask AI is told about the accounts and contributions (t103). GUARDED: it does not exist on the v6.38 leg.
+  aiPlanFacts: _g("aiPlanFacts"),
   // v6.18 (D-41) — the one year-by-year read of the expense table that Engine D, Backtest and What-Breaks share, and the three display
   // snapshots, read LIVE (recomputeDerivedExpenses reassigns them). GUARDED: tableYearExpense does not exist before v6.18 (t81 reads
   // `undefined` on the v6.17 leg); recomputeDerivedExpenses and the snapshots exist on every leg.
