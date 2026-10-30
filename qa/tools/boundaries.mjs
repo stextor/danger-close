@@ -575,6 +575,22 @@ export function census(G) {
       single ? "single filer — no spouse B" : _b === _bAge ? "DEGENERATE — her claim falls in the retirement year, so the SS tab's v6.36 use of her retirement-year age cannot be seen here"
         : "reachable — the SS tab must tag her planned age Modeled and take her benefit at her slider's age"); }
 
+  // ── v6.38 (F-20 — SCOPE_F20_INCOME_TAB_PHONE_V638) · the condition that hid the negative shortfall (§K1) ───────────────────────
+  // 25. STEADY-STATE INCOME BELOW SPENDING. Through v6.37 six places on the Income tab printed spending less income unguarded, so a plan
+  //    whose income covers its spending read "-$-1,302" and was told the shortfall came from the portfolio. The example's income is below
+  //    its spending, so the covered branch never runs there. ON when the steady-state income — the tab's own sum: both checks, the pension
+  //    and the streams active at the last Medicare month (at the planned retirement year) — is below the full-retirement spending.
+  //    (F-20's other condition, a plan with income streams, is row `income_streams` above.)
+  { const _ym = d => d.year * 12 + d.month;
+    const _last = single ? _ym(tl.medicareA) : _ym(tl.medicareB);
+    const _ph3 = Math.max(tl.targetRetireYear * 12 + 1, _last);
+    const _inc = G.getSSA() + (single ? 0 : G.getSSB()) + G.getPension() + Math.round(G.streamsMonthlyAt(Math.floor((_ph3 - 1) / 12), 1));
+    const _full = G.snapshots().full;
+    row("income_covers_spend", "steady-state income vs full spending", `$${Math.round(_inc).toLocaleString()} vs $${Math.round(_full).toLocaleString()} /mo`,
+      "income at or above spending once all income flows", _inc < _full,
+      _inc < _full ? "DEGENERATE — income is below spending, so the Income tab's covered-spending wording (v6.38) never runs here"
+                   : "reachable — the Income tab must say income exceeds spending, never print a negative shortfall"); }
+
   return rows;
 }
 
