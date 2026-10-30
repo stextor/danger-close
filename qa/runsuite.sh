@@ -451,6 +451,12 @@ tally "t100-$CUR"   node t100_whatbreaks_tax.mjs "$CUR"
 # B's grid and shortfall card; the single household; the engines unmoved; the Field Manual. Both legs (the v6.36 leg pins the defect).
 tally "t101-$PRIOR" node t101_ss_slider_start.mjs "$PRIOR"
 tally "t101-$CUR"   node t101_ss_slider_start.mjs "$CUR"
+# t102 (v6.38) — the Income tab on a phone and when income covers spending (F-20): the phone rules by source (inside the v5.81 block
+# only, on the right elements); the example's Income tab text against v6.37's; plans whose income covers spending (no "$-", each of the six
+# sites in its covered form); the coverage metric on four plans; the Field Manual. Both legs (the v6.37 leg pins the defects). Layout is
+# t45's (a browser); this suite reads structure and text.
+tally "t102-$PRIOR" node t102_income_tab.mjs "$PRIOR"
+tally "t102-$CUR"   node t102_income_tab.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

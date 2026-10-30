@@ -27,13 +27,13 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v607";
-const KNOWN_VERSIONS = ["v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637"];
+const KNOWN_VERSIONS = ["v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637"].includes(VER);   // an array, so register_tag2 widens it each release
+const POST = ["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638"].includes(VER);   // an array, so register_tag2 widens it each release
 const { __g: g, __engines: E } = await import(pathToFileURL(join(HERE, `app_${VER}.mjs`)).href);
 
 let pass = 0, fail = 0;
@@ -338,7 +338,7 @@ T(`E-0b: the A-annuity fixture ${POST ? "leaves both cards where they are" : "mo
     JSON.stringify({ capB, capC, headA, attr }));
   // v6.08 (D-34) rewrote Engine D's conversion (docs/SCOPE_D34_ENGINE_D_OTHER_IRA_V608.md; t71 carries it): figured after the draws, bucket
   // money first, then a Traditional IRA entered under Other accounts — never annuity money, which is not in that IRA's tracker. Gated per leg.
-  const D34 = ["v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637"].includes(VER);   // an array, so register_tag2 widens it each release
+  const D34 = ["v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638"].includes(VER);   // an array, so register_tag2 widens it each release
   const capD607 = /const conv_y = yr <= _ladderEnd \? Math\.min\(rothAmount, Math\.max\(0, tradNotional_boy - rmd_y\)\) : 0;/.test(SRC);
   const capD608 = /const _bucketConvCap = Math\.max\(0, tradNotional_boy - _bucketRmdTaken - _spendFromBuckets \* tradFrac\);/.test(SRC)
     && /const _sleeveConvCap = Math\.max\(0, taxRmdA \+ taxRmdB\);/.test(SRC);

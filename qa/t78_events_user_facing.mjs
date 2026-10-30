@@ -22,7 +22,7 @@ import { spawnSync } from "child_process";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v615";
-const KNOWN_VERSIONS = ["v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637"];
+const KNOWN_VERSIONS = ["v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
@@ -57,7 +57,7 @@ if (process.env.T78_CHILD) {
 
 await import("./env_dom.mjs");
 console.error = () => {}; console.warn = () => {};
-const POST = ["v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638"].includes(VER);   // an array, so the next registration widens it
 // §A / §C-3's pair. Two constants, NOT `VER === "v615"`: the registrar widens equality tests and arrays, and this comparison is true of
 // exactly one pair of builds (t76 records why).
 const D_PRIOR = "v614", D_CUR = "v615";
@@ -252,7 +252,7 @@ console.log("  F — the Field Manual");
   T("F-0 SETUP — the Field Manual is found and its Events entry states a count", DOCS.length > 100000 && !!m, m ? m[1] : "no count");
   T(`F-1 the Events entry's count (${m ? m[1] : "?"}) equals the events the example two-person household actually has (${n})`, !!m && WORDS[m[1]] === n, `${m ? m[1] : "?"} vs ${n}`);
   // v6.29 (F-25, DF-6 a): spouse B gets an RMD event of their own ("rmdB"), so the example couple has seventeen
-  EQ(`F-1b ${POST ? "" : "[v6.14] "}that number`, n, POST ? (["v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637"].includes(VER) ? 17 : 16) : 18);
+  EQ(`F-1b ${POST ? "" : "[v6.14] "}that number`, n, POST ? (["v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638"].includes(VER) ? 17 : 16) : 18);
   if (POST) {
     T("F-2 the Ranking entry no longer says the Events tab flags the benchmarks; a later version carries the 2028 survey",
       !DOCS.includes("when the Events tab flags these benchmarks") && DOCS.includes("the 2028 survey publishes ~fall 2029, and a later version of the app will carry it."));

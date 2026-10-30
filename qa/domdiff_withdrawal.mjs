@@ -204,7 +204,7 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   // refresh", v6.15 no banner; the STALE strip renders only from the January after the figures' year). For THIS pair only, the two
   // lines are set aside on BOTH sides and nothing else; on a run date with neither, the replaces are no-ops. The two checks keep the mask
   // honest: whatever v6.15 shows, its banner never names the tax notice and its STALE strip never carries the maintainer workflow.
-  const _p615 = VA === "v614" && (VB === "v615" || (VB === "v616" || (VB === "v617" || (VB === "v618" || (VB === "v619" || (VB === "v620" || (VB === "v621" || (VB === "v622" || (VB === "v623" || (VB === "v624" || (VB === "v625" || VB === "v626" || VB === "v627" || (VB === "v628" || (VB === "v629" || VB === "v630" || (VB === "v631" || VB === "v632" || VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637"))))))))))))));
+  const _p615 = VA === "v614" && (VB === "v615" || (VB === "v616" || (VB === "v617" || (VB === "v618" || (VB === "v619" || (VB === "v620" || (VB === "v621" || (VB === "v622" || (VB === "v623" || (VB === "v624" || (VB === "v625" || VB === "v626" || VB === "v627" || (VB === "v628" || (VB === "v629" || VB === "v630" || (VB === "v631" || VB === "v632" || VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637" || VB === "v638"))))))))))))));
   const _STALE = /⌛ STALE DATA:[\s\S]{1,900}?(?:constant-update workflow\.|brings it across\.)/;
   const _n615 = (s) => !_p615 ? s : s.replace(_BAN, "").replace(_STALE, "");
   if (_p615) {
@@ -234,7 +234,7 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   // withdrawn and the 10-year average withdrawal rate are masked on BOTH sides; everything else must still be byte-identical (measured at
   // the build: nothing else differs). The checks after the identity keep the mask honest: each mask bit once a side, the masked text
   // differs, and 2029's Expenses cell is the June 2029 snapshot's $98K on v6.17 and $126K on v6.18. Engine-level figures are t81's and t40's.
-  const _p618 = VA === "v617" && (VB === "v618" || (VB === "v619" || (VB === "v620" || (VB === "v621" || (VB === "v622" || (VB === "v623" || (VB === "v624" || (VB === "v625" || VB === "v626" || VB === "v627" || (VB === "v628" || (VB === "v629" || VB === "v630" || (VB === "v631" || VB === "v632" || VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637")))))))))));
+  const _p618 = VA === "v617" && (VB === "v618" || (VB === "v619" || (VB === "v620" || (VB === "v621" || (VB === "v622" || (VB === "v623" || (VB === "v624" || (VB === "v625" || VB === "v626" || VB === "v627" || (VB === "v628" || (VB === "v629" || VB === "v630" || (VB === "v631" || VB === "v632" || VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637" || VB === "v638")))))))))));
   const _M618 = [[/EOY Portfolio[\s\S]*?Section B/, "EOY Portfolio#Section B"], [/Total withdrawn\$[\d.]+[KM]/, "Total withdrawn#"], [/Avg wr \(first 10 yr\)[\d.]+%/, "Avg wr (first 10 yr)#"]];
   const _n618 = (s) => !_p618 ? s : _cut(s, / ?Expenses are your expense table at each year's own dates[\s\S]*?for every plan\./, "v6.18 spending sentence");
   const _m618 = (s) => !_p618 ? s : _M618.reduce((t, [re, to]) => t.replace(re, to), s);
@@ -254,7 +254,7 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   // same stream (t82 C). MEASURED at the build: v6.19 with v6.18's run A length and draw-skipping restored renders this tab byte-identical
   // to v6.18 (DOM DIFF 32 of 32). For THIS pair only those Monte Carlo figures are masked on both sides; each mask must bite exactly as
   // often as stated, and everything else must still be byte-identical.
-  const _p619 = VA === "v618" && (VB === "v619" || (VB === "v620" || (VB === "v621" || (VB === "v622" || (VB === "v623" || (VB === "v624" || (VB === "v625" || VB === "v626" || VB === "v627" || (VB === "v628" || (VB === "v629" || VB === "v630" || (VB === "v631" || VB === "v632" || VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637"))))))))));
+  const _p619 = VA === "v618" && (VB === "v619" || (VB === "v620" || (VB === "v621" || (VB === "v622" || (VB === "v623" || (VB === "v624" || (VB === "v625" || VB === "v626" || VB === "v627" || (VB === "v628" || (VB === "v629" || VB === "v630" || (VB === "v631" || VB === "v632" || VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637" || VB === "v638"))))))))));
   const _M619 = [[/Success rate\d+(?:\.\d)?%/g, "Success rate#", 1], [/(\d+-month gap before [^.]+\.)\d+(?:\.\d)?%median@retire: \$[\d.]+[KM]/g, "$1#median@retire: #", 3]];
   const _m619 = (s) => !_p619 ? s : _M619.reduce((t, [re, to]) => t.replace(re, to), s);
   if (_p619) for (const [re, , n] of _M619) for (const [V, w] of [[VA, A.withdrawal], [VB, B.withdrawal]])
@@ -264,7 +264,7 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   // the figures, not the stream this time. For THIS pair the same masks as v6.19's are applied on both sides; each must bite exactly as
   // often as stated, and everything else on the tab must still be byte-identical (the Withdrawal tab's own figures do not move: Engine D
   // is untouched, t83 H).
-  const _p620 = VA === "v619" && (VB === "v620" || (VB === "v621" || (VB === "v622" || (VB === "v623" || (VB === "v624" || (VB === "v625" || VB === "v626" || VB === "v627" || (VB === "v628" || (VB === "v629" || VB === "v630" || (VB === "v631" || VB === "v632" || VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637")))))))));
+  const _p620 = VA === "v619" && (VB === "v620" || (VB === "v621" || (VB === "v622" || (VB === "v623" || (VB === "v624" || (VB === "v625" || VB === "v626" || VB === "v627" || (VB === "v628" || (VB === "v629" || VB === "v630" || (VB === "v631" || VB === "v632" || VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637" || VB === "v638")))))))));
   const _m620 = (s) => !_p620 ? s : _M619.reduce((t, [re, to]) => t.replace(re, to), s);
   if (_p620) for (const [re, , n] of _M619) for (const [V, w] of [[VA, A.withdrawal], [VB, B.withdrawal]])
     ck(`WITHDRAWAL (v619\u2192v620): the ${String(re).slice(1, 24)}\u2026 mask bites exactly ${n}\u00d7 on ${V} (the Monte Carlo pays the Taxes tab's tax)`, (w.match(re) || []).length === n);
@@ -277,7 +277,7 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   // else on the tab must still be byte-identical — bar the footer's count of expense lines, 31 → 35 (the four rows), checked exactly and set
   // aside. The checks keep the masks honest: the same rows are masked on each side, the masked rows
   // DIFFER (a v6.21 whose Engine D never charges the rows fails here), and the first masked row is 2037. Engine-level figures are t84's.
-  const _p621 = VA === "v620" && (VB === "v621" || (VB === "v622" || (VB === "v623" || (VB === "v624" || (VB === "v625" || VB === "v626" || VB === "v627" || (VB === "v628" || (VB === "v629" || VB === "v630" || (VB === "v631" || VB === "v632" || VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637"))))))));
+  const _p621 = VA === "v620" && (VB === "v621" || (VB === "v622" || (VB === "v623" || (VB === "v624" || (VB === "v625" || VB === "v626" || VB === "v627" || (VB === "v628" || (VB === "v629" || VB === "v630" || (VB === "v631" || VB === "v632" || VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637" || VB === "v638"))))))));
   const _ROW = /(?=20[2-9]\d\d{2}\/\d{2})/;   // a schedule row opens with its year then the ages, "2037" + "73/71"
   const _grid621 = s => (s.match(/EOY Portfolio[\s\S]*?Section B/) || [""])[0];
   const _late621 = s => _grid621(s).split(_ROW).filter(r => /^20[2-9]\d\d{2}\//.test(r) && +r.slice(0, 4) >= 2037);
@@ -302,7 +302,7 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   // figure moves (the built-in work is still its own; t86 §B, every engine bit for bit). For THIS pair only, Step 1's income clause and the
   // note's added clause are masked — each must bite exactly once a side (the note's clause on v6.23 only) — and everything else is identical.
   // A single-pair gate on purpose: the next pair has the new sentence on both sides.
-  const _p623 = VA === "v622" && (VB === "v623" || (VB === "v624" || (VB === "v625" || VB === "v626" || VB === "v627" || (VB === "v628" || (VB === "v629" || VB === "v630" || (VB === "v631" || VB === "v632" || VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637"))))));
+  const _p623 = VA === "v622" && (VB === "v623" || (VB === "v624" || (VB === "v625" || VB === "v626" || VB === "v627" || (VB === "v628" || (VB === "v629" || VB === "v630" || (VB === "v631" || VB === "v632" || VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637" || VB === "v638"))))));
   const _STEP1 = /Take Social Security \+ pension \+ (?:Spouse B work income|other income \(income streams and the example's built-in work\)) — guaranteed floor\./g;
   const _WNOTE = /, and the example household's built-in part-time work for spouse B(?=\) separately)/g;
   const _m623 = (s) => !_p623 ? s : s.replace(_STEP1, "Take Social Security + pension + # — guaranteed floor.").replace(_WNOTE, "");
@@ -318,7 +318,7 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   // have, and Section C carried ratings and a "Recommendation:". The header's subtitle names the sections. For THIS pair only, the subtitle and
   // the whole span from Section B to the footer caveat are masked — each must bite exactly once a side — and everything else, Section A's
   // schedule included, must be byte-identical: the witness that no figure of the schedule moved. A single-pair gate on purpose.
-  const _p628 = VA === "v627" && (VB === "v628" || (VB === "v629" || VB === "v630" || (VB === "v631" || VB === "v632" || VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637")));
+  const _p628 = VA === "v627" && (VB === "v628" || (VB === "v629" || VB === "v630" || (VB === "v631" || VB === "v632" || VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637" || VB === "v638")));
   const _SUB628 = /Year-by-year operational schedule │ (?:Account priority sequencing │ Three-strategy comparison|The order it draws from │ What the schedule models)/g;
   const _SEC628 = /Section B — account priority sequencing[\s\S]*?(?=Schedule is deterministic \(single path\))/g;
   const _m628 = (s) => !_p628 ? s : s.replace(_SUB628, "#SUB").replace(_SEC628, "#SECTIONS-B-C ");
@@ -336,7 +336,7 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   // Tax line and Step 6 say the Taxes tab computes from this schedule's spending draws and gains with its own RMD and conversion figures. For
   // THIS pair only, each changed phrase is masked by a pair of patterns (old on v6.28, new on v6.29) that must each bite exactly once on its own
   // side and not at all on the other — and everything else, Section A's schedule included, must be byte-identical. A single-pair gate on purpose.
-  const _p629 = VA === "v628" && (VB === "v629" || VB === "v630" || (VB === "v631" || VB === "v632" || VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637"));
+  const _p629 = VA === "v628" && (VB === "v629" || VB === "v630" || (VB === "v631" || VB === "v632" || VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637" || VB === "v638"));
   const _MK629 = [
     ["header chip", /@ END · PLANNED PATH \(NO LTC\/MORTALITY SHOCK\)/g, /@ END \(6 YRS\) · NO LTC\/MORTALITY SHOCK/g],
     ["RMD clause", /starting at RMD age \(\d+ — SECURE 2\.0\)\./g, /starting at each person's own RMD age \([^()]*— SECURE 2\.0\)\./g],
@@ -358,7 +358,7 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   // (old on v6.34, new on v6.35) that must each bite exactly once on its own side and not at all on the other; the masks KEEP the year and the
   // starting-balance figure, so a moved figure still fails. The example at its planned year has no such row, so the naming clause must be
   // absent and everything else, Section A's schedule included, must be byte-identical. A single-pair gate on purpose.
-  const _p635 = VA === "v634" && (VB === "v635" || VB === "v636" || VB === "v637");
+  const _p635 = VA === "v634" && (VB === "v635" || VB === "v636" || VB === "v637" || VB === "v638");
   const _MK635 = [
     ["one-time clause", /a one-time row dated before (\d{4}) is not in this schedule\./g,
       /a one-time row dated before (\d{4}) is paid from your savings before it: the schedule starts from today's holdings less those rows, after-tax money first, with no tax on anything taken from your retirement accounts \(from v6\.35; before, such a row was not charged at all\)\./g],
@@ -379,7 +379,7 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   // as the Monte Carlo does, so for THIS pair the schedule moves BY DESIGN and identity is false. Bounded instead, as C-8 was: the same year
   // rows render, the tab differs, every Expenses cell is v6.29's × (1+i)^(retirement − as-of) to the $K rounding of the two sides (i the
   // rendered plan's own inflation, the same on both legs), and the units sentence is on v6.30 only. A single-pair gate on purpose.
-  const _p630 = VA === "v629" && (VB === "v630" || (VB === "v631" || VB === "v632" || VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637"));
+  const _p630 = VA === "v629" && (VB === "v630" || (VB === "v631" || VB === "v632" || VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637" || VB === "v638"));
   if (_p630) {
     const rowRe = /(20\d\d)(\d{2})\/(\d{2})\$(\d+)K(?:\u2014|\$\d+K)\$(\d+)K/g, rowsW = t => { const o = []; let m; rowRe.lastIndex = 0; while ((m = rowRe.exec(t)) !== null) o.push({ yr: +m[1], exp: +m[5] }); return o; };
     const ra = rowsW(A.schedule || ""), rb = rowsW(B.schedule || ""), RB = Math.pow(1 + B.units.i, B.units.R - B.units.asOf);
@@ -428,13 +428,13 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   // v6.23 it reads "Earned income (job rows)", and on the example "Earned income (job rows and the example's built-in work)". For THIS pair
   // only, that label is masked on BOTH sides (exactly once a side, the old label on v6.22 and the new on v6.23); its figure is not masked,
   // and every figure must still be identical — the example's wages are its own at both builds.
-  const _p623t = VA === "v622" && (VB === "v623" || (VB === "v624" || (VB === "v625" || VB === "v626" || VB === "v627" || (VB === "v628" || (VB === "v629" || VB === "v630" || (VB === "v631" || VB === "v632" || VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637"))))));
+  const _p623t = VA === "v622" && (VB === "v623" || (VB === "v624" || (VB === "v625" || VB === "v626" || VB === "v627" || (VB === "v628" || (VB === "v629" || VB === "v630" || (VB === "v631" || VB === "v632" || VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637" || VB === "v638"))))));
   const _EARN = /Spouse B earned income|Earned income \(job rows and the example's built-in work\)/g;
   // v6.33 (F-28): the detail panel's bracket-by-bracket drawing reads the selected year's own table and filing status (through v6.32 the
   // 2026 table at the plan's LAST year's status), so for THIS pair only the panel — from its heading to the region's end — is masked on both
   // sides, every year-table figure before it must still be identical (D-67 moves nothing for the example, dated 2026), and the panel must
   // DIFFER (a v6.33 still drawing Single bounds on a joint year renders v6.32's panel and fails). t96 F-1/F-2 pin the panel's content.
-  const _p633t = VA === "v632" && (VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637");
+  const _p633t = VA === "v632" && (VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637" || VB === "v638");
   const _PANEL = /NET TAXABLE INCOME BY FEDERAL BRACKET — [\s\S]*$/;
   if (_p633t) {
     const pA = (figA.match(_PANEL) || [""])[0], pB = (figB.match(_PANEL) || [""])[0];
@@ -477,19 +477,19 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   // v6.30 (D-60): every row is in its own year's dollars on one clock, so the Taxes year table differs BY DESIGN at v629→v630 — bounded as
   // C-8 was: it differs (a v6.30 still in mixed units renders v6.29's table and fails) and the same year rows render. Dollar figures are
   // pinned against the independent federal oracle in t40 (to the cent, every row) and t93.
-  if (VA === "v629" && (VB === "v630" || (VB === "v631" || VB === "v632" || VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637"))) {
+  if (VA === "v629" && (VB === "v630" || (VB === "v631" || VB === "v632" || VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637" || VB === "v638"))) {
     const rowsOf = s => (s.match(/20[2-6]\d(?=\d{2}\/\d{2})/g) || []).join();
     ck("TAXES: both legs still render the year table", figA.length > 0 && figB.length > 0);
     ck("TAXES (v629\u2192v630): the figures DIFFER \u2014 each row now in its own year's dollars", figA !== figB);
     ck("TAXES (v629\u2192v630): the same year rows render on both legs \u2014 the units move values, never rows", rowsOf(figA).length > 0 && rowsOf(figA) === rowsOf(figB), `${rowsOf(figA).length} vs ${rowsOf(figB).length}`);
-  } else if (VA === "v620" && (VB === "v621" || (VB === "v622" || (VB === "v623" || (VB === "v624" || (VB === "v625" || VB === "v626" || VB === "v627" || (VB === "v628" || (VB === "v629" || VB === "v630" || (VB === "v631" || VB === "v632" || VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637"))))))))) {
+  } else if (VA === "v620" && (VB === "v621" || (VB === "v622" || (VB === "v623" || (VB === "v624" || (VB === "v625" || VB === "v626" || VB === "v627" || (VB === "v628" || (VB === "v629" || VB === "v630" || (VB === "v631" || VB === "v632" || VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637" || VB === "v638"))))))))) {
     const rows = s => s.split(/(?=20[2-9]\d\d{2}\/\d{2})/).filter(r => /^20[2-9]\d\d{2}\//.test(r));
     const rA = rows(figA), rB = rows(figB), early = rs => rs.filter(r => +r.slice(0, 4) < 2037).join("|"), y37 = rs => rs.find(r => r.startsWith("2037"));
     ck("TAXES: both legs still render the year table", figA.length > 0 && figB.length > 0);
     ck("TAXES (v620\u2192v621): the same year rows render on both legs", rA.length > 0 && rA.map(r => r.slice(0, 4)).join() === rB.map(r => r.slice(0, 4)).join(), `${rA.length} vs ${rB.length}`);
     ck("TAXES (v620\u2192v621): every row before 2037 is byte-identical \u2014 the car rows move nothing before the first car", early(rA).length > 0 && early(rA) === early(rB), firstDiff(early(rA), early(rB)));
     ck("TAXES (v620\u2192v621): 2037's row DIFFERS \u2014 the first car reaches Engine B through the draws (a v6.21 that never charges it fails here)", !!y37(rA) && y37(rA) !== y37(rB), `${(y37(rA) || "").slice(0, 50)} / ${(y37(rB) || "").slice(0, 50)}`);
-  } else if (VA === "v617" && (VB === "v618" || (VB === "v619" || (VB === "v620" || (VB === "v621" || (VB === "v622" || (VB === "v623" || (VB === "v624" || (VB === "v625" || VB === "v626" || VB === "v627" || (VB === "v628" || (VB === "v629" || VB === "v630" || (VB === "v631" || VB === "v632" || VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637")))))))))))) {
+  } else if (VA === "v617" && (VB === "v618" || (VB === "v619" || (VB === "v620" || (VB === "v621" || (VB === "v622" || (VB === "v623" || (VB === "v624" || (VB === "v625" || VB === "v626" || VB === "v627" || (VB === "v628" || (VB === "v629" || VB === "v630" || (VB === "v631" || VB === "v632" || VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637" || VB === "v638")))))))))))) {
     const rowsOf = s => (s.match(/20[2-6]\d(?=\d{2}\/\d{2})/g) || []).length;
     ck("TAXES: both legs still render the year table", figA.length > 0 && figB.length > 0);
     ck("TAXES (v617\u2192v618): the figures DIFFER \u2014 the year-by-year spending read reaches Engine B through the bridge", figA !== figB);
@@ -581,19 +581,19 @@ ck(`${VB}: schedule table rendered`, !!B.schedule, "not found");
   // direction is asserted (the draws rise in some years and fall in others).
   // v6.21 (D-42): see the Taxes note above — Engine C takes the same draws; rows open with the tax year then the premium year ("2037" "2039 prem").
   // v6.30 (D-60): see the Taxes note above — Engine C states each year in its own dollars, so its MAGI table differs by design; no direction.
-  if (VA === "v629" && (VB === "v630" || (VB === "v631" || VB === "v632" || VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637"))) {
+  if (VA === "v629" && (VB === "v630" || (VB === "v631" || VB === "v632" || VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637" || VB === "v638"))) {
     const rows = s => (s.match(/20[2-9]\d(?=20[2-9]\d prem|pre-MC)/g) || []).join();
     ck("IRMAA: both legs still render the MAGI table", magA.length > 0 && magB.length > 0);
     ck("IRMAA (v629\u2192v630): the MAGI figures DIFFER \u2014 each row now in its own year's dollars", magA !== magB);
     ck("IRMAA (v629\u2192v630): the same year rows render on both legs", rows(magA).length > 0 && rows(magA) === rows(magB), `${rows(magA).length} vs ${rows(magB).length}`);
-  } else if (VA === "v620" && (VB === "v621" || (VB === "v622" || (VB === "v623" || (VB === "v624" || (VB === "v625" || VB === "v626" || VB === "v627" || (VB === "v628" || (VB === "v629" || VB === "v630" || (VB === "v631" || VB === "v632" || VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637"))))))))) {
+  } else if (VA === "v620" && (VB === "v621" || (VB === "v622" || (VB === "v623" || (VB === "v624" || (VB === "v625" || VB === "v626" || VB === "v627" || (VB === "v628" || (VB === "v629" || VB === "v630" || (VB === "v631" || VB === "v632" || VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637" || VB === "v638"))))))))) {
     const rows = s => s.split(/(?=20[2-9]\d20[2-9]\d prem)/).filter(r => /^20[2-9]\d20[2-9]\d prem/.test(r));
     const rA = rows(magA), rB = rows(magB), early = rs => rs.filter(r => +r.slice(0, 4) < 2037).join("|"), y37 = rs => rs.find(r => r.startsWith("2037"));
     ck("IRMAA: both legs still render the MAGI table", magA.length > 0 && magB.length > 0);
     ck("IRMAA (v620\u2192v621): the same year rows render on both legs", rA.length > 0 && rA.map(r => r.slice(0, 4)).join() === rB.map(r => r.slice(0, 4)).join(), `${rA.length} vs ${rB.length}`);
     ck("IRMAA (v620\u2192v621): every row before 2037 is byte-identical \u2014 the car rows move nothing before the first car", early(rA).length > 0 && early(rA) === early(rB), firstDiff(early(rA), early(rB)));
     ck("IRMAA (v620\u2192v621): 2037's row DIFFERS \u2014 the first car reaches Engine C through the draws", !!y37(rA) && y37(rA) !== y37(rB), `${(y37(rA) || "").slice(0, 50)} / ${(y37(rB) || "").slice(0, 50)}`);
-  } else if (VA === "v617" && (VB === "v618" || (VB === "v619" || (VB === "v620" || (VB === "v621" || (VB === "v622" || (VB === "v623" || (VB === "v624" || (VB === "v625" || VB === "v626" || VB === "v627" || (VB === "v628" || (VB === "v629" || VB === "v630" || (VB === "v631" || VB === "v632" || VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637")))))))))))) {
+  } else if (VA === "v617" && (VB === "v618" || (VB === "v619" || (VB === "v620" || (VB === "v621" || (VB === "v622" || (VB === "v623" || (VB === "v624" || (VB === "v625" || VB === "v626" || VB === "v627" || (VB === "v628" || (VB === "v629" || VB === "v630" || (VB === "v631" || VB === "v632" || VB === "v633" || VB === "v634" || VB === "v635" || VB === "v636" || VB === "v637" || VB === "v638")))))))))))) {
     ck("IRMAA: both legs still render the MAGI table", magA.length > 0 && magB.length > 0);
     ck("IRMAA (v617\u2192v618): the MAGI figures DIFFER \u2014 the year-by-year spending read reaches Engine C through the bridge", magA !== magB);
     const cA = (magA.match(/\$[\d,]+K?/g) || []).length, cB = (magB.match(/\$[\d,]+K?/g) || []).length;
