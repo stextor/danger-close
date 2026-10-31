@@ -1,4 +1,4 @@
-# SCOPE — the 2027 tax-figure refresh: tables index from their own year (v6.33), then the 2027 figures (v6.40 — was v6.39, v6.38, v6.37, v6.36, v6.35, and v6.34 before that) · F-27 closed by decision
+# SCOPE — the 2027 tax-figure refresh: tables index from their own year (v6.33), then the 2027 figures (v6.41 — was v6.40, v6.39, v6.38, v6.37, v6.36, v6.35, and v6.34 before that) · F-27 closed by decision
 
 > **RENUMBERED 2026-10-27, at the v6.34 build** (decision DC-4 (a) of `docs/SCOPE_D58_CONTRIB_SAVE_V634.md`; Steve: *"Let's go with your
 > recommendations"*). v6.34 is the D-58 release, built while the 2027 figures were unpublished. **The 2027 figures ship as v6.35** (tag `v635`), and
@@ -42,7 +42,15 @@
 > Rev. Proc., the §402(g) notice and CMS's 2027 IRMAA figures had not published (searched 2026-10-30; only projections found). **The 2027
 > figures ship as v6.40** (tag `v640`); their suite stays **`t99_ty2027.mjs`** (v6.39's is `t103`). Every *"v6.39"*, *"v6.38"*, *"v6.37"*,
 > *"v6.36"*, *"v6.35"* or *"v6.34"* below that names the 2027-figures release now means v6.40. DT-7's 15 December date is unchanged. v6.39
-> changed no engine and no table; its suite edits are the version registry, `t29`'s census row, `t92`'s list checks and `t103`.
+> changed no engine and no table; its suite edits are the version registry, `t29`'s census row, `t92`'s list checks and `t103`. *Superseded by
+> the next box: v6.41, still `t99`.*
+>
+> **RENUMBERED A SEVENTH TIME 2026-10-31, at the v6.40 build** (DF-7 (a) of `docs/SCOPE_F30_ROTH_STRESS_PHONE_V640.md`; Steve: *"Yes —
+> v6.40; tax → v6.41"*). v6.40 is the first part of F-30 (the Roth and Stress tabs on a phone), built while the IRS TY2027 Rev. Proc., the
+> §402(g) notice and CMS's 2027 IRMAA figures had not been found published (searched 2026-10-31; only projections). **The 2027 figures ship
+> as v6.41** (tag `v641`); their suite stays **`t99_ty2027.mjs`** (v6.40's is `t104`). Every *"v6.40"* or earlier version below that names the
+> 2027-figures release now means v6.41. DT-7's 15 December date is unchanged. v6.40 changed no engine and no table; its suite edits are the
+> version registry, `t45`'s section S (S-9 and its gates), `t102`'s A-2/E-2 and `t104`.
 
 | Field | Value |
 |---|---|

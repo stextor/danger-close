@@ -1101,6 +1101,9 @@ must not both try to be the record.)
 files with their own `KNOWN_VERSIONS` lists. `register_tag2.cjs`, `tagkeys.cjs` and `vercensus` parse JavaScript only, so a
 registration they report as complete leaves all three unregistered. They fail closed (`0-0 version tag … is registered`, zero
 checks run), which is how v5.93's half B caught it. After registering, check the `.py` suites by hand until a tool reads them.
+From v6.40 `t45`'s two section gates are **version comparisons, not lists** (`_vnum(VER) >= 638` for §S, `>= 640` for its Roth and Stress
+checks). The array rule below exists so the registrar can widen a gate; nothing widens a `.py` list, and a gate there that is not widened
+does not fail closed like `KNOWN_VERSIONS` — it prints a skip and passes (found by the v6.40 build review). `KNOWN_VERSIONS` stays a list.
 
 ⚠ **Write a new gate as an ARRAY, never a single-tag ternary (added at the v5.98 build).** v5.97 gated its rate pins as
 `VER === "v597" ? new : old`; `register_tag2.cjs` cannot extend that shape and reported seven MANUAL sites at v5.98 — six of them those gates, each hand-converted to

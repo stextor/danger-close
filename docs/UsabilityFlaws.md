@@ -32,7 +32,7 @@
 > | F-5 | **OPEN, DISCLOSED v5.98** (Field Manual §13; `t62` holds the clause to the code) | **42** JSX `title` attributes (one is an iframe's name); the Field Manual has no mention of tooltips or touch |
 > | F-6 | **FIXED v5.40** | 48 `inputMode="decimal"` fields (47 at v5.40) |
 > | F-7 | **OPEN, DISCLOSED v5.98** (§13, with the work-around: leave the tab and come back; `t62`) | no resize observer or listener; the chart reads its width once; the Field Manual never mentions resizing. Whether it visibly goes stale needs a browser |
-> | F-8 | **FIXED v5.40** | grids wrapped, later `repeat(9, minmax(0, 1fr))` |
+> | F-8 | **FIXED v5.40** (the overflow) | grids wrapped, later `repeat(9, minmax(0, 1fr))`. *Corrected at v6.40:* that later change (v5.79, F-11p) turned these grids from overflowing into **overprinting** on a phone — 8 of the Social Security tab's 10 overlapping pairs at 390 px are in them. The overprint is open under F-30 |
 > | F-9 | **OPEN, DISCLOSED v5.98** (§13; `t62`) | the Docs tab's iframe is still `74vh`; the Field Manual says nothing of nested scrolling |
 > | F-10 | **FIXED v5.39** | the Skins entry documents UI SIZE |
 > | F-11p | **FIXED v5.79** | `t45` |
@@ -49,7 +49,9 @@
 > | F-26 | **FIXED v6.32** — filed at v6.29 | `t95`; `docs/SCOPE_F26_D61_V632.md` (DF-1 to DF-6 and DF-8, all (a)). The Stress tab's cards computed for the plan, the SS tab's survivor grid, the Roth ladder from the selected year, the ACA dates, the Backtest's worst start, the README |
 > | F-27 | **CLOSED BY DECISION** (Steve, 2026-10-26) — filed at v6.32 | not changed: the briefing's stress figures are the example household's own requests to an AI, not a description of the model (where they overlap the model, they agree), and changing the text would mean recognising the old text too (the loader's DC-8 check matches it exactly); `t89` A-7 keeps pinning it |
 > | F-28 | **FIXED v6.33** — filed and fixed together | two drawings of the brackets read the wrong table: the Taxes tab's bracket-by-bracket panel (the 2026 table at the plan's last-year filing status, through Engine B's as-of `inflate`) and the Roth tab's BRACKET UTILIZATION bar (the 2026 table unindexed); `t96` A-9, F-1 to F-3; `docs/SCOPE_TY2027_REFRESH_V633_V634.md` §7 |
-> | F-30 | **OPEN, DISCLOSED v6.38** — filed at v6.38 (§H) | on a phone, text prints over other text on six tabs (pairs of overlapping text boxes on the example at 390, `t45` §S's detector: Roth 70, Stress 30, Social Security 10, My Data 8, Expenses 4, Taxes 2); Stress also at 600–640 px; from 680 px only one Expenses label. Field Manual §13 says so; `t45` §S holds the Income tab at zero |
+> | F-30 | **PARTLY FIXED v6.40** (Roth and Stress) — filed and disclosed at v6.38 (§H) | on a phone, text printed over other text on six tabs (pairs on the example at 390, `t45` §S's detector: Roth 70, Stress 30, Social Security 10, My Data 8, Expenses 4, Taxes 2). **v6.40 fixed Roth and Stress** (100 of 124 pairs; also at UI SIZE 115–130%): `t104`, `t45` S-9; `docs/SCOPE_F30_ROTH_STRESS_PHONE_V640.md` (DF-1 to DF-7, all (a)). **Open:** My Data, Social Security, Expenses, Taxes — cause traced, the same v5.79 grids; the Expenses label at every width; the Roth calendar's *"CONVERT"* labels past their cards below about 690 px (with the web fonts). Field Manual §13 says so |
+> | F-31 | **OPEN, DISCLOSED v6.40** — filed at v6.40 (§H) | the Income tab widens the page at 600–625 px on a plan with a long income-stream label (626 px at 600 and 620 on the stream plan); v6.38's stream-row wrapping stops at 599 px. Low |
+> | F-32 | **OPEN, DISCLOSED v6.40** — filed at v6.40 (§H) | UI SIZE (a zoom) and the phone layout (the window's width) do not meet: a large UI SIZE in a narrow window gets the tablet layout in less room than a phone; at 150% a phone page scrolls sideways, and the Roth RMD cards (phone) and rules box (600 px) overlap. v6.40's minimum widths fixed Roth and Stress at 115–130%. Medium for those who need the size |
 > | F-29 | **FIXED v6.37** — filed and fixed together; wider than reported | the SS tab's claim-age explorer opened spouse A's slider at 67 for every plan and measured its draw comparison against three different baselines; spouse B's grid, note and shortfall card read her age in the retirement year; a single household's table counted a second check. `t101`; `docs/SCOPE_F29_SS_SLIDER_START.md` (DS-1 to DS-6, all (a)) |
 > | F-15b | **FIXED v6.32** | the Stress table's label reads "Success (>$1.5M)" (`t95` B-1, B-3; folded into F-26 under DF-1) |
 > | F-16 | **FIXED v5.98** | the pair swapped; `t62` holds every term in order (was: "API Key" before "Agency MBS") |
@@ -463,7 +465,7 @@ names the first counted stream that ends); the gap card, the first phase's note 
 that costs $0; *"$0"* ran into its sub-line; a plan carrying cents printed them in the draw figures (now to the dollar). Tests: `t102` (both legs; the v6.37 leg pins each defect), `t45` §S (a stream plan, an overlap check on the Income tab);
 census row `income_covers_spend` (`t29` B-33, C-f20-1). Its sibling on other tabs is **F-30**.
 
-### F-30 · On a phone, text prints over other text on six tabs — **MED (phone layout)** — OPEN, DISCLOSED v6.38
+### F-30 · On a phone, text prints over other text on six tabs — **MED (phone layout)** — PARTLY FIXED v6.40 (Roth and Stress); open for four tabs
 
 **Filed at v6.38** (`docs/SCOPE_F20_INCOME_TAB_PHONE_V638.md` §5, DF-5 (a); not fixed). Measured on the built v6.37 page, the example as
 it opens: pairs of visible text boxes from different elements overlapping by more than 3 px each way (SVG text and collapsed panels
@@ -484,6 +486,46 @@ said *"On a phone the page itself no longer scrolls sideways (v5.79)"* and nothi
 added a sentence naming the tabs. The cause on each tab was **not traced** (the Income tab's were three grids too narrow for their
 content at 390; whether the other six share that shape is a scope question). **Candidate fix:** its own release, tab by tab, with `t45`
 §S's overlap check extended to each tab it fixes; the Expenses label needs a desktop fix too.
+
+
+**Partly fixed at v6.40** (`docs/SCOPE_F30_ROTH_STRESS_PHONE_V640.md`; Steve: DF-1 to DF-7 as recommended). **The cause, traced:** v5.79 (F-11p,
+`5c2c2ac`) stopped every tab scrolling sideways by rewriting grid tracks from `1fr` to `minmax(0, 1fr)`, which lets a column shrink below its
+text; where it also put a table in a `dc-scrollx` box the table kept its columns, and these grids were not put in one. **Wider than registered:**
+every phone width (Roth 77 / Stress 43 at 360), every plan measured, and every UI SIZE above 100% (130%: 177 / 139 at 390, 23 / 15 at 600).
+**Roth and Stress fixed** — six grids: on a phone the IRMAA calendar shows as many year cards a row as fit at 84 px or more, the rules box
+stacks and the risk tiles go two a row; the calendar (500 px minimum), the comparator (490), the scenario table (720) and the guardrail table
+(290) scroll within their boxes where the window, or UI SIZE, leaves them too little room. Zero pairs on both tabs at 360–1440 px on five
+plans and at UI SIZE 115–130%; at UI SIZE 100% the Roth tab is box-for-box unchanged from 600 px and the Stress tab from 800 px. `t104`
+(structure and an extinction check by AST; the two tabs' text identical to v6.39's) and `t45` S-9 (Chromium).
+**Still open:** **My Data 8** (`repeat(4, …)` ×3, four `minmax(0, 1fr)` columns ×4, `140px` + three ×1), **Social Security 10** (the F-8
+claiming grids ×8; `repeat(3, …)` ×2), **Expenses 4** (`repeat(4, …)`), **Taxes 2** (`repeat(6, …)`) — every pair in a v5.79 grid of shrinking
+tracks; the same two tools (reflow on a phone, or a minimum in a box that scrolls) should fix them, tab by tab, each measured. The Expenses
+label that runs under its item at every width is not one of these (it overprints on desktop too; cause not traced). **Found at the v6.40
+build, unchanged since v6.39 and disclosed in §13:** with the web fonts, the Roth calendar's *"CONVERT"* labels (about 57 px with their
+letter-spacing, in 52 px cards at a 600 px window) run past their cards below about 690 px, and into the next card's label just above 600.
+The overlap detector misses it (under 3 px, or past a border rather than over text). A fix changes the 600–690 px desktop layout — a larger
+minimum (about 620 px), or the phone's card reflow above 600 px too — so it is left for Steve with the next phone release. The pinned first
+column and scroll hint DF-6 declined are recorded there as an option.
+
+
+### F-31 · The Income tab widens the page at 600–625 px on a plan with a long income-stream label — **LOW (tablet layout)** — OPEN, DISCLOSED v6.40
+
+**Filed at v6.40** (`docs/SCOPE_F30_ROTH_STRESS_PHONE_V640.md` §5, found by its review on v6.39 as shipped). On the stream plan
+(`qa/tools/fixture/f20_streams_plan.json`) the Income tab is 626 px wide at windows of 600 and 620 px (660 is fine): v6.38's stream-row
+wrapping lives in the phone block and stops at 599 px, and the row's amount (*"$12,500/mo"*) crosses the edge. `t45` checks the stream plan
+at 390 only. A 26 px band, a long label. Disclosed in §13's desktop item from v6.40. **Candidate fix:** with F-30's next part.
+
+### F-32 · UI SIZE and the phone layout do not meet — **MED (for users who need the larger size)** — OPEN, DISCLOSED v6.40
+
+**Filed at v6.40** (`docs/SCOPE_F30_ROTH_STRESS_PHONE_V640.md` §0.2, §5). UI SIZE (the Skins tab's 100/115/130/150%) is a CSS `zoom` on the
+whole app; the phone layout (v5.81, v6.38 and v6.40's rules) switches on the window's width (`@media (max-width: 599px)`). So a larger UI SIZE
+in a narrow window gets the tablet layout in less room than a phone has. On v6.39, at 130%, the Roth and Stress tabs printed 177 and 139
+pairs at 390 px and the Stress tab made the page scroll sideways (395 px); at 150% a 390 px phone page scrolled sideways (404 and 421 px).
+**v6.40's minimum widths** (R1, R2, S1, S3) remove the Roth and Stress overlaps at 115% and 130% everywhere measured. **Still at 150%:** the
+Roth RMD cards on a phone and the rules box at 600 px overlap, and a phone page scrolls sideways. *(The scope first listed the page header's
+"Success rate" as overprinting at 150%; it is a detector false positive — the figure's line box touches its label by design — corrected at
+the build.)* Undisclosed until v6.40's §13 sentence. **Candidate fix:** make the phone layout follow the zoomed width (for example a class set
+from the window width and UI SIZE together), which reaches every phone rule in the app — its own release.
 
 ### F-21 · My Data's holdings table: the plan type read as the next holding's, and the totals sat one column right — **LOW–MED (desktop layout)** — **FIXED v6.25**
 
