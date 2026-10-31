@@ -18,7 +18,7 @@
 //
 // Current leg only (the feature does not exist on the prior leg). Run: node t49_engineA_draw.mjs <tag>
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639"];
+const KNOWN_VERSIONS = ["v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640"];
 let pass = 0, fail = 0; const fails = [];
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; const m = `  \u2717 ${n}${d ? " \u2014 " + d : ""}`; console.log(m); fails.push(m); } };
 const done = () => { console.log(`\nt49 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
@@ -113,7 +113,7 @@ const passes = calls.map(c => { const a = c.arguments[0]; if (!a || a.type !== "
   return [c.loc.start.line, !!d && d.init.properties.some(p => p.key && (p.key.name || p.key.value) === "ordDrawByYr" && /withdrawalPlanSeries\(/.test(src.slice(p.value.range[0], p.value.range[1])))]; });
 // v6.36 (D-66): What Breaks reads the Monte Carlo's schedule and no longer calls runRothStrategies, so the app's callers are the Roth tab's
 // three from v6.36 (four through v6.35). An array, so the next registration widens it.
-const RRS_N = ["v636", "v637", "v638", "v639"].includes(VER) ? 3 : 4;
+const RRS_N = ["v636", "v637", "v638", "v639", "v640"].includes(VER) ? 3 : 4;
 CK(`X-2 every app call of runRothStrategies (${calls.length}; ${RRS_N} expected on this build) passes ordDrawByYr from withdrawalPlanSeries — the one bridge B and C use`,
    calls.length === RRS_N && passes.every(p => p[1]), JSON.stringify(passes));
 let depsOk = null;

@@ -25,13 +25,13 @@ import { spawnSync } from "child_process";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v629";
-const KNOWN_VERSIONS = ["v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639"];
+const KNOWN_VERSIONS = ["v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640"].includes(VER);   // an array, so the next registration widens it
 const KD = "[KNOWN DEFECT 2026-10-22, F-25 — flips at v6.29]";
 
 // ══ CHILD MODE (--module): the module-level facts — events, Verify, the history and preset helpers, the Stress recovery ══
@@ -492,7 +492,7 @@ console.log("  E — privacy parity");
     ["plan-to ages", "plan-to ages"], ["\\bstate\\b", "state"], ["home value", "home value"], ["mortgage", "mortgage"], ["home-move cash", "home-move cash"],
     ["12 earlier messages|last 12 messages", "the conversation"], ["question", "the question"], ["attach", "attachments"],
     // v6.39 (D-69): the accounts by tax type and owner, and the salaries, are sent — each list names them
-    ...(["v639"].includes(VER) ? [["by tax type", "account types"], ["owner", "account owners"], ["salar", "salaries"], ["bonus", "the bonus"]] : [])];
+    ...(["v639", "v640"].includes(VER) ? [["by tax type", "account types"], ["owner", "account owners"], ["salar", "salaries"], ["bonus", "the bonus"]] : [])];
   const miss = (txt) => need.filter(([re]) => !new RegExp(re, "i").test(txt)).map(x => x[1]);
   if (POST) for (const [name, txt] of [["landing", landing], ["My Data", mydata], ["Field Manual", fmRow]])
     T(`E-2: the ${name} list names every part the request carries`, miss(txt).length === 0, miss(txt).join(", "));
@@ -500,7 +500,7 @@ console.log("  E — privacy parity");
   // and every item the lists name is sent (each is in the live context or the plan description)
   // v6.39 (D-69): the live context's contributions are aiPlanFacts' line, so "401(k) contribs" gives way to the helper's call. An array, so the
   // next registration widens it.
-  const D69 = ["v639"].includes(VER);
+  const D69 = ["v639", "v640"].includes(VER);
   const liveFacts = ["retiring", "Portfolio $", "Pre-retire $", D69 ? "aiPlanFacts(PORTFOLIO" : "401(k) contribs", "SS $", "pension $", "Roth conversions", "Guardrails:", "MC results"];
   T("E-3: every item the lists name is in the request (the live context's own fields)", liveFacts.every(k => sysS.includes(k)), liveFacts.filter(k => !sysS.includes(k)).join(", "));
 }
@@ -523,7 +523,7 @@ if (POST) {
   // v6.30 (D-60; docs/SCOPE_D60_DOLLAR_UNITS_V630.md): the two DF-7 sentences described the mixed dollar units, which v6.30 removes; their
   // measured figures counted only Social Security and were too small. On that leg the Field Manual must no longer carry them, and must say so
   // in the v6.29 entry's place. An array, so register_tag2 widens it each release.
-  const U630 = ["v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639"].includes(VER), DF7 = [FM_HAS[6][0], FM_HAS[7][0]];
+  const U630 = ["v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640"].includes(VER), DF7 = [FM_HAS[6][0], FM_HAS[7][0]];
   for (const [p, why] of FM_HAS) {
     if (U630 && DF7.includes(p)) T(`F-1 (v6.30): the Field Manual no longer says: ${why} — the units it described are fixed`, !DOCS.includes(p), p.slice(0, 80));
     else T(`F-1: the Field Manual says: ${why}`, DOCS.includes(p), p.slice(0, 80)); }
@@ -555,7 +555,7 @@ if (POST) {
     310477 - 212552 === 97925 && 286507 - 213670 === 72837 && 212552 - 195674 === 16878 && 213670 - 212779 === 891);
   else
   T("F-3b: its arithmetic holds ($283,375 − $212,552 and $254,334 − $213,670)", 283375 - 212552 === 70823 && 254334 - 213670 === 40664);
-  if (["v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639"].includes(VER))
+  if (["v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640"].includes(VER))
     T("F-4 (v6.30): the in-app units sentences describe one unit — each year's own dollars — and the two-directions sentences are gone",
       SRC.includes("Every figure is in that year's own dollars") && !SRC.includes("so read as each year's own dollars these rows run <strong>low</strong>")
       && !SRC.includes("so read as future dollars their totals run <em>low</em>, and the Monte Carlo, which grows them with inflation again, runs slightly <em>high</em>"));

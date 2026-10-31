@@ -27,13 +27,13 @@ import { spawnSync } from "child_process";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v628";
-const KNOWN_VERSIONS = ["v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639"];
+const KNOWN_VERSIONS = ["v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640"].includes(VER);   // an array, so the next registration widens it
 const KD = "[KNOWN DEFECT 2026-10-21, F-23 — flips at v6.28]";
 const KD24 = "[KNOWN DEFECT 2026-10-21, F-24 — flips at v6.28]";
 
@@ -339,7 +339,7 @@ if (POST) {
     GK.every(k => Math.abs(NAMES.reduce((s, n) => s + GR_CARD[k].cats[n].gpa * GR_CARD[k].cats[n].w, 0) / 78 - GR_CARD[k].gpa) < 0.006));
   T("B-4: a category reads STATUS only at GPA 4.0, and DRAG otherwise, on every plan",
     // v6.29 (F-25, DF-11 a): a FIXED category's sentence is one the grade does not read, so it is labelled NOTE, not DRAG
-    GK.every(k => NAMES.every(n => { const c = GR_CARD[k].cats[n]; const fx = ["v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639"].includes(VER) && FIXED_CATS.includes(n);
+    GK.every(k => NAMES.every(n => { const c = GR_CARD[k].cats[n]; const fx = ["v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640"].includes(VER) && FIXED_CATS.includes(n);
       return (c.gpa === 4.0) === /STATUS:/.test(c.seg) && (c.gpa < 4.0 && !fx) === /DRAG:/.test(c.seg) && (c.gpa < 4.0 && fx) === /NOTE:/.test(c.seg); })),
     GK.flatMap(k => NAMES.filter(n => { const c = GR_CARD[k].cats[n]; return (c.gpa === 4.0) !== /STATUS:/.test(c.seg); }).map(n => `${k}/${n} ${GR_CARD[k].cats[n].gpa}`)).join(", "));
   T("B-5: the Monte Carlo category says, on every plan, that its rate is the 6-year Monte Carlo's and that it carries no long-term-care event",

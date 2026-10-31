@@ -25,14 +25,14 @@ import { spawnSync } from "child_process";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v639";
 const ENGINES = process.argv.includes("--engines");
-const KNOWN_VERSIONS = ["v638", "v639"];
+const KNOWN_VERSIONS = ["v638", "v639", "v640"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v639"].includes(VER);   // an array, so the next registration widens it
-const PRIOR_OF = { v639: "v638" };     // §F's comparison module, by tag (a map: give the next tag its own arm)
+const POST = ["v639", "v640"].includes(VER);   // an array, so the next registration widens it
+const PRIOR_OF = { v639: "v638", v640: "v639" };     // §F's comparison module, by tag (a map: give the next tag its own arm)
 const KD = "[KNOWN DEFECT 2026-10-30, D-69 — flips at v6.39]";
 const require = createRequire(import.meta.url);
 const clone = o => JSON.parse(JSON.stringify(o));

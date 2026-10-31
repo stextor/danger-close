@@ -463,6 +463,12 @@ tally "t102-$CUR"   node t102_income_tab.mjs "$CUR"
 # engines unmoved (a child process, against the prior module). Both legs (the v6.38 leg pins the defects).
 tally "t103-$PRIOR" node t103_ai_context.mjs "$PRIOR"
 tally "t103-$CUR"   node t103_ai_context.mjs "$CUR"
+# t104 (v6.40) — the Roth and Stress tabs on a phone (F-30, first part): the one new phone rule by source; each of the six sites' class, minimum
+# width or scroll box; EXTINCTION — no shrinking grid on either tab stands unprotected; both tabs' text identical to the prior leg's on three
+# plans (a child process, seeded alike; fails without the prior bundle); the Field Manual. Both legs (the v6.39 leg pins the defects). Layout
+# is t45 §S's (a browser).
+tally "t104-$PRIOR" node t104_roth_stress_phone.mjs "$PRIOR"
+tally "t104-$CUR"   node t104_roth_stress_phone.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

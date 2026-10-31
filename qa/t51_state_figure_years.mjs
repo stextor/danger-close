@@ -18,7 +18,7 @@ import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 const require = createRequire(import.meta.url);
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639"];
+const KNOWN_VERSIONS = ["v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  \u2713 ${n}`); } else { fail++; console.log(`  \u2717 ${n}${d ? " \u2014 " + String(d).slice(0, 240) : ""}`); } };
 const done = () => { console.log(`\nt51 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
@@ -32,11 +32,11 @@ const SR = g.STATE_RULES();
 // v6.02 (D-30 batch 1 — docs/SCOPE_D30_DEDUCTIONS_V602.md): the 27 progressive rows carry `deduct`, a dollar figure dated by `years.deduct`
 // (DD-12); the six held at TY2025 are AR, CA, DC, MD, OR, VT (DD-8). §E's pins keep their BASE and on a D-30 leg expect it after the state's
 // deductions (qa/d30_ref.mjs on the calculator's own record of the call; a different base fails). A version LIST.
-const D30L = ["v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639"].includes(VER), D30 = d30Pins(g.stateTaxAnnual, SR, D30L);
+const D30L = ["v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640"].includes(VER), D30 = d30Pins(g.stateTaxAnnual, SR, D30L);
 // v6.03 (D-30 batch 2 — docs/SCOPE_D30_DEDUCTIONS_V603.md): fourteen flat-rate rows carry `deduct` too, and Idaho and Ohio schedules; eight of them
 // had no dated figure before (AZ, IA, ID, IL, IN, MA, NC, OH). Five deductions and Idaho's schedule are held at TY2025 (DD-11). Louisiana's §E pins
 // keep their base and on this leg expect it after Louisiana's standard deduction (qa/d30_ref.mjs D30F). A version LIST.
-const D30FL = ["v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639"].includes(VER);
+const D30FL = ["v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640"].includes(VER);
 const LAW = (x) => D30FL ? D30.B("LA", x) : 0.03 * x;
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SETS = [join(HERE, "tools", "state_sets.cjs"), join(HERE, "state_sets.cjs")].find(existsSync);
@@ -89,7 +89,7 @@ CK("V-LA2 Louisiana's note carries $12,324, names IRA distributions, and disclos
 // ── X · extinction: no dollar figure without a year ────────────────────────────────────────────────────────────────────
 const TAX_YEAR = 2026;   // TAX_CONSTANTS_YEAR at v5.86: no displayed year may run ahead of the model's tax year
 // v6.00 (D-22 option 3): a bracket schedule's thresholds are dollar figures and carry their tax year (`years.brackets`). A version LIST.
-const BRACKET_LEGS = ["v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639"], BRK = BRACKET_LEGS.includes(VER);
+const BRACKET_LEGS = ["v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640"], BRK = BRACKET_LEGS.includes(VER);
 const dollarFields = r => ["excl65", "exclTest", "ssRule", "retCap", ...(BRK ? ["brackets"] : []), ...(D30L ? ["deduct"] : [])].filter( /* retCap: v5.90 (D-24), Michigan */f => f === "excl65" ? (r.excl65 || 0) > 0 : r[f] !== undefined);
 const bearing = Object.entries(SR).filter(([, r]) => dollarFields(r).length > 0);
 const missing = [], badYear = [], stale = [], stray = [];
@@ -108,7 +108,7 @@ CK("X-3 no `years` key names a field that is absent or carries no dollars", stal
 CK("X-4 no row without a dollar figure carries `years`", stray.length === 0, stray.join(","));
 CK("X-5 no rate carries a year (D18-1)", Object.values(SR).every(r => !r.years || r.years.rate === undefined));
 // v6.01 (D-22 batch 2): seventeen more schedules, six of them in rows with no other figure (DC, HI, KS, MO, ND, NE). A version LIST.
-const BRK2 = ["v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639"].includes(VER);
+const BRK2 = ["v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640"].includes(VER);
 CK(`X-6 the census: ${D30FL ? "41 dollar-bearing rows, 102 dated figures (v6.03: + fourteen flat-rate rows' deductions and Idaho's and Ohio's schedules, eight rows new — AZ, IA, ID, IL, IN, MA, NC, OH)" : D30L ? "33 dollar-bearing rows, 86 dated figures (v6.02: + the 27 progressive rows' deductions, every one in a row already dated)" : BRK2 ? "33 dollar-bearing rows, 59 dated figures (v6.01: + seventeen bracket schedules, six of them in rows with no other figure — DC, HI, KS, MO, ND, NE)" : BRK ? "27 dollar-bearing rows, 42 dated figures (v6.00: + ten bracket schedules, three of them in rows with no other figure — CA, MS, OR)" : "24 dollar-bearing rows, 32 dated figures (v5.90: + Michigan's cap, D-24)"}`,
    bearing.length === (D30FL ? 41 : BRK2 ? 33 : BRK ? 27 : 24) && bearing.reduce((a, [, r]) => a + dollarFields(r).length, 0) === (D30FL ? 102 : D30L ? 86 : BRK2 ? 59 : BRK ? 42 : 32),
    `${bearing.length} rows`);

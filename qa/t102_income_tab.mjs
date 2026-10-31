@@ -41,13 +41,14 @@ console.error = () => {}; console.warn = () => {};
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v638";
 const DUMP = process.argv.includes("--dump");
-const KNOWN_VERSIONS = ["v637", "v638", "v639"];
+const KNOWN_VERSIONS = ["v637", "v638", "v639", "v640"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v638", "v639"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v638", "v639", "v640"].includes(VER);   // an array, so the next registration widens it
+const F30 = ["v640"].includes(VER);   // v6.40 (F-30 — docs/SCOPE_F30_ROTH_STRESS_PHONE_V640.md): the Roth and Stress tabs reuse two of these classes, and §13's desktop item is reworded
 const B_PRIOR = "v637";                // §B's prior leg — a constant, so the registrar cannot widen it (t76 records why)
 const KD = "[KNOWN DEFECT 2026-10-29, F-20 — flips at v6.38]";
 dom.reconfigure({ url: "https://stextor.github.io/danger-close/" }); globalThis.location = window.location;
@@ -93,8 +94,11 @@ if (!DUMP) {
       && /\.dc-streamrow \{ flex-wrap: wrap;/.test(PHONE) && /\.dc-sr-label \{ min-width: min\(170px, 100%\) !important; flex-shrink: 1 !important;/.test(PHONE)
       && /\.dc-sr-desc \{ flex: 1 1 160px !important; min-width: 0;/.test(PHONE) && /\.dc-sr-amt \{ margin-left: auto; \}/.test(PHONE));
     const g = jsxWithClass("dc-stack-phone"), t2 = jsxWithClass("dc-two-phone"), r = jsxWithClass("dc-streamrow"), l = jsxWithClass("dc-sr-label"), d = jsxWithClass("dc-sr-desc"), a = jsxWithClass("dc-sr-amt");
-    T("A-2 one element each: the three-card grid (three columns), the phase figure row (five columns), the stream row and its label, description and amount",
-      g.length === 1 && styleOf(g[0]).includes('gridTemplateColumns:"minmax(0,1fr)minmax(0,1fr)minmax(0,1fr)"') && t2.length === 1 && styleOf(t2[0]).includes('gridTemplateColumns:"repeat(5,minmax(0,1fr))"')
+    // v6.40 (F-30, DF-1/DF-3): the Roth rules box reuses .dc-stack-phone and the Stress risk report .dc-two-phone (t104 holds those), so from
+    // v6.40 each class sits on two elements; the Income tab's are found by their own grid, and there is still exactly one of each.
+    const gI = g.filter(n => styleOf(n).includes('gridTemplateColumns:"minmax(0,1fr)minmax(0,1fr)minmax(0,1fr)"')), t2I = t2.filter(n => styleOf(n).includes('gridTemplateColumns:"repeat(5,minmax(0,1fr))"'));
+    T("A-2 one element each: the three-card grid (three columns), the phase figure row (five columns), the stream row and its label, description and amount" + (F30 ? " (from v6.40 each grid class also on one Roth or Stress element)" : ""),
+      gI.length === 1 && g.length === (F30 ? 2 : 1) && t2I.length === 1 && t2.length === (F30 ? 2 : 1)
       && r.length === 1 && l.length === 1 && d.length === 1 && a.length === 1 && styleOf(l[0]).includes("minWidth:170,flexShrink:0") && styleOf(d[0]).includes("flex:1}"),
       [g, t2, r, l, d, a].map(x => x.length).join(","));
     const PP = all(AST, n => n.type === "BinaryExpression" && n.operator === "-" && n.right.type === "Identifier" && n.right.name === "_ppInc");
@@ -278,7 +282,10 @@ console.log("  E — the Field Manual");
   if (POST) {
     T("E-1 §13's v6.38 note is there, ahead of v6.37's, and names the negative shortfall, the phone and the coverage figure",
       N38 > 0 && N37 > N38 && /“-\$-1,302”/.test(H.slice(N38, N37)) && /On a phone they now stack and wrap; the tablet and desktop layout is unchanged/.test(H.slice(N38, N37)) && /counts the income streams running on that date/.test(H.slice(N38, N37)) && /only once it has started/.test(H.slice(N38, N37)));
-    T("E-2 the desktop item says what still overprints on a phone, and where (DF-5 (a))",
+    if (F30) T("E-2 the desktop item says what still overprints on a phone, and where — from v6.40 the four tabs left, UI SIZE and F-31 (F-30 DF-4, DF-5)",
+      /On a phone some figures still print over their neighbours on parts of the My Data, Social Security, Expenses and Taxes tabs \(v6\.38: the Income tab’s were fixed; v6\.40: the Roth and Stress tabs’\)\. At UI SIZE 100% a screen 600 px wide or more shows them apart, except that a long category name on the Expenses tab can run under its item at any width, and below about 690 px the Roth tab’s IRMAA calendar’s “CONVERT” labels can run past their cards\./.test(item)
+      && /the phone layout follows the window’s width, not UI SIZE/.test(item) && /Between 600 and 625 px the Income tab can scroll sideways when an income stream has a long label\./.test(item) && !/the Roth tab’s IRMAA calendar, the Stress tab’s scenario table/.test(item));
+    else T("E-2 the desktop item says what still overprints on a phone, and where (DF-5 (a))",
       /On a phone some figures still print over their neighbours: the Roth tab’s IRMAA calendar, the Stress tab’s scenario table, and parts of the My Data, Social Security, Expenses and Taxes tabs \(v6\.38: the Income tab’s were fixed\)/.test(item)
       && /A screen 680 px wide or more \(a desktop, or a tablet held sideways\) shows them apart, except that a long category name on the Expenses tab can run under its item at any width/.test(item));
   } else {

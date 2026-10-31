@@ -20,9 +20,13 @@
 import os, sys, re
 
 VER = sys.argv[1] if len(sys.argv) > 1 else ""
-KNOWN_VERSIONS = ["v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639"]
+KNOWN_VERSIONS = ["v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640"]
 HERE = os.path.dirname(os.path.abspath(__file__))
-POSTF20 = VER in ["v638", "v639"]   # v6.38 (F-20): section S holds builds from v6.38 on; a list, so the next registration widens it by hand
+def _vnum(v):   # "v640" -> 640; anything else -> -1. From v6.40 the two gates below compare numbers, so a registration that forgets them cannot
+    m = re.fullmatch(r"v(\d+)", v or "")   # turn section S into a silent skip (through v6.39 they were hand-widened lists)
+    return int(m.group(1)) if m else -1
+F30 = _vnum(VER) >= 640       # v6.40 (F-30, docs/SCOPE_F30_ROTH_STRESS_PHONE_V640.md): section S also holds the Roth and Stress tabs
+POSTF20 = _vnum(VER) >= 638   # v6.38 (F-20): section S holds builds from v6.38 on
 PAGE = os.path.abspath(sys.argv[2]) if len(sys.argv) > 2 else os.path.join(HERE, "..", "index.html")
 ok = 0; bad = 0; fails = []
 def T(name, cond, detail=""):
@@ -111,13 +115,19 @@ try:
             const ox = Math.min(a.right, b.right) - Math.max(a.left, b.left), oy = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
             if (ox > 3 && oy > 3) hits.push(R[i].t + ' / ' + R[j].t); } return hits; }"""
         # The page's own heading box ("Success rate" over its 30 px figure, line-height 1) touches by design; only the Income tab's card is read.
+        # v6.40: the same, for the whole page less that heading box (the h1's block, whose right side holds "Success rate" and its figure). The
+        # pair it makes is a line-box touch, not overprinting: it crosses the 3 px threshold only when the web fonts load or UI SIZE is 150%.
+        PAGE_OVERLAP = OVERLAP.replace("document.querySelectorAll('body *')", "(() => { const h = document.querySelector('h1'), hd = h && h.parentElement && h.parentElement.parentElement; return [...document.querySelectorAll('body *')].filter(e => !(hd && hd.contains(e))); })()")
+        HEADER_OK = "() => { const h = document.querySelector('h1'), hd = h && h.parentElement && h.parentElement.parentElement; return !!hd && /DANGER CLOSE/.test(h.textContent) && /Success rate/.test(hd.textContent) && !/Monte Carlo|Roth|IRMAA/.test(hd.textContent.replace(/Monte Carlo tab/g, '')); }"
+        ZOOM = "() => { const d = [...document.querySelectorAll('#root div')].find(e => e.style.zoom); return d ? d.style.zoom : ''; }"
         INCOME_OVERLAP = OVERLAP.replace("document.querySelectorAll('body *')", "[...document.querySelectorAll('.card')].filter(c => (c.textContent || '').includes('INCOME SOURCES & PORTFOLIO DRAW ANALYSIS')).flatMap(c => [...c.querySelectorAll('*')])")
         FIX = os.path.join(HERE, "tools", "fixture", "f20_streams_plan.json")
         T("S-0 the stream-plan fixture exists (qa/tools/fixture/f20_streams_plan.json)", os.path.exists(FIX), FIX)
         import json as _json
         PLAN = _json.load(open(FIX, encoding="utf-8")) if os.path.exists(FIX) else None
-        def open_plan(w, h, mobile, plan):
+        def open_plan(w, h, mobile, plan, zoom=None):
             pg = b.new_page(viewport={"width": w, "height": h}, is_mobile=mobile, has_touch=mobile); pg.set_default_timeout(120000)
+            if zoom: pg.add_init_script("localStorage.setItem('dc:danger_close:ui_scale_v1', '" + str(zoom) + "')")   # UI SIZE, read at load
             pg.goto("file://" + PAGE); pg.wait_for_timeout(1200); pg.check("#dc-dg-check"); pg.click("#dc-dg-accept"); pg.wait_for_timeout(500)
             if plan is None:
                 pg.get_by_text("Use example data", exact=False).first.click(); pg.wait_for_timeout(2500)
@@ -161,6 +171,27 @@ try:
                 hits = pg.evaluate(INCOME_OVERLAP)
                 T(f"S-8 {w} px, stream plan: no text on the Income tab prints over other text ({len(hits)} pairs)", not hits, "; ".join(hits[:6]))
                 pg.close()
+            # v6.40 (F-30): the Roth and Stress tabs. Through v6.39 six of their grids printed text over itself below 600 px (Roth 70 and Stress 30
+            # pairs at 390 on the example), the Stress scenario table at 600-679 px too, and at UI SIZE above 100% in any narrow window. The whole
+            # page is read except the heading box (PAGE_OVERLAP above), and each zoomed case first checks that UI SIZE took effect.
+            if F30:
+                cases = [(w, None, True, pl) for pl in (None, PLAN) for w in (360, 390, 430)] + [(w, None, False, None) for w in (600, 640)] \
+                      + [(w, 130, w < 600, None) for w in (390, 600, 800)]
+                first = True
+                for w, zoom, mobile, pl in cases:
+                    pg = open_plan(w, 844 if mobile else 900, mobile, pl, zoom)
+                    if first:
+                        T("S-9 SETUP: the heading box S-9 leaves out is found, and holds only the heading (no tab content)", pg.evaluate(HEADER_OK)); first = False
+                    if zoom:
+                        z = pg.evaluate(ZOOM)
+                        T(f"S-9 SETUP {w} px: UI SIZE {zoom}% took effect (the app's zoom reads {z!r})", z == str(zoom / 100).rstrip("0").rstrip("."), z)
+                    for t in ("roth", "stress"):
+                        to_tab(pg, t); pg.wait_for_timeout(900); hits = pg.evaluate(PAGE_OVERLAP); m = pg.evaluate(MEASURE)
+                        T(f"S-9 {w} px{' at UI SIZE ' + str(zoom) + '%' if zoom else ''}, {'stream plan' if pl else 'the example'}: no text on the {t} tab prints over other text ({len(hits)} pairs), and the page does not scroll sideways ({m['sw']} vs {m['vw']})",
+                          not hits and m["sw"] <= m["vw"], "; ".join(hits[:6]))
+                    pg.close()
+            else:
+                print(f"  · S-9 skipped: {VER} predates v6.40 (F-30's Roth and Stress tabs)")
         b.close()
 except SystemExit:
     raise
