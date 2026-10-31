@@ -1,5 +1,148 @@
 # Changelog
 
+## v6.40 — the Roth and Stress tabs on a phone (F-30, first part)
+
+**A presentation release, for two tabs.** Scoped in `docs/SCOPE_F30_ROTH_STRESS_PHONE_V640.md` (repo-only; build record §9), from F-30, which
+v6.38 filed and disclosed. Steve's decisions: DF-1 to DF-7 as recommended (*"As proposed"*, *"Fix 115–130%, file the rest"*, *"Leave as is,
+note it"*, *"Yes — v6.40; tax → v6.41"*). Built on v6.39 (source `5a948ff4…`). No engine, table, stored field or computed figure changes
+(parity 10/10), and no word on either tab changes: `t104` §B holds both tabs' text identical to v6.39's on three plans. No METHODOLOGY change.
+Under DF-7 (a) **the 2027 tax figures become v6.41** (`docs/SCOPE_TY2027_REFRESH_V633_V634.md` renumbered a seventh time; its suite stays
+`t99_ty2027.mjs`). None of the three 2027 publications had appeared when this was built (searched 2026-10-31: only projections). The
+15 December deadline still outranks any model release.
+
+**What was wrong (v6.39, measured in Chromium on the built page with `t45` §S's overlap detector).**
+- **On a phone the Roth tab printed 70 pairs of text over each other, and the Stress tab 30** (the example at 390 px; 77 and 43 at 360).
+  - The Roth tab's IRMAA lookback calendar put nine year cards in a row, 29 px each: *"CONVERT"* over *"CONVERT"*, years over years.
+    Unreadable.
+  - The Roth strategy comparator's figure columns were 28 px wide: *"$1496K"* over *"$329K"*.
+  - The Stress tab's scenario table did the same, and still overprinted at 600–640 px (*"STAGFLATION"* over *"SEQUENCE RISK"*).
+  - The Roth rules box, the Stress risk tiles and the Stress guardrail table each overprinted below about 375 px.
+- **Every plan measured did it**, not only the example (the stream, single, no-ACA and ×5-balance plans).
+- **UI SIZE made it worse at every narrow width.** UI SIZE is a zoom on the whole app, while the phone layout follows the window's width. At
+  130% the two tabs printed 177 and 139 pairs at 390 px, and 23 and 15 at 600. At 130% the Stress tab also made a 390 px page scroll
+  sideways.
+- **The cause is one change, the fix for something else.** v5.79 stopped every tab scrolling sideways on a phone by letting each grid column
+  shrink below its text (`1fr` became `minmax(0, 1fr)`). Where v5.79 also put a table in a box that scrolls, it kept its columns. These six
+  grids were not put in one. The Roth calendar sat in a scrolling box already, but a box whose content has no minimum width never scrolls.
+
+**What changed.**
+- **The Roth tab.**
+  - On a phone the IRMAA calendar shows as many year cards a row as fit at 84 px or more (three on a phone at UI SIZE 100%). The one new
+    rule lives only inside the phone block.
+  - The calendar keeps a 500 px minimum at every width, inside the box it already sat in. In a window that UI SIZE has narrowed, the calendar
+    scrolls in its box instead of printing over itself.
+  - The strategy comparator sits in a box that scrolls, with a 490 px minimum.
+  - The rules box stacks on a phone.
+- **The Stress tab.**
+  - The scenario table sits in a box that scrolls, with a 720 px minimum, so every heading fits whole. It scrolls on every phone and in
+    windows up to about 790 px wide (DF-2).
+  - The risk tiles show two a row on a phone.
+  - The guardrail table sits in a box that scrolls, with a 290 px minimum: its own width at a 390 px window, so it scrolls only below that.
+- **At UI SIZE 100% the desktop layout does not move**, measured box by box with the Monte Carlo seeded alike on both pages. Every Roth
+  text box is identical at 600–1440 px. Every Stress box is identical from 800 px. At 600–768 the scenario table changes (it is now 720 px
+  wide inside its box), and everything below it moves up by one constant amount.
+- **Field Manual §13.**
+  - A v6.40 note.
+  - The *"Designed for a desktop browser"* item names the four tabs that still overprint, and says the screen width at which they show apart
+    is 600 px at UI SIZE 100%.
+  - It now discloses three things it did not say before: the phone layout follows the window and not UI SIZE (F-32); the Roth calendar's
+    *"CONVERT"* labels run past their cards below about 690 px; and the Income tab can scroll sideways at 600–625 px (F-31).
+- **Registers.**
+  - UsabilityFlaws **F-30 partly fixed**: the Roth and Stress tabs, 100 of its 124 pairs. The cause on the other four tabs is traced.
+  - **F-31 and F-32 filed** (below).
+  - **F-8**'s row corrected: v5.79 turned its claiming grids from overflowing into overprinting.
+  - The four version sites read v6.40.
+
+**Still open, and why.**
+- **F-30's other four tabs** (My Data 8, Social Security 10, Expenses 4, Taxes 2, at 390 px).
+  - Every remaining pair is in a v5.79 grid of shrinking columns. The same two tools should fix them.
+  - Each tab needs its own measurement, so it is the next phone release (DF-4).
+- **F-31, filed: the Income tab can widen the page at 600–625 px.**
+  - It needs a plan with a long income-stream label. On the stream plan the tab is 626 px wide at 600 and 620 px windows.
+  - v6.38's stream-row wrapping stops at 599 px. Low, and disclosed in §13.
+- **F-32, filed: UI SIZE and the phone layout.**
+  - The phone layout switches on the window's width, so a large UI SIZE in a narrow window gets the tablet layout in less room than a phone.
+  - On a phone at 150% the page scrolls sideways, as on v6.39.
+  - At 150% the Roth tab's RMD cards still overlap on a phone, and its rules box at 600 px.
+  - A real fix makes every phone rule in the app follow the zoomed width. That is its own release.
+
+**Owned.**
+- **The first build's guardrail-table minimum was 360 px, and the scope's reason for it was false.**
+  - The scope said a low minimum *"scrolls only where it must"*. At 360 px the table scrolled on every phone below 460 px, though from 375 px
+    it fits.
+  - At 390 px that hid its fifth column (*"MC MEDIAN"*), which v6.39 showed.
+  - The independent build review found it. The minimum is now 290 px, the narrowest width at which no heading touches the next, measured with
+    and without the web fonts.
+- **The scope filed a page-header overprint under F-32 that does not exist.**
+  - The 30 px success-rate figure's line box touches its label by design. The detector counts that pair only under 150% zoom, or when the web
+    fonts load.
+  - `t45` has left that box out of its Income check since v6.38, and a screenshot is clean. The review found it, and the scope is corrected.
+- **`t45`'s new check would have failed on a correct page anywhere the web fonts load.**
+  - It read the whole page, header included. With the real fonts, that header pair appears at every width at UI SIZE 100%.
+  - This sandbox cannot reach Google Fonts, so the check passed here. The review loaded the fonts locally and saw it.
+  - §S-9 now leaves the header box out, and first checks that the box it leaves out holds only the header. Measured with the fonts: 0 pairs
+    on both tabs in every S-9 case.
+- **The §13 sentence as first built said the tabs show apart from 600 px, but the Roth calendar's labels do not.**
+  - With the web fonts, *"CONVERT"* runs past its card below about 690 px, and into the next card's label just above 600.
+  - This is unchanged from v6.39, and the box comparison cannot see it.
+  - Found by the review from a screenshot. Disclosed, not fixed: fixing it changes the 600–690 px desktop layout. That is a choice for Steve,
+    and it is recorded on F-30.
+- **`t104`'s extinction check counted `minWidth: 0` as protection.** It now requires a minimum of at least 200 px, and a `--dc-floor` (if set)
+  of at least 200 px.
+- **`t104` §B would have failed every run after this one,** because a later run folder holds no v6.39 bundle. It is now required in the
+  v6.39 → v6.40 run and prints a skip in any later one.
+- **`t45`'s version gates were hand-widened lists that no tool widens.** A missed one would have turned §S into a silent skip. They now
+  compare version numbers (OPERATIONS records why).
+- **Two controls expected the wrong check, once each.** Removing the calendar's class leaves its 500 px minimum, which rightly still protects
+  it (the first controls run read 18 of 19). Setting the minimum to 0 leaves the class, which rightly still protects it on a phone (the
+  second read 22 of 23). Each control now removes both, and the test was not changed.
+- **Depends on the scrollbar.** Where the browser's scrollbar takes room (Windows, not the overlay scrollbars of a phone or a Mac), the
+  calendar and comparator minimums engage in windows up to about 620 px, and the scenario table's up to about 810. Those boxes then scroll
+  by a few pixels. No text overprints. The §13 note says *"about 810 where the browser's scrollbar takes room"*.
+
+**Limitations, stated.**
+- Four tabs still overprint on a phone (F-30), and UI SIZE 150% still overlaps in places (F-32). Both are disclosed in §13.
+- Nothing is pinned in a box that scrolls: a table's first column scrolls away with the rest, and no hint says the box scrolls. The column
+  cut off at its edge is the cue, as in v5.79's 14 boxes (DF-6).
+- Measured in Chromium's mobile emulation, not on a real phone.
+- The box comparison at 600–1440 px was done at the build, not by a suite: no suite holds two built pages.
+
+**Tests.** New suite **`t104_roth_stress_phone.mjs`**, run on both legs. The v6.39 leg pins each defect as
+`[KNOWN DEFECT 2026-10-30, F-30 — flips at v6.40]`.
+- **§A, the source (AST).**
+  - The one new rule sits only inside the phone block, and says what it does.
+  - Each of the six sites carries its class, or its own minimum, or is the direct child of a `dc-scrollx` box with the decided floor.
+  - **Extinction:** on the two tabs, no grid with two or more columns that can shrink to zero stands unprotected (a minimum counts only from
+    200 px; `repeat()` expanded, both branches of a conditional read). Three named exceptions stand, each with its reason.
+- **§B, the text.** Both tabs' rendered text is identical to v6.39's on the example, a single plan and a no-ACA plan. The run seeds both
+  legs alike, and the v6.39 leg is dumped in a child process.
+- **§C, the Field Manual:** the note and the sentence.
+- **`t45` §S-9 (Chromium):** both tabs at zero overlapping pairs, and no sideways page scroll, at:
+  - 360, 390 and 430 px on the example and the stream plan;
+  - 600 and 640 px;
+  - UI SIZE 130% at 390, 600 and 800 px, each case first checking that the zoom took effect.
+- **Re-gated:** `t102` A-2 (the Roth and Stress tabs reuse two of its classes) and E-2 (the §13 sentence).
+- **Registered:** `v640` by the AST registration (182 gate extensions, 291 array entries, 2 map arms). By hand: `t33` PINS (unchanged
+  figures), `t93`'s Engine D reference (v639), `t103`'s prior-leg map, and `t45`/`t47`/`t48`. `runsuite.sh` lists `t104`.
+- **No shim change.**
+
+**Counts**, from the full suite run from the packaged copies:
+- **10,937 app checks across 102 app suites, 0 failed, 0 DIED**: 5,880 current-leg, 4,576 prior-leg (v6.39), 234 and 237 in the two attribution runs, MC parity 10/10 (no engine changed).
+- Tooling: `t21` 64, `domdiff` 32, `sets` 12 + 12. GRAND **11,057**, 0 failed.
+- Against v6.39, the current leg: `t104` new (26; 16 on the v6.39 leg); `t45` 124 → 150 (S-9). Every other count is unchanged (`t102` re-gated at the same count). The prior leg grows by 35: `t104`'s 16, and `t103` on the v6.39 leg, now a current-leg suite (38, was 19 pinning v6.38). Per-suite figures are in `TESTING.md`.
+- The run was made in one part.
+
+**Controls.** `qa/tools/controls_v640_phone.py`, on a copy of the run folder: **23 of 23 as expected**.
+- C0 is silent.
+- K1–K18 each mutate the source and turn their named `t104` checks red (§A's structure and extinction, §B's text identity, §C's copy).
+- P1–P4 each lower one minimum width in a copy of the built page and turn `t45` S-9 red.
+- Every file was restored and hash-checked.
+- On the development runs it was 18 of 19, then 22 of 23: K3, then K17, expected A-6 where the remaining protection rightly kept it green. Both controls were corrected, not the test (above).
+
+**Provenance.** Source `99f7f8f150bcd8db89a282fe2e2dfe63` · built `index.html` `53d30398041e26cd9ba6d84a8073651d` (vite 5.4.21, the `npm ci` toolchain;
+v6.39 rebuilt byte-identically to `f8df7ca2…` on the same toolchain) · `smoke_built` 22 of 22 on the packaged page. The first build
+(`6b6cd883…` / `8d3ffcf1…`), which the build review read, was never shipped.
+
 ## v6.39 — Ask AI is told what accounts the plan holds and what it contributes (D-69)
 
 **An Ask AI release.** Scoped in `docs/SCOPE_D69_AI_CONTEXT_V639.md` (repo-only; build record §8), from a report by the maintainer on his own
