@@ -1,5 +1,134 @@
 # Changelog
 
+## v6.41 — My Data, Social Security, Expenses and Taxes on a phone (F-30, second part), F-31, and the Roth calendar's labels
+
+**A presentation release.** Scoped in `docs/SCOPE_F30B_PHONE_V641.md` (repo-only; review §8, build record §9). Steve asked for F-30's second
+part with *"for any decisions, use your recommendations"*, so DG-1 to DG-9 were taken as the scope recommended; none was put to him one by one.
+Built on v6.40 (source `99f7f8f1…`). No engine, table, stored field or computed figure changes (parity 10/10), and no word on any tab changes:
+`t105` §B holds seven tabs' text identical to v6.40's. No METHODOLOGY change. Under DG-8 **the 2027 tax figures become v6.42**
+(`docs/SCOPE_TY2027_REFRESH_V633_V634.md` renumbered an eighth time; its suite stays `t99_ty2027.mjs`). The 15 December deadline still
+outranks any model release.
+
+**What was wrong (v6.40, measured in Chromium on the built page with `t45` §S's overlap detector).**
+- **On a phone four tabs printed text over itself.** At 390 px on the example: My Data 8 pairs, Social Security 10, Expenses 4, Taxes 2. At
+  360: 12 (and the My Data page 8 px too wide), 19, 18 and 4.
+  - The Social Security claiming grid put nine age cards in a row: *"$1,260"* over its *"$"*. It sat in a scrolling box, but a box whose
+    content has no minimum width never scrolls.
+  - My Data's household totals, asset-class cards and paycheck row; the Expenses tab's *"drops off"* panel and one-time list; the Taxes
+    tab's lifetime tiles.
+- **Two grids F-30 did not list**, found at 360 px: a Withdrawal panel widened the page to 363 px, and a Monte Carlo LTC panel printed
+  *"Insurance covers"* over *"Remaining out-of-pocket"*.
+- **On every screen** the Expenses tab's monthly lists ran *"Transportation"* under its item: the category column was 85 px (since the first
+  commit), against the one-time list's 110.
+- **The Roth calendar's *"CONVERT"* labels** ran past their cards below about 690 px (with the web fonts; disclosed at v6.40).
+- **F-31:** on a plan with a long income-stream label the Income tab was 626 px wide in a 600 px window.
+- **UI SIZE made all of it worse.** At 130% on a 390 px phone: My Data 28 pairs (page 473 px wide), Social Security 34, Expenses 31, Taxes 26.
+- **The cause is v6.40's:** v5.79 let each grid column shrink below its text (`1fr` became `minmax(0, 1fr)`).
+
+**What changed.**
+- **On a phone (below 600 px):**
+  - My Data's fields sit two to a row or one above another; its two flex rows wrap, and the export row may shrink.
+  - The claiming grid shows as many age cards a row as fit at 84 px or more (v6.40's rule for the Roth calendar, reused). Its survivor
+    cards and the next row stack.
+  - The Expenses *"drops off"* panel stacks. The one-time list scrolls inside its own box below a 390 px phone.
+  - The Taxes tiles go two a row and its three columns stack.
+  - The Withdrawal panel stacks and the Monte Carlo LTC panel goes two a row.
+  - Three new rules, all inside the phone block. Every other site reuses v6.40's classes.
+- **At every width:**
+  - The Expenses monthly lists' category column is 110 px, and the date line under each item moves with it (its indent is the column plus 10).
+  - An income stream's row wraps when it does not fit (F-31). A row that fits is unchanged.
+  - Below 700 px the Roth calendar uses the phone's card layout, so *"CONVERT"* stays inside its card; from 700 px a 600 px minimum (was
+    500), so a zoomed window scrolls the calendar.
+- **At UI SIZE 100% the desktop layout does not move** elsewhere, measured box by box with the Monte Carlo seeded alike:
+  - My Data, Social Security, Taxes, Income, Withdrawal and Monte Carlo identical at every width measured from 600 to 1440 px.
+  - Roth identical from 700 px. The stream plan's Income tab identical from 680 px (at 600–670 its rows now wrap).
+  - The Expenses tab changes at every width, as decided: an item name that filled its line wraps once more, and a category that wrapped no
+    longer does. At 1440 the tab is 28 px shorter; at 600, and on a phone, it is longer.
+- **Field Manual §13.**
+  - A v6.41 note.
+  - The *"Designed for a desktop browser"* item now says no tab prints figures over their neighbours at UI SIZE 100% on a screen 360 px wide
+    or more, and what remains below 360 px (F-33). It drops the clauses v6.41 fixed (the four tabs, the Expenses label, the calendar's labels,
+    F-31).
+  - Its UI SIZE sentence is corrected: v6.40 said a phone page scrolls sideways at 150%; on v6.40 it did from 115% (Grade, Verify).
+  - The v6.40 note's last sentence (*"Four other tabs still overprint…"*) now says v6.41 fixed them.
+- **Registers.** UsabilityFlaws **F-30 fixed** at 360 px and wider; **F-31 fixed**; **F-32 widened** by a 26-tab sweep at UI SIZE 115–150%;
+  **F-33 filed** (below). F-8's row notes the claiming grid's fix. The four version sites read v6.41.
+
+**Still open, and why.**
+- **F-32, widened: UI SIZE and the phone layout.** On a phone at 130–150% the Monte Carlo tab overlaps heavily (125 and 146 pairs at 390 px
+  on v6.40; 121 and 146 now), Withdrawal, Guardrails, Survivor and Ranking overlap, and Grade and Verify scroll sideways from 115%. In windows
+  of 600 px and wider at 130%, My Data, Expenses and Income overlap. A real fix makes every phone rule follow the zoomed width: its own
+  release, and the recommended next phone release.
+- **F-33, filed: phones narrower than 360 px.** At 320 px the Monte Carlo tab has 3 pairs (1 at 340, none at 355), and the Grade and Verify
+  pages are 348 and 358 px wide. All as on v6.40. Low, disclosed in §13.
+
+**Owned.**
+- **The first build's one-time-list floor was 20 px too wide.** It was set to 316 px, the row's measured width, but the floor sets the row's
+  content width and the row adds 10 px of padding each side. So the list scrolled up to about 410 px, and on 390 and 393 px phones it hid part
+  of the year. The overlap detector clips text to its box, so nothing saw it. The independent build review found it. Now 296 px; `t45` S-10
+  checks that the box does not scroll at 390 and 393 px.
+- **The first build moved the date line under each monthly item 15 px into the category column**, on every screen: its indent was 95 px,
+  the old column plus 10. Found by the review from a screenshot. Now 120 px.
+- **The first build's §13 sentence said no tab overprints "on a phone or on a wider screen".** Below 360 px that is false (F-33). Found by
+  the review at 320 and 344 px. Now bounded at 360 px, with what remains below it.
+- **`t45`'s tally was overwritten.** S-10 set a module-level `ok = <bool>`, which replaced the suite's pass counter, so the first run printed
+  *"8 passed"* for about 220 checks. A failure still counted, so only the tally lied; but a count quoted from it would have been false, and a
+  drop from 150 to 8 looks like a silent skip. Found by the review. The counters now have names no check would reuse.
+- **v6.40's §13 understated UI SIZE.** It said a phone page scrolls sideways at 150%; v6.40 had measured UI SIZE on all 26 tabs only at 100%.
+- **A first draft of `t105` missed one Social Security render.** It found the tab renders by `activeTab === "ss" && …` with
+  the test as the chain's direct left operand; two renders nest it two deep, so one grid escaped the extinction check. Found when the walk's
+  count disagreed with the census; the test reads the chain's left-most operand.
+- **Depends on the scrollbar.** Where the browser's scrollbar takes room (Windows), the Roth calendar's 600 px minimum engages in windows up to
+  about 716 px, and its box scrolls by the scrollbar's width. No text overprints.
+
+**Limitations, stated.**
+- UI SIZE above 100% still overlaps in places (F-32), and phones below 360 px (F-33). Both disclosed in §13.
+- Four two-column Social Security grids are clean but cramped at 360 px (noted, not filed).
+- Nothing is pinned in the one-time list's scroll box, and no hint says it scrolls (as v5.79's boxes).
+- Measured in Chromium's mobile emulation, not on a real phone.
+- The box comparison at 600–1440 px was done at the build, not by a suite.
+
+**Tests.** New suite **`t105_f30b_phone.mjs`**, run on both legs. The v6.40 leg pins each defect as
+`[KNOWN DEFECT 2026-10-31, F-30 — flips at v6.41]`.
+- **§A, the source (AST).**
+  - The three new phone rules sit only in the phone block; `.dc-cards-sub700` only in its 699 px block; the stream row's wrap outside both.
+  - Each site carries its class; the one-time list's rows are DOM children of a `dc-scrollx` box with a 296 px floor; the two category columns
+    are 110 px; the Roth calendar carries both classes and a 600 px minimum.
+  - **Extinction:** on My Data, Social Security, Expenses, Taxes and Income, no grid with two or more columns that can shrink to zero stands
+    unprotected. Three named exempt sets (eight two-column grids measured clean), each with its reason.
+- **§B, the text.** Seven tabs' text identical to v6.40's on the example, and the five F-30 tabs' on a single and a no-ACA plan. Both legs
+  seeded alike; the v6.40 leg is dumped in a child process, to a file (seventeen texts overflow a pipe).
+- **§C, the Field Manual:** the v6.41 note (first, and the newest), the desktop item, the v6.40 note's corrected sentence.
+- **`t45` §S-10 (Chromium, seeded):**
+  - the four tabs and Income at zero pairs with no sideways scroll at 360, 390 and 430 px on the example and the stream plan, at 600 and
+    640 px, and at UI SIZE 130% on a 390 px phone;
+  - Withdrawal and Monte Carlo at 360; Expenses at 1024 and 1440;
+  - the Roth calendar's card layout at 640 px and nine columns at 700;
+  - the one-time list's box scrolling at 360 and not at 390 or 393;
+  - the stream plan's Income tab at 600, 610 and 620 px with no sideways scroll.
+- **Re-gated:** `t104` A-3a (the calendar's classes and minimum) and §C (the desktop item, the v6.40 note); `t102` A-1b (the stream row's wrap
+  outside the phone block), A-2 (the two classes' counts, 9 and 13) and E-2.
+- **Registered:** `v641` by the AST registration (182 gate extensions, 294 array entries, 2 map arms). By hand: `t33` PINS (unchanged
+  figures), `t93`'s Engine D reference (v640), `t103`'s prior-leg map, and `t45`/`t47`/`t48`. `runsuite.sh` lists `t105`.
+- **No shim change.**
+
+**Counts**, from the full suite run from the packaged copies:
+- **11,090 app checks across 103 app suites, 0 failed, 0 DIED**: 6,002 current-leg, 4,607 prior-leg (v6.40), 234 and 237 in the two attribution runs, MC parity 10/10 (no engine changed).
+- Tooling: `t21` 64, `domdiff` 32, `sets` 12 + 12. GRAND **11,210**, 0 failed.
+- Against v6.40, the current leg: `t105` new (55; 29 on the v6.40 leg); `t45` 150 → 225 (S-10); `t104` 26 → 18 (its §B, eight checks against v6.39's text, prints a skip in any run after v6.40's, as designed). Every other count is unchanged (`t102` re-gated at the same count). The prior leg grows by 31: `t105`'s 29, and `t104` on the v6.40 leg (18, was 16 pinning v6.39). Per-suite figures are in `TESTING.md`.
+- The run was made in one part.
+
+**Controls.** `qa/tools/controls_v641_phone.py`, on a copy of the run folder: **36 of 36 as expected**.
+- C0 is silent.
+- K1–K29 each mutate the source and turn their named `t105` checks red (§A's rules, sites and extinction, §B's text identity, §C's copy). K25, a word on the Expenses tab, also turns B-0 red, whose sanity check reads that word.
+- P1–P5 and P9 each mutate a copy of the built page and turn `t45` S-10 red (one `t45` run is about 15 minutes, so the My Data, Monte Carlo and Withdrawal classes are held in the source by K6, K16 and K17, not by page controls).
+- Every file was restored and hash-checked.
+- The first start of the run read *"C0 BAD"* (`t105` A-1 red on what should have been the unmutated source) and was stopped. On a fresh copy of the run folder C0 passed, alone and in the full run. The cause was not established; the counted run is the fresh one.
+
+**Provenance.** Source `0f20b07de191cccbea077efb7cc1e11b` · built `index.html` `a8862af237917897bc14145e9f3a415f` (vite 5.4.21, the `npm ci` toolchain;
+built twice, byte-identical; v6.40 rebuilt byte-identically to `53d30398…` on the same toolchain) · `smoke_built` 22 of 22 on the packaged page.
+The first build (`69ad33e8…` / `9f5de995…`), which the build review read, was never shipped.
+
 ## v6.40 — the Roth and Stress tabs on a phone (F-30, first part)
 
 **A presentation release, for two tabs.** Scoped in `docs/SCOPE_F30_ROTH_STRESS_PHONE_V640.md` (repo-only; build record §9), from F-30, which
