@@ -469,6 +469,12 @@ tally "t103-$CUR"   node t103_ai_context.mjs "$CUR"
 # is t45 §S's (a browser).
 tally "t104-$PRIOR" node t104_roth_stress_phone.mjs "$PRIOR"
 tally "t104-$CUR"   node t104_roth_stress_phone.mjs "$CUR"
+# t105 (v6.41) — My Data, Social Security, Expenses and Taxes on a phone (F-30, second part), F-31 and the Roth calendar's labels: the new
+# rules by source (three in the phone block, one below 700 px, the stream row's wrap outside both); each site's class, floor or column;
+# EXTINCTION — no shrinking grid on the five tabs stands unprotected; seven tabs' text identical to the prior leg's on three plans (a child
+# process, seeded alike; fails without the prior bundle); the Field Manual. Both legs (the v6.40 leg pins the defects). Layout is t45 §S's.
+tally "t105-$PRIOR" node t105_f30b_phone.mjs "$PRIOR"
+tally "t105-$CUR"   node t105_f30b_phone.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

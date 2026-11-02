@@ -21,6 +21,7 @@
 //  §C  the Field Manual: §13's desktop item names only the four tabs left, says the phone layout follows the window and not UI SIZE, and
 //      discloses F-31; §13's v6.40 note sits first.
 //  The v6.39 leg pins each defect as a dated [KNOWN DEFECT 2026-10-30, F-30 — flips at v6.40].
+//  v6.41 (F-30 second part): A-3a reads R1's new class list and 600 px minimum, and §C reads the reworded desktop item (t105 §C pins it).
 //  Both legs: node t104_roth_stress_phone.mjs v639 | node t104_roth_stress_phone.mjs v640. Controls: qa/tools/controls_v640_phone.py (repo-only).
 //  Exits with process.exit (the rendered app leaves timers running).
 import { window, dom } from "./env_dom.mjs";
@@ -40,14 +41,16 @@ console.error = () => {}; console.warn = () => {};
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v640";
 const DUMP = process.argv.includes("--dump");
-const KNOWN_VERSIONS = ["v639", "v640"];
+const KNOWN_VERSIONS = ["v639", "v640", "v641"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v640"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v640", "v641"].includes(VER);   // an array, so the next registration widens it
 const B_PRIOR = "v639";                // §B's comparison leg — a constant, so the registrar cannot widen it (t76 records why)
+const F30B = Number(VER.slice(1)) >= 641;   // v6.41 (docs/SCOPE_F30B_PHONE_V641.md, DG-6): R1 gains dc-cards-sub700 and a 600 px minimum; §13's
+                                            // desktop item is reworded and the v6.40 note's last sentence corrected (t105 §C holds the new text)
 const KD = "[KNOWN DEFECT 2026-10-30, F-30 — flips at v6.40]";
 dom.reconfigure({ url: "https://stextor.github.io/danger-close/" }); globalThis.location = window.location;
 
@@ -157,7 +160,8 @@ const gridsIn = node => all(node, n => n.type === "JSXOpeningElement" && !!propO
 const G = { roth: gridsIn(ROTH[0] || AST), stress: gridsIn(STRESS[0] || AST) };
 const find = (tab, tp, gap) => G[tab].filter(g => g.tps.some(t => t && t.replace(/\s+/g, "") === tp.replace(/\s+/g, "")) && (gap === undefined || g.gap === gap));
 const SITES = [
-  { k: "a", id: "R1 the IRMAA lookback calendar", tab: "roth", tp: "repeat(9, minmax(0, 1fr))", gap: 4, want: g => g.cls === "dc-cards-phone" && g.minW === 500, how: "class dc-cards-phone and its own minWidth 500" },
+  { k: "a", id: "R1 the IRMAA lookback calendar", tab: "roth", tp: "repeat(9, minmax(0, 1fr))", gap: 4, want: g => F30B ? g.cls === "dc-cards-phone dc-cards-sub700" && g.minW === 600 : g.cls === "dc-cards-phone" && g.minW === 500,
+    how: F30B ? "classes dc-cards-phone and dc-cards-sub700 (v6.41: the card layout below 700 px) and its own minWidth 600" : "class dc-cards-phone and its own minWidth 500" },
   { k: "b", id: "R2 the strategy comparator", tab: "roth", tp: "1.5fr repeat(7, minmax(0, 1fr))", gap: 0, want: g => g.parCls === "dc-scrollx" && g.parFloor === "490px" && g.tps.length === 2, how: "the direct child of a dc-scrollx box, --dc-floor 490px (both templates, with and without the ACA column)" },
   { k: "c", id: "R3 the constraints & rules box", tab: "roth", tp: "minmax(0, 1fr) minmax(0, 1fr)", gap: 12, want: g => g.cls === "dc-stack-phone", how: "class dc-stack-phone" },
   { k: "d", id: "S1 the scenario table", tab: "stress", tp: "150px repeat(6, minmax(0, 1fr))", gap: 0, want: g => g.parCls === "dc-scrollx" && g.parFloor === "720px", how: "the direct child of a dc-scrollx box, --dc-floor 720px" },
@@ -224,9 +228,9 @@ console.log("  C — the Field Manual");
   const N40 = H.indexOf("<li><strong>The Roth and Stress tabs on a phone (v6.40).</strong>"), N39 = H.indexOf("<li><strong>Ask AI is told what accounts you hold (v6.39).</strong>");
   const item = (() => { const i = H.indexOf("Designed for a desktop browser."); return i < 0 ? "" : H.slice(i, H.indexOf("</li>", i)); })();
   T("C-0 SETUP: the Field Manual, its v6.39 note and its desktop item were found", H.length > 100000 && N39 > 0 && item.length > 200, `${H.length} ${N39} ${item.length}`);
-  if (POST) {
+  if (POST && !F30B) {
     const note = N40 > 0 && N39 > N40 ? H.slice(N40, N39) : "";
-    T("C-1 §13's v6.40 note is first, ahead of v6.39's, and says what changed: the calendar as many years a row as fit, the tables scroll in their boxes, UI SIZE, the desktop layout and every figure unchanged",
+    T("C-1 §13's v6.40 note is ahead of v6.39's (first until v6.41), and says what changed: the calendar as many years a row as fit, the tables scroll in their boxes, UI SIZE, the desktop layout and every figure unchanged",
       !!note && /as many years a row as fit/.test(note) && /scroll within their own boxes/.test(note) && /up to about 790 px wide \(about 810 where the browser’s scrollbar takes room\)/.test(note) && /UI SIZE/.test(note) && /Otherwise the desktop layout is unchanged, and so is every figure/.test(note));
     T("C-2 the desktop item names only the four tabs left (no Roth calendar or Stress table as overprinting), the 600 px threshold at UI SIZE 100%, the Expenses label and the calendar's CONVERT labels below 690 px",
       /On a phone some figures still print over their neighbours on parts of the My Data, Social Security, Expenses and Taxes tabs \(v6\.38: the Income tab’s were fixed; v6\.40: the Roth and Stress tabs’\)\./.test(item)
@@ -235,6 +239,17 @@ console.log("  C — the Field Manual");
     T("C-3 …and says the phone layout follows the window, not UI SIZE (F-32), and that the Income tab can scroll sideways at 600–625 px with a long stream label (F-31)",
       /the phone layout follows the window’s width, not UI SIZE/.test(item) && /on a phone at 150% the page can scroll sideways/.test(item)
       && /Between 600 and 625 px the Income tab can scroll sideways when an income stream has a long label\./.test(item));
+  } else if (F30B) {
+    // v6.41: the four tabs, the CONVERT labels, the Expenses label and F-31 were fixed; the item no longer lists them (t105 §C pins its new text),
+    // and the v6.40 note's last sentence says v6.41 fixed the four tabs.
+    const note = N40 > 0 && N39 > N40 ? H.slice(N40, N39) : "";
+    T("C-1 §13's v6.40 note is still ahead of v6.39's and says what changed; from v6.41 its last sentence says v6.41 fixed the four other tabs",
+      !!note && /as many years a row as fit/.test(note) && /scroll within their own boxes/.test(note) && /Otherwise the desktop layout is unchanged, and so is every figure/.test(note)
+      && /Four other tabs still overprinted on a phone; v6\.41 fixed them\./.test(note) && !/Four other tabs still overprint on a phone/.test(note));
+    T("C-2 the desktop item no longer names the four tabs, the Expenses label or the calendar's CONVERT labels as overprinting (v6.41)",
+      !/On a phone some figures still print over their neighbours/.test(item) && !/a long category name on the Expenses tab can run under its item/.test(item) && !/“CONVERT” labels can run past/.test(item));
+    T("C-3 …nor F-31, and still says the phone layout follows the window, not UI SIZE (F-32)",
+      !/Between 600 and 625 px the Income tab can scroll sideways/.test(item) && /the phone layout follows the window’s width, not UI SIZE/.test(item));
   } else {
     T(`C-1 ${KD} no v6.40 note; the desktop item names the Roth calendar and the Stress table as overprinting, and does not say the phone layout follows the window`,
       N40 < 0 && /the Roth tab’s IRMAA calendar, the Stress tab’s scenario table/.test(item) && !/follows the window’s width/.test(item));

@@ -20,21 +20,24 @@
 import os, sys, re
 
 VER = sys.argv[1] if len(sys.argv) > 1 else ""
-KNOWN_VERSIONS = ["v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640"]
+KNOWN_VERSIONS = ["v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641"]
 HERE = os.path.dirname(os.path.abspath(__file__))
 def _vnum(v):   # "v640" -> 640; anything else -> -1. From v6.40 the two gates below compare numbers, so a registration that forgets them cannot
     m = re.fullmatch(r"v(\d+)", v or "")   # turn section S into a silent skip (through v6.39 they were hand-widened lists)
     return int(m.group(1)) if m else -1
 F30 = _vnum(VER) >= 640       # v6.40 (F-30, docs/SCOPE_F30_ROTH_STRESS_PHONE_V640.md): section S also holds the Roth and Stress tabs
 POSTF20 = _vnum(VER) >= 638   # v6.38 (F-20): section S holds builds from v6.38 on
+F30B = _vnum(VER) >= 641      # v6.41 (F-30 second part, F-31, docs/SCOPE_F30B_PHONE_V641.md): section S also holds My Data, SS, Expenses, Taxes
 PAGE = os.path.abspath(sys.argv[2]) if len(sys.argv) > 2 else os.path.join(HERE, "..", "index.html")
-ok = 0; bad = 0; fails = []
+# v6.41: the tallies have names no check would reuse. The first v6.41 build set a module-level `ok = <bool>` in S-10, which replaced the
+# pass counter and printed "8 passed" for about 220 checks (found by the build review); a failure still counted, so only the tally lied.
+_N_PASS = 0; bad = 0; fails = []
 def T(name, cond, detail=""):
-    global ok, bad
-    if cond: ok += 1
+    global _N_PASS, bad
+    if cond: _N_PASS += 1
     else: bad += 1; fails.append(f"  \u2717 {name}" + (f" — {detail}" if detail else ""))
 def finish():
-    print("\n".join(fails)); print(f"\nt45 SUITE ({VER}): {ok} passed, {bad} failed"); sys.exit(1 if bad else 0)
+    print("\n".join(fails)); print(f"\nt45 SUITE ({VER}): {_N_PASS} passed, {bad} failed"); sys.exit(1 if bad else 0)
 
 print(f"t45 — THE APP FITS A PHONE ({VER}) · page {os.path.basename(PAGE)}")
 if VER not in KNOWN_VERSIONS:
@@ -101,7 +104,7 @@ try:
         # scrollWidth cannot see. OVERLAP counts pairs of visible text boxes from different elements overlapping by more than 3 px each way:
         # SVG text (d3 places chart labels on purpose) and text inside a collapsed <details> are skipped, and each box is first clipped to
         # every scrolling or clipping box around it, its own element included (a scrolling <pre>'s hidden lines are not visible text).
-        # Only the Income tab is held to zero here: six other tabs still overprint on a phone (UsabilityFlaws F-30, disclosed in §13).
+        # S-5/S-6 hold the Income tab to zero; S-9 (v6.40) adds the Roth and Stress tabs and S-10 (v6.41) the other four F-30 tabs.
         OVERLAP = """() => { const clip = (e, r) => { let L = r.left, T = r.top, R = r.right, B = r.bottom;
             for (let a = e; a && a !== document.body; a = a.parentElement) { const cs = getComputedStyle(a); if (cs.display === 'none' || cs.visibility === 'hidden') return null;
               if (a !== e || cs.overflowX !== 'visible' || cs.overflowY !== 'visible') { const q = a.getBoundingClientRect();
@@ -125,8 +128,10 @@ try:
         T("S-0 the stream-plan fixture exists (qa/tools/fixture/f20_streams_plan.json)", os.path.exists(FIX), FIX)
         import json as _json
         PLAN = _json.load(open(FIX, encoding="utf-8")) if os.path.exists(FIX) else None
-        def open_plan(w, h, mobile, plan, zoom=None):
+        SEED = "(() => { let a = 105; Math.random = () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; })()"
+        def open_plan(w, h, mobile, plan, zoom=None, seed=False):
             pg = b.new_page(viewport={"width": w, "height": h}, is_mobile=mobile, has_touch=mobile); pg.set_default_timeout(120000)
+            if seed: pg.add_init_script(SEED)   # v6.41: S-10 seeds Math.random, so its Monte Carlo figures are the same every run
             if zoom: pg.add_init_script("localStorage.setItem('dc:danger_close:ui_scale_v1', '" + str(zoom) + "')")   # UI SIZE, read at load
             pg.goto("file://" + PAGE); pg.wait_for_timeout(1200); pg.check("#dc-dg-check"); pg.click("#dc-dg-accept"); pg.wait_for_timeout(500)
             if plan is None:
@@ -192,6 +197,58 @@ try:
                     pg.close()
             else:
                 print(f"  · S-9 skipped: {VER} predates v6.40 (F-30's Roth and Stress tabs)")
+            # v6.41 (F-30 second part): My Data, Social Security, Expenses and Taxes, and the Income tab beside them. Through v6.40 their v5.79
+            # grids printed text over itself on a phone (My Data 8, SS 10, Expenses 4, Taxes 2 pairs at 390 px; 12/19/18/4 at 360), the Expenses
+            # category column ran Transportation under its item at every width, the Roth calendar's CONVERT labels ran past their cards below
+            # about 690 px, a Withdrawal panel widened a 360 px page and a Monte Carlo panel overprinted there, and the stream plan's Income tab
+            # was 626 px wide in a 600 px window (F-31). Tabs are clicked by their exact label on a desktop (has_text would match "ss" in "stress").
+            def to_tab_x(pg, t):
+                menu = pg.locator('select[aria-label="Choose a tab"]')
+                if menu.count() == 1 and menu.is_visible(): menu.select_option(t)
+                else:
+                    if pg.get_by_text("SHOW ALL TABS", exact=False).count(): pg.get_by_text("SHOW ALL TABS", exact=False).first.click()
+                    lab = {"mydata": "my data", "montecarlo": "monte carlo"}.get(t, t)
+                    found = pg.evaluate("(l) => { const b = [...document.querySelectorAll('button.tab')].find(x => x.textContent.trim().toLowerCase() === l); if (b) b.click(); return !!b; }", lab)
+                    T(f"S-10 SETUP: the {t} tab button was found by its label", found)
+                pg.wait_for_timeout(900)
+            if F30B:
+                F5 = ("mydata", "ss", "expenses", "taxes", "income")
+                cases = [(w, None, True, pl, F5) for pl in (None, PLAN) for w in (360, 390, 430)] + [(w, None, False, None, F5) for w in (600, 640)] \
+                      + [(390, 130, True, None, F5), (360, None, True, None, ("withdrawal", "montecarlo"))] \
+                      + [(w, None, False, None, ("expenses",)) for w in (1024, 1440)]
+                for w, zoom, mobile, pl, tabs5 in cases:
+                    pg = open_plan(w, 844 if mobile else 900, mobile, pl, zoom, seed=True)
+                    if zoom:
+                        z = pg.evaluate(ZOOM)
+                        T(f"S-10 SETUP {w} px: UI SIZE {zoom}% took effect (the app's zoom reads {z!r})", z == str(zoom / 100).rstrip("0").rstrip("."), z)
+                    for t in tabs5:
+                        to_tab_x(pg, t); hits = pg.evaluate(PAGE_OVERLAP); m = pg.evaluate(MEASURE)
+                        T(f"S-10 {w} px{' at UI SIZE ' + str(zoom) + '%' if zoom else ''}, {'stream plan' if pl else 'the example'}: no text on the {t} tab prints over other text ({len(hits)} pairs), and the page does not scroll sideways ({m['sw']} vs {m['vw']})",
+                          not hits and m["sw"] <= m["vw"], "; ".join(hits[:6]))
+                    pg.close()
+                # The Roth calendar: below 700 px the phone's card layout (several cards a row, each at least 84 px wide), from 700 px its nine columns.
+                CAL = """() => { const g = [...document.querySelectorAll('div')].find(d => (d.className || '').toString().includes('dc-cards-sub700')); if (!g) return null;
+                  const tops = [...g.children].map(c => Math.round(c.getBoundingClientRect().top)); const first = tops.filter(t => t === tops[0]).length;
+                  return { first, minw: Math.min(...[...g.children].map(c => c.getBoundingClientRect().width)) }; }"""
+                for w, want in ((640, "cards"), (700, "nine")):
+                    pg = open_plan(w, 900, False, None, seed=True); to_tab_x(pg, "roth"); c = pg.evaluate(CAL)
+                    cal_ok = c is not None and ((want == "cards" and 2 <= c["first"] < 9 and c["minw"] >= 84) or (want == "nine" and c["first"] == 9))
+                    T(f"S-10 {w} px: the Roth calendar shows {'its card layout (several cards a row, each 84 px or more)' if want == 'cards' else 'its nine columns'} ({c})", cal_ok, str(c))
+                    pg.close()
+                # E2: the one-time list's box scrolls below a 390 px phone and not at 390 (the first v6.41 build's floor ignored the row's padding and
+                # scrolled to about 410 px, hiding part of the year at 390 and 393 — found by the build review; overlap clipped to the box cannot see it).
+                BOX = """() => { const r = document.querySelector('.erow'); const b = r && r.parentElement; return b && (b.className || '').toString().includes('dc-scrollx') ? { cw: b.clientWidth, sw: b.scrollWidth } : null; }"""
+                for w, want in ((360, True), (390, False), (393, False)):
+                    pg = open_plan(w, 844, True, None, seed=True); to_tab_x(pg, "expenses"); bx = pg.evaluate(BOX)
+                    T(f"S-10 {w} px: the one-time list's box {'scrolls' if want else 'does not scroll (every column shows)'} ({bx})", bx is not None and ((bx["sw"] > bx["cw"]) == want), str(bx))
+                    pg.close()
+                # F-31: the stream plan's Income tab fits its window from 600 px (v6.40: 626 px wide at 600 and 620).
+                for w in (600, 610, 620):
+                    pg = open_plan(w, 900, False, PLAN, seed=True); to_tab_x(pg, "income"); m = pg.evaluate(MEASURE)
+                    T(f"S-10 {w} px, stream plan: the Income tab does not scroll sideways ({m['sw']} vs {m['vw']}) — F-31", m["sw"] <= m["vw"])
+                    pg.close()
+            else:
+                print(f"  · S-10 skipped: {VER} predates v6.41 (F-30's other four tabs, F-31)")
         b.close()
 except SystemExit:
     raise
