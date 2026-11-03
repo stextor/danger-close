@@ -603,6 +603,18 @@ export function census(G) {
       kinds.length === 0 ? "DEGENERATE — every account is taxable or Traditional holdings, so Ask AI's per-type block (v6.39) shows nothing a total hid"
                          : "reachable — Ask AI must be told each type, by owner"); }
 
+
+  // ── v6.43 (D-70 — SCOPE_D64_D70_V643) · the condition that would hide a single plan's stale owners (§K1) ──────────────────────────────
+  // 27. A SINGLE PLAN WITH ROWS STORED UNDER SPOUSE B. Through v6.42 such rows were counted as spouse B's money, whose RMD every engine
+  //    turns off on a single plan. A married plan, or a single plan with no such row, cannot show it. ON (degenerate) on either; clear when a
+  //    single plan stores a holding or an Other account under B — the value counts them.
+  { const P = G.PORTFOLIO() || {}, tl = G.PLAN_TIMELINE ? G.PLAN_TIMELINE() : null, single = !!(P.single || (tl && tl.single));
+    const nB = single ? (P.positions || []).filter(q => q.owner === "B").length + (P.otherAccounts || []).filter(a => a.owner === "B").length : 0;
+    row("single_b_owned", "a single plan's rows stored under spouse B", single ? `${nB} row${nB === 1 ? "" : "s"} under B` : "married",
+      "a single plan with a holding or Other account stored under B", !single || nB === 0,
+      !single || nB === 0 ? "DEGENERATE — no single plan with rows under B, so D-70's single-plan rule (v6.43) has nothing to change here"
+                          : "reachable — every engine must count these rows as the one person's"); }
+
   return rows;
 }
 
