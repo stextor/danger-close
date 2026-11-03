@@ -10,7 +10,7 @@
 //          B EXTINCTION: the glossary's terms in case-insensitive order, the "Authoritative sources" footer last (v5.97 pins the one pair)
 // BOTH LEGS. Reads the source by parser (DOCS_HTML is one string literal). Run: node t62_desktop_disclosures.mjs <tag>
 const VER = process.argv[2] || "";
-const KNOWN_VERSIONS = ["v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641"];
+const KNOWN_VERSIONS = ["v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642"];
 let pass = 0, fail = 0;
 const CK = (n, ok, d = "") => { if (ok) { pass++; console.log(`  ✓ ${n}`); } else { fail++; console.log(`  ✗ ${n}${d !== "" ? " — " + String(d).slice(0, 260) : ""}`); } };
 const done = () => { console.log(`\nt62 SUITE (${VER}): ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); };
@@ -41,19 +41,23 @@ if (FIXED) {
 } else CK("A-1 PIN v5.97: the item says nothing of tooltips, resizing or nested scrolling", !item.includes(SENT) && !/tooltip|resiz|rotat|scrolls inside/i.test(item));
 // The facts. Each is true on both legs; on v5.98 each is what keeps its clause true.
 let titles = 0, iframeH = null, resizeObs = 0, resizeLit = 0;
+// v6.42 (F-32): the app's one resize listener sets the layout classes (useLayoutWidthClass) and redraws no chart — the chart's effect does not
+// depend on them (checked below) — so its "resize" literals are not this clause's; every other one still counts.
+let LW = null; walk.full(ast, n => { if (n.type === "FunctionDeclaration" && n.id && n.id.name === "useLayoutWidthClass") LW = n; }, B);
+const inLW = n => !!LW && n.start >= LW.start && n.end <= LW.end;
 walk.full(ast, n => {
   if (n.type === "JSXOpeningElement" && n.name.name !== "iframe" && n.attributes.some(a => a.type === "JSXAttribute" && a.name.name === "title")) titles++;
   if (n.type === "JSXOpeningElement" && n.name.name === "iframe") { const st = n.attributes.find(a => a.name && a.name.name === "style");
     const h = st && st.value.expression.properties.find(p => p.key.name === "height"); iframeH = h ? h.value.value : null; }
   if (n.type === "Identifier" && n.name === "ResizeObserver") resizeObs++;
-  if (n.type === "Literal" && n.value === "resize") resizeLit++;
+  if (n.type === "Literal" && n.value === "resize" && !inLW(n)) resizeLit++;
 }, B);
 CK(`A-2 FACT for clause a: ${titles} non-iframe elements still carry a hover-only title (when this reaches 0, drop the clause)`, titles > 0, titles);
 let deps = null; const cw = src.indexOf("chartRef.current.clientWidth");
 walk.full(ast, n => { if (n.type === "CallExpression" && n.callee.name === "useEffect" && n.arguments[0].start < cw && n.arguments[0].end > cw && n.arguments[1])
   deps = n.arguments[1].elements.map(e => e.name); }, B);
 CK(`A-3 FACT for clause b: the chart's draw effect reads clientWidth, re-runs on activeTab (${deps && deps.join(", ")}), and nothing listens for a resize (ResizeObserver ${resizeObs}, "resize" ${resizeLit})`,
-   cw > 0 && !!deps && deps.includes("activeTab") && resizeObs === 0 && resizeLit === 0, JSON.stringify({ cw, deps, resizeObs, resizeLit }));
+   cw > 0 && !!deps && deps.includes("activeTab") && !deps.includes("_layoutCls") && resizeObs === 0 && resizeLit === 0, JSON.stringify({ cw, deps, resizeObs, resizeLit }));
 CK(`A-4 FACT for clause c: the Docs tab's iframe is still a ${iframeH} box inside the page`, iframeH === "74vh", iframeH);
 
 // ── B · the glossary in order ──

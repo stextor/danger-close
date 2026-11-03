@@ -41,16 +41,16 @@ console.error = () => {}; console.warn = () => {};
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v638";
 const DUMP = process.argv.includes("--dump");
-const KNOWN_VERSIONS = ["v637", "v638", "v639", "v640", "v641"];
+const KNOWN_VERSIONS = ["v637", "v638", "v639", "v640", "v641", "v642"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v638", "v639", "v640", "v641"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v638", "v639", "v640", "v641", "v642"].includes(VER);   // an array, so the next registration widens it
 const F30B = Number(VER.slice(1)) >= 641;   // v6.41 (F-30 second part, F-31 — docs/SCOPE_F30B_PHONE_V641.md): nine more grids reuse each class, the stream row
                                             // wraps at every width (one rule outside the phone block), and §13's desktop item is reworded
-const F30 = ["v640", "v641"].includes(VER);   // v6.40 (F-30 — docs/SCOPE_F30_ROTH_STRESS_PHONE_V640.md): the Roth and Stress tabs reuse two of these classes, and §13's desktop item is reworded
+const F30 = ["v640", "v641", "v642"].includes(VER);   // v6.40 (F-30 — docs/SCOPE_F30_ROTH_STRESS_PHONE_V640.md): the Roth and Stress tabs reuse two of these classes, and §13's desktop item is reworded
 const B_PRIOR = "v637";                // §B's prior leg — a constant, so the registrar cannot widen it (t76 records why)
 const KD = "[KNOWN DEFECT 2026-10-29, F-20 — flips at v6.38]";
 dom.reconfigure({ url: "https://stextor.github.io/danger-close/" }); globalThis.location = window.location;
@@ -71,14 +71,21 @@ const kids = n => { const o = []; for (const k of Object.keys(n)) { if (k === "l
 const all = (root, pred, out = [], parent = null) => { if (pred(root, parent)) out.push(root); for (const c of kids(root)) all(c, pred, out, root); return out; };
 const SRCOF = n => SRC.slice(n.range[0], n.range[1]);
 // The app's stylesheet is one template literal holding the v5.81 phone block. Its rules are read from the source, never from a render.
-const SHEET = all(AST, n => n.type === "TemplateLiteral" && n.quasis.some(q => (q.value.cooked || "").includes("@media (max-width: 599px)")));
+// v6.42 (F-32, docs/SCOPE_F32_UI_SIZE_V642.md): the phone rules moved from the window's media query to the class .dc-narrow on the app's
+// zoomed root (the layout width), and the 699 px rule to .dc-sub700w. From v6.42 PHONE reads the .dc-narrow rules with that prefix taken off and
+// SUB700 the .dc-sub700w rule, so every check below reads the same rules on every leg; t106 holds the move itself (EXTINCTION of the media query).
+const NARROWKEY = ["v642"].includes(VER);   // an array, so the next registration widens it
+const keyed = (css, key) => css.split("\n").map(l => l.trim()).filter(l => l.startsWith(key + " "))
+  .map(l => l.split(", ").map(x => x.startsWith(key + " ") ? x.slice(key.length + 1) : x).join(", ")).join("\n");
+const unkeyed = css => css.split("\n").filter(l => !l.trim().startsWith(".dc-narrow ") && !l.trim().startsWith(".dc-sub700w ")).join("\n");
+const SHEET = all(AST, n => n.type === "TemplateLiteral" && n.quasis.some(q => (q.value.cooked || "").includes(NARROWKEY ? ".dc-narrow .dc-phone-only {" : "@media (max-width: 599px)")));
 const CSS = SHEET.length === 1 ? SHEET[0].quasis.map(q => q.value.cooked).join("") : "";
 const blockOf = (css, at) => { const i = css.indexOf(at); if (i < 0) return ""; let d = 0, j = css.indexOf("{", i);
   for (let k = j; k < css.length; k++) { if (css[k] === "{") d++; else if (css[k] === "}" && --d === 0) return css.slice(j + 1, k); } return ""; };
-const PHONE = blockOf(CSS, "@media (max-width: 599px)");
-const OUTSIDE = CSS.replace(PHONE, "");
+const PHONE = NARROWKEY ? keyed(CSS, ".dc-narrow") : blockOf(CSS, "@media (max-width: 599px)");
+const OUTSIDE = NARROWKEY ? unkeyed(CSS) : CSS.replace(PHONE, "");
 const SEL = [".dc-stack-phone", ".dc-two-phone", ".dc-streamrow", ".dc-streamrow > .dc-sr-label", ".dc-streamrow > .dc-sr-desc", ".dc-streamrow > .dc-sr-amt"];
-const jsxWithClass = c => all(AST, n => n.type === "JSXOpeningElement" && n.attributes.some(a => a.type === "JSXAttribute" && a.name.name === "className" && a.value && a.value.type === "Literal" && a.value.value === c));
+const jsxWithClass = c => all(AST, n => n.type === "JSXOpeningElement" && n.attributes.some(a => a.type === "JSXAttribute" && a.name.name === "className" && a.value && a.value.type === "Literal" && (NARROWKEY ? String(a.value.value).split(" ").includes(c) : a.value.value === c)));   // v6.42: My Data's totals carry two classes
 const styleOf = n => { const a = n.attributes.find(a => a.type === "JSXAttribute" && a.name.name === "style"); return a ? SRCOF(a).replace(/\s+/g, "") : ""; };
 // Subtractions of the steady-state income: X - _steadyInc. From v6.38 only the two named differences may hold one.
 const SUBS = all(AST, (n, p) => n.type === "BinaryExpression" && n.operator === "-" && n.right.type === "Identifier" && n.right.name === "_steadyInc");
@@ -285,7 +292,10 @@ console.log("  E — the Field Manual");
   if (POST) {
     T("E-1 §13's v6.38 note is there, ahead of v6.37's, and names the negative shortfall, the phone and the coverage figure",
       N38 > 0 && N37 > N38 && /“-\$-1,302”/.test(H.slice(N38, N37)) && /On a phone they now stack and wrap; the tablet and desktop layout is unchanged/.test(H.slice(N38, N37)) && /counts the income streams running on that date/.test(H.slice(N38, N37)) && /only once it has started/.test(H.slice(N38, N37)));
-    if (F30B) T("E-2 the desktop item says no tab overprints at UI SIZE 100% (v6.41), and keeps the UI SIZE disclosure (F-32)",
+    if (NARROWKEY) T("E-2 the desktop item says no tab overprints or scrolls sideways on a phone 360 px wide or more at any UI SIZE (v6.42; F-32 fixed, t106 §D pins the item), and no longer says the layout follows the window",
+      /on a phone 360 px wide or more at any UI SIZE, or 320 px wide or more at UI SIZE up to 130% \(v6\.38, v6\.40, v6\.41 and v6\.42 fixed the tabs that did\)/.test(item)
+      && !/the phone layout follows the window’s width, not UI SIZE/.test(item) && !/Between 600 and 625 px/.test(item));
+    else if (F30B) T("E-2 the desktop item says no tab overprints at UI SIZE 100% (v6.41), and keeps the UI SIZE disclosure (F-32)",
       /At UI SIZE 100% no tab prints figures over their neighbours on a screen 360 px wide or more \(v6\.38, v6\.40 and v6\.41 fixed the tabs that did\)/.test(item)
       && /the phone layout follows the window’s width, not UI SIZE/.test(item) && !/Between 600 and 625 px/.test(item));
     else if (F30) T("E-2 the desktop item says what still overprints on a phone, and where — from v6.40 the four tabs left, UI SIZE and F-31 (F-30 DF-4, DF-5)",

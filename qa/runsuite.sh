@@ -8,7 +8,7 @@ PRIOR=${1:-v536}; CUR=${2:-v537}
 TMP=$(mktemp -d)
 tally () {  # $1 label, $2... command
   local label="$1"; shift
-  local out rc; out=$(timeout 900 "$@" 2>&1); rc=$?
+  local out rc; out=$(timeout "${TALLY_TIMEOUT:-900}" "$@" 2>&1); rc=$?   # v6.42: a suite may set its own ceiling (t45)
   echo "$out" > "$TMP/$label.log"
   local p f
   p=$(echo "$out" | grep -oE '[0-9]+ passed' | awk '{s+=$1} END {print s+0}')
@@ -145,7 +145,9 @@ tally "t44-$CUR"   node t44_irmaa_top_tier.mjs "$CUR"
 # t45 (v5.79) — the phone layout, in REAL Chromium against the BUILT page (../index.html, copied in by mk_runfolder).
 # Current leg ONLY by construction: the run folder carries exactly one built page. It FAILS, never skips, when no browser
 # can launch or the page is not this build (decision D-2). Python, the first non-Node suite: Playwright ships in Python here.
-tally "t45-$CUR"   python3 t45_phone_layout.py "$CUR"
+# v6.42: t45 gained S-11 (all 26 tabs at seven sizes) and runs about 30 minutes, past the 900 s every other suite gets; its run of the v6.42
+# package reported DIED (rc=124, the timeout) before this ceiling was raised for it alone.
+TALLY_TIMEOUT=3600 tally "t45-$CUR"   python3 t45_phone_layout.py "$CUR"
 # t46 (v5.80) runs on BOTH legs: the v5.79 leg pins BASE on every visit with nothing stored; the current leg asserts a
 # first visit on BULL-LEANING (label AND the Monte Carlo's regime weights), a saved choice restored in a new session, an
 # invalid stored value falling back to the default, and the non-default notice naming the default. Wired AT BUILD.
@@ -475,6 +477,13 @@ tally "t104-$CUR"   node t104_roth_stress_phone.mjs "$CUR"
 # process, seeded alike; fails without the prior bundle); the Field Manual. Both legs (the v6.40 leg pins the defects). Layout is t45 §S's.
 tally "t105-$PRIOR" node t105_f30b_phone.mjs "$PRIOR"
 tally "t105-$CUR"   node t105_f30b_phone.mjs "$CUR"
+# t106 (v6.42) — the phone layout follows UI SIZE (F-32, F-33): no window media query left in the app's stylesheet, every v6.41 phone rule once
+# under .dc-narrow and the 699 px rule under .dc-sub700w (EXTINCTION); the narrow rules under .dc-xs and each site's class or scroll box; the
+# layout-width function run on the source's own text at every boundary for UI SIZE 100-150% (and the old media queries' switch at 100%); the
+# rendered root's class following a resize and a stored UI SIZE (jsdom); the Field Manual. Both legs (the v6.41 leg pins the defects). Layout
+# is t45 §S-11's (a browser).
+tally "t106-$PRIOR" node t106_ui_size_layout.mjs "$PRIOR"
+tally "t106-$CUR"   node t106_ui_size_layout.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

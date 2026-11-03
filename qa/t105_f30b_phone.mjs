@@ -41,13 +41,13 @@ console.error = () => {}; console.warn = () => {};
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v641";
 const DUMP = process.argv.includes("--dump");
-const KNOWN_VERSIONS = ["v640", "v641"];
+const KNOWN_VERSIONS = ["v640", "v641", "v642"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v641"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v641", "v642"].includes(VER);   // an array, so the next registration widens it
 const B_PRIOR = "v640";                // §B's comparison leg — a constant, so the registrar cannot widen it (t76 records why)
 const KD = "[KNOWN DEFECT 2026-10-31, F-30 — flips at v6.41]";
 dom.reconfigure({ url: "https://stextor.github.io/danger-close/" }); globalThis.location = window.location;
@@ -120,12 +120,19 @@ const PARENT = new Map();
 const all = (root, pred, out = []) => { if (pred(root)) out.push(root); for (const c of kids(root)) { PARENT.set(c, root); all(c, pred, out); } return out; };
 all(AST, () => false);   // fill PARENT
 const SRCOF = n => SRC.slice(n.range[0], n.range[1]);
-const SHEET = all(AST, n => n.type === "TemplateLiteral" && n.quasis.some(q => (q.value.cooked || "").includes("@media (max-width: 599px)")));
+// v6.42 (F-32, docs/SCOPE_F32_UI_SIZE_V642.md): the phone rules moved from the window's media query to the class .dc-narrow on the app's
+// zoomed root (the layout width), and the 699 px rule to .dc-sub700w. From v6.42 PHONE reads the .dc-narrow rules with that prefix taken off and
+// SUB700 the .dc-sub700w rule, so every check below reads the same rules on every leg; t106 holds the move itself (EXTINCTION of the media query).
+const NARROWKEY = ["v642"].includes(VER);   // an array, so the next registration widens it
+const keyed = (css, key) => css.split("\n").map(l => l.trim()).filter(l => l.startsWith(key + " "))
+  .map(l => l.split(", ").map(x => x.startsWith(key + " ") ? x.slice(key.length + 1) : x).join(", ")).join("\n");
+const unkeyed = css => css.split("\n").filter(l => !l.trim().startsWith(".dc-narrow ") && !l.trim().startsWith(".dc-sub700w ")).join("\n");
+const SHEET = all(AST, n => n.type === "TemplateLiteral" && n.quasis.some(q => (q.value.cooked || "").includes(NARROWKEY ? ".dc-narrow .dc-phone-only {" : "@media (max-width: 599px)")));
 const CSS = SHEET.length === 1 ? SHEET[0].quasis.map(q => q.value.cooked).join("") : "";
 const blockOf = (css, at) => { const i = css.indexOf(at); if (i < 0) return ""; let d = 0, j = css.indexOf("{", i);
   for (let k = j; k < css.length; k++) { if (css[k] === "{") d++; else if (css[k] === "}" && --d === 0) return css.slice(j + 1, k); } return ""; };
-const PHONE = blockOf(CSS, "@media (max-width: 599px)"), SUB700 = blockOf(CSS, "@media (max-width: 699px)");
-const OUTSIDE = CSS.replace(PHONE, "").replace(SUB700, "");   // the sheet less both blocks' bodies
+const PHONE = NARROWKEY ? keyed(CSS, ".dc-narrow") : blockOf(CSS, "@media (max-width: 599px)"), SUB700 = NARROWKEY ? keyed(CSS, ".dc-sub700w") : blockOf(CSS, "@media (max-width: 699px)");
+const OUTSIDE = NARROWKEY ? unkeyed(CSS) : CSS.replace(PHONE, "").replace(SUB700, "");   // the sheet less both blocks' bodies
 T("A-0 SETUP: one stylesheet holds the phone block, and the dc-scrollx rules stand outside it (the child's minimum is var(--dc-floor, 600px))",
   SHEET.length === 1 && PHONE.length > 50 && /\.dc-scrollx > \* \{ min-width: var\(--dc-floor, 600px\); \}/.test(OUTSIDE), `${SHEET.length} ${PHONE.length}`);
 const once = (css, sel) => css.split(sel + " {").length === 2;
@@ -135,8 +142,8 @@ if (POST) {
     && /\.dc-wrap-phone \{ flex-wrap: wrap !important; \}/.test(PHONE) && /\.dc-export-phone \{ max-width: 100%; \}/.test(PHONE)
     && /\.dc-export-phone > input \{ min-width: 0; flex-shrink: 1; \}/.test(PHONE)
     && !OUTSIDE.includes(".dc-wrap-phone") && !OUTSIDE.includes(".dc-export-phone") && !SUB700.includes(".dc-wrap-phone") && !SUB700.includes(".dc-export-phone"));
-  T("A-1b .dc-cards-sub700 is inside one max-width: 699px block, once, and nowhere else: the phone's card layout (84 px cards, the minimum lifted)",
-    CSS.split("@media (max-width: 699px)").length === 2 && once(SUB700, ".dc-cards-sub700") && !PHONE.includes("dc-cards-sub700") && !OUTSIDE.includes("dc-cards-sub700")
+  T("A-1b .dc-cards-sub700 is inside one max-width: 699px block (from v6.42 the one .dc-sub700w rule), once, and nowhere else: the phone's card layout (84 px cards, the minimum lifted)",
+    (NARROWKEY ? SUB700.split("\n").length === 1 : CSS.split("@media (max-width: 699px)").length === 2) && once(SUB700, ".dc-cards-sub700") && !PHONE.includes("dc-cards-sub700") && !OUTSIDE.includes("dc-cards-sub700")
     && /\.dc-cards-sub700 \{ grid-template-columns: repeat\(auto-fill, minmax\(84px, 1fr\)\) !important; min-width: 0 !important; \}/.test(SUB700));
   T("A-1c F-31: .dc-streamrow { flex-wrap: wrap; } stands outside every media block, once — an income stream's row wraps at any width (its parts' rules stay phone-only)",
     OUTSIDE.split(".dc-streamrow { flex-wrap: wrap; }").length === 2 && OUTSIDE.split(".dc-streamrow").length === 2 && /\.dc-streamrow \{ flex-wrap: wrap; row-gap: 2px; \}/.test(PHONE));
@@ -291,10 +298,17 @@ console.log("  C — the Field Manual");
       && /category column is wider/.test(note) && /Below 700 px the Roth tab’s IRMAA calendar shows as many years a row as fit/.test(note)
       && /wraps at any width when it does not fit/.test(note) && /Otherwise the desktop layout is unchanged, and so is every figure\./.test(note), note.slice(0, 200));
     T("C-1b …and it is the first release note in the Field Manual, and the newest (§13's items and release notes interleave; the notes run newest first)",
-      notes.length > 5 && notes[0].at === N41 && notes[0].v === 641 && notes.every(n => n.v <= 641), notes.slice(0, 3).map(n => `${n.v}@${n.at}`).join(" "));
-    T("C-2 the desktop item says no tab prints over its neighbours at UI SIZE 100% from 360 px, naming the three releases that fixed them, and what remains below 360 px (F-33)",
+      notes.length > 5 && (NARROWKEY ? notes[0].v === 642 && notes[1].at === N41 && notes[1].v === 641 && notes.slice(1).every(n => n.v <= 641)   // v6.42: its own note is first (t106 D-1)
+        : notes[0].at === N41 && notes[0].v === 641 && notes.every(n => n.v <= 641)), notes.slice(0, 3).map(n => `${n.v}@${n.at}`).join(" "));
+    if (NARROWKEY) T("C-2 the desktop item says no tab prints over its neighbours or scrolls sideways on a phone 360 px wide or more at any UI SIZE, 320 px up to 130%, naming the four releases that fixed them (v6.42: F-33 fixed)",
+      /No tab prints figures over their neighbours, and no page scrolls sideways, on a phone 360 px wide or more at any UI SIZE, or 320 px wide or more at UI SIZE up to 130% \(v6\.38, v6\.40, v6\.41 and v6\.42 fixed the tabs that did\)\./.test(item)
+      && !/on a narrower phone a few figures on the Monte Carlo tab still do/.test(item));
+    else T("C-2 the desktop item says no tab prints over its neighbours at UI SIZE 100% from 360 px, naming the three releases that fixed them, and what remains below 360 px (F-33)",
       /At UI SIZE 100% no tab prints figures over their neighbours on a screen 360 px wide or more \(v6\.38, v6\.40 and v6\.41 fixed the tabs that did\); on a narrower phone a few figures on the Monte Carlo tab still do, and the Grade and Verify tabs scroll sideways a little\./.test(item));
-    T("C-3 …keeps the UI SIZE disclosure (F-32), corrected: above 100% some figures overlap in a narrow window (on a phone, most on Monte Carlo) and some tabs scroll sideways on a phone — not only at 150%",
+    if (NARROWKEY) T("C-3 …and from v6.42 says the layout follows the room UI SIZE leaves, and where it is not designed for (below 240 px of room) (F-32 fixed)",
+      /since v6\.42 the layout follows that room, not the window’s width/.test(item) && /The app is not designed for less than 240 px of room/.test(item)
+      && !/the phone layout follows the window’s width, not UI SIZE/.test(item) && !/at 150% the page can scroll sideways/.test(item));
+    else T("C-3 …keeps the UI SIZE disclosure (F-32), corrected: above 100% some figures overlap in a narrow window (on a phone, most on Monte Carlo) and some tabs scroll sideways on a phone — not only at 150%",
       /the phone layout follows the window’s width, not UI SIZE: with a UI SIZE above 100% some figures overlap in a narrow window - on a phone, most on the Monte Carlo tab - and on a phone some tabs scroll sideways\./.test(item)
       && !/at 150% the page can scroll sideways/.test(item));
     T("C-4 …and drops what v6.41 fixed: the four tabs, the Expenses label, the calendar's CONVERT labels and F-31",

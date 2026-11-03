@@ -20,7 +20,7 @@
 import os, sys, re
 
 VER = sys.argv[1] if len(sys.argv) > 1 else ""
-KNOWN_VERSIONS = ["v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641"]
+KNOWN_VERSIONS = ["v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642"]
 HERE = os.path.dirname(os.path.abspath(__file__))
 def _vnum(v):   # "v640" -> 640; anything else -> -1. From v6.40 the two gates below compare numbers, so a registration that forgets them cannot
     m = re.fullmatch(r"v(\d+)", v or "")   # turn section S into a silent skip (through v6.39 they were hand-widened lists)
@@ -28,6 +28,7 @@ def _vnum(v):   # "v640" -> 640; anything else -> -1. From v6.40 the two gates b
 F30 = _vnum(VER) >= 640       # v6.40 (F-30, docs/SCOPE_F30_ROTH_STRESS_PHONE_V640.md): section S also holds the Roth and Stress tabs
 POSTF20 = _vnum(VER) >= 638   # v6.38 (F-20): section S holds builds from v6.38 on
 F30B = _vnum(VER) >= 641      # v6.41 (F-30 second part, F-31, docs/SCOPE_F30B_PHONE_V641.md): section S also holds My Data, SS, Expenses, Taxes
+F32 = _vnum(VER) >= 642       # v6.42 (F-32, F-33, docs/SCOPE_F32_UI_SIZE_V642.md): section S also holds UI SIZE above 100% and phones under 360 px
 PAGE = os.path.abspath(sys.argv[2]) if len(sys.argv) > 2 else os.path.join(HERE, "..", "index.html")
 # v6.41: the tallies have names no check would reuse. The first v6.41 build set a module-level `ok = <bool>` in S-10, which replaced the
 # pass counter and printed "8 passed" for about 220 checks (found by the build review); a failure still counted, so only the tally lied.
@@ -211,6 +212,10 @@ try:
                     found = pg.evaluate("(l) => { const b = [...document.querySelectorAll('button.tab')].find(x => x.textContent.trim().toLowerCase() === l); if (b) b.click(); return !!b; }", lab)
                     T(f"S-10 SETUP: the {t} tab button was found by its label", found)
                 pg.wait_for_timeout(900)
+                if t == "montecarlo":   # v6.42: the mortgage what-if renders its results later; measure once nothing is re-running
+                    for _ in range(120):
+                        if not pg.evaluate("() => /Recalculating both scenarios|RE-RUNNING/.test(document.body.innerText)"): break
+                        pg.wait_for_timeout(500)
             if F30B:
                 F5 = ("mydata", "ss", "expenses", "taxes", "income")
                 cases = [(w, None, True, pl, F5) for pl in (None, PLAN) for w in (360, 390, 430)] + [(w, None, False, None, F5) for w in (600, 640)] \
@@ -249,6 +254,70 @@ try:
                     pg.close()
             else:
                 print(f"  · S-10 skipped: {VER} predates v6.41 (F-30's other four tabs, F-31)")
+            # v6.42 (F-32, F-33): the layout follows the room UI SIZE leaves (the window's width / UI SIZE), not the window. Through v6.41 a
+            # zoomed window got the layout for its own width: at 150% a 600 px window overprinted 52 pairs on six tabs, and a 390 px phone 163 pairs on
+            # eight (Monte Carlo 133) with eight pages scrolling sideways; below 360 px at 100% Monte Carlo overprinted and Grade and Verify scrolled
+            # (F-33). All 26 tabs, seeded, at the cases DH-1 (a) promises: every phone 360 px or wider at every UI SIZE (240 px of room at 360 / 150%),
+            # 320 px at 100-130%. Windows of 600 and 700 px at 150% (400 and 467 px of room) get the phone layout: the tab menu, not the grid.
+            ROOTCLS = "() => { const d = [...document.querySelectorAll('#root div')].find(e => e.style.zoom); return d ? (d.getAttribute('class') || '') : null; }"
+            if F32:
+                ALL26 = ("mydata", "dashboard", "trajectory", "expenses", "income", "ss", "grade", "ranking", "guardrails", "withdrawal", "roth", "taxes",
+                         "irmaa", "montecarlo", "backtest", "whatbreaks", "survivor", "stress", "checklist", "exitplan", "positions", "command", "skins",
+                         "docs", "verify", "events")
+                # (window, UI SIZE, mobile, plan, the classes the root must carry)
+                # 360/150 is the floor (240 px of room); 320/130 the Field Manual's other bound (246); 412/115 the most common Android width just under
+                # 360 px of room (358); 430/115 a phone that keeps the phone layout without dc-xs (374); 320/100 F-33.
+                cases = [(360, 150, True, None, "dc-narrow dc-sub700w dc-xs"), (390, 130, True, None, "dc-narrow dc-sub700w dc-xs"),
+                         (320, 130, True, None, "dc-narrow dc-sub700w dc-xs"), (412, 115, True, None, "dc-narrow dc-sub700w dc-xs"),
+                         (430, 115, True, None, "dc-narrow dc-sub700w"), (320, None, True, None, "dc-narrow dc-sub700w dc-xs"),
+                         (360, 150, True, PLAN, "dc-narrow dc-sub700w dc-xs"), (600, 150, False, None, "dc-narrow dc-sub700w")]
+                for w, zoom, mobile, pl, want in cases:
+                    pg = open_plan(w, 844 if mobile else 900, mobile, pl, zoom, seed=True)
+                    if zoom:
+                        z = pg.evaluate(ZOOM)
+                        T(f"S-11 SETUP {w} px: UI SIZE {zoom}% took effect (the app's zoom reads {z!r})", z == str(zoom / 100).rstrip("0").rstrip("."), z)
+                    rc = pg.evaluate(ROOTCLS)
+                    T(f"S-11 {w} px{' at UI SIZE ' + str(zoom) + '%' if zoom else ''}: the app's root carries {want!r} ({rc!r})", rc == want, repr(rc))
+                    menu = pg.locator('select[aria-label="Choose a tab"]')
+                    T(f"S-11 {w} px{' at UI SIZE ' + str(zoom) + '%' if zoom else ''}: the tabs sit in one menu (the phone layout)", menu.count() == 1 and menu.is_visible())
+                    for t in (ALL26 if pl is None else ("mydata", "ss", "expenses", "taxes", "income", "montecarlo")):
+                        to_tab_x(pg, t); hits = pg.evaluate(PAGE_OVERLAP); m = pg.evaluate(MEASURE)
+                        if t == "grade":   # the large letter's glyph box touches its label by design (the known false positive): that one pair only
+                            hits = [h for h in hits if not h.startswith("Overall grade / ")]
+                        T(f"S-11 {w} px{' at UI SIZE ' + str(zoom) + '%' if zoom else ''}, {'stream plan' if pl else 'the example'}: no text on the {t} tab prints over other text ({len(hits)} pairs), and the page does not scroll sideways ({m['sw']} vs {m['vw']})",
+                          not hits and m["sw"] <= m["vw"], "; ".join(hits[:6]))
+                    pg.close()
+                # A desktop window at 100%: no class at all (not an empty attribute); at 150% the root follows a resize both ways.
+                pg = open_plan(1024, 900, False, None, None, seed=True)
+                T("S-11 1024 px at UI SIZE 100%: the app's root carries no class attribute", pg.evaluate("() => { const d = [...document.querySelectorAll('#root div')].find(e => e.style.zoom); return !!d && !d.hasAttribute('class'); }"))
+                pg.close()
+                pg = open_plan(1024, 900, False, None, 150, seed=True)
+                seen = [pg.evaluate(ROOTCLS)]
+                for w in (800, 1100):
+                    pg.set_viewport_size({"width": w, "height": 900}); pg.wait_for_timeout(500); seen.append(pg.evaluate(ROOTCLS))
+                T(f"S-11 UI SIZE 150%: the root's class follows the window as it is resized, 1024 -> 800 -> 1100 px ({seen})",
+                  seen == ["dc-sub700w", "dc-narrow dc-sub700w", ""], str(seen))
+                pg.close()
+                # The tables (DH-2 (a)) keep their columns: at 240 px of room the percentile and IRMAA tables scroll in their own box; at 358 px (412 px
+                # at 115%) none of the three boxes scrolls — the first build's 300 px floors hid the percentile table's last column there (found by the
+                # build review); the Verify tables fit at every room (a long citation breaks); at 100% on a phone each box is a plain box.
+                SBOX = """(sel) => { const b = [...document.querySelectorAll('.dc-scrollx-xs')].find(x => x.querySelector(sel)); if (!b) return null;
+                  const cs = getComputedStyle(b); return { ox: cs.overflowX, cw: b.clientWidth, sw: b.scrollWidth }; }"""
+                VALL = "() => [...document.querySelectorAll('.dc-scrollx-xs')].filter(b => b.querySelector('table')).map(b => b.scrollWidth - b.clientWidth)"
+                for w, zoom, want in ((360, 150, "scroll"), (412, 115, "fit"), (390, None, "plain")):
+                    pg = open_plan(w, 844, True, None, zoom, seed=True)
+                    to_tab_x(pg, "montecarlo"); mc = pg.evaluate(SBOX, "div.dc-tight-xs")
+                    to_tab_x(pg, "irmaa"); ir = pg.evaluate(SBOX, "div")
+                    to_tab_x(pg, "verify"); vt = pg.evaluate(VALL)
+                    at = f"{w} px{' at UI SIZE ' + str(zoom) + '%' if zoom else ''}"
+                    for nm, bx in (("Monte Carlo's percentile table", mc), ("the IRMAA tier table", ir)):
+                        ok_ = bx is not None and (bx["ox"] == "auto" and bx["sw"] > bx["cw"] if want == "scroll" else bx["ox"] == "auto" and bx["sw"] <= bx["cw"] if want == "fit" else bx["ox"] == "visible")
+                        T(f"S-11 {at}: {nm}'s box {dict(scroll='scrolls in its own box', fit='shows every column without scrolling', plain='is a plain box (overflow visible)')[want]} ({bx})", ok_, str(bx))
+                    if want != "plain":
+                        T(f"S-11 {at}: none of the Verify tab's {len(vt)} check tables scrolls ({max(vt) if vt else None} px hidden at most)", len(vt) >= 10 and max(vt) <= 0, str(vt))
+                    pg.close()
+            else:
+                print(f"  · S-11 skipped: {VER} predates v6.42 (F-32, F-33)")
         b.close()
 except SystemExit:
     raise
