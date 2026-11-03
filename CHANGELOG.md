@@ -1,5 +1,136 @@
 # Changelog
 
+## v6.43 — the money the Withdrawal tab, What Breaks and Backtest start from (D-64); a single plan's accounts are the one person's (D-70)
+
+**A modeling release.** Scoped in `docs/SCOPE_D64_D70_V643.md` (repo-only; review §6, build record §7). Steve, on the nine decisions:
+*"all recommended"* — DD-1 to DD-9 all (a). Built on v6.42 (source `940e1f02…`). METHODOLOGY's new section *The money the Withdrawal tab,
+What Breaks and Backtest start from (v6.43)* is the full account. Under DD-4 (a) **the 2027 tax figures become v6.44**
+(`docs/SCOPE_TY2027_REFRESH_V633_V634.md` renumbered a tenth time; its suite stays `t99_ty2027.mjs`). As far as this session could find on
+3 November, the IRS had not published its TY2027 figures; the 15 December deadline stands, and the tax release goes next the moment they are out.
+
+**What was wrong (v6.42, measured at the scope).**
+- **D-64, wider than registered.** Three projections start at the retirement year and spend down from there: the Withdrawal tab's schedule
+  (Engine D), What Breaks and Backtest. None put the contributions planned before retirement into the money it starts from. Engine D filled
+  its buckets from today's holdings but took its Traditional and Roth shares from balances that included the contributions, so the two
+  shares added up to more than the whole — 1.068 on the example, 1.342 on a plan retiring twelve years out, 1.684 on a plan whose holdings
+  are small beside its contributions — and the balance was short by every contribution. What Breaks and (not registered) Backtest started
+  from today's household. The Withdrawal tab's *Holdings, by sleeve* card printed today's holdings plus the contributions, not grown, which
+  matched nothing else on the tab.
+- **D-70.** A single plan whose holdings or Other accounts were still stored under spouse B (a married plan switched to Single) had that
+  money counted as spouse B's, and no engine takes spouse B's RMD on a single plan. On the example made single: lifetime RMDs on the
+  Withdrawal tab $262,395 against $305,824 with every owner A. Optimistic.
+
+**What changed.**
+- **Engine D** adds the contributions to its buckets at face value (the v5.10 rule), after the one-time rows before retirement and the carry,
+  placed by the contribution mix (DD-1 (a)); the shares are re-taken over the new total. On the example under BASE the buckets open at
+  $1,500,000 × 1.0844728 + $102,600 = **$1,729,309**, Traditional share 0.802459, Roth 0.197541 (they sum to 1); the schedule opens
+  $102,600 higher in 2029's dollars and ends $2,066,038 where it ended $1,833,424.
+- **What Breaks and Backtest** start from today's household plus the contributions in today's dollars, less the one-time rows before
+  retirement — one helper, `retireStartToday` (DD-2 (a)). On the example under BASE: $1,647,000 + $94,608 = $1,741,608. They move more than
+  the tax tabs: under BASE What Breaks' spending headroom 1.25× → 1.30×, the shock it absorbs $0.55M → $0.65M, its return break-point
+  −2.2% → −2.7%; Backtest's worst start on the example, at the page's default prior, ends $1.21M → $1.40M real.
+- **A spouse who retires later** (DD-7 (a)): the three count that spouse's contributions only to the first retirement, and say so where it
+  applies (What Breaks, Backtest, the Withdrawal tab's units note). Engines A–C keep their own treatment (filed, D-71).
+- **A one-time row before retirement larger than today's money** (DD-6 (a)) is charged against the contributions too.
+- **A single plan's accounts are the one person's** (DD-3 (a)): `retireStartBalances` — the only engine-side reader of a row's owner —
+  counts every row of a single plan as spouse A's; nothing stored changes. The two plans above now agree on every figure probed.
+- **What else moves.** Engine D's draws feed every tax engine (`withdrawalPlanSeries`), so the Taxes, IRMAA and Roth tabs and the Monte
+  Carlo move a little: lifetime tax in today's dollars on the example (BASE) $180,578 → $180,515 at $0, $201,203 → $200,652 at $70,000.
+  MC parity: `mc`, `extMC` and `stress` differ by design (`t2`'s intended differences for the pair). The Roth tab's best cell moved on 3 of
+  21 plans measured on the default objective and 6 of 21 on the lowest-tax one (the example's: $10K → $0 a year, two cells $459 apart).
+- **Copy and documents.** The *Holdings, by sleeve* card shows the schedule's own opening at the retirement year, in that year's dollars
+  (DD-8 (a); $1,388K / $342K on the example under BASE). The Withdrawal tab's units note and D-44 sentence, Backtest's and What Breaks'
+  start, My Data's accrual readout and split note, and the Monte Carlo tab's sentence (corrected for a spouse who keeps contributing after
+  the first retirement — it said "no contributions") name the contributions. Field Manual: the Withdrawal Strategy entry, the units
+  sentence and a §13 v6.43 note (DD-5 (a): no notice). METHODOLOGY: *Contribution accrual* corrected (eight call sites, the consumer list
+  re-derived), *A single plan's accounts are the one person's (v6.43)*, and the new section. MissingFeatures **D-64 and D-70 closed**;
+  **D-71 to D-74 filed** (DD-9 (a)'s three: the tax engines front-load a later spouse's contributions; a single plan drops streams stored under
+  B; the Monte Carlo adds spouse B's contribution on a single plan restored from a backup — and the build review's DD-6 remainder). The four
+  version sites read v6.43.
+
+**Owned.**
+- **The first build left a case of D-64 open, and the build review found it.** The step ran only when Engine D opened with a contribution;
+  a plan already retired whose spouse still contributes opens with none (DD-7), so it kept v6.42's shares — which counted those later
+  contributions (1.16 with spouse B at $2,000 a month to 2036). The step now also runs when `retireStartBalances` counted a contribution;
+  `t107` §B has the case and control K14 puts the defect back.
+- **A control could not run.** K3's target carried a trailing `}` the source does not have, so it would have reported itself invalid; the
+  script had not yet been run when the review read it. Fixed; the scope's "What Breaks only" control was also missing (K13 added).
+- **The release notes understated what moves most.** The first §13 note and METHODOLOGY called the moves small and left out What Breaks and
+  Backtest, whose answers move most; both now say so.
+- **The scope's suite census missed checks in eight suites, six of which it did not name at all.** The prototype it ran had no copy changes and no guard, so it could not see `t8` (a regex
+  window), `t81` E-5/E-8, `t91` C-13, `t92` B-8d, `t98` C-6–C-6f, `t100` C-8, `t105` C-1b and `t106` D-1/D-4 (the §13 note order and the
+  version sites). Each is re-gated below.
+- **The scope gave spouse B's Traditional on the single example as $218,600** ($211,600 RMD-bearing), the married figure; on a single plan
+  no contribution accrues to spouse B, and it is $206,000 ($199,000). Corrected in the scope; `t107` D-1 pins it. The Roth best-cell count
+  was 20 plans in the draft; 21 at the final build, the same moves.
+
+**Limitations, stated.**
+- **D-74:** Engine D charges a one-time row before retirement against the after-tax money and the retirement holdings only, so a part larger
+  than both together, contributions included, is never charged (an IRA, annuity or HSA under Other accounts is not drawn for it); What
+  Breaks and Backtest charge the whole household. The build review's case: holdings cut to $150,000, a $300,000 row in 2028, about $37,000
+  uncharged in Engine D. Disclosed in §13 and METHODOLOGY.
+- **D-71:** the tax engines put a later-retiring spouse's contributions in from the first retirement; the three projections above leave them
+  out after it. Neither is exact; the Monte Carlo, which adds them quarter by quarter, is.
+- What Breaks' and Backtest's asset weights stay today's mix; the three rates that divide spending by today's household (the Income tab's,
+  the Social Security tab's, the Dashboard's) stay on today's basis.
+- A stored bucket mix that does not sum to 1 (a hand-edited or old backup) still leaves Engine D's shares off 1 — out of scope; `t107` §B
+  states its invariant over the stored mix's own sum.
+
+**Tests.** New suite **`t107_opening_balances.mjs`**, run on both legs; the v6.42 leg pins each defect as `[KNOWN DEFECT 2026-11-03, D-64 —
+flips at v6.43]` or `[…, D-70 …]`.
+- **§A, the source by AST:** `openingAccrual` and its one `contribAccrual` call (B capped); the three calls of `contribAccrual`; Engine D's
+  guarded step (both kinds of contribution) and its two helpers; both `startBal` declarations on the helper; the single-plan rule in
+  `retireStartBalances`; no engine reads an owner itself.
+- **§B, the extinction invariant:** on 26 plans (the example, every fixture household, plans retiring 2035 and 2041, an unsplit holding,
+  spouse B retiring later, no contribution mix, a stored mix off 1, Roth contributions with a bonus, and a plan already retired whose spouse
+  still contributes) × $0/$70K/$250K × BASE/BULL: Engine D's buckets, Traditional and Roth are the holdings carried plus the contributions
+  (computed in the suite from the plan's fields), they reconcile with Engine C's carried balances to the cent, and the shares sum to at most
+  1; an anti-vacuity check.
+- **§C, hand pins:** $1,729,309 and the two shares; spouse B's RMD split; placement by the mix; DD-7 on the later-B plan; DD-6 on a plan with
+  $150,000 of holdings and a $200,000 row; the helper's $1,741,608 and its note; a negative contribution clamped.
+- **§D, D-70:** the example made single with every row under B equals it with owners A; v6.42 pinned at $206,000 / $262,395 vs $305,824.
+- **§E:** plans with no contributions and a plan retired in its as-of year bit-identical to v6.42's module (Engine D, Engines B and C, the
+  Monte Carlo's schedule, the helper); the Monte Carlo's contribution weights unchanged.
+- **§F, rendered:** the Field Manual and METHODOLOGY; the sleeve card against `_opening`; the units note and D-44 sentence; Backtest's and
+  What Breaks' start; the Monte Carlo tab with and without a later spouse; DD-7's disclosure on three tabs; a plan with no contributions;
+  My Data's readout.
+- **Re-gated:** `t2` (`v642→v643`: `mc`, `extMC`, `stress`); `t8` (a constructor regex window); `t19`, `t40`, `t42`, `t58` (pins re-measured,
+  every one still equal to its oracle or partner); `t71` and `t72` (their independent Engine D oracles now carry the contributions, computed
+  from the plan's fields; t71 D-4's cap no longer binds in 2035, so D-4b holds it where it does; t72 A-3/B-2 and E-2's card); `t81` E-5/E-8;
+  `t91` C-13; `t92` B-8d; `t94` D-2/D-3 (on the single example Engine A now equals Engine C, $12,080); `t98` C-1b/C-1c (restated on the
+  holdings' part) and C-6–C-6f; `t100` B-4, C-5, C-8; `t105` C-1b and `t106` D-1 (restated so a later release's §13 note ahead of theirs
+  does not redden them); `t106` D-4 (reads the leg's own version); `domdiff` bounds the pair (the same rows, every Expenses cell unchanged,
+  the sleeve sentence one side each; Taxes and IRMAA differ with the same rows).
+- **Registered:** `v643` by the AST registration; by hand `t1`/`t4`'s maps, `t33` PINS (unchanged), `t93`'s Engine D reference (v642),
+  `t103`'s prior-leg map (no arm), `t45`/`t47`/`t48`. `runsuite.sh` lists `t107`. The shim exports the five new helpers on `__g` (guarded).
+  The boundary census gains `single_b_owned` (`t29` B-35, C-d70-1).
+
+**Counts**, from the full suite run from the packaged copies:
+- **11,426 app checks across 105 app suites, 0 failed, 0 DIED**: 6,279 current-leg, 4,664 prior-leg (v6.42), 235 and 238 in the two
+  attribution runs, MC parity 10/10 (with `mc`, `extMC` and `stress` differing from v6.42 as intended).
+- Tooling: `t21` 64, `domdiff` 39, `sets` 12 + 12. GRAND **11,553**, 0 failed — green on its first run from the packaged copies.
+- Against v6.42, the current leg: `t107` new (39; 13 on the v6.42 leg); `t29` 142 → 145 (the census row); `t71` 26 → 27 (D-4b; in the
+  attribution runs too); `t103` 39 → 38 and `t106` 36 → 33 (each has a check that runs only in the v6.41 → v6.42 folder and prints a skip
+  here). Every other current-leg count is unchanged; the re-gated suites kept their counts. `domdiff` 32 → 39 (the pair's arms). Per-suite
+  figures are on `TESTING.md`'s v6.43 line.
+- Before it, from the build workspace: a first full run (browser suites skipped) of the build the review read, GRAND 10,868 / 86 failed —
+  every red a re-gate listed above.
+
+**Controls.** `qa/tools/controls_v643_opening.py`, on a copy of the packaged run folder: **16 of 16 as expected** — C0 silent; K1–K15 each fire their named `t107` checks (several also turn related checks red); every file
+restored and hash-checked. K3's first version could not run (its target did not occur; found by the build review), and K13–K15 came with
+the review's fixes; the full set was run first on the build workspace and then on the packaged folder, both 16 of 16.
+
+**The reviews.** The scope was reviewed once before Steve decided (2 must-fix, 10 should-fix, 7 nits; scope §6). The build was reviewed by
+an agent that had not seen it, given the workspace diff and the built modules: **2 must-fix, 3 should-fix, 3 notes**, every one checked and
+taken (scope §7): the retired-plan case above; K3; DD-6's remainder (disclosed and filed, D-74 — not changed, because drawing an IRA or
+annuity for the row raises how that draw is taxed); the release notes; the missing control; DD-7's disclosure on What Breaks and Backtest;
+two copy sites printed when they did not apply (the units note on a plan with no contributions, the spouse-B clauses when spouse B
+contributes nothing after); the Monte Carlo sentence's year (*"until the start of 2034"*). It reproduced the headline figures by hand.
+
+**Provenance.** Source `0709eb9acdae8d58a72f9de1bd1fcbc1` · built `index.html` `a8b1a139dc02ff9a922b9c0394d7617f` (vite 5.4.21, `npm ci`; built twice, byte-identical; v6.42 rebuilt
+byte-identically to `7c817209…` on the same toolchain) · `smoke_built` 22 of 22 on the packaged page. The candidate the build review read
+(`ea62a8d0…` / `96cb548f…`) was never shipped.
+
 ## v6.42 — the phone layout follows UI SIZE (F-32), and phones narrower than 360 px (F-33)
 
 **A presentation release.** Scoped in `docs/SCOPE_F32_UI_SIZE_V642.md` (repo-only; review §8, build record §9). Steve chose all four decisions

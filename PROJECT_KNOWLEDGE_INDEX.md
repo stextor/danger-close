@@ -25,15 +25,19 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 
 | Field | Value |
 |---|---|
-| Version | **v6.42** |
-| Source file in knowledge | `DangerClose-v6_42.jsx` |
-| Source md5 | `940e1f02e59e9acb631957464ce643b3` |
-| Built `index.html` md5 | `7c817209095ce6db7f065c815761b38e` |
-| Shipped | 2026-11-02 |
+| Version | **v6.43** |
+| Source file in knowledge | `DangerClose-v6_43.jsx` |
+| Source md5 | `0709eb9acdae8d58a72f9de1bd1fcbc1` |
+| Built `index.html` md5 | `a8b1a139dc02ff9a922b9c0394d7617f` |
+| Shipped | 2026-11-03 |
 
-> ⚠ **v6.42 SHIPPED (2026-11-02) — the phone layout follows UI SIZE (F-32), and phones narrower than 360 px (F-33).** Source `940e1f02…` · built `7c817209…`.
+> ⚠ **v6.43 SHIPPED (2026-11-03) — the money the Withdrawal tab, What Breaks and Backtest start from (D-64); a single plan's accounts are the one person's (D-70).** Source `0709eb9a…` · built `a8b1a139…`.
+> A MODELING release (`docs/SCOPE_D64_D70_V643.md`, DD-1 to DD-9 all (a), Steve: *"all recommended"*; review §6, build record §7, which includes the independent build review's two must-fixes). Through v6.42 Engine D (the Withdrawal tab) filled its buckets from today's holdings but took its Traditional and Roth shares from balances that included the contributions planned before retirement, so the shares summed past 1 (1.068 on the example, 1.684 on a plan with small holdings) and the balance was short by every contribution; What Breaks and Backtest started from today's household; a single plan with rows stored under spouse B took no RMD on them. From v6.43 the contributions join Engine D's buckets at face value after the carry, placed by the contribution mix ($1,729,309 on the example under BASE, shares 0.802459 / 0.197541); What Breaks and Backtest start from today's household plus them in today's dollars (`retireStartToday`; $1,741,608); a later spouse's count only to the first retirement (DD-7); a single plan's rows are the one person's (`retireStartBalances`). Engine D's draws feed every tax engine, so the Taxes, IRMAA and Roth tabs and the Monte Carlo move a little (parity: `mc`, `extMC`, `stress` differ by design); What Breaks and Backtest move most. METHODOLOGY: a new section and two corrected. MissingFeatures **D-64 and D-70 closed**, **D-71 to D-74 filed**. **Under DD-4 the 2027 tax figures become v6.44** (`docs/SCOPE_TY2027_REFRESH_V633_V634.md`, renumbered a tenth time; suite still `t99`; OPEN — it waits on the IRS TY2027 Rev. Proc., the §402(g) notice and CMS's 2027 IRMAA figures, to ship by 15 December, DT-7).
+> New suite `t107` (both legs); `controls_v643_opening.py` new; `boundaries.mjs` gains `single_b_owned` (`t29` B-35, C-d70-1); `t2` compare's intended differences for the pair; `t8`, `t19`, `t40`, `t42`, `t58`, `t71`, `t72` (their Engine D oracles carry the contributions), `t81`, `t91`, `t92`, `t94`, `t98`, `t100`, `t105`, `t106` and `domdiff` re-gated; `v643` registered (`t33` PINS unchanged; `t93`'s Engine D reference v642; `t103`'s prior-leg map); the shim exports five helpers on `__g`. `TESTING.md`'s v6.40 per-suite line moved to the archive. **Rotation:** the pool loses `DangerClose-v6_42.jsx` (v6.42 is read from history, commit `91c0c13`) and gains `DangerClose-v6_43.jsx`. **Pool stays 16.**
+>
+> *(**v6.42 SHIPPED (2026-11-02) — the phone layout follows UI SIZE (F-32), and phones narrower than 360 px (F-33).** Source `940e1f02…` · built `7c817209…`.
 > A PRESENTATION release (`docs/SCOPE_F32_UI_SIZE_V642.md`, DH-1 to DH-4 all (a), Steve's choice; review §8, build record §9). UI SIZE is a CSS zoom on the app's root, and through v6.41 the phone layout read the window's width, so a zoomed window got the layout for its own width in less room: at 150% a 600 px window printed 52 pairs of text over each other on six tabs, a 390 px phone 163 on eight (Monte Carlo 133) with eight pages scrolling sideways; below 360 px at 100% Monte Carlo overprinted and Grade and Verify scrolled (F-33). From v6.42 classes on the zoomed root, set from the window's width divided by UI SIZE (`dc-narrow` < 600 px of room, `dc-sub700w` < 700, `dc-xs` < 360), carry every phone rule, and ten narrow rules on 42 sites act under 360 px of room, down to 240 (DH-1 (a)). At UI SIZE 100% nothing moves from 360 px up (every text box on all 26 tabs identical to v6.41's at 360–1440 px); no word or figure moved (`t106` §E, parity 10/10). Under DH-4 the 2027 tax figures become **v6.43**.
-> New suite `t106` (both legs); `t45` gains S-11 (and its desktop tab clicks wait out the Monte Carlo tab's recalculation); `controls_v642_ui_size.py` new; `t102`, `t104` and `t105` re-gated (`NARROWKEY`: the phone rules read from `.dc-narrow`); `v642` registered (`t33` PINS unchanged; `t93`'s Engine D reference v641; `t103`'s prior-leg map); no shim change. `TESTING.md`'s v6.39 per-suite line moved to the archive. **Rotation:** the pool loses `DangerClose-v6_41.jsx` (v6.41 is read from history, commit `40271f8`) and gains `DangerClose-v6_42.jsx`. **Pool stays 16.**
+> New suite `t106` (both legs); `t45` gains S-11 (and its desktop tab clicks wait out the Monte Carlo tab's recalculation); `controls_v642_ui_size.py` new; `t102`, `t104` and `t105` re-gated (`NARROWKEY`: the phone rules read from `.dc-narrow`); `v642` registered (`t33` PINS unchanged; `t93`'s Engine D reference v641; `t103`'s prior-leg map); no shim change. `TESTING.md`'s v6.39 per-suite line moved to the archive. **Rotation:** the pool loses `DangerClose-v6_41.jsx` (v6.41 is read from history, commit `40271f8`) and gains `DangerClose-v6_42.jsx`. **Pool stays 16.**)*
 >
 > *(**v6.41 SHIPPED (2026-10-31) — My Data, Social Security, Expenses and Taxes on a phone (F-30, second part), F-31, and the Roth calendar's labels.** Source `0f20b07d…` · built `a8862af2…`.
 > A PRESENTATION release (`docs/SCOPE_F30B_PHONE_V641.md`, DG-1 to DG-9 all (a), taken as the scope recommended under Steve's instruction *"for any decisions, use your recommendations"*; review §8, build record §9). Since v5.79 the four tabs' grids let their columns shrink below their text, so on a phone they printed text over itself (My Data 8, SS 10, Expenses 4, Taxes 2 pairs at 390; 12/19/18/4 at 360); one Withdrawal and one Monte Carlo grid did at 360; the Expenses category column (85 px) ran *"Transportation"* under its item at every width; the Roth calendar's *"CONVERT"* labels ran past their cards below about 690 px; a long stream label widened the Income tab at 600–625 px (F-31). From v6.41: phone classes on 19 grids, two flex rows and the export row (three new phone rules); the one-time list in a box that scrolls below a 390 px phone (`--dc-floor: 296px`); the category column 110 px at every width; the calendar's card layout below 700 px (minimum 600 above); stream rows wrap at every width. Zero pairs on all 26 tabs (but the Grade false positive) at 360–1440 px; at UI SIZE 100% every text box on My Data, SS, Taxes, Income, Withdrawal and Monte Carlo unchanged from 600 px, Roth from 700; the Expenses tab changes at every width (decided); no word or figure moved on seven tabs (`t105` §B), parity 10/10. Field Manual §13: a v6.41 note; the desktop item says no tab overprints from 360 px at UI SIZE 100% and corrects the UI SIZE sentence; the v6.40 note's last sentence corrected. UsabilityFlaws **F-30 and F-31 fixed**, **F-32 widened**, **F-33 filed** (below 360 px). No METHODOLOGY change. **Under DG-8 the 2027 tax figures are v6.42** (`docs/SCOPE_TY2027_REFRESH_V633_V634.md`, renumbered an eighth time; suite still `t99`; OPEN — it waits on the IRS TY2027 Rev. Proc., the §402(g) notice and CMS's 2027 IRMAA figures, to ship by 15 December, DT-7).
@@ -116,12 +120,12 @@ or a reason here (OPERATIONS §I).
 
 | Pool file | md5 | Repo path |
 |---|---|---|
-| `CHANGELOG.md` | `72c3284869a8feb2e606685125b1c819` | `CHANGELOG.md` |
-| `METHODOLOGY.md` | `523bf6319d76f5e1c8107059ba761d38` | `METHODOLOGY.md` |
-| `MissingFeatures.md` | `a6048725f352e683d29f8e9fb08bd046` | `docs/MissingFeatures.md` |
+| `CHANGELOG.md` | `e4dd10d7146c32c237e22de5b7885e1f` | `CHANGELOG.md` |
+| `METHODOLOGY.md` | `5d0ad6e0136668a6de76b9b7f318c3d8` | `METHODOLOGY.md` |
+| `MissingFeatures.md` | `aceb0b32e4c6f60df897f17aa52ca270` | `docs/MissingFeatures.md` |
 | `OPERATIONS.md` | `4bd40e0844c9c91e6de4e66c75f5c187` | `docs/OPERATIONS.md` — **rolled 2026-10-31 at the v6.40 ship:** §G's *fifth place* paragraph says `t45`'s §S gates are version comparisons, not lists, and why. *(Previously `7675168d93…`.)* Before that, **rolled 2026-10-27 at the v6.34 ship:** §C4's *An unedited Save & Apply* trap keeps only the as-of move (D-58 closed) and names the save's other normalisations. *(Previously `a127f4a4ff…`.)* Before that, **rolled 2026-10-27 at the v6.33 ship:** §I's *Annual data refreshes* row names the year-keyed tables (a new year's entry, nothing bumped by hand) and §C's OBBBA bullet says `TAX_CONSTANTS_YEAR` is read from `FED_TABLES`. *(Previously `0468ef1e62…`.)* Before that, **rolled 2026-09-09** at the run-folder ops package: §B gained the `mk_runfolder.sh` pointer, and §D gained **D1** (the named existence-only assertion class) and **D2** (the `t29` F-6a/F-6b defect pin). *(Previously `f33c2e0cfd…`.)* |
 | `README.md` | `2757b43ee6b39d0f34496c1cf639d688` | `README.md` |
-| `TESTING.md` | `7fde65fe0888f279123823042d98630d` | `TESTING.md` |
+| `TESTING.md` | `5635b1095514caf62c204e49c78944ba` | `TESTING.md` |
 | `index.html` | `247816be583271d50cf13e0a02e18cdf` | `src/index.html` — the **Vite entry template**, **restored to the pool 2026-08-20** after being found absent (see the build-scaffold row below). ⚠ **Not the built app.** The published single-file `index.html` is repo-only output and never enters the pool; its md5 is in the Current build table and is different by construction |
 | `main.jsx` | `d9eca7b469a3fb7ec1c5325fd4bf8145` | `src/main.jsx` |
 | `package.json` | `9ee8d745bc9f32d6e8fa02e623603423` | `package.json` — The pinned toolchain, and a **build input** rather than a suite file — given a row 2026-08-23 for a measured reason: `npm i <pkg>` in a run folder rewrites it with resolved versions, so it drifts as a side effect of setting the folder up. That is why OPERATIONS §N3a installs jsdom with `--no-save`, and it is the drift `package_check`'s new G-1 caught on its first real use |
@@ -131,10 +135,12 @@ or a reason here (OPERATIONS §I).
 
 | Field | Value |
 |---|---|
-| Version | **v6.41** |
-| Source file in knowledge | — **not pooled**: repo history, commit `40271f8`, found by this md5 |
-| Source md5 | `0f20b07de191cccbea077efb7cc1e11b` |
-| Built `index.html` md5 | `a8862af237917897bc14145e9f3a415f` |
+| Version | **v6.42** |
+| Source file in knowledge | — **not pooled**: repo history, commit `91c0c13`, found by this md5 |
+| Source md5 | `940e1f02e59e9acb631957464ce643b3` |
+| Built `index.html` md5 | `7c817209095ce6db7f065c815761b38e` |
+
+> **Rolled 2026-11-03 at the v6.43 ship.** The pair is now **v6.42 prior / v6.43 current**; both tables rolled in one edit (K-7, which counts 643 − 1 = 642). Commit `91c0c13` carries the v6.42 source (`mk_runfolder.sh` resolved it by md5 at this build); `80a48ee` set the executable bit `controls_v642_ui_size.py` landed without.
 
 > **Rolled 2026-11-02 at the v6.42 ship.** The pair is now **v6.41 prior / v6.42 current**; both tables rolled in one edit (K-7, which counts 642 − 1 = 641). Commit `40271f8` is the first to carry the v6.41 source (`1db099d` to `49c3284`, earlier v6.41 uploads, carry v6.40's source beside v6.41's page); `ad722dc` set the executable bit `controls_v641_phone.py` landed without.
 
@@ -675,6 +681,24 @@ retired and superseded. They get no row because there is no file. Checked 2026-0
 committed tree, so the next sweep does not re-open them.
 
 ## Retirement list (delete-first; nothing replaces these)
+
+### At the v6.43 ship (2026-11-03) — DELETE THESE FIRST
+
+**Rotation:** delete `DangerClose-v6_42.jsx`; `DangerClose-v6_43.jsx` arrives. **Pool stays 16** documents. Count from the Projects listing (OPERATIONS §I, no-mount note).
+
+| Delete | Because |
+|---|---|
+| `DangerClose-v6_42.jsx` | **rotated out** — v6.42 is read from the repo's history (commit `91c0c13`) |
+| `CHANGELOG.md` | replaced — the v6.43 entry |
+| `METHODOLOGY.md` | replaced — *Contribution accrual* corrected, *A single plan's accounts are the one person's (v6.43)*, and the new section *The money the Withdrawal tab, What Breaks and Backtest start from (v6.43)* |
+| `MissingFeatures.md` | replaced — D-64 and D-70 closed; D-71 to D-74 filed |
+| `PROJECT_KNOWLEDGE_INDEX.md` | replaced — this edit; `CHANGELOG.md`'s and `TESTING.md`'s rows rolled last |
+| `TESTING.md` | replaced — the v6.43 per-suite line, v6.40's moved to the archive; `t107`'s and `dom_entry_v643.jsx`'s entries; the re-gates noted |
+
+**Arriving new:** `DangerClose-v6_43.jsx`. **Not changed, stays:** `OPERATIONS.md`, `UsabilityFlaws.md`, `FlawsToFix-v5_73-Phase2.md`, `ARCHITECTUREIssues.md`, `README.md`, the four scaffold files, `SCOPE_STANDING_AUDIT.md`. **Repo-only:** every `qa/` change (`t107_opening_balances.mjs`,
+`qa-baseline/dom_entry_v643.jsx`, `tools/controls_v643_opening.py` new; the registered suites; the re-gates named in the CHANGELOG; `qa-baseline/shim.txt` (five helpers); `tools/boundaries.mjs` (`single_b_owned`); `t29`; `runsuite.sh`; `tools/package_check.mjs`'s OPEN allowlist reason (the TY2027 scope, now v6.44)),
+`docs/TESTING_ARCHIVE_per_suite_v5_53_to_v6_01.md` (v6.40's line and note appended), the D-64/D-70 scope (`docs/SCOPE_D64_D70_V643.md`, new —
+built, §6 its review, §7 its record), the TY2027 scope (renumbered v6.44), the built `index.html`. (`docs/MissingFeatures.md` ships to both, under its pool name.)
 
 ### At the v6.42 ship (2026-11-02) — DELETE THESE FIRST
 

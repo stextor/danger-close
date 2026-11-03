@@ -1363,6 +1363,14 @@ two readings give different rankings and the label alone does not distinguish th
 Person A — the pre-v5.8 model — and a one-time notice in My Data asks for review; other
 accounts use their names as hints and default to Joint. Saving writes explicit owners.
 
+**A single plan's accounts are the one person's (v6.43).** A married plan switched to Single keeps each row's stored owner — My Data
+hides the choice and keeps the field — and through v6.42 the engines counted a row stored under spouse B as spouse B's money. Every
+engine turns spouse B's required distribution off on a single plan, so that money was never required out (MissingFeatures D-70; on the
+example made single with its owners left alone, $43,429 of lifetime RMDs). From v6.43 `retireStartBalances`, the one engine-side reader of
+a row's owner, counts every row of a single plan as the one person's; the stored owner is not changed, so a plan switched back to married
+keeps its split. A single plan whose rows are stored under spouse B and the same plan with every row under spouse A now give the same
+figures, to the bit (`t107` §D).
+
 ## One stated approximation: the Withdrawal tab's schedule view (v5.8.1)
 
 The Withdrawal tab's year-by-year schedule uses a fraction-of-pool accounting model. Its RMD
@@ -1382,6 +1390,12 @@ future contribution between now and the retirement date was silently ignored, un
 the Traditional and Roth pools those engines start from. v5.10 adds the missing dollars: four
 monthly fields (pre-tax and Roth, per spouse) accrue from the as-of year to each person's stop
 year and are added, per bucket and per owner, to the retirement-start snapshot.
+
+*(Corrected at v6.43: this paragraph was true of the Roth ladder, the comparator, the solve-for grid, the Taxes schedule and the
+IRMAA planner, and false of the balance the Withdrawal schedule and What-Breaks spend. Through v6.42 Engine D took its Traditional and
+Roth shares from the snapshot but filled its buckets from today's holdings, so the shares summed past 1 and the balance was short by
+every contribution; What-Breaks reached the accrual only through its tax, and Backtest not at all. From v6.43 all three start with it —
+see* The money the Withdrawal tab, What Breaks and Backtest start from (v6.43) *below.)*
 
 **Nominal dollars, no growth — a stated house rule, not an oversight.** Accrued contributions
 are summed at face value: `12 x monthly x years` (plus the bonus-deferral lump for Person A),
@@ -1407,8 +1421,11 @@ accrues to the household timeline's own `targetRetireYearB`, the identical field
 Carlo's accumulation phase already uses for B's contribution stop — one source of truth, not
 a parallel definition.
 
-**One choke point.** All nine consumer sites call a single constructor
-(`retireStartBalances`) that reduces positions per owner and adds the accrual per bucket. No
+**One choke point.** All eight consumer sites call a single constructor
+(`retireStartBalances`) that reduces positions per owner and adds the accrual per person. *(Corrected at v6.43: this said nine sites
+and "per bucket"; the census counts eight calls, and the snapshot holds the accrual per person, not per bucket.)* From v6.43 the
+accrual has one more reader, `openingAccrual`, which gives the Withdrawal schedule, What Breaks and Backtest their starting
+contributions (a later-retiring spouse's only to the first retirement); both call the same `contribAccrual`. No
 tab computes its own accrual, and the source invariant is greppable: raw Traditional/Roth
 position reduces exist only inside the constructor. The one whitelisted exception is the My
 Data readout, which previews the accrual from UNSAVED form state by design (its formula
@@ -3576,3 +3593,64 @@ A, cut) and is $8,048 (the schedule, either way). The Field Manual's cut paragra
 - The QCD lowers What Breaks' tax as it lowers the Monte Carlo's, and the gift itself is not charged in either (*The Taxes tab and the
   drawdown*, item 3).
 - The Roth tab's figures still come from Engine A and run high on most plans (MissingFeatures **D-68**, filed at this release).
+
+## The money the Withdrawal tab, What Breaks and Backtest start from (v6.43)
+
+One correction, two defects (`docs/SCOPE_D64_D70_V643.md`; decisions DD-1 to DD-9 of 2026-11-03, all as recommended). MissingFeatures
+**D-64**, wider than registered, and **D-70** (the section above, *A single plan's accounts are the one person's*).
+
+**What was wrong.** Three projections start at the retirement year and spend down from there: Engine D (the Withdrawal tab), What
+Breaks and Backtest. None put the planned contributions (*Contribution accrual (v5.10)*) into the money it starts from. Engine D filled
+its four buckets from today's holdings, carried to retirement at inflation (v6.30), and took its Traditional and Roth shares from
+`retireStartBalances`, which includes the contributions — so the two shares summed past 1 and the balance was short by every planned
+contribution. Measured on v6.42 (BASE, $0 slider):
+
+| Plan | Contributions to retirement (face) | Traditional + Roth share | End balance v6.42 → v6.43 |
+|---|---|---|---|
+| Example (retires 2029) | $102,600 | 1.068 | $1,833,424 → $2,066,038 |
+| Example, both born six years later, retiring 2035 | $307,800 | 1.205 | $2,171,627 → $2,869,720 |
+| Example, both born twelve years later, retiring 2041 | $513,000 | 1.342 | $2,368,058 → $3,531,926 |
+| Holdings at 10% of the example's | $102,600 | 1.684 | runs out 2031 → 2033 |
+
+The shares' error roughly offset the missing balance in the RMDs (the example's Traditional notional was $1,396,367 against a true
+$1,387,700), so it showed mostly as the balance. What Breaks and Backtest started from today's household, without the contributions.
+
+**What changed.**
+- **Engine D.** After the one-time rows before retirement (v6.35) and the carry (v6.30), the contributions are added to the buckets at
+  their face value (the v5.10 rule), placed by the contribution mix when one is set (`contribAllocationWeights`, the mix the Monte Carlo
+  drifts toward), else by the buckets' own mix, else, with no bucket money at all, to cash. The shares are re-taken over the new total:
+  the Traditional share times the buckets is the holdings' Traditional at retirement plus the Traditional contributions; the Roth
+  likewise; spouse B's part of the Traditional, which splits the RMD, is B's carried holdings plus B's contributions. On the example:
+  buckets $1,500,000 × 1.0844728 + $102,600 = $1,729,309; Traditional share 0.802459, Roth 0.197541. A plan with no contributions is
+  unchanged to the bit (the step does not run). A plan already retired whose spouse still contributes opens with none of them (DD-7), and
+  its shares are re-taken from the holdings alone; through v6.42, and in the first v6.43 build, they counted those later contributions
+  (shares summing to 1.16 with spouse B at $2,000 a month to 2036 — found by the build review).
+- **What Breaks and Backtest** start from today's household plus the contributions in today's dollars (÷ the carry to the retirement year,
+  as What Breaks deflates a fixed pension), less the one-time rows before retirement — one helper, `retireStartToday`, for both. On the
+  example under BASE: $1,647,000 + $94,608 = $1,741,608.
+- **A spouse who retires later** (DD-7): these three count that spouse's contributions only to the first retirement — the conservative
+  reading; counting them from the start would let them earn returns for years before they are made. Engines A, B and C keep the
+  accrual to each person's own year, as before (filed at this release).
+- **A one-time row before retirement larger than today's money** (DD-6): what today's money cannot cover is charged against the
+  contributions too, pro rata across the buckets. Through v6.42 the excess was never charged — invisible then, because the buckets
+  held no contributions to charge it against. **Still not charged, stated:** in Engine D the rows come out of the after-tax money and
+  the buckets only (v6.35's rule), so a part larger than both together, contributions included, is left uncharged — an IRA, annuity or
+  HSA under Other accounts is not drawn for it. What Breaks and Backtest charge it against the whole household, so on such a plan the
+  two disagree (measured by the build review: holdings cut to $150,000 with a $300,000 row in 2028, about $37,000 left uncharged in
+  Engine D). Reaching it takes a row larger than nearly everything the plan holds.
+- **The Withdrawal tab's "Holdings, by sleeve" card** (DD-8) shows the schedule's own opening at the retirement year, in that year's
+  dollars ($1,388K Traditional / $342K Roth on the example under BASE); through v6.42 it showed today's holdings plus the contributions,
+  uncarried ($1,288K / $315K), which matched nothing else on the tab.
+
+**What else moves.** Engine D's draws reach every tax engine (`withdrawalPlanSeries`), so the Taxes, IRMAA and Roth tabs and the
+Monte Carlo's tax schedule move with the ordinary share of each draw (0.858 → 0.802 on the example) and the draws themselves: lifetime
+tax in today's dollars $180,578 → $180,515 on the example ($0 slider) and $201,203 → $200,652 ($70,000); on other plans by a few
+thousand dollars either way. The Monte Carlo figures, which pay that schedule, move with it, and so do the tabs that read them. The
+Roth tab's best cell can change on some plans (measured at the final build on 21 plans — the example, 17 fixtures, two younger versions of the example and a single plan with rows stored under spouse B: on the default objective three moved, on the lowest-tax objective six).
+What Breaks and Backtest move more, because the money they start from does: on the example $1.65M → $1.74M, and under BASE What Breaks'
+spending headroom 1.25× → 1.30×, the shock it absorbs $0.55M → $0.65M and its return break-point −2.2% → −2.7% (`t100` C-8); Backtest's
+worst start on the example, at the page's default prior, ends $1.21M → $1.40M real (`t81` E-5).
+
+**Not changed, stated.** The three rates that divide spending by today's household (the Income tab's implied rate, the Social Security
+tab's and the Dashboard's) stay on today's basis. What Breaks' and Backtest's asset weights stay today's mix. The Monte Carlo is
+untouched apart from the tax it pays: it already added contributions quarter by quarter, with growth, and the HSA's too.
