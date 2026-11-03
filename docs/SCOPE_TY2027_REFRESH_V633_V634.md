@@ -1,4 +1,4 @@
-# SCOPE — the 2027 tax-figure refresh: tables index from their own year (v6.33), then the 2027 figures (v6.42 — was v6.41, v6.40, v6.39, v6.38, v6.37, v6.36, v6.35, and v6.34 before that) · F-27 closed by decision
+# SCOPE — the 2027 tax-figure refresh: tables index from their own year (v6.33), then the 2027 figures (v6.43 — was v6.42, v6.41, v6.40, v6.39, v6.38, v6.37, v6.36, v6.35, and v6.34 before that) · F-27 closed by decision
 
 > **RENUMBERED 2026-10-27, at the v6.34 build** (decision DC-4 (a) of `docs/SCOPE_D58_CONTRIB_SAVE_V634.md`; Steve: *"Let's go with your
 > recommendations"*). v6.34 is the D-58 release, built while the 2027 figures were unpublished. **The 2027 figures ship as v6.35** (tag `v635`), and
@@ -57,7 +57,15 @@
 > Security, Expenses and Taxes on a phone), F-31 and the Roth calendar's labels. **The 2027 figures ship as v6.42** (tag `v642`); their suite
 > stays **`t99_ty2027.mjs`** (v6.41's is `t105`). Every *"v6.41"* or earlier version below that names the 2027-figures release now means
 > v6.42. DT-7's 15 December date is unchanged. v6.41 changed no engine and no table; its suite edits are the version registry, `t45`'s
-> section S (S-10, its pass counter), `t104`'s A-3a/§C, `t102`'s A-1b/A-2/E-2 and `t105`.
+> section S (S-10, its pass counter), `t104`'s A-3a/§C, `t102`'s A-1b/A-2/E-2 and `t105`. *Superseded by the next box: v6.43, still `t99`.*
+>
+> **RENUMBERED A NINTH TIME 2026-11-02, at the v6.42 build** (DH-4 (a) of `docs/SCOPE_F32_UI_SIZE_V642.md`; Steve chose it: *"F-32
+> first, as v6.42"*). v6.42 is F-32 (the phone layout follows UI SIZE) and F-33, built while the IRS TY2027 Rev. Proc., the §402(g) notice
+> and CMS's 2027 IRMAA figures were, as far as this session could find, still unpublished (late October). **The 2027 figures ship as v6.43**
+> (tag `v643`); their suite stays **`t99_ty2027.mjs`** (v6.42's is `t106`). Every *"v6.42"* or earlier version below that names the
+> 2027-figures release now means v6.43. DT-7's 15 December date is unchanged, and the tax release goes next the moment the figures are out.
+> v6.42 changed no engine and no table; its suite edits are the version registry, `t45`'s section S (S-11), the `t102`/`t104`/`t105` re-gates
+> and `t106`.
 
 | Field | Value |
 |---|---|
