@@ -1,5 +1,129 @@
 # Changelog
 
+## v6.42 — the phone layout follows UI SIZE (F-32), and phones narrower than 360 px (F-33)
+
+**A presentation release.** Scoped in `docs/SCOPE_F32_UI_SIZE_V642.md` (repo-only; review §8, build record §9). Steve chose all four decisions
+as recommended (2026-11-02): DH-1 (a) the layout handles down to 240 px of room; DH-2 (a) a table too wide keeps its columns and scrolls in its
+own box; DH-3 (a) the 44 px tap targets stay on the window's width; DH-4 (a) F-32 first. Built on v6.41 (source `0f20b07d…`). No engine,
+table, stored field or computed figure changes (parity 10/10), and no word on any tab changes: `t106` §E holds every tab's text but the Field
+Manual's identical to v6.41's. No METHODOLOGY change. Under DH-4 **the 2027 tax figures become v6.43** (`docs/SCOPE_TY2027_REFRESH_V633_V634.md`
+renumbered a ninth time; its suite stays `t99_ty2027.mjs`). As far as this session could find, the IRS had not published its 2027 inflation
+figures by late October; the 15 December deadline stands, and the tax release goes next the moment they are out.
+
+**What was wrong (v6.41, measured in Chromium on the built page with `t45` §S's overlap detector, Monte Carlo seeded alike).**
+- **UI SIZE is a CSS zoom on the app's root; the phone layout read the window's width** (`@media (max-width: 599px)`, and `(max-width: 699px)`
+  for the Roth calendar). A zoom does not change the window, so a zoomed window got the layout for its own width in less room.
+- **Zoomed windows 600 px and wider:** at 150% a 600 px window printed 52 pairs of text over each other on six tabs (Income 27, SS 10, My Data
+  8, Expenses 4, Taxes 2, Roth 1); 12 pairs at 700 px; 2 at 800. At 130%, 13 pairs at 600. At 115%, 2.
+- **Phones at UI SIZE above 100%:** at 390 px, 2 pairs at 115%, 129 at 130% and 163 at 150% (Monte Carlo 133); the page scrolled sideways on
+  one tab at 115%, four at 130% and eight at 150% (Verify 537 px wide in a 390 px window).
+- **F-33, phones narrower than 360 px at 100%:** Monte Carlo 3 pairs at 320 px; the Grade and Verify pages 348 and 358 px wide.
+
+**What changed.**
+- **The layout follows the room UI SIZE leaves** — the window's width divided by UI SIZE. A small function sets classes on the app's zoomed
+  root: `dc-narrow` under 600 px of room, `dc-sub700w` under 700, `dc-xs` under 360. It runs before paint (`useLayoutEffect`), again on every
+  resize or rotation, and when UI SIZE changes. Every rule of the old 599 px block now reads `.dc-narrow …`, the Roth calendar's 699 px rule
+  `.dc-sub700w …`; nothing else in the stylesheet moved. At UI SIZE 100% the classes switch exactly where the media queries did (every
+  integer width 200–1500 checked), and on a desktop the root carries no class attribute at all.
+- **So a zoomed window narrower than its UI SIZE needs gets the phone layout** — at 150%, any window under 900 px; at 130%, under 780.
+- **Under 360 px of room (`dc-xs`; a phone narrower than 360 px, or any phone at 115–150%), ten new rules (nine classes) on 42 sites** across 16 tabs,
+  each pinned in `t106`:
+  - Panels of three to six figures sit two or three to a row or one above another (Monte Carlo, Survivor, Guardrails, Withdrawal, Roth,
+    IRMAA, Ranking, Stress, Grade, Social Security, My Data).
+  - Rows wrap (the Trajectory legend, the Social Security claim-age sliders and trust-fund buttons, the Roth tab's ACA law toggle, two My
+    Data rows); fixed widths and minimums give way (the Dashboard's answer cards, the Ranking net-worth card, My Data's 220 px fields, the
+    Checklist's inputs, the Ask AI key box).
+  - **DH-2:** the Monte Carlo percentile table and the IRMAA tier table keep their columns and scroll inside their own box; the percentile
+    table's cells give up 4 px a side, so it fits without scrolling down to about 354 px of room (a 412 px phone at 115%). The Verify tab's check
+    tables keep their columns too; a long citation may break mid-word, so they fit at every room down to 240 px.
+- **At UI SIZE 100% on a phone 360 px wide or more, and on every wider screen, nothing moves:** every text box on all 26 tabs identical to
+  v6.41's at 360, 375, 390, 430, 599, 600, 699, 700, 1024 and 1440 px.
+- **Field Manual §13.** A v6.42 note. The *"Designed for a desktop browser"* item now says no tab prints figures over their neighbours, and
+  no page scrolls sideways, on a phone 360 px wide or more at any UI SIZE, or 320 px wide or more at up to 130%; that the layout follows the
+  room UI SIZE leaves; and that less than 240 px of room (a phone narrower than 360 px at 150%) is not designed for. The four version sites
+  read v6.42.
+- **Registers.** UsabilityFlaws **F-32 fixed** and **F-33 fixed**.
+
+**Measured after the change (the final build, seeded).** All 26 tabs, 0 pairs (but the Grade false positive) and no sideways scroll: phones
+of 360, 390 at 150%; 412, 393 at 115%; 320 at 130%; 340 at 100%; windows of 600 and 700 px at 150%; and at 360 px / 150% on the x5, single and
+stream plans. The build's earlier sweeps add 360/390/430 at 115–150%, 320 at 100–130% and the four plans (494 tab-cases).
+
+**Owned.**
+- **The first build's table floors were too wide** (300 px each). At 357–359 px of room — a 412 px phone, the most common Android width, at
+  115% — the box was about 285 px wide, so all three tables scrolled where v6.41 had shown them in full, and the percentile table hid most of
+  its 90th-percentile column. The overlap detector clips text to its box, so it could not see this — the same blind spot as v6.41's one-time
+  list. Found by the independent build review. Now: the percentile table 280 px with tighter cells (it fits in 285); the IRMAA tiers 240 px;
+  the Verify tables no floor (their citations may break). `t45` S-11 checks that none of the three scrolls at 412 px / 115%.
+- **One Monte Carlo panel renders after the tab opens** (the mortgage what-if's results, *"Recalculating both scenarios…"*), so the build's
+  first sweeps measured it before it appeared. The review's timing caught it overprinting at 240 px of room; it now stacks there (and §E and
+  `t45` wait for it).
+- **My Data's asset-class cards** overprinted at 240 px of room on a plan with five times the balances — found by the build's own sweep, now
+  stacked.
+- **`t106`'s first draft counted classes instead of pinning sites,** so a class moved to the wrong grid stayed green (the review moved one);
+  every site is now found by an anchor inside it. Its §E read the Monte Carlo tab mid-recalculation once under load; it now waits for the tab
+  to settle. Two controls named checks that could not fire (K10, K14); corrected and re-run.
+- **The scope's census of suites missed one.** `t62` A-3 backs §13's sentence that the Trajectory chart does not redraw when the window is
+  resized with a fact: no `"resize"` literal anywhere in the source. v6.42's layout-class listener is one, so the first full packaged run turned
+  it red (11,462 passed, 1 failed). The census had searched the suites for the media queries and the phone classes, not for `resize`. The
+  listener redraws no chart, so the sentence stays true; A-3 now leaves out the literals inside `useLayoutWidthClass` and also checks that the
+  chart's effect does not depend on the layout class. The suite was re-run in full from a re-cut package.
+- **`t45` outgrew the runner's ceiling.** With S-11 it runs about 25 minutes alone; `runsuite.sh` gives every suite 900 s, so the first packaged
+  run reported it DIED (rc=124). That run was stopped, `t45` alone was given 3,600 s (`TALLY_TIMEOUT`), it was run alone (446 passed, 0 failed,
+  24 min 44 s), and the whole suite was re-run from a fresh run folder of the re-cut package.
+- **The first t45 S-11 draft expected the narrow class on a 430 px phone at 115%** (374 px of room, above the 360 threshold); corrected before
+  any run.
+
+**Limitations, stated.**
+- Below 240 px of room (a phone narrower than 360 px at 150%) a page may scroll sideways; §13 says so.
+- The class reads `window.innerWidth`. On a phone whose page already scrolls sideways (only below the supported range) that can exceed the
+  media query's width, and the class can flip on the next resize; inside the supported range nothing scrolls sideways, so it does not.
+- Under the browser's own zoom (Ctrl +) the window's width is fractional; the class compares that fraction where the media query compared
+  whole pixels, so at 600 px the switch can land up to a pixel apart.
+- At 355–359 px of room the percentile table's last cell gives up its right padding; no text is hidden.
+- Measured in Chromium's mobile emulation, not on a real phone; Safari and Firefox not measured.
+- The box comparison at UI SIZE 100% was done at the build, not by a suite.
+
+**Tests.** New suite **`t106_ui_size_layout.mjs`**, run on both legs. The v6.41 leg pins each defect as
+`[KNOWN DEFECT 2026-11-02, F-32 — flips at v6.42]`.
+- **§A, the source (AST).** EXTINCTION: no `@media … max-width` left in the app's stylesheet; every rule of v6.41's phone block once under
+  `.dc-narrow` (declarations unchanged) and none unscoped; the calendar's rule under `.dc-sub700w`; the ten narrow rules once each under
+  `.dc-xs`, after the phone rules; no `.dc-tap44` rule in the app (DH-3). The function and hook; the root's class (absent, not empty, on a
+  desktop) and its unchanged zoom. Each of the 42 sites by an anchor; the three tables' boxes and floors.
+- **§B, the function**, run on the source's own text: 30 boundary cases at UI SIZE 100/115/130/150%, and at 100% the old media queries' switch
+  at every integer width 200–1500.
+- **§C, the rendered root (jsdom):** no class at 1024 px; the classes after a resize to 390, 650, 340 and back; UI SIZE 150% set by its own
+  button on the Skins tab, at 1024 and 390 px; back to 100%.
+- **§D, the Field Manual:** the v6.42 note first; the desktop item; the four version sites.
+- **§E, the text:** every tab but the Field Manual's identical to v6.41's on the example (both legs dumped in child processes, seeded alike).
+- **`t45` §S-11 (Chromium, seeded):** all 26 tabs at 360 / 150%, 390 / 130%, 320 / 130%, 412 / 115%, 430 / 115%, 320 / 100% and 600 / 150%, and
+  six tabs at 360 / 150% on the stream plan — no overprint, no sideways scroll, the phone menu, and the root's class; no class at 1024 px; the
+  class following a resize at 150%; the three tables' boxes at 360 / 150%, 412 / 115% and 390 / 100%.
+- **Re-gated:** `t102`, `t104` and `t105` read the phone rules from `.dc-narrow` from v6.42 (earlier legs keep the media block); their §13
+  checks read v6.42's sentence; `t102` A-2 counts a class among several.
+- **Registered:** `v642` by the AST registration. By hand: `t33` PINS (unchanged figures), `t93`'s Engine D reference (v641), `t103`'s
+  prior-leg map, and `t45`/`t47`/`t48`. `runsuite.sh` lists `t106`. **No shim change.**
+
+**Counts**, from the full suite run from the packaged copies:
+- **11,343 app checks across 104 app suites, 0 failed, 0 DIED**: 6,240 current-leg, 4,622 prior-leg (v6.41), 234 and 237 in the two attribution runs, MC parity 10/10 (no engine changed).
+- Tooling: `t21` 64, `domdiff` 32, `sets` 12 + 12. GRAND **11,463**, 0 failed.
+- Against v6.41, the current leg: `t106` new (36; 8 on the v6.41 leg); `t45` 225 → 446 (S-11); `t105` 55 → 36 (its §B, nineteen checks against v6.40's text, prints a skip in any run after v6.41's, as designed). Every other count is unchanged (`t62`, `t102`, `t104` and `t105` re-gated at the same counts). The prior leg grows by 15: `t106`'s 8, and `t105` on the v6.41 leg (36, was 29 pinning v6.40). Per-suite figures are on `TESTING.md`'s v6.42 line.
+- The counted run is the third (§9.4 of the scope): the first was stopped at `t45`'s timeout, the second ended 11,462 / 1 on `t62`.
+
+**Controls.** `qa/tools/controls_v642_ui_size.py`, on a copy of the run folder: **25 of 25 as expected**.
+- C0 is silent.
+- K1–K20 each mutate the source and turn their named `t106` checks red (§A's rules, function, root and sites, §B's boundaries, §C's rendered
+  root, §D's copy, §E's text). K1 also turns A-2b red; K6, K7, K8 and K9 also turn §B/§C checks red that read the same mechanism.
+- P1–P4 each mutate a copy of the built page and turn `t45` S-11 red (P1 and P2 also S-10, whose 390 px / 130% case has 300 px of room).
+- Every file was restored and hash-checked.
+- The first P1 removed the root's class altogether. That takes the phone layout off every phone, and `t45` died in an earlier section (a click
+  timing out on a tab bar a phone no longer shows) before S-11 ran: red, but not by the named check, so it counted as missed (24 of 25). It
+  was replaced by a narrower defect only S-11 can see — the built page's layout width ignoring UI SIZE — and that control, run alone on the same copy, fired
+  (50 checks red). The control script changed after the suite run; the suite does not run it.
+
+**Provenance.** Source `940e1f02e59e9acb631957464ce643b3` · built `index.html` `7c817209095ce6db7f065c815761b38e` (vite 5.4.21, the `npm ci` toolchain;
+built twice, byte-identical; v6.41 rebuilt byte-identically to `a8862af2…` on the same toolchain) · `smoke_built` 22 of 22 on the packaged page.
+The candidate the build review read (`f3058745…` / `f364c0cd…`) was never shipped.
+
 ## v6.41 — My Data, Social Security, Expenses and Taxes on a phone (F-30, second part), F-31, and the Roth calendar's labels
 
 **A presentation release.** Scoped in `docs/SCOPE_F30B_PHONE_V641.md` (repo-only; review §8, build record §9). Steve asked for F-30's second
