@@ -124,6 +124,12 @@ if (MODE === "compare") {
     // Monte Carlo keys, `ssTable`, `stateTax` and `inflation` (D-65 and D-44 change nothing on a plan with a blank field and no row before
     // retirement, which is every fingerprint household).
     "v634→v635": ["roth", "rothAca", "rothOther"],
+    // v6.43 (D-64 — docs/SCOPE_D64_D70_V643.md): Engine D opens with the planned contributions, so its draws — and the ordinary share of each
+    // — change on any plan still contributing, and both Monte Carlo engines pay the Taxes tab's tax built on those draws (v6.20's schedule).
+    // So `mc`, `extMC` and `stress` MUST move (MEASURED at the prototype run and the build: the 6-year engine's p10 $1,320,288.82 →
+    // $1,320,272.13, the schedule's change alone). Engine A's four fingerprints must NOT: they are hand-built Ps that pass no draw series,
+    // and D-70 touches only a single plan's rows stored under spouse B, which no fingerprint holds. `ssTable`, `stateTax`, `inflation`: no.
+    "v642→v643": ["mc", "extMC", "stress"],
   };
   const expectDiff = new Set(INTENDED_DIFFS[`${PRIOR}→${CUR}`] || []);
   for (const key of Object.keys(a)) {
