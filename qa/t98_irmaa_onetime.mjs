@@ -37,13 +37,16 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v635";
-const KNOWN_VERSIONS = ["v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642"];
+const KNOWN_VERSIONS = ["v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643"].includes(VER);   // an array, so the next registration widens it
+// v6.43 (D-64): the buckets open with the planned contributions at face, after the one-time charge and the carry; Backtest and What Breaks
+// start from today's holdings plus them. An array, so the next registration widens it.
+const U643 = ["v643"].includes(VER);
 const D_PRIOR = "v634";                // the differential's prior leg — a constant, so the registrar cannot widen it (t76 records why)
 const KD = "[KNOWN DEFECT 2026-10-28, D-62 — flips at v6.35]", KW = "[KNOWN DEFECT 2026-10-28, D-65 — flips at v6.35]", KO = "[KNOWN DEFECT 2026-10-28, D-44 — flips at v6.35]";
 const require = createRequire(import.meta.url);
@@ -363,7 +366,7 @@ if (POST) {
     const obj = a.type === "ObjectExpression" ? a : a.type === "Identifier" ? decls.filter(d => d.id.name === a.name && d.start < call.start).sort((x, y) => y.start - x.start)[0]?.init : null;
     return !!obj && obj.properties.some(p => p.type === "Property" && ((p.key.type === "Identifier" && p.key.name === "workMagi") || p.key.value === "workMagi")); };
   // v6.36 (D-66): What Breaks' builder left with its call (it reads the Monte Carlo's schedule), so three sites from v6.36. An array, so the registrar widens it.
-  const B6_N = ["v636", "v637", "v638", "v639", "v640", "v641", "v642"].includes(VER) ? 3 : 4;
+  const B6_N = ["v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643"].includes(VER) ? 3 : 4;
   if (POST) T(`B-6: every object passed to runRothStrategies carries workMagi — ${calls.length} call sites (${B6_N} expected; one more builder without it fails here)`, calls.length === B6_N && calls.every(carries),
     calls.filter(c => !carries(c)).map(c => `L${c.loc.start.line}`).join(", "));
   else T(`B-6 ${KW}: no object passed to runRothStrategies carries workMagi (${calls.length} call sites)`, calls.length === 4 && !calls.some(carries));
@@ -515,9 +518,22 @@ if (POST) {
     `${o0.taxGainPool / rb} ${o1.preRetireOneTime}`);
   T("C-1a: by hand — the after-tax part falls by its whole $21,000 × the carry; the pool by the same; its basis to 0 (the gain share kept)",
     Math.abs(o1.taxGainPool) < 1e-6 && Math.abs((o0.taxable - o1.taxable) - 21000 * rb) < 1e-6 && Math.abs(o1.gainBasis) < 1e-9, `${o1.taxGainPool} ${o0.taxable - o1.taxable}`);
+  if (!U643) {
   T(`C-1b: by hand — each bucket × ${k.toFixed(6)} (the $9,000 rest, pro rata)`, ["b1", "b2", "b3", "b4"].every(b => Math.abs(o1[b] - o0[b] * k) < 1e-6), ["b1", "b2", "b3"].map(b => (o1[b] / o0[b]).toFixed(6)).join(" "));
   T("C-1c: …and the Traditional IRA, annuity and HSA parts of the pool, and tradFrac/rothFrac, are untouched", o1.taxOrd === o0.taxOrd && o1.taxRmdA === o0.taxRmdA && o1.taxRmdB === o0.taxRmdB
     && o1.tradFrac === o0.tradFrac && o1.rothFrac === o0.rothFrac);
+  } else {
+  // v6.43 (D-64): each bucket = its holdings × the carry + the contributions × the contribution mix (at face, added after the charge). The row
+  // scales the holdings' part only; the contributions' part, and the contributions' Traditional and Roth dollars, are the same with or without it.
+  const ac = g.openingAccrual(RY), aT = ac.tradA + ac.tradB, aR = ac.rothA + ac.rothB, w = g.contribAllocationWeights();
+  const hold = (o, b) => o[b] - (aT + aR) * w[+b.slice(1)], S = o => o.b1 + o.b2 + o.b3 + o.b4;
+  T(`C-1b: by hand — the holdings' part of each bucket × ${k.toFixed(6)} (the $9,000 rest, pro rata); the $${(aT + aR).toLocaleString()} of contributions, placed by the contribution mix, untouched (v6.43, D-64)`,
+    !!w && aT + aR > 0 && ["b1", "b2", "b3", "b4"].every(b => Math.abs(hold(o1, b) - hold(o0, b) * k) < 1e-6), w ? ["b1", "b2", "b3"].map(b => (hold(o1, b) / hold(o0, b)).toFixed(6)).join(" ") : "no contribution mix");
+  T("C-1c: …and the Traditional IRA, annuity and HSA parts of the pool are untouched; the holdings' Traditional and Roth dollars scale by the same factor, the contributions' do not (v6.43)",
+    o1.taxOrd === o0.taxOrd && o1.taxRmdA === o0.taxRmdA && o1.taxRmdB === o0.taxRmdB
+    && Math.abs((o1.tradFrac * S(o1) - aT) - (o0.tradFrac * S(o0) - aT) * k) < 1e-6 && Math.abs((o1.rothFrac * S(o1) - aR) - (o0.rothFrac * S(o0) - aR) * k) < 1e-6,
+    `${(o1.tradFrac * S(o1) - aT).toFixed(2)} vs ${((o0.tradFrac * S(o0) - aT) * k).toFixed(2)}`);
+  }
   // a row smaller than the after-tax money: the buckets untouched; the basis scaled pro rata (the gain share kept)
   { load(g, { ...clone(P0), otherAccounts: P0.otherAccounts.map(a => a.taxType === "taxable" ? { ...a, balance: a.balance * 10 } : a), household: P0.household + 189000 }, [...X0, ROW(30000, "2027-05")]);
     const o2 = sched(g, RY)._opening; load(g, { ...clone(P0), otherAccounts: P0.otherAccounts.map(a => a.taxType === "taxable" ? { ...a, balance: a.balance * 10 } : a), household: P0.household + 189000 });
@@ -567,26 +583,44 @@ if (POST) {
   await go("backtest"); const bt0 = txt();
   await go("what breaks"); const wb0 = txt();
   if (POST) {
-    T("C-6: the Withdrawal tab says a one-time row before retirement is paid from savings, after-tax money first, untaxed", w0.includes(`a one-time row dated before ${RY} is paid from your savings before it: the schedule starts from today's holdings less those rows, after-tax money first, with no tax on anything taken from your retirement accounts (from v6.35; before, such a row was not charged at all).`));
+    T("C-6: the Withdrawal tab says a one-time row before retirement is paid from savings, after-tax money first, untaxed", U643
+      ? w0.includes(`a one-time row dated before ${RY} is paid from your savings before it: the schedule starts from today's holdings less those rows, after-tax money first, then your retirement accounts — the contributions planned before ${RY} included — with no tax on anything taken from them (from v6.35; before, such a row was not charged at all).`)
+      : w0.includes(`a one-time row dated before ${RY} is paid from your savings before it: the schedule starts from today's holdings less those rows, after-tax money first, with no tax on anything taken from your retirement accounts (from v6.35; before, such a row was not charged at all).`));
     T("C-6b: Backtest and What Breaks say so too; the v6.18/v6.20 Backtest sentence stays", bt0.includes("From v6.35 one dated before retirement comes out of this backtest's starting portfolio, untaxed; before, it was not charged here at all.")
       && /\(Both spend your one-time expenses: this backtest from v6\.18, the MC in the quarter each one falls from v6\.20\.\)/.test(bt0)
       && wb0.includes("One-time expenses dated before retirement come out of the starting portfolio, untaxed (from v6.35; before, they were not charged here)."));
-    T("C-6c: at the planned year the Backtest's start is today's holdings ($1.65M) with no clause", /against your \$1\.65M, before tax\./.test(bt0));
+    if (!U643) T("C-6c: at the planned year the Backtest's start is today's holdings ($1.65M) with no clause", /against your \$1\.65M, before tax\./.test(bt0));
+    // v6.43 (D-64, DD-2): the start adds the contributions planned before retirement, in today's dollars (t107 C-7 holds the helper by hand)
+    else { const p0 = DG.retireStartTodayParts(RY);
+      T(`C-6c: at the planned year the Backtest's start is today's holdings plus the contributions planned before retirement ($${(p0.start / 1e6).toFixed(2)}M), and names them (v6.43)`,
+        p0.oneTime === 0 && p0.contributions > 0 && bt0.includes(`against your $${(p0.start / 1e6).toFixed(2)}M (today's holdings plus $${Math.round(p0.contributions / 1000)}K of contributions planned before retirement, in today's dollars), before tax.`),
+        (bt0.match(/against your \$[\d.]+M[^,]*/) || [])[0]); }
     await go("roth"); await pickYr("+1 YEAR"); await go("backtest"); const bt1 = txt();
     await go("roth"); await pickYr("PLANNED");
-    T("C-6d: at +1 YEAR the Backtest starts from $1.62M and names the $28K of one-time rows before retirement", /against your \$1\.62M \(today's holdings less \$28K of one-time expenses dated before retirement\), before tax\./.test(bt1),
+    const p1 = U643 ? DG.retireStartTodayParts(RY + 1) : null;
+    if (!U643) T("C-6d: at +1 YEAR the Backtest starts from $1.62M and names the $28K of one-time rows before retirement", /against your \$1\.62M \(today's holdings less \$28K of one-time expenses dated before retirement\), before tax\./.test(bt1),
       (bt1.match(/against your \$[\d.]+M[^,]*/) || [])[0]);
+    else T(`C-6d: at +1 YEAR the Backtest starts from $${(p1.start / 1e6).toFixed(2)}M and names the contributions and the $28K of one-time rows before retirement (v6.43)`,
+      p1.oneTime === 28000 && bt1.includes(`against your $${(p1.start / 1e6).toFixed(2)}M (today's holdings plus $${Math.round(p1.contributions / 1000)}K of contributions planned before retirement, in today's dollars, less $28K of one-time expenses dated before retirement), before tax.`),
+      (bt1.match(/against your \$[\d.]+M[^)]*\)/) || [])[0]);
     // C-6e: What Breaks' start, by its one figure that divides by it — the last plan year's draw as a share of the starting portfolio. At the
     // planned year, a $300,000 row in May 2027 must raise that share by exactly 1,647,000 / 1,347,000 (to the 0.1% shown); an unreduced
     // start leaves it unchanged (control K24).
     const wr = t => +((t.match(/is ([\d.]+)% of (?:today's portfolio|the portfolio this projection starts from)/) || [])[1]);
+    const st0 = U643 ? DG.retireStartToday(RY) : 1647000;
     await seed(clone(P0), [...X0, ROW(300000, "2027-05")]); await go("what breaks"); const wb2 = txt();
-    T("C-6e: What Breaks starts $300,000 lower with a $300,000 row in 2027 — its draw share rises by 1,647,000 / 1,347,000, and the sentence says why",
-      wr(wb0) > 0 && Math.abs(wr(wb2) - wr(wb0) * 1647000 / 1347000) <= 0.11 && wb2.includes("of the portfolio this projection starts from — today's less $300K of one-time expenses dated before retirement"),
-      `${wr(wb0)} → ${wr(wb2)} (want ${(wr(wb0) * 1647000 / 1347000).toFixed(2)})`);
+    const st2 = U643 ? DG.retireStartToday(RY) : 1347000;
+    // v6.43 (D-64): both starts carry the same contributions (in today's dollars), so the row still takes exactly $300,000 off; the ratio is over them
+    T(`C-6e: What Breaks starts $300,000 lower with a $300,000 row in 2027 — its draw share rises by ${Math.round(st0).toLocaleString()} / ${Math.round(st2).toLocaleString()}, and the sentence says why`,
+      wr(wb0) > 0 && Math.abs((st0 - st2) - 300000) < 1e-6 && Math.abs(wr(wb2) - wr(wb0) * st0 / st2) <= 0.11
+      && wb2.includes(U643 ? "of the portfolio this projection starts from — today's holdings plus $" : "of the portfolio this projection starts from — today's less $300K of one-time expenses dated before retirement")
+      && (!U643 || wb2.includes("of contributions planned before retirement, in today's dollars, less $300K of one-time expenses dated before retirement")),
+      `${wr(wb0)} → ${wr(wb2)} (want ${(wr(wb0) * st0 / st2).toFixed(2)})`);
     T("C-6g: the Withdrawal tab's first card names the $300K before retirement beside its starting balance", (await go("withdrawal"), txt().includes("; the $300K of one-time expenses dated before 2029 comes out of its after-tax money first")));
     const DOCS = String(DG.DOCS_HTML());
-    T("C-6f: the Field Manual's Withdrawal Strategy entry says so, and EXTINCTION — the old \"is not in this schedule\" is gone everywhere", DOCS.includes("A one-time row dated between today and the retirement year is paid from your savings before it: this schedule, Backtest and What Breaks start from today's holdings less those rows")
+    T("C-6f: the Field Manual's Withdrawal Strategy entry says so, and EXTINCTION — the old \"is not in this schedule\" is gone everywhere", DOCS.includes(U643
+      ? "A one-time row dated between today and the retirement year is paid from your savings before it: this schedule, Backtest and What Breaks start from today's holdings plus the contributions you plan to make before retiring, less those rows"
+      : "A one-time row dated between today and the retirement year is paid from your savings before it: this schedule, Backtest and What Breaks start from today's holdings less those rows")
       && !DOCS.includes("A one-time row dated before the retirement year is not in this schedule.") && !/is not in this schedule\./.test(w0));
   } else T(`C-6 ${KO}: the Withdrawal tab says a one-time row dated before ${RY} is not in its schedule`, w0.includes(`a one-time row dated before ${RY} is not in this schedule.`));
   await unmount();

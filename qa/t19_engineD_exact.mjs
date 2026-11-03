@@ -739,7 +739,10 @@ console.log("\n  v5.36 — gain on the SPENDING SALE only");
   // v6.11-rule MAGI $3,191,209; othOrdDraw $224,434 / $223,909). From v6.30 each is asserted against the INDEPENDENT LEDGER above — its
   // own sub-pool arithmetic, Pub. 590-B divisors and the §86 statute oracle — on BOTH spending tables, and the ledger's figure is pinned
   // beside it so a drift in the two together is still visible. Measured at the v6.30 build by the ledger, not by the engine.
-  const PIN30 = { gain: 105929, gain17: 107183, magi: 3212150, magi17: 3235431, magi85_17: 3456310, oth: 247659, oth17: 247089 };
+  // v6.43 (D-64): Engine D opens with the example's $102,600 of planned contributions, so the buckets hold more and its lifetime RMDs —
+  // inside MAGI — rise: magi $3,212,150 → $3,294,335, magi17 $3,235,431 → $3,317,339, magi85_17 $3,456,310 → $3,537,033 (measured at the
+  // v6.43 build, the engine and this ledger agreeing to the dollar). The gains and othOrdDraw figures did not move (the pool is unchanged).
+  const PIN30 = { gain: 105929, gain17: 107183, magi: 3294335, magi17: 3317339, magi85_17: 3537033, oth: 247659, oth17: 247089 };
   const eq = (eng, led, pin) => Math.round(eng) === Math.round(led) && Math.round(led) === pin;
   ck(`mixed pool [v6.18 D-41]: on v6.17's spending (a table) the lifetime realized gain is the ledger's — $${PIN30.gain17.toLocaleString()} (v6.30 units; $89,673 through v6.29)`,
      eq(sumOf(mx17, x => x.capGain_y || 0), LG17.sumGain, PIN30.gain17), `engine $${sumOf(mx17, x => x.capGain_y || 0).toLocaleString()} ledger ${$(LG17.sumGain)}`);

@@ -42,7 +42,9 @@ const callsRaw = (SRC.match(/retireStartBalances\(/g) || []).length;
 // retireStartBalances and taxableInitAll left with it: 9 → 8 and 8 → 7 (measured at the v6.36 build).
 ck("retireStartBalances: 1 definition + 8 consumer call sites (comments excluded)", calls === 9,
    `found ${calls} in code (${callsRaw} including comments)`);
-ck("constructor itself applies contribAccrual", /function retireStartBalances[\s\S]{0,400}contribAccrual\(retireYr\)/.test(SRC));
+// v6.43 (D-70): the single-plan owner rule and its comment now open the constructor, so its accrual call sits ~1,000 characters in;
+// the window is widened to 1,400 (still well inside the function, which runs past 5,000).
+ck("constructor itself applies contribAccrual", /function retireStartBalances[\s\S]{0,1400}contribAccrual\(retireYr\)/.test(SRC));
 
 // 3) The three census-found sites (missing from the scope's enumerated list) are wired.
 // v6.32 (F-26, DF-3): the ladder starts at the SELECTED retirement year (`retireYear`), as the strategy engine beside it does — through

@@ -27,14 +27,16 @@ import { spawnSync } from "child_process";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v628";
-const KNOWN_VERSIONS = ["v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642"];
+const KNOWN_VERSIONS = ["v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643"].includes(VER);   // an array, so the next registration widens it
 const KD = "[KNOWN DEFECT 2026-10-21, F-23 — flips at v6.28]";
+// v6.43 (D-64, DD-8 (a)): the holdings card prints Engine D's own opening at the retirement year (_wpOpen), not today's holdings.
+const U643 = ["v643"].includes(VER);   // an array, so the next registration widens it
 const KD24 = "[KNOWN DEFECT 2026-10-21, F-24 — flips at v6.28]";
 
 // ══ CHILD MODE (--events): the Events tab's items, from the app module, on fixed dates — no DOM, no clock ══
@@ -339,7 +341,7 @@ if (POST) {
     GK.every(k => Math.abs(NAMES.reduce((s, n) => s + GR_CARD[k].cats[n].gpa * GR_CARD[k].cats[n].w, 0) / 78 - GR_CARD[k].gpa) < 0.006));
   T("B-4: a category reads STATUS only at GPA 4.0, and DRAG otherwise, on every plan",
     // v6.29 (F-25, DF-11 a): a FIXED category's sentence is one the grade does not read, so it is labelled NOTE, not DRAG
-    GK.every(k => NAMES.every(n => { const c = GR_CARD[k].cats[n]; const fx = ["v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642"].includes(VER) && FIXED_CATS.includes(n);
+    GK.every(k => NAMES.every(n => { const c = GR_CARD[k].cats[n]; const fx = ["v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643"].includes(VER) && FIXED_CATS.includes(n);
       return (c.gpa === 4.0) === /STATUS:/.test(c.seg) && (c.gpa < 4.0 && !fx) === /DRAG:/.test(c.seg) && (c.gpa < 4.0 && fx) === /NOTE:/.test(c.seg); })),
     GK.flatMap(k => NAMES.filter(n => { const c = GR_CARD[k].cats[n]; return (c.gpa === 4.0) !== /STATUS:/.test(c.seg); }).map(n => `${k}/${n} ${GR_CARD[k].cats[n].gpa}`)).join(", "));
   T("B-5: the Monte Carlo category says, on every plan, that its rate is the 6-year Monte Carlo's and that it carries no long-term-care event",
@@ -435,10 +437,14 @@ if (POST) {
 // the build review's findings, rendered (POST only)
 if (POST) {
   // the JSX element that holds the "Starting Traditional:" text: what does it print?
-  const stEl = all(AST, n => n.type === "JSXElement" && n.children.some(c => c.type === "JSXText" && c.value.includes("Starting Traditional:")));
+  const stEl = all(AST, n => n.type === "JSXElement" && n.children.some(c => c.type === "JSXText" && c.value.includes(U643 ? "in that year's dollars" : "Starting Traditional:")));
   const stIds = stEl.length === 1 ? idents(stEl[0]) : new Set();
-  T("C-13: the holdings card's Starting Traditional is the holdings' own (_posTradW), not _tradInit, which also counts Other-account money already in Priority 1",
+  if (!U643) T("C-13: the holdings card's Starting Traditional is the holdings' own (_posTradW), not _tradInit, which also counts Other-account money already in Priority 1",
     stEl.length === 1 && stIds.has("_posTradW") && !stIds.has("_tradInit") && /Starting Traditional: \$ ?\d+ ?K ?; Roth:/.test(wx), `${stEl.length} / ${[...stIds].filter(x => /trad/i.test(x)).join(",")}`);
+  // v6.43: the card reads the schedule's own opening (its buckets × its Traditional share) — still not _tradInit, which counts the Other-account money
+  else T("C-13: the holdings card's Traditional is the schedule's own opening (_wpOpenBk × _wpOpen.tradFrac, v6.43), not _tradInit, which also counts Other-account money already in Priority 1",
+    stEl.length === 1 && stIds.has("_wpOpen") && stIds.has("_wpOpenBk") && !stIds.has("_tradInit") && /At the start of \d{4} ?, in that year's dollars ?[^:]*: Traditional \$ ?\d+ ?K ?; Roth \$ ?\d+ ?K/.test(wx),
+    `${stEl.length} / ${[...stIds].filter(x => /trad|wpOpen/i.test(x)).join(",")} / ${(wx.match(/At the start of.{0,140}/) || ["no card"])[0]}`);   // wx is the text joined by node, so a space can sit at each JSX boundary
   T("C-13b: Exit Plan's income line counts income streams; its conversion years are not said to end before RMDs", /Guaranteed income in the model: Social Security.{0,60} and any income streams you entered( \(the Backtest and What Breaks count Social Security and the pension only\))?\./.test(ex) && !/before RMDs\./.test(ex));
   const cobra = all(AST, n => n.type === "ConditionalExpression" && n.consequent.type === "Literal" && /cannot span this gap alone/.test(String(n.consequent.value)) && n.alternate.type === "Literal" && /can span this gap/.test(String(n.alternate.value)));
   T("C-13c: the COBRA sentence follows the gap's length (> 18 months: cannot span; otherwise can) — the example's 24-month gap reads 'cannot'",

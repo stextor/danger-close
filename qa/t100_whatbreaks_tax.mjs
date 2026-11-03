@@ -34,13 +34,16 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v636";
-const KNOWN_VERSIONS = ["v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642"];
+const KNOWN_VERSIONS = ["v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v636", "v637", "v638", "v639", "v640", "v641", "v642"].includes(VER);   // an array, so the next registration widens it
+// v6.43 (D-64, D-70): the figures below move; MEASURED at the v6.43 build. An array, so the next registration widens it.
+const U643 = ["v643"].includes(VER);
+const P43 = (v642, v643) => U643 ? v643 : v642;
+const POST = ["v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643"].includes(VER);   // an array, so the next registration widens it
 const D_PRIOR = "v635";                // §D's prior module — a constant, so the registrar cannot widen it (t76 records why)
 const KD = "[KNOWN DEFECT 2026-10-28, D-66 — flips at v6.36]";
 const require = createRequire(import.meta.url);
@@ -169,8 +172,8 @@ if (POST) {
   T(`B-3 …and its two parts are those sums: the IRMAA What Breaks charges is Engine C's inside the horizon, on every case (D-66's claim)`, badI.length === 0,
     badI.slice(0, 3).map(c => `${c.lab} ${c.pre} ${c.roth}`).join(" | "));
   const ex = cases.find(c => c.lab === "example" && c.pre === "base" && c.roth === 70000);
-  T(`B-4 the example at $70,000 under BASE: $${ex && ex.h.toFixed(2)} a year (scope §0.3: $8,048), against Engine A's $${ex && ex.aY.toFixed(2)} ($10,528)`,
-    !!ex && Math.round(ex.h) === 8048 && Math.round(ex.aY) === 10528);
+  T(`B-4 the example at $70,000 under BASE: $${ex && ex.h.toFixed(2)} a year (${P43("scope §0.3: $8,048", "$8,026 from v6.43, D-64; $8,048 at v6.36–v6.42")}), against Engine A's $${ex && ex.aY.toFixed(2)} (${P43("$10,528", "$10,500; $10,528 at v6.36–v6.42")})`,
+    !!ex && Math.round(ex.h) === P43(8048, 8026) && Math.round(ex.aY) === P43(10528, 10500));
   const z = g.whatBreaksAnnualTax(2040, 2039, {});
   T("B-5 an empty span returns 0 with no years (no division by zero)", z.annual === 0 && z.years === 0);
 } else {
@@ -266,15 +269,15 @@ console.log("  C — What Breaks rendered, and the Field Manual");
   const wb = R.example.t;
   if (POST) {
     T(`C-5 the estimate printed is the helper's at the page's settings ($70,000, QCD $0, 2%), in thousands, on all three ($${["example", "single", "NY3"].map(k => Math.round(R[k].h)).join(", $")})`,
-      ["example", "single", "NY3"].every(k => R[k].est === String(Math.round(R[k].h / 1000))) && Math.round(R.example.h) === 8048 && Math.round(R.single.h) === 14931 && Math.round(R.NY3.h) === 31526);
+      ["example", "single", "NY3"].every(k => R[k].est === String(Math.round(R[k].h / 1000))) && Math.round(R.example.h) === P43(8048, 8026) && Math.round(R.single.h) === P43(14931, 15233) && Math.round(R.NY3.h) === 31526);   // v6.43: $8,048 / $14,931 at v6.36–v6.42 (the single example also moves with D-70)
     T("C-6 the basis line names the Monte Carlo's tax — the Taxes tab's income tax and the IRMAA tab's surcharges — keeps D-65's clause (t98 B-8c), and drops the Roth engine",
       wb.includes("K/yr, the average of what the Monte Carlo pays at your current settings: the Taxes tab's income tax, Roth-conversion taxes included, and the IRMAA tab's surcharges — except the first two years' premiums, which working-year income sets, unless you enter it on My Data; Social Security at its scheduled amount, even with the trust-fund cut on)")
       && !wb.includes("Roth tab's strategy engine") && !wb.includes("its IRMAA differs"));
     T("C-7 the footer: its taxes are the Monte Carlo's, averaged over the plan's years", wb.includes("Its taxes are the Monte Carlo's — the Taxes tab's tax and the IRMAA tab's surcharges — averaged over the plan's years")
       && wb.includes("(the Monte Carlo pays those taxes year by year)"));
     const e = R.example;
-    T(`C-8 the four answers on the example under BASE, measured at the build: 1.25× spending, $0.55M shock, −2.2% return, 1 crash year (v6.35: 1.20×, $0.50M, −2.2%, 1) — got ${[e.spend, e.shock, e.ret, e.crash].join(" / ")}`,
-      e.spend === "1.25" && e.shock === "0.55M" && e.ret === "-2.2" && e.crash === "1");
+    T(`C-8 the four answers on the example under BASE, measured at the build: ${P43("1.25× spending, $0.55M shock, −2.2% return, 1 crash year (v6.35: 1.20×, $0.50M, −2.2%, 1)", "1.30× spending, $0.65M shock, −2.7% return, 1 crash year (v6.43, D-64: it starts with the planned contributions; 1.25×, $0.55M, −2.2%, 1 at v6.36–v6.42)")} — got ${[e.spend, e.shock, e.ret, e.crash].join(" / ")}`,
+      e.spend === P43("1.25", "1.30") && e.shock === P43("0.55M", "0.65M") && e.ret === P43("-2.2", "-2.7") && e.crash === "1");
   } else {
     const e = R.example;
     T(`C-5 ${KD} What Breaks names the Roth engine, prints its higher estimate ($11K on the example), and says its IRMAA can differ`, wb.includes("K/yr average from the Roth tab's strategy engine")

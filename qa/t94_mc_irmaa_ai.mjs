@@ -36,15 +36,17 @@ console.error = () => {}; console.warn = () => {};
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v631";
 const CLAUDE = process.argv.includes("--claude");
-const KNOWN_VERSIONS = ["v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642"];
+const KNOWN_VERSIONS = ["v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642"].includes(VER);   // an array, so the next registration widens it
-const U636 = ["v636", "v637", "v638", "v639", "v640", "v641", "v642"].includes(VER);   // v6.36 (D-66): What Breaks reads the Monte Carlo's schedule, not Engine A (t100); an array, so the registrar widens it
-const U635 = ["v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642"].includes(VER);   // v6.35 (D-65): the copy names the My Data field — the blank-field wording; an array, so the registrar widens it
+const POST = ["v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643"].includes(VER);   // an array, so the next registration widens it
+const U636 = ["v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643"].includes(VER);   // v6.36 (D-66): What Breaks reads the Monte Carlo's schedule, not Engine A (t100); an array, so the registrar widens it
+// v6.43 (D-64): Engine D opens with the planned contributions, so withdrawalPlanSeries's draws move and Engine A (fed them) moves with it.
+const U643 = ["v643"].includes(VER);   // an array, so the next registration widens it
+const U635 = ["v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643"].includes(VER);   // v6.35 (D-65): the copy names the My Data field — the blank-field wording; an array, so the registrar widens it
 const KD = "[KNOWN DEFECT 2026-10-24, D-51 — flips at v6.31]";
 const KA = "[KNOWN DEFECT 2026-10-24, AI-6 — flips at v6.31]";
 // Typed here from Anthropic's pricing page (platform.claude.com, read 2026-10-24), NOT read from the app: Claude Opus 4.8, $ per million tokens.
@@ -236,10 +238,12 @@ for (const r of [AvsC[0], AvsC[1]])
 // not hand-derived — the claim pinned is the disagreement, which DS-3 (a) accepted by reading What Breaks from Engine A.
 // v6.36 (D-66 closed): What Breaks no longer reads Engine A (t100), so these pins are now facts about the Roth tab's engine alone —
 // MissingFeatures D-68. Engine A is untouched at v6.36, so the figures stand.
-const DISC = [[2, 10930, 12080, 12080], [3, 50270, 41580, 32340], [4, 8050, 0, 0]];
+// v6.43 (D-64): on the single example Engine A now charges $12,080 — the same as Engine C (MEASURED at the v6.43 build; $10,930 at v6.31–v6.42).
+// The other two are unchanged. The row stays pinned, so a move either way is seen; its label says it agrees now.
+const DISC = [[2, U643 ? 12080 : 10930, 12080, 12080], [3, 50270, 41580, 32340], [4, 8050, 0, 0]];
 for (const [k, a, cAll, cIn] of DISC) { const r = AvsC[k];
   console.log(`     ${r.lab}: Engine A $${r.a.toFixed(2)} · Engine C $${r.cAll.toFixed(2)} in all, $${r.cIn.toFixed(2)} inside the horizon`);
-  T(`D-2 DISCLOSED${U636 ? " (the Roth tab's engine, D-68)" : ""} ${r.lab}: Engine A's lifetime IRMAA ($${a.toLocaleString()}) is not Engine C's ($${cIn.toLocaleString()} inside the horizon, $${cAll.toLocaleString()} in all) — measured`,
+  T(`D-2 DISCLOSED${U636 ? " (the Roth tab's engine, D-68)" : ""} ${r.lab}: Engine A's lifetime IRMAA ($${a.toLocaleString()}) ${a === cAll ? "equals (v6.43, D-64; $10,930 at v6.31–v6.42) " : "is not "}Engine C's ($${cIn.toLocaleString()} inside the horizon, $${cAll.toLocaleString()} in all) — measured`,
     Math.abs(r.a - a) < 0.5 && Math.abs(r.cAll - cAll) < 0.5 && Math.abs(r.cIn - cIn) < 0.5, `${r.a} / ${r.cAll} / ${r.cIn}`); }
 load(BASE); preset("base");
 
@@ -422,7 +426,7 @@ console.log("  D/G — rendered: What Breaks, the Income card, the Monte Carlo t
   const cA = gA.runRothStrategies(pT).find(r => r.key === "current");
   const kWith = Math.round((cA.totTaxToday + cA.totIrmaaToday) / pyA / 1000), kWithout = Math.round(cA.totTaxToday / pyA / 1000);
   T(`D-3 SETUP: the single example's What Breaks estimate renders, and with and without Engine A's IRMAA ($${Math.round(cA.totIrmaaToday).toLocaleString()}) it reads differently ($${kWith}K vs $${kWithout}K)`,
-    shown !== undefined && kWith !== kWithout, `${shown} / ${kWith} / ${kWithout}`);
+    shown !== undefined && (U643 ? cA.totIrmaaToday > 0 : kWith !== kWithout), `${shown} / ${kWith} / ${kWithout}` + (U643 ? " (v6.43: Engine A's surcharge, spread over the plan's years, no longer changes the rounded thousands, so the two read alike; the setup is that it charges one)" : ""));
   const kSch = U636 ? Math.round(gA.whatBreaksAnnualTax(RY, hzA, { rothAmount: 70000, qcdAnnual: 0, taxYield: 2.0, scenarioPreset: "bull" }).annual / 1000) : null;
   if (U636) T(`D-4 What Breaks' estimate is the Monte Carlo's schedule averaged — no longer Engine A's (~$${kWith}K/yr): ~$${kSch}K/yr (v6.36, D-66)`, +shown === kSch && kSch !== kWith, `shown ${shown}`);
   if (U636) T("D-5 What Breaks names the Monte Carlo's tax and IRMAA, and no longer says its IRMAA can differ from the IRMAA tab's (D-66 closed)",

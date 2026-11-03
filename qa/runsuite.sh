@@ -484,6 +484,11 @@ tally "t105-$CUR"   node t105_f30b_phone.mjs "$CUR"
 # is t45 §S-11's (a browser).
 tally "t106-$PRIOR" node t106_ui_size_layout.mjs "$PRIOR"
 tally "t106-$CUR"   node t106_ui_size_layout.mjs "$CUR"
+# t107 (v6.43) — the opening balances (D-64, D-70): Engine D, What Breaks and Backtest start with the planned contributions (DD-1 to DD-8),
+# and a single plan's rows stored under spouse B count as the one person's. Both legs; the v6.42 leg pins each defect as a dated KNOWN
+# DEFECT. Its §E compares with v6.42's module and runs only where the run folder holds app_v642.mjs; §F mounts the DOM bundle.
+tally "t107-$PRIOR" node t107_opening_balances.mjs "$PRIOR"
+tally "t107-$CUR"   node t107_opening_balances.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

@@ -42,13 +42,13 @@ console.error = () => {}; console.warn = () => {};
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v642";
 const DUMP = process.argv.includes("--dump");
-const KNOWN_VERSIONS = ["v641", "v642"];
+const KNOWN_VERSIONS = ["v641", "v642", "v643"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v642"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v642", "v643"].includes(VER);   // an array, so the next registration widens it
 const KD = "[KNOWN DEFECT 2026-11-02, F-32 — flips at v6.42]";
 const E_PRIOR = "v641";   // §E's comparison leg — a constant, so the registrar cannot widen it (t76 records why)
 dom.reconfigure({ url: "https://stextor.github.io/danger-close/" }); globalThis.location = window.location;
@@ -295,14 +295,20 @@ const DOCS = all(AST, n => n.type === "VariableDeclarator" && n.id.name === "DOC
 const DH = DOCS ? DOCS.init.value : "";
 const notes = [...DH.matchAll(/<li><strong>([^<]*\(v6\.\d+\))\.<\/strong>/g)].map(m => m[1]);
 if (POST) {
-  T("D-1 §13's newest note is v6.42's, before v6.41's", notes[0] === "UI SIZE and the phone layout (v6.42)" && notes[1] === "My Data, Social Security, Expenses and Taxes on a phone (v6.41)", notes.slice(0, 2).join(" | "));
+  // v6.43: restated generically — the notes ahead of v6.42's are later releases', newest first; v6.41's follows it. Through v6.42, notes[0] / notes[1].
+  { const vOf = n => +((n.match(/\(v6\.(\d+)\)$/) || [])[1]), i = notes.indexOf("UI SIZE and the phone layout (v6.42)"), ahead = i < 0 ? [] : notes.slice(0, i);
+    T("D-1 §13's v6.42 note is the newest but for later releases' (newest first), and comes before v6.41's",
+      i >= 0 && notes[i + 1] === "My Data, Social Security, Expenses and Taxes on a phone (v6.41)" && ahead.every((n, j) => vOf(n) > 42 && (j === 0 || vOf(ahead[j - 1]) > vOf(n))),
+      notes.slice(0, Math.max(2, i + 2)).join(" | ")); }
   T("D-2 the v6.42 note says the layout follows the room UI SIZE leaves, the narrow rules, and that UI SIZE 100% on a 360 px phone and wider is unchanged",
     /The layout now follows the room UI SIZE leaves, the window’s width divided by UI SIZE: under 600 px of room the app uses its phone layout/.test(DH)
     && /At UI SIZE 100% on a phone 360 px wide or more, and on any wider screen, the layout is unchanged, and so is every figure\./.test(DH));
   T("D-3 the desktop item states the supported range (360 px at any UI SIZE; 320 px up to 130%) and the 240 px floor, and no longer says the layout follows the window",
     /No tab prints figures over their neighbours, and no page scrolls sideways, on a phone 360 px wide or more at any UI SIZE, or 320 px wide or more at UI SIZE up to 130%/.test(DH)
     && /The app is not designed for less than 240 px of room/.test(DH) && !/the phone layout follows the window’s width, not UI SIZE/.test(DH));
-  T("D-4 the four version sites read v6.42", ["DATA LOAD │ v6.42</div>", "// FIELD MANUAL · v6.42 · PUBLIC BUILD", "DANGER CLOSE v6.42 · documentation regenerated", "<span>DANGER CLOSE v6.42 │ Not financial advice"].every(s => SRC.includes(s)));
+  // v6.43: the leg's own version (t1's STATIC checks hold the same four strings); through v6.42 this read a fixed "v6.42"
+  { const VD = VER.replace(/^v(\d)(\d\d)$/, "v$1.$2");
+    T(`D-4 the four version sites read ${VD}`, [`DATA LOAD │ ${VD}</div>`, `// FIELD MANUAL · ${VD} · PUBLIC BUILD`, `DANGER CLOSE ${VD} · documentation regenerated`, `<span>DANGER CLOSE ${VD} │ Not financial advice`].every(s => SRC.includes(s))); }
 } else {
   T(`D-1 ${KD} §13 says the phone layout follows the window's width, not UI SIZE`, /the phone layout follows the window’s width, not UI SIZE/.test(DH));
 }

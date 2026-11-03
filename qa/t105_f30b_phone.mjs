@@ -41,13 +41,13 @@ console.error = () => {}; console.warn = () => {};
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v641";
 const DUMP = process.argv.includes("--dump");
-const KNOWN_VERSIONS = ["v640", "v641", "v642"];
+const KNOWN_VERSIONS = ["v640", "v641", "v642", "v643"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v641", "v642"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v641", "v642", "v643"].includes(VER);   // an array, so the next registration widens it
 const B_PRIOR = "v640";                // §B's comparison leg — a constant, so the registrar cannot widen it (t76 records why)
 const KD = "[KNOWN DEFECT 2026-10-31, F-30 — flips at v6.41]";
 dom.reconfigure({ url: "https://stextor.github.io/danger-close/" }); globalThis.location = window.location;
@@ -123,7 +123,7 @@ const SRCOF = n => SRC.slice(n.range[0], n.range[1]);
 // v6.42 (F-32, docs/SCOPE_F32_UI_SIZE_V642.md): the phone rules moved from the window's media query to the class .dc-narrow on the app's
 // zoomed root (the layout width), and the 699 px rule to .dc-sub700w. From v6.42 PHONE reads the .dc-narrow rules with that prefix taken off and
 // SUB700 the .dc-sub700w rule, so every check below reads the same rules on every leg; t106 holds the move itself (EXTINCTION of the media query).
-const NARROWKEY = ["v642"].includes(VER);   // an array, so the next registration widens it
+const NARROWKEY = ["v642", "v643"].includes(VER);   // an array, so the next registration widens it
 const keyed = (css, key) => css.split("\n").map(l => l.trim()).filter(l => l.startsWith(key + " "))
   .map(l => l.split(", ").map(x => x.startsWith(key + " ") ? x.slice(key.length + 1) : x).join(", ")).join("\n");
 const unkeyed = css => css.split("\n").filter(l => !l.trim().startsWith(".dc-narrow ") && !l.trim().startsWith(".dc-sub700w ")).join("\n");
@@ -298,8 +298,11 @@ console.log("  C — the Field Manual");
       && /category column is wider/.test(note) && /Below 700 px the Roth tab’s IRMAA calendar shows as many years a row as fit/.test(note)
       && /wraps at any width when it does not fit/.test(note) && /Otherwise the desktop layout is unchanged, and so is every figure\./.test(note), note.slice(0, 200));
     T("C-1b …and it is the first release note in the Field Manual, and the newest (§13's items and release notes interleave; the notes run newest first)",
-      notes.length > 5 && (NARROWKEY ? notes[0].v === 642 && notes[1].at === N41 && notes[1].v === 641 && notes.slice(1).every(n => n.v <= 641)   // v6.42: its own note is first (t106 D-1)
-        : notes[0].at === N41 && notes[0].v === 641 && notes.every(n => n.v <= 641)), notes.slice(0, 3).map(n => `${n.v}@${n.at}`).join(" "));
+      // v6.43: restated generically — every note ahead of v6.41's is a later release's, newest first (v6.42's last of them when its build is
+      // under test, t106 D-1); v6.41's comes next; nothing after it is newer. Through v6.42 this pinned notes[0] / notes[1] by index.
+      (() => { const i = notes.findIndex(n => n.at === N41), ahead = i < 0 ? [] : notes.slice(0, i);
+        return notes.length > 5 && i >= 0 && notes[i].v === 641 && notes.slice(i).every(n => n.v <= 641) && ahead.every((n, j) => n.v > 641 && (j === 0 || ahead[j - 1].v > n.v))
+          && (NARROWKEY ? ahead.length >= 1 && ahead[ahead.length - 1].v === 642 : ahead.length === 0); })(), notes.slice(0, 3).map(n => `${n.v}@${n.at}`).join(" "));
     if (NARROWKEY) T("C-2 the desktop item says no tab prints over its neighbours or scrolls sideways on a phone 360 px wide or more at any UI SIZE, 320 px up to 130%, naming the four releases that fixed them (v6.42: F-33 fixed)",
       /No tab prints figures over their neighbours, and no page scrolls sideways, on a phone 360 px wide or more at any UI SIZE, or 320 px wide or more at UI SIZE up to 130% \(v6\.38, v6\.40, v6\.41 and v6\.42 fixed the tabs that did\)\./.test(item)
       && !/on a narrower phone a few figures on the Monte Carlo tab still do/.test(item));

@@ -28,18 +28,18 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v609";
-const KNOWN_VERSIONS = ["v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642"];
+const KNOWN_VERSIONS = ["v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642"].includes(VER);   // an array, so register_tag2 widens it each release
+const POST = ["v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643"].includes(VER);   // an array, so register_tag2 widens it each release
 const { __g: g, __engines: E } = await import(pathToFileURL(join(HERE, `app_${VER}.mjs`)).href);
 // v6.18 (D-41): Engine D reads the expense table year by year, which moved two §A/§B figures (a lifetime RMD and a realized gain). PIN18 picks the v6.18 figures (measured at the build);
 // the v6.18 leg is ALSO run with DC_V617_SPENDING=1 — each plan loaded with v6.17's spending as a table (qa/tools/v617_spending.mjs, split
 // at that plan's own Medicare year) — where every v6.17 figure must still come out exactly: the attribution of each move to the read.
-const POST_D41 = ["v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642"].includes(VER);   // an array, so the registrar widens it
+const POST_D41 = ["v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643"].includes(VER);   // an array, so the registrar widens it
 const SPEND17 = POST_D41 && process.env.DC_V617_SPENDING === "1";
 const PIN18 = POST_D41 && !SPEND17;
 const P41 = (v617, v618) => PIN18 ? v618 : v617;
@@ -47,7 +47,7 @@ const P41 = (v617, v618) => PIN18 ? v618 : v617;
 // rides on its draws after 2036 moved. PIN21 picks the v6.21 figures (measured at the build). The v6.21 leg is ALSO run with
 // DC_V620_TABLE=1 — the example's table without its car rows, which is v6.20's — and there every v6.20 figure must come out exactly: that
 // second run attributes each move to the rows alone (runsuite.sh, "<suite>-<cur>-table620"; t84 C proves v6.21 on that table IS v6.20).
-const POST_D42 = ["v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642"].includes(VER);   // an array, so the registrar widens it
+const POST_D42 = ["v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643"].includes(VER);   // an array, so the registrar widens it
 const TABLE620 = POST_D42 && process.env.DC_V620_TABLE === "1";
 const PIN21 = POST_D42 && !TABLE620;
 const P42 = (v620, v621) => PIN21 ? v621 : v620;
@@ -95,8 +95,22 @@ const startAge = by => by <= 1950 ? 72 : by <= 1959 ? 73 : 75;            // SEC
 // v6.30 (D-60; docs/SCOPE_D60_DOLLAR_UNITS_V630.md): Engine D carries today's balances to the retirement year at the plan's inflation (DU-7
 // (a)) and leaves the cost basis nominal; the oracle seeds the same way, × RB = (1+i)^(retire − as-of), i the base preset's inflation (Σ prob
 // × inflation over this module's SCENARIOS table), never the engine's helper; 1 on every earlier leg. An array, so register_tag2 widens it.
-const U630 = ["v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642"].includes(VER);
+const U630 = ["v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643"].includes(VER);
 const RBof = W => U630 ? Math.pow(1 + Object.values(g.SCENARIOS()).reduce((t, sc) => t + sc.prob * sc.inflation, 0), W._tlW.targetRetireYear - W._tlW.asOfYear) : 1;
+// v6.43 (D-64, docs/SCOPE_D64_D70_V643.md): Engine D opens with the planned contributions in its buckets — at face value, never below 0, a
+// later-retiring spouse B only to A's retirement year (DD-7 (a)). Computed HERE from the plan's own contribution fields and dates (the v5.10
+// rule, not the app's `openingAccrual`); the full accrual inside `retireStartBalances`' primitives is taken back out first, so the holdings'
+// own Traditional and Roth are what the shares start from. 0 on every earlier leg, where the buckets held today's holdings only.
+const U643 = ["v643"].includes(VER);   // an array, so the next registration widens it
+const accOpen = (P, tl) => {
+  if (!U643) return { T: 0, R: 0, TB: 0 };
+  const c = P.contributions || {}, Ry = tl.targetRetireYear, asOf = tl.asOfYear, z = x => Math.max(0, Number(x) || 0);
+  const rB = tl.single ? Ry : Math.min(tl.targetRetireYearB || Ry, Ry), yA = Math.max(0, Ry - asOf), yB = Math.max(0, rB - asOf);
+  const bonus = (Number(c.annualBonus) || 0) * (((Number(c.bonusDeferralPct) || 0) + (Number(c.bonusMatchPct) || 0)) / 100);
+  const TA = z(12 * (c.contribPreTaxA || 0) * yA + bonus * yA), RA = z(12 * (c.contribRothA || 0) * yA);
+  const TB = tl.single ? 0 : z(12 * (c.contribPreTaxB || 0) * yB), RB_ = tl.single ? 0 : z(12 * (c.contribRothB || 0) * yB);
+  return { T: TA + TB, R: RA + RB_, TB };
+};
 function oracle({ W, P, rsb }, amt, rules) {
   const R609 = rules === "v609";
   const dobA = W._dobAYr, dobB = W._tlW.dobB.year, single = !!W._tlW.single, rA = startAge(dobA), rB = startAge(dobB), gr = W.growth.tax;
@@ -110,9 +124,12 @@ function oracle({ W, P, rsb }, amt, rules) {
   let tA = bal(a => a.taxType === "trad" && a.owner !== "B") * RB, tB = bal(a => a.taxType === "trad" && a.owner === "B") * RB;
   const gp0 = Math.max(0, Math.min(taxInit, Math.max(0, taxInit - ordInit - hsaInit - (R609 ? roth : 0))));
   let gp = gp0 * RB, basis = Math.max(0, gp0 * (1 - shareOpen));   // the basis is nominal: opened on today's money, never carried
-  const fracB = rsb.posTrad > 0 ? rsb.posTradB / rsb.posTrad : 0;
   const b0 = [1, 2, 3, 4].map(i => P.bucketActuals[i] * P.total401k * RB), bsum0 = b0[0] + b0[1] + b0[2] + b0[3], bsumU = bsum0 / RB;
-  let tradBoy = bsum0 * (bsumU > 0 ? rsb.posTrad / bsumU : 0), rothBoy = bsum0 * (bsumU > 0 ? (rsb.rothInit - (R609 ? roth : 0)) / bsumU : 0), bsumBoy = bsum0;
+  // v6.43: the holdings' own (the full accrual taken out), plus the opening contributions (accOpen) — see above.
+  const ac = accOpen(P, W._tlW);
+  const aT = U643 ? (rsb.accTradA || 0) + (rsb.accTradB || 0) : 0, aR = U643 ? (rsb.accRothA || 0) + (rsb.accRothB || 0) : 0, aTB = U643 ? (rsb.accTradB || 0) : 0;
+  let tradBoy = bsum0 * (bsumU > 0 ? (rsb.posTrad - aT) / bsumU : 0) + ac.T, rothBoy = bsum0 * (bsumU > 0 ? (rsb.rothInit - aR - (R609 ? roth : 0)) / bsumU : 0) + ac.R, bsumBoy = bsum0 + ac.T + ac.R;
+  const fracB = U643 ? (tradBoy > 0 ? (bsum0 * (bsumU > 0 ? (rsb.posTradB - aTB) / bsumU : 0) + ac.TB) / tradBoy : 0) : (rsb.posTrad > 0 ? rsb.posTradB / rsb.posTrad : 0);
   const out = [];
   for (const R of W.schedule) {
     const ageA = R.yr - dobA, ageB = R.yr - dobB, tradFracBoy = bsumBoy > 0 ? tradBoy / bsumBoy : 0;
@@ -163,7 +180,7 @@ for (const amt of [0, 70000]) {
 {
   const _p3 = plan(F.EX_ROTH200, 70000), r = _p3.W.schedule;
   if (U630) T("A-3 (v6.30): the Roth fixture's lifetime RMD at $70,000 is the validated oracle's ($541,480 on the example's table) — its brokerage twin's (A-1)",
-    Math.abs(sum(r, "rmd_y") - sum(oracle(_p3, 70000, RULES), "rmd")) < 0.01 && (SPEND17 || TABLE620 || Math.round(sum(r, "rmd_y")) === 541480), usd(sum(r, "rmd_y")));
+    Math.abs(sum(r, "rmd_y") - sum(oracle(_p3, 70000, RULES), "rmd")) < 0.01 && (SPEND17 || TABLE620 || Math.round(sum(r, "rmd_y")) === (U643 ? 625216 : 541480)), usd(sum(r, "rmd_y")) + (U643 ? " (v6.43, D-64: the buckets open with the example's $102,600 of contributions; $541,480 at v6.30–v6.42)" : ""));
   else
   T(POST ? `A-3: the Roth fixture's lifetime RMD is EXACTLY ${P41("$470,488", P42("$479,123 (v6.18, D-41; $470,488 at v6.09–v6.17)", "$449,041 (v6.21, D-42: the car rows; $479,123 at v6.18–v6.20)"))} at $70,000 — its brokerage twin's`
          : "A-3 [KNOWN DEFECT D-35]: the Roth fixture's lifetime RMD is $343,192 at $70,000 — understated against its brokerage twin's $470,488",
@@ -178,7 +195,7 @@ for (const amt of [0, 70000]) {
     POST ? o.every(x => (x.capGain_y || 0) === 0 && x.taxGainPool === 0) : sum(o, "capGain_y") > 1000, `lifetime gain ${usd(sum(o, "capGain_y"))}`);
   const _p5 = plan(F.EX_ROTH500, 70000), r5 = _p5.W.schedule;
   if (U630) T("B-2 (v6.30): $500,000 of Roth IRAs at $70,000 — lifetime realized gain is the validated oracle's ($7,424 on the example's table), the example's own brokerage only",
-    Math.abs(sum(r5, "capGain_y") - sum(oracle(_p5, 70000, RULES), "gain")) < 0.01 && (SPEND17 || TABLE620 || Math.round(sum(r5, "capGain_y")) === 7424), usd(sum(r5, "capGain_y")));
+    Math.abs(sum(r5, "capGain_y") - sum(oracle(_p5, 70000, RULES), "gain")) < 0.01 && (SPEND17 || TABLE620 || Math.round(sum(r5, "capGain_y")) === (U643 ? 7813 : 7424)), usd(sum(r5, "capGain_y")) + (U643 ? " (v6.43, D-64: $7,424 at v6.30–v6.42)" : ""));
   else
   T(POST ? `B-2: $500,000 of Roth IRAs at $70,000 — lifetime realized gain ${P41("$4,909", P42("$3,249 (v6.18, D-41; $4,909 at v6.09–v6.17)", "$6,195 (v6.21, D-42: the car rows; $3,249 at v6.18–v6.20)"))}, the example's own brokerage only`
          : "B-2 [KNOWN DEFECT D-35]: $500,000 of Roth IRAs at $70,000 — lifetime realized gain $196,853, nearly all of it on Roth money",
@@ -246,7 +263,12 @@ if (POST && existsSync(PRIOR)) {
   const txt0 = body().textContent || "";
   const SENT = /A Roth IRA you entered under Other accounts sits here too: it is spent tax-free and carries no RMD, and it is counted here only, not again in the Roth line below\./;
   // v6.28 (F-23, V-9): the Traditional and Roth cards became one holdings card; its Roth figure is the same expression (_rothInit − _rothOth)
-  const card = t => { const m = t.match(/After-tax retirement accounts\. Starting balance: \$([\d,]+)K/) || t.match(/Starting Traditional: \$[\d,]+K; Roth: \$([\d,]+)K/); return m ? +m[1].replace(/,/g, "") : null; };
+  // v6.43 (DD-8 (a)): the card shows the schedule's own opening at the retirement year, in that year's dollars — the holdings' Roth carried
+  // at the plan's dollar factor, plus any Roth contributions (the example has none). The Other-account Roth IRA must still not be in it.
+  const OPEN43 = /At the start of (\d{4}), in that year's dollars[^:]*: Traditional \$[\d,]+K; Roth \$([\d,]+)K/;
+  const card = t => { const m = t.match(/After-tax retirement accounts\. Starting balance: \$([\d,]+)K/) || t.match(/Starting Traditional: \$[\d,]+K; Roth: \$([\d,]+)K/);
+    if (m) return +m[1].replace(/,/g, ""); const n = t.match(OPEN43); return n ? +n[2].replace(/,/g, "") : null; };
+  const want43 = t => { const n = t.match(OPEN43); return n ? Math.round(315 * window.__test.planDollarFactor(+n[1], window.__test.PLAN_TIMELINE.asOfYear)) : NaN; };
   T("E-0: PRECONDITION — the Withdrawal tab renders the Roth card", onTab && card(txt0) !== null, `card ${card(txt0)}`);
   T(POST ? "E-1: the Priority-1 card says a Roth IRA under Other accounts is spent tax-free with no RMD, and counted there only"
          : "E-1 (prior leg): the Priority-1 card carries no such sentence", POST ? SENT.test(txt0) : !SENT.test(txt0));
@@ -254,10 +276,11 @@ if (POST && existsSync(PRIOR)) {
   await gotoTab("taxes");
   await act(async () => { window.__test.applyLoadedData({ portfolio: clone(F.EX_ROTH200) }); });
   await flush(); await flush(); await gotoTab("withdrawal");
-  const c1 = card(body().textContent || "");
-  T(POST ? "E-2: with a $200,000 Roth IRA under Other accounts, the Roth card shows the holdings' Roth money only — $315K"
+  const txt1 = body().textContent || "", c1 = card(txt1), w1 = U643 ? want43(txt1) : 315;
+  T(POST ? (U643 ? "E-2: with a $200,000 Roth IRA under Other accounts, the Roth card shows the holdings' Roth money only — $315K today, carried to retirement (v6.43)"
+                 : "E-2: with a $200,000 Roth IRA under Other accounts, the Roth card shows the holdings' Roth money only — $315K")
          : "E-2 [KNOWN DEFECT D-35]: with a $200,000 Roth IRA under Other accounts, the Roth card counts it again — $515K",
-    c1 === (POST ? 315 : 515), `$${c1}K`);
+    c1 === (POST ? w1 : 515), `$${c1}K` + (U643 ? ` (want $${w1}K = $315K × the dollar factor)` : ""));
   root.unmount();
 }
 

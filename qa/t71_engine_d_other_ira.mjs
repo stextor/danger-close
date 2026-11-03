@@ -30,18 +30,18 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v608";
-const KNOWN_VERSIONS = ["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642"];
+const KNOWN_VERSIONS = ["v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642"].includes(VER);   // an array, so register_tag2 widens it each release
+const POST = ["v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643"].includes(VER);   // an array, so register_tag2 widens it each release
 const { __g: g, __engines: E } = await import(pathToFileURL(join(HERE, `app_${VER}.mjs`)).href);
 // v6.18 (D-41): Engine D reads the expense table year by year, which moved three §D figures (lifetime RMDs and a cap-year conversion). PIN18 picks the v6.18 figures (measured at the build);
 // the v6.18 leg is ALSO run with DC_V617_SPENDING=1 — each plan loaded with v6.17's spending as a table (qa/tools/v617_spending.mjs, split
 // at that plan's own Medicare year) — where every v6.17 figure must still come out exactly: the attribution of each move to the read.
-const POST_D41 = ["v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642"].includes(VER);   // an array, so the registrar widens it
+const POST_D41 = ["v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643"].includes(VER);   // an array, so the registrar widens it
 const SPEND17 = POST_D41 && process.env.DC_V617_SPENDING === "1";
 const PIN18 = POST_D41 && !SPEND17;
 const P41 = (v617, v618) => PIN18 ? v618 : v617;
@@ -49,7 +49,7 @@ const P41 = (v617, v618) => PIN18 ? v618 : v617;
 // rides on its draws after 2036 moved. PIN21 picks the v6.21 figures (measured at the build). The v6.21 leg is ALSO run with
 // DC_V620_TABLE=1 — the example's table without its car rows, which is v6.20's — and there every v6.20 figure must come out exactly: that
 // second run attributes each move to the rows alone (runsuite.sh, "<suite>-<cur>-table620"; t84 C proves v6.21 on that table IS v6.20).
-const POST_D42 = ["v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642"].includes(VER);   // an array, so the registrar widens it
+const POST_D42 = ["v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643"].includes(VER);   // an array, so the registrar widens it
 const TABLE620 = POST_D42 && process.env.DC_V620_TABLE === "1";
 const PIN21 = POST_D42 && !TABLE620;
 const P42 = (v620, v621) => PIN21 ? v621 : v620;
@@ -57,7 +57,7 @@ const P42 = (v620, v621) => PIN21 ? v621 : v620;
 // — the buckets, the pool and its ordinary, gains and RMD-bearing trackers — and leaves the cost basis nominal. The oracle seeds the same way:
 // × RB = (1+i)^(retire − as-of), i the base preset's inflation (Σ prob × inflation over this module's SCENARIOS table), never the engine's
 // helper; 1 on every earlier leg. §D's lifetime-RMD and conversion pins are then the VALIDATED oracle's own figures on the v6.30 leg.
-const U630 = ["v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642"].includes(VER);   // an array, so register_tag2 widens it each release
+const U630 = ["v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643"].includes(VER);   // an array, so register_tag2 widens it each release
 const RBof = W => U630 ? Math.pow(1 + Object.values(g.SCENARIOS()).reduce((t, sc) => t + sc.prob * sc.inflation, 0), W._tlW.targetRetireYear - W._tlW.asOfYear) : 1;
 const { v617Table } = await import(pathToFileURL(join(HERE, "tools", "v617_spending.mjs")).href);
 if (SPEND17) console.log("  (DC_V617_SPENDING=1 — v6.17's spending, as a table: every v6.17 figure must come out exactly)");
@@ -116,6 +116,20 @@ const DIV = { 72: 27.4, 73: 26.5, 74: 25.5, 75: 24.6, 76: 23.7, 77: 22.9, 78: 22
   114: 3.0, 115: 2.9, 116: 2.8, 117: 2.7, 118: 2.5, 119: 2.3, 120: 2.0 };   // IRS Pub 590-B, Uniform Lifetime Table (Appendix B, Table III)
 const dv = age => DIV[Math.min(120, age)];
 const startAge = by => by <= 1950 ? 72 : by <= 1959 ? 73 : 75;            // SECURE 2.0 §107
+// v6.43 (D-64, docs/SCOPE_D64_D70_V643.md): Engine D opens with the planned contributions in its buckets — at face value, never below 0, a
+// later-retiring spouse B only to A's retirement year (DD-7 (a)). Computed HERE from the plan's own contribution fields and dates (the v5.10
+// rule, not the app's `openingAccrual`); the full accrual inside `retireStartBalances`' primitives is taken back out first, so the holdings'
+// own Traditional and Roth are what the shares start from. 0 on every earlier leg, where the buckets held today's holdings only.
+const U643 = ["v643"].includes(VER);   // an array, so the next registration widens it
+const accOpen = (P, tl) => {
+  if (!U643) return { T: 0, R: 0, TB: 0 };
+  const c = P.contributions || {}, Ry = tl.targetRetireYear, asOf = tl.asOfYear, z = x => Math.max(0, Number(x) || 0);
+  const rB = tl.single ? Ry : Math.min(tl.targetRetireYearB || Ry, Ry), yA = Math.max(0, Ry - asOf), yB = Math.max(0, rB - asOf);
+  const bonus = (Number(c.annualBonus) || 0) * (((Number(c.bonusDeferralPct) || 0) + (Number(c.bonusMatchPct) || 0)) / 100);
+  const TA = z(12 * (c.contribPreTaxA || 0) * yA + bonus * yA), RA = z(12 * (c.contribRothA || 0) * yA);
+  const TB = tl.single ? 0 : z(12 * (c.contribPreTaxB || 0) * yB), RB_ = tl.single ? 0 : z(12 * (c.contribRothB || 0) * yB);
+  return { T: TA + TB, R: RA + RB_, TB };
+};
 function oracle({ W, P, rsb }, amt, rules) {
   const R608 = rules === "v608";
   const dobA = W._dobAYr, dobB = W._tlW.dobB.year, single = !!W._tlW.single, rA = startAge(dobA), rB = startAge(dobB), gr = W.growth.tax;
@@ -128,11 +142,13 @@ function oracle({ W, P, rsb }, amt, rules) {
   let tA = bal(a => a.taxType === "trad" && a.owner !== "B") * RB, tB = bal(a => a.taxType === "trad" && a.owner === "B") * RB;   // "B or else A"
   const gp0 = Math.max(0, Math.min(taxInit, Math.max(0, taxInit - ordInit - hsaInit)));
   let gp = gp0 * RB, basis = Math.max(0, gp0 * (1 - shareOpen));   // the basis is nominal: opened on today's money, never carried
-  const fracB = rsb.posTrad > 0 ? rsb.posTradB / rsb.posTrad : 0;
   const b0 = [1, 2, 3, 4].map(i => P.bucketActuals[i] * P.total401k * RB), bsum0 = b0[0] + b0[1] + b0[2] + b0[3];
-  // the buckets' Traditional and Roth shares are today's (retireStartBalances' primitives); the carried sum takes them to retirement (v6.30)
-  const bsumU = bsum0 / RB;
-  let tradBoy = bsum0 * (bsumU > 0 ? rsb.posTrad / bsumU : 0), rothBoy = bsum0 * (bsumU > 0 ? rsb.rothInit / bsumU : 0), bsumBoy = bsum0;
+  // the buckets' Traditional and Roth shares are today's (retireStartBalances' primitives); the carried sum takes them to retirement (v6.30).
+  // v6.43: the holdings' own (the full accrual taken out), plus the opening contributions (accOpen) — see above.
+  const bsumU = bsum0 / RB, ac = accOpen(P, W._tlW);
+  const aT = U643 ? (rsb.accTradA || 0) + (rsb.accTradB || 0) : 0, aR = U643 ? (rsb.accRothA || 0) + (rsb.accRothB || 0) : 0, aTB = U643 ? (rsb.accTradB || 0) : 0;
+  let tradBoy = bsum0 * (bsumU > 0 ? (rsb.posTrad - aT) / bsumU : 0) + ac.T, rothBoy = bsum0 * (bsumU > 0 ? (rsb.rothInit - aR) / bsumU : 0) + ac.R, bsumBoy = bsum0 + ac.T + ac.R;
+  const fracB = U643 ? (tradBoy > 0 ? (bsum0 * (bsumU > 0 ? (rsb.posTradB - aTB) / bsumU : 0) + ac.TB) / tradBoy : 0) : (rsb.posTrad > 0 ? rsb.posTradB / rsb.posTrad : 0);
   const out = [];
   for (const R of W.schedule) {
     const ageA = R.yr - dobA, ageB = R.yr - dobB, tradFracBoy = bsumBoy > 0 ? tradBoy / bsumBoy : 0;
@@ -247,8 +263,16 @@ if (POST) {
          : "D-4 [KNOWN DEFECT D-34]: the example at $200,000 converts $105,857 in 2035 — $2,672 more than the spending draw left",
     // v6.30: the rule on every leg — the conversion is the slider or what the year's draw left, whichever is less (on the v6.17 table the
     // carried buckets leave more than $200,000 in 2035, so the slider binds there); on the example's table the cap binds, at $194,409.
-    U630 ? !!r35 && Math.abs(r35.conv_y - Math.min(200000, oe.capB)) < 0.01 && (SPEND17 || TABLE620 || (oe.capB < 200000 && Math.round(r35.conv_y) === 194409))
+    // v6.43 (D-64): the buckets open with the $102,600 of contributions, so in 2035 they leave $273,185 and the slider binds on the example's
+    // table too (MEASURED at the v6.43 build). D-4b below keeps the binding cap exercised.
+    U630 ? !!r35 && Math.abs(r35.conv_y - Math.min(200000, oe.capB)) < 0.01 && (SPEND17 || TABLE620 || (U643 ? oe.capB > 200000 && Math.round(r35.conv_y) === 200000 : oe.capB < 200000 && Math.round(r35.conv_y) === 194409))
          : !!r35 && Math.round(r35.conv_y) === (POST ? P41(103185, 86883) : 105857) && Math.round(oe.capB) === P41(103185, 86883), r35 ? `${usd(r35.conv_y)}, left ${usd(oe.capB)}${U630 ? " (v6.30: the oracle's cap, to the cent; $194,409 on the example's table)" : ""}` : "row missing");
+  // v6.43: the cap binding is no longer reached in 2035 on the example's table, so it is held where it does bind — every conversion year whose
+  // spending draw left less than the slider converts exactly what was left (the oracle's capB, to the cent), and there is at least one.
+  if (U630) { const oa = oracle(e2, 200000, "v608"), bind = oa.filter(o => o.capB < 200000 && o.capB > 0 && e2.W.schedule.some(r => r.yr === o.yr && r.conv_y > 0));
+    T(`D-4b: at $200,000 the cap binds in ${bind.length} year(s) (${bind.map(o => o.yr).join(", ")}), and in each the conversion is what the year's spending draw left, to the cent`,
+      bind.length > 0 && bind.every(o => { const r = e2.W.schedule.find(x => x.yr === o.yr); return !!r && Math.abs(r.conv_y - o.capB) < 0.01; }),
+      bind.slice(0, 3).map(o => `${o.yr}: ${usd(e2.W.schedule.find(x => x.yr === o.yr).conv_y)} vs ${usd(o.capB)}`).join("; ")); }
   // The IRA's RMD inside the bucket cap. It can bind only in an RMD year inside the ladder window (2039–2040 here: A's first RMD year is
   // 2039, the window ends 2040), with the buckets' pre-tax money between the slider and the slider plus the whole RMD — so this needs its own
   // fixture (found by a sweep at the build; the IRA-heavy fixtures above run out of bucket money first). Holdings at 40 %, a $900,000 IRA, a
