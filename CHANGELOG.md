@@ -1,5 +1,148 @@
 # Changelog
 
+## v6.44 — a spouse who retires later (D-71); a single plan's spouse-B income and contributions (D-72, D-73)
+
+**A modeling release.** Scoped in `docs/SCOPE_D71_D72_D73_V644.md` (repo-only; review §6, build record §7). Steve, on the six decisions:
+*"take all six as recommended"* — DE-1 to DE-6 all (a). Built on v6.43 (source `0709eb9a…`). METHODOLOGY's new section *A spouse who
+retires later, and spouse-B data on a single plan (v6.44)* is the full account. Under DE-6 (a) **the 2027 tax figures become v6.45**
+(`docs/SCOPE_TY2027_REFRESH_V633_V634.md` renumbered an eleventh time; its suite stays `t99_ty2027.mjs`). As far as this session could find
+on 3 November, the IRS had not published its TY2027 figures; the 15 December deadline stands.
+
+**What was wrong (v6.43, measured at the scope).**
+- **D-71.** When spouse B retires after spouse A, B keeps contributing in the years between, and the app counted that money three ways. The
+  Taxes, IRMAA and Roth tabs (and the Roth ladder and its RMD cards) put all of it into the balance at A's retirement, where it earned one to
+  several years of returns before it was made. The Withdrawal tab, What Breaks and Backtest left it out (v6.43's DD-7). Only the Monte Carlo
+  added it as it was made. The example cannot show it — its spouses retire together.
+- **D-72.** A single plan whose income stream was still stored under spouse B (a backup, or a married plan switched to Single) had that
+  stream dropped from every figure. On the example made single with a $1,500/mo rental under B: Monte Carlo 94.35% → 91.65%, lifetime tax
+  $270,097 → $231,656, the Withdrawal tab's end $1,992,597 → $1,491,304. A job row's payroll tax went with it.
+- **D-73.** On such a plan the Monte Carlo still added spouse B's stored contribution (`spouseBMonthly`) every quarter to the retirement
+  year: on the example made single with $500 a month for B, 91.65% → 92.25%. Optimistic.
+
+**What changed.**
+- **One helper, `laterBContribAt(yr, retireYr)`** (DE-1 (a)): spouse B's pre-tax and Roth contributions in a year, at face value (today's
+  monthly amounts × 12, the v5.10 rule), from the engine's own retirement year — the one the ±1 selector moves — to the year before B's,
+  from the as-of year, while B is alive, never below 0; nothing on a single plan.
+- **Every deterministic projection adds them at the end of the year they are made** (DE-2 (a)): Engines B and C to B's Traditional (the
+  annuity and employer shares re-taken with their dollars unchanged — B's contributions are IRA money); Engine A to B's Traditional and Roth,
+  read from its P (`P.laterB`, passed by its three builders; Engine A still reads no module state); Engine D to the buckets by the
+  contribution mix, its shares and B's part of the Traditional re-taken; the Roth ladder in its year loop; its RMD cards' closed forms; What
+  Breaks and Backtest in their own units (÷ the plan's dollar factor × the loop's inflation, as v6.43 does for the start). `retireStartBalances`
+  now stops B's accrual at A's year, as v6.43's `openingAccrual` already did, so the two readings of the start are one. `contribAccrual`'s
+  default (B to B's own year) stays for My Data's readout, which states what B will have put in by then.
+- **What moves, against v6.43** (BASE, the $70,000 slider; the scope's 20 plans, re-measured on the build and equal to the prototype's
+  figures on all 22 plans probed): the Withdrawal tab's end balance +$8,824 to +$177,570 in today's dollars; lifetime tax −$6,004 to +$2,213
+  (lower on 18, higher on 2 — the extra money is drawn and taxed later); the Monte Carlo's success −0.3 to +0.1 points; IRMAA at $250,000 on
+  the $2,000 + $500 case $26,480 → $24,180; the Roth tab's estate-maximising cell unchanged on all 20, its lowest-tax cell on two. What Breaks
+  and Backtest (not measured at the scope; measured on the build, the example with B working to 2035 at $2,000 + $500 a month): What Breaks'
+  spending headroom 1.45× → 1.50× (~$140K → ~$144K a year), the shock it absorbs $1.10M → $1.30M; Backtest's worst start ends $1.55M →
+  $1.83M real (the worst start moves from 1966 to 1957). With B at $350 a month two or five years later, Backtest's worst start ends $1.40M →
+  $1.42M / $1.44M and What Breaks does not move at its rounding. **The example is unchanged.**
+- **The retirement selector.** Moving it a year earlier makes the second spouse retire a year after the first on the example, so that
+  spouse's contribution for that year now joins in it (disclosed in the §13 note).
+- **D-72** (DE-4 (a)): `streamsMonthlyAt` reads a single plan's B-owned stream as the one person's, for the alive test and the owner filter;
+  the stored owner is not changed (a plan switched back to married keeps its split). The Income tab's two owner labels and Ask AI's context
+  name the one person. The two plans above now agree on every figure probed, payroll tax included.
+- **D-73** (DE-5 (a)): `runMonteCarlo` and `runExtendedMC` read spouse B's contribution as 0 on a single plan; the stored field is untouched.
+- **Copy and documents.** The Withdrawal tab's units note, the Monte Carlo tab's method note, What Breaks' and Backtest's start
+  (`retireStartNote`) and My Data's accrual readout say a later spouse is counted to the first retirement at the start and adds the rest in
+  the years they are made. Field Manual: the Withdrawal Strategy sentence, v6.43's §13 note, and a new §13 v6.44 note (the three readings,
+  the measured moves, the selector, the wages not modeled, D-72 and D-73). METHODOLOGY: *Contribution accrual*'s stop-years and one-choke-point
+  paragraphs, v6.43's later-spouse bullet marked superseded, and the new section. `laterBLeftOut` and its readers are gone. MissingFeatures
+  **D-71, D-72 and D-73 closed; D-75 filed** (DE-3 (a)): the wages of a spouse who works on after the first retirement are not modeled unless
+  entered as a job row, and a job row is taxed whole (the pre-tax contribution is not taken off it, so that tax runs a little high). The
+  four version sites read v6.44.
+
+**Owned.**
+- **The scope's formula for What Breaks and Backtest was wrong, and the first build followed it.** §1.2 had them add a contribution as
+  its today's-dollar worth re-grown by the loop's own inflation. That indexes a face-value amount: in Backtest a 1970s start credited it
+  23–29% above face (the build review's probe). Those loops carry a fixed amount — What Breaks' fixed pension, v6.43's opening
+  contributions — as amount ÷ the dollar factor to retirement, and they now add B's contributions the same way. This is the face value
+  Steve chose (DE-2 (a)); the scope's §7 records the correction. The displayed figures above did not move at their rounding.
+- **Two notes were false on a plan whose spouse B dies before retiring** ("through" B's retirement year less one, where every projection
+  stops at the death), and What Breaks' and Backtest's start note named nothing on a plan already retired. Both fixed after the build
+  review (`t108` F-6b, D-7).
+- **Control K10 could not run** — its target occurs twice in the source. Re-anchored before any control run.
+- **A run of the full suite in the workspace had eight red checks in `t45`** because I ran DOM probes beside it. Alone it is green at 446,
+  v6.43's count; the release's run was made with nothing else running.
+- **The build review found a pre-existing defect this release newly reaches:** the Roth ladder seeds a phantom $356,813 Roth when the
+  plan's start Roth is 0 (filed, D-76). And Backtest enters a fixed pension at its face amount, without the step What Breaks has applied
+  since v6.30 — pre-existing, reported, not changed.
+
+**Limitations, stated.**
+- **D-75** (filed): B's wages between the two retirements are not modeled; entered as a job row they are taxed without the pre-tax
+  contribution taken off. Disclosed in §13 and METHODOLOGY.
+- The deterministic projections add face value (each year's own dollars, the v5.10 rule); the Monte Carlo adds today's dollars grown with
+  its runs. They agree on **which years** carry B's contributions (`t108` B-7), not on the amounts — the same difference v6.30 (DU-7) already
+  accepts for the accrual before retirement.
+- The Roth ladder, its RMD cards, What Breaks and Backtest are computed inside components; `t108` pins the no-conversion RMD card to the
+  dollar and checks that the ladder's with-conversion card, What Breaks and Backtest rise as B works later, but has no per-year oracle for
+  their loops (stated in the suite's header). The controls remove the step from each.
+- **D-74** (v6.43) stands.
+
+**Tests.** New suite **`t108_later_b_contrib.mjs`**, run on both legs; the v6.43 leg pins each defect as `[KNOWN DEFECT 2026-11-03, D-71 —
+flips at v6.44]` (D-72, D-73 alike).
+- **§A, the source by AST:** the helper's eight calls and where they sit; Engine A reads P only, and its three builders pass the series;
+  `retireStartBalances` stops B at A's year; no engine reads B's contribution fields itself; the helper's guards; the step after each year's
+  growth; What Breaks' and Backtest's unit conversion; D-72's rule and three labels; both Monte Carlo gates; `laterBLeftOut` gone.
+- **§B, the extinction invariant:** the helper against an oracle written in the suite from the plan's fields (41 plans × the engine's year
+  and either side); then **twin pairs** — the same plan with B retiring in year y + 1 and in year y, so only year y's contribution differs —
+  on 22 later-B plans (the example 2 and 6 years later, a plan already retired, one whose retirement year is before its as-of year, one where
+  B dies before retiring, one where B is at RMD age and still working, and 16 fixture households) × $0/$70K/$250K BASE and $70K BULL: every
+  engine identical before year y; in year y Engine D's Traditional, Roth and buckets and Engine A's wealth rise by exactly the contribution;
+  Engines B and C do not move until the next year, when B's RMD rises by exactly the Traditional part ÷ the IRS divisor at B's age (zero
+  before B's RMD age); B and C agree in every year; the Monte Carlo's planned path first moves in a quarter of the same year; nothing is added
+  after B's death; Engine D's shares sum to at most 1.
+- **§C, bit-identity:** 19 plans where B does not retire later (the example, B retiring first, the single fixture, 16 fixtures) equal
+  v6.43's module across Engines A–D, the bridge, the start balances, the Monte Carlo's schedule, both seeded Monte Carlo engines and the
+  What Breaks / Backtest start; the Roth tab (ladder and RMD cards), What Breaks, Backtest and the Withdrawal tab render v6.43's text on two
+  such plans (the v6.43 leg dumped in a child process).
+- **§D, hand pins:** B working to 2035 at $2,000 + $500 — the series, the start ($72,000 / $18,000), the selector either side, Engine D's
+  2029 buckets by the mix (+$9,000 bonds, +$21,000 equities), the scope's IRMAA ($24,180) and Withdrawal-end (+$177,570) figures.
+- **§E, D-72 and D-73:** the single plan's B rental and B job equal their A versions everywhere probed; the owner queries; a married plan
+  untouched; B's $500 a month moves neither Monte Carlo engine on a single plan and both on a married one.
+- **§F, rendered:** the Field Manual and METHODOLOGY; no copy left saying "only to the first retirement" without v6.44's rule; the units
+  note, the Monte Carlo note and the start note; the RMD card to the dollar ($24,000 × (1.045¹¹ + 1.045¹⁰ + 1.045⁹) ÷ 24.6); the ladder,
+  What Breaks and Backtest rising; the Income tab of a single plan with the rental under B equal to it under A.
+- **Re-gated:** `t1` S-8 (the no-conversion RMD card's closed form adds `_lbGrown` outside the annuity scaling; `noConvTrad` adds it too);
+  `t7` and `t8` (the constructor carries B only to A's year: $48,000 of B's, $144,000 in all, where v6.43 carried $72,000 / $168,000; the
+  `contribAccrual` default is unchanged at $72,000); `t57` B1/B3 (its hand-computed B accrual, likewise); `t107` A-2, A-3, B-1, C-5, F-2,
+  F-10, F-13 (DD-7's pins read the in-year rule on the v6.44 leg). `t2` parity, `domdiff`, `t33`'s pins and `t93`'s reference needed nothing.
+- **Registered:** `v644` by the AST registration; by hand `t1`/`t4`'s maps, `t33` PINS, `t93`'s Engine D reference, `t45`/`t47`/`t48`.
+  `runsuite.sh` lists `t108`. The shim exports the three new helpers on `__g` (guarded). The boundary census gains
+  `b_contrib_after_first_retire` and `single_b_income` (`t29` B-36, B-37, C-d71-1, C-d72-1).
+
+**Counts**, from the full suite run from the packaged copies:
+- **11,522 app checks across 106 app suites, 0 failed, 0 DIED**: 6,332 current-leg, 4,707 prior-leg (v6.43), 235 and 238 in the two
+  attribution runs, MC parity 10/10 (no intended difference — the example cannot show D-71).
+- Tooling: `t21` 64, `domdiff` 32, `sets` 12 + 12. GRAND **11,642**, 0 failed. (A first run from the packaged copies was cut off at
+  `t96` when the session's machine restarted — green to that point; the full run was then repeated from the start.)
+- Against v6.43, the current leg: `t108` new (49; 13 on the v6.43 leg); `t29` 145 → 151 (the two census rows); `t107` 39 → 37 (its §E
+  compares with v6.42's module, which this folder does not hold, and prints a skip). Every other current-leg count is unchanged; the
+  re-gated suites kept their counts. `domdiff` 39 → 32 (v6.43's bounded arms belong to the v6.42 → v6.43 pair). Per-suite figures are on
+  `TESTING.md`'s v6.44 line.
+- Before it, from the build workspace: a first full run of the first build, GRAND 11,610 / 23 failed — the re-gates listed above, `t108`
+  F-4 (copy reworded at the build) and eight `t45` checks that failed only because I ran DOM probes beside it (green alone, 446).
+
+**Controls.** `qa/tools/controls_v644_later_b.py`, on a copy of the packaged run folder: **25 of 25 as expected** — C0 silent; K1–K24 each fire their named
+`t108` checks (several also turn related checks red); every file restored and hash-checked. The step is removed from each projection in turn
+(K1–K8), moved a year early (K9), run from the timeline's year (K10), kept after B's death (K11), front-loaded again (K12), read from the module
+by Engine A (K13); D-72's rule and its labels (K14, K17, K24), D-73's gates (K15, K16), the two re-indexings (K20, K21), the notes (K19, K22,
+K23) and the §13 note (K18). A first control run on the same folder was 24 of 25: K14 named `F-11`, which does not depend on the stream rule
+(the Income tab's text is the same either way) — `F-11` checks the owner labels, so K24 now removes those, and K14's list was corrected.
+The control script changed after the suite run for that reason only; the suite does not run it.
+
+**The reviews.** The scope was reviewed once before Steve decided (scope §6). The build was reviewed by an agent that had not seen it, given the
+workspace diff, the built modules and the scope: **1 must-fix, 2 should-fix, 5 notes**, each checked and taken or filed (scope §7.3): control
+K10's doubled target; What Breaks' and Backtest's re-indexing (the scope's own formula, corrected to face value); the notes on a plan whose B
+dies before retiring; the empty start note on a plan already retired; the phantom Roth (D-76, filed); a dead term in `balAt`'s fallback
+(harmless, left); My Data's readout; two test gaps (B-6's anti-vacuity count added). It reproduced the headline figures by hand: Engine D's
+2029 buckets, the RMD card's $4,548.21, lifetime tax −$6,004, IRMAA $26,480 → $24,180 and the Field Manual's $178,000.
+
+**Provenance.** Source `e024f8ba39fe29c5b131c0aff38d6a6c` · built `index.html` `82c47833604141b5bbe23da378a6e681` (vite 5.4.21, `npm ci`; built twice,
+byte-identical; v6.43 rebuilt byte-identically to `a8b1a139…` on the same toolchain) · `smoke_built` 22 of 22 on the packaged page. The
+first build the review read (source `f8060134…`) was never shipped.
+
 ## v6.43 — the money the Withdrawal tab, What Breaks and Backtest start from (D-64); a single plan's accounts are the one person's (D-70)
 
 **A modeling release.** Scoped in `docs/SCOPE_D64_D70_V643.md` (repo-only; review §6, build record §7). Steve, on the nine decisions:

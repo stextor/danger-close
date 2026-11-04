@@ -1417,15 +1417,18 @@ a 13.6% lower end balance on the example and 49.6% on a plan retiring twelve yea
 
 **Stop years.** Person A accrues to the selected retirement year — the same year the engines
 being seeded start from, so the snapshot and the engine agree by construction. Person B
-accrues to the household timeline's own `targetRetireYearB`, the identical field the Monte
-Carlo's accumulation phase already uses for B's contribution stop — one source of truth, not
-a parallel definition.
+accrues to the earlier of that year and the household timeline's own `targetRetireYearB`, the
+identical field the Monte Carlo's accumulation phase already uses for B's contribution stop.
+A person B who retires later has the contributions made after the first retirement added by
+each projection in the years they are made (v6.44, *A spouse who retires later* below);
+through v6.43 the snapshot ran B to her own year, so the tax engines started the first
+retirement holding money B had not yet contributed.
 
 **One choke point.** All eight consumer sites call a single constructor
 (`retireStartBalances`) that reduces positions per owner and adds the accrual per person. *(Corrected at v6.43: this said nine sites
 and "per bucket"; the census counts eight calls, and the snapshot holds the accrual per person, not per bucket.)* From v6.43 the
 accrual has one more reader, `openingAccrual`, which gives the Withdrawal schedule, What Breaks and Backtest their starting
-contributions (a later-retiring spouse's only to the first retirement); both call the same `contribAccrual`. No
+contributions (a later-retiring spouse's only to the first retirement — from v6.44 the snapshot counts them the same way, and the later ones join in the years they are made); both call the same `contribAccrual`. No
 tab computes its own accrual, and the source invariant is greppable: raw Traditional/Roth
 position reduces exist only inside the constructor. The one whitelisted exception is the My
 Data readout, which previews the accrual from UNSAVED form state by design (its formula
@@ -3630,7 +3633,8 @@ $1,387,700), so it showed mostly as the balance. What Breaks and Backtest starte
   example under BASE: $1,647,000 + $94,608 = $1,741,608.
 - **A spouse who retires later** (DD-7): these three count that spouse's contributions only to the first retirement — the conservative
   reading; counting them from the start would let them earn returns for years before they are made. Engines A, B and C keep the
-  accrual to each person's own year, as before (filed at this release).
+  accrual to each person's own year, as before (filed at this release). *Superseded at v6.44: every projection now adds the later
+  contributions in the years they are made — see* A spouse who retires later, and spouse-B data on a single plan (v6.44) *below.*
 - **A one-time row before retirement larger than today's money** (DD-6): what today's money cannot cover is charged against the
   contributions too, pro rata across the buckets. Through v6.42 the excess was never charged — invisible then, because the buckets
   held no contributions to charge it against. **Still not charged, stated:** in Engine D the rows come out of the after-tax money and
@@ -3654,3 +3658,59 @@ worst start on the example, at the page's default prior, ends $1.21M → $1.40M 
 **Not changed, stated.** The three rates that divide spending by today's household (the Income tab's implied rate, the Social Security
 tab's and the Dashboard's) stay on today's basis. What Breaks' and Backtest's asset weights stay today's mix. The Monte Carlo is
 untouched apart from the tax it pays: it already added contributions quarter by quarter, with growth, and the HSA's too.
+
+## A spouse who retires later, and spouse-B data on a single plan (v6.44)
+
+`docs/SCOPE_D71_D72_D73_V644.md`, DE-1 to DE-6 all (a) (Steve, 2026-11-03: *"take all six as recommended"*). MissingFeatures **D-71**,
+**D-72** and **D-73**.
+
+**What was wrong.** When spouse B retires after spouse A, B keeps contributing in the years between. Through v6.43 those contributions
+were counted three ways. The tax engines — Engines A, B and C, the Roth ladder and its RMD cards, and so the Taxes, IRMAA and Roth tabs
+and the Monte Carlo's tax — put all of them in the balance at A's retirement year (`retireStartBalances` ran B's accrual to her own
+year), where each earned one to several years of returns before it was made and all of them counted toward the RMD base. Engine D, What
+Breaks and Backtest left them out (v6.43's DD-7). Only the Monte Carlo added them as they are made, quarter by quarter until B's
+retirement. On a single plan restored from a backup, an income stream stored under spouse B was dropped by `streamsMonthlyAt` (D-72) and
+the Monte Carlo added spouse B's monthly contribution (`spouseBMonthly`) to A's retirement (D-73).
+
+**What changed.**
+- **One helper, `laterBContribAt(year, retireYear)`:** spouse B's contributions in that year — today's monthly pre-tax and Roth amounts
+  × 12, at face value (the v5.10 rule: no growth, no raises) — when the plan is married, the year is on or after the projection's own
+  retirement year (the one the ±1 selector moves) and before `targetRetireYearB`, on or after the as-of year, and B is alive. Otherwise
+  nothing. `retireStartBalances` counts B's accrual only to A's year, as `openingAccrual` already did, so nothing is counted twice.
+- **Every deterministic projection adds them at the end of the year they are made**, after that year's growth, so they grow from the
+  next year on (DE-2 (a), the conservative timing). Engines B and C: pre-tax to B's Traditional (they carry no Roth balance). Engine A:
+  pre-tax to B's Traditional and Roth to her Roth, from its P (`P.laterB`, `laterBContribSeries`) — it reads no module state. Engine D:
+  both to the buckets, placed by the contribution mix as the opening contributions are, with the Traditional and Roth shares and B's part
+  of the Traditional re-taken. The Roth ladder: the same step in its loop; its RMD cards add the contributions, grown from their year, in
+  their closed forms. What Breaks and Backtest: the year's contribution at face value, a fixed amount, entered as What Breaks enters a
+  fixed pension — ÷ the dollar factor to the retirement year, the unit their balances are kept in — and never re-indexed by the loop's
+  inflation (in Backtest, the historical sequence's). The scope's first form (÷ the factor to the contribution's own year × the loop's
+  inflation) indexed the money; the build review found it and measured it worth 23–29% more than its face on Backtest's 1970s starts. B's contributions are IRA money (v5.93's conservative default): the annuity and employer shares
+  are re-taken with their dollars unchanged.
+- **D-72:** on a single plan a stream stored under spouse B is the one person's, in `streamsMonthlyAt` and in the three places that name a
+  stream's owner; the stored owner is untouched, as D-70 decided for holdings.
+- **D-73:** both Monte Carlo engines read spouse B's contribution as 0 on a single plan, as `getSSB()` reads her benefit; the stored field
+  is untouched.
+
+**Measured at the scope**, on 20 plans whose spouse B retires later (the example with B retiring 2, 5 and 6 years after A, a plan already
+retired, and the 16 married fixtures with B retiring four years later at $1,000 a month), BASE, $70,000 slider, against v6.43:
+- the Withdrawal tab's end balance rises by about $8,800 to $178,000 in today's dollars (the latter for B working six more years at
+  $2,000 pre-tax and $500 Roth a month);
+- lifetime tax moves by −$6,004 to +$2,213 (lower on 18 plans): the tax engines stop counting returns on money not yet contributed, while
+  the Withdrawal tab's added money is drawn and taxed;
+- the Monte Carlo's success rate moves by −0.3 to +0.1 points; IRMAA is unchanged at the $70,000 slider (at $250,000 one plan's falls
+  $26,480 → $24,180);
+- the Roth tab's estate-maximising cell does not change on any of the 20; its lowest-tax cell changes on two.
+The example, whose spouses retire together, and every plan whose spouse B does not retire later are unchanged to the bit at their own
+retirement year. Moving the retirement selector a year earlier makes B retire a year after A, so B's contributions for that year join
+in it there. On a single plan with a $1,500/mo rental stored under B (the example made single): Monte Carlo success 91.65% → 94.35%
+with the rental counted.
+
+**Not changed, stated.**
+- **Spouse B's wages in the years between the two retirements are not modeled** (MissingFeatures D-75). No projection takes a salary;
+  the example's built-in part-time wages (v6.23) are the one exception. With the work entered as a job row, the row is taxed whole — the
+  pre-tax contribution is not deducted from it — so that tax runs high by the contribution × the marginal rate (conservative). Without
+  one, B's paycheck never offsets spending.
+- **The Monte Carlo adds B's contributions in today's dollars,** quarterly, scaled by its contribution rate; the deterministic projections
+  add face value at the end of the year. They agree on which years carry the contributions, not on the amounts — the face-value rule
+  (DU-7 (a)) at work. The Monte Carlo also adds them to B's retirement even when B's projected death comes first (an edge, unchanged).
