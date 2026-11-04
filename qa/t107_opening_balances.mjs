@@ -40,14 +40,18 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v643";
-const KNOWN_VERSIONS = ["v642", "v643"];
+const KNOWN_VERSIONS = ["v642", "v643", "v644"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v643"].includes(VER);   // an array, so the next registration widens it
-const E_PRIOR = "v642";                // §E's prior module — a constant, so the registrar cannot widen it
+const POST = ["v643", "v644"].includes(VER);   // an array, so the next registration widens it
+const E_PRIOR = "v642";
+// v6.44 (D-71, docs/SCOPE_D71_D72_D73_V644.md): DD-7's "only to the first retirement" is replaced by the in-year rule — `retireStartBalances`
+// stops B at A's year too, `laterBLeftOut` is gone, and B's later contributions join every projection in the years they are made (t108).
+// The checks below that pinned DD-7's leave-out read v6.44's rule on this leg. An array, so the registrar widens it.
+const D71 = ["v644"].includes(VER);                // §E's prior module — a constant, so the registrar cannot widen it
 const KD64 = "[KNOWN DEFECT 2026-11-03, D-64 — flips at v6.43]", KD70 = "[KNOWN DEFECT 2026-11-03, D-70 — flips at v6.43]";
 const require = createRequire(import.meta.url);
 const M = await import(pathToFileURL(join(HERE, `app_${VER}.mjs`)).href);
@@ -100,11 +104,14 @@ console.log("  A — the source, by AST");
       && /bStopsAtA:\s*true/.test(SRCOF(caInOA[0].n)));
     // three from the build review's fixes: `laterBLeftOut` compares the two (uncapped and capped) to say when DD-7 leaves B's contributions out
     const LB = topFn("laterBLeftOut");
-    T("A-2 `contribAccrual` is called exactly three times in the source: by `retireStartBalances`, by `openingAccrual`, and by `laterBLeftOut` (which only says what DD-7 leaves out)",
+    if (D71) T("A-2 `contribAccrual` is called exactly twice in the source: by `retireStartBalances` and by `openingAccrual` (v6.44: `laterBLeftOut` is gone)",
+      callsOf(AST, "contribAccrual").length === 2 && !!RSB && callsOf(RSB, "contribAccrual").length === 1 && !LB);
+    else T("A-2 `contribAccrual` is called exactly three times in the source: by `retireStartBalances`, by `openingAccrual`, and by `laterBLeftOut` (which only says what DD-7 leaves out)",
       callsOf(AST, "contribAccrual").length === 3 && !!RSB && callsOf(RSB, "contribAccrual").length === 1 && !!LB && callsOf(LB, "contribAccrual").length === 1
       && callsOf(LB, "openingAccrual").length === 1);
-    T("A-3 Engine D calls `openingAccrual` once and `contribAllocationWeights` once, and never `contribAccrual` directly",
-      !!W && callsOf(W, "openingAccrual").length === 1 && callsOf(W, "contribAllocationWeights").length === 1 && callsOf(W, "contribAccrual").length === 0);
+    // v6.44 (D-71): a second `contribAllocationWeights` call places a later-retiring spouse B's contributions in the years they are made
+    T(`A-3 Engine D calls \`openingAccrual\` once and \`contribAllocationWeights\` ${D71 ? "twice (the opening, and from v6.44 B's later contributions)" : "once"}, and never \`contribAccrual\` directly`,
+      !!W && callsOf(W, "openingAccrual").length === 1 && callsOf(W, "contribAllocationWeights").length === (D71 ? 2 : 1) && callsOf(W, "contribAccrual").length === 0);
     const guard = W ? all(W, n => n.type === "IfStatement" && /_accT\s*!==\s*0\s*\|\|\s*_accR\s*!==\s*0\s*\|\|\s*_accRaw\b/.test(SRCOF(n.test))) : [];
     const raw = W ? all(W, n => n.type === "VariableDeclarator" && n.id.type === "Identifier" && n.id.name === "_accRaw")[0] : null;
     // the build review (finding 1): the guard also runs when `retireStartBalances` counted a contribution into the shares — a plan already
@@ -179,7 +186,9 @@ let nB = 0, nBreach = 0, nBodd = []; const bBad = [];
       nB++;
       if (POST) {
         const rsb = g.retireStartBalances(R), cs = g.carryStartBalances(rsb, rb);
-        const cT = cs.tradInitA + cs.tradInitB - ((aFull.tradB - a.tradB)), cR = cs.rothInitA + cs.rothInitB - (aFull.rothB - a.rothB);
+        // v6.44 (D-71): `retireStartBalances` stops B at A's year too, so Engine C's carried balances leave out the same later contributions
+        const lT = D71 ? 0 : aFull.tradB - a.tradB, lR = D71 ? 0 : aFull.rothB - a.rothB;
+        const cT = cs.tradInitA + cs.tradInitB - lT, cR = cs.rothInitA + cs.rothInitB - lR;
         const ok = near(bk, baSum * Pl.total401k * rb + acc, 0.01) && near(dT, tH * rb + accT, 0.01) && near(dR, rH * rb + accR, 0.01)
           && near(dT + o.taxOrd, cT, 0.01) && near(dR + othRoth * rb, cR, 0.01) && near(o.taxOrd, othOrd * rb, 0.01) && (!baOne || shares <= 1 + 1e-12);
         if (!ok) { nBreach++; if (bBad.length < 4) bBad.push(`${name}@${roth}/${pre}: bk ${bk.toFixed(2)} vs ${(baSum * Pl.total401k * rb + acc).toFixed(2)}, T ${dT.toFixed(2)} vs ${(tH * rb + accT).toFixed(2)}, R ${dR.toFixed(2)} vs ${(rH * rb + accR).toFixed(2)}, C ${(dT + o.taxOrd).toFixed(2)} vs ${cT.toFixed(2)}, shares ${shares}`); }
@@ -225,7 +234,9 @@ console.log("  C — hand pins");
     load(g, { ...clone(P0), retireYearB: 2034 });
     const oB = g.computeWithdrawalPlan({ retireYear: 2029, rothAmount: 0, scenarioPreset: "base" })._opening;
     const rsbB = g.retireStartBalances(2029);
-    T(`C-5 DD-7: with spouse B retiring in 2034, Engine D opens with B's $12,600 to 2029, not the $33,600 to 2034 that Engines A–C carry (got $${oB.accrual} against $${(rsbB.accTradA || 0) + (rsbB.accTradB || 0)})`,
+    if (D71) T(`C-5 DD-7, and from v6.44 Engines A–C too: with spouse B retiring in 2034, every start carries B's $12,600 to 2029 (B's later contributions join in the years they are made, t108) (got $${oB.accrual}; B's accrual $${rsbB.accTradB})`,
+      oB.accrual === 102600 && rsbB.accTradB === 12600 && near(oB.b1 + oB.b2 + oB.b3 + oB.b4, 1500000 * rb + 102600, 0.01));
+    else T(`C-5 DD-7: with spouse B retiring in 2034, Engine D opens with B's $12,600 to 2029, not the $33,600 to 2034 that Engines A–C carry (got $${oB.accrual} against $${(rsbB.accTradA || 0) + (rsbB.accTradB || 0)})`,
       oB.accrual === 102600 && rsbB.accTradB === 33600 && near(oB.b1 + oB.b2 + oB.b3 + oB.b4, 1500000 * rb + 102600, 0.01));
     // DD-6: holdings $150,000, no Other accounts, a $200,000 one-time row in June 2028
     const small = clone(P0); small.positions = small.positions.map(q => ({ ...q, balance: q.balance / 10, trad: (q.trad || 0) / 10, roth: (q.roth || 0) / 10 }));
@@ -330,8 +341,10 @@ console.log("  F — rendered, the Field Manual and METHODOLOGY");
       && FM.indexOf("start from (v6.43).") < FM.indexOf("UI SIZE and the phone layout (v6.42)."));
     T("F-2 Field Manual, Withdrawal Strategy and the units sentence: the three start with the contributions; a later spouse only to the first retirement",
       FM.includes("this schedule, Backtest and What Breaks start from today's holdings plus the contributions you plan to make before retiring, less those rows")
-      && FM.includes("a spouse who retires later is counted only to the first retirement, and the contributions after it are left out here")
-      && FM.includes("(planned contributions at their face value; from v6.43 the Withdrawal schedule, What Breaks and Backtest start with them too)"));
+      && (D71 ? FM.includes("a spouse who retires later is counted to the first retirement here, and that spouse's later contributions join at the end of each year they are made")
+              : FM.includes("a spouse who retires later is counted only to the first retirement, and the contributions after it are left out here"))
+      && FM.includes("(planned contributions at their face value; from v6.43 the Withdrawal schedule, What Breaks and Backtest start with them too"
+        + (D71 ? "; from v6.44 a spouse who retires later has the contributions made after the first retirement added in the years they are made, in every projection)" : ")")));
     const MP = [join(HERE, "..", "METHODOLOGY.md"), join(HERE, "METHODOLOGY.md")].find(existsSync);
     const MD = MP ? readFileSync(MP, "utf8").replace(/\s+/g, " ") : "";
     T("F-3 METHODOLOGY: the v6.43 section, the corrected accrual section (eight sites, not nine) and the single-plan rule",
@@ -375,14 +388,19 @@ console.log("  F — rendered, the Field Manual and METHODOLOGY");
     T("F-8 What Breaks' basis names the same start", wb.includes(`the portfolio this projection starts from — today's holdings ${DG.retireStartNote(RD)}`));
     T("F-9 the Monte Carlo tab, on the example (both retire together): no exception", mc.includes("the model is drawdown-only (no salary or contributions).") && !mc.includes("contributions, which continue until"));
     const mcB = await visit("monte carlo", { ...clone(DP0), retireYearB: 2034 });
-    T("F-10 the Monte Carlo tab, with spouse B retiring in 2034: her contributions continue until the start of 2034 (the quarter of January)", mcB.includes(`except ${DP0.nameB || "Spouse B"}'s contributions, which continue until the start of 2034.`));
+    T("F-10 the Monte Carlo tab, with spouse B retiring in 2034: her contributions continue until the start of 2034 (the quarter of January)",
+      mcB.includes(`except ${DP0.nameB || "Spouse B"}'s contributions, which continue until the start of 2034${D71 ? " — here and, from v6.44, in every other projection." : "."}`));
     // DD-7 disclosed where it applies (the build review's findings 6 and 7): What Breaks, Backtest and the Withdrawal units note name B's cap
     const PB = { ...clone(DP0), retireYearB: 2034 }, nmB = DP0.nameB || "Spouse B";
     const wbB = await visit("what breaks", PB), btB = await visit("backtest", PB), wdB = await visit("withdrawal", PB);
     const noteB = DG.retireStartNote(RD);
-    T(`F-13 with spouse B retiring in 2034, What Breaks, Backtest and the Withdrawal tab say her contributions count only to ${RD}`,
-      noteB.includes(`of contributions planned before retirement (${nmB}'s only to ${RD}), in today's dollars`) && wbB.includes(`today's holdings ${noteB}`)
-      && btB.includes(`(today's holdings ${noteB})`) && wdB.includes(`at their face value (${nmB}'s only to ${RD}) (from v6.43;`), noteB);
+    // v6.44 (D-71): the same three now say B's later contributions are added in the years they are made
+    const capTxt = D71 ? `(${nmB}'s to ${RD}; ${nmB}'s later ones are added in the years they are made)` : `(${nmB}'s only to ${RD})`;
+    const wdTxt = D71 ? `at their face value (${nmB}'s to ${RD}; ${nmB}'s later ones join the schedule at the end of each year they are made, through 2033 — from v6.44; through v6.43 they were left out) (from v6.43;`
+      : `at their face value (${nmB}'s only to ${RD}) (from v6.43;`;
+    T(`F-13 with spouse B retiring in 2034, What Breaks, Backtest and the Withdrawal tab say her contributions count ${D71 ? `to ${RD} at the start, the later ones in the years they are made` : `only to ${RD}`}`,
+      noteB.includes(`of contributions planned before retirement ${capTxt}, in today's dollars`) && wbB.includes(`today's holdings ${noteB}`)
+      && btB.includes(`(today's holdings ${noteB})`) && wdB.includes(wdTxt), noteB);
     const mcB0 = await visit("monte carlo", { ...PB, contributions: { ...DP0.contributions, contribPreTaxB: 0, contribRothB: 0 } });
     T("F-14 …and with B retiring later but contributing nothing, the Monte Carlo tab names no exception", mcB0.includes("the model is drawdown-only (no salary or contributions).") && !mcB0.includes("continue until"));
     // a plan with no planned contributions (the tab's selected year does not follow a loaded plan's retirement year, so this zeroes the

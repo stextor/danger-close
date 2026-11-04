@@ -34,16 +34,16 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v636";
-const KNOWN_VERSIONS = ["v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643"];
+const KNOWN_VERSIONS = ["v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643", "v644"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
 // v6.43 (D-64, D-70): the figures below move; MEASURED at the v6.43 build. An array, so the next registration widens it.
-const U643 = ["v643"].includes(VER);
+const U643 = ["v643", "v644"].includes(VER);
 const P43 = (v642, v643) => U643 ? v643 : v642;
-const POST = ["v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643", "v644"].includes(VER);   // an array, so the next registration widens it
 const D_PRIOR = "v635";                // §D's prior module — a constant, so the registrar cannot widen it (t76 records why)
 const KD = "[KNOWN DEFECT 2026-10-28, D-66 — flips at v6.36]";
 const require = createRequire(import.meta.url);

@@ -489,6 +489,11 @@ tally "t106-$CUR"   node t106_ui_size_layout.mjs "$CUR"
 # DEFECT. Its §E compares with v6.42's module and runs only where the run folder holds app_v642.mjs; §F mounts the DOM bundle.
 tally "t107-$PRIOR" node t107_opening_balances.mjs "$PRIOR"
 tally "t107-$CUR"   node t107_opening_balances.mjs "$CUR"
+# t108 (v6.44) — a spouse who retires later (D-71): every deterministic projection adds spouse B's contributions after the first retirement
+# in the years they are made; a single plan's spouse-B stream is the one person's (D-72); the Monte Carlo adds no spouse-B contribution on a
+# single plan (D-73). Both legs — the v6.43 leg pins each defect. §C (bit-identity to v6.43's module) runs where app_v643.mjs is in the folder.
+tally "t108-$PRIOR" node t108_later_b_contrib.mjs "$PRIOR"
+tally "t108-$CUR"   node t108_later_b_contrib.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

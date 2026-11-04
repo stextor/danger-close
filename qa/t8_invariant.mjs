@@ -44,7 +44,8 @@ ck("retireStartBalances: 1 definition + 8 consumer call sites (comments excluded
    `found ${calls} in code (${callsRaw} including comments)`);
 // v6.43 (D-70): the single-plan owner rule and its comment now open the constructor, so its accrual call sits ~1,000 characters in;
 // the window is widened to 1,400 (still well inside the function, which runs past 5,000).
-ck("constructor itself applies contribAccrual", /function retireStartBalances[\s\S]{0,1400}contribAccrual\(retireYr\)/.test(SRC));
+// v6.44 (D-71): …with `bStopsAtA: true` — a later-retiring spouse B's accrual stops at A's year, as `openingAccrual`'s does (t108 A-3).
+ck("constructor itself applies contribAccrual (B to A's year)", /function retireStartBalances[\s\S]{0,1600}contribAccrual\(retireYr, \{ bStopsAtA: true \}\)/.test(SRC));
 
 // 3) The three census-found sites (missing from the scope's enumerated list) are wired.
 // v6.32 (F-26, DF-3): the ladder starts at the SELECTED retirement year (`retireYear`), as the strategy engine beside it does — through
@@ -132,8 +133,10 @@ T.applyLoadedData({ portfolio: port, expenses: [], incomeFromForm: true });
   // v5.26: plus the ordinary-income Other accounts. Asserted as a decomposition so the invariant
   // still means "nothing appeared from nowhere" rather than being re-pinned to a new constant.
   const othOrd = rsb.othOrdA + rsb.othOrdB;
-  ck("constructor pooled tradInit = positions + $168,000 total accrual + ordinary Other accounts",
-     Math.abs(rsb.tradInit - (basePos + 96000 + 72000 + othOrd)) < 1e-6, `got ${rsb.tradInit}, othOrd ${othOrd}`);
+  // v6.44 (D-71): B (retiring two years after A) is carried only to A's year: $96,000 + 4 × $12,000 = $144,000 (through v6.43 $168,000);
+  // B's other $24,000 is added by each projection in the years it is made (t108).
+  ck("constructor pooled tradInit = positions + $144,000 total accrual (B to A's year) + ordinary Other accounts",
+     Math.abs(rsb.tradInit - (basePos + 96000 + 48000 + othOrd)) < 1e-6, `got ${rsb.tradInit}, othOrd ${othOrd}`);
   ck("CONSERVATION: the two bases differ by exactly the annuity money",
      Math.abs((rsb.tradInit - rsb.rmdInit) - (othOrd - (rsb.othRmdA + rsb.othRmdB))) < 1e-6,
      `tax ${rsb.tradInit} rmd ${rsb.rmdInit}`);

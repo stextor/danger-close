@@ -148,8 +148,12 @@ T.applyLoadedData({ portfolio: mkPortfolio({}, { contribPreTaxA: 2000, contribRo
   // fails if positions, accrual or the Other-account split each drift while the total holds.
   ck("engine tradInitA = positions + $96,000 accrual + ordinary Other accounts (A)",
      rsb.tradInitA, base.tradA + 96000 + rsb.othOrdA);
-  ck("engine tradInitB = positions + $72,000 accrual + ordinary Other accounts (B)",
-     rsb.tradInitB, base.tradB + 72000 + rsb.othOrdB);
+  // v6.44 (D-71, SCOPE_D71_D72_D73_V644 §1.1): the constructor stops a later-retiring spouse B at A's year — B retires two years after A
+  // here, so the start balance carries 4 years × $12,000 = $48,000 of B's, and the other $24,000 is added by each projection in the years it
+  // is made (t108). Through v6.43 the constructor carried all $72,000 to A's year. `contribAccrual`'s own default (B to B's year, the My Data
+  // readout's figure) is unchanged — the last check below still reads $72,000.
+  ck("engine tradInitB = positions + $48,000 accrual (B to A's year, v6.44) + ordinary Other accounts (B)",
+     rsb.tradInitB, base.tradB + 48000 + rsb.othOrdB);
   ck("the A-side Other-account contribution is the two named IRAs", rsb.othOrdA, 90000);
   ck("the B-side is the annuity plus the state plan", rsb.othOrdB, 21000);
   // The RMD basis excludes the annuity — that is the whole reason `annuity` is a separate type.
