@@ -615,6 +615,30 @@ export function census(G) {
       !single || nB === 0 ? "DEGENERATE — no single plan with rows under B, so D-70's single-plan rule (v6.43) has nothing to change here"
                           : "reachable — every engine must count these rows as the one person's"); }
 
+  // ── v6.44 (D-71, D-72, D-73 — SCOPE_D71_D72_D73_V644) · the conditions that would hide them (§K1) ────────────────────────────────────
+  // 28. A SPOUSE CONTRIBUTING AFTER THE FIRST RETIREMENT. Through v6.43 a later-retiring spouse B's contributions in the years between were
+  //    counted three ways (D-71). A plan where B retires with or before A, or contributes nothing, cannot show it. ON (degenerate) when no
+  //    spouse B contributes after A's retirement year; the value is the money B adds in those years, at face. Read from the plan's fields.
+  { const P = G.PORTFOLIO() || {}, tl = G.PLAN_TIMELINE ? G.PLAN_TIMELINE() : null, single = !!(P.single || (tl && tl.single));
+    const c = P.contributions || {}, z = x => Math.max(0, Number(x) || 0), perYr = 12 * (z(c.contribPreTaxB) + z(c.contribRothB));
+    const rA = tl ? tl.targetRetireYear : Number(P.retireYear), rB = tl ? (tl.targetRetireYearB || rA) : rA;
+    const yrs = single || !perYr ? 0 : Math.max(0, rB - Math.max(rA, tl ? tl.asOfYear : rA));
+    row("b_contrib_after_first_retire", "spouse B's contributions after the first retirement", single ? "single" : (yrs ? `$${(perYr * yrs).toLocaleString("en-US")} over ${yrs} yr${yrs === 1 ? "" : "s"}` : "none"),
+      "a married plan whose spouse B retires later and still contributes", yrs === 0,
+      yrs === 0 ? "DEGENERATE — no spouse B contributes after the first retirement, so D-71's in-year rule (v6.44) adds nothing here"
+                : "reachable — every projection must add these in the years they are made"); }
+
+  // 29. A SINGLE PLAN WITH SPOUSE-B INCOME OR CONTRIBUTIONS STORED. Through v6.43 such a stream was dropped from every figure (D-72), and the
+  //    Monte Carlo still added B's stored contribution (D-73). A married plan, or a single plan storing neither, cannot show it. ON
+  //    (degenerate) on either; clear when a single plan stores a B-owned stream or a non-zero `spouseBMonthly` — the value counts them.
+  { const P = G.PORTFOLIO() || {}, tl = G.PLAN_TIMELINE ? G.PLAN_TIMELINE() : null, single = !!(P.single || (tl && tl.single));
+    const nS = single ? (P.incomeStreams || []).filter(s => s && s.owner === "B" && (Number(s.monthly) || 0) > 0).length : 0;
+    const mo = single ? Math.max(0, Number((P.contributions || {}).spouseBMonthly) || 0) : 0;
+    row("single_b_income", "a single plan's spouse-B income or contribution", single ? `${nS} stream${nS === 1 ? "" : "s"} under B, $${mo}/mo for B` : "married",
+      "a single plan with a stream under B or a contribution stored for B", !single || (nS === 0 && mo === 0),
+      !single || (nS === 0 && mo === 0) ? "DEGENERATE — no single plan with spouse-B income or contributions, so D-72 and D-73 (v6.44) change nothing here"
+                                        : "reachable — the stream must count as the one person's, and the Monte Carlo must not add B's contribution"); }
+
   return rows;
 }
 
