@@ -3738,3 +3738,29 @@ Engines A–D, the strategy comparison, the solve-for grid, the other tabs, the 
 unchanged on every plan. The example, and every plan holding both kinds of money at the selected year, render the Roth tab identically.
 The ladder stays computed inside the component (OPERATIONS §M): its balance columns are testable to the display's $0.01M, its RMD cards
 to the dollar.
+
+## The Social Security tab's reading of each spouse's benefit at 67 (v6.46)
+
+`docs/SCOPE_D56_SS_FRA_ESTIMATE_V646.md`, DK-1 to DK-4 as recommended (Steve, 2026-11-05: *"all as recommended"*). MissingFeatures **D-56**
+(the $1,944, narrowed out of it); **D-77** filed (the spousal benefit); UsabilityFlaws **F-36** filed.
+
+**What was wrong.** The Social Security tab works from each spouse's benefit at full retirement age (67). Through v6.45 it read that figure
+seven times, in three blocks, with four fallbacks for a plan whose benefit table has no age-67 figure: spouse A's planned amount (as if
+claimed at 67), spouse B's planned amount, $0, and — for spouse B in the tab's main block — a typed **$1,944**. A married plan whose spouse B
+has no benefit of her own (the guided setup or My Data with her amount at $0, Start Fresh, a backup with no spouse-B block) reached the $1,944,
+and the tab built her claiming table, her card, the combined income, the shortfall card, the draw-impact table and the survivor figures from
+it, while every engine paid her nothing. On the example with her benefit removed: her card $1,458 a month at 63 ($1,944 × 0.75), the combined
+income $5,158 where the engines' figures give $3,700, and the shortfall card $2,462 a month (1.8%) where they give $3,920 (2.9%). Because
+$1,944 is above half of spouse A's $3,300, the tab's warning that SSA's spousal top-up is not modeled was hidden on exactly that plan.
+
+**What changed.** One reading, `ssFraOf`, used at all seven sites: the table's age-67 figure when above 0; else the planned amount carried
+back to 67 from the tab's own claim age (`ssTabClaimAge`) by the factors My Data builds tables with (`SS_FACTORS`, SSA's rates for a 67 FRA);
+else 0. Spouse B with no benefit shows $0, one line saying the plan holds no Social Security benefit for spouse B, and the spousal warning
+(on the example with spouse B's benefit removed: about $1,650 a month, $19,800 a year, left out of every projection). Spouse A with no
+benefit shows 0% of FRA: the three places that divide by these figures read 0% instead of NaN, and no line or warning is added for A (F-36). A statement table without an age-67 row is read from the planned amount ($1,300 at 63 → $1,733), and a spouse whose plan
+holds a benefit but no table moves to that amount carried to 67 (v6.45 read the planned amount as if it were the age-67 figure).
+
+**What did not change.** Display only. No engine, the Monte Carlo, What Breaks, Backtest or Ask AI reads the benefit table: they read the
+planned amount (`getSSA`, `getSSB`), as before. The example and every plan whose tables hold a numeric age-67 figure for both spouses render the tab
+identically (a backup storing the figures as text, such as "1800", now reads them as numbers). The spousal top-up itself remains unmodeled (D-77), and the tab's warning about it still looks only at spouse B (F-36). The tab
+fixes full retirement age at 67, so carrying back to 67 is SSA's rule for people born in 1960 or later.

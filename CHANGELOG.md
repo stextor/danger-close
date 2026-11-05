@@ -1,5 +1,111 @@
 # Changelog
 
+## v6.46 — the Social Security tab reads each spouse's benefit at 67 one way (D-56's $1,944)
+
+**A display release, on one tab.** Scoped in `docs/SCOPE_D56_SS_FRA_ESTIMATE_V646.md` (repo-only; review §6, build record §7). Steve, on the
+four decisions: *"all as recommended"* — DK-1 to DK-4 (a). Built on v6.45 (source `b67f0d9a…`). METHODOLOGY's new section *The Social
+Security tab's reading of each spouse's benefit at 67 (v6.46)* is the full account. Under DK-4 (a) **the 2027 tax figures become v6.47**
+(`docs/SCOPE_TY2027_REFRESH_V633_V634.md` renumbered a thirteenth time; its suite stays `t99_ty2027.mjs`): searches of irs.gov on 5 November
+found the IRS's TY2027 revenue procedure still unpublished. The 15 December deadline stands.
+
+**What was wrong (v6.45, measured at the scope).** The Social Security tab works from each spouse's benefit at full retirement age (67). It
+read that figure seven times, in three blocks, with four fallbacks for a plan whose benefit table has no age-67 figure — and spouse B's main
+one was a typed **$1,944** a month.
+- **A married plan whose spouse B has no benefit of her own reached it** — the guided setup or My Data with her amount at $0, Start Fresh, a
+  backup with no spouse-B block. The tab then showed *"EST. FRA: $1,944/mo"*, built her card from it ($1,458 a month at 63), and carried it
+  into the combined income ($5,158 where the engines' figures give $3,700), the shortfall card ($2,462 a month, 1.8%, where they give $3,920,
+  2.9%), the draw-impact table and the survivor figures — while every projection paid her nothing.
+- **It hid the warning meant for exactly that plan.** $1,944 is above half of spouse A's $3,300, so *"SPOUSAL BENEFIT NOT MODELED"* did not
+  show on the household it exists for.
+- **The other fallbacks.** A statement table without an age-67 row read spouse B at $1,944 too (her own $1,300 at 63 shown as $1,458); a
+  spouse A whose plan holds a benefit but no table had the planned amount read as the age-67 figure; spouse A with no benefit printed *NaN*.
+- **Display only.** No engine, the Monte Carlo, What Breaks, Backtest or Ask AI reads the benefit table: they read the planned amount.
+
+**What changed.**
+- **One reading, `ssFraOf`, at all seven sites** (DK-1 (a)): the table's age-67 figure when above 0; else the planned amount carried back to
+  67 from the tab's own claim age, by the factors My Data builds tables with (SSA's rates for a 67 FRA); else 0. The three places that divide
+  by these figures are guarded (0%, not NaN).
+- **Spouse B with no benefit of her own** (DK-2 (a)) shows $0 — her claiming table at $0 a cell, her card, the combined income and the
+  shortfall card as the engines see them — one sentence in place of the derivation note: *"This plan holds no Social Security benefit for
+  {name}, so every projection pays {name} no Social Security."*, and the spousal warning: *"… roughly $1,650/mo ($19,800/yr) more than every
+  projection here assumes"* on the example with her benefit removed.
+- **What moves, against v6.45:** only the Social Security tab, and only on a plan where a spouse's table has no positive age-67 figure (or
+  holds it as text). The example — and every plan whose tables hold a numeric age-67 figure for both spouses — renders the tab identically
+  (`t110` §D: 20 plans, every fixture household among them). **The example is unchanged.**
+- **Copy and documents.** Field Manual §13: a v6.46 note. METHODOLOGY: the new section. MissingFeatures **D-56 narrowed** (the $1,944
+  fixed; its other members stand) and **D-77 filed** (DK-3 (a)). UsabilityFlaws F-29's $1,944 paragraph closed and **F-36 filed**. The four
+  version sites read v6.46.
+
+**Found by this release and not fixed (DK-3 (a)).**
+- **D-77: SSA's spousal benefit is not modeled.** A spouse with little or no record of their own is paid up to half the other's benefit at 67
+  once the other has claimed; no engine pays it, so such a couple reads short by up to that much a month while both are alive (conservative).
+  Disclosed before (METHODOLOGY, the tab's warning, the Field Manual) but in no register until now. Its own scope — a change to every engine.
+- **F-36: the spousal warning only looks at spouse B.** With spouse A at $0 and spouse B at $1,800, A's top-up (½ × $1,800 = $900 a month)
+  gets no warning. Recorded with it: on a no-benefit spouse B the claiming grid's best cell names B at 62 (every B column ties); with both
+  spouses at $0 the survivor sentence still says spouse A has the larger benefit.
+
+**Owned.**
+- **The scope understated how far the $1,944 reached** in its first draft (the card and the table only); its review found the combined
+  income, the shortfall card, the draw table and the survivor figures, and that its *Combined income* oracle was false. Both corrected
+  before Steve decided (scope §6).
+- **Three of the scope's figures were measured at the wrong slider age.** Its prototype loaded plans without the app's remount, so the tab's
+  claim-age sliders kept the example's ages: for spouse A planned at 65 with no table it reported the shortfall moving $2,870 → $2,409; at
+  her own age it moves $3,270 → $2,870. The build review caught it; the scope's §7 records it, and no shipped copy carried the wrong figures.
+- **`t110`'s first draft made the same mistake** — every shape read at the example's ages, and a hand-pin title (*"her card at 65"*) that
+  could not be reached. Caught by the build review before the suite run; `t110` now loads each plan into a fresh mount.
+- **The first Field Manual note and METHODOLOGY said "a spouse"** where only spouse B gets the sentence and the warning, and the note used
+  a typed pronoun (v6.28's rule for in-app copy). Corrected.
+
+**Limitations, stated.**
+- The tab fixes full retirement age at 67, so carrying a planned amount back to 67 is SSA's rule for people born in 1960 or later — as
+  everywhere on the tab already.
+- Two of the seven sites — the breakeven block and the claiming grid — have no rendered check; `t110`'s source checks and four controls hold
+  them, and its §D holds every plan whose tables hold 67 to v6.45's text.
+- **D-56's other members** (the as-of date, spouse B's claim age 63 and the 2029 retirement placeholders; the Roth tab's 5-year-clock line;
+  the Grade tab's literals), **D-74**, **D-75**, **D-77** and **F-36** stand. Backtest's fixed pension at face (reported at v6.44) is still
+  unregistered.
+
+**Tests.** New suite **`t110_ss_fra.mjs`**, run on both legs; the v6.45 leg pins each defect as `[KNOWN DEFECT 2026-11-05, D-56 — flips at
+v6.46]`.
+- **§A, the source by AST:** `ssFraOf` is module-level and uses `ssTabClaimAge`; every computed `[67]` read in the source is in it (or the
+  statement parser, reading the table it has just parsed); the tab calls it seven times; no numeric literal of 1,000 or more stands as the
+  fallback on a benefit-table read; every division by a spouse's figure sits inside the branch of a test that it is above 0.
+- **§B, the helper, by checks that do not share its formula:** it equals `genSSTable`'s age-67 cell — the table My Data writes — for every
+  whole planned amount $1–$6,000 at all nine claim ages (54,000 cases); the SSA round trip returns the planned amount within $1; the table's
+  figure wins; string values, claim-age shapes and a single plan's B.
+- **§C, rendered:** eleven plan shapes, each loaded from storage into a fresh mount — no spouse-B benefit three ways, a statement without 67,
+  a large B, no A benefit, a small A with no B, A with no table (planned at 67 and at 65), a single plan and the example — against oracles from
+  the plan's fields at the sliders' ages; the new sentence on exactly the four no-benefit shapes; no NaN.
+- **§D, page identity:** the tab equals v6.45's text on 20 plans (the example, a large B, a single plan, every fixture household).
+- **§E, hand pins:** $3,700, $3,920 (7,620 − 0 − 400 − 3,300) and $1,650 / $19,800; $1,733 (1,300 ÷ 0.75) and her $1,300; $3,461 (3,000 ÷
+  0.8667) and A's own $3,000 at 65; the example's $1,800 / $1,350 / $5,050.
+- **§F, the copy:** the §13 note (ahead of v6.45's) and METHODOLOGY's section.
+- **Boundary census (§K1):** rows `ss_fra_source` and `spousal_warning` — `t29` B-40, B-41, C-d56-1 to C-d56-3; the example is ON for both
+  (both figures from a table; half of A's below B's), which is why nothing caught this.
+- **Re-gated:** `t101`'s oracle copied both old fallbacks (`|| DG.getSSA()`, `|| 1944`) — on the v6.46 leg it takes the new rule (no `t101`
+  plan reaches either branch); `t109` A-3's allowlist expects the `|| 1944` on the v6.45 leg only.
+- **Registered:** `v646` by the AST registration (508 sites in 91 files: 182 gates, 324 arrays, 2 maps); by hand `t33` PINS, `t93`'s Engine D reference, `t45`/`t47`/`t48`. The shim
+  exports `ssFraOf` and `ssTabClaimAge`. `runsuite.sh` lists `t110`.
+
+**Counts**, from the full suite run from the packaged copies:
+- **11,681 app checks across 108 app suites, 0 failed, 0 DIED**: 6,405 current-leg, 4,793 prior-leg (v6.45), 235 and 238 in the two attribution runs, MC parity 10/10 (no intended difference — no engine changed).
+- Tooling: `t21` 64, `domdiff` 32, `sets` 12 + 12. GRAND **11,801**, 0 failed.
+- Against v6.45, the current leg: `t110` new (34; 11 on the v6.45 leg); `t29` 160 → 167 (the two census rows and three shapes); `t109` 28 → 26 (its §C compares with v6.44's module, which this folder does not hold, and prints a skip — as `t108`'s did at v6.45). Every other current-leg count is unchanged. Per-suite figures are on `TESTING.md`'s v6.46 line.
+
+**Controls.** `qa/tools/controls_v646_ss_fra.py`, on a copy of the run folder: **16 of 16 as expected** — C0 silent; K1–K15 each fire their named `t110` checks (most also turn related checks red); every file restored and hash-checked. Run on a copy of the build workspace's run folder whose source, `t110`, DOM entry and script are byte-identical to the packaged copies. The seven reads each reverted to their v6.45 fallback (K1–K5, K13, K14): the $1,944 turns eleven checks red; the breakeven's and the claiming grid's four turn the source checks only (A-2, A-3), as recorded. The helper's carry and claim age (K6, K7), the three guards (K8, K9, K15), the sentence (K10, K11 — K11 also turns §D's page identity red) and the §13 note (K12).
+
+**The reviews.** The scope was reviewed once before Steve decided (scope §6: 2 must-fix, 6 further findings, 9 notes). The build was reviewed by
+an agent that had not seen it, read-only, with no suite runs: **1 must-fix, 6 should-fix, 11 notes**, each checked and acted on (scope §7):
+the documents not yet written (written here); the sliders (`t110` now remounts, the scope's figures corrected); controls short of the scope —
+two of spouse A's reads and the note's division had no mutant (added); the v6.45 leg not rerun after an edit; the copy's "a spouse" and its
+pronoun; `t110` A-4's narrowing undisclosed, A-5 accepting a guard on the wrong branch, A-2's narrow matcher (each fixed or recorded); two
+dead locals. It confirmed the source against the scope by AST on both builds and recomputed every figure in the copy by hand. One of its
+notes was itself wrong (that the statement parser has no `[67]` read: it reads a bare local `tableByAge[67]`); `t110` allows that read by
+name.
+
+**Provenance.** Source `c3c747904705d506c1e4d1ef61dbc8dd` · built `index.html` `d5c3db2c39e9b0718a9499de849a6a7e` (vite 5.4.21, `npm ci`; built twice, byte-identical) · `smoke_built`
+22 passed, 0 failed on the packaged page.
+
 ## v6.45 — the Roth ladder starts from the plan's own balances (D-76)
 
 **A modeling release, on one tab.** Scoped in `docs/SCOPE_D76_LADDER_SEED_V645.md` (repo-only; review §6, build record §7). Steve, on the six
