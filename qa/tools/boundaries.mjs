@@ -667,6 +667,32 @@ export function census(G) {
       cv == null || cv + lb > 0 ? "DEGENERATE — the plan holds convertible Traditional money, so the ladder's nothing-converts path (D-76, v6.45) is unexercised here"
                                 : "reachable — every conversion must be $0 and the tab must say so"); }
 
+  // ── v6.46 (D-56 — SCOPE_D56_SS_FRA_ESTIMATE_V646) · the conditions that hid the $1,944 (§K1) ───────────────────────────────────────────
+  // The Social Security tab reads each spouse's benefit at 67 from the table's age-67 figure, else the planned amount carried back to 67, else 0
+  // (v6.46's ssFraOf; written out here from the plan's fields, so the rows read the same on every leg). Through v6.45 a spouse B with no table
+  // figure was given a typed $1,944.
+  const _ssf = { 62: 0.70, 63: 0.75, 64: 0.80, 65: 0.8667, 66: 0.9333, 67: 1.0, 68: 1.08, 69: 1.16, 70: 1.24 };
+  const _fraSrc = (who) => { const P = G.PORTFOLIO() || {}; if (who === "B" && P.single) return { src: "none", v: 0 };
+    const b = (P.incomeSources || {})[who === "B" ? "ssB" : "ssA"] || {}; const t = Number(b.tableByAge && b.tableByAge[67]) || 0;
+    if (t > 0) return { src: "table", v: t }; const pl = Number(b.planned) || 0; const n = Math.round(Number(b.plannedAge));
+    const age = Math.min(70, Math.max(62, Number.isFinite(n) && n > 0 ? n : (who === "A" ? 67 : 63)));
+    return pl > 0 ? { src: "planned", v: Math.round(pl / _ssf[age]) } : { src: "none", v: 0 }; };
+  // 32. WHERE EACH SPOUSE'S BENEFIT AT 67 COMES FROM. ON (degenerate) when both come from a table, as on the example and every fixture —
+  //    the planned-amount and no-benefit paths are then unexercised.
+  { const P = G.PORTFOLIO() || {}, a = _fraSrc("A"), b = _fraSrc("B");
+    const both = a.src === "table" && (P.single || b.src === "table");
+    row("ss_fra_source", "where each spouse's benefit at 67 comes from (the SS tab)", P.single ? `A ${a.src}` : `A ${a.src}, B ${b.src}`,
+      "a spouse with no age-67 table figure (planned amount, or no benefit)", both,
+      both ? "DEGENERATE — both figures come from a benefit table, so the tab's planned-amount and no-benefit paths (D-56, v6.46) are unexercised"
+           : "reachable — the tab must read the planned amount carried to 67, or $0, never an invented figure"); }
+  // 33. THE SPOUSAL WARNING. The tab warns that SSA's spousal top-up is not modeled when half of A's benefit at 67 exceeds B's. ON
+  //    (degenerate) when it does not, as on the example ($1,650 vs $1,800), or on a single plan.
+  { const P = G.PORTFOLIO() || {}, a = _fraSrc("A"), b = _fraSrc("B"), half = Math.round(a.v * 0.5), on = !!P.single || half <= b.v;
+    row("spousal_warning", "the SS tab's spousal-benefit warning", P.single ? "single" : `½ × A $${half.toLocaleString("en-US")} vs B $${b.v.toLocaleString("en-US")}`,
+      "half of spouse A's benefit at 67 above spouse B's", on,
+      on ? "DEGENERATE — the warning does not show here, so its path (hidden by the $1,944 through v6.45) is unexercised"
+         : "reachable — the tab must warn, with the gap"); }
+
   return rows;
 }
 
