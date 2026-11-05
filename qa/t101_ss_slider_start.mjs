@@ -36,13 +36,14 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v637";
-const KNOWN_VERSIONS = ["v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643", "v644", "v645"];
+const KNOWN_VERSIONS = ["v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643", "v644", "v645", "v646"];
+const D56 = ["v646"].includes(VER);   // v6.46 (D-56): the oracle's new rule — an array, so the next registration widens it
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v637", "v638", "v639", "v640", "v641", "v642", "v643", "v644", "v645"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v637", "v638", "v639", "v640", "v641", "v642", "v643", "v644", "v645", "v646"].includes(VER);   // an array, so the next registration widens it
 const D_PRIOR = "v636";                // §D's prior module — a constant, so the registrar cannot widen it (t76 records why)
 const KD = "[KNOWN DEFECT 2026-10-29, F-29 — flips at v6.37]";
 dom.reconfigure({ url: "https://stextor.github.io/danger-close/" }); globalThis.location = window.location;   // the self-hosted branch
@@ -141,7 +142,15 @@ const singleMD = P => { const p = clone(P); p.single = true; p.incomeSources.ssB
 
 // Everything the expected figures need, read from the plan (and the expense snapshot), never from the tab.
 const model = () => { const P = DG.PORTFOLIO(), tl = DG.PLAN_TIMELINE(), single = !!tl.single;
-  const fraA = P.incomeSources.ssA.tableByAge[67] || DG.getSSA(), fraB = single ? 0 : (P.incomeSources.ssB.tableByAge[67] || 1944);
+  // v6.46 (D-56): the tab reads each spouse's benefit at 67 one way (ssFraOf) — the table's figure, else the planned amount carried back to 67
+  // from the tab's claim age, else 0. Written out here, not read from the app. No plan in this suite reaches either fallback (every table is
+  // genSSTable's or the example's, and the single plan's B is 0), so no figure moves; through v6.45 the oracle copied the tab's old fallbacks.
+  const _SSF = { 62: 0.70, 63: 0.75, 64: 0.80, 65: 0.8667, 66: 0.9333, 67: 1.0, 68: 1.08, 69: 1.16, 70: 1.24 };   // SSA's rates for a 67 FRA
+  const _fra = (b, dflt) => { const t = Number(b && b.tableByAge && b.tableByAge[67]) || 0; if (t > 0) return t; const pl = Number(b && b.planned) || 0;
+    const n = Math.round(Number(b && b.plannedAge)); const age = Math.min(70, Math.max(62, Number.isFinite(n) && n > 0 ? n : dflt));
+    return pl > 0 ? Math.round(pl / _SSF[age]) : 0; };
+  const fraA = D56 ? _fra(P.incomeSources.ssA, 67) : (P.incomeSources.ssA.tableByAge[67] || DG.getSSA()),
+    fraB = single ? 0 : (D56 ? _fra(P.incomeSources.ssB, 63) : (P.incomeSources.ssB.tableByAge[67] || 1944));
   return { P, tl, single, fraA, fraB, planA: Math.min(70, Math.max(62, P.incomeSources.ssA.plannedAge || 67)), planB: Math.min(70, Math.max(62, P.incomeSources.ssB.plannedAge || 67)),
     E: DG.snapshots().early, pen: DG.getPension(), R: tl.targetRetireYear, medB: tl.medicareB.year, dobA: tl.dobA, dobB: tl.dobB, pp: DG.postPayments ? DG.postPayments() : null }; };
 const series = (m, selA, selB) => {   // month index = year × 12 + month

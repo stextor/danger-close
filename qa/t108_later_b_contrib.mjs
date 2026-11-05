@@ -55,13 +55,13 @@ console.error = () => {}; console.warn = () => {};
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v644";
 const DUMP = process.argv[3] === "--dumpdom";
-const KNOWN_VERSIONS = ["v643", "v644", "v645"];
+const KNOWN_VERSIONS = ["v643", "v644", "v645", "v646"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v644", "v645"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v644", "v645", "v646"].includes(VER);   // an array, so the next registration widens it
 const C_PRIOR = "v643";                // §C's prior module — a constant, so the registrar cannot widen it
 const KD71 = "[KNOWN DEFECT 2026-11-03, D-71 — flips at v6.44]", KD72 = "[KNOWN DEFECT 2026-11-03, D-72 — flips at v6.44]",
   KD73 = "[KNOWN DEFECT 2026-11-03, D-73 — flips at v6.44]";

@@ -43,13 +43,13 @@ console.error = () => {}; console.warn = () => {};
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v645";
 const DUMP = process.argv[3] === "--dumpdom";
-const KNOWN_VERSIONS = ["v644", "v645"];
+const KNOWN_VERSIONS = ["v644", "v645", "v646"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v645"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v645", "v646"].includes(VER);   // an array, so the next registration widens it
 const C_PRIOR = "v644";                // §C's prior module — a constant, so the registrar cannot widen it
 const KD = "[KNOWN DEFECT 2026-11-04, D-76 — flips at v6.45]";
 const require = createRequire(import.meta.url);
@@ -225,7 +225,9 @@ console.log("  A — the source");
     "runExtendedMC default 10000": [1, "the iteration count"],
     "layoutWidthClass || 1024": [1, "the window width with no window (a test environment)"],
     "DangerCloseMain || 2033": [2, "the Social Security haircut's year when its field is blank — a setting's default, shown in the field"],
-    "DangerCloseMain || 1944": [1, "spouse B's FRA estimate with no age-67 figure — DJ-6 (b): registered (UsabilityFlaws, D-56) and scoped next"],
+    // v6.46 (D-56, docs/SCOPE_D56_SS_FRA_ESTIMATE_V646.md): the $1,944 is gone from v6.46 — expected on the v6.44 and v6.45 legs only. The list is
+    // literal (not widened by the registrar): it names the builds that still carry the fallback.
+    "DangerCloseMain || 1944": [["v644", "v645"].includes(VER) ? 1 : 0, "spouse B's FRA estimate with no age-67 figure — removed at v6.46 (D-56; the SS tab's one reading, ssFraOf)"],
     "DangerCloseMain ?: 9999": [1, "the break-even 'never' sentinel"],
     "DangerCloseMain ?: 500000": [1, "home value — disclosed in-app (`_fb`, 'Showing baked-in defaults', ⚠ rows)"],
     "DangerCloseMain ?: 150000": [1, "mortgage balance — disclosed in-app (`_fb`)"],

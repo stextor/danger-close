@@ -498,6 +498,11 @@ tally "t108-$CUR"   node t108_later_b_contrib.mjs "$CUR"
 # nothing converts says so. Both legs — the v6.44 leg pins each defect. §C (page text identical to v6.44) runs where dom_v644.cjs is in the folder.
 tally "t109-$PRIOR" node t109_ladder_seed.mjs "$PRIOR"
 tally "t109-$CUR"   node t109_ladder_seed.mjs "$CUR"
+# t110 (v6.46) — the Social Security tab's one reading of each spouse's benefit at 67 (D-56's $1,944): no benefit invented for a spouse with
+# none; the spousal warning, the shortfall and the survivor figures from the plan's own figures. Both legs — the v6.45 leg pins each defect.
+# §D (the tab identical to v6.45's text where both tables hold 67) runs where dom_v645.cjs is in the folder.
+tally "t110-$PRIOR" node t110_ss_fra.mjs "$PRIOR"
+tally "t110-$CUR"   node t110_ss_fra.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
