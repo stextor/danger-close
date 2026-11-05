@@ -3714,3 +3714,27 @@ with the rental counted.
 - **The Monte Carlo adds B's contributions in today's dollars,** quarterly, scaled by its contribution rate; the deterministic projections
   add face value at the end of the year. They agree on which years carry the contributions, not on the amounts — the face-value rule
   (DU-7 (a)) at work. The Monte Carlo also adds them to B's retirement even when B's projected death comes first (an edge, unchanged).
+
+## The Roth ladder starts from the plan's own balances (v6.45)
+
+`docs/SCOPE_D76_LADDER_SEED_V645.md`, DJ-1 to DJ-6 as recommended (Steve, 2026-11-04: *"all as recommended"*). MissingFeatures **D-76**
+(widened to the Traditional twin and closed).
+
+**What was wrong.** The Roth tab's conversion ladder seeds its balances from `retireStartBalances` at the selected retirement year,
+carried to that year (v6.30). Two exceptions had been in the source since its first commit. When the plan's Roth at that year was 0, the
+ladder's Roth column started from a fixed $356,813 (× the carry) — the example household's old Roth. When its Traditional was 0, the
+ladder converted from a fixed $1,340,645 — the example's old Traditional — and every figure built on it followed: the conversions, the
+tax, MAGI, the IRMAA calendar, the headroom, the totals and the with-conversion RMD card (*"Combined RMDs reduced by $-56,268/yr"* on a
+plan with no Traditional money at all). On the example with its Roth removed the Roth column ran $401,951 high in 2029 and $652,308 high
+by 2040 (the carried seed, $384,642, grown at 4.5%).
+
+**What changed.** The seeds are the plan's own, always: Roth = `carryStartBalances(…).rothInitA + rothInitB`; Traditional =
+`tradInitA` / `tradInitB` carried, 0 when the plan has none. A ladder in which nothing converts while the slider is above $0 says so in
+a line above the table — keyed to the ladder's result, not the start balance, because a plan with $0 at the start can still convert a
+later-retiring spouse B's contributions (v6.44), and a plan whose Traditional is all annuity money converts nothing.
+
+**What did not change.** Both fallbacks were confined to the ladder's render block: nothing outside it reads the ladder's balances, so
+Engines A–D, the strategy comparison, the solve-for grid, the other tabs, the Monte Carlo, What Breaks, Backtest and Ask AI are
+unchanged on every plan. The example, and every plan holding both kinds of money at the selected year, render the Roth tab identically.
+The ladder stays computed inside the component (OPERATIONS §M): its balance columns are testable to the display's $0.01M, its RMD cards
+to the dollar.

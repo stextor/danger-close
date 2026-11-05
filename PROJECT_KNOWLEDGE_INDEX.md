@@ -25,15 +25,19 @@ The operational half — sections §A–§N — lives here as **`OPERATIONS.md`*
 
 | Field | Value |
 |---|---|
-| Version | **v6.44** |
-| Source file in knowledge | `DangerClose-v6_44.jsx` |
-| Source md5 | `e024f8ba39fe29c5b131c0aff38d6a6c` |
-| Built `index.html` md5 | `82c47833604141b5bbe23da378a6e681` |
-| Shipped | 2026-11-03 |
+| Version | **v6.45** |
+| Source file in knowledge | `DangerClose-v6_45.jsx` |
+| Source md5 | `b67f0d9adcfc7a8eb8bd9a60b72e1c72` |
+| Built `index.html` md5 | `80088bc12313dbad04622a74655ab8c1` |
+| Shipped | 2026-11-04 |
 
-> ⚠ **v6.44 SHIPPED (2026-11-03) — a spouse who retires later (D-71); a single plan's spouse-B income and contributions (D-72, D-73).** Source `e024f8ba…` · built `82c47833…`.
+> ⚠ **v6.45 SHIPPED (2026-11-04) — the Roth ladder starts from the plan's own balances (D-76).** Source `b67f0d9a…` · built `80088bc1…`.
+> A MODELING release on one tab (`docs/SCOPE_D76_LADDER_SEED_V645.md`, DJ-1 (b), DJ-2 to DJ-5 (a), DJ-6 (b), Steve: *"all as recommended"*; review §6, build record §7). Through v6.44 the Roth tab's conversion ladder seeded its Roth column from the example's $356,813 (× the carry) on a plan with no Roth money at the selected year, and converted from the example's $1,340,645 on a plan with no Traditional money — both since the repo's first commit, both display-only (nothing outside the ladder reads them). From v6.45 the seeds are the plan's own, and a ladder in which nothing converts says so above the table, keyed to the ladder's result. The example, and every plan holding both kinds of money, render the Roth tab identically. MissingFeatures D-76 widened to the Traditional twin and closed; D-56 widened (spouse B's $1,944 Social Security estimate, measured reachable — its own scope next). UsabilityFlaws F-34 (the *(now)* cards show the retirement-year balance) and F-35 (the RATE column's 10% at $0 income) filed. The 2027 tax figures become v6.46 (the TY2027 scope renumbered a twelfth time).
+> New suite `t109` (both legs); `controls_v645_ladder_seed.py` new; `boundaries.mjs` gains `ladder_start_roth` and `ladder_convertible` (`t29` B-38, B-39, C-d76-1 to -5); `v645` registered; no re-gate. `TESTING.md`'s v6.42 per-suite line moved to the archive. **Rotation:** the pool loses `DangerClose-v6_44.jsx` (v6.44 is read from history, commit `b72653c`) and gains `DangerClose-v6_45.jsx`. **Pool stays 16.**
+>
+> *(**v6.44 SHIPPED (2026-11-03) — a spouse who retires later (D-71); a single plan's spouse-B income and contributions (D-72, D-73).** Source `e024f8ba…` · built `82c47833…`.
 > A MODELING release (`docs/SCOPE_D71_D72_D73_V644.md`, DE-1 to DE-6 all (a), Steve: *"take all six as recommended"*; review §6, build record §7, which records the independent build review and one correction to the scope's §1.2 — What Breaks and Backtest enter the contributions at face value, as What Breaks enters a fixed pension, not re-indexed by their loops' inflation). Through v6.43 a later-retiring spouse B's contributions in the years between the two retirements were counted three ways: the tax engines (and the Roth ladder and its RMD cards) put them all in the start balance at A's retirement; Engine D, What Breaks and Backtest left them out (v6.43's DD-7); only the Monte Carlo added them as made. From v6.44 one helper (`laterBContribAt`) and every deterministic projection adds them at the end of the year they are made, at face value; `retireStartBalances` stops B at A's year. The example is unchanged (its spouses retire together). D-72: a single plan's B-owned income stream is the one person's (`streamsMonthlyAt`, three labels). D-73: the Monte Carlo reads spouse B's contribution as 0 on a single plan. MissingFeatures D-71–D-73 closed; D-75 (B's wages between the retirements) and D-76 (the Roth ladder's phantom $356,813 Roth when the start Roth is 0 — pre-existing, found by the build review) filed. The 2027 tax figures become v6.45 (the TY2027 scope renumbered an eleventh time).
-> New suite `t108` (both legs); `controls_v644_later_b.py` new; `boundaries.mjs` gains `b_contrib_after_first_retire` and `single_b_income` (`t29` B-36, B-37, C-d71-1, C-d72-1); `t1` S-8, `t7`, `t8`, `t57` and `t107` (DD-7's pins, now the in-year rule) re-gated; `v644` registered; the shim exports three helpers. `TESTING.md`'s v6.41 per-suite line moved to the archive. **Rotation:** the pool loses `DangerClose-v6_43.jsx` (v6.43 is read from history, commit `ea73e62`) and gains `DangerClose-v6_44.jsx`. **Pool stays 16.**
+> New suite `t108` (both legs); `controls_v644_later_b.py` new; `boundaries.mjs` gains `b_contrib_after_first_retire` and `single_b_income` (`t29` B-36, B-37, C-d71-1, C-d72-1); `t1` S-8, `t7`, `t8`, `t57` and `t107` (DD-7's pins, now the in-year rule) re-gated; `v644` registered; the shim exports three helpers. `TESTING.md`'s v6.41 per-suite line moved to the archive. **Rotation:** the pool loses `DangerClose-v6_43.jsx` (v6.43 is read from history, commit `ea73e62`) and gains `DangerClose-v6_44.jsx`. **Pool stays 16.**)*
 >
 > *(**v6.43 SHIPPED (2026-11-03) — the money the Withdrawal tab, What Breaks and Backtest start from (D-64); a single plan's accounts are the one person's (D-70).** Source `0709eb9a…` · built `a8b1a139…`.
 > A MODELING release (`docs/SCOPE_D64_D70_V643.md`, DD-1 to DD-9 all (a), Steve: *"all recommended"*; review §6, build record §7, which includes the independent build review's two must-fixes). Through v6.42 Engine D (the Withdrawal tab) filled its buckets from today's holdings but took its Traditional and Roth shares from balances that included the contributions planned before retirement, so the shares summed past 1 (1.068 on the example, 1.684 on a plan with small holdings) and the balance was short by every contribution; What Breaks and Backtest started from today's household; a single plan with rows stored under spouse B took no RMD on them. From v6.43 the contributions join Engine D's buckets at face value after the carry, placed by the contribution mix ($1,729,309 on the example under BASE, shares 0.802459 / 0.197541); What Breaks and Backtest start from today's household plus them in today's dollars (`retireStartToday`; $1,741,608); a later spouse's count only to the first retirement (DD-7); a single plan's rows are the one person's (`retireStartBalances`). Engine D's draws feed every tax engine, so the Taxes, IRMAA and Roth tabs and the Monte Carlo move a little (parity: `mc`, `extMC`, `stress` differ by design); What Breaks and Backtest move most. METHODOLOGY: a new section and two corrected. MissingFeatures **D-64 and D-70 closed**, **D-71 to D-74 filed**. **Under DD-4 the 2027 tax figures become v6.44** (`docs/SCOPE_TY2027_REFRESH_V633_V634.md`, renumbered a tenth time; suite still `t99`; OPEN — it waits on the IRS TY2027 Rev. Proc., the §402(g) notice and CMS's 2027 IRMAA figures, to ship by 15 December, DT-7).
@@ -124,12 +128,12 @@ or a reason here (OPERATIONS §I).
 
 | Pool file | md5 | Repo path |
 |---|---|---|
-| `CHANGELOG.md` | `b5b21b6d76883de21918ddab4f6aa7c9` | `CHANGELOG.md` |
-| `METHODOLOGY.md` | `24085563c3e6032f9839ce8fb6cc5f49` | `METHODOLOGY.md` |
-| `MissingFeatures.md` | `536295f2beb02120d1b2b81c6b7f06f7` | `docs/MissingFeatures.md` |
+| `CHANGELOG.md` | `3cee343d52e233af5247000a04a71078` | `CHANGELOG.md` |
+| `METHODOLOGY.md` | `549f32dbade4f74472c6589952d944df` | `METHODOLOGY.md` |
+| `MissingFeatures.md` | `bbaa5c11f476c22e62ce7ac0e050d5c7` | `docs/MissingFeatures.md` |
 | `OPERATIONS.md` | `4bd40e0844c9c91e6de4e66c75f5c187` | `docs/OPERATIONS.md` — **rolled 2026-10-31 at the v6.40 ship:** §G's *fifth place* paragraph says `t45`'s §S gates are version comparisons, not lists, and why. *(Previously `7675168d93…`.)* Before that, **rolled 2026-10-27 at the v6.34 ship:** §C4's *An unedited Save & Apply* trap keeps only the as-of move (D-58 closed) and names the save's other normalisations. *(Previously `a127f4a4ff…`.)* Before that, **rolled 2026-10-27 at the v6.33 ship:** §I's *Annual data refreshes* row names the year-keyed tables (a new year's entry, nothing bumped by hand) and §C's OBBBA bullet says `TAX_CONSTANTS_YEAR` is read from `FED_TABLES`. *(Previously `0468ef1e62…`.)* Before that, **rolled 2026-09-09** at the run-folder ops package: §B gained the `mk_runfolder.sh` pointer, and §D gained **D1** (the named existence-only assertion class) and **D2** (the `t29` F-6a/F-6b defect pin). *(Previously `f33c2e0cfd…`.)* |
 | `README.md` | `2757b43ee6b39d0f34496c1cf639d688` | `README.md` |
-| `TESTING.md` | `ac5785f1ce66a317a5c28ec7040fb98c` | `TESTING.md` |
+| `TESTING.md` | `fdcf6505909476b7a4332734028d70ca` | `TESTING.md` |
 | `index.html` | `247816be583271d50cf13e0a02e18cdf` | `src/index.html` — the **Vite entry template**, **restored to the pool 2026-08-20** after being found absent (see the build-scaffold row below). ⚠ **Not the built app.** The published single-file `index.html` is repo-only output and never enters the pool; its md5 is in the Current build table and is different by construction |
 | `main.jsx` | `d9eca7b469a3fb7ec1c5325fd4bf8145` | `src/main.jsx` |
 | `package.json` | `9ee8d745bc9f32d6e8fa02e623603423` | `package.json` — The pinned toolchain, and a **build input** rather than a suite file — given a row 2026-08-23 for a measured reason: `npm i <pkg>` in a run folder rewrites it with resolved versions, so it drifts as a side effect of setting the folder up. That is why OPERATIONS §N3a installs jsdom with `--no-save`, and it is the drift `package_check`'s new G-1 caught on its first real use |
@@ -139,11 +143,13 @@ or a reason here (OPERATIONS §I).
 
 | Field | Value |
 |---|---|
-| Version | **v6.43** |
-| Source file in knowledge | — **not pooled**: repo history, commit `ea73e62`, found by this md5 |
-| Source md5 | `0709eb9acdae8d58a72f9de1bd1fcbc1` |
-| Built `index.html` md5 | `a8b1a139dc02ff9a922b9c0394d7617f` |
+| Version | **v6.44** |
+| Source file in knowledge | — **not pooled**: repo history, commit `b72653c`, found by this md5 |
+| Source md5 | `e024f8ba39fe29c5b131c0aff38d6a6c` |
+| Built `index.html` md5 | `82c47833604141b5bbe23da378a6e681` |
 
+> **Rolled 2026-11-04 at the v6.45 ship.** The pair is now **v6.44 prior / v6.45 current**; both tables rolled in one edit (K-7, which counts 645 − 1 = 644). Commit `b72653c` carries the v6.44 source (`mk_runfolder.sh` resolved it by md5 at this build; `740285e` is the follow-up that set the control script's executable bit).
+>
 > **Rolled 2026-11-03 at the v6.44 ship.** The pair is now **v6.43 prior / v6.44 current**; both tables rolled in one edit (K-7, which counts 644 − 1 = 643). Commit `ea73e62` carries the v6.43 source (`mk_runfolder.sh` resolved it by md5 at this build); `36a2b18` moved the 90 suite files the v6.43 upload had put at the repo root into `qa/` and restored four executable bits; `d620d8b` is empty.
 
 > **Rolled 2026-11-03 at the v6.43 ship.** The pair is now **v6.42 prior / v6.43 current**; both tables rolled in one edit (K-7, which counts 643 − 1 = 642). Commit `91c0c13` carries the v6.42 source (`mk_runfolder.sh` resolved it by md5 at this build); `80a48ee` set the executable bit `controls_v642_ui_size.py` landed without.
@@ -687,6 +693,25 @@ retired and superseded. They get no row because there is no file. Checked 2026-0
 committed tree, so the next sweep does not re-open them.
 
 ## Retirement list (delete-first; nothing replaces these)
+
+### At the v6.45 ship (2026-11-04) — DELETE THESE FIRST
+
+**Rotation:** delete `DangerClose-v6_44.jsx`; `DangerClose-v6_45.jsx` arrives. **Pool stays 16** documents. Count from the Projects listing (OPERATIONS §I, no-mount note).
+
+| Delete | Because |
+|---|---|
+| `DangerClose-v6_44.jsx` | **rotated out** — v6.44 is read from the repo's history (commit `b72653c`) |
+| `CHANGELOG.md` | replaced — the v6.45 entry |
+| `METHODOLOGY.md` | replaced — the new section *The Roth ladder starts from the plan's own balances (v6.45)* |
+| `MissingFeatures.md` | replaced — D-76 widened and closed; D-56 widened (the $1,944) |
+| `PROJECT_KNOWLEDGE_INDEX.md` | replaced — this edit; `CHANGELOG.md`'s and `TESTING.md`'s rows rolled last |
+| `TESTING.md` | replaced — the v6.45 per-suite line, v6.42's moved to the archive; `t109`'s and `dom_entry_v645.jsx`'s entries; the harness traps |
+| `UsabilityFlaws.md` | replaced — F-34 and F-35 filed; F-29's `spouseBFRAest` paragraph measured |
+
+**Arriving new:** `DangerClose-v6_45.jsx`. **Not changed, stays:** `OPERATIONS.md`, `FlawsToFix-v5_73-Phase2.md`, `ARCHITECTUREIssues.md`, `README.md`, the four scaffold files, `SCOPE_STANDING_AUDIT.md`. **Repo-only:** every `qa/` change (`t109_ladder_seed.mjs`,
+`qa-baseline/dom_entry_v645.jsx`, `tools/controls_v645_ladder_seed.py` new; the registered suites; `tools/boundaries.mjs` (two rows); `t29`; `t33` (PINS); `t93` (DREF_BY); `t107` (a comment); `runsuite.sh`; `tools/package_check.mjs`'s OPEN allowlist reason (the TY2027 scope, now v6.46)),
+`docs/TESTING_ARCHIVE_per_suite_v5_53_to_v6_01.md` (v6.42's line and note appended), the D-76 scope (`docs/SCOPE_D76_LADDER_SEED_V645.md`, new —
+built, §6 its review, §7 its record), the TY2027 scope (renumbered v6.46), the built `index.html`. (`docs/MissingFeatures.md` and `docs/UsabilityFlaws.md` ship to both, under their pool names.)
 
 ### At the v6.44 ship (2026-11-03) — DELETE THESE FIRST
 

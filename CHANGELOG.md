@@ -1,5 +1,109 @@
 # Changelog
 
+## v6.45 — the Roth ladder starts from the plan's own balances (D-76)
+
+**A modeling release, on one tab.** Scoped in `docs/SCOPE_D76_LADDER_SEED_V645.md` (repo-only; review §6, build record §7). Steve, on the six
+decisions: *"all as recommended"* — DJ-1 (b), DJ-2 to DJ-5 (a), DJ-6 (b). Built on v6.44 (source `e024f8ba…`). METHODOLOGY's new section
+*The Roth ladder starts from the plan's own balances (v6.45)* is the full account. Under DJ-5 (a) **the 2027 tax figures become v6.46**
+(`docs/SCOPE_TY2027_REFRESH_V633_V634.md` renumbered a twelfth time; its suite stays `t99_ty2027.mjs`): two third-party trackers (updated
+24 and 31 October) and a search on 4 November found the IRS's TY2027 revenue procedure still unpublished. The 15 December deadline stands.
+
+**What was wrong (v6.44, measured at the scope).** The Roth tab's conversion ladder seeds its balances from the plan's balances at the
+selected retirement year — with two exceptions that had been in the source since the repo's first commit (v5.6):
+- **No Roth money at that year:** the ladder's ROTH BAL column started from a fixed **$356,813** — the example household's old Roth — grown
+  to the retirement year ($384,642 on the example's dates). On the example with its Roth removed the column read $0.48M in 2029 and $1.78M
+  in 2040 where the plan's own figures are $0.07M and $1.13M: $401,951 and $652,308 high. $1 of Roth started it at $73,151 — a cliff.
+- **No Traditional money:** the ladder converted from a fixed **$1,340,645** — the example's old Traditional. On such a plan it showed
+  $70,000 a year of conversions, $108,237 of tax, the IRMAA calendar's MAGI, the headroom, and *"Combined RMDs reduced by $-56,268/yr"* —
+  all from money the plan does not hold. This half was not in D-76 as filed; the scope found it two lines above.
+- **Display only.** Nothing outside the ladder's render block reads either figure (an AST read census; the build review's matched it): the
+  strategy comparison, the solve-for grid, every other tab, the engines, the Monte Carlo and Ask AI were never affected.
+
+**What changed.**
+- **The seeds are the plan's own, always** (DJ-1 (b)): Roth = the carried start Roth, $0 when there is none; Traditional = each spouse's
+  carried start Traditional, $0 when there is none. Two literals and their conditions removed; nothing else in the ladder's arithmetic moved.
+- **A ladder in which nothing converts says so** (DJ-2 (a)), in one line above the table, when the slider is above $0 and no year converts:
+  *"Nothing converts in this ladder, so the slider has no effect here: the plan holds no Traditional (pre-tax) money the ladder converts in
+  these years. It converts neither annuity money nor the money of a spouse already past their own conversion window (which closes the year
+  before their RMDs begin)."* It reads the ladder's result, not the start balance, because a plan with $0 at the start can still convert a
+  later-retiring spouse B's contributions (v6.44), an annuity-only plan converts nothing from a non-zero start, and neither does an older
+  spouse past their window.
+- **What moves, against v6.44:** only the Roth tab's ladder, and only on a plan with no Roth or no Traditional money at the selected year.
+  The example — and every plan holding both kinds of money — renders the Roth tab identically (`t109` §C: 23 pages, the selector either side,
+  three slider positions and every fixture household). **The example is unchanged.**
+- **Copy and documents.** Field Manual §13: a v6.45 note (both fallbacks, what moved, the note, what did not). METHODOLOGY: the new section.
+  MissingFeatures **D-76 widened to the Traditional twin and closed; D-56 widened** with the $1,944 measurement (DJ-6 (b), below).
+  UsabilityFlaws **F-34 and F-35 filed** (DJ-4 (a)). The four version sites read v6.45.
+
+**Found by this release and not fixed (DJ-4 (a), DJ-6 (b)).**
+- **Spouse B's $1,944 Social Security estimate** (D-56, widened). The same class, on the Social Security tab: `spouseBFRAest` falls back to
+  a typed $1,944 a month when a married plan's spouse-B table has no age-67 figure — which happens whenever spouse B has no benefit of her own.
+  It drives B's claiming-age table and hides the *"SPOUSAL BENEFIT NOT MODELED"* warning (A's half-FRA, $1,650, is below $1,944) on the
+  household that warning is for. Display only. Its own scope is next.
+- **F-34:** the Roth tab's *Traditional bal (now)* and *Roth bal (now)* cards show the balance at the retirement year (today's holdings
+  plus the planned contributions to it), not today's.
+- **F-35:** the ladder's RATE column reads 10% in a year with no taxable income — from v6.45 on every row of a plan with nothing to convert.
+
+**Owned.**
+- **The scope's note was keyed wrong twice.** Its first draft keyed the note to the start Traditional; the scope's review found two shapes
+  where that is false (spouse B's later contributions convert from $0; an annuity-only plan converts nothing). The build's first wording then
+  said *"the plan holds no Traditional money that can be converted"*; the build review found a third shape (an older spouse past their window
+  holding all of it) where that sentence sits beside *Traditional bal (now) $1,365,000*. Both corrected before the suite run; `t109` asserts
+  the words (B-10) and the shape (B-11).
+- **The scope overstated what was measured in one place:** its §0.3 said a no-Roth plan is "common", with no source. Removed at its review.
+- **The first draft of the Field Manual note** said the column started "from a fixed $356,813" without saying it was grown to the retirement
+  year; the build review caught it.
+- **Three of `t109`'s first runs failed on the harness, not the app** — a stale solve-for grid (the harness loads plans without the app's
+  remount), a jsdom crash cloning a page whose styles React had updated, and a truncated dump through a pipe. Each is fixed in the suite and
+  recorded (scope §7, TESTING).
+
+**Limitations, stated.**
+- The ladder is computed inside the component (OPERATIONS §M): `t109` reads its balance columns at the display's $0.01M (the effects are
+  $400,000 and more) and its RMD cards to the dollar. Its §C compares the Roth tab from its opening panel to the page's end — the retirement
+  selector above it carries Monte Carlo medians that depend on the random stream's position.
+- `t109` A-3 holds every numeric literal of 1,000 or more in a fallback position to a named allowlist; smaller placeholders (D-56's) and
+  object-valued fallbacks are outside it (scope §7).
+- **D-56** (now including the $1,944), **D-74**, **D-75** stand.
+
+**Tests.** New suite **`t109_ladder_seed.mjs`**, run on both legs; the v6.44 leg pins each defect as `[KNOWN DEFECT 2026-11-04, D-76 —
+flips at v6.45]`.
+- **§A, the source by AST:** the seeds' initialisers, followed through `rothBal0` and `tradBal0`, carry no numeric literal but 0 and read only
+  the start balances; every numeric literal of 1,000 or more in a fallback position anywhere in the source is on a named allowlist, each with
+  its reason (17 on v6.45; v6.44 has the two seeds besides); the note's condition reads the ladder's rows and the slider, not the start balance.
+- **§B, rendered, eleven shapes:** no Roth, $1 of Roth, Roth moved into Traditional, no Traditional, no IRA at all, annuity only, no
+  Traditional but spouse B contributing later, an older spouse past their window holding everything, both windows closed (an empty ladder),
+  the example, and no Traditional at a $0 slider. The cliff is gone; a no-Traditional ladder is all zeros with both RMD cards $0; B's later
+  contributions convert in the years they arrive; the note shows on exactly the four shapes where nothing converts at $70K, with its words.
+- **§C, page identity:** the Roth tab equals v6.44's text on 23 pages (the example at PLANNED, −1 and +1 YEAR, $0 / $70K / $250K; $1 of Roth;
+  every fixture household), v6.44 dumped in a child process.
+- **§D, hand pins (the RMD cards, dollar-exact):** the example's first-year cards from its fields ($79,859 / $15,657 with no conversion;
+  $50,215 / $4,026 at $70K); v6.44's phantom card from 1,340,645 × 1.02535³ grown and converted to 2038 ÷ 24.6 = $56,268, and $0 from v6.45;
+  spouse B's later contributions grown to 2040 ÷ 24.6 = $5,936.
+- **§E, the copy:** the §13 note (ahead of v6.44's) and METHODOLOGY's section.
+- **Boundary census (§K1):** rows `ladder_start_roth` and `ladder_convertible` (each spouse's Traditional less annuity while their window is
+  open, plus spouse B's later pre-tax) — `t29` B-38, B-39, C-d76-1 to C-d76-5; the example is ON for both, which is why nothing caught this.
+- **Registered:** `v645` by the AST registration (506 sites in 90 files: 182 gates, 322 arrays, 2 maps); by hand `t33` PINS, `t93`'s Engine D reference, `t45`/`t47`/`t48`; `t107`'s `D71`
+  comment corrected (it said "a constant"; it is an array the registration widens). `runsuite.sh` lists `t109`. No re-gate was needed.
+
+**Counts**, from the full suite run from the packaged copies:
+- **11,612 app checks across 107 app suites, 0 failed, 0 DIED**: 6,366 current-leg, 4,763 prior-leg (v6.44), 235 and 238 in the two attribution runs, MC parity 10/10 (no intended difference — no engine changed).
+- Tooling: `t21` 64, `domdiff` 32, `sets` 12 + 12. GRAND **11,732**, 0 failed.
+- Against v6.44, the current leg: `t109` new (28; 14 on the v6.44 leg); `t29` 151 → 160 (the two census rows); `t108` 49 → 46 (its §C compares with v6.43's module, which this folder does not hold, and prints a skip). Every other current-leg count is unchanged; no re-gate. Per-suite figures are on `TESTING.md`'s v6.45 line.
+- Before it, from the build workspace: a first full run was stopped at `t44` (78 suite runs, all green) when the build review changed the note's wording and the Field Manual; `t109`'s own first runs failed on three harness traps (above) before it went green on both legs.
+
+**Controls.** `qa/tools/controls_v645_ladder_seed.py`, on a copy of the build workspace's run folder (its source, `t109`, DOM entry and the script byte-identical to the packaged copies): **14 of 14 as expected** — C0 silent; K1–K9 (with K4a–K4e) each fire their named `t109` checks (most also turn related checks red); every file restored and hash-checked. The Roth fallback restored (K1), the Traditional fallback restored (K2), a new literal fallback planted (K3), a listed one changed (K6); the note shown always, never, keyed to the start Traditional, without its empty-ladder clause or its slider clause (K4a–K4e); the Roth seed uncarried (K5); spouse B's Traditional and annuity seeds (K8, K9); the §13 note removed (K7).
+
+**The reviews.** The scope was reviewed once before Steve decided (scope §6: 1 must-fix — the note's key — 4 should-fix, 5 notes; the
+$1,944 found there). The build was reviewed by an agent that had not seen it, read-only, with no page runs while the suite ran: **2 must-fix,
+5 should-fix, 6 notes**, each checked and acted on (scope §7): the documents not yet written (written here); the note's wording on an older
+spouse past their window; the empty-ladder clause untested (shape and control added); A-3 and the census narrower than scoped (recorded);
+controls missing for the slider clause and the other seeds (added); D-2 counted on the wrong leg and D-1 without its working (fixed); the
+version mask, `t33`'s comments and the Field Manual's wording. It recomputed the copy's figures ($384,642.33, $401,951.23, $652,307.78) and
+the example's RMD cards by hand, and matched `t109` A-3's allowlist key for key with its own walk.
+
+**Provenance.** Source `b67f0d9adcfc7a8eb8bd9a60b72e1c72` · built `index.html` `80088bc12313dbad04622a74655ab8c1` (vite 5.4.21, `npm ci`; built twice, byte-identical; v6.44 rebuilt byte-identically to `82c47833…` on the same toolchain) · `smoke_built`
+22 of 22 on the packaged page.
+
 ## v6.44 — a spouse who retires later (D-71); a single plan's spouse-B income and contributions (D-72, D-73)
 
 **A modeling release.** Scoped in `docs/SCOPE_D71_D72_D73_V644.md` (repo-only; review §6, build record §7). Steve, on the six decisions:
