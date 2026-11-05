@@ -1,4 +1,4 @@
-# SCOPE — the 2027 tax-figure refresh: tables index from their own year (v6.33), then the 2027 figures (v6.46 — was v6.45, v6.44, v6.43, v6.42, v6.41, v6.40, v6.39, v6.38, v6.37, v6.36, v6.35, and v6.34 before that) · F-27 closed by decision
+# SCOPE — the 2027 tax-figure refresh: tables index from their own year (v6.33), then the 2027 figures (v6.47 — was v6.46, v6.45, v6.44, v6.43, v6.42, v6.41, v6.40, v6.39, v6.38, v6.37, v6.36, v6.35, and v6.34 before that) · F-27 closed by decision
 
 > **RENUMBERED 2026-10-27, at the v6.34 build** (decision DC-4 (a) of `docs/SCOPE_D58_CONTRIB_SAVE_V634.md`; Steve: *"Let's go with your
 > recommendations"*). v6.34 is the D-58 release, built while the 2027 figures were unpublished. **The 2027 figures ship as v6.35** (tag `v635`), and
@@ -75,6 +75,12 @@
 > **Unlike v6.40–v6.42, v6.43 changes an engine:** Engine D's opening balances, and through `withdrawalPlanSeries` every tax engine's
 > drawdown draws (MC parity `mc`, `extMC`, `stress` differ by design). Figures `t99` pins that depend on the example's draws may need
 > re-measuring on v6.43 before the tax build.
+>
+> **RENUMBERED A THIRTEENTH TIME 2026-11-05, at the v6.46 build** (DK-4 (a) of `docs/SCOPE_D56_SS_FRA_ESTIMATE_V646.md`; Steve: *"all as
+> recommended"*). v6.46 is D-56's $1,944 (the Social Security tab's reading of each spouse's benefit at 67). Searches of irs.gov on
+> 2026-11-05 found the IRS's TY2027 revenue procedure still unpublished. **The 2027 figures ship as v6.47** (tag `v647`); their suite stays
+> **`t99_ty2027.mjs`** (v6.46's is `t110`). Every *"v6.46"* or earlier version below that names the 2027-figures release now means v6.47.
+> DT-7's 15 December date is unchanged. **v6.46 changes no engine** — the Social Security tab's display only — so no `t99` figure moves.
 >
 > **RENUMBERED A TWELFTH TIME 2026-11-04, at the v6.45 build** (DJ-5 (a) of `docs/SCOPE_D76_LADDER_SEED_V645.md`; Steve: *"all as
 > recommended"*). v6.45 is D-76 (the Roth ladder's example-balance seeds). Two third-party trackers (updated 2026-10-24 and 2026-10-31) and a

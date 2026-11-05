@@ -54,6 +54,7 @@
 > | F-32 | **FIXED v6.42** — filed at v6.40 (§H); widened at v6.41 | UI SIZE (a zoom) and the phone layout (the window's width) did not meet: a large UI SIZE in a narrow window got the tablet layout in less room than a phone (v6.41: at 150%, 52 pairs on six tabs in a 600 px window; 163 on eight on a 390 px phone, eight pages scrolling sideways). **v6.42:** the phone rules follow the room UI SIZE leaves (window width ÷ UI SIZE; classes on the zoomed root), and ten narrow rules act under 360 px of room, down to 240 (DH-1 (a)). No overprint and no sideways scroll on all 26 tabs on a phone 360 px or wider at any UI SIZE, 320 px up to 130%, and in zoomed windows. `t106`, `t45` S-11; `docs/SCOPE_F32_UI_SIZE_V642.md` (DH-1 to DH-4, Steve's). Below 240 px of room (a phone under 360 px at 150%): not designed for, disclosed |
 > | F-34 | **OPEN** — filed at v6.45 (§H) | the Roth tab's *Traditional bal (now)* and *Roth bal (now)* cards print the balance at the selected retirement year — today's holdings plus the planned contributions to it at face — not today's ($1,398,600 on the example, whose Traditional today is $1,296,000) |
 > | F-35 | **OPEN** — filed at v6.45 (§H) | the Roth ladder's RATE column reads 10% in a year with $0 of taxable income (`marginalRate` starts at 0.10) — every row of a plan with nothing to convert from v6.45 |
+> | F-36 | **OPEN** — filed at v6.46 (§H) | the Social Security tab's *"SPOUSAL BENEFIT NOT MODELED"* warning checks spouse B only: with spouse A's benefit at $0 and B's at $1,800, A's top-up from B (½ × $1,800 = $900 a month) gets no warning |
 > | F-33 | **FIXED v6.42** — filed at v6.41 (§H) | below 360 px at UI SIZE 100% the Monte Carlo tab overlapped (3 pairs at 320) and the Grade and Verify pages were 348 and 358 px wide. Fixed by F-32's narrow rules (the same room): all 26 tabs clean at 320 and 340 px. `t106` B-3, `t45` S-11 (320 px) |
 > | F-29 | **FIXED v6.37** — filed and fixed together; wider than reported | the SS tab's claim-age explorer opened spouse A's slider at 67 for every plan and measured its draw comparison against three different baselines; spouse B's grid, note and shortfall card read her age in the retirement year; a single household's table counted a second check. `t101`; `docs/SCOPE_F29_SS_SLIDER_START.md` (DS-1 to DS-6, all (a)) |
 > | F-15b | **FIXED v6.32** | the Stress table's label reads "Success (>$1.5M)" (`t95` B-1, B-3; folded into F-26 under DF-1) |
@@ -570,6 +571,15 @@ all 26 tabs: at 320 px the Monte Carlo tab has 3 pairs (*"$2.08M"* into *"$2.96M
 some card titles run past their borders; at 340, 1 pair; at 355, none. The Grade page is 348 px wide (it fits from 348) and the Verify page
 358 (it fits from 358). All as on v6.40. Disclosed in §13's desktop item from v6.41. Few phones are this narrow. **Candidate fix:** with F-32's release. **Fixed at v6.42** with F-32: the same narrow rules (`dc-xs`, under 360 px of room) act on a phone narrower than 360 px at 100%; all 26 tabs clean at 320 and 340 px.
 
+### F-36 · The spousal-benefit warning only looks at spouse B — **LOW (disclosure)** — OPEN
+
+**Filed at v6.46** (`docs/SCOPE_D56_SS_FRA_ESTIMATE_V646.md` §4, DK-3 (a); not fixed). The Social Security tab warns that SSA's spousal top-up is not modeled when half of
+spouse A's benefit at 67 is above spouse B's — never the other way round. With spouse A's benefit at $0 and spouse B's at $1,800, A's top-up
+from B (½ × $1,800 = $900 a month) gets no warning. The top-up itself is MissingFeatures D-77. **Recorded with it** (the scope's review; same
+tab): on a plan where spouse B has no benefit the claiming grid's *"the model's best cell"* names spouse B at 62 (every B column ties and the
+first wins); with both spouses at $0 the survivor sentence still says spouse A has the larger benefit. **Candidate fix:** test both
+directions; fix with D-77 or on its own.
+
 ### F-34 · The Roth tab's "(now)" balance cards show the balance at retirement — **LOW (labels)** — OPEN
 
 **Filed at v6.45** (`docs/SCOPE_D76_LADDER_SEED_V645.md` §4, DJ-4 (a); not fixed). The ladder's parameter cards *Traditional bal (now)* and
@@ -838,4 +848,7 @@ $1,350 on the tab and $1,300 in the plan (so from v6.37 the example's shortfall 
 beside it already did). And `spouseBFRAest` falls back to a typed $1,944 when a plan's table has no age-67 entry — whether a married plan can
 reach it was not measured (a MissingFeatures D-56-type default). *Measured at v6.45* (`docs/SCOPE_D76_LADDER_SEED_V645.md` §0.4): **reachable** — any
 married plan whose spouse B has no benefit of her own; it shows *"EST. FRA: $1,944/mo"* and hides the *"SPOUSAL BENEFIT NOT MODELED"* warning
-(A's half-FRA, $1,650, is below $1,944). Registered under MissingFeatures D-56 (widened); its own scope is next (DJ-6 (b)).
+(A's half-FRA, $1,650, is below $1,944). Registered under MissingFeatures D-56 (widened); its own scope is next (DJ-6 (b)). *Fixed at v6.46*
+(`docs/SCOPE_D56_SS_FRA_ESTIMATE_V646.md`): one reading of each spouse's benefit at 67 — the table's figure, else the planned amount carried back to 67, else $0. A spouse
+with no benefit shows $0, a sentence saying so, and the warning; the shortfall card on that plan reads $3,920, was $2,462. The example's $1,350
+vs $1,300 above is unchanged (its table holds 67).
