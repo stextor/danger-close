@@ -52,6 +52,8 @@
 > | F-30 | **FIXED v6.41** at 360 px and wider (v6.40 Roth and Stress; v6.41 the rest) — filed and disclosed at v6.38 (§H) | on a phone, text printed over other text on six tabs (pairs on the example at 390, `t45` §S's detector: Roth 70, Stress 30, Social Security 10, My Data 8, Expenses 4, Taxes 2). **v6.40 fixed Roth and Stress**: `t104`, `t45` S-9; `docs/SCOPE_F30_ROTH_STRESS_PHONE_V640.md`. **v6.41 fixed My Data, Social Security, Expenses and Taxes** (and one Withdrawal and one Monte Carlo grid found at 360 px), the Expenses label at every width, and the Roth calendar's *"CONVERT"* labels: `t105`, `t45` S-10; `docs/SCOPE_F30B_PHONE_V641.md` (DG-1 to DG-9, all (a), taken as recommended under Steve's instruction). Below 360 px: **F-33**. At a UI SIZE above 100%: **F-32** (both fixed at v6.42) |
 > | F-31 | **FIXED v6.41** — filed at v6.40 (§H) | the Income tab widened the page at 600–625 px on a plan with a long income-stream label (626 px at 600 and 620 on the stream plan). An income stream's row now wraps at every width when it does not fit; a row that fits is unchanged (the stream plan's Income tab box-for-box identical from 680 px). `t105` A-1c, `t45` S-10 |
 > | F-32 | **FIXED v6.42** — filed at v6.40 (§H); widened at v6.41 | UI SIZE (a zoom) and the phone layout (the window's width) did not meet: a large UI SIZE in a narrow window got the tablet layout in less room than a phone (v6.41: at 150%, 52 pairs on six tabs in a 600 px window; 163 on eight on a 390 px phone, eight pages scrolling sideways). **v6.42:** the phone rules follow the room UI SIZE leaves (window width ÷ UI SIZE; classes on the zoomed root), and ten narrow rules act under 360 px of room, down to 240 (DH-1 (a)). No overprint and no sideways scroll on all 26 tabs on a phone 360 px or wider at any UI SIZE, 320 px up to 130%, and in zoomed windows. `t106`, `t45` S-11; `docs/SCOPE_F32_UI_SIZE_V642.md` (DH-1 to DH-4, Steve's). Below 240 px of room (a phone under 360 px at 150%): not designed for, disclosed |
+> | F-34 | **OPEN** — filed at v6.45 (§H) | the Roth tab's *Traditional bal (now)* and *Roth bal (now)* cards print the balance at the selected retirement year — today's holdings plus the planned contributions to it at face — not today's ($1,398,600 on the example, whose Traditional today is $1,296,000) |
+> | F-35 | **OPEN** — filed at v6.45 (§H) | the Roth ladder's RATE column reads 10% in a year with $0 of taxable income (`marginalRate` starts at 0.10) — every row of a plan with nothing to convert from v6.45 |
 > | F-33 | **FIXED v6.42** — filed at v6.41 (§H) | below 360 px at UI SIZE 100% the Monte Carlo tab overlapped (3 pairs at 320) and the Grade and Verify pages were 348 and 358 px wide. Fixed by F-32's narrow rules (the same room): all 26 tabs clean at 320 and 340 px. `t106` B-3, `t45` S-11 (320 px) |
 > | F-29 | **FIXED v6.37** — filed and fixed together; wider than reported | the SS tab's claim-age explorer opened spouse A's slider at 67 for every plan and measured its draw comparison against three different baselines; spouse B's grid, note and shortfall card read her age in the retirement year; a single household's table counted a second check. `t101`; `docs/SCOPE_F29_SS_SLIDER_START.md` (DS-1 to DS-6, all (a)) |
 > | F-15b | **FIXED v6.32** | the Stress table's label reads "Success (>$1.5M)" (`t95` B-1, B-3; folded into F-26 under DF-1) |
@@ -568,6 +570,21 @@ all 26 tabs: at 320 px the Monte Carlo tab has 3 pairs (*"$2.08M"* into *"$2.96M
 some card titles run past their borders; at 340, 1 pair; at 355, none. The Grade page is 348 px wide (it fits from 348) and the Verify page
 358 (it fits from 358). All as on v6.40. Disclosed in §13's desktop item from v6.41. Few phones are this narrow. **Candidate fix:** with F-32's release. **Fixed at v6.42** with F-32: the same narrow rules (`dc-xs`, under 360 px of room) act on a phone narrower than 360 px at 100%; all 26 tabs clean at 320 and 340 px.
 
+### F-34 · The Roth tab's "(now)" balance cards show the balance at retirement — **LOW (labels)** — OPEN
+
+**Filed at v6.45** (`docs/SCOPE_D76_LADDER_SEED_V645.md` §4, DJ-4 (a); not fixed). The ladder's parameter cards *Traditional bal (now)* and
+*Roth bal (now)* print `retireStartBalances` at the selected retirement year — today's holdings plus the contributions planned before it, at
+face — not today's balances. On the example *Traditional bal (now)* reads $1,398,600: today's $1,296,000 plus $102,600 of planned contributions
+to 2029. **Candidate fix:** relabel them *"at retirement ({year})"*; it changes the example's Roth-tab text, so a release doing it masks or
+re-pins `t109` §C and `t108` §C.
+
+### F-35 · The Roth ladder's RATE column reads 10% with no taxable income — **LOW (display)** — OPEN
+
+**Filed at v6.45** (`docs/SCOPE_D76_LADDER_SEED_V645.md` §4, DJ-4 (a); not fixed). The ladder's marginal rate starts at 0.10 and is set only by a
+bracket the year's taxable income reaches, so a year with $0 of taxable income prints *10%*. Pre-existing in any such year; from v6.45 it shows on
+every row of a plan with nothing to convert (before, that plan's phantom conversions gave the rows real rates). **Candidate fix:** print *0%* or
+a dash when the year's taxable income is $0.
+
 ### F-21 · My Data's holdings table: the plan type read as the next holding's, and the totals sat one column right — **LOW–MED (desktop layout)** — **FIXED v6.25**
 
 **Filed and fixed at v6.25** (`docs/SCOPE_F21_HOLDINGS_PLAN_TYPE_V625.md`; Steve, with a screenshot: *"under the My data tab in the
@@ -819,4 +836,6 @@ gone; a single household counts one check. Display only: no engine reads the sli
 plan's own figure. For a plan written by My Data they agree; for the example, whose benefit table carries statement figures, spouse B at 63 is
 $1,350 on the tab and $1,300 in the plan (so from v6.37 the example's shortfall card reads $2,570, was $2,620, taking her check as the table
 beside it already did). And `spouseBFRAest` falls back to a typed $1,944 when a plan's table has no age-67 entry — whether a married plan can
-reach it was not measured (a MissingFeatures D-56-type default).
+reach it was not measured (a MissingFeatures D-56-type default). *Measured at v6.45* (`docs/SCOPE_D76_LADDER_SEED_V645.md` §0.4): **reachable** — any
+married plan whose spouse B has no benefit of her own; it shows *"EST. FRA: $1,944/mo"* and hides the *"SPOUSAL BENEFIT NOT MODELED"* warning
+(A's half-FRA, $1,650, is below $1,944). Registered under MissingFeatures D-56 (widened); its own scope is next (DJ-6 (b)).
