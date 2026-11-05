@@ -639,6 +639,34 @@ export function census(G) {
       !single || (nS === 0 && mo === 0) ? "DEGENERATE — no single plan with spouse-B income or contributions, so D-72 and D-73 (v6.44) change nothing here"
                                         : "reachable — the stream must count as the one person's, and the Monte Carlo must not add B's contribution"); }
 
+  // ── v6.45 (D-76 — SCOPE_D76_LADDER_SEED_V645) · the conditions that hid the ladder's two example fallbacks (§K1) ───────────────────────
+  // 30. THE LADDER'S START ROTH. Through v6.44 a plan whose Roth at the selected retirement year was 0 had its Roth ladder's ROTH BAL column
+  //    started from the example's $356,813. A plan with Roth money cannot show it. ON (degenerate) when the start Roth is above 0; the value
+  //    is that start Roth (`retireStartBalances` at the target year — the ladder's seed before the carry).
+  { const tl = G.PLAN_TIMELINE ? G.PLAN_TIMELINE() : null, R = tl ? tl.targetRetireYear : null;
+    const rs = (G.retireStartBalances && R != null) ? G.retireStartBalances(R) : null, roth = rs ? Math.round(rs.rothInit || 0) : null;
+    row("ladder_start_roth", "the Roth ladder's start Roth", roth == null ? "n/a" : `$${roth.toLocaleString("en-US")}`,
+      "a plan with no Roth money at the retirement year", roth == null || roth > 0,
+      roth == null || roth > 0 ? "DEGENERATE — the plan holds Roth money at the retirement year, so the ladder's zero-Roth seed (D-76, v6.45) is unreachable here"
+                               : "reachable — the ladder's Roth column must start from $0, not from an example balance"); }
+
+  // 31. THE LADDER'S CONVERTIBLE MONEY. Through v6.44 a plan with no Traditional money converted from the example's $1,340,645. The ladder is
+  //    computed inside the page (OPERATIONS §M), so this census cannot read whether a row converted; it reads what could: the start
+  //    Traditional less annuity money (`rmdInit*`, which cannot be converted) of each spouse whose conversion window is still open at the
+  //    start (the ladder converts nobody past `rothLadderEndA/B` — the build review's pastA), plus a later-retiring spouse B's pre-tax
+  //    contributions in her window (v6.44). ON (degenerate) when that is above 0 — the ladder then converts and the nothing-converts path is
+  //    unexercised.
+  { const tl = G.PLAN_TIMELINE ? G.PLAN_TIMELINE() : null, R = tl ? tl.targetRetireYear : null;
+    const rs = (G.retireStartBalances && R != null) ? G.retireStartBalances(R) : null;
+    const ser = (G.laterBContribSeries && R != null) ? G.laterBContribSeries(R) : {};
+    const single = !!(tl && tl.single), eA = tl ? tl.rothLadderEndA : null, eB = tl ? tl.rothLadderEndB : null;
+    const lb = Math.round(Object.entries(ser || {}).reduce((t, [y, v]) => t + (!single && eB != null && +y <= eB ? (Number(v && v.trad) || 0) : 0), 0));
+    const cv = rs ? Math.round(Math.max(0, (eA != null && eA >= R ? rs.rmdInitA || 0 : 0) + (!single && eB != null && eB >= R ? rs.rmdInitB || 0 : 0))) : null;
+    row("ladder_convertible", "the Roth ladder's convertible money", cv == null ? "n/a" : `$${cv.toLocaleString("en-US")} at the start + $${lb.toLocaleString("en-US")} of B's later pre-tax`,
+      "a plan with nothing the ladder can convert", cv == null || cv + lb > 0,
+      cv == null || cv + lb > 0 ? "DEGENERATE — the plan holds convertible Traditional money, so the ladder's nothing-converts path (D-76, v6.45) is unexercised here"
+                                : "reachable — every conversion must be $0 and the tab must say so"); }
+
   return rows;
 }
 
