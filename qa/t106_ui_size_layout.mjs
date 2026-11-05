@@ -42,13 +42,13 @@ console.error = () => {}; console.warn = () => {};
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v642";
 const DUMP = process.argv.includes("--dump");
-const KNOWN_VERSIONS = ["v641", "v642", "v643", "v644"];
+const KNOWN_VERSIONS = ["v641", "v642", "v643", "v644", "v645"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v642", "v643", "v644"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v642", "v643", "v644", "v645"].includes(VER);   // an array, so the next registration widens it
 const KD = "[KNOWN DEFECT 2026-11-02, F-32 — flips at v6.42]";
 const E_PRIOR = "v641";   // §E's comparison leg — a constant, so the registrar cannot widen it (t76 records why)
 dom.reconfigure({ url: "https://stextor.github.io/danger-close/" }); globalThis.location = window.location;

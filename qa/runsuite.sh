@@ -494,6 +494,10 @@ tally "t107-$CUR"   node t107_opening_balances.mjs "$CUR"
 # single plan (D-73). Both legs — the v6.43 leg pins each defect. §C (bit-identity to v6.43's module) runs where app_v643.mjs is in the folder.
 tally "t108-$PRIOR" node t108_later_b_contrib.mjs "$PRIOR"
 tally "t108-$CUR"   node t108_later_b_contrib.mjs "$CUR"
+# t109 (v6.45) — the Roth ladder's seeds (D-76): no example fallback for a plan with no Roth or no Traditional money; a ladder in which
+# nothing converts says so. Both legs — the v6.44 leg pins each defect. §C (page text identical to v6.44) runs where dom_v644.cjs is in the folder.
+tally "t109-$PRIOR" node t109_ladder_seed.mjs "$PRIOR"
+tally "t109-$CUR"   node t109_ladder_seed.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

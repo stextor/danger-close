@@ -41,13 +41,13 @@ console.error = () => {}; console.warn = () => {};
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v640";
 const DUMP = process.argv.includes("--dump");
-const KNOWN_VERSIONS = ["v639", "v640", "v641", "v642", "v643", "v644"];
+const KNOWN_VERSIONS = ["v639", "v640", "v641", "v642", "v643", "v644", "v645"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v640", "v641", "v642", "v643", "v644"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v640", "v641", "v642", "v643", "v644", "v645"].includes(VER);   // an array, so the next registration widens it
 const B_PRIOR = "v639";                // §B's comparison leg — a constant, so the registrar cannot widen it (t76 records why)
 const F30B = Number(VER.slice(1)) >= 641;   // v6.41 (docs/SCOPE_F30B_PHONE_V641.md, DG-6): R1 gains dc-cards-sub700 and a 600 px minimum; §13's
                                             // desktop item is reworded and the v6.40 note's last sentence corrected (t105 §C holds the new text)
@@ -123,7 +123,7 @@ const SRCOF = n => SRC.slice(n.range[0], n.range[1]);
 // v6.42 (F-32, docs/SCOPE_F32_UI_SIZE_V642.md): the phone rules moved from the window's media query to the class .dc-narrow on the app's
 // zoomed root (the layout width), and the 699 px rule to .dc-sub700w. From v6.42 PHONE reads the .dc-narrow rules with that prefix taken off and
 // SUB700 the .dc-sub700w rule, so every check below reads the same rules on every leg; t106 holds the move itself (EXTINCTION of the media query).
-const NARROWKEY = ["v642", "v643", "v644"].includes(VER);   // an array, so the next registration widens it
+const NARROWKEY = ["v642", "v643", "v644", "v645"].includes(VER);   // an array, so the next registration widens it
 const keyed = (css, key) => css.split("\n").map(l => l.trim()).filter(l => l.startsWith(key + " "))
   .map(l => l.split(", ").map(x => x.startsWith(key + " ") ? x.slice(key.length + 1) : x).join(", ")).join("\n");
 const unkeyed = css => css.split("\n").filter(l => !l.trim().startsWith(".dc-narrow ") && !l.trim().startsWith(".dc-sub700w ")).join("\n");
