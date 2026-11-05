@@ -66,6 +66,9 @@ export const __g = {
   laterBContribAt: _g("laterBContribAt"),
   laterBContribSeries: _g("laterBContribSeries"),
   laterBTotal: _g("laterBTotal"),
+  // v6.46 (D-56) — the Social Security tab's one reading of a spouse's benefit at 67 (t110). GUARDED: it does not exist on the v6.45 leg.
+  ssFraOf: _g("ssFraOf"),
+  ssTabClaimAge: _g("ssTabClaimAge"),
   retireStartNote: _g("retireStartNote"),
   contribAllocationWeights: _g("contribAllocationWeights"),
   // v6.39 (D-69) — what Ask AI is told about the accounts and contributions (t103). GUARDED: it does not exist on the v6.38 leg.
