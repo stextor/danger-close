@@ -1,5 +1,65 @@
 # Changelog
 
+## v6.48 — the Roth ladder's starting-balance cards (F-34) and its RATE column (F-35)
+
+**A presentation release: no engine changes.** Scoped in `docs/SCOPE_F34_F35_V648.md` (repo-only). Steve: *"Go ahead with v6.48 and move the
+tax figures to v6.49"* (DR-3 (a)), and on F-34's fix, after the census found it wider than registered: *"Ladder's start (Recommended)"* (DR-1
+(a)); F-35 as recommended (DR-2 (a)). **The 2027 tax figures become v6.49** (`docs/SCOPE_TY2027_REFRESH_V633_V634.md` renumbered a fifteenth
+time; its suite stays `t99_ty2027.mjs`; the 15 December deadline stands). That scope gains **§8**: every 2027 figure published by
+2026-11-06 read at its primary source (IRS Rev. Proc. 2026-35 and 2026-26, SSA), checked independently, staged on v6.47 and run against
+the suite — so v6.49 waits only on CMS's 2027 IRMAA figures and the IRS's retirement-plan notice. ⚠ **Correction to that scope:** it said the
+2027 QCD limit comes from the TY2027 Rev. Proc.; it does not — it comes with the §402(g) limit in the retirement-plan notice. Built on v6.47
+(source `f75e7cf1…`).
+
+**What was wrong (v6.47).**
+- **F-34 — wider than registered.** The Roth tab's two parameter cards read *"Traditional bal (now)"* and *"Roth bal (now)"* and printed
+  today's holdings plus the planned contributions at face, **not carried** to the retirement year. That is neither today's balance nor the
+  balance the ladder starts from. On the example as it opens (BULL-LEANING): the card $1,398,600; today's Traditional $1,296,000; the ladder's
+  start $1,499,680 in 2029's dollars (Roth: $315,000 shown, $339,568 the start). UsabilityFlaws had registered it as a label only.
+- **F-35.** The ladder's marginal rate started at 0.10 and was set only by a bracket the year's taxable income reached, so a year with $0 of
+  taxable income read *10%* in the RATE column. Invisible on the example at the opening $70,000 slider (every ladder year has taxable income).
+
+**What changed.**
+- The cards read **"Traditional at retirement (2029)"** and **"Roth at retirement (2029)"** — the selected year — and print the balance the
+  ladder starts from: today's holdings carried to that year at the plan's inflation, plus the planned contributions at face (v6.30's rule). A
+  line under each says so (*"today's holdings carried to 2029 at the plan's inflation, plus the planned contributions — in 2029's dollars — the
+  ladder's start"*); a plan already retired (a retirement year before its as-of date) reads its holdings deflated to that year, and the line
+  says that instead. The figures change (the example: $1,398,600 → $1,499,680; $315,000 → $339,568); nothing else on the
+  tab moves.
+- The RATE column reads **0%** in a year with no taxable income — the next dollar owes no federal income tax while the standard deduction is
+  unused (the ladder's tax is federal). A year with taxable income is unchanged. Each row's RATE cell carries its exact taxable income
+  (`data-dc-taxable`) for the suite.
+- **The Field Manual's** Roth entry said the tab showed *"current Traditional/Roth balances (derived from your positions)"*; it now says what
+  the cards show. §13 gains the v6.48 note. The four version sites read v6.48.
+- **The manifest's `MissingFeatures.md` hash row is rolled** — the v6.47 package left it at v6.46's md5 (`package_check` K-8, post-upload,
+  2026-11-06: the row roll named three of the four rowed files that package changed). Owned here; no file content was wrong.
+
+**What did not move.** Every engine: MC parity 10/10 with no intended difference. On the example and the seventeen fixture households,
+the Roth tab's text is v6.47's but for the two cards and the RATE cells of $0-taxable years (`t112` §D). Every other tab.
+
+**Tests.**
+- **`t112_roth_cards_rate.mjs`** (new, both legs; the v6.47 leg pins each defect as a dated `[KNOWN DEFECT 2026-11-06, F-34 — flips at v6.48]`
+  / `[…, F-35 …]`): §A by AST (the cards read the ladder's carried seeds, captured before the loop; no "(now)" label; the rate starts at 0);
+  §B the cards rendered on ten plans — the example at PLANNED / −1 / +1 YEAR, no contributions, a later retirement, a plan already retired
+  (2024, dated 2026: the carry below 1), an annuity, a single plan, no Roth, no Traditional — each against the carried start computed in the suite, and each card's line (units_v630's carry, the inflation from the app's live scenario table), B-1 tying the
+  example's holdings to its own fields; §C a plan with no income at a $0 slider: 2029–2038 (exactly $0 of taxable income) read 0%, the RMD years their bracket; every taxed row's
+  rate the bracket of its exact taxable income, from the 2026 tables typed in the suite and indexed at C-CPI-U (three plans, joint and single); §D the
+  Roth tab against v6.47 on 23 plans (v6.47 dumped in a child process); §E the Field Manual.
+- **Re-gated:** `t109` reads the cards by either label; its v6.48 leg checks the annuity-only plan's card above its uncarried $250,000.
+- **Registered:** `v648` by the AST registration (517 sites in 93 files: 182 gates, 333 arrays, 2 maps); by hand `t33` PINS (unchanged figures), `t93`'s prior map, `t45`/`t47`/`t48`.
+  `runsuite.sh` lists `t112`. No census row (§K1): F-34 was visible on the example; F-35 hid behind the slider — a view, not a household.
+
+**Counts**, from the full suite run from the packaged copies:
+- **11,920 app checks across 110 app suites, 0 failed, 0 DIED**: 6,529 current-leg, 4,908 prior-leg (v6.47), 235 and 238 in the two attribution runs, MC parity 10/10 (no intended difference).
+- Tooling: `t21` 64, `domdiff` 32, `sets` 12 + 12. GRAND **12,040**, 0 failed.
+- Against v6.47, the current leg: `t112` new (68; 36 on the v6.47 leg); `t111` 60 → 56 (its §D compares with v6.46 and runs only where `app_v646.mjs` and `dom_v646.cjs` are in the folder — a v6.47 → v6.48 folder has neither). Every other current-leg count is unchanged. Per-suite figures are on `TESTING.md`'s v6.48 line.
+
+**Controls.** `qa/tools/controls_v648_roth_cards.py`, on a copy of the run folder: **10 of 10 as expected** — C0 silent; K1–K9 each fire their named `t112` checks; every file restored and hash-checked. Run on a copy of the run folder, with §D's rendered comparison against v6.47 skipped (`T112_CONTROLS_SKIP_D`). The "(now)" label back (K1); each card printing the uncarried figure (K2, K3); the start taken from `retireStartBalances` (K4); the label and the card's line naming the year after (K5, K9); the rate starting at 0.10 (K6); the Field Manual's old sentence (K7); §13's note removed (K8).
+
+**The review.** An agent that had not seen the build read the source diff, `t112` and the documents (read-only, no suite runs): no must-fix; three should-fix and eight notes, each checked (scope §5). **Taken:** a plan already retired (a retirement year before its as-of date) carries by a factor below 1, so its card printed today's holdings deflated under "at retirement (2024)" — each card's line now says what the figure is, for that plan too; `t112` had judged "$0 of taxable income" from the rounded cell, which reads $0K up to $499 — each RATE cell now carries the exact figure; the scope's per-row bracket check, unbuilt, is C-3; the card line's year checked; an annuity and a single plan added; the §13 note says "federal". **Left, recorded in the scope:** `_rothFromPortfolio` is now read by nothing (as its sibling seed, §3); `t109`'s v6.48 annuity check is a floor (`t112` holds the figures); the ladder header's *"State tax per My Data"* is not modelled in the ladder's own tax — an older matter, not this release's.
+
+**Provenance.** Source `9d4df8545dc2ea58a04559b71fa91ee2` · built `index.html` `936186ee3cdee636a4f1c101fa35f8ba` (vite 5.4.21, `npm ci`) · `smoke_built` 22 of 22 on the packaged page.
+
 ## v6.47 — SSA's spousal benefit, paid by every projection (D-77)
 
 **A modeling release.** Scoped in `docs/SCOPE_D77_SPOUSAL_BENEFIT_V647.md` (repo-only; review §6, build record §7). Steve, on the seven
