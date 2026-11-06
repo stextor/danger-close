@@ -1,4 +1,4 @@
-# SCOPE — the 2027 tax-figure refresh: tables index from their own year (v6.33), then the 2027 figures (v6.48 — was v6.47, v6.46, v6.45, v6.44, v6.43, v6.42, v6.41, v6.40, v6.39, v6.38, v6.37, v6.36, v6.35, and v6.34 before that) · F-27 closed by decision
+# SCOPE — the 2027 tax-figure refresh: tables index from their own year (v6.33), then the 2027 figures (v6.49 — was v6.48, v6.47, v6.46, v6.45, v6.44, v6.43, v6.42, v6.41, v6.40, v6.39, v6.38, v6.37, v6.36, v6.35, and v6.34 before that) · F-27 closed by decision
 
 > **RENUMBERED 2026-10-27, at the v6.34 build** (decision DC-4 (a) of `docs/SCOPE_D58_CONTRIB_SAVE_V634.md`; Steve: *"Let's go with your
 > recommendations"*). v6.34 is the D-58 release, built while the 2027 figures were unpublished. **The 2027 figures ship as v6.35** (tag `v635`), and
@@ -75,6 +75,14 @@
 > **Unlike v6.40–v6.42, v6.43 changes an engine:** Engine D's opening balances, and through `withdrawalPlanSeries` every tax engine's
 > drawdown draws (MC parity `mc`, `extMC`, `stress` differ by design). Figures `t99` pins that depend on the example's draws may need
 > re-measuring on v6.43 before the tax build.
+>
+> **RENUMBERED A FIFTEENTH TIME 2026-11-06, at the v6.48 build** (DR-3 (a) of `docs/SCOPE_F34_F35_V648.md`; Steve: *"Go ahead with v6.48 and
+> move the tax figures to v6.49"*). v6.48 is F-34 and F-35 (the Roth ladder's starting-balance cards and its RATE column), built while CMS's
+> 2027 IRMAA figures and the IRS's 2027 retirement-plan notice (the §402(g) and QCD limits) were not yet published. **The 2027 figures ship as
+> v6.49** (tag `v649`); their suite stays **`t99_ty2027.mjs`** (v6.48's is `t112`). Every *"v6.48"* or earlier version below that names the
+> 2027-figures release now means v6.49. DT-7's 15 December date is unchanged. **v6.48 changes no engine** (the Roth tab's display only), so no
+> `t99` figure moves. **§8 records the readiness work done on v6.47** — every 2027 figure published by 2026-11-06 read at its source, staged and
+> run against the suite.
 >
 > **RENUMBERED A FOURTEENTH TIME 2026-11-05, at the v6.47 build** (DL-5 of `docs/SCOPE_D77_SPOUSAL_BENEFIT_V647.md`, revised by Steve the
 > same day: *"D-77 now as v6.47"*). v6.47 is D-77 (SSA's spousal benefit, paid by every projection). The IRS published its TY2027 revenue
@@ -555,3 +563,102 @@ An agent that had not seen the build was given this scope, the source diff, the 
 - **Build:** `smoke_built` 22/22; v6.32 rebuilt byte-identically to `2cdbfc54…` with the same `npm ci` tree.
 - **Packaging:** `package_check` I-2 asked for this scope to be classified. It is half built, so it went on the tool's OPEN allowlist, with
   an entry that expires at the v6.34 build. That build marks the scope FULFILLED and removes the entry in the same package.
+
+## 8 · Readiness at v6.47 — the 2027 figures read and staged (2026-11-06)
+
+Prepared on v6.47 (`f75e7cf1…`, repo `8647e9b`, Pages serving `046031af…`), so that the v6.49 build (renumbered from v6.48 when F-34 and F-35 went first) waits only on the figures still
+unpublished. **Nothing here is shipped.** The prototype is session-only; the figures below are the ones the build types into the tables,
+each re-read at the build against the same document.
+
+### 8.1 What is published, as of 2026-11-06 — read at the primary source
+
+| Figure | 2027 | 2026 (held) | Source, read 2026-11-06 |
+|---|---|---|---|
+| Standard deduction, single / joint | **$16,600 / $33,200** | 16,100 / 32,200 | IRS Rev. Proc. 2026-35 §3.15(1) (PDF `rp-26-35.pdf`, md5 `da92f5ce13973722ec03d1592212c07a`; announced IR-2026-133, 5 Nov) |
+| §63(f) additional amount, married / unmarried | **$1,700 / $2,100** | 1,650 / 2,050 | §3.15(3) |
+| Single bracket tops (10–35%) | **12,800 · 52,025 · 109,125 · 208,325 · 264,550 · 661,375** | 12,400 · 50,400 · 105,700 · 201,775 · 256,225 · 640,600 | §3.01 Table 3 |
+| Joint bracket tops (10–35%) | **25,600 · 104,050 · 218,250 · 416,650 · 529,100 · 793,650** | 24,800 · 100,800 · 211,400 · 403,550 · 512,450 · 768,700 | §3.01 Table 1 |
+| LTCG maximum 0% / 15% amounts, single | **$51,050 / $563,200** | 49,450 / 545,500 | §3.03 ("All Other Individuals") |
+| LTCG maximum 0% / 15% amounts, joint | **$102,100 / $633,600** | 98,900 / 613,700 | §3.03 |
+| AMT exemption, single / joint | **$93,000 / $144,700** | 90,100 / 140,200 | §3.11 |
+| AMT phase-out start, single / joint | **$515,950 / $1,031,900** | 500,000 / 1,000,000 | §3.11 (complete at $701,950 / $1,321,300 — so the 50% phase-out rate holds) |
+| AMT 28% rate begins above | **$252,500** | 244,500 | §3.11 |
+| Social Security wage base | **$192,300** | 184,500 | SSA, *Contribution and Benefit Base* page (oact/cola/cbb.html) |
+| ACA applicable percentages, coverage year 2027 | **2.15/2.15 · 3.23/4.30 · 4.30/6.78 · 6.78/8.66 · 8.66/10.22 · 10.22/10.22** | 2.10 · 3.14/4.19 · … · 9.96 | IRS Rev. Proc. 2026-26 §3.01 (re-read; unchanged from §0.1) |
+| Poverty guidelines for 2027 coverage | already held (2026 guidelines) | — | HHS/ASPE 2026 |
+
+**Transcription checked against the document's own arithmetic:** the tax at each bracket top, computed from the typed thresholds,
+equals the base amount the Rev. Proc. prints for the next bracket — all six tops in both tables, to the cent (e.g. joint $213,290.50 at
+$793,650; single $199,237.75 at $661,375); and each AMT phase-out start plus the exemption ÷ 0.50 is the printed complete phase-out.
+
+**Checked independently:** an agent that had not seen the work found each figure above (and in the prototype) in the two Rev. Procs.
+itself, re-ran the base-amount and phase-out arithmetic, and searched Rev. Proc. 2026-35 for any §408(d)(8) or §402(g) figure: no
+mismatch, none found. It also confirmed Table 3 (unmarried) is the single table; Table 4 (married filing separately) differs only at the
+35% top.
+
+**Not yet published, as of 2026-11-06:**
+- **CMS's 2027 IRMAA tiers and Part B/D surcharges** — no 2027 fact sheet found; last year's was dated 14 November 2025. The top tier
+  stays $500,000 / $750,000 for 2027 by statute (frozen through 2027).
+- **The 2027 §402(g) limit and the 2027 QCD limit.** ⚠ **Correction to this scope's §1 and §3:** both said the QCD limit comes from the
+  TY2027 Rev. Proc. It does not — Rev. Proc. 2026-35 carries no §408(d)(8) figure; the 2026 limit ($111,000) was published in the IRS's
+  retirement-plan notice (Notice 2025-67) with §402(g). The QCD limit therefore waits on the same notice as §402(g). The IRS newsroom's
+  November releases (IR-2026-130 to -133) include no such notice.
+
+### 8.2 The prototype
+
+`stage_2027.py` (session-only) adds to v6.47's tables, and changes nothing else: `FED_TABLES[2027]` (the figures above, spread over
+`TAX_CONSTS` so the statutory figures carry), `WAGE_BASE_TABLES[2027] = 192300`, `ACA_CONSTS.tableCurrentByCoverageYear[2027]`. It adds no
+2027 IRMAA entry (the 2026 table indexed forward stands, as today) and carries 2026's §402(g) and QCD values in the 2027 table as marked
+placeholders. Module check: `fedTableFor(2027)` and `taxFactsFor(·, 2027)` read the new table, 2028 reads it as the newest held.
+
+**The suites that move** — the current leg run against the prototype (a copy of the packaged v6.47 run folder, the prototype as its
+`v647` source; no prior leg, no parity, and the three browser suites `t45`, `t47`, `t48` not run): **6,317 passed, 149 failed, 0 DIED** (tooling included), in
+18 app suites, five of their attribution runs and `domdiff`. Every failure checked is one this scope predicted: a pin on a figure for 2027 or later that
+was computed from the 2026 table indexed forward. The 2027 figure is now the table's own.
+
+| Suite | Failed | What moved |
+|---|---|---|
+| `t15` | 6 | Engine A's death-year tax (a 2027 death year; −$45 to −$190) |
+| `t18` | 26 | Engine B's hand cases in 2027 and later (deductions +$218 on a $60K MFJ pension) |
+| `t22` | 14 | §F's byte-identity of Engine A's ACA path across the pair (the 2027 ACA table) |
+| `t29` | 2 | B-28 and C-table-1 — the example's first row now reads the 2027 table (§7.4 predicted it) |
+| `t33` | 3 | E-3, E-4, G-1 (lifetime pin $206,189 → $205,172) |
+| `t40` (+ `-spend617`, `-table620`) | 7 (+6, +6) | the independent oracle is on the 2026 table (A4, A5, E1: lifetime $288,603 → $287,117) |
+| `t41` | 13 | Engine B's 2027+ hand cases (the §63(f) extra, fed tax) |
+| `t42` (+ two) | 3 (+2, +2) | the oracle's 2035 tax; D-3 and D-4's lifetime and Monte Carlo pins |
+| `t75` (+ `-spend617`) | 4 (+2) | Engine D's bracket column against an oracle on the 2026 table |
+| `t77`, `t79` | 4, 9 | payroll tax: the 2027 wage base is $192,300, not $184,500 indexed |
+| `t78` | 10 | its setup asserts `TAX_CONSTANTS_YEAR` is 2026, and the Events notice's dated texts |
+| `t83` | 1 | B-3's hand pin on the example's 2029 tax |
+| `t93` | 4 | indexation figures read from the 2026 base (A-4, A-4b, A-10, A-11) |
+| `t95` | 4 | A-8's four measured lifetime-tax figures |
+| `t96` | 15 | B-9, B-10, B-12 and §D — the table-year suite's own assumptions about which tables are held |
+| `t100` | 3 | What Breaks' tax estimate and its four answers |
+| `t111` | 2 | §D's bit-identity to v6.46 (it runs only where v6.46's module is in the folder — a v6.47 → v6.48 run folder has none, so it prints a skip there) |
+| `domdiff` | 1 | the Taxes year table's figures across the pair |
+
+So the build re-gates 18 suites and `domdiff`, each kept on its v6.47 assertion for the v6.47 leg and re-derived for the v6.48 leg from an
+independent model on the 2027 table (§3's rule). The oracles that carry a 2026 table (`tools/fed_oracle_v630.mjs`, the ones in `t40`, `t42`,
+`t75`, `t77`, `t79`, `tools/sim_ledger.mjs`) gain the 2027 table, typed from the Rev. Proc. Not seen by this run, and to be re-run at the
+build: the prior leg, MC parity (it will differ by design: `t2` INTENDED_DIFFS), `t45`, `t47`, `t48`. The IRMAA table, the §402(g) limit and
+the QCD limit will move more, once they are typed.
+
+### 8.3 Copy that names 2026 (DT-4), by parser
+
+An acorn walk over every string literal, template element and JSX text of v6.47 (`lit2026.cjs`, session-only): 112 hits — 32 inside the
+Field Manual, 21 in `buildVerificationChecks`, the rest state notes (DT-5 leaves them on TY2026), the example's as-of date, the footer and
+the copy DT-4 moves to the tables: the Roth tab's rules note (*"(2026) + $2,050 age 65+ / + $1,650 per spouse"*), the Taxes tab's method
+note (*"official 2026 brackets per Rev. Proc. 2025-32"*), the QCD panel (*"2026 cap: $111K"*), the IRMAA tab (*"2026 IRMAA TIERS"*, *"approximate
+2026 Part B + Part D add-ons"*) and My Data's §402(g) note. Each is re-read at the build; §7.4's list is unchanged.
+
+### 8.4 What the build does when the last sources publish
+
+1. Re-check freshness against the then-current build (v6.48 — F-34 and F-35 shipped first, the Roth tab's display only) and re-read §8.1's
+   documents. Re-stage the tables on it (`stage_2027.py`'s three anchors are unchanged by v6.48).
+2. Type CMS's 2027 tiers and surcharges as `IRMAA_TABLES[2027]` (the surcharges derived as (B + D) × 12, rounded to $10 as today, C-2),
+   and the §402(g) and QCD limits into `FED_TABLES[2027]`.
+3. Copy from the tables (DT-4), the Verify tab's 2027 rows (DT-6), the four version sites, METHODOLOGY, Field Manual §13 and *Data vintages*.
+4. `t99_ty2027.mjs` per §3; the re-gates §8.2 names; MC parity's intended difference; `t29` B-28.
+5. ~~Fold in the manifest row the v6.47 package left stale~~ — done at v6.48 (`MissingFeatures.md`'s hash row read v6.46's md5 after the v6.47
+   upload, `package_check` K-8, post-upload, 2026-11-06; the row roll named three of the four rowed files that package changed).
+6. If one source is still unpublished on 15 December, DT-7 (a): ship the rest, the late table indexed forward, and the Events notice names it.

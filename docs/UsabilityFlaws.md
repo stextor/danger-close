@@ -52,8 +52,8 @@
 > | F-30 | **FIXED v6.41** at 360 px and wider (v6.40 Roth and Stress; v6.41 the rest) — filed and disclosed at v6.38 (§H) | on a phone, text printed over other text on six tabs (pairs on the example at 390, `t45` §S's detector: Roth 70, Stress 30, Social Security 10, My Data 8, Expenses 4, Taxes 2). **v6.40 fixed Roth and Stress**: `t104`, `t45` S-9; `docs/SCOPE_F30_ROTH_STRESS_PHONE_V640.md`. **v6.41 fixed My Data, Social Security, Expenses and Taxes** (and one Withdrawal and one Monte Carlo grid found at 360 px), the Expenses label at every width, and the Roth calendar's *"CONVERT"* labels: `t105`, `t45` S-10; `docs/SCOPE_F30B_PHONE_V641.md` (DG-1 to DG-9, all (a), taken as recommended under Steve's instruction). Below 360 px: **F-33**. At a UI SIZE above 100%: **F-32** (both fixed at v6.42) |
 > | F-31 | **FIXED v6.41** — filed at v6.40 (§H) | the Income tab widened the page at 600–625 px on a plan with a long income-stream label (626 px at 600 and 620 on the stream plan). An income stream's row now wraps at every width when it does not fit; a row that fits is unchanged (the stream plan's Income tab box-for-box identical from 680 px). `t105` A-1c, `t45` S-10 |
 > | F-32 | **FIXED v6.42** — filed at v6.40 (§H); widened at v6.41 | UI SIZE (a zoom) and the phone layout (the window's width) did not meet: a large UI SIZE in a narrow window got the tablet layout in less room than a phone (v6.41: at 150%, 52 pairs on six tabs in a 600 px window; 163 on eight on a 390 px phone, eight pages scrolling sideways). **v6.42:** the phone rules follow the room UI SIZE leaves (window width ÷ UI SIZE; classes on the zoomed root), and ten narrow rules act under 360 px of room, down to 240 (DH-1 (a)). No overprint and no sideways scroll on all 26 tabs on a phone 360 px or wider at any UI SIZE, 320 px up to 130%, and in zoomed windows. `t106`, `t45` S-11; `docs/SCOPE_F32_UI_SIZE_V642.md` (DH-1 to DH-4, Steve's). Below 240 px of room (a phone under 360 px at 150%): not designed for, disclosed |
-> | F-34 | **OPEN** — filed at v6.45 (§H) | the Roth tab's *Traditional bal (now)* and *Roth bal (now)* cards print the balance at the selected retirement year — today's holdings plus the planned contributions to it at face — not today's ($1,398,600 on the example, whose Traditional today is $1,296,000) |
-> | F-35 | **OPEN** — filed at v6.45 (§H) | the Roth ladder's RATE column reads 10% in a year with $0 of taxable income (`marginalRate` starts at 0.10) — every row of a plan with nothing to convert from v6.45 |
+> | F-34 | **FIXED v6.48** — filed at v6.45 (§H); wider than registered | the Roth tab's *Traditional bal (now)* and *Roth bal (now)* cards printed today's holdings plus the planned contributions at face, not carried — neither today's balance ($1,296,000 on the example) nor the ladder's start ($1,499,680 as the example opens): $1,398,600. From v6.48 they read *"… at retirement (2029)"* and print the ladder's carried start. `t112`; `docs/SCOPE_F34_F35_V648.md` (DR-1 (a)) |
+> | F-35 | **FIXED v6.48** — filed at v6.45 (§H) | the Roth ladder's RATE column read 10% in a year with $0 of taxable income (`marginalRate` started at 0.10); from v6.48 it reads 0%. `t112` §C; `docs/SCOPE_F34_F35_V648.md` (DR-2 (a)) |
 > | F-36 | **CLOSED v6.47** — filed at v6.46 (§H) | the Social Security tab's *"SPOUSAL BENEFIT NOT MODELED"* warning checks spouse B only: with spouse A's benefit at $0 and B's at $1,800, A's top-up from B (½ × $1,800 = $900 a month) gets no warning. *Closed at v6.47* (`docs/SCOPE_D77_SPOUSAL_BENEFIT_V647.md`): the warning is gone — the top-up is modelled, and a sentence states it for whichever spouse it reaches; the survivor sentence is not shown when neither spouse has a benefit; the grid names the latest of tied cells and says they tie |
 > | F-33 | **FIXED v6.42** — filed at v6.41 (§H) | below 360 px at UI SIZE 100% the Monte Carlo tab overlapped (3 pairs at 320) and the Grade and Verify pages were 348 and 358 px wide. Fixed by F-32's narrow rules (the same room): all 26 tabs clean at 320 and 340 px. `t106` B-3, `t45` S-11 (320 px) |
 > | F-29 | **FIXED v6.37** — filed and fixed together; wider than reported | the SS tab's claim-age explorer opened spouse A's slider at 67 for every plan and measured its draw comparison against three different baselines; spouse B's grid, note and shortfall card read her age in the retirement year; a single household's table counted a second check. `t101`; `docs/SCOPE_F29_SS_SLIDER_START.md` (DS-1 to DS-6, all (a)) |
@@ -582,7 +582,7 @@ directions; fix with D-77 or on its own.
 
 **Closed at v6.47** (`docs/SCOPE_D77_SPOUSAL_BENEFIT_V647.md`, DL-3 (a), with D-77). The warning is replaced: SSA's spousal benefit is modelled, and the tab states it — the amount at the sliders' ages, its start, why it is paid and what the plan pays — for each spouse it reaches (on the example with spouse A's benefit removed: spouse A, $900 a month). The survivor sentence is not shown when neither spouse has a benefit. The grid's tie: a spouse with no benefit of their own gets the same top-up at every claim age up to the other's filing, so those cells tie; the grid now names the latest claim ages among the tied cells as the model's best and says how many tie. `t111` F-3 to F-7.
 
-### F-34 · The Roth tab's "(now)" balance cards show the balance at retirement — **LOW (labels)** — OPEN
+### F-34 · The Roth tab's "(now)" balance cards show the balance at retirement — **LOW (labels)** — FIXED v6.48
 
 **Filed at v6.45** (`docs/SCOPE_D76_LADDER_SEED_V645.md` §4, DJ-4 (a); not fixed). The ladder's parameter cards *Traditional bal (now)* and
 *Roth bal (now)* print `retireStartBalances` at the selected retirement year — today's holdings plus the contributions planned before it, at
@@ -590,12 +590,27 @@ face — not today's balances. On the example *Traditional bal (now)* reads $1,3
 to 2029. **Candidate fix:** relabel them *"at retirement ({year})"*; it changes the example's Roth-tab text, so a release doing it masks or
 re-pins `t109` §C and `t108` §C.
 
-### F-35 · The Roth ladder's RATE column reads 10% with no taxable income — **LOW (display)** — OPEN
+**Fixed at v6.48** (`docs/SCOPE_F34_F35_V648.md`, DR-1 (a); Steve chose it after the census). **Wider than registered:** the figure was not the
+balance at retirement either — it was today's holdings plus the planned contributions, **not carried** to the retirement year, so a relabel
+alone would have described the wrong number. The ladder starts from the carried figures (holdings × the plan's inflation to the retirement
+year, the contributions at face, v6.30's rule): on the example as it opens (BULL-LEANING) $1,499,680 Traditional and $339,568 Roth, against
+the card's $1,398,600 and $315,000. The cards now read *"Traditional at retirement (2029)"* / *"Roth at retirement (2029)"* (the selected
+year) with a line beneath saying what the figure is (*"today's holdings carried to 2029 at the plan's inflation, plus the planned contributions —
+in 2029's dollars — the ladder's start"*; a plan already retired reads its holdings deflated to the retirement year, and says so), and print the
+ladder's start; the Field Manual's Roth entry, which called them current balances,
+says what they are. No engine figure moved. `t112` §A, §B, §D; `t109` re-gated (it reads the cards).
+
+### F-35 · The Roth ladder's RATE column reads 10% with no taxable income — **LOW (display)** — FIXED v6.48
 
 **Filed at v6.45** (`docs/SCOPE_D76_LADDER_SEED_V645.md` §4, DJ-4 (a); not fixed). The ladder's marginal rate starts at 0.10 and is set only by a
 bracket the year's taxable income reaches, so a year with $0 of taxable income prints *10%*. Pre-existing in any such year; from v6.45 it shows on
 every row of a plan with nothing to convert (before, that plan's phantom conversions gave the rows real rates). **Candidate fix:** print *0%* or
 a dash when the year's taxable income is $0.
+
+**Fixed at v6.48** (`docs/SCOPE_F34_F35_V648.md`, DR-2 (a)): the rate starts at 0, so a year with no taxable income reads *0%* — while the
+standard deduction is unused, the next dollar owes no federal income tax (the ladder's tax is federal). A year with taxable income is unchanged (its rate is the bracket of its last taxed
+dollar, as before). Invisible on the example at the opening $70,000 (every ladder year has taxable income); reached by a plan whose income stays under the
+standard deduction at a low slider — the slider is a view, not a household, so no census row (§K1's exception). `t112` §C, §D.
 
 ### F-21 · My Data's holdings table: the plan type read as the next holding's, and the totals sat one column right — **LOW–MED (desktop layout)** — **FIXED v6.25**
 
