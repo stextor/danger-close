@@ -1,5 +1,117 @@
 # Changelog
 
+## v6.47 — SSA's spousal benefit, paid by every projection (D-77)
+
+**A modeling release.** Scoped in `docs/SCOPE_D77_SPOUSAL_BENEFIT_V647.md` (repo-only; review §6, build record §7). Steve, on the seven
+decisions: *"Let's continue with your recommendations"* — DL-1 to DL-7 (a) — and, on DL-5, *"D-77 now as v6.47"*: the IRS published its
+TY2027 revenue procedure (Rev. Proc. 2026-35) on 5 November, but CMS's 2027 IRMAA figures and the 2027 §402(g) limit had not been published,
+so **the 2027 tax figures become v6.48** (`docs/SCOPE_TY2027_REFRESH_V633_V634.md` renumbered a fourteenth time; its suite stays
+`t99_ty2027.mjs`; the 15 December deadline stands). Built on v6.46 (source `c3c74790…`). METHODOLOGY's new section *SSA's spousal benefit
+(v6.47)* is the full account.
+
+**What was wrong (v6.46).** When one spouse's own Social Security at full retirement age is less than half the other's, SSA pays the
+difference on the other's record once both have filed — reduced if the spouse is under 67 when it starts (POMS RS 00615.250, .201). No
+projection paid it: every engine held each spouse to their own benefit, so a couple where one spouse has little or no record of their own read
+short by up to half the other's benefit a month, every year both are alive. The Social Security tab warned that it was not modeled — for
+spouse B only (F-36). The direction was conservative: every success rate, income floor and ending balance for such a couple was too low.
+
+**What changed.**
+- **One rule** (DL-1 (a)), written from SSA's: the excess `½ × PIA_W − PIA_S`, reduced 25/36 of 1% a month for the first 36 months before 67
+  and 5/12 of 1% beyond, from the later of the two filings (deemed filing; the worker must have filed), with 67 reached the day before the
+  67th birthday (20 CFR 404.102 — born on the 1st, the month before, granted only where the plan holds the day); no delayed credits on it, and the spouse's own delayed credits come out
+  of it (20 CFR 404.313; POMS RS 00615.694).
+- **Every projection pays it, for either spouse**, as Social Security and by its own rule for a claim: both Monte Carlo engines (planned path
+  and every run), Engines A, B and D and the Roth ladder from its month; Engine C and Backtest from its year; What Breaks' guaranteed income.
+  So it is taxed by the §86 worksheet and each state's own rule, counts toward IRMAA's MAGI, gets the COLA and the depletion scenario's cut.
+  It stops at the first death (the survivor keeps the larger own check, as before).
+- **The spouse's filing** is the claim age My Data holds for them (DL-2 (a)). **A benefit entered as $0** is taken as no record of one's own
+  and pays the top-up (DL-7 (a)); My Data and the Social Security tab say it is paid *because {name}'s own benefit is entered as $0*, so a
+  blank left by mistake is visible where it is fixed. The placeholder the loader inserts for a backup with no spouse-B block pays nothing.
+- **The Social Security tab** (DL-3 (a)): each spouse's card shows the top-up as its own line at the sliders' ages — *"+ $1,386/mo spousal
+  benefit on Spouse A's record from Jan 2031 (when Spouse A files) │ total $1,386/mo"* — and the combined income, the shortfall card, the draw
+  table and the claiming grid include it. The warning is replaced by a sentence for whichever spouse it reaches, saying what is paid, from
+  when and why. Three lines of copy shown on every plan change (the claiming grid's limits, spouse B's breakeven note, and the line under
+  spouse B's table). F-36's neighbours: the survivor sentence is not shown when neither spouse has a benefit, and when grid cells tie the grid
+  names the latest claim ages among them and says they tie.
+- **Every other figure that sums Social Security** (DL-4 (a)): the Income tab (its total, phases, a spousal-benefit row and an event), the
+  Dashboard's floor, the Grade and Ranking tabs, the Survivor tab, Backtest's high-survival line, the trust-fund scenario's readout, the Exit
+  Plan, My Data and Ask AI's live context. The Taxes tab's Social Security lines say *"with spousal"* in the years they include it.
+- **What moves, against v6.46:** only plans where a spouse's benefit at 67 is below half the other's. On the example with spouse B's benefit
+  removed (her claim age 63): **$1,386 a month from January 2031**; at BASE with $70,000 a year of conversions the Withdrawal tab's ending
+  balance $1,480,888 → $2,012,969, lifetime tax $178,140 → $197,907, and the 30-year Monte Carlo's success 77% → 85% (4,000 seeded runs).
+  With spouse A's removed instead: $900 a month; the ending balance $304,477 → $633,345, success 36% → 56%. **The example, and every fixture
+  household, is unchanged** in every engine and on fifteen tabs but for the three lines of copy (`t111` §D).
+- **Copy and documents.** Field Manual §13: a v6.47 note; the Social Security entry: the rule and what is not modeled; the claiming grid's
+  entry corrected. METHODOLOGY: the new section, and the v5.6 summary's *"spousal top-ups not modeled"* corrected. MissingFeatures **D-77
+  closed**; D-56 notes its claim-age-63 placeholder pays no top-up. UsabilityFlaws **F-36 closed**. The four version sites read v6.47.
+
+**Owned.**
+- **The scope's census missed a display.** Backtest's high-survival line (*"Social Security and the pension (≈ $51K/yr once both SS checks
+  flow)"*) sums the tab's own variables, so a census of `getSSA()` / `getSSB()` reads did not count it. `t111`'s rendered twins found it
+  ($51K beside $71K for the same income); fixed before the suite run, with control K27. The seventh twin found one more difference, in a label: the Withdrawal tab's phase colour
+  turned *"income-active"* at spouse A's $0 filing a year before the top-up paid anything; it now turns when A's Social Security first pays.
+- **A test pinned on a false premise.** `t111` B-4's first draft (born on the 1st, claiming in January at 62: $654) was what SSA pays; the
+  build "fixed" it to December on the wrong belief that someone born on the 1st is 62 a month earlier. The build review found it (POMS RS
+  00201.001: born on the 1st or 2nd, entitled from the birth month). B-4 now uses a birthday on the 2nd (60 months, $650); the rule never moved.
+- **Three things the build review found in the copy and one in the rule**, all fixed before the package: the tab said *"none is owed"* beside
+  the loader's placeholder (a $0 spouse B against A's $3,300); *"it stops at the first death"* was stated as true of every projection, when
+  Backtest and the Roth ladder model no death and pay it to the plan's end, as they pay both own checks; the draw card still said spouse B's
+  check *"follows her slider in both columns"*; and a date of birth saved without its day (the guided setup's `YYYY-06`) was read as the 1st,
+  granting a month of reduction nobody entered (optimistic, about 0.7%). Each is in the scope's §7.
+
+**Found by this release and not fixed.**
+- **D-78: a claim at 62 is paid from the birth month.** SSA pays from the first month the claimant is 62 throughout the month — the birth
+  month only for someone born on the 1st or 2nd (POMS RS 00201.001). For most birthdays every engine pays a claim at exactly 62 one month
+  early (optimistic by a month of benefit; from v6.47 a spousal top-up starting with it too). Filed in MissingFeatures; its own scope.
+
+**Limitations, stated.**
+- **Not modeled:** the retirement earnings test (benefits withheld while someone under 67 still works — for anyone's own benefit too); full
+  retirement ages below 67 (fixed at 67: for a spouse born 1955–1959 the reduction runs a few months long, conservative; for a worker born
+  then, half of the age-67 figure runs up to about 6.7% high, optimistic); the family maximum (not reached by a worker and one spouse);
+  divorced-spouse, child-in-care and disability benefits; restricted applications (born before 2 January 1954); SSA's rounding to the dime.
+- **The breakeven cards and the per-spouse benefit tables stay on each spouse's own record** (scope §7) — the claiming grid is where the
+  top-up enters the claiming comparison; the cards say so where a top-up is owed.
+- **A $0 left blank by mistake pays a top-up** (DL-7 (a)): optimistic for that user, visible on My Data and the tab.
+- **D-56's other members**, **D-74**, **D-75**, F-34, F-35 and Backtest's fixed pension at face (reported at v6.44, still unregistered) stand.
+- The statute's own page (42 U.S.C. §402(w)) could not be fetched at the build; 20 CFR 404.313 states the same rule and was read.
+
+**Tests.** New suite **`t111_spousal.mjs`**, run on both legs; the v6.46 leg pins each absence as `[KNOWN DEFECT 2026-11-05, D-77 — flips
+at v6.47]`. Its oracle is new: **`qa/tools/spousal_oracle.mjs`**, SSA's rule written from the primary sources, exact in integers.
+- **§A, the source by AST — the extinction census:** every read of a spouse's own benefit (`getSSA()` / `getSSB()`), by site, against a
+  table (a new reader is a new site to decide); the spousal additions counted per money path and display (one removed turns it red); Engine
+  A's three builders spread the plan's fields and its sums read them; half a benefit is taken only in the rule and the tab's note; the
+  warning's text gone, the Field Manual's included.
+- **§B, the rule against the oracle:** 419,628 cases (PIA pairs $0–$4,000 by $250 × 11 claim months each side × 4 dates of birth × 3 own
+  benefits), every month 62–70 on odd PIAs (the half-dollar), POMS RS 00615.250's example ($600), 32.5% at 62, the 20 CFR 404.102 month, no
+  delayed credits, the delayed-credit offset, deemed filing.
+- **§C, the twin-plan invariant:** a spouse with no benefit and a top-up of $X, against the same plan with an own benefit of $X from the same
+  month — seven twins (unreduced from the worker's month, three dates and the mirror; reduced, the spouse filing first, two dates and the mirror); Engines A, B,
+  C and D, the Monte Carlo's tax schedule, What Breaks' tax and both Monte Carlo engines (planned path and 300 seeded runs) bit-identical at
+  $0 and $70,000, and the Roth, Backtest and What Breaks tabs' rendered text identical.
+- **§D, nothing moves where nothing is owed:** the example and the seventeen fixture households — no top-up on any — bit-identical to v6.46
+  in those engines, and fifteen tabs' rendered text identical but for the three copy changes, each mask bound to one hit a side.
+- **§E, hand pins:** $1,386, $1,650, $546, $410, $900 and their months; Engine B's 2031 figure; Engine D's equal to it; the placeholder and a
+  single plan pay none. **§F**, the tab (each card's line, the totals, the sentence, the mirror, the tie, F-36's neighbours, a grid cell by the
+  grid's own arithmetic); **§G**, the Income tab, Grade, Dashboard, Ask AI, the Exit Plan and My Data; **§H**, the copy.
+- **Boundary census (§K1):** v6.46's row `spousal_warning` re-pointed as `spousal_topup` — ON when neither spouse's benefit is below half the
+  other's, as on the example and every fixture (the boundary that hid D-77); `t29` B-41, C-d56-1 to -3 re-pointed, C-d77-1 new.
+- **A harness race fixed in `t45`** (found by the packaged run; reproduced on v6.46's page too): its stream-plan load sometimes opened the app on DATA LOAD, and eight checks then measured an empty page. It now confirms the plan loaded and retries. Scope §7.
+- **Re-gated:** `t1` (S-7: the Roth ladder's Social Security lines carry the top-up), `t6` (the shortfall's one rule now carries spouse B's top-up, gated by the single flag), `t25` §F and §G (their spouse B has no benefit of her own, so from v6.47 she is paid the top-up — the statute's oracle adds it; the fixture is unchanged), `t43` C-4 (Engine A's figure is the worksheet on what its hand-built P pays, which carries no spousal fields), `t101` (its plans reach a top-up — the reported plan's spouse A at $3,833 against spouse B's $1,800 — so its oracle adds it and §C's hand pins are restated: e.g. 24 × ($3,322 + $82) = $81,696), `t110` (the cards, totals, the replaced warning and sentence, A-3's count) and `t29` (B-41, C-d56-1 to -3 re-pointed to `spousal_topup`; C-d77-1 new)
+- **Registered:** `v647` by the AST registration (511 sites in 92 files: 182 gates, 327 arrays, 2 maps); by hand `t33` PINS, `t93`'s Engine D reference, `t45`/`t47`/`t48`. The shim
+  exports the spousal helpers. `runsuite.sh` lists `t111`.
+
+**Counts**, from the full suite run from the packaged copies:
+- **11,773 app checks across 109 app suites, 0 failed, 0 DIED**: 6,465 current-leg, 4,825 prior-leg (v6.46), 235 and 238 in the two attribution runs, MC parity 10/10 (no intended difference — none of its three fixtures reaches a top-up).
+- Tooling: `t21` 64, `domdiff` 32, `sets` 12 + 12. GRAND **11,893**, 0 failed.
+- Against v6.46, the current leg: `t111` new (60; 9 on the v6.46 leg); `t29` 167 → 168; `t110` 34 → 33 (its §D compares with v6.45's tab and runs only where `dom_v645.cjs` is in the folder); `t45` 446 (its first packaged run failed 8 on a harness race, fixed and rerun alone — scope §7). Every other current-leg count is unchanged. Per-suite figures are on `TESTING.md`'s v6.47 line.
+
+**Controls.** `qa/tools/controls_v647_spousal.py`, on a copy of the run folder: **31 of 31 as expected** — C0 silent; K1–K30 each fire their named `t111` checks (most turn related checks red too); every file restored and hash-checked. Run on a copy of the run folder built from the packaged copies (its source, `t111`, the oracle, the DOM entry and the script byte-identical to them), each control with `t111`'s sections for its checks (`T111_SECTIONS`) and §D's rendered comparison skipped. Each money path's addition removed in turn — the 6- and 30-year Monte Carlo (planned path and runs), Engines A–D, the Roth ladder, Backtest, What Breaks — fires the census (A-3) and the twins (§C or their rendered form), as do Engine A's builders without the plan's fields (K12) and Backtest's line (K27); the rule's reduction branches, start month, delayed-credit offset, attained-age month, placeholder guard and unknown-day rule (K13–K17, K28); the top-up taxed as a pension (K18); spouse A's top-up paid from A's own filing (K30); the tab's card line, the warning, the Income total, the tie rule, the grid, Ask AI, My Data and the "none is owed" line (K19–K22, K24–K26, K29); the §13 note (K23). In the first pass K1, K2 and K10 named checks that cannot see them — the 6-year Monte Carlo's six years end before the twins whose top-ups start in 2033, and Backtest's sums read the top-ups' fields, which A-3's call count does not see; each still turned the other twins red. Their lists were corrected and the three rerun.
+
+**The reviews.** The scope was reviewed once before Steve decided (scope §6: 1 must-fix, 5 further findings, notes). The build was reviewed by an agent that had not seen it, read-only, with no suite runs: **2 must-fix, 5 should-fix, 4 notes**, each checked and acted on (scope §7): the *"none is owed"* line beside the placeholder; *"it stops at the first death"* stated without its conditions (Backtest and the Roth ladder model no death); `t111` B-4's false premise (and from it D-78); a date of birth without its day read as the 1st; the draw cards' copy; the Taxes label in widowed years; a twin for spouse A's reduced top-up (2c, control K30) and a tighter Dashboard check; the note's reason for *"none"*; *"every tab"* in METHODOLOGY. Two it raised are recorded, not fixed: no rendered value check on the Ranking, Survivor and trust-fund figures (held by `t111` A-3), and a future path that reads the planned amount without `getSSA()`/`getSSB()` would pass A-2. It reproduced the five top-ups by hand, the lifetime tax and the ending balances from both builds' modules; it did not run the Monte Carlo.
+
+**Provenance.** Source `f75e7cf11612932186d9338c6422634e` · built `index.html` `046031afb7c33fe6c90987be9459f6d1` (vite 5.4.21, `npm ci`; built twice, byte-identical) · `smoke_built`
+22 passed, 0 failed on the packaged page.
+
 ## v6.46 — the Social Security tab reads each spouse's benefit at 67 one way (D-56's $1,944)
 
 **A display release, on one tab.** Scoped in `docs/SCOPE_D56_SS_FRA_ESTIMATE_V646.md` (repo-only; review §6, build record §7). Steve, on the

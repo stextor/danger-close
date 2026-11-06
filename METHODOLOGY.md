@@ -862,7 +862,7 @@ one blended gain fraction — tracked, not fixed at the declared opening share �
 per-lot logic by design); **spousal Social Security analytics**
 (per-spouse breakeven cards including the couple's-horizon correction — the lower earner's
 record pays only until the first death — plus an 81-combination joint claiming grid with
-survivor step-up, undiscounted today's dollars, spousal top-ups not modeled); a **guided
+survivor step-up, undiscounted today's dollars; SSA's spousal top-up counted from v6.47); a **guided
 first-run wizard** that synthesizes a three-position portfolio and two-phase expense
 schedule through the same apply/persist pipeline as every other load path; **Simple Mode**
 (a persisted six-tab view); a **Dashboard** summarizing Monte Carlo success, spending vs
@@ -3764,3 +3764,71 @@ holds a benefit but no table moves to that amount carried to 67 (v6.45 read the 
 planned amount (`getSSA`, `getSSB`), as before. The example and every plan whose tables hold a numeric age-67 figure for both spouses render the tab
 identically (a backup storing the figures as text, such as "1800", now reads them as numbers). The spousal top-up itself remains unmodeled (D-77), and the tab's warning about it still looks only at spouse B (F-36). The tab
 fixes full retirement age at 67, so carrying back to 67 is SSA's rule for people born in 1960 or later.
+
+## SSA's spousal benefit (v6.47)
+
+`docs/SCOPE_D77_SPOUSAL_BENEFIT_V647.md`, DL-1 to DL-7 (a) (Steve, 2026-11-05: *"Let's continue with your recommendations"*; DL-5 revised by
+Steve the same day — the IRS had published its 2027 figures, Rev. Proc. 2026-35, but CMS's 2027 IRMAA figures and the 2027 §402(g) limit had
+not, so this is v6.47 and the 2027 tax figures v6.48). MissingFeatures **D-77** closed; UsabilityFlaws **F-36** closed.
+
+**What SSA pays.** A spouse entitled to their own retirement benefit is paid it first; if their own benefit at full retirement age (PIA) is
+less than half the other spouse's PIA, SSA adds the **excess**, `½ × PIA_W − PIA_S`, and nothing when the own PIA is at least half (POMS RS
+00615.250; ssa.gov, *Benefits for your spouse*). The worker must be receiving benefits, and deemed filing makes the spouse's own filing the
+spousal filing for anyone born on or after 2 January 1954 (POMS GN 00204.035), so the excess starts at the **later of the two filings**. It is
+reduced for each month the spouse is under full retirement age when it starts: 25/36 of 1% for each of the first 36 months, 5/12 of 1% for
+each month beyond (POMS RS 00615.201 B) — 32.5% of the worker's PIA at 62 with no own benefit (ssa.gov/oact/quickcalc/spouse.html). A person
+reaches an age on the day before the birthday (20 CFR 404.102), so someone born on the 1st reaches 67 in the month before their birth month.
+The model grants that month only when the plan holds the day of birth: the guided setup saves a month and year, and a missing day is not
+read as the 1st.
+Delayed retirement credits increase only the person's own old-age benefit — *"We do not use your delayed retirement credits to increase the
+benefits of other family members"* (20 CFR 404.313(a), (e)(2)) — and credits on the spouse's own benefit come out of the excess (POMS RS
+00615.694 A: the combined amount is computed without them). The Government Pension Offset no longer applies from January 2024 (ssa.gov FAQ
+KA-02041). The statute's own page (42 U.S.C. §402(w)) could not be fetched at the build; 20 CFR 404.313 states the same rule.
+
+**What the model pays.** One rule, `spousalTopUpFor`, from those rows: the excess, reduced for the spouse's months before 67 at its start
+month, less the spouse's own delayed-credit amount (own benefit less PIA when the own claim is after 67), floored at $0 and rounded to the
+dollar once. `spousalTopUp(who)` applies it to the plan: PIAs as the Social Security tab reads them (`ssFraOf`), the own benefit as every
+engine pays it (`getSSA` / `getSSB`), the claim dates and dates of birth from the plan's timeline. Every projection adds it to that spouse's
+own Social Security, by the projection's own rule for a claim: from its month in the Monte Carlo (both engines, the planned path and every
+run, through `mcPaidShare`), Engines A, B and D and the Roth ladder (the months from the start month through December in the first year);
+whole years from its year in Engine C and Backtest; and What Breaks' guaranteed income from its month. So it is taxed as Social Security
+(the §86 worksheet, each state's own Social Security rule, IRMAA's MAGI), given the Social Security COLA and cut by a trust-fund depletion
+scenario like the rest. Engine A takes it as two fields on its inputs, `topA` and `topB`; an input without them pays none.
+
+**The spouse's filing** is the claim age My Data holds for them, which the app shows and saves whatever the amount; a spouse with no benefit
+of their own files then, and the top-up starts then or at the other spouse's filing, whichever is later. A benefit **entered** as $0 — My
+Data, the guided setup — is taken as a spouse with no record of their own and pays the top-up; My Data and the Social Security tab say it is
+paid because that spouse's own benefit is entered as $0, so a figure left blank by mistake shows where it is corrected. The placeholder the
+loader inserts for a backup with no spouse-B block (flagged `isDefault`) pays nothing: the plan never carried that figure. A single plan pays none.
+
+**After a death.** SSA stops the top-up at the first death; the survivor keeps the larger of the two own checks. The engines that model a
+death take the larger of the two spouses' Social Security from then, with the top-up inside the spouse's figure. In whole periods with
+consistent entries that changes nothing: a worker's own check claimed at 62 or later is at least 70% of their PIA, more than the spouse's own
+check and top-up together (at most half that PIA, or the spouse's own when it is larger). It can differ in a partial period — Engines A, B
+and D in a worker's claim year that falls on or after the first death, the Monte Carlo in the quarter of a claim after a death on that path —
+and on a plan whose entered planned amount is far below its own table's age-67 figure. Backtest and the Roth ladder model no death: they pay
+both own checks to the plan's end, as before, and the top-up with them.
+
+**Where it shows.** The Social Security tab shows it on each spouse's card as its own line — at the sliders' ages, with its start and why —
+and counts it in the combined income, the shortfall card, the draw table and the claiming grid (each cell at its own ages, while both are
+alive, from the year of the later filing). The warning that it was not modeled, which looked only at spouse B, is replaced by a sentence for
+whichever spouse it reaches. When grid cells tie — a spouse with no benefit of their own gets the same top-up at every claim age up to the
+other's filing — the grid names the latest claim ages among them and says the cells tie. The Income tab (its total, phases and events), the
+Dashboard's floor, the Grade and Ranking tabs, the Survivor tab's joint figure, the trust-fund scenario's readout, the Exit Plan, My Data
+and Ask AI's live context all count it as Social Security; the Taxes tab's Social Security lines say when they include it.
+
+**Measured** (BASE scenario, $70,000 a year of Roth conversions, against v6.46). On the example with spouse B's benefit removed (her claim age
+63): spouse B receives $1,386 a month from January 2031, when spouse A files (½ × $3,300 × 121/144); lifetime tax $178,140 → $197,907 in
+today's dollars; the Withdrawal tab's ending balance $1,480,888 → $2,012,969; the 30-year Monte Carlo's success (4,000 seeded runs) 77% → 85% (ending above
+$800,000: 61% → 74%). With spouse A's benefit removed instead: spouse A receives $900 a month from January 2031; the ending balance $304,477
+→ $633,345; the 30-year success 36% → 56%. The example, and every plan where each spouse's benefit at 67 is at least half the other's, is
+unchanged in every engine the suite compares bit for bit, and on the fifteen tabs whose text it compares, but for three lines of copy on
+the Social Security tab.
+
+**What is not modeled.** The retirement earnings test (benefits withheld while someone under 67 still works — for anyone's own benefit
+too). Full retirement ages below 67: the app fixes 67 for everyone, so for a spouse born 1955–1959 the reduction runs a few months long
+(conservative), and for a worker born then the age-67 figure it reads carries up to ten months of delayed credits, so half of it runs up to
+about 6.7% high (optimistic). The family maximum (about 150–180% of the worker's PIA; a worker and one spouse at 50% do not reach it).
+Divorced-spouse, child-in-care and disability benefits; restricted applications (born before 2 January 1954). SSA's rounding to the dime at
+each step. The breakeven cards and the per-spouse benefit-by-age tables stay on each spouse's own record and say so where a top-up is owed;
+the claiming grid is where the top-up enters the claiming comparison.
