@@ -69,6 +69,10 @@ export const __g = {
   // v6.46 (D-56) — the Social Security tab's one reading of a spouse's benefit at 67 (t110). GUARDED: it does not exist on the v6.45 leg.
   ssFraOf: _g("ssFraOf"),
   ssTabClaimAge: _g("ssTabClaimAge"),
+  // v6.47 (D-77) — SSA's spousal benefit (t111). GUARDED: none of these exists on the v6.46 leg.
+  spousalTopUpFor: _g("spousalTopUpFor"), spousalTopUp: _g("spousalTopUp"), spousalTopUpAtAges: _g("spousalTopUpAtAges"),
+  spousalTopUpsAt: _g("spousalTopUpsAt"), spousalTopUpsSteady: _g("spousalTopUpsSteady"), spousalTopUpFields: _g("spousalTopUpFields"),
+  spousalEligible: _g("spousalEligible"),
   retireStartNote: _g("retireStartNote"),
   contribAllocationWeights: _g("contribAllocationWeights"),
   // v6.39 (D-69) — what Ask AI is told about the accounts and contributions (t103). GUARDED: it does not exist on the v6.38 leg.
