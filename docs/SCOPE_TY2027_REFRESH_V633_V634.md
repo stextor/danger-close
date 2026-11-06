@@ -1,4 +1,4 @@
-# SCOPE — the 2027 tax-figure refresh: tables index from their own year (v6.33), then the 2027 figures (v6.47 — was v6.46, v6.45, v6.44, v6.43, v6.42, v6.41, v6.40, v6.39, v6.38, v6.37, v6.36, v6.35, and v6.34 before that) · F-27 closed by decision
+# SCOPE — the 2027 tax-figure refresh: tables index from their own year (v6.33), then the 2027 figures (v6.48 — was v6.47, v6.46, v6.45, v6.44, v6.43, v6.42, v6.41, v6.40, v6.39, v6.38, v6.37, v6.36, v6.35, and v6.34 before that) · F-27 closed by decision
 
 > **RENUMBERED 2026-10-27, at the v6.34 build** (decision DC-4 (a) of `docs/SCOPE_D58_CONTRIB_SAVE_V634.md`; Steve: *"Let's go with your
 > recommendations"*). v6.34 is the D-58 release, built while the 2027 figures were unpublished. **The 2027 figures ship as v6.35** (tag `v635`), and
@@ -75,6 +75,14 @@
 > **Unlike v6.40–v6.42, v6.43 changes an engine:** Engine D's opening balances, and through `withdrawalPlanSeries` every tax engine's
 > drawdown draws (MC parity `mc`, `extMC`, `stress` differ by design). Figures `t99` pins that depend on the example's draws may need
 > re-measuring on v6.43 before the tax build.
+>
+> **RENUMBERED A FOURTEENTH TIME 2026-11-05, at the v6.47 build** (DL-5 of `docs/SCOPE_D77_SPOUSAL_BENEFIT_V647.md`, revised by Steve the
+> same day: *"D-77 now as v6.47"*). v6.47 is D-77 (SSA's spousal benefit, paid by every projection). The IRS published its TY2027 revenue
+> procedure (Rev. Proc. 2026-35) on 2026-11-05; CMS's 2027 IRMAA figures and the 2027 §402(g) limit were not yet published, so the figures
+> wait for those. **The 2027 figures ship as v6.48** (tag `v648`); their suite stays **`t99_ty2027.mjs`** (v6.47's is `t111`). Every
+> *"v6.47"* or earlier version below that names the 2027-figures release now means v6.48. DT-7's 15 December date is unchanged, and if CMS
+> publishes while a later release is far from done the figures go first. **v6.47 moves the engines only where a spousal top-up is owed** —
+> on neither the example nor any fixture household — so no `t99` figure moves.
 >
 > **RENUMBERED A THIRTEENTH TIME 2026-11-05, at the v6.46 build** (DK-4 (a) of `docs/SCOPE_D56_SS_FRA_ESTIMATE_V646.md`; Steve: *"all as
 > recommended"*). v6.46 is D-56's $1,944 (the Social Security tab's reading of each spouse's benefit at 67). Searches of irs.gov on
