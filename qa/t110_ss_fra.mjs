@@ -36,16 +36,16 @@ console.error = () => {}; console.warn = () => {};
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v646";
 const DUMP = process.argv[3] === "--dumpdom";
-const KNOWN_VERSIONS = ["v645", "v646", "v647"];
+const KNOWN_VERSIONS = ["v645", "v646", "v647", "v648"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v646", "v647"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v646", "v647", "v648"].includes(VER);   // an array, so the next registration widens it
 // v6.47 (D-77 — SSA's spousal benefit modelled): from this leg each card, the combined income and the shortfall include the top-up, the
 // warning is replaced by the modelled note, and the no-benefit sentence changes where a top-up is paid. An array, so the registrar widens it.
-const TOP = ["v647"].includes(VER);
+const TOP = ["v647", "v648"].includes(VER);
 const C_PRIOR = "v645";                // §D's prior module — a constant, so the registrar cannot widen it
 const KD = "[KNOWN DEFECT 2026-11-05, D-56 — flips at v6.46]";
 const require = createRequire(import.meta.url);

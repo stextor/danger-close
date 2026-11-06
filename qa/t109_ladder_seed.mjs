@@ -43,13 +43,14 @@ console.error = () => {}; console.warn = () => {};
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v645";
 const DUMP = process.argv[3] === "--dumpdom";
-const KNOWN_VERSIONS = ["v644", "v645", "v646", "v647"];
+const KNOWN_VERSIONS = ["v644", "v645", "v646", "v647", "v648"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v645", "v646", "v647"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v645", "v646", "v647", "v648"].includes(VER);   // an array, so the next registration widens it
+const CARDS648 = ["v648"].includes(VER);   // v6.48 (F-34): the parameter cards print the ladder's carried start — an array, so the registrar widens it
 const C_PRIOR = "v644";                // §C's prior module — a constant, so the registrar cannot widen it
 const KD = "[KNOWN DEFECT 2026-11-04, D-76 — flips at v6.45]";
 const require = createRequire(import.meta.url);
@@ -137,7 +138,8 @@ const mountApp = async ver => {
     const rows = []; for (let i = 9; i + 8 < cells.length; i += 9) rows.push({ year: +cells[i], conv: cells[i + 1], tax: cells[i + 4], magi: cells[i + 5], trad: cells[i + 7], roth: cells[i + 8] });
     // the cards list A then B, each "<first name>: $N at <age> (<year>)" — read by position (the example names both spouses "Spouse …")
     const card = (lab, i) => { const seg = m(new RegExp(`${lab}(.*?)(?:Forced taxable|Combined RMDs)`)) || ""; const r = [...seg.matchAll(/: \$([\d,]+) at \d+ \(\d{4}\)/g)][i]; return r ? +r[1].replace(/,/g, "") : null; };
-    return { text: t, rows, tradNow: m(/Traditional bal \(now\)\s*\$([\d,]+)/), rothNow: m(/Roth bal \(now\)\s*\$([\d,]+)/),
+    // v6.48 (F-34): the cards read "… at retirement (YYYY)" and print the ladder's carried start (t112 holds their figures); either label here
+    return { text: t, rows, tradNow: m(/Traditional (?:bal \(now\)|at retirement \(\d{4}\))\s*\$([\d,]+)/), rothNow: m(/Roth (?:bal \(now\)|at retirement \(\d{4}\))\s*\$([\d,]+)/),
       totConv: m(/Total conversion \(\d+ yr\)\s*(\$[\d.]+M)/), totTax: m(/Total tax cost\s*\$([\d,]+)/),
       noConvA: card("NO CONVERSION \\(each at their own age\\)", 0), noConvB: card("NO CONVERSION \\(each at their own age\\)", 1),
       withConvA: card("K/YR CONVERSION", 0), withConvB: card("K/YR CONVERSION", 1), red: m(/Combined RMDs reduced by \$(-?[\d,]+)\/yr/),
@@ -262,7 +264,9 @@ T(`B-0 SETUP: every shape renders a twelve-row ladder 2029–2040 but bothPast, 
   Object.entries(R).every(([k, r]) => k === "bothPast" ? r.rows.length === 0 : (r.rows.length === 12 && r.rows[0].year === 2029 && r.rows[11].year === 2040)));
 T(`B-1 SETUP: the start balances the parameter cards print — noRoth Roth $0, roth1 $1, noTrad and noIra Traditional $0, annOnly Traditional $250,000, noTradLaterB2 $0, rothToTrad Roth $0 (got ${["noRoth", "roth1", "noTrad", "noIra", "annOnly", "noTradLaterB2", "rothToTrad"].map(k => `${k} ${R[k].tradNow}/${R[k].rothNow}`).join("; ")})`,
   R.noRoth.rothNow === "0" && R.roth1.rothNow === "1" && R.noTrad.tradNow === "0" && R.noIra.tradNow === "0" && R.noIra.rothNow === "0"
-  && R.annOnly.tradNow === "250,000" && R.noTradLaterB2.tradNow === "0" && R.rothToTrad.rothNow === "0");
+  // v6.48 (F-34): the card shows the carried start, so the annuity's $250,000 (dated 2026, retiring 2029) reads above $250,000; t112 B-3/B-4
+  // check the carried figure itself. The $0 and $1 cases read the same on every leg ($1 carried rounds to $1).
+  && (CARDS648 ? +R.annOnly.tradNow.replace(/,/g, "") > 250000 : R.annOnly.tradNow === "250,000") && R.noTradLaterB2.tradNow === "0" && R.rothToTrad.rothNow === "0");
 if (POST) {
   T(`B-2 the cliff is gone: noRoth's ROTH BAL column equals roth1's, row by row (${col(R.noRoth, "roth").join(" ")})`, col(R.noRoth, "roth").join() === col(R.roth1, "roth").join());
   // the oracle: no Roth, $70,000 converted at the end of 2029's growth — (0 + 70,000) × 1.045 = $73,150 → $0.07M

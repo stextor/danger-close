@@ -37,19 +37,19 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v637";
-const KNOWN_VERSIONS = ["v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643", "v644", "v645", "v646", "v647"];
+const KNOWN_VERSIONS = ["v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643", "v644", "v645", "v646", "v647", "v648"];
 // v6.47 (D-77): the tab's draw series carries each spouse's spousal top-up from its month, spouse B's depending on which of spouse A's claims
 // the column takes. Several plans here reach one (spouse A's benefit at 67 above twice spouse B's $1,800 — the reported plan's $3,833 among
 // them), so from v6.47 the oracle adds it, from the suite's own oracle (tools/spousal_oracle.mjs), and §C's hand pins are restated with it.
 // An array, so the next registration widens it.
-const TOP = ["v647"].includes(VER);
-const D56 = ["v646", "v647"].includes(VER);   // v6.46 (D-56): the oracle's new rule — an array, so the next registration widens it
+const TOP = ["v647", "v648"].includes(VER);
+const D56 = ["v646", "v647", "v648"].includes(VER);   // v6.46 (D-56): the oracle's new rule — an array, so the next registration widens it
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v637", "v638", "v639", "v640", "v641", "v642", "v643", "v644", "v645", "v646", "v647"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v637", "v638", "v639", "v640", "v641", "v642", "v643", "v644", "v645", "v646", "v647", "v648"].includes(VER);   // an array, so the next registration widens it
 const D_PRIOR = "v636";                // §D's prior module — a constant, so the registrar cannot widen it (t76 records why)
 const KD = "[KNOWN DEFECT 2026-10-29, F-29 — flips at v6.37]";
 dom.reconfigure({ url: "https://stextor.github.io/danger-close/" }); globalThis.location = window.location;   // the self-hosted branch

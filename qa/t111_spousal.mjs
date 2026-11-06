@@ -38,13 +38,13 @@ console.error = () => {}; console.warn = () => {};
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v647";
 const DUMP = process.argv[3] === "--dumpdom";
-const KNOWN_VERSIONS = ["v646", "v647"];
+const KNOWN_VERSIONS = ["v646", "v647", "v648"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v647"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v647", "v648"].includes(VER);   // an array, so the next registration widens it
 const C_PRIOR = "v646";                // §D's prior leg — a constant, so the registrar cannot widen it
 const KD = "[KNOWN DEFECT 2026-11-05, D-77 — flips at v6.47]";
 const require = createRequire(import.meta.url);

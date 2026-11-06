@@ -509,6 +509,11 @@ tally "t110-$CUR"   node t110_ss_fra.mjs "$CUR"
 # dom_v646.cjs are in the folder. Its two switches (T111_SECTIONS, T111_CONTROLS_SKIP_DDOM) are the negative controls' and are never set here.
 tally "t111-$PRIOR" node t111_spousal.mjs "$PRIOR"
 tally "t111-$CUR"   node t111_spousal.mjs "$CUR"
+# t112 (v6.48) — the Roth ladder's starting-balance cards (F-34) and its RATE column (F-35): the cards against the ladder's carried start computed
+# here (units_v630's carry), the RATE column on a plan with no taxable income, and (where dom_v647.cjs is in the folder) the Roth tab equal to v6.47's but
+# for the cards and the $0-taxable RATE cells. Both legs — the v6.47 leg pins each defect.
+tally "t112-$PRIOR" node t112_roth_cards_rate.mjs "$PRIOR"
+tally "t112-$CUR"   node t112_roth_cards_rate.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"
