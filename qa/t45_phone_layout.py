@@ -20,7 +20,7 @@
 import os, sys, re
 
 VER = sys.argv[1] if len(sys.argv) > 1 else ""
-KNOWN_VERSIONS = ["v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643", "v644", "v645", "v646"]
+KNOWN_VERSIONS = ["v579", "v580", "v581", "v582", "v583", "v584", "v585", "v586", "v587", "v588", "v589", "v590", "v591", "v593", "v594", "v595", "v596", "v597", "v598", "v599", "v600", "v601", "v602", "v603", "v604", "v605", "v606", "v607", "v608", "v609", "v610", "v611", "v612", "v613", "v614", "v615", "v616", "v617", "v618", "v619", "v620", "v621", "v622", "v623", "v624", "v625", "v626", "v627", "v628", "v629", "v630", "v631", "v632", "v633", "v634", "v635", "v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643", "v644", "v645", "v646", "v647"]
 HERE = os.path.dirname(os.path.abspath(__file__))
 def _vnum(v):   # "v640" -> 640; anything else -> -1. From v6.40 the two gates below compare numbers, so a registration that forgets them cannot
     m = re.fullmatch(r"v(\d+)", v or "")   # turn section S into a silent skip (through v6.39 they were hand-widened lists)
@@ -138,11 +138,18 @@ try:
             if plan is None:
                 pg.get_by_text("Use example data", exact=False).first.click(); pg.wait_for_timeout(2500)
             else:
-                pg.evaluate("([p, x]) => { localStorage.setItem('dc:danger_close:portfolio_v1', JSON.stringify(p)); localStorage.setItem('dc:danger_close:expenses_v1', JSON.stringify(x)); }", [plan["P"], plan["X"]])
-                pg.reload(); pg.wait_for_timeout(2500)
-                if pg.locator("#dc-dg-check").count() and pg.locator("#dc-dg-check").is_visible():
-                    pg.check("#dc-dg-check"); pg.click("#dc-dg-accept"); pg.wait_for_timeout(500)
-                pg.wait_for_timeout(1500)
+                # v6.47 build: a HARNESS RACE, found when it turned up in two runs of the v6.47 build and then once in nine on v6.46's page
+                # (probe, 2026-11-05). The plan is written into
+                # storage while the app's no-data screen is mounted, and on some loads the two keys are gone after the reload (cause not
+                # traced: the page's first-run handling or the browser races the write) — so the app opens on DATA LOAD and every check after it measures an empty page (S-11's
+                # 360 px / 150% stream-plan case, eight checks). Write, reload, and confirm the plan loaded; on a miss, write and reload again.
+                for _try in range(4):
+                    pg.evaluate("([p, x]) => { localStorage.setItem('dc:danger_close:portfolio_v1', JSON.stringify(p)); localStorage.setItem('dc:danger_close:expenses_v1', JSON.stringify(x)); }", [plan["P"], plan["X"]])
+                    pg.reload(); pg.wait_for_timeout(2500)
+                    if pg.locator("#dc-dg-check").count() and pg.locator("#dc-dg-check").is_visible():
+                        pg.check("#dc-dg-check"); pg.click("#dc-dg-accept"); pg.wait_for_timeout(500)
+                    pg.wait_for_timeout(1500)
+                    if pg.locator("button.tab").count() > 0: break
             return pg
         def to_tab(pg, t):
             menu = pg.locator('select[aria-label="Choose a tab"]')

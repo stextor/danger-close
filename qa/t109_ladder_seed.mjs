@@ -43,13 +43,13 @@ console.error = () => {}; console.warn = () => {};
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v645";
 const DUMP = process.argv[3] === "--dumpdom";
-const KNOWN_VERSIONS = ["v644", "v645", "v646"];
+const KNOWN_VERSIONS = ["v644", "v645", "v646", "v647"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v645", "v646"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v645", "v646", "v647"].includes(VER);   // an array, so the next registration widens it
 const C_PRIOR = "v644";                // §C's prior module — a constant, so the registrar cannot widen it
 const KD = "[KNOWN DEFECT 2026-11-04, D-76 — flips at v6.45]";
 const require = createRequire(import.meta.url);

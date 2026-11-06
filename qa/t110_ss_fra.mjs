@@ -1,5 +1,5 @@
 // t110 — THE SOCIAL SECURITY TAB'S READING OF EACH SPOUSE'S BENEFIT AT 67 (D-56's $1,944; docs/SCOPE_D56_SS_FRA_ESTIMATE_V646.md, DK-1 (a),
-// DK-2 (a)). NEW at v6.46. Both legs.  Run: node t110_ss_fra.mjs v646   |   node t110_ss_fra.mjs v645
+// DK-2 (a)). NEW at v6.46. Both legs. Re-gated at v6.47 (D-77: the spousal top-up on the cards and totals; `TOP` below).  Run: node t110_ss_fra.mjs v646   |   node t110_ss_fra.mjs v645
 //
 // WHAT WAS WRONG. The tab read a spouse's benefit at 67 seven times with four fallbacks for a plan whose table has no age-67 figure; spouse B's
 // main one was a typed $1,944. A married plan whose spouse B has no benefit of her own reached it, and the tab built her card ($1,458 at 63),
@@ -25,6 +25,7 @@ import { spawnSync } from "child_process";
 import { dirname, join } from "path";
 import { fileURLToPath, pathToFileURL } from "url";
 import "./env_dom.mjs";
+import { spousalOracle, ym as ymAbs, dobOf } from "./tools/spousal_oracle.mjs";   // v6.47 (D-77): the re-gate's oracle, from SSA's rules
 const mulberry = a => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a);
   t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
 let _src = mulberry(110); Math.random = () => _src();
@@ -35,13 +36,16 @@ console.error = () => {}; console.warn = () => {};
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v646";
 const DUMP = process.argv[3] === "--dumpdom";
-const KNOWN_VERSIONS = ["v645", "v646"];
+const KNOWN_VERSIONS = ["v645", "v646", "v647"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v646"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v646", "v647"].includes(VER);   // an array, so the next registration widens it
+// v6.47 (D-77 — SSA's spousal benefit modelled): from this leg each card, the combined income and the shortfall include the top-up, the
+// warning is replaced by the modelled note, and the no-benefit sentence changes where a top-up is paid. An array, so the registrar widens it.
+const TOP = ["v647"].includes(VER);
 const C_PRIOR = "v645";                // §D's prior module — a constant, so the registrar cannot widen it
 const KD = "[KNOWN DEFECT 2026-11-05, D-56 — flips at v6.46]";
 const require = createRequire(import.meta.url);
@@ -124,7 +128,10 @@ const grab = t => { const m = re => (t.match(re) || [])[1];
     comb: num(m(/Combined income \(all SS\) ?\$ ?([\d,]+) ?\/mo/)), short: num(m(/Shortfall after [^$]*?\$ ?([\d,]+) ?\/mo/)),
     survOwn: num(m(/Max of Spouse B ?'s own \(\$ ?([\d,]+) ?\)/)),
     grid: [...t.matchAll(/CLAIM (?:62|FRA \(67\)|70) ?\$ ?([\d,]+) ?Spouse B keeps/g)].map(x => num(x[1])),
-    warn: /SPOUSAL BENEFIT NOT MODELED/.test(t), gap: num(m(/roughly \$ ?([\d,]+) ?\/mo/)), gapYr: num(m(/roughly \$ ?[\d,]+ ?\/mo \(\$ ?([\d,]+) ?\/yr\)/)),
+    warn: /SPOUSAL BENEFIT NOT MODELED/.test(t),
+    notes: [...t.matchAll(/SSA ?'s spousal benefit, modelled: (Spouse [AB]) ?'s own/g)].map(x => x[1].slice(-1)),
+    topA: num(m(/SPOUSE A SS @ AGE (?:(?!SPOUSE B SS|Combined income)[^+])*?\+ \$ ?([\d,]+) ?\/mo spousal benefit on/)), topB: num(m(/SPOUSE B SS @ AGE (?:(?!Combined income)[^+])*?\+ \$ ?([\d,]+) ?\/mo spousal benefit on/)),
+    noneOwn: /This plan holds no Social Security of Spouse B ?'s own; Spouse B ?'s spousal benefit on Spouse A ?'s record is shown on Spouse B ?'s card above\./.test(t), gap: num(m(/roughly \$ ?([\d,]+) ?\/mo/)), gapYr: num(m(/roughly \$ ?[\d,]+ ?\/mo \(\$ ?([\d,]+) ?\/yr\)/)),
     none: /This plan holds no Social Security benefit for Spouse B ?, so every projection pays Spouse B ?no Social Security\./.test(t),
     nan: /NaN|Infinity/.test(t) }; };
 if (DUMP) {
@@ -171,6 +178,13 @@ console.log("  A — the source");
     T(`A-2 EXTINCTION: every [67] read in the source is in \`ssFraOf\` or the statement parser (got: ${where.join(", ")})`,
       where.length > 0 && where.every(w => w === "ssFraOf" || w === "extractIncomeSourcesFromDocx") && where.filter(w => w === "ssFraOf").length === 1);
     const calls = all(AST, n => n.type === "CallExpression" && n.callee.type === "Identifier" && n.callee.name === "ssFraOf").map(r => topOf(r.anc));
+    if (TOP) {
+      // v6.47 (D-77): the seven reads, plus the modelled note's two (each spouse's figure at 67); and the spousal helpers' two each
+      const tab = calls.filter(w => w === "DangerCloseMain").length, rest = calls.filter(w => w !== "DangerCloseMain");
+      const per = h => rest.filter(w => w === h).length;
+      T(`A-3 the Social Security tab calls \`ssFraOf\` at the seven reads and the spousal note's two (${tab}); the spousal helpers twice each (${rest.join(", ")})`,
+        tab === 9 && rest.length === 6 && ["spousalTopUp", "spousalTopUpAtAges", "spousalEligible"].every(h => per(h) === 2));
+    } else
     T(`A-3 the Social Security tab calls \`ssFraOf\` at the seven reads (${calls.length})`, calls.length === 7 && calls.every(w => w === "DangerCloseMain"));
   } else T(`A-2 ${KD}: the Social Security tab reads the age-67 figure itself at seven sites, each with its own fallback (got ${inTab})`, inTab === 7 && !helper);
   // no literal of 1,000 or more as a fallback on a read of the benefit table
@@ -223,22 +237,39 @@ if (POST) {
 console.log("  C — rendered");
 const app = await mountApp(VER);
 const P0 = app.DP0, R = {}, PL = {};
-for (const [nm, f] of Object.entries(SHAPES)) { _src = mulberry(110); PL[nm] = f(P0); R[nm] = grab(await app.visit(PL[nm])); R[nm].pp = (app.DG.postPayments() || {}).monthly; }
+for (const [nm, f] of Object.entries(SHAPES)) { _src = mulberry(110); PL[nm] = f(P0); R[nm] = grab(await app.visit(PL[nm])); R[nm].pp = (app.DG.postPayments() || {}).monthly; R[nm].ppFrom = (app.DG.postPayments() || {}).from; }
 const pen = P => Number((P.incomeSources.pension || {}).amount) || 0;
 // the oracle for one shape at the sliders' ages, from the plan's fields
+// v6.47 (D-77): each spouse's top-up at the sliders' ages, from the suite's oracle; none on a single plan or on the loader's placeholder
+// (missingB: the backup has no spouse-B block, so the loader inserts one — DL-7 (a)).
+const spTop = (nm, who) => { const P = PL[nm], r = R[nm]; if (!TOP || P.single || (who === "B" && nm === "missingB")) return { monthly: 0, start: null };
+  const dA = dobOf(P.dobA), dB = dobOf(P.dobB), fS = fraOf(P, who), fW = fraOf(P, who === "A" ? "B" : "A");
+  const yA = ymAbs(dA.year + r.ageA, dA.month), yB = ymAbs(dB.year + r.ageB, dB.month);
+  return spousalOracle({ piaW: fW, piaS: fS, ownS: ben(fS, who === "A" ? r.ageA : r.ageB), dobS: who === "A" ? dA : dB, ymS: who === "A" ? yA : yB, ymW: who === "A" ? yB : yA }); };
 const expect = nm => { const P = PL[nm], r = R[nm], fA = fraOf(P, "A"), fB = fraOf(P, "B"), a = ben(fA, r.ageA), b = P.single ? 0 : ben(fB, r.ageB);
   const half = Math.round(fA * 0.5);
-  return { fA, fB, a, b, comb: a + b + pen(P), short: Math.max(0, r.pp - b - pen(P) - a), warn: !P.single && half > fB, gap: Math.max(0, half - fB),
+  const tA = spTop(nm, "A"), tB = spTop(nm, "B"), ppF = r.ppFrom ? ymAbs(r.ppFrom.year, r.ppFrom.month) : null;
+  const by = t => t.monthly > 0 && ppF !== null && ppF >= t.start ? t.monthly : 0;
+  const notes = TOP ? ["A", "B"].filter(w => !P.single && !(w === "B" && nm === "missingB") && 0.5 * fraOf(P, w === "A" ? "B" : "A") - fraOf(P, w) > 0) : [];
+  return { fA, fB, a, b, tA: tA.monthly, tB: tB.monthly, notes, comb: a + b + pen(P) + tA.monthly + tB.monthly, short: Math.max(0, r.pp - b - pen(P) - a - by(tA) - by(tB)),
+    warn: !TOP && !P.single && half > fB, gap: Math.max(0, half - fB),
     grid: [Math.max(ben(fA, 62), b), Math.max(fA, b), Math.max(ben(fA, 70), b)] }; };
 if (POST) {
   for (const nm of ["example", "noSSB", "zeroTable", "missingB", "no67", "bigB", "noSSA", "smallA_noSSB", "aNoTable", "aNoTable65"]) {
     const r = R[nm], e = expect(nm);
     T(`C-${nm}: EST. FRA, both cards, combined income, shortfall, survivor card and grid, and the warning, from the plan's own figures at the sliders' ages (A ${r.ageA}, B ${r.ageB})`,
       r.estFra === e.fB && r.cardA === e.a && r.cardB === e.b && r.comb === e.comb && r.short === e.short && r.survOwn === e.b
-      && JSON.stringify(r.grid) === JSON.stringify(e.grid) && r.warn === e.warn && (!e.warn || r.gap === e.gap) && !r.nan,
-      JSON.stringify({ got: { fra: r.estFra, a: r.cardA, b: r.cardB, comb: r.comb, short: r.short, surv: r.survOwn, grid: r.grid, warn: r.warn, gap: r.gap, nan: r.nan },
-        want: { fra: e.fB, a: e.a, b: e.b, comb: e.comb, short: e.short, grid: e.grid, warn: e.warn, gap: e.gap } }));
+      && JSON.stringify(r.grid) === JSON.stringify(e.grid) && r.warn === e.warn && (!e.warn || r.gap === e.gap) && !r.nan
+      && (!TOP || ((r.topA || 0) === e.tA && (r.topB || 0) === e.tB && JSON.stringify(r.notes) === JSON.stringify(e.notes))),
+      JSON.stringify({ got: { fra: r.estFra, a: r.cardA, b: r.cardB, comb: r.comb, short: r.short, surv: r.survOwn, grid: r.grid, warn: r.warn, gap: r.gap, nan: r.nan, tA: r.topA, tB: r.topB, notes: r.notes },
+        want: { fra: e.fB, a: e.a, b: e.b, comb: e.comb, short: e.short, grid: e.grid, warn: e.warn, gap: e.gap, tA: e.tA, tB: e.tB, notes: e.notes } }));
   }
+  if (TOP) {
+    // v6.47 (D-77, §1.4): where a top-up is paid the sentence says so; the loader's placeholder (missingB) pays none and keeps v6.46's
+    T(`C-none: v6.46's sentence for a spouse with no benefit shows on missingB only; the spousal one on noSSB, zeroTable and smallA_noSSB, and nowhere else`,
+      Object.entries(R).every(([k, r]) => r.none === (k === "missingB") && r.noneOwn === ["noSSB", "zeroTable", "smallA_noSSB"].includes(k)),
+      Object.entries(R).map(([k, r]) => `${k}:${r.none}/${r.noneOwn}`).join(" "));
+  } else
   T(`C-none: the sentence for a spouse with no benefit shows on noSSB, zeroTable, missingB and smallA_noSSB, and nowhere else`,
     Object.entries(R).every(([k, r]) => r.none === ["noSSB", "zeroTable", "missingB", "smallA_noSSB"].includes(k)), Object.entries(R).map(([k, r]) => `${k}:${r.none}`).join(" "));
   T("C-single: a single plan shows no spouse-B estimate and no NaN", R.single.estFra === null && !R.single.nan);
@@ -279,6 +310,12 @@ console.log("  E — hand pins");
     R.example.estFra === 1800 && R.example.cardB === 1350 && R.example.comb === 5050 && !R.example.warn);
   if (POST) {
     // noSSB: B $0; the post-payment spending $7,620 − $0 − the $400 pension − A's $3,300 = $3,920; the warning's gap ½ × 3,300 − 0 = $1,650.
+    if (TOP) {
+      // v6.47 (D-77): B (born 1 Jan 1966) reaches 67 in December 2032 (20 CFR 404.102); the top-up starts in January 2031 when A files, 23
+      // months early: ½ × 3,300 × (144 − 23)/144 = 1,650 × 121/144 = $1,386.46 → $1,386. Combined 3,300 + 1,386 + 400 = $5,086; shortfall 3,920 − 1,386 = $2,534.
+      T(`E-2 noSSB: B's card shows + $1,386/mo, combined $5,086, shortfall $2,534, no warning, the modelled note for B (got ${R.noSSB.topB}, ${R.noSSB.comb}, ${R.noSSB.short}, ${R.noSSB.warn}, ${R.noSSB.notes})`,
+        R.noSSB.topB === 1386 && R.noSSB.comb === 5086 && R.noSSB.short === 2534 && !R.noSSB.warn && JSON.stringify(R.noSSB.notes) === '["B"]' && R.noSSB.pp === 7620);
+    } else
     T(`E-2 noSSB: combined $3,700, shortfall $3,920, the warning with a $1,650/mo ($19,800/yr) gap (got ${R.noSSB.comb}, ${R.noSSB.short}, ${R.noSSB.gap}, ${R.noSSB.gapYr})`,
       R.noSSB.comb === 3700 && R.noSSB.short === 3920 && R.noSSB.warn && R.noSSB.gap === 1650 && R.noSSB.gapYr === 19800 && R.noSSB.pp === 7620);
     // no67: her $1,300 at 63 ÷ 0.75 = $1,733.33 → $1,733; at 63 the card is 1,733 × 0.75 = 1,299.75 → $1,300, her plan's own figure.

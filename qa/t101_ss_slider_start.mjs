@@ -26,6 +26,7 @@ import { createRequire } from "module";
 import { existsSync, readFileSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath, pathToFileURL } from "url";
+import { spousalOracle, ym as ymAbs, dobOf } from "./tools/spousal_oracle.mjs";   // v6.47 (D-77)
 
 const mulberry = a => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a);
   t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
@@ -36,14 +37,19 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v637";
-const KNOWN_VERSIONS = ["v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643", "v644", "v645", "v646"];
-const D56 = ["v646"].includes(VER);   // v6.46 (D-56): the oracle's new rule — an array, so the next registration widens it
+const KNOWN_VERSIONS = ["v636", "v637", "v638", "v639", "v640", "v641", "v642", "v643", "v644", "v645", "v646", "v647"];
+// v6.47 (D-77): the tab's draw series carries each spouse's spousal top-up from its month, spouse B's depending on which of spouse A's claims
+// the column takes. Several plans here reach one (spouse A's benefit at 67 above twice spouse B's $1,800 — the reported plan's $3,833 among
+// them), so from v6.47 the oracle adds it, from the suite's own oracle (tools/spousal_oracle.mjs), and §C's hand pins are restated with it.
+// An array, so the next registration widens it.
+const TOP = ["v647"].includes(VER);
+const D56 = ["v646", "v647"].includes(VER);   // v6.46 (D-56): the oracle's new rule — an array, so the next registration widens it
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v637", "v638", "v639", "v640", "v641", "v642", "v643", "v644", "v645", "v646"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v637", "v638", "v639", "v640", "v641", "v642", "v643", "v644", "v645", "v646", "v647"].includes(VER);   // an array, so the next registration widens it
 const D_PRIOR = "v636";                // §D's prior module — a constant, so the registrar cannot widen it (t76 records why)
 const KD = "[KNOWN DEFECT 2026-10-29, F-29 — flips at v6.37]";
 dom.reconfigure({ url: "https://stextor.github.io/danger-close/" }); globalThis.location = window.location;   // the self-hosted branch
@@ -155,18 +161,27 @@ const model = () => { const P = DG.PORTFOLIO(), tl = DG.PLAN_TIMELINE(), single 
     E: DG.snapshots().early, pen: DG.getPension(), R: tl.targetRetireYear, medB: tl.medicareB.year, dobA: tl.dobA, dobB: tl.dobB, pp: DG.postPayments ? DG.postPayments() : null }; };
 const series = (m, selA, selB) => {   // month index = year × 12 + month
   const yrOf = i => Math.floor((i - 1) / 12);
+  // v6.47: the top-ups at these ages — none on a single plan; the date of birth's day only when the plan holds one (as the app reads it)
+  const dA = dobOf(m.P.dobA) || { year: m.dobA.year, month: m.dobA.month }, dB = dobOf(m.P.dobB) || { year: m.dobB.year, month: m.dobB.month };
+  const topAt = (who, ageA) => (!TOP || m.single) ? { monthly: 0, start: null } : spousalOracle({ piaW: who === "A" ? m.fraB : m.fraA, piaS: who === "A" ? m.fraA : m.fraB,
+    ownS: who === "A" ? atAge(m.fraA, ageA) : atAge(m.fraB, selB), dobS: who === "A" ? dA : dB,
+    ymS: who === "A" ? ymAbs(dA.year + ageA, dA.month) : ymAbs(dB.year + selB, dB.month), ymW: who === "A" ? ymAbs(dB.year + selB, dB.month) : ymAbs(dA.year + ageA, dA.month) });
+  const tAp = topAt("A", m.planA), tBp = topAt("B", m.planA), tAs = topAt("A", selA), tBs = topAt("B", selA);
+  const at = (t, i) => t.monthly > 0 && i >= t.start + 1 ? t.monthly : 0;   // the oracle's month is year × 12 + (month − 1)
   const aPlanM = (m.dobA.year + m.planA) * 12 + (m.dobA.month || 1), aSelM = (m.dobA.year + selA) * 12 + (m.dobA.month || 1);
   const bM = (m.dobB.year + selB) * 12 + (m.dobB.month || 1);
   const aPlan = atAge(m.fraA, m.planA), aSel = atAge(m.fraA, selA), bBen = m.single ? 0 : atAge(m.fraB, selB);
-  const E = i => m.E + (yrOf(i) >= m.medB ? 475 : 0), inc = i => (!m.single && i >= bM ? bBen : 0) + m.pen;
-  const draw = (i, a) => Math.max(0, E(i) - (inc(i) + a));
+  const E = i => m.E + (yrOf(i) >= m.medB ? 475 : 0), inc = (i, plan) => (!m.single && i >= bM ? bBen : 0) + at(plan ? tBp : tBs, i) + m.pen;
+  const aP = i => (i >= aPlanM ? aPlan : 0) + at(tAp, i), aS = i => (i >= aSelM ? aSel : 0) + at(tAs, i);
+  const draw = (i, plan) => Math.max(0, E(i) - (inc(i, plan) + (plan ? aP(i) : aS(i))));
   const retM = m.R * 12 + 1, later = Math.max(aPlanM, aSelM);
-  let delta = 0; for (let i = retM; i < later; i++) delta += draw(i, i >= aSelM ? aSel : 0) - draw(i, i >= aPlanM ? aPlan : 0);
+  let delta = 0; for (let i = retM; i < later; i++) delta += draw(i, false) - draw(i, true);
   const endYr = Math.max(m.R + 8, yrOf(later)), rows = [];
-  for (let y = m.R; y <= endYr; y++) { let dp = 0, ds = 0; for (let mo = 1; mo <= 12; mo++) { const i = y * 12 + mo; dp += draw(i, i >= aPlanM ? aPlan : 0); ds += draw(i, i >= aSelM ? aSel : 0); } rows.push({ y, dp, ds, d: ds - dp }); }
+  for (let y = m.R; y <= endYr; y++) { let dp = 0, ds = 0; for (let mo = 1; mo <= 12; mo++) { const i = y * 12 + mo; dp += draw(i, true); ds += draw(i, false); } rows.push({ y, dp, ds, d: ds - dp }); }
   const ppM = m.pp ? m.pp.from.year * 12 + m.pp.from.month : null;
-  const shortfall = m.pp ? Math.max(0, m.pp.monthly - (!m.single && ppM >= bM ? bBen : 0) - m.pen - (ppM >= aSelM ? aSel : 0)) : null;
-  return { aPlan, aSel, bBen, delta, rows, later, laterYr: yrOf(later), perm: aSel - aPlan, shortfall, endYr, retM };
+  const shortfall = m.pp ? Math.max(0, m.pp.monthly - (!m.single && ppM >= bM ? bBen : 0) - at(tBs, ppM) - m.pen - aS(ppM)) : null;
+  return { aPlan, aSel, bBen, delta, rows, later, laterYr: yrOf(later), perm: (aSel + tAs.monthly + tBs.monthly) - (aPlan + tAp.monthly + tBp.monthly), shortfall, endYr, retM,
+    tops: [tAp.monthly, tBp.monthly, tAs.monthly, tBs.monthly] };
 };
 // ── reading the tab ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
 const num = s => s == null ? null : Number(String(s).replace(/[,$]/g, ""));
@@ -234,21 +249,41 @@ const moveTo = async (ageA, ageB) => { const sl = sliders(); await drive(sl[0], 
 const fullDelay = async (P, sel, lab) => { const m = await open(P); if (!POST) return null; await moveTo(sel); const r = read(m.P.nameA || "Spouse A"); const s = series(m, sel, m.planB); return { m, r, s }; };
 if (POST) {
   { const { m, r, s } = await fullDelay(PLANS[1][1], 67);
+    if (TOP) {
+      // v6.47 (D-77): spouse B (born 1 Jan 1966; 67 in Dec 2032) is owed ½ × 3,833 − 1,800 = $116.50. In the plan column it starts with A's
+      // claim at 65, Jan 2029 — 47 months early: 116.5 × 169/240 = 82.04 → $82; at the slider's 67, Jan 2031 — 23 months: 116.5 × 121/144 = 97.89 → $98.
+      T("C-1 the reported plan, 65 → 67: the delay total is 24 months × ($3,322 + spouse B's $82 top-up) = $81,696 (the draws stay positive, so the month rule is exact)",
+        s.delta === 81696 && r.tot === 81696 && JSON.stringify(s.tops) === "[0,82,0,98]", `${r.tot} / ${s.delta} ${s.tops}`);
+      T("C-2 … the top card reads +$82K and the permanent card +$527/mo (($3,833 + $98) − ($3,322 + $82))", r.top === "+$82K" && r.perm === 527 && s.perm === 527, `${r.top} ${r.perm}`);
+    } else {
     T("C-1 the reported plan, 65 → 67: the delay total is 24 months × $3,322 = $79,728 (the draws stay positive, so the month rule is exact)", s.delta === 79728 && r.tot === 79728, `${r.tot} / ${s.delta}`);
     T("C-2 … the top card reads +$80K and the permanent card +$511/mo ($3,833 − $3,322)", r.top === "+$80K" && r.perm === 511 && s.perm === 511, `${r.top} ${r.perm}`);
-    T("C-3 … the table's rows before 2031 are +$40K, +$40K and every later row is the permanent difference ×12 (−$6K)", r.rows[0].d === 40000 && r.rows[1].d === 40000
+    }
+    const _row = TOP ? 41000 : 40000;   // v6.47: 3,404 × 12 = 40,848
+    T(`C-3 … the table's rows before 2031 are +$${_row / 1000}K, +$${_row / 1000}K and every later row is the permanent difference ×12 (−$6K)`, r.rows[0].d === _row && r.rows[1].d === _row
       && r.rows.slice(2).every(x => x.d === Math.round(s.perm * -12 / 1000) * 1000), r.rows.map(x => x.d).join(","));
     T("C-4 … the delay total names its window: Jan 2029 to Dec 2030", r.t.includes("vs your plan, Jan 2029 to Dec 2030")); }
-  { const { r, s } = await fullDelay(PLANS[5][1], 67);
+  if (TOP) { const { r, s } = await fullDelay(PLANS[5][1], 67);
+    // v6.47: the top-up starts with A's claim, Jul 2029 — 41 months before B's Dec 2032: 116.5 × 175/240 = 84.95 → $85; at 67, Jul 2031 — 17 months: $103
+    T("C-5 born in July: 65 → 67 is Jul 2029 → Jul 2031, 24 months × ($3,322 + $85) = $81,768; the rows split +$20K, +$41K, +$17K by month (2031: six months of +$3,407, six of −$529)",
+      r.tot === 81768 && s.delta === 81768 && r.rows[0].d === 20000 && r.rows[1].d === 41000 && r.rows[2].d === Math.round((6 * 3407 + 6 * -529) / 1000) * 1000 && s.perm === 529, `${r.tot} ${r.rows.slice(0, 3).map(x => x.d)} ${s.perm}`); }
+  else { const { r, s } = await fullDelay(PLANS[5][1], 67);
     T("C-5 born in July: 65 → 67 is Jul 2029 → Jul 2031, still 24 months ($79,728); the rows split +$20K, +$40K, +$17K by month (2031: six months of +$3,322, six of −$511)", r.tot === 79728 && s.delta === 79728
       && r.rows[0].d === 20000 && r.rows[1].d === 40000 && r.rows[2].d === Math.round((6 * 3322 + 6 * -511) / 1000) * 1000, `${r.tot} ${r.rows.slice(0, 3).map(x => x.d)}`); }
-  { const { r, s } = await fullDelay(PLANS[2][1], 67);
+  if (TOP) { const { r, s } = await fullDelay(PLANS[2][1], 67);
+    // v6.47: A's $2,600 at 62 → $3,714 at 67; B is owed ½ × 3,714 − 1,800 = $57: from Jan 2029 (her filing, after A's) 47 months early → $40
+    T("C-6 a claim before retirement (62, Jan 2026) moved to 67: only the 24 months from retirement count — 24 × ($2,600 + $40) = $63,360", s.delta === 63360 && r.tot === 63360, `${r.tot}`); }
+  else { const { r, s } = await fullDelay(PLANS[2][1], 67);
     T("C-6 a claim before retirement (62, Jan 2026) moved to 67: only the 24 months from retirement count — $62,400, not 60 months", s.delta === 62400 && r.tot === 62400, `${r.tot}`); }
-  { const { r, s } = await fullDelay(PLANS[3][1], 67);
+  if (TOP) { const { r, s } = await fullDelay(PLANS[3][1], 67);
+    // v6.47: A's $4,600 at 70 → $3,710 at 67; B is owed ½ × 3,710 − 1,800 = $55 — unreduced from A's claim at 70 (Jan 2034), $46 from Jan 2031 (23 months early)
+    T("C-7 an early claim, 70 → 67: 36 months saved × ($3,710 + $46) = −$135,216; permanent −$899/mo (($3,710 + $46) − ($4,600 + $55))", s.delta === -135216 && r.tot === -135216 && r.perm === -899 && r.top === "−$135K", `${r.tot} ${r.perm} ${r.top}`); }
+  else { const { r, s } = await fullDelay(PLANS[3][1], 67);
     T("C-7 an early claim, 70 → 67: 36 months saved × $3,710 = −$133,560; permanent −$890/mo", s.delta === -133560 && r.tot === -133560 && r.perm === -890 && r.top === "−$134K", `${r.tot} ${r.perm} ${r.top}`); }
+  // v6.47: plus spouse B's $57 top-up, unreduced from A's claim (Jan 2034) in the plan column
   { const { m, r, s } = await fullDelay(PLANS[6][1], 70);
-    T(`C-8 born 1972, 62 → 70: the table runs past retirement + 8 to ${s.laterYr} (both claims started), and the total is 96 months × $2,600`,
-      r.rows.length === s.rows.length && r.rows[r.rows.length - 1].y === 2042 && s.delta === 96 * 2600 && r.tot === s.delta, `${r.rows.length} ${r.rows.at(-1) && r.rows.at(-1).y} ${r.tot}`); }
+    T(`C-8 born 1972, 62 → 70: the table runs past retirement + 8 to ${s.laterYr} (both claims started), and the total is 96 months × ${TOP ? "($2,600 + spouse B's $57 top-up)" : "$2,600"}`,
+      r.rows.length === s.rows.length && r.rows[r.rows.length - 1].y === 2042 && s.delta === 96 * (TOP ? 2657 : 2600) && r.tot === s.delta, `${r.rows.length} ${r.rows.at(-1) && r.rows.at(-1).y} ${r.tot}`); }
   // THE EXTINCTION CHECK: on every plan at every position, the card is the table's rows before the later claim (one series)
   let cells = 0, bad = []; for (const [lab, P] of PLANS) { const m = await open(P);
     for (let a = 62; a <= 70; a++) { await moveTo(a); const r = read(m.P.nameA || "Spouse A"), s = series(m, a, m.planB); cells++;

@@ -503,6 +503,12 @@ tally "t109-$CUR"   node t109_ladder_seed.mjs "$CUR"
 # §D (the tab identical to v6.45's text where both tables hold 67) runs where dom_v645.cjs is in the folder.
 tally "t110-$PRIOR" node t110_ss_fra.mjs "$PRIOR"
 tally "t110-$CUR"   node t110_ss_fra.mjs "$CUR"
+# t111 (v6.47) — SSA's spousal benefit, paid by every projection (D-77): the rule against an oracle written from SSA's (tools/spousal_oracle.mjs),
+# the extinction census of every money path, the twin-plan invariant across the engines. Both legs — the v6.46 leg pins each absence.
+# §D (the example and every fixture bit-identical to v6.46, and fifteen tabs' text but for three copy lines) runs where app_v646.mjs and
+# dom_v646.cjs are in the folder. Its two switches (T111_SECTIONS, T111_CONTROLS_SKIP_DDOM) are the negative controls' and are never set here.
+tally "t111-$PRIOR" node t111_spousal.mjs "$PRIOR"
+tally "t111-$CUR"   node t111_spousal.mjs "$CUR"
 echo "== TOOLING (not counted in APP TOTAL) =="
 tally "t21" node t21_tools.mjs
 tally "domdiff" node domdiff_withdrawal.mjs "$PRIOR" "$CUR"

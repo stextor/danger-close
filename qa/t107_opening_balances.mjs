@@ -40,18 +40,18 @@ console.error = () => {}; console.warn = () => {};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VER = process.argv[2] || "v643";
-const KNOWN_VERSIONS = ["v642", "v643", "v644", "v645", "v646"];
+const KNOWN_VERSIONS = ["v642", "v643", "v644", "v645", "v646", "v647"];
 if (!KNOWN_VERSIONS.includes(VER)) {
   console.log(`\n  ✗ FATAL: version tag "${VER}" is not registered in this suite.`);
   console.log("    Registered: " + KNOWN_VERSIONS.join(", "));
   process.exit(1);
 }
-const POST = ["v643", "v644", "v645", "v646"].includes(VER);   // an array, so the next registration widens it
+const POST = ["v643", "v644", "v645", "v646", "v647"].includes(VER);   // an array, so the next registration widens it
 const E_PRIOR = "v642";
 // v6.44 (D-71, docs/SCOPE_D71_D72_D73_V644.md): DD-7's "only to the first retirement" is replaced by the in-year rule — `retireStartBalances`
 // stops B at A's year too, `laterBLeftOut` is gone, and B's later contributions join every projection in the years they are made (t108).
 // The checks below that pinned DD-7's leave-out read v6.44's rule on this leg. An array, so the registrar widens it.
-const D71 = ["v644", "v645", "v646"].includes(VER);        // v6.44's in-year rule — an array, so the next registration widens it (v6.45: this comment read "a constant, so the registrar cannot widen it", which was false)
+const D71 = ["v644", "v645", "v646", "v647"].includes(VER);        // v6.44's in-year rule — an array, so the next registration widens it (v6.45: this comment read "a constant, so the registrar cannot widen it", which was false)
 const KD64 = "[KNOWN DEFECT 2026-11-03, D-64 — flips at v6.43]", KD70 = "[KNOWN DEFECT 2026-11-03, D-70 — flips at v6.43]";
 const require = createRequire(import.meta.url);
 const M = await import(pathToFileURL(join(HERE, `app_${VER}.mjs`)).href);
