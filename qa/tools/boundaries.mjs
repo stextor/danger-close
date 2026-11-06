@@ -685,13 +685,15 @@ export function census(G) {
       "a spouse with no age-67 table figure (planned amount, or no benefit)", both,
       both ? "DEGENERATE — both figures come from a benefit table, so the tab's planned-amount and no-benefit paths (D-56, v6.46) are unexercised"
            : "reachable — the tab must read the planned amount carried to 67, or $0, never an invented figure"); }
-  // 33. THE SPOUSAL WARNING. The tab warns that SSA's spousal top-up is not modeled when half of A's benefit at 67 exceeds B's. ON
-  //    (degenerate) when it does not, as on the example ($1,650 vs $1,800), or on a single plan.
-  { const P = G.PORTFOLIO() || {}, a = _fraSrc("A"), b = _fraSrc("B"), half = Math.round(a.v * 0.5), on = !!P.single || half <= b.v;
-    row("spousal_warning", "the SS tab's spousal-benefit warning", P.single ? "single" : `½ × A $${half.toLocaleString("en-US")} vs B $${b.v.toLocaleString("en-US")}`,
-      "half of spouse A's benefit at 67 above spouse B's", on,
-      on ? "DEGENERATE — the warning does not show here, so its path (hidden by the $1,944 through v6.45) is unexercised"
-         : "reachable — the tab must warn, with the gap"); }
+  // 33. SSA'S SPOUSAL BENEFIT (v6.47, D-77 — the v6.46 row `spousal_warning` re-pointed: the warning is gone, the top-up is paid). Owed to a
+  //    spouse whose benefit at 67 is below half the other's. ON (degenerate) when neither is, as on the example (½ × A $1,650 ≤ B $1,800;
+  //    ½ × B $900 ≤ A $3,300) and every fixture, or on a single plan — the boundary that hid D-77 from every suite through v6.46.
+  { const P = G.PORTFOLIO() || {}, a = _fraSrc("A"), b = _fraSrc("B"), on = !!P.single || (a.v * 0.5 <= b.v && b.v * 0.5 <= a.v);
+    const f = x => `$${Math.round(x).toLocaleString("en-US")}`;
+    row("spousal_topup", "SSA's spousal benefit (a top-up for either spouse)", P.single ? "single" : `½ × A ${f(a.v * 0.5)} vs B ${f(b.v)}; ½ × B ${f(b.v * 0.5)} vs A ${f(a.v)}`,
+      "either spouse's benefit at 67 below half the other's", on,
+      on ? "DEGENERATE — no spousal top-up is owed here, so every projection's top-up path (D-77, v6.47) is unexercised"
+         : "reachable — every projection must pay the top-up from the later filing, reduced for months before 67"); }
 
   return rows;
 }

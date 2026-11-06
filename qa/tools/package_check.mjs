@@ -867,10 +867,10 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
     const OPEN = new Set([
       "SCOPE_STANDING_AUDIT.md",                  // not a build scope at all (OPERATIONS §K)
       "SCOPE_TY2027_REFRESH_V633_V634.md",        // added at the v6.33 ship as OPEN-because-HALF-BUILT: v6.33 (the tables index from their own
-      //    year) is built, its §7 the record; the 2027 figures — v6.47 since the v6.46 build renumbered them a thirteenth time (v6.34 is D-58;
+      //    year) is built, its §7 the record; the 2027 figures — v6.48 since the v6.47 build renumbered them a fourteenth time (v6.34 is D-58;
       //    v6.35 is D-62/D-65/D-44; v6.36 is D-66; v6.37 is F-29; v6.38 is F-20; v6.39 is D-69; v6.40 and v6.41 are F-30's two parts; v6.42 is
-      //    F-32; v6.43 is D-64/D-70; v6.44 is D-71/D-72/D-73; v6.45 is D-76; v6.46 is D-56's $1,944) — wait on the IRS TY2027 Rev. Proc., the §402(g) notice and CMS's 2027 IRMAA
-      //    figures (DT-7: by 15 December). EXPIRES AT THE v6.47 BUILD, which
+      //    F-32; v6.43 is D-64/D-70; v6.44 is D-71/D-72/D-73; v6.45 is D-76; v6.46 is D-56's $1,944; v6.47 is D-77) — wait on the IRS TY2027 Rev. Proc. (published 2026-11-05: Rev. Proc. 2026-35), the §402(g) notice and CMS's 2027 IRMAA
+      //    figures (DT-7: by 15 December). EXPIRES AT THE v6.48 BUILD, which
       //    marks the scope FULFILLED with its build record and removes this entry in the same package — a person removes it; I-3 fires
       //    only on an entry naming a file that is gone.
       // ── REMOVED in the second ops package of 2026-10-19: "SCOPE_UNPOOL_QA_CODE.md" — added that morning as OPEN-because-UNDECIDED;
