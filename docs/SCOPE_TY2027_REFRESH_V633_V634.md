@@ -1,5 +1,10 @@
 # SCOPE — the 2027 tax-figure refresh: tables index from their own year (v6.33), then the 2027 figures (v6.49 — was v6.48, v6.47, v6.46, v6.45, v6.44, v6.43, v6.42, v6.41, v6.40, v6.39, v6.38, v6.37, v6.36, v6.35, and v6.34 before that) · F-27 closed by decision
 
+> **STATUS 2026-11-16 (ops package of that date) — the IRS half is published; v6.49 waits on CMS alone.** The IRS's 2027 retirement-plan
+> notice, **Notice 2026-66**, came out on 12 November 2026 (news release IR-2026-136: the 401(k) limit $25,500 for 2027). §8 records that the QCD
+> limit comes from this notice with §402(g). **Not yet read at the notice itself** — the v6.49 build reads both figures there and stages them as §8 did
+> the rest. **CMS's 2027 IRMAA figures were not found published** (a cms.gov search on 2026-11-16 returned the 2026 fact sheet as the newest).
+>
 > **RENUMBERED 2026-10-27, at the v6.34 build** (decision DC-4 (a) of `docs/SCOPE_D58_CONTRIB_SAVE_V634.md`; Steve: *"Let's go with your
 > recommendations"*). v6.34 is the D-58 release, built while the 2027 figures were unpublished. **The 2027 figures ship as v6.35** (tag `v635`), and
 > their suite is **`t98_ty2027.mjs`** (`t97` is D-58's) — *superseded by the next box: v6.36, `t99`*. Every *"v6.34"* below that names the 2027-figures release now means v6.35; the file
