@@ -866,11 +866,14 @@ console.log("\nI. Scope status lines \u2014 candidates for retirement (reports, 
     //   Removed at v5.57.1 after re-verifying every premise by content against v5.57.
     const OPEN = new Set([
       "SCOPE_STANDING_AUDIT.md",                  // not a build scope at all (OPERATIONS §K)
+      "SCOPE_D78_CLAIM_AT_62.md",                 // added in the ops package of 2026-11-16 as OPEN-because-UNDECIDED: D-78 (a claim at 62 is paid from the
+      //    birth month; SSA pays from the month after for a birthday on the 3rd or later), scoped, decisions DM-1 to DM-3 Steve's. EXPIRES WHEN
+      //    THE SCOPE IS BUILT (the build marks it FULFILLED and removes this entry in the same package) OR DECLINED (marked so, same rule).
       "SCOPE_TY2027_REFRESH_V633_V634.md",        // added at the v6.33 ship as OPEN-because-HALF-BUILT: v6.33 (the tables index from their own
       //    year) is built, its §7 the record; the 2027 figures — v6.49 since the v6.48 build renumbered them a fifteenth time (v6.34 is D-58;
       //    v6.35 is D-62/D-65/D-44; v6.36 is D-66; v6.37 is F-29; v6.38 is F-20; v6.39 is D-69; v6.40 and v6.41 are F-30's two parts; v6.42 is
-      //    F-32; v6.43 is D-64/D-70; v6.44 is D-71/D-72/D-73; v6.45 is D-76; v6.46 is D-56's $1,944; v6.47 is D-77; v6.48 is F-34/F-35) — wait on the IRS's 2027 retirement-plan notice (§402(g) and QCD limits; the TY2027 Rev. Proc. 2026-35 is out and staged, scope §8) and CMS's 2027 IRMAA
-      //    figures (DT-7: by 15 December). EXPIRES AT THE v6.49 BUILD, which
+      //    F-32; v6.43 is D-64/D-70; v6.44 is D-71/D-72/D-73; v6.45 is D-76; v6.46 is D-56's $1,944; v6.47 is D-77; v6.48 is F-34/F-35) — wait on CMS's 2027 IRMAA figures (DT-7: by 15 December). The IRS's 2027 retirement-plan notice (§402(g) and QCD
+      //    limits), Notice 2026-66, came out on 2026-11-12 (reason rolled in the ops package of 2026-11-16); the TY2027 Rev. Proc. 2026-35 is out and staged, scope §8. EXPIRES AT THE v6.49 BUILD, which
       //    marks the scope FULFILLED with its build record and removes this entry in the same package — a person removes it; I-3 fires
       //    only on an entry naming a file that is gone.
       // ── REMOVED in the second ops package of 2026-10-19: "SCOPE_UNPOOL_QA_CODE.md" — added that morning as OPEN-because-UNDECIDED;
