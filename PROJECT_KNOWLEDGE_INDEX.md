@@ -140,9 +140,9 @@ or a reason here (OPERATIONS §I).
 
 | Pool file | md5 | Repo path |
 |---|---|---|
-| `CHANGELOG.md` | `54d2d7bfd10cfdf6414ab172fcbff855` | `CHANGELOG.md` |
+| `CHANGELOG.md` | `a3689d1d06e76830ad7624911e6bad7d` | `CHANGELOG.md` |
 | `METHODOLOGY.md` | `9a5bb6dc095056594a6684514f0a3a83` | `METHODOLOGY.md` |
-| `MissingFeatures.md` | `0ff244cdeed8d29ee8d18883a23bef7c` | `docs/MissingFeatures.md` |
+| `MissingFeatures.md` | `8a6f2d04b996c5e6fb4855d58ebd879f` | `docs/MissingFeatures.md` |
 | `OPERATIONS.md` | `4bd40e0844c9c91e6de4e66c75f5c187` | `docs/OPERATIONS.md` — **rolled 2026-10-31 at the v6.40 ship:** §G's *fifth place* paragraph says `t45`'s §S gates are version comparisons, not lists, and why. *(Previously `7675168d93…`.)* Before that, **rolled 2026-10-27 at the v6.34 ship:** §C4's *An unedited Save & Apply* trap keeps only the as-of move (D-58 closed) and names the save's other normalisations. *(Previously `a127f4a4ff…`.)* Before that, **rolled 2026-10-27 at the v6.33 ship:** §I's *Annual data refreshes* row names the year-keyed tables (a new year's entry, nothing bumped by hand) and §C's OBBBA bullet says `TAX_CONSTANTS_YEAR` is read from `FED_TABLES`. *(Previously `0468ef1e62…`.)* Before that, **rolled 2026-09-09** at the run-folder ops package: §B gained the `mk_runfolder.sh` pointer, and §D gained **D1** (the named existence-only assertion class) and **D2** (the `t29` F-6a/F-6b defect pin). *(Previously `f33c2e0cfd…`.)* |
 | `README.md` | `2757b43ee6b39d0f34496c1cf639d688` | `README.md` |
 | `TESTING.md` | `b552c2cce438661e86ba2a8b5afe4430` | `TESTING.md` |
@@ -711,6 +711,23 @@ retired and superseded. They get no row because there is no file. Checked 2026-0
 committed tree, so the next sweep does not re-open them.
 
 ## Retirement list (delete-first; nothing replaces these)
+
+### At the ops package of 2026-11-16 — DELETE THESE FIRST
+
+**4 files replaced, nothing leaves, nothing arrives. Pool stays 16.** v6.48 stays current. F-37 and D-79 filed, D-78 scoped (`docs/SCOPE_D78_CLAIM_AT_62.md`,
+repo-only, OPEN — DM-1 to DM-3 Steve's). Count from the Projects listing (OPERATIONS §I, no-mount note).
+
+| Delete | Because |
+|---|---|
+| `CHANGELOG.md` | replaced — the ops entry of 2026-11-16 |
+| `PROJECT_KNOWLEDGE_INDEX.md` | replaced — this block; `MissingFeatures.md`'s and `CHANGELOG.md`'s rows rolled (CHANGELOG last) |
+| `UsabilityFlaws.md` | replaced — F-37 filed (census row and §H) |
+| `MissingFeatures.md` | replaced — D-79 filed; D-78's row points to its scope |
+
+**Not changed, stays:** the source, `TESTING.md`, `METHODOLOGY.md`, `OPERATIONS.md`, `FlawsToFix-v5_73-Phase2.md`, `ARCHITECTUREIssues.md`, `README.md`, the four
+scaffold files, `SCOPE_STANDING_AUDIT.md`. **Repo-only:** `docs/SCOPE_D78_CLAIM_AT_62.md` (new, OPEN), the TY2027 scope (a dated status box: the IRS
+notice is out, CMS is not), `qa/tools/package_check.mjs` (the OPEN allowlist: the D-78 scope added, the TY2027 reason rolled). (`docs/UsabilityFlaws.md` and
+`docs/MissingFeatures.md` ship to both, under their pool names.)
 
 ### At the v6.48 ship (2026-11-06) — DELETE THESE FIRST
 

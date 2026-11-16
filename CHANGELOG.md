@@ -1,5 +1,38 @@
 # Changelog
 
+## ops 2026-11-16 — two findings filed (F-37, D-79) and D-78 scoped
+
+**KIND: ops** — documents and one tooling comment; **v6.48 stays current** (source `9d4df8545dc2ea58a04559b71fa91ee2`, built
+`936186ee3cdee636a4f1c101fa35f8ba`). No app source, suite logic or figure changes. Steve, on what to do while v6.49 waits on its figures:
+*"tier 1 please"* — file the findings that lived only in release notes, and scope D-78, without a version.
+
+**What changed.**
+- **UsabilityFlaws F-37 filed** (found by the v6.48 build review, recorded in `docs/SCOPE_F34_F35_V648.md` §5, not filed then). The Roth ladder's
+  header says *"State tax per My Data"* and the *Tax rules applied* box beside it names the plan's state income tax *"as on the Taxes tab"*; the
+  ladder's own tax is federal only (`stateTaxAnnual` has no call in the ladder's block — four AST hits, none there), as Field Manual §13 says.
+  Wider than recorded: the same header pairs spouse A's RMD age with the year after the household's ladder end — *"RMDs at 75 (2041)"* on the
+  example, where the box beside it says spouse A's RMDs start in 2039. Display only; candidate fix a presentation release.
+- **MissingFeatures D-79 filed** (reported at v6.44 in `docs/SCOPE_D71_D72_D73_V644.md` §7.4, unregistered since). Backtest counts a fixed
+  pension at its face amount in a projection that starts in today's dollars at retirement; What Breaks divides it by the inflation to
+  retirement (v6.30, D-60). On the example 7.8% high under BULL-LEANING ($347 a year of today's dollars), 8.4% under BASE ($374). Optimistic,
+  Backtest only.
+- **D-78 scoped:** `docs/SCOPE_D78_CLAIM_AT_62.md` (repo-only, OPEN — decisions DM-1 to DM-3 Steve's). The rule read at its primary sources (POMS
+  RS 00201.001 §C, RS 00202.010 §B.3, 20 CFR 404.311(a), SSR 83-42a): a claim at 62 is paid from the birth month only for a birthday on the 1st
+  or 2nd, else from the month after. The model builds every claim date at one place from the birth month; 46 + 38 reader sites (`census.cjs`),
+  five that derive a claim age as a year difference and would read 63 after a December roll, three Social Security tab sites that build their
+  own claim months. Found while scoping: the spousal module's full-retirement-age month already applies SSA's day rule (`_ssFraYm`), the claim
+  month does not. No engine run; sizes by rule, to be measured at the build.
+- **The TY2027 scope** gains a dated status box: the IRS's 2027 retirement-plan notice (Notice 2026-66, 12 November 2026; the §402(g) and QCD
+  limits) is published, not yet read at the notice; CMS's 2027 IRMAA figures were not found. **v6.49 waits on CMS alone.**
+- **`qa/tools/package_check.mjs`:** the OPEN allowlist gains `SCOPE_D78_CLAIM_AT_62.md` (OPEN-because-undecided, with its expiry), and the TY2027
+  entry's reason is rolled to the same fact — a reason left stale is invisible to I-3.
+
+**Verification.** `package_check` on the zip: **pre-ship** against a fresh clone of `4e025b4` and the workspace, **40 passed, 0 failed** (the one skip is the post-upload pool half); **post-upload, simulated** — a clone with this package committed over it, and a pool of the four `knowledge/` files plus the repo copies of the twelve unchanged pool files — **51 passed, 0 failed, 0 skipped** (I-2 sees the new scope on the allowlist; K-8 the rolled rows). No suite run: no app source, suite assertion or harness file changes; `node --check` passes on `package_check.mjs`. The two findings and the scope's census were read from the v6.48 source by parser (`census.cjs`, two acorn walks) and the laws at their primary sources on 2026-11-16.
+
+**Limitations, stated.** F-37's RMD half was computed from the source's definitions and the example's dates, not rendered. D-79's percentages
+use the carry factor the v6.48 cards pin (BULL-LEANING) and the one the v6.43 scope records (BASE); not run through Backtest. The D-78 scope's
+59-month reduction figures are derived from the model's own rates and the POMS rules, not read from an SSA calculator.
+
 ## v6.48 — the Roth ladder's starting-balance cards (F-34) and its RATE column (F-35)
 
 **A presentation release: no engine changes.** Scoped in `docs/SCOPE_F34_F35_V648.md` (repo-only). Steve: *"Go ahead with v6.48 and move the
